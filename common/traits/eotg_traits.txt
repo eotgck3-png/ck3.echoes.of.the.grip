@@ -1,0 +1,40 @@
+# ── eotg_traits.txt ───────────────────────────────────────────────────────────
+# All Echoes of the Grip custom traits.
+# Prefix: eotg_
+# Icons: gfx/interface/icons/traits/ (add .dds files matching the key name)
+# ─────────────────────────────────────────────────────────────────────────────
+
+# eotg_grip_survivor
+# Characters whose bloodline traces back to those who passed through Orrin's Grip.
+# Grants resilience; carries a mark of cosmic trauma.
+eotg_grip_survivor = {
+    # icon = eotg_grip_survivor   # Uncomment once .dds icon is added
+
+    diplomacy = -1
+    martial = 1
+    health = 0.5
+
+    monthly_prestige_gain_mult = 0.05
+
+    desc = eotg_grip_survivor_desc
+
+    # Cosmetic flag for event triggers
+    flag = eotg_flag_grip_bloodline
+}
+
+# eotg_void_touched
+# Characters exposed to Void energy — either from proximity to Orrin's remnants
+# or from the Titanworld's lingering corruption.
+eotg_void_touched = {
+    # icon = eotg_void_touched
+
+    diplomacy = -2
+    intrigue = 2
+    health = -0.5
+
+    monthly_piety_gain_mult = -0.1
+
+    desc = eotg_void_touched_desc
+
+    flag = eotg_flag_void_corruption
+}

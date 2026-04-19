@@ -1,0 +1,32 @@
+# ── eotg_modifiers.txt ────────────────────────────────────────────────────────
+# Static modifier definitions for Echoes of the Grip.
+# Prefix all keys: eotg_mod_
+# Icons go in gfx/interface/icons/modifiers/ as .dds files.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# eotg_mod_void_aura
+# Applied to characters near active Void rifts or Void-touched rulers.
+eotg_mod_void_aura = {
+    icon = stress_negative    # Placeholder — replace with custom icon
+    health = -0.25
+    monthly_piety_gain_mult = -0.15
+    intrigue = 1
+}
+
+# eotg_mod_grip_resilience
+# A temporary boon for characters who overcome a Grip-related trauma event.
+eotg_mod_grip_resilience = {
+    icon = health_positive    # Placeholder
+    health = 0.5
+    martial = 1
+    monthly_prestige_gain_mult = 0.1
+}
+
+# eotg_mod_titan_war_devastation
+# County-level modifier representing devastation from the ongoing Titan wars.
+eotg_mod_titan_war_devastation = {
+    icon = stress_negative    # Placeholder
+    tax_mult = -0.20
+    development_growth_factor = -0.30
+    monthly_county_control_change_add = -0.5
+}

@@ -1,0 +1,25 @@
+# ── eotg_story_cycle_866_opening.txt ──────────────────────────────────────────
+# Story Cycle: The Weight of 866
+# Fires at game start for the 866 AG bookmark.
+# Introduces the player to the era's three defining tensions:
+#   1. The Titan Exodus is still ongoing — refugees arrive bearing wars
+#   2. The Myr Cluster Wars have just ignited — the galaxy's next great conflict
+#   3. The memory of Orrin's Grip is only 866 years old — it is still living history
+#
+# Uses CK3 1.19 Stories system (story_cycles with stories_tab_visible support).
+# ─────────────────────────────────────────────────────────────────────────────
+
+eotg_story_866_opening = {
+    # Show in the Situations tab (1.19 Stories system)
+    # stories_tab_visible = yes    # Uncomment once tested against 1.19 stories tab
+
+    on_start = {
+        trigger_event = { id = eotg_orrins_grip.0001  days = 5 }
+    }
+
+    on_end = {
+        # TODO: grant a small prestige reward for completing the opening story
+    }
+
+    # TODO: add story_cycle stages as event chain develops
+}

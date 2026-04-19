@@ -1,0 +1,44 @@
+# ── eotg_religions.txt ────────────────────────────────────────────────────────
+# Religion and faith definitions for Echoes of the Grip.
+# Prefix all keys: eotg_religion_ / eotg_faith_
+# ─────────────────────────────────────────────────────────────────────────────
+
+# eotg_religion_elross
+# The holy faith centered on Elross — deity of order, light, and the sacred.
+# Backbone of the Second Elrossi Imperium's moral and military authority.
+eotg_religion_elross = {
+    family = eotg_rf_divine_order    # TODO: define religion family
+
+    doctrine = eotg_doctrine_theocratic_order
+    doctrine = eotg_doctrine_holy_war_justified
+    doctrine = eotg_doctrine_undead_abomination    # Relevant post-Orro Invasion
+
+    faiths = {
+
+        # The canonical Elrossi faith as practised in the Imperium
+        eotg_faith_elross_canonical = {
+            color = { 0.9 0.85 0.3 }    # Gold/holy
+            holy_site = eotg_county_caer_myr    # TODO: define county
+            holy_site = eotg_county_saint_argoths_hold
+
+            # TODO: add doctrine overrides specific to this faith
+        }
+
+    }
+}
+
+# eotg_religion_void_reverence
+# Fringe cults that venerate Orrin and the Void — feared and persecuted across the galaxy.
+eotg_religion_void_reverence = {
+    family = eotg_rf_titan_worship    # TODO: define religion family
+
+    faiths = {
+
+        eotg_faith_void_cult = {
+            color = { 0.2 0.0 0.4 }    # Deep void purple
+
+            # TODO: add void-specific doctrines
+        }
+
+    }
+}

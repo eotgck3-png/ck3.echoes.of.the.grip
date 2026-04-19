@@ -1,0 +1,36 @@
+# ── eotg_scripted_effects.txt ─────────────────────────────────────────────────
+# Reusable effect macros for Echoes of the Grip.
+# Prefix all keys: eotg_se_
+# These are additive — safe to define alongside vanilla files.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# eotg_se_apply_void_corruption
+# Applies Void corruption to the scoped character.
+# Scope: character
+eotg_se_apply_void_corruption = {
+    if = {
+        limit = { NOT = { has_trait = eotg_void_touched } }
+        add_trait = eotg_void_touched
+    }
+    add_stress = 20
+}
+
+# eotg_se_remove_void_corruption
+# Removes Void corruption from the scoped character.
+# Scope: character
+eotg_se_remove_void_corruption = {
+    if = {
+        limit = { has_trait = eotg_void_touched }
+        remove_trait = eotg_void_touched
+    }
+}
+
+# eotg_se_grant_grip_heritage
+# Marks the scoped character as carrying Grip survivor bloodline.
+# Scope: character
+eotg_se_grant_grip_heritage = {
+    if = {
+        limit = { NOT = { has_trait = eotg_grip_survivor } }
+        add_trait = eotg_grip_survivor
+    }
+}

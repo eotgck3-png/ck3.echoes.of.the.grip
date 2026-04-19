@@ -1,0 +1,30 @@
+# ── eotg_on_actions.txt ───────────────────────────────────────────────────────
+# Event hooks for Echoes of the Grip.
+#
+# IMPORTANT: The `events` and `random_events` sub-blocks are additive.
+# The `effect = {}` key is NOT additive — it overwrites vanilla.
+# Always chain via `on_actions = { eotg_my_action }` instead of
+# adding effect = {} directly to a vanilla on_action.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Hook into yearly character pulse to check for Void corruption spread
+on_yearly_pulse = {
+    on_actions = {
+        eotg_on_yearly_void_check
+    }
+}
+
+# Custom on_action: yearly Void corruption check
+eotg_on_yearly_void_check = {
+    effect = {
+        # TODO: add random_events block for Void-touched characters
+        # Example structure (uncomment and fill in when events are ready):
+        # if = {
+        #     limit = { eotg_st_is_void_touched = yes }
+        #     random_events = {
+        #         100 = eotg_void_corruption.0001
+        #         50  = eotg_void_corruption.0002
+        #     }
+        # }
+    }
+}
