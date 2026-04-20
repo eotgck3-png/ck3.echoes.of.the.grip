@@ -1,0 +1,234 @@
+﻿# ── eotg_cartel_faction_events.txt ────────────────────────────────────────────
+# Faction event chains for the Cartel government.
+#
+# Chains:
+#   faction.0001 — Grand Underlord warned Shakedown faction has critical mass
+#   faction.0002 — Grand Underlord warned Hostile Takeover faction has declared
+#   faction.0003 — Boss who declared Hostile Takeover receives confirmation
+#   faction.0004 — Purge Demand: targeted Boss must flee, submit, or resist
+# ─────────────────────────────────────────────────────────────────────────────
+
+namespace = eotg_cartel_faction
+
+# Shakedown Faction: critical mass reached — Grand Underlord must respond
+eotg_cartel_faction.0001 = {
+	type = character_event
+	title = eotg_cartel_faction_0001_title
+	theme = intrigue
+
+	desc = eotg_cartel_faction_0001_desc
+
+	left_portrait = {
+		character = root
+		animation = personality_bold
+	}
+
+	# Notify all Shakedown members the faction has momentum
+	immediate = {
+		every_vassal = {
+			limit = { has_character_flag = eotg_cartel_shakedown_member }
+			send_interface_message = {
+				title = eotg_cartel_shakedown_momentum_title
+				desc = eotg_cartel_shakedown_momentum_desc
+				left_icon = root
+			}
+		}
+	}
+
+	# Crack down — impose cost on all Shakedown members, remove standoff
+	option = {
+		name = eotg_cartel_faction_0001_opt_crack_down
+		add_internal_flag = dangerous
+		add_dread = 15
+		every_vassal = {
+			limit = { has_character_flag = eotg_cartel_shakedown_member }
+			add_prestige = -100
+			add_opinion = {
+				target = root
+				modifier = eotg_cartel_crackdown_opinion
+			}
+			remove_character_flag = eotg_cartel_faction_committed
+			remove_character_flag = eotg_cartel_shakedown_member
+		}
+		remove_character_modifier = eotg_cartel_shakedown_standoff
+		ai_chance = {
+			base = 50
+			modifier = { add = 30  dread > 40 }
+			modifier = { add = -30  dread < 20 }
+		}
+	}
+
+	# Negotiate — settle the Shakedown with a gold payout
+	option = {
+		name = eotg_cartel_faction_0001_opt_negotiate
+		eotg_se_cartel_settle_shakedown = yes
+		show_as_tooltip = {
+			add_gold = {
+				value = eotg_sv_cartel_shakedown_payout
+				multiply = -1
+			}
+		}
+		ai_chance = {
+			base = 50
+			modifier = { add = 20  gold > 300 }
+			modifier = { add = -20  dread < 20 }
+		}
+	}
+}
+
+# Hostile Takeover: Grand Underlord warned a Boss has declared against them
+eotg_cartel_faction.0002 = {
+	type = character_event
+	title = eotg_cartel_faction_0002_title
+	theme = intrigue
+
+	desc = eotg_cartel_faction_0002_desc
+
+	left_portrait = {
+		character = root
+		animation = anger
+	}
+	right_portrait = {
+		character = scope:eotg_takeover_boss
+		animation = personality_bold
+	}
+
+	immediate = {
+		# scope:eotg_takeover_boss was saved before event fired from decision
+		# Fallback: find any Boss with the flag
+		if = {
+			limit = { NOT = { exists = scope:eotg_takeover_boss } }
+			random_vassal = {
+				limit = { has_character_flag = eotg_cartel_takeover_member }
+				save_scope_as = eotg_takeover_boss
+			}
+		}
+	}
+
+	# Rally strength — add dread, notify other vassals
+	option = {
+		name = eotg_cartel_faction_0002_opt_rally
+		add_dread = 10
+		add_prestige = -100
+		every_vassal = {
+			limit = {
+				eotg_st_is_boss = yes
+				NOT = { has_character_flag = eotg_cartel_takeover_member }
+			}
+			send_interface_message = {
+				title = eotg_cartel_civil_war_notice_title
+				desc = eotg_cartel_civil_war_notice_desc
+				left_icon = root
+			}
+		}
+		custom_tooltip = eotg_cartel_hostile_takeover_war_tooltip
+		ai_chance = { base = 100 }
+	}
+}
+
+# Hostile Takeover: Boss who declared receives confirmation their claim is active
+eotg_cartel_faction.0003 = {
+	type = character_event
+	title = eotg_cartel_faction_0003_title
+	theme = intrigue
+
+	desc = eotg_cartel_faction_0003_desc
+
+	left_portrait = {
+		character = root
+		animation = personality_bold
+	}
+	right_portrait = {
+		character = liege
+		animation = anger
+	}
+
+	immediate = {
+		liege = { save_scope_as = eotg_grand_underlord }
+	}
+
+	option = {
+		name = eotg_cartel_faction_0003_opt_press_claim
+		add_prestige = 100
+		custom_tooltip = eotg_cartel_hostile_takeover_active_tooltip
+		ai_chance = { base = 100 }
+	}
+}
+
+# Purge Demand: targeted Boss must respond to the Grand Underlord's elimination order
+eotg_cartel_faction.0004 = {
+	type = character_event
+	title = eotg_cartel_faction_0004_title
+	theme = intrigue
+
+	desc = eotg_cartel_faction_0004_desc
+
+	left_portrait = {
+		character = root
+		animation = worry
+	}
+	right_portrait = {
+		character = liege
+		animation = anger
+	}
+
+	immediate = {
+		liege = { save_scope_as = eotg_grand_underlord }
+	}
+
+	# Flee — abandon holdings, escape the purge
+	option = {
+		name = eotg_cartel_faction_0004_opt_flee
+		add_internal_flag = dangerous
+		add_prestige = -200
+		remove_character_modifier = eotg_cartel_defiant_boss
+		remove_character_flag = eotg_cartel_faction_committed
+		stress_impact = {
+			proud = major_stress_impact_gain
+			base = medium_stress_impact_gain
+		}
+		ai_chance = {
+			base = 30
+			modifier = { add = 20  has_trait = content }
+			modifier = { add = -20  has_trait = ambitious }
+		}
+	}
+
+	# Submit — pay a heavy gold tribute to the Grand Underlord
+	option = {
+		name = eotg_cartel_faction_0004_opt_submit
+		add_gold = -200
+		add_prestige = -100
+		remove_character_modifier = eotg_cartel_defiant_boss
+		remove_character_flag = eotg_cartel_faction_committed
+		scope:eotg_grand_underlord = {
+			add_dread = 10
+		}
+		stress_impact = {
+			proud = medium_stress_impact_gain
+		}
+		ai_chance = {
+			base = 40
+			modifier = { add = 20  gold > 200 }
+		}
+	}
+
+	# Resist — join the Hostile Takeover faction instead
+	option = {
+		name = eotg_cartel_faction_0004_opt_resist
+		add_internal_flag = dangerous
+		eotg_se_cartel_join_hostile_takeover = yes
+		remove_character_modifier = eotg_cartel_defiant_boss
+		scope:eotg_grand_underlord = {
+			trigger_event = { id = eotg_cartel_faction.0002  days = 2 }
+		}
+		stress_impact = {
+			content = major_stress_impact_gain
+		}
+		ai_chance = {
+			base = 30
+			modifier = { add = 30  has_trait = ambitious }
+			modifier = { add = 20  prestige > 300 }
+		}
+	}
+}

@@ -1,4 +1,4 @@
-# ── eotg_modifiers.txt ────────────────────────────────────────────────────────
+﻿# ── eotg_modifiers.txt ────────────────────────────────────────────────────────
 # Static modifier definitions for Echoes of the Grip.
 # Prefix all keys: eotg_mod_
 # Icons go in gfx/interface/icons/modifiers/ as .dds files.
@@ -28,5 +28,99 @@ eotg_mod_titan_war_devastation = {
     icon = stress_negative    # Placeholder
     tax_mult = -0.20
     development_growth_factor = -0.30
-    monthly_county_control_change_add = -0.5
+    monthly_county_control_decline_add = 0.5
+}
+
+# ── Gob-Corp Government Modifiers ─────────────────────────────────────────────
+
+# eotg_gobcorp_dg_instability
+# Applied to a Director-General whose grip on power is weakening.
+# Enables the Vote of No Confidence decision for eligible vassals.
+eotg_gobcorp_dg_instability = {
+    icon = stress_negative    # Placeholder
+    monthly_prestige_gain_mult = -0.2
+    vassal_opinion = -10
+}
+
+# eotg_gobcorp_board_seat
+# Applied to vassals who hold a Seat on the Board.
+# Increases vote weight in No Confidence calculations.
+eotg_gobcorp_board_seat = {
+    icon = diplomacy_positive    # Placeholder
+    monthly_prestige_gain_mult = 0.05
+}
+
+# ── Corporation Government Modifiers ──────────────────────────────────────────
+
+# eotg_corporate_undermined
+# Applied to a target of a successful Sabotage Rival scheme.
+# Stackable — multiple successful schemes compound the damage.
+eotg_corporate_undermined = {
+    icon = stress_negative    # Placeholder
+    monthly_income_mult = -0.15
+    vassal_opinion = -10
+    monthly_prestige_gain_mult = -0.10
+}
+
+# eotg_corp_board_seat
+# Applied to Regional Directors who hold a formal Board Seat.
+# Increases election weight and influence over Corporate governance.
+eotg_corp_board_seat = {
+    icon = diplomacy_positive    # Placeholder
+    monthly_prestige_gain_mult = 0.05
+    diplomacy = 1
+}
+
+# eotg_corp_interference_suppressed
+# Applied to a Regional Director targeted by Corporate Interference.
+# Reduces their election weight in the upcoming CEO succession vote.
+eotg_corp_interference_suppressed = {
+    icon = intrigue_negative    # Placeholder
+    monthly_prestige_gain_mult = -0.05
+}
+
+# eotg_corp_full_extraction_active
+# Applied to the CEO liege when the Full Revenue Extraction contract tier is active.
+# Bonus income reward for maximum assessment — counterbalanced by vassal opinion hit.
+eotg_corp_full_extraction_active = {
+    icon = stewardship_positive    # Placeholder
+    monthly_income_mult = 0.05
+}
+
+# ── Cartel Government Modifiers ───────────────────────────────────────────────
+
+# eotg_cartel_gl_paranoia
+# Applied to a Grand Underlord whose dread has fallen below the vulnerability threshold.
+# Unlocks Hostile Takeover and Shakedown faction decisions for eligible Bosses.
+eotg_cartel_gl_paranoia = {
+    icon = stress_negative    # Placeholder
+    monthly_prestige_gain_mult = -0.15
+    vassal_opinion = -15
+    dread_decay_add = 0.5
+}
+
+# eotg_cartel_defiant_boss
+# Applied to a Boss who refused to pay the Loyalty Tax.
+# Marks them as a faction recruitment target; increases GL's willingness to purge.
+eotg_cartel_defiant_boss = {
+    icon = stress_negative    # Placeholder
+    monthly_prestige_gain_mult = -0.10
+    dread_loss_mult = 0.1
+}
+
+# eotg_cartel_defiance_pressure
+# Applied to the Grand Underlord when a Boss refuses Loyalty Tax.
+# Stackable — multiple refusals compound dread decay. Duration: 6 months each stack.
+eotg_cartel_defiance_pressure = {
+    icon = stress_negative    # Placeholder
+    dread_decay_add = 1.0
+}
+
+# eotg_cartel_shakedown_standoff
+# Applied to Grand Underlord when Shakedown faction reaches critical mass.
+# Signals that Bosses are collectively withholding compliance.
+eotg_cartel_shakedown_standoff = {
+    icon = stress_negative    # Placeholder
+    monthly_prestige_gain_mult = -0.20
+    vassal_opinion = -20
 }

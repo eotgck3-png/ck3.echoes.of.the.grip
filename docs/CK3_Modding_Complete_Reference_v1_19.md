@@ -1316,3 +1316,341 @@ debug_trigger_event = { id = mymod.0001 }
 ---
 
 *Targets CK3 version 1.19 "Scribe". After any major patch: regenerate `script_docs`, re-run CK3 Tiger, diff all vanilla overrides.*
+
+---
+
+## 21. Verified Corrections (discovered during EOTG government implementation)
+
+These correct common errors that Tiger flags but documentation doesn't always make explicit.
+
+### Character Flags
+
+There is **no `set_character_flag` effect** in CK3 1.19. Use `add_character_flag` for all flag-setting.
+
+```pdx
+# Permanent flag (no duration)
+add_character_flag = my_flag_name
+
+# Timed flag
+add_character_flag = { flag = my_flag_name  years = 5 }
+
+# Remove a flag
+remove_character_flag = my_flag_name
+
+# Trigger check (unchanged)
+has_character_flag = my_flag_name
+```
+
+### Story Cycles
+
+Story cycles do **not** support `on_monthly` or `should_end` fields. Vanilla-valid fields are `on_setup`, `on_end`, `on_owner_death`, and `effect_group`.
+
+Periodic behavior uses `effect_group = { days = { X Y } ... }`. Story termination uses `end_story = yes` inside a `triggered_effect` within the group.
+
+In `on_setup`/`on_end`, the implicit scope is **the story object** — use `story_owner = { ... }` to operate on the character.
+
+**To start a story cycle:**
+```pdx
+create_story = my_story_cycle_name   # bare name, no block
+```
+
+**To check if a character has an active story cycle**, there is no built-in trigger. The standard pattern is to set a character flag in `on_setup` and check `has_character_flag`:
+```pdx
+on_setup = {
+    story_owner = {
+        add_character_flag = my_cycle_active_flag
+    }
+}
+on_end = {
+    story_owner = {
+        remove_character_flag = my_cycle_active_flag
+    }
+}
+```
+
+**To check story ownership from a trigger**, use the scope iterator form:
+```pdx
+any_owned_story = { story_type = my_story_cycle_name }
+```
+
+Full correct structure:
+```pdx
+my_story_cycle = {
+    on_setup = {
+        story_owner = {
+            set_variable = { name = my_var  value = 0 }
+            add_character_flag = my_cycle_active_flag
+        }
+    }
+
+    on_end = {
+        story_owner = {
+            remove_variable = my_var
+            remove_character_flag = my_cycle_active_flag
+        }
+    }
+
+    on_owner_death = {
+        end_story = yes
+    }
+
+    effect_group = {
+        days = { 25 35 }
+        first_valid = {
+            triggered_effect = {
+                trigger = { story_owner = { some_end_condition = yes } }
+                effect = { end_story = yes }
+            }
+            triggered_effect = {
+                trigger = { always = yes }
+                effect = {
+                    story_owner = {
+                        trigger_event = { id = my_event.001 }
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+### Script Values
+
+Script values use `value = X` (not `base = X`) at the top level:
+```pdx
+my_value = {
+    value = 0        # starting value — NOT base = 0
+    add = { value = gold  divide = 10 }
+    min = 0
+    max = 10
+}
+```
+`base = X` is valid only inside certain inline value blocks (e.g., `ai_chance = { base = 10 }`), not at the script value definition level.
+
+### Decisions — Picture Field
+
+The `picture` field in decisions requires block syntax:
+```pdx
+my_decision = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/my_image.dds"
+    }
+    # or with conditional:
+    picture = {
+        trigger = { some_condition = yes }
+        reference = "gfx/interface/illustrations/decisions/conditional_image.dds"
+    }
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/fallback.dds"
+    }
+    ...
+}
+```
+The string form `picture = "..."` is not valid in CK3 1.19 and will cause Tiger errors.
+
+### Modifiers — Invalid Fields
+
+These fields do **not** exist in CK3 1.19 modifier definitions and will cause Tiger errors:
+- `council_opinion` — not a valid modifier format; use `vassal_opinion`, `monthly_prestige_gain_mult`, or `diplomacy` instead
+
+### Stress Impact Blocks
+
+Inside `stress_impact = {}`, named values like `minor_stress_impact_gain` are valid. `no_stress_impact` is **not** a defined script value. To express "no base stress impact", simply omit the `base =` line:
+```pdx
+stress_impact = {
+    some_trait = medium_stress_impact_gain   # just list trait modifiers
+    # no 'base' line needed for zero base impact
+}
+```
+
+### Valid Trait Categories (CK3 1.19)
+
+```
+childhood  commander  court_type  education  fame
+health  lifestyle  personality  winter_commander
+```
+There is no `virtue` category.
+
+### send_interface_message — Type Field
+
+Do **not** include `type = default_message_type` (or any undefined type) in `send_interface_message`. Either omit the `type` field entirely, or use a vanilla-defined message type from `common/messages/`:
+```pdx
+send_interface_message = {
+    title = my_title_key
+    desc  = my_desc_key
+    left_icon = scope:actor
+}
+```
+
+---
+
+## 22. Corporation Government — Additional Verified Patterns (2026-04-19)
+
+### Opinion Modifiers
+
+Opinion modifiers live in `common/opinion_modifiers/*.txt`. The directory does not exist by default in a new mod — create it manually. Structure:
+
+```pdx
+my_opinion_modifier = {
+    opinion = -30
+    months = 60     # duration in months; omit for permanent
+    decaying = yes  # fades linearly to 0 over 'months'
+}
+```
+
+There is no `icon` field on opinion modifiers — they appear as text-only entries in the relationship panel.
+
+### Subject Contract — liege_modifier
+
+Inside a subject contract obligation tier, the `liege_modifier` block applies a static modifier (from `common/modifiers/`) to the liege while that tier is active:
+
+```pdx
+eotg_assessment_full = {
+    parent = eotg_assessment_standard
+    tax = 0.35
+    subject_opinion = -15
+    liege_modifier = {
+        name = eotg_corp_full_extraction_active    # key from common/modifiers/
+        monthly_income_mult = 0.05
+    }
+}
+```
+
+The `name` must match a defined static modifier. The `monthly_income_mult` line inside `liege_modifier` overrides the static modifier's value for that contract tier — it does NOT stack separately.
+
+### Subject Contract — vassal_modifier / flag
+
+The `flag` obligation type grants a character flag (on the vassal) and optionally applies a `vassal_modifier`:
+
+```pdx
+eotg_corp_board_seat_granted = {
+    flag = eotg_corp_board_seat_flag           # adds character flag to vassal
+    vassal_modifier = {
+        name = eotg_corp_board_seat            # static modifier on vassal
+    }
+    subject_opinion = 10
+}
+```
+
+Use `has_character_flag = eotg_corp_board_seat_flag` in scripted triggers to check board seat status.
+
+### Scheme Types — Correct File Path and Hook Names
+
+- Path: `common/schemes/scheme_types/` (NOT `common/scheme_types/`)
+- Valid hooks: `on_start`, `on_monthly`, `on_semiyearly`, `on_phase_completed`, `on_invalidated`, `on_hud_click`
+- **No `on_success` field** — success is handled via `on_phase_completed`
+- Scope inside scheme hooks: `scheme_owner` = the schemer, `scheme_target_character` = the target
+- `agent_groups_owner_perspective` controls what pools AI/player can recruit agents from
+
+```pdx
+eotg_sabotage_rival = {
+    ...
+    on_phase_completed = {
+        scheme_owner = {
+            trigger_event = { id = eotg_corp_scheme.0001 }   # success
+        }
+    }
+    on_invalidated = {
+        scheme_owner = {
+            # check a flag or condition to distinguish discovered vs failed
+            if = {
+                limit = { has_character_flag = eotg_scheme_discovered }
+                trigger_event = { id = eotg_corp_scheme.0002 }
+            }
+            else = {
+                trigger_event = { id = eotg_corp_scheme.0003 }
+            }
+        }
+    }
+}
+```
+
+### Character Interactions — File Path and Required Fields
+
+Path: `common/character_interactions/*.txt`
+
+Required fields: `category`, `desc`, `greeting`, `notification_text`. The `is_shown` / `is_valid_showing_failures_only` blocks gate visibility and validity separately.
+
+- `scope:actor` = character initiating the interaction
+- `scope:recipient` = the target character
+- `on_accept` fires when recipient accepts; `on_decline` fires when refused
+- `ai_accept` uses a weighted modifier block (positive = more likely to accept)
+
+```pdx
+my_interaction = {
+    category = interaction_category_hostile
+    desc = my_desc_key
+    greeting = hostile
+    notification_text = my_notification_key
+
+    is_shown = {
+        scope:actor = { some_trigger = yes }
+        scope:recipient = { some_other_trigger = yes }
+    }
+
+    cost = {
+        gold = { value = my_script_value  desc = my_cost_desc_key }
+    }
+
+    on_accept = {
+        scope:actor = { trigger_event = { id = my_event.001  days = 1 } }
+    }
+    on_decline = {
+        scope:actor = { add_character_flag = { flag = my_refused_flag  years = 5 } }
+        scope:actor = { trigger_event = { id = my_event.002  days = 1 } }
+    }
+}
+```
+
+### Board Influence — Tracking Pattern
+
+The Corporation's board influence is a character **variable** (`var:eotg_board_influence`) on the CEO, not a modifier or flag. This allows scripted arithmetic:
+
+- Initialized in `on_yearly_playable` if not yet set
+- Decays each year via `eotg_se_corp_decay_board_influence` (scripted effect called from on_action)
+- Depleted by decisions (e.g., corporate interference costs influence)
+- Triggers a warning event when ≤ 20 (critical threshold)
+- Regional Directors check `liege = { eotg_st_corp_board_influence_critical = yes }` for vote validity
+
+Pattern for variable-based threshold triggers:
+```pdx
+eotg_st_corp_board_influence_critical = {
+    var:eotg_board_influence <= 20
+}
+```
+
+### on_death Scope
+
+`on_death` fires with `root = dying character`. Use this for succession chains (e.g., triggering CEO election when a CEO dies):
+
+```pdx
+eotg_on_death_ceo_election = {
+    trigger = {
+        root = { eotg_st_is_ceo = yes }
+    }
+    effect = {
+        root = {
+            every_vassal = {
+                limit = { eotg_st_is_regional_director = yes }
+                eotg_se_corp_run_election = yes
+            }
+        }
+    }
+}
+```
+
+### ordered_vassal for Election Winner Selection
+
+To find the highest-weight vassal (e.g., election winner), use `ordered_vassal` with `order_by`, `position`, and `max`:
+
+```pdx
+ordered_vassal = {
+    order_by = var:eotg_election_weight
+    limit = { eotg_st_is_regional_director = yes }
+    position = 0     # 0 = highest
+    max = 1
+    save_scope_as = eotg_election_winner
+}
+```
+
+This saves exactly the top-weighted vassal into the named scope. Works inside event `immediate` blocks and scripted effects.

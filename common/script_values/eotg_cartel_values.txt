@@ -1,0 +1,46 @@
+﻿# ── eotg_cartel_values.txt ────────────────────────────────────────────────────
+# Script values for Cartel government mechanics.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Gold demanded from a Boss during Loyalty Tax collection.
+# Called on the Boss's scope.
+eotg_sv_cartel_loyalty_tax_demand = {
+	value = 50
+	add = { value = realm_size  multiply = 5 }
+	min = 50
+	max = 400
+}
+
+# Prestige lost by Grand Underlord per Boss who refuses Loyalty Tax.
+# Called on the refusing Boss scope (liege = Grand Underlord).
+eotg_sv_cartel_tax_refusal_prestige_loss = {
+	value = 30
+	add = { value = liege.realm_size  divide = 10 }
+	min = 30
+	max = 100
+}
+
+# Dread gained by Grand Underlord per Boss who pays Loyalty Tax.
+eotg_sv_cartel_tax_payment_dread_gain = {
+	value = 3
+	min = 3
+	max = 10
+}
+
+# Dread gained on a successful raid (called on Grand Underlord scope).
+eotg_sv_cartel_raid_dread_gain = {
+	value = 15
+	min = 10
+	max = 40
+}
+
+# How many refusing Bosses triggers a Shakedown Standoff event on the Grand Underlord
+@eotg_cartel_shakedown_threshold = 3
+
+# Shakedown settlement payout — reduced tax rate modeled as a gold payment to Bosses
+eotg_sv_cartel_shakedown_payout = {
+	value = 100
+	add = { value = gold  divide = 5 }
+	min = 100
+	max = 500
+}

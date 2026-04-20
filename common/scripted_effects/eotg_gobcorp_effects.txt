@@ -1,0 +1,91 @@
+﻿# ── eotg_gobcorp_effects.txt ──────────────────────────────────────────────────
+# Scripted effects for the Gob-Corp government.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Apply the DG instability modifier (5-year duration)
+eotg_se_gobcorp_apply_instability = {
+	add_character_modifier = {
+		modifier = eotg_gobcorp_dg_instability
+		years = 5
+	}
+}
+
+# Remove the DG instability modifier
+eotg_se_gobcorp_clear_instability = {
+	remove_character_modifier = eotg_gobcorp_dg_instability
+}
+
+# Calculate a single vassal's vote weight and store in var:eotg_vote_weight.
+# Caller must set save_scope_as = eotg_dg on the DG before iterating.
+# Root = vassal character.
+eotg_se_gobcorp_calculate_vote_weight = {
+	set_variable = { name = eotg_vote_weight  value = 0 }
+	change_variable = { name = eotg_vote_weight  add = eotg_sv_gobcorp_gold_contrib }
+	change_variable = { name = eotg_vote_weight  add = eotg_sv_gobcorp_prestige_contrib }
+	# Opinion of DG: positive (+3), neutral (0), negative (-2)
+	if = {
+		limit = { opinion = { target = scope:eotg_dg  value >= 25 } }
+		change_variable = { name = eotg_vote_weight  add = 3 }
+	}
+	if = {
+		limit = { opinion = { target = scope:eotg_dg  value < 0 } }
+		change_variable = { name = eotg_vote_weight  add = -2 }
+	}
+	# Board Seat bonus
+	if = {
+		limit = { vassal_contract_has_flag = eotg_board_seat_flag }
+		change_variable = { name = eotg_vote_weight  add = 5 }
+	}
+	# Clamp to 0 minimum
+	if = {
+		limit = { var:eotg_vote_weight < 0 }
+		set_variable = { name = eotg_vote_weight  value = 0 }
+	}
+}
+
+# Sum vote weights of all eligible vassals onto the DG's eotg_total_votes variable.
+# Root = Director-General.
+eotg_se_gobcorp_sum_votes = {
+	set_variable = { name = eotg_total_votes  value = 0 }
+	save_scope_as = eotg_dg
+	every_vassal = {
+		limit = {
+			OR = {
+				eotg_st_is_trade_prince = yes
+				eotg_st_is_merchant_lord = yes
+			}
+		}
+		eotg_se_gobcorp_calculate_vote_weight = yes
+		scope:eotg_dg = {
+			change_variable = { name = eotg_total_votes  add = prev.var:eotg_vote_weight }
+		}
+	}
+}
+
+# Reward for a graceful DG exit (called on DG scope)
+eotg_se_gobcorp_graceful_exit = {
+	add_prestige = 300
+	add_gold = 200
+	add_trait = eotg_honorable_exit
+}
+
+# Distribute gold to all market faction members (called on realm scope — iterate from DG)
+# Faction leaders (role = 2) receive 1.5x multiplier.
+eotg_se_gobcorp_distribute_faction_gold = {
+	every_vassal = {
+		limit = { var:eotg_faction_role >= 1 }
+		if = {
+			limit = { var:eotg_faction_role >= 2 }
+			add_gold = {
+				value = var:eotg_market_share
+				multiply = 0.015
+			}
+		}
+		else = {
+			add_gold = {
+				value = var:eotg_market_share
+				multiply = 0.01
+			}
+		}
+	}
+}

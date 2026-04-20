@@ -1,0 +1,108 @@
+﻿# ── eotg_corporation_scheme_events.txt ────────────────────────────────────────
+# Sabotage Rival scheme outcome events for the Corporation government.
+#
+# eotg_corp_scheme.0001 — scheme success: apply Corporate Undermined to target
+# eotg_corp_scheme.0002 — scheme discovered: prestige hit, target gains hook
+# eotg_corp_scheme.0003 — scheme failed/aborted: notification to schemer
+# ─────────────────────────────────────────────────────────────────────────────
+
+namespace = eotg_corp_scheme
+
+# Scheme success — schemer sees the outcome; Corporate Undermined applied to target
+eotg_corp_scheme.0001 = {
+	type = character_event
+	title = eotg_corp_scheme_0001_title
+	theme = intrigue
+
+	desc = eotg_corp_scheme_0001_desc
+
+	left_portrait = {
+		character = root
+		animation = personality_bold
+	}
+	right_portrait = {
+		character = scope:target
+		animation = shock
+	}
+
+	immediate = {
+		scheme_target_character = {
+			save_scope_as = target
+		}
+		scope:target = {
+			eotg_se_corp_apply_undermined = yes
+		}
+	}
+
+	option = {
+		name = eotg_corp_scheme_0001_opt_success
+		add_prestige = 50
+		ai_chance = { base = 100 }
+	}
+}
+
+# Scheme discovered — schemer loses prestige; target gains a hook
+eotg_corp_scheme.0002 = {
+	type = character_event
+	title = eotg_corp_scheme_0002_title
+	theme = intrigue
+
+	desc = eotg_corp_scheme_0002_desc
+
+	left_portrait = {
+		character = root
+		animation = shame
+	}
+	right_portrait = {
+		character = scope:target
+		animation = anger
+	}
+
+	immediate = {
+		# scope:target was saved in the scheme's on_invalidated before this event fired
+		scope:target = {
+			add_opinion = {
+				target = root
+				modifier = eotg_sabotage_caught_opinion
+				years = 10
+			}
+			add_hook = {
+				target = root
+				type = strong_blackmail_hook
+				years = 10
+			}
+		}
+	}
+
+	option = {
+		name = eotg_corp_scheme_0002_opt_caught
+		add_prestige = -75
+		stress_impact = {
+			ambitious = medium_stress_impact_gain
+		}
+		ai_chance = { base = 100 }
+	}
+}
+
+# Scheme failed or aborted — quiet notification to schemer
+eotg_corp_scheme.0003 = {
+	type = character_event
+	title = eotg_corp_scheme_0003_title
+	theme = intrigue
+	hidden = no
+
+	desc = eotg_corp_scheme_0003_desc
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	option = {
+		name = eotg_corp_scheme_0003_opt_failed
+		stress_impact = {
+			ambitious = minor_stress_impact_gain
+		}
+		ai_chance = { base = 100 }
+	}
+}

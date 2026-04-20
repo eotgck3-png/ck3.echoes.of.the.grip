@@ -1,0 +1,170 @@
+﻿# ── eotg_cartel_decisions.txt ─────────────────────────────────────────────────
+# Decisions for the Cartel government.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Grand Underlord demands loyalty tax from all Bosses.
+eotg_cartel_demand_loyalty_tax = {
+	picture = "gfx/interface/illustrations/decisions/decision_dynasty_house.dds"
+	decision_group_type = major
+
+	desc = eotg_cartel_demand_loyalty_tax_desc
+	selection_tooltip = eotg_cartel_demand_loyalty_tax_tooltip
+
+	is_shown = {
+		eotg_st_cartel_tax_demand_valid = yes
+	}
+
+	is_valid = {
+		eotg_st_cartel_tax_demand_valid = yes
+		is_imprisoned = no
+	}
+
+	is_valid_showing_failures_only = {
+		is_imprisoned = no
+	}
+
+	effect = {
+		eotg_se_cartel_demand_loyalty_tax = yes
+		custom_tooltip = eotg_cartel_demand_loyalty_tax_effect_tooltip
+	}
+
+	ai_check_interval = 12
+	ai_will_do = {
+		base = 60
+		modifier = { add = 40  dread < 30 }
+		modifier = { add = -20  dread > 60 }
+	}
+}
+
+# Boss joins the Shakedown Faction — demand permanent Loyalty Tax reduction.
+eotg_cartel_join_shakedown_faction = {
+	picture = "gfx/interface/illustrations/decisions/decision_realm.dds"
+	decision_group_type = major
+
+	desc = eotg_cartel_join_shakedown_desc
+	selection_tooltip = eotg_cartel_join_shakedown_tooltip
+
+	is_shown = {
+		eotg_st_cartel_shakedown_eligible = yes
+	}
+
+	is_valid = {
+		eotg_st_cartel_shakedown_eligible = yes
+		is_imprisoned = no
+	}
+
+	is_valid_showing_failures_only = {
+		is_imprisoned = no
+	}
+
+	effect = {
+		eotg_se_cartel_join_shakedown = yes
+		custom_tooltip = eotg_cartel_join_shakedown_effect_tooltip
+		liege = {
+			trigger_event = { id = eotg_cartel_faction.0001  days = 5 }
+		}
+	}
+
+	ai_check_interval = 24
+	ai_will_do = {
+		base = 20
+		modifier = { add = 30  has_character_modifier = eotg_cartel_defiant_boss }
+		modifier = { add = -30  has_trait = content }
+		modifier = { add = 20  has_trait = ambitious }
+	}
+}
+
+# Boss declares Hostile Takeover — claims the Grand Underlord title by force.
+eotg_cartel_hostile_takeover = {
+	picture = "gfx/interface/illustrations/decisions/decision_war.dds"
+	decision_group_type = major
+
+	desc = eotg_cartel_hostile_takeover_desc
+	selection_tooltip = eotg_cartel_hostile_takeover_tooltip
+
+	is_shown = {
+		eotg_st_cartel_takeover_eligible = yes
+	}
+
+	is_valid = {
+		eotg_st_cartel_takeover_eligible = yes
+		is_imprisoned = no
+		prestige >= 200
+	}
+
+	is_valid_showing_failures_only = {
+		is_imprisoned = no
+		prestige >= 200
+	}
+
+	effect = {
+		eotg_se_cartel_join_hostile_takeover = yes
+		add_prestige = -200
+		liege = {
+			trigger_event = { id = eotg_cartel_faction.0002  days = 3 }
+		}
+		trigger_event = { id = eotg_cartel_faction.0003  days = 5 }
+	}
+
+	ai_check_interval = 60
+	ai_will_do = {
+		base = 5
+		modifier = { add = 25  has_trait = ambitious }
+		modifier = { add = 20  prestige > 500 }
+		modifier = { add = -50  has_trait = content }
+	}
+}
+
+# Grand Underlord issues a Purge Demand — targets the most defiant Boss for elimination.
+eotg_cartel_issue_purge_demand = {
+	picture = "gfx/interface/illustrations/decisions/decision_dynasty_house.dds"
+	decision_group_type = major
+
+	desc = eotg_cartel_issue_purge_demand_desc
+	selection_tooltip = eotg_cartel_issue_purge_demand_tooltip
+
+	is_shown = {
+		eotg_st_is_grand_underlord = yes
+		any_vassal = {
+			eotg_st_is_boss = yes
+			has_character_modifier = eotg_cartel_defiant_boss
+		}
+	}
+
+	is_valid = {
+		eotg_st_is_grand_underlord = yes
+		is_imprisoned = no
+		dread >= 30
+		any_vassal = {
+			eotg_st_is_boss = yes
+			has_character_modifier = eotg_cartel_defiant_boss
+		}
+	}
+
+	is_valid_showing_failures_only = {
+		is_imprisoned = no
+		dread >= 30
+	}
+
+	effect = {
+		add_dread = 10
+		random_vassal = {
+			limit = {
+				eotg_st_is_boss = yes
+				has_character_modifier = eotg_cartel_defiant_boss
+			}
+			save_scope_as = eotg_purge_target
+			trigger_event = { id = eotg_cartel_faction.0004  days = 3 }
+		}
+		custom_tooltip = eotg_cartel_purge_demand_effect_tooltip
+	}
+
+	cooldown = { years = 5 }
+
+	ai_check_interval = 36
+	ai_will_do = {
+		base = 15
+		modifier = { add = 30  has_character_modifier = eotg_cartel_shakedown_standoff }
+		modifier = { add = 20  dread > 50 }
+	}
+}

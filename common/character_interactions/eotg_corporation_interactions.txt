@@ -1,0 +1,102 @@
+﻿# ── eotg_corporation_interactions.txt ─────────────────────────────────────────
+# Character interactions for the Corporation government.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Hostile Acquisition — Regional Director buys out a rival's titles.
+# If refused, triggers the eotg_proxy_war CB.
+eotg_hostile_acquisition_interaction = {
+	category = interaction_category_hostile
+	icon = icon_negotiate
+
+	interface_priority = 60
+	common_interaction = no
+
+	desc = eotg_hostile_acquisition_interaction_desc
+	greeting = negative
+	notification_text = eotg_hostile_acquisition_notification
+
+	is_shown = {
+		scope:actor = {
+			eotg_st_is_regional_director = yes
+		}
+		scope:recipient = {
+			eotg_st_is_regional_director = yes
+			top_liege = { this = scope:actor.top_liege }
+			this != scope:actor
+		}
+	}
+
+	is_valid_showing_failures_only = {
+		scope:actor = {
+			gold >= eotg_sv_corp_hostile_acquisition_cost
+		}
+		scope:recipient = {
+			is_imprisoned = no
+		}
+	}
+
+	cost = {
+		gold = {
+			value = eotg_sv_corp_hostile_acquisition_cost
+			desc = eotg_hostile_acquisition_cost_desc
+		}
+	}
+
+	ai_targets = {
+		ai_recipients = peer_vassals
+	}
+
+	ai_target_quick_trigger = {
+		adult = yes
+	}
+
+	ai_frequency_by_tier = {
+		barony = 0
+		county = 0
+		duchy = 0
+		kingdom = 24
+		empire = 0
+		hegemony = 0
+	}
+
+	ai_accept = {
+		base = -20
+		modifier = {
+			add = 30
+			scope:actor = {
+				gold >= { value = eotg_sv_corp_hostile_acquisition_cost  multiply = 1.5 }
+			}
+		}
+		modifier = {
+			add = 20
+			scope:recipient = {
+				opinion = {
+					target = scope:actor
+					value >= 20
+				}
+			}
+		}
+		modifier = {
+			add = -30
+			scope:recipient = { has_trait = ambitious }
+		}
+	}
+
+	on_accept = {
+		scope:actor = {
+			trigger_event = { id = eotg_corp_board.0003  days = 1 }
+		}
+	}
+
+	on_decline = {
+		scope:actor = {
+			add_character_flag = { flag = eotg_hostile_acquisition_refused_by  years = 5 }
+		}
+		scope:recipient = {
+			add_character_flag = { flag = eotg_hostile_acquisition_refused  years = 5 }
+		}
+		scope:actor = {
+			trigger_event = { id = eotg_corp_board.0004  days = 1 }
+		}
+	}
+}

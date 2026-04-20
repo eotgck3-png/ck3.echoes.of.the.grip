@@ -1,0 +1,52 @@
+﻿# ── eotg_gobcorp_values.txt ───────────────────────────────────────────────────
+# Script values for Gob-Corp government mechanics.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Gold contribution to vote weight (called on vassal scope)
+eotg_sv_gobcorp_gold_contrib = {
+	value = 0
+	add = { value = gold  divide = 10 }
+	min = 0
+	max = 10
+}
+
+# Prestige contribution to vote weight (called on vassal scope)
+eotg_sv_gobcorp_prestige_contrib = {
+	value = 0
+	add = { value = prestige  divide = 100 }
+	min = 0
+	max = 5
+}
+
+# Maximum theoretical vote weight from any single vassal (gold + prestige + board + opinion)
+@eotg_gobcorp_max_weight_per_vassal = 20
+
+# Maximum total votes: eligible vassal count × max per vassal
+# Called on Director-General scope
+eotg_sv_gobcorp_max_votes = {
+	value = 0
+	every_vassal = {
+		limit = {
+			OR = {
+				eotg_st_is_trade_prince = yes
+				eotg_st_is_merchant_lord = yes
+			}
+		}
+		add = @eotg_gobcorp_max_weight_per_vassal
+	}
+}
+
+# 90% threshold for a successful no-confidence vote
+eotg_sv_gobcorp_threshold = {
+	value = eotg_sv_gobcorp_max_votes
+	multiply = 0.9
+}
+
+# Monthly market share accumulation for a vassal character (called in story cycle scope)
+eotg_sv_gobcorp_market_share_gain = {
+	value = 1
+	add = { value = gold  divide = 100 }
+	add = { value = realm_size  divide = 10 }
+	min = 1
+	max = 50
+}

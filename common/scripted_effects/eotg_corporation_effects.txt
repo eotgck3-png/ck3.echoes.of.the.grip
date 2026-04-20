@@ -1,0 +1,104 @@
+﻿# ── eotg_corporation_effects.txt ──────────────────────────────────────────────
+# Scripted effects for the Corporation government.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Initialize board influence on CEO accession (called on CEO scope)
+eotg_se_corp_init_board_influence = {
+	set_variable = { name = eotg_board_influence  value = 100 }
+}
+
+# Decay board influence annually (called on CEO scope via on_yearly_playable)
+eotg_se_corp_decay_board_influence = {
+	change_variable = {
+		name = eotg_board_influence
+		add = { value = eotg_sv_corp_board_influence_decay  multiply = -1 }
+	}
+	if = {
+		limit = { var:eotg_board_influence < 0 }
+		set_variable = { name = eotg_board_influence  value = 0 }
+	}
+	# Fire warning event when first hitting critical threshold
+	if = {
+		limit = {
+			var:eotg_board_influence <= 20
+			NOT = { has_character_flag = eotg_corp_influence_warned }
+		}
+		add_character_flag = eotg_corp_influence_warned
+		trigger_event = { id = eotg_corp_board.0001  days = 1 }
+	}
+}
+
+# Spend board influence on a major action (called on CEO scope)
+# $AMOUNT$ = script value or integer for how much to spend
+eotg_se_corp_spend_board_influence = {
+	change_variable = {
+		name = eotg_board_influence
+		add = { value = $AMOUNT$  multiply = -1 }
+	}
+	if = {
+		limit = { var:eotg_board_influence < 0 }
+		set_variable = { name = eotg_board_influence  value = 0 }
+	}
+}
+
+# Restore board influence after a successful diplomacy event (called on CEO scope)
+eotg_se_corp_restore_board_influence = {
+	change_variable = {
+		name = eotg_board_influence
+		add = eotg_sv_corp_board_influence_diplomacy_gain
+	}
+	if = {
+		limit = { var:eotg_board_influence > 100 }
+		set_variable = { name = eotg_board_influence  value = 100 }
+	}
+}
+
+# Calculate election weight for one Regional Director and store in var:eotg_election_weight
+eotg_se_corp_calculate_election_weight = {
+	set_variable = { name = eotg_election_weight  value = eotg_sv_corp_election_weight }
+	# Apply interference penalty if the CEO used Corporate Interference against this character
+	if = {
+		limit = { has_character_flag = eotg_corp_interference_target }
+		change_variable = {
+			name = eotg_election_weight
+			add = -15
+		}
+	}
+	if = {
+		limit = { var:eotg_election_weight < 0 }
+		set_variable = { name = eotg_election_weight  value = 0 }
+	}
+}
+
+# Find the election winner — saves as scope:eotg_election_winner
+# Called on the CEO (or liege) scope before the election event fires.
+eotg_se_corp_find_election_winner = {
+	every_vassal = {
+		limit = { eotg_st_is_regional_director = yes }
+		eotg_se_corp_calculate_election_weight = yes
+	}
+	ordered_vassal = {
+		order_by = var:eotg_election_weight
+		limit = { eotg_st_is_regional_director = yes }
+		position = 0
+		max = 1
+		save_scope_as = eotg_election_winner
+	}
+}
+
+# Trigger the election event chain after CEO death (called on dying CEO scope)
+eotg_se_corp_trigger_election = {
+	eotg_se_corp_find_election_winner = yes
+	every_vassal = {
+		limit = { eotg_st_is_regional_director = yes }
+		trigger_event = { id = eotg_corp_board.0002  days = 3 }
+	}
+}
+
+# Apply the "Corporate Undermined" modifier to a sabotage target (called on target scope)
+eotg_se_corp_apply_undermined = {
+	add_character_modifier = {
+		modifier = eotg_corporate_undermined
+		years = 3
+	}
+}
