@@ -15,7 +15,14 @@ on_yearly_playable = {
         eotg_on_yearly_corp_board_influence_decay
         eotg_on_yearly_cartel_paranoia_check
         eotg_on_yearly_elven_isolationism_update
+        eotg_on_yearly_pmc_controversy_check
+        eotg_on_yearly_pmc_loss_of_command_check
     }
+}
+
+# Hook into war declaration to offer contracts to eligible Contractor-Generals
+on_war_started = {
+    on_actions = { eotg_on_war_started_pmc_check }
 }
 
 # Hook into title gain to set/clear the corporate government flag
@@ -135,6 +142,58 @@ eotg_on_death_elven_monarch = {
     }
 }
 
+# Yearly controversy backlash check — fires eotg_pmc_contract.0004 for active CGs
+eotg_on_yearly_pmc_controversy_check = {
+    effect = {
+        if = {
+            limit = {
+                eotg_st_is_contractor_general = yes
+                OR = {
+                    has_character_modifier = eotg_pmc_controversy_minor
+                    has_character_modifier = eotg_pmc_controversy_standard
+                    has_character_modifier = eotg_pmc_controversy_exclusive
+                }
+            }
+            trigger_event = { id = eotg_pmc_contract.0004  days = 3 }
+        }
+    }
+}
+
+# Yearly check — if CG Loss of Command flag has expired naturally, fire consequence event
+eotg_on_yearly_pmc_loss_of_command_check = {
+    effect = {
+        if = {
+            limit = {
+                eotg_st_is_contractor_general = yes
+                eotg_sv_pmc_withdrawal_count >= eotg_sv_pmc_withdrawal_threshold
+                NOT = { has_character_flag = eotg_pmc_loss_of_command_flag }
+            }
+            # Flag expired without buyback — consequence
+            trigger_event = { id = eotg_pmc_command.0003  days = 5 }
+        }
+    }
+}
+
+# Yearly ally intervention check — chance for allied vassal to fire 0002
+eotg_on_yearly_pmc_ally_check = {
+    effect = {
+        if = {
+            limit = {
+                eotg_st_pmc_loss_of_command_active = yes
+                any_vassal = {
+                    is_powerful_vassal = yes
+                    NOT = { has_character_flag = eotg_pmc_withdrew_forces }
+                    opinion >= { who = root  value = 30 }
+                }
+            }
+            random = {
+                chance = 30
+                trigger_event = { id = eotg_pmc_command.0002  days = 5 }
+            }
+        }
+    }
+}
+
 # Yearly check: apply or clear Grand Underlord paranoia based on current dread
 eotg_on_yearly_cartel_paranoia_check = {
     effect = {
@@ -151,6 +210,22 @@ eotg_on_death_ceo_election = {
         if = {
             limit = { eotg_st_is_ceo = yes }
             eotg_se_corp_trigger_election = yes
+        }
+    }
+}
+
+# On war started: check if any Contractor-General can receive a contract offer
+eotg_on_war_started_pmc_check = {
+    effect = {
+        scope:attacker = { save_scope_as = eotg_pmc_war_client }
+        every_independent_ruler = {
+            limit = {
+                eotg_st_pmc_contract_available = yes
+                NOT = { this = scope:eotg_pmc_war_client }
+                opinion = { who = scope:eotg_pmc_war_client  value >= 20 }
+            }
+            set_variable = { name = eotg_pmc_contract_client  value = scope:eotg_pmc_war_client }
+            trigger_event = { id = eotg_pmc_contract.0001  days = 5 }
         }
     }
 }

@@ -184,3 +184,61 @@ eotg_cartel_shakedown_standoff = {
     monthly_prestige_gain_mult = -0.20
     vassal_opinion = -20
 }
+
+# ── PMC Government Modifiers ──────────────────────────────────────────────────
+
+# eotg_pmc_controversy_minor
+# Minor controversy from an active Minor Contract.
+eotg_pmc_controversy_minor = {
+    icon = stress_negative    # Placeholder
+    vassal_opinion = -5
+    monthly_prestige_gain_mult = -0.05
+}
+
+# eotg_pmc_controversy_standard
+# Meaningful controversy from an active Standard Contract.
+eotg_pmc_controversy_standard = {
+    icon = stress_negative    # Placeholder
+    vassal_opinion = -10
+    monthly_prestige_gain_mult = -0.10
+    different_culture_opinion = -5
+}
+
+# eotg_pmc_controversy_exclusive
+# Heavy controversy from an active Exclusive Contract.
+# The Contractor-General is honor-bound to avoid offensive wars for the duration.
+eotg_pmc_controversy_exclusive = {
+    icon = stress_negative    # Placeholder
+    vassal_opinion = -15
+    monthly_prestige_gain_mult = -0.15
+    different_culture_opinion = -10
+    diplomacy = -2
+}
+
+# eotg_pmc_command_collapsed
+# Applied after Loss of Command expires without resolution.
+# Severe legitimacy and prestige penalty for 5 years.
+eotg_pmc_command_collapsed = {
+    icon = stress_negative    # Placeholder
+    monthly_prestige_gain_mult = -0.20
+    vassal_opinion = -20
+    legitimacy_gain_mult = -0.20
+    diplomacy = -2
+}
+
+# eotg_pmc_high_fee_extraction
+# Applied to the Contractor-General liege when Full Assessment fee tier is active.
+eotg_pmc_high_fee_extraction = {
+    icon = stewardship_positive    # Placeholder
+    monthly_income_mult = 0.05
+}
+
+# eotg_pmc_field_commission_active
+# Applied to vassals who hold a Field Commission.
+# Grants a martial bonus representing formal operational authority.
+eotg_pmc_field_commission_active = {
+    icon = martial_positive    # Placeholder
+    martial = 1
+    knight_effectiveness_mult = 0.05
+}
+

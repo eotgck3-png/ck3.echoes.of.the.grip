@@ -1,0 +1,184 @@
+﻿# ── eotg_pmc_decisions.txt ───────────────────────────────────────────────────
+# Decisions for the PMC government.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Executive Commander declares withdrawal of forces from Contractor-General's command.
+eotg_pmc_withdraw_forces = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_misc.dds"
+	}
+	decision_group_type = major
+
+	desc = eotg_pmc_withdraw_forces_desc
+	selection_tooltip = eotg_pmc_withdraw_forces_tooltip
+
+	is_shown = {
+		eotg_st_pmc_can_withdraw_forces = yes
+	}
+
+	is_valid = {
+		eotg_st_pmc_can_withdraw_forces = yes
+		is_imprisoned = no
+	}
+
+	is_valid_showing_failures_only = {
+		is_imprisoned = no
+	}
+
+	effect = {
+		add_character_flag = { flag = eotg_pmc_withdrew_forces  years = 5 }
+		add_prestige = 50
+		liege = {
+			if = {
+				limit = { eotg_sv_pmc_withdrawal_count >= eotg_sv_pmc_withdrawal_threshold }
+				eotg_se_pmc_trigger_loss_of_command = yes
+			}
+			else = {
+				trigger_event = { id = eotg_pmc_command.0004  days = 3 }
+			}
+		}
+		custom_tooltip = eotg_pmc_withdraw_forces_effect_tooltip
+	}
+
+	cooldown = { years = 5 }
+
+	ai_will_do = {
+		base = 10
+		modifier = { add = 30  liege = { prestige < 100 } }
+		modifier = { add = 20  liege = { has_character_modifier = eotg_pmc_controversy_exclusive } }
+		modifier = { add = -30  opinion = { who = liege  value >= 20 } }
+	}
+}
+
+# Contractor-General buys back vassal loyalty during Loss of Command window.
+eotg_pmc_buy_back_loyalty = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_misc.dds"
+	}
+	decision_group_type = major
+
+	desc = eotg_pmc_buy_back_loyalty_desc
+	selection_tooltip = eotg_pmc_buy_back_loyalty_tooltip
+
+	is_shown = {
+		eotg_st_is_contractor_general = yes
+		eotg_st_pmc_loss_of_command_active = yes
+	}
+
+	is_valid = {
+		eotg_st_is_contractor_general = yes
+		eotg_st_pmc_loss_of_command_active = yes
+		is_imprisoned = no
+		gold >= eotg_sv_pmc_loyalty_buyback_cost
+	}
+
+	is_valid_showing_failures_only = {
+		is_imprisoned = no
+		gold >= eotg_sv_pmc_loyalty_buyback_cost
+	}
+
+	effect = {
+		remove_short_term_gold = eotg_sv_pmc_loyalty_buyback_cost
+		eotg_se_pmc_buyback_loyalty = yes
+		custom_tooltip = eotg_pmc_buy_back_loyalty_effect_tooltip
+	}
+
+	ai_check_interval = 12
+	ai_will_do = {
+		base = 60
+		modifier = { add = 30  gold > 500 }
+	}
+}
+
+# Contractor-General purchases an extension to the Loss of Command window.
+# Each extension costs progressively more gold.
+eotg_pmc_extend_command = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_misc.dds"
+	}
+	decision_group_type = major
+
+	desc = eotg_pmc_extend_command_desc
+	selection_tooltip = eotg_pmc_extend_command_tooltip
+
+	is_shown = {
+		eotg_st_is_contractor_general = yes
+		eotg_st_pmc_loss_of_command_active = yes
+	}
+
+	is_valid = {
+		eotg_st_is_contractor_general = yes
+		eotg_st_pmc_loss_of_command_active = yes
+		is_imprisoned = no
+		gold >= eotg_sv_pmc_loyalty_buyback_cost
+		prestige >= 100
+	}
+
+	is_valid_showing_failures_only = {
+		is_imprisoned = no
+		gold >= eotg_sv_pmc_loyalty_buyback_cost
+		prestige >= 100
+	}
+
+	effect = {
+		remove_short_term_gold = eotg_sv_pmc_loyalty_buyback_cost
+		add_prestige = -100
+		if = {
+			limit = { has_variable = eotg_pmc_extension_count }
+			change_variable = { name = eotg_pmc_extension_count  add = 1 }
+		}
+		else = {
+			set_variable = { name = eotg_pmc_extension_count  value = 2 }
+		}
+		# Extend the Loss of Command flag for another year
+		add_character_flag = { flag = eotg_pmc_loss_of_command_flag  years = 1 }
+		custom_tooltip = eotg_pmc_extend_command_effect_tooltip
+	}
+
+	cooldown = { years = 1 }
+
+	ai_check_interval = 12
+	ai_will_do = {
+		base = 40
+		modifier = { add = 30  gold > 600 }
+		modifier = { add = -20  gold < 300 }
+	}
+}
+
+# Contractor-General evolves the PMC into a Corporation.
+eotg_pmc_evolve_corporation = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_dynasty_house.dds"
+	}
+	decision_group_type = major
+
+	desc = eotg_pmc_evolve_corporation_desc
+	selection_tooltip = eotg_pmc_evolve_corporation_tooltip
+
+	is_shown = {
+		eotg_st_pmc_evolution_valid = yes
+	}
+
+	is_valid = {
+		eotg_st_pmc_evolution_valid = yes
+		is_imprisoned = no
+	}
+
+	is_valid_showing_failures_only = {
+		is_imprisoned = no
+		gold >= 1000
+		prestige >= 500
+	}
+
+	effect = {
+		eotg_se_pmc_evolve_to_corporation = yes
+		custom_tooltip = eotg_pmc_evolve_corporation_effect_tooltip
+	}
+
+	ai_check_interval = 60
+	ai_will_do = {
+		base = 20
+		modifier = { add = 30  gold > 2000 }
+		modifier = { add = 20  prestige > 1000 }
+	}
+}

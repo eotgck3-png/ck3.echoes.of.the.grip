@@ -1,0 +1,74 @@
+﻿# ── eotg_pmc_obligations.txt ─────────────────────────────────────────────────
+# Subject contract obligations for the PMC government.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Operational Levy — military contribution scaled by commitment tier.
+eotg_pmc_operational_levy = {
+	type = tree
+	icon = soldier_icon
+
+	eotg_pmc_levy_minimal = {
+		obligation_levels = {
+			levy_contribution_mult = 0.10
+		}
+	}
+
+	eotg_pmc_levy_standard = {
+		obligation_levels = {
+			levy_contribution_mult = 0.20
+		}
+	}
+
+	eotg_pmc_levy_full = {
+		obligation_levels = {
+			levy_contribution_mult = 0.30
+		}
+		vassal_opinion = -10
+	}
+}
+
+# Contractor Fee — tax contribution representing operational overhead payments.
+eotg_pmc_contractor_fee = {
+	type = tree
+	icon = gold_icon
+
+	eotg_pmc_fee_low = {
+		obligation_levels = {
+			tax_contribution_mult = 0.10
+		}
+	}
+
+	eotg_pmc_fee_standard = {
+		obligation_levels = {
+			tax_contribution_mult = 0.20
+		}
+	}
+
+	eotg_pmc_fee_high = {
+		obligation_levels = {
+			tax_contribution_mult = 0.35
+		}
+		vassal_opinion = -15
+		liege_modifier = {
+			modifier = eotg_pmc_high_fee_extraction
+		}
+	}
+}
+
+# Field Commission — formal operational command authorization.
+# Grants a martial bonus to the vassal when active.
+eotg_pmc_field_commission = {
+	type = radiobutton
+	icon = soldier_icon
+
+	eotg_pmc_commission_none = {
+		flag = none
+	}
+
+	eotg_pmc_commission_granted = {
+		flag = eotg_pmc_commission_flag
+		subject_modifier = {
+			modifier = eotg_pmc_field_commission_active
+		}
+	}
+}
