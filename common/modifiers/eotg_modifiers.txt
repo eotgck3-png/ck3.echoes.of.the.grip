@@ -87,6 +87,66 @@ eotg_corp_full_extraction_active = {
     monthly_income_mult = 0.05
 }
 
+# ── Elven Monarchy Government Modifiers ──────────────────────────────────────
+
+# Isolationism tier modifiers — applied by yearly pulse based on ruler's title tier.
+# Represent how strongly the elven ruler looks down on non-elven outsiders.
+eotg_elven_isolationism_county = {
+    icon = diplomacy_negative    # Placeholder
+    different_culture_opinion = -5
+}
+eotg_elven_isolationism_duchy = {
+    icon = diplomacy_negative    # Placeholder
+    different_culture_opinion = -10
+}
+eotg_elven_isolationism_kingdom = {
+    icon = diplomacy_negative    # Placeholder
+    different_culture_opinion = -15
+    diplomacy = -1
+}
+eotg_elven_isolationism_empire = {
+    icon = diplomacy_negative    # Placeholder
+    different_culture_opinion = -20
+    diplomacy = -2
+}
+
+# eotg_elven_court_confirmed
+# Applied to a Starborn Sovereign who passed the Eternal Court confirmation.
+# Legitimacy and prestige bonus representing a strong mandate.
+eotg_elven_court_confirmed = {
+    icon = diplomacy_positive    # Placeholder
+    monthly_prestige_gain_mult = 0.10
+    vassal_opinion = 5
+    legitimacy_gain_mult = 0.10
+}
+
+# eotg_elven_court_contested
+# Applied to a Starborn Sovereign whose succession was contested.
+# Legitimacy and vassal opinion penalty.
+eotg_elven_court_contested = {
+    icon = stress_negative    # Placeholder
+    legitimacy_gain_mult = -0.15
+    vassal_opinion = -10
+}
+
+# eotg_elven_succession_crisis
+# Applied to a Starborn Sovereign when a powerful vassal backs a rival claimant.
+eotg_elven_succession_crisis = {
+    icon = stress_negative    # Placeholder
+    legitimacy_gain_mult = -0.20
+    vassal_opinion = -15
+    monthly_prestige_gain_mult = -0.10
+}
+
+# eotg_elven_court_purity_active
+# Applied when the Decree of Court Purity is active.
+# Signals the realm that non-elven appointments are formally forbidden.
+eotg_elven_court_purity_active = {
+    icon = diplomacy_positive    # Placeholder
+    same_culture_opinion = 5
+    different_culture_opinion = -10
+}
+
 # ── Cartel Government Modifiers ───────────────────────────────────────────────
 
 # eotg_cartel_gl_paranoia

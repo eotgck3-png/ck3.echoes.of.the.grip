@@ -14,6 +14,7 @@ on_yearly_playable = {
         eotg_on_yearly_corporate_faction_check
         eotg_on_yearly_corp_board_influence_decay
         eotg_on_yearly_cartel_paranoia_check
+        eotg_on_yearly_elven_isolationism_update
     }
 }
 
@@ -29,6 +30,7 @@ on_title_gain = {
 on_death = {
     on_actions = {
         eotg_on_death_ceo_election
+        eotg_on_death_elven_monarch
     }
 }
 
@@ -103,6 +105,33 @@ eotg_on_title_gain_corp_board_influence = {
 eotg_sabotage_rival_ongoing = {
     effect = {
         # Reserved for periodic mid-scheme narrative events
+    }
+}
+
+# Yearly update of elven isolationism tier modifier based on current title tier
+eotg_on_yearly_elven_isolationism_update = {
+    effect = {
+        if = {
+            limit = { eotg_st_is_elven_monarch = yes }
+            eotg_se_elven_update_isolationism = yes
+        }
+    }
+}
+
+# On death: fire Eternal Court confirmation on the new Elven Monarchy ruler
+eotg_on_death_elven_monarch = {
+    effect = {
+        if = {
+            limit = { eotg_st_is_elven_monarch = yes }
+            primary_title = {
+                holder = {
+                    if = {
+                        limit = { eotg_st_is_elven_monarch = yes }
+                        trigger_event = { id = eotg_elven_court.0001  days = 7 }
+                    }
+                }
+            }
+        }
     }
 }
 

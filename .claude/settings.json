@@ -4,7 +4,14 @@
       "Bash(python3 -c ' *)",
       "Bash(python3 -c \"pass\")",
       "Bash(powershell -Command ' *)",
-      "PowerShell(& \"C:\\\\Users\\\\river\\\\tools\\\\ck3-tiger-windows-v1.17.0\\\\ck3-tiger.exe\" --game \"D:\\\\SteamLibrary\\\\steamapps\\\\common\\\\Crusader Kings III\" \"C:\\\\Users\\\\river\\\\Documents\\\\GitHub\\\\ck3.echoes.of.the.grip\\\\echoes_of_the_grip.mod\" > \"C:\\\\Users\\\\river\\\\Documents\\\\GitHub\\\\ck3.echoes.of.the.grip\\\\tiger_output.txt\")"
+      "PowerShell(& \"C:\\\\Users\\\\river\\\\tools\\\\ck3-tiger-windows-v1.17.0\\\\ck3-tiger.exe\" --game \"D:\\\\SteamLibrary\\\\steamapps\\\\common\\\\Crusader Kings III\" \"C:\\\\Users\\\\river\\\\Documents\\\\GitHub\\\\ck3.echoes.of.the.grip\\\\echoes_of_the_grip.mod\" > \"C:\\\\Users\\\\river\\\\Documents\\\\GitHub\\\\ck3.echoes.of.the.grip\\\\tiger_output.txt\")",
+      "PowerShell(& \"C:\\\\Users\\\\river\\\\tools\\\\ck3-tiger-windows-v1.17.0\\\\ck3tiger.exe\" --vanilla \"D:\\\\SteamLibrary\\\\steamapps\\\\common\\\\Crusader Kings III\\\\game\" --mod \"c:\\\\Users\\\\river\\\\Documents\\\\GitHub\\\\ck3.echoes.of.the.grip\" 2>&1)",
+      "PowerShell(Out-File \"C:\\\\Users\\\\river\\\\Documents\\\\GitHub\\\\ck3.echoes.of.the.grip\\\\tiger_output.txt\" -Encoding utf8)",
+      "Read(//c/Users/river/tools/ck3-tiger-windows-v1.17.0/**)",
+      "PowerShell(& \"C:\\\\Users\\\\river\\\\tools\\\\ck3-tiger-windows-v1.17.0\\\\ck3-tiger.exe\" --game \"D:\\\\SteamLibrary\\\\steamapps\\\\common\\\\Crusader Kings III\" \"C:\\\\Users\\\\river\\\\Documents\\\\GitHub\\\\ck3.echoes.of.the.grip\\\\echoes_of_the_grip.mod\" 2>&1)",
+      "PowerShell(Get-Content \"C:\\\\Users\\\\river\\\\Documents\\\\GitHub\\\\ck3.echoes.of.the.grip\\\\tiger_output.txt\" | Select-String \"error|warn|Error|Warn\" | Select-Object -First 60 | ForEach-Object { $_.Line })",
+      "Read(//c/Users/river/Documents/GitHub/ck3.echoes.of.the.grip/**)",
+      "PowerShell(Get-Content \"C:\\\\Users\\\\river\\\\Documents\\\\GitHub\\\\ck3.echoes.of.the.grip\\\\tiger_output.txt\" | Select-String \"elven|elven_monarchy|eotg_elven\" | ForEach-Object { $_.Line })"
     ]
   }
 }

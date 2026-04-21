@@ -1654,3 +1654,97 @@ ordered_vassal = {
 ```
 
 This saves exactly the top-weighted vassal into the named scope. Works inside event `immediate` blocks and scripted effects.
+
+---
+
+## 23. Cartel Government — Additional Verified Patterns (2026-04-20)
+
+### Government Rules — Raiding
+
+`can_raid = yes` is NOT a valid field anywhere in the government block in CK3 1.19. Tiger errors on it at both top-level and inside `government_rules`.
+
+The correct way to enable raiding is via a **flag** inside the `flags` block:
+
+```
+flags = {
+    government_can_raid_rule    # Enables raiding capability
+    government_is_settled
+    government_uses_domain_limit
+}
+```
+
+Verified from vanilla `00_government_types.txt` — tribal, iqta, and steppe admin all use `government_can_raid_rule` as a flag. No `can_raid` field exists.
+
+### Decision Picture Field
+
+In CK3 1.19, the `picture` field in decisions requires **block syntax**, not a string:
+
+```
+# WRONG — string syntax:
+picture = "gfx/interface/illustrations/decisions/decision_misc.dds"
+
+# CORRECT — block syntax:
+picture = {
+    reference = "gfx/interface/illustrations/decisions/decision_misc.dds"
+}
+```
+
+Verified from `eotg_corporation_decisions.txt` (working) and vanilla decision files.
+
+### Negative Gold Effects
+
+`add_gold` does not accept negative numbers. Tiger warns: "add_gold does not take negative numbers — try remove_short_term_gold instead."
+
+```
+# WRONG:
+add_gold = -200
+
+# CORRECT:
+remove_short_term_gold = 200
+```
+
+`remove_short_term_gold` only removes short-term gold (does not touch saved/reserved gold). If you need to remove all gold types, use:
+```
+add_gold = { value = X  multiply = -1 }
+```
+(The scripted value form still works with negative multipliers, only the literal negative integer is blocked.)
+
+### Subject Contract Obligation Level `_short` Keys
+
+Every obligation level needs a `_short` localization key in addition to the standard name and `_desc`. These are the abbreviated names shown in compact UI views:
+
+```yaml
+eotg_cartel_tax_token:0 "Token Payment"
+eotg_cartel_tax_token_short:0 "Token"
+eotg_cartel_tax_token_desc:0 "A minimal tribute..."
+```
+
+Without `_short` keys, Tiger emits `warning(missing-localization)` for every obligation level.
+
+### Subject Contract Group Localization
+
+The contract group identifier itself needs two loc keys:
+
+```yaml
+eotg_cartel_vassal:0 "Cartel Obligations"
+eotg_cartel_vassal_desc:0 "The terms under which Bosses serve the Grand Underlord."
+```
+
+### `dread` in Effects
+
+`add_dread = X` (positive integer or script value) is a valid effect in CK3 1.19. Tiger does not error on it. Dread cannot be directly subtracted with `add_dread` — model dread loss through:
+1. Character modifiers with `dread_decay_add = X` (increases monthly decay rate)
+2. Applying a timed modifier that speeds decay while active
+
+`dread_decay_add` is a valid modifier field in CK3 1.19 (verified — Tiger does not error).
+
+### Government `legitimacy = no` in `government_rules`
+
+Setting `legitimacy = no` inside `government_rules` disables the legitimacy tracking system for that government. Valid in 1.19 — useful for governments where dread or other mechanics replace legitimacy as the stability mechanic. Tiger does not error on this.
+
+### `stress_impact` — Avoid Undefined Traits
+
+`stress_impact` blocks accept vanilla trait names as keys. If a vanilla trait (e.g., `proud`) is not defined anywhere in the mod's `common/traits/` files, Tiger reports `error(missing-item): trait X not defined`. This happens even for vanilla traits if the mod does not load any file that defines them.
+
+**Safe approach:** Use only `base`, `ambitious`, `content`, `greedy`, `arbitrary` in stress_impact blocks — traits that are defined in `eotg_traits.txt` or known to be in vanilla files Tiger can resolve. Avoid `proud`, `cruel`, `wrathful`, etc. until the mod's traits file covers them or vanilla coverage is confirmed.
+
