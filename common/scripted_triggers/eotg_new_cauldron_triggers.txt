@@ -1,0 +1,89 @@
+﻿# ── eotg_new_cauldron_triggers.txt ───────────────────────────────────────────
+# Scripted triggers for the New Cauldron Democracy government.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# True for the empire-tier holder of the New Cauldron government.
+eotg_st_is_president = {
+	has_government = eotg_new_cauldron_government
+	highest_held_title_tier = tier_empire
+}
+
+# True for kingdom-tier State rulers under the New Cauldron government.
+eotg_st_is_nc_state = {
+	has_government = eotg_new_cauldron_government
+	highest_held_title_tier = tier_kingdom
+}
+
+# True for duchy-tier Senator characters under the New Cauldron government.
+eotg_st_is_nc_senator = {
+	has_government = eotg_new_cauldron_government
+	highest_held_title_tier = tier_duchy
+}
+
+# True for county-tier Governor characters under the New Cauldron government.
+eotg_st_is_nc_governor = {
+	has_government = eotg_new_cauldron_government
+	highest_held_title_tier = tier_county
+}
+
+# True for characters eligible to run in a presidential election.
+eotg_st_nc_campaign_eligible = {
+	has_government = eotg_new_cauldron_government
+	OR = {
+		highest_held_title_tier = tier_kingdom
+		AND = {
+			highest_held_title_tier = tier_duchy
+			is_powerful_vassal = yes
+		}
+	}
+	NOT = { eotg_st_is_president = yes }
+	NOT = { eotg_st_nc_two_term_limited = yes }
+	is_imprisoned = no
+	is_alive = yes
+}
+
+# True for characters who have served the maximum two presidential terms.
+eotg_st_nc_two_term_limited = {
+	has_variable = eotg_nc_term_count
+	var:eotg_nc_term_count >= 2
+}
+
+# True for vassals of a President currently in the campaign phase.
+eotg_st_nc_campaign_active = {
+	liege = { has_character_flag = eotg_nc_campaign_phase }
+}
+
+# True for the current Vice President (runner-up in last election).
+eotg_st_nc_is_vice_president = {
+	has_character_flag = eotg_nc_vice_president
+	liege = { eotg_st_is_president = yes }
+}
+
+# True when the Senate is hostile — support below the threshold.
+eotg_st_nc_senate_hostile = {
+	eotg_st_is_president = yes
+	has_variable = eotg_nc_senate_support
+	var:eotg_nc_senate_support < 30
+}
+
+# True when the Senate is cooperative — strong majority backing.
+eotg_st_nc_senate_cooperative = {
+	eotg_st_is_president = yes
+	has_variable = eotg_nc_senate_support
+	var:eotg_nc_senate_support >= 70
+}
+
+# True when the President has not yet used Emergency Powers this term.
+eotg_st_nc_emergency_powers_available = {
+	eotg_st_is_president = yes
+	NOT = { has_character_flag = eotg_nc_emergency_powers_used }
+}
+
+# True when the President has Senate approval to declare an offensive war.
+eotg_st_nc_can_declare_war = {
+	eotg_st_is_president = yes
+	OR = {
+		has_character_flag = eotg_nc_senate_war_approved
+		has_character_flag = eotg_nc_emergency_active
+	}
+}

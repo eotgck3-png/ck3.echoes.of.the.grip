@@ -23,29 +23,9 @@ eotg_pmc_command.0001 = {
 		animation = stress
 	}
 	right_portrait = {
-		character = root
+		character = scope:eotg_withdrawing_commander
 		animation = personality_bold
-		trigger = {
-			any_vassal = {
-				is_powerful_vassal = yes
-				has_character_flag = eotg_pmc_withdrew_forces
-				eotg_st_is_executive_commander = yes
-			}
-		}
-		# Show the most powerful withdrawing Executive Commander
-		override_portrait = {
-			character = {
-				ordered_vassal = {
-					limit = {
-						is_powerful_vassal = yes
-						has_character_flag = eotg_pmc_withdrew_forces
-						eotg_st_is_executive_commander = yes
-					}
-					order_by = realm_size
-					save_scope_as = eotg_withdrawing_commander
-				}
-			}
-		}
+		trigger = { exists = scope:eotg_withdrawing_commander }
 	}
 
 	immediate = {
@@ -112,7 +92,7 @@ eotg_pmc_command.0002 = {
 			limit = {
 				is_powerful_vassal = yes
 				NOT = { has_character_flag = eotg_pmc_withdrew_forces }
-				opinion >= { who = root  value = 20 }
+				opinion = { target = root  value >= 20 }
 			}
 			save_scope_as = eotg_ally_vassal
 		}
@@ -237,7 +217,7 @@ eotg_pmc_command.0005 = {
 		name = eotg_pmc_command_0005_opt_evolve
 		change_government = eotg_corporation_government
 		add_prestige = 500
-		add_gold = -500
+		remove_short_term_gold = 500
 		stress_impact = {
 			base = minor_stress_impact_gain
 			content = medium_stress_impact_gain

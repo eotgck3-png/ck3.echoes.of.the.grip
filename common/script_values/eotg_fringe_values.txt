@@ -1,0 +1,82 @@
+# ── eotg_fringe_values.txt ───────────────────────────────────────────────────
+# Script values for the Fringe Government.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Current Grip value — returns the variable or a default of 50 if unset.
+eotg_sv_fringe_grip = {
+	value = 50
+	if = {
+		limit = { has_variable = eotg_fringe_grip }
+		value = var:eotg_fringe_grip
+	}
+}
+
+# Yearly Grip change — net gain or loss from current conditions.
+eotg_sv_fringe_grip_change = {
+	value = 0
+
+	# Active warfare maintains Grip
+	if = {
+		limit = { is_at_war = yes }
+		add = 3
+	}
+
+	# Peace decays Grip
+	if = {
+		limit = {
+			is_at_war = no
+			has_variable = eotg_fringe_peace_years
+			var:eotg_fringe_peace_years >= 2
+		}
+		add = -2
+	}
+	if = {
+		limit = {
+			is_at_war = no
+			has_variable = eotg_fringe_peace_years
+			var:eotg_fringe_peace_years >= 5
+		}
+		add = -2
+	}
+
+	# Realm overextension passive decay
+	if = {
+		limit = { realm_size >= 30 }
+		add = -1
+	}
+	if = {
+		limit = { realm_size >= 60 }
+		add = -2
+	}
+
+	# Low prestige means the realm is losing faith in the overlord
+	if = {
+		limit = { prestige < 100 }
+		add = -1
+	}
+
+	# Gold debt signals weakness
+	if = {
+		limit = { gold < 0 }
+		add = -2
+	}
+}
+
+# Cost to Distribute the Spoils — gold per captain.
+eotg_sv_fringe_spoils_cost = {
+	value = 0
+	every_vassal = {
+		limit = { eotg_st_is_fringe_captain = yes }
+		add = 30
+	}
+	min = 50
+}
+
+# Reform prestige threshold — scales slightly with realm size.
+eotg_sv_fringe_reform_prestige_cost = {
+	value = 300
+	add = {
+		value = realm_size
+		multiply = 3
+	}
+}

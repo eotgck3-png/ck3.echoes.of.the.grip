@@ -1,0 +1,172 @@
+# ── eotg_fringe_effects.txt ──────────────────────────────────────────────────
+# Scripted effects for the Fringe Government.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Initialize Grip and peace counter on a new Fringe ruler.
+eotg_se_fringe_init_grip = {
+	if = {
+		limit = { NOT = { has_variable = eotg_fringe_grip } }
+		set_variable = { name = eotg_fringe_grip  value = 50 }
+	}
+	if = {
+		limit = { NOT = { has_variable = eotg_fringe_peace_years } }
+		set_variable = { name = eotg_fringe_peace_years  value = 0 }
+	}
+}
+
+# Update the Grip variable by the yearly net change, then clamp to 0-100.
+eotg_se_fringe_update_grip = {
+	if = {
+		limit = { NOT = { has_variable = eotg_fringe_grip } }
+		set_variable = { name = eotg_fringe_grip  value = 50 }
+	}
+	change_variable = {
+		name = eotg_fringe_grip
+		add = eotg_sv_fringe_grip_change
+	}
+	if = {
+		limit = { var:eotg_fringe_grip > 100 }
+		set_variable = { name = eotg_fringe_grip  value = 100 }
+	}
+	if = {
+		limit = { var:eotg_fringe_grip < 0 }
+		set_variable = { name = eotg_fringe_grip  value = 0 }
+	}
+}
+
+# Update peace counter — increment during peace, reset during war.
+eotg_se_fringe_update_peace_counter = {
+	if = {
+		limit = { is_at_war = yes }
+		set_variable = { name = eotg_fringe_peace_years  value = 0 }
+		add_character_flag = { flag = eotg_fringe_was_at_war  years = 1 }
+	}
+	else = {
+		if = {
+			limit = { has_variable = eotg_fringe_peace_years }
+			change_variable = { name = eotg_fringe_peace_years  add = 1 }
+		}
+		else = {
+			set_variable = { name = eotg_fringe_peace_years  value = 1 }
+		}
+	}
+}
+
+# Apply or refresh Grip-state modifiers based on current variable.
+eotg_se_fringe_apply_grip_modifiers = {
+	remove_character_modifier = eotg_fringe_high_grip
+	remove_character_modifier = eotg_fringe_low_grip
+	if = {
+		limit = { eotg_st_fringe_grip_high = yes }
+		add_character_modifier = {
+			modifier = eotg_fringe_high_grip
+			years = 2
+		}
+	}
+	else_if = {
+		limit = { eotg_st_fringe_grip_low = yes }
+		add_character_modifier = {
+			modifier = eotg_fringe_low_grip
+			years = 2
+		}
+	}
+}
+
+# Apply or refresh peace decay modifiers based on current peace duration.
+eotg_se_fringe_apply_peace_modifiers = {
+	remove_character_modifier = eotg_fringe_peace_decay_minor
+	remove_character_modifier = eotg_fringe_peace_decay_major
+	remove_character_modifier = eotg_fringe_peace_decay_severe
+	if = {
+		limit = {
+			has_variable = eotg_fringe_peace_years
+			var:eotg_fringe_peace_years >= 10
+		}
+		add_character_modifier = {
+			modifier = eotg_fringe_peace_decay_severe
+			years = 2
+		}
+	}
+	else_if = {
+		limit = {
+			has_variable = eotg_fringe_peace_years
+			var:eotg_fringe_peace_years >= 5
+		}
+		add_character_modifier = {
+			modifier = eotg_fringe_peace_decay_major
+			years = 2
+		}
+	}
+	else_if = {
+		limit = {
+			has_variable = eotg_fringe_peace_years
+			var:eotg_fringe_peace_years >= 2
+		}
+		add_character_modifier = {
+			modifier = eotg_fringe_peace_decay_minor
+			years = 2
+		}
+	}
+}
+
+# Apply or refresh overextension modifiers based on realm size.
+eotg_se_fringe_apply_overextension = {
+	remove_character_modifier = eotg_fringe_overextension_minor
+	remove_character_modifier = eotg_fringe_overextension_major
+	if = {
+		limit = { realm_size >= 60 }
+		add_character_modifier = {
+			modifier = eotg_fringe_overextension_major
+			years = 2
+		}
+	}
+	else_if = {
+		limit = { realm_size >= 30 }
+		add_character_modifier = {
+			modifier = eotg_fringe_overextension_minor
+			years = 2
+		}
+	}
+}
+
+# Full yearly maintenance pass for a Fringe ruler.
+eotg_se_fringe_yearly_maintenance = {
+	eotg_se_fringe_update_peace_counter = yes
+	eotg_se_fringe_update_grip = yes
+	eotg_se_fringe_apply_grip_modifiers = yes
+	eotg_se_fringe_apply_peace_modifiers = yes
+	eotg_se_fringe_apply_overextension = yes
+}
+
+# Gain a fixed Grip amount (clamped at 100).
+eotg_se_fringe_gain_grip = {
+	if = {
+		limit = { has_variable = eotg_fringe_grip }
+		change_variable = { name = eotg_fringe_grip  add = $AMOUNT$ }
+		if = {
+			limit = { var:eotg_fringe_grip > 100 }
+			set_variable = { name = eotg_fringe_grip  value = 100 }
+		}
+	}
+}
+
+# Lose a fixed Grip amount (clamped at 0).
+eotg_se_fringe_lose_grip = {
+	if = {
+		limit = { has_variable = eotg_fringe_grip }
+		change_variable = { name = eotg_fringe_grip  add = -$AMOUNT$ }
+		if = {
+			limit = { var:eotg_fringe_grip < 0 }
+			set_variable = { name = eotg_fringe_grip  value = 0 }
+		}
+	}
+}
+
+# Apply new ruler chaos modifier on succession — called from on_death.
+eotg_se_fringe_succession_chaos = {
+	add_character_modifier = {
+		modifier = eotg_fringe_chaos_succession
+		years = 5
+	}
+	set_variable = { name = eotg_fringe_grip  value = 30 }
+}

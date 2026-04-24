@@ -17,6 +17,9 @@ on_yearly_playable = {
         eotg_on_yearly_elven_isolationism_update
         eotg_on_yearly_pmc_controversy_check
         eotg_on_yearly_pmc_loss_of_command_check
+        eotg_on_yearly_nc_campaign_check
+        eotg_on_yearly_nc_election_check
+        eotg_on_yearly_nc_senate_check
     }
 }
 
@@ -33,11 +36,12 @@ on_title_gain = {
     }
 }
 
-# Hook into character death to fire Corporation election event chain
+# Hook into character death to fire Corporation election event chain and NC VP succession
 on_death = {
     on_actions = {
         eotg_on_death_ceo_election
         eotg_on_death_elven_monarch
+        eotg_on_death_nc_president
     }
 }
 
@@ -183,7 +187,7 @@ eotg_on_yearly_pmc_ally_check = {
                 any_vassal = {
                     is_powerful_vassal = yes
                     NOT = { has_character_flag = eotg_pmc_withdrew_forces }
-                    opinion >= { who = root  value = 30 }
+                    opinion = { target = root  value >= 30 }
                 }
             }
             random = {
@@ -222,10 +226,69 @@ eotg_on_war_started_pmc_check = {
             limit = {
                 eotg_st_pmc_contract_available = yes
                 NOT = { this = scope:eotg_pmc_war_client }
-                opinion = { who = scope:eotg_pmc_war_client  value >= 20 }
+                opinion = { target = scope:eotg_pmc_war_client  value >= 20 }
             }
             set_variable = { name = eotg_pmc_contract_client  value = scope:eotg_pmc_war_client }
             trigger_event = { id = eotg_pmc_contract.0001  days = 5 }
+        }
+    }
+}
+
+# Yearly check — if President's pre-election flag has expired, start campaign phase.
+eotg_on_yearly_nc_campaign_check = {
+    effect = {
+        if = {
+            limit = {
+                eotg_st_is_president = yes
+                has_character_flag = eotg_nc_term_active
+                NOT = { has_character_flag = eotg_nc_pre_election }
+                NOT = { has_character_flag = eotg_nc_campaign_phase }
+            }
+            eotg_se_nc_start_campaign = yes
+        }
+    }
+}
+
+# Yearly check — if President's term has expired, resolve the election.
+eotg_on_yearly_nc_election_check = {
+    effect = {
+        if = {
+            limit = {
+                eotg_st_is_president = yes
+                NOT = { has_character_flag = eotg_nc_term_active }
+                has_character_flag = eotg_nc_campaign_phase
+            }
+            trigger_event = { id = eotg_nc_election.0002  days = 5 }
+        }
+    }
+}
+
+# Yearly check — fire Senate dissatisfaction event if senate support is low.
+eotg_on_yearly_nc_senate_check = {
+    effect = {
+        if = {
+            limit = {
+                eotg_st_nc_senate_hostile = yes
+                NOT = { has_character_flag = eotg_nc_senate_hostile_notified }
+            }
+            add_character_flag = { flag = eotg_nc_senate_hostile_notified  years = 3 }
+            trigger_event = { id = eotg_nc_senate.0001  days = 7 }
+        }
+    }
+}
+
+# On death: fire NC VP succession event if President dies with a VP available.
+eotg_on_death_nc_president = {
+    effect = {
+        if = {
+            limit = {
+                eotg_st_is_president = yes
+                any_vassal = { has_character_flag = eotg_nc_vice_president }
+            }
+            random_vassal = {
+                limit = { has_character_flag = eotg_nc_vice_president }
+                trigger_event = { id = eotg_nc_election.0005  days = 7 }
+            }
         }
     }
 }

@@ -4,53 +4,71 @@
 
 # Operational Levy — military contribution scaled by commitment tier.
 eotg_pmc_operational_levy = {
-	type = tree
+	display_mode = tree
 	icon = soldier_icon
 
-	eotg_pmc_levy_minimal = {
-		obligation_levels = {
-			levy_contribution_mult = 0.10
+	obligation_levels = {
+		eotg_pmc_levy_minimal = {
+			default = yes
+			position = { 0 0 }
+			levies = 0.10
+			ai_liege_desire = 2
+			ai_subject_desire = 5
+			score = 1
 		}
-	}
-
-	eotg_pmc_levy_standard = {
-		obligation_levels = {
-			levy_contribution_mult = 0.20
+		eotg_pmc_levy_standard = {
+			parent = eotg_pmc_levy_minimal
+			position = { 1 0 }
+			levies = 0.20
+			ai_liege_desire = 3
+			ai_subject_desire = 3
+			score = 0
 		}
-	}
-
-	eotg_pmc_levy_full = {
-		obligation_levels = {
-			levy_contribution_mult = 0.30
+		eotg_pmc_levy_full = {
+			parent = eotg_pmc_levy_standard
+			position = { 2 0 }
+			levies = 0.30
+			subject_opinion = -10
+			ai_liege_desire = 5
+			ai_subject_desire = 1
+			score = -2
 		}
-		vassal_opinion = -10
 	}
 }
 
 # Contractor Fee — tax contribution representing operational overhead payments.
 eotg_pmc_contractor_fee = {
-	type = tree
+	display_mode = tree
 	icon = gold_icon
 
-	eotg_pmc_fee_low = {
-		obligation_levels = {
-			tax_contribution_mult = 0.10
+	obligation_levels = {
+		eotg_pmc_fee_low = {
+			default = yes
+			position = { 0 0 }
+			tax = 0.10
+			ai_liege_desire = 1
+			ai_subject_desire = 5
+			score = 2
 		}
-	}
-
-	eotg_pmc_fee_standard = {
-		obligation_levels = {
-			tax_contribution_mult = 0.20
+		eotg_pmc_fee_standard = {
+			parent = eotg_pmc_fee_low
+			position = { 1 0 }
+			tax = 0.20
+			ai_liege_desire = 3
+			ai_subject_desire = 3
+			score = 0
 		}
-	}
-
-	eotg_pmc_fee_high = {
-		obligation_levels = {
-			tax_contribution_mult = 0.35
-		}
-		vassal_opinion = -15
-		liege_modifier = {
-			modifier = eotg_pmc_high_fee_extraction
+		eotg_pmc_fee_high = {
+			parent = eotg_pmc_fee_standard
+			position = { 2 0 }
+			tax = 0.35
+			subject_opinion = -15
+			liege_modifier = {
+				monthly_income_mult = 0.05
+			}
+			ai_liege_desire = 5
+			ai_subject_desire = 1
+			score = -2
 		}
 	}
 }
@@ -58,17 +76,28 @@ eotg_pmc_contractor_fee = {
 # Field Commission — formal operational command authorization.
 # Grants a martial bonus to the vassal when active.
 eotg_pmc_field_commission = {
-	type = radiobutton
-	icon = soldier_icon
+	display_mode = radiobutton
 
-	eotg_pmc_commission_none = {
-		flag = none
-	}
-
-	eotg_pmc_commission_granted = {
-		flag = eotg_pmc_commission_flag
-		subject_modifier = {
-			modifier = eotg_pmc_field_commission_active
+	obligation_levels = {
+		eotg_pmc_commission_none = {
+			default = yes
+			position = { 0 0 }
+			ai_liege_desire = 0
+			ai_subject_desire = 2
+			score = 0
+		}
+		eotg_pmc_commission_granted = {
+			parent = eotg_pmc_commission_none
+			position = { 1 0 }
+			flag = eotg_pmc_commission_flag
+			subject_modifier = {
+				martial = 1
+				knight_effectiveness_mult = 0.05
+			}
+			subject_opinion = 5
+			ai_liege_desire = 3
+			ai_subject_desire = 4
+			score = 2
 		}
 	}
 }

@@ -11,7 +11,21 @@
       "PowerShell(& \"C:\\\\Users\\\\river\\\\tools\\\\ck3-tiger-windows-v1.17.0\\\\ck3-tiger.exe\" --game \"D:\\\\SteamLibrary\\\\steamapps\\\\common\\\\Crusader Kings III\" \"C:\\\\Users\\\\river\\\\Documents\\\\GitHub\\\\ck3.echoes.of.the.grip\\\\echoes_of_the_grip.mod\" 2>&1)",
       "PowerShell(Get-Content \"C:\\\\Users\\\\river\\\\Documents\\\\GitHub\\\\ck3.echoes.of.the.grip\\\\tiger_output.txt\" | Select-String \"error|warn|Error|Warn\" | Select-Object -First 60 | ForEach-Object { $_.Line })",
       "Read(//c/Users/river/Documents/GitHub/ck3.echoes.of.the.grip/**)",
-      "PowerShell(Get-Content \"C:\\\\Users\\\\river\\\\Documents\\\\GitHub\\\\ck3.echoes.of.the.grip\\\\tiger_output.txt\" | Select-String \"elven|elven_monarchy|eotg_elven\" | ForEach-Object { $_.Line })"
+      "PowerShell(Get-Content \"C:\\\\Users\\\\river\\\\Documents\\\\GitHub\\\\ck3.echoes.of.the.grip\\\\tiger_output.txt\" | Select-String \"elven|elven_monarchy|eotg_elven\" | ForEach-Object { $_.Line })",
+      "PowerShell(Get-Content \"C:\\\\Users\\\\river\\\\Documents\\\\GitHub\\\\ck3.echoes.of.the.grip\\\\tiger_output.txt\" | Select-String \"error\\\\\\(\" | Where-Object { $_.Line -match \"pmc|PMC|council_task|council_position|eotg_pmc\" } | ForEach-Object { $_.Line })",
+      "PowerShell(Get-Content \"C:\\\\Users\\\\river\\\\Documents\\\\GitHub\\\\ck3.echoes.of.the.grip\\\\tiger_output.txt\" | Select-String \"error\\\\\\(\" | Where-Object { $_.Line -notmatch \"pmc|PMC|council_task|council_position|eotg_pmc\" } | ForEach-Object { $_.Line } | Select-Object -First 40)",
+      "PowerShell(Get-Content \"C:\\\\Users\\\\river\\\\Documents\\\\GitHub\\\\ck3.echoes.of.the.grip\\\\tiger_output.txt\" | Select-String \"pmc|councillor_steward_collect|break|councillor_task|field `who|field `target\" -Context 2 | ForEach-Object { $_.Line } | Select-Object -First 120)",
+      "PowerShell(Get-Content \"C:\\\\Users\\\\river\\\\Documents\\\\GitHub\\\\ck3.echoes.of.the.grip\\\\tiger_output.txt\" | Select-String \"error\\\\\\(\" | Where-Object { $_.Line -match \"pmc|PMC|eotg_pmc|council_task|council_pos|men_at_arms_maint|knight_effect|change_government|add_gold\" } | ForEach-Object { $_.Line })",
+      "PowerShell(Get-Content \"C:\\\\Users\\\\river\\\\Documents\\\\GitHub\\\\ck3.echoes.of.the.grip\\\\tiger_output.txt\" | Select-String \"field `who|field `on_start\" -Context 3 | ForEach-Object { $_.Line } | Select-Object -First 50)",
+      "PowerShell(Get-Content \"C:\\\\Users\\\\river\\\\Documents\\\\GitHub\\\\ck3.echoes.of.the.grip\\\\tiger_output.txt\" -Raw | Out-String | Select-String \"\\(?s\\).{200}\\(who|on_start\\).{200}\" -AllMatches | ForEach-Object { $_.Matches } | Select-Object -First 5 | ForEach-Object { $_.Value })",
+      "PowerShell(& \"C:\\\\Users\\\\river\\\\tools\\\\ck3-tiger-windows-v1.17.0\\\\ck3tiger.exe\" --vanilla \"D:\\\\SteamLibrary\\\\steamapps\\\\common\\\\Crusader Kings III\\\\game\" --mod \"C:\\\\Users\\\\river\\\\Documents\\\\GitHub\\\\ck3.echoes.of.the.grip\" 2>&1)",
+      "Bash(\"/c/Users/river/tools/ck3-tiger-windows-v1.17.0/ck3-tiger.exe\" --help)",
+      "PowerShell(Out-File -Encoding utf8 \"C:\\\\Users\\\\river\\\\tiger_nc.txt\")",
+      "PowerShell(Out-File -Encoding utf8 \"C:\\\\Users\\\\river\\\\tiger_nc2.txt\")",
+      "PowerShell(Out-File -Encoding utf8 \"C:\\\\Users\\\\river\\\\tiger_nc3.txt\")"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\river"
     ]
   }
 }

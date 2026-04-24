@@ -1,0 +1,153 @@
+﻿# ── eotg_new_cauldron_election_events.txt ────────────────────────────────────
+# Presidential election chain for the New Cauldron Democracy.
+#
+# eotg_nc_election.0001 — Campaign phase begins (fires to President)
+# eotg_nc_election.0002 — Election resolved — transfer of power (fires to President)
+# eotg_nc_election.0003 — You are the new President (fires to winner)
+# eotg_nc_election.0004 — You are the Vice President (fires to runner-up)
+# eotg_nc_election.0005 — President died mid-term (fires to VP)
+# ─────────────────────────────────────────────────────────────────────────────
+
+namespace = eotg_nc_election
+
+# Campaign phase begins — the final two years of the presidential term.
+eotg_nc_election.0001 = {
+	type = character_event
+	title = eotg_nc_election_0001_title
+	theme = stewardship
+
+	desc = eotg_nc_election_0001_desc
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	option = {
+		name = eotg_nc_election_0001_opt_noted
+		add_prestige = 25
+		ai_chance = { base = 100 }
+	}
+}
+
+# Election resolved — winner calculated, transfer of power event.
+eotg_nc_election.0002 = {
+	type = character_event
+	title = eotg_nc_election_0002_title
+	theme = stewardship
+
+	desc = eotg_nc_election_0002_desc
+
+	left_portrait = {
+		character = root
+		animation = stress
+	}
+	right_portrait = {
+		character = scope:nc_election_winner
+		animation = personality_bold
+		trigger = { exists = scope:nc_election_winner }
+	}
+
+	immediate = {
+		eotg_se_nc_resolve_election = yes
+	}
+
+	# Transfer power to the elected President.
+	option = {
+		name = eotg_nc_election_0002_opt_transfer
+		trigger = { exists = scope:nc_election_winner }
+		eotg_se_nc_transfer_power = yes
+		scope:nc_election_winner = {
+			trigger_event = { id = eotg_nc_election.0003  days = 3 }
+		}
+		if = {
+			limit = { exists = scope:nc_election_runner_up }
+			scope:nc_election_runner_up = {
+				trigger_event = { id = eotg_nc_election.0004  days = 5 }
+			}
+		}
+		stress_impact = {
+			base = minor_stress_impact_gain
+			content = medium_stress_impact_gain
+		}
+		ai_chance = { base = 100 }
+	}
+
+	# No valid candidate — constitutional crisis (edge case fallback).
+	option = {
+		name = eotg_nc_election_0002_opt_crisis
+		trigger = { NOT = { exists = scope:nc_election_winner } }
+		add_legitimacy = -20
+		add_prestige = -100
+		add_character_flag = { flag = eotg_nc_campaign_phase  years = 1 }
+		custom_tooltip = eotg_nc_election_0002_crisis_tooltip
+		ai_chance = { base = 100 }
+	}
+}
+
+# Fires to the election winner — you are the new President.
+eotg_nc_election.0003 = {
+	type = character_event
+	title = eotg_nc_election_0003_title
+	theme = stewardship
+
+	desc = eotg_nc_election_0003_desc
+
+	left_portrait = {
+		character = root
+		animation = personality_bold
+	}
+
+	option = {
+		name = eotg_nc_election_0003_opt_accept
+		add_prestige = 200
+		stress_impact = {
+			base = minor_stress_impact_gain
+		}
+		ai_chance = { base = 100 }
+	}
+}
+
+# Fires to the runner-up — you are the Vice President.
+eotg_nc_election.0004 = {
+	type = character_event
+	title = eotg_nc_election_0004_title
+	theme = stewardship
+
+	desc = eotg_nc_election_0004_desc
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	option = {
+		name = eotg_nc_election_0004_opt_serve
+		add_prestige = 50
+		ai_chance = { base = 100 }
+	}
+}
+
+# President died mid-term — fires to VP. VP enters emergency succession.
+eotg_nc_election.0005 = {
+	type = character_event
+	title = eotg_nc_election_0005_title
+	theme = martial
+
+	desc = eotg_nc_election_0005_desc
+
+	left_portrait = {
+		character = root
+		animation = stress
+	}
+
+	option = {
+		name = eotg_nc_election_0005_opt_assume_duty
+		eotg_se_nc_vp_succession = yes
+		add_prestige = 100
+		stress_impact = {
+			base = medium_stress_impact_gain
+		}
+		ai_chance = { base = 100 }
+	}
+}
