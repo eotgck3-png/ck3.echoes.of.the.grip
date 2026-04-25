@@ -1,0 +1,469 @@
+# art_needed.txt — Echoes of the Grip
+# Master list of every custom art asset the mod requires.
+# Supersedes the per-system art_needed_* files in docs/.
+#
+# FORMAT NOTES
+#   DXT5  = RGBA (has alpha/transparency)
+#   DXT1  = RGB  (opaque)
+#   Size is width×height in pixels.
+#   All paths are relative to the mod root.
+#
+# STATUS LEGEND
+#   [ ] = not yet made
+#   [P] = using vanilla placeholder (game won't crash, but looks wrong)
+#   [X] = done
+# ==============================================================================
+
+
+# ── TRAIT ICONS ───────────────────────────────────────────────────────────────
+# Path: gfx/interface/icons/traits/
+# Size: 64×64  Format: DXT5
+# Name must exactly match the trait key in common/traits/eotg_traits.txt.
+
+[ ] eotg_grip_survivor.dds
+    Concept: survivor glyph — cracked ring with a star still burning inside.
+    Used by: trait eotg_grip_survivor (Grip Survivor — health/martial bonus)
+
+[ ] eotg_void_touched.dds
+    Concept: eye corrupted by void energy — pupil replaced by a dark spiral.
+    Used by: trait eotg_void_touched (Void Touched — negative health/piety)
+
+[ ] eotg_honorable_exit.dds
+    Concept: open hand releasing a signet ring — dignified departure.
+    Used by: trait eotg_honorable_exit (Gob-Corp graceful exit from Director-General)
+
+
+# ── MODIFIER ICONS ────────────────────────────────────────────────────────────
+# Path: gfx/interface/icons/modifiers/
+# Size: 48×48 (check vanilla; some use 64×64)  Format: DXT5
+# Name must exactly match the modifier key in common/modifiers/eotg_modifiers.txt.
+# Currently ALL modifiers use vanilla placeholder icon= values. Replace each
+# placeholder reference in eotg_modifiers.txt once the custom icon is added.
+
+# ── General / Shared
+[ ] eotg_mod_void_aura.dds
+    Concept: pulsing dark ring with wisps. Negative, ominous.
+    Used by: eotg_mod_void_aura (health -0.25, intrigue +1)
+
+[ ] eotg_mod_grip_resilience.dds
+    Concept: broken chain link that has been re-welded. Positive.
+    Used by: eotg_mod_grip_resilience (health +0.5, martial +1)
+
+[ ] eotg_mod_titan_war_devastation.dds
+    Concept: burning crater or smashed cityscape. Negative, county-level.
+    Used by: eotg_mod_titan_war_devastation (tax -20%, control decline)
+
+# ── Gob-Corp Government
+[ ] eotg_gobcorp_dg_instability.dds
+    Concept: cracked boardroom gavel or splintered stock chart. Negative.
+    Used by: eotg_gobcorp_dg_instability (DG prestige loss, vassal opinion -10)
+
+[ ] eotg_gobcorp_board_seat.dds
+    Concept: ornate chair silhouette with a corporate seal. Positive.
+    Used by: eotg_gobcorp_board_seat (council opinion, vote weight)
+
+# ── Corporation Government
+[ ] eotg_corporate_undermined.dds
+    Concept: severed circuit or sabotaged gear. Negative, stackable.
+    Used by: eotg_corporate_undermined (income -15%, vassal opinion -10)
+
+[ ] eotg_corp_board_seat.dds
+    Concept: different design from gobcorp — formal round table icon. Positive.
+    Used by: eotg_corp_board_seat (election weight, diplomacy +1)
+
+[ ] eotg_corp_interference_suppressed.dds
+    Concept: broadcast antenna with static interference lines. Negative.
+    Used by: eotg_corp_interference_suppressed (election weight reduction)
+
+[ ] eotg_corp_full_extraction_active.dds
+    Concept: fuel pump or resource drill at full draw. Positive/stewardship.
+    Used by: eotg_corp_full_extraction_active (income +5% for CEO)
+
+# ── Elven Monarchy Government
+[ ] eotg_elven_isolationism_county.dds
+    Concept: stylized elven gate — partially open. Tier 1 (lightest tint).
+    Used by: eotg_elven_isolationism_county (different_culture_opinion -5)
+
+[ ] eotg_elven_isolationism_duchy.dds
+    Concept: same gate — mostly closed. Tier 2.
+    Used by: eotg_elven_isolationism_duchy (different_culture_opinion -10)
+
+[ ] eotg_elven_isolationism_kingdom.dds
+    Concept: same gate — sealed with a lock. Tier 3.
+    Used by: eotg_elven_isolationism_kingdom (different_culture_opinion -15, diplomacy -1)
+
+[ ] eotg_elven_isolationism_empire.dds
+    Concept: gate barred with a broken chain across it. Tier 4.
+    Used by: eotg_elven_isolationism_empire (different_culture_opinion -20, diplomacy -2)
+
+[ ] eotg_elven_court_confirmed.dds
+    Concept: radiant crown above an elven glyph. Positive.
+    Used by: eotg_elven_court_confirmed (legitimacy gain, prestige, vassal opinion)
+
+[ ] eotg_elven_court_contested.dds
+    Concept: crown with a crack through it. Negative.
+    Used by: eotg_elven_court_contested (legitimacy loss, vassal opinion -10)
+
+[ ] eotg_elven_succession_crisis.dds
+    Concept: two silhouetted figures pulling at a crown from opposite sides. Negative.
+    Used by: eotg_elven_succession_crisis (legitimacy -20, vassal opinion -15)
+
+[ ] eotg_elven_court_purity_active.dds
+    Concept: sealed elven crest — no foreign heraldry visible. Mixed.
+    Used by: eotg_elven_court_purity_active (same_culture +5, different_culture -10)
+
+# ── Cartel Government
+[ ] eotg_cartel_gl_paranoia.dds
+    Concept: cracked/shattered eye. Paranoia aesthetic.
+    Used by: eotg_cartel_gl_paranoia (prestige -15%, vassal opinion -15, dread decay)
+
+[ ] eotg_cartel_defiant_boss.dds
+    Concept: clenched fist or crossed arms. Defiance.
+    Used by: eotg_cartel_defiant_boss (prestige -10%, dread loss)
+
+[ ] eotg_cartel_defiance_pressure.dds
+    Concept: pressure gauge at red zone / gathering storm. Tension.
+    Used by: eotg_cartel_defiance_pressure (stackable dread decay +1.0 per stack)
+
+[ ] eotg_cartel_shakedown_standoff.dds
+    Concept: deadlock / two opposed hands in standoff. Deadlock.
+    Used by: eotg_cartel_shakedown_standoff (prestige -20%, vassal opinion -20)
+
+# ── PMC Government
+[ ] eotg_pmc_controversy_minor.dds
+    Concept: small newspaper headline / spinning rumour icon. Negative, tier 1.
+    Used by: eotg_pmc_controversy_minor (vassal opinion -5, prestige -5%)
+
+[ ] eotg_pmc_controversy_standard.dds
+    Concept: exposed dossier / spotlight on a figure. Negative, tier 2.
+    Used by: eotg_pmc_controversy_standard (vassal opinion -10, culture opinion -5)
+
+[ ] eotg_pmc_controversy_exclusive.dds
+    Concept: burning contract / major scandal icon. Negative, tier 3.
+    Used by: eotg_pmc_controversy_exclusive (vassal opinion -15, diplomacy -2)
+
+[ ] eotg_pmc_command_collapsed.dds
+    Concept: broken command staff / shattered chain of command. Negative, severe.
+    Used by: eotg_pmc_command_collapsed (prestige -20%, vassal opinion -20, legitimacy -20%)
+
+[ ] eotg_pmc_high_fee_extraction.dds
+    Concept: coin stack with upward arrow / premium billing icon. Positive.
+    Used by: eotg_pmc_high_fee_extraction (income +5% for Contractor-General)
+
+[ ] eotg_pmc_field_commission_active.dds
+    Concept: field medals / rank insignia bar. Positive.
+    Used by: eotg_pmc_field_commission_active (martial +1, knight effectiveness)
+
+# ── New Cauldron Democracy
+[ ] eotg_former_president.dds
+    Concept: retired statesman silhouette with laurel wreath. Positive.
+    Used by: eotg_former_president (prestige +10%, same_culture +5, income +5%)
+
+[ ] eotg_nc_vp_succession_mourning.dds
+    Concept: half-mast flag above a presidential seal. Mixed.
+    Used by: eotg_nc_vp_succession_mourning (same_culture opinion +15, galactic mourning)
+
+# ── Fringe Government
+[ ] eotg_fringe_high_grip.dds
+    Concept: iron fist gripping a chain — controlled. Positive.
+    Used by: eotg_fringe_high_grip (vassal opinion +10, prestige +5%)
+
+[ ] eotg_fringe_low_grip.dds
+    Concept: open hand with a chain slipping out. Negative.
+    Used by: eotg_fringe_low_grip (vassal opinion -15)
+
+[ ] eotg_fringe_peace_decay_minor.dds
+    Concept: idle warband campfire going cold. Tier 1 negative.
+    Used by: eotg_fringe_peace_decay_minor (2+ years peace, vassal opinion -5)
+
+[ ] eotg_fringe_peace_decay_major.dds
+    Concept: rusting weapons piled outside a war tent. Tier 2 negative.
+    Used by: eotg_fringe_peace_decay_major (5+ years peace, vassal opinion -10)
+
+[ ] eotg_fringe_peace_decay_severe.dds
+    Concept: crumbling fortress / fractured coalition banner. Tier 3 negative.
+    Used by: eotg_fringe_peace_decay_severe (10+ years peace, vassal opinion -20)
+
+[ ] eotg_fringe_overextension_minor.dds
+    Concept: stretched supply line / overfull map. Negative, tier 1.
+    Used by: eotg_fringe_overextension_minor (realm_size 30+, county control decline)
+
+[ ] eotg_fringe_overextension_major.dds
+    Concept: collapsing frontier tower. Negative, tier 2.
+    Used by: eotg_fringe_overextension_major (realm_size 60+, severe control decline)
+
+[ ] eotg_fringe_chaos_succession.dds
+    Concept: throne split in two / disputed crown. Negative.
+    Used by: eotg_fringe_chaos_succession (new ruler, vassal opinion -20, prestige -15%)
+
+[ ] eotg_fringe_fear_ruling.dds
+    Concept: ruler's silhouette casting a shadow shaped like a weapon. Mixed.
+    Used by: eotg_fringe_fear_ruling (dread decay slowed, prestige -5%)
+
+[ ] eotg_fringe_warbands_called.dds
+    Concept: war horn and raised banners. Positive/martial.
+    Used by: eotg_fringe_warbands_called (levy reinforce +20%, knight +10%, income -10%)
+
+[ ] eotg_fringe_unified.dds
+    Concept: multiple banners fused into one. Positive, rare.
+    Used by: eotg_fringe_unified (vassal opinion +15, prestige +10%)
+
+[ ] eotg_fringe_captain_defiant.dds
+    Concept: captain turning their back on the Overlord's banner. Negative.
+    Used by: eotg_fringe_captain_defiant (on the captain, prestige -5%)
+
+[ ] eotg_fringe_captain_hunted.dds
+    Concept: target reticle or crosshairs on a silhouette. Negative.
+    Used by: eotg_fringe_captain_hunted (on the captain, prestige -10%, intrigue -1)
+
+
+# ── DECISION ILLUSTRATIONS ────────────────────────────────────────────────────
+# Path: gfx/interface/illustrations/decisions/
+# Size: 740×260  Format: DXT1 (no alpha needed for full-bleed illustrations)
+# All decisions currently use vanilla placeholders.
+
+# ── Gob-Corp
+[ ] eotg_gobcorp_no_confidence.dds
+    Concept: corporate boardroom vote — raised hands, tension.
+    Used by: eotg_gobcorp_no_confidence_vote
+
+# ── Corporation
+[ ] eotg_corp_no_confidence.dds
+    Concept: board election aftermath — empty chair at head of table.
+    Used by: eotg_corp_vote_no_confidence
+
+[ ] eotg_corp_interference.dds
+    Concept: shadowed figure briefing a smaller group. Clandestine.
+    Used by: eotg_corp_corporate_interference
+
+# ── Cartel
+[ ] eotg_cartel_demand_loyalty_tax.dds
+    Concept: enforcers arriving at a den. Dark corridor, dim lighting.
+    Used by: eotg_cartel_demand_loyalty_tax
+
+[ ] eotg_cartel_join_shakedown.dds
+    Concept: bosses gathered in secret — hands on a table making a pact.
+    Used by: eotg_cartel_join_shakedown_faction
+
+[ ] eotg_cartel_hostile_takeover.dds
+    Concept: armed men outside a rival's compound at night.
+    Used by: eotg_cartel_hostile_takeover
+
+[ ] eotg_cartel_issue_purge_demand.dds
+    Concept: Grand Underlord pointing — tribunal aesthetic.
+    Used by: eotg_cartel_issue_purge_demand
+
+# ── Elven Monarchy
+[ ] eotg_elven_decree_court_purity.dds
+    Concept: elven court chamber — formal decree being stamped. Regal.
+    Used by: eotg_elven_decree_court_purity
+
+[ ] eotg_elven_summon_eternal_court.dds
+    Concept: ancient star-map chamber filled with elven nobles.
+    Used by: eotg_elven_summon_eternal_court
+
+# ── PMC
+[ ] eotg_pmc_take_contract.dds
+    Concept: two parties signing a contract across a steel table. Clinical.
+    Used by: eotg_pmc_take_contract
+
+[ ] eotg_pmc_buyback_command.dds
+    Concept: gold changing hands across a command tent. Tense negotiation.
+    Used by: eotg_pmc_buyback_command
+
+[ ] eotg_pmc_retire_contractor.dds
+    Concept: a veteran handing over their rank insignia. Respectful.
+    Used by: eotg_pmc_retire_contractor (Graceful Exit)
+
+[ ] eotg_pmc_commission_operators.dds
+    Concept: row of operators receiving field commissions / standing at attention.
+    Used by: eotg_pmc_issue_field_commissions
+
+# ── New Cauldron Democracy
+[ ] eotg_nc_declare_candidacy.dds
+    Concept: campaign podium with a crowd behind it. Political.
+    Used by: eotg_nc_declare_candidacy
+
+[ ] eotg_nc_emergency_powers.dds
+    Concept: presidential seal with a red override stamp. Authoritarian tension.
+    Used by: eotg_nc_invoke_emergency_powers
+
+[ ] eotg_nc_senate_appeal.dds
+    Concept: president speaking to the Senate chamber from the floor.
+    Used by: eotg_nc_appeal_to_senate
+
+[ ] eotg_nc_appoint_vp.dds
+    Concept: hand placing a VP sash across a standing figure.
+    Used by: eotg_nc_appoint_vice_president
+
+[ ] eotg_nc_senate_war_vote.dds
+    Concept: Senate in session, war maps visible, vote boards displayed.
+    Used by: eotg_nc_call_senate_war_vote
+
+[ ] eotg_nc_address_senate.dds
+    Concept: overhead shot of the Senate chamber, speaker at center.
+    Used by: eotg_nc_address_senate
+
+[ ] eotg_nc_release_state.dds
+    Concept: document being signed releasing a territory — handshake moment.
+    Used by: eotg_nc_release_state
+
+[ ] eotg_nc_annex_state.dds
+    Concept: map with borders shifting inward — integration ceremony.
+    Used by: eotg_nc_integrate_state
+
+# ── Fringe
+[ ] eotg_fringe_distribute_spoils.dds
+    Concept: Overlord distributing crates and gold to gathered captains. Martial.
+    Used by: eotg_fringe_distribute_spoils
+
+[ ] eotg_fringe_rule_through_fear.dds
+    Concept: captain kneeling under a raised weapon — dread enforcement.
+    Used by: eotg_fringe_rule_through_fear
+
+[ ] eotg_fringe_call_warbands.dds
+    Concept: war horn call — massed warband assembling at a rally point.
+    Used by: eotg_fringe_call_warbands
+
+[ ] eotg_fringe_suppress_captains.dds
+    Concept: Overlord confronting a defiant captain — face-to-face standoff.
+    Used by: eotg_fringe_suppress_captains
+
+[ ] eotg_fringe_forge_unified.dds
+    Concept: all warband banners being planted together — unified coalition.
+    Used by: eotg_fringe_forge_unified
+
+[ ] eotg_fringe_reform.dds
+    Concept: old Fringe banner being replaced by a new structured emblem.
+    Used by: eotg_fringe_reform_cartel / eotg_fringe_reform_pmc /
+             eotg_fringe_reform_corporation / eotg_fringe_reform_feudal
+    NOTE: One shared illustration for all 4 reform paths is acceptable.
+
+
+# ── FAITH ICONS ───────────────────────────────────────────────────────────────
+# Path: gfx/interface/icons/faith/
+# Size: 72×72  Format: DXT5
+# Name must exactly match the faith key in common/religion/religions/eotg_religions.txt.
+
+[ ] eotg_faith_elross_canonical.dds
+    Concept: radiant eight-pointed star in gold — holy order aesthetic.
+    Used by: faith eotg_faith_elross_canonical (Second Elrossi Imperium's faith)
+
+[ ] eotg_faith_void_cult.dds
+    Concept: inverted spiral into darkness — void reverence aesthetic.
+    Used by: faith eotg_faith_void_cult (Fringe/outlaw void cults)
+
+
+# ── CHARACTER INTERACTION ICONS ───────────────────────────────────────────────
+# Path: gfx/interface/icons/character_interactions/
+# Size: 44×44  Format: DXT5
+# These are used in the interaction pop-up header.
+
+[ ] icon_negotiate.dds
+    Concept: two hands clasping across a table (handshake icon). Neutral.
+    Used by: eotg_hostile_acquisition_interaction (Corporation hostile buyout)
+    NOTE: Check if vanilla already has this — Tiger flags it missing but some
+    vanilla versions include it. If missing, create a simple handshake icon.
+
+
+# ── BOOKMARK ILLUSTRATION ─────────────────────────────────────────────────────
+# Path: gfx/interface/illustrations/bookmarks/
+# Size: 1920×1080 (or match vanilla bookmark image dimensions)  Format: DXT1
+
+[ ] eotg_866.dds
+    Concept: galaxy-wide establishing shot — the Myr Cluster in the distance,
+    a Fringe warfleet in the foreground, the light of Orrin's Grip visible as
+    a faint ring in deep space. Tone: epic, unsettled, ancient.
+    Used by: bookmark eotg_866 (866 AG starting bookmark)
+    NOTE: Currently commented out in common/bookmarks/eotg_bookmarks.txt.
+    Uncomment the `picture = ...` line once the file is created.
+
+
+# ── GOVERNMENT MAP COLORS (no art files needed) ───────────────────────────────
+# Government colors defined inline in common/governments/*.txt.
+# They appear on character shields and realm map mode.
+# No separate .dds required in CK3 1.19 — map colors are script-only.
+#
+# Current assignments:
+#   eotg_gobcorp_government    hsv{ 0.12 0.90 0.75 }  (amber-orange)
+#   eotg_corporation_government  (check file for value)
+#   eotg_cartel_government       (check file for value)
+#   eotg_pmc_government          (check file for value)
+#   eotg_new_cauldron_government (check file for value)
+#   eotg_elven_monarchy_government (check file for value)
+#   eotg_fringe_government       (check file for value)
+
+
+# ── FRINGE EXPANDED EVENT MODIFIER ICONS (Phase 1 addition) ──────────────────
+# Path: gfx/interface/icons/modifiers/
+# Size: 48×48  Format: DXT5
+# Names must match the icon = field in eotg_modifiers.txt.
+
+[ ] eotg_fringe_cracking_authority.dds
+    Concept: cracked stone seal or broken signet ring. Negative, instability.
+    Used by: eotg_fringe_cracking_authority (vassal opinion -10, prestige -10%)
+
+[ ] eotg_fringe_bought_loyalty.dds
+    Concept: coin with a handshake pressed into it. Positive but transient.
+    Used by: eotg_fringe_bought_loyalty (vassal opinion +5, character modifier)
+             eotg_fringe_bought_loyalty (opinion modifier, captain → ruler)
+
+[ ] eotg_fringe_promised_glory.dds
+    Concept: war horn wrapped in a promise scroll. Mixed — temporary positive.
+    Used by: eotg_fringe_promised_glory (knight effectiveness +5%, vassal opinion +5)
+
+[ ] eotg_fringe_restless_captains.dds
+    Concept: captain arms crossed, looking away. Negative.
+    Used by: eotg_fringe_restless_captains (vassal opinion -5, prestige -5%)
+
+[ ] eotg_fringe_great_plunder.dds
+    Concept: overflowing cargo hold — crates, gold, trophies. Positive, rare.
+    Used by: eotg_fringe_great_plunder (income +10%, prestige +5%)
+
+[ ] eotg_fringe_personal_following.dds
+    Concept: captain surrounded by loyal soldiers (not the Overlord's banner). Mixed.
+    Used by: eotg_fringe_personal_following (vassal opinion +5, prestige +5%)
+
+[ ] eotg_fringe_captain_entrenched.dds
+    Concept: captain's banner planted so deep it cannot be pulled out. Negative.
+    Used by: eotg_fringe_captain_entrenched (prestige -10%, vassal opinion -10)
+
+[ ] eotg_fringe_public_terror.dds
+    Concept: noose or public execution stand silhouette. Negative, dread.
+    Used by: eotg_fringe_public_terror (dread decay -1.0, vassal opinion -20, prestige -10%)
+
+[ ] eotg_fringe_great_unifier.dds
+    Concept: all warband symbols merged into a single glowing emblem. Positive, rare.
+    Used by: eotg_fringe_great_unifier (vassal opinion +20, prestige +15%, legitimacy +10%)
+
+[ ] eotg_fringe_fragmentation.dds
+    Concept: map of the realm with cracks spreading from the edges inward. Negative.
+    Used by: eotg_fringe_fragmentation (vassal opinion -15, control decline +0.2, prestige -10%)
+
+[ ] eotg_fringe_old_blood.dds
+    Concept: weathered warband banner, aged and battle-scarred. Positive/traditional.
+    Used by: eotg_fringe_old_blood (knight effectiveness +10%, vassal opinion +5)
+
+[ ] eotg_fringe_modernized_state.dds
+    Concept: Fringe emblem merged with clean institutional architecture lines. Positive.
+    Used by: eotg_fringe_modernized_state (income +5%, diplomacy +1)
+
+[ ] eotg_fringe_butcher_reputation.dds
+    Concept: skull icon with Overlord's crest beneath it. Negative, infamous.
+    Used by: eotg_fringe_butcher_reputation (dread decay -0.5, culture opinion -15, prestige -5%)
+
+[ ] eotg_fringe_loot_flood.dds
+    Concept: markets flooded with goods — overflow aesthetic. Positive short-term.
+    Used by: eotg_fringe_loot_flood (income +15%, vassal opinion +5)
+
+
+# ── TECHNICAL NOTES ───────────────────────────────────────────────────────────
+# All .dds files must be saved with mipmaps.
+# DXT5 for anything with transparency (icons, traits, faith).
+# DXT1 for full-bleed opaque illustrations (decisions, events, bookmark).
+# Use Intel Texture Works or GIMP DDS plugin.
+# See vanilla gfx/ folder for reference examples of each type.
+#
+# When adding a modifier icon, update the `icon =` field in eotg_modifiers.txt
+# from the vanilla placeholder to the new custom key name (without path or .dds).
+# When adding a trait icon, uncomment the `# icon = eotg_*` line in eotg_traits.txt.

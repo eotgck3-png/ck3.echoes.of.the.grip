@@ -22,7 +22,13 @@
       "Bash(\"/c/Users/river/tools/ck3-tiger-windows-v1.17.0/ck3-tiger.exe\" --help)",
       "PowerShell(Out-File -Encoding utf8 \"C:\\\\Users\\\\river\\\\tiger_nc.txt\")",
       "PowerShell(Out-File -Encoding utf8 \"C:\\\\Users\\\\river\\\\tiger_nc2.txt\")",
-      "PowerShell(Out-File -Encoding utf8 \"C:\\\\Users\\\\river\\\\tiger_nc3.txt\")"
+      "PowerShell(Out-File -Encoding utf8 \"C:\\\\Users\\\\river\\\\tiger_nc3.txt\")",
+      "PowerShell(& \"C:\\\\Users\\\\river\\\\tools\\\\ck3-tiger-windows-v1.17.0\\\\ck3-tiger.exe\" --vanilla \"D:\\\\SteamLibrary\\\\steamapps\\\\common\\\\Crusader Kings III\\\\game\" --mod \"c:\\\\Users\\\\river\\\\Documents\\\\GitHub\\\\ck3.echoes.of.the.grip\" 2>&1)",
+      "PowerShell(& \"C:\\\\Users\\\\river\\\\tools\\\\ck3-tiger-windows-v1.17.0\\\\ck3-tiger.exe\" --help 2>&1)",
+      "PowerShell(& \"C:\\\\Users\\\\river\\\\tools\\\\ck3-tiger-windows-v1.17.0\\\\ck3-tiger.exe\" --game \"D:\\\\SteamLibrary\\\\steamapps\\\\common\\\\Crusader Kings III\\\\game\" \"c:\\\\Users\\\\river\\\\Documents\\\\GitHub\\\\ck3.echoes.of.the.grip\\\\descriptor.mod\" 2>&1)",
+      "Read(//d/SteamLibrary/steamapps/common/Crusader Kings III/game/common/modifier_definition_formats/**)",
+      "PowerShell(& \"C:\\\\Users\\\\river\\\\tools\\\\ck3-tiger-windows-v1.17.0\\\\ck3-tiger.exe\" --game \"D:\\\\SteamLibrary\\\\steamapps\\\\common\\\\Crusader Kings III\\\\game\" \"c:\\\\Users\\\\river\\\\Documents\\\\GitHub\\\\ck3.echoes.of.the.grip\\\\descriptor.mod\" 2>&1 | Where-Object { $_ -match \"\\\\[1;31merror\" -or $_ -match \"^fatal\" } | Select-Object -First 60)",
+      "Bash(sort -t. -k2 -n)"
     ],
     "additionalDirectories": [
       "C:\\Users\\river"

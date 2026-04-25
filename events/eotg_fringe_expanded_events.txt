@@ -1,0 +1,1132 @@
+# ── eotg_fringe_expanded_events.txt ──────────────────────────────────────────
+# Phase 1 expanded flavor and mechanics events for the Fringe Government.
+#
+# eotg_fringe.0014 — The Grip Weakens (yearly random, low Grip)
+# eotg_fringe.0015 — The Captains Smell Weakness (triggered only, after losing war)
+# eotg_fringe.0016 — The Fringe Hungers (yearly random, prolonged peace)
+# eotg_fringe.0017 — Raiders Desert the Cause (yearly random, long peace + low gold)
+# eotg_fringe.0018 — The Heir Is Challenged (triggered only, succession)
+# eotg_fringe.0019 — The Realm Fractures (yearly random, large realm + low Grip)
+# eotg_fringe.0020 — Supply Lines Collapse (triggered only)
+# eotg_fringe.0021 — The Great Plunder (triggered only, after successful raid)
+# eotg_fringe.0022 — Raid Gone Wrong (triggered only, after failed raid)
+# eotg_fringe.0023 — Refugees Join the Fringe (yearly random, neighbor at war)
+# eotg_fringe.0024 — The Raiders Grow Fat (yearly random, wealthy + long peace)
+# eotg_fringe.0025 — Discipline Over Chaos (yearly random, high martial)
+# eotg_fringe.0026 — The Old Ways Die Hard (triggered only, reform resistance)
+# eotg_fringe.0027 — A Warlord of Legend Emerges (yearly random, rare, prowess captain)
+# eotg_fringe.0028 — Songs of the Fringe (yearly random, prestigious overlord)
+# eotg_fringe.0029 — The Ghost Fleet (triggered only, after failed mutiny/lost fleet)
+# ─────────────────────────────────────────────────────────────────────────────
+
+namespace = eotg_fringe
+
+# The Grip is slipping. Captains grow bold.
+eotg_fringe.0014 = {
+	type = character_event
+	title = eotg_fringe_0014_title
+	theme = intrigue
+
+	desc = eotg_fringe_0014_desc
+
+	left_portrait = {
+		character = root
+		animation = stress
+	}
+
+	trigger = {
+		eotg_st_is_fringe_overlord = yes
+		eotg_st_fringe_grip_low = yes
+		realm_size >= 8
+	}
+
+	# Tighten discipline — dread gain, grip gain, resentment.
+	option = {
+		name = eotg_fringe_0014_opt_discipline
+		add_dread = 10
+		eotg_se_fringe_gain_grip = { AMOUNT = 10 }
+		add_character_modifier = {
+			modifier = eotg_fringe_cracking_authority
+			years = 2
+		}
+		every_vassal = {
+			limit = { eotg_st_is_fringe_captain = yes }
+			add_opinion = {
+				target = root
+				modifier = eotg_fringe_fear_rule_resentment
+			}
+		}
+		stress_impact = {
+			base = minor_stress_impact_gain
+			compassionate = medium_stress_impact_gain
+		}
+		ai_chance = {
+			base = 40
+			modifier = { add = 20  dread > 20 }
+		}
+	}
+
+	# Let them squabble — Grip falls, captains direct anger at each other.
+	option = {
+		name = eotg_fringe_0014_opt_squabble
+		eotg_se_fringe_lose_grip = { AMOUNT = 8 }
+		add_prestige = -50
+		random = {
+			chance = 40
+			trigger_event = { id = eotg_fringe.0007  days = 14 }
+		}
+		ai_chance = {
+			base = 30
+			modifier = { add = -20  eotg_st_fringe_grip_critical = yes }
+		}
+	}
+
+	# Buy their loyalty — gold for opinion and grip.
+	option = {
+		name = eotg_fringe_0014_opt_buy
+		remove_short_term_gold = 150
+		eotg_se_fringe_gain_grip = { AMOUNT = 5 }
+		add_character_modifier = {
+			modifier = eotg_fringe_bought_loyalty
+			years = 2
+		}
+		every_vassal = {
+			limit = { eotg_st_is_fringe_captain = yes }
+			add_opinion = {
+				target = root
+				modifier = eotg_fringe_spoils_distributed
+			}
+		}
+		ai_chance = {
+			base = 30
+			modifier = { add = 30  gold > 300 }
+		}
+	}
+}
+
+# After a humiliating defeat, the captains openly question the Overlord.
+eotg_fringe.0015 = {
+	type = character_event
+	title = eotg_fringe_0015_title
+	theme = martial
+
+	desc = eotg_fringe_0015_desc
+
+	left_portrait = {
+		character = root
+		animation = anger
+	}
+
+	immediate = {
+		random_vassal = {
+			limit = { eotg_st_is_fringe_captain = yes }
+			save_scope_as = eotg_challenger_captain
+		}
+	}
+
+	right_portrait = {
+		character = scope:eotg_challenger_captain
+		animation = personality_bold
+		trigger = { exists = scope:eotg_challenger_captain }
+	}
+
+	# Public execution — silence the loudest voice.
+	option = {
+		name = eotg_fringe_0015_opt_execute
+		trigger = { exists = scope:eotg_challenger_captain }
+		add_dread = 20
+		eotg_se_fringe_gain_grip = { AMOUNT = 10 }
+		scope:eotg_challenger_captain = {
+			add_character_modifier = {
+				modifier = eotg_fringe_captain_defiant
+				years = 3
+			}
+		}
+		every_vassal = {
+			limit = {
+				eotg_st_is_fringe_captain = yes
+				NOT = { this = scope:eotg_challenger_captain }
+			}
+			add_opinion = {
+				target = root
+				modifier = eotg_fringe_fear_rule_resentment
+			}
+		}
+		stress_impact = {
+			base = minor_stress_impact_gain
+			compassionate = major_stress_impact_gain
+		}
+		ai_chance = {
+			base = 40
+			modifier = { add = 20  dread > 25 }
+		}
+	}
+
+	# Challenge them personally — a public show of martial dominance.
+	option = {
+		name = eotg_fringe_0015_opt_challenge
+		random_list = {
+			50 = {
+				modifier = { add = 20  prowess >= 14 }
+				modifier = { add = 15  prowess >= 18 }
+				add_prestige = 150
+				eotg_se_fringe_gain_grip = { AMOUNT = 8 }
+				custom_tooltip = eotg_fringe_0015_challenge_win_tt
+			}
+			50 = {
+				modifier = { add = -20  prowess >= 14 }
+				add_prestige = -100
+				eotg_se_fringe_lose_grip = { AMOUNT = 5 }
+				custom_tooltip = eotg_fringe_0015_challenge_loss_tt
+			}
+		}
+		ai_chance = {
+			base = 30
+			modifier = { add = 20  prowess >= 16 }
+		}
+	}
+
+	# Ignore the insults — show restraint, lose face.
+	option = {
+		name = eotg_fringe_0015_opt_ignore
+		add_prestige = -75
+		eotg_se_fringe_lose_grip = { AMOUNT = 5 }
+		ai_chance = {
+			base = 30
+			modifier = { add = -20  eotg_st_fringe_grip_low = yes }
+		}
+	}
+}
+
+# The captains are restless. There has been no war, no glory, no loot.
+eotg_fringe.0016 = {
+	type = character_event
+	title = eotg_fringe_0016_title
+	theme = martial
+
+	desc = eotg_fringe_0016_desc
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	trigger = {
+		eotg_st_is_fringe_overlord = yes
+		has_variable = eotg_fringe_peace_years
+		var:eotg_fringe_peace_years >= 3
+	}
+
+	# Promise future glory — temporary reprieve, worse if no war comes.
+	option = {
+		name = eotg_fringe_0016_opt_promise
+		add_character_modifier = {
+			modifier = eotg_fringe_promised_glory
+			years = 2
+		}
+		add_prestige = -25
+		ai_chance = {
+			base = 40
+			modifier = { add = 20  diplomacy > 12 }
+		}
+	}
+
+	# Mobilize now — spend prestige, signal war is coming.
+	option = {
+		name = eotg_fringe_0016_opt_mobilize
+		add_prestige = -50
+		add_character_modifier = {
+			modifier = eotg_fringe_warbands_called
+			years = 1
+		}
+		eotg_se_fringe_gain_grip = { AMOUNT = 5 }
+		ai_chance = {
+			base = 35
+			modifier = { add = 20  martial > 12 }
+		}
+	}
+
+	# Tighten rations — suppress restlessness through hardship.
+	option = {
+		name = eotg_fringe_0016_opt_rations
+		eotg_se_fringe_lose_grip = { AMOUNT = 5 }
+		add_character_modifier = {
+			modifier = eotg_fringe_restless_captains
+			years = 2
+		}
+		ai_chance = { base = 25 }
+	}
+}
+
+# Warbands are drifting away. Long peace has broken the bonds of loyalty.
+eotg_fringe.0017 = {
+	type = character_event
+	title = eotg_fringe_0017_title
+	theme = martial
+
+	desc = eotg_fringe_0017_desc
+
+	left_portrait = {
+		character = root
+		animation = stress
+	}
+
+	trigger = {
+		eotg_st_is_fringe_overlord = yes
+		has_variable = eotg_fringe_peace_years
+		var:eotg_fringe_peace_years >= 5
+		gold < 100
+	}
+
+	# Pay them to stay — drain reserves to retain levies.
+	option = {
+		name = eotg_fringe_0017_opt_pay
+		remove_short_term_gold = 200
+		eotg_se_fringe_gain_grip = { AMOUNT = 5 }
+		ai_chance = {
+			base = 50
+			modifier = { add = 20  gold > 300 }
+		}
+	}
+
+	# Let them leave — accept the levy loss.
+	option = {
+		name = eotg_fringe_0017_opt_leave
+		eotg_se_fringe_lose_grip = { AMOUNT = 5 }
+		add_prestige = -50
+		ai_chance = {
+			base = 30
+			modifier = { add = -20  eotg_st_fringe_grip_low = yes }
+		}
+	}
+
+	# Threaten execution — dread gain, loyalty collapse risk.
+	option = {
+		name = eotg_fringe_0017_opt_threaten
+		add_dread = 15
+		eotg_se_fringe_gain_grip = { AMOUNT = 3 }
+		every_vassal = {
+			limit = { eotg_st_is_fringe_captain = yes }
+			add_opinion = {
+				target = root
+				modifier = eotg_fringe_fear_rule_resentment
+			}
+		}
+		stress_impact = {
+			base = minor_stress_impact_gain
+			compassionate = major_stress_impact_gain
+		}
+		ai_chance = {
+			base = 20
+			modifier = { add = 20  dread > 30 }
+		}
+	}
+}
+
+# A captain challenges the heir's right to rule before the body is cold.
+eotg_fringe.0018 = {
+	type = character_event
+	title = eotg_fringe_0018_title
+	theme = intrigue
+
+	desc = eotg_fringe_0018_desc
+
+	left_portrait = {
+		character = root
+		animation = stress
+	}
+
+	immediate = {
+		random_vassal = {
+			limit = {
+				eotg_st_is_fringe_captain = yes
+				NOT = { is_allied_to = root }
+			}
+			save_scope_as = eotg_heir_challenger
+		}
+	}
+
+	right_portrait = {
+		character = scope:eotg_heir_challenger
+		animation = personality_bold
+		trigger = { exists = scope:eotg_heir_challenger }
+	}
+
+	# Meet the challenge in single combat.
+	option = {
+		name = eotg_fringe_0018_opt_duel
+		random_list = {
+			50 = {
+				modifier = { add = 25  prowess >= 14 }
+				modifier = { add = 20  prowess >= 18 }
+				add_prestige = 200
+				eotg_se_fringe_gain_grip = { AMOUNT = 15 }
+				custom_tooltip = eotg_fringe_0018_duel_win_tt
+			}
+			50 = {
+				modifier = { add = -25  prowess >= 14 }
+				add_prestige = -100
+				eotg_se_fringe_lose_grip = { AMOUNT = 10 }
+				custom_tooltip = eotg_fringe_0018_duel_loss_tt
+			}
+		}
+		ai_chance = {
+			base = 35
+			modifier = { add = 20  prowess >= 16 }
+		}
+	}
+
+	# Have them quietly removed — intrigue challenge.
+	option = {
+		name = eotg_fringe_0018_opt_assassinate
+		trigger = { exists = scope:eotg_heir_challenger }
+		random_list = {
+			50 = {
+				modifier = { add = 20  intrigue >= 14 }
+				add_prestige = 100
+				add_dread = 10
+				custom_tooltip = eotg_fringe_0018_assassinate_success_tt
+			}
+			50 = {
+				modifier = { add = -20  intrigue >= 14 }
+				add_prestige = -75
+				eotg_se_fringe_lose_grip = { AMOUNT = 8 }
+				custom_tooltip = eotg_fringe_0018_assassinate_fail_tt
+			}
+		}
+		ai_chance = {
+			base = 30
+			modifier = { add = 20  intrigue >= 14 }
+		}
+	}
+
+	# Buy the challenger's loyalty — expensive but clean.
+	option = {
+		name = eotg_fringe_0018_opt_buy
+		remove_short_term_gold = 300
+		trigger = { exists = scope:eotg_heir_challenger }
+		scope:eotg_heir_challenger = {
+			add_opinion = {
+				target = root
+				modifier = eotg_fringe_bought_loyalty
+			}
+		}
+		eotg_se_fringe_gain_grip = { AMOUNT = 5 }
+		ai_chance = {
+			base = 35
+			modifier = { add = 20  gold > 400 }
+		}
+	}
+}
+
+# The realm is growing too large for the Overlord's grip to hold.
+eotg_fringe.0019 = {
+	type = character_event
+	title = eotg_fringe_0019_title
+	theme = intrigue
+
+	desc = eotg_fringe_0019_desc
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	trigger = {
+		eotg_st_is_fringe_overlord = yes
+		realm_size >= 20
+		eotg_st_fringe_grip_low = yes
+	}
+
+	# Abandon remote holdings — shrink to preserve the core.
+	option = {
+		name = eotg_fringe_0019_opt_abandon
+		add_prestige = -100
+		add_character_modifier = {
+			modifier = eotg_fringe_fragmentation
+			years = 3
+		}
+		ai_chance = {
+			base = 40
+			modifier = { add = 20  eotg_st_fringe_grip_critical = yes }
+		}
+	}
+
+	# Centralize power — massive opinion penalties, short Grip boost.
+	option = {
+		name = eotg_fringe_0019_opt_centralize
+		eotg_se_fringe_gain_grip = { AMOUNT = 15 }
+		add_character_modifier = {
+			modifier = eotg_fringe_cracking_authority
+			years = 3
+		}
+		every_vassal = {
+			limit = { eotg_st_is_fringe_captain = yes }
+			add_opinion = {
+				target = root
+				modifier = eotg_fringe_fear_rule_resentment
+			}
+		}
+		ai_chance = {
+			base = 30
+			modifier = { add = 20  eotg_st_fringe_grip_high = yes }
+		}
+	}
+
+	# Delegate authority — empower strong vassals, reduce pressure.
+	option = {
+		name = eotg_fringe_0019_opt_delegate
+		every_vassal = {
+			limit = {
+				eotg_st_is_fringe_captain = yes
+				opinion = { target = root  value >= 20 }
+			}
+			add_opinion = {
+				target = root
+				modifier = eotg_fringe_spoils_distributed
+			}
+		}
+		add_prestige = -50
+		ai_chance = {
+			base = 30
+			modifier = { add = 20  diplomacy > 12 }
+		}
+	}
+}
+
+# Distance has broken the supply chain. The armies at the frontier go hungry.
+eotg_fringe.0020 = {
+	type = character_event
+	title = eotg_fringe_0020_title
+	theme = martial
+
+	desc = eotg_fringe_0020_desc
+
+	left_portrait = {
+		character = root
+		animation = stress
+	}
+
+	# Divert resources — expensive but army is sustained.
+	option = {
+		name = eotg_fringe_0020_opt_divert
+		remove_short_term_gold = 200
+		add_prestige = 25
+		ai_chance = {
+			base = 50
+			modifier = { add = 20  gold > 300 }
+		}
+	}
+
+	# Let local captains handle it — captain power grows.
+	option = {
+		name = eotg_fringe_0020_opt_delegate
+		eotg_se_fringe_lose_grip = { AMOUNT = 8 }
+		every_vassal = {
+			limit = {
+				eotg_st_is_fringe_captain = yes
+				opinion = { target = root  value >= 10 }
+			}
+			add_character_modifier = {
+				modifier = eotg_fringe_personal_following
+				years = 3
+			}
+		}
+		ai_chance = { base = 30 }
+	}
+
+	# Push forward anyway — army attrition increases.
+	option = {
+		name = eotg_fringe_0020_opt_push
+		add_prestige = 50
+		eotg_se_fringe_lose_grip = { AMOUNT = 3 }
+		stress_impact = {
+			base = medium_stress_impact_gain
+			brave = minor_stress_impact_gain
+		}
+		ai_chance = {
+			base = 20
+			modifier = { add = 20  martial > 14 }
+		}
+	}
+}
+
+# The raid returned legendary wealth. The ships sit heavy in the harbor.
+eotg_fringe.0021 = {
+	type = character_event
+	title = eotg_fringe_0021_title
+	theme = stewardship
+
+	desc = eotg_fringe_0021_desc
+
+	left_portrait = {
+		character = root
+		animation = personality_bold
+	}
+
+	# Celebrate publicly — prestige and loyalty.
+	option = {
+		name = eotg_fringe_0021_opt_celebrate
+		add_prestige = 200
+		eotg_se_fringe_gain_grip = { AMOUNT = 8 }
+		every_vassal = {
+			limit = { eotg_st_is_fringe_captain = yes }
+			add_opinion = {
+				target = root
+				modifier = eotg_fringe_spoils_distributed
+			}
+		}
+		ai_chance = {
+			base = 40
+			modifier = { add = 20  eotg_st_fringe_grip_low = yes }
+		}
+	}
+
+	# Hoard the wealth secretly — gold gain, Grip loss.
+	option = {
+		name = eotg_fringe_0021_opt_hoard
+		add_gold = 400
+		eotg_se_fringe_lose_grip = { AMOUNT = 10 }
+		add_prestige = -50
+		ai_chance = {
+			base = 30
+			modifier = { add = 20  has_trait = greedy }
+		}
+	}
+
+	# Reward the captains generously — strong loyalty boost, eotg_fringe_great_plunder.
+	option = {
+		name = eotg_fringe_0021_opt_reward
+		remove_short_term_gold = 200
+		add_character_modifier = {
+			modifier = eotg_fringe_great_plunder
+			years = 3
+		}
+		every_vassal = {
+			limit = { eotg_st_is_fringe_captain = yes }
+			add_opinion = {
+				target = root
+				modifier = eotg_fringe_spoils_distributed
+			}
+		}
+		eotg_se_fringe_gain_grip = { AMOUNT = 12 }
+		ai_chance = {
+			base = 30
+			modifier = { add = 20  eotg_st_fringe_grip_low = yes }
+		}
+	}
+}
+
+# The raid was a disaster. The captains came back with nothing but shame.
+eotg_fringe.0022 = {
+	type = character_event
+	title = eotg_fringe_0022_title
+	theme = martial
+
+	desc = eotg_fringe_0022_desc
+
+	left_portrait = {
+		character = root
+		animation = stress
+	}
+
+	immediate = {
+		random_vassal = {
+			limit = { eotg_st_is_fringe_captain = yes }
+			save_scope_as = eotg_blamed_captain
+		}
+	}
+
+	right_portrait = {
+		character = scope:eotg_blamed_captain
+		animation = stress
+		trigger = { exists = scope:eotg_blamed_captain }
+	}
+
+	# Blame the scouts — deflect, one captain takes the fall.
+	option = {
+		name = eotg_fringe_0022_opt_blame
+		trigger = { exists = scope:eotg_blamed_captain }
+		scope:eotg_blamed_captain = {
+			add_opinion = {
+				target = root
+				modifier = eotg_fringe_public_punishment
+			}
+		}
+		add_prestige = -50
+		ai_chance = {
+			base = 40
+			modifier = { add = 20  intrigue > 12 }
+		}
+	}
+
+	# Accept responsibility — legitimacy gain, prestige loss.
+	option = {
+		name = eotg_fringe_0022_opt_accept
+		add_legitimacy = 5
+		add_prestige = -100
+		eotg_se_fringe_lose_grip = { AMOUNT = 3 }
+		ai_chance = {
+			base = 30
+			modifier = { add = 20  has_trait = just }
+		}
+	}
+
+	# Demand another raid immediately — army exhaustion risk.
+	option = {
+		name = eotg_fringe_0022_opt_another
+		add_prestige = 50
+		eotg_se_fringe_lose_grip = { AMOUNT = 5 }
+		add_character_modifier = {
+			modifier = eotg_fringe_warbands_called
+			years = 1
+		}
+		stress_impact = {
+			base = minor_stress_impact_gain
+		}
+		ai_chance = {
+			base = 30
+			modifier = { add = 20  martial > 14 }
+		}
+	}
+}
+
+# Displaced peoples from nearby conflicts arrive, offering their labor and swords.
+eotg_fringe.0023 = {
+	type = character_event
+	title = eotg_fringe_0023_title
+	theme = diplomacy
+
+	desc = eotg_fringe_0023_desc
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	trigger = {
+		eotg_st_is_fringe_overlord = yes
+		NOT = { is_at_war = yes }
+	}
+
+	# Accept them — levies and labor, but strains resources.
+	option = {
+		name = eotg_fringe_0023_opt_accept
+		add_prestige = 25
+		eotg_se_fringe_gain_grip = { AMOUNT = 3 }
+		add_character_modifier = {
+			modifier = eotg_fringe_promised_glory
+			years = 1
+		}
+		ai_chance = {
+			base = 50
+			modifier = { add = 20  diplomacy > 10 }
+		}
+	}
+
+	# Press them into service — gold and levies, tyranny cost.
+	option = {
+		name = eotg_fringe_0023_opt_press
+		add_gold = 150
+		add_tyranny = 10
+		eotg_se_fringe_gain_grip = { AMOUNT = 2 }
+		stress_impact = {
+			base = minor_stress_impact_gain
+			compassionate = major_stress_impact_gain
+		}
+		ai_chance = {
+			base = 25
+			modifier = { add = 20  has_trait = greedy }
+		}
+	}
+
+	# Turn them away — avoid the complications.
+	option = {
+		name = eotg_fringe_0023_opt_refuse
+		add_prestige = -25
+		ai_chance = { base = 25 }
+	}
+}
+
+# The captains have grown comfortable. Success has made them soft.
+eotg_fringe.0024 = {
+	type = character_event
+	title = eotg_fringe_0024_title
+	theme = stewardship
+
+	desc = eotg_fringe_0024_desc
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	trigger = {
+		eotg_st_is_fringe_overlord = yes
+		has_variable = eotg_fringe_peace_years
+		var:eotg_fringe_peace_years >= 3
+		gold > 200
+		realm_size >= 8
+	}
+
+	# Begin organizing criminal trade networks — Cartel reform path opens.
+	option = {
+		name = eotg_fringe_0024_opt_cartel
+		add_character_flag = { flag = eotg_fringe_cartel_reform_available  years = 10 }
+		add_prestige = 50
+		custom_tooltip = eotg_fringe_0024_cartel_tt
+		ai_chance = {
+			base = 33
+			modifier = { add = 20  stewardship > 12 }
+		}
+	}
+
+	# Maintain the old ways — the captains approve.
+	option = {
+		name = eotg_fringe_0024_opt_old_ways
+		eotg_se_fringe_gain_grip = { AMOUNT = 8 }
+		every_vassal = {
+			limit = { eotg_st_is_fringe_captain = yes }
+			add_opinion = {
+				target = root
+				modifier = eotg_fringe_spoils_distributed
+			}
+		}
+		ai_chance = { base = 34 }
+	}
+
+	# Quietly prepare institutional structures — hidden reform progress.
+	option = {
+		name = eotg_fringe_0024_opt_secret
+		add_character_flag = { flag = eotg_fringe_cartel_reform_available  years = 10 }
+		add_character_flag = { flag = eotg_fringe_pmc_reform_available  years = 10 }
+		add_prestige = -25
+		custom_tooltip = eotg_fringe_0024_secret_tt
+		ai_chance = {
+			base = 33
+			modifier = { add = 20  intrigue > 12 }
+		}
+	}
+}
+
+# The veterans are tired of raiding. They want structure, discipline, hierarchy.
+eotg_fringe.0025 = {
+	type = character_event
+	title = eotg_fringe_0025_title
+	theme = martial
+
+	desc = eotg_fringe_0025_desc
+
+	left_portrait = {
+		character = root
+		animation = personality_bold
+	}
+
+	trigger = {
+		eotg_st_is_fringe_overlord = yes
+		martial >= 14
+		realm_size >= 8
+	}
+
+	# Establish a professional officer structure — PMC reform path opens.
+	option = {
+		name = eotg_fringe_0025_opt_officers
+		add_character_flag = { flag = eotg_fringe_pmc_reform_available  years = 10 }
+		add_prestige = 50
+		custom_tooltip = eotg_fringe_0025_pmc_tt
+		ai_chance = {
+			base = 50
+			modifier = { add = 20  martial > 16 }
+		}
+	}
+
+	# Reject the proposal — honor the warband traditions.
+	option = {
+		name = eotg_fringe_0025_opt_reject
+		eotg_se_fringe_gain_grip = { AMOUNT = 5 }
+		every_vassal = {
+			limit = { eotg_st_is_fringe_captain = yes }
+			add_opinion = {
+				target = root
+				modifier = eotg_fringe_spoils_distributed
+			}
+		}
+		ai_chance = { base = 50 }
+	}
+}
+
+# The traditionalist captains resist centralization. Reform is tearing the realm apart.
+eotg_fringe.0026 = {
+	type = character_event
+	title = eotg_fringe_0026_title
+	theme = intrigue
+
+	desc = eotg_fringe_0026_desc
+
+	left_portrait = {
+		character = root
+		animation = anger
+	}
+
+	immediate = {
+		random_vassal = {
+			limit = {
+				eotg_st_is_fringe_captain = yes
+				opinion = { target = root  value < 0 }
+			}
+			save_scope_as = eotg_traditionalist_captain
+		}
+	}
+
+	right_portrait = {
+		character = scope:eotg_traditionalist_captain
+		animation = personality_bold
+		trigger = { exists = scope:eotg_traditionalist_captain }
+	}
+
+	# Suppress the dissidents — rebellion risk, reform continues.
+	option = {
+		name = eotg_fringe_0026_opt_suppress
+		add_dread = 10
+		trigger = { exists = scope:eotg_traditionalist_captain }
+		scope:eotg_traditionalist_captain = {
+			add_character_modifier = {
+				modifier = eotg_fringe_captain_defiant
+				years = 5
+			}
+		}
+		every_vassal = {
+			limit = {
+				eotg_st_is_fringe_captain = yes
+				NOT = { this = scope:eotg_traditionalist_captain }
+			}
+			add_opinion = {
+				target = root
+				modifier = eotg_fringe_reform_resentment
+			}
+		}
+		ai_chance = {
+			base = 30
+			modifier = { add = 20  dread > 20 }
+		}
+	}
+
+	# Compromise — reform continues at half pace, traditionalists calm down.
+	option = {
+		name = eotg_fringe_0026_opt_compromise
+		add_prestige = -50
+		add_character_modifier = {
+			modifier = eotg_fringe_old_blood
+			years = 3
+		}
+		ai_chance = {
+			base = 40
+			modifier = { add = 20  diplomacy > 12 }
+		}
+	}
+
+	# Abandon reform — stability at the cost of progress.
+	option = {
+		name = eotg_fringe_0026_opt_abandon
+		remove_character_flag = eotg_fringe_cartel_reform_available
+		remove_character_flag = eotg_fringe_pmc_reform_available
+		eotg_se_fringe_gain_grip = { AMOUNT = 10 }
+		every_vassal = {
+			limit = { eotg_st_is_fringe_captain = yes }
+			add_opinion = {
+				target = root
+				modifier = eotg_fringe_spoils_distributed
+			}
+		}
+		ai_chance = {
+			base = 30
+			modifier = { add = 20  eotg_st_fringe_grip_low = yes }
+		}
+	}
+}
+
+# A captain has become more beloved by the warbands than the Overlord.
+eotg_fringe.0027 = {
+	type = character_event
+	title = eotg_fringe_0027_title
+	theme = intrigue
+
+	desc = eotg_fringe_0027_desc
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	immediate = {
+		random_vassal = {
+			limit = {
+				eotg_st_is_fringe_captain = yes
+				prowess >= 16
+			}
+			save_scope_as = eotg_legend_captain
+		}
+	}
+
+	right_portrait = {
+		character = scope:eotg_legend_captain
+		animation = personality_bold
+		trigger = { exists = scope:eotg_legend_captain }
+	}
+
+	trigger = {
+		eotg_st_is_fringe_overlord = yes
+		any_vassal = {
+			eotg_st_is_fringe_captain = yes
+			prowess >= 16
+		}
+	}
+
+	# Promote them — powerful knight, future rival risk.
+	option = {
+		name = eotg_fringe_0027_opt_promote
+		trigger = { exists = scope:eotg_legend_captain }
+		scope:eotg_legend_captain = {
+			add_character_modifier = {
+				modifier = eotg_fringe_personal_following
+				years = 5
+			}
+		}
+		add_prestige = 75
+		ai_chance = {
+			base = 40
+			modifier = { add = 20  NOT = { eotg_st_fringe_grip_low = yes } }
+		}
+	}
+
+	# Suppress their fame — the Overlord's glory is not to be shared.
+	option = {
+		name = eotg_fringe_0027_opt_suppress
+		trigger = { exists = scope:eotg_legend_captain }
+		scope:eotg_legend_captain = {
+			add_opinion = {
+				target = root
+				modifier = eotg_fringe_public_punishment
+			}
+		}
+		add_dread = 5
+		ai_chance = {
+			base = 30
+			modifier = { add = 20  eotg_st_fringe_grip_low = yes }
+		}
+	}
+
+	# Bind them through marriage — alliance and loyalty.
+	option = {
+		name = eotg_fringe_0027_opt_marry
+		add_prestige = -25
+		eotg_se_fringe_gain_grip = { AMOUNT = 5 }
+		trigger = { exists = scope:eotg_legend_captain }
+		scope:eotg_legend_captain = {
+			add_opinion = {
+				target = root
+				modifier = eotg_fringe_bought_loyalty
+			}
+		}
+		ai_chance = {
+			base = 30
+			modifier = { add = 20  diplomacy > 12 }
+		}
+	}
+}
+
+# Songs spread across the frontier of this Overlord's victories.
+eotg_fringe.0028 = {
+	type = character_event
+	title = eotg_fringe_0028_title
+	theme = martial
+
+	desc = eotg_fringe_0028_desc
+
+	left_portrait = {
+		character = root
+		animation = personality_bold
+	}
+
+	trigger = {
+		eotg_st_is_fringe_overlord = yes
+		prestige >= 1000
+	}
+
+	# Embrace the legend — prestige surge.
+	option = {
+		name = eotg_fringe_0028_opt_embrace
+		add_prestige = 150
+		eotg_se_fringe_gain_grip = { AMOUNT = 5 }
+		ai_chance = {
+			base = 50
+			modifier = { add = 20  NOT = { eotg_st_fringe_grip_low = yes } }
+		}
+	}
+
+	# Encourage fear instead — the songs become warnings.
+	option = {
+		name = eotg_fringe_0028_opt_fear
+		add_dread = 15
+		add_prestige = 75
+		add_character_modifier = {
+			modifier = eotg_fringe_butcher_reputation
+			years = 5
+		}
+		ai_chance = {
+			base = 50
+			modifier = { add = 20  dread > 20 }
+		}
+	}
+}
+
+# The ghost ships of a failed mutiny haunt the frontier. Stories spread.
+eotg_fringe.0029 = {
+	type = character_event
+	title = eotg_fringe_0029_title
+	theme = intrigue
+
+	desc = eotg_fringe_0029_desc
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	# Exploit the fear — the ghost fleet becomes a weapon of reputation.
+	option = {
+		name = eotg_fringe_0029_opt_exploit
+		add_dread = 10
+		add_prestige = 50
+		ai_chance = {
+			base = 40
+			modifier = { add = 20  intrigue > 12 }
+		}
+	}
+
+	# Investigate the rumors — possible treasure or intelligence.
+	option = {
+		name = eotg_fringe_0029_opt_investigate
+		random_list = {
+			50 = {
+				add_gold = 200
+				add_prestige = 75
+				custom_tooltip = eotg_fringe_0029_investigate_find_tt
+			}
+			50 = {
+				add_prestige = 25
+				custom_tooltip = eotg_fringe_0029_investigate_nothing_tt
+			}
+		}
+		ai_chance = {
+			base = 40
+			modifier = { add = 20  stewardship > 12 }
+		}
+	}
+
+	# Ignore the stories — let the legend fade.
+	option = {
+		name = eotg_fringe_0029_opt_ignore
+		ai_chance = { base = 20 }
+	}
+}
