@@ -28,7 +28,13 @@
       "PowerShell(& \"C:\\\\Users\\\\river\\\\tools\\\\ck3-tiger-windows-v1.17.0\\\\ck3-tiger.exe\" --game \"D:\\\\SteamLibrary\\\\steamapps\\\\common\\\\Crusader Kings III\\\\game\" \"c:\\\\Users\\\\river\\\\Documents\\\\GitHub\\\\ck3.echoes.of.the.grip\\\\descriptor.mod\" 2>&1)",
       "Read(//d/SteamLibrary/steamapps/common/Crusader Kings III/game/common/modifier_definition_formats/**)",
       "PowerShell(& \"C:\\\\Users\\\\river\\\\tools\\\\ck3-tiger-windows-v1.17.0\\\\ck3-tiger.exe\" --game \"D:\\\\SteamLibrary\\\\steamapps\\\\common\\\\Crusader Kings III\\\\game\" \"c:\\\\Users\\\\river\\\\Documents\\\\GitHub\\\\ck3.echoes.of.the.grip\\\\descriptor.mod\" 2>&1 | Where-Object { $_ -match \"\\\\[1;31merror\" -or $_ -match \"^fatal\" } | Select-Object -First 60)",
-      "Bash(sort -t. -k2 -n)"
+      "Bash(sort -t. -k2 -n)",
+      "Read(//mnt/c/Users/**)",
+      "Read(//d/SteamLibrary/steamapps/common/Crusader Kings III/game/**)",
+      "Bash(/c/Users/river/tools/ck3-tiger-windows-v1.17.0/ck3-tiger.exe --game 'D:/SteamLibrary/steamapps/common/Crusader Kings III/game' c:/Users/river/Documents/GitHub/ck3.echoes.of.the.grip/echoes_of_the_grip.mod)",
+      "PowerShell(& \"C:\\\\Users\\\\river\\\\tools\\\\ck3-tiger-windows-v1.17.0\\\\ck3-tiger.exe\" --vanilla \"D:\\\\SteamLibrary\\\\steamapps\\\\common\\\\Crusader Kings III\\\\game\" --mod \"C:\\\\Users\\\\river\\\\Documents\\\\GitHub\\\\ck3.echoes.of.the.grip\" > \"C:\\\\Users\\\\river\\\\Documents\\\\GitHub\\\\ck3.echoes.of.the.grip\\\\tiger_output.txt\" 2>&1; Write-Output \"Exit: $LASTEXITCODE\")",
+      "PowerShell(& \"C:\\\\Users\\\\river\\\\tools\\\\ck3-tiger-windows-v1.17.0\\\\ck3-tiger-auto.exe\" --vanilla \"D:\\\\SteamLibrary\\\\steamapps\\\\common\\\\Crusader Kings III\\\\game\" --mod \"C:\\\\Users\\\\river\\\\Documents\\\\GitHub\\\\ck3.echoes.of.the.grip\" > \"C:\\\\Users\\\\river\\\\Documents\\\\GitHub\\\\ck3.echoes.of.the.grip\\\\tiger_output.txt\" 2>&1; Write-Output \"Exit: $LASTEXITCODE\")",
+      "Bash(xargs grep *)"
     ],
     "additionalDirectories": [
       "C:\\Users\\river"

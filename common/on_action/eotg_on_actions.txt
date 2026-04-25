@@ -22,6 +22,12 @@ on_yearly_playable = {
         eotg_on_yearly_nc_senate_check
         eotg_on_yearly_fringe_check
         eotg_on_yearly_fringe_flavor
+        eotg_on_yearly_gobcorp_flavor
+        eotg_on_yearly_corp_flavor
+        eotg_on_yearly_cartel_flavor
+        eotg_on_yearly_pmc_flavor
+        eotg_on_yearly_elven_flavor
+        eotg_on_yearly_nc_flavor
     }
 }
 
@@ -482,6 +488,431 @@ eotg_on_yearly_fringe_flavor = {
                     chance = 15
                     add_character_flag = { flag = eotg_fringe_0028_recent  years = 4 }
                     trigger_event = { id = eotg_fringe.0028  days = 7 }
+                }
+            }
+        }
+    }
+}
+
+# ── Government Flavor on_actions (Phase 1 expanded events) ───────────────────
+
+eotg_on_yearly_gobcorp_flavor = {
+    effect = {
+        if = {
+            limit = { eotg_st_is_director_general = yes }
+            if = {
+                limit = {
+                    eotg_st_gobcorp_dg_vulnerable = yes
+                    NOT = { has_character_flag = eotg_gobcorp_0007_recent }
+                }
+                random = {
+                    chance = 50
+                    add_character_flag = { flag = eotg_gobcorp_0007_recent  years = 3 }
+                    trigger_event = { id = eotg_gobcorp_flavor.0007  days = 3 }
+                }
+            }
+            if = {
+                limit = {
+                    any_vassal = { is_powerful_vassal = yes }
+                    NOT = { has_character_flag = eotg_gobcorp_0001_recent }
+                }
+                random = {
+                    chance = 35
+                    add_character_flag = { flag = eotg_gobcorp_0001_recent  years = 4 }
+                    trigger_event = { id = eotg_gobcorp_flavor.0001  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    stewardship < 10
+                    NOT = { has_character_flag = eotg_gobcorp_0008_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_gobcorp_0008_recent  years = 4 }
+                    trigger_event = { id = eotg_gobcorp_flavor.0008  days = 7 }
+                }
+            }
+            if = {
+                limit = {
+                    NOT = { has_character_flag = eotg_gobcorp_0009_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_gobcorp_0009_recent  years = 3 }
+                    trigger_event = { id = eotg_gobcorp_flavor.0009  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    gold > 100
+                    NOT = { has_character_flag = eotg_gobcorp_0014_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_gobcorp_0014_recent  years = 3 }
+                    trigger_event = { id = eotg_gobcorp_flavor.0014  days = 7 }
+                }
+            }
+            if = {
+                limit = {
+                    age >= 50
+                    NOT = { has_character_flag = eotg_gobcorp_0016_recent }
+                }
+                random = {
+                    chance = 20
+                    add_character_flag = { flag = eotg_gobcorp_0016_recent  years = 5 }
+                    trigger_event = { id = eotg_gobcorp_flavor.0016  days = 5 }
+                }
+            }
+        }
+    }
+}
+
+eotg_on_yearly_corp_flavor = {
+    effect = {
+        if = {
+            limit = { eotg_st_is_ceo = yes }
+            if = {
+                limit = {
+                    prestige < 150
+                    NOT = { has_character_flag = eotg_corp_0011_recent }
+                }
+                random = {
+                    chance = 45
+                    add_character_flag = { flag = eotg_corp_0011_recent  years = 3 }
+                    trigger_event = { id = eotg_corp_flavor.0011  days = 3 }
+                }
+            }
+            if = {
+                limit = {
+                    intrigue >= 10
+                    vassal_count >= 2
+                    NOT = { has_character_flag = eotg_corp_0001_recent }
+                }
+                random = {
+                    chance = 35
+                    add_character_flag = { flag = eotg_corp_0001_recent  years = 3 }
+                    trigger_event = { id = eotg_corp_flavor.0001  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    vassal_count >= 2
+                    NOT = { has_character_flag = eotg_corp_0004_recent }
+                }
+                random = {
+                    chance = 35
+                    add_character_flag = { flag = eotg_corp_0004_recent  years = 3 }
+                    trigger_event = { id = eotg_corp_flavor.0004  days = 7 }
+                }
+            }
+            if = {
+                limit = {
+                    gold < 50
+                    NOT = { has_character_flag = eotg_corp_0015_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_corp_0015_recent  years = 3 }
+                    trigger_event = { id = eotg_corp_flavor.0015  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    age >= 50
+                    NOT = { has_character_flag = eotg_corp_0014_recent }
+                }
+                random = {
+                    chance = 20
+                    add_character_flag = { flag = eotg_corp_0014_recent  years = 5 }
+                    trigger_event = { id = eotg_corp_flavor.0014  days = 5 }
+                }
+            }
+        }
+    }
+}
+
+eotg_on_yearly_cartel_flavor = {
+    effect = {
+        if = {
+            limit = { eotg_st_is_grand_underlord = yes }
+            if = {
+                limit = {
+                    dread >= 30
+                    NOT = { has_character_flag = eotg_cartel_0001_recent }
+                }
+                random = {
+                    chance = 40
+                    add_character_flag = { flag = eotg_cartel_0001_recent  years = 3 }
+                    trigger_event = { id = eotg_cartel_flavor.0001  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    dread >= 60
+                    NOT = { has_character_flag = eotg_cartel_0002_recent }
+                }
+                random = {
+                    chance = 35
+                    add_character_flag = { flag = eotg_cartel_0002_recent  years = 3 }
+                    trigger_event = { id = eotg_cartel_flavor.0002  days = 7 }
+                }
+            }
+            if = {
+                limit = {
+                    NOT = { has_character_flag = eotg_cartel_0004_recent }
+                }
+                random = {
+                    chance = 35
+                    add_character_flag = { flag = eotg_cartel_0004_recent  years = 3 }
+                    trigger_event = { id = eotg_cartel_flavor.0004  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    NOT = { has_character_flag = eotg_cartel_0010_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_cartel_0010_recent  years = 3 }
+                    trigger_event = { id = eotg_cartel_flavor.0010  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    dread >= 40
+                    NOT = { has_character_flag = eotg_cartel_0012_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_cartel_0012_recent  years = 3 }
+                    trigger_event = { id = eotg_cartel_flavor.0012  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    years_as_ruler >= 15
+                    NOT = { has_character_flag = eotg_cartel_0015_recent }
+                }
+                random = {
+                    chance = 20
+                    add_character_flag = { flag = eotg_cartel_0015_recent  years = 5 }
+                    trigger_event = { id = eotg_cartel_flavor.0015  days = 7 }
+                }
+            }
+        }
+    }
+}
+
+eotg_on_yearly_pmc_flavor = {
+    effect = {
+        if = {
+            limit = { eotg_st_is_contractor_general = yes }
+            if = {
+                limit = {
+                    is_at_war = no
+                    NOT = { has_character_modifier = eotg_pmc_active_contract }
+                    NOT = { has_character_flag = eotg_pmc_0001_recent }
+                }
+                random = {
+                    chance = 40
+                    add_character_flag = { flag = eotg_pmc_0001_recent  years = 3 }
+                    trigger_event = { id = eotg_pmc_flavor.0001  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    gold < 60
+                    NOT = { has_character_flag = eotg_pmc_0004_recent }
+                }
+                random = {
+                    chance = 40
+                    add_character_flag = { flag = eotg_pmc_0004_recent  years = 3 }
+                    trigger_event = { id = eotg_pmc_flavor.0004  days = 7 }
+                }
+            }
+            if = {
+                limit = {
+                    has_character_modifier = eotg_pmc_operator_discontent
+                    NOT = { has_character_flag = eotg_pmc_0007_recent }
+                }
+                random = {
+                    chance = 35
+                    add_character_flag = { flag = eotg_pmc_0007_recent  years = 3 }
+                    trigger_event = { id = eotg_pmc_flavor.0007  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    has_character_modifier = eotg_pmc_active_contract
+                    NOT = { has_character_flag = eotg_pmc_0013_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_pmc_0013_recent  years = 4 }
+                    trigger_event = { id = eotg_pmc_flavor.0013  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    is_at_war = no
+                    NOT = { has_character_modifier = eotg_pmc_active_contract }
+                    gold < 50
+                    NOT = { has_character_flag = eotg_pmc_0014_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_pmc_0014_recent  years = 3 }
+                    trigger_event = { id = eotg_pmc_flavor.0014  days = 5 }
+                }
+            }
+        }
+    }
+}
+
+eotg_on_yearly_elven_flavor = {
+    effect = {
+        if = {
+            limit = { eotg_st_is_starborn_sovereign = yes }
+            if = {
+                limit = {
+                    vassal_count >= 3
+                    NOT = { has_character_flag = eotg_elven_0001_recent }
+                }
+                random = {
+                    chance = 40
+                    add_character_flag = { flag = eotg_elven_0001_recent  years = 4 }
+                    trigger_event = { id = eotg_elven_flavor.0001  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    any_vassal = { eotg_st_is_non_elven = yes }
+                    NOT = { has_character_flag = eotg_elven_0005_recent }
+                }
+                random = {
+                    chance = 35
+                    add_character_flag = { flag = eotg_elven_0005_recent  years = 4 }
+                    trigger_event = { id = eotg_elven_flavor.0005  days = 7 }
+                }
+            }
+            if = {
+                limit = {
+                    has_character_modifier = eotg_elven_subject_unrest
+                    NOT = { has_character_flag = eotg_elven_0007_recent }
+                }
+                random = {
+                    chance = 45
+                    add_character_flag = { flag = eotg_elven_0007_recent  years = 3 }
+                    trigger_event = { id = eotg_elven_flavor.0007  days = 3 }
+                }
+            }
+            if = {
+                limit = {
+                    NOT = { has_character_flag = eotg_elven_0004_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_elven_0004_recent  years = 3 }
+                    trigger_event = { id = eotg_elven_flavor.0004  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    has_character_modifier = eotg_elven_isolationist_posture
+                    NOT = { has_character_flag = eotg_elven_0014_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_elven_0014_recent  years = 4 }
+                    trigger_event = { id = eotg_elven_flavor.0014  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    eotg_st_elven_court_pending = yes
+                    NOT = { has_character_flag = eotg_elven_0010_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_elven_0010_recent  years = 5 }
+                    trigger_event = { id = eotg_elven_flavor.0010  days = 5 }
+                }
+            }
+        }
+    }
+}
+
+eotg_on_yearly_nc_flavor = {
+    effect = {
+        if = {
+            limit = { eotg_st_is_president = yes }
+            if = {
+                limit = {
+                    eotg_st_nc_senate_hostile = yes
+                    NOT = { has_character_flag = eotg_nc_0001_recent }
+                }
+                random = {
+                    chance = 45
+                    add_character_flag = { flag = eotg_nc_0001_recent  years = 3 }
+                    trigger_event = { id = eotg_nc_flavor.0001  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    eotg_st_nc_campaign_eligible = yes
+                    NOT = { has_character_modifier = eotg_nc_campaign_season }
+                    NOT = { has_character_flag = eotg_nc_0004_recent }
+                }
+                random = {
+                    chance = 40
+                    add_character_flag = { flag = eotg_nc_0004_recent  years = 3 }
+                    trigger_event = { id = eotg_nc_flavor.0004  days = 7 }
+                }
+            }
+            if = {
+                limit = {
+                    has_character_modifier = eotg_nc_campaign_season
+                    NOT = { has_character_flag = eotg_nc_0005_recent }
+                }
+                random = {
+                    chance = 35
+                    add_character_flag = { flag = eotg_nc_0005_recent  years = 3 }
+                    trigger_event = { id = eotg_nc_flavor.0005  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    has_character_modifier = eotg_nc_senate_corruption
+                    NOT = { has_character_flag = eotg_nc_0009_recent }
+                }
+                random = {
+                    chance = 35
+                    add_character_flag = { flag = eotg_nc_0009_recent  years = 3 }
+                    trigger_event = { id = eotg_nc_flavor.0009  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    has_character_modifier = eotg_nc_emergency_powers
+                    NOT = { has_character_flag = eotg_nc_0013_recent }
+                }
+                random = {
+                    chance = 40
+                    add_character_flag = { flag = eotg_nc_0013_recent  years = 3 }
+                    trigger_event = { id = eotg_nc_flavor.0013  days = 3 }
+                }
+            }
+            if = {
+                limit = {
+                    prestige < 150
+                    NOT = { has_character_flag = eotg_nc_0015_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_nc_0015_recent  years = 3 }
+                    trigger_event = { id = eotg_nc_flavor.0015  days = 7 }
                 }
             }
         }
