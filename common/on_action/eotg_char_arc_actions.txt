@@ -1,0 +1,87 @@
+# ── eotg_char_arc_actions.txt ─────────────────────────────────────────────────
+# Hooks for firing bookmark character arc opener events at game start.
+# Fires each named character's first arc event with a short delay so the
+# tutorial and game-start events settle first.
+#
+# Additive block — only on_actions (not effect/trigger) to avoid overwriting vanilla.
+# ─────────────────────────────────────────────────────────────────────────────
+
+on_game_started = {
+    on_actions = { eotg_bookmark_char_arcs_start }
+}
+
+eotg_bookmark_char_arcs_start = {
+    effect = {
+        # Vaelorin Sylvaerath — Xerxes chain
+        if = {
+            limit = { character:eotg_char_90001 = { is_alive = yes is_landed = yes } }
+            character:eotg_char_90001 = {
+                trigger_event = { id = eotg_xerxes.0001 days = 30 }
+            }
+        }
+
+        # Clayd Kestrel-Vire — Helix chain
+        if = {
+            limit = { character:eotg_char_90002 = { is_alive = yes is_landed = yes } }
+            character:eotg_char_90002 = {
+                trigger_event = { id = eotg_clayd.0001 days = 60 }
+            }
+        }
+
+        # Corven Vultarre — 7th Legion chain
+        if = {
+            limit = { character:eotg_char_90003 = { is_alive = yes is_landed = yes } }
+            character:eotg_char_90003 = {
+                trigger_event = { id = eotg_7thlegion.0001 days = 14 }
+            }
+        }
+
+        # Lireth Davan — New Cauldron chain
+        if = {
+            limit = { character:eotg_char_20002 = { is_alive = yes is_landed = yes } }
+            character:eotg_char_20002 = {
+                trigger_event = { id = eotg_newcauldron_char.0001 days = 14 }
+            }
+        }
+
+        # Grezzik Gildspanner — Trade League chain (fires both Trade League events)
+        if = {
+            limit = { character:eotg_char_30002 = { is_alive = yes is_landed = yes } }
+            character:eotg_char_30002 = {
+                trigger_event = { id = eotg_tradeleague.0001 days = 14 }
+            }
+        }
+
+        # Rughan Broad-Jaw — Rughan secondary chain
+        if = {
+            limit = { character:eotg_char_30003 = { is_alive = yes is_landed = yes } }
+            character:eotg_char_30003 = {
+                trigger_event = { id = eotg_rughan.0001 days = 75 }
+            }
+        }
+
+        # Marzuk Al-Khadrin — Coldiron chain
+        if = {
+            limit = { character:eotg_char_40002 = { is_alive = yes is_landed = yes } }
+            character:eotg_char_40002 = {
+                trigger_event = { id = eotg_coldiron.0001 days = 14 }
+            }
+        }
+
+        # Caelorin Solvaerath — Lanius chain
+        if = {
+            limit = { character:eotg_char_90005 = { is_alive = yes is_landed = yes } }
+            character:eotg_char_90005 = {
+                trigger_event = { id = eotg_lanius.0001 days = 60 }
+            }
+        }
+
+        # Skrit Grimweave — Ratfolk chain
+        if = {
+            limit = { character:eotg_char_90006 = { is_alive = yes is_landed = yes } }
+            character:eotg_char_90006 = {
+                trigger_event = { id = eotg_ratfolk.0001 days = 14 }
+            }
+        }
+    }
+}

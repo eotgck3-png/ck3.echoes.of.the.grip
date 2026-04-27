@@ -1,0 +1,225 @@
+# ── eotg_7thlegion_events.txt ─────────────────────────────────────────────────
+# Event chain for Corven Vultarre (and Lyssa Varayne) — 7th Mercenary Legion.
+# Fires from: eotg_char_arc_actions.txt (on_game_started, day 14)
+# Scope: character (Corven)
+#
+# Arc summary:
+#   I   — The Board Vote         (0001)
+#   II  — The Leak               (0002)
+#   III — The Contract Problem   (0003)
+#   IV  — The Nightglass Files   (0004)
+#   V   — The Sovereignty Question (0005)
+#   VI  — The Future of the Legion (0006, final)
+# ─────────────────────────────────────────────────────────────────────────────
+
+namespace = eotg_7thlegion
+
+# ── eotg_7thlegion.0001 ───────────────────────────────────────────────────────
+# Fires from: on_game_started (day 14)
+# The Legion Board Vote: mercenaries or independent strategic force?
+eotg_7thlegion.0001 = {
+    type = character_event
+    title = eotg_7thlegion.0001.t
+    desc = eotg_7thlegion.0001.desc
+    theme = martial
+
+    option = {
+        name = eotg_7thlegion.0001.a
+        # "We are soldiers-for-hire. Nothing more."
+        add_gold = 100
+        add_character_modifier = { modifier = eotg_professional_contractors years = 10 }
+        trigger_event = { id = eotg_7thlegion.0002 days = 270 }
+    }
+
+    option = {
+        name = eotg_7thlegion.0001.b
+        # "Contracts are leverage." (Lyssa influence)
+        add_character_modifier = { modifier = eotg_contract_leverage_network years = 10 }
+        trigger_event = { id = eotg_7thlegion.0002 days = 270 }
+    }
+
+    option = {
+        name = eotg_7thlegion.0001.c
+        # "We decide where the Legion marches." (Corven influence)
+        add_character_modifier = { modifier = eotg_autonomous_command years = 10 }
+        add_dread = 10
+        add_character_flag = eotg_legion_autonomy_path
+        trigger_event = { id = eotg_7thlegion.0002 days = 270 }
+    }
+}
+
+# ── eotg_7thlegion.0002 ───────────────────────────────────────────────────────
+# Fires from: eotg_7thlegion.0001 (6-12 months later)
+# The Leak — public accusations against the Legion
+eotg_7thlegion.0002 = {
+    type = character_event
+    title = eotg_7thlegion.0002.t
+    desc = eotg_7thlegion.0002.desc
+    theme = intrigue
+
+    option = {
+        name = eotg_7thlegion.0002.a
+        # "Deny everything."
+        add_legitimacy = 15
+        add_character_modifier = { modifier = eotg_public_denial_campaign years = 5 }
+        trigger_event = { id = eotg_7thlegion.0003 days = 365 }
+    }
+
+    option = {
+        name = eotg_7thlegion.0002.b
+        # "Blame subcontractors."
+        add_prestige = -50
+        trigger_event = { id = eotg_7thlegion.0003 days = 365 }
+    }
+
+    option = {
+        name = eotg_7thlegion.0002.c
+        # "Fear keeps order."
+        add_dread = 15
+        add_character_modifier = { modifier = eotg_fear_enforcement years = 10 }
+        trigger_event = { id = eotg_7thlegion.0003 days = 365 }
+    }
+}
+
+# ── eotg_7thlegion.0003 ───────────────────────────────────────────────────────
+# Fires from: eotg_7thlegion.0002 (year 1-2)
+# The Contract Problem — conflicting obligations
+eotg_7thlegion.0003 = {
+    type = character_event
+    title = eotg_7thlegion.0003.t
+    desc = eotg_7thlegion.0003.desc
+    theme = martial
+
+    option = {
+        name = eotg_7thlegion.0003.a
+        # "Honor the contract."
+        add_prestige = 150
+        add_character_modifier = { modifier = eotg_honor_before_politics years = 5 }
+        trigger_event = { id = eotg_7thlegion.0004 days = 365 }
+    }
+
+    option = {
+        name = eotg_7thlegion.0003.b
+        # "Choose strategic advantage."
+        add_prestige = 100
+        trigger_event = { id = eotg_7thlegion.0004 days = 365 }
+    }
+
+    option = {
+        name = eotg_7thlegion.0003.c
+        # "Let Lyssa solve it quietly."
+        add_character_modifier = { modifier = eotg_shadow_contracts years = 5 }
+        trigger_event = { id = eotg_7thlegion.0004 days = 365 }
+    }
+}
+
+# ── eotg_7thlegion.0004 ───────────────────────────────────────────────────────
+# Fires from: eotg_7thlegion.0003 (if Lyssa influence high / contract_leverage)
+# The Nightglass Files — Lyssa reveals her dossiers
+eotg_7thlegion.0004 = {
+    type = character_event
+    title = eotg_7thlegion.0004.t
+    desc = eotg_7thlegion.0004.desc
+    theme = intrigue
+
+    trigger = {
+        OR = {
+            has_character_modifier = eotg_contract_leverage_network
+            has_character_modifier = eotg_shadow_contracts
+        }
+    }
+
+    option = {
+        name = eotg_7thlegion.0004.a
+        # "Use the files carefully."
+        add_intrigue_skill = 1
+        trigger_event = { id = eotg_7thlegion.0005 days = 730 }
+    }
+
+    option = {
+        name = eotg_7thlegion.0004.b
+        # "Release enough to frighten them."
+        add_dread = 15
+        add_diplomacy_skill = -1
+        trigger_event = { id = eotg_7thlegion.0005 days = 730 }
+    }
+
+    option = {
+        name = eotg_7thlegion.0004.c
+        # "Destroy them." (Corven distrusts corruption)
+        add_legitimacy = 20
+        add_intrigue_skill = -1
+        trigger_event = { id = eotg_7thlegion.0005 days = 730 }
+    }
+}
+
+# ── eotg_7thlegion.0005 ───────────────────────────────────────────────────────
+# Fires from: eotg_7thlegion.0004 (autonomy path or high military power)
+# The Sovereignty Question
+eotg_7thlegion.0005 = {
+    type = character_event
+    title = eotg_7thlegion.0005.t
+    desc = eotg_7thlegion.0005.desc
+    theme = martial
+
+    trigger = {
+        OR = {
+            has_character_flag = eotg_legion_autonomy_path
+            martial >= 18
+        }
+    }
+
+    option = {
+        name = eotg_7thlegion.0005.a
+        # "We are still contractors."
+        add_gold = 200
+        trigger_event = { id = eotg_7thlegion.0006 days = 1095 }
+    }
+
+    option = {
+        name = eotg_7thlegion.0005.b
+        # "We are protectors."
+        add_legitimacy = 20
+        trigger_event = { id = eotg_7thlegion.0006 days = 1095 }
+    }
+
+    option = {
+        name = eotg_7thlegion.0005.c
+        # "We are what survives war."
+        add_prestige = 200
+        add_dread = 15
+        trigger_event = { id = eotg_7thlegion.0006 days = 1095 }
+    }
+}
+
+# ── eotg_7thlegion.0006 ───────────────────────────────────────────────────────
+# The Future of the Legion — final choice
+eotg_7thlegion.0006 = {
+    type = character_event
+    title = eotg_7thlegion.0006.t
+    desc = eotg_7thlegion.0006.desc
+    theme = martial
+
+    option = {
+        name = eotg_7thlegion.0006.a
+        # "We endure through discipline." — Professional Legion
+        add_gold = 300
+        add_legitimacy = 20
+        add_prestige = 200
+    }
+
+    option = {
+        name = eotg_7thlegion.0006.b
+        # "Power belongs to those who know secrets." — Shadow Legion
+        add_intrigue_skill = 2
+        add_prestige = -100
+    }
+
+    option = {
+        name = eotg_7thlegion.0006.c
+        # "No ruler commands us again." — War State
+        add_prestige = 400
+        add_martial_skill = 2
+        add_diplomacy_skill = -2
+    }
+}

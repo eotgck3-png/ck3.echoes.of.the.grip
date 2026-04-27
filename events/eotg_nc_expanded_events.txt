@@ -156,7 +156,7 @@ eotg_nc_flavor.0004 = {
 
 	option = {
 		name = eotg_nc_flavor_0004_opt_aggressive
-		add_gold = -40
+		remove_short_term_gold = 40
 		add_character_modifier = { modifier = eotg_nc_campaign_season  years = 2 }
 		add_prestige = 20
 		add_character_flag = { flag = eotg_nc_0004_recent  years = 3 }
@@ -330,7 +330,7 @@ eotg_nc_flavor.0008 = {
 
 	option = {
 		name = eotg_nc_flavor_0008_opt_expand
-		add_gold = -60
+		remove_short_term_gold = 60
 		remove_character_modifier = eotg_nc_senate_gridlock
 		add_character_modifier = { modifier = eotg_nc_senate_corruption  years = 4 }
 		every_vassal = {
@@ -342,7 +342,7 @@ eotg_nc_flavor.0008 = {
 	}
 	option = {
 		name = eotg_nc_flavor_0008_opt_limited
-		add_gold = -30
+		remove_short_term_gold = 30
 		add_character_modifier = { modifier = eotg_nc_senate_corruption  years = 2 }
 		add_character_flag = { flag = eotg_nc_0008_recent  years = 3 }
 		ai_chance = { base = 35  modifier = { add = 10  has_trait = patient } }
@@ -691,7 +691,7 @@ eotg_nc_flavor.0016 = {
 	option = {
 		name = eotg_nc_flavor_0016_opt_suppress
 		add_intrigue_skill = 1
-		add_gold = -30
+		remove_short_term_gold = 30
 		add_character_flag = { flag = eotg_nc_0016_recent  years = 3 }
 		ai_chance = { base = 35  modifier = { add = 15  has_trait = deceitful } }
 	}
@@ -709,5 +709,134 @@ eotg_nc_flavor.0016 = {
 		add_character_modifier = { modifier = eotg_nc_public_discontent  years = 2 }
 		add_character_flag = { flag = eotg_nc_0016_recent  years = 3 }
 		ai_chance = { base = 30  modifier = { add = 10  has_trait = callous } }
+	}
+}
+
+# ── eotg_nc_flavor.0017 ───────────────────────────────────────────────────────
+# A Senator requests the President's public endorsement for a critical bill.
+# Fires from: eotg_on_yearly_nc_flavor (vassal_count >= 2)
+eotg_nc_flavor.0017 = {
+	type = character_event
+	title = eotg_nc_flavor_0017_title
+	desc = eotg_nc_flavor_0017_desc
+	theme = diplomacy
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	option = {
+		name = eotg_nc_flavor_0017_opt_endorse
+		# Endorse the bill. Political capital earns political capital.
+		add_prestige = 75
+		add_diplomacy_skill = 1
+		add_character_flag = { flag = eotg_nc_0017_recent  years = 4 }
+		ai_chance = { base = 40  modifier = { add = 15  has_trait = gregarious } }
+	}
+
+	option = {
+		name = eotg_nc_flavor_0017_opt_conditional
+		# Conditional support. The bill passes only if amended.
+		add_prestige = 50
+		add_character_flag = { flag = eotg_nc_0017_recent  years = 4 }
+		ai_chance = { base = 35  modifier = { add = 10  has_trait = just } }
+	}
+
+	option = {
+		name = eotg_nc_flavor_0017_opt_distance
+		# The Presidency does not take sides in Senate business.
+		add_dread = 5
+		add_prestige = -50
+		add_character_flag = { flag = eotg_nc_0017_recent  years = 3 }
+		ai_chance = { base = 25  modifier = { add = 15  has_trait = arrogant } }
+	}
+}
+
+# ── eotg_nc_flavor.0018 ───────────────────────────────────────────────────────
+# Outer member-states claim they are underrepresented in the Senate.
+# Fires from: eotg_on_yearly_nc_flavor (realm_size >= 8)
+eotg_nc_flavor.0018 = {
+	type = character_event
+	title = eotg_nc_flavor_0018_title
+	desc = eotg_nc_flavor_0018_desc
+	theme = diplomacy
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	option = {
+		name = eotg_nc_flavor_0018_opt_reform
+		# Convene a constitutional review. Every voice deserves a seat.
+		add_prestige = 100
+		add_legitimacy = 15
+		add_diplomacy_skill = 1
+		add_character_flag = { flag = eotg_nc_0018_recent  years = 5 }
+		ai_chance = { base = 40  modifier = { add = 15  has_trait = just } }
+	}
+
+	option = {
+		name = eotg_nc_flavor_0018_opt_study
+		# Commission a representational study. Change takes time and evidence.
+		add_prestige = 50
+		add_diplomacy_skill = 1
+		add_character_flag = { flag = eotg_nc_0018_recent  years = 5 }
+		ai_chance = { base = 35  modifier = { add = 10  learning >= 10 } }
+	}
+
+	option = {
+		name = eotg_nc_flavor_0018_opt_deny
+		# The Senate apportionment is established. This petition is out of order.
+		add_dread = 5
+		add_prestige = -50
+		add_legitimacy = -10
+		add_character_flag = { flag = eotg_nc_0018_recent  years = 4 }
+		ai_chance = { base = 25  modifier = { add = 15  has_trait = arrogant } }
+	}
+}
+
+# ── eotg_nc_flavor.0019 ───────────────────────────────────────────────────────
+# A Senator publicly questions whether the President is still fit to govern.
+# Fires from: eotg_on_yearly_nc_flavor (prestige < 300 or has NC instability modifier)
+eotg_nc_flavor.0019 = {
+	type = character_event
+	title = eotg_nc_flavor_0019_title
+	desc = eotg_nc_flavor_0019_desc
+	theme = intrigue
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	option = {
+		name = eotg_nc_flavor_0019_opt_record
+		# Release the full record of this administration. Let the people judge.
+		add_stewardship_skill = 1
+		add_prestige = 100
+		add_legitimacy = 10
+		add_character_flag = { flag = eotg_nc_0019_recent  years = 5 }
+		ai_chance = { base = 40  modifier = { add = 15  stewardship >= 10 } }
+	}
+
+	option = {
+		name = eotg_nc_flavor_0019_opt_debate
+		# Challenge them to a public debate. Democracy runs on argument.
+		add_diplomacy_skill = 1
+		add_prestige = 75
+		add_character_flag = { flag = eotg_nc_0019_recent  years = 5 }
+		ai_chance = { base = 35  modifier = { add = 15  diplomacy >= 12 } }
+	}
+
+	option = {
+		name = eotg_nc_flavor_0019_opt_authority
+		# Use executive authority to end this challenge before it spreads.
+		add_dread = 15
+		add_prestige = -50
+		add_legitimacy = -15
+		add_character_flag = { flag = eotg_nc_0019_recent  years = 4 }
+		ai_chance = { base = 25  modifier = { add = 20  has_trait = arrogant } }
 	}
 }

@@ -47,7 +47,7 @@ eotg_char_10002 = {
     # dynasty = dynasty:eotg_dynasty_myr_proxy
     religion = faith:eotg_faith_elross_canonical
     culture = culture:eotg_culture_elrossi
-    father = 0    # TODO: tie to Imperium nobility
+    # father = 0    # TODO: tie to Imperium nobility once dynasty is defined
 
     830.6.1 = { birth = yes }
 
@@ -182,5 +182,374 @@ eotg_char_70001 = {
         add_trait = ambitious
         add_trait = paranoid
         # give_title = { title = title:eotg_d_daimyo_a_system }
+    }
+}
+
+# ── BOOKMARK CHARACTERS ───────────────────────────────────────────────────────
+# Named characters from the 866 AG bookmark design doc.
+# ID range 90001–90099 reserved for independents / minor powers.
+# New Cauldron 20002+, Trade League 30002+, Coldiron 40002+.
+
+# ── XERXES ───────────────────────────────────────────────────────────────────
+
+eotg_char_90001 = {
+    name = "Vaelorin"
+    # dynasty = dynasty:eotg_dynasty_sylvaerath
+    religion = faith:eotg_faith_firstlight
+    culture = culture:eotg_culture_xeric_elf
+
+    # Born 866 - 142 = 724 AG
+    724.3.1 = { birth = yes }
+
+    866.1.1 = {
+        add_trait = education_diplomacy_4
+        add_trait = calm
+        add_trait = arrogant
+        add_trait = diligent
+        add_trait = administrator
+        add_trait = lifestyle_poet
+        add_trait = scholar
+    }
+}
+
+# ── HELIX REMNANTS ────────────────────────────────────────────────────────────
+
+eotg_char_90002 = {
+    name = "Clayd"
+    # dynasty = dynasty:eotg_dynasty_kestrel_vire
+    religion = faith:eotg_faith_industrial_survivalism
+    culture = culture:eotg_culture_xeric_human
+
+    # Born 866 - 41 = 825 AG
+    825.6.15 = { birth = yes }
+
+    866.1.1 = {
+        add_trait = education_intrigue_4
+        add_trait = paranoid
+        add_trait = ambitious
+        add_trait = callous
+        add_trait = overseer
+        add_trait = torturer
+        add_trait = scarred
+        add_trait = athletic
+    }
+}
+
+# ── 7TH MERCENARY LEGION ─────────────────────────────────────────────────────
+
+eotg_char_90003 = {
+    name = "Corven"
+    # dynasty = dynasty:eotg_dynasty_vultarre
+    religion = faith:eotg_faith_secular_contract
+    culture = culture:eotg_culture_mercenary_clusterborn
+
+    # Born 866 - 52 = 814 AG
+    814.4.1 = { birth = yes }
+
+    866.1.1 = {
+        add_trait = education_martial_4
+        add_trait = brave
+        add_trait = stubborn
+        add_trait = cynical
+        add_trait = logistician
+        add_trait = gallant
+        add_trait = lifestyle_blademaster
+    }
+}
+
+eotg_char_90004 = {
+    name = "Lyssa"
+    # dynasty = dynasty:eotg_dynasty_varayne
+    religion = faith:eotg_faith_secular_contract
+    culture = culture:eotg_culture_mercenary_clusterborn
+
+    # Born 866 - 39 = 827 AG
+    827.9.10 = { birth = yes }
+
+    866.1.1 = {
+        add_trait = education_intrigue_4
+        add_trait = patient
+        add_trait = deceitful
+        add_trait = arbitrary
+        add_trait = schemer
+        add_trait = seducer
+    }
+}
+
+# ── NEW CAULDRON ──────────────────────────────────────────────────────────────
+
+eotg_char_20002 = {
+    name = "Lireth"
+    # dynasty = dynasty:eotg_dynasty_davan
+    religion = faith:eotg_faith_civic_secular
+    culture = culture:eotg_culture_cauldronite
+
+    # Born 866 - 48 = 818 AG
+    818.7.20 = { birth = yes }
+
+    866.1.1 = {
+        add_trait = education_stewardship_4
+        add_trait = just
+        add_trait = temperate
+        add_trait = paranoid
+        add_trait = administrator
+    }
+}
+
+# ── GOB-OGRE TRADE LEAGUE ─────────────────────────────────────────────────────
+
+eotg_char_30002 = {
+    name = "Grezzik"
+    # dynasty = dynasty:eotg_dynasty_gildspanner
+    religion = faith:eotg_faith_commerce
+    culture = culture:eotg_culture_trade_goblin
+
+    # Born 866 - 57 = 809 AG
+    809.2.5 = { birth = yes }
+
+    866.1.1 = {
+        add_trait = education_stewardship_4
+        add_trait = greedy
+        add_trait = arbitrary
+        add_trait = paranoid
+        add_trait = architect
+        add_trait = avaricious
+    }
+}
+
+eotg_char_30003 = {
+    name = "Rughan"
+    # dynasty = dynasty:eotg_dynasty_broad_jaw
+    religion = faith:eotg_faith_forge_tradition
+    culture = culture:eotg_culture_industrial_ogre
+
+    # Born 866 - 46 = 820 AG
+    820.11.1 = { birth = yes }
+
+    866.1.1 = {
+        add_trait = education_stewardship_3
+        add_trait = patient
+        add_trait = stubborn
+        add_trait = compassionate
+        add_trait = architect
+        add_trait = overseer
+    }
+}
+
+# ── COLDIRON CALIPHATE ────────────────────────────────────────────────────────
+
+eotg_char_40002 = {
+    name = "Marzuk"
+    # dynasty = dynasty:eotg_dynasty_al_khadrin
+    religion = faith:eotg_faith_coldiron
+    culture = culture:eotg_culture_coldiron
+
+    # Born 866 - 67 = 799 AG
+    799.1.10 = { birth = yes }
+
+    866.1.1 = {
+        add_trait = education_learning_4
+        add_trait = patient
+        add_trait = temperate
+        add_trait = cynical
+        add_trait = whole_of_body
+        add_trait = theologian
+    }
+}
+
+eotg_char_40003 = {
+    name = "Qadir"
+    # dynasty = dynasty:eotg_dynasty_al_khadrin
+    religion = faith:eotg_faith_coldiron
+    culture = culture:eotg_culture_coldiron
+    father = eotg_char_40002
+
+    # Born 866 - 49 = 817 AG
+    817.5.1 = { birth = yes }
+
+    866.1.1 = {
+        add_trait = education_martial_3
+        add_trait = zealous
+        add_trait = wrathful
+        add_trait = loyal
+        add_trait = overseer
+    }
+}
+
+eotg_char_40004 = {
+    name = "Samir"
+    # dynasty = dynasty:eotg_dynasty_al_khadrin
+    religion = faith:eotg_faith_coldiron
+    culture = culture:eotg_culture_coldiron
+    father = eotg_char_40002
+
+    # Born 866 - 43 = 823 AG
+    823.8.15 = { birth = yes }
+
+    866.1.1 = {
+        add_trait = education_diplomacy_4
+        add_trait = gregarious
+        add_trait = ambitious
+        add_trait = cynical
+        add_trait = diplomat
+    }
+}
+
+# ── LANIUS PRINCIPALITY ───────────────────────────────────────────────────────
+
+eotg_char_90005 = {
+    name = "Caelorin"
+    # dynasty = dynasty:eotg_dynasty_solvaerath
+    religion = faith:eotg_faith_firstlight
+    culture = culture:eotg_culture_elrossi
+
+    # Born 866 - 37 = 829 AG
+    829.3.1 = { birth = yes }
+
+    866.1.1 = {
+        add_trait = education_diplomacy_4
+        add_trait = ambitious
+        add_trait = gregarious
+        add_trait = deceitful
+        add_trait = august
+        add_trait = lifestyle_poet
+    }
+}
+
+# ── RATFOLK FACTIONS ─────────────────────────────────────────────────────────
+
+eotg_char_90006 = {
+    name = "Skrit"
+    # dynasty = dynasty:eotg_dynasty_grimweave
+    religion = faith:eotg_faith_deep_warren
+    culture = culture:eotg_culture_warren_ratfolk
+
+    # Born 866 - 35 = 831 AG
+    831.6.1 = { birth = yes }
+
+    866.1.1 = {
+        add_trait = education_stewardship_4
+        add_trait = ambitious
+        add_trait = patient
+        add_trait = paranoid
+        add_trait = intellect_good_3
+        add_trait = architect
+        add_trait = diligent
+    }
+}
+
+eotg_char_90007 = {
+    name = "Threelatch"
+    # dynasty = dynasty:eotg_dynasty_vessel_collective
+    religion = faith:eotg_faith_deep_warren
+    culture = culture:eotg_culture_warren_ratfolk
+    female = yes
+
+    # Born 866 - 61 = 805 AG
+    805.2.1 = { birth = yes }
+
+    866.1.1 = {
+        add_trait = education_learning_4
+        add_trait = calm
+        add_trait = zealous
+        add_trait = patient
+        add_trait = theologian
+        add_trait = lifestyle_mystic
+    }
+}
+
+# ── LANIUS RELIGIOUS FIGURES ─────────────────────────────────────────────────
+
+eotg_char_90008 = {
+    name = "Serapion"
+    # dynasty = dynasty:eotg_dynasty_vale
+    religion = faith:eotg_faith_firstlight
+    culture = culture:eotg_culture_elrossi
+
+    # Born 866 - 71 = 795 AG
+    795.4.10 = { birth = yes }
+
+    866.1.1 = {
+        add_trait = education_learning_4
+        add_trait = cynical
+        add_trait = temperate
+        add_trait = just
+        add_trait = theologian
+    }
+}
+
+eotg_char_90009 = {
+    name = "Ilyr"
+    # dynasty = dynasty:eotg_dynasty_kavos
+    religion = faith:eotg_faith_firstlight
+    culture = culture:eotg_culture_elrossi
+
+    # Born 866 - 58 = 808 AG
+    808.9.1 = { birth = yes }
+
+    866.1.1 = {
+        add_trait = education_martial_4
+        add_trait = brave
+        add_trait = zealous
+        add_trait = stubborn
+        add_trait = gallant
+        add_trait = strategist
+    }
+}
+
+# ── OPTIONAL CHARACTERS ───────────────────────────────────────────────────────
+
+eotg_char_90010 = {
+    name = "Mirelle"
+    # dynasty = dynasty:eotg_dynasty_voss
+    religion = faith:eotg_faith_industrial_survivalism
+    culture = culture:eotg_culture_xeric_human
+    female = yes
+
+    # Born 866 - 54 = 812 AG
+    812.1.20 = { birth = yes }
+
+    866.1.1 = {
+        add_trait = education_stewardship_4
+        add_trait = calm
+        add_trait = cynical
+        add_trait = diligent
+        add_trait = administrator
+    }
+}
+
+eotg_char_30004 = {
+    name = "Nibrak"
+    # dynasty = dynasty:eotg_dynasty_coilmint
+    religion = faith:eotg_faith_commerce
+    culture = culture:eotg_culture_trade_goblin
+
+    # Born 866 - 62 = 804 AG
+    804.7.5 = { birth = yes }
+
+    866.1.1 = {
+        add_trait = education_intrigue_3
+        add_trait = greedy
+        add_trait = sadistic
+        add_trait = arbitrary
+        add_trait = schemer
+    }
+}
+
+eotg_char_90011 = {
+    name = "Dorian"
+    # dynasty = dynasty:eotg_dynasty_valek
+    religion = faith:eotg_faith_secular_contract
+    culture = culture:eotg_culture_mercenary_clusterborn
+
+    # Born 866 - 50 = 816 AG
+    816.3.10 = { birth = yes }
+
+    866.1.1 = {
+        add_trait = education_stewardship_3
+        add_trait = content
+        add_trait = cynical
+        add_trait = patient
+        add_trait = administrator
     }
 }

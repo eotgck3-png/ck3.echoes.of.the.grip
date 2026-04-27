@@ -2,34 +2,162 @@
 # Culture definitions for Echoes of the Grip.
 # Prefix all keys: eotg_culture_
 #
-# Heritage, language, and ethos pillars are defined in:
-#   common/culture/pillars/eotg_pillars.txt
+# Heritage, language, and ethos pillars will be replaced with custom eotg_ pillars
+# once common/culture/pillars/eotg_pillars.txt is written.
 # ─────────────────────────────────────────────────────────────────────────────
 
 # eotg_culture_elrossi
 # The dominant culture of the Second Elrossi Imperium — devout, martial, ordered.
 eotg_culture_elrossi = {
-    # TODO: define heritage, language, ethos once pillars are written
-    # heritage = eotg_heritage_imperium
-    # language = eotg_language_high_elrossi
-    # ethos = eotg_ethos_devoted
-
-    martial_custom_name = eotg_elrossi_marshal
-
-    # Traditions (fill in once innovation/tradition system is mapped to ATG)
-    # traditions = {
-    #     eotg_tradition_holy_war_doctrine
-    #     eotg_tradition_starfaring_orders
-    # }
+    color = { 0.85 0.75 0.2 }
+    ethos = ethos_bellicose
+    heritage = heritage_frankish
+    language = language_latin
+    martial_custom = martial_custom_male_only
+    head_determination = head_determination_domain
+    name_list = name_list_french
 }
 
 # eotg_culture_cauldronite
-# Survivors and descendants of those who crashed with the ruins of Orrin's Grip's capital.
-# Pragmatic, resourceful, fiercely independent.
+# Survivors of Orrin's Grip — pragmatic, resourceful, fiercely independent.
 eotg_culture_cauldronite = {
-    # heritage = eotg_heritage_remnant
-    # language = eotg_language_salvage_creole
-    # ethos = eotg_ethos_pragmatic
+    color = { 0.4 0.6 0.7 }
+    ethos = ethos_communal
+    heritage = heritage_frankish
+    language = language_french
+    martial_custom = martial_custom_male_only
+    head_determination = head_determination_domain
+    name_list = name_list_french
+}
 
-    stewardship_custom_name = eotg_cauldronite_salvagemaster
+# eotg_culture_goborc
+# Gob-Ogre hybrid culture of the Trade League — mercantile, competitive.
+eotg_culture_goborc = {
+    color = { 0.3 0.6 0.2 }
+    ethos = ethos_bureaucratic
+    heritage = heritage_mongolic
+    language = language_mongolic
+    martial_custom = martial_custom_male_only
+    head_determination = head_determination_domain
+    name_list = name_list_mongol
+}
+
+# eotg_culture_coldiron
+# Caliphate culture — disciplined, faith-driven, expansionist.
+eotg_culture_coldiron = {
+    color = { 0.3 0.4 0.7 }
+    ethos = ethos_stoic
+    heritage = heritage_arabic
+    language = language_arabic
+    martial_custom = martial_custom_male_only
+    head_determination = head_determination_domain
+    name_list = name_list_levantine
+}
+
+# eotg_culture_centaur
+# Nikios Khanate centaur culture — clan-based, martial, mercenary.
+eotg_culture_centaur = {
+    color = { 0.6 0.4 0.2 }
+    ethos = ethos_bellicose
+    heritage = heritage_mongolic
+    language = language_mongolic
+    martial_custom = martial_custom_male_only
+    head_determination = head_determination_domain
+    name_list = name_list_mongol
+}
+
+# eotg_culture_aasimar
+# Angelian culture — devout, celestial-blooded, honor-bound.
+eotg_culture_aasimar = {
+    color = { 0.9 0.9 0.5 }
+    ethos = ethos_courtly
+    heritage = heritage_frankish
+    language = language_latin
+    martial_custom = martial_custom_male_only
+    head_determination = head_determination_domain
+    name_list = name_list_french
+}
+
+# eotg_culture_nippon
+# Broken Daimyo culture — Titanworld refugees (~500 AG), feudal, ancestor-focused.
+eotg_culture_nippon = {
+    color = { 0.7 0.2 0.2 }
+    ethos = ethos_courtly
+    heritage = heritage_mongolic
+    language = language_korean
+    martial_custom = martial_custom_male_only
+    head_determination = head_determination_domain
+    name_list = name_list_emishi
+}
+
+# eotg_culture_xeric_elf
+# Ancient elven culture of the Xerxes system — survivors of the great flood of 851 AG.
+eotg_culture_xeric_elf = {
+    color = { 0.2 0.6 0.8 }
+    ethos = ethos_stoic
+    heritage = heritage_frankish
+    language = language_latin
+    martial_custom = martial_custom_male_only
+    head_determination = head_determination_domain
+    name_list = name_list_roman
+}
+
+# eotg_culture_xeric_human
+# Human culture of the post-flood Helix Remnants — survivalist, corporate, militarized.
+eotg_culture_xeric_human = {
+    color = { 0.5 0.4 0.3 }
+    ethos = ethos_stoic
+    heritage = heritage_frankish
+    language = language_french
+    martial_custom = martial_custom_male_only
+    head_determination = head_determination_domain
+    name_list = name_list_french
+}
+
+# eotg_culture_mercenary_clusterborn
+# Mixed culture of the 7th Mercenary Legion — multispecies, contract-bound, professional.
+eotg_culture_mercenary_clusterborn = {
+    color = { 0.6 0.5 0.3 }
+    ethos = ethos_bellicose
+    heritage = heritage_frankish
+    language = language_french
+    martial_custom = martial_custom_male_only
+    head_determination = head_determination_domain
+    name_list = name_list_french
+}
+
+# eotg_culture_trade_goblin
+# Goblin merchant culture of the Gob-Ogre Trade League — profit-focused, politically aggressive.
+eotg_culture_trade_goblin = {
+    color = { 0.4 0.7 0.2 }
+    ethos = ethos_bureaucratic
+    heritage = heritage_mongolic
+    language = language_mongolic
+    martial_custom = martial_custom_male_only
+    head_determination = head_determination_domain
+    name_list = name_list_mongol
+}
+
+# eotg_culture_industrial_ogre
+# Ogre engineering culture of the Gob-Ogre Trade League — builder-focused, pragmatic.
+eotg_culture_industrial_ogre = {
+    color = { 0.5 0.3 0.1 }
+    ethos = ethos_communal
+    heritage = heritage_mongolic
+    language = language_mongolic
+    martial_custom = martial_custom_male_only
+    head_determination = head_determination_domain
+    name_list = name_list_mongol
+}
+
+# eotg_culture_warren_ratfolk
+# Ratfolk culture of the deep warrens — tunnel-dwelling, adaptive, ideologically divided.
+eotg_culture_warren_ratfolk = {
+    color = { 0.5 0.4 0.4 }
+    ethos = ethos_bureaucratic
+    heritage = heritage_mongolic
+    language = language_mongolic
+    martial_custom = martial_custom_male_only
+    head_determination = head_determination_domain
+    name_list = name_list_mongol
 }

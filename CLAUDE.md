@@ -41,11 +41,13 @@ Two identifiers with the same name will overwrite each other with zero warning.
 | Static modifiers | `common/modifiers/` |
 | Traits | `common/traits/` |
 | Cultures | `common/culture/cultures/` |
-| Religions & faiths | `common/religion/religions/` |
-| Doctrines | `common/religion/doctrines/` |
+| Religions & faiths | `common/religion/religion_types/` (CK3 1.19 — **not** `religions/`) |
+| Religion families | `common/religion/religion_family_types/` |
+| Holy sites | `common/religion/holy_site_types/` |
+| Doctrines | `common/religion/doctrine_types/` |
 | Governments | `common/governments/` |
 | Laws | `common/laws/` |
-| Bookmark definition | `common/bookmarks/` |
+| Bookmark definition | `common/bookmarks/bookmarks/` (nested subfolder in 1.19) |
 | Landed titles | `common/landed_titles/` |
 | Localization | `localization/english/*_l_english.yml` |
 | Vanilla loc overrides | `localization/english/replace/` |

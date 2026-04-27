@@ -428,7 +428,7 @@ eotg_elven_flavor.0010 = {
 	}
 	option = {
 		name = eotg_elven_flavor_0010_opt_bribe
-		add_gold = -60
+		remove_short_term_gold = 60
 		add_prestige = 15
 		remove_character_modifier = eotg_elven_court_contested
 		add_character_flag = { flag = eotg_elven_0010_recent  years = 5 }
@@ -519,7 +519,7 @@ eotg_elven_flavor.0012 = {
 	}
 	option = {
 		name = eotg_elven_flavor_0012_opt_dividepriv
-		add_gold = -50
+		remove_short_term_gold = 50
 		remove_character_modifier = eotg_elven_succession_crisis
 		add_prestige = 10
 		add_character_flag = { flag = eotg_elven_0012_recent  years = 4 }
@@ -655,5 +655,133 @@ eotg_elven_flavor.0015 = {
 		add_prestige = 10
 		add_character_flag = { flag = eotg_elven_0015_recent  years = 4 }
 		ai_chance = { base = 30  modifier = { add = 15  has_trait = just } }
+	}
+}
+
+# ── eotg_elven_flavor.0016 ───────────────────────────────────────────────────
+# A court noble petitions the Starborn Sovereign for a grant of planetary holdings.
+# Fires from: eotg_on_yearly_elven_flavor (vassal_count >= 2)
+eotg_elven_flavor.0016 = {
+	type = character_event
+	title = eotg_elven_flavor_0016_title
+	desc = eotg_elven_flavor_0016_desc
+	theme = diplomacy
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	option = {
+		name = eotg_elven_flavor_0016_opt_grant
+		# Grant the petition. A loyal noble is worth more than unclaimed territory.
+		add_prestige = 75
+		add_diplomacy_skill = 1
+		add_character_flag = { flag = eotg_elven_0016_recent  years = 4 }
+		ai_chance = { base = 40  modifier = { add = 15  has_trait = generous } }
+	}
+
+	option = {
+		name = eotg_elven_flavor_0016_opt_lesser
+		# Grant a lesser title. What is given can always be refined.
+		add_prestige = 50
+		add_character_flag = { flag = eotg_elven_0016_recent  years = 4 }
+		ai_chance = { base = 35  modifier = { add = 10  has_trait = just } }
+	}
+
+	option = {
+		name = eotg_elven_flavor_0016_opt_decline
+		# Decline. The Eternal Court does not redistribute holdings lightly.
+		add_prestige = -25
+		add_dread = 5
+		add_character_flag = { flag = eotg_elven_0016_recent  years = 3 }
+		ai_chance = { base = 25  modifier = { add = 15  has_trait = arrogant } }
+	}
+}
+
+# ── eotg_elven_flavor.0017 ───────────────────────────────────────────────────
+# An ancient house demands the Sovereign restore their bloodline's lost titles.
+# Fires from: eotg_on_yearly_elven_flavor (any vassal with dynasty present)
+eotg_elven_flavor.0017 = {
+	type = character_event
+	title = eotg_elven_flavor_0017_title
+	desc = eotg_elven_flavor_0017_desc
+	theme = diplomacy
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	option = {
+		name = eotg_elven_flavor_0017_opt_acknowledge
+		# Acknowledge the claim. Memory is the foundation of elven legitimacy.
+		add_prestige = 100
+		add_legitimacy = 15
+		add_diplomacy_skill = 1
+		add_character_flag = { flag = eotg_elven_0017_recent  years = 5 }
+		ai_chance = { base = 40  modifier = { add = 15  has_trait = just } }
+	}
+
+	option = {
+		name = eotg_elven_flavor_0017_opt_ceremonial
+		# Grant ceremonial recognition without material concessions.
+		add_prestige = 50
+		add_character_flag = { flag = eotg_elven_0017_recent  years = 5 }
+		ai_chance = { base = 35  modifier = { add = 10  diplomacy >= 10 } }
+	}
+
+	option = {
+		name = eotg_elven_flavor_0017_opt_dismiss
+		# Old claims have no standing. The Eternal Court rules the present, not the past.
+		add_dread = 5
+		add_legitimacy = -10
+		add_prestige = -25
+		add_character_flag = { flag = eotg_elven_0017_recent  years = 4 }
+		ai_chance = { base = 25  modifier = { add = 15  has_trait = arrogant } }
+	}
+}
+
+# ── eotg_elven_flavor.0018 ───────────────────────────────────────────────────
+# A court noble argues the Sovereign has deviated from Eternal Court doctrine.
+# Fires from: eotg_on_yearly_elven_flavor (prestige < 300 or legitimacy < 30)
+eotg_elven_flavor.0018 = {
+	type = character_event
+	title = eotg_elven_flavor_0018_title
+	desc = eotg_elven_flavor_0018_desc
+	theme = faith
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	option = {
+		name = eotg_elven_flavor_0018_opt_defend
+		# Defend the governance record. Doctrine is a guide, not a cage.
+		add_learning_skill = 1
+		add_prestige = 75
+		add_legitimacy = 10
+		add_character_flag = { flag = eotg_elven_0018_recent  years = 5 }
+		ai_chance = { base = 40  modifier = { add = 15  learning >= 10 } }
+	}
+
+	option = {
+		name = eotg_elven_flavor_0018_opt_review
+		# Commission a doctrinal review. Let the Eternal Court itself answer.
+		add_prestige = 50
+		add_legitimacy = 15
+		add_character_flag = { flag = eotg_elven_0018_recent  years = 5 }
+		ai_chance = { base = 35  modifier = { add = 10  has_trait = diligent } }
+	}
+
+	option = {
+		name = eotg_elven_flavor_0018_opt_silence
+		# Silence the noble. The Sovereign is the Eternal Court's highest expression.
+		add_dread = 15
+		add_prestige = -50
+		add_legitimacy = -15
+		add_character_flag = { flag = eotg_elven_0018_recent  years = 4 }
+		ai_chance = { base = 25  modifier = { add = 20  has_trait = arrogant } }
 	}
 }

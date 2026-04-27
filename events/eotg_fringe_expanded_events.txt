@@ -1130,3 +1130,121 @@ eotg_fringe.0029 = {
 		ai_chance = { base = 20 }
 	}
 }
+
+# ── eotg_fringe.0030 ──────────────────────────────────────────────────────────
+# A Fringe Captain demands the Overlord fund better raider equipment.
+# Fires from: eotg_on_yearly_fringe_flavor (any captain vassal present)
+eotg_fringe.0030 = {
+	type = character_event
+	title = eotg_fringe_0030_title
+	desc = eotg_fringe_0030_desc
+	theme = martial
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	option = {
+		name = eotg_fringe_0030_opt_fund
+		# Fund the upgrade. Better tools make better raiders.
+		remove_short_term_gold = 150
+		add_prestige = 75
+		ai_chance = { base = 35  modifier = { add = 15  gold >= 150 } }
+	}
+
+	option = {
+		name = eotg_fringe_0030_opt_spoils
+		# Promise them first pick of the next conquest.
+		add_prestige = 50
+		ai_chance = { base = 40  modifier = { add = 15  martial >= 12 } }
+	}
+
+	option = {
+		name = eotg_fringe_0030_opt_refuse
+		# They outfit themselves or they don't raid. That is the Fringe way.
+		add_dread = 10
+		add_prestige = -50
+		ai_chance = { base = 25  modifier = { add = 20  has_trait = callous } }
+	}
+}
+
+# ── eotg_fringe.0031 ──────────────────────────────────────────────────────────
+# Fringe raiders claim past spoils were divided unfairly and demand restitution.
+# Fires from: eotg_on_yearly_fringe_flavor (gold >= 100, any vassal present)
+eotg_fringe.0031 = {
+	type = character_event
+	title = eotg_fringe_0031_title
+	desc = eotg_fringe_0031_desc
+	theme = intrigue
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	option = {
+		name = eotg_fringe_0031_opt_pay
+		# Pay what's owed. A raider with a grudge is a liability.
+		remove_short_term_gold = 100
+		add_prestige = 75
+		ai_chance = { base = 35  modifier = { add = 15  gold >= 100 } }
+	}
+
+	option = {
+		name = eotg_fringe_0031_opt_investigate
+		# Investigate the complaint. If the claim holds, you act. If it doesn't, they face consequences.
+		add_intrigue_skill = 1
+		add_prestige = 50
+		ai_chance = { base = 40  modifier = { add = 15  intrigue >= 10 } }
+	}
+
+	option = {
+		name = eotg_fringe_0031_opt_example
+		# Make an example. Complaints are contagious.
+		add_dread = 15
+		add_prestige = -50
+		ai_chance = { base = 25  modifier = { add = 20  has_trait = callous } }
+	}
+}
+
+# ── eotg_fringe.0032 ──────────────────────────────────────────────────────────
+# A Captain openly questions whether the Overlord can still fight — and backs it.
+# Fires from: eotg_on_yearly_fringe_flavor (any captain with prowess >= 12)
+eotg_fringe.0032 = {
+	type = character_event
+	title = eotg_fringe_0032_title
+	desc = eotg_fringe_0032_desc
+	theme = martial
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	option = {
+		name = eotg_fringe_0032_opt_accept
+		# Accept the challenge. The Fringe answers questions with blood.
+		add_prestige = 200
+		add_dread = 20
+		add_stress = 10
+		ai_chance = { base = 35  modifier = { add = 20  prowess >= 14 } }
+	}
+
+	option = {
+		name = eotg_fringe_0032_opt_flog
+		# Have them flogged in front of their crew.
+		add_dread = 15
+		add_prestige = -50
+		ai_chance = { base = 30  modifier = { add = 15  dread >= 30 } }
+	}
+
+	option = {
+		name = eotg_fringe_0032_opt_command
+		# Give them command of the vanguard. Channel ambition into usefulness.
+		add_martial_skill = 1
+		add_prestige = 75
+		remove_short_term_gold = 100
+		ai_chance = { base = 35  modifier = { add = 15  martial >= 12 } }
+	}
+}

@@ -156,7 +156,7 @@ eotg_corp_flavor.0004 = {
 			limit = { is_powerful_vassal = yes }
 			add_opinion = { target = root  modifier = eotg_pmc_loyalty_restored }
 		}
-		add_gold = -30
+		remove_short_term_gold = 30
 		add_character_flag = { flag = eotg_corp_0004_recent  years = 3 }
 		ai_chance = { base = 40  modifier = { add = 10  has_trait = gregarious } }
 	}
@@ -244,7 +244,7 @@ eotg_corp_flavor.0006 = {
 
 	option = {
 		name = eotg_corp_flavor_0006_opt_prcampaign
-		add_gold = -60
+		remove_short_term_gold = 60
 		add_prestige = 40
 		add_character_flag = { flag = eotg_corp_0006_recent  years = 3 }
 		ai_chance = { base = 35  modifier = { add = 10  gold > 80 } }
@@ -255,7 +255,7 @@ eotg_corp_flavor.0006 = {
 			limit = { is_powerful_vassal = yes }
 			add_opinion = { target = root  modifier = eotg_pmc_loyalty_restored }
 		}
-		add_gold = -40
+		remove_short_term_gold = 40
 		add_character_flag = { flag = eotg_corp_0006_recent  years = 3 }
 		ai_chance = { base = 35  modifier = { add = 10  has_trait = gregarious } }
 	}
@@ -322,7 +322,7 @@ eotg_corp_flavor.0008 = {
 	option = {
 		name = eotg_corp_flavor_0008_opt_pursue
 		add_stewardship_skill = 1
-		add_gold = -60
+		remove_short_term_gold = 60
 		add_prestige = 20
 		add_character_flag = { flag = eotg_corp_0008_recent  years = 4 }
 		ai_chance = { base = 35  modifier = { add = 15  has_trait = ambitious } }
@@ -399,7 +399,7 @@ eotg_corp_flavor.0010 = {
 	option = {
 		name = eotg_corp_flavor_0010_opt_suppress
 		add_intrigue_skill = 1
-		add_gold = -30
+		remove_short_term_gold = 30
 		add_character_flag = { flag = eotg_corp_0010_recent  years = 3 }
 		ai_chance = { base = 35  modifier = { add = 15  has_trait = deceitful } }
 	}
@@ -438,7 +438,7 @@ eotg_corp_flavor.0011 = {
 
 	option = {
 		name = eotg_corp_flavor_0011_opt_prcampaign
-		add_gold = -80
+		remove_short_term_gold = 80
 		add_prestige = 50
 		remove_character_modifier = eotg_corporation_pr_crisis
 		add_character_flag = { flag = eotg_corp_0011_recent  years = 3 }
@@ -477,7 +477,7 @@ eotg_corp_flavor.0012 = {
 
 	option = {
 		name = eotg_corp_flavor_0012_opt_genuine
-		add_gold = -50
+		remove_short_term_gold = 50
 		add_prestige = 30
 		remove_character_modifier = eotg_corporation_pr_crisis
 		stress_impact = { base = minor_stress_impact_loss  callous = minor_stress_impact_gain }
@@ -616,5 +616,132 @@ eotg_corp_flavor.0015 = {
 		add_prestige = 15
 		add_character_flag = { flag = eotg_corp_0015_recent  years = 3 }
 		ai_chance = { base = 25  modifier = { add = 10  has_trait = callous } }
+	}
+}
+
+# ── eotg_corp_flavor.0016 ─────────────────────────────────────────────────────
+# A Director demands their division receives priority resource allocation.
+# Fires from: eotg_on_yearly_corp_flavor (vassal_count >= 2)
+eotg_corp_flavor.0016 = {
+	type = character_event
+	title = eotg_corp_flavor_0016_title
+	desc = eotg_corp_flavor_0016_desc
+	theme = stewardship
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	option = {
+		name = eotg_corp_flavor_0016_opt_fund
+		# Fund the division. Loyalty is an investment.
+		remove_short_term_gold = 100
+		add_prestige = 75
+		add_character_flag = { flag = eotg_corp_0016_recent  years = 4 }
+		ai_chance = { base = 35  modifier = { add = 15  has_trait = generous } }
+	}
+
+	option = {
+		name = eotg_corp_flavor_0016_opt_partial
+		# A partial allocation. Nobody gets everything they ask for.
+		add_prestige = 50
+		add_stewardship_skill = 1
+		add_character_flag = { flag = eotg_corp_0016_recent  years = 4 }
+		ai_chance = { base = 40  modifier = { add = 10  stewardship >= 10 } }
+	}
+
+	option = {
+		name = eotg_corp_flavor_0016_opt_deny
+		# Denied. Resource queues exist for a reason.
+		add_dread = 10
+		add_prestige = -50
+		add_character_flag = { flag = eotg_corp_0016_recent  years = 3 }
+		ai_chance = { base = 25  modifier = { add = 15  has_trait = greedy } }
+	}
+}
+
+# ── eotg_corp_flavor.0017 ─────────────────────────────────────────────────────
+# Junior Directors petition for seats on the executive board.
+# Fires from: eotg_on_yearly_corp_flavor (vassal_count >= 3)
+eotg_corp_flavor.0017 = {
+	type = character_event
+	title = eotg_corp_flavor_0017_title
+	desc = eotg_corp_flavor_0017_desc
+	theme = intrigue
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	option = {
+		name = eotg_corp_flavor_0017_opt_grant
+		# Grant limited board representation. Inclusion is cheaper than rebellion.
+		add_prestige = 100
+		add_diplomacy_skill = 1
+		add_character_flag = { flag = eotg_corp_0017_recent  years = 5 }
+		ai_chance = { base = 40  modifier = { add = 15  has_trait = gregarious } }
+	}
+
+	option = {
+		name = eotg_corp_flavor_0017_opt_assign
+		# Give them visible projects. Let them prove themselves first.
+		add_prestige = 50
+		add_character_flag = { flag = eotg_corp_0017_recent  years = 5 }
+		ai_chance = { base = 35  modifier = { add = 10  has_trait = just } }
+	}
+
+	option = {
+		name = eotg_corp_flavor_0017_opt_dismiss
+		# The board earns its seats. This petition is denied.
+		add_dread = 5
+		add_prestige = -25
+		add_character_flag = { flag = eotg_corp_0017_recent  years = 4 }
+		ai_chance = { base = 25  modifier = { add = 15  has_trait = arrogant } }
+	}
+}
+
+# ── eotg_corp_flavor.0018 ─────────────────────────────────────────────────────
+# A Director publicly calls for a CEO performance audit.
+# Fires from: eotg_on_yearly_corp_flavor (prestige < 200 or stewardship < 8)
+eotg_corp_flavor.0018 = {
+	type = character_event
+	title = eotg_corp_flavor_0018_title
+	desc = eotg_corp_flavor_0018_desc
+	theme = stewardship
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	option = {
+		name = eotg_corp_flavor_0018_opt_publish
+		# Release the performance data. Transparency is its own defense.
+		add_stewardship_skill = 1
+		add_prestige = 75
+		add_legitimacy = 15
+		add_character_flag = { flag = eotg_corp_0018_recent  years = 5 }
+		ai_chance = { base = 40  modifier = { add = 15  stewardship >= 10 } }
+	}
+
+	option = {
+		name = eotg_corp_flavor_0018_opt_review
+		# Commission an independent review. A controlled audit is better than a hostile one.
+		remove_short_term_gold = 150
+		add_legitimacy = 20
+		add_character_flag = { flag = eotg_corp_0018_recent  years = 5 }
+		ai_chance = { base = 30  modifier = { add = 10  gold >= 150 } }
+	}
+
+	option = {
+		name = eotg_corp_flavor_0018_opt_shut_down
+		# The CEO answers to no Director. Shut the audit down.
+		add_dread = 15
+		add_prestige = -50
+		add_legitimacy = -10
+		add_character_flag = { flag = eotg_corp_0018_recent  years = 4 }
+		ai_chance = { base = 30  modifier = { add = 20  has_trait = arrogant } }
 	}
 }

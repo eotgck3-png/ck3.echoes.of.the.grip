@@ -4,6 +4,44 @@ Thank you for contributing! This document covers the conventions that keep the m
 
 ---
 
+## Development Setup (First Time)
+
+CK3 requires the mod to be registered in your user mod folder.
+
+**Step 1 — Copy the launcher file:**
+
+```
+copy echoes_of_the_grip.mod "%USERPROFILE%\Documents\Paradox Interactive\Crusader Kings III\mod\echoes_of_the_grip.mod"
+```
+
+**Step 2 — Update the path in that copy:**
+
+Open the copied `.mod` file and change `path=` to the absolute path of your local clone:
+
+```
+path="C:/your/path/to/ck3.echoes.of.the.grip"
+```
+
+**Do not commit this change** — the path is machine-specific. The `echoes_of_the_grip.mod` in the repo root contains the project maintainer's path; contributors update their local copy only.
+
+**Step 3 — Verify:**
+
+Launch CK3. The mod should appear in the launcher. If it doesn't, check that `path=` points exactly to the directory containing `descriptor.mod`.
+
+---
+
+## Running CK3 Tiger (Validator)
+
+```bash
+"/c/Users/your-username/tools/ck3-tiger-windows-v1.17.0/ck3-tiger.exe" \
+  --game "D:/SteamLibrary/steamapps/common/Crusader Kings III/game" \
+  "echoes_of_the_grip.mod"
+```
+
+Fix all `error(...)` lines before committing. Warnings are reviewed case-by-case.
+
+---
+
 ## Prefix Rule — Non-Negotiable
 
 Every mod-specific identifier **must** be prefixed with `eotg_`.
@@ -49,8 +87,10 @@ This includes:
 | Static modifiers | `common/modifiers/` |
 | Traits | `common/traits/` |
 | Cultures | `common/culture/cultures/` |
-| Religions | `common/religion/religions/` |
-| Doctrines | `common/religion/doctrines/` |
+| Religions & faiths | `common/religion/religion_types/` (CK3 1.19 — not `religions/`) |
+| Religion families | `common/religion/religion_family_types/` |
+| Holy sites | `common/religion/holy_site_types/` |
+| Doctrines | `common/religion/doctrine_types/` |
 | Localization | `localization/english/*_l_english.yml` |
 | Vanilla loc overrides | `localization/english/replace/` |
 | History characters | `history/characters/` |

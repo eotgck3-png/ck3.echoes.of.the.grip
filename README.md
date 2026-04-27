@@ -2,7 +2,7 @@
 
 > *"And so the Titan's hand gripped the veil, pulling creation into chaos."*
 
-**Echoes of the Grip** is a total conversion mod for Crusader Kings III set in the Third Era — the age that began when Orrin, Titan of the Void, tore through the fabric of reality and merged the First and Second Material Planes in the cataclysm known as **Orrin's Grip (0 AG)**.
+**Echoes of the Grip** is a total conversion mod for Crusader Kings III set in the Third Era of a fictional setting — the age that began when Orrin, Titan of the Void, tore through the fabric of reality and merged the First and Second Material Planes in the cataclysm known as **Orrin's Grip (0 AG)**.
 
 The mod places players into the fractured galaxy that emerged from that catastrophe: weakened gods, freed titans, scattered civilizations struggling to rebuild, and the looming shadow of Orrin and Yu's war reshaping the cosmos.
 
