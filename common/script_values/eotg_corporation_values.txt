@@ -35,3 +35,12 @@ eotg_sv_corp_board_influence_war_cost = 25
 
 # Board influence spent on major economic decisions
 eotg_sv_corp_board_influence_decision_cost = 15
+
+# Monthly market share accumulation for a vassal character (called in story cycle scope)
+eotg_sv_corp_market_share_gain = {
+	value = 1
+	add = { value = stewardship  divide = 5 }
+	add = { value = realm_size  divide = 10 }
+	min = 1
+	max = 50
+}

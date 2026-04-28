@@ -53,12 +53,20 @@ eotg_market_faction_cycle = {
 				}
 			}
 
-			# Monthly market faction pulse for corporate vassals
+			# Monthly market faction pulse — dispatch to the correct government's event chain
 			triggered_effect = {
 				trigger = { always = yes }
 				effect = {
 					story_owner = {
-						trigger_event = { id = eotg_gobcorp_faction.0001 }
+						if = {
+							limit = { liege = { has_government = eotg_gobcorp_government } }
+							trigger_event = { id = eotg_gobcorp_faction.0001 }
+						}
+						else_if = {
+							limit = { liege = { has_government = eotg_corporation_government } }
+							trigger_event = { id = eotg_corp_faction.0001 }
+						}
+						# Additional corporate government types dispatched here as faction event chains are written
 					}
 				}
 			}

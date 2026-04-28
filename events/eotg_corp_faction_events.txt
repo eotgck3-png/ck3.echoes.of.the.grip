@@ -1,0 +1,122 @@
+# ── eotg_corp_faction_events.txt ───────────────────────────────────────────────
+# Market faction events for the Corporation government.
+# These fire from the eotg_market_faction_cycle story cycle (monthly pulse).
+#
+# eotg_corp_faction.0001 — hidden monthly pulse: accumulates market share
+# eotg_corp_faction.0002 — periodic gold distribution to faction members
+# eotg_corp_faction.0003 — dominant faction announcement (realm notification)
+# ─────────────────────────────────────────────────────────────────────────────
+
+namespace = eotg_corp_faction
+
+# Monthly hidden pulse — accumulates market share, checks dominance threshold.
+# Fires from the eotg_market_faction_cycle on_monthly block.
+# Root = the powerful vassal character (Regional Director or Operations Chief).
+eotg_corp_faction.0001 = {
+	type = character_event
+	hidden = yes
+
+	immediate = {
+		# Only process for Corporation vassals
+		if = {
+			limit = {
+				liege = { government_has_flag = eotg_government_is_corporation }
+			}
+			# Accumulate monthly market share
+			change_variable = {
+				name = eotg_market_share
+				add = eotg_sv_corp_market_share_gain
+			}
+
+			# Distribute faction gold roughly every year (random check each month)
+			random = {
+				chance = 8
+				trigger_event = { id = eotg_corp_faction.0002 }
+			}
+
+			# Check for dominant faction (faction leader with > 40% of max possible share)
+			if = {
+				limit = {
+					var:eotg_faction_role >= 2
+					var:eotg_market_share >= 400
+					NOT = { has_character_flag = eotg_faction_dominance_announced }
+				}
+				liege = {
+					trigger_event = { id = eotg_corp_faction.0003  days = 1 }
+				}
+				add_character_flag = { flag = eotg_faction_dominance_announced  years = 5 }
+			}
+		}
+	}
+
+	option = {
+		name = eotg_corp_faction_0001_opt
+	}
+}
+
+# Faction gold distribution — fires periodically for faction members/leaders.
+# Root = faction member or leader character.
+eotg_corp_faction.0002 = {
+	type = character_event
+	hidden = yes
+
+	immediate = {
+		if = {
+			limit = { var:eotg_faction_role >= 1 }
+			if = {
+				limit = { var:eotg_faction_role >= 2 }
+				# Faction leader: 1.5x multiplier
+				add_gold = {
+					value = var:eotg_market_share
+					multiply = 0.015
+				}
+			}
+			else = {
+				# Faction member: standard multiplier
+				add_gold = {
+					value = var:eotg_market_share
+					multiply = 0.01
+				}
+			}
+		}
+	}
+
+	option = {
+		name = eotg_corp_faction_0002_opt
+	}
+}
+
+# Dominant faction announcement — fires on the CEO.
+# Notifies the realm that one faction has accumulated overwhelming market share.
+eotg_corp_faction.0003 = {
+	type = character_event
+	title = eotg_corp_faction_0003_title
+	theme = stewardship
+
+	desc = eotg_corp_faction_0003_desc
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	immediate = {
+		# Find the dominant faction leader (highest market share among leaders)
+		ordered_vassal = {
+			order_by = var:eotg_market_share
+			limit = { var:eotg_faction_role >= 2 }
+			position = 0
+			max = 1
+			save_scope_as = eotg_dominant_faction_leader
+		}
+	}
+
+	option = {
+		name = eotg_corp_faction_0003_opt_acknowledge
+		stress_impact = {
+			base = minor_stress_impact_gain
+			greedy = medium_stress_impact_gain
+		}
+		ai_chance = { base = 100 }
+	}
+}

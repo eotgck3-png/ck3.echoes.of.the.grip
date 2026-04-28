@@ -242,6 +242,26 @@ eotg_pmc_field_commission_active = {
     knight_effectiveness_mult = 0.05
 }
 
+# eotg_pmc_proven_legitimacy
+# Applied when the PMC is actively at war or holds live contracts.
+# Represents demonstrated military effectiveness — the core of PMC legitimacy.
+eotg_pmc_proven_legitimacy = {
+    icon = martial_positive    # Placeholder
+    legitimacy_gain_mult = 0.10
+    monthly_prestige_gain_mult = 0.05
+    vassal_opinion = 5
+}
+
+# eotg_pmc_legitimacy_questioned
+# Applied when the PMC has been at peace too long without a contract.
+# Represents the question: are you a real PMC or just a bandit with a flag?
+eotg_pmc_legitimacy_questioned = {
+    icon = stress_negative    # Placeholder
+    legitimacy_gain_mult = -0.15
+    monthly_prestige_gain_mult = -0.05
+    vassal_opinion = -5
+}
+
 # ── Fringe Government Modifiers ──────────────────────────────────────────────
 
 eotg_fringe_high_grip = {

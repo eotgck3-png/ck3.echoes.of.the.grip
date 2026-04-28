@@ -54,8 +54,8 @@ eotg_se_fringe_update_peace_counter = {
 
 # Apply or refresh Grip-state modifiers based on current variable.
 eotg_se_fringe_apply_grip_modifiers = {
-	remove_character_modifier = eotg_fringe_high_grip
-	remove_character_modifier = eotg_fringe_low_grip
+	if = { limit = { has_character_modifier = eotg_fringe_high_grip } remove_character_modifier = eotg_fringe_high_grip }
+	if = { limit = { has_character_modifier = eotg_fringe_low_grip } remove_character_modifier = eotg_fringe_low_grip }
 	if = {
 		limit = { eotg_st_fringe_grip_high = yes }
 		add_character_modifier = {
@@ -74,9 +74,9 @@ eotg_se_fringe_apply_grip_modifiers = {
 
 # Apply or refresh peace decay modifiers based on current peace duration.
 eotg_se_fringe_apply_peace_modifiers = {
-	remove_character_modifier = eotg_fringe_peace_decay_minor
-	remove_character_modifier = eotg_fringe_peace_decay_major
-	remove_character_modifier = eotg_fringe_peace_decay_severe
+	if = { limit = { has_character_modifier = eotg_fringe_peace_decay_minor } remove_character_modifier = eotg_fringe_peace_decay_minor }
+	if = { limit = { has_character_modifier = eotg_fringe_peace_decay_major } remove_character_modifier = eotg_fringe_peace_decay_major }
+	if = { limit = { has_character_modifier = eotg_fringe_peace_decay_severe } remove_character_modifier = eotg_fringe_peace_decay_severe }
 	if = {
 		limit = {
 			has_variable = eotg_fringe_peace_years
@@ -111,8 +111,8 @@ eotg_se_fringe_apply_peace_modifiers = {
 
 # Apply or refresh overextension modifiers based on realm size.
 eotg_se_fringe_apply_overextension = {
-	remove_character_modifier = eotg_fringe_overextension_minor
-	remove_character_modifier = eotg_fringe_overextension_major
+	if = { limit = { has_character_modifier = eotg_fringe_overextension_minor } remove_character_modifier = eotg_fringe_overextension_minor }
+	if = { limit = { has_character_modifier = eotg_fringe_overextension_major } remove_character_modifier = eotg_fringe_overextension_major }
 	if = {
 		limit = { realm_size >= 60 }
 		add_character_modifier = {

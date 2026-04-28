@@ -706,3 +706,299 @@ eotg_pmc_flavor.0017 = {
 		ai_chance = { base = 25  modifier = { add = 20  has_trait = arrogant } }
 	}
 }
+
+# ── PMC Legitimacy Events ─────────────────────────────────────────────────────
+# Modeled on vanilla legitimacy event patterns:
+# Principled / transparent action → legitimacy gain
+# Expedient / cynical / corrupt action → legitimacy loss
+
+# eotg_pmc_flavor.0018 — The Record Speaks for Itself
+# The PMC's track record is under external review. How they present it shapes
+# whether outside powers see a professional force or a licensed bandit fleet.
+eotg_pmc_flavor.0018 = {
+	type = character_event
+	title = eotg_pmc_flavor_0018_title
+	desc = eotg_pmc_flavor_0018_desc
+	theme = stewardship
+
+	left_portrait = { character = root  animation = personality_rational }
+
+	trigger = {
+		eotg_st_is_contractor_general = yes
+		NOT = { is_at_war = yes }
+		prestige >= 400
+		NOT = { has_character_modifier = eotg_pmc_controversy_standard }
+		NOT = { has_character_modifier = eotg_pmc_controversy_exclusive }
+		NOT = { has_character_flag = eotg_pmc_0018_recent }
+	}
+
+	# Publish a full performance dossier — transparency that earns institutional legitimacy
+	option = {
+		name = eotg_pmc_flavor_0018_opt_publish
+		add_legitimacy = major_legitimacy_gain
+		add_prestige = -25
+		add_character_flag = { flag = eotg_pmc_0018_recent  years = 5 }
+		ai_chance = { base = 35  modifier = { add = 20  has_trait = honest } }
+	}
+
+	# Let the record speak quietly — modest, but legitimacy still accumulates
+	option = {
+		name = eotg_pmc_flavor_0018_opt_quiet
+		add_legitimacy = minor_legitimacy_gain
+		add_prestige = 50
+		add_character_flag = { flag = eotg_pmc_0018_recent  years = 5 }
+		ai_chance = { base = 40  modifier = { add = 10  has_trait = humble } }
+	}
+
+	# License the record as marketing copy — cynical commercialization undermines professional standing
+	option = {
+		name = eotg_pmc_flavor_0018_opt_market
+		add_gold = 60
+		add_legitimacy = minor_legitimacy_loss
+		add_character_flag = { flag = eotg_pmc_0018_recent  years = 4 }
+		ai_chance = { base = 25  modifier = { add = 20  has_trait = greedy } }
+	}
+}
+
+# eotg_pmc_flavor.0019 — War Crimes Tribunal
+# External powers have lodged a formal inquiry into PMC operations.
+# Cooperation is costly but legitimizing. Stonewalling is cheap but corrosive.
+eotg_pmc_flavor.0019 = {
+	type = character_event
+	title = eotg_pmc_flavor_0019_title
+	desc = eotg_pmc_flavor_0019_desc
+	theme = intrigue
+
+	left_portrait = { character = root  animation = stress }
+
+	trigger = {
+		eotg_st_is_contractor_general = yes
+		OR = {
+			has_character_modifier = eotg_pmc_controversy_standard
+			has_character_modifier = eotg_pmc_controversy_exclusive
+		}
+		NOT = { has_character_flag = eotg_pmc_0019_recent }
+	}
+
+	# Cooperate fully — painful, but accountability builds lasting institutional credibility
+	option = {
+		name = eotg_pmc_flavor_0019_opt_cooperate
+		add_legitimacy = major_legitimacy_gain
+		add_prestige = -50
+		if = {
+			limit = { has_character_modifier = eotg_pmc_controversy_minor }
+			remove_character_modifier = eotg_pmc_controversy_minor
+		}
+		add_character_flag = { flag = eotg_pmc_0019_recent  years = 4 }
+		ai_chance = { base = 30  modifier = { add = 20  has_trait = just } }
+	}
+
+	# Stonewall — attorney access only — protects short-term but erodes standing
+	option = {
+		name = eotg_pmc_flavor_0019_opt_stonewall
+		add_dread = 10
+		add_legitimacy = medium_legitimacy_loss
+		add_character_flag = { flag = eotg_pmc_0019_recent  years = 4 }
+		ai_chance = { base = 35  modifier = { add = 15  has_trait = paranoid } }
+	}
+
+	# Buy the tribunal — costly, but quieter than a public fight
+	option = {
+		name = eotg_pmc_flavor_0019_opt_buy
+		trigger = { gold >= 100 }
+		add_gold = { value = -100 }
+		add_legitimacy = minor_legitimacy_loss
+		add_character_flag = { flag = eotg_pmc_0019_recent  years = 4 }
+		ai_chance = { base = 35  modifier = { add = 20  has_trait = greedy } }
+	}
+}
+
+# eotg_pmc_flavor.0020 — A Rival Command Rises
+# Another PMC is building a name in the same operational markets.
+# How you respond signals what kind of organization you actually are.
+eotg_pmc_flavor.0020 = {
+	type = character_event
+	title = eotg_pmc_flavor_0020_title
+	desc = eotg_pmc_flavor_0020_desc
+	theme = martial
+
+	left_portrait = { character = root  animation = personality_rational }
+
+	trigger = {
+		eotg_st_is_contractor_general = yes
+		any_independent_ruler = {
+			NOT = { this = root }
+			eotg_st_is_contractor_general = yes
+		}
+		NOT = { has_character_flag = eotg_pmc_0020_recent }
+	}
+
+	# Compete openly — stand on your record and let the market decide
+	option = {
+		name = eotg_pmc_flavor_0020_opt_compete
+		add_legitimacy = minor_legitimacy_gain
+		add_prestige = 50
+		add_character_flag = { flag = eotg_pmc_0020_recent  years = 4 }
+		ai_chance = { base = 40  modifier = { add = 15  has_trait = brave } }
+	}
+
+	# Poach their best operators — aggressive but direct
+	option = {
+		name = eotg_pmc_flavor_0020_opt_poach
+		trigger = { gold >= 80 }
+		add_gold = { value = -80 }
+		add_martial_skill = 1
+		add_prestige = 25
+		add_character_flag = { flag = eotg_pmc_0020_recent  years = 4 }
+		ai_chance = { base = 30  modifier = { add = 20  has_trait = ambitious } }
+	}
+
+	# Undermine through back channels — effective but self-corroding
+	option = {
+		name = eotg_pmc_flavor_0020_opt_undermine
+		add_intrigue_skill = 1
+		add_legitimacy = minor_legitimacy_loss
+		add_character_flag = { flag = eotg_pmc_0020_recent  years = 4 }
+		ai_chance = { base = 30  modifier = { add = 20  has_trait = deceitful } }
+	}
+}
+
+# eotg_pmc_flavor.0021 — The Old Client's Endorsement
+# A major past employer has publicly vouched for the PMC's professionalism.
+# Accepting and amplifying it converts the goodwill into institutional legitimacy.
+eotg_pmc_flavor.0021 = {
+	type = character_event
+	title = eotg_pmc_flavor_0021_title
+	desc = eotg_pmc_flavor_0021_desc
+	theme = diplomacy
+
+	left_portrait = { character = root  animation = personality_rational }
+
+	trigger = {
+		eotg_st_is_contractor_general = yes
+		has_character_modifier = eotg_pmc_proven_legitimacy
+		prestige >= 200
+		NOT = { has_character_flag = eotg_pmc_0021_recent }
+	}
+
+	# Accept the endorsement and publish it widely — converts goodwill into public standing
+	option = {
+		name = eotg_pmc_flavor_0021_opt_accept
+		add_legitimacy = major_legitimacy_gain
+		add_prestige = 75
+		add_character_flag = { flag = eotg_pmc_0021_recent  years = 5 }
+		ai_chance = { base = 40  modifier = { add = 15  has_trait = gregarious } }
+	}
+
+	# Accept privately — leverage for direct contract negotiations
+	option = {
+		name = eotg_pmc_flavor_0021_opt_leverage
+		add_legitimacy = medium_legitimacy_gain
+		add_gold = 50
+		add_character_flag = { flag = eotg_pmc_0021_recent  years = 5 }
+		ai_chance = { base = 35  modifier = { add = 20  has_trait = greedy } }
+	}
+
+	# Decline — our reputation needs no intermediary. Principled, but reads as standoffish.
+	option = {
+		name = eotg_pmc_flavor_0021_opt_decline
+		add_prestige = 100
+		add_legitimacy = minor_legitimacy_loss
+		add_character_flag = { flag = eotg_pmc_0021_recent  years = 5 }
+		ai_chance = { base = 25  modifier = { add = 15  has_trait = proud } }
+	}
+}
+
+# eotg_pmc_flavor.0022 — A Dirty Contract
+# The offer is substantial. The target is not a military objective by any recognized standard.
+# Taking it means gold. Refusing it means something harder to measure.
+eotg_pmc_flavor.0022 = {
+	type = character_event
+	title = eotg_pmc_flavor_0022_title
+	desc = eotg_pmc_flavor_0022_desc
+	theme = intrigue
+
+	left_portrait = { character = root  animation = stress }
+
+	trigger = {
+		eotg_st_is_contractor_general = yes
+		NOT = { is_at_war = yes }
+		NOT = { has_character_modifier = eotg_pmc_active_contract }
+		NOT = { has_character_flag = eotg_pmc_0022_recent }
+	}
+
+	# Refuse — these are not military targets. The refusal becomes part of the record.
+	option = {
+		name = eotg_pmc_flavor_0022_opt_refuse
+		add_legitimacy = medium_legitimacy_gain
+		add_prestige = 50
+		stress_impact = { base = minor_stress_impact_loss }
+		add_character_flag = { flag = eotg_pmc_0022_recent  years = 4 }
+		ai_chance = { base = 30  modifier = { add = 20  has_trait = just } }
+	}
+
+	# Accept with conditions — civilian exclusion zones, documented ROE
+	option = {
+		name = eotg_pmc_flavor_0022_opt_conditions
+		add_gold = 75
+		add_legitimacy = minor_legitimacy_loss
+		add_character_flag = { flag = eotg_pmc_0022_recent  years = 4 }
+		ai_chance = { base = 40  modifier = { add = 15  has_trait = ambitious } }
+	}
+
+	# Accept without reservation — the client's money, the client's war
+	option = {
+		name = eotg_pmc_flavor_0022_opt_accept
+		add_gold = 150
+		add_legitimacy = major_legitimacy_loss
+		add_character_flag = { flag = eotg_pmc_0022_recent  years = 3 }
+		ai_chance = { base = 30  modifier = { add = 25  has_trait = greedy } }
+	}
+}
+
+# eotg_pmc_flavor.0023 — The Industry Symposium
+# Formal recognition: major military organizations invite the PMC to a sector summit
+# on standards, contracts, and the role of private military commands in state conflicts.
+eotg_pmc_flavor.0023 = {
+	type = character_event
+	title = eotg_pmc_flavor_0023_title
+	desc = eotg_pmc_flavor_0023_desc
+	theme = diplomacy
+
+	left_portrait = { character = root  animation = personality_rational }
+
+	trigger = {
+		eotg_st_is_contractor_general = yes
+		prestige >= 500
+		NOT = { has_character_modifier = eotg_pmc_legitimacy_questioned }
+		NOT = { has_character_flag = eotg_pmc_0023_recent }
+	}
+
+	# Attend and present the PMC's doctrine — active engagement with institutional structures
+	option = {
+		name = eotg_pmc_flavor_0023_opt_attend
+		add_legitimacy = major_legitimacy_gain
+		add_prestige = 100
+		add_diplomacy_skill = 1
+		add_character_flag = { flag = eotg_pmc_0023_recent  years = 5 }
+		ai_chance = { base = 40  modifier = { add = 15  has_trait = gregarious } }
+	}
+
+	# Send representatives — observe without committing
+	option = {
+		name = eotg_pmc_flavor_0023_opt_send
+		add_legitimacy = minor_legitimacy_gain
+		add_prestige = 25
+		add_character_flag = { flag = eotg_pmc_0023_recent  years = 5 }
+		ai_chance = { base = 35  modifier = { add = 10  has_trait = patient } }
+	}
+
+	# Decline — we answer to our clients, not to symposia
+	option = {
+		name = eotg_pmc_flavor_0023_opt_decline
+		add_prestige = 50
+		add_legitimacy = medium_legitimacy_loss
+		add_character_flag = { flag = eotg_pmc_0023_recent  years = 4 }
+		ai_chance = { base = 25  modifier = { add = 15  has_trait = arrogant } }
+	}
+}

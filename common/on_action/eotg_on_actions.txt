@@ -17,6 +17,7 @@ on_yearly_playable = {
         eotg_on_yearly_elven_isolationism_update
         eotg_on_yearly_pmc_controversy_check
         eotg_on_yearly_pmc_loss_of_command_check
+        eotg_on_yearly_pmc_legitimacy_check
         eotg_on_yearly_nc_campaign_check
         eotg_on_yearly_nc_election_check
         eotg_on_yearly_nc_senate_check
@@ -34,6 +35,11 @@ on_yearly_playable = {
 # Hook into war declaration to offer contracts to eligible Contractor-Generals
 on_war_started = {
     on_actions = { eotg_on_war_started_pmc_check }
+}
+
+# Hook into raid start to check if a Fringe Overlord is raiding an ally
+on_raid_action_start = {
+    on_actions = { eotg_on_raid_fringe_ally_check }
 }
 
 # Hook into title gain to set/clear the corporate government flag
@@ -139,17 +145,19 @@ eotg_on_yearly_elven_isolationism_update = {
     }
 }
 
-# On death: fire Eternal Court confirmation on the new Elven Monarchy ruler
+# On death: fire Eternal Court confirmation on the new Elven Monarchy ruler.
+# on_death fires BEFORE succession — primary_heir is the incoming ruler, not primary_title.holder.
 eotg_on_death_elven_monarch = {
     effect = {
         if = {
-            limit = { eotg_st_is_elven_monarch = yes }
-            primary_title = {
-                holder = {
-                    if = {
-                        limit = { eotg_st_is_elven_monarch = yes }
-                        trigger_event = { id = eotg_elven_court.0001  days = 7 }
-                    }
+            limit = {
+                eotg_st_is_elven_monarch = yes
+                exists = primary_heir
+            }
+            primary_heir = {
+                if = {
+                    limit = { eotg_st_is_elven_monarch = yes }
+                    trigger_event = { id = eotg_elven_court.0001  days = 7 }
                 }
             }
         }
@@ -288,6 +296,9 @@ eotg_on_yearly_nc_senate_check = {
 }
 
 # On death: fire NC VP succession event if President dies with a VP available.
+# on_death fires BEFORE succession. The VP is still the dying president's vassal at this point,
+# so random_vassal correctly finds them. The event fires at days = 1 so it lands before
+# the normal succession heir can consolidate — the VP event handles the title transfer.
 eotg_on_death_nc_president = {
     effect = {
         if = {
@@ -297,7 +308,7 @@ eotg_on_death_nc_president = {
             }
             random_vassal = {
                 limit = { has_character_flag = eotg_nc_vice_president }
-                trigger_event = { id = eotg_nc_election.0005  days = 7 }
+                trigger_event = { id = eotg_nc_election.0005  days = 1 }
             }
         }
     }
@@ -328,25 +339,29 @@ eotg_on_title_gain_fringe_init = {
 
 # On death — apply succession chaos to the new Fringe Overlord.
 # The deceased character is in scope; check their primary title's new holder.
+# On death: apply succession chaos to the incoming Fringe Overlord.
+# on_death fires BEFORE succession — use primary_heir to reach the new ruler.
+# primary_heir is the character who will inherit the primary title after death.
 eotg_on_death_fringe_overlord = {
     effect = {
         if = {
-            limit = { eotg_st_is_fringe_overlord = yes }
-            primary_title = {
-                holder = {
+            limit = {
+                eotg_st_is_fringe_overlord = yes
+                exists = primary_heir
+            }
+            primary_heir = {
+                if = {
+                    limit = { eotg_st_is_fringe_overlord = yes }
+                    eotg_se_fringe_succession_chaos = yes
+                    trigger_event = { id = eotg_fringe.0005  days = 7 }
                     if = {
-                        limit = { eotg_st_is_fringe_overlord = yes }
-                        eotg_se_fringe_succession_chaos = yes
-                        trigger_event = { id = eotg_fringe.0005  days = 7 }
-                        if = {
-                            limit = { realm_size >= 30 }
-                            trigger_event = { id = eotg_fringe.0006  days = 14 }
-                        }
-                        # Heir challenge fires if an ambitious captain exists
-                        random = {
-                            chance = 50
-                            trigger_event = { id = eotg_fringe.0018  days = 21 }
-                        }
+                        limit = { realm_size >= 30 }
+                        trigger_event = { id = eotg_fringe.0006  days = 14 }
+                    }
+                    # Heir challenge fires if an ambitious captain exists
+                    random = {
+                        chance = 50
+                        trigger_event = { id = eotg_fringe.0018  days = 21 }
                     }
                 }
             }
@@ -952,6 +967,98 @@ eotg_on_yearly_pmc_flavor = {
                     trigger_event = { id = eotg_pmc_flavor.0017  days = 5 }
                 }
             }
+
+            # ── Legitimacy Events ─────────────────────────────────────────────
+
+            # The Record Speaks for Itself — prestigious, controversy-free, at peace
+            if = {
+                limit = {
+                    NOT = { is_at_war = yes }
+                    prestige >= 400
+                    NOT = { has_character_modifier = eotg_pmc_controversy_standard }
+                    NOT = { has_character_modifier = eotg_pmc_controversy_exclusive }
+                    NOT = { has_character_flag = eotg_pmc_0018_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_pmc_0018_recent  years = 5 }
+                    trigger_event = { id = eotg_pmc_flavor.0018  days = 5 }
+                }
+            }
+
+            # War Crimes Tribunal — active controversy modifier required
+            if = {
+                limit = {
+                    OR = {
+                        has_character_modifier = eotg_pmc_controversy_standard
+                        has_character_modifier = eotg_pmc_controversy_exclusive
+                    }
+                    NOT = { has_character_flag = eotg_pmc_0019_recent }
+                }
+                random = {
+                    chance = 40
+                    add_character_flag = { flag = eotg_pmc_0019_recent  years = 4 }
+                    trigger_event = { id = eotg_pmc_flavor.0019  days = 3 }
+                }
+            }
+
+            # A Rival Command Rises — any other PMC exists
+            if = {
+                limit = {
+                    any_independent_ruler = {
+                        NOT = { this = root }
+                        eotg_st_is_contractor_general = yes
+                    }
+                    NOT = { has_character_flag = eotg_pmc_0020_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_pmc_0020_recent  years = 4 }
+                    trigger_event = { id = eotg_pmc_flavor.0020  days = 7 }
+                }
+            }
+
+            # The Old Client's Endorsement — proven legitimacy active, decent prestige
+            if = {
+                limit = {
+                    has_character_modifier = eotg_pmc_proven_legitimacy
+                    prestige >= 200
+                    NOT = { has_character_flag = eotg_pmc_0021_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_pmc_0021_recent  years = 5 }
+                    trigger_event = { id = eotg_pmc_flavor.0021  days = 5 }
+                }
+            }
+
+            # A Dirty Contract — at peace, no active contract
+            if = {
+                limit = {
+                    NOT = { is_at_war = yes }
+                    NOT = { has_character_modifier = eotg_pmc_active_contract }
+                    NOT = { has_character_flag = eotg_pmc_0022_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_pmc_0022_recent  years = 4 }
+                    trigger_event = { id = eotg_pmc_flavor.0022  days = 7 }
+                }
+            }
+
+            # The Industry Symposium — prestigious, not questioned
+            if = {
+                limit = {
+                    prestige >= 500
+                    NOT = { has_character_modifier = eotg_pmc_legitimacy_questioned }
+                    NOT = { has_character_flag = eotg_pmc_0023_recent }
+                }
+                random = {
+                    chance = 20
+                    add_character_flag = { flag = eotg_pmc_0023_recent  years = 5 }
+                    trigger_event = { id = eotg_pmc_flavor.0023  days = 7 }
+                }
+            }
         }
     }
 }
@@ -1171,6 +1278,74 @@ eotg_on_yearly_nc_flavor = {
                     add_character_flag = { flag = eotg_nc_0019_recent  years = 5 }
                     trigger_event = { id = eotg_nc_flavor.0019  days = 5 }
                 }
+            }
+        }
+    }
+}
+
+# Yearly PMC legitimacy check — applies proven_legitimacy when at war/on contract,
+# applies legitimacy_questioned when idle too long. 3-year cooldown on each state.
+eotg_on_yearly_pmc_legitimacy_check = {
+    effect = {
+        if = {
+            limit = { eotg_st_is_contractor_general = yes }
+
+            # Proven: at war — remove questioned modifier, apply proven if not already set
+            if = {
+                limit = { is_at_war = yes }
+                if = {
+                    limit = { has_character_modifier = eotg_pmc_legitimacy_questioned }
+                    remove_character_modifier = eotg_pmc_legitimacy_questioned
+                }
+                if = {
+                    limit = { NOT = { has_character_modifier = eotg_pmc_proven_legitimacy } }
+                    add_character_modifier = {
+                        modifier = eotg_pmc_proven_legitimacy
+                        years = 3
+                    }
+                }
+            }
+
+            # Questioned: idle for 3+ years without war
+            else_if = {
+                limit = {
+                    NOT = { is_at_war = yes }
+                    NOT = { has_character_modifier = eotg_pmc_proven_legitimacy }
+                    NOT = { has_character_flag = eotg_pmc_active_contract }
+                    NOT = { has_character_modifier = eotg_pmc_legitimacy_questioned }
+                }
+                add_character_modifier = {
+                    modifier = eotg_pmc_legitimacy_questioned
+                    years = 3
+                }
+            }
+        }
+    }
+}
+
+# on_raid_action_start: Fringe Overlord ally-raid check.
+# root = raid army; scope:raider = raider char; scope:barony = target barony title.
+eotg_on_raid_fringe_ally_check = {
+    effect = {
+        if = {
+            limit = {
+                scope:raider = { eotg_st_is_fringe_overlord = yes }
+                scope:barony = {
+                    holder = {
+                        is_allied_to = scope:raider
+                        NOT = { this = scope:raider }
+                    }
+                }
+                NOT = { scope:raider = { has_character_flag = eotg_ally_raid_chain_active } }
+            }
+            # Save ally reference and raider reference on each other for cross-event communication
+            scope:raider = {
+                set_variable = { name = eotg_ally_raid_target  value = scope:barony.holder }
+                add_character_flag = { flag = eotg_ally_raid_chain_active  years = 1 }
+                trigger_event = { id = eotg_fringe_ally_raid.0001  days = 1 }
+            }
+            scope:barony.holder = {
+                set_variable = { name = eotg_ally_raid_raider  value = scope:raider }
             }
         }
     }

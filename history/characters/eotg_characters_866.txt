@@ -13,9 +13,6 @@
 #           eotg_char_20000–29999 = New Cauldron
 #           eotg_char_30000–39999 = Gob-Ogre Trade League
 #           eotg_char_40000–49999 = Coldiron Caliphate
-#           eotg_char_50000–59999 = Nikios Khanate
-#           eotg_char_60000–69999 = Angelia
-#           eotg_char_70000–79999 = Broken Daimyos
 #           eotg_char_80000–89999 = Shatter Stance
 #           eotg_char_90000–99999 = Independent / minor powers
 # ─────────────────────────────────────────────────────────────────────────────
@@ -29,7 +26,7 @@ eotg_char_10001 = {
     name = "TODO_ElrossiEmperor"
     # dynasty = dynasty:eotg_dynasty_elross_imperial
     religion = faith:eotg_faith_elross_canonical
-    culture = culture:eotg_culture_elrossi
+    culture = culture:eotg_culture_solvari
 
     # Born roughly 820 AG — in his mid-40s at bookmark
     820.1.1 = { birth = yes }
@@ -46,7 +43,7 @@ eotg_char_10002 = {
     name = "TODO_PrinceOfMyr"
     # dynasty = dynasty:eotg_dynasty_myr_proxy
     religion = faith:eotg_faith_elross_canonical
-    culture = culture:eotg_culture_elrossi
+    culture = culture:eotg_culture_istrovan
     # father = 0    # TODO: tie to Imperium nobility once dynasty is defined
 
     830.6.1 = { birth = yes }
@@ -68,7 +65,7 @@ eotg_char_20001 = {
     name = "TODO_NCPresident"
     # dynasty = dynasty:eotg_dynasty_cauldron_council
     religion = faith:eotg_faith_elross_canonical    # TODO: Cauldronite faith may differ
-    culture = culture:eotg_culture_cauldronite
+    culture = culture:eotg_culture_cauldrani
 
     # Born roughly 820 AG
     820.3.15 = { birth = yes }
@@ -92,7 +89,7 @@ eotg_char_30001 = {
     name = "TODO_LeadTradePrince"
     # dynasty = dynasty:eotg_dynasty_trade_prince_chair
     religion = faith:eotg_faith_commerce    # TODO: define mercantile faith
-    culture = culture:eotg_culture_goborc   # TODO: define Gob-Ogre culture
+    culture = culture:eotg_culture_geldmark
 
     815.9.1 = { birth = yes }
 
@@ -111,7 +108,7 @@ eotg_char_40001 = {
     name = "TODO_Caliph"
     # dynasty = dynasty:eotg_dynasty_coldiron_khalid
     religion = faith:eotg_faith_coldiron    # TODO: define Caliphate faith
-    culture = culture:eotg_culture_coldiron # TODO
+    culture = culture:eotg_culture_khadrashi
 
     825.2.20 = { birth = yes }
 
@@ -119,69 +116,6 @@ eotg_char_40001 = {
         add_trait = zealous
         add_trait = brave
         # give_title = { title = title:eotg_e_coldiron_caliphate }
-    }
-}
-
-# ── NIKIOS KHANATE ────────────────────────────────────────────────────────────
-# Centaur mercenary nation. The War of Broken Hooves (~800–840 AG) just ended.
-# The new Khan is consolidating power — distrust between clans still lingers.
-# The Mercenary Council was founded in 600 AG and is their economic backbone.
-
-eotg_char_50001 = {
-    name = "TODO_NikiosKhan"
-    # dynasty = dynasty:eotg_dynasty_nikios_khan
-    religion = faith:eotg_faith_stampede   # TODO: centaur faith
-    culture = culture:eotg_culture_centaur # TODO
-
-    # Khan is in his prime — born ~826 AG
-    826.7.4 = { birth = yes }
-
-    866.1.1 = {
-        add_trait = brave
-        add_trait = wrathful
-        add_trait = administrator    # War of Broken Hooves forced consolidation skills
-        # give_title = { title = title:eotg_k_nikios_khanate }
-    }
-}
-
-# ── ANGELIA ───────────────────────────────────────────────────────────────────
-# Aasimar holy nation in the Border Systems. Founded ~150 AG by divine pilgrims.
-# At 866 AG: prosperous and pious, Celestial Hosts defend against Carrigore raids.
-# Noble families are growing in influence — seeds of future decadence.
-
-eotg_char_60001 = {
-    name = "TODO_AngeliaWarlordProphet"
-    # dynasty = dynasty:eotg_dynasty_conclave_luminaries
-    religion = faith:eotg_faith_elross_canonical    # Aasimar worship Elross, Malvrick, and Yu
-    culture = culture:eotg_culture_aasimar           # TODO
-
-    818.4.10 = { birth = yes }
-
-    866.1.1 = {
-        add_trait = zealous
-        add_trait = brave
-        add_trait = just
-        # give_title = { title = title:eotg_k_angelia }
-    }
-}
-
-# ── BROKEN DAIMYOS ────────────────────────────────────────────────────────────
-# Feuding star-city-states descended from Titanworld refugees (arrived ~500 AG).
-# At 866 AG: fragmented, no unification yet (Tokugari Yatsume won't unify them until 920 AG).
-# Multiple rival daimyos — we define a few of the more powerful ones.
-
-eotg_char_70001 = {
-    name = "TODO_DaimyoRival1"
-    # dynasty = dynasty:eotg_dynasty_daimyo_a
-    religion = faith:eotg_faith_ancestor_veneration  # TODO: Daimyo ancestor faith
-    culture = culture:eotg_culture_nippon             # TODO
-
-    828.11.3 = { birth = yes }
-
-    866.1.1 = {
-        add_trait = ambitious
-        add_trait = paranoid
-        # give_title = { title = title:eotg_d_daimyo_a_system }
     }
 }
 
@@ -196,7 +130,7 @@ eotg_char_90001 = {
     name = "Vaelorin"
     # dynasty = dynasty:eotg_dynasty_sylvaerath
     religion = faith:eotg_faith_firstlight
-    culture = culture:eotg_culture_xeric_elf
+    culture = culture:eotg_culture_aelvaryn
 
     # Born 866 - 142 = 724 AG
     724.3.1 = { birth = yes }
@@ -218,7 +152,7 @@ eotg_char_90002 = {
     name = "Clayd"
     # dynasty = dynasty:eotg_dynasty_kestrel_vire
     religion = faith:eotg_faith_industrial_survivalism
-    culture = culture:eotg_culture_xeric_human
+    culture = culture:eotg_culture_virens
 
     # Born 866 - 41 = 825 AG
     825.6.15 = { birth = yes }
@@ -241,7 +175,7 @@ eotg_char_90003 = {
     name = "Corven"
     # dynasty = dynasty:eotg_dynasty_vultarre
     religion = faith:eotg_faith_secular_contract
-    culture = culture:eotg_culture_mercenary_clusterborn
+    culture = culture:eotg_culture_uvreki
 
     # Born 866 - 52 = 814 AG
     814.4.1 = { birth = yes }
@@ -261,7 +195,7 @@ eotg_char_90004 = {
     name = "Lyssa"
     # dynasty = dynasty:eotg_dynasty_varayne
     religion = faith:eotg_faith_secular_contract
-    culture = culture:eotg_culture_mercenary_clusterborn
+    culture = culture:eotg_culture_uvreki
 
     # Born 866 - 39 = 827 AG
     827.9.10 = { birth = yes }
@@ -282,7 +216,7 @@ eotg_char_20002 = {
     name = "Lireth"
     # dynasty = dynasty:eotg_dynasty_davan
     religion = faith:eotg_faith_civic_secular
-    culture = culture:eotg_culture_cauldronite
+    culture = culture:eotg_culture_cauldrani
 
     # Born 866 - 48 = 818 AG
     818.7.20 = { birth = yes }
@@ -302,7 +236,7 @@ eotg_char_30002 = {
     name = "Grezzik"
     # dynasty = dynasty:eotg_dynasty_gildspanner
     religion = faith:eotg_faith_commerce
-    culture = culture:eotg_culture_trade_goblin
+    culture = culture:eotg_culture_geldmark
 
     # Born 866 - 57 = 809 AG
     809.2.5 = { birth = yes }
@@ -321,7 +255,7 @@ eotg_char_30003 = {
     name = "Rughan"
     # dynasty = dynasty:eotg_dynasty_broad_jaw
     religion = faith:eotg_faith_forge_tradition
-    culture = culture:eotg_culture_industrial_ogre
+    culture = culture:eotg_culture_drogmari
 
     # Born 866 - 46 = 820 AG
     820.11.1 = { birth = yes }
@@ -342,7 +276,7 @@ eotg_char_40002 = {
     name = "Marzuk"
     # dynasty = dynasty:eotg_dynasty_al_khadrin
     religion = faith:eotg_faith_coldiron
-    culture = culture:eotg_culture_coldiron
+    culture = culture:eotg_culture_khadrashi
 
     # Born 866 - 67 = 799 AG
     799.1.10 = { birth = yes }
@@ -361,7 +295,7 @@ eotg_char_40003 = {
     name = "Qadir"
     # dynasty = dynasty:eotg_dynasty_al_khadrin
     religion = faith:eotg_faith_coldiron
-    culture = culture:eotg_culture_coldiron
+    culture = culture:eotg_culture_khadrashi
     father = eotg_char_40002
 
     # Born 866 - 49 = 817 AG
@@ -380,7 +314,7 @@ eotg_char_40004 = {
     name = "Samir"
     # dynasty = dynasty:eotg_dynasty_al_khadrin
     religion = faith:eotg_faith_coldiron
-    culture = culture:eotg_culture_coldiron
+    culture = culture:eotg_culture_khadrashi
     father = eotg_char_40002
 
     # Born 866 - 43 = 823 AG
@@ -401,7 +335,7 @@ eotg_char_90005 = {
     name = "Caelorin"
     # dynasty = dynasty:eotg_dynasty_solvaerath
     religion = faith:eotg_faith_firstlight
-    culture = culture:eotg_culture_elrossi
+    culture = culture:eotg_culture_solvari
 
     # Born 866 - 37 = 829 AG
     829.3.1 = { birth = yes }
@@ -422,7 +356,7 @@ eotg_char_90006 = {
     name = "Skrit"
     # dynasty = dynasty:eotg_dynasty_grimweave
     religion = faith:eotg_faith_deep_warren
-    culture = culture:eotg_culture_warren_ratfolk
+    culture = culture:eotg_culture_skarrin
 
     # Born 866 - 35 = 831 AG
     831.6.1 = { birth = yes }
@@ -442,7 +376,7 @@ eotg_char_90007 = {
     name = "Threelatch"
     # dynasty = dynasty:eotg_dynasty_vessel_collective
     religion = faith:eotg_faith_deep_warren
-    culture = culture:eotg_culture_warren_ratfolk
+    culture = culture:eotg_culture_veskari
     female = yes
 
     # Born 866 - 61 = 805 AG
@@ -464,7 +398,7 @@ eotg_char_90008 = {
     name = "Serapion"
     # dynasty = dynasty:eotg_dynasty_vale
     religion = faith:eotg_faith_firstlight
-    culture = culture:eotg_culture_elrossi
+    culture = culture:eotg_culture_nyssari
 
     # Born 866 - 71 = 795 AG
     795.4.10 = { birth = yes }
@@ -482,7 +416,7 @@ eotg_char_90009 = {
     name = "Ilyr"
     # dynasty = dynasty:eotg_dynasty_kavos
     religion = faith:eotg_faith_firstlight
-    culture = culture:eotg_culture_elrossi
+    culture = culture:eotg_culture_istrovan
 
     # Born 866 - 58 = 808 AG
     808.9.1 = { birth = yes }
@@ -503,7 +437,7 @@ eotg_char_90010 = {
     name = "Mirelle"
     # dynasty = dynasty:eotg_dynasty_voss
     religion = faith:eotg_faith_industrial_survivalism
-    culture = culture:eotg_culture_xeric_human
+    culture = culture:eotg_culture_veltrani
     female = yes
 
     # Born 866 - 54 = 812 AG
@@ -522,7 +456,7 @@ eotg_char_30004 = {
     name = "Nibrak"
     # dynasty = dynasty:eotg_dynasty_coilmint
     religion = faith:eotg_faith_commerce
-    culture = culture:eotg_culture_trade_goblin
+    culture = culture:eotg_culture_geldmark
 
     # Born 866 - 62 = 804 AG
     804.7.5 = { birth = yes }
@@ -540,7 +474,7 @@ eotg_char_90011 = {
     name = "Dorian"
     # dynasty = dynasty:eotg_dynasty_valek
     religion = faith:eotg_faith_secular_contract
-    culture = culture:eotg_culture_mercenary_clusterborn
+    culture = culture:eotg_culture_uvreki
 
     # Born 866 - 50 = 816 AG
     816.3.10 = { birth = yes }

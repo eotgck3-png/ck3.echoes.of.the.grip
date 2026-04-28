@@ -55,9 +55,12 @@ eotg_se_gobcorp_sum_votes = {
 				eotg_st_is_merchant_lord = yes
 			}
 		}
+		# Save the vassal explicitly so the vote weight read is unambiguous
+		# regardless of any future scope nesting inside calculate_vote_weight.
+		save_scope_as = eotg_current_voter
 		eotg_se_gobcorp_calculate_vote_weight = yes
 		scope:eotg_dg = {
-			change_variable = { name = eotg_total_votes  add = prev.var:eotg_vote_weight }
+			change_variable = { name = eotg_total_votes  add = scope:eotg_current_voter.var:eotg_vote_weight }
 		}
 	}
 }

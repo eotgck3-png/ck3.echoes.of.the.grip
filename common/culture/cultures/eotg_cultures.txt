@@ -1,163 +1,640 @@
-﻿# ── eotg_cultures.txt ─────────────────────────────────────────────────────────
-# Culture definitions for Echoes of the Grip.
-# Prefix all keys: eotg_culture_
-#
-# Heritage, language, and ethos pillars will be replaced with custom eotg_ pillars
-# once common/culture/pillars/eotg_pillars.txt is written.
-# ─────────────────────────────────────────────────────────────────────────────
+# ── eotg_cultures.txt ─────────────────────────────────────────────────────────
+# All 28 cultures for Echoes of the Grip — 866 AG bookmark.
+# Heritage, language, and ethos use eotg_ pillars from eotg_pillars.txt.
+# Name lists are vanilla placeholders until custom eotg_ lists are created.
+# Traditions use vanilla IDs; display names are overridden in replace/eotg_traditions_l_english.yml.
+# ──────────────────────────────────────────────────────────────────────────────
 
-# eotg_culture_elrossi
-# The dominant culture of the Second Elrossi Imperium — devout, martial, ordered.
-eotg_culture_elrossi = {
-    color = { 0.85 0.75 0.2 }
-    ethos = ethos_bellicose
-    heritage = heritage_frankish
-    language = language_latin
-    martial_custom = martial_custom_male_only
-    head_determination = head_determination_domain
-    name_list = name_list_french
+# ══ XERIC SPHERE ══════════════════════════════════════════════════════════════
+
+# Restorationist Xerxes elves — traumatized continuity culture
+eotg_culture_aelvaryn = {
+	color = { 0.2 0.5 0.8 }
+	ethos = ethos_stoic
+	heritage = eotg_heritage_elf
+	language = eotg_language_elven
+	martial_custom = martial_custom_equal
+	head_determination = head_determination_domain
+	traditions = {
+		tradition_philosopher_culture      # Archive Tradition
+		tradition_fp2_ritualised_friendship # Oath Networks
+		tradition_parochialism             # Sector Isolationism
+		tradition_castle_keepers           # Bastion Keepers
+	}
+	name_list = name_list_roman
+	coa_gfx = { western_coa_gfx }
+	building_gfx = { western_building_gfx }
+	clothing_gfx = { western_clothing_gfx }
+	unit_gfx = { western_unit_gfx }
+	ethnicities = { 100 = caucasian_northern }
 }
 
-# eotg_culture_cauldronite
-# Survivors of Orrin's Grip — pragmatic, resourceful, fiercely independent.
-eotg_culture_cauldronite = {
-    color = { 0.4 0.6 0.7 }
-    ethos = ethos_communal
-    heritage = heritage_frankish
-    language = language_french
-    martial_custom = martial_custom_male_only
-    head_determination = head_determination_domain
-    name_list = name_list_french
+# Sea-altered elf descendants — adaptive coastal survivors
+eotg_culture_thalassyr = {
+	color = { 0.1 0.7 0.7 }
+	ethos = ethos_egalitarian
+	heritage = eotg_heritage_elf
+	language = eotg_language_elven
+	martial_custom = martial_custom_equal
+	head_determination = head_determination_domain
+	traditions = {
+		tradition_seafaring                # Voidfarers
+		tradition_adaptive_skirmishing     # Adaptive Skirmishers
+		tradition_hereditary_hierarchy     # Lineage Reverence
+		tradition_forest_fighters          # Debris Field Navigators
+	}
+	name_list = name_list_roman
+	coa_gfx = { western_coa_gfx }
+	building_gfx = { western_building_gfx }
+	clothing_gfx = { western_clothing_gfx }
+	unit_gfx = { western_unit_gfx }
+	ethnicities = { 100 = caucasian_northern }
 }
 
-# eotg_culture_goborc
-# Gob-Ogre hybrid culture of the Trade League — mercantile, competitive.
-eotg_culture_goborc = {
-    color = { 0.3 0.6 0.2 }
-    ethos = ethos_bureaucratic
-    heritage = heritage_mongolic
-    language = language_mongolic
-    martial_custom = martial_custom_male_only
-    head_determination = head_determination_domain
-    name_list = name_list_mongol
+# Hybridized flood survivors — mixed displaced populations
+eotg_culture_brackwateri = {
+	color = { 0.5 0.6 0.5 }
+	ethos = ethos_communal
+	heritage = eotg_heritage_xeric
+	language = eotg_language_xeric
+	martial_custom = martial_custom_equal
+	head_determination = head_determination_domain
+	traditions = {
+		tradition_diasporic                # Diasporic
+		tradition_seafaring                # Voidfarers
+		tradition_frugal_armorsmiths       # Resource Reclaimers
+		tradition_esteemed_hospitality     # Port Sanctuary Codes
+	}
+	name_list = name_list_roman
+	coa_gfx = { western_coa_gfx }
+	building_gfx = { western_building_gfx }
+	clothing_gfx = { western_clothing_gfx }
+	unit_gfx = { western_unit_gfx }
+	ethnicities = { 100 = caucasian_southern }
 }
 
-# eotg_culture_coldiron
-# Caliphate culture — disciplined, faith-driven, expansionist.
-eotg_culture_coldiron = {
-    color = { 0.3 0.4 0.7 }
-    ethos = ethos_stoic
-    heritage = heritage_arabic
-    language = language_arabic
-    martial_custom = martial_custom_male_only
-    head_determination = head_determination_domain
-    name_list = name_list_levantine
+# ══ HELIX SPHERE ══════════════════════════════════════════════════════════════
+
+# Post-corporate survivors — violence-network survival culture
+eotg_culture_virens = {
+	color = { 0.8 0.3 0.1 }
+	ethos = ethos_bellicose
+	heritage = eotg_heritage_helix
+	language = eotg_language_helix
+	martial_custom = martial_custom_equal
+	head_determination = head_determination_domain
+	traditions = {
+		tradition_practiced_pirates        # Raid Fleets
+		tradition_swords_for_hire          # Swords for Hire
+		tradition_frugal_armorsmiths       # Resource Reclaimers
+		tradition_adaptive_skirmishing     # Adaptive Skirmishers
+	}
+	name_list = name_list_french
+	coa_gfx = { western_coa_gfx }
+	building_gfx = { western_building_gfx }
+	clothing_gfx = { western_clothing_gfx }
+	unit_gfx = { western_unit_gfx }
+	ethnicities = { 100 = caucasian_southern }
 }
 
-# eotg_culture_centaur
-# Nikios Khanate centaur culture — clan-based, martial, mercenary.
-eotg_culture_centaur = {
-    color = { 0.6 0.4 0.2 }
-    ethos = ethos_bellicose
-    heritage = heritage_mongolic
-    language = language_mongolic
-    martial_custom = martial_custom_male_only
-    head_determination = head_determination_domain
-    name_list = name_list_mongol
+# Industrial rural survivors — collective reconstruction
+eotg_culture_veltrani = {
+	color = { 0.6 0.5 0.2 }
+	ethos = ethos_communal
+	heritage = eotg_heritage_helix
+	language = eotg_language_helix
+	martial_custom = martial_custom_equal
+	head_determination = head_determination_domain
+	traditions = {
+		tradition_collective_lands         # Communal Infrastructure
+		tradition_hard_working             # Industrial Discipline
+		tradition_artisans                 # Systems Engineers
+		tradition_stalwart_defenders       # Bulkhead Defenders
+	}
+	name_list = name_list_french
+	coa_gfx = { western_coa_gfx }
+	building_gfx = { western_building_gfx }
+	clothing_gfx = { western_clothing_gfx }
+	unit_gfx = { western_unit_gfx }
+	ethnicities = { 100 = caucasian_southern }
 }
 
-# eotg_culture_aasimar
-# Angelian culture — devout, celestial-blooded, honor-bound.
-eotg_culture_aasimar = {
-    color = { 0.9 0.9 0.5 }
-    ethos = ethos_courtly
-    heritage = heritage_frankish
-    language = language_latin
-    martial_custom = martial_custom_male_only
-    head_determination = head_determination_domain
-    name_list = name_list_french
+# Border military-industrial populations — militarized frontier survivors
+eotg_culture_caldryx = {
+	color = { 0.7 0.2 0.2 }
+	ethos = ethos_bellicose
+	heritage = eotg_heritage_helix
+	language = eotg_language_helix
+	martial_custom = martial_custom_equal
+	head_determination = head_determination_domain
+	traditions = {
+		tradition_by_the_sword             # Through Force Alone
+		tradition_fp3_frontier_warriors    # Frontier Warriors
+		tradition_frugal_armorsmiths       # Resource Reclaimers
+		tradition_stalwart_defenders       # Bulkhead Defenders
+	}
+	name_list = name_list_french
+	coa_gfx = { western_coa_gfx }
+	building_gfx = { western_building_gfx }
+	clothing_gfx = { western_clothing_gfx }
+	unit_gfx = { western_unit_gfx }
+	ethnicities = { 100 = caucasian_southern }
 }
 
-# eotg_culture_nippon
-# Broken Daimyo culture — Titanworld refugees (~500 AG), feudal, ancestor-focused.
-eotg_culture_nippon = {
-    color = { 0.7 0.2 0.2 }
-    ethos = ethos_courtly
-    heritage = heritage_mongolic
-    language = language_korean
-    martial_custom = martial_custom_male_only
-    head_determination = head_determination_domain
-    name_list = name_list_emishi
+# Criminal salvage populations — nomadic criminal scavengers
+eotg_culture_duskvein = {
+	color = { 0.3 0.2 0.3 }
+	ethos = ethos_egalitarian
+	heritage = eotg_heritage_helix
+	language = eotg_language_helix
+	martial_custom = martial_custom_equal
+	head_determination = head_determination_domain
+	traditions = {
+		tradition_practiced_pirates        # Raid Fleets
+		tradition_diasporic                # Diasporic
+		tradition_hunters                  # Salvage Pursuers
+		tradition_parochialism             # Sector Isolationism
+	}
+	name_list = name_list_french
+	coa_gfx = { western_coa_gfx }
+	building_gfx = { western_building_gfx }
+	clothing_gfx = { western_clothing_gfx }
+	unit_gfx = { western_unit_gfx }
+	ethnicities = { 100 = caucasian_southern }
 }
 
-# eotg_culture_xeric_elf
-# Ancient elven culture of the Xerxes system — survivors of the great flood of 851 AG.
-eotg_culture_xeric_elf = {
-    color = { 0.2 0.6 0.8 }
-    ethos = ethos_stoic
-    heritage = heritage_frankish
-    language = language_latin
-    martial_custom = martial_custom_male_only
-    head_determination = head_determination_domain
-    name_list = name_list_roman
+# ══ CAULDRON SPHERE ═══════════════════════════════════════════════════════════
+
+# Civic republicans — institutional survivalists
+eotg_culture_cauldrani = {
+	color = { 0.2 0.5 0.6 }
+	ethos = ethos_bureaucratic
+	heritage = eotg_heritage_cauldron
+	language = eotg_language_cauldron
+	martial_custom = martial_custom_equal
+	head_determination = head_determination_domain
+	traditions = {
+		tradition_republican_legacy        # Civic Directorate
+		tradition_legalistic               # Codified Governance
+		tradition_collective_lands         # Communal Infrastructure
+		tradition_martial_admiration       # Martial Admiration
+	}
+	name_list = name_list_english
+	coa_gfx = { western_coa_gfx }
+	building_gfx = { western_building_gfx }
+	clothing_gfx = { western_clothing_gfx }
+	unit_gfx = { western_unit_gfx }
+	ethnicities = { 100 = caucasian_northern }
 }
 
-# eotg_culture_xeric_human
-# Human culture of the post-flood Helix Remnants — survivalist, corporate, militarized.
-eotg_culture_xeric_human = {
-    color = { 0.5 0.4 0.3 }
-    ethos = ethos_stoic
-    heritage = heritage_frankish
-    language = language_french
-    martial_custom = martial_custom_male_only
-    head_determination = head_determination_domain
-    name_list = name_list_french
+# Marcher military settlers — frontier military colonists
+eotg_culture_halrethi = {
+	color = { 0.3 0.4 0.6 }
+	ethos = ethos_stoic
+	heritage = eotg_heritage_cauldron
+	language = eotg_language_cauldron
+	martial_custom = martial_custom_equal
+	head_determination = head_determination_domain
+	traditions = {
+		tradition_fp3_frontier_warriors    # Frontier Warriors
+		tradition_castle_keepers           # Bastion Keepers
+		tradition_loyal_soldiers           # Loyal Subjects
+		tradition_stalwart_defenders       # Bulkhead Defenders
+	}
+	name_list = name_list_english
+	coa_gfx = { western_coa_gfx }
+	building_gfx = { western_building_gfx }
+	clothing_gfx = { western_clothing_gfx }
+	unit_gfx = { western_unit_gfx }
+	ethnicities = { 100 = caucasian_northern }
 }
 
-# eotg_culture_mercenary_clusterborn
-# Mixed culture of the 7th Mercenary Legion — multispecies, contract-bound, professional.
-eotg_culture_mercenary_clusterborn = {
-    color = { 0.6 0.5 0.3 }
-    ethos = ethos_bellicose
-    heritage = heritage_frankish
-    language = language_french
-    martial_custom = martial_custom_male_only
-    head_determination = head_determination_domain
-    name_list = name_list_french
+# Warp-route scavengers — transit corridor drifters
+eotg_culture_tangentine = {
+	color = { 0.4 0.6 0.7 }
+	ethos = ethos_egalitarian
+	heritage = eotg_heritage_cauldron
+	language = eotg_language_cauldron
+	martial_custom = martial_custom_equal
+	head_determination = head_determination_domain
+	traditions = {
+		tradition_seafaring                # Voidfarers
+		tradition_adaptive_skirmishing     # Adaptive Skirmishers
+		tradition_caravaneers              # Transit Enclaves
+		tradition_frugal_armorsmiths       # Resource Reclaimers
+	}
+	name_list = name_list_english
+	coa_gfx = { western_coa_gfx }
+	building_gfx = { western_building_gfx }
+	clothing_gfx = { western_clothing_gfx }
+	unit_gfx = { western_unit_gfx }
+	ethnicities = { 100 = caucasian_northern }
 }
 
-# eotg_culture_trade_goblin
-# Goblin merchant culture of the Gob-Ogre Trade League — profit-focused, politically aggressive.
-eotg_culture_trade_goblin = {
-    color = { 0.4 0.7 0.2 }
-    ethos = ethos_bureaucratic
-    heritage = heritage_mongolic
-    language = language_mongolic
-    martial_custom = martial_custom_male_only
-    head_determination = head_determination_domain
-    name_list = name_list_mongol
+# ══ COLDIRON SPHERE ═══════════════════════════════════════════════════════════
+
+# Theocratic industrial core — order-through-discipline civilization
+eotg_culture_khadrashi = {
+	color = { 0.4 0.4 0.6 }
+	ethos = ethos_bureaucratic
+	heritage = eotg_heritage_coldiron
+	language = eotg_language_coldiron
+	martial_custom = martial_custom_equal
+	head_determination = head_determination_domain
+	traditions = {
+		tradition_zealous_people           # Doctrinal Adherents
+		tradition_hard_working             # Industrial Discipline
+		tradition_legalistic               # Codified Governance
+		tradition_winter_warriors          # Cryozone Veterans
+	}
+	name_list = name_list_levantine
+	coa_gfx = { mena_coa_gfx }
+	building_gfx = { mena_building_gfx }
+	clothing_gfx = { mena_clothing_gfx }
+	unit_gfx = { mena_unit_gfx }
+	ethnicities = { 100 = arab }
 }
 
-# eotg_culture_industrial_ogre
-# Ogre engineering culture of the Gob-Ogre Trade League — builder-focused, pragmatic.
-eotg_culture_industrial_ogre = {
-    color = { 0.5 0.3 0.1 }
-    ethos = ethos_communal
-    heritage = heritage_mongolic
-    language = language_mongolic
-    martial_custom = martial_custom_male_only
-    head_determination = head_determination_domain
-    name_list = name_list_mongol
+# Fortress defenders — militarized defensive populations
+eotg_culture_sternstahl = {
+	color = { 0.5 0.5 0.5 }
+	ethos = ethos_stoic
+	heritage = eotg_heritage_coldiron
+	language = eotg_language_coldiron
+	martial_custom = martial_custom_equal
+	head_determination = head_determination_domain
+	traditions = {
+		tradition_stalwart_defenders       # Bulkhead Defenders
+		tradition_castle_keepers           # Bastion Keepers
+		tradition_martial_admiration       # Martial Admiration
+		tradition_winter_warriors          # Cryozone Veterans
+	}
+	name_list = name_list_levantine
+	coa_gfx = { mena_coa_gfx }
+	building_gfx = { mena_building_gfx }
+	clothing_gfx = { mena_clothing_gfx }
+	unit_gfx = { mena_unit_gfx }
+	ethnicities = { 100 = arab }
 }
 
-# eotg_culture_warren_ratfolk
-# Ratfolk culture of the deep warrens — tunnel-dwelling, adaptive, ideologically divided.
-eotg_culture_warren_ratfolk = {
-    color = { 0.5 0.4 0.4 }
-    ethos = ethos_bureaucratic
-    heritage = heritage_mongolic
-    language = language_mongolic
-    martial_custom = martial_custom_male_only
-    head_determination = head_determination_domain
-    name_list = name_list_mongol
+# Intelligence frontier culture — paranoid frontier observers
+eotg_culture_noctivar = {
+	color = { 0.2 0.2 0.4 }
+	ethos = ethos_stoic
+	heritage = eotg_heritage_coldiron
+	language = eotg_language_coldiron
+	martial_custom = martial_custom_equal
+	head_determination = head_determination_domain
+	traditions = {
+		tradition_mystical_ancestors       # Archive Reverence
+		tradition_swords_for_hire          # Swords for Hire
+		tradition_parochialism             # Sector Isolationism
+		tradition_adaptive_skirmishing     # Adaptive Skirmishers
+	}
+	name_list = name_list_levantine
+	coa_gfx = { mena_coa_gfx }
+	building_gfx = { mena_building_gfx }
+	clothing_gfx = { mena_clothing_gfx }
+	unit_gfx = { mena_unit_gfx }
+	ethnicities = { 100 = arab }
+}
+
+# ══ LANIUS SPHERE ═════════════════════════════════════════════════════════════
+
+# Descended from Elrossi colonists — legitimacy-performance aristocracy
+eotg_culture_solvari = {
+	color = { 0.8 0.7 0.2 }
+	ethos = ethos_courtly
+	heritage = eotg_heritage_lanius
+	language = eotg_language_lanius
+	martial_custom = martial_custom_equal
+	head_determination = head_determination_domain
+	traditions = {
+		tradition_legalistic               # Codified Governance
+		tradition_court_eunuchs            # Chamber Custodians
+		tradition_fp2_ritualised_friendship # Oath Networks
+		tradition_philosopher_culture      # Archive Tradition
+	}
+	name_list = name_list_roman
+	coa_gfx = { western_coa_gfx }
+	building_gfx = { western_building_gfx }
+	clothing_gfx = { western_clothing_gfx }
+	unit_gfx = { western_unit_gfx }
+	ethnicities = { 100 = caucasian_southern }
+}
+
+# Pilgrim-warrior frontier — sacred military frontier culture
+eotg_culture_istrovan = {
+	color = { 0.6 0.2 0.2 }
+	ethos = ethos_spiritual
+	heritage = eotg_heritage_lanius
+	language = eotg_language_lanius
+	martial_custom = martial_custom_equal
+	head_determination = head_determination_domain
+	traditions = {
+		tradition_warrior_monks            # Sanctified Wardens
+		tradition_by_the_sword             # Through Force Alone
+		tradition_loyal_soldiers           # Loyal Subjects
+		tradition_warriors_of_the_dry      # Expanse Raiders
+	}
+	name_list = name_list_roman
+	coa_gfx = { western_coa_gfx }
+	building_gfx = { western_building_gfx }
+	clothing_gfx = { western_clothing_gfx }
+	unit_gfx = { western_unit_gfx }
+	ethnicities = { 100 = caucasian_southern }
+}
+
+# Isolated noble houses — preservationist aristocratic enclaves
+eotg_culture_zeladani = {
+	color = { 0.6 0.4 0.7 }
+	ethos = ethos_courtly
+	heritage = eotg_heritage_lanius
+	language = eotg_language_lanius
+	martial_custom = martial_custom_equal
+	head_determination = head_determination_domain
+	traditions = {
+		tradition_hereditary_hierarchy     # Lineage Reverence
+		tradition_parochialism             # Sector Isolationism
+		tradition_fp2_ritualised_friendship # Oath Networks
+		tradition_gardening                # Garden Architects
+	}
+	name_list = name_list_roman
+	coa_gfx = { western_coa_gfx }
+	building_gfx = { western_building_gfx }
+	clothing_gfx = { western_clothing_gfx }
+	unit_gfx = { western_unit_gfx }
+	ethnicities = { 100 = caucasian_southern }
+}
+
+# Ancient remnant descendants — fading old-world custodians
+eotg_culture_nyssari = {
+	color = { 0.7 0.6 0.5 }
+	ethos = ethos_courtly
+	heritage = eotg_heritage_lanius
+	language = eotg_language_lanius
+	martial_custom = martial_custom_equal
+	head_determination = head_determination_domain
+	traditions = {
+		tradition_mystical_ancestors       # Archive Reverence
+		tradition_talent_acquisition       # Merit Ascension
+		tradition_fp2_ritualised_friendship # Oath Networks
+		tradition_mountain_homes           # Fortified Sector Dwellers
+	}
+	name_list = name_list_roman
+	coa_gfx = { western_coa_gfx }
+	building_gfx = { western_building_gfx }
+	clothing_gfx = { western_clothing_gfx }
+	unit_gfx = { western_unit_gfx }
+	ethnicities = { 100 = caucasian_southern }
+}
+
+# ══ TRADE LEAGUE SPHERE ═══════════════════════════════════════════════════════
+
+# Goblin oligarchs — predatory hyper-capitalists
+eotg_culture_geldmark = {
+	color = { 0.2 0.6 0.1 }
+	ethos = ethos_bureaucratic
+	heritage = eotg_heritage_goblin
+	language = eotg_language_goblin
+	martial_custom = martial_custom_equal
+	head_determination = head_determination_domain
+	traditions = {
+		tradition_maritime_mercantilism    # Voidlane Commerce
+		tradition_frugal_armorsmiths       # Resource Reclaimers
+		tradition_parochialism             # Sector Isolationism
+		tradition_hard_working             # Industrial Discipline
+	}
+	name_list = name_list_mongol
+	coa_gfx = { western_coa_gfx }
+	building_gfx = { western_building_gfx }
+	clothing_gfx = { western_clothing_gfx }
+	unit_gfx = { western_unit_gfx }
+	ethnicities = { 100 = mediterranean }
+}
+
+# Trade intermediary humans — transit administrators
+eotg_culture_brokari = {
+	color = { 0.7 0.6 0.3 }
+	ethos = ethos_bureaucratic
+	heritage = eotg_heritage_trade
+	language = eotg_language_common
+	martial_custom = martial_custom_equal
+	head_determination = head_determination_domain
+	traditions = {
+		tradition_caravaneers              # Transit Enclaves
+		tradition_legalistic               # Codified Governance
+		tradition_talent_acquisition       # Merit Ascension
+		tradition_seafaring                # Voidfarers
+	}
+	name_list = name_list_english
+	coa_gfx = { western_coa_gfx }
+	building_gfx = { western_building_gfx }
+	clothing_gfx = { western_clothing_gfx }
+	unit_gfx = { western_unit_gfx }
+	ethnicities = { 100 = caucasian_northern }
+}
+
+# Independent goblin shipping clans — semi-lawless shipping dynasties
+eotg_culture_kelmori = {
+	color = { 0.1 0.5 0.2 }
+	ethos = ethos_egalitarian
+	heritage = eotg_heritage_goblin
+	language = eotg_language_goblin
+	martial_custom = martial_custom_equal
+	head_determination = head_determination_domain
+	traditions = {
+		tradition_seafaring                # Voidfarers
+		tradition_practiced_pirates        # Raid Fleets
+		tradition_esteemed_hospitality     # Port Sanctuary Codes
+		tradition_adaptive_skirmishing     # Adaptive Skirmishers
+	}
+	name_list = name_list_mongol
+	coa_gfx = { western_coa_gfx }
+	building_gfx = { western_building_gfx }
+	clothing_gfx = { western_clothing_gfx }
+	unit_gfx = { western_unit_gfx }
+	ethnicities = { 100 = mediterranean }
+}
+
+# ══ OGRE SPHERE ═══════════════════════════════════════════════════════════════
+
+# Industrial engineer ogres — builder-worker civilization
+eotg_culture_drogmari = {
+	color = { 0.6 0.4 0.2 }
+	ethos = ethos_communal
+	heritage = eotg_heritage_ogre
+	language = eotg_language_ogre
+	martial_custom = martial_custom_equal
+	head_determination = head_determination_domain
+	traditions = {
+		tradition_artisans                 # Systems Engineers
+		tradition_hard_working             # Industrial Discipline
+		tradition_collective_lands         # Communal Infrastructure
+		tradition_metal_craftsmanship      # Alloy Forgers
+	}
+	name_list = name_list_norse
+	coa_gfx = { western_coa_gfx }
+	building_gfx = { western_building_gfx }
+	clothing_gfx = { western_clothing_gfx }
+	unit_gfx = { western_unit_gfx }
+	ethnicities = { 100 = caucasian_northern }
+}
+
+# Independent ogre clans — self-reliant frontier industrialists
+eotg_culture_thrakani = {
+	color = { 0.5 0.3 0.1 }
+	ethos = ethos_stoic
+	heritage = eotg_heritage_ogre
+	language = eotg_language_ogre
+	martial_custom = martial_custom_equal
+	head_determination = head_determination_domain
+	traditions = {
+		tradition_warriors_of_the_dry      # Expanse Raiders
+		tradition_metal_craftsmanship      # Alloy Forgers
+		tradition_zealous_people           # Doctrinal Adherents
+		tradition_frugal_armorsmiths       # Resource Reclaimers
+	}
+	name_list = name_list_norse
+	coa_gfx = { western_coa_gfx }
+	building_gfx = { western_building_gfx }
+	clothing_gfx = { western_clothing_gfx }
+	unit_gfx = { western_unit_gfx }
+	ethnicities = { 100 = caucasian_northern }
+}
+
+# ══ RATFOLK SPHERE ════════════════════════════════════════════════════════════
+
+# Industrial revolutionary ratfolk — collective revolutionary reconstructionists
+eotg_culture_skarrin = {
+	color = { 0.4 0.4 0.3 }
+	ethos = ethos_communal
+	heritage = eotg_heritage_ratfolk
+	language = eotg_language_ratfolk
+	martial_custom = martial_custom_equal
+	head_determination = head_determination_domain
+	traditions = {
+		tradition_hard_working             # Industrial Discipline
+		tradition_collective_lands         # Communal Infrastructure
+		tradition_talent_acquisition       # Merit Ascension
+		tradition_adaptive_skirmishing     # Adaptive Skirmishers
+	}
+	name_list = name_list_ugro_finnic
+	coa_gfx = { western_coa_gfx }
+	building_gfx = { western_building_gfx }
+	clothing_gfx = { western_clothing_gfx }
+	unit_gfx = { western_unit_gfx }
+	ethnicities = { 100 = mediterranean }
+}
+
+# Traditionalist ratfolk — doctrinal survival collectivists
+eotg_culture_veskari = {
+	color = { 0.3 0.3 0.3 }
+	ethos = ethos_spiritual
+	heritage = eotg_heritage_ratfolk
+	language = eotg_language_ratfolk
+	martial_custom = martial_custom_equal
+	head_determination = head_determination_domain
+	traditions = {
+		tradition_hereditary_hierarchy     # Lineage Reverence
+		tradition_parochialism             # Sector Isolationism
+		tradition_stalwart_defenders       # Bulkhead Defenders
+		tradition_mystical_ancestors       # Archive Reverence
+	}
+	name_list = name_list_ugro_finnic
+	coa_gfx = { western_coa_gfx }
+	building_gfx = { western_building_gfx }
+	clothing_gfx = { western_clothing_gfx }
+	unit_gfx = { western_unit_gfx }
+	ethnicities = { 100 = mediterranean }
+}
+
+# ══ OUTER MARCHES ═════════════════════════════════════════════════════════════
+
+# Scavenger goblins — violent scrap-raider culture
+eotg_culture_gnashvok = {
+	color = { 0.4 0.5 0.1 }
+	ethos = ethos_bellicose
+	heritage = eotg_heritage_goblin
+	language = eotg_language_goblin
+	martial_custom = martial_custom_equal
+	head_determination = head_determination_domain
+	traditions = {
+		tradition_practiced_pirates        # Raid Fleets
+		tradition_hunters                  # Salvage Pursuers
+		tradition_frugal_armorsmiths       # Resource Reclaimers
+		tradition_adaptive_skirmishing     # Adaptive Skirmishers
+	}
+	name_list = name_list_mongol
+	coa_gfx = { western_coa_gfx }
+	building_gfx = { western_building_gfx }
+	clothing_gfx = { western_clothing_gfx }
+	unit_gfx = { western_unit_gfx }
+	ethnicities = { 100 = mediterranean }
+}
+
+# Mixed frontier drifters — cross-cultural frontier survivors
+eotg_culture_uvreki = {
+	color = { 0.5 0.4 0.3 }
+	ethos = ethos_egalitarian
+	heritage = eotg_heritage_frontier
+	language = eotg_language_common
+	martial_custom = martial_custom_equal
+	head_determination = head_determination_domain
+	traditions = {
+		tradition_diasporic                # Diasporic
+		tradition_seafaring                # Voidfarers
+		tradition_collective_lands         # Communal Infrastructure
+		tradition_esteemed_hospitality     # Port Sanctuary Codes
+	}
+	name_list = name_list_english
+	coa_gfx = { western_coa_gfx }
+	building_gfx = { western_building_gfx }
+	clothing_gfx = { western_clothing_gfx }
+	unit_gfx = { western_unit_gfx }
+	ethnicities = { 100 = caucasian_northern }
+}
+
+# Isolated deep-route descendants — isolated void populations
+eotg_culture_vanthari = {
+	color = { 0.3 0.3 0.4 }
+	ethos = ethos_stoic
+	heritage = eotg_heritage_frontier
+	language = eotg_language_common
+	martial_custom = martial_custom_equal
+	head_determination = head_determination_domain
+	traditions = {
+		tradition_parochialism             # Sector Isolationism
+		tradition_seafaring                # Voidfarers
+		tradition_mystical_ancestors       # Archive Reverence
+		tradition_dryland_dwellers         # Sparse Zone Survivors
+	}
+	name_list = name_list_english
+	coa_gfx = { western_coa_gfx }
+	building_gfx = { western_building_gfx }
+	clothing_gfx = { western_clothing_gfx }
+	unit_gfx = { western_unit_gfx }
+	ethnicities = { 100 = caucasian_northern }
+}
+
+# Old administrative remnants — fallen bureaucratic elite descendants
+eotg_culture_orovane = {
+	color = { 0.5 0.5 0.3 }
+	ethos = ethos_bureaucratic
+	heritage = eotg_heritage_frontier
+	language = eotg_language_common
+	martial_custom = martial_custom_equal
+	head_determination = head_determination_domain
+	traditions = {
+		tradition_legalistic               # Codified Governance
+		tradition_talent_acquisition       # Merit Ascension
+		tradition_philosopher_culture      # Archive Tradition
+		tradition_court_eunuchs            # Chamber Custodians
+	}
+	name_list = name_list_english
+	coa_gfx = { western_coa_gfx }
+	building_gfx = { western_building_gfx }
+	clothing_gfx = { western_clothing_gfx }
+	unit_gfx = { western_unit_gfx }
+	ethnicities = { 100 = caucasian_northern }
 }
