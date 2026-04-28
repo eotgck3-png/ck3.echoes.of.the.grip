@@ -297,6 +297,8 @@ eotg_clayd.0007 = {
         add_stress = -50
         add_legitimacy = 20
         add_prestige = 100
+        add_character_flag = eotg_clayd_path_survived
+        trigger_event = { id = eotg_clayd.0008 days = 30 }
     }
 
     option = {
@@ -304,6 +306,8 @@ eotg_clayd.0007 = {
         # "The world belongs to those willing to become harder."
         add_dread = 20
         add_prestige = 300
+        add_character_flag = eotg_clayd_path_hardened
+        trigger_event = { id = eotg_clayd.0008 days = 30 }
     }
 
     option = {
@@ -312,5 +316,56 @@ eotg_clayd.0007 = {
         add_legitimacy = 30
         add_prestige = 200
         add_stress = -30
+        add_character_flag = eotg_clayd_path_built
+        trigger_event = { id = eotg_clayd.0008 days = 30 }
+    }
+}
+
+# ── eotg_clayd.0008 ───────────────────────────────────────────────────────────
+# What the Scar Left Behind — epilogue, fires 30 days after the final choice
+eotg_clayd.0008 = {
+    type = character_event
+    title = eotg_clayd.0008.t
+    desc = {
+        triggered_desc = {
+            trigger = { has_character_flag = eotg_clayd_path_survived }
+            desc = eotg_clayd.0008.desc_survived
+        }
+        triggered_desc = {
+            trigger = { has_character_flag = eotg_clayd_path_hardened }
+            desc = eotg_clayd.0008.desc_hardened
+        }
+        triggered_desc = {
+            trigger = { has_character_flag = eotg_clayd_path_built }
+            desc = eotg_clayd.0008.desc_built
+        }
+    }
+    theme = intrigue
+
+    option = {
+        name = eotg_clayd.0008.opt_survived
+        trigger = { has_character_flag = eotg_clayd_path_survived }
+        add_stress = -30
+        add_legitimacy = 20
+        add_prestige = 200
+        remove_character_flag = eotg_clayd_path_survived
+    }
+
+    option = {
+        name = eotg_clayd.0008.opt_hardened
+        trigger = { has_character_flag = eotg_clayd_path_hardened }
+        add_dread = 15
+        add_intrigue_skill = 1
+        add_prestige = 300
+        remove_character_flag = eotg_clayd_path_hardened
+    }
+
+    option = {
+        name = eotg_clayd.0008.opt_built
+        trigger = { has_character_flag = eotg_clayd_path_built }
+        add_legitimacy = 30
+        add_stress = -50
+        add_prestige = 200
+        remove_character_flag = eotg_clayd_path_built
     }
 }

@@ -192,6 +192,8 @@ eotg_newcauldron_char.0006 = {
         # "Transparency is strength." — Open Republic
         add_legitimacy = 30
         add_diplomacy_skill = 1
+        add_character_flag = eotg_newcauldron_path_open
+        trigger_event = { id = eotg_newcauldron_char.0007 days = 30 }
     }
 
     option = {
@@ -199,6 +201,8 @@ eotg_newcauldron_char.0006 = {
         # "Trust must be monitored." — Watchful Republic
         add_character_modifier = { modifier = eotg_internal_security_expansion years = 20 }
         add_legitimacy = 20
+        add_character_flag = eotg_newcauldron_path_watchful
+        trigger_event = { id = eotg_newcauldron_char.0007 days = 30 }
     }
 
     option = {
@@ -207,5 +211,57 @@ eotg_newcauldron_char.0006 = {
         add_martial_skill = 1
         add_dread = 10
         add_legitimacy = 10
+        add_character_flag = eotg_newcauldron_path_hardened
+        trigger_event = { id = eotg_newcauldron_char.0007 days = 30 }
+    }
+}
+
+# ── eotg_newcauldron_char.0007 ────────────────────────────────────────────────
+# The Republic's Final Shape — epilogue, fires 30 days after the final choice
+eotg_newcauldron_char.0007 = {
+    type = character_event
+    title = eotg_newcauldron_char.0007.t
+    desc = {
+        triggered_desc = {
+            trigger = { has_character_flag = eotg_newcauldron_path_open }
+            desc = eotg_newcauldron_char.0007.desc_open
+        }
+        triggered_desc = {
+            trigger = { has_character_flag = eotg_newcauldron_path_watchful }
+            desc = eotg_newcauldron_char.0007.desc_watchful
+        }
+        triggered_desc = {
+            trigger = { has_character_flag = eotg_newcauldron_path_hardened }
+            desc = eotg_newcauldron_char.0007.desc_hardened
+        }
+    }
+    theme = stewardship
+
+    option = {
+        name = eotg_newcauldron_char.0007.opt_open
+        trigger = { has_character_flag = eotg_newcauldron_path_open }
+        add_diplomacy_skill = 1
+        add_legitimacy = 25
+        add_prestige = 200
+        remove_character_flag = eotg_newcauldron_path_open
+    }
+
+    option = {
+        name = eotg_newcauldron_char.0007.opt_watchful
+        trigger = { has_character_flag = eotg_newcauldron_path_watchful }
+        add_dread = 10
+        add_legitimacy = 20
+        add_prestige = 200
+        remove_character_flag = eotg_newcauldron_path_watchful
+    }
+
+    option = {
+        name = eotg_newcauldron_char.0007.opt_hardened
+        trigger = { has_character_flag = eotg_newcauldron_path_hardened }
+        add_martial_skill = 1
+        add_dread = 10
+        add_legitimacy = 15
+        add_prestige = 150
+        remove_character_flag = eotg_newcauldron_path_hardened
     }
 }

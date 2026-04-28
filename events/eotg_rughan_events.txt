@@ -194,6 +194,8 @@ eotg_rughan.0006 = {
         # "Prosperity must be sustainable." — Reformed League
         add_legitimacy = 30
         add_prestige = 300
+        add_character_flag = eotg_rughan_path_reformed
+        trigger_event = { id = eotg_rughan.0007 days = 30 }
     }
 
     option = {
@@ -201,6 +203,8 @@ eotg_rughan.0006 = {
         # "Builders deserve control of the future." — Engineer Commonwealth
         add_stewardship_skill = 2
         add_prestige = 400
+        add_character_flag = eotg_rughan_path_engineer
+        trigger_event = { id = eotg_rughan.0007 days = 30 }
     }
 
     option = {
@@ -209,5 +213,56 @@ eotg_rughan.0006 = {
         add_dread = 15
         add_legitimacy = 20
         add_stewardship_skill = 1
+        add_character_flag = eotg_rughan_path_industrial
+        trigger_event = { id = eotg_rughan.0007 days = 30 }
+    }
+}
+
+# ── eotg_rughan.0007 ──────────────────────────────────────────────────────────
+# The Builder's Shape — epilogue, fires 30 days after the final choice
+eotg_rughan.0007 = {
+    type = character_event
+    title = eotg_rughan.0007.t
+    desc = {
+        triggered_desc = {
+            trigger = { has_character_flag = eotg_rughan_path_reformed }
+            desc = eotg_rughan.0007.desc_reformed
+        }
+        triggered_desc = {
+            trigger = { has_character_flag = eotg_rughan_path_engineer }
+            desc = eotg_rughan.0007.desc_engineer
+        }
+        triggered_desc = {
+            trigger = { has_character_flag = eotg_rughan_path_industrial }
+            desc = eotg_rughan.0007.desc_industrial
+        }
+    }
+    theme = stewardship
+
+    option = {
+        name = eotg_rughan.0007.opt_reformed
+        trigger = { has_character_flag = eotg_rughan_path_reformed }
+        add_stewardship_skill = 1
+        add_legitimacy = 25
+        add_prestige = 250
+        remove_character_flag = eotg_rughan_path_reformed
+    }
+
+    option = {
+        name = eotg_rughan.0007.opt_engineer
+        trigger = { has_character_flag = eotg_rughan_path_engineer }
+        add_stewardship_skill = 1
+        add_prestige = 300
+        add_legitimacy = 20
+        remove_character_flag = eotg_rughan_path_engineer
+    }
+
+    option = {
+        name = eotg_rughan.0007.opt_industrial
+        trigger = { has_character_flag = eotg_rughan_path_industrial }
+        add_dread = 10
+        add_legitimacy = 20
+        add_prestige = 300
+        remove_character_flag = eotg_rughan_path_industrial
     }
 }

@@ -201,6 +201,8 @@ eotg_coldiron.0006 = {
         # "Continuity is victory." — Enduring Caliphate
         add_legitimacy = 40
         add_piety = 200
+        add_character_flag = eotg_coldiron_path_enduring
+        trigger_event = { id = eotg_coldiron.0007 days = 30 }
     }
 
     option = {
@@ -208,6 +210,8 @@ eotg_coldiron.0006 = {
         # "Rigidity breaks. Adaptation survives." — Reformed Caliphate
         add_legitimacy = 25
         add_prestige = 300
+        add_character_flag = eotg_coldiron_path_reformed
+        trigger_event = { id = eotg_coldiron.0007 days = 30 }
     }
 
     option = {
@@ -215,5 +219,56 @@ eotg_coldiron.0006 = {
         # "Fear preserves what weakness destroys." — Frozen Regime
         add_dread = 25
         add_prestige = 400
+        add_character_flag = eotg_coldiron_path_frozen
+        trigger_event = { id = eotg_coldiron.0007 days = 30 }
+    }
+}
+
+# ── eotg_coldiron.0007 ────────────────────────────────────────────────────────
+# What the Caliphate Endures — epilogue, fires 30 days after the final choice
+eotg_coldiron.0007 = {
+    type = character_event
+    title = eotg_coldiron.0007.t
+    desc = {
+        triggered_desc = {
+            trigger = { has_character_flag = eotg_coldiron_path_enduring }
+            desc = eotg_coldiron.0007.desc_enduring
+        }
+        triggered_desc = {
+            trigger = { has_character_flag = eotg_coldiron_path_reformed }
+            desc = eotg_coldiron.0007.desc_reformed
+        }
+        triggered_desc = {
+            trigger = { has_character_flag = eotg_coldiron_path_frozen }
+            desc = eotg_coldiron.0007.desc_frozen
+        }
+    }
+    theme = faith
+
+    option = {
+        name = eotg_coldiron.0007.opt_enduring
+        trigger = { has_character_flag = eotg_coldiron_path_enduring }
+        add_legitimacy = 25
+        add_piety = 150
+        add_prestige = 200
+        remove_character_flag = eotg_coldiron_path_enduring
+    }
+
+    option = {
+        name = eotg_coldiron.0007.opt_reformed
+        trigger = { has_character_flag = eotg_coldiron_path_reformed }
+        add_learning_skill = 1
+        add_legitimacy = 20
+        add_prestige = 300
+        remove_character_flag = eotg_coldiron_path_reformed
+    }
+
+    option = {
+        name = eotg_coldiron.0007.opt_frozen
+        trigger = { has_character_flag = eotg_coldiron_path_frozen }
+        add_dread = 15
+        add_prestige = 400
+        add_legitimacy = 25
+        remove_character_flag = eotg_coldiron_path_frozen
     }
 }
