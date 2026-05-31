@@ -1,4 +1,4 @@
-# ── eotg_clayd_events.txt ─────────────────────────────────────────────────────
+﻿# ── eotg_clayd_events.txt ─────────────────────────────────────────────────────
 # Event chain for Clayd Kestrel-Vire, "The Last Shotcaller" — Helix Remnants.
 # Fires from: eotg_char_arc_actions.txt (on_game_started, day 60)
 # Scope: character (Clayd)
@@ -51,7 +51,6 @@ eotg_clayd.0001 = {
         # "File it away."
         add_stress = -20
         add_intrigue_skill = 1
-        change_variable = { name = eotg_clayd_fear add = 0 }
         trigger_event = { id = eotg_clayd.0002 days = 180 }
     }
 
@@ -197,20 +196,13 @@ eotg_clayd.0004 = {
 }
 
 # ── eotg_clayd.0005 ───────────────────────────────────────────────────────────
-# Fires from: eotg_clayd.0004 (triggers if intrigue >= 15 or investigation path)
+# Fires from: eotg_clayd.0004 (~1 year later)
 # Karim's Shadow — unconfirmed sighting
 eotg_clayd.0005 = {
     type = character_event
     title = eotg_clayd.0005.t
     desc = eotg_clayd.0005.desc
     theme = intrigue
-
-    trigger = {
-        OR = {
-            intrigue >= 15
-            has_character_flag = eotg_clayd_authoritarian_path
-        }
-    }
 
     option = {
         name = eotg_clayd.0005.a
@@ -244,20 +236,13 @@ eotg_clayd.0005 = {
 }
 
 # ── eotg_clayd.0006 ───────────────────────────────────────────────────────────
-# Fires from: eotg_clayd.0005 (heir exists or authoritarian path)
+# Fires from: eotg_clayd.0005 (~2 years later)
 # The Heir and the Future
 eotg_clayd.0006 = {
     type = character_event
     title = eotg_clayd.0006.t
     desc = eotg_clayd.0006.desc
     theme = stewardship
-
-    trigger = {
-        OR = {
-            exists = primary_heir
-            has_character_flag = eotg_clayd_authoritarian_path
-        }
-    }
 
     option = {
         name = eotg_clayd.0006.a
@@ -327,17 +312,20 @@ eotg_clayd.0008 = {
     type = character_event
     title = eotg_clayd.0008.t
     desc = {
-        triggered_desc = {
-            trigger = { has_character_flag = eotg_clayd_path_survived }
+        first_valid = {
+            triggered_desc = {
+                trigger = { has_character_flag = eotg_clayd_path_survived }
+                desc = eotg_clayd.0008.desc_survived
+            }
+            triggered_desc = {
+                trigger = { has_character_flag = eotg_clayd_path_hardened }
+                desc = eotg_clayd.0008.desc_hardened
+            }
+            triggered_desc = {
+                trigger = { has_character_flag = eotg_clayd_path_built }
+                desc = eotg_clayd.0008.desc_built
+            }
             desc = eotg_clayd.0008.desc_survived
-        }
-        triggered_desc = {
-            trigger = { has_character_flag = eotg_clayd_path_hardened }
-            desc = eotg_clayd.0008.desc_hardened
-        }
-        triggered_desc = {
-            trigger = { has_character_flag = eotg_clayd_path_built }
-            desc = eotg_clayd.0008.desc_built
         }
     }
     theme = intrigue

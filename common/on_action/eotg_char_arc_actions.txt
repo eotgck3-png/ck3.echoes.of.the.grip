@@ -1,4 +1,4 @@
-# ── eotg_char_arc_actions.txt ─────────────────────────────────────────────────
+﻿# ── eotg_char_arc_actions.txt ─────────────────────────────────────────────────
 # Hooks for firing bookmark character arc opener events at game start.
 # Fires each named character's first arc event with a short delay so the
 # tutorial and game-start events settle first.
@@ -6,7 +6,7 @@
 # Additive block — only on_actions (not effect/trigger) to avoid overwriting vanilla.
 # ─────────────────────────────────────────────────────────────────────────────
 
-on_game_started = {
+on_game_start_after_lobby = {
     on_actions = { eotg_bookmark_char_arcs_start }
 }
 

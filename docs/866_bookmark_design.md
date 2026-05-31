@@ -16,7 +16,7 @@
 | Broken Daimyo ancestors arrive in star systems | ~500 AG |
 | Angelia founded by Aasimar divine pilgrims | ~150 AG |
 | Nikios Khanate: War of Broken Hooves | ~800–840 AG |
-| **► BOOKMARK: 866 AG ◄** | **866 AG** |
+| **► BOOKMARK: 866 AG - After the Crucible ◄** | **866 AG** |
 | Hobgoblin Drift Wars in the Wastes | ~900 AG |
 | Shatter Stance: Exodus of Shards | ~950 AG |
 | Broken Daimyos: first unification attempt | ~920 AG |
@@ -32,14 +32,14 @@
 ### New Cauldron
 - **Government:** Democratic republic, elections every 5 years
 - **Founded:** 131 AG by Mikey the Great (formerly Mikey Smalls)
-- **Origin:** Survivors who crash-landed on a distant world in the ruins of Orrin's Grip's capital city — the protective mountain peaks formed a "cauldron" around the wreckage
+- **Origin:** Survivors who crash-landed on the Titanworld in the ruins of one of the second era's capital cities - newly named 'The Cauldron' - the protective mountain peaks formed a "cauldron" around the wreckage and ruins, leading to it's name
 - **Military:** Renowned mercenary legions hired across the galaxy; the Vault Stance serves as elite aristocratic guards
 - **866 AG status:** Thriving, confident, ambitious. Entering the Myr Cluster Wars in early phase — their Mercenary Legions are being hired by multiple factions simultaneously
 - **Key tension:** The Band of Cock mercenary guild's influence in government vs. pure democratic ideals
 - **CK3 government type to design:** Republican/elective with mercenary tradition mechanics
 
 ### The Elrossi Imperium
-- **Government:** Holy theocratic empire
+- **Government:** Holy theocratic empire, inspired by the HRE and Imperial France
 - **Faith:** Faith of Elross — order, light, sacred martial discipline
 - **866 AG status:** Expansionist, holy, entering the Myr Cluster Wars via proxy (the Prince of Myr). Holy Orders serve as crusading forces. The Imperium at 866 is a First Imperium — the "Second" designation reflects a later reformation after collapse
 - **Key tension:** Using a proxy leader in the Clusters to avoid domestic dissent vs. direct conquest ambitions

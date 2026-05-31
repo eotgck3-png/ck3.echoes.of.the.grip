@@ -1,0 +1,116 @@
+﻿l_english:
+ # ── EP1, EP3, LAAMP & Misc — EotG Setting Overrides ──────────────────────────
+ # Sources: dlc/ep1/dlc_ep1_flavor_events_l_english.yml,
+ #          dlc/ep3/ep3_laamp_decision_events_l_english.yml,
+ #          dlc/ep3/ep3_laamps_8_l_english.yml,
+ #          dlc/ep3/ep3_modifiers_l_english.yml,
+ #          dlc/ep3/ep3_story_cycle_el_cid_l_english.yml,
+ #          great_projects/great_project_types_l_english.yml,
+ #          historical_characters_l_english.yml,
+ #          laamp_contract_schemes_l_english.yml,
+ #          single_combat_events_l_english.yml,
+ #          dlc/tgp/dlc_tgp_japan_gloss_l_english.yml,
+ #          dlc/tgp/dlc_tgp_japan_religion_l_english.yml
+ # Replaces: "peasant/peasantry/serf" → "commoner/commonfolk/bonded worker".
+ # ─────────────────────────────────────────────────────────────────────────────
+
+ # ── EP1 Flavor Events ─────────────────────────────────────────────────────────
+
+ # "written by an illiterate peasant"
+ ep1_flavor.0021.desc:0 "Giggling confronts me as I walk into the chamber: a gaggle of courtiers, led by [nitpicker.GetTitledFirstName], are all crowded around a recent letter from [rival_monarch.GetTitledFirstName].\n\n[nitpicker.GetFirstNameNoTooltip] waves me over with a shout of laughter.\n\n\"[ROOT.Char.Custom('FormOfAddressForLiege')|U], you simply #EMP must#! read this! It has the official seal of [rival_realm.GetNameNoTier], but every other word is spelled like it was written by an illiterate commoner. Those scatterbrained sluggards can't even use the right consonants, much less speak good [ROOT.Char.GetCourtLanguage.GetName], and it's #EMP hilarious#!.\""
+
+ # "Active Peasantry" — levies modifier name
+ ep1_2000_levies_modifier:0 "Active Commonfolk"
+
+ # ── EP3 LAAMP Decision Events ─────────────────────────────────────────────────
+
+ # "local peasants are returning from service in a nearby stone church"
+ ep3_laamp_decision_event.1000.desc_outro_regional_europe_returned_03:0 "\n\nOn my left, local commoners are returning from service in a nearby stone church. The minister standing at the entrance gives me an inscrutable smile as I pass by."
+
+ # "a peasant finishes a crude joke"
+ ep3_laamp_decision_event.1030.desc_outro_return_partner_02:0 "\n\nOn my right, [visiting_partner.GetFirstName] grins appreciatively as a commoner finishes a crude joke involving several bodily fluids. I shoot [visiting_partner.GetHerHim] a surprised look, as I weigh what to do next."
+
+ # "chatting up a peasant [man/woman]"
+ ep3_laamp_decision_event.1030.desc_outro_return_02:0 "\n\nAt the back of the [ROOT.Char.Custom('GetRoomTent')], a noble[ROOT.Char.GetWomanMan] is busy chatting up a commoner [ROOT.Char.Custom('GetRandomWomanMan')]. My eyes linger on the noble[ROOT.Char.Custom('WomanManPossessive')] coat of arms while I weigh what to do next."
+
+ # "heckle from the peasant crowd"
+ ep3_laamp_decision_event.1040.desc_outro_physician:0 "\n\nAt the edge of the square, a devotee is preaching how better bodily health will increase our spiritual health. [laamp_physician_recruit.GetSheHe|U] stands firm despite the occasional heckle from the commoner crowd."
+
+ # ── EP3 LAAMP Modifiers ───────────────────────────────────────────────────────
+
+ # "The peasantry have come to regard this character as a folk hero"
+ laamp_prepping_for_invasion_desc:0 "The commonfolk have come to regard this character as a folk hero who will save them from high taxes and tyranny."
+
+ # "popular support of peasants within the lands they travel"
+ laamp_familiar_lands_desc:0 "This character is enjoying the popular support of commoners within the lands they travel."
+
+ # ── EP3 Governor Modifiers ────────────────────────────────────────────────────
+
+ # "Peasant Concessions"
+ ep3_governor_yearly_8150_concession_modifier:0 "Commoner Concessions"
+
+ # "a surplus of fit peasants of fighting age"
+ ep3_surplus_manpower_desc:0 "This county has a surplus of fit commoners of fighting age."
+
+ # "Sided with Peasants"
+ sided_with_peasants_opinion:0 "Sided with Commoners"
+
+ # ── EP3 El Cid Story Cycle ────────────────────────────────────────────────────
+
+ # "forced open the doors of the peasantry to secure shelter"
+ cid_opened_doors_modifier_desc:0 "This character forced open the doors of the commonfolk to secure shelter for their followers."
+
+ # ── Great Projects ────────────────────────────────────────────────────────────
+
+ # "from the humblest peasant to the wisest scholar"
+ great_project_type_mandala_capital_05_contribution_work_force_desc:0 "We shall provide laborers of every skill, from the humblest commoner to the wisest scholar, drawn from every corner of the realm, to assist in the construction of the $building_mandala_capital_05$."
+
+ # ── Historical Characters ─────────────────────────────────────────────────────
+
+ # "A peasant by birth, he rose through valor"
+ historical_character.pham_ngu_lao:0 "Famed general of the Tran dynasty who helped repel multiple Mongol invasions in the 13th century. A commoner by birth, he rose through valor and became a symbol of patriotism (also subject of a famous poem highlighting his dedication)."
+
+ # ── LAAMP Contract Schemes ────────────────────────────────────────────────────
+
+ # "The alerted peasants quickly join"
+ laamp_base_contract_schemes.6021.desc.random_child:0 "The alerted commoners quickly join [dummy_gender.GetHerHim]: \"Is this the best that our [employer.GetLadyLord]ship has to offer?\"\n\nBut the mumbling ends as soon as [employer.GetTitledFirstName] enters the square, stopping [employer.GetHerHis] horse before me:"
+
+ # "you just need to impress these peasants"
+ laamp_base_contract_schemes.6021.desc.outro:0 "\"An easy windfall, wouldn't you say? You just need to impress these commoners.\""
+
+ # "popular with the peasantry and [employer]"
+ laamp_base_contract_schemes.5002.desc:0 "My band and I have cloaked ourselves in glory with this hunt: [employer.Custom('GetOutOfControlAnimalTypePlural')] aplenty lie dead at our hand, making us popular with the commonfolk and [employer.GetTitledFirstName] alike, and the harvest we've taken in from the wilds is bountiful indeed.\n\nOur baggage laden with fur and food, we've made more than enough to replenish our lost arrows and splintered spears."
+
+ # "leading peasant mobs to chant and burn"
+ laamp_extra_contract_schemes.0001.desc_martial:0 "[task_contract_target.GetTitledFirstName] seems a reasonable-enough [task_contract_target.GetWomanMan]. When my hardened followers start bruising [task_contract_target.GetHerHis] local functionaries, will [task_contract_target.GetSheHe] bristle? When we start leading commoner mobs to chant and burn, will [task_contract_target.GetSheHe] fight back? No, better to simply agree to [task_contract_employer.GetTitledFirstNamePossessive] terms..."
+
+ # "poorer than peasants, a state that we ourselves know all too well"
+ laamp_base_contract_schemes.1782.desc.victim_type.laamp:0 "It is patently obvious that, like us, this is an adventuring party moving about in search of fresh lodgings for the night. They might be richer than kings or poorer than commoners, a state that we ourselves know all too well."
+
+ # "no mealy-mouthed peasant is going to get between us and our payday"
+ laamp_base_contract_schemes.2541.desc.fluff_type.paranoia:0 "The people of [location.GetNameNoTier] react to our arrival with barely-restrained hostility.\n\nIt's clear that they consider the updating of [employer.GetTitledFirstNamePossessive] records to be a #EMP sure#! sign of something poor on the horizon, be it conflict or a poll tax, and our inquiries are frequently rebuffed.\n\nStill, we've a job to do and no mealy-mouthed commoner is going to get between us and our payday."
+
+ # "petty landholders and privileged peasantry"
+ laamp_base_contract_schemes.2661.desc:0 "The dispute in [employer.GetPrimaryTitle.GetBaseNameNoTier] stems from a minor local legal case: our employer foolishly ruled a particular natural landmark to have a slightly different boundary than was traditional.\n\nImmediately, dozens of cases were sprung by petty landholders and privileged commonfolk, all of whom had some grievance or other now raised by the change in definition."
+
+ # "these meager peasants"
+ laamp_base_contract_schemes.5661.desc.opportunity.06:0 "There's no room for pity, no space to acknowledge the harm we're doing to these meager commoners. Their animals will go to us, or we will put them to the sword — that's simply all there is to it."
+
+ # "a wealthy peasant coming past our picking grounds"
+ laamp_base_contract_schemes.5901.desc.intro.5:0 "After a largely fruitless day, with nary so much as a wealthy commoner coming past our picking grounds, we finally catch a bit of luck with a [victim.GetWomanMan] of clear means."
+
+ # ── Single Combat Events ──────────────────────────────────────────────────────
+
+ # "tone what one would use for a misbehaving serf, not a [title]"
+ single_combat.0001.desc.opponent_response.martial_voice:0 "[my_foe.GetFirstNamePossessiveNoTooltip] [my_foe.Custom('signature_weapon')] moves into a lazy defensive position, and [my_foe.GetSheHe] begins shouting me down, [my_foe.GetHerHis] tone what one would use for a misbehaving bonded worker, not a [myself.GetTitleAsNameNoTooltip]."
+
+ # "killing terrified peasants at the head of an army"
+ single_combat.0031.desc.sc_attacker.butchery:0 "As it transpires, killing terrified commoners at the head of an army of professional raiders is somewhat different to single combat with one staunch foe.\n\nTechniques that terrify children, the ill, and the old simply don't have the same effect on my opponent, who takes advantage of my easy over-confidence to"
+
+ # ── TGP Japan ─────────────────────────────────────────────────────────────────
+
+ # "referring to a serf who had fled their master's land" — Rōnin glossary entry
+ RONIN_GLOSS:0 "#bold Rōnin#! — literally #EMP wave-person#! — originated as a term in the late Nara period, referring to a bonded worker who had fled their master's land. It later came to refer to samurai who had no master, either due to their death or the loss of their favor or status. Being unemployed, with few skills beyond fighting, many Rōnin resorted to crime in order to survive."
+
+ # "Peasant and Populist [factions] are more common" — doctrine parameter
+ doctrine_parameter_peasant_and_populist_factions_more_common:0 "Commoner and Populist [factions|E] are more common and more powerful"

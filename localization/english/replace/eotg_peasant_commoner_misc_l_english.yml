@@ -1,0 +1,166 @@
+﻿l_english:
+ # ── Peasant → Commoner — EotG Setting Overrides (Misc Events) ────────────────
+ # Sources: activities/playdate_events_l_english.yml,
+ #          artifact_events_l_english.yml,
+ #          councillor_task_events/councillor_spouse_events/councillor_spouse_martial_events_l_english.yml,
+ #          councillor_task_events/marshal_task_events_l_english.yml,
+ #          councillor_task_events/steward_task_events_l_english.yml,
+ #          court_events/01_ep3_court_events_3_l_english.yml,
+ #          court_events/court_events_george_l_english.yml,
+ #          court_events/court_events_isabella_l_english.yml,
+ #          decisions/major_decisions_other_l_english.yml,
+ #          tribal_events_l_english.yml,
+ #          laamp_events_l_english.yml,
+ #          lifestyle/governance/stewardship_wealth_events_l_english.yml,
+ #          intrigue_events/intrigue_dread_events_l_english.yml,
+ #          intrigue_events/intrigue_scheming_events_l_english.yml,
+ #          lifestyle/nickname_events_l_english.yml,
+ #          lifestyle/learning/learning_medicine_events_l_english.yml,
+ #          sell_titles_l_english.yml,
+ #          subject_extortion_events_l_english.yml,
+ #          lifestyle/wanderer/internal_affairs_l_english.yml
+ # Replaces: "peasant/peasants/peasantry" → "commoner/commoners/commonfolk".
+ # ─────────────────────────────────────────────────────────────────────────────
+
+ # ── Playdate Events ───────────────────────────────────────────────────────────
+
+ # "the peasant [GirlBoy]" + "the peasant standing above"
+ playdate.3001.desc:0 "I thought [guest.Custom2('MyCharacterIntroduction', ROOT.Char)] and the commoner [peasant_child.Custom('GirlBoy')] were merely pretending to fight, but suddenly there is blood in the dirt.\n\n[guest.GetFirstNameNoTooltip] hits the ground with a grunt, and the commoner standing above [guest.GetHerHim] moves to attack again."
+
+ # "watching some peasants train"
+ playdate.3012.desc_no_knight:0 "[participant.Custom2('MyCharacterIntroduction', ROOT.Char)|U] and I are watching some commoners train when one of them approaches us with a smile."
+
+ # "helped a peasant girl assail"
+ playdate_joined_beating_log:0 "[CHARACTER.GetTitledFirstName] helped a commoner girl assail [TARGET_CHARACTER.GetTitledFirstName] and discovered a taste for bullying this victim"
+
+ # ── Artifact Events ───────────────────────────────────────────────────────────
+
+ # "Nobles and peasants alike"
+ artifact.4000.cursed_desc:0 "[this_artifact.GetDesc]\n\nNobles and commoners alike fall silent or call on divine protection in the presence of this item, which is famed to be cursed."
+
+ # ── Councillor Spouse: Martial ────────────────────────────────────────────────
+
+ # "peasants are milling about the tourney"
+ councillor_spouse_martial.1001.desc:0 "The sun is shining and commoners are milling about the tourney hosted by my [ROOT.Char.Custom2('RelationToMe', SCOPE.sC('councillor'))]. All my $knight_culture_player_plural_no_tooltip_lowercase$ cheer as [councillor.GetTitledFirstName] announces the tournament in their honor, and for once I get to simply sit and watch.\n\nI am not going to spend an entire tourney day stuck to a throne, however!"
+
+ # ── Marshal Tasks ─────────────────────────────────────────────────────────────
+
+ # "more peasants are rounded up"
+ marshal_task.1001.desc:0 "The harsh recruitment practices of my [councillor.GetCouncilTitle], [councillor.GetTitledFirstName], seem to be having the opposite of the intended effect.\n\nWhile more commoners are rounded up in the towns and villages, large numbers are fleeing from [councillor.GetFirstNamePossessive] troops to escape their obligations of servitude!"
+
+ # "[knight] Subdues Peasantry"
+ marshal_task.3103.notification:0 "[acclaimed_knight] Subdues Commonfolk"
+
+ # ── Steward Tasks ─────────────────────────────────────────────────────────────
+
+ # "The peasants are complaining"
+ steward_task.2001.desc:0 "The commoners are complaining about the interference of my [councillor.GetCouncilTitle] in the [county.GetName]! [councillor.GetTitledFirstNamePossessive] diversion of workers from all over the [county.GetTitleTierName] means that other construction projects already under way are rarely finished."
+
+ # "the peasants are calling for"
+ steward_task.2002.desc:0 "My dear [councillor.Custom2('RelationToMe', ROOT.Char)],\nMy efforts to aid the [county.GetName], and guide the continued development of land there, has been poorly received. Indeed, one might say that the commoners are calling for, well, my "head on a pike", as it were. Some of that anger seems to be directed at you, as well, even though all of it is entirely unjustified."
+
+ # "some peasants willingly conscript themselves"
+ steward_task.3103.desc:0 "Something strange has occurred, thanks to [councillor.GetTitledFirstNamePossessive] efforts to introduce [ROOT.Char.GetCulture.GetName] settlers in [county.GetNameNoTier].\n\nThe locals seem to have developed a greater understanding of their part of the realm, and when it comes time to fight for it, each village does what it can to send their best able-bodied [ROOT.Char.Custom('LevyMenWomen')] to serve. In fact, some commoners willingly conscript themselves!"
+
+ # ── EP3 Court Events ──────────────────────────────────────────────────────────
+
+ # "We all eat like peasants"
+ court_events.3010.desc:0 ""I beg of you, [ROOT.Char.Custom2('RelationToMeAddress', SCOPE.sC('courtier'))]," [courtier.Custom2('MyCharacterIntroduction', ROOT.Char)] approaches me with pleading eyes.\n\n"You need to do something about the food served at court! We all eat like commoners, foreign emissaries grimace at our table, and neighboring rulers and artists use our traditional dishes as examples of poor taste and barbaric habits!""
+
+ # "like #EMP peasants!#!"
+ court_events.3020.desc:0 "[courtier.Custom2('MyCharacterIntroduction', ROOT.Char)|U] is looking particularly miserable today.\n\n"We live like animals at this court! Or worse, like #EMP commoners!#! The rooms are crowded, whole families are piling in the same bed, chamberpots discarded everywhere; we roll and wallow in our filth and smell...""
+
+ # ── Court Events: George ──────────────────────────────────────────────────────
+
+ # "a peasant's table"
+ court.7300.desc:0 "Attempts on my life are expected, and therefore the people I rely on for security must remain loyal and well-disposed towards me. Today however, my designated $food_taster_court_position$ [taster.GetFirstName] looks utterly disgusted, and a bit green, as I check in with [taster.GetHerHim].\n\n "[ROOT.Char.Custom('FormOfAddressForLiege')|U], I just cannot stand it anymore. The food your court serves is utterly #EMP vile!#! I cannot believe you eat this gruel #EMP night after night after night..."#!\n\n"...This muck is hardly fit for a commoner's table!""
+
+ # "#EMP Peasant's table?#!"
+ court.7300.a:0 "#EMP Commoner's table? #!We must fix this at once!"
+
+ # ── Court Events: Isabella ────────────────────────────────────────────────────
+
+ # "so many peasants have nine fingers"
+ court.4500.h:0 "So #EMP this #!is why so many commoners have nine fingers nowadays."
+
+ # ── Major Decisions ───────────────────────────────────────────────────────────
+
+ # "peasants who do not ask questions"
+ major_decisions.0200.desc:0 "Though I am used to a strict hierarchical system and commoners who do not ask questions when tilling the fields, I find myself ruling nothing but unruly tribespeople. These people do not respect me, they only respect strength.\n\nI will show them strength! I will shed the trappings of majesty that my subjects loathe and seize their hearts with a raised sword!"
+
+ # ── Tribal Events ─────────────────────────────────────────────────────────────
+
+ # "Let the peasantry utilize it best they can."
+ tribal.1303.c:0 "Let the commonfolk utilize it best they can."
+
+ # ── LAAMP Events ──────────────────────────────────────────────────────────────
+
+ # "where the peasantry negotiate hardest"
+ handcrafted_map_desc.people.rural:0 "noting the habits and reputations of people from the many rural areas: where the commonfolk negotiate hardest, who grows the best grapes, and where they are most likely to grow a little too... familialy intimate."
+
+ # "[culture] peasants we see"
+ ep3_laamp_flavour_ewan.4081.desc.intro:0 "At first, it's just a few gaunt [current_county.GetCountyData.GetCulture.GetName] commoners we see. They appear in the distance, or peeking around little features of the terrain, fleeing when we we notice them.\n\nHours pass, the skittish locals eyeing us from afar all the while.\n\nJust they seem to have finally backed off, a cry goes up, and a frenzied horde surges at us from the cover of a ridge. Wild-eyed and emaciated,"
+
+ # ── Stewardship Wealth Events ─────────────────────────────────────────────────
+
+ # "Raise additional taxes from the peasants."
+ stewardship_wealth.1021.a:0 "Raise additional taxes from the commoners."
+
+ # "A learned peasant?"
+ stewardship_wealth.1051.a.arrogant:0 "A learned commoner? How novel! You #EMP must#! join my court!"
+
+ # "a peasant by the name of"
+ stewardship_wealth.6001.desc:0 "While traveling across the [stall_county.Custom('TerrainTypeCountyScope')] of the [stall_county.GetName], I find a makeshift looking stall by the side of the track.\n\nAs I stop to take a look, a commoner by the name of [stall_owner.GetFirstName] jumps into action, trying to convince me to buy one of the small [stall_owner.GetFaith.ReligiousSymbol] carvings [stall_owner.GetSheHe] has on sale.\n\n"I make them by hand, [ROOT.Char.Custom('FormOfAddressForLiege')], each one takes me hours of work.""
+
+ # ── Intrigue: Dread Events ────────────────────────────────────────────────────
+
+ # "from the peasantry"
+ intrigue_dread_special.1197.desc:0 "I will admit my first performance may have been somewhat lacking... Putting the entire troupe on the stocks was met with a much more favorable reaction from the commonfolk. Well, perhaps not exactly #EMP favorable#!, but certainly satisfying."
+
+ # ── Intrigue: Scheming Events ─────────────────────────────────────────────────
+
+ # "The peasants are angered by your behavior"
+ intrigue_scheming.1401.b.penalty:0 "The commoners are angered by your behavior"
+
+ # ── Lifestyle: Nickname Events ────────────────────────────────────────────────
+
+ # "Peasants wave gladly to my retinue"
+ lifestyle_nicknames.0004.desc:0 "All the hard work spent on perfecting my statecraft has left internal and foreign relations in an excellent state. Commoners wave gladly to my retinue in the streets, and I know most of my courtiers by name.\n\nI think I have made a name for myself, but what might it be?"
+
+ # "lips of peasant and noble alike"
+ lifestyle_nicknames.1000.desc_good:0 ""They call you #EMP '[nickname_getter.GetTitledFirstNameNicknamedNoTooltip]'#!, spectacular, is it not? It's on the lips of commoner and noble alike."
+
+ # ── Learning: Medicine Events ─────────────────────────────────────────────────
+
+ # "The peasant reveals [her/his] secrets"
+ learning_medicine_special.2100.b.tt_success:0 "The commoner reveals [fish_alchemist.GetHerHis] secrets"
+
+ # "Associates with Strange Peasants" — modifier name
+ associates_with_strange_peasants_modifier:0 "Associates with Strange Commoners"
+
+ # "time-wasting peasants" — modifier desc
+ aloof_from_the_commoners_modifier_desc:0 "This character has a reputation for turning away time-wasting commoners."
+
+ # ── Sell Titles Events ────────────────────────────────────────────────────────
+
+ # "haggle at a peasant's market"
+ sell_titles.0001.b:0 "This is not a haggle at a commoner's market!"
+
+ # ── Subject Extortion Events ──────────────────────────────────────────────────
+
+ # "Extort Subjects: Peasants" — event title
+ subject_extortion.0002.t:0 "Extort Subjects: Commoners"
+
+ # "The peasants of the [county]" + "that peasants always do"
+ subject_extortion.0002.desc:0 "The commoners of the [extortion_target.GetName] seem to be doing better than one might expect from the taxes I have collected there. An extra contribution to my treasury should do no harm.\n\nOh, they will complain, but is that not what commoners always do? They will live through this, I am sure of it."
+
+ # ── Internal Affairs (Wanderer) ───────────────────────────────────────────────
+
+ # "The peasants of [county]"
+ internal_affairs.50.desc:0 "The commoners of [tensions_county.GetNameNoTier] do not seem to have given their trust, nor affections to [tensions_county.GetHolder.GetName]. There is no speculation about the cause of such unease, as [target_faith.GetAdherentNameNoTooltip] monuments are being desecrated, and with the uptick in brawls involving [target_faith.GetAdherentNamePluralNoTooltip] and [opposing_faith.GetAdherentNamePluralNoTooltip] alike."
+
+ # "assist the peasants in asserting"
+ internal_affairs.tolerance_desc:0 "You attempt to assist the commoners in asserting their right to practice [target_faith.GetNameNoTooltip]."
+
+ # "convert the peasants of [county]"
+ internal_affairs.conversion_desc:0 "You attempt to convert the commoners of [tensions_county.GetNameNoTierNoTooltip] to [opposing_faith.GetNameNoTooltip]."

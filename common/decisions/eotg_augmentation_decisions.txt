@@ -1,0 +1,151 @@
+# ── eotg_augmentation_decisions.txt ─────────────────────────────────────────
+# Decisions for the Cybernetic Augmentation system.
+#
+# eotg_decision_partial_removal       — Enhanced → Augmented regression (gold + stress gate)
+# eotg_decision_overclock_regression  — Overclocked → Enhanced regression (gold + stress gate)
+# eotg_decision_maintenance_protocol  — Periodic calibration (all tiers, reduces fracture risk)
+# ─────────────────────────────────────────────────────────────────────────────
+
+eotg_decision_partial_removal = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_misc.dds"
+    }
+    ai_check_interval = 120
+
+    is_shown = {
+        has_trait = eotg_enhanced
+    }
+
+    is_valid = {
+        gold >= 150
+        stress >= 100
+    }
+
+    is_valid_showing_failures_only = {
+        gold >= 150
+    }
+
+    cost = { gold = 150 }
+
+    effect = {
+        remove_trait = eotg_enhanced
+        add_trait = eotg_augmented
+        eotg_apply_edu_synergy_augmented = yes
+        remove_character_modifier = eotg_mod_enh_martial_bonus
+        remove_character_modifier = eotg_mod_enh_steward_bonus
+        remove_character_modifier = eotg_mod_enh_intrigue_bonus
+        remove_character_modifier = eotg_mod_enh_learning_bonus
+        remove_character_modifier = eotg_mod_enh_diplomacy_bonus
+        stress_impact = { base = medium_stress_impact_loss }
+        custom_tooltip = eotg_decision_partial_removal_tooltip
+    }
+
+    ai_potential = {
+        stress >= 200
+    }
+    ai_will_do = {
+        base = 5
+        modifier = { add = 20  stress >= 300 }
+        modifier = { add = 10  has_trait = content }
+        modifier = { add = -15  has_trait = ambitious }
+    }
+}
+
+
+eotg_decision_overclock_regression = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_misc.dds"
+    }
+    ai_check_interval = 120
+
+    is_shown = {
+        has_trait = eotg_overclocked
+    }
+
+    is_valid = {
+        gold >= 400
+        stress >= 200
+    }
+
+    is_valid_showing_failures_only = {
+        gold >= 400
+    }
+
+    cost = { gold = 400 }
+
+    effect = {
+        remove_trait = eotg_overclocked
+        add_trait = eotg_enhanced
+        eotg_apply_edu_synergy_enhanced = yes
+        remove_character_modifier = eotg_mod_oc_martial_bonus
+        remove_character_modifier = eotg_mod_oc_steward_bonus
+        remove_character_modifier = eotg_mod_oc_intrigue_bonus
+        remove_character_modifier = eotg_mod_oc_learning_bonus
+        remove_character_modifier = eotg_mod_oc_diplomacy_bonus
+        add_character_modifier = { modifier = eotg_mod_oc_regression_recovery  years = 5 }
+        stress_impact = { base = medium_stress_impact_loss }
+        custom_tooltip = eotg_decision_overclock_regression_tooltip
+    }
+
+    ai_potential = {
+        stress >= 300
+    }
+    ai_will_do = {
+        base = 3
+        modifier = { add = 20  stress >= 350 }
+        modifier = { add = 10  has_trait = content }
+        modifier = { add = -20  has_trait = ambitious }
+        modifier = { add = -10  has_trait = brave }
+    }
+}
+
+
+eotg_decision_maintenance_protocol = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_misc.dds"
+    }
+    ai_check_interval = 60
+
+    is_shown = {
+        OR = {
+            has_trait = eotg_augmented
+            has_trait = eotg_enhanced
+            has_trait = eotg_overclocked
+        }
+    }
+
+    is_valid = {
+        gold >= 50
+        NOT = { has_character_flag = eotg_flag_maintenance_cooldown }
+    }
+
+    is_valid_showing_failures_only = {
+        gold >= 50
+    }
+
+    cost = { gold = 50 }
+
+    effect = {
+        add_character_flag = { flag = eotg_flag_maintenance_cooldown  years = 3 }
+        add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 3 }
+        if = {
+            limit = { has_trait = eotg_overclocked }
+            eotg_add_fracture_risk = { AMOUNT = -8 }
+        }
+        stress_impact = { base = minor_stress_impact_loss }
+        custom_tooltip = eotg_decision_maintenance_protocol_tooltip
+    }
+
+    ai_potential = {
+        OR = {
+            has_trait = eotg_overclocked
+            gold >= 100
+        }
+    }
+    ai_will_do = {
+        base = 10
+        modifier = { add = 30  has_trait = eotg_overclocked }
+        modifier = { add = 20  stress >= 200 }
+        modifier = { add = -10  has_trait = callous }
+    }
+}

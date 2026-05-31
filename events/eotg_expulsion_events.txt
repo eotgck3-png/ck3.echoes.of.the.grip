@@ -1,0 +1,1212 @@
+# ── eotg_expulsion_events.txt ─────────────────────────────────────────────────
+# Cultural Displacement Chain — The Edict of Displacement
+#
+# eotg_expulsion.0001 — The Edict of Displacement    (elven expeller)
+# eotg_expulsion.0002 — The Refugees At Our Door     (neighboring ruler)
+# eotg_expulsion.0003 — The Desperate Stand          (ruler who drove them off)
+# eotg_expulsion.0004 — A Problem Resolved           (elven expeller notification)
+# eotg_expulsion.0005 — An Uninvited Migration       (third ruler — chain deflected)
+# eotg_expulsion.0006 — The Dust Settles             (military aftermath beat)
+#
+# All option outcomes are probabilistic. Attribute modifiers shift the weight
+# distribution but never guarantee a result.
+#
+# Fires from: Wire eotg_expulsion.0001 to a yearly elven ruler on_action or
+#             the eotg_elven_monarchy government event pulse.
+# ─────────────────────────────────────────────────────────────────────────────
+
+namespace = eotg_expulsion
+
+
+# ── eotg_expulsion.0001 ──────────────────────────────────────────────────────
+# The Edict of Displacement
+# Elven ruler decides to clear non-elven culture populations from held sectors.
+
+eotg_expulsion.0001 = {
+    type = character_event
+    title = eotg_expulsion.0001.t
+    desc = eotg_expulsion.0001.desc
+    theme = culture_change
+
+    trigger = {
+        culture = { has_cultural_pillar = heritage:eotg_heritage_elf }
+        any_sub_realm_county = {
+            culture = { NOT = { has_cultural_pillar = heritage:eotg_heritage_elf } }
+        }
+        any_neighboring_realm_owner = { is_ruler = yes  NOT = { this = root } }
+        NOT = { has_character_flag = eotg_expulsion_edict_issued }
+    }
+
+    left_portrait = { character = root  animation = authority }
+    right_portrait = {
+        character = scope:eotg_expelled_rep
+        animation = fear
+        trigger = { exists = scope:eotg_expelled_rep }
+    }
+
+    immediate = {
+        random_sub_realm_county = {
+            limit = { culture = { NOT = { has_cultural_pillar = heritage:eotg_heritage_elf } } }
+            save_scope_as = eotg_origin_county
+        }
+        random_courtier_or_guest = {
+            limit = { culture = scope:eotg_origin_county.culture }
+            save_scope_as = eotg_expelled_rep
+        }
+        random_neighboring_realm_owner = {
+            limit = { is_ruler = yes  NOT = { this = root } }
+            save_scope_as = eotg_expulsion_receiver
+        }
+        scope:eotg_expulsion_receiver = {
+            set_variable = { name = eotg_expulsion_expeller  value = root }
+            set_variable = { name = eotg_refugee_culture     value = scope:eotg_origin_county.culture }
+            set_variable = { name = eotg_refugee_faith       value = scope:eotg_origin_county.faith }
+        }
+        add_character_flag = { flag = eotg_expulsion_edict_issued years = 20 }
+    }
+
+    # ── Option A: Formal relocation orders ───────────────────────────────────
+    # Outcome shifts on diplomacy + stewardship.
+    option = {
+        name = eotg_expulsion.0001.a
+
+        add_character_modifier = { modifier = eotg_expulsion_exile_edict_issued years = 10 }
+
+        random_list = {
+            # Smooth — population relocates efficiently under structured mandate
+            55 = {
+                modifier = { add = 20  diplomacy >= 14 }
+                modifier = { add = 10  stewardship >= 12 }
+                modifier = { add = 10  has_trait = administrator }
+                modifier = { add = -15  has_trait = arbitrary }
+                every_sub_realm_county = {
+                    limit = { culture = scope:eotg_origin_county.culture }
+                    add_county_modifier = { modifier = eotg_expulsion_relocation_zone years = 3 }
+                }
+                add_prestige = 150
+            }
+            # Friction — local resistance forces costly renegotiation
+            30 = {
+                modifier = { add = 10  diplomacy <= 8 }
+                modifier = { add = 5   has_trait = arbitrary }
+                modifier = { add = -10  diplomacy >= 14 }
+                every_sub_realm_county = {
+                    limit = { culture = scope:eotg_origin_county.culture }
+                    add_county_modifier = { modifier = eotg_expulsion_relocation_zone years = 5 }
+                }
+                remove_short_term_gold = 50
+                add_prestige = 75
+            }
+            # Resistance — a sector refuses and digs in; mandate stalls
+            15 = {
+                modifier = { add = 10  diplomacy <= 6 }
+                modifier = { add = 10  has_trait = lazy }
+                modifier = { add = -10  diplomacy >= 14 }
+                modifier = { add = -5   stewardship >= 14 }
+                scope:eotg_origin_county = {
+                    add_county_modifier = { modifier = eotg_expulsion_contested_sector years = 5 }
+                }
+                add_prestige = 25
+                stress_impact = { base = minor_stress_impact_gain }
+            }
+        }
+
+        scope:eotg_expulsion_receiver = {
+            trigger_event = { id = eotg_expulsion.0002 days = 30 }
+        }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = patient }
+            modifier = { add = 10  has_trait = administrator }
+        }
+    }
+
+    # ── Option B: Delegate to local prefects ─────────────────────────────────
+    # Outcome shifts on stewardship. Lazy rulers risk corruption.
+    option = {
+        name = eotg_expulsion.0001.b
+
+        add_character_modifier = { modifier = eotg_expulsion_exile_edict_issued years = 10 }
+
+        random_list = {
+            # Efficient delegation — prefects are competent
+            50 = {
+                modifier = { add = 20  stewardship >= 14 }
+                modifier = { add = -15  has_trait = lazy }
+                every_sub_realm_county = {
+                    limit = { culture = scope:eotg_origin_county.culture }
+                    add_county_modifier = { modifier = eotg_expulsion_relocation_zone years = 4 }
+                }
+                add_prestige = 75
+            }
+            # Patchy — some sectors go unaddressed
+            35 = {
+                modifier = { add = 10  stewardship <= 8 }
+                modifier = { add = 5   has_trait = cynical }
+                modifier = { add = -10  stewardship >= 14 }
+                scope:eotg_origin_county = {
+                    add_county_modifier = { modifier = eotg_expulsion_relocation_zone years = 6 }
+                }
+                add_prestige = 40
+            }
+            # Corruption — a prefect pockets the relocation budget and does nothing
+            15 = {
+                modifier = { add = 15  has_trait = lazy }
+                modifier = { add = 10  has_trait = cynical }
+                modifier = { add = -15  stewardship >= 14 }
+                remove_short_term_gold = 100
+                add_prestige = 25
+            }
+        }
+
+        scope:eotg_expulsion_receiver = {
+            trigger_event = { id = eotg_expulsion.0002 days = 45 }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = lazy }
+            modifier = { add = 15  has_trait = arbitrary }
+        }
+    }
+
+    # ── Option C: Sanctified Wardens enforce directly ────────────────────────
+    # Outcome shifts on martial. Cruelty helps; compassion costs.
+    option = {
+        name = eotg_expulsion.0001.c
+
+        add_character_modifier = { modifier = eotg_expulsion_exile_edict_issued years = 10 }
+        stress_impact = {
+            compassionate = major_stress_impact_gain
+            just = minor_stress_impact_gain
+        }
+
+        random_list = {
+            # Effective — swift, complete, silent
+            45 = {
+                modifier = { add = 20  martial >= 14 }
+                modifier = { add = 10  has_trait = callous }
+                modifier = { add = 10  has_trait = zealous }
+                modifier = { add = -15  has_trait = compassionate }
+                every_sub_realm_county = {
+                    limit = { culture = scope:eotg_origin_county.culture }
+                    add_county_modifier = { modifier = eotg_expulsion_relocation_zone years = 2 }
+                }
+                add_dread = 25
+                add_prestige = 250
+            }
+            # Bloody — efficient but atrocity reports leak out
+            35 = {
+                modifier = { add = 10  martial >= 10 }
+                modifier = { add = -10  martial <= 6 }
+                every_sub_realm_county = {
+                    limit = { culture = scope:eotg_origin_county.culture }
+                    add_county_modifier = { modifier = eotg_expulsion_relocation_zone years = 3 }
+                }
+                add_dread = 15
+                add_prestige = 150
+                add_piety = -100
+            }
+            # Backlash — excessive force shocks neighboring rulers into action
+            20 = {
+                modifier = { add = 20  martial <= 6 }
+                modifier = { add = 10  has_trait = just }
+                modifier = { add = -15  has_trait = callous }
+                modifier = { add = -10  martial >= 14 }
+                every_sub_realm_county = {
+                    limit = { culture = scope:eotg_origin_county.culture }
+                    add_county_modifier = { modifier = eotg_expulsion_relocation_zone years = 4 }
+                }
+                add_dread = 10
+                add_prestige = 100
+                add_piety = -200
+                add_legitimacy = -10
+                scope:eotg_expulsion_receiver = {
+                    add_opinion = { target = root  modifier = eotg_expulsion_opinion_proximity_grievance }
+                }
+            }
+        }
+
+        scope:eotg_expulsion_receiver = {
+            set_variable = { name = eotg_expulsion_violent value = 1 }
+            trigger_event = { id = eotg_expulsion.0002 days = 14 }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = callous }
+            modifier = { add = 20  has_trait = zealous }
+            modifier = { add = -30  has_trait = compassionate }
+        }
+    }
+}
+
+
+# ── eotg_expulsion.0002 ──────────────────────────────────────────────────────
+# The Refugees At Our Door
+# The neighboring ruler decides. Every path has a probabilistic outcome;
+# trait gates determine which options are visible, attributes determine
+# how well each plays out.
+
+eotg_expulsion.0002 = {
+    type = character_event
+    title = eotg_expulsion.0002.t
+    desc = {
+        triggered_desc = {
+            trigger = { has_variable = eotg_expulsion_violent }
+            desc = eotg_expulsion.0002.desc_violent
+        }
+        desc = eotg_expulsion.0002.desc
+    }
+    theme = diplomacy
+
+    left_portrait = { character = root  animation = worry }
+    right_portrait = {
+        character = scope:eotg_expulsion_expeller_char
+        animation = authority
+        trigger = { exists = scope:eotg_expulsion_expeller_char }
+    }
+
+    immediate = {
+        var:eotg_expulsion_expeller = { save_scope_as = eotg_expulsion_expeller_char }
+        var:eotg_refugee_culture    = { save_scope_as = eotg_refugee_culture_scope }
+        var:eotg_refugee_faith      = { save_scope_as = eotg_refugee_faith_scope }
+        random_sub_realm_county = {
+            save_scope_as = eotg_refuge_county
+        }
+        random_neighboring_realm_owner = {
+            limit = {
+                is_ruler = yes
+                NOT = { this = scope:eotg_expulsion_expeller_char }
+                NOT = { this = root }
+            }
+            save_scope_as = eotg_third_ruler
+        }
+    }
+
+    # ── Option A: Accept them ─────────────────────────────────────────────────
+    # Quality of integration shifts on diplomacy and social traits.
+    option = {
+        name = eotg_expulsion.0002.a
+        trigger = {
+            OR = {
+                has_trait = compassionate
+                has_trait = just
+                has_trait = gregarious
+                diplomacy >= 14
+            }
+        }
+
+        random_list = {
+            # Thriving — refugees integrate well; county culture and faith flip fully
+            45 = {
+                modifier = { add = 20  diplomacy >= 14 }
+                modifier = { add = 15  has_trait = gregarious }
+                modifier = { add = 10  has_trait = administrator }
+                modifier = { add = -20  has_trait = callous }
+                scope:eotg_refuge_county = {
+                    set_county_culture = scope:eotg_refugee_culture_scope
+                    set_county_faith = scope:eotg_refugee_faith_scope
+                    add_county_modifier = { modifier = eotg_expulsion_refugee_settlement years = 10 }
+                }
+                add_character_modifier = { modifier = eotg_expulsion_harboring_refugees years = 10 }
+                add_prestige = 75
+            }
+            # Stable — culture flips, faith holds, minor tension
+            35 = {
+                modifier = { add = 10  diplomacy >= 10 }
+                modifier = { add = -5   has_trait = callous }
+                scope:eotg_refuge_county = {
+                    set_county_culture = scope:eotg_refugee_culture_scope
+                    add_county_modifier = { modifier = eotg_expulsion_refugee_settlement years = 7 }
+                }
+                add_character_modifier = { modifier = eotg_expulsion_harboring_refugees years = 5 }
+                add_prestige = 50
+            }
+            # Troubled — integration fails; cultural friction destabilizes the sector
+            20 = {
+                modifier = { add = 15  diplomacy <= 8 }
+                modifier = { add = 15  has_trait = callous }
+                modifier = { add = 10  has_trait = cynical }
+                modifier = { add = -10  has_trait = just }
+                scope:eotg_refuge_county = {
+                    set_county_culture = scope:eotg_refugee_culture_scope
+                    add_county_modifier = { modifier = eotg_expulsion_integration_strife years = 8 }
+                }
+                add_prestige = -25
+            }
+        }
+
+        scope:eotg_expulsion_expeller_char = {
+            set_variable = { name = eotg_expulsion_receiver value = root }
+            trigger_event = { id = eotg_expulsion.0004 days = 30 }
+        }
+        ai_chance = {
+            base = 15
+            modifier = { add = 30  has_trait = compassionate }
+            modifier = { add = 20  has_trait = just }
+            modifier = { add = -30  has_trait = callous }
+        }
+    }
+
+    # ── Option B: Sell them a sector ─────────────────────────────────────────
+    # Quality of deal shifts on stewardship and greed.
+    option = {
+        name = eotg_expulsion.0002.b
+
+        random_list = {
+            # Profitable — refugees pay premium; culture and faith flip
+            40 = {
+                modifier = { add = 20  stewardship >= 14 }
+                modifier = { add = 10  has_trait = greedy }
+                modifier = { add = 5   diplomacy >= 12 }
+                scope:eotg_refuge_county = {
+                    set_county_culture = scope:eotg_refugee_culture_scope
+                    set_county_faith = scope:eotg_refugee_faith_scope
+                    add_county_modifier = { modifier = eotg_expulsion_refugee_settlement years = 10 }
+                }
+                add_character_modifier = { modifier = eotg_expulsion_harboring_refugees years = 5 }
+                add_gold = 300
+                add_prestige = 75
+            }
+            # Standard — fair exchange; culture flips
+            40 = {
+                modifier = { add = -5  stewardship >= 14 }
+                modifier = { add = -5  has_trait = greedy }
+                scope:eotg_refuge_county = {
+                    set_county_culture = scope:eotg_refugee_culture_scope
+                    set_county_faith = scope:eotg_refugee_faith_scope
+                    add_county_modifier = { modifier = eotg_expulsion_refugee_settlement years = 8 }
+                }
+                add_character_modifier = { modifier = eotg_expulsion_harboring_refugees years = 5 }
+                add_gold = 200
+                add_prestige = 50
+            }
+            # Defaulted — refugees can't pay in full; culture flips but with strife
+            20 = {
+                modifier = { add = 15  stewardship <= 6 }
+                modifier = { add = 10  has_trait = lazy }
+                modifier = { add = -20  stewardship >= 14 }
+                scope:eotg_refuge_county = {
+                    set_county_culture = scope:eotg_refugee_culture_scope
+                    add_county_modifier = { modifier = eotg_expulsion_integration_strife years = 6 }
+                }
+                add_gold = 75
+                add_prestige = -25
+            }
+        }
+
+        scope:eotg_expulsion_expeller_char = {
+            set_variable = { name = eotg_expulsion_receiver value = root }
+            trigger_event = { id = eotg_expulsion.0004 days = 30 }
+        }
+        ai_chance = {
+            base = 25
+            modifier = { add = 30  has_trait = greedy }
+            modifier = { add = 10  stewardship >= 14 }
+        }
+    }
+
+    # ── Option C: Drive them off ──────────────────────────────────────────────
+    # Outcome shifts on martial. High martial scatters them; low sends them to war.
+    option = {
+        name = eotg_expulsion.0002.c
+
+        set_variable = { name = eotg_expulsion_expeller  value = scope:eotg_expulsion_expeller_char }
+        set_variable = { name = eotg_refugee_culture     value = scope:eotg_refugee_culture_scope }
+        set_variable = { name = eotg_refugee_faith       value = scope:eotg_refugee_faith_scope }
+
+        random_list = {
+            # Scattered — enforcement is convincing; refugees disperse without organizing
+            30 = {
+                modifier = { add = 25  martial >= 14 }
+                modifier = { add = 10  has_trait = diplomat }
+                modifier = { add = -10  has_trait = callous }
+                scope:eotg_refuge_county = {
+                    add_county_modifier = { modifier = eotg_expulsion_desperate_border years = 2 }
+                }
+                add_prestige = 25
+                # No uprising fires — refugees scatter into the wider cluster
+            }
+            # Regrouped — enforcement stalls; refugees regroup and plan
+            40 = {
+                modifier = { add = -5  martial >= 14 }
+                modifier = { add = -5  martial <= 6 }
+                scope:eotg_refuge_county = {
+                    add_county_modifier = { modifier = eotg_expulsion_desperate_border years = 3 }
+                }
+                add_prestige = -25
+                trigger_event = { id = eotg_expulsion.0003 days = 90 }
+            }
+            # Immediate uprising — refusal sparks immediate violent response
+            30 = {
+                modifier = { add = 20  martial <= 6 }
+                modifier = { add = 10  has_trait = callous }
+                modifier = { add = 5   has_trait = wrathful }
+                modifier = { add = -20  martial >= 14 }
+                scope:eotg_refuge_county = {
+                    add_county_modifier = { modifier = eotg_expulsion_desperate_border years = 3 }
+                }
+                add_prestige = -50
+                # Warlord will be stronger — mark for event 0003
+                set_variable = { name = eotg_expulsion_warlord_boost value = 1 }
+                trigger_event = { id = eotg_expulsion.0003 days = 30 }
+            }
+        }
+
+        ai_chance = {
+            base = 25
+            modifier = { add = 30  has_trait = callous }
+            modifier = { add = 20  has_trait = wrathful }
+            modifier = { add = -30  has_trait = compassionate }
+        }
+    }
+
+    # ── Option D: Force them on ───────────────────────────────────────────────
+    # Outcome shifts on intrigue. Low intrigue risks the deflection being traced back.
+    option = {
+        name = eotg_expulsion.0002.d
+        trigger = {
+            exists = scope:eotg_third_ruler
+            OR = {
+                has_trait = deceitful
+                has_trait = arbitrary
+                diplomacy >= 12
+            }
+        }
+
+        remove_short_term_gold = 75
+        scope:eotg_third_ruler = {
+            set_variable = { name = eotg_expulsion_expeller  value = scope:eotg_expulsion_expeller_char }
+            set_variable = { name = eotg_refugee_culture     value = scope:eotg_refugee_culture_scope }
+            set_variable = { name = eotg_refugee_faith       value = scope:eotg_refugee_faith_scope }
+            set_variable = { name = eotg_expulsion_deflector value = root }
+            set_variable = { name = eotg_expulsion_violent   value = 1 }
+            trigger_event = { id = eotg_expulsion.0005 days = 30 }
+        }
+
+        random_list = {
+            # Clean — third ruler doesn't realize who arranged this
+            40 = {
+                modifier = { add = 20  intrigue >= 14 }
+                modifier = { add = 15  has_trait = deceitful }
+                modifier = { add = -20  has_trait = honest }
+                # Minimal additional fallout
+                add_prestige = 25
+            }
+            # Suspected — third ruler has a reasonable guess
+            35 = {
+                modifier = { add = -5  intrigue >= 14 }
+                modifier = { add = -5  has_trait = deceitful }
+                scope:eotg_third_ruler = {
+                    add_opinion = { target = root  modifier = eotg_expulsion_opinion_chain_deflection }
+                }
+                add_prestige = -10
+            }
+            # Exposed — third ruler knows exactly what happened and tells others
+            25 = {
+                modifier = { add = 20  intrigue <= 6 }
+                modifier = { add = 20  has_trait = honest }
+                modifier = { add = -15  intrigue >= 14 }
+                scope:eotg_third_ruler = {
+                    add_opinion = { target = root  modifier = eotg_expulsion_opinion_chain_deflection }
+                    add_opinion = { target = root  modifier = eotg_expulsion_opinion_diplomatic_censure }
+                }
+                add_prestige = -50
+                add_legitimacy = -5
+            }
+        }
+
+        ai_chance = {
+            base = 20
+            modifier = { add = 25  has_trait = deceitful }
+            modifier = { add = 15  has_trait = arbitrary }
+            modifier = { add = -30  has_trait = honest }
+        }
+    }
+
+    # ── Option E: Execute them ────────────────────────────────────────────────
+    # Cruel-only. Outcome shifts on intrigue — how well the news can be contained.
+    option = {
+        name = eotg_expulsion.0002.e
+        trigger = { has_trait = callous }
+
+        add_dread = 10
+
+        random_list = {
+            # Contained — the act is hushed; consequences are limited
+            30 = {
+                modifier = { add = 20  intrigue >= 16 }
+                modifier = { add = 15  has_trait = callous }
+                modifier = { add = 10  dread >= 60 }
+                modifier = { add = -20  has_trait = just }
+                add_piety = -150
+                add_legitimacy = -10
+                add_character_modifier = { modifier = eotg_expulsion_massacre_infamy years = 15 }
+                scope:eotg_expulsion_expeller_char = {
+                    add_opinion = { target = root  modifier = eotg_expulsion_opinion_massacre }
+                }
+            }
+            # Known — full consequences; word spreads through the cluster
+            45 = {
+                modifier = { add = -5  intrigue >= 16 }
+                modifier = { add = -5  has_trait = callous }
+                add_piety = -300
+                add_legitimacy = -25
+                add_character_modifier = { modifier = eotg_expulsion_massacre_infamy years = 30 }
+                scope:eotg_expulsion_expeller_char = {
+                    add_opinion = { target = root  modifier = eotg_expulsion_opinion_massacre }
+                }
+            }
+            # Exposed — the act becomes a diplomatic incident; neighbors mobilize
+            25 = {
+                modifier = { add = 20  intrigue <= 6 }
+                modifier = { add = 20  has_trait = just }
+                modifier = { add = -15  intrigue >= 16 }
+                add_piety = -300
+                add_legitimacy = -35
+                add_character_modifier = { modifier = eotg_expulsion_massacre_infamy years = 40 }
+                scope:eotg_expulsion_expeller_char = {
+                    add_opinion = { target = root  modifier = eotg_expulsion_opinion_massacre }
+                    add_opinion = { target = root  modifier = eotg_expulsion_opinion_diplomatic_censure }
+                }
+                every_neighboring_realm_owner = {
+                    limit = { NOT = { this = root } }
+                    add_opinion = { target = root  modifier = eotg_expulsion_opinion_massacre }
+                }
+            }
+        }
+
+        ai_chance = {
+            base = 5
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = 10  dread >= 50 }
+        }
+    }
+}
+
+
+# ── eotg_expulsion.0003 ──────────────────────────────────────────────────────
+# The Desperate Stand — Refugee Uprising
+# Displaced people with nowhere left to go form a warband and attack.
+# All options produce probabilistic outcomes. Event 0006 fires as a narrative
+# beat after the military option resolves.
+
+eotg_expulsion.0003 = {
+    type = character_event
+    title = eotg_expulsion.0003.t
+    desc = eotg_expulsion.0003.desc
+    theme = war
+
+    left_portrait = { character = root  animation = stress }
+    right_portrait = {
+        character = scope:eotg_refugee_warlord
+        animation = war_attacker
+        trigger = { exists = scope:eotg_refugee_warlord }
+    }
+
+    immediate = {
+        var:eotg_refugee_culture = { save_scope_as = eotg_refugee_culture_scope }
+        var:eotg_refugee_faith   = { save_scope_as = eotg_refugee_faith_scope }
+        var:eotg_expulsion_expeller = { save_scope_as = eotg_expulsion_expeller_char }
+
+        random_sub_realm_county = {
+            save_scope_as = eotg_contested_county
+        }
+
+        create_character = {
+            location = root.capital_province
+            age = { min = 28 max = 44 }
+            culture = scope:eotg_refugee_culture_scope
+            faith = scope:eotg_refugee_faith_scope
+            trait = brave
+            trait = wrathful
+            trait = education_martial_3
+            save_scope_as = eotg_refugee_warlord
+        }
+
+        # If the ruler drove them off badly, the warlord is more capable
+        if = {
+            limit = { has_variable = eotg_expulsion_warlord_boost }
+            scope:eotg_refugee_warlord = {
+                add_trait = education_martial_4
+                add_martial_skill = 2
+            }
+        }
+
+        scope:eotg_refugee_warlord = {
+            add_pressed_claim = scope:eotg_contested_county
+        }
+    }
+
+    # ── Option A: Full military response ─────────────────────────────────────
+    # Victory/stalemate/defeat determined by martial, traits, and realm size.
+    # Fires Event 0006 as a narrative aftermath beat.
+    option = {
+        name = eotg_expulsion.0003.a
+
+        random_list = {
+            # Victory — uprising crushed; culture holds; warlord is driven off
+            40 = {
+                modifier = { add = 30  martial >= 18 }
+                modifier = { add = 20  martial >= 14 }
+                modifier = { add = 10  martial >= 10 }
+                modifier = { add = 15  has_trait = strategist }
+                modifier = { add = 5   has_trait = brave }
+                modifier = { add = 10  realm_size >= 10 }
+                modifier = { add = -25  martial <= 6 }
+                modifier = { add = -10  has_variable = eotg_expulsion_warlord_boost }
+                modifier = { add = -10  realm_size <= 3 }
+                add_character_flag = { flag = eotg_expulsion_victory years = 1 }
+                scope:eotg_contested_county = {
+                    add_county_modifier = { modifier = eotg_expulsion_contested_sector years = 3 }
+                }
+                add_prestige = 300
+                add_martial_skill = 1
+            }
+            # Stalemate — costly fight; county is scarred but held; warlord retreats
+            35 = {
+                modifier = { add = 10  martial >= 10 }
+                modifier = { add = 5   has_trait = brave }
+                modifier = { add = -5  has_trait = wrathful }
+                modifier = { add = -5  martial >= 18 }
+                add_character_flag = { flag = eotg_expulsion_stalemate years = 1 }
+                scope:eotg_contested_county = {
+                    change_county_control = -30
+                    add_county_modifier = { modifier = eotg_expulsion_contested_sector years = 5 }
+                }
+                add_prestige = 50
+                add_legitimacy = -5
+            }
+            # Defeat — defense collapses; county culture and faith flip to refugees
+            25 = {
+                modifier = { add = 25  martial <= 6 }
+                modifier = { add = 10  has_trait = wrathful }
+                modifier = { add = 10  has_variable = eotg_expulsion_warlord_boost }
+                modifier = { add = 10  realm_size <= 3 }
+                modifier = { add = -25  martial >= 18 }
+                modifier = { add = -15  has_trait = strategist }
+                add_character_flag = { flag = eotg_expulsion_defeat years = 1 }
+                scope:eotg_contested_county = {
+                    set_county_culture = scope:eotg_refugee_culture_scope
+                    set_county_faith = scope:eotg_refugee_faith_scope
+                    change_county_control = -60
+                    add_county_modifier = { modifier = eotg_expulsion_contested_sector years = 10 }
+                }
+                add_prestige = -200
+                add_legitimacy = -15
+            }
+        }
+
+        trigger_event = { id = eotg_expulsion.0006 days = 7 }
+
+        ai_chance = {
+            base = 50
+            modifier = { add = 30  martial >= 14 }
+            modifier = { add = -20  martial <= 6 }
+        }
+    }
+
+    # ── Option B: Let the war be fought properly ──────────────────────────────
+    # Pre-war positioning shifts on martial. Fires claim_cb war regardless.
+    option = {
+        name = eotg_expulsion.0003.b
+
+        random_list = {
+            # Commanding position — your forces are well-prepared
+            40 = {
+                modifier = { add = 25  martial >= 14 }
+                modifier = { add = 10  has_trait = strategist }
+                modifier = { add = -15  martial <= 6 }
+                add_prestige = 50
+                # Pre-war advantage: temporary martial bonus
+                add_character_modifier = { modifier = eotg_expulsion_commander_advantage years = 2 }
+            }
+            # Neutral position — evenly matched, outcome up to the field
+            35 = {
+                modifier = { add = -5  martial >= 14 }
+                modifier = { add = -5  martial <= 6 }
+                add_prestige = -25
+            }
+            # Weak position — your forces are scattered from the edict crisis
+            25 = {
+                modifier = { add = 25  martial <= 6 }
+                modifier = { add = -15  martial >= 14 }
+                modifier = { add = -10  has_trait = strategist }
+                add_prestige = -75
+                add_character_modifier = { modifier = eotg_expulsion_commander_weakness years = 2 }
+            }
+        }
+
+        scope:eotg_refugee_warlord = {
+            start_war = {
+                cb = claim_cb
+                claimant = scope:eotg_refugee_warlord
+                target = root
+                target_title = scope:eotg_contested_county
+            }
+        }
+
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  martial <= 8 }
+        }
+    }
+
+    # ── Option C: Negotiate a settlement ─────────────────────────────────────
+    # Outcome shifts on diplomacy and social traits. Collapse triggers a fight.
+    option = {
+        name = eotg_expulsion.0003.c
+        trigger = {
+            OR = {
+                has_trait = patient
+                has_trait = diplomat
+                diplomacy >= 12
+            }
+        }
+
+        random_list = {
+            # Accepted — warlord takes the sector; culture and faith flip; peace holds
+            45 = {
+                modifier = { add = 25  diplomacy >= 16 }
+                modifier = { add = 15  has_trait = diplomat }
+                modifier = { add = 10  has_trait = patient }
+                modifier = { add = -15  has_trait = wrathful }
+                scope:eotg_contested_county = {
+                    set_county_culture = scope:eotg_refugee_culture_scope
+                    set_county_faith = scope:eotg_refugee_faith_scope
+                    add_county_modifier = { modifier = eotg_expulsion_refugee_settlement years = 15 }
+                }
+                add_prestige = -50
+                add_legitimacy = -5
+                scope:eotg_expulsion_expeller_char = {
+                    set_variable = { name = eotg_expulsion_receiver value = root }
+                    trigger_event = { id = eotg_expulsion.0004 days = 15 }
+                }
+            }
+            # Partial — terms accepted grudgingly; integration is uneasy
+            30 = {
+                modifier = { add = 10  diplomacy >= 10 }
+                modifier = { add = -5  has_trait = wrathful }
+                scope:eotg_contested_county = {
+                    set_county_culture = scope:eotg_refugee_culture_scope
+                    add_county_modifier = { modifier = eotg_expulsion_integration_strife years = 8 }
+                }
+                add_prestige = -75
+                add_legitimacy = -8
+            }
+            # Collapsed — negotiations break down; warlord attacks in fury
+            25 = {
+                modifier = { add = 20  diplomacy <= 6 }
+                modifier = { add = 10  has_trait = wrathful }
+                modifier = { add = -20  diplomacy >= 16 }
+                modifier = { add = -10  has_trait = diplomat }
+                # Talks fail — the county falls as in a military defeat
+                scope:eotg_contested_county = {
+                    set_county_culture = scope:eotg_refugee_culture_scope
+                    set_county_faith = scope:eotg_refugee_faith_scope
+                    change_county_control = -60
+                    add_county_modifier = { modifier = eotg_expulsion_contested_sector years = 10 }
+                }
+                add_prestige = -175
+                add_legitimacy = -15
+                stress_impact = { base = minor_stress_impact_gain }
+            }
+        }
+
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = patient }
+            modifier = { add = 20  diplomacy >= 12 }
+        }
+    }
+
+    # ── Option D: Yield the border sector ────────────────────────────────────
+    # Outcome shifts on how the warlord reads the capitulation.
+    option = {
+        name = eotg_expulsion.0003.d
+
+        random_list = {
+            # Graceful acceptance — warlord takes the sector cleanly; culture flips
+            45 = {
+                modifier = { add = 15  diplomacy >= 12 }
+                modifier = { add = 10  has_trait = patient }
+                modifier = { add = -15  has_trait = arrogant }
+                scope:eotg_contested_county = {
+                    set_county_culture = scope:eotg_refugee_culture_scope
+                    set_county_faith = scope:eotg_refugee_faith_scope
+                    add_county_modifier = { modifier = eotg_expulsion_refugee_settlement years = 10 }
+                }
+                add_prestige = -100
+                add_legitimacy = -10
+                scope:eotg_expulsion_expeller_char = {
+                    set_variable = { name = eotg_expulsion_receiver value = root }
+                    trigger_event = { id = eotg_expulsion.0004 days = 15 }
+                }
+            }
+            # Emboldened — warlord sees the yield as weakness; demands more
+            35 = {
+                modifier = { add = 20  has_trait = arrogant }
+                modifier = { add = 10  has_trait = callous }
+                modifier = { add = -15  diplomacy >= 12 }
+                scope:eotg_contested_county = {
+                    set_county_culture = scope:eotg_refugee_culture_scope
+                    set_county_faith = scope:eotg_refugee_faith_scope
+                }
+                # Second county gets contested claim modifier
+                random_sub_realm_county = {
+                    limit = {
+                        NOT = { this = scope:eotg_contested_county }
+                    }
+                    add_county_modifier = { modifier = eotg_expulsion_contested_sector years = 5 }
+                }
+                add_prestige = -150
+                add_legitimacy = -15
+            }
+            # Overreach — warlord interprets total capitulation as invitation to take more
+            20 = {
+                modifier = { add = 20  martial <= 4 }
+                modifier = { add = -15  diplomacy >= 12 }
+                scope:eotg_contested_county = {
+                    set_county_culture = scope:eotg_refugee_culture_scope
+                    set_county_faith = scope:eotg_refugee_faith_scope
+                    change_county_control = -40
+                }
+                random_sub_realm_county = {
+                    limit = {
+                        NOT = { this = scope:eotg_contested_county }
+                    }
+                    add_county_modifier = { modifier = eotg_expulsion_contested_sector years = 8 }
+                }
+                add_prestige = -200
+                add_legitimacy = -20
+                stress_impact = { base = minor_stress_impact_gain }
+            }
+        }
+
+        ai_chance = {
+            base = 10
+            modifier = { add = 30  martial <= 4 }
+        }
+    }
+}
+
+
+# ── eotg_expulsion.0004 ──────────────────────────────────────────────────────
+# A Problem Resolved — Notification for the Elven Expeller
+# The expelling ruler reacts to learning the refugees have settled.
+
+eotg_expulsion.0004 = {
+    type = character_event
+    title = eotg_expulsion.0004.t
+    desc = eotg_expulsion.0004.desc
+    theme = culture_change
+
+    left_portrait = { character = root  animation = dismissal }
+    right_portrait = {
+        character = scope:eotg_expulsion_receiver_char
+        animation = personality_rational
+        trigger = { exists = scope:eotg_expulsion_receiver_char }
+    }
+
+    immediate = {
+        if = {
+            limit = { has_variable = eotg_expulsion_receiver }
+            var:eotg_expulsion_receiver = { save_scope_as = eotg_expulsion_receiver_char }
+        }
+    }
+
+    option = {
+        name = eotg_expulsion.0004.a
+        add_prestige = 50
+        remove_character_flag = eotg_expulsion_edict_issued
+        ai_chance = { base = 50 }
+    }
+
+    option = {
+        name = eotg_expulsion.0004.b
+        trigger = { exists = scope:eotg_expulsion_receiver_char }
+        add_opinion = {
+            target = scope:eotg_expulsion_receiver_char
+            modifier = eotg_expulsion_opinion_proximity_grievance
+        }
+        remove_character_flag = eotg_expulsion_edict_issued
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = arrogant }
+        }
+    }
+
+    option = {
+        name = eotg_expulsion.0004.c
+        trigger = {
+            exists = scope:eotg_expulsion_receiver_char
+            OR = {
+                has_trait = ambitious
+                has_trait = arrogant
+                diplomacy >= 14
+            }
+        }
+
+        random_list = {
+            # Pressure lands — receiver concedes distance
+            50 = {
+                modifier = { add = 20  diplomacy >= 14 }
+                modifier = { add = 10  has_trait = ambitious }
+                remove_short_term_gold = 75
+                scope:eotg_expulsion_receiver_char = {
+                    add_opinion = { target = root  modifier = eotg_expulsion_opinion_elven_pressure }
+                }
+                add_prestige = 25
+            }
+            # Pressure ignored — receiver resents the overreach
+            50 = {
+                modifier = { add = 20  has_trait = arrogant }
+                modifier = { add = -10  diplomacy >= 14 }
+                remove_short_term_gold = 75
+                scope:eotg_expulsion_receiver_char = {
+                    add_opinion = { target = root  modifier = eotg_expulsion_opinion_elven_pressure }
+                    add_opinion = { target = root  modifier = eotg_expulsion_opinion_diplomatic_censure }
+                }
+                add_prestige = -25
+            }
+        }
+
+        remove_character_flag = eotg_expulsion_edict_issued
+        ai_chance = {
+            base = 20
+            modifier = { add = 25  has_trait = ambitious }
+            modifier = { add = 20  has_trait = arrogant }
+        }
+    }
+}
+
+
+# ── eotg_expulsion.0005 ──────────────────────────────────────────────────────
+# An Uninvited Migration — The Chain Forced Onward
+# A third ruler who had no part in the edict receives the displaced population.
+
+eotg_expulsion.0005 = {
+    type = character_event
+    title = eotg_expulsion.0005.t
+    desc = eotg_expulsion.0005.desc
+    theme = diplomacy
+
+    left_portrait = { character = root  animation = worry }
+    right_portrait = {
+        character = scope:eotg_expulsion_deflector_char
+        animation = schadenfreude
+        trigger = { exists = scope:eotg_expulsion_deflector_char }
+    }
+
+    immediate = {
+        var:eotg_expulsion_deflector = { save_scope_as = eotg_expulsion_deflector_char }
+        var:eotg_expulsion_expeller  = { save_scope_as = eotg_expulsion_expeller_char }
+        var:eotg_refugee_culture     = { save_scope_as = eotg_refugee_culture_scope }
+        var:eotg_refugee_faith       = { save_scope_as = eotg_refugee_faith_scope }
+        random_sub_realm_county = {
+            save_scope_as = eotg_refuge_county
+        }
+    }
+
+    # ── Option A: Accept them ─────────────────────────────────────────────────
+    # Same integration quality roll as 0002.a but with base resentment toward deflector.
+    option = {
+        name = eotg_expulsion.0005.a
+
+        add_opinion = {
+            target = scope:eotg_expulsion_deflector_char
+            modifier = eotg_expulsion_opinion_chain_deflection
+        }
+
+        random_list = {
+            # Cooperative — refugees are relieved to finally be welcome
+            45 = {
+                modifier = { add = 20  diplomacy >= 12 }
+                modifier = { add = 15  has_trait = compassionate }
+                modifier = { add = -15  has_trait = callous }
+                scope:eotg_refuge_county = {
+                    set_county_culture = scope:eotg_refugee_culture_scope
+                    set_county_faith = scope:eotg_refugee_faith_scope
+                    add_county_modifier = { modifier = eotg_expulsion_refugee_settlement years = 10 }
+                }
+                add_character_modifier = { modifier = eotg_expulsion_harboring_refugees years = 8 }
+                add_prestige = 50
+            }
+            # Tense — arrival is chaotic; integration is slow
+            35 = {
+                modifier = { add = -5  diplomacy >= 12 }
+                modifier = { add = -5  has_trait = compassionate }
+                scope:eotg_refuge_county = {
+                    set_county_culture = scope:eotg_refugee_culture_scope
+                    add_county_modifier = { modifier = eotg_expulsion_refugee_settlement years = 6 }
+                    add_county_modifier = { modifier = eotg_expulsion_contested_sector years = 2 }
+                }
+                add_prestige = 25
+            }
+            # Resentful — exhausted and angry, refugees cause friction immediately
+            20 = {
+                modifier = { add = 20  has_trait = callous }
+                modifier = { add = 10  has_trait = cynical }
+                modifier = { add = -15  has_trait = compassionate }
+                scope:eotg_refuge_county = {
+                    set_county_culture = scope:eotg_refugee_culture_scope
+                    add_county_modifier = { modifier = eotg_expulsion_integration_strife years = 8 }
+                }
+                add_prestige = -25
+            }
+        }
+
+        ai_chance = {
+            base = 40
+            modifier = { add = 25  has_trait = compassionate }
+            modifier = { add = 10  has_trait = patient }
+        }
+    }
+
+    # ── Option B: Drive them off ──────────────────────────────────────────────
+    # Same scatter/regroup/immediate roll as 0002.c. Resentment toward deflector.
+    option = {
+        name = eotg_expulsion.0005.b
+
+        add_opinion = {
+            target = scope:eotg_expulsion_deflector_char
+            modifier = eotg_expulsion_opinion_chain_deflection
+        }
+        set_variable = { name = eotg_expulsion_expeller  value = scope:eotg_expulsion_expeller_char }
+        set_variable = { name = eotg_refugee_culture     value = scope:eotg_refugee_culture_scope }
+        set_variable = { name = eotg_refugee_faith       value = scope:eotg_refugee_faith_scope }
+
+        random_list = {
+            # Scattered — twice-rejected, refugees have no fight left
+            30 = {
+                modifier = { add = 25  martial >= 14 }
+                modifier = { add = -10  has_trait = callous }
+                scope:eotg_refuge_county = {
+                    add_county_modifier = { modifier = eotg_expulsion_desperate_border years = 2 }
+                }
+                add_prestige = 25
+            }
+            # Regrouped — the repeated rejection hardens them
+            40 = {
+                modifier = { add = -5  martial >= 14 }
+                scope:eotg_refuge_county = {
+                    add_county_modifier = { modifier = eotg_expulsion_desperate_border years = 3 }
+                }
+                add_prestige = -25
+                trigger_event = { id = eotg_expulsion.0003 days = 90 }
+            }
+            # Immediate uprising — nowhere left to go; they fight now
+            30 = {
+                modifier = { add = 20  martial <= 6 }
+                modifier = { add = 10  has_trait = callous }
+                modifier = { add = -20  martial >= 14 }
+                scope:eotg_refuge_county = {
+                    add_county_modifier = { modifier = eotg_expulsion_desperate_border years = 3 }
+                }
+                set_variable = { name = eotg_expulsion_warlord_boost value = 1 }
+                add_prestige = -50
+                trigger_event = { id = eotg_expulsion.0003 days = 30 }
+            }
+        }
+
+        ai_chance = {
+            base = 35
+            modifier = { add = 20  has_trait = wrathful }
+            modifier = { add = 20  has_trait = callous }
+        }
+    }
+
+    # ── Option C: Accept and formally censure the deflector ──────────────────
+    # Outcome shifts on diplomacy — whether the censure sticks or backfires.
+    option = {
+        name = eotg_expulsion.0005.c
+        trigger = {
+            OR = {
+                has_trait = just
+                has_trait = wrathful
+                diplomacy >= 12
+            }
+        }
+
+        scope:eotg_refuge_county = {
+            set_county_culture = scope:eotg_refugee_culture_scope
+            set_county_faith = scope:eotg_refugee_faith_scope
+            add_county_modifier = { modifier = eotg_expulsion_refugee_settlement years = 10 }
+        }
+
+        random_list = {
+            # Diplomatic win — censure lands; deflector's reputation takes the hit
+            45 = {
+                modifier = { add = 20  diplomacy >= 14 }
+                modifier = { add = 15  has_trait = just }
+                scope:eotg_expulsion_deflector_char = {
+                    add_opinion = { target = root  modifier = eotg_expulsion_opinion_diplomatic_censure }
+                    add_opinion = { target = root  modifier = eotg_expulsion_opinion_chain_deflection }
+                }
+                add_prestige = 75
+            }
+            # Neutral — censure is noted but changes little
+            35 = {
+                modifier = { add = -5  diplomacy >= 14 }
+                scope:eotg_expulsion_deflector_char = {
+                    add_opinion = { target = root  modifier = eotg_expulsion_opinion_diplomatic_censure }
+                }
+                add_prestige = 25
+            }
+            # Backfires — deflector responds aggressively; you look weak
+            20 = {
+                modifier = { add = 20  diplomacy <= 8 }
+                modifier = { add = 10  has_trait = callous }
+                modifier = { add = -15  diplomacy >= 14 }
+                scope:eotg_expulsion_deflector_char = {
+                    add_opinion = { target = root  modifier = eotg_expulsion_opinion_diplomatic_censure }
+                }
+                add_prestige = -25
+                add_legitimacy = -5
+            }
+        }
+
+        ai_chance = {
+            base = 25
+            modifier = { add = 25  has_trait = just }
+            modifier = { add = 15  has_trait = wrathful }
+        }
+    }
+}
+
+
+# ── eotg_expulsion.0006 ──────────────────────────────────────────────────────
+# The Dust Settles — Military Aftermath Beat
+# Fires 7 days after eotg_expulsion.0003 option A resolves.
+# Description varies based on the outcome flags set by the random_list.
+
+eotg_expulsion.0006 = {
+    type = character_event
+    title = eotg_expulsion.0006.t
+    desc = {
+        triggered_desc = {
+            trigger = { has_character_flag = eotg_expulsion_victory }
+            desc = eotg_expulsion.0006.desc_victory
+        }
+        triggered_desc = {
+            trigger = { has_character_flag = eotg_expulsion_stalemate }
+            desc = eotg_expulsion.0006.desc_stalemate
+        }
+        triggered_desc = {
+            trigger = { has_character_flag = eotg_expulsion_defeat }
+            desc = eotg_expulsion.0006.desc_defeat
+        }
+    }
+    theme = war
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+
+    option = {
+        name = eotg_expulsion.0006.a
+        remove_character_flag = eotg_expulsion_victory
+        remove_character_flag = eotg_expulsion_stalemate
+        remove_character_flag = eotg_expulsion_defeat
+    }
+}

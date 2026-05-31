@@ -1,0 +1,31 @@
+﻿l_english:
+ # ── Health Events — EotG Setting Overrides ────────────────────────────────────
+ # Source: health_events_l_english.yml
+ # Replaces: "peasant" class references, "humors" (medieval medicine), ceremony
+ # "sermon/prayer" text, "disease of kings" title framing.
+ # ─────────────────────────────────────────────────────────────────────────────
+
+ # "peasant" → "commoner"; "disease of kings" stays — it's a real medical term
+ health.1001.desc:0 "[ROOT.Char.GetTitleAsNameNoTooltip] or commoner, high or low, it does not matter. In the end, we are all mortal.\n\nI was reminded of this as I woke coughing in the early morning hours, a dull ache pounding through my head and throat. My body is wracked by shivers and weakness, my head leaking from every orifice.\n\n"
+
+ # "simple peasant" → "simple commoner"
+ health.1003.desc:0 "They call it "the disease of rulers" as if there was something luxurious or enviable about my swollen, aching joints.\n\nMy big toe in particular is painfully distended, leaving me limping.\n\nWhen my pains reach their peak, I cannot help but wish I was but a simple commoner."
+
+ # "Balanced Humors" — medieval four-humors medicine
+ health.2202.t:0 "Vital Equilibrium"
+ health.3106.t:0 "Vital Equilibrium"
+
+ # "sermon" + "silent prayer" — hardcoded religious ceremony framing
+ health.safe_treatment.6.desc:0 "[physician.GetTitledFirstName] arranged a small ceremony in my name. Once my family and closest entourage were all gathered, a representative of my faith delivered an address on my behalf. The ceremony concluded with a period of quiet reflection.\n\nReaching out to [ROOT.Char.GetFaith.HealthGodName]"
+
+ # "humors" + "bloodletting" + "astronomical charts" — medieval medicine
+ health.safe_treatment.10.desc:0 "[physician.GetTitledFirstName] insisted that my vitals were out of balance and that the best way to restore them would be through a controlled phlebotomy. After consulting [physician.GetHerHis] diagnostic charts, [physician.GetSheHe] decided that I should be bled from my armpits and temples.\n\nThe procedure"
+
+ # "humors" in vomiting treatment
+ health.safe_treatment.20.desc:0 "In order to restore my equilibrium, [physician.GetTitledFirstName] made me drink salty water to induce vomiting. It was very effective.\n\nEmptying my stomach"
+
+ # "humors" in leech treatment failure
+ health.4102.desc_end:0 "did nothing to restore my equilibrium, and the pain only grew worse."
+
+ # "humors" in cauterization treatment
+ health.4103.risky_treatment_medicine.1.desc:0 "When [physician.GetFirstName] lit a fire in my [ROOT.Char.Custom('GetChambersOrTent')] I presumed [physician.GetSheHe] meant for the heat to help restore my equilibrium. However, as [physician.GetHerHis] assistant began to strap me down to my bed, I noticed the iron rod heating up in the flames."

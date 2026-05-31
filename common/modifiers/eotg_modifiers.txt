@@ -1145,3 +1145,84 @@ eotg_technological_salvation = {
     monthly_income_mult = 0.10
 }
 
+
+# ── Cultural Expulsion Chain Modifiers ────────────────────────────────────────
+# Used by eotg_expulsion_events.txt
+
+# County modifier: sector undergoing active displacement edict enforcement
+eotg_expulsion_relocation_zone = {
+    icon = stress_negative    # Placeholder
+    development_growth_factor = -0.10
+    monthly_county_control_decline_add = 0.20
+    tax_mult = -0.10
+}
+
+# County modifier: sector that has absorbed a refugee settlement
+eotg_expulsion_refugee_settlement = {
+    icon = diplomacy_positive    # Placeholder
+    development_growth_factor = 0.05
+    monthly_county_control_decline_add = 0.15
+    tax_mult = -0.10
+}
+
+# County modifier: border sector with a massing refugee population
+eotg_expulsion_desperate_border = {
+    icon = stress_negative    # Placeholder
+    monthly_county_control_decline_add = 0.40
+    defender_holding_advantage = -5
+}
+
+# County modifier: sector under dispute following a refugee uprising
+eotg_expulsion_contested_sector = {
+    icon = stress_negative    # Placeholder
+    monthly_county_control_decline_add = 0.30
+    tax_mult = -0.20
+    levy_size = -0.15
+}
+
+# Character modifier: ruler who issued the displacement edict
+eotg_expulsion_exile_edict_issued = {
+    icon = diplomacy_negative    # Placeholder
+    monthly_prestige_gain_mult = 0.10
+    different_culture_opinion = -10
+}
+
+# Character modifier: ruler who accepted displaced populations into their realm
+eotg_expulsion_harboring_refugees = {
+    icon = diplomacy_positive    # Placeholder
+    diplomacy = 1
+    different_faith_opinion = 5
+    monthly_income_mult = -0.05
+}
+
+# Character modifier: ruler who executed unarmed refugees
+eotg_expulsion_massacre_infamy = {
+    icon = stress_negative    # Placeholder
+    monthly_piety_gain_mult = -0.25
+    legitimacy_gain_mult = -0.15
+    different_culture_opinion = -20
+    vassal_opinion = -10
+}
+
+# County modifier: integration failure — cultural friction destabilizing a refugee sector
+eotg_expulsion_integration_strife = {
+    icon = stress_negative    # Placeholder
+    monthly_county_control_decline_add = 0.25
+    tax_mult = -0.15
+    development_growth_factor = -0.05
+}
+
+# Character modifier: pre-war advantage from strategic positioning before a refugee uprising
+eotg_expulsion_commander_advantage = {
+    icon = martial_positive    # Placeholder
+    martial = 2
+    knight_effectiveness_mult = 0.05
+}
+
+# Character modifier: pre-war weakness from forces scattered by the edict crisis
+eotg_expulsion_commander_weakness = {
+    icon = stress_negative    # Placeholder
+    martial = -2
+    levy_reinforcement_rate = -0.15
+}
+

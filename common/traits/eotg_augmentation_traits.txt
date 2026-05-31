@@ -1,0 +1,85 @@
+﻿# ── eotg_augmentation_traits.txt ─────────────────────────────────────────────
+# Cybernetic Augmentation trait chain.
+# Tiers: eotg_augmented → eotg_enhanced → eotg_overclocked → eotg_neurofractured
+# Each tier replaces the previous via remove_trait / add_trait in progression events.
+# eotg_neurofractured is permanent — no regression path exists.
+# ─────────────────────────────────────────────────────────────────────────────
+
+eotg_augmented = {
+    category = health
+
+    prowess = 2
+    health = 0.5
+    stress_gain_mult = 0.1
+    attraction_opinion = -5
+
+    opposites = { eotg_enhanced  eotg_overclocked  eotg_neurofractured }
+
+    ai_honor = -1
+    ai_energy = 2
+    ai_zeal = -1
+
+    ruler_designer_cost = 20
+}
+
+eotg_enhanced = {
+    category = health
+
+    prowess = 4
+    health = 0.5
+    enemy_hostile_scheme_phase_duration_add = 5
+    stress_gain_mult = 0.2
+    attraction_opinion = -15
+    diplomacy = -2
+    fertility = -0.2
+
+    opposites = { eotg_augmented  eotg_overclocked  eotg_neurofractured }
+
+    ai_honor = -1
+    ai_energy = 3
+    ai_zeal = -2
+
+    ruler_designer_cost = 0
+}
+
+eotg_overclocked = {
+    category = health
+
+    prowess = 8
+    dread_gain_mult = 0.3
+    knight_effectiveness_mult = 0.1
+    stress_gain_mult = 0.4
+    attraction_opinion = -30
+    diplomacy = -5
+    fertility = -0.4
+
+    opposites = { eotg_augmented  eotg_enhanced  eotg_neurofractured }
+
+    ai_honor = -2
+    ai_energy = 4
+    ai_zeal = -3
+
+    ruler_designer_cost = 0
+}
+
+eotg_neurofractured = {
+    category = health
+
+    prowess = 14
+    dread_gain_mult = 0.6
+    knight_effectiveness_mult = 0.25
+    enemy_hostile_scheme_phase_duration_add = 10
+    stress_gain_mult = 0.6
+    attraction_opinion = -50
+    diplomacy = -10
+    fertility = -0.8
+    health = -1.0
+
+    opposites = { eotg_augmented  eotg_enhanced  eotg_overclocked }
+
+    ai_honor = -3
+    ai_energy = 4
+    ai_zeal = -4
+
+    ruler_designer_cost = 0
+}

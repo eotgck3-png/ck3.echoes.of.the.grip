@@ -1,0 +1,52 @@
+﻿l_english:
+ # ── Activity Events — EotG Setting Overrides ──────────────────────────────────
+ # Sources: hold_court_events_l_english.yml (linnea),
+ #          feast_main_stable_breakin_l_english.yml,
+ #          childhood_personality_events_l_english.yml,
+ #          childhood_personality_events_2_l_english.yml,
+ #          coming_of_age_event_l_english.yml,
+ #          seduce_ongoing_events_l_english.yml
+ # Replaces: "peasant" class references, "sins" used as a noun for crude acts,
+ #            "uppity peasants" in combat-training text.
+ # ─────────────────────────────────────────────────────────────────────────────
+
+ # ── Hold Court ────────────────────────────────────────────────────────────────
+
+ # "peasant" ×2 + "My village" → "commoner" + "My settlement"
+ hold_court.1021.desc:0 "A thin, raggedy commoner stands before me, gawking at the opulence of my throne room. Obviously distracted, I call [peasant.GetHerHim] to get [peasant.GetHerHis] attention.\n\n"Oh, I'm sorry, [ROOT.Char.Custom('FormOfAddressForLiege')]. I, uh... My settlement in [county.GetNameNoTier] was hit by blight this year. We lost not only our crop but our seed, too. We have nothing, we shall starve without help!"\n\nGlancing around my throne room again, [peasant.GetSheHe] adds "Surely you have wealth to spare?""
+
+ # "A peasant [woman/man]" → "A commoner"
+ hold_court.5010.desc:0 "A commoner [peasant.GetWomanMan] timidly approaches my throne, clutching at [peasant.GetHerHis] hat.\n\n"
+
+ # ── Feast Stable Break-in ─────────────────────────────────────────────────────
+
+ # "committing unspeakable sins with an ox" — "sins" is needlessly religious here
+ feast_main_stable_breakin.0004.deviant_discovered:0 "\nThe laughter and joy fell silent however, as [breakin_deviant.GetTitledFirstName] was discovered at the back of the stables, committing unspeakable acts with an ox! What a rogue!"
+
+ feast_main_stable_breakin.0006.deviant_discovered:0 "\n\nThe laughter and joy was nowhere to be found, however, when [breakin_deviant.GetTitledFirstName] was discovered at the back of the stables, committing unspeakable acts with an ox!"
+
+ # ── Childhood Personality ─────────────────────────────────────────────────────
+
+ # "break a few peasants" — dark joke option for callous child
+ child_personality.7050.c:0 "To make a golden omelette, you have to break a few commoners..."
+
+ # "if a peasant stops paying their taxes" — callous education outcome
+ child_personality.callous.desc:0 "[child.GetFirstNameNoTooltip] seems to have taken the lesson... somewhat... to heart.\n\nWhile [child.GetSheHe] understands the role of the lower classes, [child.GetSheHe] also insists that 'if a commoner stops paying their taxes, they are of no more use, and should be discarded' – a very callous view on human life..."
+
+ # ── Coming of Age ─────────────────────────────────────────────────────────────
+
+ # "fought a few uppity peasants" in combat training — feudal-class framing
+ coming_of_age.0003.desc_child_2:0 "proceeded acceptably, and I have sparred with several opponents with some success."
+
+ # ── Childhood Personality (personality_events_l_english) ─────────────────────
+
+ # "Unworthy Peasants" — event title
+ child_personality.1021.t:0 "Unworthy Commoners"
+
+ # "No... this peasant over here! Wait, maybe..." — fickle charity option
+ child_personality.7080.b:0 "The [ROOT.Char.Custom('lowly_servant_type')]! No... this commoner over here! Wait, maybe..."
+
+ # ── Seduce Ongoing Events ─────────────────────────────────────────────────────
+
+ # "The peasants are standing before me" — flower-planting scene
+ seduce_ongoing.1311.desc:0 "\"So you don't want us planting 'em, then, [ROOT.Char.Custom('FormOfAddressForLiege')]?\" The commoners are standing before me, soil spilling from crates on their yokes. The flower display they carry looks worn and battered."

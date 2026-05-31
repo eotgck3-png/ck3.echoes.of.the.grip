@@ -91,7 +91,7 @@ Two identifiers with the same name will overwrite each other with zero warning.
 
 Tiger is located at:
 ```
-C:\Users\river\tools\ck3-tiger-windows-v1.17.0\ck3tiger.exe
+C:\Users\river\tools\ck3-tiger-windows-v1.17.0\ck3-tiger.exe
 ```
 
 CK3 vanilla files are at:
@@ -101,9 +101,9 @@ D:\SteamLibrary\steamapps\common\Crusader Kings III\game
 
 To validate the mod, run from PowerShell:
 ```powershell
-& "C:\Users\river\tools\ck3-tiger-windows-v1.17.0\ck3tiger.exe" `
-  --vanilla "D:\SteamLibrary\steamapps\common\Crusader Kings III\game" `
-  --mod "PATH\TO\echoes_of_the_grip"
+& "C:\Users\river\tools\ck3-tiger-windows-v1.17.0\ck3-tiger.exe" `
+  --game "D:\SteamLibrary\steamapps\common\Crusader Kings III\game" `
+  "c:\Users\river\Documents\GitHub\ck3.echoes.of.the.grip"
 ```
 
 Tiger catches: missing loc keys, invalid scope usage, undefined references, syntax errors,

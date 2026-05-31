@@ -1,0 +1,46 @@
+﻿l_english:
+ # ── Story Cycles: Peasant → Commoner — EotG Setting Overrides ────────────────
+ # Sources: story_cycle_peasant_affair_l_english.yml,
+ #          story_cycles_l_english.yml,
+ #          story_cycle_harrying_of_the_north_l_english.yml,
+ #          story_cycle_tax_rivalry_events_l_english.yml
+ # Replaces: "peasant/peasants/peasantry" → "commoner/commoners/commonfolk".
+ # ─────────────────────────────────────────────────────────────────────────────
+
+ # ── Peasant Affair Story Cycle ────────────────────────────────────────────────
+
+ # "this peasant you have us searching for"
+ peasant_affair.2002.desc_opening:0 ""[ROOT.Char.Custom('FormOfAddressForLiege')|U], we can find no signs of this commoner you have us searching for. With the limited resources at my disposal there is only so much that I can do..."\n\n"
+
+ # "Surely no peasant can be worth this."
+ peasant_affair.2002.b:0 "Surely no commoner can be worth this."
+
+ # "The peasant [WomanMan] of my dreams fights"
+ peasant_affair.2003.desc_dislike:0 "The commoner [peasant_character.GetWomanMan] of my dreams fights [searching_character.GetTitledFirstNamePossessive] grasp, [peasant_character.GetHerHis] face twisted in anger and fear\n\n"Please my [ROOT.Char.GetLadyLord], let me go! That night was a mistake, I only wish to be left alone.""
+
+ # "The peasant [WomanMan] of my dreams ... clutches [her/his] [son/daughter]"
+ peasant_affair.2003.desc_dislike_their_child:0 "The commoner [peasant_character.GetWomanMan] of my dreams fights [searching_character.GetTitledFirstNamePossessive] grasp, [peasant_character.GetHerHis] face twisted in anger and fear as [peasant_character.GetSheHe] clutches [peasant_character.GetHerHis] [peasant_child.Custom('GetDaughterSon')] to [peasant_character.GetHerHis] side.\n\n"Please, [ROOT.Char.Custom('FormOfAddressForLiege')], let us go! I only wish to raise #EMP my#! [peasant_child.Custom('GetDaughterSon')] alone.""
+
+ # "this peasant you have us searching for ... already dead"
+ peasant_affair.2004.desc_opening:0 ""[ROOT.Char.Custom('FormOfAddressForLiege')|U], we can find no signs of this commoner you have us searching for. In all likelihood [peasant_character.GetSheHe] is already dead..."\n\n"
+
+ # ── Story Cycles: Doppelganger ────────────────────────────────────────────────
+
+ # "A peasant bearing your exact likeness"
+ story_doppelganger_desc:0 "A commoner bearing your exact likeness has been found — a veritable [Glossary( 'doppelgänger', 'DOPPELGANGER_GLOSS' )]..."
+
+ # "A peasant that looks and talks just like you"
+ DOPPELGANGER_STORY_PRACTICAL_INFORMATION_STRING:0 "A commoner that looks and talks just like you can be an opportunity... or a curse. For now, [Story.MakeScope.Var('doppelganger_character').Char.GetUIName] resides in your [court|E]."
+
+ # ── Harrying of the North Story Cycle ────────────────────────────────────────
+
+ # "work of the peasants" / "the peasantry" / "fewer peasants" (×2)
+ ep3_story_cycle_harrying.1000.desc:0 "With the disgruntled Anglo-Saxon nobles pursuing their doomed cause, I spend many an evening musing ways to strip them of their power.\n\nRushing in and removing their titles would cause an uproar, but the life of a [ROOT.Char.GetLadyLord] depends on the work of the commoners. We sit above them, appointed by [ROOT.Char.GetFaith.HighGodName], but it is through their back-breaking labor that our power thrives.\n\nGrain is, in turn, the lifeblood of the commonfolk. Less grain means fewer commoners. The fewer the commoners, the weaker the [ROOT.Char.GetLadyLord]. And the weaker the [ROOT.Char.GetLadyLord]..."
+
+ # "hasten the peasants' acceptance of us"
+ ep3_story_cycle_harrying.1011.desc:0 "To my surprise, the [captured.GetWomanMan] considers my proposal.\n\n"I'll become... a [ROOT.Char.GetCulture.GetName]?" [captured.GetSheHe|U] sounds the word out, considering the implications. "And I'll be accepted as one of you?"\n\nI take a moment to fully explore the ramifications of my hastily-made proposal, too. If I am to rule this land, I will need as many fellow [ROOT.Char.GetCulture.GetCollectiveNounNoTooltip] around me as I can possibly muster. To accept the former rulers into the fold might just hasten the commoners' acceptance of us, despite our foreign bearing."
+
+ # ── Tax Rivalry Story Cycle ───────────────────────────────────────────────────
+
+ # "convince the peasantry of [county]"
+ tax_rivalry.3001.desc_intro:0 "As I brood over my grievances with [sabotaged_rival.GetTitledFirstNameNoTooltip], a dastardly plan occurs to me. With only a little bribe, I can convince the commonfolk of [sabotaged_county.GetNameNoTierNoTooltip] that [sabotaged_rival.GetTitledFirstNameNoTooltip] intends to quintuple their taxes and inspire a rebellion against our liege [liege.GetTitledFirstName]."

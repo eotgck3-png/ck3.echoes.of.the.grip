@@ -1,0 +1,101 @@
+﻿l_english:
+ # ── GUI, Factions, Memories & Tutorial — EotG Setting Overrides ──────────────
+ # Sources: gui/factions_view_l_english.yml,
+ #          gui/levyview_l_english.yml,
+ #          gui/potential_agents_l_english.yml,
+ #          gui/event_window_wigets_l_english.yml,
+ #          memories_l_english.yml,
+ #          portraits/portrait_modifiers_l_english.yml,
+ #          tutorial/tutorial_l_english.yml,
+ #          tutorial/tutorial_reactive_l_english.yml,
+ #          party_baron_l_english.yml
+ # Replaces: "peasant/peasants/Peasant Revolt" → "commoner/commoners/Commoner Revolt".
+ # ─────────────────────────────────────────────────────────────────────────────
+
+ # ── Factions View ─────────────────────────────────────────────────────────────
+
+ # "Peasant Revolt" — faction type name
+ FACTION_PEASANT_REVOLT:0 "Commoner Revolt"
+
+ # "#T Peasants from [county]" — faction window county member tooltip
+ FACTION_WINDOW_COUNTY_MEMBER_TT:0 "#S Faction Member#!\n#T Commoners from [FactionCountyMember.GetMember.GetNameNoTooltip]#!\n[faction_military_power|E] Contribution: [FactionCountyMember.CalcPower|%1V]\n#weak Contribution is based on the [county|E]'s [levies|E] and [county_opinion|E]#!\n\n#S Faction Commitment: [FactionCountyMember.CalcJoinScore|V0]#! #weak (leaves if less than [GetDefine('NFaction', 'COUNTY_LEAVE_SCORE_THRESHOLD')])#!\n[FactionCountyMember.CalcJoinBreakdown]\n\n#I Click to view County#!"
+
+ # ── Levy View ─────────────────────────────────────────────────────────────────
+
+ # "peasant militias" — levy flavour text
+ LV_FLAVOR:0 "Levies consist of commoner militias, ruffians, local sellswords, and destitute nobles equipped with motley tools and improvised weapons — their sheer numbers make up the bulk of most armies."
+
+ # ── Potential Agents ──────────────────────────────────────────────────────────
+
+ # "peasant's pitchfork" — assassin agent description
+ agent_assassin_desc:0 "#WEAK Knife, poison, or commoner's pitchfork — as long as they're not breathing by daybreak, it's all the same to me.#!\n$EFFECT_LIST_BULLET$ Provides [success_chance_max_i] [scheme_potential|E]\n$EFFECT_LIST_BULLET$ Requires [prowess_i] [prowess|E] & [intrigue_i] [intrigue|E]\n$EFFECT_LIST_BULLET$ #P Benefits#! from [traits|E] like [GetTrait('sadistic').GetName( GetNullCharacter )] and [GetTrait('patient').GetName( GetNullCharacter )]\n$EFFECT_LIST_BULLET$ #N Suffers#! from [traits|E] like [GetTrait('compassionate').GetName( GetNullCharacter )] and [GetTrait('impatient').GetName( GetNullCharacter )]"
+
+ # ── Event Window Widgets ──────────────────────────────────────────────────────
+
+ # "Local Peasants are in a constant struggle" + "peasants from all supported counties"
+ event_window_widget_peasant_leader_tooltip:0 "Local Commoners are in a constant struggle against their overlords. As an [adventurer|E], you are just a bystander. However, if you wish, you can take action into your own hands. Decide who's right and who's wrong, choose a side and support it."
+
+ # "peasants from all supported counties will join your banners"
+ event_window_widget_peasant_leader_tooltip_widget:0 "Reminder for how many [counties|E] you decided to support or control. If it comes down to a war, commoners from all supported counties will join your banners!"
+
+ # ── Memories ──────────────────────────────────────────────────────────────────
+
+ # "I found a peasant who looked exactly like me and I beat [them] to death"
+ found_my_clone_desc_1:0 "I found a commoner who looked exactly like me and I beat [doppelganger.GetHerHim] to death"
+
+ # "I saw a peasant who looked exactly like a better version of me"
+ found_my_clone_desc_2:0 "I saw a commoner who looked exactly like a better version of me"
+
+ # "you found a peasant who looked exactly like you and you beat [them] to death"
+ found_my_clone_desc_second_perspective_1:0 "you found a commoner who looked exactly like you and you beat [doppelganger.GetHerHim] to death"
+
+ # "you saw a peasant who looked exactly like a better version of you"
+ found_my_clone_desc_second_perspective_2:0 "you saw a commoner who looked exactly like a better version of you"
+
+ # "[owner] found a peasant who looked exactly like [them] and beat [doppelganger] to death"
+ found_my_clone_desc_third_perspective_1:0 "[owner.GetName] found a commoner who looked exactly like [owner.GetHerHim] and [owner.GetSheHe] beat [doppelganger.GetHerHim] to death"
+
+ # "[owner] saw a peasant who looked exactly like a better version of [them]"
+ found_my_clone_desc_third_perspective_2:0 "[owner.GetName] saw a commoner who looked exactly like a better version of [owner.GetHerHim]"
+
+ # "I led a peasant revolt against [character]"
+ offensive_war_desc_peasant:0 "I led a commoner revolt against [other_party.GetTitledFirstName]"
+
+ # "you led a peasant revolt against [character]"
+ offensive_war_desc_second_perspective_peasant:0 "you led a commoner revolt against [other_party.GetTitledFirstName]"
+
+ # "[owner] led a peasant revolt against [character]"
+ offensive_war_desc_third_perspective_peasant:0 "[owner.GetFirstName] led a commoner revolt against [other_party.GetTitledFirstName]"
+
+ # "A peasant revolt, led by [character], rose up against me"
+ defensive_war_desc_peasant:0 "A commoner revolt, led by [other_party.GetFirstName], rose up against me"
+
+ # "A peasant revolt, led by [character], rose up against you"
+ defensive_war_desc_second_perspective_peasant:0 "A commoner revolt, led by [other_party.GetFirstName], rose up against you"
+
+ # "A peasant revolt, led by [character], rose up against [owner]"
+ defensive_war_desc_third_perspective_peasant:0 "A commoner revolt, led by [other_party.GetFirstName], rose up against [owner.GetFullName]"
+
+ # "abused my peasants" — memory short label
+ abused_my_peasants:0 "abused my commoners"
+
+ # "peasant revolt" — war type memory label
+ war_memory_cb_peasant:0 "commoner revolt"
+
+ # ── Portrait Modifiers ────────────────────────────────────────────────────────
+
+ # "Peasant's Straw Hat" — portrait modifier name
+ PORTRAIT_MODIFIER_custom_headgear_m_headgear_sec_fp4_western_era3_com_01:0 "@legendsofthedead_icon! Commoner's Straw Hat"
+
+ # ── Tutorial ──────────────────────────────────────────────────────────────────
+
+ # "including the many unwashed peasants across the world"
+ lesson_basics_religion_3_desc:0 "All [faiths|E] have [fervor|E], which waxes and wanes over time depending on the number of adherents to the $game_concept_faith$, how [holy_wars|E] are going, and more. $game_concept_fervor$ represents how fanatical most members of the $game_concept_faith$ are feeling currently, including the many common folk across the world.\n\nWhen your $game_concept_faith$'s $game_concept_fervor$ is high, it is easier to convert [counties|E] (using [convert_county|E]) to your $game_concept_faith$, and $game_concept_counties$ of your $game_concept_faith$ #EMP resist#! conversion to other $game_concept_faiths$.\n\nWhen $game_concept_fervor$ is low, however, $game_concept_rulers$ might decide to abandon their current $game_concept_faith$ in favor of another from the same [religion|E], spawning a [heresy|E]. \n\n#TUT Heretical $game_concept_rulers$ will convert along with their closest territory and vassals, and are free to spread their new $game_concept_faith$ in place of the old.#!"
+
+ # "put the peasants in their place" + "Peasant Factions" — faction tutorial tip
+ reactive_advice_protect_against_factions_2_desc:0 "Counties with a low [county_opinion|E] tend to join the [peasant_faction|E]. Unlike other factions, this Faction will rise up no matter if they have a chance of winning or not!\n\nSometimes, you simply have to put the commoners in their place...\n\n#TUT You should always keep an eye on Commoner Factions. If they strike while you're at war they can do significant damage to your [control|E].#!"
+
+ # ── Party Baron ───────────────────────────────────────────────────────────────
+
+ # "like a giddy peasant [GirlBoy]" — wedding happiness description
+ party_baron.9003.desc_positive:0 "I cannot believe how lucky I am, to have this [party_baron.GetWomanMan] at my side. I never thought I would feel as happy as I did on my wedding day, like a giddy commoner [ROOT.Char.Custom('GirlBoy')]. And [party_baron.GetFirstName] seemed radiant.\n\nWhen [party_baron.GetSheHe] looks me in the eyes and says [party_baron.GetSheHe] can think of no greater joy than to be with me forever, I believe [party_baron.GetHerHim]."

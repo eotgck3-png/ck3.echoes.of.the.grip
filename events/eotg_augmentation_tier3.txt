@@ -1,0 +1,507 @@
+# ── eotg_augmentation_tier3.txt ──────────────────────────────────────────────
+# Events for Overclocked-tier characters.
+#
+# eotg_aug_tier3.001 — Violent Impulse         (random, adds fracture risk)
+# eotg_aug_tier3.002 — The Mirror              (random, identity confrontation)
+# eotg_aug_tier3.003 — Sleepless               (random, rest deprivation)
+# eotg_aug_tier3.004 — Signal Noise            (paranoid ideation)
+# eotg_aug_tier3.005 — Clarity                 (at-war tactical vision)
+# eotg_aug_tier3.006 — The Delegation          (vassal ultimatum)
+# eotg_aug_tier3.007 — Two Machines            (overclocked peer encounter)
+#
+# Fires from: eotg_augmentation_on_actions.txt yearly checks
+# ─────────────────────────────────────────────────────────────────────────────
+
+namespace = eotg_aug_tier3
+
+
+# ── eotg_aug_tier3.001 ────────────────────────────────────────────────────────
+# Violent Impulse
+# The overclocked system registers a threat and the body responds before
+# the mind can intervene.
+
+eotg_aug_tier3.001 = {
+    type = character_event
+    title = eotg_aug_tier3.001.t
+    desc = eotg_aug_tier3.001.desc
+    theme = intrigue
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+
+    immediate = {
+        hidden_effect = {
+            add_character_flag = { flag = eotg_flag_oc_event_cooldown  months = 6 }
+        }
+    }
+
+    # "Control yourself" — resist, gain stress, reduce risk
+    option = {
+        name = eotg_aug_tier3.001.a
+        stress_impact = { base = medium_stress_impact_gain }
+        eotg_add_fracture_risk = { AMOUNT = -3 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = patient }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # "Strike first" — wound a courtier, add dread and risk
+    option = {
+        name = eotg_aug_tier3.001.b
+        trigger = { any_courtier = { is_alive = yes  NOT = { is_imprisoned = yes } } }
+        random_courtier = {
+            limit = { is_alive = yes  NOT = { is_imprisoned = yes } }
+            add_trait = wounded
+        }
+        add_dread = 15
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = wrathful }
+            modifier = { add = 10  has_trait = callous }
+        }
+    }
+
+    # "Kill them" — execute a courtier, heavy dread and risk
+    option = {
+        name = eotg_aug_tier3.001.c
+        trigger = { any_courtier = { is_alive = yes  NOT = { is_imprisoned = yes } } }
+        random_courtier = {
+            limit = { is_alive = yes  NOT = { is_imprisoned = yes } }
+            death = { death_reason = death_murder }
+        }
+        add_dread = 30
+        add_tyranny = 10
+        eotg_add_fracture_risk = { AMOUNT = 15 }
+        ai_chance = {
+            base = 20
+            modifier = { add = 30  has_trait = callous }
+            modifier = { add = -30  has_trait = compassionate }
+        }
+    }
+}
+
+
+# ── eotg_aug_tier3.002 ────────────────────────────────────────────────────────
+# The Mirror
+# The character sees themselves — or what remains — in reflection.
+# The most dangerous option accelerates neurofracture.
+
+eotg_aug_tier3.002 = {
+    type = character_event
+    title = eotg_aug_tier3.002.t
+    desc = eotg_aug_tier3.002.desc
+    theme = mental_health
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+
+    # "This is evolution" — pride and risk
+    option = {
+        name = eotg_aug_tier3.002.a
+        add_prestige = 100
+        eotg_add_fracture_risk = { AMOUNT = 10 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 10  has_trait = arrogant }
+        }
+    }
+
+    # "I miss who I was" — grief, but reduces risk
+    option = {
+        name = eotg_aug_tier3.002.b
+        stress_impact = { base = medium_stress_impact_gain }
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # "Remove more flesh" — maximum risk push; may trigger fracture immediately
+    option = {
+        name = eotg_aug_tier3.002.c
+        add_prowess_skill = 3
+        eotg_add_fracture_risk = { AMOUNT = 25 }
+        hidden_effect = {
+            if = {
+                limit = { eotg_neurofracture_threshold_met = yes }
+                eotg_trigger_neurofracture = yes
+            }
+        }
+        ai_chance = {
+            base = 20
+            modifier = { add = 30  has_trait = brave }
+            modifier = { add = 20  has_trait = callous }
+        }
+    }
+}
+
+
+# ── eotg_aug_tier3.003 ────────────────────────────────────────────────────────
+# Sleepless
+# The implants no longer allow the body to rest. A choice between sedation,
+# dangerous exploitation of the sleeplessness, or a painful disconnection.
+
+eotg_aug_tier3.003 = {
+    type = character_event
+    title = eotg_aug_tier3.003.t
+    desc = eotg_aug_tier3.003.desc
+    theme = physical_health
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+
+    # "Sedate me" — stress relief at some cost
+    option = {
+        name = eotg_aug_tier3.003.a
+        stress_impact = { base = medium_stress_impact_loss }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 10  stress >= 200 }
+        }
+    }
+
+    # "I no longer require rest" — push the system, add risk
+    option = {
+        name = eotg_aug_tier3.003.b
+        add_character_modifier = { modifier = eotg_mod_oc_martial_bonus  years = 2 }
+        eotg_add_fracture_risk = { AMOUNT = 20 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = brave }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+
+    # "Disconnect the neural feed" — permanent skill loss, but risk drops
+    option = {
+        name = eotg_aug_tier3.003.c
+        add_martial_skill = -2
+        add_prowess_skill = -2
+        eotg_add_fracture_risk = { AMOUNT = -10 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 10  stress >= 300 }
+        }
+    }
+}
+
+
+# ── eotg_aug_tier3.004 ────────────────────────────────────────────────────────
+# Signal Noise
+# The implant flags seventeen threats in the last hour. None materialize.
+
+eotg_aug_tier3.004 = {
+    type = character_event
+    title = eotg_aug_tier3.004.t
+    desc = eotg_aug_tier3.004.desc
+    theme = intrigue
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+
+    immediate = {
+        hidden_effect = {
+            add_character_flag = { flag = eotg_flag_oc_event_cooldown  months = 6 }
+        }
+    }
+
+    # "Trust the analysis. Act accordingly." — may gain paranoid, fracture risk
+    option = {
+        name = eotg_aug_tier3.004.a
+        random = {
+            chance = 30
+            add_trait = paranoid
+        }
+        stress_impact = { base = minor_stress_impact_gain }
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = paranoid }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+
+    # "Override the threat protocols." — pay gold, reduce risk
+    option = {
+        name = eotg_aug_tier3.004.b
+        trigger = { gold >= 75 }
+        remove_short_term_gold = 75
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        stress_impact = { base = minor_stress_impact_loss }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 10  has_trait = patient }
+        }
+    }
+
+    # "Act on the highest-probability target." — courtier gets fear opinion, dread
+    option = {
+        name = eotg_aug_tier3.004.c
+        trigger = { any_courtier = { is_alive = yes  NOT = { is_imprisoned = yes } } }
+        random_courtier = {
+            limit = { is_alive = yes  NOT = { is_imprisoned = yes } }
+            add_opinion = { modifier = eotg_opinion_aug_fear  target = root }
+        }
+        add_dread = 20
+        eotg_add_fracture_risk = { AMOUNT = 10 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = paranoid }
+            modifier = { add = 20  has_trait = callous }
+        }
+    }
+}
+
+
+# ── eotg_aug_tier3.005 ────────────────────────────────────────────────────────
+# Clarity
+# In the middle of an engagement, the static clears.
+
+eotg_aug_tier3.005 = {
+    type = character_event
+    title = eotg_aug_tier3.005.t
+    desc = eotg_aug_tier3.005.desc
+    theme = battle
+
+    trigger = { is_at_war = yes }
+
+    left_portrait = {
+        character = root
+        animation = personality_bold
+    }
+
+    immediate = {
+        hidden_effect = {
+            add_character_flag = { flag = eotg_flag_oc_event_cooldown  months = 6 }
+        }
+    }
+
+    # "Execute the plan." — prestige, temporary martial bonus, fracture risk
+    option = {
+        name = eotg_aug_tier3.005.a
+        add_prestige = 200
+        add_character_modifier = { modifier = eotg_mod_oc_martial_bonus  years = 1 }
+        eotg_add_fracture_risk = { AMOUNT = 8 }
+        ai_chance = {
+            base = 50
+            modifier = { add = 30  has_trait = brave }
+            modifier = { add = 20  has_trait = ambitious }
+        }
+    }
+
+    # "The clarity is terrifying." — stress, smaller prestige
+    option = {
+        name = eotg_aug_tier3.005.b
+        stress_impact = { base = minor_stress_impact_gain }
+        add_prestige = 100
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+
+    # "Record everything for the archive." — learning gain
+    option = {
+        name = eotg_aug_tier3.005.c
+        add_learning_skill = 1
+        add_prestige = 75
+        ai_chance = {
+            base = 20
+            modifier = { add = 30  has_trait = curious }
+            modifier = { add = 10  highest_skill = learning }
+        }
+    }
+}
+
+
+# ── eotg_aug_tier3.006 ────────────────────────────────────────────────────────
+# The Delegation
+# Senior vassals arrive together to question fitness to rule.
+
+eotg_aug_tier3.006 = {
+    type = character_event
+    title = eotg_aug_tier3.006.t
+    desc = eotg_aug_tier3.006.desc
+    theme = realm
+
+    trigger = {
+        any_vassal = {
+            is_alive = yes
+            opinion = { target = root  value < -20 }
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+
+    immediate = {
+        hidden_effect = {
+            add_character_flag = { flag = eotg_flag_oc_event_cooldown  months = 6 }
+        }
+    }
+
+    # "Have them arrested." — dread, tyranny
+    option = {
+        name = eotg_aug_tier3.006.a
+        add_dread = 30
+        add_tyranny = 15
+        every_vassal = {
+            limit = {
+                is_alive = yes
+                opinion = { target = root  value < -20 }
+            }
+            add_opinion = { modifier = eotg_opinion_aug_fear  target = root }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = callous }
+            modifier = { add = 20  has_trait = wrathful }
+        }
+    }
+
+    # "Hear them out. Set conditions." — prestige cost, opinion recovery
+    option = {
+        name = eotg_aug_tier3.006.b
+        add_prestige = -100
+        every_vassal = {
+            limit = {
+                is_alive = yes
+                opinion = { target = root  value < -20 }
+            }
+            add_opinion = { modifier = eotg_opinion_aug_unease  target = root }
+        }
+        stress_impact = { base = minor_stress_impact_gain }
+        ai_chance = {
+            base = 50
+            modifier = { add = 20  has_trait = patient }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+
+    # "Demonstrate what I am still capable of." — mass intimidation, fracture risk
+    option = {
+        name = eotg_aug_tier3.006.c
+        add_dread = 50
+        every_vassal = {
+            limit = { is_alive = yes }
+            add_opinion = { modifier = eotg_opinion_aug_fear  target = root }
+        }
+        eotg_add_fracture_risk = { AMOUNT = 12 }
+        ai_chance = {
+            base = 20
+            modifier = { add = 30  has_trait = arrogant }
+            modifier = { add = 20  has_trait = callous }
+        }
+    }
+}
+
+
+# ── eotg_aug_tier3.007 ────────────────────────────────────────────────────────
+# Two Machines
+# Another overclocked character exists in the same orbit.
+
+eotg_aug_tier3.007 = {
+    type = character_event
+    title = eotg_aug_tier3.007.t
+    desc = eotg_aug_tier3.007.desc
+    theme = intrigue
+
+    trigger = {
+        OR = {
+            any_vassal = { is_alive = yes  has_trait = eotg_overclocked }
+            any_courtier = { is_alive = yes  has_trait = eotg_overclocked }
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = personality_bold
+    }
+    right_portrait = {
+        character = scope:other_machine
+        animation = personality_bold
+    }
+
+    immediate = {
+        hidden_effect = {
+            add_character_flag = { flag = eotg_flag_oc_event_cooldown  months = 6 }
+            if = {
+                limit = { any_vassal = { is_alive = yes  has_trait = eotg_overclocked } }
+                random_vassal = {
+                    limit = { is_alive = yes  has_trait = eotg_overclocked }
+                    save_scope_as = other_machine
+                }
+            }
+            else = {
+                random_courtier = {
+                    limit = { is_alive = yes  has_trait = eotg_overclocked }
+                    save_scope_as = other_machine
+                }
+            }
+        }
+    }
+
+    # "Acknowledge the kinship." — mutual positive opinion
+    option = {
+        name = eotg_aug_tier3.007.a
+        scope:other_machine = {
+            add_opinion = { modifier = eotg_opinion_aug_admiration  target = root }
+        }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = gregarious }
+        }
+    }
+
+    # "The other is a threat." — intrigue gain, they fear you
+    option = {
+        name = eotg_aug_tier3.007.b
+        add_intrigue_skill = 1
+        scope:other_machine = {
+            add_opinion = { modifier = eotg_opinion_aug_fear  target = root }
+        }
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = paranoid }
+            modifier = { add = 10  has_trait = suspicious }
+        }
+    }
+
+    # "Compare calibrations." — both gain prowess, both gain fracture risk
+    option = {
+        name = eotg_aug_tier3.007.c
+        add_prowess_skill = 2
+        eotg_add_fracture_risk = { AMOUNT = 10 }
+        scope:other_machine = {
+            add_prowess_skill = 2
+            eotg_add_fracture_risk = { AMOUNT = 10 }
+        }
+        ai_chance = {
+            base = 20
+            modifier = { add = 30  has_trait = ambitious }
+            modifier = { add = 20  has_trait = brave }
+        }
+    }
+}

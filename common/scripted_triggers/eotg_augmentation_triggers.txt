@@ -1,0 +1,69 @@
+﻿# -- eotg_augmentation_triggers.txt -------------------------------------------
+# Scripted triggers for the Cybernetic Augmentation system.
+# -----------------------------------------------------------------------------
+
+# True if the character has any augmentation trait
+eotg_is_augmented_any = {
+    OR = {
+        has_trait = eotg_augmented
+        has_trait = eotg_enhanced
+        has_trait = eotg_overclocked
+        has_trait = eotg_neurofractured
+    }
+}
+
+# Eligible for initial augmentation
+eotg_can_receive_augmented = {
+    is_adult = yes
+    is_alive = yes
+    NOT = { eotg_is_augmented_any = yes }
+    capital_county = {
+        development_level >= 10
+    }
+}
+
+# Eligible to progress Augmented -> Enhanced
+eotg_can_progress_to_enhanced = {
+    has_trait = eotg_augmented
+    NOT = { has_character_flag = eotg_flag_suppress_progression }
+    capital_county = {
+        development_level >= 20
+    }
+}
+
+# Eligible to progress Enhanced -> Overclocked
+eotg_can_progress_to_overclocked = {
+    has_trait = eotg_enhanced
+    NOT = { has_character_flag = eotg_flag_suppress_progression }
+    capital_county = {
+        development_level >= 35
+    }
+}
+
+# Neurofracture risk threshold -- checked yearly for Overclocked characters
+eotg_neurofracture_threshold_met = {
+    has_trait = eotg_overclocked
+    OR = {
+        var:eotg_fracture_risk >= 80
+        AND = {
+            var:eotg_fracture_risk >= 60
+            stress >= 200
+        }
+    }
+}
+
+# AI augmentation interest
+eotg_ai_wants_augmentation = {
+    is_ai = yes
+    OR = {
+        has_trait = ambitious
+        has_trait = brave
+        has_trait = greedy
+    }
+    NOT = {
+        OR = {
+            has_trait = zealous
+            has_trait = content
+        }
+    }
+}
