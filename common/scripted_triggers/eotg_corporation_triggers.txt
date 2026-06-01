@@ -47,9 +47,12 @@ eotg_st_corp_can_sabotage = {
 # CEO has critically low board influence (no-confidence threshold)
 eotg_st_corp_board_influence_critical = {
 	eotg_st_is_ceo = yes
-	OR = {
-		NOT = { has_variable = eotg_board_influence }
+	trigger_if = {
+		limit = { has_variable = eotg_board_influence }
 		var:eotg_board_influence <= 20
+	}
+	trigger_else = {
+		always = yes
 	}
 }
 
