@@ -7,7 +7,20 @@
 # ─────────────────────────────────────────────────────────────────────────────
 
 on_game_start_after_lobby = {
-    on_actions = { eotg_bookmark_char_arcs_start }
+    on_actions = {
+        eotg_bookmark_char_arcs_start
+        eotg_866_opening_story_start
+    }
+}
+
+# Start the Weight of 866 opening story cycle for every player ruler.
+eotg_866_opening_story_start = {
+    effect = {
+        every_player = {
+            limit = { is_landed = yes }
+            create_story = eotg_story_866_opening
+        }
+    }
 }
 
 eotg_bookmark_char_arcs_start = {

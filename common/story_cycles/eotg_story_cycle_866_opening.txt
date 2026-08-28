@@ -1,18 +1,15 @@
 ﻿# ── eotg_story_cycle_866_opening.txt ──────────────────────────────────────────
 # Story Cycle: The Weight of 866
-# Fires at game start for the 866 AG bookmark.
-# Introduces the player to the era's three defining tensions:
-#   1. The Titan Exodus is still ongoing — refugees arrive bearing wars
-#   2. The Myr Cluster Wars have just ignited — the galaxy's next great conflict
-#   3. The memory of Orrin's Grip is only 866 years old — it is still living history
-#
-# Uses CK3 1.19 Stories system (story_cycles with stories_tab_visible support).
+# Created for each player ruler at game start (eotg_char_arc_actions.txt).
+# Introduces the era's three defining tensions via a chained framing sequence:
+#   eotg_orrins_grip.0001 — the memory of Orrin's Grip (866 years old)
+#   eotg_orrins_grip.0002 — the Titan Exodus is still ongoing
+#   eotg_orrins_grip.0003 — the Myr Cluster Wars have just ignited
+# The chain advances via each event's `after` block; the cycle ends itself
+# once the sequence has had time to play out.
 # ─────────────────────────────────────────────────────────────────────────────
 
 eotg_story_866_opening = {
-    # Show in the Situations tab (1.19 Stories system)
-    # stories_tab_visible = yes    # Uncomment once tested against 1.19 stories tab
-
     on_setup = {
         story_owner = {
             trigger_event = { id = eotg_orrins_grip.0001  days = 5 }
@@ -20,8 +17,24 @@ eotg_story_866_opening = {
     }
 
     on_end = {
-        # TODO: grant a small prestige reward for completing the opening story
+        story_owner = {
+            add_prestige = 100
+        }
     }
 
-    # TODO: add story_cycle stages as event chain develops
+    on_owner_death = {
+        end_story = yes
+    }
+
+    # The framing chain finishes within ~2 months; close the story after a year.
+    effect_group = {
+        days = { 365 400 }
+
+        triggered_effect = {
+            trigger = { always = yes }
+            effect = {
+                end_story = yes
+            }
+        }
+    }
 }
