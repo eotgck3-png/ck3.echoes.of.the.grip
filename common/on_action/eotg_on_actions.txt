@@ -1333,21 +1333,45 @@ eotg_on_yearly_pmc_legitimacy_check = {
 # Yearly Titan Exodus pulse — refugee fleets arrive in settled space.
 # One arrival event at most per pulse, gated by a shared 2-year cooldown flag
 # plus longer per-event cooldowns so the same story doesn't repeat quickly.
+#
+# THE WANING (1000 AG): the Titanworld is nearly empty by the year 1000.
+# Each ruler sees the one-time eotg_exodus.0009 transition event, every
+# arrival weight is cut to a fifth, the no-arrival weight grows, and only the
+# rare Stragglers event (eotg_exodus.0010) is added to the late-era rotation.
 eotg_on_yearly_exodus_pulse = {
     effect = {
+        # One-time "The Last Fleets" transition beat once the waning begins
         if = {
+            limit = {
+                current_year >= 1000
+                eotg_st_exodus_eligible = yes
+                NOT = { has_character_flag = eotg_exodus_waning_seen }
+            }
+            add_character_flag = eotg_exodus_waning_seen
+            trigger_event = { id = eotg_exodus.0009  days = { 5 30 } }
+        }
+        else_if = {
             limit = {
                 eotg_st_exodus_eligible = yes
                 NOT = { has_character_flag = eotg_exodus_recent }
             }
             random_list = {
-                # Most years, no fleet arrives
-                60 = {}
+                # Most years, no fleet arrives — near-certain after the waning
+                60 = {
+                    modifier = {
+                        add = 40
+                        current_year >= 1000
+                    }
+                }
 
                 # Ragged Survivors — the bread-and-butter arrival
                 14 = {
                     trigger = {
                         NOT = { has_character_flag = eotg_exodus_0001_recent }
+                    }
+                    modifier = {
+                        factor = 0.2
+                        current_year >= 1000
                     }
                     add_character_flag = { flag = eotg_exodus_recent  years = 2 }
                     add_character_flag = { flag = eotg_exodus_0001_recent  years = 5 }
@@ -1359,15 +1383,21 @@ eotg_on_yearly_exodus_pulse = {
                     trigger = {
                         NOT = { has_character_flag = eotg_exodus_0004_recent }
                     }
+                    modifier = {
+                        factor = 0.2
+                        current_year >= 1000
+                    }
                     add_character_flag = { flag = eotg_exodus_recent  years = 2 }
                     add_character_flag = { flag = eotg_exodus_0004_recent  years = 10 }
                     trigger_event = { id = eotg_exodus.0004  days = { 5 30 } }
                 }
 
-                # An Organized Remnant — needs a realm worth arriving at
+                # An Organized Remnant — needs a realm worth arriving at.
+                # No organized courts remain to flee after the waning.
                 7 = {
                     trigger = {
                         realm_size >= 10
+                        current_year < 1000
                         NOT = { has_character_flag = eotg_exodus_0005_recent }
                     }
                     add_character_flag = { flag = eotg_exodus_recent  years = 2 }
@@ -1375,9 +1405,11 @@ eotg_on_yearly_exodus_pulse = {
                     trigger_event = { id = eotg_exodus.0005  days = { 5 30 } }
                 }
 
-                # Pilgrims of the Firstlight — religious order seeking sanctuary
+                # Pilgrims of the Firstlight — religious order seeking sanctuary.
+                # The temple convoys also stop coming once the Titanworld empties.
                 7 = {
                     trigger = {
+                        current_year < 1000
                         NOT = { has_character_flag = eotg_exodus_0007_recent }
                     }
                     add_character_flag = { flag = eotg_exodus_recent  years = 2 }
@@ -1390,9 +1422,24 @@ eotg_on_yearly_exodus_pulse = {
                     trigger = {
                         NOT = { has_character_flag = eotg_exodus_0008_recent }
                     }
+                    modifier = {
+                        factor = 0.2
+                        current_year >= 1000
+                    }
                     add_character_flag = { flag = eotg_exodus_recent  years = 2 }
                     add_character_flag = { flag = eotg_exodus_0008_recent  years = 8 }
                     trigger_event = { id = eotg_exodus.0008  days = { 5 30 } }
+                }
+
+                # Stragglers of a Dead World — late-era only, rare, long cooldown
+                5 = {
+                    trigger = {
+                        current_year >= 1000
+                        NOT = { has_character_flag = eotg_exodus_0010_recent }
+                    }
+                    add_character_flag = { flag = eotg_exodus_recent  years = 2 }
+                    add_character_flag = { flag = eotg_exodus_0010_recent  years = 10 }
+                    trigger_event = { id = eotg_exodus.0010  days = { 5 30 } }
                 }
             }
         }
