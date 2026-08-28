@@ -30,12 +30,17 @@ on_yearly_playable = {
         eotg_on_yearly_elven_flavor
         eotg_on_yearly_nc_flavor
         eotg_on_yearly_exodus_pulse
+        eotg_on_yearly_myr_pulse
     }
 }
 
 # Hook into war declaration to offer contracts to eligible Contractor-Generals
+# and to feed the Myr Cluster Wars struggle
 on_war_started = {
-    on_actions = { eotg_on_war_started_pmc_check }
+    on_actions = {
+        eotg_on_war_started_pmc_check
+        eotg_on_war_started_myr_catalyst
+    }
 }
 
 # Hook into raid start to check if a Fringe Overlord is raiding an ally
@@ -59,6 +64,7 @@ on_death = {
         eotg_on_death_elven_monarch
         eotg_on_death_nc_president
         eotg_on_death_fringe_overlord
+        eotg_on_death_myr_catalyst
     }
 }
 
@@ -1387,6 +1393,143 @@ eotg_on_yearly_exodus_pulse = {
                     add_character_flag = { flag = eotg_exodus_recent  years = 2 }
                     add_character_flag = { flag = eotg_exodus_0008_recent  years = 8 }
                     trigger_event = { id = eotg_exodus.0008  days = { 5 30 } }
+                }
+            }
+        }
+    }
+}
+
+# ── Myr Cluster Wars struggle hooks ──────────────────────────────────────────
+
+# On war declaration: an involved attacker declaring war feeds escalation.
+eotg_on_war_started_myr_catalyst = {
+    effect = {
+        if = {
+            limit = {
+                scope:attacker = { eotg_st_myr_involved = yes }
+            }
+            scope:attacker = {
+                eotg_se_myr_catalyst = {
+                    CATALYST = eotg_catalyst_myr_war_declared
+                    CHARACTER = scope:attacker
+                }
+            }
+        }
+    }
+}
+
+# On death: an involved ruler dying with the wars unresolved shifts the balance.
+eotg_on_death_myr_catalyst = {
+    effect = {
+        if = {
+            limit = {
+                is_ruler = yes
+                eotg_st_myr_involved = yes
+            }
+            eotg_se_myr_catalyst = {
+                CATALYST = eotg_catalyst_myr_ruler_slain
+                CHARACTER = root
+            }
+        }
+    }
+}
+
+# Yearly Myr pulse — passing-of-time catalyst, war-conclusion catalyst,
+# and per-phase flavor events for involved rulers.
+eotg_on_yearly_myr_pulse = {
+    effect = {
+        if = {
+            limit = { eotg_st_myr_involved = yes }
+
+            # The wars grind on — slow background pressure toward the next phase
+            random = {
+                chance = 25
+                eotg_se_myr_catalyst = {
+                    CATALYST = eotg_catalyst_myr_time
+                    CHARACTER = root
+                }
+            }
+
+            # A long peace among the involved feeds de-escalation
+            if = {
+                limit = {
+                    is_at_war = no
+                    has_variable = eotg_myr_peace_years
+                    var:eotg_myr_peace_years >= 3
+                }
+                random = {
+                    chance = 20
+                    eotg_se_myr_catalyst = {
+                        CATALYST = eotg_catalyst_myr_war_concluded
+                        CHARACTER = root
+                    }
+                }
+            }
+
+            # Track consecutive peace years for the check above
+            if = {
+                limit = { is_at_war = no }
+                if = {
+                    limit = { NOT = { has_variable = eotg_myr_peace_years } }
+                    set_variable = { name = eotg_myr_peace_years  value = 0 }
+                }
+                change_variable = { name = eotg_myr_peace_years  add = 1 }
+            }
+            else = {
+                set_variable = { name = eotg_myr_peace_years  value = 0 }
+            }
+
+            # ── Phase flavor events (one per phase, cooldown-gated) ──────────
+
+            # Ignition: border skirmishes
+            if = {
+                limit = {
+                    eotg_st_myr_phase = { PHASE = struggle_eotg_myr_phase_ignition }
+                    NOT = { has_character_flag = eotg_myr_0011_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_myr_0011_recent  years = 4 }
+                    trigger_event = { id = eotg_myr.0011  days = { 5 30 } }
+                }
+            }
+
+            # Escalation: the mercenary boom
+            if = {
+                limit = {
+                    eotg_st_myr_phase = { PHASE = struggle_eotg_myr_phase_escalation }
+                    NOT = { has_character_flag = eotg_myr_0012_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_myr_0012_recent  years = 4 }
+                    trigger_event = { id = eotg_myr.0012  days = { 5 30 } }
+                }
+            }
+
+            # Attrition: the long war grinds
+            if = {
+                limit = {
+                    eotg_st_myr_phase = { PHASE = struggle_eotg_myr_phase_attrition }
+                    NOT = { has_character_flag = eotg_myr_0013_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_myr_0013_recent  years = 4 }
+                    trigger_event = { id = eotg_myr.0013  days = { 5 30 } }
+                }
+            }
+
+            # Settlement: envoys in neutral space
+            if = {
+                limit = {
+                    eotg_st_myr_phase = { PHASE = struggle_eotg_myr_phase_settlement }
+                    NOT = { has_character_flag = eotg_myr_0014_recent }
+                }
+                random = {
+                    chance = 35
+                    add_character_flag = { flag = eotg_myr_0014_recent  years = 3 }
+                    trigger_event = { id = eotg_myr.0014  days = { 5 30 } }
                 }
             }
         }
