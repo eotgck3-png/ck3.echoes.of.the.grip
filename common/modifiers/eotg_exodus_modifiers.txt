@@ -1,0 +1,53 @@
+﻿# ── eotg_exodus_modifiers.txt ────────────────────────────────────────────────
+# Modifiers for the Titan Exodus refugee arrival system.
+# County modifiers track the local impact of refugee fleets; character
+# modifiers track the ruler's reputation and manpower choices.
+# Icons are vanilla placeholders — custom Exodus icons come later.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── County modifiers ─────────────────────────────────────────────────────────
+
+# Short-term strain while a refugee wave is absorbed
+eotg_exodus_refugee_strain = {
+    icon = stress_negative    # Placeholder — replace with custom Exodus icon
+    tax_mult = -0.10
+    monthly_county_control_decline_add = 0.2
+}
+
+# Long-term payoff once sheltered refugees put down roots
+eotg_exodus_integrated_refugees = {
+    icon = stewardship_positive    # Placeholder
+    development_growth_factor = 0.15
+    tax_mult = 0.05
+}
+
+# Spurned refugees turned to void-piracy in the county's reaches
+eotg_exodus_raider_scourge = {
+    icon = intrigue_negative    # Placeholder
+    tax_mult = -0.15
+    development_growth_factor = -0.10
+    monthly_county_control_decline_add = 0.3
+}
+
+# Fever brought in aboard unquarantined refugee ships
+eotg_exodus_fever_outbreak = {
+    icon = health_negative    # Placeholder
+    development_growth_factor = -0.20
+    monthly_county_control_decline_add = 0.3
+}
+
+# ── Character modifiers ──────────────────────────────────────────────────────
+
+# Refugees pressed into the levies — manpower now, resentment later
+eotg_exodus_pressed_levies = {
+    icon = martial_positive    # Placeholder
+    levy_size = 0.10
+    general_opinion = -5
+}
+
+# Reputation as a haven for the Exodus — word travels between the fleets
+eotg_exodus_haven_reputation = {
+    icon = diplomacy_positive    # Placeholder
+    general_opinion = 5
+    monthly_prestige = 0.25
+}

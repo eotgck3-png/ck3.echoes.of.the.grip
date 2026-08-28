@@ -29,6 +29,7 @@ on_yearly_playable = {
         eotg_on_yearly_pmc_flavor
         eotg_on_yearly_elven_flavor
         eotg_on_yearly_nc_flavor
+        eotg_on_yearly_exodus_pulse
     }
 }
 
@@ -1317,6 +1318,75 @@ eotg_on_yearly_pmc_legitimacy_check = {
                 add_character_modifier = {
                     modifier = eotg_pmc_legitimacy_questioned
                     years = 3
+                }
+            }
+        }
+    }
+}
+
+# Yearly Titan Exodus pulse — refugee fleets arrive in settled space.
+# One arrival event at most per pulse, gated by a shared 2-year cooldown flag
+# plus longer per-event cooldowns so the same story doesn't repeat quickly.
+eotg_on_yearly_exodus_pulse = {
+    effect = {
+        if = {
+            limit = {
+                eotg_st_exodus_eligible = yes
+                NOT = { has_character_flag = eotg_exodus_recent }
+            }
+            random_list = {
+                # Most years, no fleet arrives
+                60 = {}
+
+                # Ragged Survivors — the bread-and-butter arrival
+                14 = {
+                    trigger = {
+                        NOT = { has_character_flag = eotg_exodus_0001_recent }
+                    }
+                    add_character_flag = { flag = eotg_exodus_recent  years = 2 }
+                    add_character_flag = { flag = eotg_exodus_0001_recent  years = 5 }
+                    trigger_event = { id = eotg_exodus.0001  days = { 5 30 } }
+                }
+
+                # A Master of the Old Arts — rare skilled specialist
+                6 = {
+                    trigger = {
+                        NOT = { has_character_flag = eotg_exodus_0004_recent }
+                    }
+                    add_character_flag = { flag = eotg_exodus_recent  years = 2 }
+                    add_character_flag = { flag = eotg_exodus_0004_recent  years = 10 }
+                    trigger_event = { id = eotg_exodus.0004  days = { 5 30 } }
+                }
+
+                # An Organized Remnant — needs a realm worth arriving at
+                7 = {
+                    trigger = {
+                        realm_size >= 10
+                        NOT = { has_character_flag = eotg_exodus_0005_recent }
+                    }
+                    add_character_flag = { flag = eotg_exodus_recent  years = 2 }
+                    add_character_flag = { flag = eotg_exodus_0005_recent  years = 10 }
+                    trigger_event = { id = eotg_exodus.0005  days = { 5 30 } }
+                }
+
+                # Pilgrims of the Firstlight — religious order seeking sanctuary
+                7 = {
+                    trigger = {
+                        NOT = { has_character_flag = eotg_exodus_0007_recent }
+                    }
+                    add_character_flag = { flag = eotg_exodus_recent  years = 2 }
+                    add_character_flag = { flag = eotg_exodus_0007_recent  years = 8 }
+                    trigger_event = { id = eotg_exodus.0007  days = { 5 30 } }
+                }
+
+                # The Fever Ships — sickness rides the Exodus
+                6 = {
+                    trigger = {
+                        NOT = { has_character_flag = eotg_exodus_0008_recent }
+                    }
+                    add_character_flag = { flag = eotg_exodus_recent  years = 2 }
+                    add_character_flag = { flag = eotg_exodus_0008_recent  years = 8 }
+                    trigger_event = { id = eotg_exodus.0008  days = { 5 30 } }
                 }
             }
         }

@@ -1,0 +1,548 @@
+﻿# ── eotg_exodus_events.txt ───────────────────────────────────────────────────
+# The Titan Exodus — refugee fleet arrival events (866 AG bookmark priority #3).
+# Fired from eotg_on_yearly_exodus_pulse in common/on_action/eotg_on_actions.txt.
+#
+# eotg_exodus.0001 — Ragged Survivors (a battered fleet arrives)
+# eotg_exodus.0002 — Roots in New Soil (follow-up: sheltered refugees integrate)
+# eotg_exodus.0003 — The Spurned Turn Feral (follow-up: turned-away refugees raid)
+# eotg_exodus.0004 — A Master of the Old Arts (skilled specialist among refugees)
+# eotg_exodus.0005 — An Organized Remnant (exiled petty court arrives in force)
+# eotg_exodus.0006 — The Remnant's Grudge (follow-up: driven-off remnant raids)
+# eotg_exodus.0007 — Pilgrims of the Firstlight (religious order seeks sanctuary)
+# eotg_exodus.0008 — The Fever Ships (refugees carrying sickness)
+# ─────────────────────────────────────────────────────────────────────────────
+
+namespace = eotg_exodus
+
+# A battered refugee fleet limps into the ruler's home systems.
+eotg_exodus.0001 = {
+	type = character_event
+	title = eotg_exodus_0001_title
+	theme = realm
+
+	desc = eotg_exodus_0001_desc
+
+	left_portrait = {
+		character = root
+		animation = worry
+	}
+
+	immediate = {
+		capital_county = { save_scope_as = eotg_exodus_county }
+	}
+
+	# Shelter them — pay for their settlement, strain now, growth later.
+	option = {
+		name = eotg_exodus_0001_opt_shelter
+		remove_short_term_gold = 50
+		scope:eotg_exodus_county = {
+			add_county_modifier = {
+				modifier = eotg_exodus_refugee_strain
+				years = 3
+			}
+		}
+		if = {
+			limit = { has_trait = compassionate }
+			add_stress = -15
+		}
+		hidden_effect = {
+			trigger_event = { id = eotg_exodus.0002  days = { 360 720 } }
+		}
+		ai_chance = {
+			base = 40
+			modifier = { add = 20  gold > 300 }
+			modifier = { add = 20  has_trait = compassionate }
+			modifier = { add = -20  has_trait = greedy }
+		}
+	}
+
+	# Turn them away — no cost, but the desperate do desperate things.
+	option = {
+		name = eotg_exodus_0001_opt_refuse
+		add_prestige = -25
+		if = {
+			limit = { has_trait = compassionate }
+			add_stress = 20
+		}
+		hidden_effect = {
+			random = {
+				chance = 35
+				trigger_event = { id = eotg_exodus.0003  days = { 90 180 } }
+			}
+		}
+		ai_chance = {
+			base = 30
+			modifier = { add = 20  has_trait = callous }
+			modifier = { add = -20  has_trait = compassionate }
+		}
+	}
+
+	# Press them into service — manpower now, resentment later.
+	option = {
+		name = eotg_exodus_0001_opt_press
+		add_character_modifier = {
+			modifier = eotg_exodus_pressed_levies
+			years = 5
+		}
+		add_dread = 10
+		if = {
+			limit = {
+				OR = {
+					has_trait = compassionate
+					has_trait = just
+				}
+			}
+			add_stress = 20
+		}
+		ai_chance = {
+			base = 30
+			modifier = { add = 20  has_trait = sadistic }
+			modifier = { add = 10  has_trait = ambitious }
+			modifier = { add = -20  has_trait = just }
+		}
+	}
+}
+
+# Follow-up: sheltered refugees have put down roots and enriched the county.
+eotg_exodus.0002 = {
+	type = character_event
+	title = eotg_exodus_0002_title
+	theme = stewardship
+
+	desc = eotg_exodus_0002_desc
+
+	trigger = {
+		exists = scope:eotg_exodus_county
+	}
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	immediate = {
+		scope:eotg_exodus_county = {
+			remove_county_modifier = eotg_exodus_refugee_strain
+			add_county_modifier = {
+				modifier = eotg_exodus_integrated_refugees
+				years = 10
+			}
+			change_development_level = 1
+		}
+	}
+
+	option = {
+		name = eotg_exodus_0002_opt_good
+		add_prestige = 100
+	}
+}
+
+# Follow-up: refugees turned away have turned to void-piracy on the fringes.
+eotg_exodus.0003 = {
+	type = character_event
+	title = eotg_exodus_0003_title
+	theme = martial
+
+	desc = eotg_exodus_0003_desc
+
+	trigger = {
+		exists = scope:eotg_exodus_county
+	}
+
+	left_portrait = {
+		character = root
+		animation = anger
+	}
+
+	immediate = {
+		scope:eotg_exodus_county = {
+			add_county_modifier = {
+				modifier = eotg_exodus_raider_scourge
+				years = 5
+			}
+		}
+	}
+
+	# Hunt them down — costs coin, restores order, earns respect.
+	option = {
+		name = eotg_exodus_0003_opt_hunt
+		remove_short_term_gold = 50
+		scope:eotg_exodus_county = {
+			remove_county_modifier = eotg_exodus_raider_scourge
+		}
+		add_prestige = 50
+		ai_chance = {
+			base = 50
+			modifier = { add = 20  martial >= 12 }
+			modifier = { add = -20  gold < 100 }
+		}
+	}
+
+	# Buy them off — expensive, humiliating, effective.
+	option = {
+		name = eotg_exodus_0003_opt_pay
+		remove_short_term_gold = 100
+		scope:eotg_exodus_county = {
+			remove_county_modifier = eotg_exodus_raider_scourge
+		}
+		add_prestige = -25
+		ai_chance = {
+			base = 20
+			modifier = { add = 20  has_trait = craven }
+			modifier = { add = -10  has_trait = brave }
+		}
+	}
+
+	# Let them burn themselves out — the county suffers.
+	option = {
+		name = eotg_exodus_0003_opt_ignore
+		ai_chance = {
+			base = 20
+			modifier = { add = 15  gold < 50 }
+		}
+	}
+}
+
+# A specialist carrying knowledge of the old Titanworld arts is among the arrivals.
+eotg_exodus.0004 = {
+	type = character_event
+	title = eotg_exodus_0004_title
+	theme = learning
+
+	desc = eotg_exodus_0004_desc
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	right_portrait = {
+		character = scope:eotg_exodus_master
+		animation = personality_bold
+		trigger = { exists = scope:eotg_exodus_master }
+	}
+
+	immediate = {
+		create_character = {
+			location = root.capital_province
+			age = 52
+			culture = culture:eotg_culture_cauldrani
+			faith = faith:eotg_faith_industrial_survivalism
+			learning = 11
+			trait = education_learning_3
+			trait = diligent
+			save_scope_as = eotg_exodus_master
+		}
+	}
+
+	# Take them into your court.
+	option = {
+		name = eotg_exodus_0004_opt_recruit
+		add_courtier = scope:eotg_exodus_master
+		ai_chance = {
+			base = 60
+			modifier = { add = 20  has_trait = ambitious }
+		}
+	}
+
+	# Fund their onward passage — goodwill among the fleets.
+	option = {
+		name = eotg_exodus_0004_opt_fund
+		remove_short_term_gold = 25
+		add_character_modifier = {
+			modifier = eotg_exodus_haven_reputation
+			years = 5
+		}
+		ai_chance = {
+			base = 20
+			modifier = { add = 10  has_trait = generous }
+		}
+	}
+
+	# Let them drift on with the fleet.
+	option = {
+		name = eotg_exodus_0004_opt_pass
+		ai_chance = { base = 20 }
+	}
+}
+
+# An organized remnant — an exiled petty court — arrives with ships and soldiers.
+eotg_exodus.0005 = {
+	type = character_event
+	title = eotg_exodus_0005_title
+	theme = diplomacy
+
+	desc = eotg_exodus_0005_desc
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	right_portrait = {
+		character = scope:eotg_exodus_remnant
+		animation = personality_bold
+		trigger = { exists = scope:eotg_exodus_remnant }
+	}
+
+	immediate = {
+		create_character = {
+			location = root.capital_province
+			age = 45
+			culture = culture:eotg_culture_halrethi
+			faith = faith:eotg_faith_firstlight
+			martial = 9
+			trait = education_martial_3
+			trait = ambitious
+			save_scope_as = eotg_exodus_remnant
+		}
+	}
+
+	# Welcome them — their leader joins your court, and word spreads.
+	option = {
+		name = eotg_exodus_0005_opt_welcome
+		add_courtier = scope:eotg_exodus_remnant
+		add_character_modifier = {
+			modifier = eotg_exodus_haven_reputation
+			years = 5
+		}
+		ai_chance = {
+			base = 40
+			modifier = { add = 20  has_trait = gregarious }
+		}
+	}
+
+	# Demand tribute for safe passage through your systems.
+	option = {
+		name = eotg_exodus_0005_opt_extort
+		add_gold = 100
+		add_dread = 10
+		add_prestige = -25
+		ai_chance = {
+			base = 30
+			modifier = { add = 20  has_trait = greedy }
+			modifier = { add = -15  has_trait = just }
+		}
+	}
+
+	# Drive them off at gunpoint — strength has its own risks.
+	option = {
+		name = eotg_exodus_0005_opt_expel
+		add_prestige = 50
+		hidden_effect = {
+			random = {
+				chance = 40
+				trigger_event = { id = eotg_exodus.0006  days = { 180 360 } }
+			}
+		}
+		ai_chance = {
+			base = 30
+			modifier = { add = 20  has_trait = wrathful }
+			modifier = { add = -15  has_trait = compassionate }
+		}
+	}
+}
+
+# Follow-up: the remnant driven off returns to raid the ruler's holdings.
+eotg_exodus.0006 = {
+	type = character_event
+	title = eotg_exodus_0006_title
+	theme = war
+
+	desc = eotg_exodus_0006_desc
+
+	trigger = {
+		exists = scope:eotg_exodus_remnant
+		scope:eotg_exodus_remnant = { is_alive = yes }
+	}
+
+	left_portrait = {
+		character = root
+		animation = anger
+	}
+
+	right_portrait = {
+		character = scope:eotg_exodus_remnant
+		animation = personality_bold
+	}
+
+	immediate = {
+		capital_county = { save_scope_as = eotg_exodus_grudge_county }
+		scope:eotg_exodus_grudge_county = {
+			add_county_modifier = {
+				modifier = eotg_exodus_raider_scourge
+				years = 3
+			}
+		}
+	}
+
+	# Crush the raiders decisively.
+	option = {
+		name = eotg_exodus_0006_opt_crush
+		remove_short_term_gold = 75
+		scope:eotg_exodus_grudge_county = {
+			remove_county_modifier = eotg_exodus_raider_scourge
+		}
+		add_prestige = 75
+		ai_chance = {
+			base = 50
+			modifier = { add = 20  martial >= 12 }
+		}
+	}
+
+	# Offer the remnant the settlement you refused before.
+	option = {
+		name = eotg_exodus_0006_opt_settle
+		scope:eotg_exodus_grudge_county = {
+			remove_county_modifier = eotg_exodus_raider_scourge
+		}
+		add_courtier = scope:eotg_exodus_remnant
+		add_prestige = -50
+		ai_chance = {
+			base = 25
+			modifier = { add = 15  has_trait = compassionate }
+		}
+	}
+
+	# Endure the raids — they will exhaust themselves eventually.
+	option = {
+		name = eotg_exodus_0006_opt_endure
+		ai_chance = {
+			base = 25
+			modifier = { add = 15  gold < 75 }
+		}
+	}
+}
+
+# A religious order fleeing the Titanworld seeks sanctuary.
+eotg_exodus.0007 = {
+	type = character_event
+	title = eotg_exodus_0007_title
+	theme = faith
+
+	desc = eotg_exodus_0007_desc
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	right_portrait = {
+		character = scope:eotg_exodus_pilgrim
+		animation = personality_bold
+		trigger = { exists = scope:eotg_exodus_pilgrim }
+	}
+
+	immediate = {
+		create_character = {
+			location = root.capital_province
+			age = 38
+			culture = culture:eotg_culture_cauldrani
+			faith = faith:eotg_faith_firstlight
+			learning = 8
+			trait = education_learning_2
+			trait = zealous
+			save_scope_as = eotg_exodus_pilgrim
+		}
+	}
+
+	# Grant them sanctuary — the pious take notice.
+	option = {
+		name = eotg_exodus_0007_opt_sanctuary
+		remove_short_term_gold = 25
+		add_piety = 100
+		add_courtier = scope:eotg_exodus_pilgrim
+		ai_chance = {
+			base = 40
+			modifier = { add = 25  has_trait = zealous }
+			modifier = { add = -20  has_trait = cynical }
+		}
+	}
+
+	# Refuse — you have no room for foreign creeds.
+	option = {
+		name = eotg_exodus_0007_opt_refuse
+		add_piety = -50
+		ai_chance = {
+			base = 30
+			modifier = { add = 20  has_trait = cynical }
+			modifier = { add = -15  has_trait = zealous }
+		}
+	}
+
+	# Point their fleet toward a rival's systems instead.
+	option = {
+		name = eotg_exodus_0007_opt_redirect
+		add_prestige = 25
+		ai_chance = {
+			base = 30
+			modifier = { add = 15  has_trait = deceitful }
+		}
+	}
+}
+
+# Refugee ships arrive riding a fever outbreak.
+eotg_exodus.0008 = {
+	type = character_event
+	title = eotg_exodus_0008_title
+	theme = physical_health
+
+	desc = eotg_exodus_0008_desc
+
+	left_portrait = {
+		character = root
+		animation = fear
+	}
+
+	immediate = {
+		capital_county = { save_scope_as = eotg_exodus_fever_county }
+	}
+
+	# Quarantine the fleet at your own expense.
+	option = {
+		name = eotg_exodus_0008_opt_quarantine
+		remove_short_term_gold = 75
+		add_prestige = 25
+		ai_chance = {
+			base = 50
+			modifier = { add = 20  gold > 200 }
+		}
+	}
+
+	# Let them make landfall — mercy carries its own contagion.
+	option = {
+		name = eotg_exodus_0008_opt_admit
+		if = {
+			limit = { has_trait = compassionate }
+			add_stress = -10
+		}
+		random = {
+			chance = 50
+			scope:eotg_exodus_fever_county = {
+				add_county_modifier = {
+					modifier = eotg_exodus_fever_outbreak
+					years = 2
+				}
+			}
+		}
+		ai_chance = {
+			base = 25
+			modifier = { add = 20  has_trait = compassionate }
+		}
+	}
+
+	# Turn the fever ships away into the void.
+	option = {
+		name = eotg_exodus_0008_opt_refuse
+		add_piety = -25
+		if = {
+			limit = { has_trait = compassionate }
+			add_stress = 20
+		}
+		ai_chance = {
+			base = 25
+			modifier = { add = 20  has_trait = callous }
+			modifier = { add = -15  has_trait = compassionate }
+		}
+	}
+}
