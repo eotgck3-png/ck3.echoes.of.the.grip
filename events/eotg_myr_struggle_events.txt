@@ -311,6 +311,66 @@ eotg_myr.0014 = {
 	}
 }
 
+# ── Proxy war directive ──────────────────────────────────────────────────────
+
+# The patron's war chest arrives with instructions — how will the proxy answer?
+# Fired on the recipient of eotg_direct_proxy_war_interaction.
+# scope:actor = the patron who funded the proxy.
+eotg_myr.0020 = {
+	type = character_event
+	title = eotg_myr_0020_title
+	theme = diplomacy
+
+	desc = eotg_myr_0020_desc
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	right_portrait = {
+		character = scope:actor
+		animation = personality_bold
+		trigger = { exists = scope:actor }
+	}
+
+	# Take the coin and wage their war — the Cluster burns brighter.
+	option = {
+		name = eotg_myr_0020_opt_comply
+		add_prestige = 50
+		eotg_se_myr_catalyst = {
+			CATALYST = eotg_catalyst_myr_aggression
+			CHARACTER = root
+		}
+		ai_chance = {
+			base = 60
+			modifier = { add = 20  has_trait = ambitious }
+		}
+	}
+
+	# Pocket the coin and drag your feet — you serve no distant throne.
+	option = {
+		name = eotg_myr_0020_opt_stall
+		add_gold = 50
+		eotg_se_myr_catalyst = {
+			CATALYST = eotg_catalyst_myr_diplomacy
+			CHARACTER = root
+		}
+		if = {
+			limit = { exists = scope:actor }
+			reverse_add_opinion = {
+				target = scope:actor
+				modifier = eotg_myr_proxy_defied
+			}
+		}
+		ai_chance = {
+			base = 40
+			modifier = { add = 20  has_trait = deceitful }
+			modifier = { add = -20  has_trait = honest }
+		}
+	}
+}
+
 # ── Conclusion ───────────────────────────────────────────────────────────────
 
 # The wars are over — fired from the conclusion phase's on_start.
