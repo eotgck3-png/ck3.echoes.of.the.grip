@@ -329,6 +329,8 @@ eotg_fringe.0004 = {
 		name = eotg_fringe_0004_opt_hold
 		add_prestige = 50
 		add_dread = 10
+		# The mutiny was faced down — the lost ships become the Ghost Fleet legend (eotg_fringe.0029).
+		add_character_flag = { flag = eotg_fringe_mutiny_failed  years = 15 }
 		if = {
 			limit = { exists = scope:eotg_mutiny_leader }
 			scope:eotg_mutiny_leader = {

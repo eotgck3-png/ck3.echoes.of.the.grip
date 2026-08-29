@@ -1,14 +1,29 @@
 ﻿# ── eotg_elven_monarchy_succession_events.txt ─────────────────────────────────
 # Eternal Court confirmation event chain for the Elven Monarchy government.
 #
-# Chain (fires on new ruler 7 days after previous ruler's death):
-#   court.0001 — Court convenes. Branches on support count:
-#     Strong (>=3)   → court.0002 (confirmed with bonus)
-#     Moderate (>=1) → court.0003 (confirmed with penalty)
-#     None (0)       → court.0004 (succession crisis)
-#   court.0002 — Confirmed with bonus. Vassal notification fires.
-#   court.0003 — Confirmed with penalty. Prestige penalty.
+# Confirmation (fires on new ruler 7 days after previous ruler's death, from
+# eotg_on_death_elven_monarch):
+#   court.0001 — The Court convenes. All three outcomes resolve INSIDE .0001:
+#     Strong (>=3)   → eotg_se_elven_court_confirmed_bonus, vassals notified
+#                      via send_interface_message
+#     Moderate (>=1) → eotg_se_elven_court_confirmed_penalty, vassals notified
+#     None (0)       → penalty + eotg_elven_court_contested, and .0004 fires at
+#                      a hostile powerful vassal
 #   court.0004 — Succession crisis. Rival claimant declared.
+#
+# Aftermath (fires from eotg_on_yearly_elven_flavor, gated on the modifier the
+# confirmation left behind — these are the long tail of how the Court ruled):
+#   court.0005 — The Court calls in the debt of a unanimous confirmation.
+#                Requires eotg_elven_court_confirmed.
+#   court.0006 — Ruling without the Court's blessing. Requires
+#                eotg_elven_court_contested.
+#
+# NOTE: .0002 and .0003 were retired 2026-08-28. They were notification events
+# from an earlier design in which .0001 branched outward; .0001 now resolves
+# those outcomes inline and notifies vassals with send_interface_message, so the
+# pair was unreachable and would have double-notified if wired. .0005/.0006
+# replace them with reachable consequence events. IDs .0002/.0003 stay retired —
+# do not reuse them.
 # ─────────────────────────────────────────────────────────────────────────────
 
 namespace = eotg_elven_court
@@ -105,45 +120,6 @@ eotg_elven_court.0001 = {
 	}
 }
 
-# Realm notification: Court confirmed succession with strong support
-eotg_elven_court.0002 = {
-	type = character_event
-	title = eotg_elven_court_0002_title
-	theme = diplomacy
-	hidden = yes
-
-	immediate = {
-		# Fired as a notification — no player interaction required
-	}
-
-	option = {
-		name = eotg_elven_court_0002_opt_noted
-		ai_chance = { base = 100 }
-	}
-}
-
-# Confirmed with legitimacy penalty — notifies realm of contested succession
-eotg_elven_court.0003 = {
-	type = character_event
-	title = eotg_elven_court_0003_title
-	theme = diplomacy
-
-	desc = eotg_elven_court_0003_desc
-
-	left_portrait = {
-		character = root
-		animation = worry
-	}
-
-	option = {
-		name = eotg_elven_court_0003_opt_endure
-		stress_impact = {
-			base = minor_stress_impact_gain
-		}
-		ai_chance = { base = 100 }
-	}
-}
-
 # Succession crisis — powerful vassal backs a rival claimant
 eotg_elven_court.0004 = {
 	type = character_event
@@ -199,6 +175,145 @@ eotg_elven_court.0004 = {
 			base = 40
 			modifier = { add = 20  has_trait = content }
 			modifier = { add = -20  has_trait = ambitious }
+		}
+	}
+}
+
+# ── Confirmation aftermath ───────────────────────────────────────────────────
+
+# The Eternal Court calls in the debt implied by a unanimous confirmation.
+# Fired from eotg_on_yearly_elven_flavor while eotg_elven_court_confirmed holds.
+# Elves remember. A mandate given freely is still a mandate given, and the Court
+# has been waiting for a convenient moment to say so.
+eotg_elven_court.0005 = {
+	type = character_event
+	title = eotg_elven_court_0005_title
+	theme = diplomacy
+
+	desc = eotg_elven_court_0005_desc
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	right_portrait = {
+		character = scope:eotg_court_elder
+		animation = personality_bold
+		trigger = { exists = scope:eotg_court_elder }
+	}
+
+	immediate = {
+		# An elder of the Court delivers the reminder in person where possible.
+		random_vassal = {
+			limit = {
+				is_alive = yes
+				is_powerful_vassal = yes
+			}
+			save_scope_as = eotg_court_elder
+		}
+	}
+
+	# Honor the debt — the Court is repaid in influence, the mandate deepens.
+	option = {
+		name = eotg_elven_court_0005_opt_honor
+		add_legitimacy = 20
+		add_prestige = -50
+		if = {
+			limit = { exists = scope:eotg_court_elder }
+			reverse_add_opinion = {
+				target = scope:eotg_court_elder
+				modifier = eotg_elven_court_debt_honored
+			}
+		}
+		ai_chance = {
+			base = 45
+			modifier = { add = 20  has_trait = humble }
+			modifier = { add = -20  has_trait = arrogant }
+		}
+	}
+
+	# Remind the Court that a mandate is not a leash.
+	option = {
+		name = eotg_elven_court_0005_opt_refuse
+		add_prestige = 100
+		add_legitimacy = -15
+		remove_character_modifier = eotg_elven_court_confirmed
+		stress_impact = {
+			humble = minor_stress_impact_gain
+		}
+		ai_chance = {
+			base = 30
+			modifier = { add = 25  has_trait = arrogant }
+			modifier = { add = 20  has_trait = ambitious }
+			modifier = { add = -20  has_trait = humble }
+		}
+	}
+
+	# Defer the matter. Elves are patient; so, it turns out, are you.
+	option = {
+		name = eotg_elven_court_0005_opt_defer
+		add_stress = 10
+		ai_chance = {
+			base = 25
+			modifier = { add = 20  has_trait = patient }
+		}
+	}
+}
+
+# Ruling without the Court's blessing — the slow cost of a contested seat.
+# Fired from eotg_on_yearly_elven_flavor while eotg_elven_court_contested holds.
+eotg_elven_court.0006 = {
+	type = character_event
+	title = eotg_elven_court_0006_title
+	theme = diplomacy
+
+	desc = eotg_elven_court_0006_desc
+
+	left_portrait = {
+		character = root
+		animation = worry
+	}
+
+	# Court the Court — spend coin and time buying the ratification you lacked.
+	option = {
+		name = eotg_elven_court_0006_opt_court
+		remove_short_term_gold = 75
+		add_legitimacy = 15
+		if = {
+			limit = { has_character_modifier = eotg_elven_court_contested }
+			remove_character_modifier = eotg_elven_court_contested
+		}
+		ai_chance = {
+			base = 45
+			modifier = { add = 25  gold > 200 }
+			modifier = { add = -30  gold < 100 }
+		}
+	}
+
+	# Rule without them. Let the Court learn to follow a sovereign it did not choose.
+	option = {
+		name = eotg_elven_court_0006_opt_defy
+		add_dread = 15
+		add_prestige = 50
+		stress_impact = {
+			content = minor_stress_impact_gain
+		}
+		ai_chance = {
+			base = 30
+			modifier = { add = 25  has_trait = stubborn }
+			modifier = { add = 20  dread > 30 }
+		}
+	}
+
+	# Outlast it. The Court measures time in centuries — but so do you.
+	option = {
+		name = eotg_elven_court_0006_opt_endure
+		add_stress = 15
+		add_legitimacy = 5
+		ai_chance = {
+			base = 25
+			modifier = { add = 25  has_trait = patient }
 		}
 	}
 }
