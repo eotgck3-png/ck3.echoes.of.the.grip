@@ -1,0 +1,80 @@
+﻿l_english:
+ # ── Mounts, Stables & Assorted UI Labels — EotG Setting Overrides ────────────
+ # Sources: modifiers/*, traits/*, accolades/*, lifestyles/*, game_concepts,
+ #          travel_l_english.yml, dynasty_l_english.yml
+ #
+ # Companion to eotg_buildings_setting_l_english.yml. That pass covered the
+ # build menu; this one covers the SHORT LABELS — modifier names, trait tracks,
+ # accolade names, lifestyle focus names, dynasty mottos. Those appear on the
+ # character sheet and in tooltips constantly, so they punch far above their
+ # key count.
+ #
+ # HOW THIS SET WAS FOUND, so it can be repeated:
+ # filter vanilla to values under 60 chars with no \n, no [ ] scope refs and no
+ # # formatting codes (i.e. labels, not prose), match the medieval term against
+ # the VALUE with word boundaries (not the key — "Camilla" and "Serfoji" match
+ # "mill" and "serf" otherwise), then drop PORTRAIT_MODIFIER, HEADER_, vanilla
+ # place keys (b_/c_/d_/k_/e_) and bare given names. That yields ~121 real
+ # labels; this file takes the clearly setting-breaking ones.
+ #
+ # DELIBERATELY NOT TOUCHED — judgment calls that belong to the mod's own
+ # religious design, not to a vocabulary pass:
+ #   * the pilgrimage cluster (~55 keys). The mod ships
+ #     doctrine_pilgrimage_local_rites, so pilgrimages exist in this setting
+ #     and the word is not Earth-specific. Left whole.
+ #   * "Crusade" / trait_crusader / ghw_crusade. docs/SETTING LORE describes
+ #     Elrossi Holy Orders as "crusading forces", so the word may be intended.
+ #     Flag for the author rather than silently rename.
+ #   * bishop terms, which are faith-structure decisions.
+ # ─────────────────────────────────────────────────────────────────────────────
+
+ # The inline-prose words (castle, castles, temple, terrain_*) live in
+ # eotg_custom_loc_wordbank_l_english.yml — they come from a different vanilla
+ # source and are consumed by customizable_localization, not shown directly.
+
+ # ── Mounts → skimmers and crawlers ───────────────────────────────────────────
+ # Travel between star systems does not happen on horseback. These keep their
+ # mechanical role (a travel speed bonus is still a travel speed bonus).
+ travel_steeds_acquired_modifier:0 "Transports Acquired"
+ travel_steeds_acquired_modifier_desc:0 "This traveling party has acquired additional transports."
+ bought_horses_modifier:0 "Better Transports"
+ pushed_horses_bad_modifier:0 "Pushed the Engines"
+ pushed_horses_good_modifier:0 "Successfully Pushed the Engines"
+ warfare_tamer_of_horses_modifier:0 "Tamer of Machines"
+ warfare_tamer_of_horses_modifier_desc:0 "This character coaxes unruly machines back into service in their spare time"
+ cursed_horse_modifier:0 "Devious Skimmer"
+ cursed_horse_modifier_desc:0 "This character is plagued by a cursed and devious skimmer"
+ seduce_horse_gift_modifier:0 "Custom Skimmer"
+ seduce_horse_gift_modifier_desc:0 "A skimmer of fine make."
+ stable_boy:0 "bay hand"
+
+ # ── Horse archers → the mod's own light cavalry ──────────────────────────────
+ # Light cavalry is Strike Speeders in common/men_at_arms_types/eotg_maa_types.
+ horse_archers:0 "Strike Speeders"
+ horse_archers_lowercase:0 "strike speeders"
+ horse_archer_attribute:0 "Speeder Ace"
+ accolade_horse_archer:0 "Speeder Ace"
+
+ # ── Trait track ──────────────────────────────────────────────────────────────
+ trait_track_horse:0 "The Wing"
+ trait_track_horse_desc:0 "Pilot and airframe in perfect agreement, glorious and free against the open dark."
+
+ # ── Chivalry → Valor ─────────────────────────────────────────────────────────
+ # A martial lifestyle focus and its councillor task; shown in the lifestyle
+ # tree and on the council screen.
+ martial_chivalry_focus_short:0 "Valor"
+ task_chivalry:0 "Valor"
+ task_chivalry_modifier:0 "Spouse — Valor"
+ ll_chivalry:0 "Your valor is"
+
+ # ── Village modifiers → settlements ──────────────────────────────────────────
+ village_destroyed_modifier:0 "Settlement Destroyed"
+ village_destroyed_modifier_desc:0 "This holding is near a settlement that suffered significant damage after a Tournament's Melee rampaged through it."
+ village_rebuilt_modifier:0 "Settlement Rebuilt"
+ village_rebuilt_modifier_desc:0 "This holding is near a settlement that was expertly rebuilt following damage, increasing its efficiency."
+ village_saved_modifier:0 "Settlement Saved"
+ village_saved_modifier_desc:0 "This holding is near a settlement that narrowly escaped destruction after a Tournament's Melee rampaged through it."
+
+ # ── Dynasty mottos ───────────────────────────────────────────────────────────
+ motto_horse:0 "Skimmer"
+ motto_the_horse:0 "the Skimmer"

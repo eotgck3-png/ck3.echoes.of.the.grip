@@ -143,7 +143,11 @@
       "Bash(xxd \"c:/Users/river/Documents/GitHub/ck3.echoes.of.the.grip/common/religion/religion_types/eotg_religions.txt\")",
       "Bash(grep -c \"^error\\\\|^warning\\\\|^fatal\" /cygdrive/c/Users/river/tiger_output.txt 2>/dev/null || wc -l < /cygdrive/c/Users/river/tiger_output.txt)",
       "Read(//cygdrive/c/Users/river/**)",
-      "Bash(tail -5 /cygdrive/c/Users/river/tiger_output.txt)"
+      "Bash(tail -5 /cygdrive/c/Users/river/tiger_output.txt)",
+      "Bash(cd \"/d/SteamLibrary/steamapps/common/Crusader Kings III/game\" && grep -rn \"has_education_learning_trigger = {\" common/scripted_triggers/ | head -5; echo \"--- education trigger defs ---\"; grep -rln \"has_education_martial_trigger\" common/scripted_triggers/ | head)",
+      "Bash(cd \"/d/SteamLibrary/steamapps/common/Crusader Kings III/game\" && sed -n '55,90p' common/scripted_triggers/00_scripted_triggers.txt)",
+      "Bash(\"C:/Users/river/tools/ck3-tiger-windows-v1.17.0/ck3-tiger.exe\" --game \"D:/SteamLibrary/steamapps/common/Crusader Kings III/game\" \"c:/Users/river/Documents/GitHub/ck3.echoes.of.the.grip\")",
+      "Bash(echo \"EXIT:$?\")"
     ],
     "additionalDirectories": [
       "C:\\Users\\river",

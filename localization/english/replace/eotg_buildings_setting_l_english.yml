@@ -1,0 +1,90 @@
+﻿l_english:
+ # ── Buildings (setting pass) — EotG Setting Overrides ────────────────────────
+ # Source: buildings_l_english.yml
+ #
+ # The build menu is read constantly, and it was the single largest remaining
+ # source of medieval vocabulary in the game — stables, horses, jousting,
+ # villages, mills. This pass takes the NAMES (what the menu shows) plus each
+ # line's type-level description (what the hover shows).
+ #
+ # SCOPE NOTE — this file deliberately overrides only keys that actually leak.
+ # Vanilla names that already read fine in the setting are left alone:
+ # "Trading Outposts", "Markets", "Tournament Grounds", "Sawmills",
+ # "Piercing Arrowheads", "Courier Stations", "Drainage Channels". Fewer
+ # overrides means less to re-verify against future CK3 patches.
+ #
+ # NOT touched here because other replace/ files already own them (one
+ # definition per key across the whole folder):
+ #   building_type_farm_estates_01_desc, building_type_camel_farms_01_desc,
+ #   building_type_horse_pastures_01_desc, building_monastic_schools_01_desc,
+ #   building_monastic_schools_02(_desc), building_farm_estates_01/04_desc,
+ #   building_monastic_schools_08_desc
+ # Three of those were only half-reflavored (peasant->commoner applied, but
+ # still saying "horse", "camels", "manor") and were edited IN PLACE in
+ # eotg_buildings_commoner_l_english.yml rather than redefined here.
+ #
+ # MAPPING RATIONALE — each line keeps its mechanical role:
+ #   stables          -> ground transport and courier infrastructure
+ #   horse_pastures   -> skimmer gunnery tech (feeds Strike Speeders)
+ #   hillside_grazing -> belt-claim extraction (hills = Asteroid Belt Region)
+ #   jousting_lists   -> martial trial grounds
+ # ─────────────────────────────────────────────────────────────────────────────
+
+ # ── Stables line → Vehicle Bays ──────────────────────────────────────────────
+ building_type_stables_01:0 "Vehicle Bays"
+ building_type_stables_01_desc:0 "Crawlers, lifters and other working machines need somewhere to be housed and serviced. Vehicle Bays also ensure that a ready transport is available to anyone who can afford one."
+ building_stables_01:0 "Small Vehicle Bays"
+ building_stables_02:0 "Hardstand"
+ building_stables_03:0 "Fuel Depots"
+ building_stables_05:0 "Crew Quarters"
+ building_stables_07:0 "Fitters' Guilds"
+ building_stables_08:0 "Assembly Yards"
+
+ # ── Horse pastures line → Skimmer Yards ──────────────────────────────────────
+ # This line feeds light cavalry, which in this mod is Strike Speeders.
+ building_type_horse_pastures_01:0 "Skimmer Yards"
+ building_horse_pastures_01:0 "Salvaged Airframes"
+ building_horse_pastures_02:0 "Thruster Governors"
+ building_horse_pastures_03:0 "Gunnery Cradles"
+ building_horse_pastures_05:0 "Ablative Plating"
+ building_horse_pastures_06:0 "Long-Barrel Railguns"
+ building_horse_pastures_07:0 "Spare Airframes"
+ building_horse_pastures_08:0 "Doctrine of Fast Attack"
+
+ # ── Hillside grazing line → Belt Claims ──────────────────────────────────────
+ # Hills are "Asteroid Belt Region" in eotg_terrains_l_english.yml, so this
+ # line becomes belt extraction rather than pasture.
+ building_type_hillside_grazing_01:0 "Belt Claims"
+ building_type_hillside_grazing_01_desc:0 "Useless for cultivation and thick with loose rock and drifting ore, these belts have mainly been put to use for extraction."
+ building_hillside_grazing_01:0 "Shallow Claims"
+ building_hillside_grazing_02:0 "Harvest Crews"
+ building_hillside_grazing_03:0 "Expanded Claim Field"
+ building_hillside_grazing_04:0 "Skimmer Works"
+ building_hillside_grazing_05:0 "Small Skimmer Yards"
+ building_hillside_grazing_06:0 "Skimmer Markets"
+ building_hillside_grazing_07:0 "Flight Marshals"
+ building_hillside_grazing_08:0 "Large Skimmer Yards"
+
+ # ── Jousting lists line → Trial Grounds ──────────────────────────────────────
+ building_type_jousting_lists_01:0 "Trial Grounds"
+ building_type_jousting_lists_01_desc:0 "By keeping dedicated grounds for combat trials, more pilots and troopers are encouraged to train and take the colors."
+ building_jousting_lists_01:0 "Trial Fields"
+
+ # ── Market villages line ─────────────────────────────────────────────────────
+ building_market_villages_02:0 "Market Stations"
+
+ # ── Mills → power and processing ─────────────────────────────────────────────
+ building_type_windmills_01:0 "Turbine Fields"
+ building_type_windmills_01_desc:0 "Turbine Fields are sited where the atmosphere runs hardest, along ridgelines and open coasts. Unlike hydro plants they are not stopped when the channels freeze, and can run the year through."
+ building_type_watermills_01:0 "Hydro Plants"
+ building_type_watermills_01_desc:0 "Hydro Plants turn any moving water, from tides to falls, into rotation for grinding, cutting, crushing and pressing. Permits to run one are an easy and reliable source of additional tax for the owner of the holding."
+ building_farm_estates_06:0 "Turbine Fields"
+ building_quarries_03:0 "Hydro Plants"
+
+ # ── Estates and retreats ─────────────────────────────────────────────────────
+ building_type_farm_estates_01:0 "Estate Compounds"
+ building_type_monastic_schools_01:0 "Meditation Retreats"
+
+ # ── Stray stables elsewhere ──────────────────────────────────────────────────
+ building_hunting_grounds_05:0 "Hunters' Bays"
+ building_camel_farms_06:0 "Military Bays"

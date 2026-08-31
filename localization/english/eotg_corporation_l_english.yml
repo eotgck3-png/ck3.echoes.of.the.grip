@@ -14,7 +14,7 @@
  eotg_ruler_title_corporation_female:0 "CEO"
  eotg_realm_name_corporation:0 "[Root.GetPrimaryTitle.GetName]"
  eotg_succession_flavor_corporation:0 "The Board convenes to elect a new CEO."
- eotg_faction_name_corporation:0 "The [Root.GetHouseName] Division"
+ eotg_faction_name_corporation:0 "The [Root.GetHouse.GetBaseName] Division"
 
  # ── Subject Contracts ─────────────────────────────────────────────────────────
  eotg_quarterly_assessment:0 "Quarterly Assessment"
@@ -65,19 +65,19 @@
  eotg_sabotage_rival:0 "Sabotage Rival"
  eotg_sabotage_rival_action:0 "Sabotage"
  eotg_sabotage_rival_desc:0 "Undermine a rival Account Director or Operations Chief — sabotage their financial infrastructure, corrupt their subordinates, and leave their division in disarray."
- EOTG_SABOTAGE_RIVAL_SUCCESS_DESC:0 "The operation succeeded. [scope:target.GetTitledFirstName]'s division is compromised."
- EOTG_SABOTAGE_RIVAL_DISCOVERY_DESC:0 "The operation was blown. [scope:target.GetTitledFirstName] knows it was you."
- eotg_sabotage_rival_target_stewardship_defense:0 "[scope:target.GetTitledFirstName] runs a tight operation."
- eotg_sabotage_rival_target_stewardship_high:0 "[scope:target.GetTitledFirstName]'s stewardship is exceptional — almost impenetrable."
+ EOTG_SABOTAGE_RIVAL_SUCCESS_DESC:0 "The operation succeeded. [target.GetTitledFirstName]'s division is compromised."
+ EOTG_SABOTAGE_RIVAL_DISCOVERY_DESC:0 "The operation was blown. [target.GetTitledFirstName] knows it was you."
+ eotg_sabotage_rival_target_stewardship_defense:0 "[target.GetTitledFirstName] runs a tight operation."
+ eotg_sabotage_rival_target_stewardship_high:0 "[target.GetTitledFirstName]'s stewardship is exceptional — almost impenetrable."
  eotg_sabotage_rival_already_undermined:0 "Already undermined — harder to exploit further."
 
  # ── Scheme Events ─────────────────────────────────────────────────────────────
  eotg_corp_scheme_0001_title:0 "Operation Successful"
- eotg_corp_scheme_0001_desc:0 "The operation concluded cleanly. [scope:target.GetTitledFirstName]'s division is compromised — revenue streams disrupted, subordinates flipped, reputation among peers quietly shredded. They will feel this for years."
+ eotg_corp_scheme_0001_desc:0 "The operation concluded cleanly. [target.GetTitledFirstName]'s division is compromised — revenue streams disrupted, subordinates flipped, reputation among peers quietly shredded. They will feel this for years."
  eotg_corp_scheme_0001_opt_success:0 "Excellent work."
 
  eotg_corp_scheme_0002_title:0 "Operation Blown"
- eotg_corp_scheme_0002_desc:0 "[scope:target.GetTitledFirstName] found out. Someone talked. The operation is burned, and now [scope:target.GetTitledFirstName] holds enough on you to cause serious damage if they choose to use it."
+ eotg_corp_scheme_0002_desc:0 "[target.GetTitledFirstName] found out. Someone talked. The operation is burned, and now [target.GetTitledFirstName] holds enough on you to cause serious damage if they choose to use it."
  eotg_corp_scheme_0002_opt_caught:0 "Damage control. Immediately."
 
  eotg_corp_scheme_0003_title:0 "Operation Aborted"
@@ -91,7 +91,7 @@
 
  eotg_corp_board_0002_title:0 "The Board Has Elected a New CEO"
  eotg_corp_board_0002_desc_winner:0 "The election results are in. The Board has elected you as the new CEO. The weight of the entire Corporation now rests on your shoulders."
- eotg_corp_board_0002_desc_observer:0 "The election results are in. [scope:eotg_election_winner.GetTitledFirstName] carries the majority of the Board's weight. A new CEO emerges from the succession."
+ eotg_corp_board_0002_desc_observer:0 "The election results are in. [eotg_election_winner.GetTitledFirstName] carries the majority of the Board's weight. A new CEO emerges from the succession."
  eotg_corp_board_0002_opt_acknowledge:0 "Noted. Adapt accordingly."
  eotg_corp_board_0002_opt_assume_office:0 "The Corporation answers to me now."
 
@@ -145,7 +145,7 @@
 
  # ── Casus Belli ───────────────────────────────────────────────────────────────
  eotg_proxy_war:0 "Proxy War"
- EOTG_PROXY_WAR_NAME:0 "Proxy War: [scope:primary_title.GetName]"
+ EOTG_PROXY_WAR_NAME:0 "Proxy War for [TITLE.GetBaseName]"
  EOTG_PROXY_WAR_NAME_FALLBACK:0 "Proxy War"
  eotg_proxy_war_victory_desc:0 "The proxy war concluded. The disputed titles have changed hands."
  eotg_proxy_war_victory_attacker_desc:0 "The proxy war succeeded. The Regional Director's titles are yours."
@@ -158,6 +158,6 @@
 
  # ── Interactions ──────────────────────────────────────────────────────────────
  eotg_hostile_acquisition_interaction:0 "Hostile Acquisition"
- eotg_hostile_acquisition_interaction_desc:0 "Make [scope:recipient.GetTitledFirstName] a buy-out offer they cannot refuse. Agree: gold changes hands, titles transfer. Refuse: the Proxy War casus belli becomes available."
- eotg_hostile_acquisition_notification:0 "[scope:actor.GetTitledFirstName] is making an acquisition offer."
+ eotg_hostile_acquisition_interaction_desc:0 "Make [recipient.GetTitledFirstName] a buy-out offer they cannot refuse. Agree: gold changes hands, titles transfer. Refuse: the Proxy War casus belli becomes available."
+ eotg_hostile_acquisition_notification:0 "[actor.GetTitledFirstName] is making an acquisition offer."
  eotg_hostile_acquisition_cost_desc:0 "Acquisition payment — scales with their realm size."

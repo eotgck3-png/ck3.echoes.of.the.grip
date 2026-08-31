@@ -1074,6 +1074,17 @@ remove_opinion = { modifier = grateful_opinion  target = scope:helper }
 }
 ```
 
+> **UNVERIFIED — needs an in-game check.** The `religion = faith:x` / `culture = culture:x`
+> prefixed form shown above is what this mod uses throughout `history/characters/`, but
+> vanilla CK3 does not use it anywhere: 82,336 vanilla history entries write the bare quoted
+> form (`culture = "norse"`, `religion = "norse_pagan"`) and **zero** use the prefix.
+> ck3-tiger parses the prefixed form without a syntax error and also raises a `warning(bookmarks)`
+> because `common/bookmarks/` uses the bare form while history uses the prefixed one.
+> Before trusting either form, load a save and confirm the 866 characters actually receive their
+> culture and faith. If they do not, the fix is to convert `history/characters/` to the bare
+> quoted form. Compare the `scope:`-in-localization error noted in section 15 — this document
+> has taught a non-vanilla form once already.
+
 ### Title History
 ```pdx
 k_england = {
@@ -1117,11 +1128,20 @@ l_english:
 ```
 [ROOT.GetFirstName]       [ROOT.GetFullName]        [ROOT.GetTitledFirstName]
 [ROOT.GetHerHis]          [ROOT.GetSheHe]            [ROOT.GetHerHim]
-[scope:char.GetFirstName]
+[char.GetFirstName]       # saved scope: bare name, NO `scope:` prefix in loc
 [ROOT.GetFirstName|U]     # Uppercase first letter
 £gold£  £prestige£  £piety£  £stress£  £martial£  £diplomacy£
 #bold text#
 ```
+
+**`scope:` is script syntax only — never use it in localization.** In script you write
+`scope:my_char`, but in a `.yml` string the saved scope is referenced by bare name:
+`[my_char.GetFirstName]`. Writing `[scope:my_char.GetFirstName]` fails to resolve and the
+substitution renders broken in game. Vanilla uses the bare form exclusively; Tiger reports
+the `scope:` form as `Unexpected character ':', expected ']'`.
+
+For `war_name` / `cb_name` strings, use the built-in war scopes instead of saved scopes:
+`[ATTACKER.…]`, `[DEFENDER.…]`, `[TITLE.…]`, `[CLAIMANT.…]`.
 
 ### Flavorization
 ```pdx

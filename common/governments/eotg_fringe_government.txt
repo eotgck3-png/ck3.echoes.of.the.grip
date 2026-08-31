@@ -3,6 +3,10 @@
 # outlaw fleets. Built on fear, loot, and military success. Naturally cycles
 # through expansion, instability, and collapse. Can be reformed into PMC,
 # Cartel, Corporation, or Feudal governments.
+#
+# government_can_raid_rule added 2026-08-29 — the government was described as a
+# raiding power and carried a raid on_action hook, a 3-event ally-raid file and
+# raid-driven flavor, but could not actually raid.
 # ─────────────────────────────────────────────────────────────────────────────
 
 eotg_fringe_government = {
@@ -23,6 +27,7 @@ eotg_fringe_government = {
 		eotg_government_is_fringe
 		government_is_settled
 		government_uses_domain_limit
+		government_can_raid_rule
 	}
 
 	character_modifier = {

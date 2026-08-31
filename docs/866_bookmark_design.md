@@ -98,11 +98,10 @@ For gameplay, this means:
 
 1. **Bookmark characters** — all major rulers need stats, traits, and dynasty connections
 2. **The Myr Cluster Wars** — a struggle system defining the early game's central conflict
-3. **Titan Exodus events** — refugee arrival chain, fired from `on_yearly_pulse`
+3. **Titan Exodus events** — refugee arrival chain, fired from `on_yearly_pulse`, should be reworked so that refugees arriving can either be civilized (actual refugees) or barbaric (invaders) with different options/outcomes each
 4. **Elrossi faith** — holy war mechanics, fervor, the Prince of Myr interaction
 5. **New Cauldron republic government** — elective mechanics, mercenary contract system
-6. **Nikios Khanate tribute system** — unique casus belli for tribute extraction
-7. **Opening story cycle** — introduces players to 866 AG via three framing events
+6. **Opening story cycle** — introduces players to 866 AG via three framing events
 
 ---
 
