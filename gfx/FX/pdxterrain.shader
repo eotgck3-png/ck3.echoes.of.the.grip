@@ -1055,6 +1055,15 @@ PixelShader =
 				float w = ModA.y * EotgFxHeight( h01, EOTG_FX_HEIGHT[t] )
 							  * EotgFxSlope( Grad, EOTG_FX_SLOPE[t] );
 				float f = EotgFxSplat( xz, EOTG_FX_SCALE[t], EOTG_FX_P[t] );
+				// Q.x inverts the field. The dispatch below darkens where the effect is ABSENT, so
+				// every effect is emissive by default and its features are always brighter than
+				// their surroundings. That is wrong for rubble: it should occlude, not glow, and
+				// a small bright blob is indistinguishable from a star no matter what shape it is.
+				// Inverting makes the sprites the dark part and the gaps the lit part.
+				if ( EOTG_FX_Q[t].x > 0.0f )
+				{
+					f = 1.0f - f;
+				}
 				col += EotgFxColor( t, Tint ) * f * w * EOTG_FX_GAIN[t];
 				mul *= lerp( 1.0f, lerp( EOTG_FX_DARK[t], 1.0f, f ), w * fade );
 			}

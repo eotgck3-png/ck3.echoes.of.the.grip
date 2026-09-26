@@ -76,7 +76,9 @@ def tint_rgb(hexstr):
 # sine field), 5 filament (ridged warped noise).
 #   color   None = tint the effect with the terrain's own colour
 #   scale   cell size for 1/2/3, noise scale for 4/5
-#   p, q    kind-specific, documented beside each kind in pdxterrain.shader
+#   p, q    kind-specific, documented beside each kind in pdxterrain.shader. NOTE these are
+#           overloaded per kind - q[0] is a warp scale for kinds 4/5, a density gain for kind 6,
+#           and an INVERT FLAG for kind 2. Check which kind you are editing before touching q.
 #   height  (lo, hi, floor) in 0..1 heightmap units - effect strength ramps from `floor` at lo to
 #           full at hi. (0,0,0) disables it. Use for things that care how HIGH the ground is.
 #   slope   (lo, hi, floor) on local ruggedness - the height gradient, normalised by
@@ -133,8 +135,16 @@ FX = {
  # Elongated shards at 4:1 with no cross cannot be confused with a point of light, and the sprite
  # already rotates per anchor so they lie at every angle. Dimmer too, since stars are the bright
  # thing on this map and debris should not compete.
- "debris":   dict(kind=2, color=None,      gain=0.10, dark=0.82, scale=4.0,
-                  p=(0.95, 0.24, 0.30, 0.00), q=(0, 0, 0, 0), height=(0,0,0),
+ # Two things separate debris from stars, and shape is NOT one of them: the shards were 0.95
+ # world units long against a star radius of 0.52-2.21, so a 4:1 aspect amounted to a pixel or
+ # two of elongation and still read as a dot.
+ #   SIZE     3.5 world units, several times a star, so the shape is actually resolvable.
+ #   POLARITY q[0]=1 inverts the field so the chips are DARK and the gaps lit. A star is a bright
+ #            point by definition; something darker than its background cannot be mistaken for
+ #            one. Measured feature/background luminance 1.24 -> 0.74.
+ # gain is 0 deliberately: with the field inverted, any additive term would light the GAPS.
+ "debris":   dict(kind=2, color=None,      gain=0.00, dark=0.55, scale=12.0,
+                  p=(3.50, 1.10, 0.30, 0.00), q=(1, 0, 0, 0), height=(0,0,0),
                   slope=(0.15, 0.60, 0.45)),
  # Barren Barrier: the dust equivalent of the gas wall - same kind, drier and darker, and tied to
  # altitude for the same reason: the passes have to stay readable.

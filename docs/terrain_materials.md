@@ -619,3 +619,33 @@ source of the muddy patches reported first in the Alps and again as tan showing 
 ranges - hills sits interleaved with mountains all through a range, and tan is the one earth colour
 on a violet map. Relief shading carries its form perfectly well alone. Mountains, Barren Barrier
 and Frozen Cluster keep theirs: they are actual landforms whose altitude means something.
+
+### You cannot tell a small bright blob from a star
+
+Debris still read as "hills have more stars" after being reshaped into 4:1 shards. Measuring the
+sizes explains why:
+
+| | world units |
+|---|---|
+| debris shard, long axis | 0.95 |
+| star radius, fine layer | 0.52 |
+| star radius, coarse layer | 2.21 |
+
+The shards were the *same size class as the stars*, so a 4:1 aspect amounted to a pixel or two of
+elongation. **Shape is not a usable axis at that scale.** Two things are:
+
+- **Size.** 3.5 world units, several times the fine star, so the shape is actually resolvable.
+- **Polarity.** A star is a bright point by definition, so anything *darker* than its background
+  cannot be one. `q[0] = 1` on kind 2 inverts the field: the sprites become the dark part and the
+  gaps the lit part. Measured feature/background luminance went 1.24 -> 0.74.
+
+With the field inverted, `gain` must be 0 - the additive term would otherwise light the gaps
+rather than the chips.
+
+This was the third attempt at the same problem. The first two (change the primitive, then change
+the shape) both failed because they kept debris in the same size and brightness class as stars,
+which is the thing that actually made them confusable.
+
+**`q` is overloaded per kind.** `q[0]` is a warp scale for kinds 4 and 5, a density gain for kind 6,
+and the invert flag for kind 2. The invert branch lives inside the kind-2 dispatch so the others
+are unaffected, but check which kind you are editing before touching `q`.
