@@ -58,6 +58,27 @@ GAME = r"D:\SteamLibrary\steamapps\common\Crusader Kings III\game"
 #            so these are small. Needs eyeballing in game - it is the one value with no way to
 #            check it from here.
 #   tumble   True gives a full random orientation, False yaw only (vanilla's tree behaviour)
+# PARKED - nothing is generated while this is False.
+#
+# Reusing vanilla geometry is a dead end, and the scan that settles it is in this repo's history:
+# of 8174 meshes in the game, exactly TWO are closed solids (a city-building fragment and a steppe
+# bush, both nearly flat). Every rock, boulder, meteor and cliff is an OPEN SHELL - built as a
+# one-sided facade because CK3's camera is constrained and objects sit half-buried in terrain.
+# cliff_small_01 has 72 boundary edges out of 204, and only 22-45% of those openings are near the
+# base, so there is no orientation that hides them. That is what made the debris look like it had
+# a missing face: it did.
+#
+# Hovering was investigated and IS available - bridges carry Y 0.08-2.22, so the engine honours a
+# non-zero Y for visible objects - but lifting an open shell off the ground only exposes more of
+# the hole. The two ideas work against each other.
+#
+# Everything here still works and is worth keeping: the scatter, the terrain gating, the verified
+# transform format, and the material pipeline in build_debris_material.py. The missing piece is
+# one closed mesh. Author that (Blender + io_pdx_mesh, or the @@b@ writer this repo now has enough
+# of a parser to validate) and set ENABLED back to True - hovering is then a free addition, since
+# a closed solid can be lifted without showing anything it should not.
+ENABLED = False
+
 OBJECT_SETS = {
     # Mesh choice matters more than anything else here. Bounding boxes read out of the .mesh files:
     #   cliff_rock_01  3.02 long, flatness 0.53, 35 verts   <- a SLAB. Reads as a flat dark wedge.
@@ -179,6 +200,12 @@ def main():
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--seed", type=int, default=20260926)
     args = ap.parse_args()
+
+    if not ENABLED:
+        print("build_map_objects is PARKED (ENABLED = False).")
+        print("No vanilla mesh is a closed solid, so reused geometry renders with visible holes.")
+        print("See the note at the top of this file.")
+        return 0
 
     rng = np.random.default_rng(args.seed)
     print("loading province map ...")
