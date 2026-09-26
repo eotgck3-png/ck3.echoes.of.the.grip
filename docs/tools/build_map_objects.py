@@ -47,6 +47,8 @@ Image.MAX_IMAGE_PIXELS = None
 
 GAME = r"D:\SteamLibrary\steamapps\common\Crusader Kings III\game"
 
+# name -> what to scatter and where. Counts are deliberately low for now: this is a proof that
+# the pipeline works end to end, and the placements are thrown away with the vanilla map anyway.
 # name -> what to scatter and where.
 #   mesh     a pdxmesh name that exists in the game's .asset files
 #   terrains province_terrain values to scatter across
@@ -58,28 +60,28 @@ GAME = r"D:\SteamLibrary\steamapps\common\Crusader Kings III\game"
 #   tumble   True gives a full random orientation, False yaw only (vanilla's tree behaviour)
 OBJECT_SETS = {
     "eotg_debris_field": dict(
-        mesh="cliff_rock_01_mesh",
+        mesh="eotg_cliff_rock_01_mesh",
         layer="tree_high_layer",
         terrains=("hills",),
-        count=26000,
+        count=3500,
         scale=(0.18, 0.55),
         tumble=True,
     ),
     "eotg_debris_field_b": dict(
-        mesh="cliff_rock_03_mesh",
+        mesh="eotg_cliff_rock_03_mesh",
         layer="tree_high_layer",
         terrains=("hills",),
-        count=14000,
+        count=2000,
         scale=(0.12, 0.38),
         tumble=True,
     ),
     # Impassable provinces are forced onto desert_mountains by build_terrain_index, so this also
     # litters every wasteland - which suits a barrier you are not meant to cross.
     "eotg_debris_barrier": dict(
-        mesh="cliff_rock_02_mesh",
+        mesh="eotg_cliff_rock_02_mesh",
         layer="tree_high_layer",
         terrains=("desert_mountains",),
-        count=12000,
+        count=1800,
         scale=(0.22, 0.70),
         tumble=True,
     ),
