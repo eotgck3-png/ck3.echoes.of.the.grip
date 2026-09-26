@@ -111,15 +111,24 @@ FX = {
  # "inverse oreo". Switching grain on moves it to the noise-modulated branch, so the layering is
  # broken up along its length instead of being a clean stripe, and the contrast is way down
  # (dark 0.26 -> 0.74 means the gaps no longer punch to a quarter brightness).
+ # Layered Cluster: "pronounced variations in navigational elevation". The bands now follow
+ # ALTITUDE rather than running across the map in world space, so the layering is drawn by the
+ # landform - which is the whole concept, and it is the one terrain actually named for it. Higher
+ # band frequency than the mountains use, because this terrain spans a much smaller height range.
+ # Grain stays on: flat-topped altitude bands would just be hard contour lines, the same failure
+ # the gas wall had. The slope gate keeps it off ground with no relief to layer.
  "strata":   dict(kind=4, color=None,      gain=0.20, dark=0.74, scale=0.060,
-                  p=(0.0, 1.0, 1.25, 4.0), q=(0.35, 0.85, 0.0, 0.0), height=(0,0,0),
-                  slope=(0.15, 0.60, 0.55)),
- # Broken Cluster: rubble, gathered where the ground is actually broken. Reuses the filament
- # kind with a broad, low-thinness setting so it mottles into chunks instead of drawing strands -
- # a 3-FBM field rather than the 9-cell loop a sprite field would cost, which matters because this
- # is the second-largest terrain on the map. Deliberately faint: it is backdrop, not a feature.
- "debris":   dict(kind=5, color=None,      gain=0.12, dark=0.86, scale=0.070,
-                  p=(1.2, 0.30, 0.70, 0.6), q=(0.8, 0, 0, 0), height=(0,0,0),
+                  p=(0.0, 1.0, 1.25, 2.4), q=(0.35, 0.70, 165.0, 0.80),
+                  height=(0,0,0), slope=(0.15, 0.60, 0.55)),
+ # Broken Cluster: scattered debris. The concept is DISCRETE chunks, so this needs the sprite
+ # kind - a continuous noise field can only ever produce mottle, which is what it did before.
+ # The earlier choice of a noise field was made to save cost and had it backwards: EotgFbm is 3
+ # octaves x 4 hashes = 36 hashes, while the 3x3 sprite loop rejects most cells on their first
+ # hash and comes to about 17. The right primitive is also the cheaper one. Measured identical
+ # crawl (0.0061) with higher local contrast, which is wanted here - debris should read as chunks.
+ # Round (length ~ width) and small, unlike the long sparse flares that share this kind.
+ "debris":   dict(kind=2, color=None,      gain=0.18, dark=0.86, scale=4.0,
+                  p=(0.70, 0.60, 0.30, 0.35), q=(0, 0, 0, 0), height=(0,0,0),
                   slope=(0.15, 0.60, 0.45)),
  # Barren Barrier: the dust equivalent of the gas wall - same kind, drier and darker, and tied to
  # altitude for the same reason: the passes have to stay readable.

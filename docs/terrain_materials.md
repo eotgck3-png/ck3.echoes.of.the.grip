@@ -574,3 +574,25 @@ clean corridors. On Layered Cluster that read as hard light/dark/light stripes (
 "inverse oreo"). Turning grain on moves it to the noise-modulated branch, which breaks the layering
 up along its length so it is a texture rather than a pattern. Contrast came down at the same time
 (`dark` 0.26 -> 0.74, swing 2.43x -> 1.78x). Reach for grain before reaching for the band count.
+
+### Pick the primitive from the concept, not from a cost guess
+
+Broken Cluster is *"scattered systems, stellar debris"* - discrete chunks. It shipped on the
+filament kind, a continuous noise field, which can only produce mottle. The reason given was cost,
+on the assumption that a 3x3 sprite loop is dearer than a noise field. That was backwards:
+
+| | hashes per pixel |
+|---|---|
+| filament: 3 x `EotgFbm`, each 3 octaves x 4 hashes | **36** |
+| splat: 9 cells, most rejected on their first hash | **~17** |
+
+`EotgFbm` is not cheap. A cell loop that rejects early usually beats it. Measured on real relief
+the sprite version has identical crawl (0.0061) at higher local contrast (0.037 -> 0.083, gate
+0.35) - and the higher contrast is the point, since debris should read as chunks.
+
+Layered Cluster moved from world-space bands to **altitude** banding (`q[2:4]`), so its layers are
+drawn by the landform. It is the one terrain named for elevation variation and it was the last one
+still banding across the map regardless of shape. Grain stays on, because flat-topped altitude
+bands are just hard contour lines - the same failure the gas wall had.
+
+Neither change touched the shader. Both kinds already existed; only the parameter table moved.

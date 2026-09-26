@@ -145,6 +145,36 @@ def fx_nebula(xz_x, xz_y, h01, view_xz, view_up, time, p):
     return dens, np.clip(emis, 0, 1)
 
 
+def fx_splat(xz_x, xz_y, cell, P):
+    """EotgFxSplat, kind 2, including the per-anchor size and brightness variation.
+    P = (length, width, sparsity, cross gain). Round + small + dense = debris;
+    long + sparse = flares."""
+    bx, by = np.floor(xz_x / cell), np.floor(xz_y / cell)
+    acc = np.zeros_like(xz_x)
+    for j in (-1.0, 0.0, 1.0):
+        for i in (-1.0, 0.0, 1.0):
+            cx, cy = bx + i, by + j
+            live = star_hash(cx + 31.4, cy + 31.4) >= P[2]
+            if not live.any():
+                continue
+            ox = star_hash(cx + 4.2, cy + 4.2)
+            oy = star_hash(cx + 9.6, cy + 9.6)
+            dx = xz_x - (cx + ox) * cell
+            dy = xz_y - (cy + oy) * cell
+            ang = star_hash(cx + 17.5, cy + 17.5) * 6.2831853
+            cs, sn = np.cos(ang), np.sin(ang)
+            rx = dx * cs + dy * sn
+            ry = -dx * sn + dy * cs
+            sc = 0.65 + 0.70 * star_hash(cx + 12.8, cy + 12.8)
+            amp = 0.55 + 0.45 * star_hash(cx + 22.4, cy + 22.4)
+            lx = np.maximum(P[0] * sc, 1e-4)
+            wy = np.maximum(P[1] * sc, 1e-4)
+            v = np.exp(-(rx * rx) / (lx * lx) - (ry * ry) / (wy * wy)) * amp
+            v = v + np.exp(-(ry * ry) / (lx * lx) - (rx * rx) / (wy * wy)) * P[3] * amp
+            acc += np.where(live, v, 0.0)
+    return np.clip(acc, 0, 1)
+
+
 # ---------------------------------------------------------------- metrics (as import_terrain_textures)
 
 def box_blur(a, r):
