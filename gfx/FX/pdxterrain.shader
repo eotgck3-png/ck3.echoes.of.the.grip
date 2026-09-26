@@ -455,7 +455,14 @@ PixelShader =
 		// falls below one screen pixel as you zoom out, so it sparkles under the minification
 		// terrain is always viewed with. These are two octaves, each faded out over the camera
 		// range where its cell stops being well sampled.
-		#define EOTG_STAR_COLOR       float3( 1.00f, 0.96f, 0.88f )
+		// Stars run along a temperature ramp rather than all being one white. Each terrain biases
+		// the ramp (EOTG_STAR_TEMP, per material) and each star jitters around that bias, so a
+		// Frozen Cluster reads blue and a Fertile Reach golden - which is what the art direction
+		// in docs/terrain_texture_prompts.md has always said and the map never showed.
+		#define EOTG_STAR_WARM        float3( 1.00f, 0.74f, 0.46f )   // K/M: amber
+		#define EOTG_STAR_MID         float3( 1.00f, 0.96f, 0.88f )   // G: the old single colour
+		#define EOTG_STAR_COOL        float3( 0.70f, 0.82f, 1.00f )   // B/A: blue-white
+		#define EOTG_STAR_TEMP_JITTER 0.55f    // per-star spread around the terrain bias
 		// Occupancy follows a POWER LAW, not a straight line: a linear map bottoms out at
 		// 8% of the top (because the lowest tier's Density is 0.08) and the tiers read as
 		// near-identical. The exponent pulls the empty end down and spreads everything.
@@ -530,7 +537,16 @@ PixelShader =
 
 		// Star density and brightness at an arbitrary world position. Lod0 because this is called
 		// inside divergent flow, where implicit derivatives are undefined.
-		float2 EotgStarParamsAt( float2 xz )
+		// 0 = amber, 0.5 = white, 1 = blue-white. Signed-square keeps most stars near the middle
+		// of whatever bias they are given, so the colour reads as variation rather than confetti.
+		float3 EotgStarTint( float t )
+		{
+			t = saturate( t );
+			return ( t < 0.5f ) ? lerp( EOTG_STAR_WARM, EOTG_STAR_MID, t * 2.0f )
+								: lerp( EOTG_STAR_MID, EOTG_STAR_COOL, ( t - 0.5f ) * 2.0f );
+		}
+
+		float3 EotgStarParamsAt( float2 xz )
 		{
 			float2 C = xz * WorldSpaceToDetail + DetailTexelSize * 0.5f;
 			float4 Idx = PdxTex2DLod0( DetailIndexTexture, C ) * 255.0f;
@@ -541,11 +557,13 @@ PixelShader =
 			int t2 = clamp( int( Idx.z + 0.5f ), 0, EOTG_TERRAIN_COUNT - 1 );
 			int t3 = clamp( int( Idx.w + 0.5f ), 0, EOTG_TERRAIN_COUNT - 1 );
 			float w0 = W.x / total, w1 = W.y / total, w2 = W.z / total, w3 = W.w / total;
-			return float2(
+			return float3(
 				EOTG_STAR_DENSITY[t0] * w0 + EOTG_STAR_DENSITY[t1] * w1
 					+ EOTG_STAR_DENSITY[t2] * w2 + EOTG_STAR_DENSITY[t3] * w3,
 				EOTG_STAR_BRIGHT[t0] * w0 + EOTG_STAR_BRIGHT[t1] * w1
-					+ EOTG_STAR_BRIGHT[t2] * w2 + EOTG_STAR_BRIGHT[t3] * w3 );
+					+ EOTG_STAR_BRIGHT[t2] * w2 + EOTG_STAR_BRIGHT[t3] * w3,
+				EOTG_STAR_TEMP[t0] * w0 + EOTG_STAR_TEMP[t1] * w1
+					+ EOTG_STAR_TEMP[t2] * w2 + EOTG_STAR_TEMP[t3] * w3 );
 		}
 
 		// A star belongs to the terrain it SITS ON, not to the terrain under the pixel currently
@@ -556,10 +574,10 @@ PixelShader =
 		//
 		// The terrain fetch is paid only by stars that actually reach this pixel: the conservative
 		// radius test uses EOTG_RADIUS_HI, the largest any terrain could ask for, and rejects first.
-		float EotgStarLayer( float2 xz, float cell, float radiusWorld )
+		float3 EotgStarLayer( float2 xz, float cell, float radiusWorld )
 		{
 			float2 baseCell = floor( xz / cell );
-			float acc = 0.0f;
+			float3 acc = vec3( 0.0f );
 			float maxR = radiusWorld * EOTG_RADIUS_HI;
 			for ( int j = -1; j <= 1; j++ )
 			{
@@ -573,7 +591,7 @@ PixelShader =
 					{
 						continue;
 					}
-					float2 sp = EotgStarParamsAt( starPos );
+					float3 sp = EotgStarParamsAt( starPos );
 					float dn = saturate( sp.x );
 					if ( dn < 0.01f )
 					{
@@ -587,7 +605,11 @@ PixelShader =
 					float r = radiusWorld * lerp( EOTG_RADIUS_LO, EOTG_RADIUS_HI, dn );
 					float d = length( delta ) / r;
 					float b = 0.30f + 0.70f * EotgStarHash( cc + 11.7f );
-					acc += b * sp.y * exp( -d * d * 2.5f );
+					// Temperature: the terrain's bias, jittered per star. Signed-square so most
+					// sit near the bias and only a few go strongly amber or blue.
+					float th = EotgStarHash( cc + 5.5f ) * 2.0f - 1.0f;
+					float3 tint = EotgStarTint( sp.z + th * abs( th ) * EOTG_STAR_TEMP_JITTER );
+					acc += tint * ( b * sp.y * exp( -d * d * 2.5f ) );
 				}
 			}
 			return saturate( acc );
@@ -604,7 +626,7 @@ PixelShader =
 			float camDist = length( CameraPosition - WorldSpacePos );
 			float fine   = saturate( ( 260.0f - camDist ) / 160.0f );
 			float coarse = saturate( ( camDist - 120.0f ) / 200.0f );
-			float s = 0.0f;
+			float3 s = vec3( 0.0f );
 			if ( fine > 0.01f )
 			{
 				s += EotgStarLayer( WorldSpacePos.xz, EOTG_STAR_FINE_CELL,
@@ -615,7 +637,7 @@ PixelShader =
 				s += EotgStarLayer( WorldSpacePos.xz, EOTG_STAR_COARSE_CELL,
 					EOTG_STAR_COARSE_R ) * coarse;
 			}
-			return EOTG_STAR_COLOR * saturate( s ) * EOTG_STAR_GAIN;
+			return saturate( s ) * EOTG_STAR_GAIN;
 		}
 
 

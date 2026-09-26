@@ -176,6 +176,18 @@ FX = {
 #   terrain -> (high-altitude colour, (lo, hi, amount))   amount 0 / absent = flat, no ramp
 # This is how height becomes legible from colour rather than only from the lighting. Terrains that
 # are meant to read as flat regions should NOT have one; it is for landforms.
+# Star colour temperature per terrain: 0 = amber, 0.5 = white, 1 = blue-white. Each star jitters
+# around its terrain's value, so this is a bias rather than a fixed colour. These follow what
+# docs/terrain_texture_prompts.md already says about each region - "dim blue stars" for Frozen
+# Cluster, "warm golden stars" for Fertile Reach and Sanctuary Systems, "pale stars" for Frontier
+# Reach - none of which was true while every star on the map was the same white.
+STAR_TEMP = {
+ "plains": 0.50, "hills": 0.45, "desert": 0.62, "mountains": 0.55,
+ "taiga": 0.88, "drylands": 0.32, "forest": 0.58, "steppe": 0.66,
+ "jungle": 0.30, "desert_mountains": 0.38, "wetlands": 0.70,
+ "farmlands": 0.14, "floodplains": 0.20, "oasis": 0.12, "terraced_hills": 0.52,
+}
+
 # How much world-space procedural noise to mix into the tiled detail, per terrain. The detail
 # texture repeats tile_factor times across the map; on a big terrain with nothing else in it that
 # repeat reads as wallpaper (the Sahara was the clear case). Noise cannot repeat, so mixing it in
@@ -410,6 +422,8 @@ def main():
         return f"float4( {v[0]:.4f}f, {v[1]:.4f}f, {v[2]:.4f}f, {v[3]:.4f}f )"
     def alt(e):
         return ALT.get(e[0].replace("eotg_", "").rsplit("_01", 1)[0], (None, (0, 0, 0)))
+    arr("EOTG_STAR_TEMP", "float", [
+        f"{STAR_TEMP.get(e[0].replace('eotg_', '').rsplit('_01', 1)[0], 0.50):.2f}f" for e in entries])
     arr("EOTG_TILEBREAK", "float", [
         f"{TILEBREAK.get(e[0].replace('eotg_', '').rsplit('_01', 1)[0], 0.0):.3f}f" for e in entries])
     arr("EOTG_SHADE", "float", [

@@ -649,3 +649,20 @@ which is the thing that actually made them confusable.
 **`q` is overloaded per kind.** `q[0]` is a warp scale for kinds 4 and 5, a density gain for kind 6,
 and the invert flag for kind 2. The invert branch lives inside the kind-2 dispatch so the others
 are unaffected, but check which kind you are editing before touching `q`.
+
+### Star colour
+
+Every star on the map used to be one warm white. They now run along a temperature ramp -
+`EOTG_STAR_WARM` (amber) through `EOTG_STAR_MID` (the old white) to `EOTG_STAR_COOL` (blue-white).
+
+Two levels of variation:
+
+- **Per terrain** via `EOTG_STAR_TEMP[n]` (0 amber, 0.5 white, 1 blue). This makes the existing art
+  direction true: Frozen Cluster at 0.88 finally has the "dim blue stars" its prompt describes,
+  Fertile Reach and Sanctuary Systems at 0.14/0.12 the "warm golden stars", Frontier Reach 0.66 the
+  "pale stars".
+- **Per star** on top, jittered with a signed square so most sit near their terrain's bias and only
+  a few go strongly amber or blue. Variation, not confetti.
+
+It costs nothing extra: the temperature rides along in `EotgStarParamsAt`, which the star field was
+already calling at each anchor to fix stars being sliced at borders.
