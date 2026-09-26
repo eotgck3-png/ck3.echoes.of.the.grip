@@ -62,15 +62,34 @@ GAME_CLIFFS = os.path.join(
     "gfx", "models", "mapitems", "cliffs")
 
 
-def shape_name(mesh):
+def mesh_slots(mesh):
+    """Every meshsettings block in a vanilla .asset, in order.
+
+    A mesh can carry MORE THAN ONE material slot and they are not interchangeable: cliff_small_01
+    has index 0 on rock and index 1 on `plains_01_rough_diffuse` - a grass cap. Emitting only
+    index 0 leaves slot 1 untextured, which renders as flat pale facets on every rock. The shape
+    name is also baked in at export and is not derivable from the filename (cliff_rock_01 is
+    "cliff_rock_0Shape1", cliff_small_01 is "cliff_small_01Shape"), so the whole structure is read
+    from vanilla rather than constructed.
+    """
     path = os.path.join(GAME_CLIFFS, mesh + ".asset")
     if not os.path.exists(path):
-        sys.exit("vanilla asset missing, cannot read the shape name: " + path)
+        sys.exit("vanilla asset missing, cannot read its material slots: " + path)
     txt = open(path, encoding="utf-8-sig").read()
-    m = re.search(r'name\s*=\s*"([^"]*Shape[^"]*)"', txt)
-    if not m:
-        sys.exit("no Shape name found in " + path)
-    return m.group(1)
+    slots = []
+    for m in re.finditer(r"meshsettings\s*=\s*\{(.*?)\n\t\}", txt, re.S):
+        b = m.group(1)
+        nm = re.search(r'name\s*=\s*"([^"]+)"', b)
+        ix = re.search(r"index\s*=\s*(\d+)", b)
+        nrm = re.search(r'texture_normal\s*=\s*"([^"]+)"', b)
+        spc = re.search(r'texture_specular\s*=\s*"([^"]+)"', b)
+        if nm and ix:
+            slots.append(dict(name=nm.group(1), index=int(ix.group(1)),
+                              normal=nrm.group(1) if nrm else "nonormal.dds",
+                              specular=spc.group(1) if spc else "noproperties.dds"))
+    if not slots:
+        sys.exit("no meshsettings found in " + path)
+    return slots
 
 
 def build_diffuse(seed):
@@ -120,30 +139,34 @@ def main():
         "",
     ]
     for m in MESHES:
-        lines += [
-            "pdxmesh = {",
-            f'\tname = "eotg_{m}_mesh"',
-            f'\tfile = "{m}.mesh"',
-            "",
-            "\tmeshsettings = {",
-            f'\t\tname = "{shape_name(m)}"',
-            "\t\tindex = 0",
-            f'\t\ttexture_diffuse = "{tex}"',
-            '\t\ttexture_normal = "mountain_01_vertical_normal.dds"',
-            '\t\ttexture_specular = "mountain_01_vertical_properties.dds"',
-            '\t\tshader = "standard"',
-            '\t\tshader_file = "gfx/FX/pdxmesh.shader"',
-            "\t}",
-            "}",
-            "",
-        ]
+        slots = mesh_slots(m)
+        lines += ["pdxmesh = {", f'\tname = "eotg_{m}_mesh"', f'\tfile = "{m}.mesh"', ""]
+        for sl in slots:
+            # Our diffuse goes on EVERY slot. Slot 1 of cliff_small_01 is a grass cap in vanilla;
+            # on an asteroid it should be rock like the rest, and leaving it out is what made
+            # every rock render with flat pale facets.
+            lines += [
+                "\tmeshsettings = {",
+                f'\t\tname = "{sl["name"]}"',
+                f'\t\tindex = {sl["index"]}',
+                f'\t\ttexture_diffuse = "{tex}"',
+                f'\t\ttexture_normal = "{sl["normal"]}"',
+                f'\t\ttexture_specular = "{sl["specular"]}"',
+                '\t\tshader = "standard"',
+                '\t\tshader_file = "gfx/FX/pdxmesh.shader"',
+                "\t}",
+            ]
+        lines += ["}", ""]
     path = os.path.join(outdir, "eotg_debris.asset")
     with open(path, "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(lines))
     print(f"wrote {path}")
     print(f"  {len(MESHES)} meshes: " + ", ".join(f"eotg_{m}_mesh" for m in MESHES))
     for m in MESHES:
-        print(f"    eotg_{m}_mesh  <- {m}.mesh   shape {shape_name(m)}")
+        sl = mesh_slots(m)
+        detail = ", ".join(f'{s["index"]}:{s["name"]}' for s in sl)
+        flag = "  <- multi-slot" if len(sl) > 1 else ""
+        print(f"    eotg_{m}_mesh  <- {m}.mesh   slots {detail}{flag}")
 
 
 if __name__ == "__main__":

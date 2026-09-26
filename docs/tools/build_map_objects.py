@@ -67,22 +67,25 @@ OBJECT_SETS = {
     # flatness is min/max extent, so 1.0 is a cube and 0.5 is a plate. Anything low reads as a
     # shard rather than a rock once it tumbles, so the flat ones are not used.
     #
-    # Scale is chosen against those extents: a province is tens of world units across, so the
-    # first pass at 0.18-0.55 made 0.5-1.7 unit chunks, which is invisible.
+    # Scale is bracketed by two failed passes rather than reasoned from first principles:
+    #   0.5-1.7 world unit chunks were all but invisible;
+    #   2.4-6.9 were comically large, single rocks spanning a good part of a province.
+    # So the readable range is roughly 1-2.5 units for field debris. Note the first of those was
+    # also on the flat 35-vert slab, which reads smaller than a chunky mesh at equal scale.
     "eotg_debris_field": dict(
         mesh="eotg_cliff_small_01_mesh",     # 3.45 native -> 2.4-6.9 units
         layer="tree_high_layer",
         terrains=("hills",),
-        count=9000,
-        scale=(0.70, 2.00),
+        count=11000,
+        scale=(0.26, 0.62),
         tumble=True,
     ),
     "eotg_debris_field_b": dict(
         mesh="eotg_cliff_rock_03_mesh",      # 2.60 native -> 2.1-5.2 units
         layer="tree_high_layer",
         terrains=("hills",),
-        count=5000,
-        scale=(0.80, 2.00),
+        count=6000,
+        scale=(0.34, 0.80),
         tumble=True,
     ),
     # Impassable provinces are forced onto desert_mountains by build_terrain_index, so this also
@@ -91,8 +94,8 @@ OBJECT_SETS = {
         mesh="eotg_cliff_small_01_mesh",     # 3.45 native -> 5.2-12.1 units
         layer="tree_high_layer",
         terrains=("desert_mountains",),
-        count=4000,
-        scale=(1.50, 3.50),
+        count=4500,
+        scale=(0.45, 1.05),
         tumble=True,
     ),
 }
