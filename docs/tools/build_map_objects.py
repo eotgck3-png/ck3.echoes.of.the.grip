@@ -59,30 +59,40 @@ GAME = r"D:\SteamLibrary\steamapps\common\Crusader Kings III\game"
 #            check it from here.
 #   tumble   True gives a full random orientation, False yaw only (vanilla's tree behaviour)
 OBJECT_SETS = {
+    # Mesh choice matters more than anything else here. Bounding boxes read out of the .mesh files:
+    #   cliff_rock_01  3.02 long, flatness 0.53, 35 verts   <- a SLAB. Reads as a flat dark wedge.
+    #   cliff_rock_02  1.95 long, flatness 0.75, 31 verts
+    #   cliff_rock_03  2.60 long, flatness 0.81, 55 verts
+    #   cliff_small_01 3.45 long, flatness 0.88, 128 verts  <- chunkiest and most detailed
+    # flatness is min/max extent, so 1.0 is a cube and 0.5 is a plate. Anything low reads as a
+    # shard rather than a rock once it tumbles, so the flat ones are not used.
+    #
+    # Scale is chosen against those extents: a province is tens of world units across, so the
+    # first pass at 0.18-0.55 made 0.5-1.7 unit chunks, which is invisible.
     "eotg_debris_field": dict(
-        mesh="eotg_cliff_rock_01_mesh",
+        mesh="eotg_cliff_small_01_mesh",     # 3.45 native -> 2.4-6.9 units
         layer="tree_high_layer",
         terrains=("hills",),
-        count=3500,
-        scale=(0.18, 0.55),
+        count=9000,
+        scale=(0.70, 2.00),
         tumble=True,
     ),
     "eotg_debris_field_b": dict(
-        mesh="eotg_cliff_rock_03_mesh",
+        mesh="eotg_cliff_rock_03_mesh",      # 2.60 native -> 2.1-5.2 units
         layer="tree_high_layer",
         terrains=("hills",),
-        count=2000,
-        scale=(0.12, 0.38),
+        count=5000,
+        scale=(0.80, 2.00),
         tumble=True,
     ),
     # Impassable provinces are forced onto desert_mountains by build_terrain_index, so this also
-    # litters every wasteland - which suits a barrier you are not meant to cross.
+    # litters every wasteland - which suits a barrier you are not meant to cross. Bigger chunks.
     "eotg_debris_barrier": dict(
-        mesh="eotg_cliff_rock_02_mesh",
+        mesh="eotg_cliff_small_01_mesh",     # 3.45 native -> 5.2-12.1 units
         layer="tree_high_layer",
         terrains=("desert_mountains",),
-        count=1800,
-        scale=(0.22, 0.70),
+        count=4000,
+        scale=(1.50, 3.50),
         tumble=True,
     ),
 }

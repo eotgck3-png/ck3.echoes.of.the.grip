@@ -46,8 +46,8 @@ REL = os.path.join("gfx", "models", "mapitems", "cliffs")
 
 # Vanilla rock sits at 0.266 neutral. Debris should be darker and cold - it is unlit rock a long
 # way from anything, and it has to sit on a violet nebula without reading as a brown boulder.
-BASE_DARK = np.array([0.085, 0.082, 0.105])     # deep cold grey, faint violet lean
-BASE_LIGHT = np.array([0.225, 0.215, 0.255])    # exposed faces catching a little light
+BASE_DARK = np.array([0.125, 0.120, 0.150])     # deep cold grey, faint violet lean
+BASE_LIGHT = np.array([0.330, 0.318, 0.365])    # exposed faces catching a little light
 IRON_TINT = np.array([0.240, 0.150, 0.115])     # rusty mineral streaks, used sparingly
 
 # Which vanilla meshes to reskin. Each becomes an eotg_ pdxmesh reusing that geometry.
