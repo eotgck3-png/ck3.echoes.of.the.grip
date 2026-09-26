@@ -82,8 +82,11 @@ PixelShader =
 		// into big soft blobs around island groups instead of a coastline. It survives longer than
 		// the stars because it still reads as a coast at middle zoom, but by the strategic view the
 		// flatmap is drawing the coastlines anyway.
-		#define EOTG_SHORE_FADE_FAR     900.0f
-		#define EOTG_SHORE_FADE_RANGE   420.0f
+		// Calibrated from a screenshot: at full zoom-out the stars (gone by 520) had disappeared
+		// while the shore (gone by 900) had not, so the camera sits between those two distances
+		// there. Matching the star threshold is therefore the one value guaranteed to clear it.
+		#define EOTG_SHORE_FADE_FAR     520.0f
+		#define EOTG_SHORE_FADE_RANGE   300.0f
 		// -------------------------------------------------------------------------
 
 		float3 EotgRamp( float t )
