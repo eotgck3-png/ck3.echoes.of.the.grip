@@ -1,0 +1,159 @@
+﻿# ── eotg_void_decisions.txt ──────────────────────────────────────────────────
+# Decisions for the Void Corruption system.
+#
+# eotg_decision_void_warding_rite     — orthodox ward; piety cost, modest effect
+# eotg_decision_void_voidwalker_ward  — heretic ward; needs a sheltered Voidwalker
+# eotg_decision_void_commune          — Void Cult only; spend toward the Void
+#
+# These are the player's levers on eotg_void_exposure. Without them the resource
+# is something that happens TO the player rather than something they push
+# against — which is the gap the depth audit flagged across the whole mod.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── The Warding Rite ──────────────────────────────────────────────────────────
+# Every faith except the Void Cult keeps some form of ward against the scars.
+# It is expensive, it is weaker than the heretic version, and it is available
+# to anyone devout enough to pay for it.
+
+eotg_decision_void_warding_rite = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_misc.dds"
+    }
+    ai_check_interval = 36
+
+    is_shown = {
+        eotg_st_void_can_be_warded = yes
+        eotg_st_void_venerates = no
+    }
+
+    is_valid = {
+        piety >= 200
+        NOT = { has_character_flag = eotg_flag_void_ward_cooldown }
+    }
+
+    is_valid_showing_failures_only = {
+        piety >= 200
+    }
+
+    cost = { piety = 200 }
+
+    effect = {
+        eotg_se_void_ward = yes
+        custom_tooltip = eotg_decision_void_warding_rite_tooltip
+    }
+
+    ai_potential = {
+        eotg_st_void_has_exposure = yes
+        var:eotg_void_exposure >= 40
+    }
+    ai_will_do = {
+        base = 20
+        modifier = { add = 30  var:eotg_void_exposure >= 60 }
+        modifier = { add = 25  has_trait = zealous }
+        modifier = { add = -20  has_trait = eotg_void_touched }
+    }
+}
+
+
+# ── The Voidwalker's Ward ─────────────────────────────────────────────────────
+# Malvrick's sect was hunted to near-extinction for knowing exactly this. It is
+# the strongest cleanse in the system and it costs piety and standing with the
+# devout every time it is used.
+
+eotg_decision_void_voidwalker_ward = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_misc.dds"
+    }
+    ai_check_interval = 36
+
+    is_shown = {
+        eotg_st_void_has_voidwalker = yes
+        NOT = { has_trait = eotg_void_hollowed }
+    }
+
+    is_valid = {
+        gold >= 100
+        NOT = { has_character_flag = eotg_flag_void_ward_cooldown }
+    }
+
+    is_valid_showing_failures_only = {
+        gold >= 100
+    }
+
+    cost = { gold = 100 }
+
+    effect = {
+        eotg_se_void_add_exposure = { AMOUNT = -35 }
+        add_character_modifier = { modifier = eotg_mod_void_warded  years = 10 }
+        add_character_flag = { flag = eotg_flag_void_ward_cooldown  years = 8 }
+        add_piety = -150
+        every_courtier = {
+            limit = {
+                is_alive = yes
+                has_trait = zealous
+            }
+            add_opinion = { modifier = eotg_opinion_void_harbors_heretic  target = root }
+        }
+        custom_tooltip = eotg_decision_void_voidwalker_ward_tooltip
+    }
+
+    ai_potential = {
+        eotg_st_void_has_exposure = yes
+        var:eotg_void_exposure >= 50
+    }
+    ai_will_do = {
+        base = 25
+        modifier = { add = 40  var:eotg_void_exposure >= 75 }
+        modifier = { add = 20  has_trait = cynical }
+        modifier = { add = -30  has_trait = zealous }
+    }
+}
+
+
+# ── Commune with the Eye ──────────────────────────────────────────────────────
+# The Void Cult's own lever, and the only decision in the mod that deliberately
+# raises exposure. Trades the character's remaining distance from Orrin for the
+# education-differentiated insight — the fast path to power and to Hollowing.
+
+eotg_decision_void_commune = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_misc.dds"
+    }
+    ai_check_interval = 60
+
+    is_shown = {
+        eotg_st_void_venerates = yes
+        NOT = { has_trait = eotg_void_hollowed }
+    }
+
+    is_valid = {
+        piety >= 150
+        NOT = { has_character_flag = eotg_flag_void_commune_cooldown }
+    }
+
+    is_valid_showing_failures_only = {
+        piety >= 150
+    }
+
+    cost = { piety = 150 }
+
+    effect = {
+        add_character_flag = { flag = eotg_flag_void_commune_cooldown  years = 10 }
+        eotg_se_void_seed = yes
+        eotg_se_void_edu_insight = yes
+        eotg_se_void_add_exposure = { AMOUNT = 20 }
+        stress_impact = { base = medium_stress_impact_gain }
+        custom_tooltip = eotg_decision_void_commune_tooltip
+    }
+
+    ai_potential = {
+        NOT = { has_trait = eotg_void_hollowed }
+    }
+    ai_will_do = {
+        base = 15
+        modifier = { add = 25  has_trait = ambitious }
+        modifier = { add = 20  has_trait = brave }
+        modifier = { add = -30  has_trait = content }
+        modifier = { add = -25  has_trait = craven }
+    }
+}

@@ -1,0 +1,267 @@
+﻿# ── eotg_newcauldron_char_events.txt ─────────────────────────────────────────
+# Event chain for Senator Lireth Davan — New Cauldron.
+# Fires from: eotg_char_arc_actions.txt (on_game_started, day 14)
+# Scope: character (Lireth)
+#
+# Arc summary:
+#   I   — The Legion Question       (0001)
+#   II  — The Public Panic          (0002)
+#   III — The Committee Hearings    (0003)
+#   IV  — The Nightglass Scandal    (0004)
+#   V   — Emergency Powers          (0005)
+#   VI  — The Future of New Cauldron (0006, final)
+# ─────────────────────────────────────────────────────────────────────────────
+
+namespace = eotg_newcauldron_char
+
+# ── eotg_newcauldron_char.0001 ────────────────────────────────────────────────
+# Fires from: on_game_started (day 14)
+# The Senate debates the Legion in the aftermath of Echelon-12.
+eotg_newcauldron_char.0001 = {
+    type = character_event
+    title = eotg_newcauldron_char.0001.t
+    desc = eotg_newcauldron_char.0001.desc
+    theme = stewardship
+
+    option = {
+        name = eotg_newcauldron_char.0001.a
+        # "Keep them under scrutiny."
+        add_character_modifier = { modifier = eotg_legion_oversight_committee years = 10 }
+        trigger_event = { id = eotg_newcauldron_char.0002 days = 270 }
+    }
+
+    option = {
+        name = eotg_newcauldron_char.0001.b
+        # "Investigate everything."
+        add_intrigue_skill = 1
+        add_stress = 10
+        add_character_modifier = { modifier = eotg_internal_security_expansion years = 10 }
+        trigger_event = { id = eotg_newcauldron_char.0002 days = 270 }
+    }
+
+    option = {
+        name = eotg_newcauldron_char.0001.c
+        # "Avoid open confrontation."
+        add_diplomacy_skill = 1
+        add_character_modifier = { modifier = eotg_fragile_cooperation years = 5 }
+        trigger_event = { id = eotg_newcauldron_char.0002 days = 270 }
+    }
+}
+
+# ── eotg_newcauldron_char.0002 ────────────────────────────────────────────────
+# The Public Panic — media releases survivor testimonies
+eotg_newcauldron_char.0002 = {
+    type = character_event
+    title = eotg_newcauldron_char.0002.t
+    desc = eotg_newcauldron_char.0002.desc
+    theme = intrigue
+
+    option = {
+        name = eotg_newcauldron_char.0002.a
+        # "Calm the public."
+        add_legitimacy = 15
+        add_character_modifier = { modifier = eotg_republican_reassurance_campaign years = 5 }
+        trigger_event = { id = eotg_newcauldron_char.0003 days = 365 }
+    }
+
+    option = {
+        name = eotg_newcauldron_char.0002.b
+        # "Use the panic."
+        add_character_modifier = { modifier = eotg_security_state_expansion years = 10 }
+        trigger_event = { id = eotg_newcauldron_char.0003 days = 365 }
+    }
+
+    option = {
+        name = eotg_newcauldron_char.0002.c
+        # "Blame the Senate opposition."
+        add_intrigue_skill = 1
+        add_prestige = -50
+        trigger_event = { id = eotg_newcauldron_char.0003 days = 365 }
+    }
+}
+
+# ── eotg_newcauldron_char.0003 ────────────────────────────────────────────────
+# The Committee Hearings
+eotg_newcauldron_char.0003 = {
+    type = character_event
+    title = eotg_newcauldron_char.0003.t
+    desc = eotg_newcauldron_char.0003.desc
+    theme = stewardship
+
+    option = {
+        name = eotg_newcauldron_char.0003.a
+        # "Push for accountability."
+        add_legitimacy = 20
+        add_character_modifier = { modifier = eotg_public_accountability years = 10 }
+        trigger_event = { id = eotg_newcauldron_char.0004 days = 365 }
+    }
+
+    option = {
+        name = eotg_newcauldron_char.0003.b
+        # "Quietly negotiate."
+        add_prestige = 50
+        trigger_event = { id = eotg_newcauldron_char.0004 days = 365 }
+    }
+
+    option = {
+        name = eotg_newcauldron_char.0003.c
+        # "Bury the hearings."
+        add_character_modifier = { modifier = eotg_suppressed_investigations years = 10 }
+        trigger_event = { id = eotg_newcauldron_char.0004 days = 365 }
+    }
+}
+
+# ── eotg_newcauldron_char.0004 ────────────────────────────────────────────────
+# The Nightglass Scandal — Lyssa's network penetrated the Republic
+eotg_newcauldron_char.0004 = {
+    type = character_event
+    title = eotg_newcauldron_char.0004.t
+    desc = eotg_newcauldron_char.0004.desc
+    theme = intrigue
+
+    option = {
+        name = eotg_newcauldron_char.0004.a
+        # "Purge compromised officials."
+        add_character_modifier = { modifier = eotg_internal_purge years = 10 }
+        trigger_event = { id = eotg_newcauldron_char.0005 days = 730 }
+    }
+
+    option = {
+        name = eotg_newcauldron_char.0004.b
+        # "Counter-infiltrate."
+        add_intrigue_skill = 1
+        add_character_modifier = { modifier = eotg_counterintelligence_bureau years = 10 }
+        trigger_event = { id = eotg_newcauldron_char.0005 days = 730 }
+    }
+
+    option = {
+        name = eotg_newcauldron_char.0004.c
+        # "Hide this from the public."
+        add_legitimacy = 10
+        trigger_event = { id = eotg_newcauldron_char.0005 days = 730 }
+    }
+}
+
+# ── eotg_newcauldron_char.0005 ────────────────────────────────────────────────
+# Emergency Powers — the Senate demands authority expansion
+eotg_newcauldron_char.0005 = {
+    type = character_event
+    title = eotg_newcauldron_char.0005.t
+    desc = eotg_newcauldron_char.0005.desc
+    theme = stewardship
+
+    trigger = {
+        legitimacy <= 60
+    }
+
+    option = {
+        name = eotg_newcauldron_char.0005.a
+        # "Emergency powers are temporary."
+        add_stress = 15
+        add_legitimacy = 10
+        add_character_modifier = { modifier = eotg_limited_emergency_measures years = 10 }
+        trigger_event = { id = eotg_newcauldron_char.0006 days = 1095 }
+    }
+
+    option = {
+        name = eotg_newcauldron_char.0005.b
+        # "The Republic must defend itself aggressively."
+        add_dread = 10
+        add_character_modifier = { modifier = eotg_security_first_doctrine years = 10 }
+        trigger_event = { id = eotg_newcauldron_char.0006 days = 1095 }
+    }
+
+    option = {
+        name = eotg_newcauldron_char.0005.c
+        # "Reject emergency authority."
+        add_legitimacy = 15
+        trigger_event = { id = eotg_newcauldron_char.0006 days = 1095 }
+    }
+}
+
+# ── eotg_newcauldron_char.0006 ────────────────────────────────────────────────
+# The Future of New Cauldron — final reflection
+eotg_newcauldron_char.0006 = {
+    type = character_event
+    title = eotg_newcauldron_char.0006.t
+    desc = eotg_newcauldron_char.0006.desc
+    theme = stewardship
+
+    option = {
+        name = eotg_newcauldron_char.0006.a
+        # "Transparency is strength." — Open Republic
+        add_legitimacy = 30
+        add_diplomacy_skill = 1
+        add_character_flag = eotg_newcauldron_path_open
+        trigger_event = { id = eotg_newcauldron_char.0007 days = 30 }
+    }
+
+    option = {
+        name = eotg_newcauldron_char.0006.b
+        # "Trust must be monitored." — Watchful Republic
+        add_character_modifier = { modifier = eotg_internal_security_expansion years = 20 }
+        add_legitimacy = 20
+        add_character_flag = eotg_newcauldron_path_watchful
+        trigger_event = { id = eotg_newcauldron_char.0007 days = 30 }
+    }
+
+    option = {
+        name = eotg_newcauldron_char.0006.c
+        # "Freedom means nothing if the Republic dies." — Hardened State
+        add_martial_skill = 1
+        add_dread = 10
+        add_legitimacy = 10
+        add_character_flag = eotg_newcauldron_path_hardened
+        trigger_event = { id = eotg_newcauldron_char.0007 days = 30 }
+    }
+}
+
+# ── eotg_newcauldron_char.0007 ────────────────────────────────────────────────
+# The Republic's Final Shape — epilogue, fires 30 days after the final choice
+eotg_newcauldron_char.0007 = {
+    type = character_event
+    title = eotg_newcauldron_char.0007.t
+    desc = {
+        triggered_desc = {
+            trigger = { has_character_flag = eotg_newcauldron_path_open }
+            desc = eotg_newcauldron_char.0007.desc_open
+        }
+        triggered_desc = {
+            trigger = { has_character_flag = eotg_newcauldron_path_watchful }
+            desc = eotg_newcauldron_char.0007.desc_watchful
+        }
+        triggered_desc = {
+            trigger = { has_character_flag = eotg_newcauldron_path_hardened }
+            desc = eotg_newcauldron_char.0007.desc_hardened
+        }
+    }
+    theme = stewardship
+
+    option = {
+        name = eotg_newcauldron_char.0007.opt_open
+        trigger = { has_character_flag = eotg_newcauldron_path_open }
+        add_diplomacy_skill = 1
+        add_legitimacy = 25
+        add_prestige = 200
+        remove_character_flag = eotg_newcauldron_path_open
+    }
+
+    option = {
+        name = eotg_newcauldron_char.0007.opt_watchful
+        trigger = { has_character_flag = eotg_newcauldron_path_watchful }
+        add_dread = 10
+        add_legitimacy = 20
+        add_prestige = 200
+        remove_character_flag = eotg_newcauldron_path_watchful
+    }
+
+    option = {
+        name = eotg_newcauldron_char.0007.opt_hardened
+        trigger = { has_character_flag = eotg_newcauldron_path_hardened }
+        add_martial_skill = 1
+        add_dread = 10
+        add_legitimacy = 15
+        add_prestige = 150
+        remove_character_flag = eotg_newcauldron_path_hardened
+    }
+}

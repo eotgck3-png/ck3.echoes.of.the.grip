@@ -1,0 +1,55 @@
+﻿# ── eotg_gobcorp_triggers.txt ─────────────────────────────────────────────────
+# Scripted triggers for the Gob-Corp government.
+# ─────────────────────────────────────────────────────────────────────────────
+
+eotg_st_is_gobcorp_ruler = {
+	has_government = eotg_gobcorp_government
+}
+
+# Trade Prince: county- or duchy-tier Gob-Corp vassal
+eotg_st_is_trade_prince = {
+	has_government = eotg_gobcorp_government
+	is_landed = yes
+	highest_held_title_tier >= tier_county
+	highest_held_title_tier <= tier_duchy
+}
+
+# Merchant Lord: kingdom-tier Gob-Corp vassal
+eotg_st_is_merchant_lord = {
+	has_government = eotg_gobcorp_government
+	highest_held_title_tier = tier_kingdom
+}
+
+# Director-General: empire-tier Gob-Corp ruler
+eotg_st_is_director_general = {
+	has_government = eotg_gobcorp_government
+	highest_held_title_tier = tier_empire
+}
+
+# Character is eligible to call a Vote of No Confidence
+eotg_st_gobcorp_vote_valid = {
+	trigger_if = {
+		limit = { highest_held_title_tier >= tier_county }
+		highest_held_title_tier <= tier_kingdom
+	}
+	has_government = eotg_gobcorp_government
+	is_landed = yes
+	liege = { eotg_st_is_director_general = yes }
+	NOT = { has_character_flag = eotg_gobcorp_voted }
+}
+
+# The Director-General is politically vulnerable (vote can be called)
+eotg_st_gobcorp_dg_vulnerable = {
+	trigger_if = {
+		limit = { has_character_modifier = eotg_gobcorp_dg_instability }
+		always = yes
+	}
+	trigger_else = {
+		prestige < 100
+	}
+}
+
+# DG has survived a boardroom war — immune to further votes
+eotg_st_gobcorp_survived_vote = {
+	has_character_flag = eotg_survived_vote
+}

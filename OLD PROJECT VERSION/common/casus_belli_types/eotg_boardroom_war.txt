@@ -1,0 +1,136 @@
+﻿# ── eotg_boardroom_war.txt ────────────────────────────────────────────────────
+# Boardroom War — targeted title war for the Director-General title only.
+# Declared by a Merchant Lord after the DG refuses to step down during a
+# successful Vote of No Confidence. Attacker victory claims the DG title.
+# Defender victory grants the DG permanent immunity from further votes.
+# ─────────────────────────────────────────────────────────────────────────────
+
+eotg_boardroom_war = {
+	icon = claim_cb
+	group = event
+
+	combine_into_one = yes
+	mutually_exclusive_titles = { always = yes }
+
+	# Only the character who triggered the refused vote may declare this war
+	allowed_for_character = {
+		has_character_flag = eotg_gobcorp_refused_exit
+		OR = {
+			eotg_st_is_trade_prince = yes
+			eotg_st_is_merchant_lord = yes
+		}
+	}
+
+	# Only a Director-General may be the target
+	allowed_against_character = {
+		eotg_st_is_director_general = yes
+	}
+
+	target_titles = all
+	target_title_tier = empire
+
+	cost = {
+		prestige = 200
+	}
+
+	on_declaration = {
+		on_declared_war = yes
+	}
+
+	should_invalidate = {
+		OR = {
+			scope:attacker = {
+				NOT = { has_character_flag = eotg_gobcorp_refused_exit }
+			}
+			NOT = { scope:defender = { eotg_st_is_director_general = yes } }
+		}
+	}
+
+	on_invalidated_desc = { desc = eotg_boardroom_war_invalidated_desc }
+	on_invalidated = { }
+
+	on_victory_desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { scope:attacker = { is_local_player = yes } }
+				desc = eotg_boardroom_war_victory_attacker_desc
+			}
+			triggered_desc = {
+				trigger = { scope:defender = { is_local_player = yes } }
+				desc = eotg_boardroom_war_victory_defender_desc
+			}
+			desc = eotg_boardroom_war_victory_desc
+		}
+	}
+
+	on_victory = {
+		scope:attacker = { show_pow_release_message_effect = yes }
+		add_legitimacy_attacker_victory_effect = yes
+
+		# Transfer the DG empire title to the winning board member
+		create_title_and_vassal_change = {
+			type = conquest
+			save_scope_as = change
+			add_claim_on_loss = yes
+		}
+		every_in_list = {
+			list = target_titles
+			change_title_holder_include_vassals = {
+				holder = scope:attacker
+				change = scope:change
+			}
+		}
+		resolve_title_and_vassal_change = scope:change
+
+		# Remove the refused-exit flag from the deposed DG
+		scope:defender = {
+			remove_character_flag = eotg_gobcorp_refused_exit
+		}
+
+		add_truce_attacker_victory_effect = yes
+	}
+
+	on_defeat_desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { scope:attacker = { is_local_player = yes } }
+				desc = eotg_boardroom_war_defeat_attacker_desc
+			}
+			triggered_desc = {
+				trigger = { scope:defender = { is_local_player = yes } }
+				desc = eotg_boardroom_war_defeat_defender_desc
+			}
+			desc = eotg_boardroom_war_defeat_desc
+		}
+	}
+
+	on_defeat = {
+		# DG survived the boardroom war — grant permanent immunity
+		scope:defender = {
+			add_character_flag = eotg_survived_vote
+			remove_character_flag = eotg_gobcorp_refused_exit
+			trigger_event = { id = eotg_gobcorp_vote.0005  days = 1 }
+		}
+		scope:attacker = {
+			remove_character_flag = eotg_gobcorp_refused_exit
+		}
+		add_legitimacy_attacker_defeat_effect = yes
+		add_truce_attacker_defeat_effect = yes
+	}
+
+	on_white_peace_desc = { desc = eotg_boardroom_war_white_peace_desc }
+	on_white_peace = {
+		add_truce_white_peace_effect = yes
+	}
+
+	war_name = "EOTG_BOARDROOM_WAR_NAME"
+	cb_name_no_target = "EOTG_BOARDROOM_WAR_NAME_FALLBACK"
+
+	interface_priority = 50
+	attacker_wargoal_percentage = 0.8
+	on_primary_attacker_death = inherit
+	on_primary_defender_death = inherit
+	transfer_behavior = transfer
+	attacker_allies_inherit = yes
+	defender_allies_inherit = yes
+}

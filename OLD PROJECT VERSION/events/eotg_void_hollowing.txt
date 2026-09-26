@@ -1,0 +1,291 @@
+﻿# ── eotg_void_hollowing.txt ──────────────────────────────────────────────────
+# Void Corruption, stage D: the terminal transformation and life after it.
+#
+# eotg_void.0030 — The Hollowing      (100 exposure; transformation, unavoidable)
+# eotg_void.0031 — The Hollow Court   (post-transformation; the realm reacts)
+# eotg_void.0032 — A Moment of Being  (rare lucidity; the only way back to grace)
+#
+# Fires from: common/on_action/eotg_void_on_actions.txt
+#
+# Design note: the Hollowed trait is the strongest stat line in the mod attached
+# to the worst social position in it. These three events exist to make that
+# trade legible while it happens, and to leave exactly one narrow path — 0032 —
+# by which a Hollowed ruler can buy back some standing without losing the power.
+# ─────────────────────────────────────────────────────────────────────────────
+
+namespace = eotg_void
+
+
+# ── eotg_void.0030 ────────────────────────────────────────────────────────────
+# The Hollowing
+# Exposure has reached 100. The transformation happens in immediate — the
+# options only decide what the realm is told about it.
+
+eotg_void.0030 = {
+    type = character_event
+    title = eotg_void.0030.t
+    theme = corruption
+
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { eotg_st_void_venerates = yes }
+                desc = eotg_void.0030.desc_cult
+            }
+            desc = eotg_void.0030.desc
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = shock
+    }
+
+    immediate = {
+        hidden_effect = {
+            add_character_flag = { flag = eotg_flag_void_event_cooldown  years = 5 }
+        }
+        eotg_se_void_become_hollowed = yes
+    }
+
+    # "Announce it as ascension." — cult framing; keeps the faithful, loses the rest
+    option = {
+        name = eotg_void.0030.a
+        trigger = { eotg_st_void_venerates = yes }
+        add_piety = 400
+        add_prestige = 150
+        every_courtier = {
+            limit = {
+                is_alive = yes
+                eotg_st_void_venerates = yes
+            }
+            add_opinion = { modifier = eotg_opinion_void_kinship  target = root }
+        }
+        ai_chance = { base = 90 }
+    }
+
+    # "Say nothing. Rule." — intrigue conceals it for a while
+    option = {
+        name = eotg_void.0030.b
+        trigger = { has_education_intrigue_trigger = yes }
+        add_intrigue_skill = 2
+        add_character_modifier = { modifier = eotg_mod_void_unseen_step }
+        ai_chance = { base = 70 }
+    }
+
+    # "Abdicate before it finishes." — always available; the honest exit
+    option = {
+        name = eotg_void.0030.c
+        trigger = {
+            exists = primary_heir
+            primary_heir = { is_alive = yes }
+        }
+        add_piety = 300
+        primary_heir = {
+            add_opinion = { modifier = eotg_opinion_void_defiance_respect  target = root }
+        }
+        stress_impact = { base = major_stress_impact_loss }
+        ai_chance = {
+            base = 15
+            modifier = { add = 30  has_trait = humble }
+            modifier = { add = 25  has_trait = content }
+            modifier = { add = -40  has_trait = ambitious }
+        }
+    }
+
+    # "Let them see and let them fear." — the always-available floor
+    option = {
+        name = eotg_void.0030.d
+        add_dread = 50
+        add_prestige = 100
+        ai_chance = {
+            base = 40
+            modifier = { add = 35  has_trait = callous }
+            modifier = { add = 30  has_trait = arrogant }
+            modifier = { add = 25  has_trait = ambitious }
+        }
+    }
+}
+
+
+# ── eotg_void.0031 ────────────────────────────────────────────────────────────
+# The Hollow Court
+# The realm has worked out what it is being ruled by. This is the recurring
+# consequence event for the Hollowed state.
+
+eotg_void.0031 = {
+    type = character_event
+    title = eotg_void.0031.t
+    desc = eotg_void.0031.desc
+    theme = dread
+
+    trigger = {
+        has_trait = eotg_void_hollowed
+    }
+
+    left_portrait = {
+        character = root
+        animation = personality_cynical
+    }
+
+    immediate = {
+        hidden_effect = {
+            add_character_flag = { flag = eotg_flag_void_event_cooldown  years = 3 }
+        }
+    }
+
+    # "Rule through the fear. It is efficient." — leans in
+    option = {
+        name = eotg_void.0031.a
+        add_dread = 30
+        add_prestige = 75
+        every_vassal = {
+            limit = { is_alive = yes }
+            add_opinion = { modifier = eotg_opinion_void_unease  target = root }
+        }
+        ai_chance = {
+            base = 50
+            modifier = { add = 30  has_trait = callous }
+            modifier = { add = 25  has_trait = arrogant }
+        }
+    }
+
+    # "Delegate everything you can." — stewardship keeps the realm functioning
+    option = {
+        name = eotg_void.0031.b
+        trigger = { has_education_stewardship_trigger = yes }
+        add_stewardship_skill = 1
+        add_gold = 150
+        every_vassal = {
+            limit = {
+                is_alive = yes
+                opinion = { target = root  value < 0 }
+            }
+            add_opinion = { modifier = eotg_opinion_void_defiance_respect  target = root }
+        }
+        ai_chance = {
+            base = 60
+            modifier = { add = 25  has_trait = diligent }
+        }
+    }
+
+    # "Try to be present at the feast." — always available; costs, and helps a little
+    option = {
+        name = eotg_void.0031.c
+        add_piety = 50
+        random_courtier = {
+            limit = { is_alive = yes }
+            add_opinion = { modifier = eotg_opinion_void_defiance_respect  target = root }
+        }
+        stress_impact = { base = medium_stress_impact_gain }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = compassionate }
+            modifier = { add = 25  has_trait = gregarious }
+        }
+    }
+}
+
+
+# ── eotg_void.0032 ────────────────────────────────────────────────────────────
+# A Moment of Being
+# Rare. For a few hours the Hollowed ruler is entirely themselves. The only
+# route by which the terminal stage buys back any standing — deliberately
+# narrow, and deliberately not a cure.
+
+eotg_void.0032 = {
+    type = character_event
+    title = eotg_void.0032.t
+    theme = mental_health
+
+    trigger = {
+        has_trait = eotg_void_hollowed
+    }
+
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { age >= 60 }
+                desc = eotg_void.0032.desc_old
+            }
+            triggered_desc = {
+                trigger = {
+                    exists = primary_heir
+                    primary_heir = { is_alive = yes }
+                }
+                desc = eotg_void.0032.desc_heir
+            }
+            desc = eotg_void.0032.desc
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = grief
+    }
+
+    immediate = {
+        hidden_effect = {
+            add_character_flag = { flag = eotg_flag_void_event_cooldown  years = 6 }
+        }
+    }
+
+    # "Spend it on your heir." — the bond, repaired at some cost
+    option = {
+        name = eotg_void.0032.a
+        trigger = {
+            exists = primary_heir
+            primary_heir = { is_alive = yes }
+        }
+        primary_heir = {
+            add_opinion = { modifier = eotg_opinion_void_defiance_respect  target = root }
+        }
+        add_piety = 150
+        stress_impact = { base = major_stress_impact_loss }
+        ai_chance = {
+            base = 60
+            modifier = { add = 30  has_trait = compassionate }
+            modifier = { add = -25  has_trait = callous }
+        }
+    }
+
+    # "Spend it on the court." — broad, shallow repair of standing
+    option = {
+        name = eotg_void.0032.b
+        every_courtier = {
+            limit = { is_alive = yes }
+            add_opinion = { modifier = eotg_opinion_void_defiance_respect  target = root }
+        }
+        add_prestige = 100
+        ai_chance = {
+            base = 45
+            modifier = { add = 25  has_trait = gregarious }
+            modifier = { add = 25  has_education_diplomacy_trigger = yes }
+        }
+    }
+
+    # "Spend it working." — the ledger does not care how present you are
+    option = {
+        name = eotg_void.0032.c
+        add_gold = 200
+        add_prestige = 50
+        ai_chance = {
+            base = 35
+            modifier = { add = 30  has_trait = diligent }
+            modifier = { add = 25  has_trait = greedy }
+            modifier = { add = -20  has_trait = compassionate }
+        }
+    }
+
+    # "Sit with it." — always available; nothing gained but the hour itself
+    option = {
+        name = eotg_void.0032.d
+        add_piety = 75
+        stress_impact = { base = major_stress_impact_loss }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = content }
+            modifier = { add = 25  has_trait = shy }
+        }
+    }
+}

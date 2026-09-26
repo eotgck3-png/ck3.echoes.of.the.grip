@@ -1,0 +1,406 @@
+﻿# ── eotg_augmentation_tier2.txt ──────────────────────────────────────────────
+# Events for Enhanced-tier characters.
+#
+# eotg_aug_tier2.001 — Emotional Delay         (random flavor)
+# eotg_aug_tier2.002 — Children Fear Me        (family flavor)
+# eotg_aug_tier2.003 — The Next Stage          (progression gate: Enhanced → Overclocked)
+# eotg_aug_tier2.004 — The Space Between Us    (spouse confrontation)
+# eotg_aug_tier2.005 — The Confessor's Warning (zealous courtier)
+# eotg_aug_tier2.006 — Cold Detachment         (emotional processing anomaly)
+#
+# Fires from: eotg_augmentation_on_actions.txt yearly checks
+# ─────────────────────────────────────────────────────────────────────────────
+
+namespace = eotg_aug_tier2
+
+
+# ── eotg_aug_tier2.001 ────────────────────────────────────────────────────────
+# Emotional Delay
+# The enhanced character notices their emotional responses have slowed.
+
+eotg_aug_tier2.001 = {
+    type = character_event
+    title = eotg_aug_tier2.001.t
+    desc = eotg_aug_tier2.001.desc
+    theme = mental_health
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+
+    immediate = {
+        hidden_effect = {
+            add_character_flag = { flag = eotg_flag_enh_event_cooldown  years = 2 }
+        }
+    }
+
+    # "Emotion clouds judgment" — lean into the detachment
+    option = {
+        name = eotg_aug_tier2.001.a
+        add_character_modifier = { modifier = eotg_mod_enh_intrigue_bonus  years = 3 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+
+    # "I do not like this"
+    option = {
+        name = eotg_aug_tier2.001.b
+        stress_impact = { base = minor_stress_impact_gain }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 20  has_trait = content }
+        }
+    }
+
+    # "Increase neural responsiveness" — push the system, add fracture risk
+    option = {
+        name = eotg_aug_tier2.001.c
+        trigger = { gold >= 50 }
+        remove_short_term_gold = 50
+        eotg_add_fracture_risk = { AMOUNT = 8 }
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = brave }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+}
+
+
+# ── eotg_aug_tier2.002 ────────────────────────────────────────────────────────
+# Children Fear Me
+# Young children in the household recoil from their enhanced parent.
+
+eotg_aug_tier2.002 = {
+    type = character_event
+    title = eotg_aug_tier2.002.t
+    desc = eotg_aug_tier2.002.desc
+    theme = family
+
+    left_portrait = {
+        character = root
+        animation = personality_bold
+    }
+
+    trigger = { any_child = { is_alive = yes  age < 16 } }
+
+    # "They will understand strength"
+    option = {
+        name = eotg_aug_tier2.002.a
+        add_dread = 10
+        every_child = {
+            limit = { is_alive = yes  age < 16 }
+            add_opinion = { modifier = eotg_opinion_aug_fear  target = root }
+        }
+        ai_chance = {
+            base = 50
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = -30  has_trait = compassionate }
+        }
+    }
+
+    # "What have I become?"
+    option = {
+        name = eotg_aug_tier2.002.b
+        stress_impact = { base = medium_stress_impact_gain }
+        add_character_flag = { flag = eotg_flag_suppress_progression  years = 3 }
+        ai_chance = {
+            base = 50
+            modifier = { add = 30  has_trait = compassionate }
+            modifier = { add = 20  has_trait = content }
+        }
+    }
+}
+
+
+# ── eotg_aug_tier2.003 ────────────────────────────────────────────────────────
+# The Next Stage — Progression Gate
+# Enhanced → Overclocked transition event.
+
+eotg_aug_tier2.003 = {
+    type = character_event
+    title = eotg_aug_tier2.003.t
+    desc = eotg_aug_tier2.003.desc
+    theme = physical_health
+
+    left_portrait = {
+        character = root
+        animation = personality_bold
+    }
+
+    # "Proceed" — pay and upgrade
+    option = {
+        name = eotg_aug_tier2.003.a
+        trigger = { gold >= 200 }
+        remove_short_term_gold = 200
+        remove_trait = eotg_enhanced
+        add_trait = eotg_overclocked
+        eotg_apply_edu_synergy_overclocked = yes
+        stress_impact = {
+            base = minor_stress_impact_gain
+            brave = minor_stress_impact_loss
+            ambitious = 0
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = ambitious }
+            modifier = { add = 20  has_trait = brave }
+            modifier = { add = -50  has_trait = zealous }
+            modifier = { add = -20  has_trait = content }
+        }
+    }
+
+    # "The risks are unacceptable"
+    option = {
+        name = eotg_aug_tier2.003.b
+        stress_impact = {
+            base = 0
+            ambitious = medium_stress_impact_gain
+        }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 20  has_trait = patient }
+            modifier = { add = 20  gold < 200 }
+        }
+    }
+
+    # "Test it on prisoners first" — callous path with fracture risk
+    option = {
+        name = eotg_aug_tier2.003.c
+        trigger = { any_prisoner = { is_alive = yes } }
+        random_prisoner = {
+            limit = { is_alive = yes }
+            add_trait = wounded
+        }
+        add_dread = 15
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        remove_trait = eotg_enhanced
+        add_trait = eotg_overclocked
+        eotg_apply_edu_synergy_overclocked = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = callous }
+            modifier = { add = 10  has_trait = arbitrary }
+        }
+    }
+}
+
+
+# ── eotg_aug_tier2.004 ────────────────────────────────────────────────────────
+# The Space Between Us
+# A spouse confronts the Enhanced character about the widening emotional distance.
+
+eotg_aug_tier2.004 = {
+    type = character_event
+    title = eotg_aug_tier2.004.t
+    desc = eotg_aug_tier2.004.desc
+    theme = family
+
+    trigger = { is_married = yes }
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+    right_portrait = {
+        character = scope:aug_spouse
+        animation = worry
+    }
+
+    immediate = {
+        hidden_effect = {
+            add_character_flag = { flag = eotg_flag_enh_event_cooldown  years = 3 }
+            random_spouse = {
+                save_scope_as = aug_spouse
+            }
+        }
+    }
+
+    # "It is the implant. I am still here." — honest, some trust maintained
+    option = {
+        name = eotg_aug_tier2.004.a
+        scope:aug_spouse = {
+            add_opinion = { modifier = eotg_opinion_aug_unease  target = root }
+        }
+        stress_impact = { base = minor_stress_impact_loss }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = honest }
+            modifier = { add = 10  has_trait = compassionate }
+        }
+    }
+
+    # "I am the same person I have always been." — denial, spouse unconvinced
+    option = {
+        name = eotg_aug_tier2.004.b
+        scope:aug_spouse = {
+            add_opinion = { modifier = eotg_opinion_aug_unease  target = root }
+        }
+        stress_impact = {
+            compassionate = minor_stress_impact_gain
+            honest = medium_stress_impact_gain
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = arrogant }
+            modifier = { add = -20  has_trait = honest }
+        }
+    }
+
+    # "Then perhaps we are no longer suited." — rupture
+    option = {
+        name = eotg_aug_tier2.004.c
+        scope:aug_spouse = {
+            add_opinion = { modifier = eotg_opinion_aug_disgust  target = root }
+        }
+        stress_impact = { base = medium_stress_impact_gain }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = -30  has_trait = compassionate }
+        }
+    }
+}
+
+
+# ── eotg_aug_tier2.005 ────────────────────────────────────────────────────────
+# The Confessor's Warning
+# A zealous courtier warns of spiritual corruption from the augmentation.
+
+eotg_aug_tier2.005 = {
+    type = character_event
+    title = eotg_aug_tier2.005.t
+    desc = eotg_aug_tier2.005.desc
+    theme = faith
+
+    trigger = {
+        any_courtier = {
+            is_alive = yes
+            has_trait = zealous
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+    right_portrait = {
+        character = scope:confessor
+        animation = personality_bold
+    }
+
+    immediate = {
+        hidden_effect = {
+            add_character_flag = { flag = eotg_flag_enh_event_cooldown  years = 2 }
+            random_courtier = {
+                limit = { is_alive = yes  has_trait = zealous }
+                save_scope_as = confessor
+            }
+        }
+    }
+
+    # "Thank them for their concern. They may go." — prestige, confessor hostile
+    option = {
+        name = eotg_aug_tier2.005.a
+        add_prestige = 50
+        scope:confessor = {
+            add_opinion = { modifier = eotg_opinion_aug_disgust  target = root }
+        }
+        ai_chance = {
+            base = 50
+            modifier = { add = 20  has_trait = arrogant }
+            modifier = { add = 10  has_trait = callous }
+        }
+    }
+
+    # "Hear them out." — piety, stress relief
+    option = {
+        name = eotg_aug_tier2.005.b
+        add_piety = 100
+        stress_impact = { base = minor_stress_impact_loss }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = humble }
+            modifier = { add = 20  has_trait = zealous }
+        }
+    }
+
+    # "Their concern is noted. And unwelcome." — dread, piety loss
+    option = {
+        name = eotg_aug_tier2.005.c
+        add_dread = 20
+        add_piety = -75
+        scope:confessor = {
+            add_opinion = { modifier = eotg_opinion_aug_fear  target = root }
+        }
+        ai_chance = {
+            base = 20
+            modifier = { add = 30  has_trait = callous }
+            modifier = { add = 10  has_trait = paranoid }
+        }
+    }
+}
+
+
+# ── eotg_aug_tier2.006 ────────────────────────────────────────────────────────
+# Cold Detachment
+# The character notices grief arriving late — flagged by the implant as anomalous.
+
+eotg_aug_tier2.006 = {
+    type = character_event
+    title = eotg_aug_tier2.006.t
+    desc = eotg_aug_tier2.006.desc
+    theme = mental_health
+
+    left_portrait = {
+        character = root
+        animation = worry
+    }
+
+    immediate = {
+        hidden_effect = {
+            add_character_flag = { flag = eotg_flag_enh_event_cooldown  years = 2 }
+        }
+    }
+
+    # "The system is working. Efficiency is appropriate."
+    option = {
+        name = eotg_aug_tier2.006.a
+        add_character_modifier = { modifier = eotg_mod_enh_intrigue_bonus  years = 2 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+
+    # "This is wrong. I do not want this." — stress, suppresses progression
+    option = {
+        name = eotg_aug_tier2.006.b
+        stress_impact = { base = medium_stress_impact_gain }
+        add_character_flag = { flag = eotg_flag_suppress_progression  years = 2 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 30  has_trait = compassionate }
+            modifier = { add = 20  has_trait = content }
+        }
+    }
+
+    # "Record the anomaly and move on." — learning gain, small fracture risk
+    option = {
+        name = eotg_aug_tier2.006.c
+        add_learning_skill = 1
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        ai_chance = {
+            base = 20
+            modifier = { add = 30  has_trait = curious }
+            modifier = { add = 10  highest_skill = learning }
+        }
+    }
+}

@@ -1,0 +1,382 @@
+﻿# ── eotg_government_loc.txt ───────────────────────────────────────────────────
+# Customizable localization functions for all EOTG governments.
+# Add government-specific text blocks ABOVE the fallback block.
+# The fallback block must always be last in each function.
+# ─────────────────────────────────────────────────────────────────────────────
+
+eotg_GetHoldingTypeName = {
+	type = character
+
+	text = {
+		trigger = { has_government = eotg_fringe_government }
+		localization_key = eotg_holding_name_fringe
+	}
+
+	text = {
+		trigger = { has_government = eotg_gobcorp_government }
+		localization_key = eotg_holding_name_gobcorp
+	}
+
+	text = {
+		trigger = { has_government = eotg_corporation_government }
+		localization_key = eotg_holding_name_corporation
+	}
+
+	text = {
+		trigger = { has_government = eotg_cartel_government }
+		localization_key = eotg_holding_name_cartel
+	}
+
+	text = {
+		trigger = { has_government = eotg_elven_monarchy_government }
+		localization_key = eotg_holding_name_elven_monarchy
+	}
+
+	text = {
+		trigger = { has_government = eotg_pmc_government }
+		localization_key = eotg_holding_name_pmc
+	}
+
+	text = {
+		trigger = { has_government = eotg_new_cauldron_government }
+		localization_key = eotg_holding_name_nc
+	}
+
+	text = {
+		localization_key = eotg_holding_name_default
+	}
+}
+
+eotg_GetVassalTierOneName = {
+	type = character
+
+	text = {
+		trigger = { has_government = eotg_fringe_government }
+		localization_key = eotg_vassal_tier_one_fringe
+	}
+
+	text = {
+		trigger = { has_government = eotg_gobcorp_government }
+		localization_key = eotg_vassal_tier_one_gobcorp
+	}
+
+	text = {
+		trigger = { has_government = eotg_corporation_government }
+		localization_key = eotg_vassal_tier_one_corporation
+	}
+
+	text = {
+		trigger = { has_government = eotg_cartel_government }
+		localization_key = eotg_vassal_tier_one_cartel
+	}
+
+	text = {
+		trigger = { has_government = eotg_elven_monarchy_government }
+		localization_key = eotg_vassal_tier_one_elven_monarchy
+	}
+
+	text = {
+		trigger = { has_government = eotg_pmc_government }
+		localization_key = eotg_vassal_tier_one_pmc
+	}
+
+	text = {
+		trigger = { has_government = eotg_new_cauldron_government }
+		localization_key = eotg_vassal_tier_one_nc
+	}
+
+	text = {
+		localization_key = eotg_vassal_tier_one_default
+	}
+}
+
+eotg_GetVassalTierTwoName = {
+	type = character
+
+	text = {
+		trigger = { has_government = eotg_fringe_government }
+		localization_key = eotg_vassal_tier_two_fringe
+	}
+
+	text = {
+		trigger = { has_government = eotg_gobcorp_government }
+		localization_key = eotg_vassal_tier_two_gobcorp
+	}
+
+	text = {
+		trigger = { has_government = eotg_corporation_government }
+		localization_key = eotg_vassal_tier_two_corporation
+	}
+
+	text = {
+		trigger = { has_government = eotg_cartel_government }
+		localization_key = eotg_vassal_tier_two_cartel
+	}
+
+	text = {
+		trigger = { has_government = eotg_elven_monarchy_government }
+		localization_key = eotg_vassal_tier_two_elven_monarchy
+	}
+
+	text = {
+		trigger = { has_government = eotg_pmc_government }
+		localization_key = eotg_vassal_tier_two_pmc
+	}
+
+	text = {
+		trigger = { has_government = eotg_new_cauldron_government }
+		localization_key = eotg_vassal_tier_two_nc
+	}
+
+	text = {
+		localization_key = eotg_vassal_tier_two_default
+	}
+}
+
+eotg_GetVassalTierThreeName = {
+	type = character
+
+	text = {
+		trigger = { has_government = eotg_fringe_government }
+		localization_key = eotg_vassal_tier_three_fringe
+	}
+
+	text = {
+		trigger = { has_government = eotg_gobcorp_government }
+		localization_key = eotg_vassal_tier_three_gobcorp
+	}
+
+	text = {
+		trigger = { has_government = eotg_corporation_government }
+		localization_key = eotg_vassal_tier_three_corporation
+	}
+
+	text = {
+		trigger = { has_government = eotg_cartel_government }
+		localization_key = eotg_vassal_tier_three_cartel
+	}
+
+	text = {
+		trigger = { has_government = eotg_elven_monarchy_government }
+		localization_key = eotg_vassal_tier_three_elven_monarchy
+	}
+
+	text = {
+		trigger = { has_government = eotg_pmc_government }
+		localization_key = eotg_vassal_tier_three_pmc
+	}
+
+	text = {
+		trigger = { has_government = eotg_new_cauldron_government }
+		localization_key = eotg_vassal_tier_three_nc
+	}
+
+	text = {
+		localization_key = eotg_vassal_tier_three_default
+	}
+}
+
+eotg_GetRulerTitle = {
+	type = character
+
+	text = {
+		trigger = { has_government = eotg_fringe_government }
+		localization_key = eotg_ruler_title_fringe
+	}
+
+	text = {
+		trigger = {
+			has_government = eotg_gobcorp_government
+			is_female = no
+		}
+		localization_key = eotg_ruler_title_gobcorp_male
+	}
+
+	text = {
+		trigger = {
+			has_government = eotg_gobcorp_government
+			is_female = yes
+		}
+		localization_key = eotg_ruler_title_gobcorp_female
+	}
+
+	text = {
+		trigger = {
+			has_government = eotg_corporation_government
+			is_female = no
+		}
+		localization_key = eotg_ruler_title_corporation_male
+	}
+
+	text = {
+		trigger = {
+			has_government = eotg_corporation_government
+			is_female = yes
+		}
+		localization_key = eotg_ruler_title_corporation_female
+	}
+
+	text = {
+		trigger = {
+			has_government = eotg_cartel_government
+			is_female = no
+		}
+		localization_key = eotg_ruler_title_cartel_male
+	}
+
+	text = {
+		trigger = {
+			has_government = eotg_cartel_government
+			is_female = yes
+		}
+		localization_key = eotg_ruler_title_cartel_female
+	}
+
+	text = {
+		trigger = { has_government = eotg_elven_monarchy_government }
+		localization_key = eotg_ruler_title_elven_monarchy
+	}
+
+	text = {
+		trigger = { has_government = eotg_pmc_government }
+		localization_key = eotg_ruler_title_pmc
+	}
+
+	text = {
+		trigger = { has_government = eotg_new_cauldron_government }
+		localization_key = eotg_ruler_title_nc
+	}
+
+	text = {
+		localization_key = eotg_ruler_title_default
+	}
+}
+
+eotg_GetRealmName = {
+	type = character
+
+	text = {
+		trigger = { has_government = eotg_fringe_government }
+		localization_key = eotg_realm_name_fringe
+	}
+
+	text = {
+		trigger = { has_government = eotg_gobcorp_government }
+		localization_key = eotg_realm_name_gobcorp
+	}
+
+	text = {
+		trigger = { has_government = eotg_corporation_government }
+		localization_key = eotg_realm_name_corporation
+	}
+
+	text = {
+		trigger = { has_government = eotg_cartel_government }
+		localization_key = eotg_realm_name_cartel
+	}
+
+	text = {
+		trigger = { has_government = eotg_elven_monarchy_government }
+		localization_key = eotg_realm_name_elven_monarchy
+	}
+
+	text = {
+		trigger = { has_government = eotg_pmc_government }
+		localization_key = eotg_realm_name_pmc
+	}
+
+	text = {
+		trigger = { has_government = eotg_new_cauldron_government }
+		localization_key = eotg_realm_name_nc
+	}
+
+	text = {
+		localization_key = eotg_realm_name_default
+	}
+}
+
+eotg_GetSuccessionEventFlavor = {
+	type = character
+
+	text = {
+		trigger = { has_government = eotg_fringe_government }
+		localization_key = eotg_succession_flavor_fringe
+	}
+
+	text = {
+		trigger = { has_government = eotg_gobcorp_government }
+		localization_key = eotg_succession_flavor_gobcorp
+	}
+
+	text = {
+		trigger = { has_government = eotg_corporation_government }
+		localization_key = eotg_succession_flavor_corporation
+	}
+
+	text = {
+		trigger = { has_government = eotg_cartel_government }
+		localization_key = eotg_succession_flavor_cartel
+	}
+
+	text = {
+		trigger = { has_government = eotg_elven_monarchy_government }
+		localization_key = eotg_succession_flavor_elven_monarchy
+	}
+
+	text = {
+		trigger = { has_government = eotg_pmc_government }
+		localization_key = eotg_succession_flavor_pmc
+	}
+
+	text = {
+		trigger = { has_government = eotg_new_cauldron_government }
+		localization_key = eotg_succession_flavor_nc
+	}
+
+	text = {
+		localization_key = eotg_succession_flavor_default
+	}
+}
+
+eotg_GetFactionName = {
+	type = character
+
+	text = {
+		trigger = { has_government = eotg_fringe_government }
+		localization_key = eotg_faction_name_fringe
+	}
+
+	text = {
+		trigger = { has_government = eotg_gobcorp_government }
+		localization_key = eotg_faction_name_gobcorp
+	}
+
+	text = {
+		trigger = { has_government = eotg_corporation_government }
+		localization_key = eotg_faction_name_corporation
+	}
+
+	text = {
+		trigger = { has_government = eotg_cartel_government }
+		localization_key = eotg_faction_name_cartel
+	}
+
+	text = {
+		trigger = { has_government = eotg_elven_monarchy_government }
+		localization_key = eotg_faction_name_elven_monarchy
+	}
+
+	text = {
+		trigger = { has_government = eotg_pmc_government }
+		localization_key = eotg_faction_name_pmc
+	}
+
+	text = {
+		trigger = { has_government = eotg_new_cauldron_government }
+		localization_key = eotg_faction_name_nc
+	}
+
+	text = {
+		localization_key = eotg_faction_name_default
+	}
+}

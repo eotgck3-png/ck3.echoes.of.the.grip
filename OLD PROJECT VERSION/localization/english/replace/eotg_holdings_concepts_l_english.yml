@@ -1,0 +1,150 @@
+﻿l_english:
+ # ── Holdings & Structural Game Concepts — EotG Setting Overrides ─────────────
+ # Sources: game_concepts_l_english.yml,
+ #          holdings_l_english.yml,
+ #          buildings_l_english.yml
+ #
+ # This is the other half of the tier pass in eotg_title_tiers_l_english.yml.
+ # Together they remove Castle / City / Temple / Tribe / Barony / County /
+ # Duchy from every tooltip, holding panel and county view in the game.
+ #
+ # TECHNIQUE — read before editing:
+ # Concept LINKS ([castle|E], [county|E], [baronies|E]) are keys, not display
+ # text. Renaming game_concept_castle to "Bastion" makes every [castle|E] link
+ # in vanilla — hundreds of them, across files this mod does not touch — render
+ # as "Bastion" automatically. So the link keys below are left EXACTLY as they
+ # are; only the display names and the hardcoded prose are rewritten.
+ # Do not "fix" [castle|E] to [bastion|E] — that concept does not exist and the
+ # link would break silently.
+ #
+ # Likewise $game_concept_x$ self-references resolve to the new names, so most
+ # vanilla descriptions needed no rewrite at all. The ones below are here
+ # because they hardcode a medieval word in prose rather than linking it.
+ #
+ # GLOSSARY (ladder set by the mod author 2026-08-29):
+ #   Castle  → Bastion   City   → Port     Temple → Sanctum   Tribe → Clanhold
+ #   Barony  → System    County → Region   Duchy  → Sector
+ #   Kingdom → Expanse   Empire → Cluster
+ #
+ # A Barony is ONE star system; a County is a Region of several. The header of
+ # eotg_title_tiers_l_english.yml records why "Realm" was rejected for the
+ # kingdom tier, and the one open friction (barony titles still say "Station").
+ # ─────────────────────────────────────────────────────────────────────────────
+
+ # ── Holding type names ───────────────────────────────────────────────────────
+ # Shown on every holding in the county view.
+ castle_holding:0 "Bastion"
+ city_holding:0 "Port"
+ church_holding:0 "Sanctum"
+ tribal_holding:0 "Clanhold"
+
+ # ── Holding concepts ─────────────────────────────────────────────────────────
+ game_concept_castle:0 "Bastion"
+ game_concept_castles:0 "Bastions"
+ game_concept_castle_holding:0 "Bastion Holding"
+ game_concept_castle_holdings:0 "Bastion Holdings"
+ game_concept_castle_holding_desc:0 "Bastions are the most heavily fortified [holding_type|E] and the standard type for [feudal|E], [clan|E] and [tribal|E] [rulers|E], as well as [holy_orders|E]. They tend to provide more [levies|E] than [taxes|E]."
+
+ game_concept_city:0 "Port"
+ game_concept_cities:0 "Ports"
+ game_concept_city_holding:0 "Port Holding"
+ game_concept_city_holdings:0 "Port Holdings"
+ game_concept_city_holding_desc:0 "Ports are the wealthiest [holding_type|E], favoring [taxes|E] over [levies|E]. They are associated with [republics|E], and holding them as any of the playable [government_forms|E] will always incur a penalty."
+
+ game_concept_temple:0 "Sanctum"
+ game_concept_temples:0 "Sanctums"
+ game_concept_temple_holding:0 "Sanctum Holding"
+ game_concept_temple_holdings:0 "Sanctum Holdings"
+ game_concept_temple_holding_desc:0 "Sanctums are a [holding_type|E] that can be held by members of the [clergy|E] as [church_property|E] (the [theocratic|E] [government_form|E]). However, in [faiths|E] with the [GetFaithDoctrine('doctrine_theocracy_lay_clergy').GetBaseName] [doctrine|E], anyone can hold Sanctums without penalty.\n\nSanctums provide a fairly even mix of [levies|E] and [taxes|E]."
+
+ game_concept_tribe:0 "Clanhold"
+ game_concept_tribes:0 "Clanholds"
+
+ game_concept_temple_citadel:0 "Sanctum Bastion"
+ game_concept_temple_citadels:0 "Sanctum Bastions"
+ game_concept_temple_citadel_holding:0 "Sanctum Bastion Holding"
+ game_concept_temple_citadel_holdings:0 "Sanctum Bastion Holdings"
+ game_concept_temple_citadel_holding_desc:0 "Sanctum Bastions are a pragmatic mix of the [castle|E] fortification and the [temple|E] rites — it is the standard [holding_type|E] for [mandala|E] [rulers|E]. They provide an even amount of [levies|E], [piety|E] and [taxes|E]."
+
+ # ── Holding-type overview ────────────────────────────────────────────────────
+ # The four links here resolve to the new names on their own.
+ game_concept_holding_type_desc:0 "There are four types of [holdings|E]: [castles|E], [cities|E], [tribes|E], and [temples|E]. Each type allows different types of [buildings|E]. A [ruler|E]'s [government_form|E] determines which types of Holding the Ruler can personally own without penalty. In the case of Sanctums, the [doctrines|E] of their [faith|E] may also play a role."
+
+ # ── Title tier concepts ──────────────────────────────────────────────────────
+ # Display names only; the surrounding vanilla descriptions self-reference
+ # these via $game_concept_x$ and update without being touched.
+ game_concept_barony:0 "System"
+ game_concept_baronies:0 "Systems"
+ game_concept_county:0 "Region"
+ game_concept_counties:0 "Regions"
+ game_concept_duchy:0 "Sector"
+ game_concept_duchies:0 "Sectors"
+ game_concept_kingdom:0 "Expanse"
+ game_concept_kingdoms:0 "Expanses"
+ game_concept_empire:0 "Cluster"
+ game_concept_empires:0 "Clusters"
+
+ # Rewritten because they hardcode the tier word in prose rather than linking it.
+ game_concept_duchy_desc:0 "A $game_concept_duchy$ is a [title|E] one [title_tier|E] below a [kingdom|E] and one above a [county|E].\n\nThe [holder|E] of a $game_concept_duchy$ has [de_jure|E] rights to its constituent $game_concept_counties$ and can have [counts|E] as [vassals|E].\n\n$game_concept_duchies$ may be dormant and have no current Holder. Such $game_concept_title_succession$ can be created by a [ruler|E] who controls at least half of its $game_concept_counties$."
+
+ # ── Region capital ───────────────────────────────────────────────────────────
+ game_concept_county_capital:0 "Region Capital"
+ game_concept_county_capitals:0 "Region Capitals"
+ game_concept_county_capital_desc:0 "The $game_concept_county_capital$ is the main [holding|E] of a [county|E]. This Holding can never be destroyed or [leased|E] out and is always owned by the [ruler|E] who holds the Region [title|E].\n\n$game_concept_county_capitals$ allow the construction of an additional [building|E] compared to a lesser Holding."
+
+ # ── Region-level statistics ──────────────────────────────────────────────────
+ game_concept_county_control:0 "Region Control"
+ game_concept_county_control_desc:0 "$game_concept_county_control$ measures the grip that the government has on the population of a [county|E]. It is crucial especially for collecting [taxes|E] from the [holdings|E].\n\nWhen a Region changes hands through [war|E], Control goes down drastically, which is a good reason to vassalize the current [holder|E] instead (if the [casus_belli|E] allows). Region Control can also be damaged by [sieges|E] and [Concept( 'peasant_faction', 'Commoner Uprisings' )|E].\n\nLow Control may lead to [county_corruption|E], and the primary way of increasing Control is a [councillor_task|E] available to your [marshal|E]."
+ game_concept_county_corruption:0 "Region Corruption"
+ game_concept_county_corruption_desc:0 "While a [county|E] has low [control|E] or its [holder|E] is in [debt|E], the Region might acquire $game_concept_county_corruption$. These are various kinds of negative [county_modifiers|E].\n\n$game_concept_county_corruption$ will fade over time, but if the root cause persists ([debt|E] or low [control|E]), it may reappear.\n\nThe $councillor_marshal$'s $task_increase_control$ $game_concept_councillor_task$ can clear out $game_concept_county_corruption$ faster."
+ game_concept_county_modifier:0 "Region Modifier"
+ game_concept_county_modifiers:0 "Region Modifiers"
+ game_concept_county_modifier_desc:0 "$game_concept_county_modifiers$ are modifiers that affect a [county|E]'s various values.\n\n[baronies|E] can have modifiers of their own, and they can be viewed in the [holdings|E] of the $game_concept_county$."
+
+ # ── Sector buildings ─────────────────────────────────────────────────────────
+ game_concept_duchy_building:0 "Sector Building"
+ game_concept_duchy_buildings:0 "Sector Buildings"
+ game_concept_duchy_building_desc:0 "$game_concept_duchy_buildings$ are powerful [buildings|E] that can only be constructed in the [de_jure_capital|E] of a [duchy|E]. Only one type can be constructed in each Sector.\n\n$game_concept_duchy_buildings$ are only active if the owner also holds the associated Sector [title|E].\n\nMany $game_concept_duchy_buildings$ have modifiers that affect all [holdings|E] in the Sector, making them powerful tools for specializing your [domain|E]."
+
+ # ── Base holding buildings ───────────────────────────────────────────────────
+ # The first building in each holding line, shown in the build menu.
+ building_type_castle_01:0 "Bastion"
+ building_type_city_01:0 "Port"
+ building_type_temple_01:0 "Sanctum"
+
+ # ── Holding upgrade lines ────────────────────────────────────────────────────
+ # Seen in the build menu of every holding in the realm. This is where the
+ # word "castle" actually reaches the player most often.
+ #
+ # NOT redefined here because other replace/ files already own them:
+ #   building_city_04_desc, building_temple_03_desc,
+ #   building_type_city_01_desc, building_type_temple_01_desc
+ # building_temple_01_desc and building_city_01_desc are $-passthroughs to the
+ # building_type_* descs above, so they inherit the reflavor for free.
+
+ # Bastion line (was Motte / Keep / Concentric Castle / Fortress)
+ building_castle_01:0 "Landing Redoubt"
+ building_castle_01_desc:0 "A small but formidable hardpoint raised over the approach lanes, sited to make any landing expensive."
+ building_castle_02:0 "Hardpoint"
+ building_castle_02_desc:0 "The Hardpoint #weak (or Core Tower)#! is a heavily shielded structure serving as both command residence and last line of defense."
+ building_castle_03:0 "Layered Bastion"
+ building_castle_03_desc:0 "The Layered Bastion is enclosed by two or more independent barrier rings, the inner one carrying the heavier projectors."
+ building_castle_04:0 "Citadel Works"
+ building_castle_04_desc:0 "The Citadel Works is the epitome of defense, able to both repel orbital assault and garrison a standing army."
+ building_type_castle_01_desc:0 "A fortified seat built to house a ruling house and to shelter the settlements and orbital works around it."
+
+ # Sanctum line (was Shrine / Temple Grounds / House of Worship / Grand Temple)
+ building_temple_01:0 "Shrine"
+ building_temple_02:0 "Sanctum Grounds"
+ building_temple_02_desc:0 "A sanctum at the center of the settlement, raised by local hands to show their dedication to the faith."
+ building_temple_03:0 "Hall of Rites"
+ building_temple_04:0 "Grand Sanctum"
+ building_temple_04_desc:0 "Not satisfied with a modest sanctum, local artisans and engineers have worked together to create a true work of art — a grand sanctum that seems to draw something vast down into anyone who worships beneath it."
+
+ # Port line (was Village Center / Large City / City Center / Bustling Metropolis)
+ building_city_01:0 "Settlement Core"
+ building_city_02:0 "Expanded Port"
+ building_city_02_desc:0 "This port has drawn traders and technicians from across the reach, with wealthy factors setting up shop and new habitation stacks going up almost daily."
+ building_city_03:0 "Port Core"
+ building_city_03_desc:0 "No longer content with its original footprint, the port has subsumed the surrounding works into its prosperous center. It is vast, and full of wealth and opportunity."
+ building_city_04:0 "Teeming Metropolis"

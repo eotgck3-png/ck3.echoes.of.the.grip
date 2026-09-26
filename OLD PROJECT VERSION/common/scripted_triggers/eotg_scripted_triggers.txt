@@ -1,0 +1,25 @@
+﻿# ── eotg_scripted_triggers.txt ────────────────────────────────────────────────
+# Reusable trigger macros for Echoes of the Grip.
+# Prefix all keys: eotg_st_
+# These are additive — safe to define alongside vanilla files.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# eotg_st_is_grip_survivor
+# TRUE if the character carries Grip bloodline.
+eotg_st_is_grip_survivor = {
+    has_trait = eotg_grip_survivor
+}
+
+# eotg_st_is_void_touched
+# TRUE if the character is corrupted by Void energy.
+eotg_st_is_void_touched = {
+    has_trait = eotg_void_touched
+}
+
+# eotg_st_is_third_era_ruler
+# TRUE if the character is a landed ruler in the Third Era setting.
+eotg_st_is_third_era_ruler = {
+    is_ruler = yes
+    is_landed = yes
+    # TODO: add culture/religion tier checks once eotg_ faiths are defined
+}

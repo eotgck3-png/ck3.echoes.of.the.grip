@@ -1,0 +1,161 @@
+﻿# ── eotg_sabotage_rival.txt ───────────────────────────────────────────────────
+# Sabotage Rival — hostile scheme for Corporation government.
+# Account Directors and Operations Chiefs scheme against each other.
+# Owner uses Intrigue. Target resists via Stewardship (modeled in success chance).
+# On success: applies eotg_corporate_undermined to target (3 years, stackable).
+# On discovery: schemer takes prestige hit; target gains a hook.
+# Agents: up to 3, must be Account Directors/Operations Chiefs in same realm.
+# ─────────────────────────────────────────────────────────────────────────────
+
+eotg_sabotage_rival = {
+	skill = intrigue
+	desc = eotg_sabotage_rival_desc
+	success_desc = "EOTG_SABOTAGE_RIVAL_SUCCESS_DESC"
+	discovery_desc = "EOTG_SABOTAGE_RIVAL_DISCOVERY_DESC"
+	icon = icon_scheme_seduce
+	illustration = "gfx/interface/illustrations/event_scenes/corridor.dds"
+	category = hostile
+	target_type = character
+	is_secret = yes
+	maximum_breaches = 3
+	cooldown = { years = 5 }
+
+	speed_per_skill_point = -2.0
+	speed_per_target_skill_point = 1.5
+	base_progress_goal = t2_base_phase_length_value
+	maximum_secrecy = 90
+	base_maximum_success = 85
+	phases_per_agent_charge = 1
+	success_chance_growth_per_skill_point = 1.5
+
+	allow = {
+		age >= 16
+		is_imprisoned = no
+		eotg_st_is_account_director = yes
+	}
+
+	valid = {
+		is_imprisoned = no
+		eotg_st_is_account_director = yes
+		scope:target = {
+			top_liege = { this = scope:owner.top_liege }
+		}
+		NOT = { scope:target = scope:owner }
+		NOT = {
+			scope:owner = {
+				has_opinion_modifier = {
+					target = scope:target
+					modifier = eotg_sabotage_caught_opinion
+				}
+			}
+		}
+	}
+
+	odds_prediction = {
+		add = base_odds_prediction_target_is_char_value
+		add = odds_skill_contribution_intrigue_value
+	}
+
+	base_success_chance = {
+		base = 50
+
+		scheme_type_skill_success_chance_modifier = { SKILL = INTRIGUE }
+
+		# Target's stewardship provides resistance
+		modifier = {
+			add = -5
+			desc = eotg_sabotage_rival_target_stewardship_defense
+			scope:target.stewardship >= 12
+		}
+		modifier = {
+			add = -10
+			desc = eotg_sabotage_rival_target_stewardship_high
+			scope:target.stewardship >= 20
+		}
+
+		# Schemer has Corporate Undermined already active on target — harder to stack
+		modifier = {
+			add = -15
+			desc = eotg_sabotage_rival_already_undermined
+			scope:target = {
+				has_character_modifier = eotg_corporate_undermined
+			}
+		}
+
+		opinion_modifier = {
+			who = scope:owner
+			opinion_target = scope:target
+			multiplier = 0.25
+		}
+	}
+
+	base_secrecy = {
+		add = secrecy_base_value
+	}
+
+	agent_leave_threshold = -30
+
+	agent_join_chance = {
+		base = 0
+		ai_agent_join_chance_basic_suite_modifier = yes
+		ai_agent_join_chance_hostile_general_suite_modifier = yes
+		modifier = {
+			add = 10
+			has_relation_rival = scope:target
+		}
+	}
+
+	valid_agent = {
+		is_imprisoned = no
+		is_alive = yes
+		NOT = { this = scope:target }
+		OR = {
+			eotg_st_is_account_director = yes
+			eotg_st_is_operations_chief = yes
+		}
+	}
+
+	agent_groups_owner_perspective = {
+		peer_vassals
+		vassals
+		courtiers
+	}
+
+	on_start = {
+		add_scheme_starting_opportunities_intrigue_effect = yes
+		add_agent_slot = agent_footpad
+		add_agent_slot = agent_footpad
+		add_agent_slot = agent_footpad
+	}
+
+	on_phase_completed = {
+		suppress_scheme_follow_up_event_till_input_given_effect = yes
+		scheme_target_character = { save_scope_as = target }
+		scheme_owner = {
+			trigger_event = { id = eotg_corp_scheme.0001 }
+		}
+	}
+
+	on_monthly = {
+		hostile_scheme_monthly_discovery_chance_effect = yes
+		scheme_owner = {
+			trigger_event = { on_action = eotg_sabotage_rival_ongoing }
+		}
+	}
+
+	on_invalidated = {
+		scheme_target_character = { save_scope_as = target }
+		scheme_owner = { save_scope_as = owner }
+		if = {
+			limit = { exists = scope:discoverer }
+			scope:owner = {
+				trigger_event = { id = eotg_corp_scheme.0002 }
+			}
+		}
+		else = {
+			scope:owner = {
+				trigger_event = { id = eotg_corp_scheme.0003 }
+			}
+		}
+	}
+}

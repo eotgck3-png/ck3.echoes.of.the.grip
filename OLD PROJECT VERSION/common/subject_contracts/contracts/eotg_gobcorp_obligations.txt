@@ -1,0 +1,92 @@
+﻿# ── eotg_gobcorp_obligations.txt ──────────────────────────────────────────────
+# Contract obligation types for the Gob-Corp government.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Market Tithe — replaces standard taxes. Three extraction levels.
+# Higher extraction tanks vassal opinion and faction loyalty.
+eotg_market_tithe = {
+	display_mode = tree
+	icon = gold_icon
+
+	obligation_levels = {
+		eotg_tithe_minimum = {
+			position = { 0 0 }
+
+			tax = 0.10
+			subject_opinion = 10
+
+			ai_liege_desire = 1
+			ai_subject_desire = 5
+			score = 2
+		}
+		eotg_tithe_standard = {
+			default = yes
+			parent = eotg_tithe_minimum
+			position = { 1 0 }
+
+			tax = 0.25
+
+			ai_liege_desire = 3
+			ai_subject_desire = 3
+			score = 0
+		}
+		eotg_tithe_full = {
+			parent = eotg_tithe_standard
+			position = { 2 0 }
+
+			tax = 0.40
+			subject_opinion = -15
+
+			ai_liege_desire = 5
+			ai_subject_desire = 1
+			score = -2
+			flag = eotg_tithe_full_extraction
+		}
+	}
+}
+
+# Corporate Security Levy — levies only. Low by default.
+# Military is a corporate expense, not a vassal obligation.
+eotg_corporate_security_levy = {
+	display_mode = tree
+	icon = soldier_icon
+
+	obligation_levels = {
+		eotg_levy_standard = {
+			default = yes
+			position = { 0 0 }
+
+			levies = 0.10
+
+			ai_liege_desire = 2
+			ai_subject_desire = 3
+			score = 0
+		}
+	}
+}
+
+# Seat on the Board — rights checkbox.
+# Grants council position flag, increases vote weight in No Confidence.
+eotg_board_seat_rights = {
+	display_mode = checkbox
+
+	obligation_levels = {
+		eotg_board_seat_none = {
+			default = yes
+			position = { 0 0 }
+
+			ai_liege_desire = 2
+			ai_subject_desire = 0
+		}
+		eotg_board_seat_granted = {
+			parent = eotg_board_seat_none
+			position = { 1 0 }
+
+			subject_opinion = 10
+			flag = eotg_board_seat_flag
+
+			ai_liege_desire = 0
+			ai_subject_desire = 3
+		}
+	}
+}

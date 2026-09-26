@@ -1,0 +1,100 @@
+﻿# ── eotg_legacy_decisions.txt ────────────────────────────────────────────────
+# Decisions for the Confluence Legacies system.
+#
+# eotg_decision_survey_legacies — the deliberate entry point: survey the
+#   domain for Confluence sites. Reveals a hidden site if one exists in the
+#   ruler's held counties; otherwise the survey itself becomes a story
+#   (a contested map, a silent expedition) that may seed a fresh site.
+# ─────────────────────────────────────────────────────────────────────────────
+
+eotg_decision_survey_legacies = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_misc.dds"
+    }
+    ai_check_interval = 60
+
+    desc = eotg_decision_survey_legacies_desc
+    selection_tooltip = eotg_decision_survey_legacies_tooltip
+
+    is_shown = {
+        is_ruler = yes
+        is_landed = yes
+        highest_held_title_tier >= tier_county
+    }
+
+    is_valid = {
+        gold >= 50
+        is_at_war = no
+        NOT = { has_character_flag = eotg_legacy_survey_cooldown }
+    }
+
+    is_valid_showing_failures_only = {
+        gold >= 50
+        is_at_war = no
+    }
+
+    cost = { gold = 50 }
+
+    effect = {
+        add_character_flag = { flag = eotg_legacy_survey_cooldown  years = 5 }
+        custom_tooltip = eotg_decision_survey_legacies_effect_tooltip
+
+        hidden_effect = {
+            # A hidden site in the domain is always found first
+            if = {
+                limit = { eotg_st_holds_hidden_legacy = yes }
+                random_sub_realm_county = {
+                    limit = {
+                        holder = root
+                        eotg_st_legacy_hidden_site = yes
+                    }
+                    eotg_se_legacy_fire_discovery = yes
+                }
+            }
+            # Otherwise the survey itself becomes the story
+            else = {
+                random_sub_realm_county = {
+                    limit = { holder = root }
+                    save_scope_as = eotg_legacy_county
+                }
+                if = {
+                    limit = { exists = scope:eotg_legacy_county }
+                    random_list = {
+                        # Nothing but honest geology — better odds for the learned
+                        40 = {
+                            modifier = {
+                                add = -10
+                                learning >= 12
+                            }
+                            modifier = {
+                                add = -10
+                                stewardship >= 12
+                            }
+                            trigger_event = { id = eotg_legacy.0004  days = { 10 30 } }
+                        }
+                        # The Map That Contradicts the Sky
+                        40 = {
+                            trigger_event = { id = eotg_legacy.0002  days = { 10 30 } }
+                        }
+                        # The Surveyors Have Stopped Reporting
+                        20 = {
+                            trigger_event = { id = eotg_legacy.0003  days = { 10 30 } }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    ai_potential = {
+        is_at_war = no
+        gold >= 150
+    }
+    ai_will_do = {
+        base = 15
+        modifier = { add = 15  stewardship >= 12 }
+        modifier = { add = 15  learning >= 12 }
+        modifier = { add = 10  has_trait = curious }
+        modifier = { add = -10  has_trait = content }
+    }
+}

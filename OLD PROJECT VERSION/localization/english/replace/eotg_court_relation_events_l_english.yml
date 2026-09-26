@@ -1,0 +1,190 @@
+﻿l_english:
+ # ── Court, Relation & Religion Events — EotG Setting Overrides ───────────────
+ # Sources: court_events_george_l_english.yml,
+ #          court_events_claudia_l_english.yml,
+ #          hold_court_events_claudia_l_english.yml,
+ #          hold_court_events_joe_l_english.yml,
+ #          hold_court_events_bianca_l_english.yml,
+ #          hold_court_events_isabella_l_english.yml,
+ #          sibling_events_l_english.yml,
+ #          lover_events_l_english.yml,
+ #          wet_nurse_events_l_english.yml,
+ #          vassal_events_l_english.yml,
+ #          bishop_events_2_l_english.yml,
+ #          tribal_events_l_english.yml,
+ #          religious_interaction_events_l_english.yml,
+ #          stewardship_wealth_events_l_english.yml,
+ #          claim_throne_ongoing_events_l_english.yml,
+ #          laamp_events_l_english.yml
+ # Replaces: "peasant/peasantry" → "commoner/commonfolk",
+ #            "humors" → "constitution/health/condition",
+ #            "exorcism/exorcisms" → "banishment ritual/rituals",
+ #            "sermon/sermons" → "address/addresses",
+ #            "sins" → "failings",
+ #            "pray/prayer" hardcoded → "offer devotion/beseech/gather".
+ # ─────────────────────────────────────────────────────────────────────────────
+
+ # ── Court Events: George ─────────────────────────────────────────────────────
+
+ # "hardly fit for a peasant's table!" — food taster complains about court cuisine
+ court.7300.desc:0 "Attempts on my life are expected, and therefore the people I rely on for security must remain loyal and well-disposed towards me. Today however, my designated $food_taster_court_position$ [taster.GetFirstName] looks utterly disgusted, and a bit green, as I check in with [taster.GetHerHim].\n\n "[ROOT.Char.Custom('FormOfAddressForLiege')|U], I just cannot stand it anymore. The food your court serves is utterly #EMP vile!#! I cannot believe you eat this gruel #EMP night after night after night..."#!\n\n"...This muck is hardly fit for a commoner's table!""
+
+ # "#EMP Peasant's table?#! We must fix this at once!"
+ court.7300.a:0 "#EMP Commoner's table?#! We must fix this at once!"
+
+ # ── Court Events: Claudia (Exorcism & Humors) ─────────────────────────────────
+
+ # "[chaplain's] exorcism is/fails" — result strings for possessed courtier event
+ court.6020.a.success:0 "[court_chaplain.GetFirstNamePossessive] banishment ritual is successful"
+ court.6020.a.success.tt:0 "With regular rituals to keep the evil at bay, [possessed_char.GetTitledFirstNamePossessive] condition seems to improve, and your courtiers are satisfied"
+ court.6020.a.failure:0 "[court_chaplain.GetFirstNamePossessive] banishment ritual fails"
+
+ # "A little wine keeps the humors balanced." — heavy drinker courtier rationalization
+ court.6060.b:0 "A little wine keeps the constitution balanced."
+
+ # ── Hold Court Events: Claudia ────────────────────────────────────────────────
+
+ # "The peasant in front of me seems about to explode with excitement." — local saint cult petition
+ hold_court.6050.desc:0 "The commoner in front of me seems about to explode with excitement.\n\n"[ROOT.Char.Custom('FormOfAddressForLiege')|U]! The miracles! The holiness! We have been #EMP BLESSED#!!"\n\n[6050_pop.GetHerHis|U] enthusiastic ramblings are confusing, but I finally get the gist of it: [6050_pop.GetSheHe] wants me to sponsor the cult of a local saint who has recently died in [6050_tomb.GetNameNoTooltip]. [6050_holy.GetFirstName] was a miracle-maker in life, known for [6050_holy.Custom('GetMiracle1')] and [6050_holy.Custom('GetMiracle2')]. [6050_holy.GetHerHis|U] tomb is attracting devoted visitors from all over the realm."
+
+ # "I don't care about peasant superstitions." — dismissive option for saint cult
+ hold_court.6050.d:0 "I don't care about folk superstitions."
+
+ # "I am but a humble peasant" + "the peasants die!" — war-ravaged petitioner
+ hold_court.6110.desc:0 ""[ROOT.Char.Custom('FormOfAddressForLiege')|U], I am but a humble commoner, but I beg for your help! The land of my people has been ravaged by the long and bloody war between your vassals [6110_vassal_1.GetTitledFirstName] and [6110_vassal_2.GetTitledFirstName]!\n\n"The fields burn, the animals are slaughtered, and the commoners die! Please, stop the bloodshed!""
+
+ # "A peasant shouldn't meddle in the matters of nobility."
+ hold_court.6110.e:0 "A commoner shouldn't meddle in the matters of nobility."
+
+ # ── Hold Court Events: Joe ────────────────────────────────────────────────────
+
+ # "lacks a significant [HouseOfWorship] at which the locals can pray and honor [God]"
+ hold_court.8060.desc.first:0 "lacks a significant [ROOT.Char.GetFaith.HouseOfWorship|U] at which the locals can gather and honor [ROOT.Char.GetFaith.HighGodNameAlternate].""
+
+ # "A frightful peasant strolls all too close" — petty village dispute comes to court
+ hold_court.8110.desc:0 "A frightful commoner strolls all too close before a guard steps between us. "Oo!" [peasant.GetSheHe] backs off with a wink, laughing through scant teeth.\n\n"[ROOT.Char.Custom('FormOfAddressForLiege')], I'm come from [peasant_holding.GetNameNoTooltip] with a matter of great import!" [peasant.GetHerHis|U] eyebrows undulate.\n\n"You see [ROOT.Char.Custom('FormOfAddressForLiege')],"
+
+ # "Tears of laughter stream down the convulsing peasant's face." — goat/vegetable dispute variant
+ hold_court.8110.desc.veg:0 "the [dummy_female.Custom2('dummy_peasant_profession', ROOT.Char)]'s sow slipped a fence one night, and sh-she...she only went and got into the old [dummy_male.Custom2('dummy_peasant_profession', ROOT.Char)]'s' veggie patch! His pride and joy!" Tears of laughter stream down the convulsing commoner's face."
+
+ # "Bowing before me is a peasant of [culture] extraction" — cultural pride petition
+ hold_court.8130.desc:0 "Bowing before me is a commoner of [peasant.GetCulture.GetName] extraction, wringing [peasant.GetHerHis] hands. \n\n"Majestic [ROOT.Char.GetTitleAsNameNoTooltip], in my beautiful homeland of [conversion_target.GetNameNoTier] we are being encouraged to abandon our customs and adopt [ROOT.Char.GetCulture.GetName] ways." \n\n"
+
+ # ── Hold Court Events: Bianca ─────────────────────────────────────────────────
+
+ # "If [she/he] can teach peasants, then [she/he] would make a good [tutor]"
+ hold_court.3010.d:0 "If [unconventional_preacher.GetSheHe] can teach commoners, then [unconventional_preacher.GetSheHe] would make a good $court_tutor_court_position$..."
+
+ # "A peasant steps forward... The peasant briefly pauses [her/his] rehearsed speech."
+ hold_court.3020.desc:0 "A commoner steps forward, carrying a petition. "[ROOT.Char.Custom('FormOfAddressForLiege')|U], I come to you as a representative of the [village.GetCountyData.GetCulture.GetCollectiveNounNoTooltip] from the [village.GetName]." The commoner briefly pauses [different_culture_peasant.GetHerHis] rehearsed speech.\n\n"Our plea to see an important monument of our culture restored was ignored by the [holder_of_area.GetTitleTierName]. [holder_of_area.GetSheHe|U] is actively hindering us from rebuilding!"\n\n"[ROOT.Char.Custom2('RelationToMeAddress', holder_of_area)|U], allow me to explain!" [holder_of_area.GetFirstNameNoTooltip] interjects in a panic. "This monument makes a mockery of our culture! It depicts [holder_of_area.GetCulture.GetCollectiveNounNoTooltip] as monsters! Surely, you can see why I would oppose the restoration of such a hateful monument!""
+
+ # "A peasant [woman/man] stands before me... The peasant ends [her/his] request with a clumsy bow"
+ hold_court.3030.desc:0 "A commoner [different_culture_peasant.GetWomanMan] stands before me, informing the court of [different_culture_peasant.GetHerHis] plea.\n\n"The recent war took a toll on the countryside, and we're not sure who the culprit was, but they looted an important cultural site to us [different_culture_peasant.GetCulture.GetCollectiveNounNoTooltip] from [province.GetName]. Please, we beseech you, spare some of your resources so we can see it restored!"\n\nThe commoner ends [different_culture_peasant.GetHerHis] request with a clumsy bow — a clear indicator of their lowborn status."
+
+ # "This is NOT a peasant's market! A jester has no place in this court!"
+ hold_court.3040.d:0 "This is NOT a commoner's market! A jester has no place in this court!"
+
+ # ── Hold Court Events: Isabella ───────────────────────────────────────────────
+
+ # "taunts drunken peasants into fights" — report about heir's tavern brawls
+ hold_court.4001.heir_street_fight:0 "The bloody villain lingers outside of taverns and taunts drunken commoners into fights. Several have died in these brawls where [annoying_heir.GetSheHe] kills for sport!""
+
+ # "A gaggle of grotty peasants appear before my throne." — villagers think ruler is a monster
+ hold_court.4600.desc:0 "A gaggle of grotty commoners appear before my throne. They are armed with the most vicious flaming farming equipment I've seen in my whole career of quashing rebellions.\n\n"This being which rules us is a true demon incarnate. No real [ROOT.GetCharacter.GetWomanMan] could be capable of such violent extremities and profanity. We demand an end to your monstrous tyranny!""
+
+ # ── Sibling Events ────────────────────────────────────────────────────────────
+
+ # "listening to the plight of the peasants, and generously handing out gifts"
+ sibling.8002.desc:0 "My [ROOT.GetCharacter.Custom('trait_generous_adjective')] [ROOT.Char.Custom2('RelationToMeShort' , SCOPE.sC('sibling') )], [sibling.GetTitledFirstName], has been traveling [province.GetName], listening to the plight of the commoners, and generously handing out gifts and promises.\n\n[sibling.GetSheHe|U] even made it very clear that these were all kindnesses in the name of #EMP '[ROOT.Char.GetTitledFirstNameNoTooltip] the Good'#!..."
+
+ # "greatly upset the peasants of several villages and towns"
+ sibling.8004.desc:0 "Traveling through [province.GetName], my [ROOT.Char.Custom2('RelationToMeShort' , SCOPE.sC('sibling') )] seems to have greatly upset the commoners of several villages and towns. [sibling.GetTitledFirstName] demanded not only housing and to be treated as though [sibling.GetSheHe] was a [ROOT.GetCharacter.Custom2('using_my_title' , SCOPE.sC('sibling') ) ], but [sibling.GetSheHe] also punished people for the slightest display of disrespect."
+
+ # "The peasants of [province] are not pleased" — tooltip for sibling misconduct
+ peasants_dislike_sibling_tt:0 "The commoners of [province.GetName] are not pleased"
+
+ # ── Wet Nurse Events ──────────────────────────────────────────────────────────
+
+ # "my bad humors could afflict the children under my care"
+ bp2_yearly.7000.desc:0 "The wet nurse, [wet_nurse.GetFirstName], has asked for an immediate audience with me.\n\n"My dear [wet_nurse.Custom2('RelationToMe', ROOT.Char)], I've fallen ill! I need to beg a few days rest — my condition could afflict the children under my care."\n\n[wet_nurse.GetSheHe|U] moans this with a sickly urgency."
+
+ # ── Lover Events ──────────────────────────────────────────────────────────────
+
+ # "A familiar-looking peasant appears before me." — brothel worker reunion
+ lover.8102.desc:0 ""Excuse me," A familiar-looking commoner appears before me. As I rack my brain for where I might've met [brothel_worker.GetHerHim] before, [brothel_worker.GetSheHe] answers as if reading my mind.\n\n"We met at a brothel in [brothel_location.GetName]. You paid for my services." A shade of pink spreads across [brothel_worker.GetHerHis] cheeks.\n"For us to be reunited... It has to be fate that"
+
+ # ── Vassal Events ─────────────────────────────────────────────────────────────
+
+ # "as I feel my warm humors dwindle" — bad medicinal brew from vassal
+ vassal.3003.desc_bad_counsel:0 "My [ROOT.Char.Custom2('RelationToMe', SCOPE.sC('vassal_to_ask'))], [vassal_to_ask.GetTitledFirstName], gave me a brew to drink, claiming: "You will notice the difference immediately, [ROOT.Char.Custom('FormOfAddressForLiege')]!"\n\n[vassal_to_ask.GetHerHis|U] vagueness on the topic of ingredients left me a little worried, and as I feel my health dwindle I curse [vassal_to_ask.GetHerHis] bad counsel!"
+
+ # ── Bishop Events ─────────────────────────────────────────────────────────────
+
+ # "making a mockery of me during [her/his] sermons" + "turned the peasantry against me"
+ bishop.2003.desc:0 "Not a day passes by without [scoped_bishop.GetCouncilTitle] [scoped_bishop.GetFirstName] making a mockery of me during [scoped_bishop.GetHerHis] addresses.\n\nThat obsessed [scoped_bishop.Custom2('InsultNoun', ROOT.Char)] is certain that I am an agent of [ROOT.Char.GetFaith.DevilName] and will not rest until [scoped_bishop.GetSheHe] has turned the commonfolk against me."
+
+ # "complained about my supposed 'lack of piety' during every sermon"
+ bishop.2004.desc:0 "My [scoped_bishop.GetCouncilTitle] [scoped_bishop.GetFirstName] has complained about my supposed 'lack of piety' during every address as of late.\n\nApparently [scoped_bishop.GetSheHe] has gone so far as to call me an 'impious [root_scope.Custom2('InsultNoun', SCOPE.sC('scoped_bishop'))]', and my more zealous vassals are starting to listen to [scoped_bishop.GetHerHim]..."
+
+ # ── Tribal Events ─────────────────────────────────────────────────────────────
+
+ # "Let the peasantry utilize it best they can." — dismissive option for natural resource
+ tribal.1303.c:0 "Let the commoners utilize it best they can."
+
+ # ── Religious Interaction Events ──────────────────────────────────────────────
+
+ # "After much prayer and deliberation" — religious leader granting a divorce request
+ religious_interaction.1.desc:0 "After much deliberation, I have decided to grant your request to divorce your [secondary_recipient.GetWifeHusband], [secondary_recipient.GetFirstNameNoTooltip],"
+
+ religious_interaction.6.desc:0 "After much deliberation, I have decided to grant your request to divorce [secondary_actor.GetFirstNameNoTooltip] and their [secondary_recipient.GetWifeHusband], [secondary_recipient.GetFirstNameNoTooltip],"
+
+ # "It is commendable that you seek to atone for your sins."
+ religious_interaction.1010:0 "It is commendable that you seek to atone for your failings. I accept your generous donation and send you my blessing in return."
+
+ # "If you truly wish to atone for your sins, you must change your ways"
+ religious_interaction.1011:0 "Your misdeeds are far too severe to be redeemed by mere gold. If you truly wish to atone for your failings, you must change your ways and prove to me that you truly seek forgiveness. Only then will I accept your donation."
+
+ # "I see that you have truly repented for your sins"
+ religious_interaction.1024:0 "I see that you have truly atoned for your failings and have gone to great lengths to redeem yourself. Though your transgressions against the [actor.GetFaith.GetAdjective] faith were grievous indeed, your recent actions make me believe you deserve a another chance.\n\nIn light of this, I hereby lift your excommunication and welcome you back into the [actor.GetFaith.GetAdjective] faith."
+
+ # "proselytizing among my peasants" + "pray for your [HighGodName]"
+ religious_interaction.2011.desc:0 "I would gladly join you in your exultation, but the sheer cost of refurbishing [recipient.GetFaith.HouseOfWorshipPlural] and proselytizing among my commoners...\n\nIf you were to help pay for these efforts, I am more than willing to offer devotion to your [ROOT.Char.GetFaith.HighGodName]."
+
+ # "one of the peasantry hurls a live chicken at my head" — losing a public debate
+ religious_interaction.2401.desc_lost:0 "[recipient.GetTitledFirstNamePossessive] verbal onslaught begins immediately, barely giving me a chance to rebut, and before long the crowd has decided on the victor.\n\nI soldier on for a few minutes, braving the rain of rotting vegetables, but I'm finally forced to retreat when one of the crowd hurls a live chicken at my head."
+
+ # ── Stewardship Wealth Events ─────────────────────────────────────────────────
+
+ # "Raise additional taxes from the peasants."
+ stewardship_wealth.1021.a:0 "Raise additional taxes from the commoners."
+
+ # "A learned peasant? How novel! You #EMP must#! join my court!"
+ stewardship_wealth.1051.a.arrogant:0 "A learned commoner? How novel! You #EMP must#! join my court!"
+
+ # "a peasant by the name of [name] jumps into action" — roadside merchant stall
+ stewardship_wealth.6001.desc:0 "While traveling across the [stall_county.Custom('TerrainTypeCountyScope')] of the [stall_county.GetName], I find a makeshift looking stall by the side of the track.\n\nAs I stop to take a look, a commoner by the name of [stall_owner.GetFirstName] jumps into action, trying to convince me to buy one of the small [stall_owner.GetFaith.ReligiousSymbol] carvings [stall_owner.GetSheHe] has on sale.\n\n"I make them by hand, [ROOT.Char.Custom('FormOfAddressForLiege')], each one takes me hours of work.""
+
+ # ── Claim Throne Ongoing Events ───────────────────────────────────────────────
+
+ # "Peasants and nobles alike whisper that it is a sign"
+ claim_throne_ongoing.1001.desc:0 "I clearly do not stand alone in my ambition to rule [target_title.GetNameNoTooltip]! Ravens have been gathering on the roofs of [target.GetTitledFirstNamePossessive] [target.Custom('ResidenceBuilding')], and a few nights ago even the stars seemed to be falling, all over [target_title.GetNameNoTierNoTooltip].\n\nCommoners and nobles alike whisper that it is a sign that [target.GetFirstNameNoTooltip] has lost the favor of [ROOT.Char.GetFaith.PantheonTerm]."
+
+ # ── LAAMP Events (EP3) ────────────────────────────────────────────────────────
+
+ # "Perhaps I shall have my humors checked?" — bald female character self-deprecation
+ ep3_laamp_flavour_ewan.0051.c.bald.female:0 "Perhaps I shall have my constitution checked?"
+
+ # "Pray to [WaterGodName] that we're out of this soon."
+ ep3_laamp_flavour_ewan.4021.e:0 "May [ROOT.Char.GetFaith.WaterGodName] see us out of this soon."
+
+ # "Carry on and pray to [HealthGodName] for mercy."
+ ep3_laamp_flavour_ewan.4031.g:0 "Carry on and beseech [ROOT.Char.GetFaith.HealthGodName] for mercy."
+
+ # "Pray to [FateGodName] and hope."
+ ep3_laamp_flavour_ewan.4041.d:0 "Beseech [ROOT.Char.GetFaith.FateGodName] and hope."
+
+ # "just a few gaunt [culture] peasants we see" — ambush buildup during travel
+ ep3_laamp_flavour_ewan.4081.desc.intro:0 "At first, it's just a few gaunt [current_county.GetCountyData.GetCulture.GetName] commoners we see. They appear in the distance, or peeking around little features of the terrain, fleeing when we we notice them.\n\nHours pass, the skittish locals eyeing us from afar all the while.\n\nJust they seem to have finally backed off, a cry goes up, and a frenzied horde surges at us from the cover of a ridge. Wild-eyed and emaciated,"
+
+ # "where the peasantry negotiate hardest" — handcrafted map description
+ handcrafted_map_desc.people.rural:0 "noting the habits and reputations of people from the many rural areas: where the commonfolk negotiate hardest, who grows the best grapes, and where they are most likely to grow a little too... familialy intimate."

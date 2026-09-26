@@ -1,0 +1,60 @@
+﻿l_english:
+ # ── FP1 Norse, FP2 Friends & Foes, FP3 Struggle Events — EotG Overrides ──────
+ # Sources: dlc/fp1/dlc_fp1_yearly_events_l_english.yml,
+ #          dlc/fp2/dlc_fp2_lyonese_monk_events_l_english.yml,
+ #          dlc/fp3/dlc_fp3_decision_events_l_english.yml,
+ #          dlc/fp3/dlc_fp3_modifiers_l_english.yml
+ # Replaces: "peasant/peasantry" → "commoner/commonfolk",
+ #            "burgher/burghers" → "contractor/contractors",
+ #            "sermon/sermons" → "address/addresses".
+ # ─────────────────────────────────────────────────────────────────────────────
+
+ # ── FP1: Norse Yearly Events ──────────────────────────────────────────────────
+
+ # "the snarling burghers claim [priest] simply doesn't have to deal"
+ fp1_yearly.0011.desc.priest:0 "[priest.Custom2('MyCharacterIntroduction',ROOT.Char)|U] insists that [offensive_courtier.GetHerHis] behavior is #EMP actually#! quite pious, but the snarling contractors claim [priest.GetFirstNameNoTooltip] simply doesn't have to deal with the consequences of such "virtue"."
+
+ # "Peasants! [offensive_courtier] is blameless."
+ fp1_yearly.0011.c:0 "Commoners! [offensive_courtier.GetFirstNameNoTooltip] is blameless."
+
+ # "not popular with the local peasantry" — draugr chain
+ fp1_yearly.0051.desc:0 "[draugr.GetTitledFirstNamePossessive] death some time ago did not go unmarked by the common people of [capital_county.GetNameNoTier]. Whatever else [draugr.GetSheHe] may have been, [draugr.GetFirstNameNoTooltip] was not popular with the local commonfolk, and it has become the norm for every ill in the land to be blamed on the [draugr.Custom('WomanManPossessive')] walking corpse.\n\nNot a week seems to go by any more without every farmer, forester, and dung-shoveller within spitting distance of the capital complaining about [draugr.GetFirstNamePossessiveNoTooltip] draugr.\n\n#EMP Something#! must be done."
+
+ # "Your potions and spells reassure the peasantry"
+ fp1_yearly.0051.c.tt_success:0 "Your potions and spells reassure the commonfolk"
+
+ # "The peasants were wrong about the draugr, but not about the curse!"
+ fp1_yearly.0061.desc:0 "My retinue and I have barely arrived at [draugr.GetFirstNamePossessiveNoTooltip] barrow when the first snarl echoes out from inside.\n\nAs the largest wolf I've ever seen squeezes out through the darkened entrance, the rest of its pack seems to spring from the ground itself. There must be a dozen or more, each as large as a man, and already at a dead-run from every direction.\n\nThe commoners were wrong about the draugr, but not about the curse!"
+
+ # "The peasants may have insisted that [draugr's] walking corpse was stealing"
+ fp1_yearly.0064.desc:0 "The commoners may have insisted that [draugr.GetFirstNamePossessiveNoTooltip] walking corpse was stealing their food, hexing their livestock, and pawing at their windows at night, but when I get to [draugr.GetHerHis] barrow, I find a very different beast.\n\nAmidst a nest of stolen furs and half-eaten food sits an orphaned child, staring at me, eyes wide with utter terror."
+
+ # "every other grave the peasants have me check"
+ fp1_yearly.0065.desc:0 "[draugr.GetFirstNamePossessiveNoTooltip] barrow is much as it was when [draugr.GetSheHe] was buried. As is every other grave the commoners have me check.\n\nNor do I find anything in any supposedly-cursed cave, troll-haunted grove, or giant's grotto: after a few weeks, I'm beginning to question quite how sure we are that such monsters truly even #EMP exist#!?\n\nAt least the exercise does me good."
+
+ # "The peasants of [county] are a superstitious bunch"
+ fp1_yearly.0071.desc.intro:0 "The commoners of [ROOT.Char.GetCapitalLocation.GetCounty.GetTitle.GetNameNoTier] are a superstitious bunch, regularly coming to me with claims of sorcerers, giants, and gods in disguise.\n\nUsually, I ignore such claims as commoner theatrics, but this time they bring evidence:"
+
+ # "a young peasant boy, his head crushed to powder and pulp"
+ fp1_yearly.0071.desc.troll_type.bear:0 "a young commoner boy, his head crushed to powder and pulp, and the wailing parents who witnessed his death."
+
+ # ── FP2: Friends & Foes — Lyonese Monk Events ────────────────────────────────
+
+ # "rival crowds of burghers and peasants"
+ fp2_lyonese_monk.0611.desc:0 ""Heretics! Liars! Defilers!"\n\n"Pagans! Fools! Idolators!"\n\nFrom atop the walls of the keep in [rioting_county.GetNameNoTier], I stare out at the two rival crowds of contractors and commoners, each spitting venom at the other, the students and acolytes of [acolyte.GetFirstName] facing down a mob of their detractors.\n\nBetween the two stands a thin string of my retinue, keeping them distant for now, but the tension is almost at boiling point."
+
+ # "Clearly [theocrat]'s got to work on [her/his] sermons."
+ fp2_lyonese_monk.0231.b:0 "Clearly [irate_theocrat.GetSheHe]'s got to work on [irate_theocrat.GetHerHis] addresses."
+
+ # ── FP3: Khurramite Struggle Events ──────────────────────────────────────────
+
+ # "the peasant leader Babak ensconced himself"
+ fp3_decision.0003.desc_recently:0 "Just a few decades ago, during the height of the Khurramite rebellion against the Abbasids, the common leader Babak ensconced himself and his followers in an ancient Parthian fortress. That became his last stand, but the Abbasids paid dearly for their victory."
+
+ # "The peasants and herders of these rugged mountains are notoriously unruly"
+ fp3_decision.0003.desc_zandik:0 "The commoners and herders of these rugged mountains are notoriously unruly, but they loathe the old [ROOT.Char.GetFaith.GetReligion.GetAdjectiveNoTooltip] clergy, and have promised me their support.\n\n"
+
+ # ── FP3: Modifiers ────────────────────────────────────────────────────────────
+
+ # "leaving not even a maund for the peasants"
+ fp3_wheat_shortage_modifier_desc:0 "The royal baker in this county is hoarding wheat, leaving not even a maund for the commoners."

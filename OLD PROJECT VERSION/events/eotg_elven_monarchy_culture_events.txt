@@ -1,0 +1,104 @@
+﻿# ── eotg_elven_monarchy_culture_events.txt ────────────────────────────────────
+# Cultural loyalty events for the Elven Monarchy government.
+#
+# culture.0001 — Elven vassal receives Cultural Appeal from Sovereign
+# culture.0002 — Independent elven ruler receives Sovereign's appeal
+# ─────────────────────────────────────────────────────────────────────────────
+
+namespace = eotg_elven_culture
+
+# Powerful elven vassal receives the Sovereign's Cultural Appeal
+eotg_elven_culture.0001 = {
+	type = character_event
+	title = eotg_elven_culture_0001_title
+	theme = diplomacy
+
+	desc = eotg_elven_culture_0001_desc
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+	right_portrait = {
+		character = liege
+		animation = personality_bold
+	}
+
+	immediate = {
+		liege = { save_scope_as = eotg_sovereign }
+	}
+
+	# Affirm solidarity — improves relations with Sovereign
+	option = {
+		name = eotg_elven_culture_0001_opt_affirm
+		add_opinion = {
+			target = scope:eotg_sovereign
+			modifier = eotg_elven_cultural_solidarity
+		}
+		scope:eotg_sovereign = {
+			add_prestige = 25
+		}
+		stress_impact = {
+			arbitrary = minor_stress_impact_gain
+		}
+		ai_chance = {
+			base = 80
+			modifier = { add = -20  has_trait = ambitious }
+		}
+	}
+
+	# Acknowledge but remain distant — no opinion change
+	option = {
+		name = eotg_elven_culture_0001_opt_acknowledge
+		ai_chance = {
+			base = 20
+			modifier = { add = 20  has_trait = ambitious }
+		}
+	}
+}
+
+# Independent elven ruler receives the Sovereign's Cultural Appeal
+eotg_elven_culture.0002 = {
+	type = character_event
+	title = eotg_elven_culture_0002_title
+	theme = diplomacy
+
+	desc = eotg_elven_culture_0002_desc
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	# Respond warmly — improves mutual relations
+	option = {
+		name = eotg_elven_culture_0002_opt_warm
+		every_player = {
+			limit = { eotg_st_is_starborn_sovereign = yes }
+			add_opinion = {
+				target = root
+				modifier = eotg_elven_cultural_solidarity
+			}
+		}
+		add_prestige = 25
+		ai_chance = {
+			base = 60
+			modifier = { add = 20  has_trait = gregarious }
+			modifier = { add = -20  has_trait = arrogant }
+		}
+	}
+
+	# Decline — elven independence transcends Sovereign's calls
+	option = {
+		name = eotg_elven_culture_0002_opt_decline
+		add_prestige = 50
+		stress_impact = {
+			base = minor_stress_impact_gain
+		}
+		ai_chance = {
+			base = 40
+			modifier = { add = 30  has_trait = arrogant }
+			modifier = { add = -20  has_trait = gregarious }
+		}
+	}
+}

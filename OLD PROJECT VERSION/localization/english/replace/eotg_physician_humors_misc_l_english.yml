@@ -1,0 +1,122 @@
+﻿l_english:
+ # ── Physician Epidemic, Humors, Bloodletting & Misc DLC — EotG Overrides ─────
+ # Sources: dlc/ce1/ce1_epidemic_physician_events_l_english.yml,
+ #          dlc/ep2/tournament/dlc_ep2_tournament_events_l_english.yml,
+ #          dlc/ep2/dlc_ep2_locale_events_l_english.yml,
+ #          dlc/ep3/ep3_laamp_decision_events_l_english.yml,
+ #          dlc/fp3/dlc_fp3_yearly_events_l_english.yml,
+ #          dlc/bp3/bp3_travel_events_l_english.yml,
+ #          dlc/mpo/mpo_decisions_l_english.yml,
+ #          dlc/ep1/dlc_ep1_fund_inspiration_events_l_english.yml,
+ #          dlc/ep2/tour/tour_events_veronica_l_english.yml,
+ #          dlc/bp2/dlc_bp2_yearly_1_events_l_english.yml,
+ #          event_localization/religion_events/religious_interaction_events_l_english.yml,
+ #          dlc/ep3/dlc_ep3_hasan_l_english.yml,
+ #          dlc/ep3/ep3_interactions_l_english.yml
+ # Replaces: "humors" (medieval medicine) → "constitution/medicine",
+ #            "bloodletting" → "phlebotomy",
+ #            "peasant/peasantry" → "commoner/commonfolk",
+ #            "sin" as noun → "failing",
+ #            "sermon/sermonizing" → "address/proselytizing".
+ # ─────────────────────────────────────────────────────────────────────────────
+
+ # ── CE1: Physician Epidemic Events ────────────────────────────────────────────
+
+ # "irritated the humors and made the corruption both more infectious"
+ physician_epidemic_events.1022.desc:0 "Not only have [physician.GetNamePossessive] preventative measures failed, they seem to have actually irritated the constitution and made the corruption both more infectious and more severe."
+
+ # "couldn't withstand the onslaught of bloodletting and leeches"
+ physician_epidemic_events.1024.desc:0 "As well as taking a tremendous toll on the economy, [physician.GetNamePossessive] treatments have lead to countless lives being lost. The peasants, already weak from the ravages of disease, couldn't withstand the onslaught of phlebotomy and leeches. This loss of life seems to have brought with it an increase in spread of the disease, as the miasma clings to the corpses and infests the lungs of the healthy."
+
+ # "bloodletting to release bad humors"
+ physician_epidemic_events.1025.desc:0 "Decried as heretical by many, [physician.GetNamePossessive] treatments seem to have worked quite well in slowing the spread of disease. Exercise regiments to sweat out the corruption, phlebotomy to reduce harmful buildup, and thorough cleansing to prevent the accumulation of miasma seems to be just the thing to stop [epidemic.GetName]!"
+
+ # ── EP2: Tournament Events ────────────────────────────────────────────────────
+
+ # "my humors will restrict me from carrying on in this tournament"
+ tournament_events.0800.health:0 "I fear my constitution will restrict me from carrying on in this tournament. I will not make a good showing in this state, and shouldn't tempt the physic's ire..."
+
+ # "[character's] humors are too unbalanced to continue"
+ tournament_events.0801.health:0 "It seems [contest_withdrawal.GetHerHis] constitution is too unbalanced to continue."
+
+ # "Your rival's humors are disturbed"
+ tournament_events.6010.a.ill:0 "Your rival's constitution is disturbed"
+
+ # ── EP2: Locale Events ────────────────────────────────────────────────────────
+
+ # "our bloodletting aims are realized" — sword-forging with blood quench
+ ep2_locale_events.4521.start:0 "I clutch a clean rag to my forearm to stem the flow as [tournament_weaponsmith.GetFirstName] fires and hammers excitedly. By the time our phlebotomy aims are realized the rag is nearly soaked through, but the flow itself has slowed and the wound congealed.\n\nThe sword is reverently deposited on a table."
+
+ # "what seems to be a peasant brawl"
+ ep2_locale_events.5510.desc:0 "The locals at [ROOT.Char.GetCurrentLocation.GetNameNoTooltip] seem equally interested in the tournament as the nobles attending it: some have improvised temporary shops in the ground floor of their houses, and the [ROOT.Char.Custom('GetLocalStreetFoodPlural')] smell delicious.\n\nAbove all the revelry and the chatter I hear some more... violent noises coming from one of the alleys; as I approach it I observe what seems to be a commoner brawl, but one of them is more skilled than the rest."
+
+ # ── EP3: LAAMP Decision Events ────────────────────────────────────────────────
+
+ # "How are your humors? Need a bit of cleansing?"
+ ep3_laamp_decision_event.1041.desc:0 "$ep3_laamp_decision_event.1041_intro$ [laamp_healer_character.GetSheHe|U] looks up as I approach: "Greetings. How is your constitution? Need a bit of cleansing?""
+
+ # "shelves containing scriptures and prints relating to humors, health and spirituality"
+ ep3_laamp_decision_event.1047_desc_intro:0 "I follow [laamp_physician_recruit.GetFirstName] down a dwindling alley, up some stairs and into [laamp_physician_recruit.GetHerHis] study. The room is crammed, floor to ceiling, with shelves containing scriptures and prints relating to medicine, health and spirituality.\n\n[laamp_physician_recruit.GetSheHe|U] sits down in the only chair, behind the desk, absentmindedly stroking a small talisman and then finally notices my presence: "
+
+ # ── FP3: Yearly Events ────────────────────────────────────────────────────────
+
+ # "Herbs & Humors" — event title
+ fp3_yearly.8039.t:0 "Herbs & Remedies"
+
+ # ── BP3: Travel Events ────────────────────────────────────────────────────────
+
+ # "Hold your tongue, vile peasant!"
+ travel_events_bp3.15.c:0 "Hold your tongue, vile commoner!"
+
+ # "run to a small peasant kid struggling to breathe"
+ travel_events_bp3.105.desc.physician:0 "[lifestyle_character.GetSheHe|U] often helps others with small wounds and scratches, putting together small poultices like it was nothing.\n\nWhen we pass through [ROOT.Char.GetCurrentLocation.GetName] I see [lifestyle_character.GetHerHim] suddenly run to a small commoner kid struggling to breathe and turning an unnatural color in a back alley, and before you know it the kid's face returns to normal. How did [lifestyle_character.GetSheHe] do it?"
+
+ # "a particularly ribald story about four peasants"
+ travel_events_bp3.115.desc.outro:0 "I didn't know [character_number_1.GetSheHe] had it in [character_number_1.GetHerHim], but [character_number_1.GetFirstNameNoTooltip] ends up telling a particularly ribald story about four commoners [character_number_1.GetSheHe] had seen in [ROOT.Char.GetCapitalLocation.GetName].\n\nAfter drying my eyes from the laughter, and drinking a bit to clear my throat, I will..."
+
+ # ── MPO: Decisions Events ─────────────────────────────────────────────────────
+
+ # "I cannot let that sin be my undoing."
+ mpo_decisions_events.0201.desc_intro:0 "Now that I have begun my training in earnest, I must investigate what my strengths and weaknesses are. I am aware that often I am [ROOT.Char.Custom('DescriptorNegativeStandalone')], but I cannot let that failing be my undoing.\n\nI must focus on my weakest point."
+
+ # "You gather a group of peasants, and try to convince them to do your bidding"
+ mpo_decisions_events.0201.intrigue_1_tt:0 "You gather a group of commoners, and try to convince them to do your bidding"
+
+ # ── EP1: Fund Inspiration Events ──────────────────────────────────────────────
+
+ # "some coin to abduct a few peasants" — versioned :1 in vanilla, override at :0
+ fund_inspiration.2002.b:0 ""Here, some coin to abduct a few commoners.""
+
+ # "Go kidnap some foreign peasants."
+ fund_inspiration.2002.c:0 ""The border isn't far. Go kidnap some foreign commoners.""
+
+ # "the cause of the missing peasants"
+ fund_inspiration.2002.toast_outcome.negative:0 "Evidence leads to you as the cause of the missing commoners"
+
+ # "the kidnapping of peasants"
+ fund_inspiration.2002.toast_outcome.positive:0 "You get away with the kidnapping of commoners"
+
+ # ── EP2 / Tour: Cultural Festival Events ─────────────────────────────────────
+
+ # "the longest, blandest sermon I've ever heard"
+ cultural_festival.3050.desc:0 "A group of locals has taken the stage in what seems to be the longest, blandest address I've ever heard.\n\nI try to keep my eyes open, but soon enough the piles of hay at the corner of the street look a bit too comfortable, a bit too tempting..."
+
+ # ── BP2: Yearly Events ────────────────────────────────────────────────────────
+
+ # "An excellent sermon, a perfect rite."
+ bp2_yearly.1000.desc_improvident:0 "An excellent address, a perfect rite. As we depart the [ROOT.Char.GetFaith.HouseOfWorship], I — of course — dignify the [ROOT.Char.Custom('DefaultPriestTitle')] with not only coins, but all the jewelry I can spare. Some look upon me, askance.\n\nBut gold is a fleeting thing! Heavier is the weight of guilt and shame..."
+
+ # ── Religion Events ───────────────────────────────────────────────────────────
+
+ # "one of the peasantry hurls a live chicken at my head"
+ religious_interaction.2401.desc_lost:0 "[recipient.GetTitledFirstNamePossessive] verbal onslaught begins immediately, barely giving me a chance to rebut, and before long the crowd has decided on the victor.\n\nI soldier on for a few minutes, braving the rain of rotting vegetables, but I'm finally forced to retreat when one of the commonfolk hurls a live chicken at my head."
+
+ # ── EP3: Hasan Events ─────────────────────────────────────────────────────────
+
+ # "Hold the sermon"
+ hasan_evangelize_the_faith_confirm:0 "Hold the address"
+
+ # ── EP3: Interactions ─────────────────────────────────────────────────────────
+
+ # "many are sermonizing proponents of this family's interests"
+ ep3_requested_faith_support_modifier_desc:0 "Many political creatures wear holy robes; many are proselytizing proponents of this family's interests."

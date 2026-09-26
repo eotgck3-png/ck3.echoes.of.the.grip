@@ -1,0 +1,93 @@
+﻿# ── eotg_cartel_obligations.txt ───────────────────────────────────────────────
+# Contract obligation types for the Cartel government.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Loyalty Tax — replaces standard taxes. The primary tool of the Grand Underlord.
+# Higher tiers drain Bosses but fund the Grand Underlord's power.
+eotg_cartel_loyalty_tax = {
+	display_mode = tree
+	icon = gold_icon
+
+	obligation_levels = {
+		eotg_cartel_tax_token = {
+			default = yes
+			position = { 0 0 }
+			tax = 0.10
+			subject_opinion = 10
+			ai_liege_desire = 1
+			ai_subject_desire = 5
+			score = 2
+		}
+		eotg_cartel_tax_standard = {
+			parent = eotg_cartel_tax_token
+			position = { 1 0 }
+			tax = 0.25
+			ai_liege_desire = 3
+			ai_subject_desire = 3
+			score = 0
+		}
+		eotg_cartel_tax_heavy = {
+			parent = eotg_cartel_tax_standard
+			position = { 2 0 }
+			tax = 0.40
+			subject_opinion = -15
+			liege_modifier = {
+				monthly_income_mult = 0.05
+			}
+			ai_liege_desire = 5
+			ai_subject_desire = 1
+			score = -2
+		}
+	}
+}
+
+# Territory Tribute — levies obligation. Bosses field muscle for the Grand Underlord.
+eotg_cartel_territory_tribute = {
+	display_mode = tree
+	icon = soldier_icon
+
+	obligation_levels = {
+		eotg_cartel_tribute_minimal = {
+			default = yes
+			position = { 0 0 }
+			levies = 0.10
+			ai_liege_desire = 2
+			ai_subject_desire = 4
+			score = 1
+		}
+		eotg_cartel_tribute_full = {
+			parent = eotg_cartel_tribute_minimal
+			position = { 1 0 }
+			levies = 0.25
+			subject_opinion = -10
+			ai_liege_desire = 4
+			ai_subject_desire = 1
+			score = -1
+		}
+	}
+}
+
+# Enforcement Rights — checkbox granting raiding rights in Boss territory.
+# Bosses with this flag may conduct cartel operations freely across the realm.
+eotg_cartel_enforcement_rights = {
+	display_mode = radiobutton
+
+	obligation_levels = {
+		eotg_cartel_enforcement_none = {
+			default = yes
+			position = { 0 0 }
+			ai_liege_desire = 0
+			ai_subject_desire = 3
+			score = 0
+		}
+		eotg_cartel_enforcement_granted = {
+			parent = eotg_cartel_enforcement_none
+			position = { 1 0 }
+			flag = eotg_cartel_enforcement_flag
+			subject_opinion = -5
+			ai_liege_desire = 3
+			ai_subject_desire = 0
+			score = -1
+		}
+	}
+}

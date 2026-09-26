@@ -1,0 +1,76 @@
+﻿l_english:
+ # ── Lifestyle, Warfare, Health & Journey — EotG Setting Overrides ─────────────
+ # Sources: event_localization/lifestyle/governance/stewardship_duty_events_l_english.yml,
+ #          event_localization/lifestyle/guile/intrigue_dread_events_l_english.yml,
+ #          event_localization/lifestyle/nickname/nickname_events_l_english.yml,
+ #          event_localization/lifestyle/scholarship/learning_medicine_events_l_english.yml,
+ #          event_localization/lifestyle/wanderer/journey_l_english.yml,
+ #          event_localization/lifestyle/warfare/martial_chivalry_events_l_english.yml,
+ #          event_localization/lifestyle/warfare/martial_strategy_events_2_l_english.yml,
+ #          event_localization/health_events_l_english.yml
+ # Replaces: "peasant/peasants/peasantry" → "commoner/commoners/commonfolk".
+ # ─────────────────────────────────────────────────────────────────────────────
+
+ # ── Stewardship Duty Events ───────────────────────────────────────────────────
+
+ # "The peasants tending the roadside field had probably never seen"
+ stewardship_duty_special.1205.desc:0 "The commoners tending the roadside field had probably never seen as regal a passage as the one I was spearheading.\n\n"Who is this?" I heard one of them asking another."
+
+ # "I should learn about life as a peasant out here."
+ stewardship_duty_special.1205.b:0 "I should learn about life as a commoner out here."
+
+ # ── Intrigue Dread Events ─────────────────────────────────────────────────────
+
+ # "much more favorable reaction from the peasantry"
+ intrigue_dread_special.1197.desc:0 "I will admit my first performance may have been somewhat lacking... Putting the entire troupe on the stocks was met with a much more favorable reaction from the commonfolk. Well, perhaps not exactly #EMP favorable#!, but certainly satisfying."
+
+ # ── Nickname Events ───────────────────────────────────────────────────────────
+
+ # "on the lips of peasant and noble alike"
+ lifestyle_nicknames.1000.desc_good:0 ""They call you #EMP '[nickname_getter.GetTitledFirstNameNicknamedNoTooltip]'#!, spectacular, is it not? It's on the lips of commoner and noble alike.""
+
+ # ── Learning Medicine Events ──────────────────────────────────────────────────
+
+ # "The peasant reveals [fish_alchemist.GetHerHis] secrets" — tooltip
+ learning_medicine_special.2100.b.tt_success:0 "The commoner reveals [fish_alchemist.GetHerHis] secrets"
+
+ # ── Journey Events ────────────────────────────────────────────────────────────
+
+ # "Some sort of minstrel the peasants like"
+ journey_events.40.desc:0 ""[ROOT.Char.Custom('FormOfAddressForLiege')|U]," My [ROOT.Char.Custom2('RelationToMe', SCOPE.sC('suggester_character'))], [suggester_character.GetFirstName] addresses me, as [suggester_character.GetSheHe] enters the room. "Everyone at court knows how happy you are to share your traveling tales and exploits, to everyone's great pleasure I assure you."\n\n[suggester_character.GetSheHe|U] continues, "I heard about a local bard that has become particularly popular as of late. Some sort of ministrel the commoners like. With the right motivation, maybe he could start sharing some of your tales around the realm?""
+
+ # "I am not going to sit down with peasants and serfs!" — option tooltip
+ journey_events.50.b.tt:0 "What was wrong with me? Of course I am not going to sit down with commoners and bondspeople!"
+
+ # "several peasants seem to be enjoying themselves over some dice game"
+ journey_events.51.desc:0 "I find a seedy yet popular building as I travel through the streets. As soon as I enter, I am handed some alcohol, and the crowd of people pushes me off to a seat in the corner. Nobody has given me a second glance throughout the whole process.\n\nI sit by myself, watching the others at the establishment. A loud group is gathered around a large table, where several commoners seem to be enjoying themselves over some dice game."
+
+ # "I have seen enough peasants for a lifetime."
+ journey_events.51.b.tt:0 "I have seen enough commoners for a lifetime."
+
+ # "popular among their peasants and serfs" — modifier desc
+ journey_pauper_king_modifier_desc:0 "Supposedly particularly popular among their commoners and bondspeople due to the many stories of their friendly and personal interactions with those of the lower classes."
+
+ # "a group of peasants and monks alike" + "some peasants are of higher stature"
+ journey_events.60.desc_spiritual:0 "I come across a group of commoners and monks alike, gathered around in a circle. Their soft hymns fill the air, though I cannot make out if they are singing in praise of [ROOT.Char.GetFaith.HighGodName] or another deity. Upon closer inspection, I realize some commoners are of higher stature, with some even wearing the garb of nobility. Nonetheless, all seem to be in a state of peace, with their reverence of the divine binding them together."
+
+ # ── Martial Chivalry Events ───────────────────────────────────────────────────
+
+ # "This peasant — and my soldiers — will get a lecture on honor."
+ martial_chivalry.0001.b:0 "This commoner — and my soldiers — will get a lecture on honor."
+
+ # "These idiotic peasants don't know their right hand from their left!"
+ martial_chivalry.3004.desc:0 "As I tap [bad_commander.GetTitledFirstName] on [bad_commander.GetHerHis] shoulder, [bad_commander.GetSheHe] throws up [bad_commander.GetHerHis] hands and shouts "This is #EMP not#! my fault [ROOT.Char.GetFirstNameNoTooltip]! These idiotic commoners don't know their right hand from their left! How can anyone be expected to turn this rabble into an army!?""
+
+ # ── Martial Strategy Events ───────────────────────────────────────────────────
+
+ # "Bread for the Peasantry" — modifier name
+ strategy_fed_peasants_larders_modifier:0 "Bread for the Commonfolk"
+
+ # ── Health Events ─────────────────────────────────────────────────────────────
+
+ # "[RulerTitle] or peasant, high or low, it does not matter"
+ health.1001.desc:0 "[ROOT.Char.GetTitleAsNameNoTooltip] or commoner, high or low, it does not matter. In the end, we are all mortal.\n\nI was reminded of this as I woke coughing in the early morning hours, a dull ache pounding through my head and throat. My body is wracked by shivers and weakness, my head leaking from every orifice.\n\n"
+
+ # "I cannot help but wish I was but a simple peasant"
+ health.1003.desc:0 "They call it "the disease of kings" as if there was something luxurious or enviable about my swollen, aching joints.\n\nMy big toe in particular is painfully distended, leaving me limping.\n\nWhen my pains reach their peak, I cannot help but wish I was but a simple commoner."

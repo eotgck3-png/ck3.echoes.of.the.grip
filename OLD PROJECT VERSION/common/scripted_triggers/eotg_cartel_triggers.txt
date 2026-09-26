@@ -1,0 +1,74 @@
+﻿# ── eotg_cartel_triggers.txt ──────────────────────────────────────────────────
+# Scripted triggers for the Cartel government.
+# ─────────────────────────────────────────────────────────────────────────────
+
+eotg_st_is_cartel_ruler = {
+	has_government = eotg_cartel_government
+}
+
+# Street Lord: county-tier Cartel vassal
+eotg_st_is_street_lord = {
+	has_government = eotg_cartel_government
+	is_landed = yes
+	highest_held_title_tier = tier_county
+}
+
+# Underboss: duchy-tier Cartel vassal
+eotg_st_is_underboss = {
+	has_government = eotg_cartel_government
+	highest_held_title_tier = tier_duchy
+}
+
+# Boss: kingdom-tier Cartel vassal
+eotg_st_is_boss = {
+	has_government = eotg_cartel_government
+	highest_held_title_tier = tier_kingdom
+}
+
+# Grand Underlord: empire-tier Cartel ruler
+eotg_st_is_grand_underlord = {
+	has_government = eotg_cartel_government
+	highest_held_title_tier = tier_empire
+}
+
+# Boss has not paid their tax this cycle and is alive and free
+eotg_st_cartel_tax_eligible = {
+	eotg_st_is_boss = yes
+	is_alive = yes
+	is_imprisoned = no
+	NOT = { has_character_flag = eotg_cartel_tax_paid }
+}
+
+# Grand Underlord is vulnerable — Dread has fallen dangerously low
+eotg_st_cartel_gl_vulnerable = {
+	dread < 25
+}
+
+# Boss has not committed to a faction this cycle
+eotg_st_cartel_faction_uncommitted = {
+	eotg_st_is_boss = yes
+	NOT = { has_character_flag = eotg_cartel_faction_committed }
+}
+
+# Boss is eligible to join the Shakedown faction
+eotg_st_cartel_shakedown_eligible = {
+	eotg_st_cartel_faction_uncommitted = yes
+	liege = { eotg_st_cartel_gl_vulnerable = yes }
+}
+
+# Boss has a claim on the Grand Underlord title and qualifies for Hostile Takeover
+eotg_st_cartel_takeover_eligible = {
+	eotg_st_cartel_faction_uncommitted = yes
+	liege = { eotg_st_cartel_gl_vulnerable = yes }
+	any_claim = {
+		tier = tier_empire
+		holder = { eotg_st_is_grand_underlord = yes }
+	}
+}
+
+# Grand Underlord can demand loyalty tax (not on cooldown)
+eotg_st_cartel_tax_demand_valid = {
+	eotg_st_is_grand_underlord = yes
+	NOT = { has_character_flag = eotg_cartel_tax_demanded }
+	any_vassal = { eotg_st_cartel_tax_eligible = yes }
+}

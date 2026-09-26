@@ -1,0 +1,33 @@
+﻿# ── eotg_bookmarks.txt ────────────────────────────────────────────────────────
+# Bookmark definitions for Echoes of the Grip.
+# Place this file in: common/bookmarks/eotg_bookmarks.txt
+# (Directory common/bookmarks/ will need to be created)
+#
+# CK3 uses the start_date in this file to set the game clock.
+# For a total conversion, the "year" shown in-game will be 866 AD by the engine,
+# but all lore and UI text will refer to it as 866 AG via localization.
+# ─────────────────────────────────────────────────────────────────────────────
+
+eotg_bookmark_866 = {
+    start_date = 866.1.1
+    is_playable = yes
+    recommended = yes
+    group = eotg_bm_group_866
+
+    # TODO: add bookmark illustration (gfx/interface/illustrations/bookmarks/)
+    # picture = "gfx/interface/illustrations/bookmarks/eotg_866.dds"
+
+    character = {
+        name = "eotg_bookmark_vaelorin_name"
+        type = male
+        birth = 724.3.1
+        culture = eotg_culture_aelvaryn
+        religion = eotg_faith_firstlight
+        difficulty = "BOOKMARK_CHARACTER_DIFFICULTY_MEDIUM"
+        history_id = eotg_char_90001
+        position = { 750 500 }
+        animation = personality_calm
+    }
+
+    # description text comes from loc key: eotg_bookmark_866_desc (used via bookmark's name key)
+}

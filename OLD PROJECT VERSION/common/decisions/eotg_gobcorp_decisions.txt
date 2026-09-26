@@ -1,0 +1,67 @@
+﻿# ── eotg_gobcorp_decisions.txt ────────────────────────────────────────────────
+# Decisions for the Gob-Corp government.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Vote of No Confidence
+# Available to Trade Princes and Merchant Lords when the Director-General is
+# politically vulnerable. Triggers a vote tally and, if sufficient support is
+# found, confronts the DG with the board's demand.
+eotg_gobcorp_no_confidence_vote = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_misc.dds"
+	}
+	decision_group_type = major
+	ai_check_interval = 12
+
+	is_shown = {
+		eotg_st_gobcorp_vote_valid = yes
+		liege = {
+			eotg_st_gobcorp_dg_vulnerable = yes
+			NOT = { eotg_st_gobcorp_survived_vote = yes }
+		}
+	}
+
+	is_valid = {
+		eotg_st_gobcorp_vote_valid = yes
+		NOT = { has_character_flag = eotg_gobcorp_voted }
+		liege = {
+			eotg_st_gobcorp_dg_vulnerable = yes
+			NOT = { eotg_st_gobcorp_survived_vote = yes }
+		}
+	}
+
+	is_valid_showing_failures_only = {
+		eotg_st_gobcorp_vote_valid = yes
+		NOT = { has_character_flag = eotg_gobcorp_voted }
+	}
+
+	effect = {
+		hidden_effect = {
+			add_character_flag = { flag = eotg_gobcorp_voted  years = 10 }
+			liege = { eotg_se_gobcorp_sum_votes = yes }
+		}
+		trigger_event = { id = eotg_gobcorp_vote.0001 }
+		custom_tooltip = eotg_gobcorp_no_confidence_vote_tooltip
+	}
+
+	ai_potential = {
+		is_ai = yes
+		NOT = { has_character_flag = eotg_gobcorp_voted }
+	}
+
+	ai_will_do = {
+		base = 5
+		modifier = {
+			add = 20
+			opinion = { target = liege  value < -20 }
+		}
+		modifier = {
+			add = 10
+			liege = { has_character_modifier = eotg_gobcorp_dg_instability }
+		}
+		modifier = {
+			add = -30
+			opinion = { target = liege  value >= 20 }
+		}
+	}
+}

@@ -1,0 +1,67 @@
+﻿l_english:
+ # ── Custom-Loc Word Bank — EotG Setting Overrides ────────────────────────────
+ # Source: custom_localization/regional_custom_loc_l_english.yml
+ #
+ # WHAT THIS FILE IS, because it is not obvious:
+ # These keys are not shown anywhere on their own. They are the word bank that
+ # CK3's customizable_localization functions splice INLINE into event prose —
+ # FortifiedBuilding, TerrainType, LocalAnimal and friends. One key here can
+ # surface in dozens of unrelated events, which makes this the highest
+ # leverage-per-key file in the whole crusade.
+ #
+ # WHY IT MATTERS RIGHT NOW:
+ # eotg_terrains_l_english.yml already renamed the terrain TYPES shown in the
+ # UI ("Asteroid Belt Region", "Debris Cluster"). It did not touch these inline
+ # forms, so event prose was still saying "hills" and "forest" while the
+ # tooltip beside it said something else. That inconsistency was created by
+ # the earlier pass; this file closes it. Keep the two files in sync.
+ #
+ # NOT touched deliberately:
+ #   * LocalAnimal (hart, stag, boar, wolf, unicorn, dragon…) and the mythical
+ #     creatures. This setting has elves, gnolls and tieflings — a fantasy
+ #     bestiary is native to it, and hunting alien fauna reads fine.
+ #   * knight / knights / knightly, which are $…$ passthroughs to the
+ #     culture-specific MountedWarriorTerm and should be reflavored at the
+ #     culture level if at all.
+ #   * mansion/mansions ("palace"), residence, office — already neutral.
+ #   * yurt_residence / hall_residence — culture-specific, leave to a culture pass.
+ # ─────────────────────────────────────────────────────────────────────────────
+
+ # ── FortifiedBuilding ────────────────────────────────────────────────────────
+ # Matches the holding glossary in eotg_holdings_concepts_l_english.yml.
+ castle:0 "bastion"
+ castles:0 "bastions"
+ temple:0 "sanctum"
+ temples:0 "sanctums"
+
+ # ── MartialTournamentAdjective ───────────────────────────────────────────────
+ # "jousting" -> matches the Trial Grounds line in eotg_buildings_setting.
+ tournament_jousting:0 "trial"
+
+ # ── TerrainType (singular) ───────────────────────────────────────────────────
+ # Lowercase inline forms of eotg_terrains_l_english.yml. Kept short: these
+ # get spliced mid-sentence, so the full UI names would read badly.
+ terrain_plains:0 "open expanse"
+ terrain_farmlands:0 "trade corridor"
+ terrain_hills:0 "asteroid belt"
+ terrain_terraced_hills:0 "terraced belt claims"
+ terrain_mountains:0 "fortified sector"
+ terrain_desert:0 "dead zone"
+ terrain_oasis:0 "relay nexus"
+ terrain_jungle:0 "drift zone"
+ terrain_taiga:0 "cryo frontier"
+ terrain_wetlands:0 "flooded expanse"
+ terrain_steppe:0 "longlane"
+ terrain_floodplains:0 "resource corridor"
+ terrain_drylands:0 "failing frontier"
+ terrain_forest:0 "debris cluster"
+
+ # ── TerrainType (plural / collective) ────────────────────────────────────────
+ # Vanilla uses evocative collectives here rather than plain plurals
+ # ("sands", "trees", "woods"), so these follow the same instinct.
+ terrain_deserts:0 "dead zones"
+ terrain_oases:0 "relay nexuses"
+ terrain_jungles:0 "drifts"
+ terrain_forests:0 "debris fields"
+ terrain_taigas:0 "cryo frontiers"
+ terrain_steppes:0 "longlanes"

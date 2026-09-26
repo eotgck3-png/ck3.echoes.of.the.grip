@@ -1,0 +1,206 @@
+﻿# ── eotg_gobcorp_vote_events.txt ──────────────────────────────────────────────
+# Vote of No Confidence event chain for the Gob-Corp government.
+#
+# Chain:
+#   Decision → vote.0001 (vassal sees tally result)
+#     If passed → vote.0002 to DG (step down or refuse)
+#       Step down → vote.0003 (graceful exit)
+#       Refuse    → vote.0004 (boardroom war unlocked, vassal notified)
+#   DG wins boardroom war → vote.0005 (survived vote flag granted)
+# ─────────────────────────────────────────────────────────────────────────────
+
+namespace = eotg_gobcorp_vote
+
+# Vote tally result — fires on the initiating vassal
+eotg_gobcorp_vote.0001 = {
+	type = character_event
+	title = eotg_gobcorp_vote_0001_title
+	theme = intrigue
+
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = {
+					scope:eotg_vote_dg = {
+						var:eotg_total_votes >= eotg_sv_gobcorp_threshold
+					}
+				}
+				desc = eotg_gobcorp_vote_0001_desc_passed
+			}
+			desc = eotg_gobcorp_vote_0001_desc_failed
+		}
+	}
+
+	left_portrait = {
+		character = root
+		animation = personality_bold
+	}
+	right_portrait = {
+		character = scope:eotg_vote_dg
+		animation = personality_rational
+	}
+
+	immediate = {
+		liege = {
+			save_scope_as = eotg_vote_dg
+		}
+	}
+
+	# Vote passed — announce to the Director-General
+	option = {
+		name = eotg_gobcorp_vote_0001_opt_announce
+		trigger = {
+			scope:eotg_vote_dg = {
+				var:eotg_total_votes >= eotg_sv_gobcorp_threshold
+			}
+		}
+		add_prestige = 50
+		scope:eotg_vote_dg = {
+			trigger_event = { id = eotg_gobcorp_vote.0002  days = 3 }
+		}
+		ai_chance = { base = 100 }
+	}
+
+	# Vote failed — not enough support
+	option = {
+		name = eotg_gobcorp_vote_0001_opt_insufficient
+		trigger = {
+			NOT = {
+				scope:eotg_vote_dg = {
+					var:eotg_total_votes >= eotg_sv_gobcorp_threshold
+				}
+			}
+		}
+		stress_impact = {
+			base = minor_stress_impact_gain
+			ambitious = medium_stress_impact_gain
+		}
+		ai_chance = { base = 100 }
+	}
+}
+
+# Director-General receives the board's demand — step down or refuse
+eotg_gobcorp_vote.0002 = {
+	type = character_event
+	title = eotg_gobcorp_vote_0002_title
+	theme = intrigue
+
+	desc = eotg_gobcorp_vote_0002_desc
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	# Step down gracefully
+	option = {
+		name = eotg_gobcorp_vote_0002_opt_step_down
+		eotg_se_gobcorp_graceful_exit = yes
+		trigger_event = { id = eotg_gobcorp_vote.0003  days = 1 }
+		ai_chance = {
+			base = 30
+			modifier = { add = 30  has_trait = content }
+			modifier = { add = -20  has_trait = ambitious }
+			modifier = { add = 20  prestige < 50 }
+		}
+	}
+
+	# Refuse to step down — unlock boardroom war
+	option = {
+		name = eotg_gobcorp_vote_0002_opt_refuse
+		add_internal_flag = dangerous
+		add_character_flag = eotg_gobcorp_refused_exit
+		trigger_event = { id = eotg_gobcorp_vote.0004  days = 1 }
+		stress_impact = {
+			content = medium_stress_impact_gain
+		}
+		ai_chance = {
+			base = 70
+			modifier = { add = 20  has_trait = ambitious }
+			modifier = { add = -20  has_trait = content }
+		}
+	}
+}
+
+# Graceful exit outcome — fires on the DG who stepped down
+eotg_gobcorp_vote.0003 = {
+	type = character_event
+	title = eotg_gobcorp_vote_0003_title
+	theme = intrigue
+
+	desc = eotg_gobcorp_vote_0003_desc
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	option = {
+		name = eotg_gobcorp_vote_0003_opt_accept
+		show_as_tooltip = {
+			add_prestige = 300
+			add_gold = 200
+			add_trait = eotg_honorable_exit
+		}
+		ai_chance = { base = 100 }
+	}
+}
+
+# Refusal — boardroom war unlocked, notification to realm vassals
+eotg_gobcorp_vote.0004 = {
+	type = character_event
+	title = eotg_gobcorp_vote_0004_title
+	theme = intrigue
+
+	desc = eotg_gobcorp_vote_0004_desc
+
+	left_portrait = {
+		character = root
+		animation = anger
+	}
+
+	immediate = {
+		# Notify all Merchant Lords they may declare Boardroom War
+		every_vassal = {
+			limit = { eotg_st_is_merchant_lord = yes }
+			send_interface_message = {
+				title = eotg_gobcorp_boardroom_war_unlocked_title
+				desc = eotg_gobcorp_boardroom_war_unlocked_desc
+				left_icon = root
+			}
+		}
+	}
+
+	option = {
+		name = eotg_gobcorp_vote_0004_opt_hold
+		add_prestige = -100
+		custom_tooltip = eotg_gobcorp_boardroom_war_available_tooltip
+		ai_chance = { base = 100 }
+	}
+}
+
+# DG victory in the boardroom war — survived vote immunity granted
+eotg_gobcorp_vote.0005 = {
+	type = character_event
+	title = eotg_gobcorp_vote_0005_title
+	theme = intrigue
+
+	desc = eotg_gobcorp_vote_0005_desc
+
+	left_portrait = {
+		character = root
+		animation = personality_bold
+	}
+
+	immediate = {
+		# Flag already set in on_defeat before this event fires
+		eotg_se_gobcorp_clear_instability = yes
+	}
+
+	option = {
+		name = eotg_gobcorp_vote_0005_opt_victory
+		add_prestige = 300
+		custom_tooltip = eotg_gobcorp_survived_vote_tooltip
+		ai_chance = { base = 100 }
+	}
+}

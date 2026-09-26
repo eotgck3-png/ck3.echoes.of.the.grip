@@ -1,0 +1,296 @@
+﻿# ── eotg_fringe_ally_raid_events.txt ──────────────────────────────────────────
+# Three-part event chain that fires when a Fringe Overlord raids an ally's barony.
+# Wired via on_raid_action_start → eotg_on_raid_fringe_ally_check.
+#
+# eotg_fringe_ally_raid.0001 — Fringe ruler: choose how to frame the raid
+# eotg_fringe_ally_raid.0002 — Allied target: react based on traits
+# eotg_fringe_ally_raid.0003 — Fringe ruler: receive the ally's answer
+#
+# Cross-event communication:
+#   var:eotg_ally_raid_target  — set on the fringe ruler, points to the ally
+#   var:eotg_ally_raid_raider  — set on the ally, points to the fringe ruler
+#   Reaction flags on the fringe ruler (eotg_ally_raid_reaction_*) set by the ally
+#   and cleaned up in event 0003.
+# ─────────────────────────────────────────────────────────────────────────────
+
+namespace = eotg_fringe_ally_raid
+
+# Event 0001 — "An Ally's Holdings Plundered" — fires on Fringe ruler (scope:raider)
+# The raid has started. How does the overlord frame their intent to their ally?
+eotg_fringe_ally_raid.0001 = {
+	type = character_event
+	title = eotg_fringe_ally_raid_0001_title
+	theme = war
+
+	desc = eotg_fringe_ally_raid_0001_desc
+
+	left_portrait = {
+		character = root
+		animation = personality_bold
+	}
+	right_portrait = {
+		character = scope:eotg_raid_ally
+		animation = anger
+	}
+
+	immediate = {
+		var:eotg_ally_raid_target = {
+			save_scope_as = eotg_raid_ally
+		}
+	}
+
+	# "No quarter — not even for friends." Bold posture. Grip cost; full anger from ally.
+	option = {
+		name = eotg_fringe_ally_raid_0001_opt_bold
+		add_character_flag = { flag = eotg_ally_raid_posture_bold  years = 1 }
+		eotg_se_fringe_lose_grip = { AMOUNT = 5 }
+		scope:eotg_raid_ally = {
+			trigger_event = { id = eotg_fringe_ally_raid.0002  days = 3 }
+		}
+		ai_chance = {
+			base = 40
+			modifier = { add = 20  has_trait = brave }
+			modifier = { add = 20  has_trait = wrathful }
+		}
+	}
+
+	# "Send a tribute ahead — frame it as a tax." Diplomatic posture. Costs gold; reduces anger.
+	option = {
+		name = eotg_fringe_ally_raid_0001_opt_tribute
+		trigger = { gold >= 50 }
+		add_gold = { value = -50 }
+		add_character_flag = { flag = eotg_ally_raid_posture_tribute  years = 1 }
+		scope:eotg_raid_ally = {
+			trigger_event = { id = eotg_fringe_ally_raid.0002  days = 3 }
+		}
+		ai_chance = {
+			base = 35
+			modifier = { add = 20  has_trait = diplomat }
+			modifier = { add = 15  has_trait = generous }
+		}
+	}
+
+	# "Blame the lieutenants — unauthorized raid." Deception posture. Requires intrigue.
+	option = {
+		name = eotg_fringe_ally_raid_0001_opt_deny
+		trigger = { intrigue >= 10 }
+		add_character_flag = { flag = eotg_ally_raid_posture_deny  years = 1 }
+		scope:eotg_raid_ally = {
+			trigger_event = { id = eotg_fringe_ally_raid.0002  days = 3 }
+		}
+		ai_chance = {
+			base = 25
+			modifier = { add = 20  has_trait = schemer }
+			modifier = { add = 15  has_trait = deceitful }
+		}
+	}
+}
+
+# Event 0002 — "Raiders in Our Lands" — fires on the ally being raided
+# The ally character reacts based on their traits and the fringe ruler's posture.
+eotg_fringe_ally_raid.0002 = {
+	type = character_event
+	title = eotg_fringe_ally_raid_0002_title
+	theme = war
+
+	desc = {
+		triggered_desc = {
+			trigger = { var:eotg_ally_raid_raider = { has_character_flag = eotg_ally_raid_posture_bold } }
+			desc = eotg_fringe_ally_raid_0002_desc_bold
+		}
+		triggered_desc = {
+			trigger = { var:eotg_ally_raid_raider = { has_character_flag = eotg_ally_raid_posture_tribute } }
+			desc = eotg_fringe_ally_raid_0002_desc_tribute
+		}
+		triggered_desc = {
+			trigger = { var:eotg_ally_raid_raider = { has_character_flag = eotg_ally_raid_posture_deny } }
+			desc = eotg_fringe_ally_raid_0002_desc_deny
+		}
+	}
+
+	left_portrait = {
+		character = root
+		animation = anger
+	}
+	right_portrait = {
+		character = scope:eotg_raid_raider
+		animation = personality_bold
+	}
+
+	immediate = {
+		var:eotg_ally_raid_raider = {
+			save_scope_as = eotg_raid_raider
+		}
+	}
+
+	# "Demand reparations — or face consequences." Wrathful reaction.
+	option = {
+		name = eotg_fringe_ally_raid_0002_opt_demand
+		trigger = {
+			OR = {
+				has_trait = wrathful
+				has_trait = aggressive_attacker
+				has_trait = ambitious
+			}
+		}
+		add_opinion = { target = scope:eotg_raid_raider  modifier = eotg_fringe_raided_ally  opinion = -30 }
+		scope:eotg_raid_raider = {
+			add_character_flag = { flag = eotg_ally_raid_reaction_demand  years = 1 }
+			trigger_event = { id = eotg_fringe_ally_raid.0003  days = 3 }
+		}
+		remove_variable = eotg_ally_raid_raider
+		ai_chance = {
+			base = 40
+			modifier = { add = 30  has_trait = wrathful }
+			modifier = { add = 20  has_trait = aggressive_attacker }
+		}
+	}
+
+	# "Lodge a formal protest — the alliance is strained." Patient/diplomatic reaction.
+	option = {
+		name = eotg_fringe_ally_raid_0002_opt_protest
+		trigger = {
+			OR = {
+				has_trait = patient
+				has_trait = calm
+				has_trait = diplomat
+				diplomacy >= 12
+			}
+		}
+		add_opinion = { target = scope:eotg_raid_raider  modifier = eotg_fringe_raided_ally  opinion = -15 }
+		scope:eotg_raid_raider = {
+			add_character_flag = { flag = eotg_ally_raid_reaction_protest  years = 1 }
+			trigger_event = { id = eotg_fringe_ally_raid.0003  days = 3 }
+		}
+		remove_variable = eotg_ally_raid_raider
+		ai_chance = {
+			base = 35
+			modifier = { add = 25  has_trait = patient }
+			modifier = { add = 20  has_trait = diplomat }
+		}
+	}
+
+	# "Accept it. This is the Fringe." Pragmatic/resigned acceptance.
+	option = {
+		name = eotg_fringe_ally_raid_0002_opt_accept
+		add_opinion = { target = scope:eotg_raid_raider  modifier = eotg_fringe_raided_ally  opinion = -20 }
+		scope:eotg_raid_raider = {
+			add_character_flag = { flag = eotg_ally_raid_reaction_accept  years = 1 }
+			trigger_event = { id = eotg_fringe_ally_raid.0003  days = 3 }
+		}
+		remove_variable = eotg_ally_raid_raider
+		ai_chance = {
+			base = 25
+		}
+	}
+}
+
+# Event 0003 — "The Ally's Answer" — fires on Fringe ruler
+# Shows the consequence of the ally's reaction. Three possible outcomes.
+eotg_fringe_ally_raid.0003 = {
+	type = character_event
+	title = eotg_fringe_ally_raid_0003_title
+	theme = war
+
+	desc = {
+		triggered_desc = {
+			trigger = { has_character_flag = eotg_ally_raid_reaction_demand }
+			desc = eotg_fringe_ally_raid_0003_desc_demand
+		}
+		triggered_desc = {
+			trigger = { has_character_flag = eotg_ally_raid_reaction_protest }
+			desc = eotg_fringe_ally_raid_0003_desc_protest
+		}
+		triggered_desc = {
+			trigger = { has_character_flag = eotg_ally_raid_reaction_accept }
+			desc = eotg_fringe_ally_raid_0003_desc_accept
+		}
+	}
+
+	left_portrait = {
+		character = root
+		animation = personality_bold
+	}
+	right_portrait = {
+		character = scope:eotg_result_ally
+		animation = anger
+	}
+
+	immediate = {
+		var:eotg_ally_raid_target = {
+			save_scope_as = eotg_result_ally
+		}
+	}
+
+	# Reaction: Demand — pay up or the alliance fractures
+	option = {
+		name = eotg_fringe_ally_raid_0003_opt_demand_pay
+		trigger = {
+			has_character_flag = eotg_ally_raid_reaction_demand
+			gold >= 100
+		}
+		add_gold = { value = -100 }
+		scope:eotg_result_ally = { add_gold = 100 }
+		add_prestige = -50
+		eotg_se_fringe_lose_grip = { AMOUNT = 5 }
+		remove_character_flag = eotg_ally_raid_reaction_demand
+		remove_variable = eotg_ally_raid_target
+		remove_character_flag = eotg_ally_raid_chain_active
+		ai_chance = { base = 60 }
+	}
+
+	option = {
+		name = eotg_fringe_ally_raid_0003_opt_demand_refuse
+		trigger = { has_character_flag = eotg_ally_raid_reaction_demand }
+		# Refuse — alliance degrades further
+		scope:eotg_result_ally = {
+			remove_opinion = { target = root  modifier = eotg_fringe_raided_ally }
+			add_opinion = { target = root  modifier = eotg_fringe_raided_ally  opinion = -20 }
+		}
+		eotg_se_fringe_lose_grip = { AMOUNT = 10 }
+		add_prestige = 50
+		remove_character_flag = eotg_ally_raid_reaction_demand
+		remove_variable = eotg_ally_raid_target
+		remove_character_flag = eotg_ally_raid_chain_active
+		ai_chance = { base = 40 }
+	}
+
+	# Reaction: Protest — acknowledge or dismiss
+	option = {
+		name = eotg_fringe_ally_raid_0003_opt_protest_acknowledge
+		trigger = { has_character_flag = eotg_ally_raid_reaction_protest }
+		# Acknowledge the protest — costs prestige but preserves the alliance
+		add_prestige = -25
+		scope:eotg_result_ally = {
+			add_opinion = { target = root  modifier = eotg_fringe_apology_given  opinion = 10 }
+		}
+		remove_character_flag = eotg_ally_raid_reaction_protest
+		remove_variable = eotg_ally_raid_target
+		remove_character_flag = eotg_ally_raid_chain_active
+		ai_chance = { base = 60 }
+	}
+
+	option = {
+		name = eotg_fringe_ally_raid_0003_opt_protest_dismiss
+		trigger = { has_character_flag = eotg_ally_raid_reaction_protest }
+		# Dismiss the protest — show strength, lose some standing
+		add_prestige = 25
+		eotg_se_fringe_lose_grip = { AMOUNT = 3 }
+		remove_character_flag = eotg_ally_raid_reaction_protest
+		remove_variable = eotg_ally_raid_target
+		remove_character_flag = eotg_ally_raid_chain_active
+		ai_chance = { base = 40 }
+	}
+
+	# Reaction: Accept — a grudging acceptance; costs you nothing but leaves a mark
+	option = {
+		name = eotg_fringe_ally_raid_0003_opt_accept
+		trigger = { has_character_flag = eotg_ally_raid_reaction_accept }
+		# They accepted it — gain prestige for the strength display
+		add_prestige = 75
+		remove_character_flag = eotg_ally_raid_reaction_accept
+		remove_variable = eotg_ally_raid_target
+		remove_character_flag = eotg_ally_raid_chain_active
+		ai_chance = { base = 100 }
+	}
+}

@@ -1,0 +1,359 @@
+﻿# ── eotg_clayd_events.txt ─────────────────────────────────────────────────────
+# Event chain for Clayd Kestrel-Vire, "The Last Shotcaller" — Helix Remnants.
+# Fires from: eotg_char_arc_actions.txt (on_game_started, day 60)
+# Scope: character (Clayd)
+#
+# Arc summary:
+#   I    — The Bar Massacre     (0001)
+#   II   — Coppervein Street    (0002)
+#   III  — The Year of Regret   (0003)
+#   IV   — The Systems That Failed (0004)
+#   V    — Karim's Shadow       (0005)
+#   VI   — The Heir and Future  (0006)
+#   VII  — The Thing That Survived (0007, final)
+#
+# Global variable: eotg_clayd_fear (0–6, tracks paranoia depth)
+# ─────────────────────────────────────────────────────────────────────────────
+
+namespace = eotg_clayd
+
+# ── eotg_clayd.0001 ───────────────────────────────────────────────────────────
+# Fires from: on_game_started (day 60-90)
+# Memory event: The Bar Massacre
+eotg_clayd.0001 = {
+    type = character_event
+    title = eotg_clayd.0001.t
+    desc = eotg_clayd.0001.desc
+    theme = intrigue
+
+    immediate = {
+        if = {
+            limit = { NOT = { has_variable = eotg_clayd_fear } }
+            set_variable = { name = eotg_clayd_fear value = 0 }
+        }
+    }
+
+    option = {
+        name = eotg_clayd.0001.a
+        # "Count the dead."
+        add_stress = 20
+        add_prestige = 100
+        add_character_modifier = {
+            modifier = eotg_emotional_compartmentalization
+            years = 5
+        }
+        change_variable = { name = eotg_clayd_fear add = 1 }
+        trigger_event = { id = eotg_clayd.0002 days = 180 }
+    }
+
+    option = {
+        name = eotg_clayd.0001.b
+        # "File it away."
+        add_stress = -20
+        add_intrigue_skill = 1
+        trigger_event = { id = eotg_clayd.0002 days = 180 }
+    }
+
+    option = {
+        name = eotg_clayd.0001.c
+        # "Find out where they went."
+        add_intrigue_skill = 1
+        add_stress = 10
+        change_variable = { name = eotg_clayd_fear add = 2 }
+        trigger_event = { id = eotg_clayd.0002 days = 180 }
+    }
+}
+
+# ── eotg_clayd.0002 ───────────────────────────────────────────────────────────
+# Fires from: eotg_clayd.0001 (~6 months later)
+# Memory event: Coppervein Street demolition
+eotg_clayd.0002 = {
+    type = character_event
+    title = eotg_clayd.0002.t
+    desc = eotg_clayd.0002.desc
+    theme = intrigue
+
+    option = {
+        name = eotg_clayd.0002.a
+        # "It was business."
+        add_stress = -10
+        add_dread = 10
+        trigger_event = { id = eotg_clayd.0003 days = 180 }
+    }
+
+    option = {
+        name = eotg_clayd.0002.b
+        # "I should've stopped them."
+        add_stress = 15
+        add_martial_skill = 1
+        add_intrigue_skill = 1
+        change_variable = { name = eotg_clayd_fear add = 1 }
+        trigger_event = { id = eotg_clayd.0003 days = 180 }
+    }
+
+    option = {
+        name = eotg_clayd.0002.c
+        # "You survive by seeing the move before it happens."
+        add_character_modifier = {
+            modifier = eotg_predictive_paranoia
+            years = 10
+        }
+        add_dread = 10
+        change_variable = { name = eotg_clayd_fear add = 2 }
+        trigger_event = { id = eotg_clayd.0003 days = 180 }
+    }
+}
+
+# ── eotg_clayd.0003 ───────────────────────────────────────────────────────────
+# Fires from: eotg_clayd.0002 (~year 1)
+# The Year of Regret
+eotg_clayd.0003 = {
+    type = character_event
+    title = eotg_clayd.0003.t
+    desc = eotg_clayd.0003.desc
+    theme = intrigue
+
+    option = {
+        name = eotg_clayd.0003.a
+        # "Nobody could've stopped them."
+        add_stress = -50
+        add_learning_skill = 1
+        add_character_modifier = {
+            modifier = eotg_resigned_survivor
+            years = 5
+        }
+        trigger_event = { id = eotg_clayd.0004 days = 365 }
+    }
+
+    option = {
+        name = eotg_clayd.0003.b
+        # "I should've killed them when I had the chance."
+        add_martial_skill = 1
+        add_stress = 15
+        add_character_modifier = {
+            modifier = eotg_predatory_thinking
+            years = 5
+        }
+        change_variable = { name = eotg_clayd_fear add = 1 }
+        trigger_event = { id = eotg_clayd.0004 days = 365 }
+    }
+
+    option = {
+        name = eotg_clayd.0003.c
+        # "The problem was weakness."
+        add_dread = 10
+        add_character_modifier = {
+            modifier = eotg_iron_logic
+            years = 10
+        }
+        add_character_flag = eotg_clayd_authoritarian_path
+        change_variable = { name = eotg_clayd_fear add = 2 }
+        trigger_event = { id = eotg_clayd.0004 days = 365 }
+    }
+}
+
+# ── eotg_clayd.0004 ───────────────────────────────────────────────────────────
+# Fires from: eotg_clayd.0003 (year 2-3)
+# The Systems That Failed — recovered Helix archives
+eotg_clayd.0004 = {
+    type = character_event
+    title = eotg_clayd.0004.t
+    desc = eotg_clayd.0004.desc
+    theme = stewardship
+
+    option = {
+        name = eotg_clayd.0004.a
+        # "Then Helix deserves burial." — reconstruction state
+        add_character_modifier = {
+            modifier = eotg_pragmatic_rebuilder
+            years = 10
+        }
+        add_stewardship_skill = 1
+        trigger_event = { id = eotg_clayd.0005 days = 365 }
+    }
+
+    option = {
+        name = eotg_clayd.0004.b
+        # "Then Helix must become disciplined."
+        add_character_modifier = {
+            modifier = eotg_disciplined_continuity
+            years = 10
+        }
+        trigger_event = { id = eotg_clayd.0005 days = 365 }
+    }
+
+    option = {
+        name = eotg_clayd.0004.c
+        # "No committees. No weakness. Never again."
+        add_character_modifier = {
+            modifier = eotg_iron_continuity
+            years = 10
+        }
+        add_dread = 15
+        change_variable = { name = eotg_clayd_fear add = 1 }
+        trigger_event = { id = eotg_clayd.0005 days = 365 }
+    }
+}
+
+# ── eotg_clayd.0005 ───────────────────────────────────────────────────────────
+# Fires from: eotg_clayd.0004 (~1 year later)
+# Karim's Shadow — unconfirmed sighting
+eotg_clayd.0005 = {
+    type = character_event
+    title = eotg_clayd.0005.t
+    desc = eotg_clayd.0005.desc
+    theme = intrigue
+
+    option = {
+        name = eotg_clayd.0005.a
+        # "Find him."
+        add_character_modifier = {
+            modifier = eotg_hunt_the_problem
+            years = 10
+        }
+        trigger_event = { id = eotg_clayd.0006 days = 730 }
+    }
+
+    option = {
+        name = eotg_clayd.0005.b
+        # "Prepare for him."
+        add_character_modifier = {
+            modifier = eotg_prepare_for_return
+            years = 10
+        }
+        trigger_event = { id = eotg_clayd.0006 days = 730 }
+    }
+
+    option = {
+        name = eotg_clayd.0005.c
+        # "If he comes back, he dies."
+        add_character_modifier = {
+            modifier = eotg_anti_predator_doctrine
+            years = 10
+        }
+        trigger_event = { id = eotg_clayd.0006 days = 730 }
+    }
+}
+
+# ── eotg_clayd.0006 ───────────────────────────────────────────────────────────
+# Fires from: eotg_clayd.0005 (~2 years later)
+# The Heir and the Future
+eotg_clayd.0006 = {
+    type = character_event
+    title = eotg_clayd.0006.t
+    desc = eotg_clayd.0006.desc
+    theme = stewardship
+
+    option = {
+        name = eotg_clayd.0006.a
+        # "They deserve stability." — restoration
+        add_character_modifier = { modifier = eotg_helix_restoration years = 20 }
+        add_legitimacy = 20
+        trigger_event = { id = eotg_clayd.0007 days = 1825 }
+    }
+
+    option = {
+        name = eotg_clayd.0006.b
+        # "Helix should rule what weaker systems couldn't." — ascendancy
+        add_character_modifier = { modifier = eotg_helix_ascendant years = 20 }
+        add_character_flag = eotg_helix_ascendant_path
+        trigger_event = { id = eotg_clayd.0007 days = 1825 }
+    }
+
+    option = {
+        name = eotg_clayd.0006.c
+        # "Nothing will ever catch us unprepared again." — fortress
+        add_character_modifier = { modifier = eotg_fortress_helix years = 20 }
+        trigger_event = { id = eotg_clayd.0007 days = 1825 }
+    }
+}
+
+# ── eotg_clayd.0007 ───────────────────────────────────────────────────────────
+# The Thing That Survived — final reflection
+eotg_clayd.0007 = {
+    type = character_event
+    title = eotg_clayd.0007.t
+    desc = eotg_clayd.0007.desc
+    theme = intrigue
+
+    option = {
+        name = eotg_clayd.0007.a
+        # "Survival is enough."
+        add_stress = -50
+        add_legitimacy = 20
+        add_prestige = 100
+        add_character_flag = eotg_clayd_path_survived
+        trigger_event = { id = eotg_clayd.0008 days = 30 }
+    }
+
+    option = {
+        name = eotg_clayd.0007.b
+        # "The world belongs to those willing to become harder."
+        add_dread = 20
+        add_prestige = 300
+        add_character_flag = eotg_clayd_path_hardened
+        trigger_event = { id = eotg_clayd.0008 days = 30 }
+    }
+
+    option = {
+        name = eotg_clayd.0007.c
+        # "I will build something that outlives fear."
+        add_legitimacy = 30
+        add_prestige = 200
+        add_stress = -30
+        add_character_flag = eotg_clayd_path_built
+        trigger_event = { id = eotg_clayd.0008 days = 30 }
+    }
+}
+
+# ── eotg_clayd.0008 ───────────────────────────────────────────────────────────
+# What the Scar Left Behind — epilogue, fires 30 days after the final choice
+eotg_clayd.0008 = {
+    type = character_event
+    title = eotg_clayd.0008.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { has_character_flag = eotg_clayd_path_survived }
+                desc = eotg_clayd.0008.desc_survived
+            }
+            triggered_desc = {
+                trigger = { has_character_flag = eotg_clayd_path_hardened }
+                desc = eotg_clayd.0008.desc_hardened
+            }
+            triggered_desc = {
+                trigger = { has_character_flag = eotg_clayd_path_built }
+                desc = eotg_clayd.0008.desc_built
+            }
+            desc = eotg_clayd.0008.desc_survived
+        }
+    }
+    theme = intrigue
+
+    option = {
+        name = eotg_clayd.0008.opt_survived
+        trigger = { has_character_flag = eotg_clayd_path_survived }
+        add_stress = -30
+        add_legitimacy = 20
+        add_prestige = 200
+        remove_character_flag = eotg_clayd_path_survived
+    }
+
+    option = {
+        name = eotg_clayd.0008.opt_hardened
+        trigger = { has_character_flag = eotg_clayd_path_hardened }
+        add_dread = 15
+        add_intrigue_skill = 1
+        add_prestige = 300
+        remove_character_flag = eotg_clayd_path_hardened
+    }
+
+    option = {
+        name = eotg_clayd.0008.opt_built
+        trigger = { has_character_flag = eotg_clayd_path_built }
+        add_legitimacy = 30
+        add_stress = -50
+        add_prestige = 200
+        remove_character_flag = eotg_clayd_path_built
+    }
+}

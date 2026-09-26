@@ -1,0 +1,118 @@
+﻿# ── eotg_pmc_council_tasks.txt ───────────────────────────────────────────────
+# Council tasks for the PMC Logistics Officer position.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Manage Supply Lines — reduces army upkeep for the Contractor-General's realm.
+task_eotg_pmc_manage_supply_lines = {
+	default_task = yes
+	position = eotg_pmc_logistics_officer
+
+	task_type = task_type_general
+	task_progress = task_progress_infinite
+
+	asset = {
+		icon = "gfx/interface/icons/council_task_types/task_raise_levies.dds"
+		background = "gfx/interface/buttons/button_round_bg.dds"
+		frame = "gfx/interface/buttons/button_round_frame.dds"
+		glow = "gfx/particles/halo.dds"
+	}
+
+	effect_desc = {
+		desc = task_eotg_pmc_manage_supply_lines_effect_desc
+	}
+
+	is_valid_showing_failures_only = {
+		has_government = eotg_pmc_government
+	}
+
+	council_owner_modifier = {
+		name = task_eotg_pmc_manage_supply_lines_modifier
+		men_at_arms_maintenance = -0.10
+		scale = steward_collect_taxes_total_scale
+	}
+
+	ai_will_do = {
+		value = 2
+	}
+}
+
+# Secure Resources — boosts gold income from the Contractor-General's domain.
+task_eotg_pmc_secure_resources = {
+	position = eotg_pmc_logistics_officer
+
+	task_type = task_type_general
+	task_progress = task_progress_infinite
+
+	asset = {
+		icon = "gfx/interface/icons/council_task_types/task_collect_taxes.dds"
+		background = "gfx/interface/buttons/button_round_bg.dds"
+		frame = "gfx/interface/buttons/button_round_frame.dds"
+		glow = "gfx/particles/halo.dds"
+	}
+
+	effect_desc = {
+		desc = task_eotg_pmc_secure_resources_effect_desc
+	}
+
+	is_valid_showing_failures_only = {
+		has_government = eotg_pmc_government
+	}
+
+	council_owner_modifier = {
+		name = task_eotg_pmc_secure_resources_modifier
+		domain_tax_mult = 0.10
+		scale = steward_collect_taxes_total_scale
+	}
+
+	ai_will_do = {
+		value = 2
+	}
+}
+
+# Audit Contracts — manages public perception of active contracts.
+# Reduces controversy pressure and improves vassal relations.
+task_eotg_pmc_audit_contracts = {
+	position = eotg_pmc_logistics_officer
+
+	task_type = task_type_general
+	task_progress = task_progress_infinite
+
+	asset = {
+		icon = "gfx/interface/icons/council_task_types/task_study_technology.dds"
+		background = "gfx/interface/buttons/button_round_bg.dds"
+		frame = "gfx/interface/buttons/button_round_frame.dds"
+		glow = "gfx/particles/halo.dds"
+	}
+
+	effect_desc = {
+		desc = task_eotg_pmc_audit_contracts_effect_desc
+	}
+
+	is_valid_showing_failures_only = {
+		has_government = eotg_pmc_government
+	}
+
+	council_owner_modifier = {
+		name = task_eotg_pmc_audit_contracts_modifier
+		vassal_opinion = 3
+		monthly_prestige_gain_mult = 0.05
+		scale = steward_collect_taxes_total_scale
+	}
+
+	ai_will_do = {
+		value = 1
+		# Prefer this when controversy is active
+		if = {
+			limit = {
+				liege = {
+					OR = {
+						has_character_modifier = eotg_pmc_controversy_minor
+						has_character_modifier = eotg_pmc_controversy_standard
+						has_character_modifier = eotg_pmc_controversy_exclusive
+					}
+				}
+			}
+			add = 3
+		}
+	}
+}

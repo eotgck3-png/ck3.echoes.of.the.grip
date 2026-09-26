@@ -1,0 +1,97 @@
+﻿l_english:
+ # ── Title Tiers — EotG Setting Overrides ─────────────────────────────────────
+ # Source: culture/culture_titles_l_english.yml
+ # Replaces the GENERIC title-tier names shown for every title in the game:
+ # the realm tree, title tooltips, the map, succession screens, war names.
+ #
+ # WHY THE GENERIC SET IS ENOUGH:
+ # CK3 derives tier keys as <tier>_<government>, but falls back to the generic
+ # set when no government-specific key exists. Verified against vanilla:
+ # japan_feudal, mandala, meritocratic, steppe_admin, wanua, celestial, nomad
+ # and landless_adventurer all ship WITHOUT <tier>_<gov> keys and still display
+ # correctly. The mod's seven custom governments are in the same position, so
+ # overriding the generic keys covers them too. Culture-group variants
+ # (feudal_roman, theocracy_islam_religion, …) are deliberately NOT overridden:
+ # they key off vanilla culture heritages, and this mod ships its own.
+ #
+ # THE LADDER — set by the mod author 2026-08-29:
+ #   Barony  → System    (one star system)
+ #   County  → Region    (several systems)
+ #   Duchy   → Sector    (duchies are "Xerxes Reach", "Aphionian Belt")
+ #   Kingdom → Expanse   (the mod already has "The Lanius Expanse", a kingdom)
+ #   Empire  → Cluster   (the mod's empire is literally "The Myr Cluster")
+ #
+ # WHY NOT "Realm" for the kingdom tier: it was the first choice and was
+ # rejected. Vanilla uses "realm" 916 times to mean "everything a character
+ # rules, at ANY tier" — Realm Law, Realm Heir, Realm Priest, Realm Capital,
+ # and every [realm|E] link. A count holding no kingdom still has a Realm
+ # Capital, so the word would have carried two meanings in the same tooltip.
+ # "Expanse" appears exactly ONCE in all of vanilla, so it is effectively free.
+ #
+ # ONE KNOWN FRICTION, left deliberately:
+ # Barony TITLES are still named "Xerxes Station", "Crestfall Station" in
+ # eotg_titles_l_english.yml, while the barony TIER is now "System" — the UI
+ # reads "Xerxes Station (System)". This mirrors vanilla's own county/barony
+ # name sharing (County of York holds Barony of York), so it is not a bug. A
+ # rename pass over the eotg_b_* keys would tighten it; that is a content
+ # decision, not a loc fix.
+ #
+ # Non-feudal variants keep their vanilla ROLE while losing the medieval word:
+ # republics trade in Ports and Charters, theocracies in Sanctums, tribal and
+ # clan realms in Clanholdings.
+ # ─────────────────────────────────────────────────────────────────────────────
+
+ # ── Barony tier ──────────────────────────────────────────────────────────────
+ # "Barony" / "City" / "Temple" / "Tribe" / "Chapter" / "Band"
+ barony_feudal:0 "System"
+ barony_republic:0 "Port"
+ barony_theocracy:0 "Sanctum"
+ barony_clan:0 "Clanhold"
+ barony_tribal:0 "Clanhold"
+ barony_holy_order:0 "Chapter Post"
+ barony_mercenary:0 "Berth"
+
+ # ── County tier ──────────────────────────────────────────────────────────────
+ # "County" / "Grand City" / "Great Temple" / "Chiefdom" / "Host"
+ county_feudal:0 "Region"
+ county_republic:0 "Free Port"
+ county_theocracy:0 "Great Sanctum"
+ county_clan:0 "Clanholding"
+ county_tribal:0 "Clanholding"
+ county_holy_order:0 "Host"
+ county_mercenary:0 "Host"
+
+ # ── Duchy tier ───────────────────────────────────────────────────────────────
+ # "Duchy" / "Republic" / "Theocracy" / "High Chiefdom" / "Order" / "Company"
+ duchy_feudal:0 "Sector"
+ duchy_republic:0 "Charter"
+ duchy_theocracy:0 "Hierarchate"
+ duchy_clan:0 "High Clanholding"
+ duchy_tribal:0 "High Clanholding"
+ duchy_holy_order:0 "Order"
+ duchy_mercenary:0 "Company"
+
+ # ── Kingdom tier ─────────────────────────────────────────────────────────────
+ # "Kingdom" / "Most Serene Republic" / "Grand Theocracy" / "Clan" / "Army"
+ kingdom_feudal:0 "Expanse"
+ kingdom_republic:0 "Most Serene Charter"
+ kingdom_theocracy:0 "Grand Hierarchate"
+ kingdom_clan:0 "Great Clan"
+ kingdom_tribal:0 "Expanse"
+ kingdom_holy_order:0 "Sacred Order"
+ kingdom_mercenary:0 "Armada"
+
+ # ── Empire tier ──────────────────────────────────────────────────────────────
+ # "Empire" / "Grand Principality" / "Holy Empire" / "Grand Clan" / "High Kingdom"
+ empire_feudal:0 "Cluster"
+ empire_republic:0 "Grand Charter"
+ empire_theocracy:0 "Holy Cluster"
+ empire_clan:0 "Grand Clan"
+ empire_tribal:0 "High Expanse"
+ empire_holy_order:0 "Most Sacred Order"
+ empire_mercenary:0 "Grand Armada"
+
+ # ── Map mode / title list plurals ────────────────────────────────────────────
+ # Vanilla: "Baronies" / "County Titles"
+ baronies:0 "Systems"
+ counties:0 "Region Titles"

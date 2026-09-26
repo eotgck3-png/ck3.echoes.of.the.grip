@@ -1,0 +1,58 @@
+﻿l_english:
+ # ── Stress Threshold Events — EotG Setting Overrides ─────────────────────────
+ # Replaces medieval/Christianity-specific vanilla stress event text.
+ # Source files:
+ #   stress_threshold_events_l_english.yml
+ #   stress_threshold_events_1_l_english.yml
+ # Rules: no option removed, no trait removed, only setting-breaking text changed.
+ # ─────────────────────────────────────────────────────────────────────────────
+
+ # ── stress_threshold_events_l_english ────────────────────────────────────────
+
+ # "sins" → "mistakes" (medieval guilt framing)
+ stress_threshold.1001.desc:0 "Guilt and shame have been plaguing me as of late. All of my mistakes, my flaws, my failings... these dark thoughts distract me from my responsibilities and keep me awake at night.\n\nI feel like I must do something to put an end to this mental anguish, but what could possibly help?"
+
+ # "excise my sins" → "excise my failings"
+ stress_threshold.1001.flagellant.gain:0 "The sting of the lash will excise my failings."
+
+ # "make up for my sins" → "make up for my failings"
+ stress_threshold.1001.improvident.gain:0 "Donating to charity will make up for my failings."
+
+ # Hardcoded "Jesus" — replaced with dynamic faith name
+ stress_threshold.1011.conversion.christianity:0 "[ROOT.Char.GetFaith.HighGodName], deliver me from these temptations!"
+
+ # "re-balance my humors" — medieval medical theory, replaced with neutral phrasing
+ stress_threshold.1504.b:0 "I need something to re-calibrate my mind..."
+
+ # "exorcise these devils" — replaced with setting-neutral phrasing
+ stress_threshold.3001.naked_run:0 "I must purge these phantoms with a naked run!"
+
+ # ── stress_threshold_events_1_l_english ──────────────────────────────────────
+
+ # "scourge myself for my sins" → "failings"
+ # NOTE: also resolves stress_threshold.1721.c and stress_threshold.2311.c via $alias$
+ stress_threshold.1701.c.flagellant.gain:0 "I will scourge myself for my failings!"
+
+ # "burgher" — feudal merchant-class term; replaced with "contractor"
+ stress_threshold.1711.desc.ambitious:0 ""You think you can wheedle a formal stamp out of me, contractor? I am a [ROOT.GetCharacter.GetTitleAsNameNoTooltip|L]!""
+
+ # "reek of sin" + "burgher" — religious framing + feudal term
+ stress_threshold.1711.desc.zealous:0 ""I can practically smell the reek of corruption upon you, contractor!""
+
+ # "dispel the sin" → "dispel the failing"
+ # NOTE: also resolves stress_threshold.1711.b.flagellant.effect via $alias$
+ stress_threshold.1711.b.flagellant.gain:0 "Scourging myself will dispel the failing..."
+
+ # "burgher" — replaced with "contractor"
+ stress_threshold.1711.d.improvident.gain:0 "Help yourself to the treasury, contractor. You need it."
+
+ # "confess my sins publicly" → "failings"
+ stress_threshold.1721.f.contrite.gain:0 "I must confess my failings publicly."
+
+ # "My flesh for forgiveness" — replaced with setting-neutral phrasing
+ # NOTE: also resolves stress_threshold.3411.b.flagellant.effect via $alias$
+ stress_threshold.3411.b.flagellant.gain:0 "My flesh for penance!"
+
+ # "scourged for my failure" — replaced with less archaic phrasing
+ # NOTE: also resolves stress_threshold.3421.d.flagellant.effect via $alias$
+ stress_threshold.3421.d.flagellant.gain:0 "What?! I must be punished for my failure!"

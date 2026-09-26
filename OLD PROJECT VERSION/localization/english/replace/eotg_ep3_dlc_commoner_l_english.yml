@@ -1,0 +1,123 @@
+﻿l_english:
+ # ── EP3 DLC: Peasant → Commoner — EotG Setting Overrides ─────────────────────
+ # Sources: dlc/ep3/ep3_governance_l_english.yml,
+ #          dlc/ep3/ep3_laamp_decision_events_l_english.yml,
+ #          dlc/ep3/ep3_laamps_8_l_english.yml,
+ #          dlc/ep3/ep3_governor_yearly_8_l_english.yml,
+ #          dlc/ep3/ep3_story_cycle_el_cid_l_english.yml,
+ #          dlc/ep3/dlc_ep3_wars_l_english.yml,
+ #          dlc/ep3/dlc_ep3_decisions_l_english.yml,
+ #          dlc/ep3/ep3_modifiers_l_english.yml
+ # Replaces: "peasant/peasants/peasantry" → "commoner/commoners/commonfolk".
+ # ─────────────────────────────────────────────────────────────────────────────
+
+ # ── EP3 Governance ────────────────────────────────────────────────────────────
+
+ # "unguarded peasant flesh"
+ governor_contract_event.1032.desc_tactical:0 "My undisciplined foe cannot hope to stand before well-trained troops! Their projectiles streak now not towards unguarded commoner flesh; they thud harmlessly into the shields of our battle-line. The criminals break off to flee, but riders on our flanks cut off all retreat.\n\nI gaze upon the dead. I consider the captured survivors."
+
+ # "Raiding Peasants" — modifier name
+ raiding_peasants:0 "Raiding Commoners"
+
+ # "A self-organized band of peasants has been raiding"
+ raiding_peasants_desc:0 "A self-organized band of commoners has been raiding our lands from across the border."
+
+ # "a group of local peasants has taken up arms"
+ governor_contract_event.2030.desc:0 "Concerning news have come from [ongoing_destination.GetName].\n\nApparently, a group of local commoners has taken up arms and, in unruly gangs, ventured beyond our borders into [neighbor.GetCulture.GetNameNoTooltip] territory.\n\nThe practice itself is unlikely to cause diplomatic concerns, but military actions — and the possession of weapons — are a prerogative of the army. Any violation of the law, therefore, must be investigated."
+
+ # "Peasants' Border Raids" — modifier name
+ ep3_peasant_border_raids_modifier:0 "Commoners' Border Raids"
+
+ # "local peasants have armed themselves"
+ ep3_peasant_border_raids_modifier_desc:0 "The local commoners have armed themselves and are actively protecting their borders."
+
+ # "the peasants sent back to the fields"
+ ep3_peasant_workers_modifier_desc:0 "The local militia has been disbanded and the commoners sent back to the fields."
+
+ # "The local peasants can handle it." — option text
+ governor_contract_event.2041.d:0 "The local commoners can handle it."
+
+ # "The peasants are but fodder" — outcome tooltip
+ governor_contract_event.2041.d.fail:0 "The commoners are but fodder"
+
+ # "killing peasants and game alike"
+ ep3_wild_predators_modifier_desc:0 "An abundance of wild predators prowls in these lands, killing commoners and game alike."
+
+ # "A local peasant has found a hoard of buried gold"
+ buried_treasure_desc:0 "A local commoner has found a hoard of buried gold, and a dispute has risen as to who it belongs to."
+
+ # "A peasant family has unearthed a substantial hoard"
+ governor_contract_event.2070.desc:0 "The elders of a small community near [ongoing_destination.GetName] have contacted me to make a decision about a rare event.\n\nA commoner family has unearthed a substantial hoard of gold coins while working the fields! Their neighbors promptly broke into factions: some believe that the gold should go to the finders, while others argue for the windfall be shared by the whole village.\n\nThe word of a higher authority could slake the greed of these simple folk, and spare them descending into petty violence."
+
+ # "the peasant has come across a buried stash"
+ governor_contract_event.2071.desc.fallback:0 "It is a modest-looking chest filled to the brim with an assortment of golden coins minted throughout the region in different periods. My guess would be that the commoner has come across a buried stash from some long-dead crew of outlaws."
+
+ # "the unschooled peasants are so very ignorant"
+ governor_contract_event.2081.desc:0 "Upon my arrival in [ongoing_destination.GetName], I'm immediately received by [magnate.GetTitledFirstName] in [magnate.GetHerHis] manse.\n\n"Let's not speak of frivolities," I open sternly. "A good plenty of irregularities and illegal deals emerge when one considers closers your recent land acquisitions."\n\n[magnate.GetFirstNameNoTooltip] is sheepish, but unrepentant. "#EMP My good friend#!, you know how these things are... there is such bureaucracy, and the unschooled commoners are so very ignorant and slow to grasp the law. One wishes sometimes to swiftly see their business through! Can you blame me for this?""
+
+ # "several peasants have been caught killing" (×3 variants)
+ governor_contract_event.2110.desc_murder:0 "\n\nAccording to this report, several commoners have been caught killing and butchering their fellow humans to consume their flesh!"
+ governor_contract_event.2110.desc_cannibal:0 "\n\nAccording to this report, several commoners have been caught consuming the flesh of their fellow humans who died from starvation!"
+ governor_contract_event.2110.desc_animal:0 "\n\nAccording to this report, several commoners have been caught killing and consuming religiously unclean animals, thus attracting the ire of the local clergy."
+
+ # ── EP3 LAAMP Decision Events ─────────────────────────────────────────────────
+
+ # "local peasants are returning from service"
+ ep3_laamp_decision_event.1000.desc_outro_regional_europe_returned_03:0 "\n\nOn my left, local commoners are returning from service in a nearby stone church. The minister standing at the entrance gives me an inscrutable smile as I pass by."
+
+ # "a peasant finishes a crude joke"
+ ep3_laamp_decision_event.1030.desc_outro_return_partner_02:0 "\n\nOn my right, [visiting_partner.GetFirstName] grins appreciatively as a commoner finishes a crude joke involving several bodily fluids. I shoot [visiting_partner.GetHerHim] a surprised look, as I weigh what to do next."
+
+ # "chatting up a peasant [WomanMan]"
+ ep3_laamp_decision_event.1030.desc_outro_return_02:0 "\n\nAt the back of the [ROOT.Char.Custom('GetRoomTent')], a noble[ROOT.Char.GetWomanMan] is busy chatting up a commoner [ROOT.Char.Custom('GetRandomWomanMan')]. My eyes linger on the noble[ROOT.Char.Custom('WomanManPossessive')] coat of arms while I weigh what to do next."
+
+ # "occasional heckle from the peasant crowd"
+ ep3_laamp_decision_event.1040.desc_outro_physician:0 "\n\nAt the edge of the square, a devotee is preaching how better bodily health will increase our spiritual health. [laamp_physician_recruit.GetSheHe|U] stands firm despite the occasional heckle from the commonfolk."
+
+ # ── EP3 LAAmPs 8 ──────────────────────────────────────────────────────────────
+
+ # "The peasantry have come to regard this character as a folk hero"
+ laamp_prepping_for_invasion_desc:0 "The commonfolk have come to regard this character as a folk hero who will save them from high taxes and tyranny."
+
+ # "popular support of peasants within the lands"
+ laamp_familiar_lands_desc:0 "This character is enjoying the popular support of commoners within the lands they travel."
+
+ # ── EP3 Governor Yearly Events ────────────────────────────────────────────────
+
+ # "[estate_owner] may do as [she/he] pleases, peasant." — dialogue insult
+ ep3_governor_yearly.8140.c:0 "[estate_owner.GetTitledFirstNameNoTooltip] may do as [estate_owner.GetSheHe] pleases, commoner."
+
+ # "damnable peasants, [TitleAsName]!" — dialogue fragment
+ ep3_governor_yearly.8150.peasant:0 "damnable commoners, [ROOT.Char.GetTitleAsNameNoTooltip]!""
+
+ # "Peasant Uprising" — troop name
+ ep3_governor_yearly_8150_troop_name:0 "Commoner Uprising"
+
+ # ── EP3 Story Cycle: El Cid ───────────────────────────────────────────────────
+
+ # "doors of the peasantry to secure shelter"
+ cid_opened_doors_modifier_desc:0 "This character forced open the doors of the commonfolk to secure shelter for their followers."
+
+ # ── EP3 Wars ──────────────────────────────────────────────────────────────────
+
+ # "Peasant Uprising" — LAAMP war name
+ ep3_laamp_peasant_war:0 "Commoner Uprising"
+
+ # "Peasants in every county will raise as [levies]"
+ ep3_laamp_peasant_war.peasant_army:0 "Commoners in every county will raise as [levies|E] and join your side"
+
+ # ── EP3 Decisions ─────────────────────────────────────────────────────────────
+
+ # "courtiers, governors and peasants, all gathered"
+ ep3_decisions_event.4050.desc.intro:0 "The calmness of the [ROOT.Char.GetFaith.HouseOfWorship] has been disturbed by a horde of courtiers, governors and commoners, all gathered here to celebrate... #EMP me!#!\n\n"
+
+ # ── EP3 Modifiers ─────────────────────────────────────────────────────────────
+
+ # "Peasant Concessions" — modifier name
+ ep3_governor_yearly_8150_concession_modifier:0 "Commoner Concessions"
+
+ # "surplus of fit peasants of fighting age"
+ ep3_surplus_manpower_desc:0 "This county has a surplus of fit commoners of fighting age."
+
+ # "Sided with Peasants" — opinion modifier name
+ sided_with_peasants_opinion:0 "Sided with Commoners"

@@ -1,0 +1,417 @@
+﻿# ── eotg_fringe_decisions.txt ────────────────────────────────────────────────
+# Decisions for the Fringe Government.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Governance Decisions ──────────────────────────────────────────────────────
+
+# Distribute the Spoils — share war gains with captains to buy loyalty.
+eotg_fringe_distribute_spoils = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_misc.dds"
+	}
+	decision_group_type = major
+
+	desc = eotg_fringe_distribute_spoils_desc
+	selection_tooltip = eotg_fringe_distribute_spoils_tooltip
+
+	is_shown = {
+		eotg_st_is_fringe_overlord = yes
+	}
+
+	is_valid = {
+		eotg_st_is_fringe_overlord = yes
+		is_imprisoned = no
+		gold >= eotg_sv_fringe_spoils_cost
+		OR = {
+			has_character_flag = eotg_fringe_was_at_war
+			is_at_war = yes
+		}
+	}
+
+	is_valid_showing_failures_only = {
+		is_imprisoned = no
+		gold >= eotg_sv_fringe_spoils_cost
+	}
+
+	effect = {
+		remove_short_term_gold = eotg_sv_fringe_spoils_cost
+		eotg_se_fringe_gain_grip = { AMOUNT = 10 }
+		every_vassal = {
+			limit = { eotg_st_is_fringe_captain = yes }
+			add_opinion = {
+				target = root
+				modifier = eotg_fringe_spoils_distributed
+			}
+		}
+		add_character_flag = { flag = eotg_fringe_captain_paid  years = 2 }
+		custom_tooltip = eotg_fringe_distribute_spoils_effect_tooltip
+	}
+
+	cooldown = { years = 2 }
+
+	ai_will_do = {
+		base = 50
+		modifier = { add = 30  gold > 500 }
+		modifier = { add = -20  gold < 150 }
+	}
+}
+
+# Rule Through Fear — intimidate captains into submission.
+eotg_fringe_rule_through_fear = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_misc.dds"
+	}
+	decision_group_type = major
+
+	desc = eotg_fringe_rule_through_fear_desc
+	selection_tooltip = eotg_fringe_rule_through_fear_tooltip
+
+	is_shown = {
+		eotg_st_is_fringe_overlord = yes
+	}
+
+	is_valid = {
+		eotg_st_is_fringe_overlord = yes
+		is_imprisoned = no
+		prestige >= 100
+	}
+
+	is_valid_showing_failures_only = {
+		is_imprisoned = no
+		prestige >= 100
+	}
+
+	effect = {
+		add_prestige = -100
+		add_tyranny = 10
+		eotg_se_fringe_gain_grip = { AMOUNT = 8 }
+		add_character_modifier = {
+			modifier = eotg_fringe_fear_ruling
+			years = 3
+		}
+		every_vassal = {
+			limit = { eotg_st_is_fringe_captain = yes }
+			add_opinion = {
+				target = root
+				modifier = eotg_fringe_fear_rule_resentment
+			}
+		}
+		custom_tooltip = eotg_fringe_rule_through_fear_effect_tooltip
+	}
+
+	cooldown = { years = 3 }
+
+	ai_will_do = {
+		base = 20
+		modifier = { add = 20  eotg_st_fringe_grip_low = yes }
+		modifier = { add = -10  has_trait = compassionate }
+	}
+}
+
+# Call the Warbands — mobilize all captains for a campaign.
+eotg_fringe_call_warbands = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_misc.dds"
+	}
+	decision_group_type = major
+
+	desc = eotg_fringe_call_warbands_desc
+	selection_tooltip = eotg_fringe_call_warbands_tooltip
+
+	is_shown = {
+		eotg_st_is_fringe_overlord = yes
+	}
+
+	is_valid = {
+		eotg_st_is_fringe_overlord = yes
+		is_imprisoned = no
+		is_at_war = no
+		prestige >= 50
+	}
+
+	is_valid_showing_failures_only = {
+		is_imprisoned = no
+		is_at_war = no
+		prestige >= 50
+	}
+
+	effect = {
+		add_prestige = -50
+		add_character_modifier = {
+			modifier = eotg_fringe_warbands_called
+			years = 2
+		}
+		custom_tooltip = eotg_fringe_call_warbands_effect_tooltip
+	}
+
+	cooldown = { years = 2 }
+
+	ai_will_do = {
+		base = 30
+		modifier = { add = 20  is_at_war = no }
+	}
+}
+
+# Suppress Breakaway Captains — address disloyal captains before they rebel.
+eotg_fringe_suppress_captains = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_misc.dds"
+	}
+	decision_group_type = major
+
+	desc = eotg_fringe_suppress_captains_desc
+	selection_tooltip = eotg_fringe_suppress_captains_tooltip
+
+	is_shown = {
+		eotg_st_is_fringe_overlord = yes
+		any_vassal = {
+			eotg_st_is_fringe_captain = yes
+			opinion = { target = root  value < -10 }
+		}
+	}
+
+	is_valid = {
+		eotg_st_is_fringe_overlord = yes
+		is_imprisoned = no
+		any_vassal = {
+			eotg_st_is_fringe_captain = yes
+			opinion = { target = root  value < -10 }
+		}
+	}
+
+	is_valid_showing_failures_only = {
+		is_imprisoned = no
+	}
+
+	effect = {
+		trigger_event = { id = eotg_fringe.0003  days = 3 }
+	}
+
+	cooldown = { years = 3 }
+
+	ai_will_do = {
+		base = 30
+		modifier = { add = 20  eotg_st_fringe_grip_low = yes }
+	}
+}
+
+# Forge a Unified Fringe — major decision for late-game temporary stabilization.
+eotg_fringe_forge_unified = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_dynasty_house.dds"
+	}
+	decision_group_type = major
+
+	desc = eotg_fringe_forge_unified_desc
+	selection_tooltip = eotg_fringe_forge_unified_tooltip
+
+	is_shown = {
+		eotg_st_is_fringe_overlord = yes
+		NOT = { has_character_modifier = eotg_fringe_unified }
+	}
+
+	is_valid = {
+		eotg_st_is_fringe_overlord = yes
+		is_imprisoned = no
+		eotg_st_fringe_grip_high = yes
+		prestige >= 500
+		dread >= 30
+		realm_size >= 20
+	}
+
+	is_valid_showing_failures_only = {
+		is_imprisoned = no
+		eotg_st_fringe_grip_high = yes
+		prestige >= 500
+		dread >= 30
+		realm_size >= 20
+	}
+
+	effect = {
+		add_prestige = -200
+		add_character_modifier = {
+			modifier = eotg_fringe_unified
+			years = 15
+		}
+		eotg_se_fringe_gain_grip = { AMOUNT = 15 }
+		every_vassal = {
+			limit = { eotg_st_is_fringe_captain = yes }
+			add_opinion = {
+				target = root
+				modifier = eotg_fringe_unified_fear
+			}
+		}
+		custom_tooltip = eotg_fringe_forge_unified_effect_tooltip
+	}
+
+	ai_will_do = {
+		base = 20
+		modifier = { add = 30  prestige > 1000 }
+		modifier = { add = 20  dread > 50 }
+	}
+}
+
+# ── Reform Decisions ──────────────────────────────────────────────────────────
+
+# Reform Path 1: Evolve the Fringe into a Cartel State.
+eotg_fringe_reform_cartel = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_dynasty_house.dds"
+	}
+	decision_group_type = major
+
+	desc = eotg_fringe_reform_cartel_desc
+	selection_tooltip = eotg_fringe_reform_cartel_tooltip
+
+	is_shown = {
+		eotg_st_fringe_reform_ready = yes
+	}
+
+	is_valid = {
+		eotg_st_fringe_reform_ready = yes
+		prestige >= eotg_sv_fringe_reform_prestige_cost
+		gold >= 300
+		dread >= 20
+	}
+
+	is_valid_showing_failures_only = {
+		is_imprisoned = no
+		prestige >= eotg_sv_fringe_reform_prestige_cost
+		gold >= 300
+		dread >= 20
+	}
+
+	effect = {
+		add_prestige = { value = eotg_sv_fringe_reform_prestige_cost  multiply = -1 }
+		remove_short_term_gold = 300
+		trigger_event = { id = eotg_fringe.0010  days = 3 }
+	}
+
+	ai_will_do = {
+		base = 5
+		modifier = { add = 20  dread > 40 }
+		modifier = { add = 15  prestige > 800 }
+	}
+}
+
+# Reform Path 2: Evolve the Fringe into a PMC.
+eotg_fringe_reform_pmc = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_dynasty_house.dds"
+	}
+	decision_group_type = major
+
+	desc = eotg_fringe_reform_pmc_desc
+	selection_tooltip = eotg_fringe_reform_pmc_tooltip
+
+	is_shown = {
+		eotg_st_fringe_reform_ready = yes
+	}
+
+	is_valid = {
+		eotg_st_fringe_reform_ready = yes
+		prestige >= eotg_sv_fringe_reform_prestige_cost
+		gold >= 300
+		martial >= 10
+	}
+
+	is_valid_showing_failures_only = {
+		is_imprisoned = no
+		prestige >= eotg_sv_fringe_reform_prestige_cost
+		gold >= 300
+		martial >= 10
+	}
+
+	effect = {
+		add_prestige = { value = eotg_sv_fringe_reform_prestige_cost  multiply = -1 }
+		remove_short_term_gold = 300
+		trigger_event = { id = eotg_fringe.0011  days = 3 }
+	}
+
+	ai_will_do = {
+		base = 5
+		modifier = { add = 20  martial > 14 }
+		modifier = { add = 15  prestige > 800 }
+	}
+}
+
+# Reform Path 3: Evolve the Fringe into a Corporate Frontier State.
+eotg_fringe_reform_corporation = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_dynasty_house.dds"
+	}
+	decision_group_type = major
+
+	desc = eotg_fringe_reform_corporation_desc
+	selection_tooltip = eotg_fringe_reform_corporation_tooltip
+
+	is_shown = {
+		eotg_st_fringe_reform_ready = yes
+	}
+
+	is_valid = {
+		eotg_st_fringe_reform_ready = yes
+		prestige >= eotg_sv_fringe_reform_prestige_cost
+		gold >= 500
+		stewardship >= 10
+	}
+
+	is_valid_showing_failures_only = {
+		is_imprisoned = no
+		prestige >= eotg_sv_fringe_reform_prestige_cost
+		gold >= 500
+		stewardship >= 10
+	}
+
+	effect = {
+		add_prestige = { value = eotg_sv_fringe_reform_prestige_cost  multiply = -1 }
+		remove_short_term_gold = 500
+		trigger_event = { id = eotg_fringe.0012  days = 3 }
+	}
+
+	ai_will_do = {
+		base = 5
+		modifier = { add = 20  stewardship > 14 }
+		modifier = { add = 15  gold > 1000 }
+	}
+}
+
+# Reform Path 4: Feudalize the Fringe realm into a legitimate feudal state.
+eotg_fringe_reform_feudal = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_dynasty_house.dds"
+	}
+	decision_group_type = major
+
+	desc = eotg_fringe_reform_feudal_desc
+	selection_tooltip = eotg_fringe_reform_feudal_tooltip
+
+	is_shown = {
+		eotg_st_fringe_reform_ready = yes
+	}
+
+	is_valid = {
+		eotg_st_fringe_reform_ready = yes
+		prestige >= eotg_sv_fringe_reform_prestige_cost
+		gold >= 200
+		diplomacy >= 10
+	}
+
+	is_valid_showing_failures_only = {
+		is_imprisoned = no
+		prestige >= eotg_sv_fringe_reform_prestige_cost
+		gold >= 200
+		diplomacy >= 10
+	}
+
+	effect = {
+		add_prestige = { value = eotg_sv_fringe_reform_prestige_cost  multiply = -1 }
+		remove_short_term_gold = 200
+		trigger_event = { id = eotg_fringe.0013  days = 3 }
+	}
+
+	ai_will_do = {
+		base = 5
+		modifier = { add = 20  diplomacy > 14 }
+	}
+}

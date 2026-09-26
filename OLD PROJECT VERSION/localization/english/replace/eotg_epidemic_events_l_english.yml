@@ -1,0 +1,53 @@
+﻿l_english:
+ # ── Epidemic Events (CE1 DLC) — EotG Setting Overrides ───────────────────────
+ # Source: dlc/ce1/ce1_epidemic_events_l_english.yml
+ # Replaces: "peasant/peasantry" → "commoner/commonfolk",
+ #            "humors" (medieval medicine) → "ailments",
+ #            "sin" as noun → "failing/transgression",
+ #            "prayer/pray" (hardcoded) → "devotions/devotion".
+ # ─────────────────────────────────────────────────────────────────────────────
+
+ # "peasants say" + "Their prayers turned against them"
+ epidemic_events.1060.desc.mid.faith:0 "The [faith_to_blame.GetAdherentNamePlural] — long tolerated — are now seen as a curse. "They angered the heavens," commoners say, "and now we suffer for it." Their temples are defaced. Their devotions turned against them."
+
+ # "My sin runs deep"
+ epidemic_events.1063.desc.outro:0 "Only by striving to be [virtuous_trait.GetName(ROOT.Char)] can we even hope for an end to the plague."\n\nThe people murmur approval. In truth, part of me wonders if they're right. My failing runs deep, deeper than I'd admit aloud. And if this plague is judgment... then perhaps it begins with me."
+
+ # "of sin in silk"
+ epidemic_events.1065.desc.outro:0 "of consorting with [ROOT.Char.GetFaith.EvilGodNames], of transgression in silk. Now they demand [shamed_buddy.GetHerHis] public punishment — dragged from [shamed_buddy.GetHerHis] halls and made to repent.\n\nTo refuse them risks revolt. To yield shames the crown."
+
+ # "the peasantry — they blame"
+ epidemic_events.1066.desc:0 "No words will sway the commonfolk — they blame the [faith_blamed.GetAdherentNamePlural] for [epidemic_scope.GetName]. Their traders are harassed, their homes defaced. Many have fled, and trade has withered.\n\nWorse still, in some villages, they are being hunted.\n\nIf this persecution continues, my realm may bleed itself dry — not from plague, but from fear."
+
+ # "the peasantry there has been insistent on blaming"
+ epidemic_events.1067.desc:0 "As [epidemic_scope.GetName] ravages [bigoted_ruler_that_everyone_hates.GetNamePossessive] realm, the commonfolk there has been insistent on blaming [faith_blamed.GetAdherentNamePlural]. This problem has become so widespread that many have even begun fleeing [bigoted_ruler_that_everyone_hates.GetPrimaryTitle.GetNameNoTierNoTooltip|U] and coming to my lands."
+
+ # "bad humors of all sorts" — physician fallback description
+ epidemic_events.1100.desc.mid.fallback:0 "The populace are wracked with ailments of all sorts, resulting in symptoms that are too numerous to name.\n\n"
+
+ # "half of the peasant population have been infected"
+ epidemic_events.1100.desc.mid2.major:0 "At least half of the commoner population have been infected, and it's only a matter of time until it spreads to the nobility."
+
+ # "Those poor sick peasants..."
+ epidemic_events.1100.a.compassionate:0 "Those poor sick commoners..."
+
+ # "only peasants and plague"
+ epidemic_events.2003.desc:0 ""Our soldiers fall without a fight. [epidemic_scope.GetName|U] has taken more than any blade."\n\n[marshal.GetName] speaks harshly, but he's right. From [first_epidemic_province.GetName] to [second_epidemic_province.GetName], the barracks lie empty. There are no warriors left — only commoners and plague."
+
+ # "Drag peasants from the fields if we must."
+ epidemic_events.2003.b:0 "Drag commoners from the fields if we must."
+
+ # "A peasant writhes in my courtyard"
+ epidemic_events.2006.desc:0 "A commoner writhes in my courtyard, feet pounding the earth in a ceaseless, maddening rhythm.\n\n"Forgive [dance_victim.GetHerHim], my liege," says an onlooker. "[dance_victim.GetFirstName] has danced for days without rest — others have even joined [dance_victim.GetHerHim]! [dance_victim.GetSheHe|U] won't stop."\n\nThe woman moans, [dance_victim.GetHerHim] face contorting with pain and joy. Madness, or something worse, grips [dance_victim.GetHerHim]."
+
+ # "the peasant who throws [herself/himself] before my horse" — [peasant.GetHerselfHimself] is a scope token, not literal "peasant"
+ epidemic_events.5003.desc:0 "Mud and misery cling to the streets of [location.GetName] — and to the commoner who throws [peasant.GetHerselfHimself] before my horse, clutching a frail child.\n\n"My [ROOT.Char.Custom('FormOfAddressForLiege')], please," [peasant.GetSheHe] begs. "[child.GetSheHe|U] is so ill. But your royal touch could heal [child.GetHerHim]..."\n\nThe rain drums down. The child sways."
+
+ # "The peasants believing a royal's touch heals"
+ epidemic_events.5003.b.tt:0 "The commoners believing a royal's touch heals has its benefits and drawbacks..."
+
+ # "a flood of peasants surges in"
+ epidemic_events.5004.desc:0 "A roar, a crash — the throne room doors burst open, and a flood of commoners surges in. Old, young, sick, scared — all eyes are on me.\n\n"[ROOT.Char.Custom('FormOfAddressForLiege')|U]," one of them pleads, "protect us from [epidemic_scope.GetName]. You must."\n\nMy guards stand ready, awaiting my word."
+
+ # "turn their calloused hands to prayer" — Toledo flavor text
+ epidemic_events.5010.toledo:0 "What city is more known for its steel than Toledo? The waters of the Tagus have been used to quench the blades of a million swords, but there are some threats no amount of fine craftsmanship can protect from.\n\nIt is a grim irony that so diverse a place should be so suddenly united in the face of such adversity. The sickness kills without prejudice, laying low all from every walk of life.\n\nThe ancient smithies fall silent. Those who worked them turn their calloused hands to devotion rather than toil, in hope that the divine may save them where a weapon would not."

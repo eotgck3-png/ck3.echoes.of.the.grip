@@ -1,0 +1,432 @@
+﻿# ── eotg_new_cauldron_decisions.txt ──────────────────────────────────────────
+# Decisions for the New Cauldron Democracy government.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Campaign Decisions ────────────────────────────────────────────────────────
+
+# Make a public campaign promise — boosts vote weight but creates an obligation.
+eotg_nc_make_campaign_promise = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_misc.dds"
+	}
+	decision_group_type = major
+
+	desc = eotg_nc_make_campaign_promise_desc
+	selection_tooltip = eotg_nc_make_campaign_promise_tooltip
+
+	is_shown = {
+		eotg_st_nc_campaign_eligible = yes
+		eotg_st_nc_campaign_active = yes
+	}
+
+	is_valid = {
+		eotg_st_nc_campaign_eligible = yes
+		eotg_st_nc_campaign_active = yes
+		is_imprisoned = no
+		NOT = { has_character_flag = eotg_nc_promise_made }
+	}
+
+	is_valid_showing_failures_only = {
+		is_imprisoned = no
+		NOT = { has_character_flag = eotg_nc_promise_made }
+	}
+
+	effect = {
+		add_character_flag = { flag = eotg_nc_promise_made  years = 5 }
+		custom_tooltip = eotg_nc_make_campaign_promise_effect_tooltip
+	}
+
+	ai_will_do = {
+		base = 50
+	}
+}
+
+# Rally the Districts — spend gold to boost vote weight in your region.
+eotg_nc_rally_districts = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_misc.dds"
+	}
+	decision_group_type = major
+
+	desc = eotg_nc_rally_districts_desc
+	selection_tooltip = eotg_nc_rally_districts_tooltip
+
+	is_shown = {
+		eotg_st_nc_campaign_eligible = yes
+		eotg_st_nc_campaign_active = yes
+	}
+
+	is_valid = {
+		eotg_st_nc_campaign_eligible = yes
+		eotg_st_nc_campaign_active = yes
+		is_imprisoned = no
+		gold >= eotg_sv_nc_rally_cost
+	}
+
+	is_valid_showing_failures_only = {
+		is_imprisoned = no
+		gold >= eotg_sv_nc_rally_cost
+	}
+
+	effect = {
+		remove_short_term_gold = eotg_sv_nc_rally_cost
+		if = {
+			limit = { has_variable = eotg_nc_rally_bonus }
+			change_variable = { name = eotg_nc_rally_bonus  add = 3 }
+		}
+		else = {
+			set_variable = { name = eotg_nc_rally_bonus  value = 3 }
+		}
+		custom_tooltip = eotg_nc_rally_districts_effect_tooltip
+	}
+
+	cooldown = { years = 1 }
+
+	ai_will_do = {
+		base = 40
+		modifier = { add = 20  gold > 300 }
+		modifier = { add = -20  gold < 150 }
+	}
+}
+
+# Attack Rival's Record — intrigue-based attempt to damage a rival's vote weight.
+eotg_nc_attack_rivals_record = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_misc.dds"
+	}
+	decision_group_type = major
+
+	desc = eotg_nc_attack_rivals_record_desc
+	selection_tooltip = eotg_nc_attack_rivals_record_tooltip
+
+	is_shown = {
+		eotg_st_nc_campaign_eligible = yes
+		eotg_st_nc_campaign_active = yes
+		liege = {
+			any_vassal = {
+				eotg_st_nc_campaign_eligible = yes
+				NOT = { this = root }
+			}
+		}
+	}
+
+	is_valid = {
+		eotg_st_nc_campaign_eligible = yes
+		eotg_st_nc_campaign_active = yes
+		is_imprisoned = no
+		liege = {
+			any_vassal = {
+				eotg_st_nc_campaign_eligible = yes
+				NOT = { this = root }
+			}
+		}
+	}
+
+	is_valid_showing_failures_only = {
+		is_imprisoned = no
+	}
+
+	effect = {
+		liege = {
+			ordered_vassal = {
+				limit = {
+					eotg_st_nc_campaign_eligible = yes
+					NOT = { this = root }
+				}
+				order_by = eotg_sv_nc_vote_weight
+				max = 1
+				save_scope_as = nc_attack_target
+			}
+		}
+		random_list = {
+			40 = {
+				modifier = { add = intrigue }
+				scope:nc_attack_target = {
+					add_character_flag = {
+						flag = eotg_nc_rivals_record_damaged
+						years = 2
+					}
+				}
+				custom_tooltip = eotg_nc_attack_rivals_success_tooltip
+			}
+			40 = {
+				trigger_event = { id = eotg_nc_senate.0004  days = 3 }
+				custom_tooltip = eotg_nc_attack_rivals_fail_tooltip
+			}
+		}
+	}
+
+	cooldown = { years = 1 }
+
+	ai_will_do = {
+		base = 20
+		modifier = { add = 20  intrigue > 12 }
+	}
+}
+
+# Public Address — spend prestige; diplomacy determines if it helps or hurts.
+eotg_nc_public_address = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_misc.dds"
+	}
+	decision_group_type = major
+
+	desc = eotg_nc_public_address_desc
+	selection_tooltip = eotg_nc_public_address_tooltip
+
+	is_shown = {
+		eotg_st_nc_campaign_eligible = yes
+		eotg_st_nc_campaign_active = yes
+	}
+
+	is_valid = {
+		eotg_st_nc_campaign_eligible = yes
+		eotg_st_nc_campaign_active = yes
+		is_imprisoned = no
+		prestige >= 100
+	}
+
+	is_valid_showing_failures_only = {
+		is_imprisoned = no
+		prestige >= 100
+	}
+
+	effect = {
+		add_prestige = -100
+		if = {
+			limit = { diplomacy >= 14 }
+			if = {
+				limit = { has_variable = eotg_nc_rally_bonus }
+				change_variable = { name = eotg_nc_rally_bonus  add = 4 }
+			}
+			else = {
+				set_variable = { name = eotg_nc_rally_bonus  value = 4 }
+			}
+			custom_tooltip = eotg_nc_public_address_success_tooltip
+		}
+		else_if = {
+			limit = { diplomacy >= 10 }
+			if = {
+				limit = { has_variable = eotg_nc_rally_bonus }
+				change_variable = { name = eotg_nc_rally_bonus  add = 2 }
+			}
+			else = {
+				set_variable = { name = eotg_nc_rally_bonus  value = 2 }
+			}
+			custom_tooltip = eotg_nc_public_address_partial_tooltip
+		}
+		else = {
+			if = {
+				limit = { has_variable = eotg_nc_rally_bonus }
+				change_variable = { name = eotg_nc_rally_bonus  add = -2 }
+			}
+			trigger_event = { id = eotg_nc_senate.0004  days = 5 }
+			custom_tooltip = eotg_nc_public_address_fail_tooltip
+		}
+	}
+
+	cooldown = { years = 1 }
+
+	ai_will_do = {
+		base = 30
+		modifier = { add = 20  diplomacy > 12 }
+		modifier = { add = -20  diplomacy < 8 }
+	}
+}
+
+# Forge Alliance — offer a council position to win a State's Senate vote.
+eotg_nc_forge_alliance = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_misc.dds"
+	}
+	decision_group_type = major
+
+	desc = eotg_nc_forge_alliance_desc
+	selection_tooltip = eotg_nc_forge_alliance_tooltip
+
+	is_shown = {
+		eotg_st_nc_campaign_eligible = yes
+		eotg_st_nc_campaign_active = yes
+		NOT = { has_character_flag = eotg_nc_council_promised }
+	}
+
+	is_valid = {
+		eotg_st_nc_campaign_eligible = yes
+		eotg_st_nc_campaign_active = yes
+		is_imprisoned = no
+		prestige >= 150
+		diplomacy >= 10
+		NOT = { has_character_flag = eotg_nc_council_promised }
+	}
+
+	is_valid_showing_failures_only = {
+		is_imprisoned = no
+		prestige >= 150
+		diplomacy >= 10
+		NOT = { has_character_flag = eotg_nc_council_promised }
+	}
+
+	effect = {
+		add_prestige = -150
+		add_character_flag = { flag = eotg_nc_council_promised  years = 6 }
+		if = {
+			limit = { has_variable = eotg_nc_rally_bonus }
+			change_variable = { name = eotg_nc_rally_bonus  add = 5 }
+		}
+		else = {
+			set_variable = { name = eotg_nc_rally_bonus  value = 5 }
+		}
+		custom_tooltip = eotg_nc_forge_alliance_effect_tooltip
+	}
+
+	ai_will_do = {
+		base = 20
+		modifier = { add = 20  prestige > 400 }
+	}
+}
+
+# ── Senate Decisions (President only) ─────────────────────────────────────────
+
+# Call a Senate vote on an offensive war declaration.
+eotg_nc_call_senate_war_vote = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_misc.dds"
+	}
+	decision_group_type = major
+
+	desc = eotg_nc_call_senate_war_vote_desc
+	selection_tooltip = eotg_nc_call_senate_war_vote_tooltip
+
+	is_shown = {
+		eotg_st_is_president = yes
+		NOT = { has_character_flag = eotg_nc_senate_war_approved }
+		NOT = { has_character_flag = eotg_nc_emergency_active }
+	}
+
+	is_valid = {
+		eotg_st_is_president = yes
+		is_imprisoned = no
+		NOT = { has_character_flag = eotg_nc_senate_war_approved }
+	}
+
+	is_valid_showing_failures_only = {
+		is_imprisoned = no
+	}
+
+	effect = {
+		eotg_se_nc_update_senate_support = yes
+		trigger_event = { id = eotg_nc_senate.0002  days = 3 }
+	}
+
+	cooldown = { years = 1 }
+
+	ai_will_do = {
+		base = 30
+		modifier = { add = 20  var:eotg_nc_senate_support >= 50 }
+	}
+}
+
+# Invoke Emergency Powers — bypass Senate for one offensive war.
+eotg_nc_invoke_emergency_powers = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_misc.dds"
+	}
+	decision_group_type = major
+
+	desc = eotg_nc_invoke_emergency_powers_desc
+	selection_tooltip = eotg_nc_invoke_emergency_powers_tooltip
+
+	is_shown = {
+		eotg_st_nc_emergency_powers_available = yes
+	}
+
+	is_valid = {
+		eotg_st_nc_emergency_powers_available = yes
+		is_imprisoned = no
+		prestige >= 200
+	}
+
+	is_valid_showing_failures_only = {
+		is_imprisoned = no
+		prestige >= 200
+	}
+
+	effect = {
+		add_prestige = -200
+		add_legitimacy = -20
+		add_character_flag = { flag = eotg_nc_emergency_active  years = 2 }
+		add_character_flag = { flag = eotg_nc_emergency_powers_used  years = 15 }
+		every_vassal = {
+			limit = {
+				OR = {
+					eotg_st_is_nc_state = yes
+					AND = {
+						eotg_st_is_nc_senator = yes
+						is_powerful_vassal = yes
+					}
+				}
+			}
+			trigger_event = { id = eotg_nc_senate.0003  days = 5 }
+		}
+		custom_tooltip = eotg_nc_invoke_emergency_powers_effect_tooltip
+	}
+
+	ai_will_do = {
+		base = 10
+		modifier = { add = 20  prestige > 500 }
+	}
+}
+
+# Buy Senate support — spend gold to improve senate relations.
+eotg_nc_buy_senate_support = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_misc.dds"
+	}
+	decision_group_type = major
+
+	desc = eotg_nc_buy_senate_support_desc
+	selection_tooltip = eotg_nc_buy_senate_support_tooltip
+
+	is_shown = {
+		eotg_st_is_president = yes
+	}
+
+	is_valid = {
+		eotg_st_is_president = yes
+		is_imprisoned = no
+		gold >= eotg_sv_nc_senate_buy_cost
+	}
+
+	is_valid_showing_failures_only = {
+		is_imprisoned = no
+		gold >= eotg_sv_nc_senate_buy_cost
+	}
+
+	effect = {
+		remove_short_term_gold = eotg_sv_nc_senate_buy_cost
+		random_list = {
+			80 = {
+				if = {
+					limit = { has_variable = eotg_nc_senate_support }
+					change_variable = { name = eotg_nc_senate_support  add = 20 }
+				}
+				else = {
+					set_variable = { name = eotg_nc_senate_support  value = 70 }
+				}
+				custom_tooltip = eotg_nc_buy_senate_support_effect_tooltip
+			}
+			20 = {
+				trigger_event = { id = eotg_nc_senate.0004  days = 5 }
+				custom_tooltip = eotg_nc_buy_senate_scandal_tooltip
+			}
+		}
+	}
+
+	cooldown = { years = 2 }
+
+	ai_will_do = {
+		base = 20
+		modifier = { add = 30  eotg_st_nc_senate_hostile = yes }
+		modifier = { add = 20  gold > 500 }
+	}
+}

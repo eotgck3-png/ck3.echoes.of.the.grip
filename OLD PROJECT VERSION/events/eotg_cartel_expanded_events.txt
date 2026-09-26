@@ -1,0 +1,767 @@
+﻿namespace = eotg_cartel_flavor
+
+# ── Cartel Government Flavor Events (Phase 1) ────────────────────────────────
+# Yearly flavor events fired via eotg_on_yearly_cartel_flavor on_action.
+# Covers: Fear & Loyalty, Smuggling Networks, Internal Politics, Criminal
+# Operations, Enforcement & Violence, Succession, and Underworld Culture.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# eotg_cartel_flavor.0001 — Loyalty Bought with Blood
+# Subordinates become loyal after witnessing brutal punishment.
+eotg_cartel_flavor.0001 = {
+	type = character_event
+	title = eotg_cartel_flavor_0001_title
+	desc = eotg_cartel_flavor_0001_desc
+	theme = intrigue
+
+	left_portrait = { character = root  animation = personality_bold }
+
+	trigger = {
+		eotg_st_is_grand_underlord = yes
+		dread >= 30
+	}
+
+	option = {
+		name = eotg_cartel_flavor_0001_opt_display
+		add_dread = 20
+		every_vassal = {
+			limit = { eotg_st_is_boss = yes }
+			add_opinion = { target = root  modifier = eotg_fringe_bought_loyalty }
+		}
+		add_character_modifier = { modifier = eotg_cartel_rule_of_fear  years = 3 }
+		add_character_flag = { flag = eotg_cartel_0001_recent  years = 3 }
+		ai_chance = { base = 40  modifier = { add = 20  has_trait = callous } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0001_opt_quiet
+		add_dread = 10
+		add_character_flag = { flag = eotg_cartel_0001_recent  years = 3 }
+		ai_chance = { base = 35  modifier = { add = 15  has_trait = patient } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0001_opt_spare
+		add_prestige = 15
+		add_character_flag = { flag = eotg_cartel_0001_recent  years = 3 }
+		ai_chance = { base = 25  modifier = { add = 15  has_trait = compassionate } }
+	}
+}
+
+# eotg_cartel_flavor.0002 — Fear Turns Into Hatred
+# Subordinates obey, but secretly dream of betrayal.
+eotg_cartel_flavor.0002 = {
+	type = character_event
+	title = eotg_cartel_flavor_0002_title
+	desc = eotg_cartel_flavor_0002_desc
+	theme = intrigue
+
+	left_portrait = { character = root  animation = stress }
+
+	trigger = {
+		eotg_st_is_grand_underlord = yes
+		dread >= 60
+	}
+
+	option = {
+		name = eotg_cartel_flavor_0002_opt_security
+		remove_short_term_gold = 30
+		add_character_flag = { flag = eotg_cartel_0002_recent  years = 3 }
+		ai_chance = { base = 35  modifier = { add = 10  gold > 60 } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0002_opt_purge
+		add_dread = 15
+		every_vassal = {
+			limit = { eotg_st_is_boss = yes  opinion = { target = root  value < 0 } }
+			add_opinion = { target = root  modifier = eotg_fringe_public_punishment }
+		}
+		stress_impact = { base = minor_stress_impact_gain  compassionate = medium_stress_impact_gain }
+		add_character_flag = { flag = eotg_cartel_0002_recent  years = 3 }
+		ai_chance = { base = 35  modifier = { add = 15  has_trait = paranoid } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0002_opt_ignore
+		add_character_flag = { flag = eotg_cartel_0002_recent  years = 3 }
+		ai_chance = { base = 30  modifier = { add = 10  has_trait = lazy } }
+	}
+}
+
+# eotg_cartel_flavor.0003 — A Lieutenant Demands Respect
+# A lieutenant feels underappreciated and insulted.
+eotg_cartel_flavor.0003 = {
+	type = character_event
+	title = eotg_cartel_flavor_0003_title
+	desc = eotg_cartel_flavor_0003_desc
+	theme = diplomacy
+
+	left_portrait = { character = root  animation = stress }
+
+	trigger = {
+		eotg_st_is_grand_underlord = yes
+		any_vassal = { eotg_st_is_boss = yes  opinion = { target = root  value < -10 } }
+	}
+
+	option = {
+		name = eotg_cartel_flavor_0003_opt_reward
+		remove_short_term_gold = 30
+		every_vassal = {
+			limit = { eotg_st_is_boss = yes  opinion = { target = root  value < -10 } }
+			add_opinion = { target = root  modifier = eotg_fringe_spoils_distributed }
+		}
+		add_character_flag = { flag = eotg_cartel_0003_recent  years = 3 }
+		ai_chance = { base = 40  modifier = { add = 10  has_trait = gregarious } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0003_opt_threaten
+		add_dread = 15
+		every_vassal = {
+			limit = { eotg_st_is_boss = yes  opinion = { target = root  value < -10 } }
+			add_opinion = { target = root  modifier = eotg_fringe_fear_rule_resentment }
+		}
+		add_character_flag = { flag = eotg_cartel_0003_recent  years = 3 }
+		ai_chance = { base = 35  modifier = { add = 15  has_trait = wrathful } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0003_opt_humiliate
+		add_dread = 10
+		add_prestige = -10
+		add_character_flag = { flag = eotg_cartel_0003_recent  years = 3 }
+		ai_chance = { base = 25  modifier = { add = 10  has_trait = arrogant } }
+	}
+}
+
+# eotg_cartel_flavor.0004 — Smuggling Route Discovered
+# A lucrative illegal trade route is uncovered.
+eotg_cartel_flavor.0004 = {
+	type = character_event
+	title = eotg_cartel_flavor_0004_title
+	desc = eotg_cartel_flavor_0004_desc
+	theme = stewardship
+
+	left_portrait = { character = root  animation = personality_rational }
+
+	trigger = {
+		eotg_st_is_grand_underlord = yes
+	}
+
+	option = {
+		name = eotg_cartel_flavor_0004_opt_exploit
+		add_gold = 60
+		add_character_modifier = { modifier = eotg_cartel_smuggling_network  years = 4 }
+		add_character_flag = { flag = eotg_cartel_0004_recent  years = 3 }
+		ai_chance = { base = 40  modifier = { add = 20  has_trait = greedy } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0004_opt_secret
+		add_gold = 30
+		add_intrigue_skill = 1
+		add_character_flag = { flag = eotg_cartel_0004_recent  years = 3 }
+		ai_chance = { base = 35  modifier = { add = 10  has_trait = patient } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0004_opt_share
+		add_gold = 25
+		every_vassal = {
+			limit = { eotg_st_is_boss = yes }
+			add_opinion = { target = root  modifier = eotg_fringe_spoils_distributed }
+		}
+		add_character_flag = { flag = eotg_cartel_0004_recent  years = 3 }
+		ai_chance = { base = 25  modifier = { add = 15  has_trait = gregarious } }
+	}
+}
+
+# eotg_cartel_flavor.0005 — Authorities Interfere with Smuggling
+# Local authorities attempt to disrupt operations.
+eotg_cartel_flavor.0005 = {
+	type = character_event
+	title = eotg_cartel_flavor_0005_title
+	desc = eotg_cartel_flavor_0005_desc
+	theme = intrigue
+
+	left_portrait = { character = root  animation = stress }
+
+	trigger = {
+		eotg_st_is_grand_underlord = yes
+		has_character_modifier = eotg_cartel_smuggling_network
+	}
+
+	option = {
+		name = eotg_cartel_flavor_0005_opt_bribe
+		remove_short_term_gold = 40
+		add_prestige = 10
+		add_character_flag = { flag = eotg_cartel_0005_recent  years = 3 }
+		ai_chance = { base = 40  modifier = { add = 15  gold > 60 } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0005_opt_assassinate
+		add_dread = 15
+		add_character_flag = { flag = eotg_cartel_0005_recent  years = 3 }
+		ai_chance = { base = 35  modifier = { add = 20  has_trait = callous } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0005_opt_relocate
+		remove_character_modifier = eotg_cartel_smuggling_network
+		remove_short_term_gold = 20
+		add_character_flag = { flag = eotg_cartel_0005_recent  years = 3 }
+		ai_chance = { base = 25  modifier = { add = 10  has_trait = patient } }
+	}
+}
+
+# eotg_cartel_flavor.0006 — Smugglers Skim Profits
+# Smugglers secretly steal from cartel profits.
+eotg_cartel_flavor.0006 = {
+	type = character_event
+	title = eotg_cartel_flavor_0006_title
+	desc = eotg_cartel_flavor_0006_desc
+	theme = intrigue
+
+	left_portrait = { character = root  animation = stress }
+
+	trigger = {
+		eotg_st_is_grand_underlord = yes
+		has_character_modifier = eotg_cartel_smuggling_network
+	}
+
+	option = {
+		name = eotg_cartel_flavor_0006_opt_punish
+		add_dread = 15
+		add_character_flag = { flag = eotg_cartel_0006_recent  years = 3 }
+		ai_chance = { base = 40  modifier = { add = 20  has_trait = callous } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0006_opt_blackmail
+		every_vassal = {
+			limit = { stewardship < 8 }
+			add_hook = {
+				type = favor_hook
+				target = prev
+			}
+		}
+		add_character_flag = { flag = eotg_cartel_0006_recent  years = 3 }
+		ai_chance = { base = 35  modifier = { add = 20  has_trait = deceitful } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0006_opt_ignore
+		every_vassal = {
+			limit = { stewardship < 8 }
+			add_opinion = { target = root  modifier = eotg_fringe_bought_loyalty }
+		}
+		add_character_flag = { flag = eotg_cartel_0006_recent  years = 3 }
+		ai_chance = { base = 25  modifier = { add = 10  has_trait = lazy } }
+	}
+}
+
+# eotg_cartel_flavor.0007 — Rival Crews Clash
+# Two criminal crews fight over territory and profits.
+eotg_cartel_flavor.0007 = {
+	type = character_event
+	title = eotg_cartel_flavor_0007_title
+	desc = eotg_cartel_flavor_0007_desc
+	theme = intrigue
+
+	left_portrait = { character = root  animation = personality_bold }
+
+	trigger = {
+		eotg_st_is_grand_underlord = yes
+		vassal_count >= 2
+	}
+
+	option = {
+		name = eotg_cartel_flavor_0007_opt_backcrew
+		every_vassal = {
+			limit = { eotg_st_is_boss = yes  martial >= 10 }
+			add_opinion = { target = root  modifier = eotg_pmc_loyalty_restored }
+		}
+		add_character_flag = { flag = eotg_cartel_0007_recent  years = 3 }
+		ai_chance = { base = 35  modifier = { add = 10  has_trait = arbitrary } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0007_opt_forcepeace
+		add_diplomacy_skill = 1
+		add_prestige = 15
+		add_character_flag = { flag = eotg_cartel_0007_recent  years = 3 }
+		ai_chance = { base = 35  modifier = { add = 10  has_trait = just } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0007_opt_bleach
+		add_intrigue_skill = 1
+		add_character_flag = { flag = eotg_cartel_0007_recent  years = 3 }
+		ai_chance = { base = 30  modifier = { add = 15  has_trait = callous } }
+	}
+}
+
+# eotg_cartel_flavor.0008 — A Lieutenant Builds Private Armies
+# A subordinate secretly builds independent forces.
+eotg_cartel_flavor.0008 = {
+	type = character_event
+	title = eotg_cartel_flavor_0008_title
+	desc = eotg_cartel_flavor_0008_desc
+	theme = intrigue
+
+	left_portrait = { character = root  animation = stress }
+
+	trigger = {
+		eotg_st_is_grand_underlord = yes
+		any_vassal = { eotg_st_is_boss = yes  martial >= 12 }
+	}
+
+	option = {
+		name = eotg_cartel_flavor_0008_opt_disarm
+		every_vassal = {
+			limit = { eotg_st_is_boss = yes  martial >= 12 }
+			add_opinion = { target = root  modifier = eotg_fringe_reform_resentment }
+		}
+		add_character_flag = { flag = eotg_cartel_0008_recent  years = 4 }
+		ai_chance = { base = 35  modifier = { add = 10  has_trait = brave } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0008_opt_allownow
+		add_character_modifier = { modifier = eotg_cartel_defiant_boss  years = 3 }
+		add_character_flag = { flag = eotg_cartel_0008_recent  years = 4 }
+		ai_chance = { base = 30  modifier = { add = 10  has_trait = lazy } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0008_opt_sabotage
+		add_intrigue_skill = 2
+		add_character_flag = { flag = eotg_cartel_0008_recent  years = 4 }
+		ai_chance = { base = 35  modifier = { add = 20  has_trait = deceitful } }
+	}
+}
+
+# eotg_cartel_flavor.0009 — Informants Spread Through the Cartel
+# Rumors spread that informants infiltrate operations.
+eotg_cartel_flavor.0009 = {
+	type = character_event
+	title = eotg_cartel_flavor_0009_title
+	desc = eotg_cartel_flavor_0009_desc
+	theme = intrigue
+
+	left_portrait = { character = root  animation = stress }
+
+	trigger = {
+		eotg_st_is_grand_underlord = yes
+	}
+
+	option = {
+		name = eotg_cartel_flavor_0009_opt_investigate
+		add_intrigue_skill = 1
+		add_character_flag = { flag = eotg_cartel_0009_recent  years = 3 }
+		ai_chance = { base = 40  modifier = { add = 15  has_trait = diligent } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0009_opt_torture
+		add_dread = 15
+		stress_impact = { base = minor_stress_impact_gain  compassionate = medium_stress_impact_gain }
+		add_character_flag = { flag = eotg_cartel_0009_recent  years = 3 }
+		ai_chance = { base = 35  modifier = { add = 20  has_trait = callous } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0009_opt_ignorerumors
+		add_character_flag = { flag = eotg_cartel_0009_recent  years = 3 }
+		ai_chance = { base = 25  modifier = { add = 10  has_trait = lazy } }
+	}
+}
+
+# eotg_cartel_flavor.0010 — Protection Racket Expands
+# Businesses are forced to pay for "protection."
+eotg_cartel_flavor.0010 = {
+	type = character_event
+	title = eotg_cartel_flavor_0010_title
+	desc = eotg_cartel_flavor_0010_desc
+	theme = stewardship
+
+	left_portrait = { character = root  animation = personality_bold }
+
+	trigger = {
+		eotg_st_is_grand_underlord = yes
+	}
+
+	option = {
+		name = eotg_cartel_flavor_0010_opt_expand
+		add_gold = 50
+		add_character_modifier = { modifier = eotg_cartel_protection_racket  years = 4 }
+		add_character_flag = { flag = eotg_cartel_0010_recent  years = 3 }
+		ai_chance = { base = 40  modifier = { add = 20  has_trait = greedy } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0010_opt_moderate
+		add_gold = 25
+		add_character_flag = { flag = eotg_cartel_0010_recent  years = 3 }
+		ai_chance = { base = 35  modifier = { add = 10  has_trait = patient } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0010_opt_violence
+		add_gold = 35
+		add_dread = 10
+		add_character_modifier = { modifier = eotg_cartel_protection_racket  years = 3 }
+		add_character_flag = { flag = eotg_cartel_0010_recent  years = 3 }
+		ai_chance = { base = 25  modifier = { add = 10  has_trait = callous } }
+	}
+}
+
+# eotg_cartel_flavor.0011 — Illegal Trade Boom
+# Illegal trade floods cartel markets.
+eotg_cartel_flavor.0011 = {
+	type = character_event
+	title = eotg_cartel_flavor_0011_title
+	desc = eotg_cartel_flavor_0011_desc
+	theme = stewardship
+
+	left_portrait = { character = root  animation = personality_bold }
+
+	trigger = {
+		eotg_st_is_grand_underlord = yes
+		has_character_modifier = eotg_cartel_smuggling_network
+	}
+
+	option = {
+		name = eotg_cartel_flavor_0011_opt_flood
+		add_gold = 80
+		add_character_modifier = { modifier = eotg_cartel_shakedown_standoff  years = 2 }
+		add_character_flag = { flag = eotg_cartel_0011_recent  years = 4 }
+		ai_chance = { base = 35  modifier = { add = 20  has_trait = greedy } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0011_opt_control
+		add_gold = 45
+		add_character_flag = { flag = eotg_cartel_0011_recent  years = 4 }
+		ai_chance = { base = 35  modifier = { add = 10  has_trait = patient } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0011_opt_restrict
+		add_gold = 30
+		add_intrigue_skill = 1
+		add_character_flag = { flag = eotg_cartel_0011_recent  years = 4 }
+		ai_chance = { base = 30  modifier = { add = 15  has_trait = diligent } }
+	}
+}
+
+# eotg_cartel_flavor.0012 — Public Execution in the Streets
+# A traitor is executed publicly as a warning.
+eotg_cartel_flavor.0012 = {
+	type = character_event
+	title = eotg_cartel_flavor_0012_title
+	desc = eotg_cartel_flavor_0012_desc
+	theme = intrigue
+
+	left_portrait = { character = root  animation = personality_bold }
+
+	trigger = {
+		eotg_st_is_grand_underlord = yes
+		dread >= 20
+	}
+
+	option = {
+		name = eotg_cartel_flavor_0012_opt_brutal
+		add_dread = 25
+		stress_impact = { base = minor_stress_impact_gain  compassionate = medium_stress_impact_gain }
+		add_character_modifier = { modifier = eotg_cartel_rule_of_fear  years = 3 }
+		add_character_flag = { flag = eotg_cartel_0012_recent  years = 3 }
+		ai_chance = { base = 40  modifier = { add = 20  has_trait = callous } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0012_opt_quick
+		add_dread = 10
+		add_character_flag = { flag = eotg_cartel_0012_recent  years = 3 }
+		ai_chance = { base = 35  modifier = { add = 10  has_trait = patient } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0012_opt_spare
+		add_prestige = 20
+		add_character_flag = { flag = eotg_cartel_0012_recent  years = 3 }
+		ai_chance = { base = 25  modifier = { add = 15  has_trait = compassionate } }
+	}
+}
+
+# eotg_cartel_flavor.0013 — Enforcers Become Too Violent
+# Cartel enforcers terrorize civilians excessively.
+eotg_cartel_flavor.0013 = {
+	type = character_event
+	title = eotg_cartel_flavor_0013_title
+	desc = eotg_cartel_flavor_0013_desc
+	theme = intrigue
+
+	left_portrait = { character = root  animation = stress }
+
+	trigger = {
+		eotg_st_is_grand_underlord = yes
+		dread >= 40
+	}
+
+	option = {
+		name = eotg_cartel_flavor_0013_opt_encourage
+		add_dread = 10
+		add_prestige = -15
+		add_character_flag = { flag = eotg_cartel_0013_recent  years = 3 }
+		ai_chance = { base = 30  modifier = { add = 20  has_trait = callous } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0013_opt_restrain
+		every_vassal = {
+			limit = { eotg_st_is_boss = yes }
+			add_opinion = { target = root  modifier = eotg_fringe_fear_rule_resentment }
+		}
+		add_prestige = 15
+		add_character_flag = { flag = eotg_cartel_0013_recent  years = 3 }
+		ai_chance = { base = 40  modifier = { add = 15  has_trait = just } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0013_opt_profitchaos
+		add_gold = 20
+		add_intrigue_skill = 1
+		add_character_flag = { flag = eotg_cartel_0013_recent  years = 3 }
+		ai_chance = { base = 30  modifier = { add = 15  has_trait = deceitful } }
+	}
+}
+
+# eotg_cartel_flavor.0014 — Lieutenants Prepare for Succession
+# Subordinates begin preparing for power struggles.
+eotg_cartel_flavor.0014 = {
+	type = character_event
+	title = eotg_cartel_flavor_0014_title
+	desc = eotg_cartel_flavor_0014_desc
+	theme = diplomacy
+
+	left_portrait = { character = root  animation = personality_bold }
+
+	trigger = {
+		eotg_st_is_grand_underlord = yes
+		age >= 50
+	}
+
+	option = {
+		name = eotg_cartel_flavor_0014_opt_name
+		add_prestige = 20
+		add_diplomacy_skill = 1
+		add_character_flag = { flag = eotg_cartel_0014_recent  years = 5 }
+		ai_chance = { base = 35  modifier = { add = 10  has_trait = gregarious } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0014_opt_compete
+		every_vassal = {
+			limit = { eotg_st_is_boss = yes }
+			add_opinion = { target = root  modifier = eotg_fringe_succession_chaos_opinion }
+		}
+		add_character_flag = { flag = eotg_cartel_0014_recent  years = 5 }
+		ai_chance = { base = 30  modifier = { add = 10  has_trait = arbitrary } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0014_opt_elimrivals
+		add_intrigue_skill = 2
+		add_character_flag = { flag = eotg_cartel_0014_recent  years = 5 }
+		ai_chance = { base = 35  modifier = { add = 20  has_trait = deceitful } }
+	}
+}
+
+# eotg_cartel_flavor.0015 — Criminal Legends Spread
+# Stories spread of the ruler's brutality and cunning.
+eotg_cartel_flavor.0015 = {
+	type = character_event
+	title = eotg_cartel_flavor_0015_title
+	desc = eotg_cartel_flavor_0015_desc
+	theme = intrigue
+
+	left_portrait = { character = root  animation = personality_bold }
+
+	trigger = {
+		eotg_st_is_grand_underlord = yes
+		years_as_ruler >= 15
+	}
+
+	option = {
+		name = eotg_cartel_flavor_0015_opt_encourage
+		add_dread = 15
+		add_character_modifier = { modifier = eotg_cartel_untouchable  years = 5 }
+		add_character_flag = { flag = eotg_cartel_0015_recent  years = 5 }
+		ai_chance = { base = 35  modifier = { add = 15  has_trait = paranoid } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0015_opt_publicpersona
+		add_prestige = 40
+		add_character_flag = { flag = eotg_cartel_0015_recent  years = 5 }
+		ai_chance = { base = 35  modifier = { add = 10  has_trait = gregarious } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0015_opt_shadows
+		add_intrigue_skill = 2
+		add_character_flag = { flag = eotg_cartel_0015_recent  years = 5 }
+		ai_chance = { base = 30  modifier = { add = 20  has_trait = deceitful } }
+	}
+}
+
+# eotg_cartel_flavor.0016 — Feast of the Underworld
+# Lieutenants gather for lavish criminal celebrations.
+eotg_cartel_flavor.0016 = {
+	type = character_event
+	title = eotg_cartel_flavor_0016_title
+	desc = eotg_cartel_flavor_0016_desc
+	theme = diplomacy
+
+	left_portrait = { character = root  animation = personality_bold }
+
+	trigger = {
+		eotg_st_is_grand_underlord = yes
+		gold > 100
+		has_character_modifier = eotg_cartel_smuggling_network
+	}
+
+	option = {
+		name = eotg_cartel_flavor_0016_opt_reward
+		remove_short_term_gold = 60
+		every_vassal = {
+			limit = { eotg_st_is_boss = yes }
+			add_opinion = { target = root  modifier = eotg_fringe_spoils_distributed }
+		}
+		add_character_flag = { flag = eotg_cartel_0016_recent  years = 4 }
+		ai_chance = { base = 40  modifier = { add = 15  has_trait = gregarious } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0016_opt_secretdeals
+		remove_short_term_gold = 30
+		add_intrigue_skill = 2
+		every_vassal = {
+			limit = { eotg_st_is_boss = yes  intrigue >= 10 }
+			add_hook = {
+				type = favor_hook
+				target = prev
+			}
+		}
+		add_character_flag = { flag = eotg_cartel_0016_recent  years = 4 }
+		ai_chance = { base = 35  modifier = { add = 20  has_trait = deceitful } }
+	}
+	option = {
+		name = eotg_cartel_flavor_0016_opt_excess
+		remove_short_term_gold = 80
+		add_prestige = 30
+		add_character_modifier = { modifier = eotg_cartel_shakedown_standoff  years = 2 }
+		add_character_flag = { flag = eotg_cartel_0016_recent  years = 4 }
+		ai_chance = { base = 25  modifier = { add = 10  has_trait = greedy } }
+	}
+}
+
+# ── eotg_cartel_flavor.0017 ───────────────────────────────────────────────────
+# A cartel Boss demands the Underlord guarantee protection for their territory.
+# Fires from: eotg_on_yearly_cartel_flavor (any vassal present)
+eotg_cartel_flavor.0017 = {
+	type = character_event
+	title = eotg_cartel_flavor_0017_title
+	desc = eotg_cartel_flavor_0017_desc
+	theme = intrigue
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	option = {
+		name = eotg_cartel_flavor_0017_opt_guarantee
+		# Guarantee their sector. Loyalty flows from protection.
+		add_prestige = 75
+		add_diplomacy_skill = 1
+		add_character_flag = { flag = eotg_cartel_0017_recent  years = 4 }
+		ai_chance = { base = 35  modifier = { add = 15  diplomacy >= 10 } }
+	}
+
+	option = {
+		name = eotg_cartel_flavor_0017_opt_enforcers
+		# Send enforcers instead. Let them handle the problem themselves.
+		remove_short_term_gold = 100
+		add_prestige = 50
+		add_character_flag = { flag = eotg_cartel_0017_recent  years = 4 }
+		ai_chance = { base = 35  modifier = { add = 10  gold >= 100 } }
+	}
+
+	option = {
+		name = eotg_cartel_flavor_0017_opt_refuse
+		# Bosses hold their own territory. That is the deal.
+		add_dread = 10
+		add_prestige = -50
+		add_character_flag = { flag = eotg_cartel_0017_recent  years = 3 }
+		ai_chance = { base = 30  modifier = { add = 15  dread >= 30 } }
+	}
+}
+
+# ── eotg_cartel_flavor.0018 ───────────────────────────────────────────────────
+# An ambitious enforcer claims they already run their sector and demands the title.
+# Fires from: eotg_on_yearly_cartel_flavor (any vassal with dread-adjacent traits)
+eotg_cartel_flavor.0018 = {
+	type = character_event
+	title = eotg_cartel_flavor_0018_title
+	desc = eotg_cartel_flavor_0018_desc
+	theme = intrigue
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	option = {
+		name = eotg_cartel_flavor_0018_opt_grant
+		# Grant the title. Better to make them a vassal than a rival.
+		add_prestige = 100
+		add_diplomacy_skill = 1
+		add_character_flag = { flag = eotg_cartel_0018_recent  years = 5 }
+		ai_chance = { base = 35  modifier = { add = 15  intrigue >= 10 } }
+	}
+
+	option = {
+		name = eotg_cartel_flavor_0018_opt_position
+		# Offer them a position without independence. Keep them close.
+		add_prestige = 50
+		add_intrigue_skill = 1
+		add_character_flag = { flag = eotg_cartel_0018_recent  years = 5 }
+		ai_chance = { base = 40  modifier = { add = 15  has_trait = paranoid } }
+	}
+
+	option = {
+		name = eotg_cartel_flavor_0018_opt_example
+		# Make an example of them before others get ideas.
+		add_dread = 15
+		add_prestige = -50
+		add_character_flag = { flag = eotg_cartel_0018_recent  years = 4 }
+		ai_chance = { base = 25  modifier = { add = 20  dread >= 40 } }
+	}
+}
+
+# ── eotg_cartel_flavor.0019 ───────────────────────────────────────────────────
+# A territorial Boss openly questions whether the Underlord still controls the network.
+# Fires from: eotg_on_yearly_cartel_flavor (prestige < 400 or dread < 30)
+eotg_cartel_flavor.0019 = {
+	type = character_event
+	title = eotg_cartel_flavor_0019_title
+	desc = eotg_cartel_flavor_0019_desc
+	theme = intrigue
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	option = {
+		name = eotg_cartel_flavor_0019_opt_bluff
+		# Call their bluff publicly. Let the network see who blinks.
+		add_prestige = 150
+		add_dread = 15
+		add_character_flag = { flag = eotg_cartel_0019_recent  years = 5 }
+		ai_chance = { base = 35  modifier = { add = 20  intrigue >= 12 } }
+	}
+
+	option = {
+		name = eotg_cartel_flavor_0019_opt_demonstration
+		# Arrange a private demonstration of what happens to doubters.
+		add_intrigue_skill = 1
+		add_dread = 20
+		add_prestige = -50
+		add_character_flag = { flag = eotg_cartel_0019_recent  years = 5 }
+		ai_chance = { base = 35  modifier = { add = 15  has_trait = paranoid } }
+	}
+
+	option = {
+		name = eotg_cartel_flavor_0019_opt_crush
+		# Crush them. Doubt is a disease and this is the cure.
+		add_dread = 25
+		add_prestige = -75
+		add_legitimacy = -10
+		add_character_flag = { flag = eotg_cartel_0019_recent  years = 4 }
+		ai_chance = { base = 30  modifier = { add = 20  dread >= 50 } }
+	}
+}

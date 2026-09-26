@@ -1,0 +1,227 @@
+﻿# ── eotg_pmc_command_events.txt ──────────────────────────────────────────────
+# Loss of Command and Evolution events for the PMC government.
+#
+# eotg_pmc_command.0001 — Loss of Command initiated (fires to Contractor-General)
+# eotg_pmc_command.0002 — Ally vassal intervenes to buy time
+# eotg_pmc_command.0003 — Loss of Command expires — consequence event
+# eotg_pmc_command.0004 — Individual vassal withdrawal notice to Contractor-General
+# eotg_pmc_command.0005 — Evolution to Corporation (fires to Contractor-General)
+# ─────────────────────────────────────────────────────────────────────────────
+
+namespace = eotg_pmc_command
+
+# Loss of Command sequence begins — enough powerful vassals have withdrawn
+eotg_pmc_command.0001 = {
+	type = character_event
+	title = eotg_pmc_command_0001_title
+	theme = martial
+
+	desc = eotg_pmc_command_0001_desc
+
+	left_portrait = {
+		character = root
+		animation = stress
+	}
+	right_portrait = {
+		character = scope:eotg_withdrawing_commander
+		animation = personality_bold
+		trigger = { exists = scope:eotg_withdrawing_commander }
+	}
+
+	immediate = {
+		ordered_vassal = {
+			limit = {
+				is_powerful_vassal = yes
+				has_character_flag = eotg_pmc_withdrew_forces
+				eotg_st_is_executive_commander = yes
+			}
+			order_by = realm_size
+			save_scope_as = eotg_withdrawing_commander
+		}
+	}
+
+	# Begin buying back loyalty immediately
+	option = {
+		name = eotg_pmc_command_0001_opt_negotiate
+		eotg_se_pmc_buyback_loyalty = yes
+		stress_impact = {
+			base = medium_stress_impact_gain
+			arrogant = major_stress_impact_gain
+		}
+		ai_chance = {
+			base = 40
+			modifier = { add = 30  gold > 300 }
+		}
+	}
+
+	# Hold firm — use the decisions to manage it over time
+	option = {
+		name = eotg_pmc_command_0001_opt_hold
+		add_prestige = 50
+		stress_impact = {
+			base = minor_stress_impact_gain
+		}
+		ai_chance = {
+			base = 60
+			modifier = { add = -30  gold < 100 }
+		}
+	}
+}
+
+# An ally vassal fires an intervention — buys the Contractor-General more time
+eotg_pmc_command.0002 = {
+	type = character_event
+	title = eotg_pmc_command_0002_title
+	theme = martial
+
+	desc = eotg_pmc_command_0002_desc
+
+	left_portrait = {
+		character = root
+		animation = personality_bold
+	}
+	right_portrait = {
+		character = scope:eotg_ally_vassal
+		animation = personality_rational
+		trigger = { exists = scope:eotg_ally_vassal }
+	}
+
+	immediate = {
+		# Find a powerful vassal who did NOT withdraw forces and has positive opinion
+		random_vassal = {
+			limit = {
+				is_powerful_vassal = yes
+				NOT = { has_character_flag = eotg_pmc_withdrew_forces }
+				opinion = { target = root  value >= 20 }
+			}
+			save_scope_as = eotg_ally_vassal
+		}
+	}
+
+	# Accept the ally's support — add one year to Loss of Command window
+	option = {
+		name = eotg_pmc_command_0002_opt_accept
+		trigger = { exists = scope:eotg_ally_vassal }
+		add_prestige = 50
+		scope:eotg_ally_vassal = {
+			add_opinion = {
+				target = root
+				modifier = eotg_pmc_loyalty_restored
+			}
+		}
+		add_character_flag = { flag = eotg_pmc_loss_of_command_flag  years = 1 }
+		ai_chance = { base = 80 }
+	}
+
+	# Decline — preserve independence
+	option = {
+		name = eotg_pmc_command_0002_opt_decline
+		add_prestige = 25
+		ai_chance = { base = 20 }
+	}
+}
+
+# Loss of Command expired — the Contractor-General's authority collapses
+eotg_pmc_command.0003 = {
+	type = character_event
+	title = eotg_pmc_command_0003_title
+	theme = martial
+
+	desc = eotg_pmc_command_0003_desc
+
+	left_portrait = {
+		character = root
+		animation = stress
+	}
+
+	immediate = {
+		remove_character_flag = eotg_pmc_loss_of_command_flag
+		remove_variable = eotg_pmc_extension_count
+		# Heavy consequence — severe prestige and legitimacy collapse
+		add_prestige = -500
+		add_legitimacy = -30
+		add_character_modifier = {
+			modifier = eotg_pmc_command_collapsed
+			years = 5
+		}
+		# Clear all withdrawal flags — the crisis resolves itself through instability
+		every_vassal = {
+			limit = { has_character_flag = eotg_pmc_withdrew_forces }
+			remove_character_flag = eotg_pmc_withdrew_forces
+		}
+	}
+
+	option = {
+		name = eotg_pmc_command_0003_opt_endure
+		stress_impact = {
+			base = major_stress_impact_gain
+		}
+		ai_chance = { base = 100 }
+	}
+}
+
+# Individual vassal withdrawal notice to Contractor-General (below Loss of Command threshold)
+eotg_pmc_command.0004 = {
+	type = character_event
+	title = eotg_pmc_command_0004_title
+	theme = martial
+
+	desc = eotg_pmc_command_0004_desc
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	immediate = {
+		# Find the most recently withdrawn vassal
+		random_vassal = {
+			limit = {
+				is_powerful_vassal = yes
+				has_character_flag = eotg_pmc_withdrew_forces
+				eotg_st_is_executive_commander = yes
+			}
+			save_scope_as = eotg_withdrawing_commander
+		}
+	}
+
+	right_portrait = {
+		character = scope:eotg_withdrawing_commander
+		animation = personality_bold
+		trigger = { exists = scope:eotg_withdrawing_commander }
+	}
+
+	# Acknowledge — they are watching for weakness
+	option = {
+		name = eotg_pmc_command_0004_opt_noted
+		add_prestige = -25
+		ai_chance = { base = 100 }
+	}
+}
+
+# Evolution to Corporation — the Contractor-General formalizes the transition
+eotg_pmc_command.0005 = {
+	type = character_event
+	title = eotg_pmc_command_0005_title
+	theme = stewardship
+
+	desc = eotg_pmc_command_0005_desc
+
+	left_portrait = {
+		character = root
+		animation = personality_bold
+	}
+
+	# Formalize the transition
+	option = {
+		name = eotg_pmc_command_0005_opt_evolve
+		change_government = eotg_corporation_government
+		add_prestige = 500
+		remove_short_term_gold = 500
+		stress_impact = {
+			base = minor_stress_impact_gain
+			content = medium_stress_impact_gain
+		}
+		ai_chance = { base = 100 }
+	}
+}

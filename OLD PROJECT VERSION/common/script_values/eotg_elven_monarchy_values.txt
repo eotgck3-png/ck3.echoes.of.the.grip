@@ -1,0 +1,53 @@
+﻿# ── eotg_elven_monarchy_values.txt ───────────────────────────────────────────
+# Script values for Elven Monarchy government mechanics.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Count of powerful vassals who approve of the current ruler (opinion >= 20).
+# Called on the ruler's scope.
+eotg_sv_elven_court_support_count = {
+	value = 0
+	every_vassal = {
+		limit = {
+			is_powerful_vassal = yes
+			opinion = { target = root  value >= 20 }
+		}
+		add = 1
+	}
+}
+
+# Isolationism penalty based on title tier.
+# Returns a negative number representing how strongly the elven ruler
+# looks down on non-elven outsiders. Called on the ruler's scope.
+eotg_sv_elven_isolationism_penalty = {
+	value = -5
+	if = {
+		limit = { highest_held_title_tier = tier_duchy }
+		add = -5
+	}
+	else_if = {
+		limit = { highest_held_title_tier = tier_kingdom }
+		add = -10
+	}
+	else_if = {
+		limit = { highest_held_title_tier = tier_empire }
+		add = -15
+	}
+	min = -20
+	max = -5
+}
+
+# Legitimacy reward for a confirmed succession with high court support.
+eotg_sv_elven_confirmation_bonus_legitimacy = {
+	value = 20
+	add = { value = eotg_sv_elven_court_support_count  multiply = 5 }
+	min = 20
+	max = 60
+}
+
+# Prestige reward for confirmed succession.
+eotg_sv_elven_confirmation_prestige = {
+	value = 100
+	add = { value = eotg_sv_elven_court_support_count  multiply = 25 }
+	min = 100
+	max = 300
+}

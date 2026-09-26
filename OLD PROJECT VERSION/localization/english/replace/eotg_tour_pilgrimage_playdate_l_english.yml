@@ -1,0 +1,119 @@
+﻿l_english:
+ # ── Tour, Pilgrimage & Playdate — EotG Setting Overrides ─────────────────────
+ # Sources: event_localization/activities/tour_events_l_english.yml,
+ #          event_localization/activities/tour_events_dan_l_english.yml,
+ #          event_localization/activities/pilgrimage_events_l_english.yml,
+ #          event_localization/activities/playdate_events_l_english.yml,
+ #          dlc/ep2/tour/tour_events_veronica_l_english.yml
+ # Replaces: "peasant/peasants/peasantry/serf" → "commoner/commoners/commonfolk".
+ # ─────────────────────────────────────────────────────────────────────────────
+
+ # ── Tour Events ───────────────────────────────────────────────────────────────
+
+ # "A Serf and [angry_peasant.GetHerHis|U] [ROOT.Char.GetTitleAsNameNoTooltip|U]"
+ tour_travel.1001.title:0 "A Commoner and [angry_peasant.GetHerHis|U] [ROOT.Char.GetTitleAsNameNoTooltip|U]"
+
+ # "a representative of the disgruntled peasantry"
+ tour_travel.1003.desc:0 "As my tour continues to progress across the [angry_county_scope.GetName] countryside, I am informed that I have made arrangements to meet with a representative of the disgruntled commonfolk.\n\nA pitiable creature grovels before me, arguing about the alleged dignity of the [angry_county_scope.GetAdjective] commonfolk. However, it soon comes to my attention that the [rude_peasant.Custom2('InsultAdjective', ROOT.Char)] [rude_peasant.Custom2('InsultNoun', ROOT.Char)] has never once addressed me as '[ROOT.Char.Custom('FormOfAddressForLiege')|U]', an offense which may be punished in any way I see fit."
+
+ # "bestow my royal touch upon the local peasantry"
+ tour_travel.1004.desc.intro:0 "I enter [diseased_county_scope.GetName], ready to bestow my royal touch upon the local commonfolk. I am immediately faced with what is undoubtedly the most wretched creature I have ever laid eyes upon. With minimal provocation, [diseased_peasant.GetSheHe] exposes [diseased_peasant.GetHerHis] calloused feet just inches from my pristine hands.\n\n"
+
+ # "a lowly peasant should never speak"
+ tour_travel.9020.desc.outro.guilty:0 "True, the evidence seems circumstantial, but a lowborn should never speak to their [ROOT.Char.GetTitleAsNameNoTooltip|U] unprompted."
+
+ # "The peasants sing praises of your tale"
+ tour_travel.9040.a.success:0 "The commoners sing praises of your tale"
+
+ # "Such beauty is wasted on this peasant rabble."
+ tour_general.3001.desc_beauty:0 "As soon as I lay eyes on [tour_general_3001_target_courtier.GetFirstName], I catch my breath. It is as if [ROOT.Char.GetFaith.HighGodName] [ROOT.Char.GetFaith.HighGodHerselfHimself] has blessed [tour_general_3001_target_courtier.GetFirstNameNoTooltip] with the beauty of a thousand [ROOT.Char.Custom('get_region_flower_type_plural')] and time itself stops as I take in [tour_general_3001_target_courtier.GetHerHis] delicate features. \n\nSuch beauty is wasted on this common rabble."
+
+ # "The peasantry and clergy of [touring_grounds_scope] will curse your name"
+ tour_grounds_events.3018.desc.outro.blamed_liege:0 "The commonfolk and clergy of [touring_grounds_scope.GetNameNoTooltip] will curse your name for eternity for what your desecration!""
+
+ # "These peasants have the right idea."
+ tour_grounds_events.3040.c:0 "These commoners have the right idea."
+
+ # "completely void of any peasants or lesser nobility"
+ tour_grounds_events.3070.desc.royal_forest:0 "around [stop_host_scope.GetNamePossessive] enchanting royal forest.\n\nThis forest is completely void of any commoners or lesser nobility; just me, my closest confidants, and [ROOT.Char.GetFaith.CreatorNamePossessive|U] creation. I feel transported to a realm of pure calm, a time before the calamitous hearts of men tainted the earth with vice and weakness."
+
+ # "a gathering of peasants in a small hamlet"
+ tour_grounds_events.3090.desc.intro:0 "Wandering the countryside of [ROOT.Char.GetCurrentLocation.GetName], I happen across what seems to be a gathering of commoners in a small hamlet.\n\nAccompanied by their proud owners,"
+
+ # "The peasants occasionally bring their goods to be judged"
+ tour_grounds_events.3090.desc.outro:0 "The commoners occasionally bring their goods to be judged, analyzing their size and health. They seem to be holding some sort of festival, and as soon as I'm noticed, they're eager to show me the fruits of their labor."
+
+ # "pious peasant called [pious_peasant.GetName]"
+ tour_travel.3000.desc:0 "I visit a village while traveling through [ROOT.Char.GetCurrentLocation.GetNameNoTooltip] and spend some time discussing matters of local worship with a particularly pious commoner called [pious_peasant.GetName].\n\n\"We don't even have a [ROOT.Char.GetFaith.HouseOfWorship], 'ere. We have to travel for days if we want to step foot in a house of [ROOT.Char.GetFaith.HighGodName|U].\""
+
+ # "a strange peasant woman standing by my bedside"
+ tour_travel.3001.desc.drunkard:0 "I wake in a haze, my head pounding, my ears ringing, and light pierces my mind like daggers. My mouth is as a desert, and before I can grunt for water, I see a strange commoner woman standing by my bedside with a jug of water.\n\n\"Here you are, [ROOT.Char.Custom('FormOfAddressForLiege')], you'll need it after the night you've had!\"\n\nI roll over in bed and see a stranger resting at my side in blissful sleep.\n\n\"After all, it's not every day my [marriage_candidate.Custom('DaughterSon')] marries the [ROOT.Char.GetTitleAsNameNoTooltip|U]!\""
+
+ # "No, I don't marry nasty, dirty peasants."
+ tour_travel.3001.b:0 "No, I don't marry nasty, lowborn commoners."
+
+ # "A peasant is screaming at me across the village square."
+ tour_travel.3002.desc:0 "\"My [widow_peasant.Custom2( 'RelationToMeShort', widow_father )], my [widow_peasant.Custom2( 'RelationToMeShort', widow_husband )], my [widow_peasant.Custom2( 'RelationToMeShort', widow_son )] all died in #EMP your war#!.\" A commoner is screaming at me across the village square.\n\n\"When [battle_memory.GetSecondPerspectiveDescription], it was a victory for you but for me it was the day three generations of my family died.\"\n\n[widow_peasant.GetHerHis|U] anger had turned to tears and the words [widow_peasant.GetSheHe] spoke next barely reached my ears.\n\n\"You're no [ROOT.Char.GetTitleAsNameNoTooltip|l] of mine.\""
+
+ # "we stop to talk to the hundredth peasant of the day"
+ tour_travel.3003.desc:0 "In [ROOT.Char.GetCurrentLocation.GetNameNoTooltip] we stop to talk to the hundredth commoner of the day and my stomach turns just looking at these wretched creatures.\n\nYellowed and mangled teeth, dull and empty eyes hiding an illiterate rotting brain. Each of them carrying nameless diseases that mar their faces in countless boils and blemishes.\n\nI simply cannot care for a word they say."
+
+ # "Several peasants gather around me asking for stories"
+ tour_travel.3006.desc:0 "Several commoners gather around me asking for stories from my life. I think back on what I could tell them and two stories jump to mind. One, when [positive_memory.GetDescription] is a lovely memory.\n\nOn the other hand, when [war_memory.GetDescription] is a more awesome tale, likely to inspire loyalty and fervor."
+
+ # "A peasant stumbles through the crowd"
+ tour_travel.3030.desc:0 "We approach a hamlet where a forlorn [wrongfully_accused.GetWomanMan] stands shackled on a gallows, a throng gathering at its foot.\n\n\"[ROOT.Char.GetTitleAsNameNoTooltip]! It's the [ROOT.Char.GetTitleAsNameNoTooltip]!\" A commoner stumbles through the crowd, crying: \"Please! My [wrongfully_accused.Custom('WifeHusband')] is innocent!\""
+
+ # "I'm afraid I have better things to do, peasant."
+ tour_travel.3040.c:0 "I'm afraid I have better things to do, commoner."
+
+ # "This is a matter for your ..., peasant."
+ tour_travel.3040.c.foreign:0 "This is a matter for your [ROOT.Char.GetCurrentLocation.GetCounty.GetTitle.GetHolder.GetTitleAsNameNoTooltip], commoner."
+
+ # ── EP2 Veronica Tour Events ─────────────────────────────────────────────────
+
+ # "a plow holding peasant, [complaining_peasant.GetHerHis|U] breath"
+ tour_travel.3130.desc.intro:0 "\"You over there!\" I hear a distant cry and turn around to find a plow-holding commoner, [complaining_peasant.GetHerHis|U] breath heavily agitated as [complaining_peasant.GetSheHe] stops for a second.\n\n\"I'm sorry, [ROOT.Char.Custom('FormOfAddressForLiege')], but rare is the chance I have to talk to you. I understand that you must grow the realm, but"
+
+ # "Peasant Influx" — modifier name
+ peasant_influx_modifier:0 "Commoner Influx"
+
+ # "offered to a group of peasants in reparation"
+ peasant_influx_modifier_desc:0 "These lands were offered to a group of commoners in reparation for the damage caused by the new buildings."
+
+ # "Local peasants have set up stalls"
+ cultural_festival.2002.desc.intro:0 "Local commoners have set up stalls with vegetables and — occasionally, rarely — [stop_host_scope.Custom('RegionalEdibleMeat')]. As I continue my walk, accompanied by a decent amount of courtiers, I see a familiar face among them, [injured_artist.GetHerHis] eyes locked into mine.\n\n\"[ROOT.Char.Custom('FormOfAddressForLiege')|U],\" [injured_artist.GetSheHe] finally approaches me, and with a hand gesture my guards let [injured_artist.GetHerHim] continue, \"you helped me in times of need, when I got injured during the performance. It is my turn to repay you with what I have.\""
+
+ # "Aren't these the same peasants that revolt against me?"
+ cultural_festival.2090.b:0 "\"Aren't these the same commoners that revolt against me? Grab them!\""
+
+ # "hear the peasants loudly singing along"
+ cultural_festival.2110.desc.outro:0 "\n\nThe music soon follows. I've heard this song before. Perhaps. Most of them sound too similar. Even from the dais I can hear the commoners loudly singing along.\n\n\"And dance in the fields of...\" #EMP \"woof! Woof woof!\"#! a figure decides to join in, stealing the juggling balls.\n\n#EMP \"Get that dog!\"#!"
+
+ # ── Pilgrimage Events ─────────────────────────────────────────────────────────
+
+ # "Not a chance, peasant."
+ pilgrimage.1140.d:0 "Not a chance, commoner."
+
+ # "a local peasant involved in chores a bit further ahead"
+ pilgrimage.2006.desc_alone:0 "I keep my eyes peeled, trying to recognize the way forward — but coming up with bupkis — and am becoming slightly concerned. It #EMP was#!\n\nthis direction, wasn't it... ? I hesitantly look over yonder to a local commoner involved in chores a bit further ahead."
+
+ # "You dare touch my clothes, peasant!?"
+ pilgrimage.2501.c.arrogant:0 "You dare touch my clothes, commoner!?"
+
+ # "I will not bathe with #EMP peasants#!!"
+ pilgrimage.3201.b:0 "I will not bathe with #EMP commoners#!!"
+
+ # "Are you trying to trick #EMP me#!, peasant?!"
+ pilgrimage.6530.d:0 "Are you trying to trick #EMP me#!, commoner?!"
+
+ # ── Playdate Events ───────────────────────────────────────────────────────────
+
+ # "the peasant [peasant_child.Custom('GirlBoy')]" + "the peasant standing above"
+ playdate.3001.desc:0 "I thought [guest.Custom2('MyCharacterIntroduction', ROOT.Char)] and the commoner [peasant_child.Custom('GirlBoy')] were merely pretending to fight, but suddenly there is blood in the dirt.\n\n[guest.GetFirstNameNoTooltip] hits the ground with a grunt, and the commoner standing above [guest.GetHerHim] moves to attack again."
+
+ # "watching some peasants train"
+ playdate.3012.desc_no_knight:0 "[participant.Custom2('MyCharacterIntroduction', ROOT.Char)|U] and I are watching some commoners train when one of them approaches us with a smile."
+
+ # "helped a peasant girl assail"
+ playdate_joined_beating_log:0 "[CHARACTER.GetTitledFirstName] helped a lowborn girl assail [TARGET_CHARACTER.GetTitledFirstName] and discovered a taste for bullying this victim"

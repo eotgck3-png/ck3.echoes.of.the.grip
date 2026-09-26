@@ -1,0 +1,117 @@
+﻿# ── eotg_new_cauldron_effects.txt ────────────────────────────────────────────
+# Scripted effects for the New Cauldron Democracy government.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Begin the presidential campaign phase (fires from President scope).
+eotg_se_nc_start_campaign = {
+	add_character_flag = { flag = eotg_nc_campaign_phase  years = 2 }
+	trigger_event = { id = eotg_nc_election.0001  days = 7 }
+}
+
+# Resolve the election: find winner and runner-up from eligible vassals.
+# Called from President scope (root = President).
+eotg_se_nc_resolve_election = {
+	ordered_vassal = {
+		limit = { eotg_st_nc_campaign_eligible = yes }
+		order_by = eotg_sv_nc_vote_weight
+		save_scope_as = nc_election_winner
+	}
+	ordered_vassal = {
+		limit = {
+			eotg_st_nc_campaign_eligible = yes
+			NOT = { this = scope:nc_election_winner }
+		}
+		order_by = eotg_sv_nc_vote_weight
+		save_scope_as = nc_election_runner_up
+	}
+}
+
+# Transfer the presidency to the election winner.
+# Called from President scope after election resolution.
+eotg_se_nc_transfer_power = {
+	eotg_se_nc_retire_president = yes
+	if = {
+		limit = { exists = scope:nc_election_winner }
+		create_title_and_vassal_change = {
+			type = granted
+			save_scope_as = change
+			add_claim_on_loss = no
+		}
+		primary_title = {
+			change_title_holder = {
+				holder = scope:nc_election_winner
+				change = scope:change
+			}
+		}
+		resolve_title_and_vassal_change = scope:change
+		scope:nc_election_winner = {
+			if = {
+				limit = { has_variable = eotg_nc_term_count }
+				change_variable = { name = eotg_nc_term_count  add = 1 }
+			}
+			else = {
+				set_variable = { name = eotg_nc_term_count  value = 1 }
+			}
+			add_character_flag = { flag = eotg_nc_term_active  years = 15 }
+			add_character_flag = { flag = eotg_nc_pre_election  years = 13 }
+			set_variable = { name = eotg_nc_senate_support  value = 50 }
+			remove_character_flag = eotg_nc_promise_made
+			remove_variable = eotg_nc_rally_bonus
+			remove_character_flag = eotg_nc_rivals_record_damaged
+			remove_character_flag = eotg_nc_council_promised
+		}
+	}
+	if = {
+		limit = { exists = scope:nc_election_runner_up }
+		scope:nc_election_runner_up = {
+			add_character_flag = { flag = eotg_nc_vice_president  years = 15 }
+		}
+	}
+}
+
+# Apply former president status to the outgoing President.
+eotg_se_nc_retire_president = {
+	add_character_modifier = {
+		modifier = eotg_former_president
+		years = 99
+	}
+	remove_character_flag = eotg_nc_campaign_phase
+	remove_character_flag = eotg_nc_emergency_powers_used
+	remove_character_flag = eotg_nc_senate_war_approved
+}
+
+# Handle VP succession when President dies mid-term.
+# Called from VP character scope.
+eotg_se_nc_vp_succession = {
+	if = {
+		limit = { has_variable = eotg_nc_term_count }
+		change_variable = { name = eotg_nc_term_count  add = 1 }
+	}
+	else = {
+		set_variable = { name = eotg_nc_term_count  value = 1 }
+	}
+	# Short emergency term — election starts immediately after 2 years
+	add_character_flag = { flag = eotg_nc_term_active  years = 2 }
+	add_character_flag = { flag = eotg_nc_pre_election  years = 0 }
+	set_variable = { name = eotg_nc_senate_support  value = 60 }
+	remove_character_flag = eotg_nc_vice_president
+	add_character_modifier = {
+		modifier = eotg_nc_vp_succession_mourning
+		years = 30
+	}
+}
+
+# Recalculate and store senate support variable on the President.
+eotg_se_nc_update_senate_support = {
+	if = {
+		limit = { eotg_st_is_president = yes }
+		set_variable = {
+			name = eotg_nc_senate_support
+			value = eotg_sv_nc_senate_support_count
+		}
+		if = {
+			limit = { var:eotg_nc_senate_support > 100 }
+			set_variable = { name = eotg_nc_senate_support  value = 100 }
+		}
+	}
+}

@@ -1,0 +1,72 @@
+﻿l_english:
+ # ── Pilgrimage & Diarchy Events — EotG Setting Overrides ─────────────────────
+ # Sources: pilgrimage_events_l_english.yml,
+ #          diarchy_events_l_english.yml (or diarchy_l_english.yml)
+ # Replaces: "peasant/peasants" → "commoner/commoners",
+ #            "serf/serfs" → "bonded worker/workers",
+ #            "peasantry" → "commonfolk",
+ #            "sin/sins" → "failing/failings" or "transgression",
+ #            "pray/prayer/prayers" (hardcoded) → "devotion/meditations/observances",
+ #            "exorcise" → "drive out".
+ # ─────────────────────────────────────────────────────────────────────────────
+
+ # ── Pilgrimage Events ─────────────────────────────────────────────────────────
+
+ # "I will join in prayer to [HighGodName]."
+ pilgrimage.1120.e:0 "I will offer devotion to [ROOT.Char.GetFaith.HighGodName]."
+
+ # "Not a chance, peasant."
+ pilgrimage.1140.d:0 "Not a chance, commoner."
+
+ # "I hesitantly look over yonder to a local peasant involved in chores"
+ pilgrimage.2006.desc_alone:0 "I keep my eyes peeled, trying to recognize the way forward — but coming up with bupkis — and am becoming slightly concerned. It #EMP was#!\n\nthis direction, wasn't it... ? I hesitantly look over yonder to a local commoner involved in chores a bit further ahead."
+
+ # "What should I do to repent my sins?"
+ pilgrimage.2021.desc:0 "I have successfully convinced [thief_to_convert.GetTitledFirstName] to change [thief_to_convert.GetHerHis] ways. [thief_to_convert.GetSheHe|U] stands in front of me, the weight of [thief_to_convert.GetHerHis] shame making [thief_to_convert.GetHerHis] shoulders slump, as [thief_to_convert.GetSheHe] avoids meeting my gaze.\n\n"It wasn't my choice, this life," [thief_to_convert.GetFirstNameNoTooltip] says slowly. "What should I do to repent my failings?""
+
+ # "[thief] will work off [her/his] sins for me"
+ pilgrimage.2021.c.flavor:0 "[thief_to_convert.GetSheHe|U] will work off [thief_to_convert.GetHerHis] transgressions for #EMP me#!."
+
+ # "conversations, prayers, contemplating the journey"
+ pilgrimage.2040.desc:0 "As we spend our days and nights on this ship, I try to fill my time with interesting conversations, meditations, contemplating the journey or simply planning my travel forward.\n\nHowever, recently I have seen some of the pilgrims in my entourage spend their time on another quite mundane task — fishing.\n\nThey all seem quite care-free and the activity itself has a soothing aspect to it."
+
+ # "#EMP Philestines.#! I should spend my time praying instead."
+ pilgrimage.2040.b:0 "#EMP Philestines.#! I should spend my time in devotion instead."
+
+ # "I know this feeling is sin!"
+ pilgrimage.2101.desc.lust_vice:0 "\n\n[ROOT.Char.GetFaith.HighGodName], I know this feeling is transgression! Why must you test me so harshly? Is my pilgrimage not enough to prove my devotion?"
+
+ # "You dare touch my clothes, peasant!?"
+ pilgrimage.2501.c.arrogant:0 "You dare touch my clothes, commoner!?"
+
+ # "The original sin still stains our souls" — naked preacher's speech
+ pilgrimage.3002.desc:0 "As my party prepares to break camp, I notice a massive commotion nearby — A naked [naked_preacher.GetWomanMan] has climbed on top of a large rock and is preaching to the assembled crowd.\n\n"The original failing still stains our souls my friends, but that need not be so! If we shed our garbs, can we recover the lost innocence of Adam and Eve... then, and #EMP only#! then, will the Holy Spirit see fit to touch us and show us God's true love!""
+
+ # "I will not bathe with #EMP peasants#!!"
+ pilgrimage.3201.b:0 "I will not bathe with #EMP commoners#!!"
+
+ # "known for being able to wash away sins" — Haridwar/Ganges pilgrimage flavor
+ pilgrimage.5331.desc:0 "At long last I have arrived at the source of the sacred Ganges River, Haridwar.\n\nThe city was built upon the site where the goddess Ganga herself descended when Lord Shiva released the mighty river from his locks of hair.\n\nKnown for being able to wash away failings, pilgrims from all over the world flock here to bathe in the waters of the river. Now I will be one of them."
+
+ # "cleaning my soul of its sins" — Ujjain/Mahakaleshwar pilgrimage flavor
+ pilgrimage.5351.desc:0 "Arriving in the ancient city of Ujjain, I begin making my way towards the Mahakaleshwar Jyotirlinga.\n\nDedicated to Lord Shiva in his incarnation as Mahakaleshwar, the city has long been both a pilgrimage and administrative center, creating a great bustling metropolis that pulses with the lives of the faithful.\n\nAfter arriving at the great temple I seek the blessing of the [ROOT.Char.GetFaith.BishopNeuter], cleansing my soul of its failings."
+
+ # "We all pay for our sins."
+ pilgrimage.6530.c.flavor:0 "We all pay for our failings."
+
+ # "Are you trying to trick me, peasant?!"
+ pilgrimage.6530.d:0 "Are you trying to trick #EMP me#!, commoner?!"
+
+ # "You successfully exorcise the villains"
+ pilgrimage.6532.c_success.desc:0 "You successfully drive out the villains"
+
+ # "As we listen to the morning prayers"
+ pilgrimage.6760.desc.intro:0 "As we listen to the morning observances, [bishop_pilgrim.GetTitledFirstName] and I have a lively discussion that quickly diverts into theological matters.\n\n"
+
+ # "Time to pray."
+ pilgrimage.6830.a:0 "Time for devotion."
+
+ # ── Diarchy Events ────────────────────────────────────────────────────────────
+
+ # "moving serfs and smallholders" + "the peasantry refuse to budge"
+ diarchy.1221.desc:0 "Per my mandate from [liege.GetTitledFirstName], my primary duty as regent is to fill [liege.GetHerHis] coffers. An easy way to do this is to help populate the outskirts of [recipient_county.GetNameNoTier], moving bonded workers and smallholders from my own [actor_county.GetName] to [liege.GetFirstNamePossessiveNoTooltip] lands.\n\nExcept the commonfolk refuse to budge. Every family forcibly moved is like pulling a tooth, like they #EMP object#! to being shifted by their betters."
