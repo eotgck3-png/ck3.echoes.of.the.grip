@@ -596,3 +596,26 @@ still banding across the map regardless of shape. Grain stays on, because flat-t
 bands are just hard contour lines - the same failure the gas wall had.
 
 Neither change touched the shader. Both kinds already existed; only the parameter table moved.
+
+### Two effects can use the same primitive and must not look the same
+
+Debris on Broken Cluster read in game as "hills have more stars than everything else". Its star
+density is 0.48, identical to plains - the extra points of light were the debris itself.
+
+The sprite was 1.17:1 (round) with a 0.35 cross term, and that cross draws a perpendicular streak
+through the sprite. A round dot with a cross through it is how you draw a star. Fixed by shape,
+not brightness: 4:1 shards with no cross, which cannot be read as a point of light, and the sprite
+already rotates per anchor so they lie at every angle.
+
+Worth knowing about the dispatch while tuning this: `mul *= lerp( 1, lerp( DARK, 1, f ), w )`
+darkens where the effect is ABSENT, so every effect is emissive by construction and its features
+are always brighter than their surroundings. A "dark rubble" look is not reachable by lowering
+gain - it needs an invert flag in the dispatch. Shape is the free axis; brightness is not.
+
+### Hypsometric ramps are for landforms, and hills is not one
+
+Hills ramped to warm tan at altitude, added when every terrain needed height legibility. It was the
+source of the muddy patches reported first in the Alps and again as tan showing up inside mountain
+ranges - hills sits interleaved with mountains all through a range, and tan is the one earth colour
+on a violet map. Relief shading carries its form perfectly well alone. Mountains, Barren Barrier
+and Frozen Cluster keep theirs: they are actual landforms whose altitude means something.

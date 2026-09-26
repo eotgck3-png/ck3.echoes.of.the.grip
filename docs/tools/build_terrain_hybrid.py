@@ -127,8 +127,14 @@ FX = {
  # hash and comes to about 17. The right primitive is also the cheaper one. Measured identical
  # crawl (0.0061) with higher local contrast, which is wanted here - debris should read as chunks.
  # Round (length ~ width) and small, unlike the long sparse flares that share this kind.
- "debris":   dict(kind=2, color=None,      gain=0.18, dark=0.86, scale=4.0,
-                  p=(0.70, 0.60, 0.30, 0.35), q=(0, 0, 0, 0), height=(0,0,0),
+ # SHAPE is what separates debris from stars, not brightness. The first version was 1.17:1 -
+ # round - with a 0.35 cross term, which draws a perpendicular streak: that is a plus sign, which
+ # is how you draw a star. It read as hills simply having more stars than everything else.
+ # Elongated shards at 4:1 with no cross cannot be confused with a point of light, and the sprite
+ # already rotates per anchor so they lie at every angle. Dimmer too, since stars are the bright
+ # thing on this map and debris should not compete.
+ "debris":   dict(kind=2, color=None,      gain=0.10, dark=0.82, scale=4.0,
+                  p=(0.95, 0.24, 0.30, 0.00), q=(0, 0, 0, 0), height=(0,0,0),
                   slope=(0.15, 0.60, 0.45)),
  # Barren Barrier: the dust equivalent of the gas wall - same kind, drier and darker, and tied to
  # altitude for the same reason: the passes have to stay readable.
@@ -197,7 +203,11 @@ ALT = {
  # Frozen Cluster: ice whitens with altitude.
  "taiga":            ("#c4e2f5", (0.10, 0.34, 0.45)),
  # Broken Cluster: high rubble is bare and lighter than the fill between it.
- "hills":            ("#998c7c", (0.10, 0.32, 0.30)),
+ # Hills had a ramp to warm tan at altitude, added back when every terrain needed height
+ # legibility. It is the source of the tan patches appearing inside mountain ranges, and tan is
+ # the one earth colour on a violet map. Relief shading carries hills' form on its own now.
+ # (kept here, disabled, because the entry documents why it should not come back)
+ # "hills":          ("#998c7c", (0.10, 0.32, 0.30)),
 }
 
 TERRAINS = {
