@@ -76,6 +76,14 @@ PixelShader =
 		// the shore rim left, which is the part that carries information at that range.
 		#define EOTG_VOID_DETAIL_FAR    520.0f
 		#define EOTG_VOID_DETAIL_RANGE  260.0f
+		// The shore has to go too, and for a different reason. Its land test samples the heightmap
+		// on rings a few world units across; zoomed out those rings are far below a pixel and the
+		// heightmap is being read from a reduced mip, so the land fraction smears and the rim turns
+		// into big soft blobs around island groups instead of a coastline. It survives longer than
+		// the stars because it still reads as a coast at middle zoom, but by the strategic view the
+		// flatmap is drawing the coastlines anyway.
+		#define EOTG_SHORE_FADE_FAR     900.0f
+		#define EOTG_SHORE_FADE_RANGE   420.0f
 		// -------------------------------------------------------------------------
 
 		float3 EotgRamp( float t )
@@ -215,7 +223,11 @@ PixelShader =
 			float camDist = length( CameraPosition - WorldSpacePos );
 			float detail = saturate( ( EOTG_VOID_DETAIL_FAR - camDist ) / EOTG_VOID_DETAIL_RANGE );
 			float3 Color = EotgVoid( WorldSpacePos, hue, detail );
-			Color += EotgShore( WorldSpacePos, hue );
+			float shoreFade = saturate( ( EOTG_SHORE_FADE_FAR - camDist ) / EOTG_SHORE_FADE_RANGE );
+			if ( shoreFade > 0.01f )
+			{
+				Color += EotgShore( WorldSpacePos, hue ) * shoreFade;
+			}
 
 			// Fade onto the beach exactly as vanilla does, using its shore-mask settings
 			float WaterFade = 1.0f - saturate( ( _WaterFadeShoreMaskDepth - Depth ) * _WaterFadeShoreMaskSharpness );
