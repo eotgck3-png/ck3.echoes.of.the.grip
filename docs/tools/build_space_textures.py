@@ -36,21 +36,32 @@ GOLD = hx("#FFC84D"); PALEGOLD = hx("#FFF2C0"); VIOLET = hx("#8A3BE0"); PURPLE =
 CRIMSON = hx("#E0325A"); TEAL = hx("#2FB8B0"); EMERALD = hx("#2E9C6A"); SAPPH = hx("#3A6CFF"); WHITE = (255, 255, 255)
 
 # ---------------- borders: horizontal strip, x along the border, y across ----------------
-def border(color, core=0.06, halo=0.35, strength=1.0, dash=None, core_col=None, size=128):
+# Vanilla's border textures are 85 wide x 86 tall, and the HEIGHT is the across-border axis -
+# it is what sets how wide the border is drawn on the map. Ours were generated at 128x128, so
+# every border on the map was about 1.5x wider than the engine expects before the halo was even
+# counted. At normal zoom that just looks bold; at maximum zoom they become slabs.
+#
+# Match vanilla exactly. The halo is a FRACTION of the height, so the two interact: the halved
+# halos in the previous commit were correct but could not fix this on their own.
+BORDER_W, BORDER_H = 85, 86
+
+
+def border(color, core=0.06, halo=0.35, strength=1.0, dash=None, core_col=None, size=None):
+    w, h = (size, size) if size else (BORDER_W, BORDER_H)
     cc = core_col or tuple(min(255, int(c * 0.45 + 255 * 0.55)) for c in color)
-    y = (np.arange(size) + 0.5) / size
+    y = (np.arange(h) + 0.5) / h
     d = np.abs(y - 0.5) * 2
     a_core = np.exp(-(d * d) / (core * core))
     a_halo = np.exp(-(d * d) / (halo * halo)) * 0.45
     t = a_core / (a_core + a_halo + 1e-6)
     col = np.stack([cc[i] * t + color[i] * (1 - t) for i in range(3)], -1)  # (size,3)
     a = np.minimum(1.0, (a_core + a_halo) * strength)                      # (size,)
-    x = (np.arange(size) + 0.5) / size
-    k = np.ones(size)
+    x = (np.arange(w) + 0.5) / w
+    k = np.ones(w)
     if dash:
         on, off = dash
         k = np.where((x % (on + off)) < on, 1.0, 0.15)
-    img = np.zeros((size, size, 4), np.float32)
+    img = np.zeros((h, w, 4), np.float32)
     img[:, :, :3] = col[:, None, :]
     img[:, :, 3] = (a[:, None] * k[None, :]) * 255
     return Image.fromarray(img.astype(np.uint8), "RGBA")
