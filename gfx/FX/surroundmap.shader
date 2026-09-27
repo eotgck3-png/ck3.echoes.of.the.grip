@@ -236,6 +236,11 @@ PixelShader =
 				float Mask = SurroundMaskChannels.g;	// 0 over the map itself
 
 				// Two star layers: soft dots at a random spot inside each cell, big cells so they read at any zoom
+				//
+				// "at any zoom" was the bug. The cells are deliberately zoom-independent, so the stars
+				// stayed at full strength under the paper map and speckled the whole view. Nothing else
+				// in this file looks at zoom, which is why the water-side fade did not touch them.
+				float EotgStarFade = 1.0f - saturate( FlatMapLerp );
 				float3 Color = float3( 0.002f, 0.002f, 0.003f );
 				float2 cellSizes[2]; cellSizes[0] = float2( 40.0f, 0.985f ); cellSizes[1] = float2( 14.0f, 0.975f );
 				for ( int i = 0; i < 2; i++ )
@@ -250,7 +255,7 @@ PixelShader =
 					float spot = exp( -d * d / ( radius * radius ) );
 					float on = step( cellSizes[i].y, h );
 					float twinkle = 0.6f + 0.4f * sin( GlobalTime * ( 0.4f + h2 * 1.2f ) + h2 * 6.28f );
-					Color += float3( 1.0f, 0.94f, 0.82f ) * spot * on * twinkle * ( i == 0 ? 1.2f : 0.6f );
+					Color += float3( 1.0f, 0.94f, 0.82f ) * spot * on * twinkle * ( i == 0 ? 1.2f : 0.6f ) * EotgStarFade;
 				}
 
 				return float4( Color, saturate( Mask ) );
@@ -276,6 +281,11 @@ PixelShader =
 				float Mask = SurroundMaskChannels.g;	// 0 over the map itself
 
 				// Two star layers: soft dots at a random spot inside each cell, big cells so they read at any zoom
+				//
+				// "at any zoom" was the bug. The cells are deliberately zoom-independent, so the stars
+				// stayed at full strength under the paper map and speckled the whole view. Nothing else
+				// in this file looks at zoom, which is why the water-side fade did not touch them.
+				float EotgStarFade = 1.0f - saturate( FlatMapLerp );
 				float3 Color = float3( 0.002f, 0.002f, 0.003f );
 				float2 cellSizes[2]; cellSizes[0] = float2( 40.0f, 0.985f ); cellSizes[1] = float2( 14.0f, 0.975f );
 				for ( int i = 0; i < 2; i++ )
@@ -290,7 +300,7 @@ PixelShader =
 					float spot = exp( -d * d / ( radius * radius ) );
 					float on = step( cellSizes[i].y, h );
 					float twinkle = 0.6f + 0.4f * sin( GlobalTime * ( 0.4f + h2 * 1.2f ) + h2 * 6.28f );
-					Color += float3( 1.0f, 0.94f, 0.82f ) * spot * on * twinkle * ( i == 0 ? 1.2f : 0.6f );
+					Color += float3( 1.0f, 0.94f, 0.82f ) * spot * on * twinkle * ( i == 0 ? 1.2f : 0.6f ) * EotgStarFade;
 				}
 
 				return float4( Color, saturate( Mask ) );
@@ -332,6 +342,11 @@ PixelShader =
 				float Mask = SurroundMaskChannels.g;	// 0 over the map itself
 
 				// Two star layers: soft dots at a random spot inside each cell, big cells so they read at any zoom
+				//
+				// "at any zoom" was the bug. The cells are deliberately zoom-independent, so the stars
+				// stayed at full strength under the paper map and speckled the whole view. Nothing else
+				// in this file looks at zoom, which is why the water-side fade did not touch them.
+				float EotgStarFade = 1.0f - saturate( FlatMapLerp );
 				float3 Color = float3( 0.002f, 0.002f, 0.003f );
 				float2 cellSizes[2]; cellSizes[0] = float2( 40.0f, 0.985f ); cellSizes[1] = float2( 14.0f, 0.975f );
 				for ( int i = 0; i < 2; i++ )
@@ -346,7 +361,7 @@ PixelShader =
 					float spot = exp( -d * d / ( radius * radius ) );
 					float on = step( cellSizes[i].y, h );
 					float twinkle = 0.6f + 0.4f * sin( GlobalTime * ( 0.4f + h2 * 1.2f ) + h2 * 6.28f );
-					Color += float3( 1.0f, 0.94f, 0.82f ) * spot * on * twinkle * ( i == 0 ? 1.2f : 0.6f );
+					Color += float3( 1.0f, 0.94f, 0.82f ) * spot * on * twinkle * ( i == 0 ? 1.2f : 0.6f ) * EotgStarFade;
 				}
 
 				return float4( Color, saturate( Mask ) * FlatMapLerp );
