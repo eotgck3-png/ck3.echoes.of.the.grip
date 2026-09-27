@@ -820,10 +820,11 @@ PixelShader =
 		// 2 -- Frozen Cluster. Voronoi cell walls read as crystalline facets. F2-F1 gives a
 		// smooth ridge rather than a hard line, which is what keeps it from aliasing.
 		// kind 1 -- P = ( ridge width, patch scale, body gain, - )
-		float EotgFxShard( float2 xz, float cell, float4 P )
+		float EotgFxShard( float2 xz, float cell, float4 P, float4 Q )
 		{
 			float2 baseCell = floor( xz / cell );
 			float f1 = 1e9f, f2 = 1e9f;
+			float2 nearCC = baseCell, nearP = xz;
 			for ( int j = -1; j <= 1; j++ )
 			{
 				for ( int i = -1; i <= 1; i++ )
@@ -835,6 +836,8 @@ PixelShader =
 					{
 						f2 = f1;
 						f1 = d;
+						nearCC = cc;
+						nearP  = ( cc + off ) * cell;
 					}
 					else if ( d < f2 )
 					{
@@ -849,7 +852,23 @@ PixelShader =
 			// and brighten the shard interiors so the cells are bodies rather than empty holes.
 			float patch = saturate( EotgFbm( xz * P.y ) * 2.4f - 0.55f );
 			float body = saturate( 1.0f - f1 * 2.2f ) * P.z;
-			return saturate( ridge + body ) * patch;
+			// Splinters. Q = ( -, length, width, gain ), both lengths as a fraction of the cell.
+			// One elongated lobe per cell, rotated by the cell's own hash, so the fracture network
+			// has actual shards lying in it rather than being only the lines between them. This
+			// lives inside kind 1 because kind 1 has exactly one user - Frozen Cluster - so there
+			// is nothing else to break. Gain 0 is a no-op, which is what every other preset uses.
+			float splinter = 0.0f;
+			if ( Q.w > 0.001f )
+			{
+				float sang = EotgStarHash( nearCC + 19.3f ) * 6.2831853f;
+				float scs = cos( sang ), ssn = sin( sang );
+				float2 sr = xz - nearP;
+				float2 srr = float2( sr.x * scs + sr.y * ssn, -sr.x * ssn + sr.y * scs );
+				float slx = max( Q.y * cell, 1e-4f ), swy = max( Q.z * cell, 1e-4f );
+				splinter = exp( -( srr.x * srr.x ) / ( slx * slx )
+				              - ( srr.y * srr.y ) / ( swy * swy ) ) * Q.w;
+			}
+			return saturate( ridge + body + splinter ) * patch;
 		}
 
 		// 3 -- Volatile Cluster. Anisotropic flares: a stretched lobe plus a weaker
@@ -1130,7 +1149,7 @@ PixelShader =
 				int t = IdxA.x;
 				float w = ModA.x * EotgFxHeight( h01, EOTG_FX_HEIGHT[t] )
 							  * EotgFxSlope( Grad, EOTG_FX_SLOPE[t] );
-				float f = EotgFxShard( xz, EOTG_FX_SCALE[t], EOTG_FX_P[t] );
+				float f = EotgFxShard( xz, EOTG_FX_SCALE[t], EOTG_FX_P[t], EOTG_FX_Q[t] );
 				col += EotgFxColor( t, Tint ) * f * w * EOTG_FX_GAIN[t];
 				mul *= lerp( 1.0f, lerp( EOTG_FX_DARK[t], 1.0f, f ), w * fade );
 			}

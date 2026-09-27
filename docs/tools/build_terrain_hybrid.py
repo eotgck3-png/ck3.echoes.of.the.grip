@@ -94,8 +94,22 @@ FX = {
  "none":     dict(kind=0, color=None,      gain=0.00, dark=1.00, scale=1.0,
                   p=(0,0,0,0), q=(0,0,0,0), height=(0,0,0)),
  # Frozen Cluster: ice shards gathered into floes, not an even honeycomb.
- "crystal":  dict(kind=1, color="#b8e6ff", gain=0.40, dark=0.38, scale=9.0,
-                  p=(0.20, 0.038, 0.35, 0.0), q=(0,0,0,0), height=(0.08, 0.30, 0.45)),
+ # Frozen Cluster: a fracture network with shards lying in it.
+ #
+ # Was a Voronoi with a lit BODY (P.z 0.35) and a hard dark gap (0.38), which is a honeycomb by
+ # construction - every cell filled, every gap black, tiling evenly. P.z is now 0 so only the
+ # cracks light up, and dark goes 0.38 -> 0.58 so the ice between them is dim rather than void.
+ # Q adds one elongated splinter per cell, rotated by the cell's own hash, so the network has
+ # shards lying in it instead of being only the lines between them.
+ # Colour went #b8e6ff -> #eaf7ff. The old one sat dE 9.5 from the taiga tint #8fc0e0 -
+ # closer than the drylands dust that turned out to be invisible - and the effect only read at
+ # all because `dark` was crushing the gaps. Removing the lit body would have taken that away
+ # and left almost nothing: measured luminance spread across the whole field was 0.048. At
+ # #eaf7ff with dark 0.45 the spread is 0.102 and the colour sits dE 17.3 from the tint, so the
+ # network reads on its own rather than only as an absence of light.
+ "crystal":  dict(kind=1, color="#eaf7ff", gain=0.55, dark=0.45, scale=9.0,
+                  p=(0.16, 0.038, 0.00, 0.0), q=(0, 0.34, 0.075, 0.60),
+                  height=(0.08, 0.30, 0.45)),
  # Volatile Cluster: stellar flares, sparse and elongated.
  "flare":    dict(kind=2, color="#ff9e42", gain=0.85, dark=0.72, scale=14.0,
                   p=(5.2, 0.30, 0.82, 0.6), q=(0,0,0,0), height=(0,0,0)),
