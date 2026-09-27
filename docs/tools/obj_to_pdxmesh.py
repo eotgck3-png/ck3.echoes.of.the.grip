@@ -23,10 +23,15 @@ Layout, decoded from gfx/models/mapitems/cliffs/cliff_rock_02.mesh:
 
 Vertex data is per-vertex and parallel: p is 3 floats, n is 3, ta is 4 (xyz + handedness), u0 is 2.
 
-TWO THINGS CANNOT BE CHECKED WITHOUT RENDERING, so both are switchable:
-  * winding order - if the model looks hollow or invisible, it is inside out: use --flip-winding.
-    A closed mesh that is backface-culled the wrong way shows its interior, which usually reads as
-    nothing at all.
+WINDING IS CHECKED, NOT GUESSED. An earlier version of this file claimed winding could only be
+verified by rendering. That was wrong, and it cost a build: a mesh whose triangles are wound
+against their own authored normals is backface-culled everywhere and draws nothing at all.
+check_winding() compares each triangle's geometric normal (cross of its edges) with the normal
+the author gave it, and refuses to write a mesh where they disagree. Measured on a mesh known to
+render correctly in game, agreement is 1672 of 1672; on the broken one it was 0 of 960.
+Use --flip-winding to correct a source that fails, or --force to write anyway.
+
+Still not checkable offline:
   * V orientation - if a texture appears upside down, use --flip-v. Irrelevant for a flat colour.
 
 Usage:
@@ -145,6 +150,24 @@ def tangents(pos, nrm, uv, tri):
     return out
 
 
+def check_winding(pos, nrm, tri):
+    """How many triangles are wound so their geometric normal matches the authored one.
+
+    A triangle (a,b,c) faces along cross(b-a, c-a). If that opposes the normal the modeller gave
+    those vertices, the face is pointing the wrong way, and a closed mesh wound that way is culled
+    on every face - it renders as nothing, which looks exactly like a missing file or a bad shader
+    and sends you looking in the wrong place.
+    """
+    a, b, c = pos[tri[:, 0]], pos[tri[:, 1]], pos[tri[:, 2]]
+    geo = np.cross(b - a, c - a)
+    ln = np.linalg.norm(geo, axis=1)
+    ok = ln > 1e-12
+    geo[ok] /= ln[ok][:, None]
+    shading = (nrm[tri[:, 0]] + nrm[tri[:, 1]] + nrm[tri[:, 2]]) / 3.0
+    d = (geo * shading).sum(1)[ok]
+    return int((d > 0).sum()), int((d < 0).sum())
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("obj")
@@ -160,6 +183,8 @@ def main():
     ap.add_argument("--flip-winding", action="store_true")
     ap.add_argument("--flip-v", action="store_true")
     ap.add_argument("--verify", action="store_true")
+    ap.add_argument("--force", action="store_true",
+                    help="write even if the winding check fails")
     a = ap.parse_args()
 
     P, N, T, tris = load_obj(a.obj)
@@ -171,6 +196,14 @@ def main():
     if a.drop_y:
         pos = pos.copy()
         pos[:, 1] -= a.drop_y * (a.scale if a.scale != 1.0 else 1.0)
+
+    agree, disagree = check_winding(pos, nrm, tri)
+    if disagree > agree and not a.force:
+        sys.exit(
+            "\nWINDING IS INVERTED: %d of %d triangles are wound against their own normals.\n"
+            "The engine would backface-cull this mesh and draw nothing, which looks exactly\n"
+            "like a missing file. Re-run with --flip-winding, or --force to write it anyway."
+            % (disagree, agree + disagree))
 
     ta = tangents(pos, nrm, uv, tri)
     lo, hi = pos.min(0), pos.max(0)
@@ -202,7 +235,8 @@ def main():
     print(f"wrote {a.out}")
     print(f"  vertices {len(pos)}  triangles {len(tri)}")
     print(f"  size {hi[0]-lo[0]:.3f} x {hi[1]-lo[1]:.3f} x {hi[2]-lo[2]:.3f}   minY {lo[1]:.3f}")
-    print(f"  boundingsphere r={radius:.3f}   winding {'FLIPPED' if a.flip_winding else 'as authored'}")
+    print(f"  boundingsphere r={radius:.3f}   winding {'FLIPPED' if a.flip_winding else 'as authored'}"
+          f"   faces agreeing with their normals {agree}/{agree + disagree}")
 
     if a.verify:
         verify(a.out, len(pos), len(tri))

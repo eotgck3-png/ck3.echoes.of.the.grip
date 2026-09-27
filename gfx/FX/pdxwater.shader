@@ -9,7 +9,7 @@
 
 Includes = {
 	"cw/heightmap.fxh"
-	"cw/camera.fxh"                 // MOD(eotg) CameraPosition, for the zoom fade below
+	"cw/camera.fxh"		# MOD(eotg) CameraPosition, for the zoom fade below
 	"bordercolor.fxh"
 	"jomini/jomini_water_default.fxh"
 	"jomini/jomini_water_pdxmesh.fxh"

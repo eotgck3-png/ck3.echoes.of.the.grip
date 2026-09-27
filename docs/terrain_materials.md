@@ -666,3 +666,52 @@ Two levels of variation:
 
 It costs nothing extra: the temperature rides along in `EotgStarParamsAt`, which the star field was
 already calling at each anchor to fix stars being sliced at borders.
+
+## `.shader` files have two languages in them, and two comment syntaxes
+
+A `.shader` file is not HLSL. The outer structure — `Includes`, `PixelShader`, `Effect`,
+`BlendState` — is **Paradox script**, read by the same parser that reads `common/`. Only what sits
+inside a `Code [[ ... ]]` block is HLSL.
+
+So:
+
+| Where | Comment |
+|---|---|
+| Inside `Code [[ ... ]]` | `//` |
+| Anywhere else, including inside `Includes = { }` | `#` |
+
+**This does not degrade, it detonates.** One `//` at the top level makes the entire file fail to
+parse, so *every* `Effect` it declares disappears. The mesh that asked for one of them draws
+nothing at all — which is indistinguishable from a missing file, a bad path, or inverted winding,
+and sends you looking in three wrong places. The tell is in
+`Documents/Paradox Interactive/Crusader Kings III/logs/error.log`:
+
+```
+Error: "Unexpected token: up, near line: 1178" in file: "gfx/FX/pdxmesh.shader"
+Failed to create material with shader eotg_marker (in gfx/FX/court_scene.shader) for mesh ...
+```
+
+Note the second line names *the wrong shader file*. Once the real one fails to parse, the engine
+reports whichever file it was holding. Do not chase that name.
+
+A `//` inside `Includes = { }` fails more quietly: the parser takes each bare word as a filename,
+so a trailing comment on an include produced `Shader include file 'gfx/FX/MOD' not loaded`,
+`'gfx/FX/eotg'`, `'gfx/FX/CameraPosition'` and so on. Harmless in effect, but it sat in
+`pdxwater.shader` unnoticed for several sessions.
+
+**Check before shipping any shader edit:** no line outside a `Code [[ ]]` block may start with
+`//`. Read `error.log` after the first load — it names the file and line.
+
+## Winding order is measurable. Do not ship a mesh on faith.
+
+An earlier version of `obj_to_pdxmesh.py` said winding could only be verified by rendering. That
+is false, and it cost a build. A triangle `(a,b,c)` faces along `cross(b-a, c-a)`; if that opposes
+the normal the author gave those vertices, the face points the wrong way. On a closed solid wound
+that way *every* face is culled and the model renders as nothing.
+
+Measured on the supplied atom glyph, which rendered correctly: **1672 of 1672 agree**. On the
+first generated lathe: **0 of 960**. There is no ambiguity in the signal.
+
+`check_winding()` now gates the converter — it refuses to write a mesh whose triangles disagree
+with their normals unless `--force` is passed. Both failures above shipped in the same commit, so
+the map showed nothing and either one alone would have explained it. Gate each independently.

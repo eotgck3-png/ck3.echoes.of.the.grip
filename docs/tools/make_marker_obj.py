@@ -103,10 +103,13 @@ def lathe(profile, segments):
         for s in range(segments):
             a = base + s * 2
             b, c, d = a + 1, a + 2, a + 3      # a,b = this ring lo/hi; c,d = next ring
+            # Winding must agree with the outward normal above or every face is backface-culled
+            # and the whole model renders as nothing. Do not reason about it - check_winding()
+            # measures it, and the first version of this loop had all 960 triangles inverted.
             if r0 > 1e-9:
-                F.append((a, c, b))
+                F.append((a, b, c))
             if r1 > 1e-9:
-                F.append((b, c, d))
+                F.append((b, d, c))
     return P, N, T, F
 
 

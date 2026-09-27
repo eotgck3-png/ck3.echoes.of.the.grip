@@ -1173,10 +1173,15 @@ Effect snap_to_terrain_atlas_usercolorShadow
 	Defines = { "PDX_MESH_SNAP_VERTICES_TO_TERRAIN" "MAP_LIGHTING_HACK" }
 }
 
-// ---------------------------------------------------------------- MOD(eotg)
-// snap_to_terrain plus EOTG_MARKER. APPLY_WINTER is deliberately dropped: a map symbol must
-// not take a snow overlay. CK3 looks up "<effect>Shadow" by name, so that pass has to exist
-// or the mesh will not draw at all; it is vanilla's, unchanged.
+# ---------------------------------------------------------------- MOD(eotg)
+# NOTE the '#'. Out here the file is Paradox script, not HLSL - the outer parser does not
+# understand '//', and a single such comment makes the WHOLE file fail to parse, so every
+# Effect in it disappears and meshes using them silently draw nothing. '//' is only correct
+# inside a Code [[ ... ]] block.
+#
+# snap_to_terrain plus EOTG_MARKER. APPLY_WINTER is deliberately dropped: a map symbol must
+# not take a snow overlay. CK3 looks up '<effect>Shadow' by name, so that pass has to exist
+# or the mesh will not draw at all; it is vanilla's, unchanged.
 Effect eotg_marker
 {
 	VertexShader = "VS_standard"
