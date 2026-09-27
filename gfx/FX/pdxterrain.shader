@@ -481,6 +481,10 @@ PixelShader =
 		// effect, so it is global and does not belong to any one material.
 		// These follow REAL height. The rings that showed up on Frozen Cluster did not: those
 		// were singularities in a noise-driven direction field that happened to look topographic.
+		// Winter whitens the ground in vanilla. Off: it is an earth cue, and it washes the nebula
+		// tints out from under every terrain effect for a quarter of every year.
+		#define EOTG_WINTER_SNOW      0
+
 		#define EOTG_CONTOUR_ON       1
 		#define EOTG_CONTOUR_COUNT    26.0f   // levels across the full height range
 		#define EOTG_CONTOUR_WIDTH    0.45f   // line half-width in WORLD units, not height units
@@ -1634,7 +1638,14 @@ PixelShader =
 							lerp( Normal, float3( 0.0f, 1.0f, 0.0f ), WaterNormalLerp ),
 							DetailNormal );
 
-						ApplySnowMaterialTerrain( DetailDiffuse, DetailNormal, DetailMaterial, Normal, Input.WorldSpacePos.xz, ColorMapCoords, SnowHighlight );
+						// MOD(eotg) no winter snow. Vanilla whitens the ground as winter advances, which
+						// is a strong earth cue - and on this palette it washes the nebula tints out
+						// from underneath every effect for a quarter of every year. The call is left in
+						// place behind a switch rather than deleted, because SnowHighlight feeds the
+						// shadow and highlight-compensation branches below and they expect it to exist.
+						#if EOTG_WINTER_SNOW
+							ApplySnowMaterialTerrain( DetailDiffuse, DetailNormal, DetailMaterial, Normal, Input.WorldSpacePos.xz, ColorMapCoords, SnowHighlight );
+						#endif
 
 						if( ConditionData._Drought > 0.0f || SnowHighlight > 0.0f )
 						{
