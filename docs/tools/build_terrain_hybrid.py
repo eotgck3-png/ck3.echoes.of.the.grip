@@ -130,8 +130,15 @@ FX = {
  # frequency shows its own grid. The shader now sums a second, finer, ROTATED octave, which
  # breaks the alignment. Stria power 2.6 -> 4.5 for a thinner wisp, gain and stria gain down.
  # Rendered and compared side by side rather than scored: lit area 8.7% -> 3.4%.
- "pleiades": dict(kind=7, color="#eaf4ff", gain=0.62, dark=0.62, scale=0.26,
-                  p=(1.00, 1.45, 0.72, 0.90), q=(0.18, 0.60, 0.014, 0.12),
+ # FIFTH PASS, and the first one that started by comparing taiga against the terrains that
+ # had already been approved instead of tuning it in isolation. Forest haze runs at gain 0.09
+ # and steppe strands at 0.10; taiga was at 0.62, six times either, which is why it read as
+ # loud next to terrains that read as atmosphere. Gain 0.62 -> 0.30, and the striae floor in
+ # the shader 0.18 -> 0.08 so the ground between lit patches goes quiet rather than carrying a
+ # weave across the whole terrain. Rendered at three gains side by side: 0.62 is an all-over
+ # texture, 0.20 is invisible, 0.30 is nebulosity gathered into patches.
+ "pleiades": dict(kind=7, color="#eaf4ff", gain=0.30, dark=0.72, scale=0.24,
+                  p=(1.00, 1.45, 0.70, 0.95), q=(0.15, 0.60, 0.013, 0.11),
                   height=(0,0,0)),
  # Volatile Cluster: stellar flares, sparse and elongated.
  "flare":    dict(kind=2, color="#ff9e42", gain=0.85, dark=0.72, scale=14.0,

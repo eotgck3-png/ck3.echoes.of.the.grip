@@ -1204,10 +1204,14 @@ PixelShader =
 			float s = sin( across * scale * P.x + warp );
 			// 4.5, not 2.6: the softer power made broad bright bands that dominated the terrain.
 			// Higher is a thinner, more delicate wisp with more dark between.
-			float stria = pow( saturate( 1.0f - abs( s ) ), 4.5f ) * P.z;
+			float stria = pow( saturate( 1.0f - abs( s ) ), 5.0f ) * P.z;
 
 			// Reflection: the striae are lit BY the cluster, so they fade out away from it.
-			return saturate( stria * ( 0.18f + 0.82f * glow ) + glow * Q.x );
+			// Floor 0.18 -> 0.08. The floor is how much of the striae shows where NO star lights
+			// them, and at 0.18 they were visible across the whole terrain - an all-over weave
+			// rather than nebulosity gathered around a cluster. At 0.08 the ground between the
+			// lit patches goes quiet.
+			return saturate( stria * ( 0.08f + 0.92f * glow ) + glow * Q.x );
 		}
 		void EotgModifierFX( float3 WorldSpacePos, float3 Tint, float4 ModA, float4 ModB,
 							 int4 IdxA, int4 IdxB, float4 Lens, float LensHue, float fade, float h01,
