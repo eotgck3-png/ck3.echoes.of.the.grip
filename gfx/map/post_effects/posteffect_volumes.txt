@@ -77,6 +77,19 @@ posteffect_values = {
 	inherit = zoom_step_01
 	exposure = 1.0
 	fog_max = 0
+
+	# MOD(eotg) the strategic view leans harder into the hologram, but NOT with a stronger
+	# colour grade. That was the plan and the measurement killed it: the argument was that
+	# terrain colour is hidden at this zoom so a near-monochrome LUT costs nothing. It ignored
+	# what replaces it. At this zoom REALM colours are the map, and pushing the grade collapses
+	# them too - a full teal grade puts 22 of 78 realm pairs under dE 10, minimum 0.2, which
+	# means you cannot tell France from the Holy Roman Empire.
+	#
+	# So: darker base, slightly higher saturation. The void goes deeper while the realm colours
+	# sitting on it get MORE separable, not less, which is the honest way to read as emitted
+	# light. value_scale is absolute, not relative, so 0.72 replaces standard's 0.82.
+	value_scale = 0.72
+	saturation_scale = 1.15
 }
 
 #################################
