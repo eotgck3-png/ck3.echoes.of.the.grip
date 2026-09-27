@@ -537,6 +537,7 @@ PixelShader =
 		// --- terrain modifiers: per-terrain appearance generated in-shader ---------------
 		// Every one is a CONTINUOUS FIELD, never isolated points, and fades out before its
 		// feature size drops below a screen pixel. Same rule the textures have to follow.
+		// SUPERSEDED by EOTG_ZOOMOUT_*: distance-to-pixel fades unevenly across one frame.
 		#define EOTG_MOD_FADE_FAR     440.0f
 		#define EOTG_MOD_FADE_RANGE   170.0f
 		#define EOTG_MOD_GAIN           1.6f   // global dial for every effect at once
@@ -823,8 +824,16 @@ PixelShader =
 		// the lens that would bend them is invisible.
 		float EotgModFade( float3 WorldSpacePos )
 		{
-			float camDist = length( CameraPosition - WorldSpacePos );
-			return saturate( ( EOTG_MOD_FADE_FAR - camDist ) / EOTG_MOD_FADE_RANGE );
+			// ZOOM, not distance to this pixel. This was the last camDist fade left in the mod and
+			// it has the same defect the water nebula had: camDist is measured per pixel, so at any
+			// given zoom the near part of the frame gets effects and the far part does not, and the
+			// transition is a band across the screen rather than an even fade. Camera height is one
+			// value for the whole frame.
+			//
+			// Same band as the stars, the water and the contours, so every additive layer in the
+			// mod now leaves at the same point instead of each one having its own idea of far.
+			return 1.0f - smoothstep( EOTG_ZOOMOUT_START, EOTG_ZOOMOUT_END,
+				GetZoomedInZoomedOutFactor() );
 		}
 
 		// 1 -- Anomaly Fields. Gravitational lensing, evaluated for EVERY pixel rather than

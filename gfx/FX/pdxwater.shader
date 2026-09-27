@@ -95,7 +95,8 @@ PixelShader =
 		// checking for land, so they do not depend on how deep the seabed is or on the engine height scale.
 		#define EOTG_SHORE_RIM_RADIUS    2.6f     // world units: bright rim reaches this far from the waterline
 		#define EOTG_SHORE_RIM_STRENGTH  0.30f     // brightness of the rim (spread over a wider band, so slightly dimmer to keep the same visual weight)
-		#define EOTG_SHORE_GLOW_RADIUS   7.0f     // world units the soft glow reaches seaward
+		#define EOTG_SHORE_GLOW_RADIUS   4.0f     // world units the soft glow reaches seaward; 7.0 washed
+		                                        // a wide halo out to sea rather than marking the shore
 		#define EOTG_SHORE_GLOW_STRENGTH 0.07f    // brightness of the soft glow
 		#define EOTG_BAND_RADIUS         5.0f    // world units the rolling bands reach seaward
 		#define EOTG_BAND_COUNT          3.0f     // bands across that reach
@@ -104,9 +105,11 @@ PixelShader =
 		#define EOTG_SHALLOW_TURB        0.10f    // turbulence/wisp strength near the coast
 
 		#define EOTG_HUE_BASE            0.00f    // same hue scheme as the river lanes so the two match
-		#define EOTG_HUE_SPREAD          0.28f   // narrower span of the ramp: coasts were banding into a rainbow
+		#define EOTG_HUE_SPREAD          0.10f   // narrower still: 0.28 still reached the violet end of the
+		                                        // ramp, which is where the purple coasts came from
 		#define EOTG_HUE_REGION_SCALE    0.00018f// ~3x larger regions, so hue changes over distance rather than along one coast
-		#define EOTG_HUE_DRIFT_SPEED     0.02f
+		#define EOTG_HUE_DRIFT_SPEED     0.00f   // was 0.02: the whole map's coast colour cycled over time,
+		                                        // so a coast you learned was not the colour you left it
 		#define EOTG_HUE_BAND_OFFSET     0.08f    // bands sit this far along the ramp from the rim
 
 		// Zoomed out, the stars and the nebula drift in the void are just noise: too small to read
