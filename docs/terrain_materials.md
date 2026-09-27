@@ -769,3 +769,35 @@ shader.** Two cheap checks that would have found this in minutes rather than hou
   the new one has 0.
 - Paint each candidate shader a flat unmistakable colour and take one screenshot. When the sea
   came back neither red (water) nor green (surround), every shader was excluded at once.
+
+## HLSL reserved words will take down the whole shader
+
+`line` is reserved in HLSL — it is a geometry-shader primitive type, along with `point`,
+`triangle`, `lineadj` and `triangleadj`. Declaring `float line = ...` produces:
+
+```
+error X3000: syntax error: unexpected token 'line'
+Failed creating terrain effect 'PdxTerrain' (gfx/FX/pdxterrain.shader)
+```
+
+and the terrain does not draw at all — a black map with only labels, borders and coats of arms,
+because those are separate shaders that compiled fine. It looks like a catastrophic data failure
+and is one word.
+
+This has now happened twice. The first was `flat` in `pdxwater.shader`, caught before shipping
+only because the name looked suspicious. The second was `line`, which shipped.
+
+**The class of name to avoid**: interpolation modifiers (`flat`, `linear`, `centroid`, `sample`,
+`noperspective`, `nointerpolation`), primitive types (`point`, `line`, `triangle`), and type
+keywords (`vector`, `matrix`, `texture`, `sampler`, `string`). They are all ordinary English words
+that read naturally as variable names, which is exactly why they get used.
+
+**Check before shipping any shader edit**, alongside the top-level `//` scan:
+
+```bash
+grep -nE '\b(float|float2|float3|float4|int|bool|uint)\s+(line|point|triangle|flat|linear|centroid|sample|vector|matrix|texture|sampler|string)\b' gfx/FX/*.shader
+```
+
+The real lesson is smaller than the rule: **the compile error was in `error.log`, named the file
+and the token, and would have taken thirty seconds to find.** Reading the log first remains the
+cheapest diagnostic available and is still the step most often skipped.

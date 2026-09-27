@@ -593,13 +593,16 @@ PixelShader =
 			float dh = min( f, 1.0f - f );                                  // in height fractions
 			float g = max( length( grad.xy ) * EOTG_CONTOUR_COUNT, 1e-6f ); // height per world unit
 			float dWorld = dh / g;                                          // world units to the line
-			float line = 1.0f - smoothstep( 0.0f, EOTG_CONTOUR_WIDTH, dWorld );
+			// NOT `line`: that is a reserved HLSL word (a geometry-shader primitive type, with
+			// `point` and `triangle`). Using it failed the whole terrain shader to compile and
+			// the map drew black. Same class of mistake as `flat` in pdxwater.shader.
+			float band = 1.0f - smoothstep( 0.0f, EOTG_CONTOUR_WIDTH, dWorld );
 
 			// Kill it on flat ground. Where the height is constant it also sits exactly ON a
 			// contour level, so dh is zero and the whole flat area reads as one continuous line -
 			// which washed the entire sea floor and every plain in a solid tint. A contour means
 			// nothing without relief, so gate on there being some.
-			return line * smoothstep( EOTG_CONTOUR_MIN_GRAD, EOTG_CONTOUR_MIN_GRAD * 4.0f,
+			return band * smoothstep( EOTG_CONTOUR_MIN_GRAD, EOTG_CONTOUR_MIN_GRAD * 4.0f,
 				length( grad.xy ) );
 		}
 		float EotgStarHash( float2 p )
