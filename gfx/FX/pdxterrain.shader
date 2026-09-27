@@ -497,6 +497,11 @@ PixelShader =
 		#define EOTG_TERRAIN_EMISSIVE 1.20f
 		#define EOTG_STRUCTURE_SCALE  0.90f   // global: how much of the structure texture survives
 		                                      // (0.45 suited a soft cloud; a grid wants to be seen)
+		// Where the fine star layer fades in, as a fraction of the camera's zoom range.
+		// The coarse layer has no such band - it is always on, so the constellations you pick
+		// out zoomed out are still there, in the same places, when you come in close.
+		#define EOTG_STAR_FINE_IN     0.22f   // fine stars at full strength at or below this
+		#define EOTG_STAR_FINE_OUT    0.58f   // and gone at or above it
 		#define EOTG_STAR_GAIN        1.00f
 
 		// --- terrain modifiers: per-terrain appearance generated in-shader ---------------
@@ -636,19 +641,24 @@ PixelShader =
 		// that actually have a star nearby pay for one.
 		float3 EotgStars( float3 WorldSpacePos, float Density, float Bright )
 		{
-			float camDist = length( CameraPosition - WorldSpacePos );
-			float fine   = saturate( ( 260.0f - camDist ) / 160.0f );
-			float coarse = saturate( ( camDist - 120.0f ) / 200.0f );
-			float3 s = vec3( 0.0f );
+			// The coarse layer is ALWAYS drawn, at full strength, at every zoom. It is the sky:
+			// fixed world-space cells and a positional hash, so a star sits at the same place
+			// whatever the camera does, and its radius is in world units, so zooming in makes it
+			// grow rather than vanish. The fine layer only adds smaller stars between them.
+			//
+			// These used to cross-fade on camDist: coarse faded OUT below 120 and fine faded IN
+			// below 260, so zooming in swapped one star field for a completely different one.
+			// camDist is also per pixel, which meant the near and far halves of a single frame
+			// were showing different layers - the same mistake as the water nebula.
+			float EotgZoomF = GetZoomedInZoomedOutFactor();
+			float fine = 1.0f - smoothstep( EOTG_STAR_FINE_IN, EOTG_STAR_FINE_OUT, EotgZoomF );
+
+			float3 s = EotgStarLayer( WorldSpacePos.xz, EOTG_STAR_COARSE_CELL,
+				EOTG_STAR_COARSE_R );
 			if ( fine > 0.01f )
 			{
 				s += EotgStarLayer( WorldSpacePos.xz, EOTG_STAR_FINE_CELL,
 					EOTG_STAR_FINE_R ) * fine;
-			}
-			if ( coarse > 0.01f )
-			{
-				s += EotgStarLayer( WorldSpacePos.xz, EOTG_STAR_COARSE_CELL,
-					EOTG_STAR_COARSE_R ) * coarse;
 			}
 			return saturate( s ) * EOTG_STAR_GAIN;
 		}
