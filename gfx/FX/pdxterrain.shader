@@ -840,7 +840,7 @@ PixelShader =
 		// 3 -- Volatile Cluster. Anisotropic flares: a stretched lobe plus a weaker
 		// perpendicular one, each cell rotated by its own hash so nothing looks stamped.
 		// kind 2 -- P = ( length, width, sparsity, cross gain )
-		float EotgFxSplat( float2 xz, float cell, float4 P )
+		float EotgFxSplat( float2 xz, float cell, float4 P, float4 Q )
 		{
 			float2 baseCell = floor( xz / cell );
 			float acc = 0.0f;
@@ -862,6 +862,16 @@ PixelShader =
 					// reading as one sprite stamped over and over.
 					float sc  = 0.65f + 0.70f * EotgStarHash( cc + 12.8f );
 					float amp = 0.55f + 0.45f * EotgStarHash( cc + 22.4f );
+					// Q.y = the fraction of sprites that render FAINT, Q.z = how faint.
+					// The per-anchor amp above only spans 0.55-1.0, which is variation but not
+					// contrast - every sprite still reads as the same weight. This splits the field
+					// into two populations on its own hash, so a dust field can be half solid and
+					// half a thin veil rather than a uniform stipple. Q.y = 0 leaves every existing
+					// effect exactly as it was, which is why debris and the flares are untouched.
+					if ( Q.y > 0.0f && EotgStarHash( cc + 55.1f ) < Q.y )
+					{
+						amp *= Q.z;
+					}
 					#if EOTG_MOD_ANIMATE
 						// Volatile Cluster is meant to be unstable, so let them actually flare.
 						amp *= 0.62f + 0.38f * sin( GlobalTime * EOTG_MOD_FLARE_FLICKER
@@ -1114,7 +1124,7 @@ PixelShader =
 				int t = IdxA.y;
 				float w = ModA.y * EotgFxHeight( h01, EOTG_FX_HEIGHT[t] )
 							  * EotgFxSlope( Grad, EOTG_FX_SLOPE[t] );
-				float f = EotgFxSplat( xz, EOTG_FX_SCALE[t], EOTG_FX_P[t] );
+				float f = EotgFxSplat( xz, EOTG_FX_SCALE[t], EOTG_FX_P[t], EOTG_FX_Q[t] );
 				// Q.x inverts the field. The dispatch below darkens where the effect is ABSENT, so
 				// every effect is emissive by default and its features are always brighter than
 				// their surroundings. That is wrong for rubble: it should occlude, not glow, and

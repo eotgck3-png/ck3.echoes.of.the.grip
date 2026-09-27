@@ -206,8 +206,13 @@ FX = {
  # fixes both problems at once. Dark on ochre actually contrasts, and it cannot be misread as
  # stars, which are always bright points - the confusion that cost the debris effect three
  # attempts. Coverage 9.4%, lc 0.032, peak 0.28, well inside the gates.
- "dust":     dict(kind=2, color=None, gain=0.00, dark=0.70, scale=13.0,
-                  p=(1.60, 1.25, 0.12, 0.0), q=(1, 0, 0, 0), height=(0,0,0)),
+ # scale 13 -> 9 roughly doubles the count: coverage 9.4% -> 19.1%, lc 0.054, peak 0.360,
+ # both still well inside the gates. Q.y/Q.z split the field into two populations - half the
+ # motes render at 35% strength, so the field is half solid dust and half a thin grey veil
+ # rather than a uniform stipple. Q.y = 0 on every other effect, so debris and the flares are
+ # unchanged.
+ "dust":     dict(kind=2, color=None, gain=0.00, dark=0.70, scale=9.0,
+                  p=(1.60, 1.25, 0.12, 0.0), q=(1, 0.50, 0.35, 0), height=(0,0,0)),
 }
 
 # Hypsometric ramp, per terrain: the tint shifts toward ALT colour as altitude rises.
