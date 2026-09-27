@@ -487,7 +487,13 @@ PixelShader =
 		#define EOTG_STAR_FINE_CELL   2.83f  // /sqrt(2): halves cell AREA, so 2x the stars
 		#define EOTG_STAR_FINE_R      0.40f
 		#define EOTG_STAR_COARSE_CELL 8.49f
-		#define EOTG_STAR_COARSE_R    1.70f
+		#define EOTG_STAR_COARSE_R    1.70f   // at full zoom out
+		#define EOTG_STAR_COARSE_R_MIN 0.80f  // zoomed right in: 1.47x the fine star, measured at 10% falloff
+		// Gaussian tightness. Higher is a crisper core with less halo. The coarse stars are the
+		// ones you look at, so they get the tighter profile; the fine layer stays soft because at
+		// its size a hard core aliases.
+		#define EOTG_STAR_COARSE_FALLOFF 4.60f
+		#define EOTG_STAR_FINE_FALLOFF   2.50f
 		#define EOTG_STRUCTURE_FLOOR  0.30f   // level the structure fades toward when amount = 0
 		// Overall terrain level. Solved so the set lands near 0.07 on screen after the colormap
 		// soft-lights it: at 1.0 the mean came out 0.172, which read as washed-out grey.
@@ -592,7 +598,7 @@ PixelShader =
 		//
 		// The terrain fetch is paid only by stars that actually reach this pixel: the conservative
 		// radius test uses EOTG_RADIUS_HI, the largest any terrain could ask for, and rejects first.
-		float3 EotgStarLayer( float2 xz, float cell, float radiusWorld )
+		float3 EotgStarLayer( float2 xz, float cell, float radiusWorld, float falloff )
 		{
 			float2 baseCell = floor( xz / cell );
 			float3 acc = vec3( 0.0f );
@@ -627,7 +633,7 @@ PixelShader =
 					// sit near the bias and only a few go strongly amber or blue.
 					float th = EotgStarHash( cc + 5.5f ) * 2.0f - 1.0f;
 					float3 tint = EotgStarTint( sp.z + th * abs( th ) * EOTG_STAR_TEMP_JITTER );
-					acc += tint * ( b * sp.y * exp( -d * d * 2.5f ) );
+					acc += tint * ( b * sp.y * exp( -d * d * falloff ) );
 				}
 			}
 			return saturate( acc );
@@ -653,12 +659,21 @@ PixelShader =
 			float EotgZoomF = GetZoomedInZoomedOutFactor();
 			float fine = 1.0f - smoothstep( EOTG_STAR_FINE_IN, EOTG_STAR_FINE_OUT, EotgZoomF );
 
+			// The coarse radius is in world units, so holding it fixed meant that keeping the star
+			// at full zoom out - where 1.70 units is a few pixels - turned it into a blob tens of
+			// pixels across when zoomed in. It now shrinks as the camera comes down, which keeps
+			// its SCREEN size roughly steady: the same star, still in the same place, still bigger
+			// than its neighbours, but not a smear. It never goes below EOTG_STAR_COARSE_R_MIN,
+			// which is set relative to the fine radius so it stays the larger of the two.
+			float rCoarse = lerp( EOTG_STAR_COARSE_R_MIN, EOTG_STAR_COARSE_R,
+				smoothstep( 0.15f, 1.0f, EotgZoomF ) );
+
 			float3 s = EotgStarLayer( WorldSpacePos.xz, EOTG_STAR_COARSE_CELL,
-				EOTG_STAR_COARSE_R );
+				rCoarse, EOTG_STAR_COARSE_FALLOFF );
 			if ( fine > 0.01f )
 			{
 				s += EotgStarLayer( WorldSpacePos.xz, EOTG_STAR_FINE_CELL,
-					EOTG_STAR_FINE_R ) * fine;
+					EOTG_STAR_FINE_R, EOTG_STAR_FINE_FALLOFF ) * fine;
 			}
 			return saturate( s ) * EOTG_STAR_GAIN;
 		}
