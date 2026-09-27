@@ -110,8 +110,22 @@ FX = {
  # coverage is 17% and it reads as knots with dark between them. Colour #eaf4ff sits dE 17.1
  # from the taiga tint - the old crystal blue was 9.5, closer than the dust that turned out
  # invisible. lc 0.052, inside the gates.
- "pleiades": dict(kind=7, color="#eaf4ff", gain=0.70, dark=0.55, scale=2.2,
-                  p=(1.00, 0.55, 0.95, 0.30), q=(0.55, 0.60, 0.025, 0.55),
+ # SECOND PASS, after the first shipped as a lattice of dots. Two mistakes, one cause.
+ #
+ # The striae were at a 2.86 world-unit period, which is a hatch rather than a wisp, and the
+ # halos at 55% of anchors with a 2.5-unit radius made a dense dot field that swamped them. The
+ # result read as spotty, which is the opposite of the reference. The cause was scoring the
+ # effect with metrics instead of LOOKING at it: lc 0.052 passed the gates while the field was
+ # a dot lattice, because a regular pattern of soft blobs has low local contrast. The harness
+ # also warns in its own docstring that world-units-per-pixel is the one genuine unknown and
+ # that --wpp sweeps it, and that sweep was not run.
+ #
+ # Now streak-led: period 24 world units, warp more than doubled so they meander instead of
+ # ruling, and the halos rare (12% of anchors) and wide (7.6 units) so they brighten stretches
+ # of the striae rather than punching dots through them. Rendered and looked at across
+ # wpp 0.5/1/2 - it stays wisps at all three - and lc 0.021-0.052 with crawl 0.0.
+ "pleiades": dict(kind=7, color="#eaf4ff", gain=0.70, dark=0.55, scale=0.26,
+                  p=(1.00, 1.30, 1.00, 0.90), q=(0.22, 0.60, 0.010, 0.12),
                   height=(0,0,0)),
  # Volatile Cluster: stellar flares, sparse and elongated.
  "flare":    dict(kind=2, color="#ff9e42", gain=0.85, dark=0.72, scale=14.0,
