@@ -59,7 +59,12 @@ PixelShader =
 		// set EOTG_VOID_POINT_STARS to 1 to try them again. Land keeps its own stars, drawn
 		// per-star in pdxterrain.shader rather than sampled from a texture.
 		#define EOTG_VOID_DETAIL         1   // the slow nebula drift over open water
-		#define EOTG_VOID_POINT_STARS    0   // the star dots - see below
+		#define EOTG_VOID_POINT_STARS    1   // the star dots - see below
+		// Back on. These were switched off while hunting stars that turned out to be baked
+		// into flatmap.dds, so the 3D water field was never the culprit and there is no reason
+		// for it to stay off. It now fades on camera height with everything else, so it cannot
+		// reach the strategic view. The one real objection stands: these are sampled from a
+		// noise texture, so zoomed right in over open sea a star magnifies into a soft blob.
 
 		// TEMPORARY DIAGNOSTIC - set back to 0. Paints all water solid red so one screenshot
 		// shows exactly which pixels this shader is responsible for.
