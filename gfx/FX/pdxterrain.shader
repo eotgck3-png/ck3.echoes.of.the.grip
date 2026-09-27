@@ -1121,6 +1121,61 @@ PixelShader =
 			return lerp( EOTG_FX_COLOR[t], Tint, EOTG_FX_USETINT[t] );
 		}
 
+		// 7 -- Frozen Cluster. The Pleiades, which is what this terrain actually is: an open
+		// cluster that has drifted into a cold dust cloud. Two mechanics, both from the real
+		// object, and neither of them cellular - which is the point, because a Voronoi can only
+		// ever read as filled cells or as a net, and both were rejected.
+		//
+		//  * STRIAE. The nebulosity is streaky because the dust grains are combed into alignment
+		//    by the interstellar magnetic field, so the wisps run parallel on ONE axis. That is
+		//    what separates this from steppe's strands, which are sparse and randomly oriented,
+		//    and from terraced_hills' bands, which follow altitude rather than a fixed heading.
+		//  * REFLECTION. It is a reflection nebula, not an emission one: the cloud only glows
+		//    where starlight reaches it. So the halos sit on the cluster's OWN star anchors, and
+		//    the striae are modulated by that same glow - bright near a star, fading to nothing
+		//    between them. No other terrain couples its effect to its stars, which is what makes
+		//    this read as a cluster rather than as a texture laid over one.
+		//
+		// kind 7 -- P = ( stria freq, warp, stria gain, halo radius in star cells )
+		//           Q = ( halo gain, direction radians, patch scale, fraction of stars lit )
+		float EotgFxReflect( float2 xz, float scale, float4 P, float4 Q )
+		{
+			// Halos on the coarse star anchors - the same cell, offset and hash EotgStarLayer
+			// uses, so a halo lands on a star rather than merely near one.
+			float cellS = EOTG_STAR_COARSE_CELL;
+			float2 bc = floor( xz / cellS );
+			float rad = max( P.w * cellS, 1e-4f );
+			float glow = 0.0f;
+			for ( int j = -1; j <= 1; j++ )
+			{
+				for ( int i = -1; i <= 1; i++ )
+				{
+					float2 cc = bc + float2( float( i ), float( j ) );
+					// Q.w: only some stars are bright enough to light the dust. Without this every
+					// anchor glowed, the halos overlapped, and the measured coverage was 94% - a flat
+					// wash with no cluster in it. At 0.55 it is 17%, which reads as knots.
+					if ( EotgStarHash( cc + 41.2f ) >= Q.w )
+					{
+						continue;
+					}
+					float2 off = float2( EotgStarHash( cc + 7.3f ), EotgStarHash( cc + 3.1f ) );
+					float2 dd = xz - ( cc + off ) * cellS;
+					float t = dot( dd, dd ) / ( rad * rad );
+					glow += exp( -t ) * ( 0.55f + 0.45f * EotgStarHash( cc + 27.6f ) );
+				}
+			}
+			glow = saturate( glow );
+
+			// Striae: a warped sine on one fixed heading, ridged so the wisps are thin.
+			float cs = cos( Q.y ), sn = sin( Q.y );
+			float across = -xz.x * sn + xz.y * cs;
+			float warp = ( EotgFbm( xz * max( Q.z, 1e-4f ) ) - 0.5f ) * P.y * 6.2831853f;
+			float s = sin( across * scale * P.x + warp );
+			float stria = pow( saturate( 1.0f - abs( s ) ), 2.6f ) * P.z;
+
+			// Reflection: the striae are lit BY the cluster, so they fade out away from it.
+			return saturate( stria * ( 0.18f + 0.82f * glow ) + glow * Q.x );
+		}
 		void EotgModifierFX( float3 WorldSpacePos, float3 Tint, float4 ModA, float4 ModB,
 							 int4 IdxA, int4 IdxB, float4 Lens, float LensHue, float fade, float h01,
 							 float3 Grad,
@@ -1203,6 +1258,15 @@ PixelShader =
 				col += EOTG_NEB_CORE * ne.y * w * EOTG_FX_GAIN[t] * 1.30f;
 				mul *= lerp( 1.0f, lerp( EOTG_FX_DARK[t], 1.0f, ne.x ), w * fade );
 			}
+			if ( ModB.z > 0.01f )								// kind 7 -- reflection cluster
+			{
+				int t = IdxB.z;
+				float w = ModB.z * EotgFxHeight( h01, EOTG_FX_HEIGHT[t] )
+							  * EotgFxSlope( Grad, EOTG_FX_SLOPE[t] );
+				float f = EotgFxReflect( xz, EOTG_FX_SCALE[t], EOTG_FX_P[t], EOTG_FX_Q[t] );
+				col += EotgFxColor( t, Tint ) * f * w * EOTG_FX_GAIN[t];
+				mul *= lerp( 1.0f, lerp( EOTG_FX_DARK[t], 1.0f, f ), w * fade );
+			}
 			Additive = col * fade * EOTG_MOD_GAIN;
 			Multiplier = mul;
 		}
@@ -1224,6 +1288,7 @@ PixelShader =
 			else if ( k == 4 ) { ModA.w += w; if ( w > BestA.w ) { BestA.w = w; IdxA.w = t; } }
 			else if ( k == 5 ) { ModB.x += w; if ( w > BestB.x ) { BestB.x = w; IdxB.x = t; } }
 			else if ( k == 6 ) { ModB.y += w; if ( w > BestB.y ) { BestB.y = w; IdxB.y = t; } }
+			else if ( k == 7 ) { ModB.z += w; if ( w > BestB.z ) { BestB.z = w; IdxB.z = t; } }
 		}
 
 		// One tap's worth of terrain colour, including the hypsometric ramp. Split out because the

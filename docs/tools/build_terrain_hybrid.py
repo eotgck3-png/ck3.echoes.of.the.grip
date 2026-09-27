@@ -94,22 +94,25 @@ FX = {
  "none":     dict(kind=0, color=None,      gain=0.00, dark=1.00, scale=1.0,
                   p=(0,0,0,0), q=(0,0,0,0), height=(0,0,0)),
  # Frozen Cluster: ice shards gathered into floes, not an even honeycomb.
- # Frozen Cluster: a fracture network with shards lying in it.
+ # Frozen Cluster is the Pleiades: an open cluster that has drifted into a cold dust cloud.
+ # Kind 7, built for this, because a Voronoi can only read as filled cells or as a net and both
+ # were rejected - the primitive was the problem, not its numbers.
  #
- # Was a Voronoi with a lit BODY (P.z 0.35) and a hard dark gap (0.38), which is a honeycomb by
- # construction - every cell filled, every gap black, tiling evenly. P.z is now 0 so only the
- # cracks light up, and dark goes 0.38 -> 0.58 so the ice between them is dim rather than void.
- # Q adds one elongated splinter per cell, rotated by the cell's own hash, so the network has
- # shards lying in it instead of being only the lines between them.
- # Colour went #b8e6ff -> #eaf7ff. The old one sat dE 9.5 from the taiga tint #8fc0e0 -
- # closer than the drylands dust that turned out to be invisible - and the effect only read at
- # all because `dark` was crushing the gaps. Removing the lit body would have taken that away
- # and left almost nothing: measured luminance spread across the whole field was 0.048. At
- # #eaf7ff with dark 0.45 the spread is 0.102 and the colour sits dE 17.3 from the tint, so the
- # network reads on its own rather than only as an absence of light.
- "crystal":  dict(kind=1, color="#eaf7ff", gain=0.55, dark=0.45, scale=9.0,
-                  p=(0.16, 0.038, 0.00, 0.0), q=(0, 0.34, 0.075, 0.60),
-                  height=(0.08, 0.30, 0.45)),
+ # Two mechanics, both from the real object. STRIAE run parallel on one heading, because the
+ # dust grains are combed into alignment by the interstellar magnetic field; that is what keeps
+ # them clear of steppe's randomly-oriented strands and terraced_hills' altitude bands. And the
+ # nebula is a REFLECTION nebula, so it only glows where starlight reaches it: the halos sit on
+ # this terrain's own star anchors, and the striae are modulated by that same glow.
+ #
+ # Measured before shipping. Halo radius and the fraction of stars bright enough to light the
+ # dust both matter more than gain: at radius 0.55 with every star lit, the halos overlapped and
+ # covered 94% of the ground, which is a flat wash with no cluster in it. At 0.30 and 0.55 the
+ # coverage is 17% and it reads as knots with dark between them. Colour #eaf4ff sits dE 17.1
+ # from the taiga tint - the old crystal blue was 9.5, closer than the dust that turned out
+ # invisible. lc 0.052, inside the gates.
+ "pleiades": dict(kind=7, color="#eaf4ff", gain=0.70, dark=0.55, scale=2.2,
+                  p=(1.00, 0.55, 0.95, 0.30), q=(0.55, 0.60, 0.025, 0.55),
+                  height=(0,0,0)),
  # Volatile Cluster: stellar flares, sparse and elongated.
  "flare":    dict(kind=2, color="#ff9e42", gain=0.85, dark=0.72, scale=14.0,
                   p=(5.2, 0.30, 0.82, 0.6), q=(0,0,0,0), height=(0,0,0)),
@@ -305,7 +308,7 @@ TERRAINS = {
  # below plains (0.48) so it stays the emptier of the two. Impassable mountains are NOT
  # affected: build_terrain_index forces every impassable province into desert_mountains.
  "mountains":       ("Nebula Barrier",     "#5c3f9e", 0, 150, 0.65, 0.22, 0.38, "nebula"),
- "taiga":           ("Frozen Cluster",     "#8fc0e0", 1, 430, 0.80, 0.48, 0.65, "crystal"),
+ "taiga":           ("Frozen Cluster",     "#8fc0e0", 1, 430, 0.80, 0.48, 0.65, "pleiades"),
  "drylands":        ("Arid Reach",         "#a8874a", 2, 380, 0.60, 0.26, 0.45, "dust"),  # saturated ochre dust
  "forest":          ("Dense Cluster",      "#90a0b8", 0, 600, 0.55, 1.00, 0.75, "haze"),
  "steppe":          ("Frontier Reach",     "#8ea8ae", 2, 300, 0.40, 0.18, 0.50, "strands"),  # pale cyan-grey, emptier than plains
