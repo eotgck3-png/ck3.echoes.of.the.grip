@@ -464,6 +464,11 @@ PixelShader =
 		#define EOTG_STAR_COOL        float3( 0.70f, 0.82f, 1.00f )   // B/A: blue-white
 		#define EOTG_STAR_TEMP_JITTER 0.55f    // per-star spread around the terrain bias
 
+		// Where the additive layers (stars, modifier FX) fade out, as a fraction of the camera's
+		// zoom-in..zoom-out range. They are detail for looking at the world, not for reading it.
+		#define EOTG_ZOOMOUT_START 0.55f
+		#define EOTG_ZOOMOUT_END   0.90f
+
 		// How opaque the political map mode is over the terrain at ordinary zoom. Vanilla covers
 		// the ground almost completely, which is right for a parchment map and wrong here - the
 		// terrain IS the setting, and burying the nebulae under flat realm colour throws away the
@@ -1463,11 +1468,17 @@ PixelShader =
 					// star field. A colour-coded diagnostic build settled it: at full zoom out the sea
 					// was neither the water shader's red nor the surround's green, so it had to be
 					// terrain.
+					// Two signals, whichever is stronger. FlatMapLerp alone was not enough: gating on it
+					// in the water, the surround and here produced no visible change whatsoever, which
+					// means it is not reaching 1 at the zoom the player calls the paper view.
+					// GetZoomedInZoomedOutFactor is camera height against ZoomInHeight/ZoomOutHeight,
+					// so it always reaches 1 when the camera is all the way out.
+					float EotgZoomOut = smoothstep( EOTG_ZOOMOUT_START, EOTG_ZOOMOUT_END,
+						GetZoomedInZoomedOutFactor() );
 					#ifdef TERRAIN_FLAT_MAP_LERP
-						float EotgFlatFade = 1.0f - saturate( FlatMapLerp );
-					#else
-						float EotgFlatFade = 1.0f;
+						EotgZoomOut = max( EotgZoomOut, saturate( FlatMapLerp ) );
 					#endif
+					float EotgFlatFade = 1.0f - EotgZoomOut;
 					FinalColor += EotgStars( EotgStarPos, EotgStarD, EotgStarB ) * EotgFlatFade;
 					FinalColor += EotgModAdd * EotgFlatFade;                        // MOD(eotg)
 				}
@@ -1631,11 +1642,17 @@ PixelShader =
 					// star field. A colour-coded diagnostic build settled it: at full zoom out the sea
 					// was neither the water shader's red nor the surround's green, so it had to be
 					// terrain.
+					// Two signals, whichever is stronger. FlatMapLerp alone was not enough: gating on it
+					// in the water, the surround and here produced no visible change whatsoever, which
+					// means it is not reaching 1 at the zoom the player calls the paper view.
+					// GetZoomedInZoomedOutFactor is camera height against ZoomInHeight/ZoomOutHeight,
+					// so it always reaches 1 when the camera is all the way out.
+					float EotgZoomOut = smoothstep( EOTG_ZOOMOUT_START, EOTG_ZOOMOUT_END,
+						GetZoomedInZoomedOutFactor() );
 					#ifdef TERRAIN_FLAT_MAP_LERP
-						float EotgFlatFade = 1.0f - saturate( FlatMapLerp );
-					#else
-						float EotgFlatFade = 1.0f;
+						EotgZoomOut = max( EotgZoomOut, saturate( FlatMapLerp ) );
 					#endif
+					float EotgFlatFade = 1.0f - EotgZoomOut;
 					FinalColor += EotgStars( EotgStarPos, EotgStarD, EotgStarB ) * EotgFlatFade;
 					FinalColor += EotgModAdd * EotgFlatFade;                        // MOD(eotg)
 				}

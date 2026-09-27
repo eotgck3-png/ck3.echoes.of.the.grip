@@ -46,7 +46,7 @@ PixelShader =
 	Code
 	[[
 		// MOD(eotg) ---- tunables -------------------------------------------------
-		// Master switch for everything drawn ON the void: stars and nebula clouds. Off.
+		// What is drawn ON the void. The nebula is back; the point stars are not.
 		//
 		// Three passes of fading these by camera distance and then by FlatMapLerp all failed the
 		// same way, because the problem was never when they appear - it was that they are a NOISE
@@ -54,14 +54,21 @@ PixelShader =
 		// across; zoomed out, the nebula reads as pink and cyan smears in open water. Neither is a
 		// star field, and no fade curve turns one into the other.
 		//
-		// The ocean is now flat void. The land keeps its stars - those are drawn per-star in
-		// pdxterrain.shader, at a real world size, which is why they hold up at every zoom.
-		// Set to 1 to bring the field back; nothing else needs changing.
-		#define EOTG_VOID_STARS          0
+		// The nebula is a large, soft feature, so magnifying it is harmless and it is what
+		// gives open water its colour. The stars are the part that broke, so they stay off;
+		// set EOTG_VOID_POINT_STARS to 1 to try them again. Land keeps its own stars, drawn
+		// per-star in pdxterrain.shader rather than sampled from a texture.
+		#define EOTG_VOID_DETAIL         1   // the slow nebula drift over open water
+		#define EOTG_VOID_POINT_STARS    0   // the star dots - see below
 
 		// TEMPORARY DIAGNOSTIC - set back to 0. Paints all water solid red so one screenshot
 		// shows exactly which pixels this shader is responsible for.
 		#define EOTG_DIAG_WATER          0
+
+		// Same range as pdxterrain.shader, so land and sea stop showing detail together rather
+		// than one fading out while the other is still busy.
+		#define EOTG_ZOOMOUT_START 0.55f
+		#define EOTG_ZOOMOUT_END   0.90f
 
 		#define EOTG_VOID_COLOR          float3( 0.002f, 0.002f, 0.003f )  // open-sea base: black
 		#define EOTG_NEBULA_STRENGTH     0.012f    // brightness of the slow nebula drift over the void (0 = flat black)
@@ -143,13 +150,20 @@ PixelShader =
 			float3 dustCol  = float3( 0.4f, 0.4f, 0.45f );
 			float3 cloudCol = EotgRamp( hue + 0.35f + big * 0.3f );
 
-			// Stars: many faint white points plus a few brighter ramp-tinted ones, twinkling slowly
-			float s  = PdxTex2D( FoamNoiseTexture, WorldSpacePos.xz * EOTG_STAR_SCALE ).g;
-			float s2 = PdxTex2D( FoamNoiseTexture, WorldSpacePos.xz * EOTG_STAR_SCALE * 0.43f + 0.19f ).r;
-			float twinkle = 0.6f + 0.4f * PdxTex2D( FoamNoiseTexture, WorldSpacePos.xz * 0.05f + GlobalTime * 0.03f ).b;
-			float star    = smoothstep( EOTG_STAR_DENSITY, 1.0f, s ) * twinkle;
-			float bright  = smoothstep( EOTG_STAR_DENSITY + 0.006f, 1.0f, s2 ) * ( 0.5f + 0.5f * twinkle );
-			float3 brightCol = lerp( EotgRamp( hue + s2 ), float3( 1.0f, 1.0f, 1.0f ), 0.4f );
+			// Stars: many faint white points plus a few brighter ramp-tinted ones, twinkling slowly.
+			// Off by default - sampled from a texture, so they magnify into soft blobs up close.
+			#if EOTG_VOID_POINT_STARS
+				float s  = PdxTex2D( FoamNoiseTexture, WorldSpacePos.xz * EOTG_STAR_SCALE ).g;
+				float s2 = PdxTex2D( FoamNoiseTexture, WorldSpacePos.xz * EOTG_STAR_SCALE * 0.43f + 0.19f ).r;
+				float twinkle = 0.6f + 0.4f * PdxTex2D( FoamNoiseTexture, WorldSpacePos.xz * 0.05f + GlobalTime * 0.03f ).b;
+				float star    = smoothstep( EOTG_STAR_DENSITY, 1.0f, s ) * twinkle;
+				float bright  = smoothstep( EOTG_STAR_DENSITY + 0.006f, 1.0f, s2 ) * ( 0.5f + 0.5f * twinkle );
+				float3 brightCol = lerp( EotgRamp( hue + s2 ), float3( 1.0f, 1.0f, 1.0f ), 0.4f );
+			#else
+				float star = 0.0f;
+				float bright = 0.0f;
+				float3 brightCol = vec3( 0.0f );
+			#endif
 
 			return EOTG_VOID_COLOR
 			     + ( dustCol  * dust  * EOTG_NEBULA_STRENGTH
@@ -241,8 +255,13 @@ PixelShader =
 			float hue = EotgHue( WorldSpacePos );
 
 			float camDist = length( CameraPosition - WorldSpacePos );
-			#if EOTG_VOID_STARS
+			#if EOTG_VOID_DETAIL
 				float detail = saturate( ( EOTG_VOID_DETAIL_FAR - camDist ) / EOTG_VOID_DETAIL_RANGE );
+				// Camera height, not distance to this pixel. camDist is per pixel, so a tilted
+				// camera keeps the near edge of the ocean close even at full zoom out and the fade
+				// never fires where it matters.
+				detail *= 1.0f - smoothstep( EOTG_ZOOMOUT_START, EOTG_ZOOMOUT_END,
+					GetZoomedInZoomedOutFactor() );
 			#else
 				float detail = 0.0f;
 			#endif
