@@ -738,3 +738,34 @@ The supplied atom glyph had this right by accident (embedded `standard`, asset `
 and rendered on the first try. Regenerating the lathes with `--shader eotg_marker` broke it, which
 is a good reminder that a working reference is worth diffing against before assuming a new failure
 is novel.
+
+## The zoomed-out view is a baked texture, not a shader
+
+`gfx/map/terrain/flat_maps/flatmap.dds` **is** the strategic view. `PixelShaderFlatMap` in
+`pdxterrain.shader` does nothing but read it. Nothing in that image can be faded, gated or tinted
+at runtime, because none of it is computed at runtime.
+
+This cost five rebuilds. Stars were visible in the ocean only at full zoom out, and the fix was
+attempted in `pdxwater.shader`, then `surroundmap.shader`, then `pdxterrain.shader`, then again in
+all three on a different zoom signal. Every one of them was a no-op, and *that was the evidence*:
+a change that produces no visible difference at all usually means the code did not run, not that
+the constant was wrong. Three no-ops in a row is a wrong hypothesis, not three wrong constants.
+
+The two culprits, both in `build_space_textures.py`:
+
+```python
+stars = (noise > 0.9975) * (1 - lmf)   # masked to SEA ONLY - literally stars in the ocean
+out += coast_col * coast * 0.9         # gold+violet band round every coastline
+```
+
+The coast band is why small islands showed as pink loops: for an island smaller than the band,
+the band is the whole island. Both are now switchable — `FLATMAP_STARS` (off) and `FLATMAP_COAST`
+(0.30, down from 0.9).
+
+**Rule: if something is visible only when fully zoomed out, check `flatmap.dds` before touching a
+shader.** Two cheap checks that would have found this in minutes rather than hours:
+
+- Count bright pixels in the texture. The old file had 246,037 bright specks on a 90% dark field;
+  the new one has 0.
+- Paint each candidate shader a flat unmistakable colour and take one screenshot. When the sea
+  came back neither red (water) nor green (surround), every shader was excluded at once.

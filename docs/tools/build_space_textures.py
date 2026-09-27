@@ -132,7 +132,21 @@ for n, c in arrows.items():
 arrow_atlas(GOLD).save(os.path.join(PREV, "arrow_new.png"))
 print("arrows:", len(arrows) * 2)
 
-# ---------------- flat map: star chart derived from the vanilla paper map land/sea ----------------
+# ---------------- flat map: the zoomed-out view, derived from the vanilla paper map ------------
+#
+# THIS TEXTURE, not any shader, is what the player sees at full zoom out. PixelShaderFlatMap in
+# pdxterrain.shader does nothing but read it. Two things baked in here were chased through
+# pdxwater, surroundmap and pdxterrain for several rounds before anyone looked at the texture:
+#
+#   * FLATMAP_STARS  - random points masked to SEA ONLY, i.e. literally "stars in the ocean"
+#   * FLATMAP_COAST  - a band around every coastline in gold+violet, which reads as a pink loop
+#                      around small islands, where the band is the entire island
+#
+# Neither can be faded by a shader, because neither is computed at runtime. If something is
+# visible only when fully zoomed out, check this file first.
+FLATMAP_STARS = False      # off: the ocean is clean at strategic zoom
+FLATMAP_COAST = 0.30       # was 0.9; enough to read a coastline, not enough to be a smear
+
 Image.MAX_IMAGE_PIXELS = None
 src = Image.open(r"D:\SteamLibrary\steamapps\common\Crusader Kings III\game\gfx\map\terrain\flat_maps\flatmap.dds").convert("RGB")
 W, H = 4608, 2304
@@ -150,11 +164,12 @@ big = (big - big.min()) / (big.max() - big.min() + 1e-6)
 out = np.zeros((H, W, 3), np.float32)
 land_col = np.array([0.10, 0.09, 0.14]); land_tint = np.array([0.16, 0.10, 0.24])
 out += (land_col[None, None, :] * (1 - big[..., None]) + land_tint[None, None, :] * big[..., None]) * lmf[..., None]
-stars = (noise > 0.9975).astype(np.float32) * (1 - lmf)
 out += np.array([0.008, 0.006, 0.012])[None, None, :] * (1 - lmf[..., None])
-out += np.array([0.9, 0.85, 0.7])[None, None, :] * stars[..., None] * 0.7
+if FLATMAP_STARS:
+    stars = (noise > 0.9975).astype(np.float32) * (1 - lmf)
+    out += np.array([0.9, 0.85, 0.7])[None, None, :] * stars[..., None] * 0.7
 coast_col = np.array([0.95, 0.75, 0.45]) * 0.55 + np.array([0.75, 0.55, 0.95]) * 0.45
-out += coast_col[None, None, :] * coast[..., None] * 0.9
+out += coast_col[None, None, :] * coast[..., None] * FLATMAP_COAST
 out = np.clip(out, 0, 1)
 fm = Image.fromarray((out * 255).astype(np.uint8))
 dds_rgb(fm, os.path.join(M, "gfx", "map", "terrain", "flat_maps", "flatmap.dds"))
