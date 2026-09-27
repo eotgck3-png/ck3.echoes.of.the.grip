@@ -124,8 +124,14 @@ FX = {
  # ruling, and the halos rare (12% of anchors) and wide (7.6 units) so they brighten stretches
  # of the striae rather than punching dots through them. Rendered and looked at across
  # wpp 0.5/1/2 - it stays wisps at all three - and lc 0.021-0.052 with crawl 0.0.
- "pleiades": dict(kind=7, color="#eaf4ff", gain=0.70, dark=0.55, scale=0.26,
-                  p=(1.00, 1.30, 1.00, 0.90), q=(0.22, 0.60, 0.010, 0.12),
+ # THIRD PASS. The streaks were right in character but wrong in weight: broad bright bands
+ # ruling the whole terrain, with visible square patches through them. The squares were the
+ # warp - one octave of value noise sampled on an axis-aligned grid, which at this low a
+ # frequency shows its own grid. The shader now sums a second, finer, ROTATED octave, which
+ # breaks the alignment. Stria power 2.6 -> 4.5 for a thinner wisp, gain and stria gain down.
+ # Rendered and compared side by side rather than scored: lit area 8.7% -> 3.4%.
+ "pleiades": dict(kind=7, color="#eaf4ff", gain=0.62, dark=0.62, scale=0.26,
+                  p=(1.00, 1.45, 0.72, 0.90), q=(0.18, 0.60, 0.014, 0.12),
                   height=(0,0,0)),
  # Volatile Cluster: stellar flares, sparse and elongated.
  "flare":    dict(kind=2, color="#ff9e42", gain=0.85, dark=0.72, scale=14.0,

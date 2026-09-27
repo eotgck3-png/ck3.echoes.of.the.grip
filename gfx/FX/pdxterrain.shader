@@ -1169,9 +1169,18 @@ PixelShader =
 			// Striae: a warped sine on one fixed heading, ridged so the wisps are thin.
 			float cs = cos( Q.y ), sn = sin( Q.y );
 			float across = -xz.x * sn + xz.y * cs;
-			float warp = ( EotgFbm( xz * max( Q.z, 1e-4f ) ) - 0.5f ) * P.y * 6.2831853f;
+			// Two warp octaves at different scales AND a rotated offset. One octave of value noise
+			// is sampled on an axis-aligned grid, and at the low frequency these wisps need, that
+			// grid shows through as square patches - visible in game as rectangular tiles across
+			// the whole terrain. Summing a second, finer, rotated octave breaks the alignment.
+			float2 wq = xz * max( Q.z, 1e-4f );
+			float2 wr = float2( wq.x * 0.80f + wq.y * 0.60f, -wq.x * 0.60f + wq.y * 0.80f );
+			float warpN = ( EotgFbm( wq ) - 0.5f ) + ( EotgFbm( wr * 2.7f + 19.1f ) - 0.5f ) * 0.55f;
+			float warp = warpN * P.y * 6.2831853f;
 			float s = sin( across * scale * P.x + warp );
-			float stria = pow( saturate( 1.0f - abs( s ) ), 2.6f ) * P.z;
+			// 4.5, not 2.6: the softer power made broad bright bands that dominated the terrain.
+			// Higher is a thinner, more delicate wisp with more dark between.
+			float stria = pow( saturate( 1.0f - abs( s ) ), 4.5f ) * P.z;
 
 			// Reflection: the striae are lit BY the cluster, so they fade out away from it.
 			return saturate( stria * ( 0.18f + 0.82f * glow ) + glow * Q.x );
