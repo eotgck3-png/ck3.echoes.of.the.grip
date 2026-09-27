@@ -130,6 +130,15 @@ FX = {
  # frequency shows its own grid. The shader now sums a second, finer, ROTATED octave, which
  # breaks the alignment. Stria power 2.6 -> 4.5 for a thinner wisp, gain and stria gain down.
  # Rendered and compared side by side rather than scored: lit area 8.7% -> 3.4%.
+ # Frozen Cluster is on "none" as a RESTING STATE, not as a decision. Seven attempts were
+ # rejected - honeycomb, fracture net, dot lattice, all-over weave, ruled lines, contour rings,
+ # ice shards - so it is parked plain rather than left wearing the last thing tried.
+ #
+ # It is not undefended without one. Its two closest neighbours, forest at dE 11.6 and steppe
+ # at 11.2, both HAVE effects, so "this one is plain" is itself the distinguishing feature, and
+ # it keeps the highest star density of the three (0.48) plus the palest tint on that side of
+ # the palette. The global contour overlay now gives every terrain some structure as well.
+ #
  # Frozen Cluster, seventh attempt, and a change of primitive rather than another tuning
  # pass. The Pleiades effect below is kept but unused - six rounds on it produced a honeycomb,
  # a net, a dot lattice, an all-over weave, ruled lines and then contour rings, and each fix
@@ -355,7 +364,7 @@ TERRAINS = {
  # below plains (0.48) so it stays the emptier of the two. Impassable mountains are NOT
  # affected: build_terrain_index forces every impassable province into desert_mountains.
  "mountains":       ("Nebula Barrier",     "#5c3f9e", 0, 150, 0.65, 0.22, 0.38, "nebula"),
- "taiga":           ("Frozen Cluster",     "#8fc0e0", 1, 430, 0.80, 0.48, 0.65, "iceshard"),
+ "taiga":           ("Frozen Cluster",     "#8fc0e0", 1, 430, 0.80, 0.48, 0.65, "none"),
  "drylands":        ("Arid Reach",         "#a8874a", 2, 380, 0.60, 0.26, 0.45, "dust"),  # saturated ochre dust
  "forest":          ("Dense Cluster",      "#90a0b8", 0, 600, 0.55, 1.00, 0.75, "haze"),
  "steppe":          ("Frontier Reach",     "#8ea8ae", 2, 300, 0.40, 0.18, 0.50, "strands"),  # pale cyan-grey, emptier than plains

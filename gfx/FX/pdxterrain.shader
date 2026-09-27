@@ -477,6 +477,17 @@ PixelShader =
 		// It returns to full strength as the paper map comes in, where there is no terrain to see.
 		#define EOTG_POLITICAL_OPACITY 0.55f
 
+		// Topographic contours over the whole map - a tactical-display cue rather than a terrain
+		// effect, so it is global and does not belong to any one material.
+		// These follow REAL height. The rings that showed up on Frozen Cluster did not: those
+		// were singularities in a noise-driven direction field that happened to look topographic.
+		#define EOTG_CONTOUR_ON       1
+		#define EOTG_CONTOUR_COUNT    38.0f   // levels across the full height range
+		#define EOTG_CONTOUR_WIDTH    0.85f   // line half-width in WORLD units, not height units
+		#define EOTG_CONTOUR_OPACITY  0.15f
+		#define EOTG_CONTOUR_COLOR    float3( 0.62f, 0.86f, 1.00f )
+		#define EOTG_CONTOUR_MIN_GRAD 0.00012f  // below this the ground is flat: no lines
+
 		// The world just stops at the map border - terrain one pixel, nothing the next. Fade it
 		// out instead, so the galaxy thins into empty space rather than being cut off. Measured
 		// in map UV, where the whole map is 0..1 on each axis, so the band is a fraction of the
@@ -569,6 +580,28 @@ PixelShader =
 			return smoothstep( EOTG_EDGE_FADE_END, EOTG_EDGE_FADE_START, e );
 		}
 
+		// Contour lines at fixed height intervals, width normalised by the height GRADIENT.
+		//
+		// Without that normalisation the lines are a fixed distance apart in HEIGHT, which means
+		// they crowd together into a solid mass wherever the ground is steep and spread out to
+		// nothing where it is flat - the classic contour-map failure. Dividing by the local rate
+		// of change converts the distance to the nearest line into world units, so every line is
+		// the same width on the ground no matter what the slope is doing.
+		float EotgContour( float h01, float3 grad )
+		{
+			float f = frac( h01 * EOTG_CONTOUR_COUNT );
+			float dh = min( f, 1.0f - f );                                  // in height fractions
+			float g = max( length( grad.xy ) * EOTG_CONTOUR_COUNT, 1e-6f ); // height per world unit
+			float dWorld = dh / g;                                          // world units to the line
+			float line = 1.0f - smoothstep( 0.0f, EOTG_CONTOUR_WIDTH, dWorld );
+
+			// Kill it on flat ground. Where the height is constant it also sits exactly ON a
+			// contour level, so dh is zero and the whole flat area reads as one continuous line -
+			// which washed the entire sea floor and every plain in a solid tint. A contour means
+			// nothing without relief, so gate on there being some.
+			return line * smoothstep( EOTG_CONTOUR_MIN_GRAD, EOTG_CONTOUR_MIN_GRAD * 4.0f,
+				length( grad.xy ) );
+		}
 		float EotgStarHash( float2 p )
 		{
 			return frac( sin( dot( p, float2( 127.1f, 311.7f ) ) ) * 43758.5453f );
@@ -1671,6 +1704,11 @@ PixelShader =
 					float EotgFlatFade = 1.0f - EotgZoomOut;
 					FinalColor += EotgStars( EotgStarPos, EotgStarD, EotgStarB ) * EotgFlatFade;
 					FinalColor += EotgModAdd * EotgFlatFade;                        // MOD(eotg)
+					#if EOTG_CONTOUR_ON
+						FinalColor += EOTG_CONTOUR_COLOR
+							* EotgContour( EotgH01, EotgGrad )
+							* ( EOTG_CONTOUR_OPACITY * EotgFlatFade );
+					#endif
 				}
 
 				#ifdef TERRAIN_COLOR_OVERLAY
@@ -1855,6 +1893,11 @@ PixelShader =
 					float EotgFlatFade = 1.0f - EotgZoomOut;
 					FinalColor += EotgStars( EotgStarPos, EotgStarD, EotgStarB ) * EotgFlatFade;
 					FinalColor += EotgModAdd * EotgFlatFade;                        // MOD(eotg)
+					#if EOTG_CONTOUR_ON
+						FinalColor += EOTG_CONTOUR_COLOR
+							* EotgContour( EotgH01, EotgGrad )
+							* ( EOTG_CONTOUR_OPACITY * EotgFlatFade );
+					#endif
 				}
 				#ifndef UNDERWATER
 					if( !IsFullyColorOverlay )
