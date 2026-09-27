@@ -195,12 +195,19 @@ FX = {
  # Arid Reach: sparse dust motes. Same sprite kind as debris and flares, but small, dim and
  # warm - debris is 3.50 long and dark-polarity, flares are 5.2 long and bright orange. These
  # are round, a third the size, and barely above the tint.
- # Swept for coverage against the aliasing gates: at the first numbers it covered only 2.6% of
- # ground, about as sparse as the flares, which is invisible across the large flat areas this
- # terrain occupies. These give 9.4% - between flares and debris' 16.3% - at lc 0.025 and peak
- # 0.232, both far inside the gates.
- "dust":     dict(kind=2, color="#c8a878", gain=0.30, dark=0.88, scale=13.0,
-                  p=(1.60, 1.25, 0.12, 0.0), q=(0, 0, 0, 0), height=(0,0,0)),
+ # Arid Reach: dust silhouetted against the glow, not lit motes on top of it.
+ #
+ # The first version was warm tan motes, #c8a878, on a warm tan terrain, #a8874a. Measured
+ # afterwards: dE 10.8 between the two. The distinctness tool calls anything under 10 "cannot
+ # tell apart", so the effect was invisible by construction - for comparison crystal sits 42.2
+ # from its terrain and filament 37.3 from its.
+ #
+ # Inverted instead, the way debris is (q[0]=1): the motes are DARK and the gaps stay lit. That
+ # fixes both problems at once. Dark on ochre actually contrasts, and it cannot be misread as
+ # stars, which are always bright points - the confusion that cost the debris effect three
+ # attempts. Coverage 9.4%, lc 0.032, peak 0.28, well inside the gates.
+ "dust":     dict(kind=2, color=None, gain=0.00, dark=0.70, scale=13.0,
+                  p=(1.60, 1.25, 0.12, 0.0), q=(1, 0, 0, 0), height=(0,0,0)),
 }
 
 # Hypsometric ramp, per terrain: the tint shifts toward ALT colour as altitude rises.
