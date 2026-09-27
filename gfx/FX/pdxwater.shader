@@ -59,6 +59,10 @@ PixelShader =
 		// Set to 1 to bring the field back; nothing else needs changing.
 		#define EOTG_VOID_STARS          0
 
+		// TEMPORARY DIAGNOSTIC - set back to 0. Paints all water solid red so one screenshot
+		// shows exactly which pixels this shader is responsible for.
+		#define EOTG_DIAG_WATER          0
+
 		#define EOTG_VOID_COLOR          float3( 0.002f, 0.002f, 0.003f )  // open-sea base: black
 		#define EOTG_NEBULA_STRENGTH     0.012f    // brightness of the slow nebula drift over the void (0 = flat black)
 		#define EOTG_NEBULA_SCALE        0.0008f  // world -> noise scale for the nebula (smaller = bigger clouds)
@@ -261,6 +265,9 @@ PixelShader =
 
 			// Fade onto the beach exactly as vanilla does, using its shore-mask settings
 			float WaterFade = 1.0f - saturate( ( _WaterFadeShoreMaskDepth - Depth ) * _WaterFadeShoreMaskSharpness );
+			#if EOTG_DIAG_WATER
+				return float4( 1.0f, 0.0f, 0.0f, 1.0f );
+			#endif
 			return float4( Color, WaterFade );
 		}
 	]]

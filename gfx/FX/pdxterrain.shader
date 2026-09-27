@@ -1453,8 +1453,23 @@ PixelShader =
 					FinalColor = Diffuse * EOTG_TERRAIN_EMISSIVE;
 					float3 EotgStarPos = Input.WorldSpacePos;                       // MOD(eotg)
 					EotgStarPos.xz += EotgLens.xy;                                 // anomalies bend starlight
-					FinalColor += EotgStars( EotgStarPos, EotgStarD, EotgStarB );
-					FinalColor += EotgModAdd;                                      // MOD(eotg)
+
+					// MOD(eotg) drop everything additive as the paper map comes in.
+					//
+					// This is where the stars in the ocean at full zoom out were coming from, after
+					// three wrong guesses at the water and the surround map. PixelShaderFlatMap draws
+					// no stars at all, but it is composited with SurroundMapAlpha, and wherever that
+					// goes transparent THIS shader shows through - sea floor included - carrying its
+					// star field. A colour-coded diagnostic build settled it: at full zoom out the sea
+					// was neither the water shader's red nor the surround's green, so it had to be
+					// terrain.
+					#ifdef TERRAIN_FLAT_MAP_LERP
+						float EotgFlatFade = 1.0f - saturate( FlatMapLerp );
+					#else
+						float EotgFlatFade = 1.0f;
+					#endif
+					FinalColor += EotgStars( EotgStarPos, EotgStarD, EotgStarB ) * EotgFlatFade;
+					FinalColor += EotgModAdd * EotgFlatFade;                        // MOD(eotg)
 				}
 
 				#ifdef TERRAIN_COLOR_OVERLAY
@@ -1606,8 +1621,23 @@ PixelShader =
 					FinalColor = Diffuse * EOTG_TERRAIN_EMISSIVE;                          // MOD(eotg) unlit
 					float3 EotgStarPos = Input.WorldSpacePos;                       // MOD(eotg)
 					EotgStarPos.xz += EotgLens.xy;                                 // anomalies bend starlight
-					FinalColor += EotgStars( EotgStarPos, EotgStarD, EotgStarB );
-					FinalColor += EotgModAdd;                                      // MOD(eotg)
+
+					// MOD(eotg) drop everything additive as the paper map comes in.
+					//
+					// This is where the stars in the ocean at full zoom out were coming from, after
+					// three wrong guesses at the water and the surround map. PixelShaderFlatMap draws
+					// no stars at all, but it is composited with SurroundMapAlpha, and wherever that
+					// goes transparent THIS shader shows through - sea floor included - carrying its
+					// star field. A colour-coded diagnostic build settled it: at full zoom out the sea
+					// was neither the water shader's red nor the surround's green, so it had to be
+					// terrain.
+					#ifdef TERRAIN_FLAT_MAP_LERP
+						float EotgFlatFade = 1.0f - saturate( FlatMapLerp );
+					#else
+						float EotgFlatFade = 1.0f;
+					#endif
+					FinalColor += EotgStars( EotgStarPos, EotgStarD, EotgStarB ) * EotgFlatFade;
+					FinalColor += EotgModAdd * EotgFlatFade;                        // MOD(eotg)
 				}
 				#ifndef UNDERWATER
 					if( !IsFullyColorOverlay )

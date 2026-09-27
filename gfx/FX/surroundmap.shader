@@ -139,6 +139,9 @@ PixelShader =
 		// sized in world units, so zooming in over open sea magnifies each into a large soft blob.
 		// Declared once here because every pixel shader in this file needs it.
 		#define EOTG_SURROUND_STARS 0
+
+		// TEMPORARY DIAGNOSTIC - set back to 0.
+		#define EOTG_DIAG_SURROUND 0
 		float4 GetFlatMapSurround( float2 UV )
 		{				
 			float Mask = PdxTex2D( SurroundMask, UV ).b;
@@ -269,6 +272,9 @@ PixelShader =
 					Color += float3( 1.0f, 0.94f, 0.82f ) * spot * on * twinkle * ( i == 0 ? 1.2f : 0.6f ) * EotgStarFade;
 				}
 
+				#if EOTG_DIAG_SURROUND
+					return float4( 0.0f, 1.0f, 0.0f, saturate( Mask ) );
+				#endif
 				return float4( Color, saturate( Mask ) );
 			}
 		]]
@@ -321,6 +327,9 @@ PixelShader =
 					Color += float3( 1.0f, 0.94f, 0.82f ) * spot * on * twinkle * ( i == 0 ? 1.2f : 0.6f ) * EotgStarFade;
 				}
 
+				#if EOTG_DIAG_SURROUND
+					return float4( 0.0f, 1.0f, 0.0f, saturate( Mask ) );
+				#endif
 				return float4( Color, saturate( Mask ) );
 			}
 		]]
@@ -389,6 +398,9 @@ PixelShader =
 					Color += float3( 1.0f, 0.94f, 0.82f ) * spot * on * twinkle * ( i == 0 ? 1.2f : 0.6f ) * EotgStarFade;
 				}
 
+				#if EOTG_DIAG_SURROUND
+					return float4( 0.0f, 0.6f, 1.0f, saturate( Mask ) * FlatMapLerp );
+				#endif
 				return float4( Color, saturate( Mask ) * FlatMapLerp );
 			}
 		]]
