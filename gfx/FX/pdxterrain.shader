@@ -482,11 +482,12 @@ PixelShader =
 		// These follow REAL height. The rings that showed up on Frozen Cluster did not: those
 		// were singularities in a noise-driven direction field that happened to look topographic.
 		#define EOTG_CONTOUR_ON       1
-		#define EOTG_CONTOUR_COUNT    38.0f   // levels across the full height range
-		#define EOTG_CONTOUR_WIDTH    0.85f   // line half-width in WORLD units, not height units
-		#define EOTG_CONTOUR_OPACITY  0.15f
+		#define EOTG_CONTOUR_COUNT    26.0f   // levels across the full height range
+		#define EOTG_CONTOUR_WIDTH    0.70f   // line half-width in WORLD units, not height units
+		#define EOTG_CONTOUR_OPACITY  0.09f
 		#define EOTG_CONTOUR_COLOR    float3( 0.62f, 0.86f, 1.00f )
 		#define EOTG_CONTOUR_MIN_GRAD 0.00012f  // below this the ground is flat: no lines
+		#define EOTG_CONTOUR_MIN_SPACE 2.5f     // world units; below this, drop the lines
 
 		// The world just stops at the map border - terrain one pixel, nothing the next. Fade it
 		// out instead, so the galaxy thins into empty space rather than being cut off. Measured
@@ -602,8 +603,20 @@ PixelShader =
 			// contour level, so dh is zero and the whole flat area reads as one continuous line -
 			// which washed the entire sea floor and every plain in a solid tint. A contour means
 			// nothing without relief, so gate on there being some.
-			return band * smoothstep( EOTG_CONTOUR_MIN_GRAD, EOTG_CONTOUR_MIN_GRAD * 4.0f,
+			float relief = smoothstep( EOTG_CONTOUR_MIN_GRAD, EOTG_CONTOUR_MIN_GRAD * 4.0f,
 				length( grad.xy ) );
+
+			// Drop the lines where they would crowd. Normalising the WIDTH keeps each line the
+			// same thickness, but it does nothing about SPACING: contours are inherently closer
+			// together the steeper the ground, so mountains stacked dozens of them and the
+			// overlay buried the terrain underneath. Cartographers drop intermediate contours on
+			// steep ground for exactly this reason; this fades them out once the gap between
+			// adjacent lines falls below EOTG_CONTOUR_MIN_SPACE world units.
+			float spacing = 1.0f / g;
+			float crowd = smoothstep( EOTG_CONTOUR_MIN_SPACE, EOTG_CONTOUR_MIN_SPACE * 2.5f,
+				spacing );
+
+			return band * relief * crowd;
 		}
 		float EotgStarHash( float2 p )
 		{
