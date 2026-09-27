@@ -1,4 +1,4 @@
-import struct, os, sys, math
+import struct, os, sys, math, re
 from PIL import Image, ImageFilter
 import numpy as np
 M = sys.argv[1]
@@ -132,46 +132,129 @@ for n, c in arrows.items():
 arrow_atlas(GOLD).save(os.path.join(PREV, "arrow_new.png"))
 print("arrows:", len(arrows) * 2)
 
-# ---------------- flat map: the zoomed-out view, derived from the vanilla paper map ------------
+# ---------------- flat map: the zoomed-out view ------------------------------------------------
 #
 # THIS TEXTURE, not any shader, is what the player sees at full zoom out. PixelShaderFlatMap in
-# pdxterrain.shader does nothing but read it. Two things baked in here were chased through
-# pdxwater, surroundmap and pdxterrain for several rounds before anyone looked at the texture:
+# pdxterrain.shader does nothing but read it, so nothing here can be faded or gated at runtime.
+# Several rounds of shader edits were spent on artefacts that live in this file. If something is
+# only visible when fully zoomed out, look here first.
 #
-#   * FLATMAP_STARS  - random points masked to SEA ONLY, i.e. literally "stars in the ocean"
-#   * FLATMAP_COAST  - a band around every coastline in gold+violet, which reads as a pink loop
-#                      around small islands, where the band is the entire island
-#
-# Neither can be faded by a shader, because neither is computed at runtime. If something is
-# visible only when fully zoomed out, check this file first.
-FLATMAP_STARS = False      # off: the ocean is clean at strategic zoom
-FLATMAP_COAST = 0.30       # was 0.9; enough to read a coastline, not enough to be a smear
+# The land/sea mask comes from the GAME DATA - provinces.png keyed through definition.csv against
+# the sea and lake lists in default.map. The previous version guessed it from the colours of
+# vanilla's parchment map, which also classified the compass rose, the cartouches and assorted
+# ink as land: that is where the purple circle near Iceland and the stray blobs between Iceland
+# and Norway came from. A heuristic over someone else's artwork was never going to be right.
+FLATMAP_STARS  = False   # point stars, masked to sea. Off - this was "stars in the ocean".
+FLATMAP_NEBULA = 1.0     # the slow cloud over open water; this is the ocean's only colour
+FLATMAP_COAST  = 0.45    # coastline rim
 
 Image.MAX_IMAGE_PIXELS = None
-src = Image.open(r"D:\SteamLibrary\steamapps\common\Crusader Kings III\game\gfx\map\terrain\flat_maps\flatmap.dds").convert("RGB")
 W, H = 4608, 2304
-src = src.resize((W, H), Image.BOX)
-a = np.asarray(src).astype(np.int16)
-landmask = ((a[:, :, 0] - a[:, :, 2]) > 28) & (a[:, :, 0] > 120)
-lm = Image.fromarray((landmask * 255).astype(np.uint8)).filter(ImageFilter.MedianFilter(5))
-lmf = np.asarray(lm).astype(np.float32) / 255.0
-blur = np.asarray(lm.filter(ImageFilter.GaussianBlur(6))).astype(np.float32) / 255.0
+GAME = r"D:\SteamLibrary\steamapps\common\Crusader Kings III\game"
+
+
+def land_sea_mask(w, h):
+    """Exact land mask at (w, h), from province data rather than from the paper map's pixels.
+
+    Rivers are deliberately counted as LAND. They are river_provinces in default.map, but drawing
+    them as water threads a dark line down every valley and then rims it with the coast glow,
+    which reads as noise at strategic zoom. The mod draws its stellar lanes with the river
+    shaders instead.
+    """
+    water = set()
+    txt = open(os.path.join(GAME, "map_data", "default.map"), encoding="utf-8-sig").read()
+    for kind in ("sea_zones", "lakes", "impassable_seas"):
+        for m in re.finditer(kind + r"\s*=\s*(RANGE|LIST)\s*\{([^}]*)\}", txt):
+            nums = [int(x) for x in m.group(2).split()]
+            if m.group(1) == "RANGE" and len(nums) == 2:
+                water.update(range(nums[0], nums[1] + 1))
+            else:
+                water.update(nums)
+
+    lut = np.zeros(1 << 24, np.int32)
+    for line in open(os.path.join(GAME, "map_data", "definition.csv"),
+                     encoding="utf-8-sig", errors="replace"):
+        f = line.strip().split(";")
+        if len(f) < 4 or not f[0].isdigit():
+            continue
+        try:
+            i, r, g, b = int(f[0]), int(f[1]), int(f[2]), int(f[3])
+        except ValueError:
+            continue
+        lut[(r << 16) | (g << 8) | b] = i
+
+    prov = np.array(Image.open(os.path.join(GAME, "map_data", "provinces.png")).convert("RGB"))
+    key = (prov[:, :, 0].astype(np.uint32) << 16) | (prov[:, :, 1].astype(np.uint32) << 8) | prov[:, :, 2]
+    ids = lut[key]
+    land = (~np.isin(ids, np.fromiter(water, np.int32))) & (ids > 0)
+    return np.asarray(Image.fromarray((land * 255).astype(np.uint8)).resize((w, h), Image.BOX)
+                      ).astype(np.float32) / 255.0
+
+
+lmf = land_sea_mask(W, H)
+lm8 = Image.fromarray((lmf * 255).astype(np.uint8))
+blur = np.asarray(lm8.filter(ImageFilter.GaussianBlur(6))).astype(np.float32) / 255.0
 coast = np.clip(1.0 - np.abs(blur - 0.5) * 2.0, 0, 1) ** 2
+
 rng = np.random.default_rng(7)
 noise = rng.random((H, W)).astype(np.float32)
 big = np.asarray(Image.fromarray((noise * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(18))).astype(np.float32) / 255.0
 big = (big - big.min()) / (big.max() - big.min() + 1e-6)
+
 out = np.zeros((H, W, 3), np.float32)
+
+# Land: unchanged. Political colour is blended over this by the shader, so it only needs to be a
+# dark, slightly varied base.
 land_col = np.array([0.10, 0.09, 0.14]); land_tint = np.array([0.16, 0.10, 0.24])
 out += (land_col[None, None, :] * (1 - big[..., None]) + land_tint[None, None, :] * big[..., None]) * lmf[..., None]
-out += np.array([0.008, 0.006, 0.012])[None, None, :] * (1 - lmf[..., None])
+
+# Sea: near-black, plus a slow nebula. Two blurred octaves so the clouds have structure without
+# the speckle that a single noise field gives at this resolution. Kept low-contrast on purpose -
+# every previous version of this map failed by making an effect strong enough to become a smear.
+sea = 1.0 - lmf
+out += np.array([0.022, 0.020, 0.046])[None, None, :] * sea[..., None]
+if FLATMAP_NEBULA > 0:
+    # Proper fBm, not blurred white noise. Gaussian-blurring a full-resolution random field
+    # collapses it to almost a constant - the variance goes with the blur radius - so the first
+    # attempt produced a nebula with sea luminance p50 13.7 and no visible structure at all.
+    # Summing upscaled low-resolution grids keeps the large shapes and the contrast.
+    def fbm(w, h, base, octaves, seed, gain=0.5):
+        r = np.random.default_rng(seed)
+        acc = np.zeros((h, w), np.float32)
+        amp, res = 1.0, base
+        for _ in range(octaves):
+            g = r.random((max(2, res // 2), max(2, res))).astype(np.float32)
+            up = np.asarray(Image.fromarray((g * 255).astype(np.uint8))
+                            .resize((w, h), Image.BICUBIC)).astype(np.float32) / 255.0
+            acc += up * amp
+            amp *= gain
+            res *= 2
+        acc -= acc.min()
+        return acc / (acc.max() + 1e-6)
+
+    n_a = fbm(W, H, 6, 5, 11)      # the clouds themselves
+    n_b = fbm(W, H, 3, 4, 23)      # slow hue drift between violet and teal
+    # smoothstep, not a clip. Clipping flattened whole seas to pure black with a visible hard
+    # edge where the field crossed the threshold - the same saturation failure documented for the
+    # terrain effects. A smooth ramp keeps the gradient at both ends.
+    t = np.clip((n_a - 0.14) / 0.78, 0, 1)
+    cloud = t * t * (3.0 - 2.0 * t)
+    deep = np.array([0.20, 0.13, 0.38])      # violet
+    warm = np.array([0.06, 0.24, 0.30])      # teal
+    mix = np.clip(n_b * 1.5 - 0.25, 0, 1)[..., None]
+    out += (deep[None, None, :] * (1 - mix) + warm[None, None, :] * mix) *            (cloud * sea)[..., None] * FLATMAP_NEBULA
+
 if FLATMAP_STARS:
-    stars = (noise > 0.9975).astype(np.float32) * (1 - lmf)
+    stars = (noise > 0.9975).astype(np.float32) * sea
     out += np.array([0.9, 0.85, 0.7])[None, None, :] * stars[..., None] * 0.7
-coast_col = np.array([0.95, 0.75, 0.45]) * 0.55 + np.array([0.75, 0.55, 0.95]) * 0.45
+
+# Coast: a cool rim, not the old gold+violet. The warm version read as a magenta smear wherever
+# an island was smaller than the band - which, at this resolution, is most islands.
+coast_col = np.array([0.55, 0.72, 0.95]) * 0.60 + np.array([0.80, 0.70, 1.00]) * 0.40
 out += coast_col[None, None, :] * coast[..., None] * FLATMAP_COAST
+
 out = np.clip(out, 0, 1)
 fm = Image.fromarray((out * 255).astype(np.uint8))
 dds_rgb(fm, os.path.join(M, "gfx", "map", "terrain", "flat_maps", "flatmap.dds"))
-fm.resize((1024, 512)).save(os.path.join(PREV, "flatmap_new_preview.png"))
+fm.resize((1152, 576)).save(os.path.join(PREV, "flatmap_new_preview.png"))
 print("flatmap written", fm.size)

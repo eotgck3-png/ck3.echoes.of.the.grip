@@ -71,7 +71,11 @@ PixelShader =
 		#define EOTG_ZOOMOUT_END   0.90f
 
 		#define EOTG_VOID_COLOR          float3( 0.002f, 0.002f, 0.003f )  // open-sea base: black
-		#define EOTG_NEBULA_STRENGTH     0.012f    // brightness of the slow nebula drift over the void (0 = flat black)
+		#define EOTG_NEBULA_STRENGTH     0.045f    // brightness of the slow nebula drift over the void (0 = flat black)
+		// was 0.012, which is invisible: the cloud term peaks at 3x this, so 0.012 put the
+		// brightest nebula in open water at about 9/255 over near-black. 0.045 peaks near 38,
+		// which is about where the flat map sits (measured sea luminance p90 60) so the two
+		// views match instead of the ocean going dead the moment you zoom in.
 		#define EOTG_NEBULA_SCALE        0.0008f  // world -> noise scale for the nebula (smaller = bigger clouds)
 		#define EOTG_STAR_DENSITY        0.990f   // noise threshold for stars; higher = fewer stars (0.97 dense, 0.995 sparse)
 		#define EOTG_STAR_STRENGTH       0.35f    // brightness of stars
