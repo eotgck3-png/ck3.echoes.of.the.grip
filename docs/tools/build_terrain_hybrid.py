@@ -242,7 +242,12 @@ TERRAINS = {
  # Barrier vs Wilds must not converge: they were 4 of 7 axes apart and read as the same purple
  # cloud in game. Barrier = a solid cold WALL (big, flat, starless); Wilds = a warm tangled
  # THICKET (fine, lumpy, stars showing through). See docs/terrain_scheme.md.
- "mountains":       ("Nebula Barrier",     "#5c3f9e", 0, 150, 0.65, 0.02, 0.30, "nebula"),
+ # star_density 0.02 -> 0.22, star_bright 0.30 -> 0.38: a few stars showing THROUGH the
+ # barrier, so it reads as dense cloud you can just see past rather than an opaque wall.
+ # Still far below Wilds (0.55), which is the terrain Barrier must not converge with, and
+ # below plains (0.48) so it stays the emptier of the two. Impassable mountains are NOT
+ # affected: build_terrain_index forces every impassable province into desert_mountains.
+ "mountains":       ("Nebula Barrier",     "#5c3f9e", 0, 150, 0.65, 0.22, 0.38, "nebula"),
  "taiga":           ("Frozen Cluster",     "#8fc0e0", 1, 430, 0.80, 0.48, 0.65, "crystal"),
  "drylands":        ("Arid Reach",         "#a8874a", 2, 380, 0.60, 0.26, 0.45, "none"),  # saturated ochre dust
  "forest":          ("Dense Cluster",      "#90a0b8", 0, 600, 0.55, 1.00, 0.75, "none"),
