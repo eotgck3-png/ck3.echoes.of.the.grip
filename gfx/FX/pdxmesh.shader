@@ -607,18 +607,28 @@ PixelShader =
 					#define EOTG_MARKER_RIM_WHITE  0.28f   // small: the hue has to survive the rim
 					#define EOTG_MARKER_FOW_FLOOR  0.35f
 
+					// Properties.r is the emissive MASK, and it is what lets one effect light two
+					// surfaces differently. The pedestal keeps vanilla's noproperties.dds (all zero),
+					// so the mask is 0 and everything below multiplies out - it lights as plain stone.
+					// The emblem gets a map with r = 1 and glows. Both slots must share the effect,
+					// because the effect also carries the terrain snap; a slot without it would stand
+					// at sea level while the rest of the model sat on the ground.
+					// .r is free here: vanilla only reads it under USER_COLOR, COA or
+					// FAKE_SCATTERING_EMISSIVE, none of which this effect defines.
+					float  EotgMask  = Properties.r;
+
 					float3 EotgView  = normalize( CameraPosition - Input.WorldSpacePos );
 					float  EotgFace  = saturate( dot( normalize( Input.Normal ), EotgView ) );
-					float  EotgRim   = pow( 1.0f - EotgFace, EOTG_MARKER_RIM_POW );
+					float  EotgRim   = pow( 1.0f - EotgFace, EOTG_MARKER_RIM_POW ) * EotgMask;
 					float  EotgFoW   = lerp( EOTG_MARKER_FOW_FLOOR, 1.0f, FogOfWarAlphaValue );
 
 					// Keep a fraction of the lit result. Fully unlit would be brighter still, but a
 					// solid rendered in one flat value loses its silhouette entirely.
 					float3 EotgFlat  = Diffuse.rgb * EOTG_MARKER_GAIN * EotgFoW;
-					Color = lerp( Color, EotgFlat, EOTG_MARKER_EMISSIVE );
+					Color = lerp( Color, EotgFlat, EOTG_MARKER_EMISSIVE * EotgMask );
 
-					// The outline. Additive in the marker's own hue first, so the edge reads as the
-					// government colour rather than as a white halo; only a little white on top.
+					// The outline. Additive in the marker's own hue first, so the edge reads as the holding-type
+					// colour rather than as a white halo; only a little white on top.
 					Color += Diffuse.rgb * EotgRim * EOTG_MARKER_RIM_GAIN * EotgFoW;
 					Color = lerp( Color, vec3( 1.0f ), EotgRim * EOTG_MARKER_RIM_WHITE * EotgFoW );
 				#endif

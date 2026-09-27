@@ -1,30 +1,29 @@
-"""Build the galactic province markers: one mesh, one flat-colour texture per government.
+"""Build the galactic province markers: one mesh, one colour per HOLDING TYPE.
 
-CK3 picks a holding's model from the `assets` block of whichever holding building is built, and
-an asset entry can be filtered by government:
+The marker is a stone pedestal with a glowing emblem floating above it. Both are slots of a
+single mesh (build_marker_mesh.py); this script writes the .asset that textures them and the
+building overrides that make every holding draw it.
 
-    asset = {
-        type = pdxmesh
-        name = "eotg_marker_feudal_mesh"
-        governments = { feudal_government }
-    }
+Colour says what KIND of holding this is - castle, city, temple, tribal, nomad - not who owns
+it. So there is no `governments` filter: each holding's primary building simply names the mesh
+for its own type. That also means the colour survives conquest, and survives a holding upgrade,
+because every level of every primary building points at the same entry.
 
-Government is one of the highest-priority selection criteria - above graphical region - and
-vanilla already uses it (tribal, nomad, and a steppe_admin/celestial/meritocratic group). An entry
-with no `governments` is the fallback.
+Holding graphics come from more places than is obvious, and all of them have to be covered or
+medieval geometry keeps showing up:
 
-Only 18 buildings in the whole game carry an assets block: 4 castle, 4 city, 4 temple, 4 temple
-citadel, 2 tribal. Listing every colour against every one of them is what makes the marker survive
-a holding upgrade unchanged - the model is the same at all levels, only the government decides the
-colour.
+  5 files with `assets = { asset = ... }`   castle, city, temple, temple citadel, tribal
+  00_nomad_buildings.txt, bare `asset = `   nomad and herder camps
+  99_background_graphics_buildings.txt      the WALLS ringing every holding, and - because the
+                                            wall meshes carry the ground decal in a decal_plane
+                                            sub-mesh - the patch of dirt underneath. Pointing
+                                            these at western_walls_00_mesh, vanilla's own empty
+                                            "no walls" mesh, removes both.
 
-Geometry is shared. Eleven pdxmesh entries point at the same .mesh file and differ only in
-texture_diffuse, so there is one mesh on disk and no duplicated vertices.
+Special and legendary buildings also carry assets, but they are placed by history and this mod
+places none yet. When it does, they will need the same treatment.
 
-Shape is switchable. The supplied atom glyph is one option; make_marker_obj.py generates the
-others as lathed solids. Pass the name as a second argument:
-
-    python docs/tools/build_marker_assets.py <mod root> [atom|podium|chess|disc]
+Usage:  python docs/tools/build_marker_assets.py <mod root>
 """
 from __future__ import annotations
 
@@ -39,45 +38,46 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from build_terrain_materials import save_dds_dxt5
 
 REL = os.path.join("gfx", "models", "buildings", "eotg_markers")
-SIZE = 128                       # a flat colour needs no resolution; mips still required
+SIZE = 128
+MESH = "eotg_marker.mesh"
+SHAPE = "eotg_markerShape"
 
-# The palette, as supplied. Government keys are the real 1.19 ones - note `nomad_government`,
-# not `nomadic`. "Military" has no vanilla equivalent so it covers the two closest; "neutral" is
-# the fallback and carries every government not named here (wanua, herder, celestial, mandala,
-# steppe_admin, meritocratic, landless_adventurer).
-MARKERS = [
-    ("feudal",         (231, 184,  75), ["feudal_government"]),
-    ("clan",           (217, 138,  58), ["clan_government"]),
-    ("republic",       ( 70, 199, 217), ["republic_government"]),
-    ("theocracy",      (167, 124, 255), ["theocracy_government"]),
-    ("tribal",         ( 85, 185, 107), ["tribal_government"]),
-    ("nomadic",        (217,  87,  87), ["nomad_government", "herder_government"]),
-    ("administrative", ( 95, 158, 234), ["administrative_government", "steppe_admin_government"]),
-    ("military",       (184, 193, 204), ["mercenary_government", "holy_order_government"]),
-    ("neutral",        (232, 244, 255), []),          # fallback: no governments filter
-]
-
-# Which solid the marker is. Each was checked watertight before conversion - an open shell
-# renders with holes, which is what killed the asteroid attempt. `file` and `shape` must agree
-# with what obj_to_pdxmesh.py was told, or the engine finds no geometry and draws nothing.
-SHAPES = {
-    "atom":   ("eotg_marker.mesh",        "eotg_markerShape"),
-    "podium": ("eotg_marker_podium.mesh", "eotg_marker_podiumShape"),
-    "chess":  ("eotg_marker_chess.mesh",  "eotg_marker_chessShape"),
-    "disc":   ("eotg_marker_disc.mesh",   "eotg_marker_discShape"),
-}
-DEFAULT_SHAPE = "chess"
-
-# Our own effect, added to gfx/FX/pdxmesh.shader. snap_to_terrain runs the marker through full PBR
-# lighting and distance fog, which turns a saturated flat colour into a grey smudge; eotg_marker
-# keeps the colour and adds a fresnel outline. Reverting is a one-word change here.
+# snap_to_terrain, not a new name. A NEW Effect declared in a shader file does not register - the
+# lookup falls through to a default and the material is never created, so the mesh draws nothing.
+# The mod's pdxmesh.shader adds EOTG_MARKER to this existing effect instead.
 SHADER = "snap_to_terrain"
 
-GAME = r"D:\SteamLibrary\steamapps\common\Crusader Kings III\game"
+# The palette was supplied for governments; it is reused here for holding types, which is what
+# the colour now means. Castle keeps gold, city keeps cyan, temple keeps violet.
+HOLDINGS = [
+    ("castle",         (231, 184,  75)),
+    ("city",           ( 70, 199, 217)),
+    ("temple",         (167, 124, 255)),
+    ("temple_citadel", (206, 160, 255)),   # a temple variant, so a lighter violet
+    ("tribal",         ( 85, 185, 107)),
+    ("nomad",          (217,  87,  87)),
+    ("herder",         (217, 138,  58)),
+]
 
-# Only these files contain buildings with an assets block - 18 buildings out of 981.
+# Which holding type each primary building belongs to. Longest prefix wins, so temple_citadel_
+# must be tested before temple_.
+BUILDING_HOLDING = [
+    ("temple_citadel_", "temple_citadel"),
+    ("castle_",         "castle"),
+    ("city_",           "city"),
+    ("temple_",         "temple"),
+    ("tribe_",          "tribal"),
+    ("nomadic_camp_",   "nomad"),
+    ("herder_camp_",    "herder"),
+]
+
 HOLDING_FILES = ("00_castle_buildings.txt", "00_city_buildings.txt", "00_temple_buildings.txt",
-                 "temple_citadel_buildings.txt", "00_tribal_buildings.txt")
+                 "temple_citadel_buildings.txt", "00_tribal_buildings.txt",
+                 "00_nomad_buildings.txt")
+WALLS_FILE = "99_background_graphics_buildings.txt"
+EMPTY_WALL_MESH = "western_walls_00_mesh"
+
+GAME = r"D:\SteamLibrary\steamapps\common\Crusader Kings III\game"
 
 
 def find_block(text, start):
@@ -95,64 +95,149 @@ def find_block(text, start):
     raise ValueError("unbalanced braces")
 
 
-def override_buildings(mod_root, assets_block):
-    """Copy each building that has an assets block, with our assets swapped in.
+def holding_of(key):
+    for prefix, holding in BUILDING_HOLDING:
+        if key.startswith(prefix):
+            return holding
+    return None
 
-    Buildings are merged by KEY, so emitting only the 18 that define a model leaves the other 963
-    vanilla definitions untouched. Every other field of those 18 is copied verbatim, so gameplay
-    is unchanged - this only decides what is drawn.
 
-    The copies go stale if a patch edits those buildings; re-running re-reads vanilla, which is
-    why this is generated rather than hand-written.
+def strip_assets(block):
+    """Remove every asset declaration from a building block, in either spelling.
+
+    Returns (block_without_assets, illustration, soundeffect). The illustration and sound are
+    carried out because they are per-asset in vanilla, and dropping them silently costs the
+    holding its picture in the UI and its ambient audio - a regression that is invisible on the
+    map and only shows up when you click the holding.
     """
-    outdir = os.path.join(mod_root, "common", "buildings")
-    os.makedirs(outdir, exist_ok=True)
-    total = 0
-    for fn in HOLDING_FILES:
-        src = os.path.join(GAME, "common", "buildings", fn)
-        if not os.path.exists(src):
-            print(f"  skipped, not in this install: {fn}")
+    illustration = soundeffect = None
+    fallback_illu = fallback_snd = None
+    while True:
+        m = re.search(r"\n\t(assets|asset)\s*=\s*\{", block)
+        if not m:
+            break
+        end = find_block(block, block.index("{", m.end() - 1))
+        chunk = block[m.start():end]
+
+        # Prefer a base-game asset. Vanilla lists DLC variants first, so taking the first match
+        # gives castles a Norse illustration and Norse ambience for every culture. An asset with
+        # no requires_dlc_flag is the one everyone sees.
+        for am in re.finditer(r"\n\t+asset\s*=\s*\{", chunk):
+            aend = find_block(chunk, chunk.index("{", am.end() - 1))
+            entry = chunk[am.start():aend]
+            dlc = "requires_dlc_flag" in entry
+            im = re.search(r"illustration\s*=\s*(\S+)", entry)
+            sm = re.search(r"soundeffect\s*=\s*\{", entry)
+            snd = None
+            if sm:
+                send = find_block(entry, entry.index("{", sm.end() - 1))
+                snd = entry[sm.start():send]
+            if im and fallback_illu is None:
+                fallback_illu = im.group(1)
+            if snd and fallback_snd is None:
+                fallback_snd = snd
+            if not dlc:
+                if im and illustration is None:
+                    illustration = im.group(1)
+                if snd and soundeffect is None:
+                    soundeffect = snd
+        block = block[:m.start()] + block[end:]
+    return block, illustration or fallback_illu, soundeffect or fallback_snd
+
+
+def asset_block(mesh_name, illustration, soundeffect):
+    out = ["\n\tassets = {", "\t\tasset = {", "\t\t\ttype = pdxmesh",
+           '\t\t\tname = "%s"' % mesh_name]
+    if illustration:
+        out.append("\t\t\tillustration = %s" % illustration)
+    if soundeffect:
+        out.append("\t\t\t" + soundeffect)
+    out += ["\t\t}", "\t}"]
+    return "\n".join(out)
+
+
+def override_file(src, outdir, pick_mesh, header_note):
+    """Copy every building that declares an asset, with our asset swapped in.
+
+    Buildings merge by key, so emitting only the ones that define a model leaves every other
+    vanilla building untouched. Everything else in the block is copied verbatim, including
+    is_enabled, so gameplay and the wall-selection logic are unchanged - only what is drawn
+    changes.
+    """
+    txt = open(src, encoding="utf-8-sig").read()
+
+    # `@name = value` reader variables are FILE-scoped, so a copied building referring to
+    # @holding_illustration_india resolves to nothing unless the definition travels with it.
+    defs = re.findall(r"^@[A-Za-z_][A-Za-z0-9_]*\s*=\s*[^\n]+$", txt, re.M)
+
+    kept, names = [], []
+    for m in re.finditer(r"^([a-z0-9_]+)\s*=\s*\{", txt, re.M):
+        key = m.group(1)
+        end = find_block(txt, txt.index("{", m.start()))
+        block = txt[m.start():end]
+        if not re.search(r"\n\t(assets|asset)\s*=\s*\{", block):
             continue
-        txt = open(src, encoding="utf-8-sig").read()
+        mesh_name = pick_mesh(key)
+        if mesh_name is None:
+            continue
+        stripped, illu, snd = strip_assets(block)
+        close = stripped.rindex("}")
+        newblock = stripped[:close].rstrip() + "\n" + asset_block(mesh_name, illu, snd) + "\n}"
+        kept.append(newblock)
+        names.append(key)
 
-        # The `@name = value` reader variables. These are FILE-SCOPED, so a copied building that
-        # says `illustration = @holding_illustration_india` resolves to nothing unless the
-        # definition travels with it. Leaving them behind cost four unresolved illustrations
-        # before Tiger caught it - the game would simply have drawn no picture.
-        defs = re.findall(r"^@[A-Za-z_][A-Za-z0-9_]*\s*=\s*[^\n]+$", txt, re.M)
-
-        kept = []
-        for m in re.finditer(r"^([a-z0-9_]+)\s*=\s*\{", txt, re.M):
-            end = find_block(txt, txt.index("{", m.start()))
-            block = txt[m.start():end]
-            am = re.search(r"\n\tassets\s*=\s*\{", block)
-            if not am:
-                continue
-            aend = find_block(block, block.index("{", am.start() + 1))
-            newblock = block[:am.start()] + "\n" + assets_block.rstrip("\n") + block[aend:]
-            kept.append(newblock)
-            total += 1
-        if kept:
-            out = os.path.join(outdir, "eotg_" + fn)
-            header = (
-                "\ufeff# MOD(eotg) GENERATED by docs/tools/build_marker_assets.py - do not hand-edit.\n"
-                "# Vanilla definitions copied verbatim with ONLY the assets block replaced, so\n"
-                "# gameplay is untouched and only the model drawn on the map changes.\n"
-                "# Buildings merge by key, so the other buildings in the vanilla file are\n"
-                "# left alone.\n\n")
-            if defs:
-                header += "\n".join(defs) + "\n\n"
-            body = header + ("\n\n".join(kept)) + "\n"
-            open(out, "w", encoding="utf-8", newline="\n").write(body)
-            print(f"  {os.path.basename(out):36} {len(kept)} buildings")
-    return total
+    if not kept:
+        return []
+    out = os.path.join(outdir, "eotg_" + os.path.basename(src))
+    header = ("\ufeff# MOD(eotg) GENERATED by docs/tools/build_marker_assets.py - do not "
+              "hand-edit.\n# " + header_note + "\n# Vanilla definitions are copied verbatim with "
+              "ONLY the asset declarations replaced,\n# so gameplay is untouched. Buildings merge "
+              "by key, so every other building in the\n# vanilla file is left alone.\n\n")
+    if defs:
+        header += "\n".join(defs) + "\n\n"
+    open(out, "w", encoding="utf-8", newline="\n").write(header + "\n\n".join(kept) + "\n")
+    return names
 
 
-def build_texture(rgb):
-    """Flat colour. The marker carries no surface detail on purpose - it is a map symbol, and the
-    silhouette plus the colour is the whole of the information it conveys."""
+def flat(rgb):
     a = np.zeros((SIZE, SIZE, 4), np.uint8)
     a[..., 0], a[..., 1], a[..., 2] = rgb
+    a[..., 3] = 255
+    return Image.fromarray(a, "RGBA")
+
+
+def stone_texture(seed=7, size=256):
+    """A quiet veined stone for the pedestal.
+
+    Deliberately low contrast. The pedestal's job is to be legible and then get out of the way -
+    it sits directly under a light source the player is meant to read, and busy rock would
+    compete with it. Value sits mid-dark so it separates from both the pale and the dark terrain.
+    """
+    rng = np.random.default_rng(seed)
+    y, x = np.mgrid[0:size, 0:size].astype(np.float64)
+    field = np.zeros((size, size))
+    amp, freq = 1.0, 2.0
+    for _ in range(5):                       # value noise, a few octaves
+        g = rng.random((int(freq) + 2, int(freq) + 2))
+        yi = (y / size * freq).astype(int)
+        xi = (x / size * freq).astype(int)
+        fy = (y / size * freq) - yi
+        fx = (x / size * freq) - xi
+        fy, fx = fy * fy * (3 - 2 * fy), fx * fx * (3 - 2 * fx)
+        v = (g[yi, xi] * (1 - fx) * (1 - fy) + g[yi, xi + 1] * fx * (1 - fy)
+             + g[yi + 1, xi] * (1 - fx) * fy + g[yi + 1, xi + 1] * fx * fy)
+        field += v * amp
+        amp *= 0.5
+        freq *= 2.0
+    field = (field - field.min()) / (np.ptp(field) + 1e-9)
+    veins = np.abs(np.sin((x * 0.055 + field * 7.0)))
+    veins = np.clip(1.0 - veins, 0.0, 1.0) ** 6
+
+    base = np.array([74, 78, 92], np.float64)      # cool grey, slightly blue
+    light = np.array([132, 136, 150], np.float64)
+    img = base + (light - base) * (0.35 * field + 0.65 * veins)[..., None]
+    a = np.zeros((size, size, 4), np.uint8)
+    a[..., :3] = np.clip(img, 0, 255).astype(np.uint8)
     a[..., 3] = 255
     return Image.fromarray(a, "RGBA")
 
@@ -161,75 +246,86 @@ def main():
     if len(sys.argv) < 2:
         sys.exit(__doc__)
     mod_root = sys.argv[1]
-    shape_key = sys.argv[2] if len(sys.argv) > 2 else DEFAULT_SHAPE
-    if shape_key not in SHAPES:
-        sys.exit("shape must be one of: " + ", ".join(sorted(SHAPES)))
-    mesh_file, shape_name = SHAPES[shape_key]
-
     outdir = os.path.join(mod_root, REL)
     os.makedirs(outdir, exist_ok=True)
+    if not os.path.exists(os.path.join(outdir, MESH)):
+        sys.exit(MESH + " is missing - run build_marker_mesh.py first")
 
-    if not os.path.exists(os.path.join(outdir, mesh_file)):
-        sys.exit(mesh_file + " is missing - run obj_to_pdxmesh.py first")
-    print("shape: %s  (%s)" % (shape_key, mesh_file))
+    # Slot 1 glows because its properties map has r = 1; EOTG_MARKER multiplies its emissive and
+    # rim by Properties.r. Slot 0 keeps vanilla's noproperties.dds (all zero, roughness 1) and so
+    # lights as ordinary stone. That is what lets both slots share one effect - and they must,
+    # because the effect carries the terrain snap and a slot without it would sit at sea level.
+    glow = np.zeros((SIZE, SIZE, 4), np.uint8)
+    glow[..., 0] = 255
+    glow[..., 3] = 255
+    save_dds_dxt5(Image.fromarray(glow, "RGBA"), os.path.join(outdir, "eotg_marker_glow_properties.dds"))
+    save_dds_dxt5(stone_texture(), os.path.join(outdir, "eotg_marker_stone_diffuse.dds"))
 
-    lines = [
-        "﻿# MOD(eotg) GENERATED by docs/tools/build_marker_assets.py - do not hand-edit.",
-        "# One shared mesh, one flat colour per government. Selection happens in the buildings"
-        " files,",
-        "# where each asset entry carries a `governments = { ... }` filter.",
-        "",
-    ]
-    for name, rgb, govs in MARKERS:
-        tex = f"eotg_marker_{name}_diffuse.dds"
-        save_dds_dxt5(build_texture(rgb), os.path.join(outdir, tex))
+    lines = ["\ufeff# MOD(eotg) GENERATED by docs/tools/build_marker_assets.py - do not hand-edit.",
+             "# One mesh, two material slots: 0 is the stone pedestal, 1 the glowing emblem.",
+             "# One entry per HOLDING TYPE - the colour says what kind of holding it is.",
+             ""]
+    for name, rgb in HOLDINGS:
+        tex = "eotg_marker_%s_diffuse.dds" % name
+        save_dds_dxt5(flat(rgb), os.path.join(outdir, tex))
         lines += [
             "pdxmesh = {",
-            f'\tname = "eotg_marker_{name}_mesh"',
-            f'\tfile = "{mesh_file}"',
+            '\tname = "eotg_marker_%s_mesh"' % name,
+            '\tfile = "%s"' % MESH,
             "",
             "\tmeshsettings = {",
-            f'\t\tname = "{shape_name}"',
+            '\t\tname = "%s"' % SHAPE,
             "\t\tindex = 0",
-            f'\t\ttexture_diffuse = "{tex}"',
+            '\t\ttexture_diffuse = "eotg_marker_stone_diffuse.dds"',
             '\t\ttexture_normal = "nonormal.dds"',
             '\t\ttexture_specular = "noproperties.dds"',
-            f'\t\tshader = "{SHADER}"',
-            # NO shader_file. Zero of vanilla's building assets set it; the only assets that do
-            # are court and portrait ones, and every one of those points at court_scene.shader.
-            # Setting it on a map asset pins the effect lookup to that court pipeline, where
-            # eotg_marker does not exist, and the material is never created:
-            #   Failed to create material with shader eotg_marker (in gfx/FX/court_scene.shader)
-            # Left out, a building mesh resolves its effect against pdxmesh.shader, which is
-            # where ours is defined.
+            '\t\tshader = "%s"' % SHADER,
+            "\t}",
+            "\tmeshsettings = {",
+            '\t\tname = "%s"' % SHAPE,
+            "\t\tindex = 1",
+            '\t\ttexture_diffuse = "%s"' % tex,
+            '\t\ttexture_normal = "nonormal.dds"',
+            '\t\ttexture_specular = "eotg_marker_glow_properties.dds"',
+            '\t\tshader = "%s"' % SHADER,
             "\t}",
             "}",
             "",
         ]
     path = os.path.join(outdir, "eotg_markers.asset")
     open(path, "w", encoding="utf-8", newline="\n").write("\n".join(lines))
-    print(f"wrote {path}")
-    for name, rgb, govs in MARKERS:
-        who = ", ".join(govs) if govs else "FALLBACK (everything else)"
-        print(f"  {name:15} rgb{rgb}  <- {who}")
+    print("wrote %s" % path)
+    for name, rgb in HOLDINGS:
+        print("  %-15s rgb%s" % (name, rgb))
 
-    # The asset block that every holding building needs, ordered so the fallback comes last.
-    snippet = ["\t\tassets = {"]
-    for name, rgb, govs in MARKERS:
-        snippet.append("\t\t\tasset = {")
-        snippet.append("\t\t\t\ttype = pdxmesh")
-        snippet.append(f'\t\t\t\tname = "eotg_marker_{name}_mesh"')
-        if govs:
-            snippet.append("\t\t\t\tgovernments = { " + " ".join(govs) + " }")
-        snippet.append("\t\t\t}")
-    snippet.append("\t\t}")
-    frag = os.path.join(outdir, "assets_block.txt")
-    open(frag, "w", encoding="utf-8", newline="\n").write("\n".join(snippet) + "\n")
-    print(f"\nwrote {frag}")
-    print("")
-    print("overriding the holding buildings:")
-    n = override_buildings(mod_root, "\n".join(snippet))
-    print(f"  {n} buildings now draw the marker")
+    print("\noverriding holding buildings (colour by holding type):")
+    bdir = os.path.join(mod_root, "common", "buildings")
+    os.makedirs(bdir, exist_ok=True)
+    total = 0
+    for fn in HOLDING_FILES:
+        src = os.path.join(GAME, "common", "buildings", fn)
+        if not os.path.exists(src):
+            print("  skipped, not in this install: %s" % fn)
+            continue
+        names = override_file(
+            src, bdir,
+            lambda k: ("eotg_marker_%s_mesh" % holding_of(k)) if holding_of(k) else None,
+            "Every level of every primary building points at the same entry, so the marker "
+            "does not change on upgrade.")
+        total += len(names)
+        print("  %-36s %d  %s" % ("eotg_" + fn, len(names), ", ".join(names)))
+    print("  %d primary buildings now draw the marker" % total)
+
+    print("\nremoving the walls and the dirt patch under them:")
+    src = os.path.join(GAME, "common", "buildings", WALLS_FILE)
+    if os.path.exists(src):
+        names = override_file(
+            src, bdir, lambda k: EMPTY_WALL_MESH,
+            "Walls off. The wall meshes carry the holding's ground decal in a decal_plane "
+            "sub-mesh,\n# so pointing them at vanilla's empty western_walls_00_mesh removes the "
+            "dirt patch too.\n# is_enabled is left exactly as vanilla wrote it; only the mesh "
+            "changes.")
+        print("  %-36s %d  %s" % ("eotg_" + WALLS_FILE, len(names), ", ".join(names)))
 
 
 if __name__ == "__main__":

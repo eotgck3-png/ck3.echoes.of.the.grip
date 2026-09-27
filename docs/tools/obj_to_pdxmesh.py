@@ -182,6 +182,70 @@ MESH_SHADERS = ("standard", "standard_atlas", "snap_to_terrain", "snap_to_terrai
                 "decal_local")
 
 
+def build_part(obj_path, scale, offset_y, flip_v, flip_winding, drop_y, force, label):
+    """Load one .obj and return the arrays a sub-mesh needs, already placed.
+
+    A CK3 .mesh can hold several `mesh` blocks under one shape, each with its own vertices and
+    its own material; the .asset addresses them with `index = 0`, `index = 1` and so on. That is
+    how one model gets two surfaces that light differently - a stone pedestal and a glowing
+    emblem - without needing two separate meshes placed at the same spot.
+    """
+    P, N, T, tris = load_obj(obj_path)
+    pos, nrm, uv, tri = build_vertices(P, N, T, tris, flip_v)
+    if flip_winding:
+        tri = tri[:, [0, 2, 1]]
+    pos = pos * scale
+    if drop_y:
+        pos = pos.copy()
+        pos[:, 1] -= drop_y * scale
+    if offset_y:
+        pos = pos.copy()
+        pos[:, 1] += offset_y
+
+    agree, disagree = check_winding(pos, nrm, tri)
+    if disagree > agree and not force:
+        sys.exit(
+            "\nWINDING IS INVERTED in %s: %d of %d triangles are wound against their own "
+            "normals.\nThe engine would backface-cull this mesh and draw nothing, which looks "
+            "exactly like a missing file. Re-run with --flip-winding, or --force."
+            % (obj_path, disagree, agree + disagree))
+
+    ta = tangents(pos, nrm, uv, tri)
+    lo, hi = pos.min(0), pos.max(0)
+    print("  %-10s verts %5d  tris %5d  size %.2f x %.2f x %.2f  y %.2f..%.2f  winding %d/%d"
+          % (label, len(pos), len(tri), hi[0]-lo[0], hi[1]-lo[1], hi[2]-lo[2], lo[1], hi[1],
+             agree, agree + disagree))
+    return dict(pos=pos, nrm=nrm, uv=uv, tri=tri, ta=ta, lo=lo, hi=hi)
+
+
+def write_mesh(parts, out, shape, materials):
+    """Write one shape holding `parts` sub-meshes, in order; index N is parts[N]."""
+    body = b"@@b@" + prop_i("pdxasset", [1, 0])
+    body += obj_node(1, "object")
+    body += obj_node(2, shape)
+    for part, mat in zip(parts, materials):
+        ctr = (part["lo"] + part["hi"]) / 2.0
+        radius = float(np.linalg.norm(part["pos"] - ctr, axis=1).max())
+        body += obj_node(3, "mesh")
+        body += prop_f("p", part["pos"])
+        body += prop_f("n", part["nrm"])
+        body += prop_f("ta", part["ta"])
+        body += prop_f("u0", part["uv"])
+        body += prop_i("tri", part["tri"])
+        body += prop_f("boundingsphere", [ctr[0], ctr[1], ctr[2], radius])
+        body += obj_node(4, "aabb")
+        body += prop_f("min", part["lo"])
+        body += prop_f("max", part["hi"])
+        body += obj_node(4, "material")
+        body += prop_s("shader", mat["shader"])
+        body += prop_s("diff", mat["diff"])
+        body += prop_s("n", mat["normal"])
+        body += prop_s("spec", mat["spec"])
+    body += obj_node(1, "locator")
+    open(out, "wb").write(body)
+    return body
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("obj")
