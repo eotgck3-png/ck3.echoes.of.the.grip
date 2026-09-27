@@ -476,6 +476,14 @@ PixelShader =
 		// as readable; only the fill is thinned.
 		// It returns to full strength as the paper map comes in, where there is no terrain to see.
 		#define EOTG_POLITICAL_OPACITY 0.55f
+
+		// The world just stops at the map border - terrain one pixel, nothing the next. Fade it
+		// out instead, so the galaxy thins into empty space rather than being cut off. Measured
+		// in map UV, where the whole map is 0..1 on each axis, so the band is a fraction of the
+		// map's width and height rather than a world distance - the map is twice as wide as it
+		// is tall, so a world-space band would be visibly wider at the poles than at the sides.
+		#define EOTG_EDGE_FADE_START 0.055f   // fade begins this far in from the border
+		#define EOTG_EDGE_FADE_END   0.004f   // fully gone this far in
 		// Occupancy follows a POWER LAW, not a straight line: a linear map bottoms out at
 		// 8% of the top (because the lowest tier's Density is 0.08) and the tiers read as
 		// near-identical. The exponent pulls the empty end down and spreads everything.
@@ -553,6 +561,13 @@ PixelShader =
 		#define EOTG_MOD_LENS_COLOR_A  float3( 0.16f, 0.90f, 0.78f )
 		#define EOTG_MOD_LENS_COLOR_B  float3( 0.30f, 0.62f, 1.00f )
 		#define EOTG_MOD_FLARE_FLICKER  0.55f
+
+		// 1 well inside the map, 0 at the border.
+		float EotgEdgeFade( float2 uv )
+		{
+			float e = min( min( uv.x, 1.0f - uv.x ), min( uv.y, 1.0f - uv.y ) );
+			return smoothstep( EOTG_EDGE_FADE_END, EOTG_EDGE_FADE_START, e );
+		}
 
 		float EotgStarHash( float2 p )
 		{
@@ -1541,6 +1556,8 @@ PixelShader =
 					FinalColor = lerp( FinalColor, FlatMap, Blend );
 				#endif
 
+				FinalColor *= EotgEdgeFade( ColorMapCoords );   // MOD(eotg)
+
 				float Alpha = 1.0f;
 				#ifdef UNDERWATER
 					Alpha = CompressWorldSpace( Input.WorldSpacePos );
@@ -1713,6 +1730,8 @@ PixelShader =
 					FinalColor = lerp( FinalColor, FlatMap, FlatMapLerp );
 				#endif
 
+				FinalColor *= EotgEdgeFade( ColorMapCoords );   // MOD(eotg)
+
 				float Alpha = 1.0f;
 				#ifdef UNDERWATER
 					Alpha = CompressWorldSpace( Input.WorldSpacePos );
@@ -1773,6 +1792,8 @@ PixelShader =
 				FinalColor = ApplyFlatMapBrightnessAdjustment( FinalColor );
 
 				// Make flatmap transparent based on the SurroundFlatMapMask
+				FinalColor *= EotgEdgeFade( ColorMapCoords );   // MOD(eotg) same fade at strategic zoom
+
 				float SurroundMapAlpha = 1 - PdxTex2D( SurroundFlatMapMask, float2( ColorMapCoords.x, 1.0 - ColorMapCoords.y ) ).b;
 				SurroundMapAlpha *= FlatMapLerp;
 

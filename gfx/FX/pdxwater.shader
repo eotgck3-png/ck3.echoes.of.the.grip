@@ -72,6 +72,11 @@ PixelShader =
 
 		// Same range as pdxterrain.shader, so land and sea stop showing detail together rather
 		// than one fading out while the other is still busy.
+		// Match pdxterrain.shader exactly. If the sea faded over a different band than the land,
+		// the border would show as a step where a coastline crosses it.
+		#define EOTG_EDGE_FADE_START 0.055f
+		#define EOTG_EDGE_FADE_END   0.004f
+
 		#define EOTG_ZOOMOUT_START 0.55f
 		#define EOTG_ZOOMOUT_END   0.90f
 
@@ -305,6 +310,11 @@ PixelShader =
 			#if EOTG_DIAG_WATER
 				return float4( 1.0f, 0.0f, 0.0f, 1.0f );
 			#endif
+			// MOD(eotg) fade the sea out at the map border too, over the same band as the land.
+			float2 eotgUV = WorldSpacePos.xz * WorldSpaceToTerrain0To1;
+			float eotgEdge = min( min( eotgUV.x, 1.0f - eotgUV.x ), min( eotgUV.y, 1.0f - eotgUV.y ) );
+			Color *= smoothstep( EOTG_EDGE_FADE_END, EOTG_EDGE_FADE_START, eotgEdge );
+
 			return float4( Color, WaterFade );
 		}
 	]]
