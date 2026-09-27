@@ -93,18 +93,23 @@ PixelShader =
 
 		// Shore distances are in world units (map pixels) measured by sampling the heightmap on rings and
 		// checking for land, so they do not depend on how deep the seabed is or on the engine height scale.
-		#define EOTG_SHORE_RIM_RADIUS    2.6f     // world units: bright rim reaches this far from the waterline
+		#define EOTG_SHORE_RIM_RADIUS    1.5f     // world units. A shore should be a LINE with a falloff, not
 		#define EOTG_SHORE_RIM_STRENGTH  0.30f     // brightness of the rim (spread over a wider band, so slightly dimmer to keep the same visual weight)
-		#define EOTG_SHORE_GLOW_RADIUS   4.0f     // world units the soft glow reaches seaward; 7.0 washed
+		#define EOTG_SHORE_GLOW_RADIUS   2.6f     // a band. Rim+glow+bands together reached about 5 units,
 		                                        // a wide halo out to sea rather than marking the shore
 		#define EOTG_SHORE_GLOW_STRENGTH 0.07f    // brightness of the soft glow
-		#define EOTG_BAND_RADIUS         5.0f    // world units the rolling bands reach seaward
+		#define EOTG_BAND_RADIUS         3.0f    // which is why it filled that much of the screen.
 		#define EOTG_BAND_COUNT          3.0f     // bands across that reach
 		#define EOTG_BAND_SPEED          0.15f    // how fast bands roll toward the shore
-		#define EOTG_BAND_STRENGTH       0.10f    // brightness of the bands
+		#define EOTG_BAND_STRENGTH       0.06f    // the parallel bands were reading as ridges in sand
 		#define EOTG_SHALLOW_TURB        0.10f    // turbulence/wisp strength near the coast
 
-		#define EOTG_HUE_BASE            0.00f    // same hue scheme as the river lanes so the two match
+		#define EOTG_HUE_BASE            0.52f    // rgb(56,152,174) - teal. Was 0.00, which is the ramp's
+		                                        // GOLD end: a wide gold band against violet ground reads as
+		                                        // a sand beach, which is the earth cue the whole map avoids.
+		                                        // Teal reads as light in water rather than sand beside it,
+		                                        // and contrasts the gold stellar lanes instead of matching
+		                                        // them, so a lane meeting a coast stays legible.
 		#define EOTG_HUE_SPREAD          0.10f   // narrower still: 0.28 still reached the violet end of the
 		                                        // ramp, which is where the purple coasts came from
 		#define EOTG_HUE_REGION_SCALE    0.00018f// ~3x larger regions, so hue changes over distance rather than along one coast
