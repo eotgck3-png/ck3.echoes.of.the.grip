@@ -483,8 +483,8 @@ PixelShader =
 		// were singularities in a noise-driven direction field that happened to look topographic.
 		#define EOTG_CONTOUR_ON       1
 		#define EOTG_CONTOUR_COUNT    26.0f   // levels across the full height range
-		#define EOTG_CONTOUR_WIDTH    0.70f   // line half-width in WORLD units, not height units
-		#define EOTG_CONTOUR_OPACITY  0.09f
+		#define EOTG_CONTOUR_WIDTH    0.45f   // line half-width in WORLD units, not height units
+		#define EOTG_CONTOUR_OPACITY  0.05f
 		#define EOTG_CONTOUR_COLOR    float3( 0.62f, 0.86f, 1.00f )
 		#define EOTG_CONTOUR_MIN_GRAD 0.00012f  // below this the ground is flat: no lines
 		#define EOTG_CONTOUR_MIN_SPACE 2.5f     // world units; below this, drop the lines
