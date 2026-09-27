@@ -1470,9 +1470,17 @@ PixelShader =
 					LerpBorderColorWithFogOfWarAlphaValue( Diffuse, FogOfWarAlphaValue, BorderColor, BorderPreLightingBlend );
 					#ifdef TERRAIN_FLAT_MAP_LERP
 						float3 FlatColor;
+						// MOD(eotg) the last argument is normally FlatMapLerp, and passing it makes
+						// bordercolor.fxh HardLight the realm colour against the desaturated flat map:
+						//   BorderColor = HardLight( BorderColor, Desaturated, FlatmapLerp * 0.9 )
+						// HardLight against a base below 0.5 MULTIPLIES. Vanilla's flat map is light
+						// parchment so that tints the realm; ours is near-black, so it crushed realm
+						// colours to nothing at strategic zoom. The coast rim is the one lighter part
+						// of our flat map, which is exactly why the colour survived along coastlines
+						// and died toward the interior. Passing 0 keeps realms their own colour.
 						GetBorderColorAndBlendGameLerp( Input.WorldSpacePos.xz, FlatMap,
 							FlatColor, BorderPreLightingBlend, BorderPostLightingBlend,
-							FlatMapLerp );
+							0.0f );
 
 						FlatMap = lerp( FlatMap, FlatColor,
 							saturate( BorderPreLightingBlend + BorderPostLightingBlend ) );
@@ -1661,9 +1669,17 @@ PixelShader =
 
 					#ifdef TERRAIN_FLAT_MAP_LERP
 						float3 FlatColor;
+						// MOD(eotg) the last argument is normally FlatMapLerp, and passing it makes
+						// bordercolor.fxh HardLight the realm colour against the desaturated flat map:
+						//   BorderColor = HardLight( BorderColor, Desaturated, FlatmapLerp * 0.9 )
+						// HardLight against a base below 0.5 MULTIPLIES. Vanilla's flat map is light
+						// parchment so that tints the realm; ours is near-black, so it crushed realm
+						// colours to nothing at strategic zoom. The coast rim is the one lighter part
+						// of our flat map, which is exactly why the colour survived along coastlines
+						// and died toward the interior. Passing 0 keeps realms their own colour.
 						GetBorderColorAndBlendGameLerp( Input.WorldSpacePos.xz, FlatMap,
 							FlatColor, BorderPreLightingBlend, BorderPostLightingBlend,
-							FlatMapLerp );
+							0.0f );
 						FlatMap = lerp( FlatMap, FlatColor,
 							saturate( BorderPreLightingBlend + BorderPostLightingBlend ) );
 					#endif
@@ -1770,9 +1786,11 @@ PixelShader =
 					float BorderPreLightingBlend;
 					float BorderPostLightingBlend;
 
+					// MOD(eotg) 1.0 here fed the same HardLight crush described above; see the note
+					// in PixelShader. This is the one that actually draws at full zoom out.
 					GetBorderColorAndBlendGameLerp( Input.WorldSpacePos.xz, FlatMap,
 						BorderColor, BorderPreLightingBlend, BorderPostLightingBlend,
-						1.0f );
+						0.0f );
 
 					FlatMap = lerp( FlatMap, BorderColor,
 						saturate( BorderPreLightingBlend + BorderPostLightingBlend ) );
