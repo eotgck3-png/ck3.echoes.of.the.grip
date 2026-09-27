@@ -1191,7 +1191,14 @@ PixelShader =
 			glow = saturate( glow );
 
 			// Striae: a warped sine on one fixed heading, ridged so the wisps are thin.
-			float cs = cos( Q.y ), sn = sin( Q.y );
+			// The heading is not constant. Warping only the PHASE of a fixed-direction wave moves
+			// the wisps along without ever turning them, so they stayed globally parallel and read
+			// as ruled lines. Rotating the heading itself by a slow noise field makes them fan and
+			// curve the way real striae do, while keeping one dominant direction overall - which is
+			// the part that is physically true and the part that separates this from steppe.
+			float dirJit = ( EotgFbmRot( xz * Q.z * 0.45f ) - 0.5f ) * 1.15f;
+			float ang = Q.y + dirJit;
+			float cs = cos( ang ), sn = sin( ang );
 			float across = -xz.x * sn + xz.y * cs;
 			// Two warp octaves at different scales AND a rotated offset. One octave of value noise
 			// is sampled on an axis-aligned grid, and at the low frequency these wisps need, that
