@@ -102,6 +102,7 @@ PixelShader =
 		// Zoomed out, the stars and the nebula drift in the void are just noise: too small to read
 		// as anything and small enough to alias. Past FAR the void is a flat black plane with only
 		// the shore rim left, which is the part that carries information at that range.
+		// SUPERSEDED by EOTG_ZOOMOUT_*: distance-to-pixel fades the sea unevenly across one frame.
 		#define EOTG_VOID_DETAIL_FAR    520.0f
 		#define EOTG_VOID_DETAIL_RANGE  260.0f
 		// The shore has to go too, and for a different reason. Its land test samples the heightmap
@@ -113,6 +114,7 @@ PixelShader =
 		// Calibrated from a screenshot: at full zoom-out the stars (gone by 520) had disappeared
 		// while the shore (gone by 900) had not, so the camera sits between those two distances
 		// there. Matching the star threshold is therefore the one value guaranteed to clear it.
+		// SUPERSEDED by EOTG_ZOOMOUT_*: see EotgVoidWater.
 		#define EOTG_SHORE_FADE_FAR     520.0f
 		#define EOTG_SHORE_FADE_RANGE   300.0f
 		// -------------------------------------------------------------------------
@@ -258,18 +260,25 @@ PixelShader =
 			float Depth = EotgDepth( WorldSpacePos );
 			float hue = EotgHue( WorldSpacePos );
 
-			float camDist = length( CameraPosition - WorldSpacePos );
+			// ZOOM, not distance to the pixel.
+			//
+			// Both of these used to fade on camDist, and that is wrong in a way that is easy to
+			// miss: camDist is measured per pixel, so it paints a pool of visible nebula around
+			// wherever the camera happens to be and flat black beyond it. At mid zoom the whole
+			// sea sat past the threshold and went dead, while the water right under the camera
+			// still had colour - the giveaway was a screenshot with nebula in the corners and
+			// black in the middle.
+			//
+			// Camera height is the signal that actually means 'zoomed out', and it is one value
+			// for the whole frame, so the sea fades evenly.
+			float eotgZoom = 1.0f - smoothstep( EOTG_ZOOMOUT_START, EOTG_ZOOMOUT_END,
+				GetZoomedInZoomedOutFactor() );
 			#if EOTG_VOID_DETAIL
-				float detail = saturate( ( EOTG_VOID_DETAIL_FAR - camDist ) / EOTG_VOID_DETAIL_RANGE );
-				// Camera height, not distance to this pixel. camDist is per pixel, so a tilted
-				// camera keeps the near edge of the ocean close even at full zoom out and the fade
-				// never fires where it matters.
-				detail *= 1.0f - smoothstep( EOTG_ZOOMOUT_START, EOTG_ZOOMOUT_END,
-					GetZoomedInZoomedOutFactor() );
+				float detail = eotgZoom;
 			#else
 				float detail = 0.0f;
 			#endif
-			float shoreFade = saturate( ( EOTG_SHORE_FADE_FAR - camDist ) / EOTG_SHORE_FADE_RANGE );
+			float shoreFade = eotgZoom;
 
 			// Kill both outright once the paper map starts coming in. Distance alone was not enough:
 			// camDist is measured per pixel, so with a tilted camera the near edge of the ocean stays
