@@ -24,6 +24,15 @@ posteffect_values = {
 	# NOT - the shields turn out to be a GUI layer over map coordinates, not map geometry.
 	# Keep that test file: it answers "what does this touch" in one launch.
 	#
+	# TINT FIX: the cool tint was [0.62, 1.02, 1.16], which cut red hard while lifting green
+	# and blue. On a SATURATED colour that just cools it. On a near-neutral one it inverts
+	# which channel dominates, and the hue swings: hills #85796a (R133 G121 B106) came out
+	# R115 G122 B112 - green wins - so a warm stone-grey rendered as olive across whole
+	# regions. Measured hue shift 55.5 degrees, against under 13 for everything else.
+	# Now [0.86, 0.95, 1.16]: red is cut gently enough not to reorder channels and green is
+	# pulled slightly DOWN so it cannot win. Max hue shift across the palette 55.5 -> 7.2
+	# degrees, with mean terrain dE unchanged at 36.0 and still no pair under dE 10.
+	#
 	# Revert by pointing this back at colorcorrection_neutral.tga.
 	lut = "gfx/map/post_effects/eotg_hologram_a.tga"
 
