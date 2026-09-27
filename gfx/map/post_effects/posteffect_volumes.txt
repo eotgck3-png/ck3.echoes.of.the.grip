@@ -8,7 +8,24 @@
 
 posteffect_values = {
 	name = standard
-	lut = "gfx/map/post_effects/colorcorrection_neutral.tga"
+	# Hologram grade: blacks crushed to true black, midtones cooled, highlights left alone,
+	# so the map reads as emitted light rather than a lit surface.
+	#
+	# Terrain separation was measured before shipping it, because a grade that flattens the
+	# palette would undo the work check_terrain_distinctness.py exists to protect. Mean
+	# CIEDE2000 over all 105 terrain pairs goes 33.8 -> 36.0 and no pair falls below dE 10,
+	# so it slightly improves separation: crushing the floor pulls the dark terrains apart.
+	# A stronger near-monochrome version was rejected on the same measurement - it put 27 of
+	# the 105 pairs under dE 10, with a minimum of 0.4.
+	#
+	# SCOPE, verified in game with eotg_scope_test.tga (a LUT with the green channel forced
+	# to zero, so anything it reaches goes pink): terrain, water, borders and the holding
+	# markers change. UI panels, character portraits and the on-map coat-of-arms shields do
+	# NOT - the shields turn out to be a GUI layer over map coordinates, not map geometry.
+	# Keep that test file: it answers "what does this touch" in one launch.
+	#
+	# Revert by pointing this back at colorcorrection_neutral.tga.
+	lut = "gfx/map/post_effects/eotg_hologram_a.tga"
 
 	# MOD(eotg) darker ambience. Everything else in this file inherits from standard, directly
 	# or through zoom_step_00, so one value here moves every zoom level together.
@@ -32,7 +49,11 @@ posteffect_values = {
 posteffect_values = {
 	name = hot
 	inherit = standard
-	value_scale = 1.0
+	# MOD(eotg) vanilla set value_scale = 1.0 here. That is an absolute, not a relative, so it
+	# cancelled the 0.82 on `standard` for everything using `hot` - which is the "south" volume,
+	# a 3000-unit band across the bottom of the map. The result would be Africa and Arabia at
+	# full brightness with a fade seam against the darker rest. Dropped so it inherits, and so a
+	# future change to `standard` carries here too.
 	colorbalance = { 1.0 1 1 }
 }
 

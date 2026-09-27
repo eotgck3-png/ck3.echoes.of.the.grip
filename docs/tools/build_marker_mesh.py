@@ -16,8 +16,8 @@ Geometry:
   index 1  the supplied emblem, scaled and lifted to float just above the pedestal's top
 
 Usage:
-    python docs/tools/build_marker_mesh.py <mod root> [--profile chess] [--pedestal-scale 1.7]
-                                           [--emblem-scale 1.2] [--hover 0.28]
+    python docs/tools/build_marker_mesh.py <mod root> [--profile chess] [--pedestal-scale 2.04]
+                                           [--emblem-scale 1.44] [--hover 0.336]
 """
 from __future__ import annotations
 
@@ -50,9 +50,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("mod_root")
     ap.add_argument("--profile", default="chess", help="pedestal profile in make_marker_obj.py")
-    ap.add_argument("--pedestal-scale", type=float, default=1.7)
-    ap.add_argument("--emblem-scale", type=float, default=1.2)
-    ap.add_argument("--hover", type=float, default=0.28,
+    ap.add_argument("--pedestal-scale", type=float, default=2.04)   # 1.70 +20%
+    ap.add_argument("--emblem-scale", type=float, default=1.44)    # 1.20 +20%
+    # 0.28 +20% as well, so the gap grows with the model instead of closing up.
+    ap.add_argument("--hover", type=float, default=0.336,
                     help="gap between the pedestal top and the emblem's base, in world units")
     a = ap.parse_args()
 
