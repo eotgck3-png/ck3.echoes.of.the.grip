@@ -463,6 +463,14 @@ PixelShader =
 		#define EOTG_STAR_MID         float3( 1.00f, 0.96f, 0.88f )   // G: the old single colour
 		#define EOTG_STAR_COOL        float3( 0.70f, 0.82f, 1.00f )   // B/A: blue-white
 		#define EOTG_STAR_TEMP_JITTER 0.55f    // per-star spread around the terrain bias
+
+		// How opaque the political map mode is over the terrain at ordinary zoom. Vanilla covers
+		// the ground almost completely, which is right for a parchment map and wrong here - the
+		// terrain IS the setting, and burying the nebulae under flat realm colour throws away the
+		// whole map. Borders come from pdxborder.shader and are not touched, so realms stay just
+		// as readable; only the fill is thinned.
+		// It returns to full strength as the paper map comes in, where there is no terrain to see.
+		#define EOTG_POLITICAL_OPACITY 0.55f
 		// Occupancy follows a POWER LAW, not a straight line: a linear map bottoms out at
 		// 8% of the top (because the lowest tier's Density is 0.08) and the tiers read as
 		// near-identical. The exponent pulls the empty end down and spreads everything.
@@ -1297,6 +1305,18 @@ PixelShader =
 					float BorderPostLightingBlend;
 					GetBorderColorAndBlendGame( Input.WorldSpacePos.xz, FlatMap, BorderColor, BorderPreLightingBlend, BorderPostLightingBlend );
 
+					// MOD(eotg) thin the realm fill so the terrain reads through it. This must happen
+					// BEFORE FullColorOverlayFactor is computed: that factor is what lets the shader
+					// skip all terrain sampling when the overlay is opaque, and a thinned overlay that
+					// still took the skip would blend against terrain that was never shaded.
+					#ifdef TERRAIN_FLAT_MAP_LERP
+						float EotgPolFade = lerp( EOTG_POLITICAL_OPACITY, 1.0f, FlatMapLerp );
+					#else
+						float EotgPolFade = EOTG_POLITICAL_OPACITY;
+					#endif
+					BorderPreLightingBlend  *= EotgPolFade;
+					BorderPostLightingBlend *= EotgPolFade;
+
 					FullColorOverlayFactor = BorderPreLightingBlend + BorderPostLightingBlend;
 					FullColorOverlayFactor *= _FullyColorOverlayHeightBlend * _EnabledTerrainCulling;
 				#endif
@@ -1500,6 +1520,18 @@ PixelShader =
 					float BorderPreLightingBlend;
 					float BorderPostLightingBlend;
 					GetBorderColorAndBlendGame( Input.WorldSpacePos.xz, FlatMap, BorderColor, BorderPreLightingBlend, BorderPostLightingBlend );
+
+					// MOD(eotg) thin the realm fill so the terrain reads through it. This must happen
+					// BEFORE FullColorOverlayFactor is computed: that factor is what lets the shader
+					// skip all terrain sampling when the overlay is opaque, and a thinned overlay that
+					// still took the skip would blend against terrain that was never shaded.
+					#ifdef TERRAIN_FLAT_MAP_LERP
+						float EotgPolFade = lerp( EOTG_POLITICAL_OPACITY, 1.0f, FlatMapLerp );
+					#else
+						float EotgPolFade = EOTG_POLITICAL_OPACITY;
+					#endif
+					BorderPreLightingBlend  *= EotgPolFade;
+					BorderPostLightingBlend *= EotgPolFade;
 
 					FullColorOverlayFactor = BorderPreLightingBlend + BorderPostLightingBlend;
 					FullColorOverlayFactor *= _FullyColorOverlayHeightBlend * _EnabledTerrainCulling;

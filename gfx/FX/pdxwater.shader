@@ -225,8 +225,18 @@ PixelShader =
 
 			float camDist = length( CameraPosition - WorldSpacePos );
 			float detail = saturate( ( EOTG_VOID_DETAIL_FAR - camDist ) / EOTG_VOID_DETAIL_RANGE );
-			float3 Color = EotgVoid( WorldSpacePos, hue, detail );
 			float shoreFade = saturate( ( EOTG_SHORE_FADE_FAR - camDist ) / EOTG_SHORE_FADE_RANGE );
+
+			// Kill both outright once the paper map starts coming in. Distance alone was not enough:
+			// camDist is measured per pixel, so with a tilted camera the near edge of the ocean stays
+			// close even at full zoom out, and stars and nebulae went on twinkling under the
+			// political map. FlatMapLerp is the engine's own 'the paper map is showing' signal and
+			// does not depend on where the camera happens to be pointing.
+			float flatLerp = saturate( FlatMapLerp );
+			detail    *= 1.0f - flatLerp;
+			shoreFade *= 1.0f - flatLerp;
+
+			float3 Color = EotgVoid( WorldSpacePos, hue, detail );
 			if ( shoreFade > 0.01f )
 			{
 				Color += EotgShore( WorldSpacePos, hue ) * shoreFade;
