@@ -1273,6 +1273,27 @@ PixelShader =
 			// lit patches goes quiet.
 			return saturate( stria * ( 0.08f + 0.92f * glow ) + glow * Q.x );
 		}
+		// 8 -- Frozen Cluster. Pack ice: irregular plates with clean space between them.
+		//
+		// Every other effect on this map is made of lines, points, rings or bands. This one is
+		// made of AREAS - a noise field thresholded into plates with soft edges - which is why it
+		// cannot be confused with any of them however close the colours get. That matters here
+		// more than anywhere else, because taiga's two nearest neighbours are only dE 11.2 and
+		// 11.6 away and shape is doing the separating.
+		//
+		// The thresholds are in EotgFbmRot's RAW range, which runs about 0 to 0.84 with a mean
+		// near 0.475 - not 0 to 1. Tuning them against a normalised preview would put the plates
+		// at completely the wrong coverage in game.
+		//
+		// kind 8 -- P = ( threshold, edge softness, interior variation, - )
+		float EotgFxFloe( float2 xz, float scale, float4 P )
+		{
+			float n = EotgFbmRot( xz * scale );
+			float t = saturate( ( n - P.x ) / max( P.y, 1e-4f ) );
+			float plate = t * t * ( 3.0f - 2.0f * t );
+			// Let the interior vary with the field, or a plate reads as a flat sticker.
+			return saturate( plate * ( 1.0f - P.z + P.z * n * 2.0f ) );
+		}
 		void EotgModifierFX( float3 WorldSpacePos, float3 Tint, float4 ModA, float4 ModB,
 							 int4 IdxA, int4 IdxB, float4 Lens, float LensHue, float fade, float h01,
 							 float3 Grad,
@@ -1364,6 +1385,15 @@ PixelShader =
 				col += EotgFxColor( t, Tint ) * f * w * EOTG_FX_GAIN[t];
 				mul *= lerp( 1.0f, lerp( EOTG_FX_DARK[t], 1.0f, f ), w * fade );
 			}
+			if ( ModB.w > 0.01f )								// kind 8 -- pack ice
+			{
+				int t = IdxB.w;
+				float w = ModB.w * EotgFxHeight( h01, EOTG_FX_HEIGHT[t] )
+							  * EotgFxSlope( Grad, EOTG_FX_SLOPE[t] );
+				float f = EotgFxFloe( xz, EOTG_FX_SCALE[t], EOTG_FX_P[t] );
+				col += EotgFxColor( t, Tint ) * f * w * EOTG_FX_GAIN[t];
+				mul *= lerp( 1.0f, lerp( EOTG_FX_DARK[t], 1.0f, f ), w * fade );
+			}
 			Additive = col * fade * EOTG_MOD_GAIN;
 			Multiplier = mul;
 		}
@@ -1386,6 +1416,7 @@ PixelShader =
 			else if ( k == 5 ) { ModB.x += w; if ( w > BestB.x ) { BestB.x = w; IdxB.x = t; } }
 			else if ( k == 6 ) { ModB.y += w; if ( w > BestB.y ) { BestB.y = w; IdxB.y = t; } }
 			else if ( k == 7 ) { ModB.z += w; if ( w > BestB.z ) { BestB.z = w; IdxB.z = t; } }
+			else if ( k == 8 ) { ModB.w += w; if ( w > BestB.w ) { BestB.w = w; IdxB.w = t; } }
 		}
 
 		// One tap's worth of terrain colour, including the hypsometric ramp. Split out because the

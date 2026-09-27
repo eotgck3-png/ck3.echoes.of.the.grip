@@ -155,6 +155,17 @@ FX = {
  # Length 6.0 against a star radius under 1.7 keeps them clear of the stars - size is what
  # separates a shard from a star, which the debris effect had to learn three times.
  # Rendered sparse-to-dense before choosing: coverage 2.4%, lc 0.020, peak 0.341.
+ # Frozen Cluster: pack ice. AREAS, not lines or points - a noise field thresholded into
+ # plates with soft edges and a varying interior. Every other effect on the map is lines,
+ # points, rings or bands, so this cannot be confused with any of them even though taiga's two
+ # nearest neighbours sit only dE 11.2 and 11.6 away in colour.
+ #
+ # Thresholds are in EotgFbmRot's RAW range - roughly 0 to 0.84, mean 0.475 - derived by
+ # measuring the function rather than assuming 0..1. At 0.600/0.070 the plates cover about 13%,
+ # which is drifts on clean ground; the first prototype sat at 48% and read as camouflage.
+ "packice":  dict(kind=8, color="#eaf4ff", gain=0.32, dark=0.88, scale=0.032,
+                  p=(0.600, 0.070, 0.30, 0.0), q=(0,0,0,0), height=(0,0,0)),
+
  "iceshard": dict(kind=2, color="#eaf4ff", gain=0.65, dark=0.70, scale=34.0,
                   p=(6.00, 0.75, 0.50, 0.25), q=(0, 0, 0, 0), height=(0,0,0)),
 
@@ -364,7 +375,7 @@ TERRAINS = {
  # below plains (0.48) so it stays the emptier of the two. Impassable mountains are NOT
  # affected: build_terrain_index forces every impassable province into desert_mountains.
  "mountains":       ("Nebula Barrier",     "#5c3f9e", 0, 150, 0.65, 0.22, 0.38, "nebula"),
- "taiga":           ("Frozen Cluster",     "#8fc0e0", 1, 430, 0.80, 0.48, 0.65, "none"),
+ "taiga":           ("Frozen Cluster",     "#8fc0e0", 1, 430, 0.80, 0.48, 0.65, "packice"),
  "drylands":        ("Arid Reach",         "#a8874a", 2, 380, 0.60, 0.26, 0.45, "dust"),  # saturated ochre dust
  "forest":          ("Dense Cluster",      "#90a0b8", 0, 600, 0.55, 1.00, 0.75, "haze"),
  "steppe":          ("Frontier Reach",     "#8ea8ae", 2, 300, 0.40, 0.18, 0.50, "strands"),  # pale cyan-grey, emptier than plains
