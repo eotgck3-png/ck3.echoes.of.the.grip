@@ -170,6 +170,37 @@ FX = {
  # the whole point is that it must not read as the Barrier's gas.
  "filament": dict(kind=5, color="#e07898", gain=0.26, dark=0.55, scale=0.065,
                   p=(1.5, 0.55, 2.2, 0.4), q=(0.6, 0, 0, 0), height=(0,0,0)),
+
+ # --- the pale blue-grey trio -------------------------------------------------------------
+ # forest #90a0b8, steppe #8ea8ae and taiga #8fc0e0 are the three closest pairs on the whole
+ # map: forest/steppe 10.3, taiga/steppe 11.2, taiga/forest 11.6. Their hues are hemmed in by
+ # the rest of the palette and cannot be pushed much further apart without colliding with
+ # something else, so they are separated by SHAPE instead - which CIEDE2000 cannot measure and
+ # the eye reads first. Taiga already has hard crystal shards; these two take the other two
+ # textures a cloud can have.
+
+ # Dense Cluster: unresolved haze BETWEEN the stars. Its star_density is already 1.00, so what
+ # it lacks is not more points but something continuous behind them. Same kind as the Barrier
+ # at a third of the gain and a much larger scale, so it reads as depth rather than as wall.
+ "haze":     dict(kind=6, color="#a8c0d8", gain=0.09, dark=0.80, scale=0.028,
+                  p=(18.0, 1.0, 0.70, 0.55), q=(0.40, 1.6, 0.45, 0.10), height=(0,0,0)),
+
+ # Frontier Reach: thin drifting strands, the opposite of forest's glow. Scale stays inside the
+ # 0.055-0.075 band the Wilds filament had to be dragged back into - at 0.16 it flooded the map
+ # pink. Gain is a third of Wilds' and the colour is near-neutral, so the two do not converge:
+ # Wilds is a hot tangled thicket, Frontier is a few cold threads across emptiness.
+ "strands":  dict(kind=5, color="#b6c6cc", gain=0.10, dark=0.82, scale=0.058,
+                  p=(1.1, 0.40, 1.7, 0.25), q=(0.55, 0, 0, 0), height=(0,0,0)),
+
+ # Arid Reach: sparse dust motes. Same sprite kind as debris and flares, but small, dim and
+ # warm - debris is 3.50 long and dark-polarity, flares are 5.2 long and bright orange. These
+ # are round, a third the size, and barely above the tint.
+ # Swept for coverage against the aliasing gates: at the first numbers it covered only 2.6% of
+ # ground, about as sparse as the flares, which is invisible across the large flat areas this
+ # terrain occupies. These give 9.4% - between flares and debris' 16.3% - at lc 0.025 and peak
+ # 0.232, both far inside the gates.
+ "dust":     dict(kind=2, color="#c8a878", gain=0.30, dark=0.88, scale=13.0,
+                  p=(1.60, 1.25, 0.12, 0.0), q=(0, 0, 0, 0), height=(0,0,0)),
 }
 
 # Hypsometric ramp, per terrain: the tint shifts toward ALT colour as altitude rises.
@@ -249,9 +280,9 @@ TERRAINS = {
  # affected: build_terrain_index forces every impassable province into desert_mountains.
  "mountains":       ("Nebula Barrier",     "#5c3f9e", 0, 150, 0.65, 0.22, 0.38, "nebula"),
  "taiga":           ("Frozen Cluster",     "#8fc0e0", 1, 430, 0.80, 0.48, 0.65, "crystal"),
- "drylands":        ("Arid Reach",         "#a8874a", 2, 380, 0.60, 0.26, 0.45, "none"),  # saturated ochre dust
- "forest":          ("Dense Cluster",      "#90a0b8", 0, 600, 0.55, 1.00, 0.75, "none"),
- "steppe":          ("Frontier Reach",     "#8ea8ae", 2, 300, 0.40, 0.18, 0.50, "none"),  # pale cyan-grey, emptier than plains
+ "drylands":        ("Arid Reach",         "#a8874a", 2, 380, 0.60, 0.26, 0.45, "dust"),  # saturated ochre dust
+ "forest":          ("Dense Cluster",      "#90a0b8", 0, 600, 0.55, 1.00, 0.75, "haze"),
+ "steppe":          ("Frontier Reach",     "#8ea8ae", 2, 300, 0.40, 0.18, 0.50, "strands"),  # pale cyan-grey, emptier than plains
  "jungle":          ("Nebula Wilds",       "#d05c86", 1, 420, 1.00, 0.55, 0.45, "filament"),
  "desert_mountains":("Barren Barrier",     "#6b3a32", 0, 220, 0.90, 0.08, 0.35, "nebula_dead"),  # ALSO the wastelands: build_terrain_index forces every impassable province here. Burnt rust, not grey.
  "wetlands":        ("Anomaly Fields",     "#3fbfb0", 1, 350, 0.70, 0.48, 0.60, "lens"),
