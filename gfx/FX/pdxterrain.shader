@@ -705,6 +705,30 @@ PixelShader =
 			return lerp( lerp( a, b, f.x ), lerp( c, d, f.x ), f.y );
 		}
 
+		// Same as EotgFbm, but each octave is ROTATED as well as scaled.
+		//
+		// EotgFbm scales by 2.03 and never rotates, so every octave lands on the same
+		// axis-aligned lattice and their cell edges stack. Value noise already shows its grid;
+		// stacking three copies of it makes the grid a feature. At the low frequency the Frozen
+		// Cluster warp needs, those cells are large, and they showed in game as soft rectangular
+		// patches across the whole terrain. An incommensurate rotation per octave means no two
+		// lattices ever line up.
+		//
+		// Deliberately a separate function: EotgFbm is used by the filament, strands and shard
+		// effects, and changing the noise under them would change three terrains that nobody has
+		// complained about.
+		float EotgFbmRot( float2 p )
+		{
+			const float ca = 0.7373f, sa = 0.6755f;   // ~42.5 degrees
+			float sum = 0.0f, amp = 0.5f;
+			for ( int k = 0; k < 4; k++ )
+			{
+				sum += amp * EotgValueNoise( p );
+				p = float2( p.x * ca + p.y * sa, -p.x * sa + p.y * ca ) * 2.03f;
+				amp *= 0.5f;
+			}
+			return sum;
+		}
 		float EotgFbm( float2 p )
 		{
 			float sum = 0.0f, amp = 0.5f;
@@ -1175,7 +1199,7 @@ PixelShader =
 			// the whole terrain. Summing a second, finer, rotated octave breaks the alignment.
 			float2 wq = xz * max( Q.z, 1e-4f );
 			float2 wr = float2( wq.x * 0.80f + wq.y * 0.60f, -wq.x * 0.60f + wq.y * 0.80f );
-			float warpN = ( EotgFbm( wq ) - 0.5f ) + ( EotgFbm( wr * 2.7f + 19.1f ) - 0.5f ) * 0.55f;
+			float warpN = ( EotgFbmRot( wq ) - 0.5f ) + ( EotgFbmRot( wr * 2.7f + 19.1f ) - 0.5f ) * 0.55f;
 			float warp = warpN * P.y * 6.2831853f;
 			float s = sin( across * scale * P.x + warp );
 			// 4.5, not 2.6: the softer power made broad bright bands that dominated the terrain.
