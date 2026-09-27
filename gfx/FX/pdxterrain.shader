@@ -1196,7 +1196,11 @@ PixelShader =
 			// as ruled lines. Rotating the heading itself by a slow noise field makes them fan and
 			// curve the way real striae do, while keeping one dominant direction overall - which is
 			// the part that is physically true and the part that separates this from steppe.
-			float dirJit = ( EotgFbmRot( xz * Q.z * 0.45f ) - 0.5f ) * 1.15f;
+			// 1.15 -> 0.30. Rotating the heading far enough lets the direction field turn through
+			// a full circle somewhere, and around those points the wisps close into rings - it came
+			// out looking like a contour map. A small rotation bends them without ever letting the
+			// field wrap, which is the difference between a curve and a contour.
+			float dirJit = ( EotgFbmRot( xz * Q.z * 0.45f ) - 0.5f ) * 0.30f;
 			float ang = Q.y + dirJit;
 			float cs = cos( ang ), sn = sin( ang );
 			float across = -xz.x * sn + xz.y * cs;
