@@ -195,7 +195,13 @@ def main():
             '\t\ttexture_normal = "nonormal.dds"',
             '\t\ttexture_specular = "noproperties.dds"',
             f'\t\tshader = "{SHADER}"',
-            '\t\tshader_file = "gfx/FX/pdxmesh.shader"',
+            # NO shader_file. Zero of vanilla's building assets set it; the only assets that do
+            # are court and portrait ones, and every one of those points at court_scene.shader.
+            # Setting it on a map asset pins the effect lookup to that court pipeline, where
+            # eotg_marker does not exist, and the material is never created:
+            #   Failed to create material with shader eotg_marker (in gfx/FX/court_scene.shader)
+            # Left out, a building mesh resolves its effect against pdxmesh.shader, which is
+            # where ours is defined.
             "\t}",
             "}",
             "",
