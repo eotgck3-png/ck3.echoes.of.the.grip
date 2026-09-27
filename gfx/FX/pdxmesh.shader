@@ -1112,12 +1112,25 @@ Effect standard_alpha_to_coverage_winterShadow
 
 
 
+# ---------------------------------------------------------------- MOD(eotg)
+# EOTG_MARKER added, APPLY_WINTER dropped (a map symbol must not take a snow overlay).
+#
+# This MODIFIES a vanilla effect rather than declaring a new one, because a new Effect name
+# does not register: the engine falls back to a default shader file and the material is never
+# created -
+#   Failed to create material with shader eotg_marker (in gfx/FX/court_scene.shader)
+# - which renders as nothing. snap_to_terrain is a name the engine already resolves.
+#
+# Collateral was measured, not assumed: all 59 vanilla assets that request snap_to_terrain are
+# holding or special-building meshes. This mod overrides all 18 holding buildings, so no
+# vanilla holding mesh is ever drawn, and it places no special buildings. If special buildings
+# are ever added, they will pick up marker shading and this needs revisiting.
 Effect snap_to_terrain
 {
 	VertexShader = "VS_standard"
 	PixelShader = "PS_standard"
 	DepthStencilState = DepthStencilStateNoReplace
-	Defines = { "PDX_MESH_SNAP_VERTICES_TO_TERRAIN" "APPLY_WINTER" "MAP_LIGHTING_HACK" }
+	Defines = { "PDX_MESH_SNAP_VERTICES_TO_TERRAIN" "MAP_LIGHTING_HACK" "EOTG_MARKER" }
 }
 Effect snap_to_terrainShadow
 {
@@ -1166,30 +1179,6 @@ Effect snap_to_terrain_atlas_usercolor
 	Defines = { "PDX_MESH_SNAP_VERTICES_TO_TERRAIN" "ATLAS" "USER_COLOR" "APPLY_WINTER" "MAP_LIGHTING_HACK" }
 }
 Effect snap_to_terrain_atlas_usercolorShadow
-{
-	VertexShader = "VertexPdxMeshStandardShadow"
-	PixelShader = "PixelPdxMeshStandardShadow"
-	RasterizerState = ShadowRasterizerState
-	Defines = { "PDX_MESH_SNAP_VERTICES_TO_TERRAIN" "MAP_LIGHTING_HACK" }
-}
-
-# ---------------------------------------------------------------- MOD(eotg)
-# NOTE the '#'. Out here the file is Paradox script, not HLSL - the outer parser does not
-# understand '//', and a single such comment makes the WHOLE file fail to parse, so every
-# Effect in it disappears and meshes using them silently draw nothing. '//' is only correct
-# inside a Code [[ ... ]] block.
-#
-# snap_to_terrain plus EOTG_MARKER. APPLY_WINTER is deliberately dropped: a map symbol must
-# not take a snow overlay. CK3 looks up '<effect>Shadow' by name, so that pass has to exist
-# or the mesh will not draw at all; it is vanilla's, unchanged.
-Effect eotg_marker
-{
-	VertexShader = "VS_standard"
-	PixelShader = "PS_standard"
-	DepthStencilState = DepthStencilStateNoReplace
-	Defines = { "PDX_MESH_SNAP_VERTICES_TO_TERRAIN" "MAP_LIGHTING_HACK" "EOTG_MARKER" }
-}
-Effect eotg_markerShadow
 {
 	VertexShader = "VertexPdxMeshStandardShadow"
 	PixelShader = "PixelPdxMeshStandardShadow"

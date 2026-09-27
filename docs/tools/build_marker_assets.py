@@ -71,7 +71,7 @@ DEFAULT_SHAPE = "chess"
 # Our own effect, added to gfx/FX/pdxmesh.shader. snap_to_terrain runs the marker through full PBR
 # lighting and distance fog, which turns a saturated flat colour into a grey smudge; eotg_marker
 # keeps the colour and adds a fresnel outline. Reverting is a one-word change here.
-SHADER = "eotg_marker"
+SHADER = "snap_to_terrain"
 
 GAME = r"D:\SteamLibrary\steamapps\common\Crusader Kings III\game"
 
