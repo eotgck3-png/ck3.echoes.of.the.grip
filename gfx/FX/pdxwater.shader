@@ -46,6 +46,19 @@ PixelShader =
 	Code
 	[[
 		// MOD(eotg) ---- tunables -------------------------------------------------
+		// Master switch for everything drawn ON the void: stars and nebula clouds. Off.
+		//
+		// Three passes of fading these by camera distance and then by FlatMapLerp all failed the
+		// same way, because the problem was never when they appear - it was that they are a NOISE
+		// TEXTURE in world space. Zoomed in, a 'star' magnifies into a soft blob tens of pixels
+		// across; zoomed out, the nebula reads as pink and cyan smears in open water. Neither is a
+		// star field, and no fade curve turns one into the other.
+		//
+		// The ocean is now flat void. The land keeps its stars - those are drawn per-star in
+		// pdxterrain.shader, at a real world size, which is why they hold up at every zoom.
+		// Set to 1 to bring the field back; nothing else needs changing.
+		#define EOTG_VOID_STARS          0
+
 		#define EOTG_VOID_COLOR          float3( 0.002f, 0.002f, 0.003f )  // open-sea base: black
 		#define EOTG_NEBULA_STRENGTH     0.012f    // brightness of the slow nebula drift over the void (0 = flat black)
 		#define EOTG_NEBULA_SCALE        0.0008f  // world -> noise scale for the nebula (smaller = bigger clouds)
@@ -224,7 +237,11 @@ PixelShader =
 			float hue = EotgHue( WorldSpacePos );
 
 			float camDist = length( CameraPosition - WorldSpacePos );
-			float detail = saturate( ( EOTG_VOID_DETAIL_FAR - camDist ) / EOTG_VOID_DETAIL_RANGE );
+			#if EOTG_VOID_STARS
+				float detail = saturate( ( EOTG_VOID_DETAIL_FAR - camDist ) / EOTG_VOID_DETAIL_RANGE );
+			#else
+				float detail = 0.0f;
+			#endif
 			float shoreFade = saturate( ( EOTG_SHORE_FADE_FAR - camDist ) / EOTG_SHORE_FADE_RANGE );
 
 			// Kill both outright once the paper map starts coming in. Distance alone was not enough:

@@ -135,6 +135,10 @@ PixelShader =
 	
 	Code
 	[[
+		// MOD(eotg) master switch for the star field beyond the map edge. Off - the stars are
+		// sized in world units, so zooming in over open sea magnifies each into a large soft blob.
+		// Declared once here because every pixel shader in this file needs it.
+		#define EOTG_SURROUND_STARS 0
 		float4 GetFlatMapSurround( float2 UV )
 		{				
 			float Mask = PdxTex2D( SurroundMask, UV ).b;
@@ -240,7 +244,14 @@ PixelShader =
 				// "at any zoom" was the bug. The cells are deliberately zoom-independent, so the stars
 				// stayed at full strength under the paper map and speckled the whole view. Nothing else
 				// in this file looks at zoom, which is why the water-side fade did not touch them.
-				float EotgStarFade = 1.0f - saturate( FlatMapLerp );
+				// Off, for the same reason as the void star field in pdxwater.shader: these are sized
+				// in world units, so zooming in over open sea magnifies each one into a large soft
+				// blob. Beyond the map edge is now plain black. Set EOTG_SURROUND_STARS to 1 to restore.
+				#if EOTG_SURROUND_STARS
+					float EotgStarFade = 1.0f - saturate( FlatMapLerp );
+				#else
+					float EotgStarFade = 0.0f;
+				#endif
 				float3 Color = float3( 0.002f, 0.002f, 0.003f );
 				float2 cellSizes[2]; cellSizes[0] = float2( 40.0f, 0.985f ); cellSizes[1] = float2( 14.0f, 0.975f );
 				for ( int i = 0; i < 2; i++ )
@@ -285,7 +296,14 @@ PixelShader =
 				// "at any zoom" was the bug. The cells are deliberately zoom-independent, so the stars
 				// stayed at full strength under the paper map and speckled the whole view. Nothing else
 				// in this file looks at zoom, which is why the water-side fade did not touch them.
-				float EotgStarFade = 1.0f - saturate( FlatMapLerp );
+				// Off, for the same reason as the void star field in pdxwater.shader: these are sized
+				// in world units, so zooming in over open sea magnifies each one into a large soft
+				// blob. Beyond the map edge is now plain black. Set EOTG_SURROUND_STARS to 1 to restore.
+				#if EOTG_SURROUND_STARS
+					float EotgStarFade = 1.0f - saturate( FlatMapLerp );
+				#else
+					float EotgStarFade = 0.0f;
+				#endif
 				float3 Color = float3( 0.002f, 0.002f, 0.003f );
 				float2 cellSizes[2]; cellSizes[0] = float2( 40.0f, 0.985f ); cellSizes[1] = float2( 14.0f, 0.975f );
 				for ( int i = 0; i < 2; i++ )
@@ -346,7 +364,14 @@ PixelShader =
 				// "at any zoom" was the bug. The cells are deliberately zoom-independent, so the stars
 				// stayed at full strength under the paper map and speckled the whole view. Nothing else
 				// in this file looks at zoom, which is why the water-side fade did not touch them.
-				float EotgStarFade = 1.0f - saturate( FlatMapLerp );
+				// Off, for the same reason as the void star field in pdxwater.shader: these are sized
+				// in world units, so zooming in over open sea magnifies each one into a large soft
+				// blob. Beyond the map edge is now plain black. Set EOTG_SURROUND_STARS to 1 to restore.
+				#if EOTG_SURROUND_STARS
+					float EotgStarFade = 1.0f - saturate( FlatMapLerp );
+				#else
+					float EotgStarFade = 0.0f;
+				#endif
 				float3 Color = float3( 0.002f, 0.002f, 0.003f );
 				float2 cellSizes[2]; cellSizes[0] = float2( 40.0f, 0.985f ); cellSizes[1] = float2( 14.0f, 0.975f );
 				for ( int i = 0; i < 2; i++ )
