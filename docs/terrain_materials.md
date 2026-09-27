@@ -715,3 +715,26 @@ first generated lathe: **0 of 960**. There is no ambiguity in the signal.
 `check_winding()` now gates the converter — it refuses to write a mesh whose triangles disagree
 with their normals unless `--force` is passed. Both failures above shipped in the same commit, so
 the map showed nothing and either one alone would have explained it. Gate each independently.
+
+### The shader name inside a `.mesh` is not where a custom effect goes
+
+A `.mesh` embeds a material shader name. That name is resolved against the engine's **default**
+shader file — *not* against whatever the `.asset` names — so a mod effect written there never
+resolves, the material is never created, and the mesh draws nothing:
+
+```
+Failed to create material with shader eotg_marker (in gfx/FX/court_scene.shader)
+```
+
+`court_scene.shader` is just where the engine happened to look. It has nothing to do with the mod,
+and chasing that filename wastes a cycle.
+
+The custom effect belongs in the `.asset` `meshsettings`, as `shader` **plus** `shader_file`,
+which does override. Keep the embedded name to one vanilla holding meshes actually use —
+`standard`, `standard_atlas`, `snap_to_terrain`, `snap_to_terrain_atlas`, `decal_local`.
+`obj_to_pdxmesh.py` now restricts `--shader` to that list.
+
+The supplied atom glyph had this right by accident (embedded `standard`, asset `snap_to_terrain`)
+and rendered on the first try. Regenerating the lathes with `--shader eotg_marker` broke it, which
+is a good reminder that a working reference is worth diffing against before assuming a new failure
+is novel.

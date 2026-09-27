@@ -168,6 +168,20 @@ def check_winding(pos, nrm, tri):
     return int((d > 0).sum()), int((d < 0).sum())
 
 
+# The shader name baked into the .mesh material is NOT where a custom effect goes. That name is
+# resolved against the engine's default shader file, not against whatever the .asset names, so a
+# mod effect put here fails to resolve and the material is never created - the mesh then draws
+# nothing, with only this in error.log:
+#
+#   Failed to create material with shader eotg_marker (in gfx/FX/court_scene.shader)
+#
+# court_scene.shader is simply where it looked; it has nothing to do with the mod. The custom
+# effect belongs in the .asset meshsettings, as `shader` plus `shader_file`, which does override.
+# These are the names vanilla's own holding meshes embed.
+MESH_SHADERS = ("standard", "standard_atlas", "snap_to_terrain", "snap_to_terrain_atlas",
+                "decal_local")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("obj")
@@ -176,7 +190,9 @@ def main():
     ap.add_argument("--diffuse", default="eotg_marker_diffuse.dds")
     ap.add_argument("--normal", default="nonormal.dds")
     ap.add_argument("--specular", default="noproperties.dds")
-    ap.add_argument("--shader", default="standard")
+    ap.add_argument("--shader", default="standard", choices=sorted(MESH_SHADERS),
+                    help="the material shader name baked into the .mesh. Leave it at 'standard'; "
+                         "a custom effect belongs in the .asset, not here (see MESH_SHADERS)")
     ap.add_argument("--scale", type=float, default=1.0)
     ap.add_argument("--drop-y", type=float, default=0.0,
                     help="subtract this from Y; use the model's min Y to sit it on the ground")
