@@ -519,12 +519,29 @@ It is *steadier* than what it replaces, despite moving with the camera.
 the field flattens to a wash and the parallax dies with it, because a saturated field has no
 dynamic range left to reveal as it slides. Keep it near 0.55.
 
-### Impassable provinces ARE Barren Barrier
+### Impassable provinces have their OWN material (since 2026-09-27)
 
 `build_terrain_index.py` forces every province listed as `impassable_mountains` in `default.map`
-onto the `desert_mountains` material, overriding whatever terrain it actually carries. So that one
-entry is both Barren Barrier *and* every wasteland on the map - the Persian and steppe blanks
-included. Changing it changes both, which is usually what you want, since they are the same idea.
+onto the `impassable` material, overriding whatever terrain it actually carries.
+
+It used to force them onto `desert_mountains`, and that was wrong, because the two sets turn out to
+be **completely disjoint**: 1183 impassable provinces, 304 provinces whose `province_terrain` really
+is desert_mountains, and *zero* in both. They were not "the same idea sharing an entry", they were
+two unrelated populations sharing one set of numbers, so every value tuned for one silently applied
+to the other. Asked to thin the stars over the wastelands, there was no way to do it without
+emptying 304 genuine Barren Barriers as well.
+
+Scale matters here and is easy to miss: `impassable` is **21.4% of the map**, the largest single
+surface on it, where real `desert_mountains` is **1.0%**. Anything changed on the impassable entry
+repaints a fifth of the world; anything changed on desert_mountains is nearly invisible.
+
+The split is deliberately *invisible*. Every field of `impassable` is identical to
+`desert_mountains` except `star_density` (0.16 -> 0.06) and `star_bright` (0.35 -> 0.30). A darker
+tint was tried and rejected: at 21% coverage a recolour is a far bigger change than the one that
+was asked for. Six darkened rusts were also tried and none cleared the distinctness gate against
+desert_mountains anyway (best dE 12.5, threshold 14.0), which is the correct result - they *should*
+look the same. `check_terrain_distinctness.py` therefore carries the pair in `INTENDED_TWINS`, where
+it prints as TWIN and does not fail the run. Do not add pairs there to silence real collisions.
 
 It reads as dark rust on the dense nebula kind rather than as dark grey. "Recede, do not draw the
 eye" was the original intent and it was right, but dark *grey* reads as unfinished rather than as

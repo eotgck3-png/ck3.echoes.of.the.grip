@@ -45,7 +45,20 @@ AREA = {
     "plains": 24.5, "hills": 6.2, "desert": 4.3, "mountains": 3.9, "taiga": 3.6,
     "drylands": 3.2, "forest": 2.6, "steppe": 2.6, "jungle": 1.6, "desert_mountains": 1.0,
     "wetlands": 0.9, "farmlands": 0.4, "floodplains": 0.4, "oasis": 0.3, "terraced_hills": 0.2,
+    # 21.4 makes this the largest single surface on the map, ahead of plains. Measured by
+    # build_terrain_index.py, which forces every impassable province into it.
+    "impassable": 21.4,
 }
+
+# Pairs that are MEANT to share a colour, so a zero distance between them is a decision and
+# not a regression. They are still printed, as TWIN, but they do not fail the run.
+#
+# Only one so far. impassable/desert_mountains were a single material until 2026-09-27 and
+# were split because their province sets are disjoint and their star densities had to
+# diverge; the split was never intended to change what either one looks like, so every other
+# field of the two is identical on purpose. Do NOT add a pair here to silence a collision you
+# did not intend - the whole value of this script is that it fails.
+INTENDED_TWINS = {frozenset(("desert_mountains", "impassable"))}
 
 # Thresholds on the washed CIEDE2000 distance. Large adjacent fields of flat colour are about the
 # easiest case for the eye, but terrain is minified, noisy and lit, which eats the margin.
@@ -194,7 +207,9 @@ def main():
             sec, why = secondary_separation(terrains[a], terrains[b])
             # weight: geometric mean of land share, normalised against the largest possible pair
             w = math.sqrt(AREA.get(a, 0.5) * AREA.get(b, 0.5))
-            if de < DE_CRITICAL:
+            if frozenset((a, b)) in INTENDED_TWINS:
+                verdict = "TWIN"
+            elif de < DE_CRITICAL:
                 verdict = "CRITICAL" if sec < 0.45 else "WATCH"
             elif de < DE_WATCH:
                 verdict = "WATCH" if sec < 0.30 else "ok"
@@ -202,7 +217,7 @@ def main():
                 verdict = "ok"
             rows.append((verdict, de, sec, w, a, b, why))
 
-    order = {"CRITICAL": 0, "WATCH": 1, "ok": 2}
+    order = {"CRITICAL": 0, "WATCH": 1, "TWIN": 2, "ok": 3}
     rows.sort(key=lambda r: (order[r[0]], -r[3], r[1]))
 
     hdr = f"{'':9} {'dE00':>6} {'other':>6} {'wt':>5}  pair"
@@ -220,8 +235,9 @@ def main():
 
     crit = [r for r in rows if r[0] == "CRITICAL"]
     watch = [r for r in rows if r[0] == "WATCH"]
-    print(f"\n{len(crit)} critical, {len(watch)} watch, {len(rows) - len(crit) - len(watch)} ok"
-          f"  (of {len(rows)} pairs)")
+    twin = [r for r in rows if r[0] == "TWIN"]
+    print(f"\n{len(crit)} critical, {len(watch)} watch, {len(twin)} intended twin, "
+          f"{len(rows) - len(crit) - len(watch) - len(twin)} ok  (of {len(rows)} pairs)")
 
     # Per-terrain: the nearest neighbour is what a player actually notices
     print("\nnearest neighbour per terrain:")

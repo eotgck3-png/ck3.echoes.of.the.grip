@@ -29,8 +29,10 @@ from PIL import Image
 Image.MAX_IMAGE_PIXELS = None
 GAME = r"D:\SteamLibrary\steamapps\common\Crusader Kings III\game"
 
+# "impassable" is never named by province_terrain - it exists only as the override target below.
 TERRAINS = ["plains", "farmlands", "hills", "mountains", "desert", "desert_mountains", "oasis",
-            "jungle", "forest", "taiga", "wetlands", "steppe", "floodplains", "drylands", "terraced_hills"]
+            "jungle", "forest", "taiga", "wetlands", "steppe", "floodplains", "drylands",
+            "terraced_hills", "impassable"]
 SEA_MAT = "eotg_desert_01"          # under the void shader, never visible; must still be valid
 EDGE_MATS = ("eotg_edge_01", "eotg_edge_02")
 
@@ -84,8 +86,11 @@ def load_water_provinces(game):
     return ids
 
 
-IMPASSABLE_TERRAIN = "desert_mountains"   # Barren Barrier: darkest, emptiest, no effect --
-                                          # impassable should recede, not draw the eye
+IMPASSABLE_TERRAIN = "impassable"   # its own material since 2026-09-27. It used to be
+                                    # desert_mountains, but the two sets are disjoint, so the
+                                    # 1188 wastelands and 304 real Barren Barriers could not be
+                                    # tuned apart. Darkest and emptiest on the map: impassable
+                                    # should recede, not draw the eye.
 
 
 def load_impassable_land(game):

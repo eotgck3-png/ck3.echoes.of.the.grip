@@ -382,19 +382,37 @@ TERRAINS = {
  # barrier, so it reads as dense cloud you can just see past rather than an opaque wall.
  # Still far below Wilds (0.55), which is the terrain Barrier must not converge with, and
  # below plains (0.48) so it stays the emptier of the two. Impassable mountains are NOT
- # affected: build_terrain_index forces every impassable province into desert_mountains.
+ # affected: build_terrain_index forces every impassable province into "impassable" below.
  "mountains":       ("Nebula Barrier",     "#5c3f9e", 0, 150, 0.65, 0.28, 0.38, "nebula"),
  "taiga":           ("Frozen Cluster",     "#8fc0e0", 1, 430, 0.80, 0.54, 0.65, "packice"),
  "drylands":        ("Arid Reach",         "#a8874a", 2, 380, 0.60, 0.32, 0.45, "dust"),  # saturated ochre dust
  "forest":          ("Dense Cluster",      "#90a0b8", 0, 600, 0.55, 1.00, 0.75, "haze"),
  "steppe":          ("Frontier Reach",     "#8ea8ae", 2, 300, 0.40, 0.24, 0.50, "strands"),  # pale cyan-grey, emptier than plains
  "jungle":          ("Nebula Wilds",       "#d05c86", 1, 420, 1.00, 0.61, 0.45, "filament"),
- "desert_mountains":("Barren Barrier",     "#6b3a32", 0, 220, 0.90, 0.16, 0.35, "nebula_dead"),  # ALSO the wastelands: build_terrain_index forces every impassable province here. Burnt rust, not grey.
+ "desert_mountains":("Barren Barrier",     "#6b3a32", 0, 220, 0.90, 0.16, 0.35, "nebula_dead"),  # burnt rust, not grey. 304 real provinces; impassables have their OWN material now, see below.
  "wetlands":        ("Anomaly Fields",     "#3fbfb0", 1, 350, 0.70, 0.54, 0.60, "lens"),
  "farmlands":       ("Fertile Reach",      "#ffc861", 0, 450, 0.65, 1.00, 0.90, "none"),
  "floodplains":     ("Volatile Cluster",   "#e08a45", 2, 400, 0.70, 0.78, 0.85, "flare"),
  "oasis":           ("Sanctuary Systems",  "#fff2e4", 1, 500, 0.55, 1.00, 0.95, "none"),  # near-white cream: the brightest thing on the map, a visible sanctuary
  "terraced_hills":  ("Layered Cluster",    "#5d7f8a", 2, 300, 0.75, 0.78, 0.55, "strata"),  # muted slate-teal; the earlier olive green won the distinctness metric but was the one earth colour on a violet/teal/gold map
+ # Impassable wastelands, split out of desert_mountains 2026-09-27. They had shared that
+ # material, which was wrong in both directions: the two sets are completely DISJOINT - 1188
+ # impassable provinces, 304 provinces whose province_terrain is actually desert_mountains, and
+ # zero in both - so every star tuned for one was being applied to the other. Lowering
+ # desert_mountains to quiet the wastelands would have emptied 304 real Barren Barriers instead.
+ # This is a VISUAL material only. province_terrain still says whatever it said, so nothing about
+ # gameplay, movement or loc changes; only what the 1188 impassable provinces are painted with.
+ # Every field EXCEPT the two star fields is byte-identical to desert_mountains above, and that
+ # is the point: the request was "fewer stars on impassable mountains", not a recolour. This
+ # surface is 21.4% of the map - the largest single terrain on it, where real desert_mountains is
+ # 1.0% - so any tint change here repaints a fifth of the world. A near-black violet was tried and
+ # rejected for exactly that reason, as were six darkened rusts, none of which cleared the
+ # distinctness gate against desert_mountains anyway (best was dE 12.5, threshold 14.0).
+ # star_density 0.16 -> 0.06 is the whole change: the lowest on the map by a wide margin, because
+ # a wall you can never enter should not be dotted with systems to look at. star_bright 0.35 ->
+ # 0.30 so the few that remain do not compensate by shouting.
+ # The identical tint is declared to check_terrain_distinctness.py as an INTENDED_TWIN.
+ "impassable":      ("Impassable Barrier", "#6b3a32", 0, 220, 0.90, 0.06, 0.30, "nebula_dead"),
 }
 EDGES = [("eotg_edge_01", "#8a4ad0", 0, 420, 0.80, 0.35, 0.60, "none"),
          ("eotg_edge_02", "#e0b060", 1, 420, 0.80, 0.35, 0.60, "none")]
