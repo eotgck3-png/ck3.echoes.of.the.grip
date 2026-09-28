@@ -360,6 +360,10 @@ ALT = {
 }
 
 TERRAINS = {
+ # Barren Reach and Barren Barrier raised again 0.10 -> 0.16 after provinces were found
+ # with literally no stars. The real cause was the density GAMMA, fixed in the shader;
+ # this is the second half, so the two barren terrains clear the floor with margin
+ # while staying the emptiest on the map.
  # Star density raised across the board 2026-09-27: +0.06 on everything, except the two
  # Barren terrains which got +0.02. A flat bump would have lifted those proportionally the
  # most - 0.08 to 0.14 is +75% - and they are named for emptiness, so the thing that makes
@@ -370,7 +374,7 @@ TERRAINS = {
  # edit here - it reads this table and will tell you which pairs you just merged.
  "plains":          ("Open Cluster",       "#6a7290", 0, 337, 0.55, 0.54, 0.60, "none"),  # the baseline everything else is read against
  "hills":           ("Broken Cluster",     "#85796a", 1, 520, 0.85, 0.54, 0.55, "debris"),  # warm stone-grey; kept well clear of plains, which it borders constantly
- "desert":          ("Barren Reach",       "#3f4a62", 2, 260, 0.35, 0.1, 0.45, "none"),  # cold near-black void
+ "desert":          ("Barren Reach",       "#3f4a62", 2, 260, 0.35, 0.16, 0.45, "none"),  # cold near-black void
  # Barrier vs Wilds must not converge: they were 4 of 7 axes apart and read as the same purple
  # cloud in game. Barrier = a solid cold WALL (big, flat, starless); Wilds = a warm tangled
  # THICKET (fine, lumpy, stars showing through). See docs/terrain_scheme.md.
@@ -385,7 +389,7 @@ TERRAINS = {
  "forest":          ("Dense Cluster",      "#90a0b8", 0, 600, 0.55, 1.00, 0.75, "haze"),
  "steppe":          ("Frontier Reach",     "#8ea8ae", 2, 300, 0.40, 0.24, 0.50, "strands"),  # pale cyan-grey, emptier than plains
  "jungle":          ("Nebula Wilds",       "#d05c86", 1, 420, 1.00, 0.61, 0.45, "filament"),
- "desert_mountains":("Barren Barrier",     "#6b3a32", 0, 220, 0.90, 0.1, 0.35, "nebula_dead"),  # ALSO the wastelands: build_terrain_index forces every impassable province here. Burnt rust, not grey.
+ "desert_mountains":("Barren Barrier",     "#6b3a32", 0, 220, 0.90, 0.16, 0.35, "nebula_dead"),  # ALSO the wastelands: build_terrain_index forces every impassable province here. Burnt rust, not grey.
  "wetlands":        ("Anomaly Fields",     "#3fbfb0", 1, 350, 0.70, 0.54, 0.60, "lens"),
  "farmlands":       ("Fertile Reach",      "#ffc861", 0, 450, 0.65, 1.00, 0.90, "none"),
  "floodplains":     ("Volatile Cluster",   "#e08a45", 2, 400, 0.70, 0.78, 0.85, "flare"),

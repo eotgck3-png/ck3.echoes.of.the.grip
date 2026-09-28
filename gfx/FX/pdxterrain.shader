@@ -504,7 +504,16 @@ PixelShader =
 		// 8% of the top (because the lowest tier's Density is 0.08) and the tiers read as
 		// near-identical. The exponent pulls the empty end down and spreads everything.
 		#define EOTG_OCC_MAX          0.45f   // Density 1 -> 45% of grid cells hold a star
-		#define EOTG_DENSITY_GAMMA    1.45f
+		// 1.45 -> 1.00. The gamma is applied to a terrain's star_density before it becomes the
+		// chance that a grid cell holds a star, so anything above 1 crushes the LOW end far
+		// harder than the high end. At 1.45, density 0.10 gave a 1.6% lit chance - one coarse
+		// star per 4500 square world units, against a county of roughly 900 to 3600 - so Barren
+		// Reach provinces genuinely contained none at all.
+		//
+		// Linear makes density mean what it says: density d lights d x OCC_MAX of the cells. It
+		// lifts the sparse terrains most and the dense ones barely (1.00 is unchanged by
+		// definition), so the ordering across all fifteen is preserved.
+		#define EOTG_DENSITY_GAMMA    1.00f
 		// Density also drives star SIZE, so a dense region gains luminous area, not just count.
 		#define EOTG_RADIUS_LO        0.75f
 		#define EOTG_RADIUS_HI        1.30f
