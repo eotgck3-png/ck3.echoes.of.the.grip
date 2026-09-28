@@ -360,12 +360,17 @@ ALT = {
 }
 
 TERRAINS = {
+ # Star density raised across the board 2026-09-27: +0.06 on everything, except the two
+ # Barren terrains which got +0.02. A flat bump would have lifted those proportionally the
+ # most - 0.08 to 0.14 is +75% - and they are named for emptiness, so the thing that makes
+ # them read would have been the thing most eroded. Forest, farmlands and oasis were
+ # already at 1.00 and are unchanged; the ordering is preserved and nothing clamps.
  # Palette is spread deliberately: 15 terrains were crowded into 3 hue families (5 cool greys,
  # 3 tans, 3 golds) and collided in pairs. Run docs/tools/check_terrain_distinctness.py after any
  # edit here - it reads this table and will tell you which pairs you just merged.
- "plains":          ("Open Cluster",       "#6a7290", 0, 337, 0.55, 0.48, 0.60, "none"),  # the baseline everything else is read against
- "hills":           ("Broken Cluster",     "#85796a", 1, 520, 0.85, 0.48, 0.55, "debris"),  # warm stone-grey; kept well clear of plains, which it borders constantly
- "desert":          ("Barren Reach",       "#3f4a62", 2, 260, 0.35, 0.08, 0.45, "none"),  # cold near-black void
+ "plains":          ("Open Cluster",       "#6a7290", 0, 337, 0.55, 0.54, 0.60, "none"),  # the baseline everything else is read against
+ "hills":           ("Broken Cluster",     "#85796a", 1, 520, 0.85, 0.54, 0.55, "debris"),  # warm stone-grey; kept well clear of plains, which it borders constantly
+ "desert":          ("Barren Reach",       "#3f4a62", 2, 260, 0.35, 0.1, 0.45, "none"),  # cold near-black void
  # Barrier vs Wilds must not converge: they were 4 of 7 axes apart and read as the same purple
  # cloud in game. Barrier = a solid cold WALL (big, flat, starless); Wilds = a warm tangled
  # THICKET (fine, lumpy, stars showing through). See docs/terrain_scheme.md.
@@ -374,18 +379,18 @@ TERRAINS = {
  # Still far below Wilds (0.55), which is the terrain Barrier must not converge with, and
  # below plains (0.48) so it stays the emptier of the two. Impassable mountains are NOT
  # affected: build_terrain_index forces every impassable province into desert_mountains.
- "mountains":       ("Nebula Barrier",     "#5c3f9e", 0, 150, 0.65, 0.22, 0.38, "nebula"),
- "taiga":           ("Frozen Cluster",     "#8fc0e0", 1, 430, 0.80, 0.48, 0.65, "packice"),
- "drylands":        ("Arid Reach",         "#a8874a", 2, 380, 0.60, 0.26, 0.45, "dust"),  # saturated ochre dust
+ "mountains":       ("Nebula Barrier",     "#5c3f9e", 0, 150, 0.65, 0.28, 0.38, "nebula"),
+ "taiga":           ("Frozen Cluster",     "#8fc0e0", 1, 430, 0.80, 0.54, 0.65, "packice"),
+ "drylands":        ("Arid Reach",         "#a8874a", 2, 380, 0.60, 0.32, 0.45, "dust"),  # saturated ochre dust
  "forest":          ("Dense Cluster",      "#90a0b8", 0, 600, 0.55, 1.00, 0.75, "haze"),
- "steppe":          ("Frontier Reach",     "#8ea8ae", 2, 300, 0.40, 0.18, 0.50, "strands"),  # pale cyan-grey, emptier than plains
- "jungle":          ("Nebula Wilds",       "#d05c86", 1, 420, 1.00, 0.55, 0.45, "filament"),
- "desert_mountains":("Barren Barrier",     "#6b3a32", 0, 220, 0.90, 0.08, 0.35, "nebula_dead"),  # ALSO the wastelands: build_terrain_index forces every impassable province here. Burnt rust, not grey.
- "wetlands":        ("Anomaly Fields",     "#3fbfb0", 1, 350, 0.70, 0.48, 0.60, "lens"),
+ "steppe":          ("Frontier Reach",     "#8ea8ae", 2, 300, 0.40, 0.24, 0.50, "strands"),  # pale cyan-grey, emptier than plains
+ "jungle":          ("Nebula Wilds",       "#d05c86", 1, 420, 1.00, 0.61, 0.45, "filament"),
+ "desert_mountains":("Barren Barrier",     "#6b3a32", 0, 220, 0.90, 0.1, 0.35, "nebula_dead"),  # ALSO the wastelands: build_terrain_index forces every impassable province here. Burnt rust, not grey.
+ "wetlands":        ("Anomaly Fields",     "#3fbfb0", 1, 350, 0.70, 0.54, 0.60, "lens"),
  "farmlands":       ("Fertile Reach",      "#ffc861", 0, 450, 0.65, 1.00, 0.90, "none"),
- "floodplains":     ("Volatile Cluster",   "#e08a45", 2, 400, 0.70, 0.72, 0.85, "flare"),
+ "floodplains":     ("Volatile Cluster",   "#e08a45", 2, 400, 0.70, 0.78, 0.85, "flare"),
  "oasis":           ("Sanctuary Systems",  "#fff2e4", 1, 500, 0.55, 1.00, 0.95, "none"),  # near-white cream: the brightest thing on the map, a visible sanctuary
- "terraced_hills":  ("Layered Cluster",    "#5d7f8a", 2, 300, 0.75, 0.72, 0.55, "strata"),  # muted slate-teal; the earlier olive green won the distinctness metric but was the one earth colour on a violet/teal/gold map
+ "terraced_hills":  ("Layered Cluster",    "#5d7f8a", 2, 300, 0.75, 0.78, 0.55, "strata"),  # muted slate-teal; the earlier olive green won the distinctness metric but was the one earth colour on a violet/teal/gold map
 }
 EDGES = [("eotg_edge_01", "#8a4ad0", 0, 420, 0.80, 0.35, 0.60, "none"),
          ("eotg_edge_02", "#e0b060", 1, 420, 0.80, 0.35, 0.60, "none")]
