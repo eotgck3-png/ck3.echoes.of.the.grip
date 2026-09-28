@@ -31,6 +31,16 @@ def dds_rgb(img, path):
 # At normal zoom that reads as a lit border; at maximum zoom the halo is enormous on
 # screen and the borders become thick bands that swamp the terrain. The core is what
 # carries the line, so the halo can come down without losing legibility.
+# Border WIDTH is engine geometry, not the texture - proved by painting every border flat
+# and full-alpha: they all came out the same thickness. So a border cannot be made thin.
+# What it can be is quiet.
+#
+# Vanilla makes the high-frequency borders - province and county, which are on every
+# boundary - PURE BLACK, and a wide dark band on a bright map reads as a seam. Ours were
+# saturated lavender at luminance 0.81 on a dark map, so the same width read as neon.
+# A dark map cannot use black, so these are desaturated and dim instead: light enough to
+# separate two provinces, far too dull to glow. The realm borders stay coloured, because
+# there are few of them and they are meant to be read.
 hx = lambda h: tuple(int(h[i:i + 2], 16) for i in (1, 3, 5))
 GOLD = hx("#FFC84D"); PALEGOLD = hx("#FFF2C0"); VIOLET = hx("#8A3BE0"); PURPLE = hx("#9A4FFF"); LAV = hx("#D6B4F0")
 CRIMSON = hx("#E0325A"); TEAL = hx("#2FB8B0"); EMERALD = hx("#2E9C6A"); SAPPH = hx("#3A6CFF"); WHITE = (255, 255, 255)
@@ -68,13 +78,13 @@ def border(color, core=0.06, halo=0.35, strength=1.0, dash=None, core_col=None, 
 
 B = os.path.join(M, "gfx", "map", "borders")
 spec = {
-    "border_water": border(VIOLET, core=0.04, halo=0.11, strength=0.25),
-    "border_province": border(LAV, core=0.035, halo=0.09, strength=0.35, dash=(0.18, 0.12)),
-    "border_county": border(LAV, core=0.04, halo=0.11, strength=0.6),
-    "border_domain": border(GOLD, core=0.05, halo=0.15, strength=0.9),
-    "border_other_realm": border(GOLD, core=0.055, halo=0.17, strength=1.0),
-    "border_my_realm": border(PURPLE, core=0.055, halo=0.17, strength=1.0),
-    "border_sub_realm": border(VIOLET, core=0.04, halo=0.13, strength=0.7),
+    "border_water": border(hx("#5A6478"), core=0.03, halo=0.07, strength=0.16),
+    "border_province": border(hx("#6E7A90"), core=0.025, halo=0.05, strength=0.20, dash=(0.18, 0.12)),
+    "border_county": border(hx("#7E8AA2"), core=0.030, halo=0.06, strength=0.30),
+    "border_domain": border(GOLD, core=0.040, halo=0.10, strength=0.55),
+    "border_other_realm": border(GOLD, core=0.045, halo=0.11, strength=0.65),
+    "border_my_realm": border(PURPLE, core=0.045, halo=0.11, strength=0.65),
+    "border_sub_realm": border(hx("#8E7AB8"), core=0.035, halo=0.08, strength=0.35),
     "border_hovered_realm": border(PALEGOLD, core=0.065, halo=0.22, strength=1.0, core_col=WHITE),
     "border_hovered_realm_flat_map": border(PALEGOLD, core=0.065, halo=0.22, strength=1.0, core_col=WHITE),
     "border_highlighted_province": border(GOLD, core=0.07, halo=0.35, strength=1.0, dash=(0.3, 0.1)),
