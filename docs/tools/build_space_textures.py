@@ -41,6 +41,12 @@ def dds_rgb(img, path):
 # A dark map cannot use black, so these are desaturated and dim instead: light enough to
 # separate two provinces, far too dull to glow. The realm borders stay coloured, because
 # there are few of them and they are meant to be read.
+#
+# SECOND PASS: the first cut changed two things at once - luminance AND weight - and
+# only the luminance needed changing. Measured visual weight fell to 18-30% of what it
+# had been, which is why it went from neon to invisible. Weight is back at roughly the
+# old level; luminance stays down at 0.69-0.73 against the old 0.81, and the solid core
+# is 2-6 px of 86 so the band stays a line rather than a slab.
 hx = lambda h: tuple(int(h[i:i + 2], 16) for i in (1, 3, 5))
 GOLD = hx("#FFC84D"); PALEGOLD = hx("#FFF2C0"); VIOLET = hx("#8A3BE0"); PURPLE = hx("#9A4FFF"); LAV = hx("#D6B4F0")
 CRIMSON = hx("#E0325A"); TEAL = hx("#2FB8B0"); EMERALD = hx("#2E9C6A"); SAPPH = hx("#3A6CFF"); WHITE = (255, 255, 255)
@@ -78,13 +84,13 @@ def border(color, core=0.06, halo=0.35, strength=1.0, dash=None, core_col=None, 
 
 B = os.path.join(M, "gfx", "map", "borders")
 spec = {
-    "border_water": border(hx("#5A6478"), core=0.03, halo=0.07, strength=0.16),
-    "border_province": border(hx("#6E7A90"), core=0.025, halo=0.05, strength=0.20, dash=(0.18, 0.12)),
-    "border_county": border(hx("#7E8AA2"), core=0.030, halo=0.06, strength=0.30),
-    "border_domain": border(GOLD, core=0.040, halo=0.10, strength=0.55),
-    "border_other_realm": border(GOLD, core=0.045, halo=0.11, strength=0.65),
-    "border_my_realm": border(PURPLE, core=0.045, halo=0.11, strength=0.65),
-    "border_sub_realm": border(hx("#8E7AB8"), core=0.035, halo=0.08, strength=0.35),
+    "border_water": border(hx("#6A7488"), core=0.035, halo=0.09, strength=0.35),
+    "border_province": border(hx("#8E9AB4"), core=0.030, halo=0.09, strength=0.60, dash=(0.18, 0.12)),
+    "border_county": border(hx("#9AA6C0"), core=0.035, halo=0.10, strength=0.80),
+    "border_domain": border(GOLD, core=0.045, halo=0.12, strength=0.80),
+    "border_other_realm": border(GOLD, core=0.050, halo=0.14, strength=0.90),
+    "border_my_realm": border(PURPLE, core=0.050, halo=0.14, strength=0.90),
+    "border_sub_realm": border(hx("#A08CC8"), core=0.040, halo=0.11, strength=0.75),
     "border_hovered_realm": border(PALEGOLD, core=0.065, halo=0.22, strength=1.0, core_col=WHITE),
     "border_hovered_realm_flat_map": border(PALEGOLD, core=0.065, halo=0.22, strength=1.0, core_col=WHITE),
     "border_highlighted_province": border(GOLD, core=0.07, halo=0.35, strength=1.0, dash=(0.3, 0.1)),
