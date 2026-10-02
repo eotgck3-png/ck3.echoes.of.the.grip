@@ -42,6 +42,20 @@ def dds_rgb(img, path):
 # separate two provinces, far too dull to glow. The realm borders stay coloured, because
 # there are few of them and they are meant to be read.
 #
+# FOURTH PASS, 2026-10-01: the realm EXPLORER borders were the actual neon, not the realm
+# borders. The character-selection screen draws every selectable realm with
+# border_realm_explorer_independent / _vassal, which still carried halos of 0.35 and 0.30 -
+# four times the realm borders - so the whole screen filled with wide violet bands. Brought
+# into line with the realm borders at ~0.09. If a border looks wrong, check WHICH SCREEN it
+# is: the explorer, struggle, war and selection sets are separate textures from the ordinary
+# realm/county/province ones and were tuned at different times.
+#
+# THIRD PASS, 2026-10-01: realm halo 0.14 -> 0.075. At maximum zoom the realm borders were
+# still reading as neon slabs. The CORE is untouched at 0.050, so legibility at normal zoom
+# is unchanged - only the glow either side of the line comes down, and that glow is what
+# scales into a band on screen when zoomed fully in. Deliberately not a strength cut: the
+# second pass below records that cutting weight is what made them invisible last time.
+#
 # SECOND PASS: the first cut changed two things at once - luminance AND weight - and
 # only the luminance needed changing. Measured visual weight fell to 18-30% of what it
 # had been, which is why it went from neon to invisible. Weight is back at roughly the
@@ -88,8 +102,8 @@ spec = {
     "border_province": border(hx("#8E9AB4"), core=0.030, halo=0.09, strength=0.60, dash=(0.18, 0.12)),
     "border_county": border(hx("#9AA6C0"), core=0.035, halo=0.10, strength=0.80),
     "border_domain": border(GOLD, core=0.045, halo=0.12, strength=0.80),
-    "border_other_realm": border(GOLD, core=0.050, halo=0.14, strength=0.90),
-    "border_my_realm": border(PURPLE, core=0.050, halo=0.14, strength=0.90),
+    "border_other_realm": border(GOLD, core=0.050, halo=0.075, strength=0.90),
+    "border_my_realm": border(PURPLE, core=0.050, halo=0.075, strength=0.90),
     "border_sub_realm": border(hx("#A08CC8"), core=0.040, halo=0.11, strength=0.75),
     "border_hovered_realm": border(PALEGOLD, core=0.065, halo=0.22, strength=1.0, core_col=WHITE),
     "border_hovered_realm_flat_map": border(PALEGOLD, core=0.065, halo=0.22, strength=1.0, core_col=WHITE),
@@ -109,8 +123,8 @@ spec = {
     "border_war_ally": border(TEAL, core=0.08, halo=0.4, strength=1.0),
     "border_war_target": border(CRIMSON, core=0.09, halo=0.45, strength=1.0, core_col=WHITE),
     "border_civil_war": border(hx("#FF7A30"), core=0.08, halo=0.4, strength=1.0),
-    "border_realm_explorer_independent": border(GOLD, core=0.07, halo=0.35, strength=1.0),
-    "border_realm_explorer_vassal": border(PURPLE, core=0.06, halo=0.3, strength=0.9),
+    "border_realm_explorer_independent": border(GOLD, core=0.055, halo=0.09, strength=0.90),
+    "border_realm_explorer_vassal": border(PURPLE, core=0.050, halo=0.085, strength=0.85),
     "epidemic": border(EMERALD, core=0.08, halo=0.4, strength=1.0),
     "migrate": border(SAPPH, core=0.08, halo=0.4, strength=1.0),
     "migrate_domain": border(SAPPH, core=0.07, halo=0.3, strength=0.9),

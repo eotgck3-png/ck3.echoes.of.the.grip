@@ -308,6 +308,54 @@ FX = {
 # docs/terrain_texture_prompts.md already says about each region - "dim blue stars" for Frozen
 # Cluster, "warm golden stars" for Fertile Reach and Sanctuary Systems, "pale stars" for Frontier
 # Reach - none of which was true while every star on the map was the same white.
+# --- star size / brightness distributions (doc sections 4 and 4.1) -----------------------
+# size  mean star size 0..1. Defaults to the terrain's own star_density, which is what used
+#       to drive size directly - so an unlisted terrain looks exactly as it did before.
+# ssk   size skew. 1.0 = even spread. >1 = mostly small with a rare large one. <1 = mostly
+#       large. The draw is normalised by (skew+1) so the MEAN stays `size` at any skew.
+# bsk   brightness skew, same shape, normalised the same way: a high skew means "mostly dim
+#       with a rare bright one", not "uniformly dimmer".
+#
+# Size is deliberately NOT tied to density any more. That coupling is why the two Barren
+# terrains read as uniformly tiny - they are meant to be sparse, not featureless, and a few
+# large isolated stars say "empty" better than many small ones do.
+# --- secondary effects ------------------------------------------------------------------
+# A rare second effect, layered under the primary at reduced strength. Only worth giving to
+# LARGE terrains: at ~1/8 coverage a terrain under a percent of the map would effectively
+# never show one. The secondary must be a different KIND from the primary - they share the
+# kind's slot, and the heavier weight would simply win.
+FX2_GAIN_CAP = 0.35      # secondary emits at 35% of its normal gain
+FX2_DARK_BLEND = 0.70    # and darkens 70% less, so it reads as texture, not as an effect
+FX2 = {
+    "impassable":       "strata",    # Impassable Barrier is 21.4% of the map on its own - the
+                                     # single most repeated terrain, so the biggest payoff.
+                                     # Occasional layered structure in an otherwise dead wall.
+    "desert_mountains": "strands",   # Barren Barrier shares both its tint AND its primary
+                                     # (nebula_dead) with impassable - the distinctness check
+                                     # calls them TWINS at dE 0.0. Different secondaries are
+                                     # the one thing currently telling them apart.
+    "plains":           "strands",   # Open Cluster: the deliberately empty baseline. Rare
+                                     # drifting wisps, so "empty" is not "uniform".
+    "desert":           "debris",    # Barren Reach: an occasional debris field - something
+                                     # happened here once.
+    "hills":            "strands",   # Broken Cluster: wisps caught in the rubble.
+}
+
+
+STAR_PROFILE_DEFAULT = dict(ssk=1.0, bsk=1.0)
+STAR_PROFILE = {
+    "forest":           dict(size=0.30, ssk=2.6),            # Dense Cluster: crowded with small stars
+    "farmlands":        dict(size=0.70, ssk=1.0, bsk=0.8),   # Fertile Reach: large and generally bright
+    "oasis":            dict(size=0.90, ssk=0.7, bsk=0.6),   # Sanctuary Systems: few, large, bright
+    "floodplains":      dict(size=0.65, ssk=1.2, bsk=0.5),   # Volatile Cluster: many flaring
+    "desert":           dict(size=0.55, ssk=1.4),            # Barren Reach: sparse but each one reads
+    "desert_mountains": dict(size=0.50, ssk=1.5),            # Barren Barrier: same, dimmer
+    "mountains":        dict(size=0.30, ssk=2.0, bsk=1.8),   # Nebula Barrier: dim pinpricks through gas
+    "jungle":           dict(size=0.35, ssk=2.2),            # Nebula Wilds: fine and tangled
+    "taiga":            dict(size=0.50, bsk=1.6),            # Frozen Cluster: cold, mostly dim
+}
+
+
 STAR_TEMP = {
  "plains": 0.50, "hills": 0.45, "desert": 0.62, "mountains": 0.55,
  "taiga": 0.88, "drylands": 0.32, "forest": 0.58, "steppe": 0.66,
@@ -583,6 +631,20 @@ def main():
         return ALT.get(e[0].replace("eotg_", "").rsplit("_01", 1)[0], (None, (0, 0, 0)))
     arr("EOTG_STAR_TEMP", "float", [
         f"{STAR_TEMP.get(e[0].replace('eotg_', '').rsplit('_01', 1)[0], 0.50):.2f}f" for e in entries])
+    def sprof(e, field, fallback):
+        k = e[0].replace("eotg_", "").rsplit("_01", 1)[0]
+        return STAR_PROFILE.get(k, {}).get(field, STAR_PROFILE_DEFAULT.get(field, fallback))
+    # size falls back to the terrain's own density: that is what drove size before this split,
+    # so terrains left out of STAR_PROFILE keep their previous mean exactly.
+    # 1 for the coastal edge materials. A star whose ANCHOR sits in the coastal band would
+    # have its seaward half clipped by the shoreline - stars are drawn by the terrain pass
+    # only, and the water shader covers whatever crosses the waterline. Rejecting at the
+    # anchor is free: EotgStarParamsAt already samples the index there.
+    arr("EOTG_IS_EDGE", "float",
+        [f"{1.0 if e[0] in ('eotg_edge_01', 'eotg_edge_02') else 0.0:.1f}f" for e in entries])
+    arr("EOTG_STAR_SIZE", "float", [f"{sprof(e, 'size', e[5]):.2f}f" for e in entries])
+    arr("EOTG_STAR_SIZE_SKEW", "float", [f"{sprof(e, 'ssk', 1.0):.2f}f" for e in entries])
+    arr("EOTG_STAR_BRIGHT_SKEW", "float", [f"{sprof(e, 'bsk', 1.0):.2f}f" for e in entries])
     arr("EOTG_TILEBREAK", "float", [
         f"{TILEBREAK.get(e[0].replace('eotg_', '').rsplit('_01', 1)[0], 0.0):.3f}f" for e in entries])
     arr("EOTG_SHADE", "float", [
@@ -592,21 +654,42 @@ def main():
             tint_rgb(alt(e)[0]) if alt(e)[0] else (0.0, 0.0, 0.0)) for e in entries])
     arr("EOTG_ALT_BAND", "float3", [
         (lambda v: f"float3( {v[0]:.3f}f, {v[1]:.3f}f, {v[2]:.3f}f )")(alt(e)[1]) for e in entries])
-    arr("EOTG_FX_KIND", "int", [f"{fx(e)['kind']}" for e in entries])
-    arr("EOTG_FX_COLOR", "float3", [
-        (lambda c: f"float3( {c[0]:.3f}f, {c[1]:.3f}f, {c[2]:.3f}f )")(hx(fx(e)["color"]) if fx(e)["color"] else (0.0, 0.0, 0.0))
-        for e in entries])
-    arr("EOTG_FX_USETINT", "float", [f"{0.0 if fx(e)['color'] else 1.0:.1f}f" for e in entries])
-    arr("EOTG_FX_GAIN", "float", [f"{fx(e)['gain']:.3f}f" for e in entries])
-    arr("EOTG_FX_DARK", "float", [f"{fx(e)['dark']:.3f}f" for e in entries])
-    arr("EOTG_FX_SCALE", "float", [f"{fx(e)['scale']:.5f}f" for e in entries])
-    arr("EOTG_FX_P", "float4", [f4(fx(e)["p"]) for e in entries])
-    arr("EOTG_FX_Q", "float4", [f4(fx(e)["q"]) for e in entries])
-    arr("EOTG_FX_SLOPE", "float3", [
-        (lambda v: f"float3( {v[0]:.3f}f, {v[1]:.3f}f, {v[2]:.3f}f )")(fx(e).get("slope", (0, 0, 0)))
-        for e in entries])
-    arr("EOTG_FX_HEIGHT", "float3", [
-        (lambda h: f"float3( {h[0]:.3f}f, {h[1]:.3f}f, {h[2]:.3f}f )")(fx(e)["height"]) for e in entries])
+    def fx2(e):
+        """Secondary effect for this entry, already weakened, or 'none'."""
+        key = e[0].replace("eotg_", "").rsplit("_01", 1)[0]
+        name = FX2.get(key)
+        if not name:
+            return FX["none"]
+        base = FX[name]
+        if base["kind"] == fx(e)["kind"]:
+            raise SystemExit(
+                f"FX2['{key}'] = '{name}' has the same kind as its primary; they share a slot")
+        d = dict(base)
+        d["gain"] = base["gain"] * FX2_GAIN_CAP
+        d["dark"] = 1.0 - (1.0 - base["dark"]) * (1.0 - FX2_DARK_BLEND)
+        return d
+
+    def arr2(name, typ, val):
+        """Emit a 2N array: primaries, then secondaries."""
+        vals = [val(fx(e)) for e in entries] + [val(fx2(e)) for e in entries]
+        F.append(f"\t\tstatic const {typ} {name}[{2 * n}] = {{")
+        F.append("\t\t\t" + ", ".join(vals))
+        F.append("\t\t};")
+
+    def c3(c):
+        return f"float3( {c[0]:.3f}f, {c[1]:.3f}f, {c[2]:.3f}f )"
+    arr2("EOTG_FX_KIND", "int", lambda f: f"{f['kind']}")
+    arr2("EOTG_FX_COLOR", "float3", lambda f: c3(hx(f["color"]) if f["color"] else (0.0, 0.0, 0.0)))
+    arr2("EOTG_FX_USETINT", "float", lambda f: f"{0.0 if f['color'] else 1.0:.1f}f")
+    arr2("EOTG_FX_GAIN", "float", lambda f: f"{f['gain']:.3f}f")
+    arr2("EOTG_FX_DARK", "float", lambda f: f"{f['dark']:.3f}f")
+    arr2("EOTG_FX_SCALE", "float", lambda f: f"{f['scale']:.5f}f")
+    arr2("EOTG_FX_P", "float4", lambda f: f4(f["p"]))
+    arr2("EOTG_FX_Q", "float4", lambda f: f4(f["q"]))
+    arr2("EOTG_FX_SLOPE", "float3", lambda f: c3(f.get("slope", (0, 0, 0))))
+    arr2("EOTG_FX_HEIGHT", "float3", lambda f: c3(f["height"]))
+    n_fx2 = sum(1 for e in entries if fx2(e)["kind"])
+    print(f"secondary effects: {n_fx2} of {n} entries carry one")
     F += ["", "\t]]", "}", ""]
     with open(os.path.join(fxdir, "eotg_terrain_params.fxh"), "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(F))

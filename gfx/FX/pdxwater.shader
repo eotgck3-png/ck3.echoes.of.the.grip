@@ -1,4 +1,4 @@
-# MOD(eotg) Void Ocean - full-file override of game/gfx/FX/pdxwater.shader (CK3 1.19.0.6)
+﻿# MOD(eotg) Void Ocean - full-file override of game/gfx/FX/pdxwater.shader (CK3 1.19.0.6)
 # The sea is deep space: a near-black plane with slow nebula drift and faint stars. The coastline is an
 # energy shore: a glowing rim where the void meets land, with bands of light rolling toward the coast,
 # coloured through the same ramp (gfx/map/rivers/eotg_lane_ramp.dds) as the stellar-river lanes.
@@ -93,11 +93,29 @@ PixelShader =
 
 		// Shore distances are in world units (map pixels) measured by sampling the heightmap on rings and
 		// checking for land, so they do not depend on how deep the seabed is or on the engine height scale.
-		#define EOTG_SHORE_RIM_RADIUS    1.5f     // world units. A shore should be a LINE with a falloff, not
+		// --- navigable rivers ----------------------------------------------------------------
+		// A navigable river is a WATER PROVINCE, so this shader draws it - which is why it looked
+		// like sea while the thin rivers next to it were stellar winds. There is no separate river
+		// effect to hook, so detect the geometry: a channel has land close by all round, open sea
+		// does not. Rather than invent a third look, just switch the SEA treatment OFF there - no
+		// nebula, no shore rim - leaving a dark channel that reads as part of the void.
+		//
+		// EotgLandAt cannot be used for this. It centres a +/-0.060 band ON the water surface, so
+		// open sea - whose height IS that surface - sits on the midpoint and returns 0.5, making
+		// the whole ocean read as half land. EotgShore is immune because it reads CONTRAST across a
+		// coast and a constant offset cancels; an absolute "how enclosed am I" is not.
+		#define EOTG_RIVER_LAND_LO     0.006f
+		#define EOTG_RIVER_LAND_HI     0.075f
+		#define EOTG_RIVER_PROBE_R    11.0f
+		#define EOTG_RIVER_LO          0.30f
+		#define EOTG_RIVER_HI          0.72f
+		#define EOTG_RIVER_DARK        0.30f   // how far the sea colour is taken down on a river
+
+		#define EOTG_SHORE_RIM_RADIUS    1.0f     // world units. A shore should be a LINE with a falloff, not
 		#define EOTG_SHORE_RIM_STRENGTH  0.30f     // brightness of the rim (spread over a wider band, so slightly dimmer to keep the same visual weight)
-		#define EOTG_SHORE_GLOW_RADIUS   2.6f     // a band. Rim+glow+bands together reached about 5 units,
+		#define EOTG_SHORE_GLOW_RADIUS   1.6f     // a band. Rim+glow+bands together reached about 5 units,
 		                                        // a wide halo out to sea rather than marking the shore
-		#define EOTG_SHORE_GLOW_STRENGTH 0.07f    // brightness of the soft glow
+		#define EOTG_SHORE_GLOW_STRENGTH 0.04f    // brightness of the soft glow
 		#define EOTG_BAND_RADIUS         3.0f    // which is why it filled that much of the screen.
 		#define EOTG_BAND_COUNT          3.0f     // bands across that reach
 		#define EOTG_BAND_SPEED          0.15f    // how fast bands roll toward the shore
@@ -235,6 +253,28 @@ PixelShader =
 			return n / float( EOTG_RING_TAPS );
 		}
 
+		// Absolute land test: 0 at and below the waterline, 1 on real land.
+		float EotgLandAtStrict( float2 xz, float WaterY )
+		{
+			float h01 = GetHeightMultisample01( xz, 1.0f );
+			float w01 = WaterY / HeightScale;
+			return smoothstep( w01 + EOTG_RIVER_LAND_LO, w01 + EOTG_RIVER_LAND_HI, h01 );
+		}
+
+		float EotgRiverAmount( float3 WorldSpacePos )
+		{
+			float n = 0.0f;
+			float angleStep = 6.2831853f / float( EOTG_RING_TAPS );
+			float jitter = PdxTex2D( FoamNoiseTexture, WorldSpacePos.xz * 0.37f ).r * angleStep;
+			for ( int i = 0; i < EOTG_RING_TAPS; i++ )
+			{
+				float a = angleStep * float( i ) + jitter;
+				float2 o = float2( cos( a ), sin( a ) ) * EOTG_RIVER_PROBE_R;
+				n += EotgLandAtStrict( WorldSpacePos.xz + o, WorldSpacePos.y );
+			}
+			return smoothstep( EOTG_RIVER_LO, EOTG_RIVER_HI, n / float( EOTG_RING_TAPS ) );
+		}
+
 		float3 EotgShore( float3 WorldSpacePos, float hue )
 		{
 			float3 rimCol  = lerp( EotgRamp( hue ), float3( 1.0f, 1.0f, 1.0f ), 0.5f );
@@ -307,7 +347,13 @@ PixelShader =
 			detail    *= 1.0f - flatLerp;
 			shoreFade *= 1.0f - flatLerp;
 
+			// MOD(eotg) navigable rivers: turn the sea treatment off instead of restyling it.
+			float river = ( shoreFade > 0.01f ) ? EotgRiverAmount( WorldSpacePos ) : 0.0f;
+			detail    *= 1.0f - river;
+			shoreFade *= 1.0f - river;
+
 			float3 Color = EotgVoid( WorldSpacePos, hue, detail );
+			Color *= lerp( 1.0f, EOTG_RIVER_DARK, river );
 			if ( shoreFade > 0.01f )
 			{
 				Color += EotgShore( WorldSpacePos, hue ) * shoreFade;
@@ -345,8 +391,8 @@ PixelShader =
 						float3 BorderColor;
 						float BorderPreLightingBlend;
 						float BorderPostLightingBlend;
-						GetProvinceOverlayAndBlend( Input.WorldSpacePos.xz, BorderColor, BorderPreLightingBlend, BorderPostLightingBlend );
-						GetBorderColorAndBlendGame( Input.WorldSpacePos.xz, Water.rgb, BorderColor, BorderPreLightingBlend, BorderPostLightingBlend );
+						GetProvinceOverlayAndBlend( Input.WorldSpacePos.xz, BorderColor, BorderPreLightingBlend, BorderPostLightingBlend , 0.0f );   // MOD(eotg) 1.20 SkipSecondaryProvinceOverlay
+						GetBorderColorAndBlendGame( Input.WorldSpacePos.xz, Water.rgb, BorderColor, BorderPreLightingBlend, BorderPostLightingBlend , 0.0f );   // MOD(eotg) 1.20
 
 						// Don't draw too close to the shore to not duplicate the colors with stripes over the land.
 						float AccurateHeight = GetHeight( Input.WorldSpacePos.xz );

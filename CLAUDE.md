@@ -36,6 +36,8 @@ The setting arrives as Markdown **briefs** per region (`intake/regions/<region>/
 Use the table in `OLD PROJECT VERSION/CLAUDE.md` — it is still correct for 1.19 (`common/religion/religion_types/`, `common/bookmarks/bookmarks/`, etc.). Add `map_data/` and `common/dynasties/` to it.
 
 ## Validation
+Black map, neon borders, or errors in files the mod does not touch: see `docs/pitfalls.md` first — all three have known causes.
+
 Tiger 1.17.0 against CK3 1.19. From the Bash tool:
 ```bash
 "/c/Users/river/tools/ck3-tiger-windows-v1.17.0/ck3-tiger.exe" --game "D:/SteamLibrary/steamapps/common/Crusader Kings III/game" "echoes_of_the_grip.mod"
@@ -43,6 +45,7 @@ Tiger 1.17.0 against CK3 1.19. From the Bash tool:
 Known benign (Tiger predates the 1.19 religion folder rename): ~48 faith/religion-path lookups, ~24 culture lookups, 2 `error(filename)` on the religion folders. Do not "fix" those. Everything else is real. Write Tiger logs to the scratchpad, not the repo.
 
 ## Reference sources, in precedence order
+0. **`docs/pitfalls.md`** — repeated issues and their confirm-before-you-change steps. Read it BEFORE debugging any visual or shader problem; every entry is something this project has got wrong more than once. Add to it whenever something costs more than one attempt.
 1. **`CLAUDE.md` invariants and the v1 lessons** (`OLD VERSION CATALOG.md` §4) — these encode failures this project actually paid for. They win over any external reference.
 2. **Vanilla game files** — `D:/SteamLibrary/steamapps/common/Crusader Kings III/game/`. Copy the shape of the vanilla equivalent before writing anything new. `eotg-vanilla-scout` exists for this.
 3. **The `ck3-modding` skill** — installed at `C:/Users/river/.claude/skills/ck3-modding/` (from github.com/Sililex/ck3-claude-skill). Topic files (`scopes.md`, `effects.md`, `triggers.md`, `events.md`, `governments.md`, `religions.md`, `cultures.md`, `history.md`, `bookmarks.md`, and more) plus `reference/common/<folder>/*.info` field specs covering 97 folders. Agents reach it via the Skill tool or by reading the file directly — reading one file is usually cheaper than loading the whole skill. **Gaps:** no `map_data/` coverage (definition.csv, provinces.png, default.map, heightmaps, positions.txt) and no `common/dynasties` spec — use vanilla for those.

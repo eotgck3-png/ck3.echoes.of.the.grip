@@ -1,4 +1,10 @@
-﻿# MOD(eotg) override of game/gfx/FX/pdxterrain.shader (CK3 1.19.0.6).
+﻿# MOD(eotg) override of game/gfx/FX/pdxterrain.shader. Base copy: CK3 1.19.0.6, patched
+# for 1.20.0.3 (Crozier): GetBorderColorAndBlendGame / ...Lerp gained a trailing
+# SkipSecondaryProvinceOverlay argument. We pass 0.0f - do not skip - which is the
+# behaviour from before the parameter existed.
+# AFTER EVERY CK3 UPDATE: diff this against the game's copy. A signature change in a
+# vanilla helper fails to compile and the map renders BLACK; grep error.log for
+# 'pdx_terrain.cpp', which names the failing effect directly.
 # Hybrid terrain: shared greyscale structure textures, per-terrain colour and stars applied
 # here from the material index. All additions marked MOD(eotg).
 
@@ -476,6 +482,12 @@ PixelShader =
 		// as readable; only the fill is thinned.
 		// It returns to full strength as the paper map comes in, where there is no terrain to see.
 		#define EOTG_POLITICAL_OPACITY 0.55f
+		// The gradient border's alpha is a soft RAMP, not a line. Vanilla hides its tail under
+		// lit terrain; on near-black emissive terrain even 10% of a saturated realm colour is a
+		// visible band, and zoomed fully in that tail covers many pixels instead of being
+		// sub-pixel - which is why the borders bloomed into wide pink bands only at max zoom.
+		// Raising the alpha to a power keeps the core of the border and discards the tail.
+		#define EOTG_BORDER_SHARPEN    2.6f
 
 		// Topographic contours over the whole map - a tactical-display cue rather than a terrain
 		// effect, so it is global and does not belong to any one material.
@@ -515,6 +527,17 @@ PixelShader =
 		// definition), so the ordering across all fifteen is preserved.
 		#define EOTG_DENSITY_GAMMA    1.00f
 		// Density also drives star SIZE, so a dense region gains luminous area, not just count.
+		// A star anchored in the coastal band gets its seaward half cut off by the shoreline,
+		// because stars are drawn by the terrain pass and the water covers anything past the
+		// waterline. Fade the star out by how much edge material its ANCHOR sits on - a fixed
+		// world position, so this is stable and cannot shimmer as the camera moves.
+		// Anchor test: catches stars standing ON the painted coastal band.
+		#define EOTG_STAR_COAST_LO     0.02f
+		#define EOTG_STAR_COAST_HI     0.40f
+		// Shore test: the per-pixel coast field reaches 4.6 units, well past the 1.8-unit band,
+		// so it covers the stars the anchor test cannot see.
+		#define EOTG_STAR_SHORE_LO     0.04f
+		#define EOTG_STAR_SHORE_HI     0.30f
 		#define EOTG_RADIUS_LO        0.75f
 		#define EOTG_RADIUS_HI        1.30f
 		#define EOTG_STAR_FINE_CELL   2.83f  // /sqrt(2): halves cell AREA, so 2x the stars
@@ -648,7 +671,11 @@ PixelShader =
 								: lerp( EOTG_STAR_MID, EOTG_STAR_COOL, ( t - 0.5f ) * 2.0f );
 		}
 
-		float3 EotgStarParamsAt( float2 xz )
+		// P = (density, brightness, temperature, mean size),
+		// S = (size skew, brightness skew, coastal-edge weight).
+		// Sampled at the STAR's position, not the pixel's, so a star takes its whole character
+		// from where it sits and the lattice stays continuous across terrain borders.
+		void EotgStarParamsAt( float2 xz, out float4 P, out float3 S )
 		{
 			float2 C = xz * WorldSpaceToDetail + DetailTexelSize * 0.5f;
 			float4 Idx = PdxTex2DLod0( DetailIndexTexture, C ) * 255.0f;
@@ -659,13 +686,22 @@ PixelShader =
 			int t2 = clamp( int( Idx.z + 0.5f ), 0, EOTG_TERRAIN_COUNT - 1 );
 			int t3 = clamp( int( Idx.w + 0.5f ), 0, EOTG_TERRAIN_COUNT - 1 );
 			float w0 = W.x / total, w1 = W.y / total, w2 = W.z / total, w3 = W.w / total;
-			return float3(
+			P = float4(
 				EOTG_STAR_DENSITY[t0] * w0 + EOTG_STAR_DENSITY[t1] * w1
 					+ EOTG_STAR_DENSITY[t2] * w2 + EOTG_STAR_DENSITY[t3] * w3,
 				EOTG_STAR_BRIGHT[t0] * w0 + EOTG_STAR_BRIGHT[t1] * w1
 					+ EOTG_STAR_BRIGHT[t2] * w2 + EOTG_STAR_BRIGHT[t3] * w3,
 				EOTG_STAR_TEMP[t0] * w0 + EOTG_STAR_TEMP[t1] * w1
-					+ EOTG_STAR_TEMP[t2] * w2 + EOTG_STAR_TEMP[t3] * w3 );
+					+ EOTG_STAR_TEMP[t2] * w2 + EOTG_STAR_TEMP[t3] * w3,
+				EOTG_STAR_SIZE[t0] * w0 + EOTG_STAR_SIZE[t1] * w1
+					+ EOTG_STAR_SIZE[t2] * w2 + EOTG_STAR_SIZE[t3] * w3 );
+			S = float3(
+				EOTG_STAR_SIZE_SKEW[t0] * w0 + EOTG_STAR_SIZE_SKEW[t1] * w1
+					+ EOTG_STAR_SIZE_SKEW[t2] * w2 + EOTG_STAR_SIZE_SKEW[t3] * w3,
+				EOTG_STAR_BRIGHT_SKEW[t0] * w0 + EOTG_STAR_BRIGHT_SKEW[t1] * w1
+					+ EOTG_STAR_BRIGHT_SKEW[t2] * w2 + EOTG_STAR_BRIGHT_SKEW[t3] * w3,
+				EOTG_IS_EDGE[t0] * w0 + EOTG_IS_EDGE[t1] * w1
+					+ EOTG_IS_EDGE[t2] * w2 + EOTG_IS_EDGE[t3] * w3 );
 		}
 
 		// A star belongs to the terrain it SITS ON, not to the terrain under the pixel currently
@@ -676,11 +712,68 @@ PixelShader =
 		//
 		// The terrain fetch is paid only by stars that actually reach this pixel: the conservative
 		// radius test uses EOTG_RADIUS_HI, the largest any terrain could ask for, and rejects first.
-		float3 EotgStarLayer( float2 xz, float cell, float radiusWorld, float falloff )
+		// --- coast ------------------------------------------------------------------------
+		// The heightmap is carved to EXACTLY 0 over water, so "is this void" is a threshold,
+		// not a comparison against _WaterHeight - which the terrain pass does not reliably
+		// get, since cw/pdxterrain.fxh is engine-internal and not a shipped file.
+		#define EOTG_COAST_TAPS        8
+		#define EOTG_COAST_RING_R      4.6f    // world units; the water side reaches ~5.0
+		// Must STRADDLE the coastal height range (p10 0.044, median 0.062, p90 0.090), not sit
+		// below it. At 0.004 every tap returned exactly 0 or 1, so 8 taps gave 9 discrete
+		// values and the band came out in blotchy steps - the same terraced-shore bug the
+		// water side already fixed with its 0.060 softness.
+		#define EOTG_COAST_SOFT        0.085f
+
+		// Shelf edge: land as a raised plate over the void.
+		#define EOTG_SHELF_LIP_LO      0.30f
+		#define EOTG_SHELF_LIP_HI      0.52f
+		#define EOTG_SHELF_LIP_GAIN    0.30f   // the water side already lights this line
+		#define EOTG_SHELF_SHADOW_LO   0.03f
+		#define EOTG_SHELF_SHADOW_HI   0.22f
+		#define EOTG_SHELF_DARK        0.62f   // was burning a heavy ring into the shoreline
+
+		// Tidal combing: the void draws the field straight.
+		#define EOTG_COMB_LO           0.02f
+		#define EOTG_COMB_HI           0.30f
+		#define EOTG_COMB_FREQ         1.25f
+		#define EOTG_COMB_GAIN         0.12f
+		#define EOTG_COMB_STRETCH      1.4f    // star elongation toward the void. 2.8 read as
+		                                       // smeared stars along the shoreline, not as force.
+
+		// How much void surrounds this pixel, and which way it lies.
+		// Returns xy = unit vector pointing at the void, z = void fraction 0..1.
+		// On a straight coast z is ~0.5 at the waterline falling to 0 at ring radius inland,
+		// so it doubles as a continuous distance-to-coast - the same trick EotgLandFraction
+		// uses in pdxwater.shader, read from the other side.
+		float3 EotgCoastField( float2 xz )
+		{
+			float2 dirAcc = float2( 0.0f, 0.0f );
+			float voidAcc = 0.0f;
+			// Per-pixel ring rotation: decorrelates the remaining step structure into dither,
+			// which reads as smooth, instead of into contours that read as bands.
+			float jitter = EotgStarHash( xz ) * ( 6.2831853f / float( EOTG_COAST_TAPS ) );
+			for ( int i = 0; i < EOTG_COAST_TAPS; i++ )
+			{
+				float a = ( float( i ) + 0.5f ) * ( 6.2831853f / float( EOTG_COAST_TAPS ) ) + jitter;
+				float2 dir = float2( cos( a ), sin( a ) );
+				float h = GetHeightMultisample01( xz + dir * EOTG_COAST_RING_R, 1.0f );
+				float isVoid = 1.0f - smoothstep( 0.0f, EOTG_COAST_SOFT, h );
+				dirAcc += dir * isVoid;
+				voidAcc += isVoid;
+			}
+			float len = length( dirAcc );
+			float2 n = ( len > 1e-4f ) ? dirAcc / len : float2( 0.0f, 1.0f );
+			return float3( n, voidAcc / float( EOTG_COAST_TAPS ) );
+		}
+		// ----------------------------------------------------------------------------------
+
+		float3 EotgStarLayer( float2 xz, float cell, float radiusWorld, float falloff,
+			float3 Aniso )
 		{
 			float2 baseCell = floor( xz / cell );
 			float3 acc = vec3( 0.0f );
-			float maxR = radiusWorld * EOTG_RADIUS_HI;
+			// Widened by the stretch, or an elongated star would be culled before it is drawn.
+			float maxR = radiusWorld * EOTG_RADIUS_HI * max( Aniso.z, 1.0f );
 			for ( int j = -1; j <= 1; j++ )
 			{
 				for ( int i = -1; i <= 1; i++ )
@@ -693,9 +786,16 @@ PixelShader =
 					{
 						continue;
 					}
-					float3 sp = EotgStarParamsAt( starPos );
+					float4 sp; float3 sk;
+					EotgStarParamsAt( starPos, sp, sk );
 					float dn = saturate( sp.x );
 					if ( dn < 0.01f )
+					{
+						continue;
+					}
+					// Anchored on the coast: fade out rather than draw a star the shoreline will clip.
+					float coastKeep = 1.0f - smoothstep( EOTG_STAR_COAST_LO, EOTG_STAR_COAST_HI, sk.z );
+					if ( coastKeep < 0.01f )
 					{
 						continue;
 					}
@@ -704,14 +804,29 @@ PixelShader =
 					{
 						continue;
 					}
-					float r = radiusWorld * lerp( EOTG_RADIUS_LO, EOTG_RADIUS_HI, dn );
-					float d = length( delta ) / r;
-					float b = 0.30f + 0.70f * EotgStarHash( cc + 11.7f );
+					// Size is its OWN draw now, not a function of density: a sparse terrain can
+					// have large stars, which is how emptiness should read. sp.w is the mean, and
+					// multiplying by (skew+1) holds that mean true at any skew, since the mean of
+					// h^k over uniform h is 1/(k+1). At skew 1 this is 2h, mean sp.w.
+					float szDraw = ( sk.x + 1.0f ) * pow( EotgStarHash( cc + 23.1f ), sk.x );
+					float r = radiusWorld * lerp( EOTG_RADIUS_LO, EOTG_RADIUS_HI,
+						saturate( sp.w * szDraw ) );
+					// Elliptical where combed: stretched along Aniso.xy (toward the void), full
+					// width across it, so coastal stars draw out into streaks pointing at the edge.
+					float2 e = float2( dot( delta, Aniso.xy ),
+									   dot( delta, float2( -Aniso.y, Aniso.x ) ) );
+					float d = length( float2( e.x / ( r * Aniso.z ), e.y / r ) );
+					// Brightness draw, normalised to a mean of 0.5 for any skew, so a high skew
+					// means 'mostly dim with a rare bright one' rather than 'uniformly dimmer'.
+					// At skew 1 this is exactly the old 0.30 + 0.70 * hash.
+					float bDraw = saturate( 0.5f * ( sk.y + 1.0f )
+						* pow( EotgStarHash( cc + 11.7f ), sk.y ) );
+					float b = lerp( 0.30f, 1.0f, bDraw );
 					// Temperature: the terrain's bias, jittered per star. Signed-square so most
 					// sit near the bias and only a few go strongly amber or blue.
 					float th = EotgStarHash( cc + 5.5f ) * 2.0f - 1.0f;
 					float3 tint = EotgStarTint( sp.z + th * abs( th ) * EOTG_STAR_TEMP_JITTER );
-					acc += tint * ( b * sp.y * exp( -d * d * falloff ) );
+					acc += tint * ( b * sp.y * coastKeep * exp( -d * d * falloff ) );
 				}
 			}
 			return saturate( acc );
@@ -723,7 +838,7 @@ PixelShader =
 		// what cut stars off at borders. Cost is held down instead by the radius test inside the
 		// layer, which rejects before paying for the terrain fetch, so only the ~30% of pixels
 		// that actually have a star nearby pay for one.
-		float3 EotgStars( float3 WorldSpacePos, float Density, float Bright )
+		float3 EotgStars( float3 WorldSpacePos, float Density, float Bright, float3 Aniso )
 		{
 			// The coarse layer is ALWAYS drawn, at full strength, at every zoom. It is the sky:
 			// fixed world-space cells and a positional hash, so a star sits at the same place
@@ -747,11 +862,11 @@ PixelShader =
 				smoothstep( 0.15f, 1.0f, EotgZoomF ) );
 
 			float3 s = EotgStarLayer( WorldSpacePos.xz, EOTG_STAR_COARSE_CELL,
-				rCoarse, EOTG_STAR_COARSE_FALLOFF );
+				rCoarse, EOTG_STAR_COARSE_FALLOFF, Aniso );
 			if ( fine > 0.01f )
 			{
 				s += EotgStarLayer( WorldSpacePos.xz, EOTG_STAR_FINE_CELL,
-					EOTG_STAR_FINE_R, EOTG_STAR_FINE_FALLOFF ) * fine;
+					EOTG_STAR_FINE_R, EOTG_STAR_FINE_FALLOFF, Aniso ) * fine;
 			}
 			return saturate( s ) * EOTG_STAR_GAIN;
 		}
@@ -1426,11 +1541,25 @@ PixelShader =
 		// whichever is dominant at that pixel rather than blended - blending them would produce a
 		// shape that belongs to neither terrain, and the weight cross-fade already carries the
 		// transition.
-		void EotgAccumMod( int t, float w, inout float4 ModA, inout float4 ModB,
+		// Patches where a secondary effect is allowed. A large-scale field, NOT province ids:
+		// keying it to provinces would put the effect's edges exactly on province boundaries,
+		// which is the seam the star lattice was already rebuilt once to avoid. Measured
+		// coverage of this threshold is 11.5% of area, with a patch period of ~67 world units
+		// - province-scale, but not province-shaped.
+		#define EOTG_FX2_SCALE   0.015f
+		#define EOTG_FX2_LO      0.68f
+		#define EOTG_FX2_HI      0.88f
+
+		float EotgFx2Mask( float2 xz )
+		{
+			return smoothstep( EOTG_FX2_LO, EOTG_FX2_HI,
+				EotgValueNoise( xz * EOTG_FX2_SCALE ) );
+		}
+
+		void EotgAccumOne( int k, int t, float w, inout float4 ModA, inout float4 ModB,
 						   inout int4 IdxA, inout int4 IdxB,
 						   inout float4 BestA, inout float4 BestB )
 		{
-			int k = EOTG_FX_KIND[t];
 			if ( k == 1 )      { ModA.x += w; if ( w > BestA.x ) { BestA.x = w; IdxA.x = t; } }
 			else if ( k == 2 ) { ModA.y += w; if ( w > BestA.y ) { BestA.y = w; IdxA.y = t; } }
 			else if ( k == 3 ) { ModA.z += w; if ( w > BestA.z ) { BestA.z = w; IdxA.z = t; } }
@@ -1439,6 +1568,26 @@ PixelShader =
 			else if ( k == 6 ) { ModB.y += w; if ( w > BestB.y ) { BestB.y = w; IdxB.y = t; } }
 			else if ( k == 7 ) { ModB.z += w; if ( w > BestB.z ) { BestB.z = w; IdxB.z = t; } }
 			else if ( k == 8 ) { ModB.w += w; if ( w > BestB.w ) { BestB.w = w; IdxB.w = t; } }
+		}
+
+		// Primary always; secondary only inside a patch, and only where it is a different
+		// kind. The secondary's index is t + EOTG_TERRAIN_COUNT, which reads the upper half of
+		// every EOTG_FX_* array - so EotgModifierFX needs no change at all. Its gain and
+		// darkening are already weakened by the generator; there is no runtime cap to bypass.
+		void EotgAccumMod( int t, float w, float fx2Mask, inout float4 ModA, inout float4 ModB,
+						   inout int4 IdxA, inout int4 IdxB,
+						   inout float4 BestA, inout float4 BestB )
+		{
+			EotgAccumOne( EOTG_FX_KIND[t], t, w, ModA, ModB, IdxA, IdxB, BestA, BestB );
+			if ( fx2Mask > 0.004f )
+			{
+				int t2 = t + EOTG_TERRAIN_COUNT;
+				int k2 = EOTG_FX_KIND[t2];
+				if ( k2 != 0 )
+				{
+					EotgAccumOne( k2, t2, w * fx2Mask, ModA, ModB, IdxA, IdxB, BestA, BestB );
+				}
+			}
 		}
 
 		// One tap's worth of terrain colour, including the hypsometric ramp. Split out because the
@@ -1532,10 +1681,11 @@ PixelShader =
 			IdxB = int4( 0, 0, 0, 0 );
 			float4 BestA = float4( 0.0f, 0.0f, 0.0f, 0.0f );
 			float4 BestB = float4( 0.0f, 0.0f, 0.0f, 0.0f );
-			EotgAccumMod( i0, w0, ModA, ModB, IdxA, IdxB, BestA, BestB );
-			EotgAccumMod( i1, w1, ModA, ModB, IdxA, IdxB, BestA, BestB );
-			EotgAccumMod( i2, w2, ModA, ModB, IdxA, IdxB, BestA, BestB );
-			EotgAccumMod( i3, w3, ModA, ModB, IdxA, IdxB, BestA, BestB );
+			float EotgFx2 = EotgFx2Mask( WorldSpacePosXZ );
+			EotgAccumMod( i0, w0, EotgFx2, ModA, ModB, IdxA, IdxB, BestA, BestB );
+			EotgAccumMod( i1, w1, EotgFx2, ModA, ModB, IdxA, IdxB, BestA, BestB );
+			EotgAccumMod( i2, w2, EotgFx2, ModA, ModB, IdxA, IdxB, BestA, BestB );
+			EotgAccumMod( i3, w3, EotgFx2, ModA, ModB, IdxA, IdxB, BestA, BestB );
 		}
 
 		// Replace the greyscale structure with the terrain's own colour.
@@ -1592,7 +1742,7 @@ PixelShader =
 					float3 BorderColor;
 					float BorderPreLightingBlend;
 					float BorderPostLightingBlend;
-					GetBorderColorAndBlendGame( Input.WorldSpacePos.xz, FlatMap, BorderColor, BorderPreLightingBlend, BorderPostLightingBlend );
+					GetBorderColorAndBlendGame( Input.WorldSpacePos.xz, FlatMap, BorderColor, BorderPreLightingBlend, BorderPostLightingBlend , 0.0f );   // MOD(eotg) SkipSecondaryProvinceOverlay
 
 					// MOD(eotg) thin the realm fill so the terrain reads through it. This must happen
 					// BEFORE FullColorOverlayFactor is computed: that factor is what lets the shader
@@ -1603,8 +1753,10 @@ PixelShader =
 					#else
 						float EotgPolFade = EOTG_POLITICAL_OPACITY;
 					#endif
-					BorderPreLightingBlend  *= EotgPolFade;
-					BorderPostLightingBlend *= EotgPolFade;
+					BorderPreLightingBlend  = pow( saturate( BorderPreLightingBlend  ),
+						EOTG_BORDER_SHARPEN ) * EotgPolFade;   // MOD(eotg) drop the gradient's tail
+					BorderPostLightingBlend = pow( saturate( BorderPostLightingBlend ),
+						EOTG_BORDER_SHARPEN ) * EotgPolFade;
 
 					FullColorOverlayFactor = BorderPreLightingBlend + BorderPostLightingBlend;
 					FullColorOverlayFactor *= _FullyColorOverlayHeightBlend * _EnabledTerrainCulling;
@@ -1701,6 +1853,23 @@ PixelShader =
 					EotgIdxA, EotgIdxB, EotgLens, EotgLensHue, EotgFade, EotgH01, EotgGrad,
 					EotgModAdd, EotgModMul );
 				EotgModMul *= EotgHillshade( EotgGrad, EotgShadeAmt * EotgFade );
+				// --- coast: shelf edge + tidal combing ------------------------- MOD(eotg)
+				float3 EotgCoast = ( EotgFade > 0.01f )
+					? EotgCoastField( Input.WorldSpacePos.xz )
+					: float3( 0.0f, 1.0f, 0.0f );
+				float EotgShelfLip = smoothstep( EOTG_SHELF_LIP_LO, EOTG_SHELF_LIP_HI, EotgCoast.z );
+				float EotgShelfShadow = smoothstep( EOTG_SHELF_SHADOW_LO, EOTG_SHELF_SHADOW_HI,
+					EotgCoast.z ) * ( 1.0f - EotgShelfLip );
+				float EotgCombAmt = smoothstep( EOTG_COMB_LO, EOTG_COMB_HI, EotgCoast.z ) * EotgFade;
+				// Varies along the TANGENT, so the stripes themselves run along the normal and
+				// point at the void rather than lying parallel to the shore.
+				float EotgComb = sin( dot( Input.WorldSpacePos.xz,
+					float2( -EotgCoast.y, EotgCoast.x ) ) * EOTG_COMB_FREQ );
+				EotgModMul *= lerp( 1.0f, EOTG_SHELF_DARK, EotgShelfShadow * EotgFade );
+				EotgModMul *= 1.0f + EotgComb * EOTG_COMB_GAIN * EotgCombAmt;
+				EotgModAdd += EotgTint * EotgShelfLip * EOTG_SHELF_LIP_GAIN * EotgFade;
+				float3 EotgCoastAniso = float3( EotgCoast.xy,
+					lerp( 1.0f, EOTG_COMB_STRETCH, EotgCombAmt ) );
 				DetailDiffuse.rgb = EotgApplyTerrain( DetailDiffuse.rgb, EotgTint,
 					EotgStructure, EotgModMul, Input.WorldSpacePos.xz, EotgBreakup );
 
@@ -1721,7 +1890,7 @@ PixelShader =
 						// and died toward the interior. Passing 0 keeps realms their own colour.
 						GetBorderColorAndBlendGameLerp( Input.WorldSpacePos.xz, FlatMap,
 							FlatColor, BorderPreLightingBlend, BorderPostLightingBlend,
-							0.0f );
+							0.0f, 0.0f );
 
 						FlatMap = lerp( FlatMap, FlatColor,
 							saturate( BorderPreLightingBlend + BorderPostLightingBlend ) );
@@ -1778,7 +1947,10 @@ PixelShader =
 						EotgZoomOut = max( EotgZoomOut, saturate( FlatMapLerp ) );
 					#endif
 					float EotgFlatFade = 1.0f - EotgZoomOut;
-					FinalColor += EotgStars( EotgStarPos, EotgStarD, EotgStarB ) * EotgFlatFade;
+					float EotgStarShore = 1.0f - smoothstep( EOTG_STAR_SHORE_LO,   // MOD(eotg)
+						EOTG_STAR_SHORE_HI, EotgCoast.z );
+					FinalColor += EotgStars( EotgStarPos, EotgStarD, EotgStarB,
+						EotgCoastAniso ) * EotgFlatFade * EotgStarShore;
 					FinalColor += EotgModAdd * EotgFlatFade;                        // MOD(eotg)
 					#if EOTG_CONTOUR_ON
 						FinalColor += EOTG_CONTOUR_COLOR
@@ -1851,7 +2023,7 @@ PixelShader =
 					float3 BorderColor;
 					float BorderPreLightingBlend;
 					float BorderPostLightingBlend;
-					GetBorderColorAndBlendGame( Input.WorldSpacePos.xz, FlatMap, BorderColor, BorderPreLightingBlend, BorderPostLightingBlend );
+					GetBorderColorAndBlendGame( Input.WorldSpacePos.xz, FlatMap, BorderColor, BorderPreLightingBlend, BorderPostLightingBlend , 0.0f );   // MOD(eotg) SkipSecondaryProvinceOverlay
 
 					// MOD(eotg) thin the realm fill so the terrain reads through it. This must happen
 					// BEFORE FullColorOverlayFactor is computed: that factor is what lets the shader
@@ -1862,8 +2034,10 @@ PixelShader =
 					#else
 						float EotgPolFade = EOTG_POLITICAL_OPACITY;
 					#endif
-					BorderPreLightingBlend  *= EotgPolFade;
-					BorderPostLightingBlend *= EotgPolFade;
+					BorderPreLightingBlend  = pow( saturate( BorderPreLightingBlend  ),
+						EOTG_BORDER_SHARPEN ) * EotgPolFade;   // MOD(eotg) drop the gradient's tail
+					BorderPostLightingBlend = pow( saturate( BorderPostLightingBlend ),
+						EOTG_BORDER_SHARPEN ) * EotgPolFade;
 
 					FullColorOverlayFactor = BorderPreLightingBlend + BorderPostLightingBlend;
 					FullColorOverlayFactor *= _FullyColorOverlayHeightBlend * _EnabledTerrainCulling;
@@ -1905,6 +2079,23 @@ PixelShader =
 					EotgIdxA, EotgIdxB, EotgLens, EotgLensHue, EotgFade, EotgH01, EotgGrad,
 					EotgModAdd, EotgModMul );
 				EotgModMul *= EotgHillshade( EotgGrad, EotgShadeAmt * EotgFade );
+				// --- coast: shelf edge + tidal combing ------------------------- MOD(eotg)
+				float3 EotgCoast = ( EotgFade > 0.01f )
+					? EotgCoastField( Input.WorldSpacePos.xz )
+					: float3( 0.0f, 1.0f, 0.0f );
+				float EotgShelfLip = smoothstep( EOTG_SHELF_LIP_LO, EOTG_SHELF_LIP_HI, EotgCoast.z );
+				float EotgShelfShadow = smoothstep( EOTG_SHELF_SHADOW_LO, EOTG_SHELF_SHADOW_HI,
+					EotgCoast.z ) * ( 1.0f - EotgShelfLip );
+				float EotgCombAmt = smoothstep( EOTG_COMB_LO, EOTG_COMB_HI, EotgCoast.z ) * EotgFade;
+				// Varies along the TANGENT, so the stripes themselves run along the normal and
+				// point at the void rather than lying parallel to the shore.
+				float EotgComb = sin( dot( Input.WorldSpacePos.xz,
+					float2( -EotgCoast.y, EotgCoast.x ) ) * EOTG_COMB_FREQ );
+				EotgModMul *= lerp( 1.0f, EOTG_SHELF_DARK, EotgShelfShadow * EotgFade );
+				EotgModMul *= 1.0f + EotgComb * EOTG_COMB_GAIN * EotgCombAmt;
+				EotgModAdd += EotgTint * EotgShelfLip * EOTG_SHELF_LIP_GAIN * EotgFade;
+				float3 EotgCoastAniso = float3( EotgCoast.xy,
+					lerp( 1.0f, EOTG_COMB_STRETCH, EotgCombAmt ) );
 				DetailDiffuse.rgb = EotgApplyTerrain( DetailDiffuse.rgb, EotgTint,
 					EotgStructure, EotgModMul, Input.WorldSpacePos.xz, EotgBreakup );
 				float3 Diffuse = SoftLight( DetailDiffuse.rgb, ColorMap, ( 1 - DetailMaterial.r ) * COLORMAP_OVERLAY_STRENGTH );
@@ -1925,7 +2116,7 @@ PixelShader =
 						// and died toward the interior. Passing 0 keeps realms their own colour.
 						GetBorderColorAndBlendGameLerp( Input.WorldSpacePos.xz, FlatMap,
 							FlatColor, BorderPreLightingBlend, BorderPostLightingBlend,
-							0.0f );
+							0.0f, 0.0f );
 						FlatMap = lerp( FlatMap, FlatColor,
 							saturate( BorderPreLightingBlend + BorderPostLightingBlend ) );
 					#endif
@@ -1967,7 +2158,10 @@ PixelShader =
 						EotgZoomOut = max( EotgZoomOut, saturate( FlatMapLerp ) );
 					#endif
 					float EotgFlatFade = 1.0f - EotgZoomOut;
-					FinalColor += EotgStars( EotgStarPos, EotgStarD, EotgStarB ) * EotgFlatFade;
+					float EotgStarShore = 1.0f - smoothstep( EOTG_STAR_SHORE_LO,   // MOD(eotg)
+						EOTG_STAR_SHORE_HI, EotgCoast.z );
+					FinalColor += EotgStars( EotgStarPos, EotgStarD, EotgStarB,
+						EotgCoastAniso ) * EotgFlatFade * EotgStarShore;
 					FinalColor += EotgModAdd * EotgFlatFade;                        // MOD(eotg)
 					#if EOTG_CONTOUR_ON
 						FinalColor += EOTG_CONTOUR_COLOR
@@ -2041,7 +2235,7 @@ PixelShader =
 					// in PixelShader. This is the one that actually draws at full zoom out.
 					GetBorderColorAndBlendGameLerp( Input.WorldSpacePos.xz, FlatMap,
 						BorderColor, BorderPreLightingBlend, BorderPostLightingBlend,
-						0.0f );
+						0.0f, 0.0f );
 
 					FlatMap = lerp( FlatMap, BorderColor,
 						saturate( BorderPreLightingBlend + BorderPostLightingBlend ) );
