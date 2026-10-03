@@ -30,6 +30,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from obj_to_pdxmesh import build_part, write_mesh, load_obj  # noqa: E402
+from make_beam_obj import beam_obj  # noqa: E402
 
 REL = os.path.join("gfx", "models", "buildings", "eotg_markers")
 SHAPE = "eotg_markerShape"
@@ -43,7 +44,35 @@ MATERIALS = [
          normal="nonormal.dds", spec="noproperties.dds"),
     dict(shader="standard", diff="eotg_marker_neutral_diffuse.dds",
          normal="nonormal.dds", spec="eotg_marker_glow_properties.dds"),
+    # The beam. It is the one slot that must NOT be opaque, so it is the one slot on a different
+    # effect - see make_beam_obj.py for why this particular vanilla name and no other.
+    dict(shader="snap_to_terrain_alpha_to_coverage", diff="eotg_marker_neutral_beam.dds",
+         normal="nonormal.dds", spec="eotg_marker_glow_properties.dds"),
 ]
+
+# Beam proportions, as multiples of what they sit against, so they survive the emblem being
+# replaced. The base is deliberately narrower than the pedestal's top face - a projector aperture
+# is smaller than the plinth it is set into - and the top is wider than the emblem so the emblem
+# sits INSIDE the light rather than balancing on top of it.
+BEAM_R0_OF_PEDESTAL = 0.55
+BEAM_R1_OF_EMBLEM = 1.15   # slightly wider than the emblem, so from directly above the beam still
+                           # shows as a ring around it instead of hiding behind it
+
+
+def top_radius(part, frac=0.12):
+    """Radius of a part's topmost band, not of its bounding box.
+
+    The pedestal is a lathe with a flared foot, so its bounding box is much wider than its top
+    face. Sizing the beam off the box would plant an aperture wider than the plinth it rises from.
+    """
+    import numpy as np
+    pos = part["pos"]
+    hi_y, lo_y = float(part["hi"][1]), float(part["lo"][1])
+    band = max((hi_y - lo_y) * frac, 1e-6)
+    top = pos[pos[:, 1] >= hi_y - band]
+    if not len(top):
+        top = pos
+    return float(np.hypot(top[:, 0], top[:, 2]).max())
 
 
 def main():
@@ -53,8 +82,19 @@ def main():
     ap.add_argument("--pedestal-scale", type=float, default=2.04)   # 1.70 +20%
     ap.add_argument("--emblem-scale", type=float, default=1.44)    # 1.20 +20%
     # 0.28 +20% as well, so the gap grows with the model instead of closing up.
+    # 0.28 +20% as well, so the gap grows with the model instead of closing up.
+    #
+    # This was briefly raised to 0.90 to give the beam room to fade in, and that was a mistake:
+    # the beam fills the gap, so a taller gap is a taller cone sitting on the plinth, and at the
+    # opacity it had it read as the PEDESTAL having been stretched upwards rather than as light.
+    # The marker's proportions are not the beam's to spend. The gap is back where it was, the beam
+    # is whatever height fits in it, and the cone was made fainter and more coloured instead -
+    # which is what should have been done in the first place.
     ap.add_argument("--hover", type=float, default=0.336,
-                    help="gap between the pedestal top and the emblem's base, in world units")
+                    help="gap between the pedestal top and the emblem's base, in world units; "
+                         "this is also exactly how tall the beam is")
+    ap.add_argument("--beam-segments", type=int, default=48,
+                    help="radial segments in the projector beam")
     a = ap.parse_args()
 
     here = os.path.dirname(os.path.abspath(__file__))
@@ -82,13 +122,32 @@ def main():
     emblem = build_part(emblem_obj, a.emblem_scale, lift, False, False, emblem_min_y, False,
                         "emblem")
 
+    # The beam spans the GAP ONLY - pedestal top to emblem base - and stops there. It used to run
+    # the full height of the emblem, which is what put a still-bright cone inside the model and
+    # gave it a visible edge; geometry that ends where the model begins cannot cut off against it.
+    # Every number is derived from the two parts just built, so a taller or wider emblem gets a
+    # taller or wider beam without this file being touched.
+    ped_r = top_radius(pedestal)
+    emb_r = float(np.hypot(emblem["pos"][:, 0], emblem["pos"][:, 2]).max())
+    beam_y0 = float(pedestal["hi"][1])
+    beam_h = float(emblem["lo"][1]) - beam_y0
+    beam_path = os.path.join(tmp, "eotg_beam.obj")
+    beam_obj(beam_path, a.beam_segments, ped_r * BEAM_R0_OF_PEDESTAL,
+             emb_r * BEAM_R1_OF_EMBLEM, 0.0, beam_h)
+    # offset_y rather than baking y0 into the .obj, so the generated file stays a plain frustum
+    # sitting at the origin and is readable on its own.
+    beam = build_part(beam_path, 1.0, beam_y0, False, False, 0.0, False, "beam")
+
     out = os.path.join(outdir, MESH)
-    write_mesh([pedestal, emblem], out, SHAPE, MATERIALS)
+    write_mesh([pedestal, emblem, beam], out, SHAPE, MATERIALS)
 
     lo = np.minimum(pedestal["lo"], emblem["lo"])
     hi = np.maximum(pedestal["hi"], emblem["hi"])
     print("\nwrote %s" % out)
-    print("  shape %s, 2 material slots (0 pedestal, 1 emblem)" % SHAPE)
+    print("  shape %s, 3 material slots (0 pedestal, 1 emblem, 2 beam)" % SHAPE)
+    print("  beam r %.2f -> %.2f, y %.2f..%.2f  (pedestal top r %.2f, emblem r %.2f)"
+          % (ped_r * BEAM_R0_OF_PEDESTAL, emb_r * BEAM_R1_OF_EMBLEM, beam_y0, beam_y0 + beam_h,
+             ped_r, emb_r))
     print("  overall %.2f x %.2f x %.2f   base at y=%.2f   emblem floats %.2f above the pedestal"
           % (hi[0]-lo[0], hi[1]-lo[1], hi[2]-lo[2], lo[1], a.hover))
     print("  (vanilla building_western_castle_01 is 2.77 x 4.16 x 2.17)")

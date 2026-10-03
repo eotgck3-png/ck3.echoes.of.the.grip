@@ -1,0 +1,55 @@
+﻿# -- eotg_augmentation_opinions.txt -------------------------------------------
+# Opinion modifiers for the Cybernetic Augmentation system.
+# -----------------------------------------------------------------------------
+
+eotg_opinion_aug_admiration = {
+    opinion = 15
+    decaying = no
+}
+
+eotg_opinion_aug_unease = {
+    opinion = -10
+    decaying = no
+}
+
+eotg_opinion_aug_fear = {
+    opinion = -25
+    decaying = no
+}
+
+eotg_opinion_aug_disgust = {
+    opinion = -20
+    decaying = no
+}
+
+# Timed (duration passed by the caller). Callers: eotg_aug_tier3.006 (b),
+# eotg_fracture.006 (b) — the "concessions" options, which also remove fear/unease.
+eotg_opinion_aug_reassured = {
+    opinion = 15
+}
+
+# +20, applied with years = 10 (cybernetics_v2_phase2.md §4). Callers:
+# eotg_aug_retainer_install_effect (init.020 a/b/c), eotg_aug_tier1.004 (d), eotg_fracture.002 (e).
+eotg_opinion_aug_grateful_patient = {
+    opinion = 20
+    decaying = no
+}
+
+# -30, applied with years = 10 (cybernetics_v2_phase3.md §5; used in 3a).
+# Callers: eotg_fracture.020 (immediate, false accusation: the accused and
+# their close family).
+eotg_opinion_aug_falsely_accused = {
+    opinion = -30
+    decaying = no
+}
+
+# -40, decaying 0.5 a month (cybernetics_v2_phase3.md §5; decaying needs
+# monthly_change or a duration, ck3-modding reference _opinions.info; shape
+# as vanilla 00_activity_feast_opinions.txt feast_life_of_the_party_opinion).
+# Applied with no duration. Caller: eotg_aug_total_integration_effect (every
+# vassal).
+eotg_opinion_aug_unmade = {
+    opinion = -40
+    decaying = yes
+    monthly_change = 0.5
+}

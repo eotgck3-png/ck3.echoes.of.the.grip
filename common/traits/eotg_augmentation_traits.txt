@@ -1,0 +1,184 @@
+﻿# ── eotg_augmentation_traits.txt ─────────────────────────────────────────────
+# Cybernetic Augmentation traits. Spec: docs/specs/cybernetics_track.md §4.
+#
+# eotg_cybernetics — one trait with a single shorthand XP track (vanilla
+#   lifestyle_blademaster model, 00_traits.txt:1178). The tier is the XP:
+#   0 = Augmented, 50 = Enhanced, 100 = Overclocked. XP is only ever exactly
+#   0, 50 or 100, and only eotg_aug_set_integration_effect changes it.
+#   Track levels STACK on the base (blademaster: prowess 3 / +3 / +6;
+#   tourney_participant `foot`), so the 50 and 100 blocks are DELTAS chosen
+#   so the totals match the v1 traits, with spec Q4: Overclocked keeps the
+#   Enhanced scheme defence (delta 0) and loses the +0.5 health.
+#   No XP decay field on the track, by design (spec §2.2 rule 5).
+# eotg_neurofractured — separate terminal failure state, not a track level.
+# ─────────────────────────────────────────────────────────────────────────────
+
+eotg_cybernetics = {
+    category = health
+    icon = eotg_cybernetics.dds
+
+    # Base = Augmented total
+    prowess = 2
+    health = 0.5
+    stress_gain_mult = 0.1
+    attraction_opinion = -5
+    ai_honor = -1
+    ai_energy = 2
+    ai_zeal = -1
+
+    track = {
+        # Enhanced (deltas): totals prowess 4, health 0.5, stress 0.2,
+        # attraction -15, scheme +5, diplomacy -2, fertility -0.2
+        50 = {
+            prowess = 2
+            stress_gain_mult = 0.1
+            attraction_opinion = -10
+            enemy_hostile_scheme_phase_duration_add = 5
+            diplomacy = -2
+            fertility = -0.2
+            ai_energy = 1
+            ai_zeal = -1
+        }
+        # Overclocked (deltas): totals prowess 8, health 0, stress 0.4,
+        # attraction -30, scheme +5 (Q4), diplomacy -5, fertility -0.4,
+        # dread gain 0.3, knight effectiveness 0.1
+        100 = {
+            prowess = 4
+            health = -0.5
+            stress_gain_mult = 0.2
+            attraction_opinion = -15
+            diplomacy = -3
+            fertility = -0.2
+            dread_gain_mult = 0.3
+            knight_effectiveness_mult = 0.1
+            ai_honor = -1
+            ai_energy = 1
+            ai_zeal = -1
+        }
+    }
+
+    opposites = { eotg_neurofractured  eotg_total_integration }
+
+    ruler_designer_cost = 20
+
+    name = {
+        first_valid = {
+            triggered_desc = {
+                trigger = {
+                    exists = this
+                    has_trait_xp = {
+                        trait = eotg_cybernetics
+                        value >= 100
+                    }
+                }
+                desc = trait_eotg_cybernetics_3
+            }
+            triggered_desc = {
+                trigger = {
+                    exists = this
+                    has_trait_xp = {
+                        trait = eotg_cybernetics
+                        value >= 50
+                    }
+                }
+                desc = trait_eotg_cybernetics_2
+            }
+            desc = trait_eotg_cybernetics_1
+        }
+    }
+
+    desc = {
+        first_valid = {
+            # No root (e.g. encyclopedia): the trait can only be shown at level 1
+            triggered_desc = {
+                trigger = {
+                    NOT = { exists = this }
+                }
+                desc = trait_eotg_cybernetics_1_desc
+            }
+            triggered_desc = {
+                trigger = {
+                    has_trait_xp = {
+                        trait = eotg_cybernetics
+                        value >= 100
+                    }
+                }
+                desc = trait_eotg_cybernetics_3_character_desc
+            }
+            triggered_desc = {
+                trigger = {
+                    has_trait_xp = {
+                        trait = eotg_cybernetics
+                        value >= 50
+                    }
+                }
+                desc = trait_eotg_cybernetics_2_character_desc
+            }
+            desc = trait_eotg_cybernetics_1_character_desc
+        }
+    }
+}
+
+eotg_neurofractured = {
+    category = health
+    icon = eotg_neurofractured.dds
+
+    prowess = 14
+    dread_gain_mult = 0.6
+    knight_effectiveness_mult = 0.25
+    enemy_hostile_scheme_phase_duration_add = 10
+    stress_gain_mult = 0.6
+    attraction_opinion = -50
+    diplomacy = -10
+    fertility = -0.8
+    health = -1.0
+
+    opposites = { eotg_cybernetics  eotg_total_integration }
+
+    ai_honor = -3
+    ai_energy = 4
+    ai_zeal = -4
+
+    # v1 cost 0 here, making it a free +14 prowess in the ruler designer
+    shown_in_ruler_designer = no
+    ruler_designer_cost = 0
+}
+
+# eotg_total_integration — "Seamless" (display name, lore review 2026-10-03;
+#   the key keeps the endgame's internal name). docs/specs/cybernetics_v2_phase3.md
+#   §5. Replaces eotg_neurofractured (Q9): no seam is left, so there is no
+#   second voice and no episode pool (the NF on_action reads only
+#   eotg_neurofractured). Set only by eotg_aug_total_integration_effect.
+#   Icon: ART DEBT, human-made 3rd trait icon expected at
+#   gfx/interface/icons/traits/eotg_total_integration.dds. No vanilla icon is
+#   substituted for a mod trait; the missing-icon warning is expected until
+#   the art lands.
+#   can_have_children: field per game/common/traits/_traits.info:84.
+eotg_total_integration = {
+    category = health
+    icon = eotg_total_integration.dds
+
+    prowess = 20
+    martial = 4
+    stewardship = 4
+    intrigue = 4
+    learning = 4
+    diplomacy = -8
+    attraction_opinion = -60
+    general_opinion = -20
+    stress_gain_mult = -0.75    # the machine does not suffer
+    dread_gain_mult = 1.0
+
+    opposites = {
+        eotg_cybernetics
+        eotg_neurofractured
+    }
+
+    ai_compassion = -50
+    ai_rationality = 50
+    ai_honor = -20
+
+    can_have_children = no
+    shown_in_ruler_designer = no
+    ruler_designer_cost = 0
+}

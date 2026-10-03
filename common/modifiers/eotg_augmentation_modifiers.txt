@@ -1,0 +1,241 @@
+﻿# -- eotg_augmentation_modifiers.txt -----------------------------------------
+# Static modifiers for the Cybernetic Augmentation system.
+# -----------------------------------------------------------------------------
+
+# Temporary stability from maintenance
+eotg_mod_implant_calibrated = {
+    icon = eotg_implant_calibrated
+    stress_gain_mult = -0.15
+    health = 0.3
+}
+
+# Black market complications
+eotg_mod_illegal_implants = {
+    icon = intrigue_negative
+    health = -0.5
+    stress_gain_mult = 0.1
+    diplomacy = -2
+}
+
+# -- Augmented tier education synergy bonuses ----------------------------------
+eotg_mod_aug_martial_bonus = {
+    icon = eotg_implant_bonus_body
+    martial = 1
+}
+eotg_mod_aug_steward_bonus = {
+    icon = eotg_implant_bonus_body
+    stewardship = 1
+}
+eotg_mod_aug_intrigue_bonus = {
+    icon = eotg_implant_bonus_mind
+    intrigue = 1
+}
+eotg_mod_aug_learning_bonus = {
+    icon = eotg_implant_bonus_mind
+    learning = 1
+}
+eotg_mod_aug_diplomacy_bonus = {
+    icon = eotg_implant_bonus_mind
+    diplomacy = 1
+}
+
+# -- Enhanced tier education synergy bonuses -----------------------------------
+eotg_mod_enh_martial_bonus = {
+    icon = eotg_implant_bonus_body
+    martial = 2
+}
+eotg_mod_enh_steward_bonus = {
+    icon = eotg_implant_bonus_body
+    stewardship = 2
+}
+eotg_mod_enh_intrigue_bonus = {
+    icon = eotg_implant_bonus_mind
+    intrigue = 2
+}
+eotg_mod_enh_learning_bonus = {
+    icon = eotg_implant_bonus_mind
+    learning = 2
+}
+eotg_mod_enh_diplomacy_bonus = {
+    icon = eotg_implant_bonus_mind
+    diplomacy = 2
+}
+
+# -- Overclocked tier education synergy bonuses --------------------------------
+eotg_mod_oc_martial_bonus = {
+    icon = eotg_implant_bonus_body
+    martial = 3
+    stress_gain_mult = 0.1
+}
+eotg_mod_oc_steward_bonus = {
+    icon = eotg_implant_bonus_body
+    stewardship = 3
+    stress_gain_mult = 0.1
+}
+eotg_mod_oc_intrigue_bonus = {
+    icon = eotg_implant_bonus_mind
+    intrigue = 3
+    stress_gain_mult = 0.1
+}
+eotg_mod_oc_learning_bonus = {
+    icon = eotg_implant_bonus_mind
+    learning = 3
+    stress_gain_mult = 0.1
+}
+eotg_mod_oc_diplomacy_bonus = {
+    icon = eotg_implant_bonus_mind
+    diplomacy = 3
+    stress_gain_mult = 0.1
+}
+
+# -- Overclocked regression withdrawal debuff ----------------------------------
+eotg_mod_oc_regression_recovery = {
+    icon = eotg_oc_regression_recovery
+    prowess = -2
+    diplomacy = -2
+    stress_gain_mult = 0.2
+}
+
+# -- Neurofracture education distortion modifiers ------------------------------
+# Negative icons: these are a failure state (QA b, spec §4.4).
+eotg_mod_nf_martial_distortion = {
+    icon = martial_negative
+    martial = 5
+    diplomacy = -5
+    stress_gain_mult = 0.2
+}
+eotg_mod_nf_steward_distortion = {
+    icon = stewardship_negative
+    stewardship = 5
+    diplomacy = -5
+    stress_gain_mult = 0.2
+}
+eotg_mod_nf_intrigue_distortion = {
+    icon = intrigue_negative
+    intrigue = 5
+    diplomacy = -5
+    stress_gain_mult = 0.2
+}
+eotg_mod_nf_learning_distortion = {
+    icon = learning_negative
+    learning = 5
+    diplomacy = -5
+    stress_gain_mult = 0.2
+}
+eotg_mod_nf_diplomacy_distortion = {
+    icon = diplomacy_negative
+    diplomacy = 3
+    attraction_opinion = -20
+    stress_gain_mult = 0.2
+}
+
+# -- Isolation modifier -------------------------------------------------------
+eotg_mod_withdrawn_from_court = {
+    icon = diplomacy_negative
+    diplomacy = -3
+    stress_gain_mult = -0.1
+    monthly_prestige_gain_mult = -0.2
+}
+
+# -- Timed event states (spec §4.4, QA a) -------------------------------------
+# Separate keys so a timed grant never refreshes/overwrites the permanent
+# synergy modifier of the same value.
+# Callers: eotg_aug_tier2.001 (a), eotg_aug_tier2.006 (a)
+eotg_mod_aug_affect_dampened = {
+    icon = intrigue_positive
+    intrigue = 2
+}
+
+# Callers: eotg_aug_tier3.003 (b), eotg_aug_tier3.005 (a)
+eotg_mod_aug_running_hot = {
+    icon = martial_positive
+    martial = 3
+    stress_gain_mult = 0.1
+}
+
+# -- Lesson modifiers (cybernetics_v2 B6, phase 0 §1.6) -----------------------
+# Repeatable flavor rewards are 5-year lessons, not permanent skill. Applied
+# with `years = 5`; re-applying refreshes the timer and does not stack.
+# Callers: listed in docs/specs/cybernetics_v2_phase1.md (Phase 1 switches them).
+# Removed by eotg_clean_all_aug_modifiers.
+eotg_mod_aug_lesson_prowess = {
+    icon = prowess_positive
+    prowess = 2
+}
+eotg_mod_aug_lesson_learning = {
+    icon = learning_positive
+    learning = 2
+}
+eotg_mod_aug_lesson_intrigue = {
+    icon = intrigue_positive
+    intrigue = 2
+}
+eotg_mod_aug_lesson_martial = {
+    icon = martial_positive
+    martial = 2
+}
+
+# -- Phase 2 states (docs/specs/cybernetics_v2_phase2.md §4) ------------------
+# All four are removed by eotg_clean_all_aug_modifiers.
+
+# Caller: eotg_decision_remove_implants (3 years)
+eotg_mod_aug_removal_withdrawal = {
+    icon = health_negative
+    prowess = -2
+    stress_gain_mult = 0.1
+}
+
+# Caller: eotg_aug_init.011 (infection outcome, 2 years). Removed by
+# init.011.b and eotg_decision_consult_physician.
+eotg_mod_aug_infection = {
+    icon = health_negative
+    health = -1
+}
+
+# Caller: eotg_aug_init.011 (excellent outcome, 10 years)
+eotg_mod_aug_clean_install = {
+    icon = prowess_positive
+    prowess = 2
+    stress_gain_mult = -0.05
+}
+
+# Callers: eotg_aug_init.007 (a, c, e; 2 years)
+eotg_mod_aug_bridge_strain = {
+    icon = health_negative
+    stress_gain_mult = 0.15
+    diplomacy = -1
+}
+
+# -- Phase 3b states (docs/specs/cybernetics_v2_phase3.md §5) -----------------
+# All three are removed by eotg_clean_all_aug_modifiers.
+
+# Callers: eotg_decision_aug_restraints (3 years, with the flag
+# eotg_flag_aug_restrained); eotg_aug_abdicate_effect (permanent, end.030).
+eotg_mod_aug_restrained = {
+    icon = prowess_negative
+    prowess = -4
+    diplomacy = -2
+    monthly_prestige_gain_mult = -0.25
+    dread_gain_mult = 0.2
+}
+
+# Caller: eotg_decision_aug_sedation (5 years, with eotg_flag_aug_sedated).
+# The income line is the regimen's cost, scaled.
+eotg_mod_aug_sedated = {
+    icon = stress_positive
+    martial = -2
+    stewardship = -2
+    intrigue = -2
+    learning = -2
+    diplomacy = -2
+    stress_gain_mult = -0.2
+    monthly_income_mult = -0.1
+}
+
+# Caller: eotg_aug_excision_effect (5 years)
+eotg_mod_aug_excision_recovery = {
+    icon = health_negative
+    health = -1
+    prowess = -4
+    stress_gain_mult = 0.2
+}

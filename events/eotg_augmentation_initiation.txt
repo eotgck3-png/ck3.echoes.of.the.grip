@@ -1,0 +1,2535 @@
+﻿# ── eotg_augmentation_initiation.txt ─────────────────────────────────────────
+# Entry events for the Cybernetic Augmentation system.
+#
+# eotg_aug_init.001 — The Cost of Survival     (post-battle wound offer)
+# eotg_aug_init.002 — A Corporate Offer        (wealthy landed ruler)
+# eotg_aug_init.003 — Aging Hands              (aged ruler with low prowess)
+#
+# eotg_aug_init.004 — Desperation Protocol     (at war + wounded)
+# eotg_aug_init.005 — A Familiar Change        (augmented peer at court)
+#
+# Fires from: eotg_on_yearly_aug_initiation_check
+#   (common/on_action/eotg_augmentation_on_actions.txt, via yearly_playable_pulse).
+# Cooldown eotg_flag_aug_event_cooldown is set and checked there only.
+# Resource: every accept option adds eotg_cybernetics at XP 0 (eotg_aug_initiate_effect)
+# and sets eotg_fracture_risk.
+#
+# cybernetics_v2 Phase 1 (docs/specs/cybernetics_v2_phase1.md §1): trait-gated
+# options (trigger has_trait + trait icon, vanilla form), stress helpers on the
+# install/refuse options, scaled gold, lesson modifiers instead of permanent skill.
+# Where an option had a bespoke stress line for a trait the helper also covers,
+# the helper's line replaces it (spec "How to read the tables").
+# ─────────────────────────────────────────────────────────────────────────────
+
+namespace = eotg_aug_init
+
+
+# ── eotg_aug_init.001 ─────────────────────────────────────────────────────────
+# The Cost of Survival
+# A battle wound opens the door to cybernetic augmentation.
+
+eotg_aug_init.001 = {
+    type = character_event
+    title = eotg_aug_init.001.t
+    desc = eotg_aug_init.001.desc
+    theme = battle
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+
+    # Install guard, as the Phase 2 install events (closes a double install
+    # via Seek Augmentation in the days before this fires).
+    trigger = { eotg_is_augmented_any = no }
+
+    # Accept — receive the augmentation, remove the wound
+    option = {
+        name = eotg_aug_init.001.a
+        eotg_aug_initiate_effect = yes
+        eotg_aug_heal_wounds_effect = yes
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 0 }
+        }
+        stress_impact = {
+            base = minor_stress_impact_loss
+            content = minor_stress_impact_gain
+        }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 50
+            modifier = { add = 30  has_trait = ambitious }
+            modifier = { add = 20  has_trait = brave }
+            modifier = { add = -50  has_trait = zealous }
+            modifier = { add = -20  has_trait = content }
+        }
+    }
+
+    # Find another way — conventional care: 50% chance the wound eases one rank
+    option = {
+        name = eotg_aug_init.001.b
+        random = {
+            chance = 50
+            eotg_aug_ease_wound_effect = yes
+        }
+        stress_impact = {
+            zealous = minor_stress_impact_loss
+            ambitious = minor_stress_impact_gain
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = zealous }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # Refuse entirely — zealous or principled characters only
+    option = {
+        name = eotg_aug_init.001.c
+        trigger = {
+            OR = { has_trait = zealous  has_trait = content  has_trait = humble }
+        }
+        add_piety = 100
+        stress_impact = {
+            zealous = minor_stress_impact_loss
+            ambitious = medium_stress_impact_gain
+        }
+        ai_chance = {
+            base = 20
+            modifier = { add = 30  has_trait = zealous }
+            modifier = { add = 20  has_trait = content }
+        }
+    }
+
+    # [craven] "Anything, so I never feel that again." — as a, but the fear
+    # buys more hardware than the wound needs: risk starts at 5.
+    # Stress is written out rather than calling the surgery helper: the helper
+    # gives craven a medium GAIN, and this option is the craven's relief. The
+    # other surgery lines are kept (craven and brave are opposites).
+    option = {
+        name = eotg_aug_init.001.d
+        trigger = { has_trait = craven }
+        trait = craven
+        eotg_aug_initiate_effect = yes
+        eotg_aug_heal_wounds_effect = yes
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 5 }
+        }
+        stress_impact = {
+            craven = minor_stress_impact_loss
+            zealous = medium_stress_impact_gain
+            humble = minor_stress_impact_gain
+            cynical = minor_stress_impact_loss
+            ambitious = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = craven }
+            modifier = { add = -30  has_trait = zealous }
+        }
+    }
+
+    # [cynical] "Flesh was only ever a first draft." — as a, plus prestige for
+    # the bravado and a piety cost for saying it aloud.
+    option = {
+        name = eotg_aug_init.001.e
+        trigger = { has_trait = cynical }
+        trait = cynical
+        eotg_aug_initiate_effect = yes
+        eotg_aug_heal_wounds_effect = yes
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 0 }
+        }
+        add_prestige = 50
+        add_piety = -50
+        stress_impact = {
+            base = minor_stress_impact_loss
+            content = minor_stress_impact_gain
+        }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = cynical }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+}
+
+
+# ── eotg_aug_init.002 ─────────────────────────────────────────────────────────
+# A Corporate Offer
+# A medical syndicate approaches a wealthy landed ruler.
+
+eotg_aug_init.002 = {
+    type = character_event
+    title = eotg_aug_init.002.t
+    desc = eotg_aug_init.002.desc
+    theme = stewardship_wealth_focus
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+
+    # Install guard, as the Phase 2 install events (closes a double install
+    # via Seek Augmentation in the days before this fires).
+    trigger = { eotg_is_augmented_any = no }
+
+    # Accept the offer — a purchase, not a gift (Phase 1: the syndicate sells)
+    option = {
+        name = eotg_aug_init.002.a
+        trigger = { gold >= medium_gold_value }
+        remove_short_term_gold = medium_gold_value
+        eotg_aug_initiate_effect = yes
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 0 }
+        }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 30  has_trait = ambitious }
+            modifier = { add = 20  eotg_ai_wants_augmentation = yes }
+            modifier = { add = -100  has_trait = zealous }
+        }
+    }
+
+    # Decline — you learned how they sell (B6: lesson, not permanent skill)
+    option = {
+        name = eotg_aug_init.002.b
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_intrigue  years = 5 }
+        stress_impact = {
+            base = 0
+            ambitious = minor_stress_impact_gain
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = zealous }
+            modifier = { add = 20  has_trait = content }
+        }
+    }
+
+    # Offer it to a knight instead
+    option = {
+        name = eotg_aug_init.002.c
+        trigger = { any_knight = { is_alive = yes  eotg_is_augmented_any = no } }
+        random_knight = {
+            limit = { is_alive = yes  eotg_is_augmented_any = no }
+            eotg_aug_initiate_effect = yes
+            # Start the knight's risk at 0, as tier1.004.a/.d do (Phase 1 QA)
+            eotg_add_fracture_risk = { AMOUNT = 0 }
+        }
+        add_dread = 5
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = -10  has_trait = compassionate }
+        }
+    }
+
+    # [greedy] "Haggle them down." — cheaper hardware, and cheap hardware
+    # comes due: thread T6 hidden flaw (+4 Overclocked accrual), risk starts at 5.
+    option = {
+        name = eotg_aug_init.002.d
+        trigger = {
+            has_trait = greedy
+            gold >= minor_gold_value
+        }
+        trait = greedy
+        remove_short_term_gold = minor_gold_value
+        eotg_aug_initiate_effect = yes
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 5 }
+            add_character_flag = eotg_flag_aug_hidden_flaw
+        }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = greedy }
+            modifier = { add = -50  has_trait = zealous }
+        }
+    }
+}
+
+
+# ── eotg_aug_init.003 ─────────────────────────────────────────────────────────
+# Aging Hands
+# An aging ruler with fading combat effectiveness considers augmentation.
+
+eotg_aug_init.003 = {
+    type = character_event
+    title = eotg_aug_init.003.t
+    desc = eotg_aug_init.003.desc
+    theme = mental_health
+
+    left_portrait = {
+        character = root
+        animation = worry
+    }
+
+    # Install guard, as the Phase 2 install events (closes a double install
+    # via Seek Augmentation in the days before this fires).
+    trigger = { eotg_is_augmented_any = no }
+
+    # Accept — restore edge through augmentation
+    option = {
+        name = eotg_aug_init.003.a
+        eotg_aug_initiate_effect = yes
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 0 }
+        }
+        stress_impact = {
+            base = 0
+            content = minor_stress_impact_gain
+        }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 50
+            modifier = { add = 25  has_trait = ambitious }
+            modifier = { add = 20  has_trait = brave }
+            modifier = { add = -50  has_trait = zealous }
+        }
+    }
+
+    # Decline — accept the limits of age with dignity
+    option = {
+        name = eotg_aug_init.003.b
+        add_prestige = 100
+        stress_impact = {
+            base = 0
+            zealous = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 50
+            modifier = { add = 30  has_trait = zealous }
+            modifier = { add = 20  has_trait = content }
+        }
+    }
+
+    # [arrogant] "I will not grow old in front of them." — as a, more prestige,
+    # more hardware: risk starts at 5.
+    option = {
+        name = eotg_aug_init.003.d
+        trigger = { has_trait = arrogant }
+        trait = arrogant
+        eotg_aug_initiate_effect = yes
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 5 }
+        }
+        add_prestige = 100
+        stress_impact = {
+            base = 0
+            content = minor_stress_impact_gain
+        }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = arrogant }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+
+    # [humble] "Let age have me." — as b, plus piety
+    option = {
+        name = eotg_aug_init.003.e
+        trigger = { has_trait = humble }
+        trait = humble
+        add_prestige = 100
+        add_piety = 50
+        stress_impact = {
+            humble = minor_stress_impact_loss
+            zealous = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = humble }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+}
+
+
+# ── eotg_aug_init.004 ─────────────────────────────────────────────────────────
+# Desperation Protocol
+# At war and wounded — a black-market technician offers field augmentation.
+
+eotg_aug_init.004 = {
+    type = character_event
+    title = eotg_aug_init.004.t
+    desc = eotg_aug_init.004.desc
+    theme = battle
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+
+    # Install guard, as the Phase 2 install events (closes a double install
+    # via Seek Augmentation in the days before this fires).
+    trigger = { eotg_is_augmented_any = no }
+
+    # "Do it. Whatever it takes." — black market augmentation, illegal implants, starts with risk = 10
+    option = {
+        name = eotg_aug_init.004.a
+        eotg_aug_initiate_effect = yes
+        add_character_modifier = eotg_mod_illegal_implants
+        eotg_aug_heal_wounds_effect = yes
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 10 }
+        }
+        stress_impact = {
+            base = minor_stress_impact_loss
+            content = minor_stress_impact_gain
+        }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 50
+            modifier = { add = 30  has_trait = brave }
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = -50  has_trait = zealous }
+        }
+    }
+
+    # "I'd rather bleed." — refuse, gain piety
+    option = {
+        name = eotg_aug_init.004.b
+        add_piety = 100
+        eotg_aug_stress_reject_effect = yes
+        ai_chance = {
+            base = 50
+            modifier = { add = 30  has_trait = zealous }
+            modifier = { add = 20  has_trait = content }
+        }
+    }
+
+    # [brave] "I will finish this war as I am." — as b, plus prestige
+    option = {
+        name = eotg_aug_init.004.d
+        trigger = { has_trait = brave }
+        trait = brave
+        add_piety = 100
+        add_prestige = 75
+        eotg_aug_stress_reject_effect = yes
+        stress_impact = {
+            brave = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = brave }
+            modifier = { add = 10  has_trait = zealous }
+        }
+    }
+
+    # [craven] "Do all of it. Now." — as a with more hardware (risk 15) and
+    # what the hardware teaches. Stress written out, not the surgery helper:
+    # the helper gives craven a medium GAIN and this is the craven's relief.
+    option = {
+        name = eotg_aug_init.004.e
+        trigger = { has_trait = craven }
+        trait = craven
+        eotg_aug_initiate_effect = yes
+        add_character_modifier = eotg_mod_illegal_implants
+        eotg_aug_heal_wounds_effect = yes
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 15 }
+        }
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_prowess  years = 5 }
+        stress_impact = {
+            base = minor_stress_impact_loss
+            content = minor_stress_impact_gain
+            craven = medium_stress_impact_loss
+            zealous = medium_stress_impact_gain
+            humble = minor_stress_impact_gain
+            cynical = minor_stress_impact_loss
+            ambitious = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = craven }
+            modifier = { add = -30  has_trait = zealous }
+        }
+    }
+}
+
+
+# ── eotg_aug_init.005 ─────────────────────────────────────────────────────────
+# A Familiar Change
+# Observing a peer who has already been augmented.
+
+eotg_aug_init.005 = {
+    type = character_event
+    title = eotg_aug_init.005.t
+    desc = eotg_aug_init.005.desc
+    theme = stewardship_wealth_focus
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+    right_portrait = {
+        character = scope:aug_peer
+        animation = personality_bold
+    }
+
+    trigger = {
+        eotg_is_augmented_any = no    # install guard, as the Phase 2 events
+        OR = {
+            any_vassal = { has_trait = eotg_cybernetics }
+            any_courtier = { is_alive = yes  has_trait = eotg_cybernetics }
+        }
+    }
+
+    immediate = {
+        hidden_effect = {
+            if = {
+                limit = { any_vassal = { has_trait = eotg_cybernetics } }
+                random_vassal = {
+                    limit = { has_trait = eotg_cybernetics }
+                    save_scope_as = aug_peer
+                }
+            }
+            else = {
+                random_courtier = {
+                    limit = { is_alive = yes  has_trait = eotg_cybernetics }
+                    save_scope_as = aug_peer
+                }
+            }
+        }
+    }
+
+    # "If it works for them, it should work for me." — become augmented
+    option = {
+        name = eotg_aug_init.005.a
+        eotg_aug_initiate_effect = yes
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 0 }
+        }
+        scope:aug_peer = {
+            add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
+        }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 30  has_trait = ambitious }
+            modifier = { add = -100  has_trait = zealous }
+        }
+    }
+
+    # "It unsettles me." — resist, gain piety, suppress initiation
+    option = {
+        name = eotg_aug_init.005.b
+        add_piety = 50
+        add_character_flag = { flag = eotg_flag_suppress_progression  years = 5 }
+        scope:aug_peer = {
+            add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = zealous }
+            modifier = { add = 20  has_trait = content }
+        }
+    }
+
+    # "Study it carefully before deciding." — delay; a lesson, not permanent skill (B6)
+    option = {
+        name = eotg_aug_init.005.c
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_learning  years = 5 }
+        add_character_flag = { flag = eotg_flag_suppress_progression  years = 2 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = patient }
+            modifier = { add = 20  OR = { has_trait = education_learning_3  has_trait = education_learning_4 } }
+        }
+    }
+
+    # [cynical] "Ask them what it cost." — as a, paying the peer's own supplier.
+    # The spec's version was a plus a cost (dominated by a). The extra cynical
+    # relief makes it a different deal: gold for stress. Vanilla trait-gated
+    # options relieve the gating trait (events/dlc/bp1/bp1_yearly.txt,
+    # bp1_yearly.8040: `trait = cynical` + `cynical = medium_stress_impact_loss`).
+    option = {
+        name = eotg_aug_init.005.d
+        trigger = {
+            has_trait = cynical
+            gold >= minor_gold_value
+        }
+        trait = cynical
+        remove_short_term_gold = minor_gold_value
+        eotg_aug_initiate_effect = yes
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 0 }
+        }
+        scope:aug_peer = {
+            add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
+        }
+        eotg_aug_stress_surgery_effect = yes
+        stress_impact = {
+            cynical = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = cynical }
+            modifier = { add = 10  has_trait = greedy }
+        }
+    }
+
+    # [paranoid] "What did they put inside you?" — refuse, watch the peer
+    option = {
+        name = eotg_aug_init.005.e
+        trigger = { has_trait = paranoid }
+        trait = paranoid
+        scope:aug_peer = {
+            add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+        }
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_intrigue  years = 5 }
+        add_character_flag = { flag = eotg_flag_suppress_progression  years = 2 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = paranoid }
+            modifier = { add = 10  has_trait = zealous }
+        }
+    }
+}
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# cybernetics_v2 Phase 2 — entry hooks (docs/specs/cybernetics_v2_phase2.md §2)
+#
+# "install" = eotg_aug_initiate_effect + eotg_fracture_risk set in hidden_effect.
+# Costed options are gated on gold in their `trigger` (as init.002.a). Costs are
+# vanilla realm-relative script values (B5); discounts are inline script-value
+# blocks (vanilla shape: common/decisions/00_diarchy_decisions.txt cost `if`).
+# Install events carry `eotg_is_augmented_any = no` as a world-state guard: the
+# ruler may have been augmented by something else in the days before it fires.
+# No event trigger here reads a cooldown flag (index §1 rule 5).
+# ═════════════════════════════════════════════════════════════════════════════
+
+
+# ── eotg_aug_init.006 ─────────────────────────────────────────────────────────
+# The Prosthetic (I-01)
+# Caller: eotg_on_yearly_aug_initiation_check, branch 2 (eotg_has_physical_loss).
+# Resource: a/c/e install and set eotg_fracture_risk.
+
+eotg_aug_init.006 = {
+    type = character_event
+    title = eotg_aug_init.006.t
+    # One line per loss, worst first: the same order as
+    # eotg_aug_restore_loss_effect, so the desc names the loss that a/c/e restore.
+    desc = {
+        desc = eotg_aug_init.006.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { has_trait = blind }
+                desc = eotg_aug_init.006.desc_blind
+            }
+            triggered_desc = {
+                trigger = { has_trait = one_legged }
+                desc = eotg_aug_init.006.desc_one_legged
+            }
+            triggered_desc = {
+                trigger = { has_trait = maimed }
+                desc = eotg_aug_init.006.desc_maimed
+            }
+            desc = eotg_aug_init.006.desc_one_eyed
+        }
+    }
+    theme = healthcare
+
+    left_portrait = {
+        character = root
+        animation = worry
+    }
+    # Guarded (vanilla events/activities/activity_system_events.txt:89-92)
+    right_portrait = {
+        trigger = { exists = scope:eotg_physician }
+        character = scope:eotg_physician
+        animation = personality_rational
+    }
+
+    trigger = {
+        eotg_has_physical_loss = yes
+        eotg_is_augmented_any = no
+    }
+
+    # The court physician, if one is employed. Vanilla form:
+    # events/activities/hunt_activity/hunt_events.txt:21050-21052.
+    immediate = {
+        hidden_effect = {
+            if = {
+                limit = { employs_court_position = court_physician_court_position }
+                court_position:court_physician_court_position = { save_scope_as = eotg_physician }
+            }
+        }
+    }
+
+    # "Replace what I lost." Full price: the physician discount lives on c
+    # only (orchestrator ruling, Phase 2).
+    option = {
+        name = eotg_aug_init.006.a
+        trigger = { gold >= medium_gold_value }
+        remove_short_term_gold = medium_gold_value
+        eotg_aug_initiate_effect = yes
+        eotg_aug_restore_loss_effect = yes
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 0 }
+        }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = ambitious }
+            modifier = { add = 20  has_trait = brave }
+            modifier = { add = -30  has_trait = zealous }
+        }
+    }
+
+    # "I will learn to live with it."
+    option = {
+        name = eotg_aug_init.006.b
+        add_prestige = 50
+        # Declined: the on_action weighs the next offer at 0.25 for 10 years
+        hidden_effect = {
+            add_character_flag = { flag = eotg_flag_aug_declined_prosthetic  years = 10 }
+        }
+        stress_impact = {
+            content = minor_stress_impact_loss
+            humble = minor_stress_impact_loss
+            ambitious = minor_stress_impact_gain
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = content }
+            modifier = { add = 20  has_trait = humble }
+            modifier = { add = -20  has_trait = ambitious }
+        }
+    }
+
+    # (physician access) "My physician holds the knife." As a, plus calibration.
+    # No trait icon: the gate is access, not a trait. The physician admires
+    # the patient who trusted them, as init.017.a (orchestrator ruling).
+    option = {
+        name = eotg_aug_init.006.c
+        trigger = {
+            eotg_has_physician_access = yes
+            gold >= { value = medium_gold_value  multiply = 0.75 }
+        }
+        remove_short_term_gold = { value = medium_gold_value  multiply = 0.75 }
+        eotg_aug_initiate_effect = yes
+        eotg_aug_restore_loss_effect = yes
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 0 }
+        }
+        add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 3 }
+        if = {
+            limit = { exists = scope:eotg_physician }
+            scope:eotg_physician = {
+                add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 10 }
+            }
+        }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = trusting }
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = -30  has_trait = zealous }
+        }
+    }
+
+    # [zealous] "As I was made, and as I was unmade."
+    option = {
+        name = eotg_aug_init.006.d
+        trigger = { has_trait = zealous }
+        trait = zealous
+        add_piety = 100
+        add_character_flag = { flag = eotg_flag_suppress_progression  years = 5 }
+        # A refusal, like .b: the on_action weighs the next offer at 0.25 for 10 years
+        hidden_effect = {
+            add_character_flag = { flag = eotg_flag_aug_declined_prosthetic  years = 10 }
+        }
+        stress_impact = {
+            zealous = medium_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 40  has_trait = zealous }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+
+    # [cynical] "Make it better than the original." As a, plus a lesson; the
+    # better limb runs warmer (risk 5).
+    option = {
+        name = eotg_aug_init.006.e
+        trigger = {
+            has_trait = cynical
+            gold >= {
+                value = medium_gold_value
+                if = {
+                    limit = { eotg_has_physician_access = yes }
+                    multiply = 0.75
+                }
+            }
+        }
+        trait = cynical
+        remove_short_term_gold = {
+            value = medium_gold_value
+            if = {
+                limit = { eotg_has_physician_access = yes }
+                multiply = 0.75
+            }
+        }
+        eotg_aug_initiate_effect = yes
+        eotg_aug_restore_loss_effect = yes
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 5 }
+        }
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_prowess  years = 5 }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = cynical }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+}
+
+
+# ── eotg_aug_init.007 ─────────────────────────────────────────────────────────
+# The Neural Bridge (I-02), stage 1
+# Caller: eotg_on_yearly_aug_initiation_check, branch 4 (incapable or infirm).
+# Resource: a/c/e install hot (risk 20-40). Stage 2: eotg_aug_init.008.
+
+eotg_aug_init.007 = {
+    type = character_event
+    title = eotg_aug_init.007.t
+    desc = eotg_aug_init.007.desc
+    theme = healthcare
+
+    left_portrait = {
+        character = root
+        animation = worry
+    }
+
+    trigger = {
+        OR = {
+            has_trait = incapable
+            has_trait = infirm
+        }
+        eotg_is_augmented_any = no
+    }
+
+    # "Build the bridge." A last resort starts hot: risk 30.
+    option = {
+        name = eotg_aug_init.007.a
+        trigger = { gold >= major_gold_value }
+        remove_short_term_gold = major_gold_value
+        eotg_aug_initiate_effect = yes
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 30 }
+        }
+        add_character_modifier = { modifier = eotg_mod_aug_bridge_strain  years = 2 }
+        trigger_event = { id = eotg_aug_init.008  days = { 90 180 } }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = ambitious }
+            modifier = { add = 20  has_trait = brave }
+            modifier = { add = -30  has_trait = zealous }
+        }
+    }
+
+    # "Let me be as I am."
+    option = {
+        name = eotg_aug_init.007.b
+        add_piety = 50
+        # Declined: the on_action weighs the next offer at 0.25 for 10 years
+        hidden_effect = {
+            add_character_flag = { flag = eotg_flag_aug_declined_bridge  years = 10 }
+        }
+        stress_impact = {
+            content = medium_stress_impact_loss
+            humble = medium_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = content }
+            modifier = { add = 20  has_trait = humble }
+            modifier = { add = 10  has_trait = zealous }
+        }
+    }
+
+    # (physician access) "Only under my physician's eye." Risk 20, cost x0.75.
+    option = {
+        name = eotg_aug_init.007.c
+        trigger = {
+            eotg_has_physician_access = yes
+            gold >= { value = major_gold_value  multiply = 0.75 }
+        }
+        remove_short_term_gold = { value = major_gold_value  multiply = 0.75 }
+        eotg_aug_initiate_effect = yes
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 20 }
+        }
+        add_character_modifier = { modifier = eotg_mod_aug_bridge_strain  years = 2 }
+        trigger_event = { id = eotg_aug_init.008  days = { 90 180 } }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = trusting }
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = -30  has_trait = zealous }
+        }
+    }
+
+    # [craven] "Not into my head. Never into my head." As b.
+    option = {
+        name = eotg_aug_init.007.d
+        trigger = { has_trait = craven }
+        trait = craven
+        add_piety = 50
+        # A refusal, like .b: the on_action weighs the next offer at 0.25 for 10 years
+        hidden_effect = {
+            add_character_flag = { flag = eotg_flag_aug_declined_bridge  years = 10 }
+        }
+        stress_impact = {
+            craven = medium_stress_impact_loss
+            content = medium_stress_impact_loss
+            humble = medium_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 40  has_trait = craven }
+            modifier = { add = 10  has_trait = paranoid }
+        }
+    }
+
+    # [ambitious] "Run it at full current." Risk 40; on success at stage 2 the
+    # extra current pays out in two lessons (flag read by eotg_aug_init.008).
+    option = {
+        name = eotg_aug_init.007.e
+        trigger = {
+            has_trait = ambitious
+            gold >= major_gold_value
+        }
+        trait = ambitious
+        remove_short_term_gold = major_gold_value
+        eotg_aug_initiate_effect = yes
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 40 }
+            add_character_flag = { flag = eotg_flag_aug_bridge_full_current  days = 365 }
+        }
+        add_character_modifier = { modifier = eotg_mod_aug_bridge_strain  years = 2 }
+        trigger_event = { id = eotg_aug_init.008  days = { 90 180 } }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = ambitious }
+            modifier = { add = 10  has_trait = brave }
+            modifier = { add = -20  has_trait = craven }
+        }
+    }
+}
+
+
+# ── eotg_aug_init.008 ─────────────────────────────────────────────────────────
+# The Neural Bridge (I-02), stage 2: the outcome
+# Caller: eotg_aug_init.007 (a, c, e), 90-180 days.
+# Resource: partial and complication raise eotg_fracture_risk; b and c move it.
+# The outcome is rolled in immediate and kept as scope:eotg_bridge_outcome
+# (save_scope_value_as + flag:, the vanilla shape for a rolled branch that
+# picks desc and options, e.g. events/birth_events.txt:4228).
+
+eotg_aug_init.008 = {
+    type = character_event
+    title = eotg_aug_init.008.t
+    desc = {
+        desc = eotg_aug_init.008.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_bridge_outcome = flag:success }
+                desc = eotg_aug_init.008.desc_success
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_bridge_outcome = flag:partial }
+                desc = eotg_aug_init.008.desc_partial
+            }
+            desc = eotg_aug_init.008.desc_complication
+        }
+    }
+    theme = recovery
+
+    left_portrait = {
+        character = root
+        triggered_animation = {
+            trigger = { scope:eotg_bridge_outcome = flag:success }
+            animation = happiness
+        }
+        animation = pain
+    }
+
+    trigger = { has_trait = eotg_cybernetics }
+
+    immediate = {
+        random_list = {
+            50 = {
+                modifier = {
+                    add = 15
+                    eotg_has_physician_access = yes
+                }
+                save_scope_value_as = { name = eotg_bridge_outcome  value = flag:success }
+                eotg_aug_bridge_success_effect = yes
+            }
+            30 = {
+                save_scope_value_as = { name = eotg_bridge_outcome  value = flag:partial }
+                hidden_effect = { eotg_add_fracture_risk = { AMOUNT = 10 } }
+            }
+            20 = {
+                modifier = {
+                    add = -10
+                    eotg_has_physician_access = yes
+                }
+                save_scope_value_as = { name = eotg_bridge_outcome  value = flag:complication }
+                # No-death step: the ruler cannot die before the event opens
+                increase_wounds_no_death_effect = { REASON = wounds }
+                hidden_effect = { eotg_add_fracture_risk = { AMOUNT = 15 } }
+            }
+        }
+    }
+
+    # "Then this is who I am now."
+    option = {
+        name = eotg_aug_init.008.a
+        hidden_effect = { remove_character_flag = eotg_flag_aug_bridge_full_current }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+
+    # (partial / complication) "Again. Recalibrate it."
+    option = {
+        name = eotg_aug_init.008.b
+        trigger = {
+            NOT = { scope:eotg_bridge_outcome = flag:success }
+            gold >= medium_gold_value
+        }
+        remove_short_term_gold = medium_gold_value
+        random_list = {
+            50 = { eotg_aug_bridge_success_effect = yes }
+            50 = { eotg_add_fracture_risk = { AMOUNT = 10 } }
+        }
+        hidden_effect = { remove_character_flag = eotg_flag_aug_bridge_full_current }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 20  has_trait = stubborn }
+            modifier = { add = -20  has_trait = content }
+        }
+    }
+
+    # [stubborn] (partial / complication) "I will make it work by will alone."
+    option = {
+        name = eotg_aug_init.008.c
+        trigger = {
+            has_trait = stubborn
+            NOT = { scope:eotg_bridge_outcome = flag:success }
+        }
+        trait = stubborn
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_martial  years = 5 }
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        hidden_effect = { remove_character_flag = eotg_flag_aug_bridge_full_current }
+        stress_impact = {
+            stubborn = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = stubborn }
+            modifier = { add = 10  has_trait = diligent }
+        }
+    }
+}
+
+
+# ── eotg_aug_init.009 ─────────────────────────────────────────────────────────
+# The Cynic's Argument (I-03)
+# Caller: eotg_on_yearly_aug_initiation_check, branch 7 (cynical, learning >= 12).
+# Resource: a/d install and set eotg_fracture_risk.
+
+eotg_aug_init.009 = {
+    type = character_event
+    title = eotg_aug_init.009.t
+    desc = {
+        desc = eotg_aug_init.009.desc
+        triggered_desc = {
+            trigger = { any_courtier = { has_trait = zealous } }
+            desc = eotg_aug_init.009.desc_zealot
+        }
+    }
+    theme = learning_scholarship_focus
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+
+    trigger = {
+        has_trait = cynical
+        learning >= 12
+        eotg_is_augmented_any = no
+    }
+
+    # "Flesh is not sacred. I will prove it."
+    option = {
+        name = eotg_aug_init.009.a
+        trigger = { gold >= medium_gold_value }
+        remove_short_term_gold = medium_gold_value
+        eotg_aug_initiate_effect = yes
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 0 }
+        }
+        add_piety = -50
+        every_courtier = {
+            limit = { has_trait = zealous }
+            add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 8 }
+        }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 20  has_trait = arrogant }
+            modifier = { add = -20  has_trait = humble }
+        }
+    }
+
+    # "Argue it, but leave my body out of it."
+    option = {
+        name = eotg_aug_init.009.b
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_learning  years = 5 }
+        add_prestige = 50
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 20  has_trait = craven }
+        }
+    }
+
+    # "Publish the argument." No install; the syndicates take note
+    # (eotg_flag_aug_published_cynic: init.018.a costs x0.75).
+    option = {
+        name = eotg_aug_init.009.c
+        add_prestige = 100
+        add_piety = -100
+        every_courtier = {
+            limit = { has_trait = zealous }
+            add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 8 }
+        }
+        add_character_flag = { flag = eotg_flag_aug_published_cynic  years = 10 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = arrogant }
+            modifier = { add = 20  has_trait = gregarious }
+            modifier = { add = -20  has_trait = shy }
+        }
+    }
+
+    # [ambitious] "Every advantage, every time." As a, risk 5, more prestige.
+    option = {
+        name = eotg_aug_init.009.d
+        trigger = {
+            has_trait = ambitious
+            gold >= medium_gold_value
+        }
+        trait = ambitious
+        remove_short_term_gold = medium_gold_value
+        eotg_aug_initiate_effect = yes
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 5 }
+        }
+        add_piety = -50
+        add_prestige = 50
+        every_courtier = {
+            limit = { has_trait = zealous }
+            add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 8 }
+        }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = ambitious }
+            modifier = { add = 10  has_trait = greedy }
+        }
+    }
+
+    # [erudite] "Write the treatise first." As b, and the question waits a year.
+    # (Replaces the proposal's childhood-trait gate; index §1 rule 10.)
+    option = {
+        name = eotg_aug_init.009.e
+        trigger = { has_trait = erudite }
+        trait = erudite
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_learning  years = 5 }
+        add_prestige = 50
+        add_character_flag = { flag = eotg_flag_suppress_progression  years = 1 }
+        stress_impact = {
+            erudite = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = erudite }
+            modifier = { add = 10  has_trait = patient }
+        }
+    }
+}
+
+
+# ── eotg_aug_init.010 ─────────────────────────────────────────────────────────
+# Back-Alley Surgery (I-04), stage 1
+# Caller: eotg_on_yearly_aug_initiation_check, branch 10 (poor, deceitful or at
+#   war), and the retry branch (eotg_flag_aug_backalley_retry, set by init.012.b).
+# Resource: a/c/d install and set eotg_fracture_risk. Stage 2: eotg_aug_init.011.
+
+eotg_aug_init.010 = {
+    type = character_event
+    title = eotg_aug_init.010.t
+    desc = eotg_aug_init.010.desc
+    theme = intrigue_skulduggery_focus
+
+    left_portrait = {
+        character = root
+        animation = scheme
+    }
+
+    trigger = { eotg_is_augmented_any = no }
+
+    # "Cheap is cheap."
+    option = {
+        name = eotg_aug_init.010.a
+        trigger = { gold >= tiny_gold_value }
+        remove_short_term_gold = tiny_gold_value
+        eotg_aug_initiate_effect = yes
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 5 }
+        }
+        trigger_event = { id = eotg_aug_init.011  days = { 180 540 } }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = greedy }
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = -30  has_trait = zealous }
+        }
+    }
+
+    # "Not from those hands."
+    option = {
+        name = eotg_aug_init.010.b
+        stress_impact = {
+            craven = minor_stress_impact_loss
+            content = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = craven }
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 10  has_trait = zealous }
+        }
+    }
+
+    # [deceitful] "And no one hears of it." As a; the discreet flag removes the
+    # discovered outcome at stage 2.
+    option = {
+        name = eotg_aug_init.010.c
+        trigger = {
+            has_trait = deceitful
+            gold >= tiny_gold_value
+        }
+        trait = deceitful
+        remove_short_term_gold = tiny_gold_value
+        eotg_aug_initiate_effect = yes
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 5 }
+            add_character_flag = eotg_flag_aug_backalley_discreet
+        }
+        trigger_event = { id = eotg_aug_init.011  days = { 180 540 } }
+        eotg_aug_stress_surgery_effect = yes
+        eotg_aug_stress_lie_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = deceitful }
+            modifier = { add = 10  has_trait = paranoid }
+        }
+    }
+
+    # [craven] "Put me under first. All the way under." As a; sloppy anaesthesia
+    # (risk 10). Stress written out, not the surgery helper: the helper gives
+    # craven a medium GAIN and this is the craven's relief (as init.001.d).
+    option = {
+        name = eotg_aug_init.010.d
+        trigger = {
+            has_trait = craven
+            gold >= tiny_gold_value
+        }
+        trait = craven
+        remove_short_term_gold = tiny_gold_value
+        eotg_aug_initiate_effect = yes
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 10 }
+        }
+        trigger_event = { id = eotg_aug_init.011  days = { 180 540 } }
+        stress_impact = {
+            craven = medium_stress_impact_loss
+            zealous = medium_stress_impact_gain
+            humble = minor_stress_impact_gain
+            cynical = minor_stress_impact_loss
+            ambitious = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = craven }
+            modifier = { add = -20  has_trait = zealous }
+        }
+    }
+}
+
+
+# ── eotg_aug_init.011 ─────────────────────────────────────────────────────────
+# The Scar Itches (I-04 stage 2; also the back-streets path of init.018)
+# Caller: eotg_aug_init.010 (a, c, d) and eotg_aug_init.018 (b), 180-540 days.
+# Resource: c/e/f raise eotg_fracture_risk; the hidden flaw (thread T6) raises
+# Overclocked accrual later.
+# Outcome kept as scope:eotg_alley_outcome. The hidden flaw stores flag:clean:
+# it shares the clean desc and options, so the player cannot tell (spec §6.3).
+
+eotg_aug_init.011 = {
+    type = character_event
+    title = eotg_aug_init.011.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_alley_outcome = flag:infection }
+                desc = eotg_aug_init.011.desc_infection
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_alley_outcome = flag:rejection }
+                desc = eotg_aug_init.011.desc_rejection
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_alley_outcome = flag:discovered }
+                desc = eotg_aug_init.011.desc_discovered
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_alley_outcome = flag:excellent }
+                desc = eotg_aug_init.011.desc_excellent
+            }
+            # clean AND hidden flaw: one key
+            desc = eotg_aug_init.011.desc_clean
+        }
+    }
+    theme = healthcare
+
+    left_portrait = {
+        character = root
+        triggered_animation = {
+            trigger = {
+                OR = {
+                    scope:eotg_alley_outcome = flag:infection
+                    scope:eotg_alley_outcome = flag:rejection
+                }
+            }
+            animation = pain
+        }
+        animation = personality_rational
+    }
+
+    trigger = { has_trait = eotg_cybernetics }
+
+    immediate = {
+        hidden_effect = {
+            random_list = {
+                35 = {
+                    save_scope_value_as = { name = eotg_alley_outcome  value = flag:clean }
+                }
+                15 = {
+                    save_scope_value_as = { name = eotg_alley_outcome  value = flag:clean }
+                    add_character_flag = eotg_flag_aug_hidden_flaw
+                }
+                20 = {
+                    save_scope_value_as = { name = eotg_alley_outcome  value = flag:infection }
+                    add_character_modifier = { modifier = eotg_mod_aug_infection  years = 2 }
+                }
+                15 = {
+                    save_scope_value_as = { name = eotg_alley_outcome  value = flag:rejection }
+                }
+                10 = {
+                    trigger = { NOT = { has_character_flag = eotg_flag_aug_backalley_discreet } }
+                    save_scope_value_as = { name = eotg_alley_outcome  value = flag:discovered }
+                    add_character_modifier = eotg_mod_illegal_implants
+                }
+                5 = {
+                    save_scope_value_as = { name = eotg_alley_outcome  value = flag:excellent }
+                    add_character_modifier = { modifier = eotg_mod_aug_clean_install  years = 10 }
+                }
+            }
+            # The discreet flag has done its job for this install
+            remove_character_flag = eotg_flag_aug_backalley_discreet
+        }
+    }
+
+    # "Good." / "Keep going." Two names for one option (vanilla
+    # events/health_events.txt:1141-1148, `name = { trigger text }`).
+    option = {
+        name = eotg_aug_init.011.a
+        name = {
+            trigger = {
+                OR = {
+                    scope:eotg_alley_outcome = flag:infection
+                    scope:eotg_alley_outcome = flag:rejection
+                    scope:eotg_alley_outcome = flag:discovered
+                }
+            }
+            text = eotg_aug_init.011.a_grim
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 10  has_trait = content }
+            modifier = { add = 10  has_trait = lazy }
+        }
+    }
+
+    # (infection) "Fetch a physician." Free with physician access (thread T5).
+    option = {
+        name = eotg_aug_init.011.b
+        trigger = {
+            scope:eotg_alley_outcome = flag:infection
+            OR = {
+                eotg_has_physician_access = yes
+                gold >= minor_gold_value
+            }
+        }
+        if = {
+            limit = { eotg_has_physician_access = no }
+            remove_short_term_gold = minor_gold_value
+        }
+        remove_character_modifier = eotg_mod_aug_infection
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 20  has_trait = craven }
+            modifier = { add = -20  has_trait = greedy }
+        }
+    }
+
+    # (infection) "Sweat it out."
+    option = {
+        name = eotg_aug_init.011.c
+        trigger = { scope:eotg_alley_outcome = flag:infection }
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        random = {
+            chance = 25
+            add_trait = ill
+        }
+        eotg_aug_stress_neglect_effect = yes
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = stubborn }
+            modifier = { add = 20  has_trait = greedy }
+        }
+    }
+
+    # (rejection) "Cut it out before it spreads."
+    option = {
+        name = eotg_aug_init.011.d
+        trigger = { scope:eotg_alley_outcome = flag:rejection }
+        trigger_event = { id = eotg_aug_init.012  days = { 3 10 } }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = craven }
+            modifier = { add = 20  has_trait = diligent }
+        }
+    }
+
+    # (rejection) "It will settle."
+    option = {
+        name = eotg_aug_init.011.e
+        trigger = { scope:eotg_alley_outcome = flag:rejection }
+        eotg_add_fracture_risk = { AMOUNT = 10 }
+        random = {
+            chance = 30
+            trigger_event = { id = eotg_aug_init.012  days = 60 }
+        }
+        eotg_aug_stress_neglect_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = stubborn }
+            modifier = { add = 20  has_trait = ambitious }
+        }
+    }
+
+    # [lazy] (infection) "Bandage it and forget it." As c.
+    option = {
+        name = eotg_aug_init.011.f
+        trigger = {
+            has_trait = lazy
+            scope:eotg_alley_outcome = flag:infection
+        }
+        trait = lazy
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        random = {
+            chance = 25
+            add_trait = ill
+        }
+        eotg_aug_stress_neglect_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = lazy }
+            modifier = { add = -20  has_trait = diligent }
+        }
+    }
+}
+
+
+# ── eotg_aug_init.012 ─────────────────────────────────────────────────────────
+# Back-Alley Surgery (I-04), stage 3: rejection resolved
+# Caller: eotg_aug_init.011 (d; e at 30%).
+# Resource: lost = leaves the system (eotg_aug_remove_all_effect, rule 2);
+# saved = eotg_fracture_risk +10.
+
+eotg_aug_init.012 = {
+    type = character_event
+    title = eotg_aug_init.012.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_rejection_outcome = flag:lost }
+                desc = eotg_aug_init.012.desc_lost
+            }
+            desc = eotg_aug_init.012.desc_saved
+        }
+    }
+    theme = healthcare
+
+    left_portrait = {
+        character = root
+        animation = pain
+    }
+
+    trigger = { has_trait = eotg_cybernetics }
+
+    immediate = {
+        random_list = {
+            60 = {
+                save_scope_value_as = { name = eotg_rejection_outcome  value = flag:lost }
+                eotg_aug_remove_all_effect = yes
+                # Spec: add_trait = wounded_1. Vanilla's no-death wound step is
+                # used instead so an already-wounded ruler is not reset to
+                # rank 1 (common/scripted_effects/20_health_effects.txt,
+                # increase_wounds_no_death_effect, REASON = treatment).
+                increase_wounds_no_death_effect = { REASON = treatment }
+            }
+            40 = {
+                save_scope_value_as = { name = eotg_rejection_outcome  value = flag:saved }
+                hidden_effect = { eotg_add_fracture_risk = { AMOUNT = 10 } }
+            }
+        }
+    }
+
+    # "So be it."
+    option = {
+        name = eotg_aug_init.012.a
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+
+    # [brave] (lost) "Find me another surgeon." The retry flag is read in the
+    # on_action's retry branch, never by an event trigger.
+    option = {
+        name = eotg_aug_init.012.b
+        trigger = {
+            has_trait = brave
+            scope:eotg_rejection_outcome = flag:lost
+        }
+        trait = brave
+        add_character_flag = { flag = eotg_flag_aug_backalley_retry  years = 2 }
+        stress_impact = {
+            brave = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = brave }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+}
+
+
+# ── eotg_aug_init.013 ─────────────────────────────────────────────────────────
+# A Parent's Hardware (I-06)
+# Caller: eotg_on_yearly_aug_initiation_check, branch 5 (var eotg_parent_hardware,
+#   set for 5 years by eotg_on_death_aug_hardware on on_death).
+# Resource: a installs at risk 15/25 with the hidden flaw (thread T6) and may
+# carry the parent's voice (thread T1); e moves risk if already augmented.
+
+eotg_aug_init.013 = {
+    type = character_event
+    title = eotg_aug_init.013.t
+    desc = {
+        desc = eotg_aug_init.013.desc
+        triggered_desc = {
+            trigger = { has_character_flag = eotg_flag_aug_hardware_fractured }
+            desc = eotg_aug_init.013.desc_fractured
+        }
+    }
+    theme = death
+
+    left_portrait = {
+        character = root
+        animation = sadness
+    }
+    # The dead parent (vanilla dead-portrait shape: events/activities/
+    # chariot_race_activity/chariot_ongoing_events_jp.txt:2544). Guarded: a
+    # pruned dead character leaves the variable empty.
+    right_portrait = {
+        trigger = { exists = scope:eotg_dead_parent }
+        character = scope:eotg_dead_parent
+        animation = dead
+        animate_if_dead = yes
+    }
+
+    trigger = {
+        has_variable = eotg_parent_hardware
+        eotg_is_augmented_any = no
+    }
+
+    immediate = {
+        hidden_effect = {
+            if = {
+                limit = { exists = var:eotg_parent_hardware }
+                var:eotg_parent_hardware = { save_scope_as = eotg_dead_parent }
+            }
+        }
+    }
+
+    # "Install them."
+    option = {
+        name = eotg_aug_init.013.a
+        trigger = { gold >= tiny_gold_value }
+        remove_short_term_gold = tiny_gold_value
+        eotg_aug_initiate_effect = yes
+        hidden_effect = {
+            if = {
+                limit = { has_character_flag = eotg_flag_aug_hardware_fractured }
+                set_variable = { name = eotg_fracture_risk  value = 25 }
+            }
+            else = {
+                set_variable = { name = eotg_fracture_risk  value = 15 }
+            }
+            add_character_flag = eotg_flag_aug_hidden_flaw
+            # The parent's echo (thread T1)
+            if = {
+                limit = {
+                    exists = scope:eotg_dead_parent
+                    scope:eotg_dead_parent = {
+                        has_variable = eotg_aug_voice
+                        var:eotg_aug_voice >= 2
+                    }
+                }
+                eotg_aug_voice_advance_effect = { STAGE = 1 }
+            }
+        }
+        eotg_aug_parent_hardware_clear_effect = yes
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 20  has_trait = greedy }
+            modifier = { add = -30  has_trait = zealous }
+        }
+    }
+
+    # "Sell them."
+    option = {
+        name = eotg_aug_init.013.b
+        add_gold = medium_gold_value
+        eotg_aug_parent_hardware_clear_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = greedy }
+            modifier = { add = 10  has_trait = cynical }
+            modifier = { add = -10  has_trait = zealous }
+        }
+    }
+
+    # "Destroy them."
+    option = {
+        name = eotg_aug_init.013.c
+        add_piety = 50
+        eotg_aug_parent_hardware_clear_effect = yes
+        stress_impact = {
+            zealous = minor_stress_impact_loss
+            compassionate = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = zealous }
+            modifier = { add = 20  has_trait = compassionate }
+        }
+    }
+
+    # [greedy] "Sell them to the highest bidder, and let it be known."
+    option = {
+        name = eotg_aug_init.013.d
+        trigger = { has_trait = greedy }
+        trait = greedy
+        add_gold = { value = medium_gold_value  multiply = 1.5 }
+        add_prestige = -50
+        eotg_aug_parent_hardware_clear_effect = yes
+        stress_impact = {
+            greedy = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = greedy }
+            modifier = { add = -10  has_trait = honest }
+        }
+    }
+
+    # [eccentric] "Keep them. Take them apart. Learn." Couples through a.
+    # No +5 risk: branch 5 sits inside the unaugmented gate, so it never applied.
+    option = {
+        name = eotg_aug_init.013.e
+        trigger = { has_trait = eccentric }
+        trait = eccentric
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_learning  years = 5 }
+        eotg_aug_parent_hardware_clear_effect = yes
+        stress_impact = {
+            eccentric = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = eccentric }
+            modifier = { add = 10  has_trait = erudite }
+        }
+    }
+}
+
+
+# ── eotg_aug_init.014 ─────────────────────────────────────────────────────────
+# The Sickly Child (I-07), stage 1 (Q8: tone review pending; narrated from the
+# parent's side)
+# Caller: eotg_on_yearly_aug_initiation_check, the separate child block
+#   (cooldown eotg_flag_aug_child_offer_cooldown, set there).
+# Resource: a/c/d install on the child and set the child's eotg_fracture_risk.
+
+eotg_aug_init.014 = {
+    type = character_event
+    title = eotg_aug_init.014.t
+    desc = eotg_aug_init.014.desc
+    theme = healthcare
+
+    left_portrait = {
+        character = root
+        animation = worry
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_sick_child }
+        character = scope:eotg_sick_child
+        animation = sadness
+    }
+
+    # Mirrors the firing branch (world state, no cooldown)
+    trigger = {
+        any_child = {
+            eotg_aug_sick_child_candidate = yes
+        }
+    }
+
+    # The youngest qualifying child. Vanilla ordered_child + order_by block:
+    # events/court_events/01_ep3_court_events.txt:162-171.
+    immediate = {
+        hidden_effect = {
+            ordered_child = {
+                limit = { eotg_aug_sick_child_candidate = yes }
+                order_by = {
+                    value = 0
+                    subtract = age
+                }
+                save_scope_as = eotg_sick_child
+            }
+        }
+    }
+
+    # "Save them, whatever it takes."
+    option = {
+        name = eotg_aug_init.014.a
+        trigger = { gold >= medium_gold_value }
+        remove_short_term_gold = medium_gold_value
+        scope:eotg_sick_child = { eotg_aug_child_install_effect = yes }
+        trigger_event = { id = eotg_aug_init.015  days = { 365 730 } }
+        stress_impact = {
+            compassionate = minor_stress_impact_loss
+            zealous = medium_stress_impact_gain
+            just = minor_stress_impact_gain
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = compassionate }
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = -30  has_trait = zealous }
+        }
+    }
+
+    # "Pray, and wait." No effect: the illness runs its normal course. Vanilla
+    # precedent health.2101.a (events/health_events.txt:5763) carries no piety,
+    # no stress and no recovery roll.
+    option = {
+        name = eotg_aug_init.014.b
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = zealous }
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = -10  has_trait = compassionate }
+        }
+    }
+
+    # "The experimental procedure. It's cheaper." 60%: as a. 40%: the child
+    # dies of the treatment, no killer (vanilla death_treatment,
+    # common/deathreasons/00_event_deaths.txt:214). Murder helper on root: an
+    # unlicensed gamble with a child's life.
+    option = {
+        name = eotg_aug_init.014.c
+        trigger = { gold >= tiny_gold_value }
+        remove_short_term_gold = tiny_gold_value
+        random_list = {
+            60 = {
+                scope:eotg_sick_child = { eotg_aug_child_install_effect = yes }
+                trigger_event = { id = eotg_aug_init.015  days = { 365 730 } }
+            }
+            40 = {
+                scope:eotg_sick_child = {
+                    death = { death_reason = death_treatment }
+                }
+            }
+        }
+        eotg_aug_stress_murder_effect = yes
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = greedy }
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = -30  has_trait = compassionate }
+        }
+    }
+
+    # [compassionate] "Sit with them through every hour of it." As a, and the
+    # child remembers who stayed.
+    option = {
+        name = eotg_aug_init.014.d
+        trigger = {
+            has_trait = compassionate
+            gold >= medium_gold_value
+        }
+        trait = compassionate
+        remove_short_term_gold = medium_gold_value
+        scope:eotg_sick_child = {
+            eotg_aug_child_install_effect = yes
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 10 }
+        }
+        trigger_event = { id = eotg_aug_init.015  days = { 365 730 } }
+        stress_impact = {
+            compassionate = medium_stress_impact_loss
+            zealous = medium_stress_impact_gain
+            just = minor_stress_impact_gain
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 40  has_trait = compassionate }
+            modifier = { add = -20  has_trait = zealous }
+        }
+    }
+
+    # [zealous] "No machine touches my child." As b, plus piety.
+    option = {
+        name = eotg_aug_init.014.e
+        trigger = { has_trait = zealous }
+        trait = zealous
+        add_piety = 100
+        stress_impact = {
+            zealous = medium_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 40  has_trait = zealous }
+            modifier = { add = -10  has_trait = compassionate }
+        }
+    }
+}
+
+
+# ── eotg_aug_init.015 ─────────────────────────────────────────────────────────
+# The Child Who Hums (I-07), stage 2
+# Caller: eotg_aug_init.014 (a, d; c at 60%), 365-730 days.
+# Resource: b/c/d move the CHILD's eotg_fracture_risk (or its lessons).
+# The hum is audible hardware (coil whine), narrated from the parent's side.
+
+eotg_aug_init.015 = {
+    type = character_event
+    title = eotg_aug_init.015.t
+    desc = eotg_aug_init.015.desc
+    theme = family
+
+    left_portrait = {
+        character = root
+        animation = worry
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_sick_child }
+        character = scope:eotg_sick_child
+        animation = idle
+    }
+
+    trigger = {
+        exists = scope:eotg_sick_child
+        scope:eotg_sick_child = {
+            is_alive = yes
+            has_trait = eotg_cybernetics
+        }
+    }
+
+    # "They are alive. That is all."
+    option = {
+        name = eotg_aug_init.015.a
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 20  has_trait = compassionate }
+        }
+    }
+
+    # "Teach them to hide it."
+    option = {
+        name = eotg_aug_init.015.b
+        scope:eotg_sick_child = {
+            add_character_modifier = { modifier = eotg_mod_aug_lesson_intrigue  years = 5 }
+        }
+        eotg_aug_stress_lie_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = deceitful }
+            modifier = { add = 20  has_trait = paranoid }
+            modifier = { add = -20  has_trait = honest }
+        }
+    }
+
+    # "Let them be what they are."
+    option = {
+        name = eotg_aug_init.015.c
+        scope:eotg_sick_child = {
+            add_character_modifier = { modifier = eotg_mod_aug_lesson_prowess  years = 5 }
+            eotg_add_fracture_risk = { AMOUNT = 5 }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = eccentric }
+            modifier = { add = 20  has_trait = cynical }
+            modifier = { add = -10  has_trait = paranoid }
+        }
+    }
+
+    # [paranoid] "Have the hardware checked. Every month."
+    option = {
+        name = eotg_aug_init.015.d
+        trigger = {
+            has_trait = paranoid
+            gold >= minor_gold_value
+        }
+        trait = paranoid
+        remove_short_term_gold = minor_gold_value
+        scope:eotg_sick_child = {
+            eotg_add_fracture_risk = { AMOUNT = -5 }
+        }
+        stress_impact = {
+            paranoid = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = paranoid }
+            modifier = { add = 10  has_trait = diligent }
+        }
+    }
+}
+
+
+# ── eotg_aug_init.016 ─────────────────────────────────────────────────────────
+# The Duel Shame (I-08)
+# Caller: eotg_on_yearly_aug_initiation_check, branch 11 (prowess <= 6, a strong
+#   rival or a war).
+# Resource: a/e install and set eotg_fracture_risk.
+
+eotg_aug_init.016 = {
+    type = character_event
+    title = eotg_aug_init.016.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { exists = scope:eotg_rival }
+                desc = eotg_aug_init.016.desc
+            }
+            desc = eotg_aug_init.016.desc_no_rival
+        }
+    }
+    theme = martial
+
+    left_portrait = {
+        character = root
+        animation = shame
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_rival }
+        character = scope:eotg_rival
+        animation = schadenfreude
+    }
+
+    trigger = { eotg_is_augmented_any = no }
+
+    immediate = {
+        hidden_effect = {
+            random_relation = {
+                type = rival
+                limit = { prowess >= 12 }
+                save_scope_as = eotg_rival
+            }
+        }
+    }
+
+    # "Then make me faster."
+    option = {
+        name = eotg_aug_init.016.a
+        trigger = { gold >= medium_gold_value }
+        remove_short_term_gold = medium_gold_value
+        eotg_aug_initiate_effect = yes
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 0 }
+        }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 20  has_trait = vengeful }
+            modifier = { add = -30  has_trait = zealous }
+        }
+    }
+
+    # "Train harder."
+    option = {
+        name = eotg_aug_init.016.b
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_prowess  years = 5 }
+        stress_impact = {
+            base = minor_stress_impact_gain
+            diligent = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = diligent }
+            modifier = { add = -10  has_trait = lazy }
+        }
+    }
+
+    # "Let them talk."
+    option = {
+        name = eotg_aug_init.016.c
+        add_prestige = -50
+        stress_impact = {
+            content = minor_stress_impact_loss
+            arrogant = medium_stress_impact_gain
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = content }
+            modifier = { add = -20  has_trait = arrogant }
+        }
+    }
+
+    # [brave] (needs a rival) "Again. As I am." A prowess duel. Shape and
+    # weights copied from vanilla events/activities/chariot_race_activity/
+    # chariot_ongoing_events_jp.txt:195 (target duel, compare_modifier on
+    # scope:duel_value). Refusing the machine: reject helper.
+    option = {
+        name = eotg_aug_init.016.d
+        trigger = {
+            has_trait = brave
+            exists = scope:eotg_rival
+        }
+        trait = brave
+        duel = {
+            skill = prowess
+            target = scope:eotg_rival
+            50 = {
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = 3.5
+                    min = -49
+                }
+                desc = eotg_aug_init.016.d.success
+                add_prestige = 200
+            }
+            50 = {
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = -3.5
+                    min = -49
+                }
+                desc = eotg_aug_init.016.d.failure
+                increase_wounds_effect = { REASON = duel }
+            }
+        }
+        eotg_aug_stress_reject_effect = yes
+        stress_impact = {
+            brave = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = brave }
+            modifier = { add = 10  has_trait = wrathful }
+        }
+    }
+
+    # [arrogant] "They will regret it." As a, plus dread, warmer hardware.
+    option = {
+        name = eotg_aug_init.016.e
+        trigger = {
+            has_trait = arrogant
+            gold >= medium_gold_value
+        }
+        trait = arrogant
+        remove_short_term_gold = medium_gold_value
+        eotg_aug_initiate_effect = yes
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 5 }
+        }
+        add_dread = 10
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = arrogant }
+            modifier = { add = 10  has_trait = vengeful }
+        }
+    }
+}
+
+
+# ── eotg_aug_init.017 ─────────────────────────────────────────────────────────
+# The Physician's Proposal (I-10)
+# Caller: eotg_on_yearly_aug_initiation_check, branch 6 (eotg_has_physician_access).
+# Resource: a/d install on root; c installs on a knight (tier change).
+# scope:eotg_physician is the court physician, or root when root is the
+# physician and employs none (the desc changes for that case).
+
+eotg_aug_init.017 = {
+    type = character_event
+    title = eotg_aug_init.017.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_physician = root }
+                desc = eotg_aug_init.017.desc_self
+            }
+            desc = eotg_aug_init.017.desc
+        }
+    }
+    theme = learning_medicine_focus
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+    right_portrait = {
+        trigger = {
+            exists = scope:eotg_physician
+            NOT = { scope:eotg_physician = root }
+        }
+        character = scope:eotg_physician
+        animation = personality_rational
+    }
+
+    trigger = {
+        eotg_has_physician_access = yes
+        eotg_is_augmented_any = no
+    }
+
+    # Court physician first (vanilla form: hunt_events.txt:21050-21052),
+    # else root. The volunteer is a non-violent pick (random_knight).
+    immediate = {
+        hidden_effect = {
+            if = {
+                limit = { employs_court_position = court_physician_court_position }
+                court_position:court_physician_court_position = { save_scope_as = eotg_physician }
+            }
+            else = {
+                save_scope_as = eotg_physician
+            }
+            random_knight = {
+                limit = {
+                    is_alive = yes
+                    is_adult = yes
+                    eotg_is_augmented_any = no
+                }
+                save_scope_as = eotg_volunteer
+            }
+        }
+    }
+
+    # "Do it, then."
+    option = {
+        name = eotg_aug_init.017.a
+        trigger = { gold >= { value = medium_gold_value  multiply = 0.75 } }
+        remove_short_term_gold = { value = medium_gold_value  multiply = 0.75 }
+        eotg_aug_initiate_effect = yes
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 0 }
+        }
+        add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 3 }
+        if = {
+            limit = { NOT = { scope:eotg_physician = root } }
+            scope:eotg_physician = {
+                add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 10 }
+            }
+        }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 20  has_trait = trusting }
+            modifier = { add = -30  has_trait = zealous }
+        }
+    }
+
+    # "Not yet."
+    option = {
+        name = eotg_aug_init.017.b
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 20  has_trait = zealous }
+            modifier = { add = 10  has_trait = craven }
+        }
+    }
+
+    # "On a volunteer first." The knight's install is the coupling.
+    option = {
+        name = eotg_aug_init.017.c
+        trigger = { exists = scope:eotg_volunteer }
+        scope:eotg_volunteer = {
+            eotg_aug_initiate_effect = yes
+            eotg_add_fracture_risk = { AMOUNT = 0 }
+        }
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_learning  years = 5 }
+        eotg_aug_stress_cruelty_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = 20  has_trait = patient }
+            modifier = { add = -10  has_trait = compassionate }
+        }
+    }
+
+    # [trusting] "I trust your hands." As a, at half price.
+    option = {
+        name = eotg_aug_init.017.d
+        trigger = {
+            has_trait = trusting
+            gold >= { value = medium_gold_value  multiply = 0.5 }
+        }
+        trait = trusting
+        remove_short_term_gold = { value = medium_gold_value  multiply = 0.5 }
+        eotg_aug_initiate_effect = yes
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 0 }
+        }
+        add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 3 }
+        if = {
+            limit = { NOT = { scope:eotg_physician = root } }
+            scope:eotg_physician = {
+                add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 10 }
+            }
+        }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = trusting }
+            modifier = { add = -20  has_trait = zealous }
+        }
+    }
+
+    # [paranoid] "And who paid you to suggest it?" Needs someone to accuse.
+    option = {
+        name = eotg_aug_init.017.e
+        trigger = {
+            has_trait = paranoid
+            NOT = { scope:eotg_physician = root }
+        }
+        trait = paranoid
+        scope:eotg_physician = {
+            add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+        }
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_intrigue  years = 5 }
+        stress_impact = {
+            paranoid = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = paranoid }
+            modifier = { add = -10  has_trait = trusting }
+        }
+    }
+}
+
+
+# ── eotg_aug_init.018 ─────────────────────────────────────────────────────────
+# The Offer You Sought (I-11), the decision hub
+# Caller: eotg_decision_seek_augmentation.
+# Resource: a/b/c install and set eotg_fracture_risk; b shares Back-Alley
+# stage 2 (eotg_aug_init.011).
+# No trigger: the decision's is_valid is the gate, and it fires at once.
+
+eotg_aug_init.018 = {
+    type = character_event
+    title = eotg_aug_init.018.t
+    desc = eotg_aug_init.018.desc
+    theme = stewardship_wealth_focus
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+
+    # "A sanctioned clinic." Published cynics are courted (init.009.c); the
+    # discount is spent here.
+    option = {
+        name = eotg_aug_init.018.a
+        trigger = {
+            gold >= {
+                value = medium_gold_value
+                if = {
+                    limit = { has_character_flag = eotg_flag_aug_published_cynic }
+                    multiply = 0.75
+                }
+            }
+        }
+        remove_short_term_gold = {
+            value = medium_gold_value
+            if = {
+                limit = { has_character_flag = eotg_flag_aug_published_cynic }
+                multiply = 0.75
+            }
+        }
+        remove_character_flag = eotg_flag_aug_published_cynic
+        eotg_aug_initiate_effect = yes
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 0 }
+        }
+        add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 2 }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 20  has_trait = just }
+            modifier = { add = -20  has_trait = greedy }
+        }
+    }
+
+    # "The back streets."
+    option = {
+        name = eotg_aug_init.018.b
+        trigger = { gold >= tiny_gold_value }
+        remove_short_term_gold = tiny_gold_value
+        eotg_aug_initiate_effect = yes
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 5 }
+        }
+        trigger_event = { id = eotg_aug_init.011  days = { 180 540 } }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = greedy }
+            modifier = { add = 20  has_trait = deceitful }
+            modifier = { add = -20  has_trait = craven }
+        }
+    }
+
+    # (physician access) "My own physician."
+    option = {
+        name = eotg_aug_init.018.c
+        trigger = {
+            eotg_has_physician_access = yes
+            gold >= { value = medium_gold_value  multiply = 0.75 }
+        }
+        remove_short_term_gold = { value = medium_gold_value  multiply = 0.75 }
+        eotg_aug_initiate_effect = yes
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 0 }
+        }
+        add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 3 }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = trusting }
+            modifier = { add = 20  has_trait = diligent }
+        }
+    }
+
+    # "Not yet."
+    option = {
+        name = eotg_aug_init.018.d
+        ai_chance = {
+            base = 10
+            modifier = { add = 20  has_trait = craven }
+            modifier = { add = 20  has_trait = zealous }
+        }
+    }
+
+    # (Phase 5 adds e "A patron will pay." -> eotg_story_aug_patron.)
+}
+
+
+# ── eotg_aug_init.020 ─────────────────────────────────────────────────────────
+# Choosing the Volunteer, the retainer decision hub
+# Caller: eotg_decision_augment_retainer.
+# Resource: a/b/c/d install on the chosen retainer (tier change, risk 0).
+# Candidate picks are non-violent (a knight or courtier to honour), each
+# followed by save_scope_as; never the victim picker.
+
+eotg_aug_init.020 = {
+    type = character_event
+    title = eotg_aug_init.020.t
+    desc = eotg_aug_init.020.desc
+    theme = martial_chivalry_focus
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_cand_best }
+        character = scope:eotg_cand_best
+        animation = personality_bold
+    }
+    lower_left_portrait = {
+        trigger = { exists = scope:eotg_cand_any }
+        character = scope:eotg_cand_any
+    }
+    lower_right_portrait = {
+        trigger = { exists = scope:eotg_cand_courtier }
+        character = scope:eotg_cand_courtier
+    }
+
+    immediate = {
+        hidden_effect = {
+            ordered_knight = {
+                limit = { eotg_aug_retainer_candidate = yes }
+                order_by = prowess
+                save_scope_as = eotg_cand_best
+            }
+            random_knight = {
+                limit = {
+                    eotg_aug_retainer_candidate = yes
+                    trigger_if = {
+                        limit = { exists = scope:eotg_cand_best }
+                        NOT = { this = scope:eotg_cand_best }
+                    }
+                }
+                save_scope_as = eotg_cand_any
+            }
+            random_courtier = {
+                limit = {
+                    eotg_aug_retainer_candidate = yes
+                    is_knight = no
+                }
+                save_scope_as = eotg_cand_courtier
+            }
+        }
+    }
+
+    # "[eotg_cand_best.GetName]"
+    option = {
+        name = eotg_aug_init.020.a
+        trigger = {
+            exists = scope:eotg_cand_best
+            gold >= minor_gold_value
+        }
+        remove_short_term_gold = minor_gold_value
+        scope:eotg_cand_best = { eotg_aug_retainer_install_effect = yes }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 10  has_trait = brave }
+        }
+    }
+
+    # "[eotg_cand_any.GetName]"
+    option = {
+        name = eotg_aug_init.020.b
+        trigger = {
+            exists = scope:eotg_cand_any
+            gold >= minor_gold_value
+        }
+        remove_short_term_gold = minor_gold_value
+        scope:eotg_cand_any = { eotg_aug_retainer_install_effect = yes }
+        ai_chance = {
+            base = 20
+            modifier = { add = 10  has_trait = arbitrary }
+            modifier = { add = 10  has_trait = generous }
+        }
+    }
+
+    # "[eotg_cand_courtier.GetName]"
+    option = {
+        name = eotg_aug_init.020.c
+        trigger = {
+            exists = scope:eotg_cand_courtier
+            gold >= minor_gold_value
+        }
+        remove_short_term_gold = minor_gold_value
+        scope:eotg_cand_courtier = { eotg_aug_retainer_install_effect = yes }
+        ai_chance = {
+            base = 20
+            modifier = { add = 10  has_trait = eccentric }
+            modifier = { add = 10  has_trait = generous }
+        }
+    }
+
+    # [callous] "Whoever survives it best." The best candidate at half price;
+    # they know what they were to you.
+    option = {
+        name = eotg_aug_init.020.d
+        trigger = {
+            has_trait = callous
+            exists = scope:eotg_cand_best
+            gold >= { value = minor_gold_value  multiply = 0.5 }
+        }
+        trait = callous
+        remove_short_term_gold = { value = minor_gold_value  multiply = 0.5 }
+        scope:eotg_cand_best = {
+            eotg_aug_initiate_effect = yes
+            eotg_add_fracture_risk = { AMOUNT = 0 }
+            add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+        }
+        eotg_aug_stress_cruelty_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = callous }
+            modifier = { add = 10  has_trait = greedy }
+        }
+    }
+
+    # "None of them."
+    option = {
+        name = eotg_aug_init.020.e
+        ai_chance = {
+            base = 10
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # (Phase 5: the second a/b/c/d resolution starts eotg_story_aug_retinue.)
+}

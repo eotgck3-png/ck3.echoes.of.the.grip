@@ -126,6 +126,7 @@ Tiger invocation that worked (Bash):
 10. **Shared opinion modifiers should not carry a government prefix** — `eotg_fringe_*` modifiers ended up used by six governments.
 11. **Name lists, CoAs, holy sites, and icons** were all deferred and all became tester-visible problems. Budget them early.
 12. Struggle behind `has_dlc_feature = the_fate_of_iberia` with no fallback means testers without the DLC see nothing and get no explanation.
+13. **`on_yearly_playable` is not a hook** — it is named only in `_on_actions.info` prose; the game fires `yearly_playable_pulse`. v1's augmentation, legacy and hub (`eotg_on_actions.txt`) on_actions all extended the dead name, so those events never fired. Found 2026-10-02 lifting augmentation; every remaining "lift as-is" system needs its hook rewired. `docs/tools/px_vocab_check.py` catches it (`docs/pitfalls.md` §12).
 
 ---
 

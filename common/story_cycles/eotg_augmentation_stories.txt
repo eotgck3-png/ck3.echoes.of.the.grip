@@ -1,0 +1,183 @@
+﻿# ── eotg_augmentation_stories.txt ───────────────────────────────────────────
+# Story cycles for the Cybernetic Augmentation system.
+#
+# eotg_story_aug_heir_arc — The Heir's Arc (thread T3,
+#   docs/specs/cybernetics_v2_phase3.md §4). The dynasty watches the ruler
+#   break. Shape copied from vanilla
+#   game/common/story_cycles/story_cycle_murders_at_court.txt (on_setup
+#   variables, on_owner_death, first_valid effect_group).
+#
+# Created by: eotg_on_yearly_aug_neurofractured_check (step 2), once per
+#   Neurofractured ruler with a primary heir aged 14+.
+# Fires: eotg_aug_heir.001 (stage 0), eotg_fracture.005 (stage 1),
+#   eotg_aug_heir.003 (stage 2), eotg_aug_heir.004 (stage 3, outside the
+#   Flicker band). heir.004 ends the story.
+#
+# Hidden (index §1 rule 3): visible left at its default (no), no
+# visualization block, no counters. The story's effect_group timing is the
+# arc's cooldown (index §1 rule 5).
+#
+# Story variables (prefixed per invariant 1; the spec calls them heir / stage /
+# heir_dread):
+#   eotg_heir        the watching heir (character)
+#   eotg_stage       0-4
+#   eotg_heir_dread  how far the heir has come to fear the ruler; weights
+#                    heir.004. Moved by heir.001, fracture.005, heir.003 and
+#                    fracture.026 (b).
+# ─────────────────────────────────────────────────────────────────────────────
+
+eotg_story_aug_heir_arc = {
+    # Hidden: `visible` defaults to no (game/common/story_cycles/
+    # _story_cycles.info). The line is left out on purpose: Tiger 1.17 does not
+    # know the field (vanilla uses it, e.g. book_translation_story_cycle.txt)
+    # and would report it as unknown. Never add visible = yes (index §1 rule 3).
+
+    on_setup = {
+        set_variable = {
+            name = eotg_heir
+            value = story_owner.primary_heir
+        }
+        set_variable = { name = eotg_stage  value = 0 }
+        set_variable = { name = eotg_heir_dread  value = 0 }
+        # Seeds only shift weights (index §4 T3). Absent at the birth: tier2.010
+        # (Phase 4b); intervention refused: tier3.020 (Phase 4c).
+        if = {
+            limit = {
+                var:eotg_heir = { has_character_flag = eotg_flag_aug_absent_at_birth }
+            }
+            change_variable = { name = eotg_heir_dread  add = 1 }
+        }
+        if = {
+            limit = {
+                story_owner = { has_character_flag = eotg_flag_aug_intervention_refused }
+            }
+            change_variable = { name = eotg_heir_dread  add = 1 }
+        }
+        if = {
+            limit = {
+                var:eotg_heir = {
+                    opinion = { target = scope:story.story_owner  value < -20 }
+                }
+            }
+            change_variable = { name = eotg_heir_dread  add = 1 }
+        }
+    }
+
+    on_end = {
+    }
+
+    on_owner_death = {
+        end_story = yes
+    }
+
+    effect_group = {
+        years = { 1 2 }
+        chance = 70
+
+        first_valid = {
+            # 0. The owner left the system entirely (no augmentation trait):
+            # nothing left to watch. Excision (eotg_aug_excision_effect) also
+            # ends the story directly; Total Integration keeps it
+            # (eotg_is_augmented_any includes eotg_total_integration).
+            triggered_effect = {
+                trigger = {
+                    story_owner = { eotg_is_augmented_any = no }
+                }
+                effect = {
+                    end_story = yes
+                }
+            }
+
+            # 1. The heir died or is no longer the primary heir: pass the arc
+            # to a new heir of 14+ one stage back, else end it.
+            triggered_effect = {
+                trigger = {
+                    OR = {
+                        NOT = { exists = var:eotg_heir }
+                        var:eotg_heir = { is_alive = no }
+                        NOT = {
+                            story_owner = { primary_heir ?= scope:story.var:eotg_heir }
+                        }
+                    }
+                }
+                effect = {
+                    if = {
+                        limit = {
+                            story_owner = {
+                                primary_heir ?= {
+                                    is_alive = yes
+                                    age >= 14
+                                }
+                            }
+                        }
+                        set_variable = {
+                            name = eotg_heir
+                            value = story_owner.primary_heir
+                        }
+                        change_variable = { name = eotg_stage  add = -1 }
+                        clamp_variable = { name = eotg_stage  min = 0  max = 4 }
+                    }
+                    else = {
+                        end_story = yes
+                    }
+                }
+            }
+
+            # 2. Concern
+            triggered_effect = {
+                trigger = { var:eotg_stage = 0 }
+                effect = {
+                    set_variable = { name = eotg_stage  value = 1 }
+                    story_owner = {
+                        trigger_event = { id = eotg_aug_heir.001  days = { 1 30 } }
+                    }
+                }
+            }
+
+            # 3. What the Heir Saw (existing event, re-homed from the random pool)
+            triggered_effect = {
+                trigger = { var:eotg_stage = 1 }
+                effect = {
+                    set_variable = { name = eotg_stage  value = 2 }
+                    story_owner = {
+                        trigger_event = { id = eotg_fracture.005  days = { 1 30 } }
+                    }
+                }
+            }
+
+            # 4. The Heir's Warning
+            triggered_effect = {
+                trigger = { var:eotg_stage = 2 }
+                effect = {
+                    set_variable = { name = eotg_stage  value = 3 }
+                    story_owner = {
+                        trigger_event = { id = eotg_aug_heir.003  days = { 1 30 } }
+                    }
+                }
+            }
+
+            # 5. The Heir's Choice — not while the owner is in the Flicker band
+            # (the heir acts when the ruler is visibly breaking). A Seamless
+            # owner has no eotg_fracture_risk (reads as Flicker), and
+            # eotg_aug_total_integration_effect sets stage 3: the heir must
+            # decide about the machine, so Seamless always qualifies.
+            triggered_effect = {
+                trigger = {
+                    var:eotg_stage = 3
+                    story_owner = {
+                        OR = {
+                            has_trait = eotg_total_integration
+                            eotg_aug_pressure_flicker = no
+                        }
+                    }
+                }
+                effect = {
+                    set_variable = { name = eotg_stage  value = 4 }
+                    story_owner = {
+                        trigger_event = { id = eotg_aug_heir.004  days = { 1 30 } }
+                    }
+                }
+            }
+        }
+    }
+}

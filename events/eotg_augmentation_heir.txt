@@ -1,0 +1,775 @@
+﻿# -- eotg_augmentation_heir.txt -----------------------------------------------
+# The Heir's Arc (thread T3; docs/specs/cybernetics_v2_phase3.md §4).
+# The dynasty watches the ruler break.
+#
+# eotg_aug_heir.001 -- Concern                 (story stage 0)
+#   (stage 1 is eotg_fracture.005 What the Heir Saw)
+# eotg_aug_heir.003 -- The Heir's Warning      (story stage 2)
+# eotg_aug_heir.004 -- The Heir's Choice       (story stage 3; ally / usurp / kill)
+# eotg_aug_heir.005 -- What Must Be Done       (to the heir, on a successful kill)
+#
+# Fires from: the story cycle eotg_story_aug_heir_arc
+#   (common/story_cycles/eotg_augmentation_stories.txt), created by
+#   eotg_on_yearly_aug_neurofractured_check; heir.005 from heir.004's immediate.
+# Cooldown: the story's effect_group timing (index §1 rule 5). No flags.
+# Each immediate saves the story as scope:eotg_heir_story and its eotg_heir
+# variable as scope:eotg_heir. Options move the story's eotg_heir_dread, which
+# weights heir.004.
+# Resource: every option moves eotg_fracture_risk on the ruler, except
+# heir.005 (the heir's event), which couples through d (tier change).
+# -----------------------------------------------------------------------------
+
+namespace = eotg_aug_heir
+
+
+# -- eotg_aug_heir.001 --------------------------------------------------------
+# Concern. The heir comes to you about what they have seen.
+# Caller: eotg_story_aug_heir_arc, stage 0.
+
+eotg_aug_heir.001 = {
+    type = character_event
+    title = eotg_aug_heir.001.t
+    desc = eotg_aug_heir.001.desc
+    theme = family
+
+    trigger = {
+        any_owned_story = {
+            story_type = eotg_story_aug_heir_arc
+            exists = var:eotg_heir
+            var:eotg_heir = { is_alive = yes }
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = worry
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_heir }
+        character = scope:eotg_heir
+        animation = worry
+    }
+
+    immediate = {
+        hidden_effect = {
+            random_owned_story = {
+                limit = { story_type = eotg_story_aug_heir_arc }
+                save_scope_as = eotg_heir_story
+                var:eotg_heir = { save_scope_as = eotg_heir }
+            }
+        }
+    }
+
+    # "Reassure them."
+    option = {
+        name = eotg_aug_heir.001.a
+        scope:eotg_heir = {
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+        }
+        scope:eotg_heir_story = { change_variable = { name = eotg_heir_dread  add = -1 } }
+        eotg_add_fracture_risk = { AMOUNT = -3 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 10  has_trait = gregarious }
+        }
+    }
+
+    # "This is not your concern."
+    option = {
+        name = eotg_aug_heir.001.b
+        scope:eotg_heir = {
+            add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+        }
+        scope:eotg_heir_story = { change_variable = { name = eotg_heir_dread  add = 1 } }
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = arrogant }
+            modifier = { add = 20  has_trait = shy }
+        }
+    }
+
+    # "Then learn to keep me, if it comes to that." The keeper flag weighs
+    # heir.004 toward ally and lets heir.003.c fall back on it.
+    option = {
+        name = eotg_aug_heir.001.c
+        scope:eotg_heir = {
+            add_character_flag = eotg_flag_aug_heir_keeper
+            add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
+        }
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = humble }
+            modifier = { add = 20  has_trait = trusting }
+            modifier = { add = -20  has_trait = paranoid }
+        }
+    }
+
+    # [honest] "Tell them the truth."
+    option = {
+        name = eotg_aug_heir.001.d
+        trigger = { has_trait = honest }
+        trait = honest
+        scope:eotg_heir = {
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+            add_character_modifier = { modifier = eotg_mod_aug_lesson_learning  years = 5 }
+        }
+        scope:eotg_heir_story = { change_variable = { name = eotg_heir_dread  add = -1 } }
+        eotg_add_fracture_risk = { AMOUNT = -3 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = honest }
+            modifier = { add = 10  has_trait = compassionate }
+        }
+    }
+
+    # [paranoid] "They want the throne."
+    option = {
+        name = eotg_aug_heir.001.e
+        trigger = { has_trait = paranoid }
+        trait = paranoid
+        scope:eotg_heir = {
+            add_opinion = { modifier = eotg_opinion_aug_fear  target = root  years = 10 }
+        }
+        scope:eotg_heir_story = { change_variable = { name = eotg_heir_dread  add = 1 } }
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        eotg_aug_stress_cruelty_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = paranoid }
+            modifier = { add = 10  has_trait = vengeful }
+        }
+    }
+}
+
+
+# -- eotg_aug_heir.003 --------------------------------------------------------
+# The Heir's Warning. "Step aside, or I will make you."
+# Caller: eotg_story_aug_heir_arc, stage 2.
+
+eotg_aug_heir.003 = {
+    type = character_event
+    title = eotg_aug_heir.003.t
+    desc = eotg_aug_heir.003.desc
+    theme = family
+
+    trigger = {
+        any_owned_story = {
+            story_type = eotg_story_aug_heir_arc
+            exists = var:eotg_heir
+            var:eotg_heir = { is_alive = yes }
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_heir }
+        character = scope:eotg_heir
+        animation = anger
+    }
+
+    immediate = {
+        hidden_effect = {
+            random_owned_story = {
+                limit = { story_type = eotg_story_aug_heir_arc }
+                save_scope_as = eotg_heir_story
+                var:eotg_heir = { save_scope_as = eotg_heir }
+            }
+        }
+    }
+
+    # "I'll seek treatment." The promise halves Excision's cost (Phase 3b,
+    # eotg_aug_end.001 / eotg_decision_aug_excision).
+    option = {
+        name = eotg_aug_heir.003.a
+        add_character_flag = { flag = eotg_flag_aug_promised_treatment  years = 2 }
+        scope:eotg_heir_story = { change_variable = { name = eotg_heir_dread  add = -1 } }
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        eotg_aug_stress_reject_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = humble }
+            modifier = { add = 20  has_trait = content }
+        }
+    }
+
+    # "Threaten them."
+    option = {
+        name = eotg_aug_heir.003.b
+        scope:eotg_heir = {
+            add_opinion = { modifier = eotg_opinion_aug_fear  target = root  years = 10 }
+        }
+        add_dread = 10
+        scope:eotg_heir_story = { change_variable = { name = eotg_heir_dread  add = 2 } }
+        eotg_aug_stress_cruelty_effect = yes
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = wrathful }
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = -20  has_trait = compassionate }
+        }
+    }
+
+    # "Then keep me." Regency with the heir at 50 if possible, else the
+    # keeper flag.
+    option = {
+        name = eotg_aug_heir.003.c
+        if = {
+            limit = {
+                basic_eligible_for_diarchy_trigger = yes
+                has_active_diarchy = no
+                scope:eotg_heir = { eotg_aug_keeper_candidate = { RULER = root } }
+            }
+            eotg_aug_start_containment_regency_effect = { KEEPER = scope:eotg_heir  SWING = 50 }
+        }
+        else = {
+            scope:eotg_heir = { add_character_flag = eotg_flag_aug_heir_keeper }
+        }
+        scope:eotg_heir_story = { change_variable = { name = eotg_heir_dread  add = -2 } }
+        eotg_add_fracture_risk = { AMOUNT = -10 }
+        eotg_aug_stress_reject_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = trusting }
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = -20  has_trait = ambitious }
+        }
+    }
+
+    # [just] "Then judge me."
+    option = {
+        name = eotg_aug_heir.003.d
+        trigger = { has_trait = just }
+        trait = just
+        add_prestige = -100
+        scope:eotg_heir_story = { change_variable = { name = eotg_heir_dread  add = -1 } }
+        eotg_add_fracture_risk = { AMOUNT = -3 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = just }
+            modifier = { add = 10  has_trait = honest }
+        }
+    }
+
+    # [wrathful] "Get out."
+    option = {
+        name = eotg_aug_heir.003.e
+        trigger = { has_trait = wrathful }
+        trait = wrathful
+        scope:eotg_heir = {
+            add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 5 }
+        }
+        scope:eotg_heir_story = { change_variable = { name = eotg_heir_dread  add = 2 } }
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        stress_impact = {
+            wrathful = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = wrathful }
+            modifier = { add = 10  has_trait = impatient }
+        }
+    }
+}
+
+
+# -- eotg_aug_heir.004 --------------------------------------------------------
+# The Heir's Choice. The heir decides in immediate (ally / usurp / kill),
+# weighted by the story's eotg_heir_dread; the ruler's options follow the
+# outcome. The story ends here.
+# Caller: eotg_story_aug_heir_arc, stage 3 (outside the Flicker band).
+#
+# Weights (spec §4): ally 40 - 15 x dread (min 5), +20 heir compassionate or
+# honest, +20 keeper flag or diarch, +20 heir opinion >= 20; usurp 30 + 10 x
+# dread, +20 ambitious, +10 arrogant; kill 10 + 10 x dread, +25 callous or
+# sadistic, +15 vengeful, x0 compassionate. The dread terms are clamped
+# (inline script value min) so a negative dread cannot drive a weight below 0.
+# Outcome: scope:eotg_heir_choice = flag:ally / usurp / kill_failed /
+# kill_success. Ally sets eotg_flag_aug_heir_ally (read by eotg_fracture.027's
+# abdication weight).
+
+eotg_aug_heir.004 = {
+    type = character_event
+    title = eotg_aug_heir.004.t
+    desc = {
+        desc = eotg_aug_heir.004.desc
+        triggered_desc = {
+            trigger = { has_character_flag = eotg_flag_aug_premonition }
+            desc = eotg_aug_heir.004.desc_premonition
+        }
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_heir_choice = flag:ally }
+                desc = eotg_aug_heir.004.desc_ally
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_heir_choice = flag:usurp }
+                desc = eotg_aug_heir.004.desc_usurp
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_heir_choice = flag:kill_failed }
+                desc = eotg_aug_heir.004.desc_kill
+            }
+            desc = eotg_aug_heir.004.desc_silent
+        }
+    }
+    theme = family
+
+    trigger = {
+        any_owned_story = {
+            story_type = eotg_story_aug_heir_arc
+            exists = var:eotg_heir
+            var:eotg_heir = { is_alive = yes }
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_heir }
+        character = scope:eotg_heir
+        triggered_animation = {
+            trigger = { scope:eotg_heir_choice = flag:ally }
+            animation = worry
+        }
+        triggered_animation = {
+            trigger = { scope:eotg_heir_choice = flag:usurp }
+            animation = personality_bold
+        }
+        animation = anger
+    }
+
+    immediate = {
+        hidden_effect = {
+            random_owned_story = {
+                limit = { story_type = eotg_story_aug_heir_arc }
+                save_scope_as = eotg_heir_story
+                var:eotg_heir = { save_scope_as = eotg_heir }
+            }
+        }
+        # The heir decides
+        random_list = {
+            # Ally
+            40 = {
+                min = 5
+                modifier = {
+                    add = {
+                        value = scope:eotg_heir_story.var:eotg_heir_dread
+                        multiply = -15
+                    }
+                }
+                modifier = {
+                    add = 20
+                    scope:eotg_heir = {
+                        OR = {
+                            has_trait = compassionate
+                            has_trait = honest
+                        }
+                    }
+                }
+                modifier = {
+                    add = 20
+                    OR = {
+                        scope:eotg_heir = { has_character_flag = eotg_flag_aug_heir_keeper }
+                        diarch ?= scope:eotg_heir
+                    }
+                }
+                modifier = {
+                    add = 20
+                    scope:eotg_heir = {
+                        opinion = { target = root  value >= 20 }
+                    }
+                }
+                save_scope_value_as = { name = eotg_heir_choice  value = flag:ally }
+            }
+            # Usurp
+            30 = {
+                modifier = {
+                    add = {
+                        value = scope:eotg_heir_story.var:eotg_heir_dread
+                        multiply = 10
+                        min = -25
+                    }
+                }
+                modifier = {
+                    add = 20
+                    scope:eotg_heir = { has_trait = ambitious }
+                }
+                modifier = {
+                    add = 10
+                    scope:eotg_heir = { has_trait = arrogant }
+                }
+                save_scope_value_as = { name = eotg_heir_choice  value = flag:usurp }
+            }
+            # Kill
+            10 = {
+                modifier = {
+                    add = {
+                        value = scope:eotg_heir_story.var:eotg_heir_dread
+                        multiply = 10
+                        min = -10
+                    }
+                }
+                modifier = {
+                    add = 25
+                    scope:eotg_heir = {
+                        OR = {
+                            has_trait = callous
+                            has_trait = sadistic
+                        }
+                    }
+                }
+                modifier = {
+                    add = 15
+                    scope:eotg_heir = { has_trait = vengeful }
+                }
+                modifier = {
+                    factor = 0
+                    scope:eotg_heir = { has_trait = compassionate }
+                }
+                # 50% (+20 at heir intrigue >= 15) that the attempt succeeds
+                random_list = {
+                    50 = {
+                        modifier = {
+                            add = 20
+                            scope:eotg_heir = { intrigue >= 15 }
+                        }
+                        save_scope_value_as = { name = eotg_heir_choice  value = flag:kill_success }
+                    }
+                    50 = {
+                        modifier = {
+                            add = -20
+                            scope:eotg_heir = { intrigue >= 15 }
+                        }
+                        save_scope_value_as = { name = eotg_heir_choice  value = flag:kill_failed }
+                    }
+                }
+            }
+        }
+
+        # Ally: a regency at 40 if one can start, else the heir stands by you
+        if = {
+            limit = { scope:eotg_heir_choice = flag:ally }
+            add_character_flag = eotg_flag_aug_heir_ally
+            if = {
+                limit = {
+                    basic_eligible_for_diarchy_trigger = yes
+                    has_active_diarchy = no
+                    scope:eotg_heir = { eotg_aug_keeper_candidate = { RULER = root } }
+                }
+                eotg_aug_start_containment_regency_effect = { KEEPER = scope:eotg_heir  SWING = 40 }
+            }
+            else = {
+                scope:eotg_heir = {
+                    add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+                }
+            }
+        }
+        # Usurp: a landed vassal heir raises the Warrant; otherwise a regency
+        # at swing 90 (vanilla regency lets the diarch overthrow at >= 95);
+        # if the heir already holds the diarchy, the swing goes to 90.
+        else_if = {
+            limit = { scope:eotg_heir_choice = flag:usurp }
+            if = {
+                limit = {
+                    scope:eotg_heir = {
+                        is_landed = yes
+                        is_vassal_of = root
+                    }
+                }
+                scope:eotg_heir = { save_scope_as = eotg_warrant_vassal }
+                eotg_aug_raise_warrant_effect = yes
+            }
+            else_if = {
+                limit = {
+                    basic_eligible_for_diarchy_trigger = yes
+                    has_active_diarchy = no
+                    scope:eotg_heir = { eotg_aug_keeper_candidate = { RULER = root } }
+                }
+                eotg_aug_start_containment_regency_effect = { KEEPER = scope:eotg_heir  SWING = 90 }
+            }
+            else_if = {
+                limit = {
+                    has_active_diarchy = yes
+                    diarch ?= scope:eotg_heir
+                }
+                set_diarchy_swing = 90
+            }
+            else = {
+                scope:eotg_heir = {
+                    add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 5 }
+                }
+            }
+        }
+        # Kill, success: the heir acts (eotg_aug_heir.005 fires to them)
+        else_if = {
+            limit = { scope:eotg_heir_choice = flag:kill_success }
+            save_scope_as = eotg_parent_ruler
+            scope:eotg_heir = {
+                trigger_event = { id = eotg_aug_heir.005  days = { 3 7 } }
+            }
+        }
+
+        # The story ends after any outcome
+        hidden_effect = {
+            scope:eotg_heir_story = { end_story = yes }
+        }
+    }
+
+    # Ally — "Thank them."
+    option = {
+        name = eotg_aug_heir.004.ally_a
+        trigger = { scope:eotg_heir_choice = flag:ally }
+        eotg_add_fracture_risk = { AMOUNT = -10 }
+        ai_chance = {
+            base = 50
+            modifier = { add = 20  has_trait = humble }
+            modifier = { add = 20  has_trait = compassionate }
+        }
+    }
+
+    # Ally — [arrogant] "I did not ask for this."
+    option = {
+        name = eotg_aug_heir.004.ally_b
+        trigger = {
+            scope:eotg_heir_choice = flag:ally
+            has_trait = arrogant
+        }
+        trait = arrogant
+        scope:eotg_heir = {
+            add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+        }
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = arrogant }
+            modifier = { add = 10  has_trait = stubborn }
+        }
+    }
+
+    # Usurp — "Let them have it."
+    option = {
+        name = eotg_aug_heir.004.usurp_a
+        trigger = { scope:eotg_heir_choice = flag:usurp }
+        add_prestige = -200
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        eotg_aug_stress_reject_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 20  has_trait = craven }
+        }
+    }
+
+    # Usurp — "Fight." Imprison the heir if they are a courtier.
+    option = {
+        name = eotg_aug_heir.004.usurp_b
+        trigger = { scope:eotg_heir_choice = flag:usurp }
+        add_dread = 30
+        if = {
+            limit = {
+                scope:eotg_heir = {
+                    is_courtier_of = root
+                    is_imprisoned = no
+                }
+            }
+            imprison = { target = scope:eotg_heir  type = dungeon }
+            eotg_aug_stress_tyranny_effect = yes
+        }
+        eotg_add_fracture_risk = { AMOUNT = 10 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 20  has_trait = wrathful }
+        }
+    }
+
+    # Kill, failed — "Imprison them."
+    option = {
+        name = eotg_aug_heir.004.kill_a
+        trigger = { scope:eotg_heir_choice = flag:kill_failed }
+        if = {
+            limit = {
+                scope:eotg_heir = {
+                    is_alive = yes
+                    is_imprisoned = no
+                }
+            }
+            imprison = { target = scope:eotg_heir  type = dungeon }
+        }
+        eotg_aug_stress_tyranny_effect = yes
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        ai_chance = {
+            base = 50
+            modifier = { add = 20  has_trait = just }
+            modifier = { add = 20  has_trait = paranoid }
+        }
+    }
+
+    # Kill, failed — "Forgive them."
+    option = {
+        name = eotg_aug_heir.004.kill_b
+        trigger = { scope:eotg_heir_choice = flag:kill_failed }
+        scope:eotg_heir = {
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+        }
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = forgiving }
+            modifier = { add = 20  has_trait = compassionate }
+        }
+    }
+
+    # Kill, failed — [vengeful] "Execute them."
+    option = {
+        name = eotg_aug_heir.004.kill_c
+        trigger = {
+            scope:eotg_heir_choice = flag:kill_failed
+            has_trait = vengeful
+        }
+        trait = vengeful
+        scope:eotg_heir = {
+            death = { death_reason = death_execution  killer = root }
+        }
+        eotg_aug_stress_murder_effect = yes
+        eotg_add_fracture_risk = { AMOUNT = 15 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = vengeful }
+            modifier = { add = 10  has_trait = wrathful }
+        }
+    }
+
+    # Kill, succeeded — the ruler sees only the quiet before it. — (the
+    # ruler dies in eotg_aug_heir.005 days later; the heir's event couples).
+    option = {
+        name = eotg_aug_heir.004.silent_a
+        trigger = { scope:eotg_heir_choice = flag:kill_success }
+        ai_chance = {
+            base = 100
+            modifier = { add = 10  has_trait = paranoid }
+            modifier = { add = 10  has_trait = trusting }
+        }
+    }
+}
+
+
+# -- eotg_aug_heir.005 --------------------------------------------------------
+# What Must Be Done. Fires to the HEIR (root = the heir). They kill the
+# Neurofractured ruler (scope:eotg_parent_ruler, saved by heir.004); the
+# player inherits by normal succession. on_death (eotg_on_death_aug_hardware,
+# Phase 2) sets var:eotg_parent_hardware and the fractured flag on the heir,
+# so d installs exactly as eotg_aug_init.013.a would.
+# Caller: eotg_aug_heir.004 immediate (Kill, success).
+
+eotg_aug_heir.005 = {
+    type = character_event
+    title = eotg_aug_heir.005.t
+    desc = eotg_aug_heir.005.desc
+    theme = death
+
+    trigger = {
+        exists = scope:eotg_parent_ruler
+        scope:eotg_parent_ruler = { is_alive = yes }
+    }
+
+    left_portrait = {
+        character = root
+        animation = grief
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_parent_ruler }
+        character = scope:eotg_parent_ruler
+        animation = dead
+        animate_if_dead = yes
+    }
+
+    immediate = {
+        scope:eotg_parent_ruler = {
+            death = { death_reason = death_murder  killer = root }
+        }
+    }
+
+    # "It was mercy." —
+    option = {
+        name = eotg_aug_heir.005.a
+        eotg_aug_stress_murder_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = forgiving }
+            modifier = { add = 20  has_trait = calm }
+        }
+    }
+
+    # [compassionate] "It was murder." —
+    option = {
+        name = eotg_aug_heir.005.b
+        trigger = { has_trait = compassionate }
+        trait = compassionate
+        stress_impact = { base = major_stress_impact_gain }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = compassionate }
+            modifier = { add = 10  has_trait = honest }
+        }
+    }
+
+    # [callous] "It was necessary." —
+    option = {
+        name = eotg_aug_heir.005.c
+        trigger = { has_trait = callous }
+        trait = callous
+        add_prestige = 100
+        eotg_aug_stress_murder_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = callous }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+
+    # "Take the implants." As eotg_aug_init.013.a (fractured branch: the
+    # parent was Neurofractured, risk 25, hidden flaw, the parent's echo).
+    # Coupling: tier change.
+    option = {
+        name = eotg_aug_heir.005.d
+        trigger = {
+            eotg_is_augmented_any = no
+            gold >= tiny_gold_value
+        }
+        remove_short_term_gold = tiny_gold_value
+        eotg_aug_initiate_effect = yes
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 25 }
+            add_character_flag = eotg_flag_aug_hidden_flaw
+            if = {
+                limit = {
+                    exists = scope:eotg_parent_ruler
+                    scope:eotg_parent_ruler = {
+                        has_variable = eotg_aug_voice
+                        var:eotg_aug_voice >= 2
+                    }
+                }
+                eotg_aug_voice_advance_effect = { STAGE = 1 }
+            }
+        }
+        eotg_aug_parent_hardware_clear_effect = yes
+        eotg_aug_stress_murder_effect = yes
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = -30  has_trait = zealous }
+        }
+    }
+}

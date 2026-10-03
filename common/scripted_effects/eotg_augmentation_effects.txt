@@ -1,0 +1,1035 @@
+﻿# ── eotg_augmentation_effects.txt ────────────────────────────────────────────
+# Scripted effects for the Cybernetic Augmentation system.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Tier state (spec docs/specs/cybernetics_track.md §4.3) ──────────────────
+# The tier is the XP on eotg_cybernetics: 0 Augmented / 50 Enhanced /
+# 100 Overclocked. The engine has no on_action for a track level change, so the
+# synergy refresh lives inside the one effect allowed to change XP.
+
+# Remove all 15 tier synergy modifiers.
+eotg_aug_clear_synergy_effect = {
+    remove_character_modifier = eotg_mod_aug_martial_bonus
+    remove_character_modifier = eotg_mod_aug_steward_bonus
+    remove_character_modifier = eotg_mod_aug_intrigue_bonus
+    remove_character_modifier = eotg_mod_aug_learning_bonus
+    remove_character_modifier = eotg_mod_aug_diplomacy_bonus
+    remove_character_modifier = eotg_mod_enh_martial_bonus
+    remove_character_modifier = eotg_mod_enh_steward_bonus
+    remove_character_modifier = eotg_mod_enh_intrigue_bonus
+    remove_character_modifier = eotg_mod_enh_learning_bonus
+    remove_character_modifier = eotg_mod_enh_diplomacy_bonus
+    remove_character_modifier = eotg_mod_oc_martial_bonus
+    remove_character_modifier = eotg_mod_oc_steward_bonus
+    remove_character_modifier = eotg_mod_oc_intrigue_bonus
+    remove_character_modifier = eotg_mod_oc_learning_bonus
+    remove_character_modifier = eotg_mod_oc_diplomacy_bonus
+}
+
+# Clear, then apply the current tier's synergy by highest_skill (martial fallback).
+# Applies nothing to Neurofractured or unaugmented characters.
+eotg_aug_refresh_synergy_effect = {
+    eotg_aug_clear_synergy_effect = yes
+    if = {
+        limit = { eotg_is_aug_tier3 = yes }
+        if = {
+            limit = { highest_skill = martial }
+            add_character_modifier = { modifier = eotg_mod_oc_martial_bonus }
+        }
+        else_if = {
+            limit = { highest_skill = stewardship }
+            add_character_modifier = { modifier = eotg_mod_oc_steward_bonus }
+        }
+        else_if = {
+            limit = { highest_skill = intrigue }
+            add_character_modifier = { modifier = eotg_mod_oc_intrigue_bonus }
+        }
+        else_if = {
+            limit = { highest_skill = learning }
+            add_character_modifier = { modifier = eotg_mod_oc_learning_bonus }
+        }
+        else_if = {
+            limit = { highest_skill = diplomacy }
+            add_character_modifier = { modifier = eotg_mod_oc_diplomacy_bonus }
+        }
+        else = {
+            add_character_modifier = { modifier = eotg_mod_oc_martial_bonus }
+        }
+    }
+    else_if = {
+        limit = { eotg_is_aug_tier2 = yes }
+        if = {
+            limit = { highest_skill = martial }
+            add_character_modifier = { modifier = eotg_mod_enh_martial_bonus }
+        }
+        else_if = {
+            limit = { highest_skill = stewardship }
+            add_character_modifier = { modifier = eotg_mod_enh_steward_bonus }
+        }
+        else_if = {
+            limit = { highest_skill = intrigue }
+            add_character_modifier = { modifier = eotg_mod_enh_intrigue_bonus }
+        }
+        else_if = {
+            limit = { highest_skill = learning }
+            add_character_modifier = { modifier = eotg_mod_enh_learning_bonus }
+        }
+        else_if = {
+            limit = { highest_skill = diplomacy }
+            add_character_modifier = { modifier = eotg_mod_enh_diplomacy_bonus }
+        }
+        else = {
+            add_character_modifier = { modifier = eotg_mod_enh_martial_bonus }
+        }
+    }
+    else_if = {
+        limit = { eotg_is_aug_tier1 = yes }
+        if = {
+            limit = { highest_skill = martial }
+            add_character_modifier = { modifier = eotg_mod_aug_martial_bonus }
+        }
+        else_if = {
+            limit = { highest_skill = stewardship }
+            add_character_modifier = { modifier = eotg_mod_aug_steward_bonus }
+        }
+        else_if = {
+            limit = { highest_skill = intrigue }
+            add_character_modifier = { modifier = eotg_mod_aug_intrigue_bonus }
+        }
+        else_if = {
+            limit = { highest_skill = learning }
+            add_character_modifier = { modifier = eotg_mod_aug_learning_bonus }
+        }
+        else_if = {
+            limit = { highest_skill = diplomacy }
+            add_character_modifier = { modifier = eotg_mod_aug_diplomacy_bonus }
+        }
+        else = {
+            add_character_modifier = { modifier = eotg_mod_aug_martial_bonus }
+        }
+    }
+}
+
+# Initiation: add the track trait (engine default XP 0 = Augmented) and its synergy.
+# Used for rulers and knights. Callers: eotg_aug_init.001-.005 (accept options,
+# incl. the Phase 1 trait options init.001.d/e, .002.d, .003.d, .004.e, .005.d),
+# eotg_aug_init.002 (c, knight), eotg_aug_tier1.004 (a, d: knight).
+# Phase 2: eotg_aug_init.006-.018 install options, init.017.c (knight),
+# init.020.d, eotg_aug_child_install_effect, eotg_aug_retainer_install_effect.
+eotg_aug_initiate_effect = {
+    add_trait = eotg_cybernetics
+    eotg_aug_refresh_synergy_effect = yes
+}
+
+# THE ONLY place add_trait_xp on eotg_cybernetics may appear (spec §2.2 rule 2).
+# Sets XP to exactly $XP$ (0, 50 or 100) and refreshes the synergy modifier.
+# Callers: eotg_aug_tier1.002 (a) XP 50; eotg_aug_tier2.003 (a, c, d) XP 100;
+#          eotg_decision_partial_removal XP 0; eotg_decision_overclock_regression XP 50.
+eotg_aug_set_integration_effect = {
+    if = {
+        limit = { has_trait = eotg_cybernetics }
+        add_trait_xp = {
+            trait = eotg_cybernetics
+            value = {
+                value = $XP$
+                subtract = "has_trait_xp(eotg_cybernetics)"
+            }
+        }
+        eotg_aug_refresh_synergy_effect = yes
+    }
+}
+
+# Apply Neurofracture education distortion modifier
+eotg_apply_neurofracture_distortion = {
+    eotg_aug_clear_synergy_effect = yes
+
+    if = {
+        limit = { highest_skill = martial }
+        add_character_modifier = { modifier = eotg_mod_nf_martial_distortion }
+    }
+    else_if = {
+        limit = { highest_skill = stewardship }
+        add_character_modifier = { modifier = eotg_mod_nf_steward_distortion }
+    }
+    else_if = {
+        limit = { highest_skill = intrigue }
+        add_character_modifier = { modifier = eotg_mod_nf_intrigue_distortion }
+    }
+    else_if = {
+        limit = { highest_skill = learning }
+        add_character_modifier = { modifier = eotg_mod_nf_learning_distortion }
+    }
+    else_if = {
+        limit = { highest_skill = diplomacy }
+        add_character_modifier = { modifier = eotg_mod_nf_diplomacy_distortion }
+    }
+    else = {
+        add_character_modifier = { modifier = eotg_mod_nf_martial_distortion }
+    }
+}
+
+# Remove all augmentation modifiers — call on death or full removal
+eotg_clean_all_aug_modifiers = {
+    remove_character_modifier = eotg_mod_aug_martial_bonus
+    remove_character_modifier = eotg_mod_aug_steward_bonus
+    remove_character_modifier = eotg_mod_aug_intrigue_bonus
+    remove_character_modifier = eotg_mod_aug_learning_bonus
+    remove_character_modifier = eotg_mod_aug_diplomacy_bonus
+    remove_character_modifier = eotg_mod_enh_martial_bonus
+    remove_character_modifier = eotg_mod_enh_steward_bonus
+    remove_character_modifier = eotg_mod_enh_intrigue_bonus
+    remove_character_modifier = eotg_mod_enh_learning_bonus
+    remove_character_modifier = eotg_mod_enh_diplomacy_bonus
+    remove_character_modifier = eotg_mod_oc_martial_bonus
+    remove_character_modifier = eotg_mod_oc_steward_bonus
+    remove_character_modifier = eotg_mod_oc_intrigue_bonus
+    remove_character_modifier = eotg_mod_oc_learning_bonus
+    remove_character_modifier = eotg_mod_oc_diplomacy_bonus
+    remove_character_modifier = eotg_mod_nf_martial_distortion
+    remove_character_modifier = eotg_mod_nf_steward_distortion
+    remove_character_modifier = eotg_mod_nf_intrigue_distortion
+    remove_character_modifier = eotg_mod_nf_learning_distortion
+    remove_character_modifier = eotg_mod_nf_diplomacy_distortion
+    remove_character_modifier = eotg_mod_implant_calibrated
+    remove_character_modifier = eotg_mod_illegal_implants
+    remove_character_modifier = eotg_mod_withdrawn_from_court
+    remove_character_modifier = eotg_mod_oc_regression_recovery
+    remove_character_modifier = eotg_mod_aug_affect_dampened
+    remove_character_modifier = eotg_mod_aug_running_hot
+    # Lesson modifiers (cybernetics_v2 B6)
+    remove_character_modifier = eotg_mod_aug_lesson_prowess
+    remove_character_modifier = eotg_mod_aug_lesson_learning
+    remove_character_modifier = eotg_mod_aug_lesson_intrigue
+    remove_character_modifier = eotg_mod_aug_lesson_martial
+    # Phase 2 states (cybernetics_v2_phase2.md §4)
+    remove_character_modifier = eotg_mod_aug_removal_withdrawal
+    remove_character_modifier = eotg_mod_aug_infection
+    remove_character_modifier = eotg_mod_aug_clean_install
+    remove_character_modifier = eotg_mod_aug_bridge_strain
+    # Phase 3b states (cybernetics_v2_phase3.md §5)
+    remove_character_modifier = eotg_mod_aug_restrained
+    remove_character_modifier = eotg_mod_aug_sedated
+    remove_character_modifier = eotg_mod_aug_excision_recovery
+}
+
+# Increment fracture risk variable — expects $AMOUNT$ parameter.
+# A Seamless character (eotg_total_integration, Phase 3b) has no risk: the
+# variable was removed with the seam, and nothing may recreate it (e.g. the
+# Heir's Arc options, which can reach a Seamless owner).
+eotg_add_fracture_risk = {
+    if = {
+        limit = { NOT = { has_trait = eotg_total_integration } }
+        if = {
+            limit = { NOT = { has_variable = eotg_fracture_risk } }
+            set_variable = { name = eotg_fracture_risk  value = 0 }
+        }
+        change_variable = { name = eotg_fracture_risk  add = $AMOUNT$ }
+        clamp_variable = { name = eotg_fracture_risk  min = 0  max = 100 }
+    }
+}
+
+# Trigger the Neural Cascade (fracture transformation)
+eotg_trigger_neurofracture = {
+    remove_trait = eotg_cybernetics    # discards the track XP
+    add_trait = eotg_neurofractured
+    eotg_apply_neurofracture_distortion = yes
+    set_variable = { name = eotg_fracture_risk  value = 0 }
+    # Open the Neurofractured cooldown here so eotg_on_yearly_aug_neurofractured_check,
+    # which runs later in the same yearly_playable_pulse, cannot roll fracture.002-.007
+    # days after the cascade. Same duration the on_action uses (11 months, B4: expires
+    # before the next pulse, so no same-day race); no event trigger reads it.
+    add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 11 }
+    trigger_event = { id = eotg_fracture.0001  days = 1 }
+}
+
+# Heal the scoped character's wound completely: the implant replaces the damaged
+# tissue. `wounded` is a trait GROUP (wounded_1/2/3); add_trait/remove_trait do
+# not accept a group, which is why v1's `remove_trait = wounded` did nothing.
+# Pattern copied from vanilla events/activities/pilgrimage_activity/
+# pilgrimage_events.txt (remove whichever rank is held; a character holds one).
+# Callers: eotg_aug_init.001 (a, d, e), eotg_aug_init.004 (a, e).
+eotg_aug_heal_wounds_effect = {
+    if = {
+        limit = { has_trait = wounded_1 }
+        remove_trait = wounded_1
+    }
+    else_if = {
+        limit = { has_trait = wounded_2 }
+        remove_trait = wounded_2
+    }
+    else_if = {
+        limit = { has_trait = wounded_3 }
+        remove_trait = wounded_3
+    }
+}
+
+# Reduce the scoped character's wound by one rank (wounded_3 -> 2 -> 1 -> healed).
+# Vanilla pattern: common/scripted_effects/20_health_effects.txt, risky treatment
+# critical success (remove the rank, add the one below, so the loss is visible).
+# Caller: eotg_aug_init.001 (b), inside a 50% random.
+eotg_aug_ease_wound_effect = {
+    if = {
+        limit = { has_trait = wounded_1 }
+        remove_trait = wounded_1
+    }
+    else_if = {
+        limit = { has_trait = wounded_2 }
+        remove_trait = wounded_2
+        add_trait = wounded_1
+    }
+    else_if = {
+        limit = { has_trait = wounded_3 }
+        remove_trait = wounded_3
+        add_trait = wounded_2
+    }
+}
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Shared foundations — docs/specs/cybernetics_v2_phase0.md §2
+# Defined in Phase 0; callers arrive in Phases 1-6.
+# ═════════════════════════════════════════════════════════════════════════════
+
+# ── Victim picker (phase 0 §2.2, audit §1.5) ────────────────────────────────
+# Run in the ruler's scope. Picks one courtier and saves them as scope:$NAME$.
+# If no candidate exists nothing is saved: callers guard with
+# `exists = scope:$NAME$` and their loc carries a "no one was near" variant.
+# Callers flag anyone they hurt:
+#   add_character_flag = { flag = eotg_flag_aug_breach_victim  days = 30 }
+# FAMILY_FACTOR: 0.05 Overclocked / Flicker / Fracture band; 0.25 Storm band and
+# Court Massacre; 0 where family must never be hit.
+# The ruler is saved as a temporary scope so the family test does not depend on
+# root (a caller may run this on a saved scope, not the event root).
+# Weighted random_courtier shape: vanilla `weight = { base  modifier = { factor } }`.
+eotg_aug_pick_victim_effect = {
+    save_temporary_scope_as = eotg_aug_victim_owner
+    random_courtier = {
+        limit = { eotg_aug_victim_candidate = yes }
+        weight = {
+            base = 100
+            # Guards and knights stand closest
+            modifier = {
+                factor = 1.5
+                is_knight = yes
+            }
+            modifier = {
+                factor = $FAMILY_FACTOR$
+                OR = {
+                    is_close_family_of = scope:eotg_aug_victim_owner
+                    is_spouse_of = scope:eotg_aug_victim_owner
+                }
+            }
+            modifier = {
+                factor = 0.25
+                age < 16
+            }
+        }
+        save_scope_as = $NAME$
+    }
+}
+
+# Second victim for multi-victim sites: same body, never the first one.
+# EXCLUDE is the NAME given to the first eotg_aug_pick_victim_effect call.
+eotg_aug_pick_second_victim_effect = {
+    save_temporary_scope_as = eotg_aug_victim_owner
+    random_courtier = {
+        limit = {
+            eotg_aug_victim_candidate = yes
+            # The first pick may have found no one; guard before comparing.
+            trigger_if = {
+                limit = { exists = scope:$EXCLUDE$ }
+                NOT = { this = scope:$EXCLUDE$ }
+            }
+        }
+        weight = {
+            base = 100
+            modifier = {
+                factor = 1.5
+                is_knight = yes
+            }
+            modifier = {
+                factor = $FAMILY_FACTOR$
+                OR = {
+                    is_close_family_of = scope:eotg_aug_victim_owner
+                    is_spouse_of = scope:eotg_aug_victim_owner
+                }
+            }
+            modifier = {
+                factor = 0.25
+                age < 16
+            }
+        }
+        save_scope_as = $NAME$
+    }
+}
+
+# ── Leaving the system (phase 0 §2.3; index §1 rule 2) ──────────────────────
+# Removes every augmentation trait and all trace state. Used by Rejection
+# failure, Remove Implants and Excision instead of setting XP. Adds no
+# withdrawal modifier: callers choose their own consequence.
+# Phase 3b: eotg_total_integration and the Neurofractured treatment flags.
+# Phase 5 ends an owned Countdown story.
+eotg_aug_remove_all_effect = {
+    if = {
+        limit = { has_trait = eotg_cybernetics }
+        remove_trait = eotg_cybernetics
+    }
+    if = {
+        limit = { has_trait = eotg_neurofractured }
+        remove_trait = eotg_neurofractured
+    }
+    if = {
+        limit = { has_trait = eotg_total_integration }
+        remove_trait = eotg_total_integration
+    }
+    remove_character_flag = eotg_flag_aug_restrained
+    remove_character_flag = eotg_flag_aug_sedated
+    remove_character_flag = eotg_flag_aug_containment_regency
+    remove_character_flag = eotg_flag_aug_may_embrace
+    eotg_clean_all_aug_modifiers = yes
+    remove_variable = eotg_fracture_risk
+    remove_variable = eotg_aug_voice
+    remove_variable = eotg_aug_focus
+    remove_character_flag = eotg_flag_aug_vendor_safe
+    remove_character_flag = eotg_flag_aug_vendor_bold
+}
+
+# Removes ONE physical-loss trait, worst first: blind > one_legged > maimed >
+# one_eyed. Same if/else_if shape as eotg_aug_heal_wounds_effect.
+# Guard: eotg_has_physical_loss.
+eotg_aug_restore_loss_effect = {
+    if = {
+        limit = { has_trait = blind }
+        remove_trait = blind
+    }
+    else_if = {
+        limit = { has_trait = one_legged }
+        remove_trait = one_legged
+    }
+    else_if = {
+        limit = { has_trait = maimed }
+        remove_trait = maimed
+    }
+    else_if = {
+        limit = { has_trait = one_eyed }
+        remove_trait = one_eyed
+    }
+}
+
+# Thread T1, the voice: raise eotg_aug_voice to $STAGE$ (1-4). Never lowers it.
+eotg_aug_voice_advance_effect = {
+    if = {
+        limit = {
+            OR = {
+                NOT = { has_variable = eotg_aug_voice }
+                var:eotg_aug_voice < $STAGE$
+            }
+        }
+        set_variable = { name = eotg_aug_voice  value = $STAGE$ }
+    }
+}
+
+# ── Stress helpers (phase 0 §2.4) ───────────────────────────────────────────
+# One trait-keyed stress_impact each, vanilla values from
+# common/script_values/00_stress_values.txt. Callers add any `base` in their
+# own stress_impact block. Every morally loaded option uses one of these.
+
+# Undergo or deepen implants
+eotg_aug_stress_surgery_effect = {
+    stress_impact = {
+        craven = medium_stress_impact_gain
+        zealous = medium_stress_impact_gain
+        humble = minor_stress_impact_gain
+        brave = minor_stress_impact_loss
+        cynical = minor_stress_impact_loss
+        ambitious = minor_stress_impact_loss
+    }
+}
+
+# Lean into the machine
+eotg_aug_stress_embrace_effect = {
+    stress_impact = {
+        zealous = medium_stress_impact_gain
+        content = minor_stress_impact_gain
+        humble = minor_stress_impact_gain
+        cynical = minor_stress_impact_loss
+        ambitious = minor_stress_impact_loss
+        eccentric = minor_stress_impact_loss
+    }
+}
+
+# Refuse or restrain it
+eotg_aug_stress_reject_effect = {
+    stress_impact = {
+        ambitious = minor_stress_impact_gain
+        arrogant = minor_stress_impact_gain
+        cynical = minor_stress_impact_gain
+        content = minor_stress_impact_loss
+        zealous = minor_stress_impact_loss
+        humble = minor_stress_impact_loss
+    }
+}
+
+# Harm someone, non-lethal
+eotg_aug_stress_wound_effect = {
+    stress_impact = {
+        compassionate = medium_stress_impact_gain
+        forgiving = minor_stress_impact_gain
+        just = minor_stress_impact_gain
+        sadistic = minor_stress_impact_loss
+        wrathful = minor_stress_impact_loss
+    }
+}
+
+# Kill or execute
+eotg_aug_stress_murder_effect = {
+    stress_impact = {
+        compassionate = major_stress_impact_gain
+        just = medium_stress_impact_gain
+        forgiving = medium_stress_impact_gain
+        sadistic = medium_stress_impact_loss
+        wrathful = minor_stress_impact_loss
+    }
+}
+
+# Menace, mass fear
+eotg_aug_stress_cruelty_effect = {
+    stress_impact = {
+        compassionate = minor_stress_impact_gain
+        forgiving = minor_stress_impact_gain
+        shy = minor_stress_impact_gain
+        sadistic = minor_stress_impact_loss
+        arrogant = minor_stress_impact_loss
+        wrathful = minor_stress_impact_loss
+    }
+}
+
+# Arrest, punish vassals
+eotg_aug_stress_tyranny_effect = {
+    stress_impact = {
+        just = medium_stress_impact_gain
+        compassionate = minor_stress_impact_gain
+        trusting = minor_stress_impact_gain
+        arbitrary = minor_stress_impact_loss
+        paranoid = minor_stress_impact_loss
+        vengeful = minor_stress_impact_loss
+    }
+}
+
+# Deceive
+eotg_aug_stress_lie_effect = {
+    stress_impact = {
+        honest = medium_stress_impact_gain
+        just = minor_stress_impact_gain
+        deceitful = minor_stress_impact_loss
+    }
+}
+
+# Ignore symptoms or skip maintenance
+eotg_aug_stress_neglect_effect = {
+    stress_impact = {
+        diligent = minor_stress_impact_gain
+        paranoid = minor_stress_impact_gain
+        lazy = minor_stress_impact_loss
+    }
+}
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Phase 2 helpers — docs/specs/cybernetics_v2_phase2.md (entry hooks)
+# ═════════════════════════════════════════════════════════════════════════════
+
+# The Neural Bridge works: remove whichever of incapable / infirm is held
+# (incapable first, the worse one), +50 prestige.
+# Callers: eotg_aug_init.008 (immediate success branch; b at 50%). The ambitious
+# "full current" path (init.007.e flag) also pays two lessons.
+eotg_aug_bridge_success_effect = {
+    if = {
+        limit = { has_trait = incapable }
+        remove_trait = incapable
+    }
+    else_if = {
+        limit = { has_trait = infirm }
+        remove_trait = infirm
+    }
+    add_prestige = 50
+    if = {
+        limit = { has_character_flag = eotg_flag_aug_bridge_full_current }
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_intrigue  years = 5 }
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_martial  years = 5 }
+        remove_character_flag = eotg_flag_aug_bridge_full_current
+    }
+}
+
+# A Parent's Hardware is settled: every option of eotg_aug_init.013 clears the
+# offer and the fractured flag (spec "All options").
+eotg_aug_parent_hardware_clear_effect = {
+    hidden_effect = {
+        remove_variable = eotg_parent_hardware
+        remove_character_flag = eotg_flag_aug_hardware_fractured
+    }
+}
+
+# Run on the sick child (scope:eotg_sick_child): install, cure, risk 10, flag
+# for Phase 6 and the Heir's Arc (index §3.3 eotg_flag_aug_child_patient).
+# Callers: eotg_aug_init.014 (a, c at 60%, d).
+eotg_aug_child_install_effect = {
+    eotg_aug_initiate_effect = yes
+    if = {
+        limit = { has_trait = ill }
+        remove_trait = ill
+    }
+    if = {
+        limit = { has_trait = incapable }
+        remove_trait = incapable
+    }
+    hidden_effect = {
+        set_variable = { name = eotg_fracture_risk  value = 10 }
+    }
+    add_character_flag = eotg_flag_aug_child_patient
+}
+
+# Run on the chosen retainer: install at risk 0 and gratitude toward root.
+# Callers: eotg_aug_init.020 (a, b, c). The callous option (d) writes its own
+# block with unease instead of gratitude.
+eotg_aug_retainer_install_effect = {
+    eotg_aug_initiate_effect = yes
+    eotg_add_fracture_risk = { AMOUNT = 0 }
+    add_opinion = { modifier = eotg_opinion_aug_grateful_patient  target = root  years = 10 }
+}
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Phase 3a helpers — docs/specs/cybernetics_v2_phase3.md §2 (Neurofractured mode)
+# ═════════════════════════════════════════════════════════════════════════════
+
+# Personality scramble. One swap to the vanilla opposite, read from `opposites`
+# in game/common/traits/00_traits.txt: 16 two-way pairs (32 entries) plus the
+# compassionate/callous/sadistic row (callous and sadistic are also each other's
+# opposite there, so a character holds at most one of the three and the swaps
+# below never collide). Remove before add. `eccentric` is never touched; its
+# opposites (fickle, stubborn) mean an eccentric holds neither, so the
+# fickle/stubborn entries never reach one. Fallback (weight 1) only when the
+# character holds none of the 34 source traits.
+# Callers: eotg_fracture.018 (a, b, c twice, d, e).
+eotg_aug_scramble_personality_effect = {
+    random_list = {
+        10 = { trigger = { has_trait = brave }  remove_trait = brave  add_trait = craven }
+        10 = { trigger = { has_trait = craven }  remove_trait = craven  add_trait = brave }
+        10 = { trigger = { has_trait = calm }  remove_trait = calm  add_trait = wrathful }
+        10 = { trigger = { has_trait = wrathful }  remove_trait = wrathful  add_trait = calm }
+        10 = { trigger = { has_trait = chaste }  remove_trait = chaste  add_trait = lustful }
+        10 = { trigger = { has_trait = lustful }  remove_trait = lustful  add_trait = chaste }
+        10 = { trigger = { has_trait = content }  remove_trait = content  add_trait = ambitious }
+        10 = { trigger = { has_trait = ambitious }  remove_trait = ambitious  add_trait = content }
+        10 = { trigger = { has_trait = diligent }  remove_trait = diligent  add_trait = lazy }
+        10 = { trigger = { has_trait = lazy }  remove_trait = lazy  add_trait = diligent }
+        10 = { trigger = { has_trait = fickle }  remove_trait = fickle  add_trait = stubborn }
+        10 = { trigger = { has_trait = stubborn }  remove_trait = stubborn  add_trait = fickle }
+        10 = { trigger = { has_trait = forgiving }  remove_trait = forgiving  add_trait = vengeful }
+        10 = { trigger = { has_trait = vengeful }  remove_trait = vengeful  add_trait = forgiving }
+        10 = { trigger = { has_trait = generous }  remove_trait = generous  add_trait = greedy }
+        10 = { trigger = { has_trait = greedy }  remove_trait = greedy  add_trait = generous }
+        10 = { trigger = { has_trait = gregarious }  remove_trait = gregarious  add_trait = shy }
+        10 = { trigger = { has_trait = shy }  remove_trait = shy  add_trait = gregarious }
+        10 = { trigger = { has_trait = honest }  remove_trait = honest  add_trait = deceitful }
+        10 = { trigger = { has_trait = deceitful }  remove_trait = deceitful  add_trait = honest }
+        10 = { trigger = { has_trait = humble }  remove_trait = humble  add_trait = arrogant }
+        10 = { trigger = { has_trait = arrogant }  remove_trait = arrogant  add_trait = humble }
+        10 = { trigger = { has_trait = just }  remove_trait = just  add_trait = arbitrary }
+        10 = { trigger = { has_trait = arbitrary }  remove_trait = arbitrary  add_trait = just }
+        10 = { trigger = { has_trait = patient }  remove_trait = patient  add_trait = impatient }
+        10 = { trigger = { has_trait = impatient }  remove_trait = impatient  add_trait = patient }
+        10 = { trigger = { has_trait = temperate }  remove_trait = temperate  add_trait = gluttonous }
+        10 = { trigger = { has_trait = gluttonous }  remove_trait = gluttonous  add_trait = temperate }
+        10 = { trigger = { has_trait = trusting }  remove_trait = trusting  add_trait = paranoid }
+        10 = { trigger = { has_trait = paranoid }  remove_trait = paranoid  add_trait = trusting }
+        10 = { trigger = { has_trait = zealous }  remove_trait = zealous  add_trait = cynical }
+        10 = { trigger = { has_trait = cynical }  remove_trait = cynical  add_trait = zealous }
+        10 = { trigger = { has_trait = compassionate }  remove_trait = compassionate  add_trait = callous }
+        10 = { trigger = { has_trait = callous }  remove_trait = callous  add_trait = compassionate }
+        10 = { trigger = { has_trait = sadistic }  remove_trait = sadistic  add_trait = compassionate }
+        # Fallback: none of the source traits held
+        1 = {
+            trigger = {
+                NOR = {
+                    has_trait = brave  has_trait = craven
+                    has_trait = calm  has_trait = wrathful
+                    has_trait = chaste  has_trait = lustful
+                    has_trait = content  has_trait = ambitious
+                    has_trait = diligent  has_trait = lazy
+                    has_trait = fickle  has_trait = stubborn
+                    has_trait = forgiving  has_trait = vengeful
+                    has_trait = generous  has_trait = greedy
+                    has_trait = gregarious  has_trait = shy
+                    has_trait = honest  has_trait = deceitful
+                    has_trait = humble  has_trait = arrogant
+                    has_trait = just  has_trait = arbitrary
+                    has_trait = patient  has_trait = impatient
+                    has_trait = temperate  has_trait = gluttonous
+                    has_trait = trusting  has_trait = paranoid
+                    has_trait = zealous  has_trait = cynical
+                    has_trait = compassionate  has_trait = callous
+                    has_trait = sadistic
+                }
+            }
+            add_trait = paranoid
+        }
+    }
+}
+
+# Forget the closest person: the first held of soulmate > best friend > lover
+# > friend. Saves them as scope:eotg_forgotten (callers name them in loc,
+# guarded on exists) and gives them unease for 5 years.
+# Callers: eotg_fracture.018 (a, at 25%).
+eotg_aug_forget_relation_effect = {
+    if = {
+        limit = { any_relation = { type = soulmate } }
+        random_relation = {
+            type = soulmate
+            save_scope_as = eotg_forgotten
+        }
+        remove_relation_soulmate = scope:eotg_forgotten
+    }
+    else_if = {
+        limit = { any_relation = { type = best_friend } }
+        random_relation = {
+            type = best_friend
+            save_scope_as = eotg_forgotten
+        }
+        remove_relation_best_friend = scope:eotg_forgotten
+    }
+    else_if = {
+        limit = { any_relation = { type = lover } }
+        random_relation = {
+            type = lover
+            save_scope_as = eotg_forgotten
+        }
+        remove_relation_lover = scope:eotg_forgotten
+    }
+    else_if = {
+        limit = { any_relation = { type = friend } }
+        random_relation = {
+            type = friend
+            save_scope_as = eotg_forgotten
+        }
+        remove_relation_friend = scope:eotg_forgotten
+    }
+    if = {
+        limit = { exists = scope:eotg_forgotten }
+        scope:eotg_forgotten = {
+            add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+        }
+    }
+}
+
+# The Warrant made real (audit §1.4). Run in the ruler's scope; the caller
+# saves scope:eotg_warrant_vassal. Shape copied from vanilla
+# prelude_events_0010_screw_over_guest_effect
+# (events/activities/coronation_activity/prelude_events.txt:236), including its
+# `NOT = { exists = faction_war }` guard: discontent on a faction already at war
+# does nothing. Liberty first ("bind the mad ruler"), independence as fallback;
+# the vanilla factions and CBs run any war. No title is referenced.
+# Saves scope:eotg_warrant_result = flag:discontent / flag:faction /
+# flag:circulated so the caller's desc can say what happened.
+# Callers: eotg_fracture.006 (immediate), eotg_fracture.025 (b, 30%),
+# eotg_aug_heir.004 (usurp, landed heir).
+eotg_aug_raise_warrant_effect = {
+    if = {
+        limit = {
+            any_targeting_faction = { NOT = { exists = faction_war } }
+        }
+        every_targeting_faction = {
+            limit = { NOT = { exists = faction_war } }
+            add_faction_discontent = major_discontent_gain
+        }
+        save_scope_value_as = { name = eotg_warrant_result  value = flag:discontent }
+    }
+    else_if = {
+        limit = {
+            scope:eotg_warrant_vassal = {
+                can_create_faction = { type = liberty_faction  target = root }
+            }
+        }
+        scope:eotg_warrant_vassal = {
+            create_faction = { type = liberty_faction  target = root }
+        }
+        save_scope_value_as = { name = eotg_warrant_result  value = flag:faction }
+    }
+    else_if = {
+        limit = {
+            scope:eotg_warrant_vassal = {
+                can_create_faction = { type = independence_faction  target = root }
+            }
+        }
+        scope:eotg_warrant_vassal = {
+            create_faction = { type = independence_faction  target = root }
+        }
+        save_scope_value_as = { name = eotg_warrant_result  value = flag:faction }
+    }
+    else = {
+        # The warrant circulates
+        every_vassal = {
+            limit = { opinion = { target = root  value < 0 } }
+            add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 5 }
+        }
+        save_scope_value_as = { name = eotg_warrant_result  value = flag:circulated }
+    }
+}
+
+# Containment Regency (Q7). Run in the ruler's scope. Vanilla precedent for the
+# three diarchy calls: events/bookmark_events.txt:2247-2249 (designate_diarch,
+# try_start_diarchy = regency, set_diarchy_swing, called on the liege).
+# Callers: eotg_fracture.025 (a 60, c 30, e 80), eotg_fracture.026 (a 50),
+# eotg_aug_heir.003 (c 50), eotg_aug_heir.004 (ally 40, usurp 90).
+eotg_aug_start_containment_regency_effect = {
+    if = {
+        limit = {
+            basic_eligible_for_diarchy_trigger = yes
+            has_active_diarchy = no
+            $KEEPER$ = {
+                is_alive = yes
+                is_adult = yes
+                is_imprisoned = no
+            }
+        }
+        designate_diarch = $KEEPER$
+        try_start_diarchy = regency
+        set_diarchy_swing = $SWING$
+        add_character_flag = eotg_flag_aug_containment_regency
+        # Q7 FALLBACK, commented on purpose. Build it ONLY if the in-game check
+        # shows the engine ends a regency whose liege fails
+        # regency_for_personal_reasons_trigger
+        # (game/common/scripted_triggers/00_diarchy_scripted_triggers.txt:194).
+        # isolating_modifier is one of that trigger's OR terms (line 205); it is
+        # defined in game/common/modifiers/06_ce1_modifiers.txt:1127.
+        # add_character_modifier = { modifier = isolating_modifier  years = 3 }
+    }
+}
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Phase 3b — the endgames (docs/specs/cybernetics_v2_phase3.md §6)
+# ═════════════════════════════════════════════════════════════════════════════
+
+# The Cascade kills. Caller: eotg_fracture.027 (death outcome).
+eotg_aug_cascade_death_effect = {
+    death = { death_reason = eotg_death_cascade }
+}
+
+# Excision survived: out of the system entirely (index §1 rule 2), with the
+# recovery and the scar; the Heir's Arc has nothing left to watch.
+# Caller: eotg_aug_excision_surgery_effect (both survival branches).
+eotg_aug_excision_effect = {
+    eotg_aug_remove_all_effect = yes
+    add_character_modifier = { modifier = eotg_mod_aug_excision_recovery  years = 5 }
+    if = {
+        limit = { NOT = { has_trait = scarred } }
+        add_trait = scarred
+    }
+    if = {
+        limit = { eotg_aug_has_heir_arc = yes }
+        random_owned_story = {
+            limit = { story_type = eotg_story_aug_heir_arc }
+            end_story = yes
+        }
+    }
+}
+
+# Total Integration (Q9): "Seamless" replaces eotg_neurofractured. Personality
+# goes (the 36 personality traits, including eccentric; remove_trait on a trait
+# not held does nothing), the close relations go, the vassals recoil, the
+# Heir's Arc jumps to the Choice (the heir must decide about the machine), and
+# the voice is retired at 5 (no seam, no second voice). Relation removal shape:
+# vanilla events/health_events.txt:6568 (every_relation, remove_relation_X =
+# prev). Fires eotg_aug_end.010.
+# Callers: eotg_fracture.027 (total integration outcome), eotg_aug_end.009 (a, c).
+eotg_aug_total_integration_effect = {
+    remove_trait = eotg_neurofractured
+    add_trait = eotg_total_integration
+    # The self goes
+    remove_trait = brave
+    remove_trait = craven
+    remove_trait = calm
+    remove_trait = wrathful
+    remove_trait = chaste
+    remove_trait = lustful
+    remove_trait = content
+    remove_trait = ambitious
+    remove_trait = diligent
+    remove_trait = lazy
+    remove_trait = fickle
+    remove_trait = stubborn
+    remove_trait = forgiving
+    remove_trait = vengeful
+    remove_trait = generous
+    remove_trait = greedy
+    remove_trait = gregarious
+    remove_trait = shy
+    remove_trait = honest
+    remove_trait = deceitful
+    remove_trait = humble
+    remove_trait = arrogant
+    remove_trait = just
+    remove_trait = arbitrary
+    remove_trait = patient
+    remove_trait = impatient
+    remove_trait = temperate
+    remove_trait = gluttonous
+    remove_trait = trusting
+    remove_trait = paranoid
+    remove_trait = zealous
+    remove_trait = cynical
+    remove_trait = compassionate
+    remove_trait = callous
+    remove_trait = sadistic
+    remove_trait = eccentric
+    eotg_clean_all_aug_modifiers = yes
+    hidden_effect = {
+        remove_variable = eotg_fracture_risk
+        set_variable = { name = eotg_aug_voice  value = 5 }
+        remove_character_flag = eotg_flag_aug_restrained
+        remove_character_flag = eotg_flag_aug_sedated
+        remove_character_flag = eotg_flag_aug_containment_regency
+    }
+    # The people who knew them
+    every_relation = {
+        type = soulmate
+        remove_relation_soulmate = prev
+    }
+    every_relation = {
+        type = best_friend
+        remove_relation_best_friend = prev
+    }
+    every_relation = {
+        type = lover
+        remove_relation_lover = prev
+    }
+    every_relation = {
+        type = friend
+        remove_relation_friend = prev
+    }
+    every_vassal = {
+        add_opinion = { modifier = eotg_opinion_aug_unmade  target = root }
+    }
+    # Heir's Arc: stage 3, so the story's next tick fires the Choice
+    # (eotg_story_aug_heir_arc stage 5 accepts a Seamless owner).
+    if = {
+        limit = { eotg_aug_has_heir_arc = yes }
+        random_owned_story = {
+            limit = { story_type = eotg_story_aug_heir_arc }
+            set_variable = { name = eotg_stage  value = 3 }
+        }
+    }
+    trigger_event = { id = eotg_aug_end.010  days = 1 }
+}
+
+# Excision's price (mirror: eotg_aug_can_afford_excision). Nothing when the
+# surgeons were already in the room or the successor paid.
+# Callers: eotg_aug_end.001 (a, c, d).
+eotg_aug_excision_pay_effect = {
+    if = {
+        limit = { NOT = { has_character_flag = eotg_flag_aug_excision_free } }
+        remove_short_term_gold = {
+            value = major_gold_value
+            if = {
+                limit = { has_character_flag = eotg_flag_aug_promised_treatment }
+                multiply = 0.5
+            }
+        }
+    }
+}
+
+# The surgery (spec §7 end.001). Run on the patient. Surgical odds, not
+# fracture risk: death 40 Neurofractured / 25 Overclocked / 15 Enhanced
+# (DEATH_BASE 15, +10 from the craven option: DEATH_BASE 25), -15 with a
+# physician (thread T5), -10 with the Heir's Arc promise; survive maimed 30;
+# survive clean 30, +15 with a physician. BRAVE = yes moves the maimed weight
+# to clean and pays 100 prestige on survival. Survivors get
+# eotg_aug_excision_effect and eotg_aug_end.002. Death is vanilla
+# death_treatment (game/common/deathreasons/00_event_deaths.txt:214).
+# Callers: eotg_aug_end.001 (a: 15/no, c: 25/no, d: 15/yes), inside
+# hidden_effect (the desc gives the odds in words).
+eotg_aug_excision_surgery_effect = {
+    random_list = {
+        # Death on the table
+        $DEATH_BASE$ = {
+            min = 2
+            modifier = {
+                add = 25
+                has_trait = eotg_neurofractured
+            }
+            modifier = {
+                add = 10
+                eotg_is_aug_tier3 = yes
+            }
+            modifier = {
+                add = -15
+                eotg_has_physician_access = yes
+            }
+            modifier = {
+                add = -10
+                has_character_flag = eotg_flag_aug_promised_treatment
+            }
+            death = { death_reason = death_treatment }
+        }
+        # Survive, maimed
+        30 = {
+            modifier = {
+                factor = 0
+                always = $BRAVE$
+            }
+            eotg_aug_excision_effect = yes
+            if = {
+                limit = { NOT = { has_trait = maimed } }
+                add_trait = maimed
+            }
+            save_scope_value_as = { name = eotg_excision_outcome  value = flag:maimed }
+        }
+        # Survive, clean
+        30 = {
+            modifier = {
+                add = 15
+                eotg_has_physician_access = yes
+            }
+            modifier = {
+                add = 30
+                always = $BRAVE$
+            }
+            eotg_aug_excision_effect = yes
+            save_scope_value_as = { name = eotg_excision_outcome  value = flag:clean }
+        }
+    }
+    if = {
+        limit = { is_alive = yes }
+        if = {
+            limit = { always = $BRAVE$ }
+            add_prestige = 100
+        }
+        remove_character_flag = eotg_flag_aug_excision_free
+        remove_character_flag = eotg_flag_aug_promised_treatment
+        trigger_event = { id = eotg_aug_end.002  days = 3 }
+    }
+}
+
+# Into Restraints (spec §7 end.030). Run on the abdicating ruler, whose
+# primary heir the caller has checked. Player hand-off precedent:
+# common/decisions/dlc_decisions/tgp/tgp_dynastic_cycle_decisions.txt:2155-2170
+# (set_player_character to the heir, then step down) and
+# events/diarchy_events/diarchy_events.txt:10580 (set_player_character in an
+# option, only onto an AI character). Voluntary abdication is `depose = yes`,
+# as vanilla events/stress_events/stress_threshold_events.txt:16775.
+# Callers: eotg_aug_end.030 (a, b).
+eotg_aug_abdicate_effect = {
+    save_scope_as = eotg_old_ruler
+    primary_heir = { save_scope_as = eotg_successor }
+    if = {
+        limit = {
+            is_ai = no
+            scope:eotg_successor = { is_ai = yes }
+        }
+        set_player_character = scope:eotg_successor
+    }
+    depose = yes
+    add_character_modifier = { modifier = eotg_mod_aug_restrained }
+    add_character_flag = eotg_flag_aug_abdicated
+    scope:eotg_successor = {
+        trigger_event = { id = eotg_aug_end.031  days = 30 }
+    }
+}

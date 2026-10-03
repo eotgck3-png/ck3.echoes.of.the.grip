@@ -139,7 +139,7 @@ Every agent ends its report with exactly this, so the orchestrator can dispatch 
 ## 5. Rules that bind every agent
 
 1. `eotg_` prefix on everything. **Except** landed titles, which are tier-first: `e_eotg_`, `k_eotg_`, `d_eotg_`, `c_eotg_`, `b_eotg_`.
-2. Nothing in Gates 2–4 is built while Gate 1 is open, except lift-as-is copies that are needed *for* Gate 1 (cultures, religions).
+2. Nothing in Gates 2–4 is built while Gate 1 is open, except lift-as-is copies that are needed *for* Gate 1 (cultures, religions), and **mod-exclusive systems** built against the temporary map (decided 2026-10-02; cybernetics first). Those must not reference specific titles, provinces, characters, cultures or faiths; anything that would is recorded as a deferral for after the real map lands.
 3. Additive on_action extension only. Cooldown authority in the on_action, never duplicated in the event trigger.
 4. Every flavor event couples to its system's signature resource.
 5. Never `replace_path` a folder you do not ship in the same commit.
@@ -159,5 +159,5 @@ Every agent ends its report with exactly this, so the orchestrator can dispatch 
 | 0 Skeleton | in progress | `descriptor.mod` + `.mod` + `.gitignore` at root; first region briefs | — |
 | 1 World loads | not started | Gate 0; human-supplied `map_data/` files; build order for the first region | — |
 | 2 Governments | not started | Gate 1 | — |
-| 3 Systems | not started | Gate 1 | — |
+| 3 Systems | in progress against the temporary map — cybernetics first: lifted 2026-10-02, converted 2026-10-03 to one XP-track trait `eotg_cybernetics` (`docs/specs/cybernetics_track.md`), awaiting in-game check §9.11 on the temporary map | temporary map (art delivered 2026-10-03: 2 trait icons, 4 modifier icons, 3 decision illustrations) | 2026-10-03 cybernetics track: PASS (static) |
 | 4 Presentation | not started (space-map presentation shipped early in `gfx/`: shaders + terrain material pipeline — `docs/stellar_rivers_shader.md`, `docs/terrain_materials.md`, 2026-09-21/24) | Gate 1 | — |

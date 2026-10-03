@@ -16,7 +16,7 @@ Eight subagents in `.claude/agents/` split the work by ownership; `docs/agent_wo
 | "How does vanilla do X" — read-only | `eotg-vanilla-scout` |
 | Turn the lore briefs for a region into a build order; send questions to the vault | `eotg-intake` (writes `docs/specs/regions/` only) |
 
-The main session orchestrates, relays handoffs, updates the gate board in `docs/agent_workflow.md` §6, and is the only thing that commits. Nothing in Gates 2–4 is built while Gate 1 (a world that loads) is open.
+The main session orchestrates, relays handoffs, updates the gate board in `docs/agent_workflow.md` §6, and is the only thing that commits. Nothing in Gates 2–4 is built while Gate 1 (a world that loads) is open — except **mod-exclusive systems** (decided 2026-10-02), which are built and tested against a **temporary map** until the real one lands. Cybernetics (augmentation) is the first. Such systems must not depend on specific titles, provinces, characters, cultures or faiths, so they survive the map swap.
 
 ## World data comes through `intake/`
 The setting arrives as Markdown **briefs** per region (`intake/regions/<region>/`, shared material in `intake/setting/`), written from the Obsidian lore vault by an external Gemini agent against `intake/templates/`. They are reference for agents to read, not input for a program: `eotg-intake` turns a region folder into a build order in `docs/specs/regions/`, and the cartographer / scripter / localizer author the script from the briefs and that order. Facts the briefs do not settle go back to the vault as questions, never into script as guesses. The mod ships its **own `map_data/`** (decided 2026-09-21); province ids come from the mod's `definition.csv`.
@@ -33,7 +33,7 @@ The setting arrives as Markdown **briefs** per region (`intake/regions/<region>/
 9. Nikios Khanate content is deferred — do not build it.
 
 ## File placement
-Use the table in `OLD PROJECT VERSION/CLAUDE.md` — it is still correct for 1.19 (`common/religion/religion_types/`, `common/bookmarks/bookmarks/`, etc.). Add `map_data/` and `common/dynasties/` to it.
+Use the table in `OLD PROJECT VERSION/CLAUDE.md` — it is still correct for 1.19 (`common/religion/religion_types/`, `common/bookmarks/bookmarks/`, etc.). Add `map_data/` and `common/dynasties/` to it, plus `common/story_cycles/`, `common/deathreasons/` and `common/scripted_character_templates/` (cybernetics v2, 2026-10-03; shapes per vanilla, cited in `docs/specs/cybernetics_v2.md`).
 
 ## Validation
 Black map, neon borders, or errors in files the mod does not touch: see `docs/pitfalls.md` first — all three have known causes.
@@ -43,6 +43,20 @@ Tiger 1.17.0 against CK3 1.19. From the Bash tool:
 "/c/Users/river/tools/ck3-tiger-windows-v1.17.0/ck3-tiger.exe" --game "D:/SteamLibrary/steamapps/common/Crusader Kings III/game" "echoes_of_the_grip.mod"
 ```
 Known benign (Tiger predates the 1.19 religion folder rename): ~48 faith/religion-path lookups, ~24 culture lookups, 2 `error(filename)` on the religion folders. Do not "fix" those. Everything else is real. Write Tiger logs to the scratchpad, not the repo.
+
+**Note (2026-10-03):** the installed game is now 1.20.0.3, and Tiger 1.17 targets 1.18.3. `16` errors inside vanilla `20_health_effects.txt` (`change_spiritual_fulfillment`, `has_personal_tenet_flag`), reached through `increase_wounds_effect`, are version noise. The repo has no `echoes_of_the_grip.mod` yet (a Gate 0 item), so run Tiger with a scratch descriptor whose `path=` points at the repo.
+
+**PX Toolkit checks** run alongside Tiger on every script or loc change. They come from the VS Code extension `jdeffner.px-toolkit`, and each catches things the others miss:
+```bash
+# language server: braces, missing values, BOM/loc-file format, dangling event ids, required loc (~10 s once vanilla is cached)
+ELECTRON_RUN_AS_NODE=1 "/c/Users/river/AppData/Local/Programs/Microsoft VS Code/Code.exe" docs/tools/px_lsp_diagnostics.js common events localization
+# engine vocabulary: unknown effects/triggers/modifiers, undefined traits/modifiers/events, dead vanilla hooks
+python docs/tools/px_vocab_check.py common events
+# PX's Event Graph + loc coverage as JSON, then reachability (invariant 4) and missing eotg_ loc
+ELECTRON_RUN_AS_NODE=1 "/c/Users/river/AppData/Local/Programs/Microsoft VS Code/Code.exe" docs/tools/px_lsp_diagnostics.js events --request=eventGraph --request=locCoverage --out=<scratchpad>
+python docs/tools/px_event_report.py <scratchpad>
+```
+Neither checks scope (e.g. `add_gold` inside `capital_county`); Tiger does. Known-benign PX findings: `missing-required-loc` on `building_walls_*` (vanilla has no loc for them either).
 
 ## Reference sources, in precedence order
 0. **`docs/pitfalls.md`** — repeated issues and their confirm-before-you-change steps. Read it BEFORE debugging any visual or shader problem; every entry is something this project has got wrong more than once. Add to it whenever something costs more than one attempt.

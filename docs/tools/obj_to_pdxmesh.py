@@ -178,8 +178,12 @@ def check_winding(pos, nrm, tri):
 # court_scene.shader is simply where it looked; it has nothing to do with the mod. The custom
 # effect belongs in the .asset meshsettings, as `shader` plus `shader_file`, which does override.
 # These are the names vanilla's own holding meshes embed.
+# Vanilla effect names only. A name that is not declared in pdxmesh.shader silently resolves
+# against a default file and the mesh draws wrong; a NEW Effect added to that shader does not
+# register at all. snap_to_terrain_alpha_to_coverage is here for the marker's beam slot - it is
+# the only vanilla effect that both snaps to terrain and blends.
 MESH_SHADERS = ("standard", "standard_atlas", "snap_to_terrain", "snap_to_terrain_atlas",
-                "decal_local")
+                "snap_to_terrain_alpha_to_coverage", "decal_local")
 
 
 def build_part(obj_path, scale, offset_y, flip_v, flip_winding, drop_y, force, label):

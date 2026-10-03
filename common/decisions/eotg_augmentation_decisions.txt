@@ -1,0 +1,548 @@
+﻿# ── eotg_augmentation_decisions.txt ─────────────────────────────────────────
+# Decisions for the Cybernetic Augmentation system.
+#
+# eotg_decision_partial_removal       — Enhanced → Augmented (XP to 0) (scaled gold)
+# eotg_decision_overclock_regression  — Overclocked → Enhanced (XP to 50), halves fracture risk (scaled gold)
+# eotg_decision_maintenance_protocol  — Periodic calibration (all tiers, reduces fracture risk)
+#
+# Costs are vanilla realm-relative script values (cybernetics_v2 B5). Cost shape
+# with a conditional discount copied from vanilla
+# common/decisions/00_diarchy_decisions.txt (diarch_attempt_to_overthrow_liege).
+# The engine blocks an unaffordable `cost` by itself (skill reference
+# decisions/_decisions.info, `minimum_cost` note; vanilla puts no gold test in
+# is_valid), so is_valid carries no gold check that could drift from the cost.
+#
+# Regression is open at any stress (cybernetics_v2 B3): prudence must be possible.
+# The discount (stress level 2+, or the Intervention flag from Phase 4c) is 25%.
+# ─────────────────────────────────────────────────────────────────────────────
+
+eotg_decision_partial_removal = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/eotg_decision_partial_removal.dds"
+    }
+    ai_check_interval = 120
+
+    is_shown = {
+        eotg_is_aug_tier2 = yes
+    }
+
+    cost = {
+        gold = {
+            value = medium_gold_value
+            if = {
+                limit = {
+                    OR = {
+                        stress_level >= 2
+                        has_character_flag = eotg_flag_aug_intervention_discount
+                    }
+                }
+                multiply = 0.75
+            }
+        }
+    }
+
+    effect = {
+        eotg_aug_set_integration_effect = { XP = 0 }
+        stress_impact = { base = medium_stress_impact_loss }
+        custom_tooltip = eotg_decision_partial_removal_tooltip
+    }
+
+    # AI only regresses when it is hurting
+    ai_potential = {
+        stress_level >= 2
+    }
+    ai_will_do = {
+        base = 5
+        modifier = { add = 20  stress >= 300 }
+        modifier = { add = 10  has_trait = content }
+        modifier = { add = -15  has_trait = ambitious }
+    }
+}
+
+
+eotg_decision_overclock_regression = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/eotg_decision_overclock_regression.dds"
+    }
+    ai_check_interval = 120
+
+    is_shown = {
+        eotg_is_aug_tier3 = yes
+    }
+
+    cost = {
+        gold = {
+            value = major_gold_value
+            if = {
+                limit = {
+                    OR = {
+                        stress_level >= 2
+                        has_character_flag = eotg_flag_aug_intervention_discount
+                    }
+                }
+                multiply = 0.75
+            }
+        }
+    }
+
+    effect = {
+        # Some of the damage remains: risk is halved, not cleared (B3). Halved
+        # before the tier change so the Enhanced character carries it forward.
+        if = {
+            limit = { has_variable = eotg_fracture_risk }
+            change_variable = { name = eotg_fracture_risk  multiply = 0.5 }
+        }
+        eotg_aug_set_integration_effect = { XP = 50 }
+        add_character_modifier = { modifier = eotg_mod_oc_regression_recovery  years = 5 }
+        remove_character_flag = eotg_flag_aug_intervention_discount
+        stress_impact = { base = medium_stress_impact_loss }
+        custom_tooltip = eotg_decision_overclock_regression_tooltip
+    }
+
+    # AI only regresses when it is hurting
+    ai_potential = {
+        stress_level >= 2
+    }
+    ai_will_do = {
+        base = 3
+        modifier = { add = 20  stress >= 350 }
+        modifier = { add = 10  has_trait = content }
+        modifier = { add = -20  has_trait = ambitious }
+        modifier = { add = -10  has_trait = brave }
+    }
+}
+
+
+eotg_decision_maintenance_protocol = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/eotg_decision_maintenance_protocol.dds"
+    }
+    ai_check_interval = 60
+
+    is_shown = {
+        has_trait = eotg_cybernetics
+    }
+
+    # Decision-owned cooldown (index §1 rule 5)
+    is_valid = {
+        NOT = { has_character_flag = eotg_flag_maintenance_cooldown }
+    }
+
+    # A physician to hand makes the calibration cheaper (thread T5)
+    cost = {
+        gold = {
+            value = minor_gold_value
+            if = {
+                limit = { eotg_has_physician_access = yes }
+                multiply = 0.75
+            }
+        }
+    }
+
+    effect = {
+        add_character_flag = { flag = eotg_flag_maintenance_cooldown  years = 3 }
+        add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 3 }
+        # Recalibration replaces black-market hardware (audit §1.7c)
+        remove_character_modifier = eotg_mod_illegal_implants
+        if = {
+            limit = { eotg_is_aug_tier3 = yes }
+            eotg_add_fracture_risk = { AMOUNT = -8 }
+        }
+        stress_impact = { base = minor_stress_impact_loss }
+        custom_tooltip = eotg_decision_maintenance_protocol_tooltip
+    }
+
+    ai_potential = {
+        OR = {
+            eotg_is_aug_tier3 = yes
+            gold >= medium_gold_value
+        }
+    }
+    ai_will_do = {
+        base = 10
+        modifier = { add = 30  eotg_is_aug_tier3 = yes }
+        modifier = { add = 20  stress >= 200 }
+        modifier = { add = -10  has_trait = callous }
+    }
+}
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Phase 2 decisions (docs/specs/cybernetics_v2_phase2.md §3)
+#
+# eotg_decision_seek_augmentation   — in: fires the hub eotg_aug_init.018
+# eotg_decision_remove_implants     — out: leaves the system (tier 1 only)
+# eotg_decision_consult_physician   — maintenance with a physician (thread T5)
+# eotg_decision_augment_retainer    — others: fires the hub eotg_aug_init.020
+#
+# Cooldowns are the vanilla decision `cooldown = { years = N }` block
+# (common/decisions/00_cultural_tradition_decisions.txt:141); decision-owned
+# per index §1 rule 5.
+# PICTURES ARE PLACEHOLDERS: the human delivered illustrations only for the
+# three earlier decisions. Each picture below is a vanilla (or existing mod)
+# illustration chosen to fit; swap when bespoke art lands.
+# ═════════════════════════════════════════════════════════════════════════════
+
+eotg_decision_seek_augmentation = {
+    # PLACEHOLDER art: vanilla decision_smith.dds (fabrication, hardware)
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_smith.dds"
+    }
+    ai_check_interval = 120
+
+    is_shown = {
+        eotg_is_augmented_any = no
+        is_adult = yes
+    }
+
+    # No cost: the hub charges per path. The gold floor is the cheapest path.
+    is_valid = {
+        eotg_can_receive_augmented = yes
+        gold >= tiny_gold_value
+    }
+
+    cooldown = { years = 3 }
+
+    effect = {
+        custom_tooltip = eotg_decision_seek_augmentation_tooltip
+        trigger_event = eotg_aug_init.018
+    }
+
+    ai_potential = {
+        eotg_ai_wants_augmentation = yes
+    }
+    ai_will_do = {
+        base = 10
+        modifier = { add = 20  has_trait = ambitious }
+        modifier = { add = 20  has_trait = cynical }
+        modifier = { add = -50  has_trait = zealous }
+    }
+}
+
+
+eotg_decision_remove_implants = {
+    # PLACEHOLDER art: the mod's own Partial Removal illustration (same act,
+    # taken further)
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/eotg_decision_partial_removal.dds"
+    }
+    ai_check_interval = 120
+
+    is_shown = {
+        eotg_is_aug_tier1 = yes
+    }
+
+    cost = {
+        gold = {
+            value = medium_gold_value
+        }
+    }
+
+    # Leaving the system: eotg_aug_remove_all_effect (index §1 rule 2), then
+    # the withdrawal (the helper adds none; callers choose).
+    effect = {
+        eotg_aug_remove_all_effect = yes
+        add_character_modifier = { modifier = eotg_mod_aug_removal_withdrawal  years = 3 }
+        eotg_aug_stress_reject_effect = yes
+        custom_tooltip = eotg_decision_remove_implants_tooltip
+    }
+
+    ai_potential = {
+        stress_level >= 2
+    }
+    ai_will_do = {
+        base = 5
+        modifier = { add = 20  has_trait = content }
+        modifier = { add = 20  has_trait = zealous }
+        modifier = { add = -15  has_trait = ambitious }
+    }
+}
+
+
+eotg_decision_consult_physician = {
+    # PLACEHOLDER art: vanilla decision_physician.dds
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_physician.dds"
+    }
+    ai_check_interval = 60
+
+    is_shown = {
+        has_trait = eotg_cybernetics
+        eotg_has_physician_access = yes
+    }
+
+    # Half price when the ruler is the physician
+    cost = {
+        gold = {
+            value = minor_gold_value
+            if = {
+                limit = { has_trait = lifestyle_physician }
+                multiply = 0.5
+            }
+        }
+    }
+
+    cooldown = { years = 3 }
+
+    effect = {
+        add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 5 }
+        remove_character_modifier = eotg_mod_aug_infection
+        # Deeper than maintenance at Overclocked (maintenance gives -8)
+        if = {
+            limit = { eotg_is_aug_tier3 = yes }
+            eotg_add_fracture_risk = { AMOUNT = -12 }
+        }
+        if = {
+            limit = { employs_court_position = court_physician_court_position }
+            court_position:court_physician_court_position = {
+                add_character_modifier = { modifier = eotg_mod_aug_lesson_learning  years = 5 }
+            }
+        }
+        custom_tooltip = eotg_decision_consult_physician_tooltip
+    }
+
+    ai_will_do = {
+        base = 10
+        modifier = { add = 30  eotg_is_aug_tier3 = yes }
+        modifier = { add = 10  has_trait = diligent }
+        modifier = { add = -10  has_trait = lazy }
+    }
+}
+
+
+eotg_decision_augment_retainer = {
+    # PLACEHOLDER art: vanilla decision_knight_kneeling.dds
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_knight_kneeling.dds"
+    }
+    ai_check_interval = 120
+
+    is_shown = {
+        has_trait = eotg_cybernetics
+    }
+
+    # No cost: the hub charges per candidate.
+    is_valid = {
+        OR = {
+            any_knight = { eotg_aug_retainer_candidate = yes }
+            any_courtier = { eotg_aug_retainer_candidate = yes }
+        }
+        gold >= minor_gold_value
+    }
+
+    cooldown = { years = 2 }
+
+    effect = {
+        custom_tooltip = eotg_decision_augment_retainer_tooltip
+        trigger_event = eotg_aug_init.020
+    }
+
+    ai_will_do = {
+        base = 5
+        modifier = { add = 15  has_trait = ambitious }
+        modifier = { add = 10  has_trait = callous }
+        modifier = { add = -10  has_trait = compassionate }
+    }
+}
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Phase 3b decisions — Neurofractured (docs/specs/cybernetics_v2_phase3.md §8)
+#
+# eotg_decision_aug_restraints        — 3 years of restraints (flag + modifier)
+# eotg_decision_aug_sedation          — 5 years of sedation (flag + modifier)
+# eotg_decision_aug_appoint_warden    — fires eotg_aug_end.020
+# eotg_decision_aug_embrace_cascade   — fires eotg_aug_end.009
+# eotg_decision_aug_excision          — fires eotg_aug_end.001 (cost charged there)
+#
+# Cooldowns are decision-owned (index §1 rule 5): the treatment flags (which
+# the NF on_action also reads for drift and violent weights) or the vanilla
+# `cooldown = {}` block. The treatments are renewable when the flag lapses.
+# PICTURES ARE PLACEHOLDERS: vanilla illustrations chosen to fit; swap when
+# bespoke art lands (spec: decision_misc.dds or the human's illustrations).
+# ═════════════════════════════════════════════════════════════════════════════
+
+eotg_decision_aug_restraints = {
+    # PLACEHOLDER art: vanilla decision_prison.dds (bound, guarded)
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_prison.dds"
+    }
+    ai_check_interval = 120
+
+    is_shown = {
+        has_trait = eotg_neurofractured
+        NOT = { has_character_flag = eotg_flag_aug_restrained }
+    }
+
+    cost = {
+        gold = {
+            value = minor_gold_value
+        }
+    }
+
+    # Violent NF weights x0.25 and drift -4 while the flag holds (on_action).
+    effect = {
+        add_character_flag = { flag = eotg_flag_aug_restrained  years = 3 }
+        add_character_modifier = { modifier = eotg_mod_aug_restrained  years = 3 }
+        custom_tooltip = eotg_decision_aug_restraints_tooltip
+    }
+
+    ai_potential = {
+        OR = {
+            has_trait = compassionate
+            has_trait = content
+        }
+    }
+    ai_will_do = {
+        base = 10
+        modifier = { add = 20  has_trait = compassionate }
+        modifier = { add = 10  has_trait = humble }
+        modifier = { add = -10  has_trait = arrogant }
+    }
+}
+
+
+eotg_decision_aug_sedation = {
+    # PLACEHOLDER art: vanilla decision_physician.dds (the regimen)
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_physician.dds"
+    }
+    ai_check_interval = 120
+
+    is_shown = {
+        has_trait = eotg_neurofractured
+        NOT = { has_character_flag = eotg_flag_aug_sedated }
+    }
+
+    cost = {
+        gold = {
+            value = medium_gold_value
+        }
+    }
+
+    # Drift -6 while the flag holds (on_action).
+    effect = {
+        add_character_flag = { flag = eotg_flag_aug_sedated  years = 5 }
+        add_character_modifier = { modifier = eotg_mod_aug_sedated  years = 5 }
+        custom_tooltip = eotg_decision_aug_sedation_tooltip
+    }
+
+    ai_potential = {
+        stress_level >= 2
+    }
+    ai_will_do = {
+        base = 15
+        modifier = { add = 15  has_trait = craven }
+        modifier = { add = 10  has_trait = content }
+        modifier = { add = -10  has_trait = stubborn }
+    }
+}
+
+
+eotg_decision_aug_appoint_warden = {
+    # PLACEHOLDER art: vanilla decision_realm.dds (the council, the realm)
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    ai_check_interval = 120
+
+    is_shown = {
+        has_trait = eotg_neurofractured
+        has_active_diarchy = no
+        basic_eligible_for_diarchy_trigger = yes
+    }
+
+    is_valid = {
+        eotg_aug_has_warden_candidate = { RULER = root }
+    }
+
+    cooldown = { years = 5 }
+
+    effect = {
+        custom_tooltip = eotg_decision_aug_appoint_warden_tooltip
+        trigger_event = eotg_aug_end.020
+    }
+
+    ai_will_do = {
+        base = 5
+        modifier = {
+            add = 20
+            primary_heir ?= { is_adult = yes }
+        }
+        modifier = { add = 10  has_trait = humble }
+        modifier = { add = -10  has_trait = ambitious }
+    }
+}
+
+
+eotg_decision_aug_embrace_cascade = {
+    # PLACEHOLDER art: vanilla decision_misc.dds (spec default)
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_misc.dds"
+    }
+    ai_check_interval = 120
+
+    # The voice reached "we" (thread T1), or the Last Lucid Moment embraced it
+    is_shown = {
+        has_trait = eotg_neurofractured
+        eotg_aug_pressure_storm = yes
+        OR = {
+            AND = {
+                has_variable = eotg_aug_voice
+                var:eotg_aug_voice >= 3
+            }
+            has_character_flag = eotg_flag_aug_may_embrace
+        }
+    }
+
+    effect = {
+        custom_tooltip = eotg_decision_aug_embrace_cascade_tooltip
+        trigger_event = eotg_aug_end.009
+    }
+
+    ai_will_do = {
+        base = 5
+        modifier = { add = 30  has_trait = ambitious }
+        modifier = { add = 20  has_trait = callous }
+        modifier = { add = -50  has_trait = compassionate }
+    }
+}
+
+
+eotg_decision_aug_excision = {
+    # PLACEHOLDER art: vanilla decision_physician.dds (the surgeons)
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_physician.dds"
+    }
+    ai_check_interval = 120
+
+    is_shown = {
+        OR = {
+            eotg_is_aug_tier2 = yes
+            eotg_is_aug_tier3 = yes
+            has_trait = eotg_neurofractured
+        }
+    }
+
+    # The cost is charged in eotg_aug_end.001 (a, c, d); this mirrors it.
+    is_valid = {
+        eotg_aug_can_afford_excision = yes
+    }
+
+    cooldown = { years = 5 }
+
+    effect = {
+        custom_tooltip = eotg_decision_aug_excision_tooltip
+        trigger_event = eotg_aug_end.001
+    }
+
+    ai_potential = {
+        stress_level >= 3
+    }
+    ai_will_do = {
+        base = 3
+        modifier = { add = 10  has_trait = zealous }
+        modifier = { add = 10  has_trait = content }
+        modifier = { add = -10  has_trait = ambitious }
+    }
+}

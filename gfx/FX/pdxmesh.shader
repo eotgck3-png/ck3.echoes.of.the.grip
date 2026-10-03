@@ -620,6 +620,12 @@ PixelShader =
 					float3 EotgView  = normalize( CameraPosition - Input.WorldSpacePos );
 					float  EotgFace  = saturate( dot( normalize( Input.Normal ), EotgView ) );
 					float  EotgRim   = pow( 1.0f - EotgFace, EOTG_MARKER_RIM_POW ) * EotgMask;
+					#ifdef EOTG_MARKER_BEAM
+						// The rim is an OUTLINE, and an outlined cone reads as a cone. The beam
+						// needs no edge: its alpha already falls to nothing at the silhouette,
+						// and brightening exactly where it is most transparent only greys it.
+						EotgRim = 0.0f;
+					#endif
 					float  EotgFoW   = lerp( EOTG_MARKER_FOW_FLOOR, 1.0f, FogOfWarAlphaValue );
 
 					// Keep a fraction of the lit result. Fully unlit would be brighter still, but a
@@ -634,6 +640,43 @@ PixelShader =
 				#endif
 
 				float Alpha = Diffuse.a;
+
+				// The projector beam. The gradient ALONG the beam is authored in the texture's
+				// alpha (v runs 0 at the aperture to 1 at the crown); what is left to do here is
+				// the gradient ACROSS it, which no texture can supply because it depends on where
+				// the camera is.
+				//
+				// A real beam is a volume, and you see more of a volume through its middle than
+				// through its edge. dot(N, view) is exactly that: 1 where the wall faces you and
+				// you are looking down its length, 0 at the silhouette where you are looking along
+				// it. Fading alpha on that turns a hard-edged cone into something that reads as
+				// light, and it is why make_beam_obj.py authors sloped normals rather than
+				// horizontal ones - a horizontal normal would fade the wrong band.
+				//
+				// Gated on Properties.r like the rest of EOTG_MARKER. Every vanilla mesh on this
+				// effect keeps noproperties.dds, so its mask is 0, the lerp selects the original
+				// alpha and nothing outside the markers is touched.
+				#ifdef EOTG_MARKER_BEAM
+					#define EOTG_BEAM_VIEW_POW  1.30f   // >1 narrows the bright core
+					#define EOTG_BEAM_GAIN      0.45f   // overall opacity of the cone. 0.85 was
+					                                    // solid enough to pass for masonry.
+					#define EOTG_BEAM_MIN_FACE  0.40f   // floor under the view fade
+
+					// The floor is what keeps the beam alive from overhead. dot(N, view) is the
+					// right shape for thickness but the wrong thing to let reach zero: the cone
+					// walls are near vertical, so from a high camera every one of them is close to
+					// edge-on at once and the whole beam drops out together. Fading to 0.40 rather
+					// than to nothing keeps it semi-visible from above while still reading as
+					// thicker through the middle than at the silhouette.
+					float EotgBeamMask = Properties.r;
+					float EotgBeamVol  = lerp( EOTG_BEAM_MIN_FACE, 1.0f,
+					                           pow( EotgFace, EOTG_BEAM_VIEW_POW ) );
+					float EotgBeamFoW  = lerp( EOTG_MARKER_FOW_FLOOR, 1.0f, FogOfWarAlphaValue );
+					Alpha = lerp( Alpha,
+					              Alpha * EotgBeamVol * EOTG_BEAM_GAIN * EotgBeamFoW,
+					              EotgBeamMask );
+				#endif
+
 				#ifdef UNDERWATER
 					clip( _WaterHeight - Input.WorldSpacePos.y + 0.1f ); // +0.1 to avoid gap between water and mesh
 
@@ -1150,6 +1193,12 @@ Effect snap_to_terrainShadow
 	Defines = { "PDX_MESH_SNAP_VERTICES_TO_TERRAIN" "MAP_LIGHTING_HACK" }
 	RasterizerState = ShadowRasterizerState
 }
+# EOTG_MARKER + EOTG_MARKER_BEAM added, APPLY_WINTER dropped (a map symbol must not take a snow
+# overlay). This is the marker's beam slot. It had to be an EXISTING effect - a new Effect name
+# added to this file does not register - and of the ones vanilla ships this is the only one that
+# both snaps vertices to terrain, which every slot of the marker must do or it stands at sea
+# level, and blends. Both defines are inert on any other mesh drawn with it, because everything
+# under them is gated on Properties.r and vanilla meshes carry noproperties.dds.
 Effect snap_to_terrain_alpha_to_coverage
 {
 	VertexShader = "VS_standard"
@@ -1157,7 +1206,7 @@ Effect snap_to_terrain_alpha_to_coverage
 
 	BlendState = "alpha_to_coverage"
 	DepthStencilState = DepthStencilStateNoReplace
-	Defines = { "PDX_MESH_SNAP_VERTICES_TO_TERRAIN" "APPLY_WINTER" "MAP_LIGHTING_HACK" }
+	Defines = { "PDX_MESH_SNAP_VERTICES_TO_TERRAIN" "MAP_LIGHTING_HACK" "EOTG_MARKER" "EOTG_MARKER_BEAM" }
 }
 Effect snap_to_terrain_alpha_to_coverageShadow
 {

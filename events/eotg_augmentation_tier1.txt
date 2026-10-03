@@ -1,0 +1,605 @@
+﻿# ── eotg_augmentation_tier1.txt ──────────────────────────────────────────────
+# Events for Augmented-tier characters.
+#
+# eotg_aug_tier1.001 — Phantom Sensation       (random flavor)
+# eotg_aug_tier1.002 — The Upgrade             (progression gate: Augmented → Enhanced)
+# eotg_aug_tier1.003 — An Uncomfortable Question (one-time vassal)
+# eotg_aug_tier1.004 — The Knight's Request
+# eotg_aug_tier1.005 — Weight of Silence
+# eotg_aug_tier1.006 — The Faster Hand          (at war)
+#
+# Fires from: eotg_on_yearly_aug_tier1_check
+#   (common/on_action/eotg_augmentation_on_actions.txt, via yearly_playable_pulse).
+# Cooldown eotg_flag_aug_event_cooldown and the one-time flag
+# eotg_flag_tier1_vassal_suspicion_fired are set and checked there only.
+# Resource: risk set at Augmented carries into Overclocked, so moves here count.
+#
+# cybernetics_v2 Phase 1 (docs/specs/cybernetics_v2_phase1.md §2): trait-gated
+# options (trigger has_trait + trait icon), stress helpers, scaled gold, lesson
+# modifiers instead of repeatable permanent skill (B5, B6).
+# ─────────────────────────────────────────────────────────────────────────────
+
+namespace = eotg_aug_tier1
+
+
+# ── eotg_aug_tier1.001 ────────────────────────────────────────────────────────
+# Phantom Sensation
+# The implants surface in consciousness. A choice between acceptance,
+# maintenance, or dangerous curiosity.
+
+eotg_aug_tier1.001 = {
+    type = character_event
+    title = eotg_aug_tier1.001.t
+    desc = eotg_aug_tier1.001.desc
+    theme = physical_health
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+
+    # "Ignore it"
+    option = {
+        name = eotg_aug_tier1.001.a
+        stress_impact = { base = minor_stress_impact_gain }
+        eotg_aug_stress_neglect_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = -20  has_trait = content }
+        }
+    }
+
+    # "Recalibrate" — pay to stabilize
+    option = {
+        name = eotg_aug_tier1.001.b
+        trigger = { gold >= tiny_gold_value }
+        remove_short_term_gold = tiny_gold_value
+        add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 2 }
+        eotg_add_fracture_risk = { AMOUNT = -3 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 10  has_trait = patient }
+        }
+    }
+
+    # "Fascinating" — lean into it, small chance to accelerate risk
+    option = {
+        name = eotg_aug_tier1.001.c
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_learning  years = 5 }
+        eotg_add_fracture_risk = { AMOUNT = 2 }
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = eccentric }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+
+    # [diligent] "Log it. Test it. Fix it." - self-calibration: half as long
+    # as b, and free
+    option = {
+        name = eotg_aug_tier1.001.d
+        trigger = { has_trait = diligent }
+        trait = diligent
+        add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 1 }
+        stress_impact = {
+            diligent = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = diligent }
+            modifier = { add = 10  has_trait = paranoid }
+        }
+    }
+
+    # [lazy] "It will pass." - the neglect helper carries the lazy relief
+    option = {
+        name = eotg_aug_tier1.001.e
+        trigger = { has_trait = lazy }
+        trait = lazy
+        eotg_aug_stress_neglect_effect = yes
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = lazy }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+}
+
+
+# ── eotg_aug_tier1.002 ────────────────────────────────────────────────────────
+# The Upgrade — Progression Gate
+# Augmented → Enhanced transition event.
+
+eotg_aug_tier1.002 = {
+    type = character_event
+    title = eotg_aug_tier1.002.t
+    desc = eotg_aug_tier1.002.desc
+    theme = physical_health
+
+    # World-state tier guard (mirrors the on_action branch): a regression
+    # between roll and firing must not let the upgrade skip a tier.
+    trigger = { eotg_is_aug_tier1 = yes }
+
+    left_portrait = {
+        character = root
+        animation = personality_bold
+    }
+
+    # "Proceed" — pay and upgrade
+    option = {
+        name = eotg_aug_tier1.002.a
+        trigger = { gold >= medium_gold_value }
+        remove_short_term_gold = medium_gold_value
+        eotg_aug_set_integration_effect = { XP = 50 }
+        stress_impact = {
+            base = 0
+            compassionate = minor_stress_impact_gain
+            humble = minor_stress_impact_gain
+        }
+        ai_chance = {
+            base = 40
+            modifier = { add = 30  has_trait = ambitious }
+            modifier = { add = 20  has_trait = brave }
+            modifier = { add = -50  has_trait = zealous }
+            modifier = { add = -20  has_trait = content }
+        }
+    }
+
+    # "Not yet"
+    option = {
+        name = eotg_aug_tier1.002.b
+        stress_impact = {
+            base = 0
+            ambitious = minor_stress_impact_gain
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = patient }
+            modifier = { add = 20  gold < medium_gold_value }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # "This concerns me" — suppress progression for 5 years
+    option = {
+        name = eotg_aug_tier1.002.c
+        add_character_flag = { flag = eotg_flag_suppress_progression  years = 5 }
+        stress_impact = {
+            base = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 20  has_trait = humble }
+        }
+    }
+}
+
+
+# ── eotg_aug_tier1.003 ────────────────────────────────────────────────────────
+# An Uncomfortable Question
+# A vassal privately asks what their lord has become. One-time event.
+
+eotg_aug_tier1.003 = {
+    type = character_event
+    title = eotg_aug_tier1.003.t
+    desc = eotg_aug_tier1.003.desc
+    theme = realm
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+    right_portrait = {
+        character = scope:concerned_vassal
+        animation = worry
+    }
+
+    # World-state guard only; the one-time flag is owned by the on_action.
+    trigger = {
+        any_vassal = { is_alive = yes }
+    }
+
+    immediate = {
+        hidden_effect = {
+            random_vassal = {
+                limit = { is_alive = yes }
+                save_scope_as = concerned_vassal
+            }
+        }
+    }
+
+    # "Reassure them." — opinion gain
+    option = {
+        name = eotg_aug_tier1.003.a
+        scope:concerned_vassal = {
+            add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
+        }
+        stress_impact = { base = minor_stress_impact_loss }
+        ai_chance = {
+            base = 50
+            modifier = { add = 20  has_trait = gregarious }
+            modifier = { add = 10  has_trait = compassionate }
+        }
+    }
+
+    # "It is not their concern." — dread, opinion penalty
+    option = {
+        name = eotg_aug_tier1.003.b
+        add_dread = 10
+        scope:concerned_vassal = {
+            add_opinion = { modifier = eotg_opinion_aug_fear  target = root  years = 10 }
+        }
+        eotg_aug_stress_cruelty_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = 10  has_trait = arrogant }
+        }
+    }
+
+    # "Show them what I can do." — dread and intimidated admiration
+    option = {
+        name = eotg_aug_tier1.003.c
+        add_dread = 20
+        scope:concerned_vassal = {
+            add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
+        }
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        stress_impact = { base = minor_stress_impact_gain }
+        eotg_aug_stress_cruelty_effect = yes
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = brave }
+            modifier = { add = 20  has_trait = arrogant }
+        }
+    }
+
+    # [honest] "The truth: I do not know what I am becoming." - saying it
+    # aloud makes it real (risk +2)
+    option = {
+        name = eotg_aug_tier1.003.d
+        trigger = { has_trait = honest }
+        trait = honest
+        scope:concerned_vassal = {
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+        }
+        eotg_add_fracture_risk = { AMOUNT = 2 }
+        stress_impact = {
+            honest = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = honest }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+
+    # [deceitful] "There is nothing to tell." - the vassal is not fooled
+    option = {
+        name = eotg_aug_tier1.003.e
+        trigger = { has_trait = deceitful }
+        trait = deceitful
+        scope:concerned_vassal = {
+            add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+        }
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_intrigue  years = 5 }
+        eotg_aug_stress_lie_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = deceitful }
+            modifier = { add = 10  has_trait = paranoid }
+        }
+    }
+}
+
+
+# ── eotg_aug_tier1.004 ────────────────────────────────────────────────────────
+# The Knight's Request
+# A knight witnessed combat performance and wants the same augmentation.
+
+eotg_aug_tier1.004 = {
+    type = character_event
+    title = eotg_aug_tier1.004.t
+    desc = eotg_aug_tier1.004.desc
+    theme = realm
+
+    left_portrait = {
+        character = root
+        animation = personality_bold
+    }
+    right_portrait = {
+        character = scope:petitioning_knight
+        animation = war_attacker
+    }
+
+    trigger = {
+        any_knight = { is_alive = yes  eotg_is_augmented_any = no }
+    }
+
+    immediate = {
+        hidden_effect = {
+            random_knight = {
+                limit = { is_alive = yes  eotg_is_augmented_any = no }
+                save_scope_as = petitioning_knight
+            }
+        }
+    }
+
+    # "Grant the request." — knight becomes augmented
+    option = {
+        name = eotg_aug_tier1.004.a
+        scope:petitioning_knight = {
+            eotg_aug_initiate_effect = yes
+            # The variable exists from install (thread T4 reads it later)
+            eotg_add_fracture_risk = { AMOUNT = 0 }
+            add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
+        }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = generous }
+            modifier = { add = 10  has_trait = brave }
+        }
+    }
+
+    # "Deny it." — knight grows uneasy
+    option = {
+        name = eotg_aug_tier1.004.b
+        scope:petitioning_knight = {
+            add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+        }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 20  has_trait = zealous }
+        }
+    }
+
+    # "This ambition concerns me." — knight grows resentful
+    option = {
+        name = eotg_aug_tier1.004.c
+        scope:petitioning_knight = {
+            add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 8 }
+        }
+        add_dread = 5
+        eotg_aug_stress_cruelty_effect = yes
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = paranoid }
+            modifier = { add = 10  has_trait = vengeful }
+        }
+    }
+
+    # [generous] "Granted, at my expense." - as a, paid for by the ruler.
+    # eotg_opinion_aug_grateful_patient (Phase 2) per phase1 §2, tier1.004.d.
+    option = {
+        name = eotg_aug_tier1.004.d
+        trigger = {
+            has_trait = generous
+            gold >= minor_gold_value
+        }
+        trait = generous
+        remove_short_term_gold = minor_gold_value
+        scope:petitioning_knight = {
+            eotg_aug_initiate_effect = yes
+            eotg_add_fracture_risk = { AMOUNT = 0 }
+            add_opinion = { modifier = eotg_opinion_aug_grateful_patient  target = root  years = 10 }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = generous }
+            modifier = { add = -20  has_trait = greedy }
+        }
+    }
+
+    # [paranoid] "Who told you to ask me this?"
+    option = {
+        name = eotg_aug_tier1.004.e
+        trigger = { has_trait = paranoid }
+        trait = paranoid
+        scope:petitioning_knight = {
+            add_opinion = { modifier = eotg_opinion_aug_fear  target = root  years = 10 }
+        }
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_intrigue  years = 5 }
+        stress_impact = {
+            paranoid = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = paranoid }
+            modifier = { add = 10  has_trait = vengeful }
+        }
+    }
+}
+
+
+# ── eotg_aug_tier1.005 ────────────────────────────────────────────────────────
+# Weight of Silence
+# A processing pause in a formal court gathering — the court learns to wait.
+
+eotg_aug_tier1.005 = {
+    type = character_event
+    title = eotg_aug_tier1.005.t
+    desc = eotg_aug_tier1.005.desc
+    theme = realm
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+
+    # "Let them watch." — dread, social cost
+    option = {
+        name = eotg_aug_tier1.005.a
+        add_dread = 5
+        add_prestige = -25
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = 10  has_trait = arrogant }
+        }
+    }
+
+    # "Make light of it." — stress relief, minor embarrassment
+    option = {
+        name = eotg_aug_tier1.005.b
+        stress_impact = { base = minor_stress_impact_loss }
+        add_prestige = -25
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = gregarious }
+            modifier = { add = -10  has_trait = callous }
+        }
+    }
+
+    # "Speak deliberately. Control it." — prestige gain, but holding the
+    # processing pause in check strains the implant (dominated fix, audit §2.5)
+    option = {
+        name = eotg_aug_tier1.005.c
+        add_prestige = 50
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = patient }
+            modifier = { add = 20  has_trait = diligent }
+        }
+    }
+
+    # [shy] "Leave the hall."
+    option = {
+        name = eotg_aug_tier1.005.d
+        trigger = { has_trait = shy }
+        trait = shy
+        add_prestige = -50
+        eotg_add_fracture_risk = { AMOUNT = 2 }
+        stress_impact = {
+            shy = medium_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = shy }
+            modifier = { add = 10  has_trait = craven }
+        }
+    }
+
+    # [gregarious] "Make it theatre."
+    option = {
+        name = eotg_aug_tier1.005.e
+        trigger = { has_trait = gregarious }
+        trait = gregarious
+        add_prestige = 100
+        add_dread = 5
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        stress_impact = {
+            gregarious = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = gregarious }
+            modifier = { add = 10  has_trait = arrogant }
+        }
+    }
+}
+
+
+# ── eotg_aug_tier1.006 ────────────────────────────────────────────────────────
+# The Faster Hand
+# In a skirmish, the implant registers a threat and acts before thought arrives.
+
+eotg_aug_tier1.006 = {
+    type = character_event
+    title = eotg_aug_tier1.006.t
+    desc = eotg_aug_tier1.006.desc
+    theme = battle
+
+    trigger = { is_at_war = yes }
+
+    left_portrait = {
+        character = root
+        animation = war_attacker
+    }
+
+    # "The advantage is what matters." — prowess, prestige
+    option = {
+        name = eotg_aug_tier1.006.a
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_prowess  years = 5 }
+        add_prestige = 100
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        ai_chance = {
+            base = 50
+            modifier = { add = 20  has_trait = brave }
+            modifier = { add = 20  has_trait = ambitious }
+        }
+    }
+
+    # "This is not natural." — stress, smaller prestige, piety (dominated fix)
+    option = {
+        name = eotg_aug_tier1.006.b
+        stress_impact = { base = minor_stress_impact_gain }
+        eotg_aug_stress_reject_effect = yes
+        add_prestige = 50
+        add_piety = 50
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 20  has_trait = humble }
+        }
+    }
+
+    # "Document every detail of the engagement." — learning
+    option = {
+        name = eotg_aug_tier1.006.c
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_learning  years = 5 }
+        add_prestige = 50
+        eotg_add_fracture_risk = { AMOUNT = 2 }
+        ai_chance = {
+            base = 20
+            modifier = { add = 30  has_trait = erudite }
+            modifier = { add = 10  highest_skill = learning }
+            modifier = { add = 10  has_trait = diligent }
+        }
+    }
+
+    # [brave] "Again." - push the edge into the next fight
+    option = {
+        name = eotg_aug_tier1.006.d
+        trigger = { has_trait = brave }
+        trait = brave
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_prowess  years = 5 }
+        add_prestige = 150
+        random = {
+            chance = 20
+            increase_wounds_effect = { REASON = fight }
+        }
+        eotg_add_fracture_risk = { AMOUNT = 6 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = brave }
+            modifier = { add = 10  has_trait = wrathful }
+        }
+    }
+
+    # [lifestyle_blademaster] "That was my blade, not the machine." - no risk
+    # move; the event couples through a, c and d. Stress keyed on the
+    # lifestyle trait, as vanilla does (events/activities/chariot_race_activity/
+    # chariot_race_ongoing_events.txt: lifestyle_reveler = ...).
+    option = {
+        name = eotg_aug_tier1.006.e
+        trigger = { has_trait = lifestyle_blademaster }
+        trait = lifestyle_blademaster
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_prowess  years = 5 }
+        add_prestige = 75
+        stress_impact = {
+            lifestyle_blademaster = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = lifestyle_blademaster }
+            modifier = { add = 10  has_trait = arrogant }
+        }
+    }
+}

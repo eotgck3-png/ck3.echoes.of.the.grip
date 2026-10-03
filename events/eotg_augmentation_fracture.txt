@@ -1,0 +1,3963 @@
+﻿# -- eotg_augmentation_fracture.txt -------------------------------------------
+# Neurofracture transformation event and Neurofractured ongoing events.
+#
+# eotg_fracture.0001 -- Neural Cascade          (transformation reveal)
+# eotg_fracture.002  -- Containment Failure     (random ongoing)
+# eotg_fracture.003  -- Lucid Moment            (rare ongoing)
+# eotg_fracture.004  -- The Court Massacre      (high-stress trigger)
+# eotg_fracture.005  -- What the Heir Saw       (primary heir witness)
+# eotg_fracture.006  -- The Warrant             (rebel declaration)
+# eotg_fracture.007  -- Dead Reckoning          (rare clarity)
+# Phase 3a (docs/specs/cybernetics_v2_phase3.md §3):
+# eotg_fracture.008-.015 -- Flicker band pool
+# eotg_fracture.016-.024 -- Fracture band pool (.020 is .019's chain stage)
+# eotg_fracture.025-.026 -- Storm band pool (with .002, .004, .006, .007, .018)
+# eotg_fracture.027      -- The Cascade (terminal, risk >= 95)
+# eotg_fracture.028/.029 -- chain stages of .017 / .027
+# Phase 3b: .007.f, .026.d and .027's outcomes fire the endgames
+# (events/eotg_augmentation_endgame.txt, namespace eotg_aug_end).
+#
+# Fires from: eotg_trigger_neurofracture scripted effect (0001), called from
+#             eotg_on_yearly_aug_overclocked_check and eotg_aug_tier3.002 (c);
+#             eotg_on_yearly_aug_neurofractured_check (band lists and the
+#             terminal step), via yearly_playable_pulse; .005 from the Heir's
+#             Arc story (eotg_story_aug_heir_arc, stage 1).
+# Cooldown flags (eotg_flag_nf_event_cooldown, eotg_flag_aug_scramble_cooldown,
+# eotg_flag_aug_last_lucid, eotg_flag_aug_terminal_cooldown) are set and
+# checked in the on_action only. Event triggers mirror world state only.
+# Resource: post-cascade, eotg_fracture_risk is "episode pressure": it drifts
+# up yearly, its band (Flicker / Fracture / Storm) selects the pool, and
+# options here move it.
+#
+# cybernetics_v2 Phase 1 (docs/specs/cybernetics_v2_phase1.md §5): victims from
+# the weighted picker, named in the desc, flagged eotg_flag_aug_breach_victim
+# for 30 days (audit §1.5); stress helpers on every violent option (audit
+# §3.3); trait-gated options; dominated-option fixes; scaled gold.
+# -----------------------------------------------------------------------------
+
+namespace = eotg_fracture
+
+
+# -- eotg_fracture.0001 -------------------------------------------------------
+# Neural Cascade -- Transformation Event
+
+eotg_fracture.0001 = {
+    type = character_event
+    title = eotg_fracture.0001.t
+    desc = {
+        desc = eotg_fracture.0001.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { exists = scope:eotg_victim }
+                desc = eotg_fracture.0001.desc_victim
+            }
+            desc = eotg_fracture.0001.desc_none
+        }
+    }
+    theme = battle
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+    # Guarded: 60% of cascades hurt no one (vanilla
+    # events/activities/activity_system_events.txt:89-92).
+    right_portrait = {
+        trigger = { exists = scope:eotg_victim }
+        character = scope:eotg_victim
+        animation = pain
+    }
+
+    # 40% that someone is hurt, as before; now picked and named (family 0.05).
+    immediate = {
+        hidden_effect = {
+            add_dread = 40
+            random = {
+                chance = 40
+                eotg_aug_pick_victim_effect = { NAME = eotg_victim  FAMILY_FACTOR = 0.05 }
+            }
+            if = {
+                limit = { exists = scope:eotg_victim }
+                scope:eotg_victim = {
+                    increase_wounds_effect = { REASON = attacked }
+                    add_character_flag = { flag = eotg_flag_aug_breach_victim  days = 30 }
+                }
+            }
+        }
+    }
+
+    option = {
+        name = eotg_fracture.0001.a
+        stress_impact = { base = massive_stress_impact_gain }
+    }
+}
+
+
+# -- eotg_fracture.002 --------------------------------------------------------
+# Containment Failure (renamed from Containment Breach, lore review)
+# The Neurofractured character loses control -- court casualties, picked and
+# named: wounded 50% (scope:eotg_victim), killed 20% (scope:eotg_victim_dead,
+# never the wounded one). Family factor 0.05 per the spec.
+
+eotg_fracture.002 = {
+    type = character_event
+    title = eotg_fracture.002.t
+    desc = {
+        desc = eotg_fracture.002.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { exists = scope:eotg_victim }
+                desc = eotg_fracture.002.desc_wounded
+            }
+            triggered_desc = {
+                trigger = { NOT = { exists = scope:eotg_victim_dead } }
+                desc = eotg_fracture.002.desc_none
+            }
+        }
+        triggered_desc = {
+            trigger = { exists = scope:eotg_victim_dead }
+            desc = eotg_fracture.002.desc_killed
+        }
+    }
+    theme = battle
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+    # Guarded (vanilla events/activities/activity_system_events.txt:89-92).
+    # Shows the wounded victim; falls back to the dead one when only that one
+    # exists. scope:eotg_victim_portrait is saved at the end of immediate.
+    # Dead-portrait shape: vanilla events/activities/chariot_race_activity/
+    # chariot_ongoing_events_jp.txt:2544 (animation = dead, animate_if_dead).
+    right_portrait = {
+        trigger = { exists = scope:eotg_victim_portrait }
+        character = scope:eotg_victim_portrait
+        triggered_animation = {
+            trigger = { is_alive = no }
+            animation = dead
+        }
+        animation = pain
+        animate_if_dead = yes
+    }
+
+    immediate = {
+        hidden_effect = {
+            random = {
+                chance = 50
+                eotg_aug_pick_victim_effect = { NAME = eotg_victim  FAMILY_FACTOR = 0.05 }
+            }
+            if = {
+                limit = { exists = scope:eotg_victim }
+                scope:eotg_victim = {
+                    increase_wounds_effect = { REASON = attacked }
+                    add_character_flag = { flag = eotg_flag_aug_breach_victim  days = 30 }
+                }
+            }
+            random = {
+                chance = 20
+                eotg_aug_pick_second_victim_effect = {
+                    NAME = eotg_victim_dead
+                    FAMILY_FACTOR = 0.05
+                    EXCLUDE = eotg_victim
+                }
+            }
+            if = {
+                limit = { exists = scope:eotg_victim_dead }
+                scope:eotg_victim_dead = {
+                    death = { death_reason = death_murder  killer = root }
+                }
+            }
+            # .d [sadistic]: pre-pick the extra victim so the option text can
+            # name them. After the death above, so the picker's is_alive test
+            # excludes the dead victim; EXCLUDE keeps the wounded one out.
+            if = {
+                limit = { has_trait = sadistic }
+                eotg_aug_pick_second_victim_effect = {
+                    NAME = eotg_victim_extra
+                    FAMILY_FACTOR = 0.05
+                    EXCLUDE = eotg_victim
+                }
+            }
+            # Portrait scope: the wounded victim, else the dead one
+            if = {
+                limit = { exists = scope:eotg_victim }
+                scope:eotg_victim = { save_scope_as = eotg_victim_portrait }
+            }
+            else_if = {
+                limit = { exists = scope:eotg_victim_dead }
+                scope:eotg_victim_dead = { save_scope_as = eotg_victim_portrait }
+            }
+        }
+    }
+
+    # "No chains"
+    option = {
+        name = eotg_fracture.002.a
+        add_dread = 30
+        add_tyranny = 5
+        eotg_add_fracture_risk = { AMOUNT = 10 }
+        eotg_aug_stress_cruelty_effect = yes
+        ai_chance = {
+            base = 50
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = -20  has_trait = compassionate }
+        }
+    }
+
+    # "Someone help me"
+    option = {
+        name = eotg_fracture.002.b
+        stress_impact = { base = medium_stress_impact_gain }
+        add_character_modifier = { modifier = eotg_mod_withdrawn_from_court  years = 2 }
+        eotg_add_fracture_risk = { AMOUNT = -10 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+
+    # "Execute the survivors" -- only the people hurt in an episode in the last
+    # 30 days (eotg_flag_aug_breach_victim), never every wounded courtier
+    # (audit §1.5). Hidden when there is no survivor to execute (an option with
+    # no target is a dead button; vanilla gates target options on existence).
+    option = {
+        name = eotg_fracture.002.c
+        trigger = {
+            any_courtier = {
+                is_alive = yes
+                has_character_flag = eotg_flag_aug_breach_victim
+            }
+        }
+        every_courtier = {
+            limit = {
+                is_alive = yes
+                has_character_flag = eotg_flag_aug_breach_victim
+            }
+            death = { death_reason = death_murder  killer = root }
+        }
+        add_dread = 50
+        add_tyranny = 20
+        eotg_aug_stress_murder_effect = yes
+        ai_chance = {
+            base = 20
+            modifier = { add = 30  has_trait = callous }
+            modifier = { add = 20  has_trait = wrathful }
+        }
+    }
+
+    # [sadistic] "Again." -- one more courtier hurt (never the first), picked
+    # in immediate as scope:eotg_victim_extra so the option text names them
+    # (Phase 1 QA). Hidden when no one is left to hurt, as .c is (an option
+    # with no target is a dead button).
+    # Stress: the wound helper gives sadistic minor relief; the extra minor
+    # line brings it to the spec's medium (-15 + -15 = -30, vanilla
+    # common/script_values/00_stress_values.txt).
+    option = {
+        name = eotg_fracture.002.d
+        trigger = {
+            has_trait = sadistic
+            exists = scope:eotg_victim_extra
+        }
+        trait = sadistic
+        if = {
+            limit = { exists = scope:eotg_victim_extra }
+            scope:eotg_victim_extra = {
+                increase_wounds_effect = { REASON = attacked }
+                add_character_flag = { flag = eotg_flag_aug_breach_victim  days = 30 }
+            }
+        }
+        add_dread = 30
+        eotg_add_fracture_risk = { AMOUNT = 15 }
+        eotg_aug_stress_wound_effect = yes
+        stress_impact = {
+            sadistic = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = sadistic }
+            modifier = { add = 10  has_trait = wrathful }
+        }
+    }
+
+    # [compassionate] "Tend them with my own hands."
+    # eotg_opinion_aug_grateful_patient (Phase 2), as the spec directs.
+    option = {
+        name = eotg_fracture.002.e
+        trigger = { has_trait = compassionate }
+        trait = compassionate
+        if = {
+            limit = { exists = scope:eotg_victim }
+            scope:eotg_victim = {
+                add_opinion = { modifier = eotg_opinion_aug_grateful_patient  target = root  years = 10 }
+            }
+        }
+        add_prestige = -50
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = compassionate }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+}
+
+
+# -- eotg_fracture.003 --------------------------------------------------------
+# Lucid Moment
+# A rare window of clarity in the fracture.
+
+eotg_fracture.003 = {
+    type = character_event
+    title = eotg_fracture.003.t
+    desc = eotg_fracture.003.desc
+    theme = intrigue
+
+    left_portrait = {
+        character = root
+        animation = worry
+    }
+
+    # "End this" -- suicide attempt (40% chance, higher if health is low)
+    option = {
+        name = eotg_fracture.003.a
+        random = {
+            chance = 40
+            modifier = { add = 20  health < 3 }
+            death = { death_reason = death_suicide }
+        }
+        stress_impact = { base = massive_stress_impact_gain }
+        ai_chance = {
+            base = 10
+            modifier = { add = 20  stress >= 300 }
+            modifier = { add = 10  has_trait = depressed_1 }
+            modifier = { add = -10  has_trait = zealous }
+        }
+    }
+
+    # "Isolate myself" -- withdraw from court, reduce stress
+    option = {
+        name = eotg_fracture.003.b
+        add_character_modifier = { modifier = eotg_mod_withdrawn_from_court  years = 3 }
+        stress_impact = { base = minor_stress_impact_loss }
+        eotg_add_fracture_risk = { AMOUNT = -10 }
+        ai_chance = {
+            base = 50
+            modifier = { add = 20  has_trait = humble }
+            modifier = { add = 10  has_trait = compassionate }
+        }
+    }
+
+    # "Weakness disgusts me" -- deny and push deeper. Dominated fix (audit
+    # §2.5): medium relief, not massive, for more pressure.
+    option = {
+        name = eotg_fracture.003.c
+        stress_impact = { base = medium_stress_impact_loss }
+        add_dread = 20
+        eotg_add_fracture_risk = { AMOUNT = 15 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 30  has_trait = callous }
+            modifier = { add = 20  has_trait = ambitious }
+        }
+    }
+
+    # [zealous] "Pray, while you still know the words."
+    option = {
+        name = eotg_fracture.003.d
+        trigger = { has_trait = zealous }
+        trait = zealous
+        add_piety = 100
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        stress_impact = {
+            zealous = medium_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = zealous }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+}
+
+
+# -- eotg_fracture.004 --------------------------------------------------------
+# The Court Massacre
+# Caller: NF on_action, Storm list (stress_level >= 2, mirrored below;
+# 23-month cooldown set there). Phase 3a moved it from the stress >= 300 roll.
+
+# One killed (scope:eotg_victim_dead) and one wounded (scope:eotg_victim),
+# picked with the Storm/Massacre family factor 0.25: family is a deliberate
+# risk here. The old flat "20% the spouse dies" block is gone; the family
+# weight replaces it.
+
+eotg_fracture.004 = {
+    type = character_event
+    title = eotg_fracture.004.t
+    desc = {
+        desc = eotg_fracture.004.desc
+        triggered_desc = {
+            trigger = { exists = scope:eotg_victim_dead }
+            desc = eotg_fracture.004.desc_killed
+        }
+        triggered_desc = {
+            trigger = { exists = scope:eotg_victim }
+            desc = eotg_fracture.004.desc_wounded
+        }
+        triggered_desc = {
+            trigger = {
+                NOT = { exists = scope:eotg_victim_dead }
+                NOT = { exists = scope:eotg_victim }
+            }
+            desc = eotg_fracture.004.desc_none
+        }
+    }
+    theme = battle
+
+    trigger = {
+        stress_level >= 2
+    }
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+    # Guarded (vanilla events/activities/activity_system_events.txt:89-92).
+    # Shows the wounded victim; falls back to the dead one when only that one
+    # exists. scope:eotg_victim_portrait is saved at the end of immediate.
+    # Dead-portrait shape: vanilla events/activities/chariot_race_activity/
+    # chariot_ongoing_events_jp.txt:2544 (animation = dead, animate_if_dead).
+    right_portrait = {
+        trigger = { exists = scope:eotg_victim_portrait }
+        character = scope:eotg_victim_portrait
+        triggered_animation = {
+            trigger = { is_alive = no }
+            animation = dead
+        }
+        animation = pain
+        animate_if_dead = yes
+    }
+
+    immediate = {
+        hidden_effect = {
+            eotg_aug_pick_victim_effect = { NAME = eotg_victim_dead  FAMILY_FACTOR = 0.25 }
+            if = {
+                limit = { exists = scope:eotg_victim_dead }
+                scope:eotg_victim_dead = {
+                    death = { death_reason = death_murder  killer = root }
+                }
+            }
+            eotg_aug_pick_second_victim_effect = {
+                NAME = eotg_victim
+                FAMILY_FACTOR = 0.25
+                EXCLUDE = eotg_victim_dead
+            }
+            if = {
+                limit = { exists = scope:eotg_victim }
+                scope:eotg_victim = {
+                    increase_wounds_effect = { REASON = attacked }
+                    add_character_flag = { flag = eotg_flag_aug_breach_victim  days = 30 }
+                }
+            }
+            # Portrait scope: the wounded victim, else the dead one
+            if = {
+                limit = { exists = scope:eotg_victim }
+                scope:eotg_victim = { save_scope_as = eotg_victim_portrait }
+            }
+            else_if = {
+                limit = { exists = scope:eotg_victim_dead }
+                scope:eotg_victim_dead = { save_scope_as = eotg_victim_portrait }
+            }
+        }
+    }
+
+    # "They were threats"
+    option = {
+        name = eotg_fracture.004.a
+        add_dread = 40
+        eotg_add_fracture_risk = { AMOUNT = 10 }
+        eotg_aug_stress_cruelty_effect = yes
+        ai_chance = {
+            base = 60
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = -20  has_trait = compassionate }
+        }
+    }
+
+    # "I do not remember"
+    option = {
+        name = eotg_fracture.004.b
+        stress_impact = { base = medium_stress_impact_gain }
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        random = {
+            chance = 30
+            add_trait = depressed_1
+        }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+
+    # "Bury them with honours." -- universal; only when someone died
+    option = {
+        name = eotg_fracture.004.c
+        trigger = { exists = scope:eotg_victim_dead }
+        add_prestige = -100
+        add_piety = 50
+        eotg_add_fracture_risk = { AMOUNT = -3 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 10  has_trait = zealous }
+        }
+    }
+
+    # [just] "Hand myself to the court's judgement."
+    # Negative add_tyranny: vanilla events/yearly_events/yearly_events_3.txt.
+    option = {
+        name = eotg_fracture.004.d
+        trigger = { has_trait = just }
+        trait = just
+        add_prestige = -200
+        add_tyranny = -20
+        eotg_add_fracture_risk = { AMOUNT = -8 }
+        stress_impact = {
+            just = medium_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = just }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+
+    # [callous] "Replace them by morning."
+    option = {
+        name = eotg_fracture.004.e
+        trigger = { has_trait = callous }
+        trait = callous
+        add_dread = 20
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        stress_impact = {
+            callous = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = callous }
+            modifier = { add = 10  has_trait = arrogant }
+        }
+    }
+}
+
+
+# -- eotg_fracture.005 --------------------------------------------------------
+# What the Heir Saw
+# The primary heir was present during a fracture episode.
+# Caller (Phase 3a): the Heir's Arc, eotg_story_aug_heir_arc stage 1; no
+# longer in the random pool. scope:watching_heir is the story's eotg_heir.
+# Each option moves the story's eotg_heir_dread (a +1, b -1, c +2, d -1, e 0).
+
+eotg_fracture.005 = {
+    type = character_event
+    title = eotg_fracture.005.t
+    desc = eotg_fracture.005.desc
+    theme = family
+
+    trigger = {
+        any_owned_story = {
+            story_type = eotg_story_aug_heir_arc
+            exists = var:eotg_heir
+            var:eotg_heir = { is_alive = yes }
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+    right_portrait = {
+        trigger = { exists = scope:watching_heir }
+        character = scope:watching_heir
+        animation = worry
+    }
+
+    immediate = {
+        hidden_effect = {
+            random_owned_story = {
+                limit = { story_type = eotg_story_aug_heir_arc }
+                save_scope_as = eotg_heir_story
+                var:eotg_heir = { save_scope_as = watching_heir }
+            }
+        }
+    }
+
+    # "They will understand eventually." — heir fears you
+    option = {
+        name = eotg_fracture.005.a
+        scope:eotg_heir_story = { change_variable = { name = eotg_heir_dread  add = 1 } }
+        scope:watching_heir = {
+            add_opinion = { modifier = eotg_opinion_aug_fear  target = root  years = 10 }
+        }
+        add_dread = 15
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        eotg_aug_stress_cruelty_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = -30  has_trait = compassionate }
+        }
+    }
+
+    # "Call them in. Explain as much as you can." — heir uneasy but closer
+    option = {
+        name = eotg_fracture.005.b
+        scope:eotg_heir_story = { change_variable = { name = eotg_heir_dread  add = -1 } }
+        scope:watching_heir = {
+            add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+        }
+        stress_impact = { base = medium_stress_impact_gain }
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 30  has_trait = compassionate }
+            modifier = { add = 20  has_trait = humble }
+        }
+    }
+
+    # "It was necessary. Prepare them." — heir disgusted, may gain callous
+    option = {
+        name = eotg_fracture.005.c
+        scope:eotg_heir_story = { change_variable = { name = eotg_heir_dread  add = 2 } }
+        scope:watching_heir = {
+            add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 8 }
+            if = {
+                limit = { NOT = { has_trait = compassionate } }    # callous/compassionate are opposites
+                random = {
+                    chance = 30
+                    add_trait = callous
+                }
+            }
+        }
+        add_dread = 30
+        eotg_aug_stress_cruelty_effect = yes
+        ai_chance = {
+            base = 20
+            modifier = { add = 30  has_trait = callous }
+            modifier = { add = -30  has_trait = compassionate }
+        }
+    }
+
+    # [honest] "Tell them everything."
+    option = {
+        name = eotg_fracture.005.d
+        trigger = { has_trait = honest }
+        trait = honest
+        scope:eotg_heir_story = { change_variable = { name = eotg_heir_dread  add = -1 } }
+        scope:watching_heir = {
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+        }
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        stress_impact = {
+            honest = medium_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = honest }
+            modifier = { add = 10  has_trait = compassionate }
+        }
+    }
+
+    # [deceitful] "It was a seizure. Nothing more." -- the heir may believe it
+    option = {
+        name = eotg_fracture.005.e
+        trigger = { has_trait = deceitful }
+        trait = deceitful
+        random_list = {
+            50 = {
+                scope:watching_heir = {
+                    add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+                }
+            }
+            50 = {
+                scope:watching_heir = {
+                    add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+                }
+            }
+        }
+        eotg_aug_stress_lie_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = deceitful }
+            modifier = { add = -20  has_trait = honest }
+        }
+    }
+}
+
+
+# -- eotg_fracture.006 --------------------------------------------------------
+# The Warrant (made real, Phase 3a; audit §1.4)
+# A vassal files a formal warrant citing cognitive corruption. The worst-
+# opinion vassal is saved as scope:eotg_warrant_vassal and
+# eotg_aug_raise_warrant_effect raises a vanilla liberty (else independence)
+# faction, adds discontent to an existing one, or lets the warrant circulate.
+# Caller: NF on_action, Storm list (vassal opinion < -30, mirrored below).
+
+eotg_fracture.006 = {
+    type = character_event
+    title = eotg_fracture.006.t
+    desc = {
+        desc = eotg_fracture.006.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_warrant_result = flag:faction }
+                desc = eotg_fracture.006.desc_faction
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_warrant_result = flag:discontent }
+                desc = eotg_fracture.006.desc_discontent
+            }
+            desc = eotg_fracture.006.desc_circulated
+        }
+    }
+    theme = realm
+
+    trigger = {
+        any_vassal = {
+            is_alive = yes
+            opinion = { target = root  value < -30 }
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_warrant_vassal }
+        character = scope:eotg_warrant_vassal
+        animation = anger
+    }
+
+    # Worst opinion first: vanilla order_by with "opinion(...)", e.g.
+    # events/activities/coronation_activity/coronation_events_6.txt:5868.
+    immediate = {
+        hidden_effect = {
+            ordered_vassal = {
+                limit = { is_alive = yes }
+                order_by = {
+                    value = 0
+                    subtract = "opinion(root)"
+                }
+                save_scope_as = eotg_warrant_vassal
+            }
+            if = {
+                limit = { exists = scope:eotg_warrant_vassal }
+                eotg_aug_raise_warrant_effect = yes
+            }
+        }
+    }
+
+    # "Crush any who stand against me." — dread, tyranny, stress, and the
+    # vassal who filed it goes to the dungeon. Risk unchanged (as before).
+    option = {
+        name = eotg_fracture.006.a
+        add_dread = 40
+        add_tyranny = 20
+        add_prestige = -100
+        if = {
+            limit = {
+                exists = scope:eotg_warrant_vassal
+                scope:eotg_warrant_vassal = { is_imprisoned = no }
+            }
+            imprison = { target = scope:eotg_warrant_vassal  type = dungeon }
+        }
+        stress_impact = { base = medium_stress_impact_gain }
+        eotg_aug_stress_tyranny_effect = yes
+        ai_chance = {
+            base = 50
+            modifier = { add = 20  has_trait = wrathful }
+            modifier = { add = 20  has_trait = callous }
+        }
+    }
+
+    # "Offer concessions. This is not the time." — prestige loss; clears fear/unease, adds reassured
+    option = {
+        name = eotg_fracture.006.b
+        add_prestige = -200
+        every_vassal = {
+            limit = {
+                is_alive = yes
+                opinion = { target = root  value < -30 }
+            }
+            remove_opinion = { target = root  modifier = eotg_opinion_aug_fear }
+            remove_opinion = { target = root  modifier = eotg_opinion_aug_unease }
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+        }
+        every_targeting_faction = {
+            limit = { NOT = { exists = faction_war } }
+            add_faction_discontent = -50
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = patient }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+
+    # "Let the implant decide." — risk +20 (as before); hidden 50/50: as a,
+    # or the factions are pushed to their demand (+100 discontent; the code
+    # fires the ultimatum).
+    option = {
+        name = eotg_fracture.006.c
+        eotg_add_fracture_risk = { AMOUNT = 20 }
+        eotg_aug_stress_cruelty_effect = yes
+        hidden_effect = {
+            random_list = {
+                50 = {
+                    add_dread = 40
+                    add_tyranny = 20
+                    add_prestige = -100
+                    if = {
+                        limit = {
+                            exists = scope:eotg_warrant_vassal
+                            scope:eotg_warrant_vassal = { is_imprisoned = no }
+                        }
+                        imprison = { target = scope:eotg_warrant_vassal  type = dungeon }
+                    }
+                }
+                50 = {
+                    every_targeting_faction = {
+                        limit = { NOT = { exists = faction_war } }
+                        add_faction_discontent = 100
+                    }
+                }
+            }
+        }
+        ai_chance = {
+            base = 20
+            modifier = { add = 30  has_trait = callous }
+            modifier = { add = 20  has_trait = paranoid }
+        }
+    }
+
+    # [just] "Submit to their tribunal."
+    option = {
+        name = eotg_fracture.006.d
+        trigger = { has_trait = just }
+        trait = just
+        add_prestige = -100
+        every_targeting_faction = {
+            limit = { NOT = { exists = faction_war } }
+            add_faction_discontent = -100
+        }
+        every_vassal = {
+            limit = { opinion = { target = root  value < 0 } }
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+        }
+        eotg_add_fracture_risk = { AMOUNT = -10 }
+        stress_impact = {
+            just = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = just }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+
+    # [gregarious] "Bring them to my table." Vanilla diplomacy duel
+    # (events/yearly_events/bp1_yearly_james.txt:3730).
+    option = {
+        name = eotg_fracture.006.e
+        trigger = {
+            has_trait = gregarious
+            exists = scope:eotg_warrant_vassal
+        }
+        trait = gregarious
+        duel = {
+            skill = diplomacy
+            target = scope:eotg_warrant_vassal
+            50 = {
+                desc = eotg_fracture.006.e.win
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = 2.5
+                    min = -45
+                }
+                scope:eotg_warrant_vassal = {
+                    add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+                }
+                every_targeting_faction = {
+                    limit = { NOT = { exists = faction_war } }
+                    add_faction_discontent = -50
+                }
+            }
+            50 = {
+                desc = eotg_fracture.006.e.lose
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = -2.5
+                    min = -45
+                }
+                every_targeting_faction = {
+                    limit = { NOT = { exists = faction_war } }
+                    add_faction_discontent = 25
+                }
+            }
+        }
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = gregarious }
+            modifier = { add = 10  has_trait = honest }
+        }
+    }
+}
+
+
+# -- eotg_fracture.007 --------------------------------------------------------
+# Dead Reckoning
+# A rare clear hour. The implant has been running logistics in the background.
+
+eotg_fracture.007 = {
+    type = character_event
+    title = eotg_fracture.007.t
+    desc = eotg_fracture.007.desc
+    theme = intrigue
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+
+    # "Write them down." — gold and prestige, fracture risk from the clarity
+    option = {
+        name = eotg_fracture.007.a
+        add_gold = minor_gold_value
+        add_prestige = 150
+        eotg_add_fracture_risk = { AMOUNT = 15 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 20  has_trait = greedy }
+        }
+    }
+
+    # "Give them to your heir." — heir gains prestige, you get stress relief
+    option = {
+        name = eotg_fracture.007.b
+        trigger = { exists = primary_heir }
+        primary_heir = {
+            add_prestige = 100
+        }
+        stress_impact = { base = minor_stress_impact_loss }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 20  has_trait = content }
+        }
+    }
+
+    # "Burn them. Let it go." — dominated fix (audit §2.5): medium relief,
+    # a larger prestige cost, and the pressure eases
+    option = {
+        name = eotg_fracture.007.c
+        stress_impact = { base = medium_stress_impact_loss }
+        add_prestige = -100
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        ai_chance = {
+            base = 20
+            modifier = { add = 30  has_trait = content }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+
+    # [greedy] "Sell them."
+    option = {
+        name = eotg_fracture.007.d
+        trigger = { has_trait = greedy }
+        trait = greedy
+        add_gold = medium_gold_value
+        add_prestige = -50
+        eotg_add_fracture_risk = { AMOUNT = 10 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = greedy }
+            modifier = { add = -10  has_trait = generous }
+        }
+    }
+
+    # [generous] "Give them to the vassals who need them."
+    option = {
+        name = eotg_fracture.007.e
+        trigger = { has_trait = generous }
+        trait = generous
+        every_vassal = {
+            limit = {
+                is_alive = yes
+                opinion = { target = root  value < 0 }
+            }
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+        }
+        eotg_add_fracture_risk = { AMOUNT = -3 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = generous }
+            modifier = { add = 10  has_trait = compassionate }
+        }
+    }
+
+    # "Read the last page: how to cut it out." (Phase 3b, universal) ->
+    # Excision: The Surgeons. Couples through the tier exit there.
+    option = {
+        name = eotg_fracture.007.f
+        trigger_event = { id = eotg_aug_end.001  days = { 1 7 } }
+        eotg_aug_stress_reject_effect = yes
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 20  has_trait = zealous }
+            modifier = { add = -20  has_trait = ambitious }
+        }
+    }
+}
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Phase 3a — the band pools (docs/specs/cybernetics_v2_phase3.md §3)
+# Caller for .008-.026: eotg_on_yearly_aug_neurofractured_check, band lists
+# (yearly_playable_pulse). .027: same on_action, terminal step. .020, .028,
+# .029: chain stages. Every option moves eotg_fracture_risk unless its comment
+# says "—"; every event couples through at least one option.
+# [voice] descs read var:eotg_aug_voice (0-1 a thought a half-second early,
+# 2 "it", 3 "we", 4 "we, on agreed terms"); register rule in the index §5.
+# ═════════════════════════════════════════════════════════════════════════════
+
+
+# ── Flicker band — eerie, small, wrong ───────────────────────────────────────
+
+# -- eotg_fracture.008 --------------------------------------------------------
+# Wrong Name. You call the heir (else the spouse) by a dead person's name.
+# Caller: NF on_action, Flicker list.
+
+eotg_fracture.008 = {
+    type = character_event
+    title = eotg_fracture.008.t
+    desc = {
+        desc = eotg_fracture.008.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { exists = scope:eotg_dead_name }
+                desc = eotg_fracture.008.desc_dead_name
+            }
+            # [voice] no dead to borrow from: a designation, not a name
+            desc = eotg_fracture.008.desc_designation
+        }
+    }
+    theme = family
+
+    trigger = {
+        OR = {
+            exists = primary_heir
+            is_married = yes
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_named }
+        character = scope:eotg_named
+        animation = shock
+    }
+
+    immediate = {
+        hidden_effect = {
+            if = {
+                limit = { exists = primary_heir }
+                primary_heir = { save_scope_as = eotg_named }
+            }
+            else_if = {
+                limit = { exists = primary_spouse }
+                primary_spouse = { save_scope_as = eotg_named }
+            }
+            else = {
+                random_spouse = { save_scope_as = eotg_named }
+            }
+            # The dead name: a dead child, else a dead parent, else a dead spouse
+            random_child = {
+                even_if_dead = yes
+                limit = { is_alive = no }
+                save_scope_as = eotg_dead_name
+            }
+            if = {
+                limit = {
+                    NOT = { exists = scope:eotg_dead_name }
+                    father ?= { is_alive = no }
+                }
+                father = { save_scope_as = eotg_dead_name }
+            }
+            if = {
+                limit = {
+                    NOT = { exists = scope:eotg_dead_name }
+                    mother ?= { is_alive = no }
+                }
+                mother = { save_scope_as = eotg_dead_name }
+            }
+            if = {
+                limit = { NOT = { exists = scope:eotg_dead_name } }
+                random_former_spouse = {
+                    even_if_dead = yes
+                    limit = { is_alive = no }
+                    save_scope_as = eotg_dead_name
+                }
+            }
+        }
+    }
+
+    # "Laugh it off."
+    option = {
+        name = eotg_fracture.008.a
+        add_prestige = -25
+        eotg_add_fracture_risk = { AMOUNT = -3 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = gregarious }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # "Insist you said it right."
+    option = {
+        name = eotg_fracture.008.b
+        if = {
+            limit = { exists = scope:eotg_named }
+            scope:eotg_named = {
+                add_opinion = { modifier = eotg_opinion_aug_fear  target = root  years = 10 }
+            }
+        }
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        eotg_aug_stress_lie_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = stubborn }
+            modifier = { add = 20  has_trait = deceitful }
+            modifier = { add = -20  has_trait = honest }
+        }
+    }
+
+    # "Ask them to say their name back to you."
+    option = {
+        name = eotg_fracture.008.c
+        stress_impact = { base = minor_stress_impact_gain }
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = humble }
+            modifier = { add = 10  has_trait = diligent }
+        }
+    }
+
+    # [compassionate] "Say their real name until it sticks."
+    option = {
+        name = eotg_fracture.008.d
+        trigger = { has_trait = compassionate }
+        trait = compassionate
+        if = {
+            limit = { exists = scope:eotg_named }
+            scope:eotg_named = {
+                add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+            }
+        }
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = compassionate }
+            modifier = { add = 10  has_trait = patient }
+        }
+    }
+
+    # [arrogant] "Then that is their name now."
+    option = {
+        name = eotg_fracture.008.e
+        trigger = { has_trait = arrogant }
+        trait = arrogant
+        add_dread = 5
+        if = {
+            limit = { exists = scope:eotg_named }
+            scope:eotg_named = {
+                add_opinion = { modifier = eotg_opinion_aug_fear  target = root  years = 10 }
+            }
+        }
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        eotg_aug_stress_cruelty_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = arrogant }
+            modifier = { add = 10  has_trait = callous }
+        }
+    }
+}
+
+
+# -- eotg_fracture.009 --------------------------------------------------------
+# Lost Hour. An hour is missing from the logs.
+# Caller: NF on_action, Flicker list.
+# The possible victim of option a is picked (family 0.05) in immediate but
+# not hurt there, so the outcome line can name them.
+
+eotg_fracture.009 = {
+    type = character_event
+    title = eotg_fracture.009.t
+    desc = eotg_fracture.009.desc
+    theme = mental_health
+
+    left_portrait = {
+        character = root
+        animation = worry
+    }
+
+    immediate = {
+        hidden_effect = {
+            eotg_aug_pick_victim_effect = { NAME = eotg_victim  FAMILY_FACTOR = 0.05 }
+        }
+    }
+
+    # "Find out what I did." Outcome descs name what was found.
+    option = {
+        name = eotg_fracture.009.a
+        random_list = {
+            50 = {
+                desc = eotg_fracture.009.a.nothing
+            }
+            30 = {
+                desc = eotg_fracture.009.a.signed
+                remove_short_term_gold = minor_gold_value
+            }
+            20 = {
+                trigger = { exists = scope:eotg_victim }
+                desc = eotg_fracture.009.a.wounded
+                scope:eotg_victim = {
+                    increase_wounds_effect = { REASON = attacked }
+                    add_character_flag = { flag = eotg_flag_aug_breach_victim  days = 30 }
+                }
+                eotg_aug_stress_wound_effect = yes
+            }
+        }
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 20  has_trait = honest }
+        }
+    }
+
+    # "Don't look."
+    option = {
+        name = eotg_fracture.009.b
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        eotg_aug_stress_neglect_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = lazy }
+            modifier = { add = 20  has_trait = craven }
+        }
+    }
+
+    # "Have someone watch me."
+    option = {
+        name = eotg_fracture.009.c
+        add_prestige = -25
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = humble }
+            modifier = { add = 10  has_trait = trusting }
+        }
+    }
+
+    # [paranoid] "Lock the door from the outside."
+    option = {
+        name = eotg_fracture.009.d
+        trigger = { has_trait = paranoid }
+        trait = paranoid
+        add_character_modifier = { modifier = eotg_mod_withdrawn_from_court  years = 1 }
+        eotg_add_fracture_risk = { AMOUNT = -3 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = paranoid }
+            modifier = { add = 10  has_trait = shy }
+        }
+    }
+
+    # [diligent] "Log every minute from now on."
+    option = {
+        name = eotg_fracture.009.e
+        trigger = { has_trait = diligent }
+        trait = diligent
+        eotg_add_fracture_risk = { AMOUNT = -6 }
+        stress_impact = {
+            diligent = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = diligent }
+            modifier = { add = 10  has_trait = patient }
+        }
+    }
+}
+
+
+# -- eotg_fracture.010 --------------------------------------------------------
+# The Mirror Doesn't Blink. The implant's overlay renders your reflection a
+# moment late. Echoes eotg_aug_tier3.002 The Mirror (flag
+# eotg_flag_aug_saw_mirror, set by every tier3.002 option from Phase 3).
+# Caller: NF on_action, Flicker list.
+
+eotg_fracture.010 = {
+    type = character_event
+    title = eotg_fracture.010.t
+    desc = {
+        desc = eotg_fracture.010.desc
+        triggered_desc = {
+            trigger = { has_character_flag = eotg_flag_aug_saw_mirror }
+            desc = eotg_fracture.010.desc_saw_mirror
+        }
+        # [voice]
+        first_valid = {
+            triggered_desc = {
+                trigger = {
+                    has_variable = eotg_aug_voice
+                    var:eotg_aug_voice >= 4
+                }
+                desc = eotg_fracture.010.desc_voice4
+            }
+            triggered_desc = {
+                trigger = {
+                    has_variable = eotg_aug_voice
+                    var:eotg_aug_voice >= 3
+                }
+                desc = eotg_fracture.010.desc_voice3
+            }
+            triggered_desc = {
+                trigger = {
+                    has_variable = eotg_aug_voice
+                    var:eotg_aug_voice >= 2
+                }
+                desc = eotg_fracture.010.desc_voice2
+            }
+            desc = eotg_fracture.010.desc_voice01
+        }
+    }
+    theme = mental_health
+
+    left_portrait = {
+        character = root
+        animation = shock
+    }
+
+    # "Break it."
+    option = {
+        name = eotg_fracture.010.a
+        stress_impact = { base = minor_stress_impact_loss }
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = wrathful }
+            modifier = { add = 10  has_trait = impatient }
+        }
+    }
+
+    # "Stare back." [voice] at voice >= 2 the overlay labels your own face.
+    option = {
+        name = eotg_fracture.010.b
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = brave }
+            modifier = { add = 20  has_trait = stubborn }
+        }
+    }
+
+    # "Cover every mirror in the residence."
+    option = {
+        name = eotg_fracture.010.c
+        add_prestige = -25
+        eotg_add_fracture_risk = { AMOUNT = -3 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = craven }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+
+    # [zealous] "Bless the glass."
+    option = {
+        name = eotg_fracture.010.d
+        trigger = { has_trait = zealous }
+        trait = zealous
+        add_piety = 50
+        eotg_add_fracture_risk = { AMOUNT = -3 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = zealous }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+
+    # [eccentric] "Talk to it." Voice to 2: if First Contact (tier3.012,
+    # Phase 4c) never happened, this is it.
+    option = {
+        name = eotg_fracture.010.e
+        trigger = { has_trait = eccentric }
+        trait = eccentric
+        eotg_aug_voice_advance_effect = { STAGE = 2 }
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        eotg_aug_stress_embrace_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = eccentric }
+            modifier = { add = 10  has_trait = gregarious }
+        }
+    }
+}
+
+
+# -- eotg_fracture.011 --------------------------------------------------------
+# Conversations With No One. A courtier finds you mid-conversation with no
+# one; the witness is picked with family factor 0 and is never hurt.
+# Caller: NF on_action, Flicker list.
+
+eotg_fracture.011 = {
+    type = character_event
+    title = eotg_fracture.011.t
+    desc = {
+        desc = eotg_fracture.011.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { exists = scope:eotg_witness }
+                desc = eotg_fracture.011.desc_witness
+            }
+            desc = eotg_fracture.011.desc_none
+        }
+    }
+    theme = mental_health
+
+    trigger = {
+        any_courtier = { eotg_aug_victim_candidate = yes }
+    }
+
+    left_portrait = {
+        character = root
+        animation = worry
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_witness }
+        character = scope:eotg_witness
+        animation = disbelief
+    }
+
+    immediate = {
+        hidden_effect = {
+            eotg_aug_pick_victim_effect = { NAME = eotg_witness  FAMILY_FACTOR = 0 }
+        }
+    }
+
+    # "I was rehearsing." —
+    option = {
+        name = eotg_fracture.011.a
+        eotg_aug_stress_lie_effect = yes
+        random = {
+            chance = 50
+            if = {
+                limit = { exists = scope:eotg_witness }
+                scope:eotg_witness = {
+                    add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+                }
+            }
+        }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = deceitful }
+            modifier = { add = -20  has_trait = honest }
+        }
+    }
+
+    # "Tell them who I was speaking to." Voice to 2.
+    option = {
+        name = eotg_fracture.011.b
+        eotg_aug_voice_advance_effect = { STAGE = 2 }
+        if = {
+            limit = { exists = scope:eotg_witness }
+            scope:eotg_witness = {
+                add_opinion = { modifier = eotg_opinion_aug_fear  target = root  years = 10 }
+            }
+        }
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = honest }
+            modifier = { add = 20  has_trait = eccentric }
+        }
+    }
+
+    # "Pay for their silence."
+    option = {
+        name = eotg_fracture.011.c
+        remove_short_term_gold = minor_gold_value
+        eotg_add_fracture_risk = { AMOUNT = -3 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = paranoid }
+            modifier = { add = -20  has_trait = greedy }
+        }
+    }
+
+    # [shy] "Leave. Now."
+    option = {
+        name = eotg_fracture.011.d
+        trigger = { has_trait = shy }
+        trait = shy
+        add_prestige = -25
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        stress_impact = {
+            shy = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = shy }
+            modifier = { add = 10  has_trait = craven }
+        }
+    }
+
+    # [deceitful] "You heard nothing." —
+    option = {
+        name = eotg_fracture.011.e
+        trigger = { has_trait = deceitful }
+        trait = deceitful
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_intrigue  years = 5 }
+        eotg_aug_stress_lie_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = deceitful }
+            modifier = { add = 10  has_trait = arbitrary }
+        }
+    }
+}
+
+
+# -- eotg_fracture.012 --------------------------------------------------------
+# The Familiar Stranger. Someone close is a stranger now: a friend, else a
+# lover, else the spouse.
+# Caller: NF on_action, Flicker list.
+
+eotg_fracture.012 = {
+    type = character_event
+    title = eotg_fracture.012.t
+    desc = eotg_fracture.012.desc
+    theme = friendly
+
+    trigger = {
+        OR = {
+            any_relation = { type = friend }
+            any_relation = { type = lover }
+            is_married = yes
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = disbelief
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_stranger }
+        character = scope:eotg_stranger
+        animation = worry
+    }
+
+    immediate = {
+        hidden_effect = {
+            if = {
+                limit = { any_relation = { type = friend } }
+                random_relation = {
+                    type = friend
+                    save_scope_as = eotg_stranger
+                }
+            }
+            else_if = {
+                limit = { any_relation = { type = lover } }
+                random_relation = {
+                    type = lover
+                    save_scope_as = eotg_stranger
+                }
+            }
+            else_if = {
+                limit = { exists = primary_spouse }
+                primary_spouse = { save_scope_as = eotg_stranger }
+            }
+            else = {
+                random_spouse = { save_scope_as = eotg_stranger }
+            }
+        }
+    }
+
+    # "Pretend."
+    option = {
+        name = eotg_fracture.012.a
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        eotg_aug_stress_lie_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = deceitful }
+            modifier = { add = -20  has_trait = honest }
+        }
+    }
+
+    # "Tell them you don't know them any more." The relation goes, with the
+    # same bodies as eotg_aug_forget_relation_effect aimed at scope:eotg_stranger
+    # (a spouse is not a scripted relation: only the opinion applies).
+    option = {
+        name = eotg_fracture.012.b
+        if = {
+            limit = { exists = scope:eotg_stranger }
+            if = {
+                limit = { has_relation_soulmate = scope:eotg_stranger }
+                remove_relation_soulmate = scope:eotg_stranger
+            }
+            else_if = {
+                limit = { has_relation_best_friend = scope:eotg_stranger }
+                remove_relation_best_friend = scope:eotg_stranger
+            }
+            else_if = {
+                limit = { has_relation_lover = scope:eotg_stranger }
+                remove_relation_lover = scope:eotg_stranger
+            }
+            else_if = {
+                limit = { has_relation_friend = scope:eotg_stranger }
+                remove_relation_friend = scope:eotg_stranger
+            }
+            scope:eotg_stranger = {
+                add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 5 }
+            }
+        }
+        eotg_add_fracture_risk = { AMOUNT = -3 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = honest }
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = -20  has_trait = compassionate }
+        }
+    }
+
+    # "Ask them who you used to be."
+    option = {
+        name = eotg_fracture.012.c
+        if = {
+            limit = { exists = scope:eotg_stranger }
+            scope:eotg_stranger = {
+                add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+            }
+        }
+        stress_impact = { base = minor_stress_impact_gain }
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = humble }
+            modifier = { add = 20  has_trait = compassionate }
+        }
+    }
+
+    # [trusting] "If they say so, it's so." —
+    option = {
+        name = eotg_fracture.012.d
+        trigger = { has_trait = trusting }
+        trait = trusting
+        if = {
+            limit = { exists = scope:eotg_stranger }
+            scope:eotg_stranger = {
+                add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+            }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = trusting }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # [paranoid] "An impostor."
+    option = {
+        name = eotg_fracture.012.e
+        trigger = { has_trait = paranoid }
+        trait = paranoid
+        if = {
+            limit = { exists = scope:eotg_stranger }
+            scope:eotg_stranger = {
+                add_opinion = { modifier = eotg_opinion_aug_fear  target = root  years = 10 }
+            }
+        }
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        eotg_aug_stress_tyranny_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = paranoid }
+            modifier = { add = 10  has_trait = vengeful }
+        }
+    }
+}
+
+
+# -- eotg_fracture.013 --------------------------------------------------------
+# Memory of Tomorrow. The implant's forecast, stored as a memory (index §5:
+# never a vision or prophecy).
+# Caller: NF on_action, Flicker list.
+# a sets eotg_flag_aug_premonition (1 year), read by the "you remember this"
+# descs of eotg_fracture.026, eotg_fracture.027 and eotg_aug_heir.004.
+
+eotg_fracture.013 = {
+    type = character_event
+    title = eotg_fracture.013.t
+    desc = eotg_fracture.013.desc
+    theme = mental_health
+
+    left_portrait = {
+        character = root
+        animation = thinking
+    }
+
+    # "Write it down."
+    option = {
+        name = eotg_fracture.013.a
+        add_character_flag = { flag = eotg_flag_aug_premonition  years = 1 }
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 10  has_trait = patient }
+        }
+    }
+
+    # "Act on it."
+    option = {
+        name = eotg_fracture.013.b
+        random_list = {
+            50 = { add_prestige = 100 }
+            50 = { add_prestige = -100 }
+        }
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = impatient }
+            modifier = { add = 20  has_trait = ambitious }
+        }
+    }
+
+    # "Ignore it."
+    option = {
+        name = eotg_fracture.013.c
+        stress_impact = { base = minor_stress_impact_gain }
+        eotg_add_fracture_risk = { AMOUNT = -3 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 10  has_trait = cynical }
+        }
+    }
+
+    # [eccentric] "Stake the treasury on it."
+    option = {
+        name = eotg_fracture.013.d
+        trigger = { has_trait = eccentric }
+        trait = eccentric
+        random_list = {
+            50 = { add_gold = medium_gold_value }
+            50 = { remove_short_term_gold = medium_gold_value }
+        }
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = eccentric }
+            modifier = { add = -20  has_trait = greedy }
+        }
+    }
+
+    # [patient] "Wait and see if it comes."
+    option = {
+        name = eotg_fracture.013.e
+        trigger = { has_trait = patient }
+        trait = patient
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = patient }
+            modifier = { add = 10  has_trait = calm }
+        }
+    }
+}
+
+
+# -- eotg_fracture.014 --------------------------------------------------------
+# The Door. The implant's spatial overlay has drawn a door on a load-bearing
+# wall. Hardware, not a threshold.
+# Caller: NF on_action, Flicker list.
+
+eotg_fracture.014 = {
+    type = character_event
+    title = eotg_fracture.014.t
+    desc = eotg_fracture.014.desc
+    theme = mental_health
+
+    left_portrait = {
+        character = root
+        animation = interested
+    }
+
+    # "Have a work crew cut it."
+    option = {
+        name = eotg_fracture.014.a
+        remove_short_term_gold = minor_gold_value
+        add_prestige = -50
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = -20  has_trait = greedy }
+        }
+    }
+
+    # "Walk through it anyway." 30%: a fall (vanilla increase_wounds_effect).
+    option = {
+        name = eotg_fracture.014.b
+        random = {
+            chance = 30
+            increase_wounds_effect = { REASON = fall }
+        }
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = brave }
+            modifier = { add = -20  has_trait = craven }
+        }
+    }
+
+    # "Let the court pretend there is a door."
+    option = {
+        name = eotg_fracture.014.c
+        add_prestige = -25
+        eotg_add_fracture_risk = { AMOUNT = -2 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 10  has_trait = lazy }
+        }
+    }
+
+    # [stubborn] "It's there. I'll wait for it to open."
+    option = {
+        name = eotg_fracture.014.d
+        trigger = { has_trait = stubborn }
+        trait = stubborn
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        stress_impact = {
+            stubborn = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = stubborn }
+            modifier = { add = 10  has_trait = patient }
+        }
+    }
+
+    # [humble] "Then I am wrong. Help me."
+    option = {
+        name = eotg_fracture.014.e
+        trigger = { has_trait = humble }
+        trait = humble
+        add_prestige = -50
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = humble }
+            modifier = { add = 10  has_trait = trusting }
+        }
+    }
+}
+
+
+# -- eotg_fracture.015 --------------------------------------------------------
+# The Unsent Letter. A letter in your hand, to a vassal, that you do not
+# remember writing. Its kind is a scope value (vanilla
+# save_scope_value_as = flag:, events/activities/tournaments/
+# tournament_events.txt:12883; the spec's "local variable").
+# Caller: NF on_action, Flicker list.
+
+eotg_fracture.015 = {
+    type = character_event
+    title = eotg_fracture.015.t
+    desc = {
+        desc = eotg_fracture.015.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_letter_kind = flag:confession }
+                desc = eotg_fracture.015.desc_confession
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_letter_kind = flag:threat }
+                desc = eotg_fracture.015.desc_threat
+            }
+            desc = eotg_fracture.015.desc_devotion
+        }
+    }
+    theme = intrigue
+
+    trigger = {
+        any_vassal = { is_alive = yes }
+    }
+
+    left_portrait = {
+        character = root
+        animation = thinking
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_addressee }
+        character = scope:eotg_addressee
+        animation = idle
+    }
+
+    immediate = {
+        hidden_effect = {
+            random_vassal = {
+                limit = { is_alive = yes }
+                save_scope_as = eotg_addressee
+            }
+            random_list = {
+                1 = { save_scope_value_as = { name = eotg_letter_kind  value = flag:confession } }
+                1 = { save_scope_value_as = { name = eotg_letter_kind  value = flag:threat } }
+                1 = { save_scope_value_as = { name = eotg_letter_kind  value = flag:devotion } }
+            }
+        }
+    }
+
+    # "Burn it."
+    option = {
+        name = eotg_fracture.015.a
+        eotg_add_fracture_risk = { AMOUNT = -3 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = paranoid }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # "Send it."
+    option = {
+        name = eotg_fracture.015.b
+        if = {
+            limit = { exists = scope:eotg_addressee }
+            if = {
+                limit = { scope:eotg_letter_kind = flag:confession }
+                scope:eotg_addressee = {
+                    add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+                }
+                add_prestige = -50
+            }
+            else_if = {
+                limit = { scope:eotg_letter_kind = flag:threat }
+                scope:eotg_addressee = {
+                    add_opinion = { modifier = eotg_opinion_aug_fear  target = root  years = 10 }
+                }
+                add_dread = 10
+                eotg_aug_stress_cruelty_effect = yes
+            }
+            else = {
+                scope:eotg_addressee = {
+                    add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
+                }
+            }
+        }
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = impatient }
+            modifier = { add = 20  has_trait = fickle }
+        }
+    }
+
+    # "Read it aloud to the court."
+    option = {
+        name = eotg_fracture.015.c
+        add_prestige = -100
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = gregarious }
+            modifier = { add = 20  has_trait = eccentric }
+        }
+    }
+
+    # [honest] "Send it with a note: I don't remember writing this."
+    option = {
+        name = eotg_fracture.015.d
+        trigger = { has_trait = honest }
+        trait = honest
+        if = {
+            limit = { exists = scope:eotg_addressee }
+            scope:eotg_addressee = {
+                add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+            }
+        }
+        eotg_add_fracture_risk = { AMOUNT = -3 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = honest }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+
+    # [deceitful] "Rewrite it into something useful."
+    option = {
+        name = eotg_fracture.015.e
+        trigger = { has_trait = deceitful }
+        trait = deceitful
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_intrigue  years = 5 }
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        eotg_aug_stress_lie_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = deceitful }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+}
+
+
+# ── Fracture band — violence and lost time ───────────────────────────────────
+
+# -- eotg_fracture.016 --------------------------------------------------------
+# Blood on the Sleeve. You wake with blood on your sleeve. The victim is
+# picked (family 0.05) and hurt in immediate; the desc shows only the blood,
+# option a names them. With no one near, the blood is your own.
+# Caller: NF on_action, Fracture list (violent).
+
+eotg_fracture.016 = {
+    type = character_event
+    title = eotg_fracture.016.t
+    desc = {
+        desc = eotg_fracture.016.desc
+        triggered_desc = {
+            trigger = { NOT = { exists = scope:eotg_victim } }
+            desc = eotg_fracture.016.desc_own
+        }
+    }
+    theme = dread
+
+    left_portrait = {
+        character = root
+        animation = shock
+    }
+
+    immediate = {
+        hidden_effect = {
+            eotg_aug_pick_victim_effect = { NAME = eotg_victim  FAMILY_FACTOR = 0.05 }
+            if = {
+                limit = { exists = scope:eotg_victim }
+                random_list = {
+                    60 = {
+                        save_scope_value_as = { name = eotg_blood_outcome  value = flag:wounded }
+                        scope:eotg_victim = {
+                            increase_wounds_effect = { REASON = attacked }
+                            add_character_flag = { flag = eotg_flag_aug_breach_victim  days = 30 }
+                        }
+                    }
+                    40 = {
+                        save_scope_value_as = { name = eotg_blood_outcome  value = flag:dead }
+                        scope:eotg_victim = {
+                            death = { death_reason = death_murder  killer = root }
+                        }
+                    }
+                }
+            }
+            else = {
+                save_scope_value_as = { name = eotg_blood_outcome  value = flag:own }
+                if = {
+                    limit = {
+                        NOR = {
+                            has_trait = wounded_1
+                            has_trait = wounded_2
+                            has_trait = wounded_3
+                        }
+                    }
+                    add_trait = wounded_1
+                }
+            }
+        }
+    }
+
+    # "Find out whose it is." Names the victim (option text keys on outcome).
+    option = {
+        name = {
+            trigger = { scope:eotg_blood_outcome = flag:dead }
+            text = eotg_fracture.016.a_dead
+        }
+        name = {
+            trigger = { NOT = { scope:eotg_blood_outcome = flag:dead } }
+            text = eotg_fracture.016.a
+        }
+        trigger = { exists = scope:eotg_victim }
+        if = {
+            limit = { scope:eotg_blood_outcome = flag:dead }
+            add_tyranny = 5
+            eotg_aug_stress_murder_effect = yes
+        }
+        else = {
+            eotg_aug_stress_wound_effect = yes
+        }
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = honest }
+            modifier = { add = 20  has_trait = diligent }
+        }
+    }
+
+    # "Burn the shirt."
+    option = {
+        name = eotg_fracture.016.b
+        eotg_aug_stress_lie_effect = yes
+        if = {
+            limit = { scope:eotg_blood_outcome = flag:dead }
+            eotg_aug_stress_murder_effect = yes
+        }
+        else_if = {
+            limit = { scope:eotg_blood_outcome = flag:wounded }
+            eotg_aug_stress_wound_effect = yes
+        }
+        eotg_add_fracture_risk = { AMOUNT = 10 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = deceitful }
+            modifier = { add = 20  has_trait = craven }
+            modifier = { add = -20  has_trait = honest }
+        }
+    }
+
+    # "Confess it to the court."
+    option = {
+        name = eotg_fracture.016.c
+        add_prestige = -150
+        stress_impact = {
+            honest = minor_stress_impact_loss
+        }
+        if = {
+            limit = { scope:eotg_blood_outcome = flag:dead }
+            eotg_aug_stress_murder_effect = yes
+        }
+        else_if = {
+            limit = { scope:eotg_blood_outcome = flag:wounded }
+            eotg_aug_stress_wound_effect = yes
+        }
+        eotg_add_fracture_risk = { AMOUNT = -8 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = honest }
+            modifier = { add = 20  has_trait = just }
+            modifier = { add = -20  has_trait = arrogant }
+        }
+    }
+
+    # [callous] "Does it matter whose?"
+    option = {
+        name = eotg_fracture.016.d
+        trigger = { has_trait = callous }
+        trait = callous
+        add_dread = 10
+        if = {
+            limit = { scope:eotg_blood_outcome = flag:dead }
+            eotg_aug_stress_murder_effect = yes
+        }
+        else_if = {
+            limit = { scope:eotg_blood_outcome = flag:wounded }
+            eotg_aug_stress_wound_effect = yes
+        }
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = callous }
+            modifier = { add = 10  has_trait = arrogant }
+        }
+    }
+
+    # [just] "Pay blood-price to their kin." The victim's close family at
+    # court is reassured.
+    option = {
+        name = eotg_fracture.016.e
+        trigger = {
+            has_trait = just
+            exists = scope:eotg_victim
+        }
+        trait = just
+        remove_short_term_gold = medium_gold_value
+        scope:eotg_victim = {
+            every_close_family_member = {
+                limit = {
+                    is_alive = yes
+                    is_courtier_of = root
+                    NOT = { this = root }
+                }
+                add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+            }
+        }
+        if = {
+            limit = { scope:eotg_blood_outcome = flag:dead }
+            eotg_aug_stress_murder_effect = yes
+        }
+        else = {
+            eotg_aug_stress_wound_effect = yes
+        }
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = just }
+            modifier = { add = 10  has_trait = generous }
+        }
+    }
+}
+
+
+# -- eotg_fracture.017 --------------------------------------------------------
+# Terms of Access (thread T1, beat 4; renamed per lore review 2026-10-03).
+# A permissions request: the implant's model asks for wider access to act
+# ahead of you. A transaction, never a pact. Agency is unreliable: b and e
+# roll hidden; an override fires eotg_fracture.028 The Terms.
+# Caller: NF on_action, Fracture list.
+
+eotg_fracture.017 = {
+    type = character_event
+    title = eotg_fracture.017.t
+    desc = {
+        desc = eotg_fracture.017.desc
+        # [voice] below 2: "for the first time, it requests access"
+        first_valid = {
+            triggered_desc = {
+                trigger = {
+                    has_variable = eotg_aug_voice
+                    var:eotg_aug_voice >= 4
+                }
+                desc = eotg_fracture.017.desc_voice4
+            }
+            triggered_desc = {
+                trigger = {
+                    has_variable = eotg_aug_voice
+                    var:eotg_aug_voice >= 3
+                }
+                desc = eotg_fracture.017.desc_voice3
+            }
+            triggered_desc = {
+                trigger = {
+                    has_variable = eotg_aug_voice
+                    var:eotg_aug_voice >= 2
+                }
+                desc = eotg_fracture.017.desc_voice2
+            }
+            desc = eotg_fracture.017.desc_voice01
+        }
+    }
+    theme = mental_health
+
+    left_portrait = {
+        character = root
+        animation = thinking
+    }
+
+    # "Grant it." Voice to 4.
+    option = {
+        name = eotg_fracture.017.a
+        eotg_aug_voice_advance_effect = { STAGE = 4 }
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_martial  years = 5 }
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_intrigue  years = 5 }
+        add_prestige = 100
+        eotg_add_fracture_risk = { AMOUNT = 15 }
+        eotg_aug_stress_embrace_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 20  has_trait = cynical }
+            modifier = { add = -20  has_trait = zealous }
+        }
+    }
+
+    # "Deny it." The tooltip shows only the denial: 70 honoured, 30 override
+    # (as a without the lessons, then eotg_fracture.028).
+    option = {
+        name = eotg_fracture.017.b
+        hidden_effect = {
+            random_list = {
+                70 = {
+                    eotg_add_fracture_risk = { AMOUNT = -5 }
+                }
+                30 = {
+                    eotg_aug_voice_advance_effect = { STAGE = 4 }
+                    add_prestige = 100
+                    eotg_add_fracture_risk = { AMOUNT = 15 }
+                    trigger_event = { id = eotg_fracture.028  days = { 7 30 } }
+                }
+            }
+        }
+        eotg_aug_stress_reject_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 20  has_trait = humble }
+        }
+    }
+
+    # "Negotiate the terms." 50 + 3 x intrigue for partial terms. Vanilla duel
+    # against a fixed value (effects.log "skill(s) + value"; compare_modifier
+    # with min, events/yearly_events/bp1_yearly_james.txt:3730).
+    option = {
+        name = eotg_fracture.017.c
+        duel = {
+            skill = intrigue
+            value = 0
+            50 = {
+                desc = eotg_fracture.017.c.partial
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = 3
+                }
+                add_character_modifier = { modifier = eotg_mod_aug_lesson_intrigue  years = 5 }
+                eotg_add_fracture_risk = { AMOUNT = 5 }
+            }
+            50 = {
+                desc = eotg_fracture.017.c.failed
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = -3
+                    min = -45
+                }
+                eotg_add_fracture_risk = { AMOUNT = 10 }
+            }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = deceitful }
+            modifier = { add = 20  has_trait = greedy }
+        }
+    }
+
+    # [ambitious] "What do I get in return?" As a, with more prestige and risk.
+    option = {
+        name = eotg_fracture.017.d
+        trigger = { has_trait = ambitious }
+        trait = ambitious
+        eotg_aug_voice_advance_effect = { STAGE = 4 }
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_martial  years = 5 }
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_intrigue  years = 5 }
+        add_prestige = 150
+        eotg_add_fracture_risk = { AMOUNT = 20 }
+        eotg_aug_stress_embrace_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = ambitious }
+            modifier = { add = 10  has_trait = greedy }
+        }
+    }
+
+    # [zealous] "No device speaks for me." Hidden: 85 honoured, 15 override.
+    option = {
+        name = eotg_fracture.017.e
+        trigger = { has_trait = zealous }
+        trait = zealous
+        hidden_effect = {
+            random_list = {
+                85 = {
+                    eotg_add_fracture_risk = { AMOUNT = -8 }
+                    add_piety = 50
+                }
+                15 = {
+                    eotg_aug_voice_advance_effect = { STAGE = 4 }
+                    add_prestige = 100
+                    eotg_add_fracture_risk = { AMOUNT = 15 }
+                    trigger_event = { id = eotg_fracture.028  days = { 7 30 } }
+                }
+            }
+        }
+        eotg_aug_stress_reject_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = zealous }
+            modifier = { add = 10  has_trait = stubborn }
+        }
+    }
+}
+
+
+# -- eotg_fracture.018 --------------------------------------------------------
+# Scrambled. The scramble runs inside the options so the trait swap shows in
+# the tooltip.
+# Caller: NF on_action, Storm and Fracture lists (5-year flag set there).
+
+eotg_fracture.018 = {
+    type = character_event
+    title = eotg_fracture.018.t
+    desc = eotg_fracture.018.desc
+    theme = mental_health
+
+    left_portrait = {
+        character = root
+        animation = disbelief
+    }
+
+    # "Who was I?" 25%: a relation is forgotten too.
+    option = {
+        name = eotg_fracture.018.a
+        eotg_aug_scramble_personality_effect = yes
+        random = {
+            chance = 25
+            eotg_aug_forget_relation_effect = yes
+        }
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = fickle }
+            modifier = { add = 20  has_trait = content }
+        }
+    }
+
+    # "Hold on to it." —
+    option = {
+        name = eotg_fracture.018.b
+        random = {
+            chance = 50
+            eotg_aug_scramble_personality_effect = yes
+        }
+        stress_impact = { base = medium_stress_impact_gain }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = stubborn }
+            modifier = { add = 20  has_trait = brave }
+        }
+    }
+
+    # "Let it go. Let all of it go." Scramble twice; the fight ends.
+    option = {
+        name = eotg_fracture.018.c
+        eotg_aug_scramble_personality_effect = yes
+        eotg_aug_scramble_personality_effect = yes
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        eotg_aug_stress_embrace_effect = yes
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 20  has_trait = craven }
+        }
+    }
+
+    # [stubborn] "No." —
+    option = {
+        name = eotg_fracture.018.d
+        trigger = { has_trait = stubborn }
+        trait = stubborn
+        random = {
+            chance = 20
+            eotg_aug_scramble_personality_effect = yes
+        }
+        stress_impact = {
+            stubborn = medium_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = stubborn }
+            modifier = { add = 10  has_trait = brave }
+        }
+    }
+
+    # [fickle] "Does it matter?"
+    option = {
+        name = eotg_fracture.018.e
+        trigger = { has_trait = fickle }
+        trait = fickle
+        eotg_aug_scramble_personality_effect = yes
+        stress_impact = {
+            fickle = medium_stress_impact_loss
+        }
+        eotg_add_fracture_risk = { AMOUNT = -3 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = fickle }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+}
+
+
+# -- eotg_fracture.019 --------------------------------------------------------
+# The False Traitor (unreliable perception). The implant names a traitor.
+# Truth is rolled now (20 true / 80 false), stored on root as
+# eotg_aug_accusation_true (flag:yes / flag:no), with the action taken in
+# eotg_aug_accusation_action; eotg_fracture.020 reveals it 90-180 days later
+# and clears both.
+# Caller: NF on_action, Fracture list.
+
+eotg_fracture.019 = {
+    type = character_event
+    title = eotg_fracture.019.t
+    desc = eotg_fracture.019.desc
+    theme = intrigue
+
+    trigger = {
+        any_courtier = { eotg_aug_victim_candidate = yes }
+    }
+
+    left_portrait = {
+        character = root
+        animation = paranoia
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_accused }
+        character = scope:eotg_accused
+        animation = worry
+    }
+
+    immediate = {
+        hidden_effect = {
+            if = {
+                limit = { any_vassal = { is_alive = yes } }
+                random_vassal = {
+                    limit = { is_alive = yes }
+                    save_scope_as = eotg_accused
+                }
+            }
+            else = {
+                eotg_aug_pick_victim_effect = { NAME = eotg_accused  FAMILY_FACTOR = 0.05 }
+            }
+            random_list = {
+                20 = { set_variable = { name = eotg_aug_accusation_true  value = flag:yes } }
+                80 = { set_variable = { name = eotg_aug_accusation_true  value = flag:no } }
+            }
+        }
+    }
+
+    # "Arrest them."
+    option = {
+        name = eotg_fracture.019.a
+        imprison = { target = scope:eotg_accused  type = dungeon }
+        hidden_effect = {
+            set_variable = { name = eotg_aug_accusation_action  value = flag:arrested }
+            trigger_event = { id = eotg_fracture.020  days = { 90 180 } }
+        }
+        eotg_aug_stress_tyranny_effect = yes
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = paranoid }
+            modifier = { add = 20  has_trait = wrathful }
+            modifier = { add = -20  has_trait = trusting }
+        }
+    }
+
+    # "Have them watched."
+    option = {
+        name = eotg_fracture.019.b
+        hidden_effect = {
+            set_variable = { name = eotg_aug_accusation_action  value = flag:watched }
+            trigger_event = { id = eotg_fracture.020  days = { 90 180 } }
+        }
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = patient }
+            modifier = { add = 20  has_trait = calm }
+        }
+    }
+
+    # "Execute them." vanilla death_execution
+    # (game/common/deathreasons/00_event_deaths.txt).
+    option = {
+        name = eotg_fracture.019.c
+        scope:eotg_accused = {
+            death = { death_reason = death_execution  killer = root }
+        }
+        add_dread = 20
+        hidden_effect = {
+            set_variable = { name = eotg_aug_accusation_action  value = flag:executed }
+            trigger_event = { id = eotg_fracture.020  days = { 90 180 } }
+        }
+        eotg_aug_stress_murder_effect = yes
+        eotg_add_fracture_risk = { AMOUNT = 10 }
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = wrathful }
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = -20  has_trait = compassionate }
+        }
+    }
+
+    # [paranoid] "Their family too." The accused and their close family at
+    # root's court.
+    option = {
+        name = eotg_fracture.019.d
+        trigger = { has_trait = paranoid }
+        trait = paranoid
+        imprison = { target = scope:eotg_accused  type = dungeon }
+        scope:eotg_accused = {
+            every_close_family_member = {
+                limit = {
+                    is_alive = yes
+                    is_courtier_of = root
+                    is_imprisoned = no
+                    NOT = { this = root }
+                }
+                root = { imprison = { target = prev  type = dungeon } }
+            }
+        }
+        add_tyranny = 20
+        hidden_effect = {
+            set_variable = { name = eotg_aug_accusation_action  value = flag:arrested }
+            trigger_event = { id = eotg_fracture.020  days = { 90 180 } }
+        }
+        eotg_aug_stress_tyranny_effect = yes
+        eotg_add_fracture_risk = { AMOUNT = 12 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = paranoid }
+            modifier = { add = 10  has_trait = vengeful }
+        }
+    }
+
+    # [trusting] "No. Not them." Overriding the implant costs.
+    option = {
+        name = eotg_fracture.019.e
+        trigger = { has_trait = trusting }
+        trait = trusting
+        scope:eotg_accused = {
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+        }
+        hidden_effect = {
+            set_variable = { name = eotg_aug_accusation_action  value = flag:spared }
+            trigger_event = { id = eotg_fracture.020  days = { 90 180 } }
+        }
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        eotg_aug_stress_reject_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = trusting }
+            modifier = { add = 10  has_trait = forgiving }
+        }
+    }
+}
+
+
+# -- eotg_fracture.020 --------------------------------------------------------
+# The False Traitor: the truth. Chain stage of eotg_fracture.019 (every
+# option, 90-180 days). scope:eotg_accused carries over from .019.
+# Desc varies by truth x action. A false accusation costs opinion now.
+
+eotg_fracture.020 = {
+    type = character_event
+    title = eotg_fracture.020.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { var:eotg_aug_accusation_true = flag:yes }
+                desc = eotg_fracture.020.desc_true
+            }
+            triggered_desc = {
+                trigger = { var:eotg_aug_accusation_action = flag:executed }
+                desc = eotg_fracture.020.desc_false_executed
+            }
+            triggered_desc = {
+                trigger = { var:eotg_aug_accusation_action = flag:arrested }
+                desc = eotg_fracture.020.desc_false_arrested
+            }
+            triggered_desc = {
+                trigger = { var:eotg_aug_accusation_action = flag:watched }
+                desc = eotg_fracture.020.desc_false_watched
+            }
+            desc = eotg_fracture.020.desc_false_spared
+        }
+    }
+    theme = intrigue
+
+    trigger = {
+        has_variable = eotg_aug_accusation_true
+        exists = scope:eotg_accused
+    }
+
+    left_portrait = {
+        character = root
+        animation = thinking
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_accused }
+        character = scope:eotg_accused
+        triggered_animation = {
+            trigger = { is_alive = no }
+            animation = dead
+        }
+        animation = anger
+        animate_if_dead = yes
+    }
+
+    immediate = {
+        if = {
+            limit = { var:eotg_aug_accusation_true = flag:no }
+            scope:eotg_accused = {
+                if = {
+                    limit = { is_alive = yes }
+                    add_opinion = { modifier = eotg_opinion_aug_falsely_accused  target = root  years = 10 }
+                }
+                every_close_family_member = {
+                    limit = {
+                        is_alive = yes
+                        NOT = { this = root }
+                    }
+                    add_opinion = { modifier = eotg_opinion_aug_falsely_accused  target = root  years = 10 }
+                }
+            }
+            if = {
+                limit = { var:eotg_aug_accusation_action = flag:executed }
+                add_tyranny = 10
+            }
+        }
+    }
+
+    # (false, imprisoned) "Release them. I was wrong."
+    option = {
+        name = eotg_fracture.020.a
+        trigger = {
+            var:eotg_aug_accusation_true = flag:no
+            scope:eotg_accused = {
+                is_alive = yes
+                is_imprisoned_by = root
+            }
+        }
+        scope:eotg_accused = {
+            release_from_prison = yes
+            every_close_family_member = {
+                limit = { is_imprisoned_by = root }
+                release_from_prison = yes
+            }
+        }
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        hidden_effect = {
+            remove_variable = eotg_aug_accusation_true
+            remove_variable = eotg_aug_accusation_action
+        }
+        ai_chance = {
+            base = 50
+            modifier = { add = 20  has_trait = just }
+            modifier = { add = 20  has_trait = forgiving }
+        }
+    }
+
+    # (false) "I was right anyway."
+    option = {
+        name = eotg_fracture.020.b
+        trigger = { var:eotg_aug_accusation_true = flag:no }
+        add_tyranny = 10
+        eotg_aug_stress_lie_effect = yes
+        eotg_add_fracture_risk = { AMOUNT = 10 }
+        hidden_effect = {
+            remove_variable = eotg_aug_accusation_true
+            remove_variable = eotg_aug_accusation_action
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = arrogant }
+            modifier = { add = 20  has_trait = stubborn }
+            modifier = { add = -20  has_trait = honest }
+        }
+    }
+
+    # (true) "As I knew." The implant was right this once; you will trust it
+    # next time.
+    option = {
+        name = eotg_fracture.020.c
+        trigger = { var:eotg_aug_accusation_true = flag:yes }
+        add_prestige = 100
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        hidden_effect = {
+            remove_variable = eotg_aug_accusation_true
+            remove_variable = eotg_aug_accusation_action
+        }
+        ai_chance = {
+            base = 50
+            modifier = { add = 20  has_trait = arrogant }
+            modifier = { add = 10  has_trait = paranoid }
+        }
+    }
+}
+
+
+# -- eotg_fracture.021 --------------------------------------------------------
+# The Missing Courtier. Picked with family factor 0. 50 left court
+# (move_to_pool) / 50 dead; the desc does not say which.
+# Caller: NF on_action, Fracture list.
+
+eotg_fracture.021 = {
+    type = character_event
+    title = eotg_fracture.021.t
+    desc = eotg_fracture.021.desc
+    theme = intrigue
+
+    trigger = {
+        any_courtier = {
+            eotg_aug_victim_candidate = yes
+            NOT = { is_close_family_of = root }
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = worry
+    }
+
+    immediate = {
+        hidden_effect = {
+            eotg_aug_pick_victim_effect = { NAME = eotg_missing  FAMILY_FACTOR = 0 }
+            if = {
+                limit = { exists = scope:eotg_missing }
+                random_list = {
+                    50 = {
+                        save_scope_value_as = { name = eotg_missing_outcome  value = flag:left }
+                        scope:eotg_missing = { move_to_pool = yes }
+                    }
+                    50 = {
+                        save_scope_value_as = { name = eotg_missing_outcome  value = flag:dead }
+                        scope:eotg_missing = {
+                            add_character_flag = { flag = eotg_flag_aug_breach_victim  days = 30 }
+                            death = { death_reason = death_murder  killer = root }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    # "Search for them."
+    option = {
+        name = eotg_fracture.021.a
+        remove_short_term_gold = minor_gold_value
+        if = {
+            limit = {
+                exists = scope:eotg_missing
+                scope:eotg_missing_outcome = flag:left
+                scope:eotg_missing = { is_alive = yes }
+            }
+            add_courtier = scope:eotg_missing
+        }
+        else = {
+            custom_tooltip = eotg_fracture.021.a.found_dead
+        }
+        eotg_add_fracture_risk = { AMOUNT = -3 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 20  has_trait = diligent }
+        }
+    }
+
+    # "I ordered it. It is done."
+    option = {
+        name = eotg_fracture.021.b
+        add_dread = 15
+        add_tyranny = 5
+        eotg_aug_stress_cruelty_effect = yes
+        eotg_add_fracture_risk = { AMOUNT = 10 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = arrogant }
+            modifier = { add = 20  has_trait = callous }
+        }
+    }
+
+    # "Ask the guards what I said." They tell you: you did order it.
+    option = {
+        name = eotg_fracture.021.c
+        custom_tooltip = eotg_fracture.021.c.tt
+        eotg_aug_stress_murder_effect = yes
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = honest }
+            modifier = { add = 20  has_trait = paranoid }
+        }
+    }
+
+    # [just] "Open an inquiry, even if it ends at my door."
+    option = {
+        name = eotg_fracture.021.d
+        trigger = { has_trait = just }
+        trait = just
+        add_prestige = -100
+        stress_impact = {
+            just = minor_stress_impact_loss
+        }
+        eotg_add_fracture_risk = { AMOUNT = -6 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = just }
+            modifier = { add = 10  has_trait = honest }
+        }
+    }
+}
+
+
+# -- eotg_fracture.022 --------------------------------------------------------
+# The Second Voice (thread T1, beat 3). You said "we". Every option advances
+# the voice to 3 first: the slip already happened.
+# Caller: NF on_action, Fracture list.
+
+eotg_fracture.022 = {
+    type = character_event
+    title = eotg_fracture.022.t
+    desc = {
+        desc = eotg_fracture.022.desc
+        # [voice] first time you notice it (voice < 2) vs. you know it (2)
+        first_valid = {
+            triggered_desc = {
+                trigger = {
+                    has_variable = eotg_aug_voice
+                    var:eotg_aug_voice >= 2
+                }
+                desc = eotg_fracture.022.desc_known
+            }
+            desc = eotg_fracture.022.desc_first
+        }
+    }
+    theme = mental_health
+
+    trigger = {
+        OR = {
+            NOT = { has_variable = eotg_aug_voice }
+            var:eotg_aug_voice < 3
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = shock
+    }
+    right_portrait = {
+        trigger = { exists = primary_spouse }
+        character = primary_spouse
+        animation = worry
+    }
+
+    # "We — I. I meant I."
+    option = {
+        name = eotg_fracture.022.a
+        eotg_aug_voice_advance_effect = { STAGE = 3 }
+        stress_impact = { base = minor_stress_impact_gain }
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        eotg_aug_stress_reject_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = humble }
+            modifier = { add = 20  has_trait = craven }
+        }
+    }
+
+    # "We."
+    option = {
+        name = eotg_fracture.022.b
+        eotg_aug_voice_advance_effect = { STAGE = 3 }
+        add_dread = 10
+        if = {
+            limit = { exists = primary_spouse }
+            primary_spouse = {
+                add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+            }
+        }
+        eotg_add_fracture_risk = { AMOUNT = 10 }
+        eotg_aug_stress_embrace_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = arrogant }
+            modifier = { add = 20  has_trait = eccentric }
+        }
+    }
+
+    # "Put it in the logs."
+    option = {
+        name = eotg_fracture.022.c
+        eotg_aug_voice_advance_effect = { STAGE = 3 }
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_learning  years = 5 }
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 20  has_trait = cynical }
+        }
+    }
+
+    # [arrogant] "We are more than any one ruler."
+    option = {
+        name = eotg_fracture.022.d
+        trigger = { has_trait = arrogant }
+        trait = arrogant
+        eotg_aug_voice_advance_effect = { STAGE = 3 }
+        add_prestige = 100
+        eotg_add_fracture_risk = { AMOUNT = 10 }
+        eotg_aug_stress_embrace_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = arrogant }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+
+    # [humble] "Help me. Please." Spouse and heir reassured.
+    option = {
+        name = eotg_fracture.022.e
+        trigger = { has_trait = humble }
+        trait = humble
+        eotg_aug_voice_advance_effect = { STAGE = 3 }
+        if = {
+            limit = { exists = primary_spouse }
+            primary_spouse = {
+                add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+            }
+        }
+        if = {
+            limit = { exists = primary_heir }
+            primary_heir = {
+                add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+            }
+        }
+        add_prestige = -100
+        eotg_add_fracture_risk = { AMOUNT = -8 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = humble }
+            modifier = { add = 10  has_trait = compassionate }
+        }
+    }
+}
+
+
+# -- eotg_fracture.023 --------------------------------------------------------
+# The Wrong War. At peace: you are mustering for a war that does not exist.
+# At war: you are accepting a surrender no one offered.
+# Caller: NF on_action, Fracture list.
+
+eotg_fracture.023 = {
+    type = character_event
+    title = eotg_fracture.023.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { is_at_war = yes }
+                desc = eotg_fracture.023.desc_war
+            }
+            desc = eotg_fracture.023.desc_peace
+        }
+    }
+    theme = war
+
+    left_portrait = {
+        character = root
+        animation = anger
+    }
+
+    # "Stand them down." / "Recall the envoys."
+    option = {
+        name = {
+            trigger = { is_at_war = no }
+            text = eotg_fracture.023.a
+        }
+        name = {
+            trigger = { is_at_war = yes }
+            text = eotg_fracture.023.a_war
+        }
+        add_prestige = -50
+        eotg_add_fracture_risk = { AMOUNT = -3 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = calm }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+
+    # "The enemy is coming." / "They surrendered; I saw it."
+    option = {
+        name = {
+            trigger = { is_at_war = no }
+            text = eotg_fracture.023.b
+        }
+        name = {
+            trigger = { is_at_war = yes }
+            text = eotg_fracture.023.b_war
+        }
+        remove_short_term_gold = minor_gold_value
+        every_vassal = {
+            limit = { opinion = { target = root  value < 0 } }
+            add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+        }
+        eotg_add_fracture_risk = { AMOUNT = 8 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = stubborn }
+            modifier = { add = 20  has_trait = paranoid }
+        }
+    }
+
+    # "Show me the maps."
+    option = {
+        name = eotg_fracture.023.c
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_martial  years = 5 }
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 10  has_trait = patient }
+        }
+    }
+
+    # [wrathful] "Then I will make one."
+    option = {
+        name = eotg_fracture.023.d
+        trigger = { has_trait = wrathful }
+        trait = wrathful
+        add_dread = 15
+        stress_impact = {
+            wrathful = minor_stress_impact_loss
+        }
+        eotg_add_fracture_risk = { AMOUNT = 10 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = wrathful }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+
+    # [calm] "Wait for the scouts."
+    option = {
+        name = eotg_fracture.023.e
+        trigger = { has_trait = calm }
+        trait = calm
+        eotg_add_fracture_risk = { AMOUNT = -6 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = calm }
+            modifier = { add = 10  has_trait = patient }
+        }
+    }
+}
+
+
+# -- eotg_fracture.024 --------------------------------------------------------
+# The Familiar Change (thread T4): only you notice an augmented courtier
+# changing. Their risk moves too.
+# Caller: NF on_action, Fracture list.
+# random_courtier here picks a subject, not a victim (index §6 item 6).
+
+eotg_fracture.024 = {
+    type = character_event
+    title = eotg_fracture.024.t
+    desc = eotg_fracture.024.desc
+    theme = court
+
+    trigger = {
+        any_courtier = {
+            is_alive = yes
+            eotg_is_augmented_any = yes
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = paranoia
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_changed }
+        character = scope:eotg_changed
+        animation = personality_rational
+    }
+
+    immediate = {
+        hidden_effect = {
+            random_courtier = {
+                limit = {
+                    is_alive = yes
+                    eotg_is_augmented_any = yes
+                }
+                save_scope_as = eotg_changed
+            }
+        }
+    }
+
+    # "Watch them."
+    option = {
+        name = eotg_fracture.024.a
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = patient }
+            modifier = { add = 20  has_trait = paranoid }
+        }
+    }
+
+    # "Confront them." 50 admit / 50 deny.
+    option = {
+        name = eotg_fracture.024.b
+        random_list = {
+            50 = {
+                desc = eotg_fracture.024.b.admit
+                scope:eotg_changed = {
+                    eotg_add_fracture_risk = { AMOUNT = -10 }
+                    add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
+                }
+            }
+            50 = {
+                desc = eotg_fracture.024.b.deny
+                scope:eotg_changed = {
+                    add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+                }
+            }
+        }
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = honest }
+            modifier = { add = 20  has_trait = brave }
+        }
+    }
+
+    # "Have them restrained."
+    option = {
+        name = eotg_fracture.024.c
+        imprison = { target = scope:eotg_changed  type = house_arrest }
+        scope:eotg_changed = {
+            eotg_add_fracture_risk = { AMOUNT = -10 }
+        }
+        eotg_aug_stress_tyranny_effect = yes
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = paranoid }
+            modifier = { add = 20  has_trait = arbitrary }
+            modifier = { add = -20  has_trait = just }
+        }
+    }
+
+    # [compassionate] "Sit with them. You both know what this is."
+    option = {
+        name = eotg_fracture.024.d
+        trigger = { has_trait = compassionate }
+        trait = compassionate
+        scope:eotg_changed = {
+            eotg_add_fracture_risk = { AMOUNT = -5 }
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+        }
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = compassionate }
+            modifier = { add = 10  has_trait = gregarious }
+        }
+    }
+
+    # [paranoid] "They report to the implant."
+    option = {
+        name = eotg_fracture.024.e
+        trigger = { has_trait = paranoid }
+        trait = paranoid
+        scope:eotg_changed = {
+            add_opinion = { modifier = eotg_opinion_aug_fear  target = root  years = 10 }
+        }
+        eotg_add_fracture_risk = { AMOUNT = 8 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = paranoid }
+            modifier = { add = 10  has_trait = vengeful }
+        }
+    }
+}
+
+
+# ── Storm band — the realm reacts ────────────────────────────────────────────
+# (eotg_fracture.006 The Warrant and .004 The Court Massacre, above, also
+# belong to this band.)
+
+# -- eotg_fracture.025 --------------------------------------------------------
+# Containment Regency. The keeper (primary spouse, else the adult primary
+# heir) comes with the council behind them. Regency through vanilla
+# designate_diarch + try_start_diarchy = regency
+# (eotg_aug_start_containment_regency_effect; Q7 needs an in-game check).
+# Caller: NF on_action, Storm list.
+
+eotg_fracture.025 = {
+    type = character_event
+    title = eotg_fracture.025.t
+    desc = eotg_fracture.025.desc
+    theme = realm
+
+    trigger = {
+        eotg_aug_containment_possible = { RULER = root }
+    }
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_keeper }
+        character = scope:eotg_keeper
+        animation = worry
+    }
+
+    immediate = {
+        hidden_effect = {
+            if = {
+                limit = {
+                    primary_spouse ?= { eotg_aug_keeper_candidate = { RULER = root } }
+                }
+                primary_spouse = { save_scope_as = eotg_keeper }
+            }
+            else_if = {
+                limit = {
+                    primary_heir ?= { eotg_aug_keeper_candidate = { RULER = root } }
+                }
+                primary_heir = { save_scope_as = eotg_keeper }
+            }
+        }
+    }
+
+    # "Let them."
+    option = {
+        name = eotg_fracture.025.a
+        eotg_aug_start_containment_regency_effect = { KEEPER = scope:eotg_keeper  SWING = 60 }
+        add_prestige = -100
+        eotg_add_fracture_risk = { AMOUNT = -10 }
+        eotg_aug_stress_reject_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = trusting }
+            modifier = { add = 20  has_trait = humble }
+            modifier = { add = -20  has_trait = ambitious }
+        }
+    }
+
+    # "No one takes what is mine." 30%: the keeper raises the Warrant, if they
+    # are a landed vassal.
+    option = {
+        name = eotg_fracture.025.b
+        scope:eotg_keeper = {
+            add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 5 }
+        }
+        add_dread = 20
+        if = {
+            limit = {
+                scope:eotg_keeper = {
+                    is_landed = yes
+                    is_vassal_of = root
+                }
+            }
+            random = {
+                chance = 30
+                scope:eotg_keeper = { save_scope_as = eotg_warrant_vassal }
+                eotg_aug_raise_warrant_effect = yes
+            }
+        }
+        eotg_aug_stress_cruelty_effect = yes
+        eotg_add_fracture_risk = { AMOUNT = 10 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = arrogant }
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = -20  has_trait = content }
+        }
+    }
+
+    # "On my terms."
+    option = {
+        name = eotg_fracture.025.c
+        eotg_aug_start_containment_regency_effect = { KEEPER = scope:eotg_keeper  SWING = 30 }
+        add_prestige = -50
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = stubborn }
+            modifier = { add = 20  has_trait = diligent }
+        }
+    }
+
+    # [paranoid] "They've planned this for months."
+    option = {
+        name = eotg_fracture.025.d
+        trigger = { has_trait = paranoid }
+        trait = paranoid
+        imprison = { target = scope:eotg_keeper  type = house_arrest }
+        eotg_aug_stress_tyranny_effect = yes
+        eotg_add_fracture_risk = { AMOUNT = 12 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = paranoid }
+            modifier = { add = 10  has_trait = vengeful }
+        }
+    }
+
+    # [content] "Take it. Please, take it."
+    option = {
+        name = eotg_fracture.025.e
+        trigger = { has_trait = content }
+        trait = content
+        eotg_aug_start_containment_regency_effect = { KEEPER = scope:eotg_keeper  SWING = 80 }
+        stress_impact = {
+            content = major_stress_impact_loss
+        }
+        eotg_add_fracture_risk = { AMOUNT = -15 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = content }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+}
+
+
+# -- eotg_fracture.026 --------------------------------------------------------
+# The Last Lucid Moment. [voice] desc, plus "you remember this" when
+# eotg_flag_aug_premonition (eotg_fracture.013.a) is set.
+# Caller: NF on_action, Storm list (5-year flag eotg_flag_aug_last_lucid
+# set there).
+
+eotg_fracture.026 = {
+    type = character_event
+    title = eotg_fracture.026.t
+    desc = {
+        desc = eotg_fracture.026.desc
+        triggered_desc = {
+            trigger = { has_character_flag = eotg_flag_aug_premonition }
+            desc = eotg_fracture.026.desc_premonition
+        }
+        # [voice]
+        first_valid = {
+            triggered_desc = {
+                trigger = {
+                    has_variable = eotg_aug_voice
+                    var:eotg_aug_voice >= 4
+                }
+                desc = eotg_fracture.026.desc_voice4
+            }
+            triggered_desc = {
+                trigger = {
+                    has_variable = eotg_aug_voice
+                    var:eotg_aug_voice >= 3
+                }
+                desc = eotg_fracture.026.desc_voice3
+            }
+            triggered_desc = {
+                trigger = {
+                    has_variable = eotg_aug_voice
+                    var:eotg_aug_voice >= 2
+                }
+                desc = eotg_fracture.026.desc_voice2
+            }
+            desc = eotg_fracture.026.desc_voice01
+        }
+    }
+    theme = mental_health
+
+    left_portrait = {
+        character = root
+        animation = sadness
+    }
+
+    immediate = {
+        hidden_effect = {
+            if = {
+                limit = {
+                    primary_spouse ?= { eotg_aug_keeper_candidate = { RULER = root } }
+                }
+                primary_spouse = { save_scope_as = eotg_keeper }
+            }
+            else_if = {
+                limit = {
+                    primary_heir ?= { eotg_aug_keeper_candidate = { RULER = root } }
+                }
+                primary_heir = { save_scope_as = eotg_keeper }
+            }
+        }
+    }
+
+    # "Ask for help." Regency at 50 if possible, else withdraw for 2 years.
+    option = {
+        name = eotg_fracture.026.a
+        if = {
+            limit = {
+                exists = scope:eotg_keeper
+                basic_eligible_for_diarchy_trigger = yes
+                has_active_diarchy = no
+            }
+            eotg_aug_start_containment_regency_effect = { KEEPER = scope:eotg_keeper  SWING = 50 }
+        }
+        else = {
+            add_character_modifier = { modifier = eotg_mod_withdrawn_from_court  years = 2 }
+        }
+        eotg_add_fracture_risk = { AMOUNT = -15 }
+        eotg_aug_stress_reject_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = humble }
+            modifier = { add = 20  has_trait = trusting }
+        }
+    }
+
+    # "Beg the heir to act." With an Heir's Arc, it jumps to the Choice with
+    # the heir leaning ally (stage 3, heir_dread -2).
+    option = {
+        name = eotg_fracture.026.b
+        trigger = { exists = primary_heir }
+        if = {
+            limit = { eotg_aug_has_heir_arc = yes }
+            random_owned_story = {
+                limit = { story_type = eotg_story_aug_heir_arc }
+                set_variable = { name = eotg_stage  value = 3 }
+                change_variable = { name = eotg_heir_dread  add = -2 }
+            }
+        }
+        eotg_add_fracture_risk = { AMOUNT = -10 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 20  has_trait = craven }
+        }
+    }
+
+    # "Embrace it." Voice to 4; may later hand over the controls (3b decision).
+    option = {
+        name = eotg_fracture.026.c
+        eotg_aug_voice_advance_effect = { STAGE = 4 }
+        add_character_flag = eotg_flag_aug_may_embrace
+        eotg_add_fracture_risk = { AMOUNT = 20 }
+        eotg_aug_stress_embrace_effect = yes
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 20  has_trait = cynical }
+            modifier = { add = -20  has_trait = zealous }
+        }
+    }
+
+    # "Cut it out of me." Excision: The Surgeons (Phase 3b). —
+    # (couples through the tier exit in eotg_aug_end.001)
+    option = {
+        name = eotg_fracture.026.d
+        trigger_event = { id = eotg_aug_end.001  days = { 1 7 } }
+        eotg_aug_stress_reject_effect = yes
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = brave }
+            modifier = { add = 20  has_trait = zealous }
+            modifier = { add = -20  has_trait = craven }
+        }
+    }
+
+    # [zealous] "Confess before the clergy."
+    option = {
+        name = eotg_fracture.026.e
+        trigger = { has_trait = zealous }
+        trait = zealous
+        add_piety = 200
+        eotg_add_fracture_risk = { AMOUNT = -10 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = zealous }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+}
+
+
+# -- eotg_fracture.027 --------------------------------------------------------
+# The Cascade (terminal, risk >= 95). The player picks a stance; the implant
+# decides. Each option rolls the outcome list hidden (custom tooltip "the
+# implant decides"), and the outcome fires its follow-up.
+# Caller: NF on_action, terminal step (eotg_flag_aug_terminal_cooldown).
+#
+# Outcomes (Phase 3b): death (eotg_aug_cascade_death_effect), total
+# integration (eotg_aug_total_integration_effect, which fires
+# eotg_aug_end.010), excision chance (eotg_aug_end.001 with
+# eotg_flag_aug_excision_free: the surgeons were already in the room),
+# abdication (eotg_aug_end.030; needs a primary heir) and "it passes"
+# (eotg_fracture.029). Each option carries its own inline list with its
+# stance's weights (table in the spec).
+
+eotg_fracture.027 = {
+    type = character_event
+    title = eotg_fracture.027.t
+    desc = {
+        desc = eotg_fracture.027.desc
+        triggered_desc = {
+            trigger = { has_character_flag = eotg_flag_aug_premonition }
+            desc = eotg_fracture.027.desc_premonition
+        }
+        # [voice]
+        first_valid = {
+            triggered_desc = {
+                trigger = {
+                    has_variable = eotg_aug_voice
+                    var:eotg_aug_voice >= 4
+                }
+                desc = eotg_fracture.027.desc_voice4
+            }
+            triggered_desc = {
+                trigger = {
+                    has_variable = eotg_aug_voice
+                    var:eotg_aug_voice >= 3
+                }
+                desc = eotg_fracture.027.desc_voice3
+            }
+            triggered_desc = {
+                trigger = {
+                    has_variable = eotg_aug_voice
+                    var:eotg_aug_voice >= 2
+                }
+                desc = eotg_fracture.027.desc_voice2
+            }
+            desc = eotg_fracture.027.desc_voice01
+        }
+    }
+    theme = mental_health
+
+    left_portrait = {
+        character = root
+        animation = pain
+    }
+
+    # "Let go."  (total integration +15)
+    option = {
+        name = eotg_fracture.027.a
+        custom_tooltip = eotg_fracture.027.tt
+        hidden_effect = {
+            random_list = {
+                # death
+                35 = {
+                    modifier = { add = 15  stress_level >= 3 }
+                    modifier = { add = 10  health < 2 }
+                    eotg_aug_cascade_death_effect = yes
+                }
+                # total integration
+                40 = {
+                    modifier = {
+                        add = 25
+                        has_variable = eotg_aug_voice
+                        var:eotg_aug_voice >= 4
+                    }
+                    modifier = { add = 15  has_character_flag = eotg_flag_aug_may_embrace }
+                    eotg_aug_total_integration_effect = yes    # fires eotg_aug_end.010
+                }
+                # excision chance — the surgeons were already in the room
+                15 = {
+                    modifier = { add = 15  eotg_has_physician_access = yes }
+                    add_character_flag = { flag = eotg_flag_aug_excision_free  days = 60 }
+                    trigger_event = { id = eotg_aug_end.001  days = 3 }
+                }
+                # abdication
+                15 = {
+                    trigger = { exists = primary_heir }
+                    modifier = {
+                        add = 15
+                        OR = {
+                            has_character_flag = eotg_flag_aug_heir_ally
+                            has_active_diarchy = yes
+                        }
+                    }
+                    trigger_event = { id = eotg_aug_end.030  days = 3 }
+                }
+                # it passes
+                10 = {
+                    trigger_event = { id = eotg_fracture.029  days = 3 }
+                }
+            }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 20  has_trait = craven }
+        }
+    }
+
+    # "Hold on."  (death +10, passes +30)
+    option = {
+        name = eotg_fracture.027.b
+        custom_tooltip = eotg_fracture.027.tt
+        hidden_effect = {
+            random_list = {
+                # death
+                45 = {
+                    modifier = { add = 15  stress_level >= 3 }
+                    modifier = { add = 10  health < 2 }
+                    eotg_aug_cascade_death_effect = yes
+                }
+                # total integration
+                25 = {
+                    modifier = {
+                        add = 25
+                        has_variable = eotg_aug_voice
+                        var:eotg_aug_voice >= 4
+                    }
+                    modifier = { add = 15  has_character_flag = eotg_flag_aug_may_embrace }
+                    eotg_aug_total_integration_effect = yes    # fires eotg_aug_end.010
+                }
+                # excision chance
+                15 = {
+                    modifier = { add = 15  eotg_has_physician_access = yes }
+                    add_character_flag = { flag = eotg_flag_aug_excision_free  days = 60 }
+                    trigger_event = { id = eotg_aug_end.001  days = 3 }
+                }
+                # abdication
+                15 = {
+                    trigger = { exists = primary_heir }
+                    modifier = {
+                        add = 15
+                        OR = {
+                            has_character_flag = eotg_flag_aug_heir_ally
+                            has_active_diarchy = yes
+                        }
+                    }
+                    trigger_event = { id = eotg_aug_end.030  days = 3 }
+                }
+                # it passes
+                40 = {
+                    trigger_event = { id = eotg_fracture.029  days = 3 }
+                }
+            }
+        }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = stubborn }
+            modifier = { add = 20  has_trait = diligent }
+        }
+    }
+
+    # [brave] "Fight it."  (total integration -10, passes +40)
+    option = {
+        name = eotg_fracture.027.c
+        trigger = { has_trait = brave }
+        trait = brave
+        custom_tooltip = eotg_fracture.027.tt
+        hidden_effect = {
+            random_list = {
+                # death
+                35 = {
+                    modifier = { add = 15  stress_level >= 3 }
+                    modifier = { add = 10  health < 2 }
+                    eotg_aug_cascade_death_effect = yes
+                }
+                # total integration
+                15 = {
+                    modifier = {
+                        add = 25
+                        has_variable = eotg_aug_voice
+                        var:eotg_aug_voice >= 4
+                    }
+                    modifier = { add = 15  has_character_flag = eotg_flag_aug_may_embrace }
+                    eotg_aug_total_integration_effect = yes    # fires eotg_aug_end.010
+                }
+                # excision chance
+                15 = {
+                    modifier = { add = 15  eotg_has_physician_access = yes }
+                    add_character_flag = { flag = eotg_flag_aug_excision_free  days = 60 }
+                    trigger_event = { id = eotg_aug_end.001  days = 3 }
+                }
+                # abdication
+                15 = {
+                    trigger = { exists = primary_heir }
+                    modifier = {
+                        add = 15
+                        OR = {
+                            has_character_flag = eotg_flag_aug_heir_ally
+                            has_active_diarchy = yes
+                        }
+                    }
+                    trigger_event = { id = eotg_aug_end.030  days = 3 }
+                }
+                # it passes
+                50 = {
+                    trigger_event = { id = eotg_fracture.029  days = 3 }
+                }
+            }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = brave }
+            modifier = { add = 10  has_trait = wrathful }
+        }
+    }
+
+    # [stubborn] "Not yet."  (total integration -10, passes +30)
+    option = {
+        name = eotg_fracture.027.d
+        trigger = { has_trait = stubborn }
+        trait = stubborn
+        custom_tooltip = eotg_fracture.027.tt
+        hidden_effect = {
+            random_list = {
+                # death
+                35 = {
+                    modifier = { add = 15  stress_level >= 3 }
+                    modifier = { add = 10  health < 2 }
+                    eotg_aug_cascade_death_effect = yes
+                }
+                # total integration
+                15 = {
+                    modifier = {
+                        add = 25
+                        has_variable = eotg_aug_voice
+                        var:eotg_aug_voice >= 4
+                    }
+                    modifier = { add = 15  has_character_flag = eotg_flag_aug_may_embrace }
+                    eotg_aug_total_integration_effect = yes    # fires eotg_aug_end.010
+                }
+                # excision chance
+                15 = {
+                    modifier = { add = 15  eotg_has_physician_access = yes }
+                    add_character_flag = { flag = eotg_flag_aug_excision_free  days = 60 }
+                    trigger_event = { id = eotg_aug_end.001  days = 3 }
+                }
+                # abdication
+                15 = {
+                    trigger = { exists = primary_heir }
+                    modifier = {
+                        add = 15
+                        OR = {
+                            has_character_flag = eotg_flag_aug_heir_ally
+                            has_active_diarchy = yes
+                        }
+                    }
+                    trigger_event = { id = eotg_aug_end.030  days = 3 }
+                }
+                # it passes
+                40 = {
+                    trigger_event = { id = eotg_fracture.029  days = 3 }
+                }
+            }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = stubborn }
+            modifier = { add = 10  has_trait = brave }
+        }
+    }
+}
+
+
+# -- eotg_fracture.028 --------------------------------------------------------
+# The Terms (notification). What the implant agreed to, with itself.
+# Chain stage of eotg_fracture.017 (b and e override branches); the override
+# already moved risk and the voice.
+
+eotg_fracture.028 = {
+    type = character_event
+    title = eotg_fracture.028.t
+    desc = eotg_fracture.028.desc
+    theme = mental_health
+
+    left_portrait = {
+        character = root
+        animation = disbelief
+    }
+
+    option = {
+        name = eotg_fracture.028.a
+    }
+}
+
+
+# -- eotg_fracture.029 --------------------------------------------------------
+# It Passes (notification). The Cascade passes: risk set to 60, two people
+# near you are hurt (picker, Storm family factor 0.25), +50 dread.
+# Chain stage of eotg_fracture.027 (the "it passes" outcome).
+
+eotg_fracture.029 = {
+    type = character_event
+    title = eotg_fracture.029.t
+    desc = {
+        desc = eotg_fracture.029.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { exists = scope:eotg_victim_2 }
+                desc = eotg_fracture.029.desc_two
+            }
+            triggered_desc = {
+                trigger = { exists = scope:eotg_victim }
+                desc = eotg_fracture.029.desc_one
+            }
+            desc = eotg_fracture.029.desc_none
+        }
+    }
+    theme = mental_health
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_victim }
+        character = scope:eotg_victim
+        animation = pain
+    }
+    lower_right_portrait = {
+        trigger = { exists = scope:eotg_victim_2 }
+        character = scope:eotg_victim_2
+    }
+
+    immediate = {
+        set_variable = { name = eotg_fracture_risk  value = 60 }
+        add_dread = 50
+        hidden_effect = {
+            eotg_aug_pick_victim_effect = { NAME = eotg_victim  FAMILY_FACTOR = 0.25 }
+            if = {
+                limit = { exists = scope:eotg_victim }
+                scope:eotg_victim = {
+                    increase_wounds_effect = { REASON = attacked }
+                    add_character_flag = { flag = eotg_flag_aug_breach_victim  days = 30 }
+                }
+                eotg_aug_pick_second_victim_effect = {
+                    NAME = eotg_victim_2
+                    FAMILY_FACTOR = 0.25
+                    EXCLUDE = eotg_victim
+                }
+            }
+            if = {
+                limit = { exists = scope:eotg_victim_2 }
+                scope:eotg_victim_2 = {
+                    increase_wounds_effect = { REASON = attacked }
+                    add_character_flag = { flag = eotg_flag_aug_breach_victim  days = 30 }
+                }
+            }
+        }
+    }
+
+    # "Again it passes."
+    option = {
+        name = eotg_fracture.029.a
+        ai_chance = {
+            base = 50
+            modifier = { add = 20  has_trait = arrogant }
+            modifier = { add = 20  has_trait = callous }
+        }
+    }
+
+    # [humble] "Next time it won't."
+    option = {
+        name = eotg_fracture.029.b
+        trigger = { has_trait = humble }
+        trait = humble
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = humble }
+            modifier = { add = 10  has_trait = patient }
+        }
+    }
+}
