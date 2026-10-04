@@ -16,7 +16,7 @@ import port_religions_1_20 as port  # noqa: E402
 
 FAMILY = """﻿# family header
 eotg_rf_test = {
-    graphical_faith = "pagan_gfx"    # gfx note
+    graphical_faith = "christian_gfx"    # gfx note
     piety_icon_group = "pagan"
     hostility_doctrine = pagan_hostility_doctrine
     doctrine_background_icon = core_tenet_banner_pagan.dds
@@ -27,7 +27,7 @@ RELIGIONS = """﻿# file header
 # eotg_religion_test: the fixture religion
 eotg_religion_test = {
     family = eotg_rf_test
-    graphical_faith = "pagan_gfx"
+    graphical_faith = "christian_gfx"
     doctrine = doctrine_theocracy_temporal
     doctrine = doctrine_gender_equal
     traits = {
@@ -96,10 +96,13 @@ class PortFixture(unittest.TestCase):
         r = P.first(self.rel.nodes, "eotg_religion_test")
         det = P.first(r.value, "religion_details")
         self.assertEqual([c.key for c in det.value], ["family", "graphical_faith"])
+        self.assertEqual(P.first(det.value, "graphical_faith").value, "orthodox_gfx")
         self.assertIsNone(P.first(r.value, "family"))
         self.assertIsNone(P.first(r.value, "faiths"))
+        # the family's hostility doctrine comes first (VERIFY fix 4)
         self.assertEqual([c.value for c in P.find(r.value, "doctrine")],
-                         ["doctrine_theocracy_temporal", "doctrine_gender_equal"])
+                         ["pagan_hostility_doctrine", "doctrine_theocracy_temporal",
+                          "doctrine_gender_equal"])
         self.assertTrue(P.first(r.value, "traits"))
 
     def test_localization_kept_intact(self):
@@ -121,20 +124,41 @@ class PortFixture(unittest.TestCase):
         self.assertEqual([c.key for c in P.first(one.value, "doctrines").value],
                          ["doctrine_monasticism_encouraged", "doctrine_pluralism_pluralistic"])
         self.assertEqual(P.find(one.value, "doctrine"), [])
+        # placeholder vanilla icon when v1 had none (fix 3); family not in the table
+        self.assertEqual(P.first(det.value, "icon").value, port.DEFAULT_FAITH_ICON)
         two = P.first(self.fth.nodes, "eotg_faith_two")
         self.assertEqual(P.first(P.first(two.value, "faith_details").value, "icon").value,
                          "eotg_faith_two")
         self.assertIsNone(P.first(two.value, "doctrines"))
 
-    def test_family_icon_renamed_with_todo(self):
+    def test_family_tenet_icons_and_gfx(self):
         f = P.first(self.fam.nodes, "eotg_rf_test")
-        self.assertEqual(P.first(f.value, "tenet_background_icon").value,
-                         "core_tenet_banner_pagan")
+        got = [(c.key, c.value) for c in f.value if c.key.startswith("tenet_")]
+        self.assertEqual(got, list(port.FAMILY_TENET_ICONS))
         self.assertIsNone(P.first(f.value, "doctrine_background_icon"))
+        self.assertEqual(P.first(f.value, "graphical_faith").value, "orthodox_gfx")
         txt = self.read("common", "religion", "religion_family_types", "eotg_fam.txt")
-        for k in port.FAMILY_ICON_SIBLINGS:
-            self.assertIn("TODO: set %s" % k, txt)
+        self.assertNotIn("TODO: set tenet_", txt)
+        self.assertNotIn("core_tenet_banner_pagan\n", txt)
         self.assertIn("# gfx note", txt)
+
+    def test_hostility_not_duplicated(self):
+        rep = port.Report()
+        doc = P.parse_text("eotg_r = { family = eotg_f doctrine = pagan_hostility_doctrine }")
+        r, _ = port.port_religion(doc.nodes[0], rep, {"eotg_f": "pagan_hostility_doctrine"})
+        self.assertEqual([c.value for c in P.find(r.value, "doctrine")],
+                         ["pagan_hostility_doctrine"])
+        doc = P.parse_text("eotg_r = { family = eotg_unknown }")
+        port.port_religion(doc.nodes[0], rep, {})
+        self.assertTrue(any("no hostility doctrine" in t for _, t in rep.todos))
+
+    def test_icon_table_by_family(self):
+        rep = port.Report()
+        doc = P.parse_text("eotg_f = { color = { 1 1 1 } }")
+        out = port.port_faith(doc.nodes[0], "eotg_r", rep, family="eotg_rf_divine_order")
+        det = P.first(out.value, "faith_details")
+        self.assertEqual(P.first(det.value, "icon").value,
+                         port.FAITH_ICON_BY_FAMILY["eotg_rf_divine_order"])
 
     def test_stampede_dropped_and_logged(self):
         self.assertIsNone(P.first(self.rel.nodes, "eotg_religion_stampede"))
@@ -158,8 +182,12 @@ class PortFixture(unittest.TestCase):
 
     def test_comments_preserved(self):
         faiths = self.read("common", "religion", "faith_types", "eotg_faiths.txt")
-        for c in ("# first faith", "# teal", "# holy_site = eotg_hs_x    # TODO"):
+        for c in ("# first faith", "# teal"):
             self.assertIn(c, faiths)
+        # commented holy sites move to the 1.20 list form (fix 6)
+        self.assertIn("# holy_sites = { eotg_hs_x }", faiths)
+        self.assertIn("# eminent_holy_sites = { }", faiths)
+        self.assertNotIn("# holy_site = ", faiths)
         rel = self.read("common", "religion", "religion_types", "eotg_religions.txt")
         self.assertIn("# eotg_religion_test: the fixture religion", rel)
 
@@ -167,8 +195,13 @@ class PortFixture(unittest.TestCase):
         r = self.read("PORT_REPORT.md")
         self.assertIn("`tenet_monasticism` -> `doctrine_monasticism_encouraged`", r)
         self.assertIn("## TODO", r)
-        self.assertIn("faith_details has no `icon`", r)
-        self.assertIn("## UNVERIFIED-VANILLA assumptions", r)
+        self.assertIn("placeholder `icon = %s`" % port.DEFAULT_FAITH_ICON, r)
+        self.assertNotIn("faith_details has no `icon`", r)
+        self.assertNotIn("set `tenet_heretical_background_icon`", r)
+        self.assertIn("## Confirmed against vanilla 1.20.0.3", r)
+        self.assertIn("## UNVERIFIED-VANILLA", r)
+        self.assertIn("## Design calls", r)
+        self.assertIn("added `doctrine = pagan_hostility_doctrine`", r)
         self.assertIn("holy sites are commented out", r)
 
     def test_deterministic(self):
@@ -179,6 +212,18 @@ class PortFixture(unittest.TestCase):
     def test_check_flag_and_refuse_live_common(self):
         with redirect_stdout(io.StringIO()):
             self.assertEqual(port.main(["--src", self.src, "--out", self.out]), 0)
+            self.assertEqual(port.main(["--src", self.src, "--out", self.out, "--check"]), 0)
+        # a Windows CRLF checkout and a hand-written note in --out are not staleness (FIX 1)
+        for d, _, files in os.walk(self.out):
+            for f in files:
+                p = os.path.join(d, f)
+                with open(p, "rb") as fh:
+                    data = fh.read()
+                with open(p, "wb") as fh:
+                    fh.write(data.replace(b"\n", b"\r\n"))
+        with open(os.path.join(self.out, "VERIFY_2026-10-04.md"), "w") as fh:
+            fh.write("hand-written\n")
+        with redirect_stdout(io.StringIO()):
             self.assertEqual(port.main(["--src", self.src, "--out", self.out, "--check"]), 0)
         with open(os.path.join(self.out, "PORT_REPORT.md"), "a") as fh:
             fh.write("tampered\n")
