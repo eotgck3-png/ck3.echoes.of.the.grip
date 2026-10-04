@@ -1,6 +1,10 @@
 
 # Generated terrain art / bakes (see gfx/map/terrain/README.md)
 gfx/map/terrain/*.dds
+# Exception (2026-10-04): the structure bakes are irreproducible. The 10-01 bake came from a
+# --source image that is no longer anywhere, so they are tracked inputs, not outputs.
+# Do not rerun build_terrain_hybrid.py over them; see docs/pitfalls.md.
+!gfx/map/terrain/eotg_structure_*.dds
 gfx/map/terrain/*.tga
 gfx/map/terrain/masks/
 docs/tools/__pycache__/
