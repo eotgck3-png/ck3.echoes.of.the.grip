@@ -5,13 +5,14 @@ Run: python -m unittest discover docs/tools/tests
 import io
 import json
 import os
-import shutil
 import sys
 import tempfile
 import unittest
 from contextlib import redirect_stdout
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _testutil import rmtree, tempdir  # noqa: E402,F401
 import spec_conformance as S  # noqa: E402
 
 FILES = {
@@ -80,7 +81,7 @@ class Analysis(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        shutil.rmtree(cls.root)
+        rmtree(cls.root)
 
     def rows(self, spec):
         return {r["token"]: r for r in self.specs[spec]["ids"]}
@@ -163,7 +164,7 @@ class Families(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        shutil.rmtree(cls.root)
+        rmtree(cls.root)
 
     def test_family_names(self):
         self.assertEqual(S.spec_family("docs/specs/cybernetics_v2_procedures.md"), "cybernetics_v2")
@@ -199,7 +200,7 @@ class Families(unittest.TestCase):
 class CLI(unittest.TestCase):
     def test_write_check_crlf_json(self):
         root = make_mod()
-        self.addCleanup(shutil.rmtree, root)
+        self.addCleanup(rmtree, root)
         out = os.path.join(root, *S.OUT_REL.split("/"))
 
         def run(*a):

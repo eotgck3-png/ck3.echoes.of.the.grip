@@ -11,6 +11,8 @@ import unittest
 from contextlib import redirect_stderr, redirect_stdout
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _testutil import rmtree, tempdir  # noqa: E402,F401
 import pdx_parse as P  # noqa: E402
 import port_religions_1_20 as port  # noqa: E402
 
@@ -69,7 +71,7 @@ eotg_religion_stampede = {
 class PortFixture(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.mkdtemp(prefix="eotg_port_")
-        self.addCleanup(shutil.rmtree, self.tmp)
+        self.addCleanup(rmtree, self.tmp)
         self.src = os.path.join(self.tmp, "src")
         for sub, name, text in (("religion_family_types", "eotg_fam.txt", FAMILY),
                                 ("religion_types", "eotg_religions.txt", RELIGIONS)):
@@ -239,7 +241,7 @@ class CrossCheckout(unittest.TestCase):
     def setUp(self):
         import subprocess  # noqa: F401
         self.tmp = tempfile.mkdtemp(prefix="eotg_x_")
-        self.addCleanup(shutil.rmtree, self.tmp)
+        self.addCleanup(rmtree, self.tmp)
         # checkout A: a copy of the tool and the parser, nothing else
         self.a_tools = os.path.join(self.tmp, "A", "docs", "tools")
         os.makedirs(self.a_tools)

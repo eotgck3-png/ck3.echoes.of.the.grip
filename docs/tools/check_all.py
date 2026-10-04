@@ -161,6 +161,11 @@ def _px_lsp_script(root):
     return p if os.path.exists(p) else os.path.join(HERE, "px_lsp_diagnostics.js")
 
 
+def px_event_report_cmd(out, root):
+    # --root: the variable names it whitelists come from the checkout under test
+    return [PY, os.path.join(HERE, "px_event_report.py"), out, "--root", os.path.abspath(root)]
+
+
 def _px_event_report(env, root=ROOT):
     exe = _env(env, "EOTG_VSCODE_EXE")
     with tempfile.TemporaryDirectory() as out:
@@ -171,7 +176,7 @@ def _px_event_report(env, root=ROOT):
                            timeout=1800)
         if not os.path.exists(os.path.join(out, "px_eventGraph.json")):
             return 1, p.stdout.decode("utf-8", errors="replace") + "\nno px_eventGraph.json written"
-        q = subprocess.run([PY, os.path.join(HERE, "px_event_report.py"), out],
+        q = subprocess.run(px_event_report_cmd(out, root),
                            cwd=root, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         return q.returncode, q.stdout.decode("utf-8", errors="replace")
 

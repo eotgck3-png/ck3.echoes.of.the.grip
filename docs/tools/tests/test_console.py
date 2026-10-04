@@ -6,7 +6,6 @@ Run: python -m unittest discover docs/tools/tests
 """
 import io
 import os
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -14,6 +13,8 @@ import unittest
 
 TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, TOOLS)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _testutil import rmtree, tempdir  # noqa: E402,F401
 import pdx_parse as P  # noqa: E402
 
 FILES = {
@@ -49,7 +50,7 @@ class Cp1252Console(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        shutil.rmtree(cls.root)
+        rmtree(cls.root)
 
     def run_cli(self, *args):
         env = dict(os.environ, PYTHONIOENCODING="cp1252")

@@ -7,13 +7,14 @@ Run: python -m unittest discover docs/tools/tests
 import io
 import json
 import os
-import shutil
 import sys
 import tempfile
 import unittest
 from contextlib import redirect_stdout
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _testutil import rmtree, tempdir  # noqa: E402,F401
 import gen_test_recipes as G  # noqa: E402
 
 BOM = "﻿"
@@ -148,7 +149,7 @@ class Recipes(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        shutil.rmtree(cls.root)
+        rmtree(cls.root)
 
     def test_fire_cold(self):
         r = self.by["eotg_t.1"]
@@ -347,7 +348,7 @@ class TitleScopesAndOptionSaves(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        shutil.rmtree(cls.root)
+        rmtree(cls.root)
 
     def consoles(self, r, key="setup"):
         return [t for k, t in r[key] if k == "console"]
@@ -406,7 +407,7 @@ class TitleScopesAndOptionSaves(unittest.TestCase):
 class CLI(unittest.TestCase):
     def setUp(self):
         self.root = make_mod()
-        self.addCleanup(shutil.rmtree, self.root)
+        self.addCleanup(rmtree, self.root)
         self.out = os.path.join(self.root, *G.OUT_REL.split("/"))
 
     def run_main(self, *args):
