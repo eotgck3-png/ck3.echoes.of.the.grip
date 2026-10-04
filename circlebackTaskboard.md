@@ -301,6 +301,13 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Owner:** human → orchestrator
 - **Next step:** check alongside CB-31 and CB-34.
 
+### CB-36: Self-repair innovation era depends on Gate 1 culture eras
+- **Status:** blocked (2026-10-04)
+- **What:** the self-repairing machinery innovation (`docs/specs/cybernetics_v2_self_repair.md` §4.1) sits one era above whatever era the mod's own cultures hold at 866. Vanilla cultures are tribal at 867 (so early medieval for testing). When Gate 1 sets the mod's culture eras, the innovation's era must move to match.
+- **Blocked by:** B-CULTURES
+- **Owner:** eotg-architect → eotg-scripter
+- **Next step:** when cultures exist, re-place the innovation per the §4.1 rule.
+
 ## Tooling and environment
 
 ### CB-18: Game is 1.20.0.3; the tools target older versions
