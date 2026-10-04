@@ -227,20 +227,34 @@ These are shared conditions. Clearing one unblocks every item that names it.
 
 ---
 
-### CB-26: Architect: ratify or reject the conformance deviations
-- **Status:** ready (2026-10-04)
-- **What:** the conformance report, `docs/qa/cybernetics_spec_conformance_cloud.md`, covers M1–M6, M9–M12, L1, L4, L6–L12, L14–L24 and S1–S19. Most are commented "final QA" or "orchestrator ruling" deviations that were never written back into the specs. Also: titles retitled in 5a97355 (init.002, init.005, tier2.005, fracture.024) now drift from the spec names.
-- **Owner:** eotg-architect
-- **Next step:** one pass. CB-22 has settled (2026-10-04), so this can be dispatched as soon as the round-2 and balance work is committed. Until then the two would touch the same files. Read §6 first: L3 is moot, and the line numbers are stale.
-
-### CB-27: Scripter: conformance bug fixes
-- **Status:** M7 and M8 ready (2026-10-04, round-2 work committed in 2e6cef2; round 2 already added `is_adult` to the critic trigger and moves a living landless envoy to the pool on `on_end`; the envoy exclusion is still open). The rest are blocked on CB-26.
-- **What:**
-  - **M8:** exclude the patron envoy from `eotg_aug_patron_critic_candidate` and the patron.004 pick.
-  - **M7:** guard patron.006's portrait and descs against a dead envoy, and decide what happens to an envoy who has left court.
-  - **After rulings:** M1 (penalty text vs modifier), M2, M10, L2, L5 and L13.
-- **Owner:** eotg-scripter (eotg-localizer for any text)
-- **Next step:** dispatch after the round-2 session commits, to avoid edit collisions.
+### CB-31: In-game checks for the 2026-10-04 cybernetics batch (eca9b9c)
+- **Status:** waiting-human (2026-10-04)
+- **What:** these were found or fixed after the human's play-test screenshots, and need confirming in game:
+  1. Decision-list hovers read as plain text: Remove Implants, Maintenance, Consult Physician.
+  2. Seek Augmentation:
+     - requirement lines are ticked text, with no raw flag names;
+     - no "You lose…" lines;
+     - the physician line appears only when you have a physician.
+  3. init.018 *The Offer You Sought*: the syndicate paragraph and option e's tooltip appear only when you have no Patron.
+  4. Pursue: the requirement lines read correctly, and only synergy modifiers you hold are listed.
+  5. Maintenance and Consult Physician: "the static quiets" shows only at Overclocked, and "lose" lines only for modifiers you hold.
+  6. Remove Implants and Excision list only modifiers you hold. The throttle shows only if you are throttled.
+  7. Total Integration lists only the traits you actually have.
+  8. fracture.006.b and tier3.006 show no opinion-removal lines when nothing is held.
+  9. The 9 new `.tt` option tooltips show their text.
+  10. tier2.011.c's success shows "Trimmed Levy Plan" (+5% tax, no opinion change).
+  11. fracture.018.a's toast names the forgotten person.
+  12. fracture.020: sparing a real traitor shows `desc_true_spared` and "It was right. I was not.", with no prestige.
+  13. The trait's Integration line is on its own paragraph, and (1) and (2) match the track.
+  14. Patron with the envoy absent:
+      - .006 shows the `_absent` text, with no portrait and no options c or e;
+      - when d fails, nobody dies; an augmented owner gets the throttle and the risk.
+  15. Patron with the envoy present:
+      - options c and e kill the envoy;
+      - at demand 2, if the envoy is the only possible critic, .005 fires instead.
+  16. error.log is clean after a few story ticks.
+- **Owner:** human → orchestrator (route failures to the Cybernetics session)
+- **Next step:** play-check during normal testing. Screenshots are enough.
 
 ## Tooling and environment
 
@@ -277,5 +291,7 @@ These are shared conditions. Clearing one unblocks every item that names it.
 | CB-09 | Commit the cybernetics work | 2e6cef2 (round 2 + balance B1/B2), pushed | 2026-10-04 |
 | CB-30 | Marker model questions | Human: keep the 7 colours for now (placeholders); every model sits on the shared plinth; leave the `map-presentation-good` tag at 69b1f5f | 2026-10-04 |
 | CB-29 | Junction the game's mod folder to the repo | `mod/eotg_stellar_rivers` is now a junction to the repo. The launcher file `eotg_stellar_rivers.mod` was renamed to "Echoes of the Grip" (Total Conversion, 1.20.*). Old folder kept as `mod/eotg_stellar_rivers_backup_20261004` (with the old `.mod` as `.mod.bak`); delete it once the game is confirmed loading. Before switching, a full diff showed: 4 settings files differed only by a BOM (kept the repo versions, which match vanilla); the lane ramp and the table_styles BOM were committed; 12 gitignored generated textures (colormap, 5 holding decals, 6 structure textures, the newer 10-01 bakes) were copied into the working tree. **Uncommitted working-tree edits are now live in game.** | 2026-10-04 |
+| CB-26 | Architect rulings on the conformance audit | `docs/specs/cybernetics_v2_conformance_rulings.md` (d223f1a); work items W1–W6 built in eca9b9c | 2026-10-04 |
+| CB-27 | Conformance bug fixes M7/M8 | Built and QA-passed, eca9b9c; in-game checks in CB-31 | 2026-10-04 |
 | CB-16 | Superseded notes on the 4 pre-v2 cybernetics QA docs | Done by cloud session (CB-24) | 2026-10-04 |
 | CB-24 | Cloud conformance audit | Merged from `claude/focused-dirac-ixo81h`. Verified locally: 12/12 MEDIUM confirmed and 5 vanilla claims settled (report §6). Follow-ups are CB-25 to CB-27. | 2026-10-04 |
