@@ -1748,3 +1748,17 @@ Setting `legitimacy = no` inside `government_rules` disables the legitimacy trac
 
 **Safe approach:** Use only `base`, `ambitious`, `content`, `greedy`, `arbitrary` in stress_impact blocks — traits that are defined in `eotg_traits.txt` or known to be in vanilla files Tiger can resolve. Avoid `proud`, `cruel`, `wrathful`, etc. until the mod's traits file covers them or vanilla coverage is confirmed.
 
+---
+
+## 24. CK3 1.20 "Crozier" — Government Changes (verified 2026-10-03)
+
+Verified against vanilla 1.20.0.2 `common/governments/_governments.info` and `00_government_types.txt`.
+The full port tracker is in `docs/ck3_1_20_port.md`.
+
+- `government_rules = { religious = yes }` and `{ administrative = yes }` are **removed**. Use `mechanic_type = theocracy` / `mechanic_type = administrative`.
+- `mechanic_type` is optional. Supported values: `feudal mercenary holy_order clan theocracy administrative landless_adventurer herder nomad mandala`. Only one government per mechanic may set `is_mechanic_type_default = yes`, and vanilla already sets all of them, so a mod government must **never** set it.
+- New trigger: `government_has_mechanic = <mechanic>` (character scope). New government-type-scope trigger: `government_type_has_flag`.
+- Realm law groups now live in `common/law_groups/` and are gated by `required_government_flag`. A government without `government_uses_crown_authority` gets no Crown Authority track. EOTG governments never had this flag, so nothing changes for them.
+- New optional fields: `possible_grant_vassal_governments = { ... }` and `grant_vassal_ai_will_do = { value = ... }` (Grant Titles government picker), plus `royal_court = landed`.
+- `theocracy_government` moved to `02_theocratic_government_types.txt`. A religion or faith picks its theocracy via `theocracy_government_type`.
+- Tiger 1.19.0 does not yet know any of the 1.20-only syntax.
