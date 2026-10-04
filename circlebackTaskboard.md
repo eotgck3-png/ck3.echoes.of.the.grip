@@ -154,6 +154,12 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Owner:** human → intake (vault questions) → eotg-cartographer
 - **Next step:** answer here or in the Helix region brief.
 
+### CB-32: Canon rulings from the docs/lore review
+- **Status:** waiting-human (2026-10-04)
+- **What:** 16 contradictions between the new docs/lore files and older canon, plus a precedence ruling and two draft errata (LAW AT 866, ERAS). They're listed in `docs/lore/REVIEW_866.md`. None blocks current cybernetics work: patron.008 and the licensing rule were confirmed.
+- **Owner:** human → orchestrator (pastes errata) → eotg-lore-keeper
+- **Next step:** rule on precedence first. Most of the rest follow from it.
+
 ### CB-08: Glossary ruling on medieval game terms
 - **Status:** waiting-human (2026-10-03)
 - **What:** cybernetics text uses vanilla UI terms: court, courtier, vassal, knight, household, gold, liege. The interim ruling keeps terms that match the game UI the player sees. A real decision would go in the reflavor glossary and `localization/english/replace/`.
