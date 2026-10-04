@@ -17,7 +17,7 @@
 
 **The hidden numbers:** take **(Debug) Frontier Readout**. It shows a toast per Frontier you hold, with progress (/100), strain (/8), and development and control against their completion floors.
 
-**Pacing (owner decision):** about 10–16 years to Settled unsponsored, 8–10 sponsored. Strain fails a project at 8.
+**Pacing (owner decision):** about 10–16 years to Settled unsponsored, 8–10 sponsored. Strain fails a project at 8. Flavor events come at most once every **3 years** per Region (about 4–5 per project at most); to see one sooner, clear the cooldown as in §4 step 1.
 
 Console lines below use `capital_county`, your capital Region. For another Region, replace `capital_county` with `title:<county key>`. Vanilla keys are fine at the console; they are never in script.
 
@@ -117,9 +117,11 @@ For each type: mark a fresh Region Unsettled, Establish, and pick that option in
      - `effect title:<c_key> = { eotg_frontier_start_effect = { TYPE = trade FOUNDER = title:<c_key>.holder } }`
    - Take **Back a Frontier** → *Whom to Back* lists it with its stage in words → the AI holder answers.
    - Afterwards **Withdraw Your Backing** appears; taking it ends the backing.
-4. **The backer dies:** kill the sponsor.
-   - **At the moment of death:** if their primary heir is landed, has gold and backs nothing, the heir carries the backing, and a toast says so.
-   - **Otherwise:** at the next debug year the backing lapses (toast, strain +1).
+4. **The backer dies:** kill the sponsor. Nothing shows at the moment of death (the backing is cleared; the heir is noted on the Region).
+   - **At the next year** (run the debug year): if their primary heir is alive, landed, has gold, backs nothing and does not hold the Region, the heir carries the backing, and a toast says so.
+   - **Otherwise:** the backing lapses at that year (toast, strain +1).
+   - **Heir holds the Region** (e.g. you hold the Region and the backer was your parent, with you as primary heir): no backer and **no** strain.
+   - **Sponsor becomes the holder:** grant the Frontier Region to its backer, then run the year. The backing ends with no strain.
 5. **Owner change:** grant a Frontier Region to a vassal. The Frontier continues under them, with the founder and backer unchanged. **Exactly one tick per calendar year:** note the progress (Readout), grant the Region away mid-year, let the year turn, re-grant it, and read again. Progress rose by one year's gain, not two. (The debug year ignores this marker on purpose, so use natural time here.)
 
 ## 5. AI (let it run 10+ years, observer if wanted)

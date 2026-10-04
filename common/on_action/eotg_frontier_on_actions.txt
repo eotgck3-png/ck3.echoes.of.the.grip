@@ -1,4 +1,4 @@
-﻿# -- eotg_frontier_on_actions.txt ---------------------------------------------
+﻿﻿﻿# -- eotg_frontier_on_actions.txt ---------------------------------------------
 # On_actions for Frontier Systems v1 (docs/specs/frontier_v1.md §3.6, §6.1, §7).
 #
 # Vanilla hooks are extended ADDITIVELY only (CLAUDE.md invariant 4): an
@@ -21,7 +21,10 @@ yearly_playable_pulse = {
 # event trigger reads it.
 # every_held_title with tier = tier_county, and yearly_playable_pulse reaching
 # every county holder: confirmed (verification V13).
-# UNVERIFIED-VANILLA: current_year as a value in set_variable / a comparison.
+# current_year as a set_variable value: confirmed (game_start.txt:987-991,
+# title_on_actions.txt:103). The comparison keeps vanilla's orientation,
+# current_year on the left
+# (00_empire_faith_gate_triggers.txt:234, yearly_on_actions.txt:546).
 eotg_on_yearly_frontier_tick = {
     effect = {
         every_held_title = {
@@ -30,7 +33,7 @@ eotg_on_yearly_frontier_tick = {
                 eotg_frontier_is_frontier = yes
                 OR = {
                     NOT = { has_variable = eotg_frontier_tick_year }
-                    var:eotg_frontier_tick_year < current_year
+                    current_year > var:eotg_frontier_tick_year
                 }
             }
             set_variable = { name = eotg_frontier_tick_year  value = current_year }
@@ -41,7 +44,8 @@ eotg_on_yearly_frontier_tick = {
 
 # Vanilla hook, extended additively only (invariant 4). Root = the dying
 # character, still alive inside the hook; vanilla reads primary_heir only here
-# (death.txt:31-51), so the sponsor hand-off runs now (verification E2).
+# (death.txt:31-51), so the heir is recorded on the Region now; the next
+# yearly tick hands the backing on (verification E2, orchestrator ruling).
 on_death = {
     on_actions = {
         eotg_frontier_on_sponsor_death

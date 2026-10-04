@@ -34,7 +34,7 @@ From [`frontier_v1_verification.md`](frontier_v1_verification.md) (local lore, Q
   - One-off gains are halved too: Invest +5, .002 "push through" +4, an accepted backing +3.
 - **Strain rescaled with the pacing:** hidden **0–8** (was 0–4). Failure is at `eotg_frontier_strain_fail_value` = 8. The .002 desc bands are 4 and 6, and the AI gates are Invest ≥ 4, Abandon ≥ 6. .005 restart sets strain 4; the backer branch sets 2.
   - Per-cause +1 and the quiet-year −1 are unchanged, so a cause held for the same share of a project fails it equally often.
-  - The 2-year flavor cooldown is unchanged: twice the events per project, each +1 hardship weighing half as much.
+  - **Flavor cooldown 3 years (owner decision, follow-up):** `years = 3` in `eotg_frontier_event_roll_effect`. Expect about **4–5 flavor events per typical project** (10–16 years, one roll at most every 3 years). That is the ceiling; with the roll's 50% "nothing" weight a project often sees fewer.
 - **One record of active Frontiers (Q-B1):**
   - `eotg_frontier_active_count` is superseded (removed). `eotg_frontier_ai_room` reads `any_in_global_list = { variable = eotg_frontier_active count >= cap }`.
   - Every .001–.005 option that changes a Region re-checks its state. Start, complete, abandon and restart are guarded by a state `limit`.
@@ -48,7 +48,8 @@ From [`frontier_v1_verification.md`](frontier_v1_verification.md) (local lore, Q
   - At full Establishment with a floor unmet, the stage modifier becomes `eotg_frontier_mod_waiting_development` / `_waiting_control`. The Invest tooltip says so too.
 - **Milestone development once per Region, ever (Q5):** permanent history `eotg_frontier_dev_granted` (0–2). Abandon keeps its −1.
 - **Tick (Q9):** a calendar-year marker, `eotg_frontier_tick_year = current_year`, replaces the 300-day `eotg_frontier_ticked` (superseded). That gives exactly one tick per in-game year.
-- **Sponsor death (E2):** the heir hand-off runs in an additive `on_death` → `eotg_frontier_on_sponsor_death`. Vanilla reads `primary_heir` of the dying only there. The yearly tick keeps only the lapse fallback.
+- **Sponsor death (E2; orchestrator ruling, follow-up):** an additive `on_death` → `eotg_frontier_on_sponsor_death` records the dying sponsor's `primary_heir` on the Region as `eotg_frontier_pending_heir` (and the dead backer as `eotg_frontier_pending_from`) and clears the sponsor. Vanilla reads `primary_heir` of the dying only there, but the heir has usually not inherited yet, so `eotg_frontier_can_sponsor` would fail. The Region's **next yearly tick** (`eotg_frontier_resolve_pending_heir_effect`) makes the heir the sponsor if they are alive, can sponsor (which includes backing nothing else) and are not the holder, firing `sponsor_changed`; otherwise the backing lapses (Sponsor Lapse, strain +1). A backer found in between wins with no lapse; an heir who now holds the Region is dropped with no strain. The pending variables are removed either way, and when the project ends.
+- **Sponsor never the holder (§R rule):** `eotg_frontier_check_sponsor_effect` drops a sponsor who has become the holder (inherited or was given the Region), with no strain.
 - **Holding build (E1):** both the check and the pick need `has_holding = no` and `barony_cannot_construct_holding = no`. The grant runs at character scope.
 - **Hooks (Q8):**
   - `progressed` fires only on a real gain;
@@ -58,10 +59,10 @@ From [`frontier_v1_verification.md`](frontier_v1_verification.md) (local lore, Q
 - **Debug readout (approved test tooling):** `eotg_decision_frontier_debug_readout` toasts each held Frontier's progress, strain and floors.
 - **Text:** time-neutral in any period of the setting (owner rule). S1 ("A Hard Year") and R3 (the sponsor credit line) are applied; S2 (Exodus) is not.
 - **Markers:** every item the verification confirmed has lost its UNVERIFIED-VANILLA marker. Three behaviours are `# TEST-IN-GAME`: V1 (variables persist), V8 (the barony a new holding creates) and V12 (scopes reach custom on_actions). They're in `frontier_v1_test_plan.md` §0.
-  - **Still UNVERIFIED-VANILLA, new in this pass:**
-    - `current_year` as a value (the Q9 marker);
-    - `development_level` / `county_control` read as values in script values;
-    - `MakeScope.Var(...).GetValue` in the debug toast's loc.
+  - **New in this pass, since confirmed against vanilla 1.20.0.3 (markers dropped):**
+    - `current_year` as a set_variable value (game_start.txt:987-991); the comparison uses vanilla's orientation, `current_year > var:eotg_frontier_tick_year` (00_empire_faith_gate_triggers.txt:234);
+    - `development_level` / `county_control` as values in county scope (03_dlc_fp2_script_values.txt:88-91);
+    - `[x.MakeScope.Var('name').GetValue|0]` in the debug toast's loc (coronation_activity_l_english.yml:675).
 
 ---
 
@@ -96,7 +97,7 @@ From [`frontier_v1_verification.md`](frontier_v1_verification.md) (local lore, Q
 
 **Design consequences applied in the build (and below):**
 - **Founder and sponsor validity are read by the yearly tick.** The `on_death` hook and the per-character county lists are dropped. That removes dependencies E2 and E6.
-- **Sponsor validity:** superseded by §V (E2): the heir hand-off runs in `on_death`; the tick records **Sponsor Lapse** for a dead sponsor not handed on.
+- **Sponsor validity:** superseded by §V (E2): `on_death` records the heir and clears the sponsor; the next tick hands the backing to the heir or records **Sponsor Lapse**.
 - **A founder is valid when** alive, adult, not imprisoned, and either the county holder or living in the holder's realm.
 - **Withdraw and Sponsor** find their counties through the global list `eotg_frontier_active`.
 
@@ -227,8 +228,9 @@ The engine needs every county to have a holder and a capital holding (E11). So U
 | `eotg_frontier_sponsor` | character (may be absent) | Design §6. The *realm* is read through the character at runtime. |
 | `eotg_frontier_sponsor_paid` | yes, timed 360 days | Set by a successful sponsor payment this year. Read by the tick. |
 | `eotg_frontier_milestone` | 0 / 1 / 2 | Which development milestones have been paid out (§6.2). |
+| `eotg_frontier_pending_heir` / `eotg_frontier_pending_from` | character, between a sponsor's death and the next tick | The heir hand-off (§V, E2 ruling); removed by that tick or when the project ends. |
 | `eotg_frontier_tick_year` | the calendar year of the last tick | **Cooldown authority for the yearly tick** (§V, Q9): exactly one tick per in-game year, whoever holds the Region (§6.1). |
-| `eotg_frontier_event_cd` | yes, timed 2 years | **Cooldown authority for flavor events**, set only in the tick's event roll (§6.4). |
+| `eotg_frontier_event_cd` | yes, timed 3 years (owner) | **Cooldown authority for flavor events**, set only in the tick's event roll (§6.4). |
 | `eotg_frontier_attempts` | integer, permanent | Times a project here has ended in abandonment (a persistent trace, design §3.4). |
 | `eotg_frontier_former_type` | type flag, permanent once set | What the last failed project was. |
 | `eotg_frontier_history` | `flag:settled`, permanent | Set on completion. Read by nothing in Phase 1; it's a hook for future systems (design §14). |
@@ -273,7 +275,9 @@ County scope unless noted.
 | `eotg_frontier_unlist_effect` | out of the active list (the one record; §V) |
 | `eotg_frontier_trigger_hook_effect` (`HOOK`) | fires a hook with the scopes as saved (§V, Q8) |
 | `eotg_frontier_start_tooltip_effect` | character: .001's start tooltip, in the right person (lore I1) |
-| `eotg_frontier_on_sponsor_death_effect` | character (dying): the heir hand-off (§V, E2) |
+| `eotg_frontier_on_sponsor_death_effect` | character (dying): records `pending_heir` / `pending_from` on the Region, clears the sponsor (§V, E2) |
+| `eotg_frontier_resolve_pending_heir_effect` | county, in the tick: the heir becomes the sponsor, or the backing lapses (§V) |
+| `eotg_frontier_clear_pending_heir_effect` | removes the pending hand-off variables |
 | `eotg_frontier_grant_milestone_dev_effect` (`LEVEL`) | +1 development once per Region, ever (§V, Q5) |
 | `eotg_frontier_raise_dev_effect` (`AMOUNT`) | result development, with the development_changed hook (Q8) |
 | `eotg_frontier_debug_readout_effect` | character: the debug readout toasts (§V) |
@@ -287,7 +291,7 @@ County scope unless noted.
 | `eotg_frontier_add_strain_effect` (`CAUSE`) | strain +1 (0–8); records the cause |
 | `eotg_frontier_ease_strain_effect` | strain −1 |
 | `eotg_frontier_tick_effect` | the yearly tick (§6.1) |
-| `eotg_frontier_check_sponsor_effect` | a dead sponsor → heir hand-off, or Sponsor Lapse |
+| `eotg_frontier_check_sponsor_effect` | fallback: a dead sponsor still set → Sponsor Lapse; a sponsor who is now the holder → dropped, no strain. The heir hand-off is `resolve_pending_heir` (on_death + next tick, §V) |
 | `eotg_frontier_sponsor_pay_effect` | the yearly payment, or Sponsor Lapse |
 | `eotg_frontier_event_roll_effect` | the flavor roll; sets the event cooldown |
 | `eotg_frontier_find_sponsor_candidate_effect` | the liege, else an ally (AI, can sponsor) |
@@ -375,8 +379,9 @@ The yearly tick (`eotg_frontier_tick_effect`, step 1) tests `eotg_frontier_has_v
 
 ### 4.2 Sponsor validity and change
 **In the tick:**
-- **A dead sponsor** (§V, E2: in `on_death`, `eotg_frontier_on_sponsor_death`) passes to their `primary_heir` when that heir is alive, landed and can pay: fire `…_on_sponsor_changed` with `scope:eotg_frontier_old_sponsor`, and toast the holder.
-- **Otherwise** clear the sponsor; strain +1 with cause `sponsor_lapsed`.
+- **A dead sponsor** (§V, E2): `on_death` (`eotg_frontier_on_sponsor_death`) stores their `primary_heir` as `eotg_frontier_pending_heir` and clears the sponsor (`…_on_sponsor_changed`). At the Region's next tick the heir becomes the sponsor when alive, able to sponsor and not the holder: fire `…_on_sponsor_changed` with `scope:eotg_frontier_old_sponsor`, and toast the holder.
+- **Otherwise** strain +1 with cause `sponsor_lapsed` (no lapse if a new backer was found meanwhile, or if the heir now holds the Region).
+- **A sponsor who becomes the holder** is dropped with no strain: sponsor and holder are never collapsed (§R).
 
 **The sponsor-change flow** (design §6–7):
 1. A would-be sponsor (player decision, or the AI through the tick) **offers**.
@@ -463,13 +468,16 @@ Every type: the settled transition (§6.5), plus its row below.
 Root is a playable character. Effect:
 
 ```
-every_held_title = {                         # E18 UNVERIFIED
+every_held_title = {                         # confirmed (V13)
     limit = {
         tier = tier_county
         eotg_frontier_is_frontier = yes
-        NOT = { has_variable = eotg_frontier_ticked }   # cooldown authority (inv. 4)
+        OR = {                                   # cooldown authority (inv. 4; §V Q9)
+            NOT = { has_variable = eotg_frontier_tick_year }
+            current_year > var:eotg_frontier_tick_year   # vanilla orientation
+        }
     }
-    set_variable = { name = eotg_frontier_ticked  value = yes  days = 300 }
+    set_variable = { name = eotg_frontier_tick_year  value = current_year }
     eotg_frontier_tick_effect = yes
 }
 ```
@@ -486,7 +494,7 @@ every_held_title = {                         # E18 UNVERIFIED
 4. **Resolve**, in order. The first match wins:
    1. `eotg_frontier_completion_met` → `trigger_event = eotg_frontier.004` to the holder, AI or player. The AI chooses by `ai_chance`, which is fewer code paths than a separate AI resolution. Up to 8 AI frontiers make the cost negligible.
    2. strain ≥ `eotg_frontier_strain_fail_value` (8) → `trigger_event = eotg_frontier.005` to the holder, AI or player. The `ai_chance` values follow §6.6's AI order.
-   3. Otherwise the **event roll**, gated by `NOT = { has_variable = eotg_frontier_event_cd }`. The event roll is the **only** place that sets `eotg_frontier_event_cd` (2 years). Event triggers never read it (lesson 5). The roll is a `random_list`:
+   3. Otherwise the **event roll**, gated by `NOT = { has_variable = eotg_frontier_event_cd }`. The event roll is the **only** place that sets `eotg_frontier_event_cd` (3 years, owner decision). Event triggers never read it (lesson 5). The roll is a `random_list`:
       - 30: `.002` (complication, or its *Without a Founder* variant while the founder is invalid; a player holder only);
       - 20: `.003` (sponsor offer). Only when there is no sponsor, a candidate sponsor exists (§8.4), and the holder is not AI. AI–AI offers resolve in script with no event.
       - 50: nothing.
@@ -507,7 +515,7 @@ Strain is an integer from 0 to 4, hidden. Its causes are the tick list (§6.1) p
 - **Tracking the cause:** the latest strain cause is kept in `eotg_frontier_last_cause` (§2.4).
 
 ### 6.4 Flavor event cadence
-- **Cooldown:** at most one flavor event per county every 2 years, with `eotg_frontier_event_cd` as the cooldown authority (§6.1).
+- **Cooldown:** at most one flavor event per county every 3 years (about 4–5 per typical project), with `eotg_frontier_event_cd` as the cooldown authority (§6.1).
 - **Not affected:** completion and failure are resolution events, outside the cooldown.
 
 ### 6.5 Completion → Settled (design §3.3)
@@ -676,7 +684,7 @@ UTF-8 with BOM, bare `[x.GetName]`, gendered pronouns for single characters, US 
    - `eotg_frontier_mod_new_settlement` is present;
    - no Frontier decision is shown for that county again.
 4. **Failure:** strain 8 → .005; each branch behaves as §6.6; Abandoned → Establish works again with the head start; `abandoned_works` is present; attempts +1.
-5. **Founder and sponsor validity:** killing or imprisoning the founder → strain +1 (No Founder) each tick, and the .002 *Without a Founder* variant offers a replacement. Killing a sponsor → it passes to their heir, or lapses with +1 strain (Sponsor Lapse).
+5. **Founder and sponsor validity:** killing or imprisoning the founder → strain +1 (No Founder) each tick, and the .002 *Without a Founder* variant offers a replacement. Killing a sponsor → at the next tick it passes to their heir, or lapses with +1 strain (Sponsor Lapse).
 6. **Owner change** (grant the county away): the frontier continues under the new holder; the founder and sponsor are unchanged, and the founder stays valid when the new holder is their vassal (Q3); there is no double tick that year.
 7. **AI behaviour (10-year observer run):** active frontiers stay ≤ 8; no AI ruler has more than one; at least one AI frontier starts and resolves.
 8. **Standalone:** nothing reads any `eotg_aug*` or other EotG system (grep). No title, province, culture or faith keys in script (grep for `title:`, `province:`, `culture:`, `faith:`: 0 hits).

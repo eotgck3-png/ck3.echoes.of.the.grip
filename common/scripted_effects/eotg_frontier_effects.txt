@@ -1,4 +1,4 @@
-﻿# -- eotg_frontier_effects.txt ------------------------------------------------
+﻿﻿﻿# -- eotg_frontier_effects.txt ------------------------------------------------
 # Scripted effects for Frontier Systems v1 (docs/specs/frontier_v1.md §3.2).
 #
 # THE ARCHITECTURAL RULE (spec §R): the REGION (county title) owns the
@@ -188,35 +188,92 @@ eotg_frontier_drop_sponsor_effect = {
     }
 }
 
-# The sponsor dies (verification E2): vanilla reads primary_heir of a dying
-# character only inside on_death (death.txt:31-51), so the hand-off runs
-# there. CHARACTER scope: root = the dying sponsor. The backing passes to
-# their primary heir if the heir can carry it; otherwise the yearly tick
-# records Sponsor Lapse.
+# The sponsor dies (verification E2; orchestrator ruling on the hand-off).
+# Vanilla reads primary_heir of a dying character only inside on_death
+# (death.txt:31-51), but there the heir usually has not inherited yet, so
+# eotg_frontier_can_sponsor would fail. So on_death only records the heir on
+# the Region and clears the sponsor; the Region's next yearly tick decides
+# (eotg_frontier_resolve_pending_heir_effect). CHARACTER scope: root = the
+# dying sponsor.
 eotg_frontier_on_sponsor_death_effect = {
     if = {
         limit = { has_variable = eotg_frontier_sponsoring }
-        primary_heir ?= { save_temporary_scope_as = eotg_frontier_heir_sponsor }
         var:eotg_frontier_sponsoring = {
             if = {
                 limit = {
                     var:eotg_frontier_sponsor ?= root
                     eotg_frontier_is_frontier = yes
-                    exists = scope:eotg_frontier_heir_sponsor
-                    scope:eotg_frontier_heir_sponsor = {
-                        is_alive = yes
-                        eotg_frontier_can_sponsor = yes
-                    }
                 }
-                eotg_frontier_set_sponsor_effect = { SPONSOR = scope:eotg_frontier_heir_sponsor }
-                holder = {
-                    send_interface_toast = {
-                        title = eotg_frontier_toast_sponsor_inherited
-                        left_icon = scope:eotg_frontier_heir_sponsor
-                    }
+                # The dead backer, for the lapse toast; also marks the hand-off
+                # as pending
+                set_variable = { name = eotg_frontier_pending_from  value = root }
+                if = {
+                    limit = { exists = root.primary_heir }
+                    set_variable = { name = eotg_frontier_pending_heir  value = root.primary_heir }
+                }
+                eotg_frontier_clear_sponsor_effect = yes
+            }
+        }
+    }
+}
+
+# The heir hand-off, at the Region's first yearly tick after the sponsor's
+# death. The heir carries the backing if alive, able to sponsor (which
+# includes backing nothing else), and not the Region's holder (spec §R: the
+# sponsor and the holder are never collapsed). An heir who now holds the
+# Region simply does not back it: no strain (as in check_sponsor). Otherwise
+# the backing lapses. A backer found in the meantime (.003, AI-to-AI) wins:
+# no lapse. The pending variables go either way. COUNTY scope, inside the
+# tick (scope:eotg_frontier_holder is saved).
+eotg_frontier_resolve_pending_heir_effect = {
+    if = {
+        limit = {
+            has_variable = eotg_frontier_pending_from
+            NOT = { exists = var:eotg_frontier_sponsor }
+        }
+        if = {
+            limit = {
+                exists = var:eotg_frontier_pending_heir
+                var:eotg_frontier_pending_heir = {
+                    is_alive = yes
+                    eotg_frontier_can_sponsor = yes
+                    NOT = { this = scope:eotg_frontier_holder }
+                }
+            }
+            var:eotg_frontier_pending_heir = { save_temporary_scope_as = eotg_frontier_heir_sponsor }
+            eotg_frontier_set_sponsor_effect = { SPONSOR = scope:eotg_frontier_heir_sponsor }
+            holder = {
+                send_interface_toast = {
+                    title = eotg_frontier_toast_sponsor_inherited
+                    left_icon = scope:eotg_frontier_heir_sponsor
                 }
             }
         }
+        else_if = {
+            limit = {
+                NOT = { var:eotg_frontier_pending_heir ?= scope:eotg_frontier_holder }
+            }
+            var:eotg_frontier_pending_from = { save_temporary_scope_as = eotg_frontier_lapsed_sponsor }
+            eotg_frontier_add_strain_effect = { CAUSE = sponsor_lapsed }
+            holder = {
+                send_interface_toast = {
+                    title = eotg_frontier_toast_sponsor_lapsed
+                    left_icon = scope:eotg_frontier_lapsed_sponsor
+                }
+            }
+        }
+    }
+    eotg_frontier_clear_pending_heir_effect = yes
+}
+
+eotg_frontier_clear_pending_heir_effect = {
+    if = {
+        limit = { has_variable = eotg_frontier_pending_from }
+        remove_variable = eotg_frontier_pending_from
+    }
+    if = {
+        limit = { has_variable = eotg_frontier_pending_heir }
+        remove_variable = eotg_frontier_pending_heir
     }
 }
 
@@ -377,8 +434,10 @@ eotg_frontier_tick_effect = {
         eotg_frontier_add_strain_effect = { CAUSE = war }
     }
 
-    # 2. The sponsor: a dead one is a lapse (the heir hand-off already ran in
-    # on_death); a living one pays
+    # 2. The sponsor: the heir hand-off recorded in on_death resolves now; a
+    # dead sponsor still set is a lapse; one who now holds the Region is
+    # dropped; a living one pays
+    eotg_frontier_resolve_pending_heir_effect = yes
     eotg_frontier_check_sponsor_effect = yes
     eotg_frontier_sponsor_pay_effect = yes
 
@@ -411,8 +470,10 @@ eotg_frontier_tick_effect = {
     }
 }
 
-# A sponsor who has died: if the on_death hand-off did not replace them, the
-# backing has lapsed (spec §4.2; verification E2 keeps this as the fallback).
+# A sponsor who has died while still set (on_death clears them, so this is
+# the fallback): the backing has lapsed (spec §4.2). A sponsor who has become
+# the Region's holder (inherited or was given it) is dropped with no strain:
+# the sponsor and the holder are never collapsed (spec §R).
 eotg_frontier_check_sponsor_effect = {
     if = {
         limit = {
@@ -428,6 +489,13 @@ eotg_frontier_check_sponsor_effect = {
                 left_icon = scope:eotg_frontier_lapsed_sponsor
             }
         }
+    }
+    else_if = {
+        limit = {
+            exists = var:eotg_frontier_sponsor
+            var:eotg_frontier_sponsor = { this = scope:eotg_frontier_holder }
+        }
+        eotg_frontier_clear_sponsor_effect = yes
     }
 }
 
@@ -458,7 +526,7 @@ eotg_frontier_sponsor_pay_effect = {
     }
 }
 
-# The flavor roll. Sets the 2-year cooldown when an event (or an AI-to-AI
+# The flavor roll. Sets the 3-year cooldown (owner decision) when an event (or an AI-to-AI
 # offer) actually happens. Player holders get .002 / .003; AI holders get
 # only the scripted AI-to-AI sponsor offer (spec §6.1, §8.4).
 eotg_frontier_event_roll_effect = {
@@ -468,13 +536,13 @@ eotg_frontier_event_roll_effect = {
         if = {
             # A founderless Frontier gets its variant of .002 first
             limit = { eotg_frontier_has_valid_founder = no }
-            set_variable = { name = eotg_frontier_event_cd  value = yes  years = 2 }
+            set_variable = { name = eotg_frontier_event_cd  value = yes  years = 3 }
             holder = { trigger_event = eotg_frontier.002 }
         }
         else = {
             random_list = {
                 30 = {
-                    set_variable = { name = eotg_frontier_event_cd  value = yes  years = 2 }
+                    set_variable = { name = eotg_frontier_event_cd  value = yes  years = 3 }
                     holder = { trigger_event = eotg_frontier.002 }
                 }
                 20 = {
@@ -482,7 +550,7 @@ eotg_frontier_event_roll_effect = {
                         NOT = { exists = var:eotg_frontier_sponsor }
                         exists = scope:eotg_frontier_sponsor_candidate
                     }
-                    set_variable = { name = eotg_frontier_event_cd  value = yes  years = 2 }
+                    set_variable = { name = eotg_frontier_event_cd  value = yes  years = 3 }
                     scope:eotg_frontier_sponsor_candidate = { save_scope_as = eotg_frontier_sponsor }
                     holder = { trigger_event = eotg_frontier.003 }
                 }
@@ -503,7 +571,7 @@ eotg_frontier_event_roll_effect = {
                         opinion = { target = scope:eotg_frontier_sponsor_candidate  value >= 0 }
                     }
                 }
-                set_variable = { name = eotg_frontier_event_cd  value = yes  years = 2 }
+                set_variable = { name = eotg_frontier_event_cd  value = yes  years = 3 }
                 eotg_frontier_set_sponsor_effect = { SPONSOR = scope:eotg_frontier_sponsor_candidate }
                 eotg_frontier_add_progress_effect = { AMOUNT = 3 }
             }
@@ -704,6 +772,7 @@ eotg_frontier_clear_project_effect = {
         limit = { has_variable = eotg_frontier_invested }
         remove_variable = eotg_frontier_invested
     }
+    eotg_frontier_clear_pending_heir_effect = yes
 }
 
 # == Failure / abandonment (spec §6.6) =========================================

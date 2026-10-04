@@ -40,7 +40,7 @@
 **Confirmed against vanilla 1.20.0.3:** V1 (title variables), V2, V4, V5, V6, V7, V8 (the effect), V10, V11, V12 (the effect), V13, V14, V15, V18, V19, V23, V24, `clamp_variable`, timed variables. The markers are dropped in script.
 
 **Wrong as designed, now fixed:**
-- **V21 / E2:** `primary_heir` of a dead character is readable only in `on_death`. The hand-off moved to `eotg_frontier_on_sponsor_death` (additive `on_death`).
+- **V21 / E2:** `primary_heir` of a dead character is readable only in `on_death`. `eotg_frontier_on_sponsor_death` (additive `on_death`) records the heir on the Region (`eotg_frontier_pending_heir`) and clears the sponsor; the next yearly tick hands the backing on or records the lapse (orchestrator ruling, follow-up: in `on_death` the heir has usually not inherited yet).
 - **E1:** `barony_cannot_construct_holding = no` added to the empty-slot check and pick.
 - **E3:** gold values are only read in a character scope (unchanged, checked).
 
@@ -49,9 +49,11 @@
 2. `set_holding_type` on an empty province: does a barony appear, and who holds it (V8)?
 3. Do saved scopes reach the custom on_actions (V12)?
 
-**Still UNVERIFIED-VANILLA (new in the fix pass; marked in script):**
-- `current_year` as a value (the Q9 marker);
-- `development_level` / `county_control` read as values in script values;
-- `MakeScope.Var(...).GetValue` in the debug readout's loc (debug only).
+**New in the fix pass, since confirmed against vanilla 1.20.0.3 (markers dropped):**
+- `current_year` as a set_variable value (game_start.txt:987-991). The comparison is written vanilla's way, `current_year > var:eotg_frontier_tick_year` (00_empire_faith_gate_triggers.txt:234, yearly_on_actions.txt:546);
+- `development_level` / `county_control` as values in county scope (03_dlc_fp2_script_values.txt:88-91; 09_mpo_wars.txt:1335);
+- `[x.MakeScope.Var('name').GetValue|0]` in the debug readout's loc (coronation_activity_l_english.yml:675, 817).
+
+**Follow-up owner decision:** the flavor-event cooldown is **3 years** (`eotg_frontier_event_roll_effect`), about 4–5 events per typical project at most.
 
 **Not used:** V9 (barony grant from script: the holding stays with the holder), V16, V17, V20, V22 (n/a).

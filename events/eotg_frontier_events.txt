@@ -699,7 +699,10 @@ eotg_frontier.005 = {
     option = {
         name = eotg_frontier.005.a
         trigger = {
-            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+            scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
+                var:eotg_frontier_strain >= eotg_frontier_strain_fail_value
+            }
         }
         scope:eotg_frontier_county = {
             eotg_frontier_abandon_effect = { FAILED = yes }
@@ -714,7 +717,10 @@ eotg_frontier.005 = {
     option = {
         name = eotg_frontier.005.b
         trigger = {
-            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+            scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
+                var:eotg_frontier_strain >= eotg_frontier_strain_fail_value
+            }
             exists = scope:eotg_frontier_candidate
             gold >= minor_gold_value
         }
@@ -735,6 +741,7 @@ eotg_frontier.005 = {
         trigger = {
             scope:eotg_frontier_county = {
                 eotg_frontier_is_frontier = yes
+                var:eotg_frontier_strain >= eotg_frontier_strain_fail_value
                 NOT = { var:eotg_frontier_type ?= flag:settlement }
             }
         }
@@ -754,6 +761,7 @@ eotg_frontier.005 = {
         trigger = {
             scope:eotg_frontier_county = {
                 eotg_frontier_is_frontier = yes
+                var:eotg_frontier_strain >= eotg_frontier_strain_fail_value
                 eotg_frontier_has_valid_sponsor = yes
                 var:eotg_frontier_sponsor = {
                     gold >= {
@@ -782,7 +790,15 @@ eotg_frontier.005 = {
     option = {
         name = eotg_frontier.option_passed
         trigger = {
-            scope:eotg_frontier_county = { eotg_frontier_is_frontier = no }
+            # Resolved already (another .005 ran, or a restart lowered the strain)
+            scope:eotg_frontier_county = {
+                NOT = {
+                    AND = {
+                        eotg_frontier_is_frontier = yes
+                        var:eotg_frontier_strain >= eotg_frontier_strain_fail_value
+                    }
+                }
+            }
         }
         ai_chance = {
             base = 100
