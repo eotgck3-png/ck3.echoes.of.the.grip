@@ -89,7 +89,9 @@ def trait_groups(root):
     base = root / "common/traits"
     if base.exists():
         for f in base.rglob("*.txt"):
-            found |= set(re.findall(r"^\s*group\s*=\s*(\w+)", read(f), re.M))
+            # `group_equivalence` makes has_trait accept the group too (vanilla: has_trait = lunatic
+            # matches lunatic_1 / lunatic_genetic, used ~150 times).
+            found |= set(re.findall(r"^\s*group(?:_equivalence)?\s*=\s*(\w+)", read(f), re.M))
     return found
 
 

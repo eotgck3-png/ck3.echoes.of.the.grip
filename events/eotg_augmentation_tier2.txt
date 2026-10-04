@@ -53,6 +53,8 @@ eotg_aug_tier2.001 = {
     option = {
         name = eotg_aug_tier2.001.a
         add_character_modifier = { modifier = eotg_mod_aug_affect_dampened  years = 3 }
+        # QA round 2 M14: leaning in has a price (spec §1 rule 6)
+        eotg_add_fracture_risk = { AMOUNT = 3 }
         ai_chance = {
             base = 40
             modifier = { add = 20  has_trait = callous }
@@ -250,6 +252,11 @@ eotg_aug_tier2.002 = {
 # ── eotg_aug_tier2.003 ────────────────────────────────────────────────────────
 # The Next Stage — Progression Gate
 # Enhanced → Overclocked transition event.
+# Callers: eotg_on_yearly_aug_tier2_check (The Next Stage branch,
+# unsolicited), eotg_decision_aug_pursue_next_stage (sought; balance spec
+# §5.1). Sought (eotg_flag_aug_sought_upgrade, 60 days): the sought desc
+# replaces the base line, the AI follows through (declines b, e x0.1), and the
+# `after` block clears the flag whichever option is taken.
 
 eotg_aug_tier2.003 = {
     type = character_event
@@ -257,7 +264,13 @@ eotg_aug_tier2.003 = {
     # E-12 (Phase 4b): what was replaced first (thread T7) and, once the
     # second self exists, "it wants this too" (thread T1).
     desc = {
-        desc = eotg_aug_tier2.003.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { has_character_flag = eotg_flag_aug_sought_upgrade }
+                desc = eotg_aug_tier2.003.desc_sought
+            }
+            desc = eotg_aug_tier2.003.desc
+        }
         first_valid = {
             triggered_desc = {
                 trigger = { var:eotg_aug_focus ?= flag:limbs }
@@ -322,6 +335,10 @@ eotg_aug_tier2.003 = {
             modifier = { add = 20  has_trait = content }
             modifier = { add = 20  has_trait = patient }
             modifier = { add = 20  gold < major_gold_value }
+            modifier = {    # balance spec §5.1: the ruler asked for this
+                factor = 0.1
+                has_character_flag = eotg_flag_aug_sought_upgrade
+            }
         }
     }
 
@@ -347,6 +364,8 @@ eotg_aug_tier2.003 = {
             base = 30
             modifier = { add = 30  has_trait = callous }
             modifier = { add = 10  has_trait = arbitrary }
+            # No sought factor (balance spec §5.1 item 3, corrected 2026-10-04):
+            # c pays and sets XP 100, so it is a follow-through, not a decline.
         }
     }
 
@@ -389,7 +408,16 @@ eotg_aug_tier2.003 = {
             base = 30
             modifier = { add = 30  has_trait = content }
             modifier = { add = 10  has_trait = humble }
+            modifier = {    # balance spec §5.1: the ruler asked for this
+                factor = 0.1
+                has_character_flag = eotg_flag_aug_sought_upgrade
+            }
         }
+    }
+
+    # Balance spec §5.1: every option clears the sought flag
+    after = {
+        remove_character_flag = eotg_flag_aug_sought_upgrade
     }
 }
 
@@ -414,14 +442,14 @@ eotg_aug_tier2.004 = {
         animation = stress
     }
     right_portrait = {
-        character = scope:aug_spouse
+        character = scope:eotg_aug_spouse
         animation = worry
     }
 
     immediate = {
         hidden_effect = {
             random_spouse = {
-                save_scope_as = aug_spouse
+                save_scope_as = eotg_aug_spouse
             }
         }
     }
@@ -429,7 +457,7 @@ eotg_aug_tier2.004 = {
     # "It is the implant. I am still here." — honest, some trust maintained
     option = {
         name = eotg_aug_tier2.004.a
-        scope:aug_spouse = {
+        scope:eotg_aug_spouse = {
             add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
         }
         eotg_add_fracture_risk = { AMOUNT = -3 }
@@ -445,18 +473,35 @@ eotg_aug_tier2.004 = {
 
     # "I am the same person I have always been." — denial, now a gamble
     # (dominated fix, audit §2.5): the spouse believes it, or sees through it.
+    # Balance spec §5.6: the gamble is a diplomacy contest against the spouse
+    # (vanilla duel with a target, events/activities/chariot_race_activity/
+    # chariot_ongoing_events_jp.txt:195).
     option = {
         name = eotg_aug_tier2.004.b
         set_variable = { name = eotg_aug_marriage_strain  value = 1 }
         trigger_event = { id = eotg_aug_tier2.017  days = { 180 365 } }
-        random_list = {
+        duel = {
+            skill = diplomacy
+            target = scope:eotg_aug_spouse
             50 = {
-                scope:aug_spouse = {
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = 3.5
+                    min = -49
+                }
+                desc = eotg_aug_tier2.004.b.success
+                scope:eotg_aug_spouse = {
                     add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
                 }
             }
             50 = {
-                scope:aug_spouse = {
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = -3.5
+                    min = -49
+                }
+                desc = eotg_aug_tier2.004.b.failure
+                scope:eotg_aug_spouse = {
                     add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 8 }
                 }
             }
@@ -475,7 +520,7 @@ eotg_aug_tier2.004 = {
     # "Then perhaps we are no longer suited." — rupture
     option = {
         name = eotg_aug_tier2.004.c
-        scope:aug_spouse = {
+        scope:eotg_aug_spouse = {
             add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 8 }
         }
         eotg_add_fracture_risk = { AMOUNT = 5 }
@@ -495,7 +540,7 @@ eotg_aug_tier2.004 = {
         name = eotg_aug_tier2.004.d
         trigger = { has_trait = deceitful }
         trait = deceitful
-        scope:aug_spouse = {
+        scope:eotg_aug_spouse = {
             add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
         }
         eotg_add_fracture_risk = { AMOUNT = 3 }
@@ -533,7 +578,7 @@ eotg_aug_tier2.005 = {
         animation = personality_rational
     }
     right_portrait = {
-        character = scope:confessor
+        character = scope:eotg_confessor
         animation = personality_bold
     }
 
@@ -541,7 +586,7 @@ eotg_aug_tier2.005 = {
         hidden_effect = {
             random_courtier = {
                 limit = { is_alive = yes  has_trait = zealous }
-                save_scope_as = confessor
+                save_scope_as = eotg_confessor
             }
         }
     }
@@ -550,7 +595,7 @@ eotg_aug_tier2.005 = {
     option = {
         name = eotg_aug_tier2.005.a
         add_prestige = 50
-        scope:confessor = {
+        scope:eotg_confessor = {
             add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 8 }
         }
         ai_chance = {
@@ -581,7 +626,7 @@ eotg_aug_tier2.005 = {
         add_dread = 20
         add_piety = -75
         eotg_add_fracture_risk = { AMOUNT = 3 }
-        scope:confessor = {
+        scope:eotg_confessor = {
             add_opinion = { modifier = eotg_opinion_aug_fear  target = root  years = 10 }
         }
         eotg_aug_stress_cruelty_effect = yes
@@ -599,7 +644,7 @@ eotg_aug_tier2.005 = {
         trait = cynical
         add_prestige = 50
         add_piety = -50
-        scope:confessor = {
+        scope:eotg_confessor = {
             add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 8 }
         }
         eotg_add_fracture_risk = { AMOUNT = 2 }
@@ -623,7 +668,7 @@ eotg_aug_tier2.005 = {
         trait = theologian
         duel = {
             skill = learning
-            target = scope:confessor
+            target = scope:eotg_confessor
             50 = {
                 compare_modifier = {
                     value = scope:duel_value
@@ -631,7 +676,7 @@ eotg_aug_tier2.005 = {
                 }
                 desc = eotg_aug_tier2.005.e.success
                 add_piety = 75
-                scope:confessor = {
+                scope:eotg_confessor = {
                     add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
                 }
             }
@@ -642,7 +687,7 @@ eotg_aug_tier2.005 = {
                 }
                 desc = eotg_aug_tier2.005.e.failure
                 add_piety = -50
-                scope:confessor = {
+                scope:eotg_confessor = {
                     add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 8 }
                 }
             }
@@ -675,6 +720,8 @@ eotg_aug_tier2.006 = {
     option = {
         name = eotg_aug_tier2.006.a
         add_character_modifier = { modifier = eotg_mod_aug_affect_dampened  years = 2 }
+        # QA round 2 M14: leaning in has a price (spec §1 rule 6)
+        eotg_add_fracture_risk = { AMOUNT = 3 }
         ai_chance = {
             base = 40
             modifier = { add = 20  has_trait = callous }
@@ -884,7 +931,13 @@ eotg_aug_tier2.008 = {
     desc = eotg_aug_tier2.008.desc
     theme = death
 
-    trigger = { has_variable = eotg_aug_grief_for }
+    # QA round 2: the desc names [eotg_mourned.GetFirstName], so the
+    # variable must still point at someone (a pruned dead character leaves
+    # it empty): exists = var:, and the save in immediate is null-safe.
+    trigger = {
+        has_variable = eotg_aug_grief_for
+        exists = var:eotg_aug_grief_for
+    }
 
     left_portrait = {
         character = root
@@ -899,7 +952,7 @@ eotg_aug_tier2.008 = {
 
     immediate = {
         hidden_effect = {
-            var:eotg_aug_grief_for = { save_scope_as = eotg_mourned }
+            var:eotg_aug_grief_for ?= { save_scope_as = eotg_mourned }
             if = {
                 limit = { has_variable = eotg_aug_grief_killer }
                 var:eotg_aug_grief_killer = { save_scope_as = eotg_grief_killer }
@@ -1397,11 +1450,58 @@ eotg_aug_tier2.012 = {
         }
     }
 
-    # "Investigate quietly."
+    # "Investigate quietly." Balance spec §5.6: an intrigue contest against
+    # the spymaster (+15 with the senses focus, thread T7). Success: you learn
+    # the truth (a toast, .success_true / .success_false, fired hidden so the
+    # tooltip gives nothing away) and the lesson. Failure: nothing learned,
+    # risk +3. Contest shape: vanilla duel with a target,
+    # events/activities/chariot_race_activity/chariot_ongoing_events_jp.txt:195
+    # (its toast in the branch: :222-225).
     option = {
         name = eotg_aug_tier2.012.a
-        add_character_modifier = { modifier = eotg_mod_aug_lesson_intrigue  years = 5 }
-        eotg_add_fracture_risk = { AMOUNT = 3 }
+        duel = {
+            skill = intrigue
+            target = scope:eotg_flagged
+            50 = {
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = 3.5
+                    min = -49
+                }
+                modifier = {
+                    add = 15
+                    var:eotg_aug_focus ?= flag:senses
+                }
+                desc = eotg_aug_tier2.012.a.success
+                add_character_modifier = { modifier = eotg_mod_aug_lesson_intrigue  years = 5 }
+                hidden_effect = {
+                    if = {
+                        limit = { scope:eotg_report_truth = flag:true }
+                        send_interface_toast = {
+                            title = eotg_aug_tier2.012.a.success_true
+                            left_icon = scope:eotg_flagged
+                        }
+                    }
+                    else = {
+                        send_interface_toast = {
+                            title = eotg_aug_tier2.012.a.success_false
+                            left_icon = scope:eotg_flagged
+                        }
+                    }
+                }
+            }
+            50 = {
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = -3.5
+                    min = -49
+                }
+                desc = eotg_aug_tier2.012.a.failure
+                hidden_effect = {
+                    eotg_add_fracture_risk = { AMOUNT = 3 }
+                }
+            }
+        }
         ai_chance = {
             base = 30
             modifier = { add = 20  has_trait = patient }
@@ -1844,10 +1944,10 @@ eotg_aug_tier2.015 = {
         }
     }
 
-    # [paranoid] "Lock down the court." - 50%: the tamperer is put under
-    # house arrest (vanilla imprison type = house_arrest,
-    # events/court_events/court_events_general.txt:12361), if they are
-    # yours to hold
+    # [paranoid] "Lock down the court." - 50%: the tamperer is arrested, if
+    # they are yours to hold, through vanilla imprison_character_effect
+    # (00_prison_effects.txt:1644; QA round 2 M5): house arrest for family
+    # or a landed vassal, else the dungeon, with tyranny and family opinion.
     option = {
         name = eotg_aug_tier2.015.d
         trigger = { has_trait = paranoid }
@@ -1864,9 +1964,9 @@ eotg_aug_tier2.015 = {
             }
             random = {
                 chance = 50
-                imprison = {
-                    target = scope:eotg_tamperer
-                    type = house_arrest
+                imprison_character_effect = {
+                    TARGET = scope:eotg_tamperer
+                    IMPRISONER = root
                 }
                 save_scope_value_as = { name = eotg_tamper_trace  value = flag:found }
             }
@@ -2046,8 +2146,8 @@ eotg_aug_tier2.017 = {
     theme = marriage
 
     trigger = {
-        exists = scope:aug_spouse
-        is_spouse_of = scope:aug_spouse
+        exists = scope:eotg_aug_spouse
+        is_spouse_of = scope:eotg_aug_spouse
     }
 
     left_portrait = {
@@ -2055,7 +2155,7 @@ eotg_aug_tier2.017 = {
         animation = stress
     }
     right_portrait = {
-        character = scope:aug_spouse
+        character = scope:eotg_aug_spouse
         animation = anger
     }
 
@@ -2168,8 +2268,8 @@ eotg_aug_tier2.018 = {
 
     trigger = {
         has_variable = eotg_aug_marriage_strain
-        exists = scope:aug_spouse
-        is_spouse_of = scope:aug_spouse
+        exists = scope:eotg_aug_spouse
+        is_spouse_of = scope:eotg_aug_spouse
     }
 
     left_portrait = {
@@ -2177,7 +2277,7 @@ eotg_aug_tier2.018 = {
         animation = sadness
     }
     right_portrait = {
-        character = scope:aug_spouse
+        character = scope:eotg_aug_spouse
         triggered_animation = {
             trigger = { var:eotg_aug_marriage_strain <= 0 }
             animation = love
@@ -2189,7 +2289,7 @@ eotg_aug_tier2.018 = {
     option = {
         name = eotg_aug_tier2.018.a
         trigger = { var:eotg_aug_marriage_strain >= 3 }
-        divorce = scope:aug_spouse
+        divorce = scope:eotg_aug_spouse
         stress_impact = {
             compassionate = minor_stress_impact_gain
             content = minor_stress_impact_gain
@@ -2219,7 +2319,7 @@ eotg_aug_tier2.018 = {
         }
         if = {
             limit = { var:eotg_aug_marriage_strain >= 3 }
-            scope:aug_spouse = {
+            scope:eotg_aug_spouse = {
                 add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 10 }
             }
             eotg_add_fracture_risk = { AMOUNT = 5 }
@@ -2227,13 +2327,13 @@ eotg_aug_tier2.018 = {
         }
         else_if = {
             limit = { var:eotg_aug_marriage_strain <= 0 }
-            scope:aug_spouse = {
+            scope:eotg_aug_spouse = {
                 add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
             }
             stress_impact = { base = medium_stress_impact_loss }
         }
         else = {
-            scope:aug_spouse = {
+            scope:eotg_aug_spouse = {
                 add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 5 }
                 add_character_flag = eotg_flag_aug_estranged
             }

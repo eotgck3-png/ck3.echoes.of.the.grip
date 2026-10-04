@@ -108,10 +108,15 @@ eotg_aug_tier3.001 = {
         }
     }
 
-    # "Kill them" — execute a courtier, heavy dread and risk
+    # "Kill them" — execute a courtier, heavy dread and risk.
+    # QA round 2 M4: a deliberate killing, so a family victim (picker 0.05)
+    # makes a kinslayer: vanilla add_kinslayer_trait_or_nothing_effect
+    # (00_secret_effects.txt:433), before the death. Option b (a wound) and
+    # the involuntary episodes carry none.
     option = {
         name = eotg_aug_tier3.001.c
         trigger = { exists = scope:eotg_victim }
+        add_kinslayer_trait_or_nothing_effect = { VICTIM = scope:eotg_victim }
         scope:eotg_victim = {
             death = { death_reason = death_murder  killer = root }
         }
@@ -398,9 +403,17 @@ eotg_aug_tier3.004 = {
     # "Trust the analysis. Act accordingly." — may gain paranoid, fracture risk
     option = {
         name = eotg_aug_tier3.004.a
-        random = {
-            chance = 30
-            add_trait = paranoid
+        # QA round 2 trait guard: paranoid's opposite is trusting
+        # (game/common/traits/00_traits.txt, opposites).
+        if = {
+            limit = {
+                NOT = { has_trait = trusting }
+                NOT = { has_trait = paranoid }
+            }
+            random = {
+                chance = 30
+                add_trait = paranoid
+            }
         }
         stress_impact = { base = minor_stress_impact_gain }
         eotg_add_fracture_risk = { AMOUNT = 5 }
@@ -636,8 +649,9 @@ eotg_aug_tier3.006 = {
             IMPRISONER = root
             TARGET = scope:eotg_delegation_leader
         }
+        # QA round 2 M5: no manual tyranny here; the wrapper already charges
+        # the unjust-imprisonment tyranny (imprison_tyranny_effect).
         add_dread = 30
-        add_tyranny = 15
         every_vassal = {
             limit = {
                 is_alive = yes
@@ -721,7 +735,7 @@ eotg_aug_tier3.006 = {
 # Two Machines
 # Another overclocked character exists in the same orbit.
 # Phase 4c: a and d (alliance) and b and c (rivalry) fire eotg_aug_tier3.015
-# in 1-2 years; its trigger checks scope:other_machine is alive and still
+# in 1-2 years; its trigger checks scope:eotg_other_machine is alive and still
 # Overclocked. The bond is carried in scope:eotg_machines_bond.
 
 eotg_aug_tier3.007 = {
@@ -742,7 +756,7 @@ eotg_aug_tier3.007 = {
         animation = personality_bold
     }
     right_portrait = {
-        character = scope:other_machine
+        character = scope:eotg_other_machine
         animation = personality_bold
     }
 
@@ -752,13 +766,13 @@ eotg_aug_tier3.007 = {
                 limit = { any_vassal = { is_alive = yes  eotg_is_aug_tier3 = yes } }
                 random_vassal = {
                     limit = { is_alive = yes  eotg_is_aug_tier3 = yes }
-                    save_scope_as = other_machine
+                    save_scope_as = eotg_other_machine
                 }
             }
             else = {
                 random_courtier = {
                     limit = { is_alive = yes  eotg_is_aug_tier3 = yes }
-                    save_scope_as = other_machine
+                    save_scope_as = eotg_other_machine
                 }
             }
         }
@@ -767,10 +781,10 @@ eotg_aug_tier3.007 = {
     # "Acknowledge the kinship." — mutual positive opinion
     option = {
         name = eotg_aug_tier3.007.a
-        scope:other_machine = {
+        scope:eotg_other_machine = {
             add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
         }
-        add_opinion = { modifier = eotg_opinion_aug_admiration  target = scope:other_machine  years = 5 }
+        add_opinion = { modifier = eotg_opinion_aug_admiration  target = scope:eotg_other_machine  years = 5 }
         save_scope_value_as = { name = eotg_machines_bond  value = flag:alliance }
         trigger_event = { id = eotg_aug_tier3.015  days = { 365 730 } }
         ai_chance = {
@@ -784,7 +798,7 @@ eotg_aug_tier3.007 = {
     option = {
         name = eotg_aug_tier3.007.b
         add_character_modifier = { modifier = eotg_mod_aug_lesson_intrigue  years = 5 }
-        scope:other_machine = {
+        scope:eotg_other_machine = {
             add_opinion = { modifier = eotg_opinion_aug_fear  target = root  years = 10 }
         }
         eotg_add_fracture_risk = { AMOUNT = 5 }
@@ -797,14 +811,47 @@ eotg_aug_tier3.007 = {
         }
     }
 
-    # "Compare calibrations." — both gain prowess, both gain fracture risk
+    # "Compare calibrations." Balance spec §5.6: a learning contest against
+    # the other machine decides who learns from whom. Success: both take the
+    # prowess lesson, root risk +5, theirs +10. Failure: only they take it,
+    # root risk +10, theirs +5. Contest shape: vanilla duel with a target,
+    # events/activities/chariot_race_activity/chariot_ongoing_events_jp.txt:195.
     option = {
         name = eotg_aug_tier3.007.c
-        add_character_modifier = { modifier = eotg_mod_aug_lesson_prowess  years = 5 }
-        eotg_add_fracture_risk = { AMOUNT = 10 }
-        scope:other_machine = {
-            add_character_modifier = { modifier = eotg_mod_aug_lesson_prowess  years = 5 }
-            eotg_add_fracture_risk = { AMOUNT = 10 }
+        duel = {
+            skill = learning
+            target = scope:eotg_other_machine
+            50 = {
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = 3.5
+                    min = -49
+                }
+                desc = eotg_aug_tier3.007.c.success
+                add_character_modifier = { modifier = eotg_mod_aug_lesson_prowess  years = 5 }
+                scope:eotg_other_machine = {
+                    add_character_modifier = { modifier = eotg_mod_aug_lesson_prowess  years = 5 }
+                }
+                hidden_effect = {
+                    eotg_add_fracture_risk = { AMOUNT = 5 }
+                    scope:eotg_other_machine = { eotg_add_fracture_risk = { AMOUNT = 10 } }
+                }
+            }
+            50 = {
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = -3.5
+                    min = -49
+                }
+                desc = eotg_aug_tier3.007.c.failure
+                scope:eotg_other_machine = {
+                    add_character_modifier = { modifier = eotg_mod_aug_lesson_prowess  years = 5 }
+                }
+                hidden_effect = {
+                    eotg_add_fracture_risk = { AMOUNT = 10 }
+                    scope:eotg_other_machine = { eotg_add_fracture_risk = { AMOUNT = 5 } }
+                }
+            }
         }
         save_scope_value_as = { name = eotg_machines_bond  value = flag:rivalry }
         trigger_event = { id = eotg_aug_tier3.015  days = { 365 730 } }
@@ -820,7 +867,7 @@ eotg_aug_tier3.007 = {
         name = eotg_aug_tier3.007.d
         trigger = { has_trait = gregarious }
         trait = gregarious
-        scope:other_machine = {
+        scope:eotg_other_machine = {
             add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
             eotg_add_fracture_risk = { AMOUNT = 5 }
         }
@@ -1001,6 +1048,14 @@ eotg_aug_tier3.009 = {
     # "Let it stand."
     option = {
         name = eotg_aug_tier3.009.a
+        # QA round 2 gold gate: the costly order must be payable (b and c
+        # stay ungated).
+        trigger = {
+            OR = {
+                NOT = { scope:eotg_phantom_order = flag:costly }
+                gold >= minor_gold_value
+            }
+        }
         if = {
             limit = { scope:eotg_phantom_order = flag:harsh }
             add_tyranny = 5
@@ -1590,12 +1645,21 @@ eotg_aug_tier3.014 = {
         }
     }
 
-    # "Trust them." - if they were lying, it costs you
+    # "Trust them." - if they were lying, it costs you.
+    # QA round 2 M7: the outcome is hidden (hidden_effect) behind a neutral
+    # custom tooltip, so the tooltip no longer gives away what b exists to
+    # find out (vanilla hidden-outcome pattern, as b: jb_hunt_events.txt:2375).
+    # The gold gate is unconditional for the same reason: a gate only on the
+    # exploiting branch would leak the truth.
     option = {
         name = eotg_aug_tier3.014.a
-        if = {
-            limit = { scope:eotg_claim_truth = flag:exploiting }
-            remove_short_term_gold = minor_gold_value
+        trigger = { gold >= minor_gold_value }
+        custom_tooltip = eotg_aug_tier3.014.a.tt
+        hidden_effect = {
+            if = {
+                limit = { scope:eotg_claim_truth = flag:exploiting }
+                remove_short_term_gold = minor_gold_value
+            }
         }
         eotg_add_fracture_risk = { AMOUNT = 3 }
         ai_chance = {
@@ -1723,10 +1787,13 @@ eotg_aug_tier3.015 = {
     }
     theme = martial
 
+    # QA round 2: root re-checked too: a year or two after tier3.007 the
+    # ruler may have regressed or cascaded.
     trigger = {
+        eotg_is_aug_tier3 = yes
         exists = scope:eotg_machines_bond
-        exists = scope:other_machine
-        scope:other_machine = {
+        exists = scope:eotg_other_machine
+        scope:eotg_other_machine = {
             is_alive = yes
             eotg_is_aug_tier3 = yes
         }
@@ -1737,7 +1804,7 @@ eotg_aug_tier3.015 = {
         animation = personality_bold
     }
     right_portrait = {
-        character = scope:other_machine
+        character = scope:eotg_other_machine
         triggered_animation = {
             trigger = { scope:eotg_machines_bond = flag:rivalry }
             animation = anger
@@ -1764,14 +1831,14 @@ eotg_aug_tier3.015 = {
         if = {
             limit = { scope:eotg_machines_bond = flag:alliance }
             if = {
-                limit = { NOT = { has_relation_friend = scope:other_machine } }
+                limit = { NOT = { has_relation_friend = scope:eotg_other_machine } }
                 set_relation_friend = {
-                    target = scope:other_machine
+                    target = scope:eotg_other_machine
                     reason = eotg_aug_tier3.015.friend_reason
                 }
             }
             eotg_add_fracture_risk = { AMOUNT = -5 }
-            scope:other_machine = {
+            scope:eotg_other_machine = {
                 eotg_add_fracture_risk = { AMOUNT = -5 }
             }
         }
@@ -1814,7 +1881,7 @@ eotg_aug_tier3.015 = {
         trigger = { scope:eotg_machines_bond = flag:alliance }
         add_character_modifier = { modifier = eotg_mod_aug_lesson_prowess  years = 5 }
         eotg_add_fracture_risk = { AMOUNT = 8 }
-        scope:other_machine = {
+        scope:eotg_other_machine = {
             add_character_modifier = { modifier = eotg_mod_aug_lesson_prowess  years = 5 }
             eotg_add_fracture_risk = { AMOUNT = 8 }
         }
@@ -1831,7 +1898,7 @@ eotg_aug_tier3.015 = {
         trigger = { scope:eotg_machines_bond = flag:rivalry }
         duel = {
             skill = prowess
-            target = scope:other_machine
+            target = scope:eotg_other_machine
             50 = {
                 compare_modifier = {
                     value = scope:duel_value
@@ -1839,7 +1906,7 @@ eotg_aug_tier3.015 = {
                 }
                 desc = eotg_aug_tier3.015.c.success
                 add_prestige = 150
-                scope:other_machine = {
+                scope:eotg_other_machine = {
                     increase_wounds_effect = { REASON = duel }
                 }
             }
@@ -1850,11 +1917,11 @@ eotg_aug_tier3.015 = {
                 }
                 desc = eotg_aug_tier3.015.c.failure
                 increase_wounds_effect = { REASON = duel }
-                scope:other_machine = { add_prestige = 150 }
+                scope:eotg_other_machine = { add_prestige = 150 }
             }
         }
         eotg_add_fracture_risk = { AMOUNT = 10 }
-        scope:other_machine = {
+        scope:eotg_other_machine = {
             eotg_add_fracture_risk = { AMOUNT = 10 }
         }
         eotg_aug_stress_wound_effect = yes
@@ -1878,7 +1945,11 @@ eotg_aug_tier3.015 = {
         random_list = {
             40 = {
                 desc = eotg_aug_tier3.015.e.success
-                scope:other_machine = {
+                # QA round 2 M4: a deliberate killing; a family rival makes
+                # a kinslayer (vanilla add_kinslayer_trait_or_nothing_effect,
+                # 00_secret_effects.txt:433), before the death.
+                add_kinslayer_trait_or_nothing_effect = { VICTIM = scope:eotg_other_machine }
+                scope:eotg_other_machine = {
                     death = {
                         death_reason = death_murder
                         killer = root
@@ -1888,7 +1959,7 @@ eotg_aug_tier3.015 = {
             60 = {
                 desc = eotg_aug_tier3.015.e.failure
                 add_prestige = -200
-                scope:other_machine = {
+                scope:eotg_other_machine = {
                     add_opinion = { modifier = eotg_opinion_aug_fear  target = root  years = 10 }
                 }
             }
@@ -1966,10 +2037,43 @@ eotg_aug_tier3.016 = {
         }
     }
 
-    # "Ride it."
+    # "Ride it." Balance spec §5.6: a prowess check against
+    # decent_skill_rating (12). Success: the martial lesson and
+    # eotg_flag_aug_chain_edge; failure: eotg_flag_aug_chain_strain (both 2
+    # years), read by .022 (insight +15 / early cascade +10) and cleared
+    # there. Shape: vanilla duel against a fixed value,
+    # events/activities/chariot_race_activity/chariot_race_events.txt:1947.
     option = {
         name = eotg_aug_tier3.016.c
-        add_character_modifier = { modifier = eotg_mod_aug_lesson_martial  years = 5 }
+        # Balance spec §5.6 (B2 QA): clear any other chain's edge/strain first
+        eotg_aug_clear_chain_flags_effect = yes
+        duel = {
+            skill = prowess
+            value = decent_skill_rating
+            50 = {
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = 3.5
+                    min = -49
+                }
+                desc = eotg_aug_tier3.016.c.success
+                add_character_modifier = { modifier = eotg_mod_aug_lesson_martial  years = 5 }
+                hidden_effect = {
+                    add_character_flag = { flag = eotg_flag_aug_chain_edge  years = 2 }
+                }
+            }
+            50 = {
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = -3.5
+                    min = -49
+                }
+                desc = eotg_aug_tier3.016.c.failure
+                hidden_effect = {
+                    add_character_flag = { flag = eotg_flag_aug_chain_strain  years = 2 }
+                }
+            }
+        }
         eotg_add_fracture_risk = { AMOUNT = 10 }
         add_character_flag = { flag = eotg_flag_aug_bleed_ridden  days = 60 }
         trigger_event = { id = eotg_aug_tier3.022  days = { 7 14 } }
@@ -2039,12 +2143,26 @@ eotg_aug_tier3.017 = {
         animation = scheme
     }
 
+    # QA round 2 M4: the vassal pick never names close family or a spouse
+    # (the copycat filter of eotg_on_yearly_aug_tier1_check); the courtier
+    # fallback keeps the picker's 0.05 family factor, so b carries the
+    # vanilla kinslayer effect.
     immediate = {
         hidden_effect = {
             if = {
-                limit = { any_vassal = { is_alive = yes } }
+                limit = {
+                    any_vassal = {
+                        is_alive = yes
+                        NOT = { is_close_family_of = root }
+                        NOT = { is_spouse_of = root }
+                    }
+                }
                 random_vassal = {
-                    limit = { is_alive = yes }
+                    limit = {
+                        is_alive = yes
+                        NOT = { is_close_family_of = root }
+                        NOT = { is_spouse_of = root }
+                    }
                     save_scope_as = eotg_conspirator
                 }
             }
@@ -2103,6 +2221,13 @@ eotg_aug_tier3.017 = {
                 }
             }
         }
+        # QA round 2 M4: a family victim makes a kinslayer (vanilla
+        # add_kinslayer_trait_or_nothing_effect, 00_secret_effects.txt:433),
+        # before the death. M6: an execution without trial costs 15 tyranny
+        # now, as vanilla charges an unjust execution up front
+        # (execution_tyranny_gain, common/script_values/00_basic_values.txt:1426);
+        # .018 adds more if the plot was false.
+        add_kinslayer_trait_or_nothing_effect = { VICTIM = scope:eotg_conspirator }
         scope:eotg_conspirator = {
             add_character_flag = { flag = eotg_flag_aug_breach_victim  days = 30 }
             death = {
@@ -2110,6 +2235,7 @@ eotg_aug_tier3.017 = {
                 killer = root
             }
         }
+        add_tyranny = 15
         save_scope_value_as = { name = eotg_plot_action  value = flag:executed }
         eotg_add_fracture_risk = { AMOUNT = 10 }
         eotg_aug_stress_murder_effect = yes
@@ -2507,11 +2633,42 @@ eotg_aug_tier3.019 = {
         }
     }
 
-    # "Keep everything in my own hands."
+    # "Keep everything in my own hands." Balance spec §5.6: a stewardship
+    # check against high_skill_rating (15). Success: risk +2 and the learning
+    # lesson; failure: risk +8 and minor stress. Shape: vanilla duel against a
+    # fixed value, events/activities/chariot_race_activity/
+    # chariot_race_events.txt:1947.
     option = {
         name = eotg_aug_tier3.019.b
         add_prestige = 50
-        eotg_add_fracture_risk = { AMOUNT = 5 }
+        duel = {
+            skill = stewardship
+            value = high_skill_rating
+            50 = {
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = 3.5
+                    min = -49
+                }
+                desc = eotg_aug_tier3.019.b.success
+                add_character_modifier = { modifier = eotg_mod_aug_lesson_learning  years = 5 }
+                hidden_effect = {
+                    eotg_add_fracture_risk = { AMOUNT = 2 }
+                }
+            }
+            50 = {
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = -3.5
+                    min = -49
+                }
+                desc = eotg_aug_tier3.019.b.failure
+                stress_impact = { base = minor_stress_impact_gain }
+                hidden_effect = {
+                    eotg_add_fracture_risk = { AMOUNT = 8 }
+                }
+            }
+        }
         ai_chance = {
             base = 30
             modifier = { add = 20  has_trait = paranoid }
@@ -2560,7 +2717,9 @@ eotg_aug_tier3.021 = {
     desc = eotg_aug_tier3.021.desc
     theme = realm
 
+    # QA round 2: root's tier re-checked (the stage lands 180-360 days on).
     trigger = {
+        eotg_is_aug_tier3 = yes
         exists = scope:eotg_delegate
         scope:eotg_delegate = { is_alive = yes }
     }
@@ -2821,11 +2980,17 @@ eotg_aug_tier3.022 = {
 
     immediate = {
         hidden_effect = {
+            # Balance spec §5.6 chain edge: tier3.016.c's check carries here
+            # (edge +15 insight, strain +10 early cascade); both cleared after.
             random_list = {
                 20 = {
                     modifier = {
                         add = 20
                         eotg_neurofracture_threshold_met = yes
+                    }
+                    modifier = {
+                        add = 10
+                        has_character_flag = eotg_flag_aug_chain_strain
                     }
                     modifier = {
                         factor = 0.5
@@ -2841,11 +3006,16 @@ eotg_aug_tier3.022 = {
                         add = 15
                         has_character_flag = eotg_flag_aug_bleed_ridden
                     }
+                    modifier = {
+                        add = 15
+                        has_character_flag = eotg_flag_aug_chain_edge
+                    }
                     save_scope_value_as = { name = eotg_bleed_outcome  value = flag:insight }
                 }
             }
             remove_character_flag = eotg_flag_aug_bleed_purged
             remove_character_flag = eotg_flag_aug_bleed_ridden
+            eotg_aug_clear_chain_flags_effect = yes
         }
         if = {
             limit = { scope:eotg_bleed_outcome = flag:cascade }
@@ -2899,10 +3069,43 @@ eotg_aug_tier3.023 = {
         animation = marshal
     }
 
-    # "Follow it."
+    # "Follow it." Balance spec §5.6: a martial check against
+    # decent_skill_rating (12) decides how well you carry the plan out:
+    # eotg_flag_aug_chain_edge / _strain (2 years), read by .024 (decisive
+    # +15 / overreach +10) and cleared there. Shape: vanilla duel against a
+    # fixed value, events/activities/chariot_race_activity/
+    # chariot_race_events.txt:1947.
     option = {
         name = eotg_aug_tier3.023.a
         add_character_modifier = { modifier = eotg_mod_aug_clarity_campaign  years = 1 }
+        # Balance spec §5.6 (B2 QA): clear any other chain's edge/strain first
+        eotg_aug_clear_chain_flags_effect = yes
+        duel = {
+            skill = martial
+            value = decent_skill_rating
+            50 = {
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = 3.5
+                    min = -49
+                }
+                desc = eotg_aug_tier3.023.a.success
+                hidden_effect = {
+                    add_character_flag = { flag = eotg_flag_aug_chain_edge  years = 2 }
+                }
+            }
+            50 = {
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = -3.5
+                    min = -49
+                }
+                desc = eotg_aug_tier3.023.a.failure
+                hidden_effect = {
+                    add_character_flag = { flag = eotg_flag_aug_chain_strain  years = 2 }
+                }
+            }
+        }
         eotg_add_fracture_risk = { AMOUNT = 10 }
         trigger_event = { id = eotg_aug_tier3.024  days = { 180 270 } }
         eotg_aug_stress_embrace_effect = yes
@@ -3000,6 +3203,13 @@ eotg_aug_tier3.024 = {
     }
     theme = battle
 
+    # QA round 2: world-state guard mirroring tier3.023's branch (Overclocked,
+    # at war); the stage lands 180-270 days on.
+    trigger = {
+        eotg_is_aug_tier3 = yes
+        is_at_war = yes
+    }
+
     left_portrait = {
         character = root
         triggered_animation = {
@@ -3015,6 +3225,8 @@ eotg_aug_tier3.024 = {
 
     immediate = {
         hidden_effect = {
+            # Balance spec §5.6 chain edge: tier3.023.a's check carries here
+            # (edge +15 decisive, strain +10 overreach); both cleared after.
             random_list = {
                 50 = {
                     modifier = {
@@ -3024,15 +3236,24 @@ eotg_aug_tier3.024 = {
                             var:eotg_aug_focus ?= flag:senses
                         }
                     }
+                    modifier = {
+                        add = 15
+                        has_character_flag = eotg_flag_aug_chain_edge
+                    }
                     save_scope_value_as = { name = eotg_campaign_outcome  value = flag:decisive }
                 }
                 30 = {
+                    modifier = {
+                        add = 10
+                        has_character_flag = eotg_flag_aug_chain_strain
+                    }
                     save_scope_value_as = { name = eotg_campaign_outcome  value = flag:overreach }
                 }
                 20 = {
                     save_scope_value_as = { name = eotg_campaign_outcome  value = flag:inconclusive }
                 }
             }
+            eotg_aug_clear_chain_flags_effect = yes
         }
     }
 

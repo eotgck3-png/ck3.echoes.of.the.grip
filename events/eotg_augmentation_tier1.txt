@@ -129,11 +129,24 @@ eotg_aug_tier1.001 = {
 # eotg_aug_tier1.021 (What Will You Change?), which fires .022 (Installation),
 # where the tier changes. Price: eotg_aug_pay_upgrade_effect (medium gold,
 # x0.85 after tier1.020.c).
+# Callers: eotg_on_yearly_aug_tier1_check (The Upgrade branch, unsolicited),
+# eotg_decision_aug_pursue_next_stage (sought; balance spec §5.1).
+# Sought (eotg_flag_aug_sought_upgrade, 60 days, set by the decision): the
+# sought desc replaces the base one, and the AI follows through (b, c x0.1).
+# tier1.022 clears the flag on delivery; b and c clear it here.
 
 eotg_aug_tier1.002 = {
     type = character_event
     title = eotg_aug_tier1.002.t
-    desc = eotg_aug_tier1.002.desc
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { has_character_flag = eotg_flag_aug_sought_upgrade }
+                desc = eotg_aug_tier1.002.desc_sought
+            }
+            desc = eotg_aug_tier1.002.desc
+        }
+    }
     theme = physical_health
 
     # World-state tier guard (mirrors the on_action branch): a regression
@@ -146,10 +159,40 @@ eotg_aug_tier1.002 = {
     }
 
     # "Proceed" — pay; the surgeons ask what to change first (.021)
+    # Balance spec §5.6: how well you vet the surgeons is a stewardship check
+    # against medium_skill_rating (10); success sets eotg_flag_aug_chain_edge
+    # (2 years), read by the Installation (tier1.022: clean +15) and cleared
+    # there. Shape: vanilla duel against a fixed value,
+    # events/activities/chariot_race_activity/chariot_race_events.txt:1947.
     option = {
         name = eotg_aug_tier1.002.a
         trigger = { eotg_aug_can_afford_upgrade = yes }
         eotg_aug_pay_upgrade_effect = yes
+        # Balance spec §5.6 (B2 QA): clear any other chain's edge/strain first
+        eotg_aug_clear_chain_flags_effect = yes
+        duel = {
+            skill = stewardship
+            value = medium_skill_rating
+            50 = {
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = 3.5
+                    min = -49
+                }
+                desc = eotg_aug_tier1.002.a.success
+                hidden_effect = {
+                    add_character_flag = { flag = eotg_flag_aug_chain_edge  years = 2 }
+                }
+            }
+            50 = {
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = -3.5
+                    min = -49
+                }
+                desc = eotg_aug_tier1.002.a.failure
+            }
+        }
         trigger_event = { id = eotg_aug_tier1.021  days = 1 }
         stress_impact = {
             base = 0
@@ -168,6 +211,7 @@ eotg_aug_tier1.002 = {
     # "Not yet"
     option = {
         name = eotg_aug_tier1.002.b
+        remove_character_flag = eotg_flag_aug_sought_upgrade
         stress_impact = {
             base = 0
             ambitious = minor_stress_impact_gain
@@ -177,12 +221,17 @@ eotg_aug_tier1.002 = {
             modifier = { add = 20  has_trait = patient }
             modifier = { add = 20  gold < medium_gold_value }
             modifier = { add = 10  has_trait = content }
+            modifier = {    # balance spec §5.1: the ruler asked for this
+                factor = 0.1
+                has_character_flag = eotg_flag_aug_sought_upgrade
+            }
         }
     }
 
     # "This concerns me" — suppress progression for 5 years
     option = {
         name = eotg_aug_tier1.002.c
+        remove_character_flag = eotg_flag_aug_sought_upgrade
         add_character_flag = { flag = eotg_flag_suppress_progression  years = 5 }
         stress_impact = {
             base = minor_stress_impact_loss
@@ -191,6 +240,10 @@ eotg_aug_tier1.002 = {
             base = 30
             modifier = { add = 20  has_trait = content }
             modifier = { add = 20  has_trait = humble }
+            modifier = {    # balance spec §5.1: the ruler asked for this
+                factor = 0.1
+                has_character_flag = eotg_flag_aug_sought_upgrade
+            }
         }
     }
 
@@ -252,7 +305,7 @@ eotg_aug_tier1.003 = {
         animation = personality_rational
     }
     right_portrait = {
-        character = scope:concerned_vassal
+        character = scope:eotg_concerned_vassal
         animation = worry
     }
 
@@ -265,7 +318,7 @@ eotg_aug_tier1.003 = {
         hidden_effect = {
             random_vassal = {
                 limit = { is_alive = yes }
-                save_scope_as = concerned_vassal
+                save_scope_as = eotg_concerned_vassal
             }
         }
     }
@@ -273,7 +326,7 @@ eotg_aug_tier1.003 = {
     # "Reassure them." — opinion gain
     option = {
         name = eotg_aug_tier1.003.a
-        scope:concerned_vassal = {
+        scope:eotg_concerned_vassal = {
             add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
         }
         stress_impact = { base = minor_stress_impact_loss }
@@ -288,7 +341,7 @@ eotg_aug_tier1.003 = {
     option = {
         name = eotg_aug_tier1.003.b
         add_dread = 10
-        scope:concerned_vassal = {
+        scope:eotg_concerned_vassal = {
             add_opinion = { modifier = eotg_opinion_aug_fear  target = root  years = 10 }
         }
         eotg_aug_stress_cruelty_effect = yes
@@ -303,7 +356,7 @@ eotg_aug_tier1.003 = {
     option = {
         name = eotg_aug_tier1.003.c
         add_dread = 20
-        scope:concerned_vassal = {
+        scope:eotg_concerned_vassal = {
             add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
         }
         eotg_add_fracture_risk = { AMOUNT = 3 }
@@ -322,7 +375,7 @@ eotg_aug_tier1.003 = {
         name = eotg_aug_tier1.003.d
         trigger = { has_trait = honest }
         trait = honest
-        scope:concerned_vassal = {
+        scope:eotg_concerned_vassal = {
             add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
         }
         eotg_add_fracture_risk = { AMOUNT = 2 }
@@ -341,7 +394,7 @@ eotg_aug_tier1.003 = {
         name = eotg_aug_tier1.003.e
         trigger = { has_trait = deceitful }
         trait = deceitful
-        scope:concerned_vassal = {
+        scope:eotg_concerned_vassal = {
             add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
         }
         add_character_modifier = { modifier = eotg_mod_aug_lesson_intrigue  years = 5 }
@@ -370,7 +423,7 @@ eotg_aug_tier1.004 = {
         animation = personality_bold
     }
     right_portrait = {
-        character = scope:petitioning_knight
+        character = scope:eotg_petitioning_knight
         animation = war_attacker
     }
 
@@ -382,7 +435,7 @@ eotg_aug_tier1.004 = {
         hidden_effect = {
             random_knight = {
                 limit = { is_alive = yes  eotg_is_augmented_any = no }
-                save_scope_as = petitioning_knight
+                save_scope_as = eotg_petitioning_knight
             }
         }
     }
@@ -390,7 +443,7 @@ eotg_aug_tier1.004 = {
     # "Grant the request." — knight becomes augmented
     option = {
         name = eotg_aug_tier1.004.a
-        scope:petitioning_knight = {
+        scope:eotg_petitioning_knight = {
             eotg_aug_initiate_effect = yes
             # The variable exists from install (thread T4 reads it later)
             eotg_add_fracture_risk = { AMOUNT = 0 }
@@ -406,7 +459,7 @@ eotg_aug_tier1.004 = {
     # "Deny it." — knight grows uneasy
     option = {
         name = eotg_aug_tier1.004.b
-        scope:petitioning_knight = {
+        scope:eotg_petitioning_knight = {
             add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
         }
         ai_chance = {
@@ -419,7 +472,7 @@ eotg_aug_tier1.004 = {
     # "This ambition concerns me." — knight grows resentful
     option = {
         name = eotg_aug_tier1.004.c
-        scope:petitioning_knight = {
+        scope:eotg_petitioning_knight = {
             add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 8 }
         }
         add_dread = 5
@@ -441,7 +494,7 @@ eotg_aug_tier1.004 = {
         }
         trait = generous
         remove_short_term_gold = minor_gold_value
-        scope:petitioning_knight = {
+        scope:eotg_petitioning_knight = {
             eotg_aug_initiate_effect = yes
             eotg_add_fracture_risk = { AMOUNT = 0 }
             add_opinion = { modifier = eotg_opinion_aug_grateful_patient  target = root  years = 10 }
@@ -458,7 +511,7 @@ eotg_aug_tier1.004 = {
         name = eotg_aug_tier1.004.e
         trigger = { has_trait = paranoid }
         trait = paranoid
-        scope:petitioning_knight = {
+        scope:eotg_petitioning_knight = {
             add_opinion = { modifier = eotg_opinion_aug_fear  target = root  years = 10 }
         }
         add_character_modifier = { modifier = eotg_mod_aug_lesson_intrigue  years = 5 }
@@ -1043,6 +1096,8 @@ eotg_aug_tier1.010 = {
             chance = 20
             scope:eotg_sparring_partner = {
                 increase_wounds_effect = { REASON = fight }
+                # QA round 2 (index §1 rule 7): someone the implant hurt
+                add_character_flag = { flag = eotg_flag_aug_breach_victim  days = 30 }
             }
             eotg_aug_stress_wound_effect = yes
         }
@@ -1152,6 +1207,44 @@ eotg_aug_tier1.010 = {
             modifier = { add = 10  has_trait = arrogant }
         }
     }
+
+    # [physique_good] "The body was already good. Now it is better." Balance
+    # spec §5.9. physique_good is the group of physique_good_1-3; trigger
+    # on the group, one icon key per rank, as vanilla
+    # events/dlc/fp1/fp1_yearly_events.txt:8693-8695.
+    option = {
+        name = eotg_aug_tier1.010.g
+        trigger = { has_trait = physique_good }
+        trait = physique_good_1
+        trait = physique_good_2
+        trait = physique_good_3
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_prowess  years = 5 }
+        add_prestige = 50
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = physique_good }
+            modifier = { add = 10  has_trait = arrogant }
+        }
+    }
+
+    # [physique_bad] "Finally, a body that keeps up." Balance spec §5.9; group
+    # trigger and rank icons as g.
+    option = {
+        name = eotg_aug_tier1.010.h
+        trigger = { has_trait = physique_bad }
+        trait = physique_bad_1
+        trait = physique_bad_2
+        trait = physique_bad_3
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_prowess  years = 5 }
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        stress_impact = { base = minor_stress_impact_loss }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = physique_bad }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
 }
 
 
@@ -1238,6 +1331,24 @@ eotg_aug_tier1.011 = {
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = gregarious }
+            modifier = { add = 10  has_trait = arrogant }
+        }
+    }
+
+    # [beauty_good] "Let them look. They always have." Balance spec §5.9;
+    # group trigger and rank icons as tier1.010.g (vanilla
+    # events/dlc/fp1/fp1_yearly_events.txt:8693-8695).
+    option = {
+        name = eotg_aug_tier1.011.f
+        trigger = { has_trait = beauty_good }
+        trait = beauty_good_1
+        trait = beauty_good_2
+        trait = beauty_good_3
+        add_prestige = 50
+        eotg_add_fracture_risk = { AMOUNT = 2 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = beauty_good }
             modifier = { add = 10  has_trait = arrogant }
         }
     }
@@ -1450,10 +1561,29 @@ eotg_aug_tier1.013 = {
         }
     }
 
-    # "Keep working."
+    # "Keep working." Balance spec §5.6: whether the body carries it is a
+    # trait-weighted roll (vanilla events/health_events.txt:11686): success
+    # costs nothing; failure risk +5 and eotg_flag_aug_chain_strain
+    # (2 years), read by tier1.015 (implant fails +10) and cleared there.
     option = {
         name = eotg_aug_tier1.013.b
-        eotg_add_fracture_risk = { AMOUNT = 5 }
+        # Balance spec §5.6 (B2 QA): clear any other chain's edge/strain first
+        eotg_aug_clear_chain_flags_effect = yes
+        random_list = {
+            50 = {
+                modifier = { add = 15  has_trait = diligent }
+                modifier = { add = 10  prowess >= decent_skill_rating }
+                modifier = { add = -15  has_trait = lazy }
+                desc = eotg_aug_tier1.013.b.success
+            }
+            50 = {
+                desc = eotg_aug_tier1.013.b.failure
+                hidden_effect = {
+                    eotg_add_fracture_risk = { AMOUNT = 5 }
+                    add_character_flag = { flag = eotg_flag_aug_chain_strain  years = 2 }
+                }
+            }
+        }
         trigger_event = { id = eotg_aug_tier1.014  days = { 30 60 } }
         eotg_aug_stress_neglect_effect = yes
         ai_chance = {
@@ -1610,12 +1740,20 @@ eotg_aug_tier1.015 = {
                         add = 15
                         has_character_flag = eotg_flag_aug_rejection_treated
                     }
+                    modifier = {    # balance spec §5.6 chain edge
+                        add = 15
+                        has_character_flag = eotg_flag_aug_chain_edge
+                    }
                     save_scope_value_as = { name = eotg_rejection_outcome  value = flag:recovered }
                 }
                 25 = {
                     modifier = {
                         add = 10
                         has_character_flag = eotg_flag_aug_rejection_brave
+                    }
+                    modifier = {    # balance spec §5.6: tier1.013.b failed
+                        add = 10
+                        has_character_flag = eotg_flag_aug_chain_strain
                     }
                     save_scope_value_as = { name = eotg_rejection_outcome  value = flag:failed }
                 }
@@ -1626,6 +1764,7 @@ eotg_aug_tier1.015 = {
             remove_character_flag = eotg_flag_aug_rejection_rested
             remove_character_flag = eotg_flag_aug_rejection_treated
             remove_character_flag = eotg_flag_aug_rejection_brave
+            eotg_aug_clear_chain_flags_effect = yes
         }
         # Visible: the implant fails (tier exit) or scars
         if = {
@@ -2079,10 +2218,16 @@ eotg_aug_tier1.018 = {
                     save_scope_as = eotg_copycat
                 }
             }
+            # QA round 2 (index §1 rule 7): the copycat is picked with the
+            # strict filters above (never close family, a spouse or a child;
+            # the victim picker's alive test) rather than the weighted
+            # picker, because the pick must match the on_action branch; the
+            # botched install hurts them, so they are flagged as a victim.
             scope:eotg_copycat = {
                 eotg_aug_initiate_effect = yes
                 eotg_add_fracture_risk = { AMOUNT = 20 }
                 add_character_modifier = { modifier = eotg_mod_aug_infection  years = 1 }
+                add_character_flag = { flag = eotg_flag_aug_breach_victim  days = 30 }
             }
         }
     }
@@ -2119,15 +2264,49 @@ eotg_aug_tier1.018 = {
         }
     }
 
-    # "Help them, for a price." - a favor hook; their risk +10
+    # "Help them, for a price." - their risk +10 either way. Balance spec
+    # §5.6: an intrigue contest against the copycat decides whether the
+    # favor sticks (success: the hook, as before) or they see through it
+    # (failure: no hook, unease). Contest shape: vanilla duel with a target,
+    # events/activities/chariot_race_activity/chariot_ongoing_events_jp.txt:195.
     option = {
         name = eotg_aug_tier1.018.c
-        add_hook = {
-            type = favor_hook
+        duel = {
+            skill = intrigue
             target = scope:eotg_copycat
-        }
-        scope:eotg_copycat = {
-            eotg_add_fracture_risk = { AMOUNT = 10 }
+            50 = {
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = 3.5
+                    min = -49
+                }
+                desc = eotg_aug_tier1.018.c.success
+                add_hook = {
+                    type = favor_hook
+                    target = scope:eotg_copycat
+                }
+                hidden_effect = {
+                    scope:eotg_copycat = {
+                        eotg_add_fracture_risk = { AMOUNT = 10 }
+                    }
+                }
+            }
+            50 = {
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = -3.5
+                    min = -49
+                }
+                desc = eotg_aug_tier1.018.c.failure
+                scope:eotg_copycat = {
+                    add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+                }
+                hidden_effect = {
+                    scope:eotg_copycat = {
+                        eotg_add_fracture_risk = { AMOUNT = 10 }
+                    }
+                }
+            }
         }
         trigger_event = { id = eotg_aug_tier1.019  days = { 365 730 } }
         stress_impact = {
@@ -2512,19 +2691,34 @@ eotg_aug_tier1.022 = {
 
     immediate = {
         hidden_effect = {
+            # Balance spec §5.6 chain edge: tier1.002.a's check carries here
+            # (edge +15 clean, strain +10 complication); both cleared after.
             random_list = {
                 70 = {
                     modifier = {
                         add = 15
                         eotg_has_physician_access = yes
                     }
+                    modifier = {
+                        add = 15
+                        has_character_flag = eotg_flag_aug_chain_edge
+                    }
                     save_scope_value_as = { name = eotg_install_outcome  value = flag:clean }
                 }
                 30 = {
+                    modifier = {
+                        add = 10
+                        has_character_flag = eotg_flag_aug_chain_strain
+                    }
                     save_scope_value_as = { name = eotg_install_outcome  value = flag:complication }
                 }
             }
+            eotg_aug_clear_chain_flags_effect = yes
             remove_character_flag = eotg_flag_aug_upgrade_reassured
+            # Balance spec §5.1: the sought upgrade is delivered
+            remove_character_flag = eotg_flag_aug_sought_upgrade
+            # The price paid in .002 is delivered (QA round 2 escrow)
+            remove_variable = eotg_aug_escrow
         }
         if = {
             limit = { scope:eotg_install_outcome = flag:complication }

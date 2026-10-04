@@ -14,13 +14,29 @@
 #
 # Regression is open at any stress (cybernetics_v2 B3): prudence must be possible.
 # The discount (stress level 2+, or the Intervention flag from Phase 4c) is 25%.
+#
+# AI layer (balance spec §5.2): every decision uses ai_check_interval_by_tier
+# (months; every tier key required, 0 = never checks: skill reference
+# decisions/_decisions.info:110; vanilla common/decisions/
+# 00_artifact_decisions.txt:616, 00_dynasty_decisions.txt:14,
+# 00_lifestyle_decisions.txt:342 for county = 0). Barony is always 0: the
+# system serves count-tier rulers and above. ai_potential leads with the cheap
+# trait test; ai_will_do is the % chance per check (_decisions.info:143), with
+# `factor = 0` vetoes as 00_artifact_decisions.txt:616.
 # ─────────────────────────────────────────────────────────────────────────────
 
 eotg_decision_partial_removal = {
     picture = {
         reference = "gfx/interface/illustrations/decisions/eotg_decision_partial_removal.dds"
     }
-    ai_check_interval = 120
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 36
+        duchy = 24
+        kingdom = 24
+        empire = 24
+        hegemony = 24
+    }
 
     is_shown = {
         eotg_is_aug_tier2 = yes
@@ -43,18 +59,22 @@ eotg_decision_partial_removal = {
 
     effect = {
         eotg_aug_set_integration_effect = { XP = 0 }
+        # Balance spec §5.9: a masked congenital trait shows again
+        eotg_aug_unmask_congenital_effect = yes
         stress_impact = { base = medium_stress_impact_loss }
         custom_tooltip = eotg_decision_partial_removal_tooltip
     }
 
-    # AI only regresses when it is hurting
+    # AI only regresses when it is hurting (balance spec §5.2)
     ai_potential = {
+        eotg_is_aug_tier2 = yes
         stress_level >= 2
     }
     ai_will_do = {
         base = 5
-        modifier = { add = 20  stress >= 300 }
-        modifier = { add = 10  has_trait = content }
+        modifier = { add = 20  stress_level >= 3 }
+        modifier = { add = 15  has_trait = content }
+        modifier = { add = 15  has_trait = zealous }
         modifier = { add = -15  has_trait = ambitious }
     }
 }
@@ -64,7 +84,14 @@ eotg_decision_overclock_regression = {
     picture = {
         reference = "gfx/interface/illustrations/decisions/eotg_decision_overclock_regression.dds"
     }
-    ai_check_interval = 120
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 12
+        duchy = 12
+        kingdom = 6
+        empire = 6
+        hegemony = 6
+    }
 
     is_shown = {
         eotg_is_aug_tier3 = yes
@@ -111,20 +138,41 @@ eotg_decision_overclock_regression = {
         }
         add_character_modifier = { modifier = eotg_mod_oc_regression_recovery  years = 5 }
         remove_character_flag = eotg_flag_aug_intervention_discount
+        # Balance spec §5.9: a masked congenital trait shows again
+        eotg_aug_unmask_congenital_effect = yes
         stress_impact = { base = medium_stress_impact_loss }
         custom_tooltip = eotg_decision_overclock_regression_tooltip
     }
 
-    # AI only regresses when it is hurting
+    # Balance spec §5.2: the AI steps back when it is hurting or the
+    # Countdown runs. The AI may read the band; the player never sees it.
     ai_potential = {
-        stress_level >= 2
+        eotg_is_aug_tier3 = yes
+        OR = {
+            stress_level >= 2
+            eotg_aug_has_countdown = yes
+            eotg_aug_pressure_storm = yes
+        }
     }
     ai_will_do = {
-        base = 3
-        modifier = { add = 20  stress >= 350 }
-        modifier = { add = 10  has_trait = content }
+        base = 0
+        modifier = {
+            add = 50
+            eotg_aug_has_countdown = yes
+            stress_level >= 2
+        }
+        modifier = {
+            add = 25
+            eotg_aug_has_countdown = yes
+            stress_level < 2
+        }
+        modifier = { add = 20  eotg_aug_pressure_storm = yes }
+        modifier = { add = 15  has_trait = content }
+        modifier = { add = 15  has_trait = craven }
+        modifier = { add = 10  has_character_flag = eotg_flag_aug_intervention_discount }
         modifier = { add = -20  has_trait = ambitious }
-        modifier = { add = -10  has_trait = brave }
+        modifier = { add = -15  has_trait = arrogant }
+        modifier = { add = -15  has_trait = stubborn }
     }
 }
 
@@ -133,7 +181,14 @@ eotg_decision_maintenance_protocol = {
     picture = {
         reference = "gfx/interface/illustrations/decisions/eotg_decision_maintenance_protocol.dds"
     }
-    ai_check_interval = 60
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 12
+        duchy = 12
+        kingdom = 12
+        empire = 12
+        hegemony = 12
+    }
 
     is_shown = {
         has_trait = eotg_cybernetics
@@ -168,16 +223,22 @@ eotg_decision_maintenance_protocol = {
         custom_tooltip = eotg_decision_maintenance_protocol_tooltip
     }
 
+    # Balance spec §5.2
     ai_potential = {
-        OR = {
-            eotg_is_aug_tier3 = yes
-            gold >= medium_gold_value
-        }
+        has_trait = eotg_cybernetics
+        NOT = { has_character_flag = eotg_flag_maintenance_cooldown }
     }
     ai_will_do = {
         base = 10
-        modifier = { add = 30  eotg_is_aug_tier3 = yes }
-        modifier = { add = 20  stress >= 200 }
+        modifier = { add = 50  eotg_is_aug_tier3 = yes }
+        modifier = { add = 30  eotg_aug_has_countdown = yes }
+        modifier = {
+            add = 20
+            eotg_is_aug_tier2 = yes
+            NOT = { has_character_modifier = eotg_mod_implant_calibrated }
+        }
+        modifier = { add = 10  has_trait = diligent }
+        modifier = { add = -10  has_trait = lazy }
         modifier = { add = -10  has_trait = callous }
     }
 }
@@ -204,7 +265,16 @@ eotg_decision_seek_augmentation = {
     picture = {
         reference = "gfx/interface/illustrations/decisions/decision_smith.dds"
     }
-    ai_check_interval = 120
+    # County 0 on purpose (balance spec §5.2/§5.3): counts are offered, they
+    # never seek.
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 36
+        kingdom = 24
+        empire = 24
+        hegemony = 24
+    }
 
     is_shown = {
         eotg_is_augmented_any = no
@@ -229,9 +299,10 @@ eotg_decision_seek_augmentation = {
     }
     ai_will_do = {
         base = 10
-        modifier = { add = 20  has_trait = ambitious }
-        modifier = { add = 20  has_trait = cynical }
-        modifier = { add = -50  has_trait = zealous }
+        modifier = { add = 15  has_trait = ambitious }
+        modifier = { add = 10  has_trait = cynical }
+        modifier = { add = 10  prowess <= 6 }
+        modifier = { factor = 0  has_trait = zealous }
     }
 }
 
@@ -242,7 +313,14 @@ eotg_decision_remove_implants = {
     picture = {
         reference = "gfx/interface/illustrations/decisions/eotg_decision_partial_removal.dds"
     }
-    ai_check_interval = 120
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 36
+        duchy = 24
+        kingdom = 24
+        empire = 24
+        hegemony = 24
+    }
 
     is_shown = {
         eotg_is_aug_tier1 = yes
@@ -263,13 +341,19 @@ eotg_decision_remove_implants = {
         custom_tooltip = eotg_decision_remove_implants_tooltip
     }
 
+    # Balance spec §5.2
     ai_potential = {
-        stress_level >= 2
+        eotg_is_aug_tier1 = yes
+        OR = {
+            stress_level >= 2
+            has_trait = zealous
+        }
     }
     ai_will_do = {
         base = 5
         modifier = { add = 20  has_trait = content }
         modifier = { add = 20  has_trait = zealous }
+        modifier = { add = 15  stress_level >= 3 }
         modifier = { add = -15  has_trait = ambitious }
     }
 }
@@ -280,7 +364,14 @@ eotg_decision_consult_physician = {
     picture = {
         reference = "gfx/interface/illustrations/decisions/decision_physician.dds"
     }
-    ai_check_interval = 60
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 12
+        duchy = 12
+        kingdom = 12
+        empire = 12
+        hegemony = 12
+    }
 
     is_shown = {
         has_trait = eotg_cybernetics
@@ -317,9 +408,15 @@ eotg_decision_consult_physician = {
         custom_tooltip = eotg_decision_consult_physician_tooltip
     }
 
+    # Balance spec §5.2: potential as is_shown
+    ai_potential = {
+        has_trait = eotg_cybernetics
+        eotg_has_physician_access = yes
+    }
     ai_will_do = {
         base = 10
-        modifier = { add = 30  eotg_is_aug_tier3 = yes }
+        modifier = { add = 50  eotg_is_aug_tier3 = yes }
+        modifier = { add = 20  eotg_aug_has_countdown = yes }
         modifier = { add = 10  has_trait = diligent }
         modifier = { add = -10  has_trait = lazy }
     }
@@ -331,7 +428,14 @@ eotg_decision_augment_retainer = {
     picture = {
         reference = "gfx/interface/illustrations/decisions/decision_knight_kneeling.dds"
     }
-    ai_check_interval = 120
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 36
+        duchy = 24
+        kingdom = 12
+        empire = 12
+        hegemony = 12
+    }
 
     is_shown = {
         has_trait = eotg_cybernetics
@@ -353,10 +457,16 @@ eotg_decision_augment_retainer = {
         trigger_event = eotg_aug_init.020
     }
 
+    # Balance spec §5.2
+    ai_potential = {
+        has_trait = eotg_cybernetics
+        any_knight = { eotg_aug_retainer_candidate = yes }
+    }
     ai_will_do = {
-        base = 5
+        base = 10
         modifier = { add = 15  has_trait = ambitious }
         modifier = { add = 10  has_trait = callous }
+        modifier = { add = 10  is_at_war = yes }
         modifier = { add = -10  has_trait = compassionate }
     }
 }
@@ -383,7 +493,14 @@ eotg_decision_aug_restraints = {
     picture = {
         reference = "gfx/interface/illustrations/decisions/decision_prison.dds"
     }
-    ai_check_interval = 120
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 12
+        duchy = 12
+        kingdom = 12
+        empire = 12
+        hegemony = 12
+    }
 
     is_shown = {
         has_trait = eotg_neurofractured
@@ -403,17 +520,23 @@ eotg_decision_aug_restraints = {
         custom_tooltip = eotg_decision_aug_restraints_tooltip
     }
 
+    # Balance spec §5.2: drops the compassionate/content-only gate
     ai_potential = {
+        has_trait = eotg_neurofractured
+        NOT = { has_character_flag = eotg_flag_aug_restrained }
         OR = {
-            has_trait = compassionate
-            has_trait = content
+            stress_level >= 1
+            eotg_aug_pressure_flicker = no
         }
     }
     ai_will_do = {
-        base = 10
+        base = 15
+        modifier = { add = 25  eotg_aug_pressure_storm = yes }
         modifier = { add = 20  has_trait = compassionate }
         modifier = { add = 10  has_trait = humble }
+        modifier = { add = 15  has_active_diarchy = yes }
         modifier = { add = -10  has_trait = arrogant }
+        modifier = { add = -20  has_trait = sadistic }
     }
 }
 
@@ -423,7 +546,14 @@ eotg_decision_aug_sedation = {
     picture = {
         reference = "gfx/interface/illustrations/decisions/decision_physician.dds"
     }
-    ai_check_interval = 120
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 12
+        duchy = 12
+        kingdom = 12
+        empire = 12
+        hegemony = 12
+    }
 
     is_shown = {
         has_trait = eotg_neurofractured
@@ -436,21 +566,43 @@ eotg_decision_aug_sedation = {
         }
     }
 
-    # Drift -6 while the flag holds (on_action).
+    # Drift relief while the flag holds (on_action, through
+    # eotg_aug_nf_drift_value). Balance spec §5.5: tolerance. The course
+    # counter goes up first, so eotg_aug_sedation_relief_value reads this
+    # course: -6, then -3, then 0. Counter shape: vanilla
+    # increment_variable_effect (common/scripted_effects/
+    # 00_debug_and_shortcut_effects.txt:6), as commission_artifact_decision
+    # (00_artifact_decisions.txt:609).
     effect = {
+        hidden_effect = {
+            increment_variable_effect = { VAR = eotg_aug_sedation_courses  VAL = 1 }
+        }
         add_character_flag = { flag = eotg_flag_aug_sedated  years = 5 }
         add_character_modifier = { modifier = eotg_mod_aug_sedated  years = 5 }
         custom_tooltip = eotg_decision_aug_sedation_tooltip
     }
 
+    # Balance spec §5.2
     ai_potential = {
-        stress_level >= 2
+        has_trait = eotg_neurofractured
+        NOT = { has_character_flag = eotg_flag_aug_sedated }
+        OR = {
+            stress_level >= 1
+            eotg_aug_pressure_flicker = no
+        }
     }
     ai_will_do = {
-        base = 15
+        base = 20
+        modifier = { add = 25  eotg_aug_pressure_storm = yes }
         modifier = { add = 15  has_trait = craven }
         modifier = { add = 10  has_trait = content }
         modifier = { add = -10  has_trait = stubborn }
+        # The AI respects tolerance (§5.5)
+        modifier = {
+            factor = 0.5
+            has_variable = eotg_aug_sedation_courses
+            var:eotg_aug_sedation_courses >= 2
+        }
     }
 }
 
@@ -460,7 +612,14 @@ eotg_decision_aug_appoint_warden = {
     picture = {
         reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
     }
-    ai_check_interval = 120
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 12
+        duchy = 12
+        kingdom = 12
+        empire = 12
+        hegemony = 12
+    }
 
     is_shown = {
         has_trait = eotg_neurofractured
@@ -479,14 +638,31 @@ eotg_decision_aug_appoint_warden = {
         trigger_event = eotg_aug_end.020
     }
 
+    # Balance spec §5.2: potential as is_shown, plus a candidate
+    ai_potential = {
+        has_trait = eotg_neurofractured
+        has_active_diarchy = no
+        basic_eligible_for_diarchy_trigger = yes
+        eotg_aug_has_warden_candidate = { RULER = root }
+    }
     ai_will_do = {
         base = 5
+        modifier = { add = 30  eotg_aug_pressure_storm = yes }
         modifier = {
             add = 20
             primary_heir ?= { is_adult = yes }
         }
+        # The Heir's Arc has reached the Warning (stage 2+)
+        modifier = {
+            add = 15
+            any_owned_story = {
+                story_type = eotg_story_aug_heir_arc
+                var:eotg_stage >= 2
+            }
+        }
         modifier = { add = 10  has_trait = humble }
         modifier = { add = -10  has_trait = ambitious }
+        modifier = { add = -20  has_trait = paranoid }
     }
 }
 
@@ -496,7 +672,14 @@ eotg_decision_aug_embrace_cascade = {
     picture = {
         reference = "gfx/interface/illustrations/decisions/decision_misc.dds"
     }
-    ai_check_interval = 120
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 24
+        duchy = 24
+        kingdom = 24
+        empire = 24
+        hegemony = 24
+    }
 
     # The voice reached "we" (thread T1), or the Last Lucid Moment embraced it
     is_shown = {
@@ -511,16 +694,37 @@ eotg_decision_aug_embrace_cascade = {
         }
     }
 
+    # QA round 2: decision-owned cooldown (index §1 rule 5), the vanilla
+    # block (common/decisions/00_cultural_tradition_decisions.txt:141).
+    cooldown = { years = 5 }
+
     effect = {
         custom_tooltip = eotg_decision_aug_embrace_cascade_tooltip
         trigger_event = eotg_aug_end.009
     }
 
+    # Balance spec §5.2: potential as is_shown
+    ai_potential = {
+        has_trait = eotg_neurofractured
+        eotg_aug_pressure_storm = yes
+        OR = {
+            AND = {
+                has_variable = eotg_aug_voice
+                var:eotg_aug_voice >= 3
+            }
+            has_character_flag = eotg_flag_aug_may_embrace
+        }
+    }
     ai_will_do = {
-        base = 5
-        modifier = { add = 30  has_trait = ambitious }
-        modifier = { add = 20  has_trait = callous }
-        modifier = { add = -50  has_trait = compassionate }
+        base = 3
+        modifier = { add = 15  has_trait = ambitious }
+        modifier = { add = 10  has_trait = callous }
+        modifier = {
+            add = 10
+            has_variable = eotg_aug_voice
+            var:eotg_aug_voice >= 4
+        }
+        modifier = { factor = 0  has_trait = compassionate }
     }
 }
 
@@ -530,7 +734,14 @@ eotg_decision_aug_excision = {
     picture = {
         reference = "gfx/interface/illustrations/decisions/decision_physician.dds"
     }
-    ai_check_interval = 120
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 24
+        duchy = 24
+        kingdom = 24
+        empire = 24
+        hegemony = 24
+    }
 
     is_shown = {
         OR = {
@@ -552,13 +763,151 @@ eotg_decision_aug_excision = {
         trigger_event = eotg_aug_end.001
     }
 
+    # Balance spec §5.2
     ai_potential = {
-        stress_level >= 3
+        eotg_aug_can_afford_excision = yes
+        OR = {
+            has_trait = eotg_neurofractured
+            AND = {
+                eotg_is_aug_tier3 = yes
+                eotg_aug_has_countdown = yes
+            }
+        }
+        stress_level >= 2
     }
     ai_will_do = {
-        base = 3
+        base = 5
+        modifier = {
+            add = 25
+            has_trait = eotg_neurofractured
+            eotg_aug_pressure_storm = yes
+        }
+        modifier = { add = 15  has_character_flag = eotg_flag_aug_promised_treatment }
+        modifier = { add = 15  eotg_has_physician_access = yes }
         modifier = { add = 10  has_trait = zealous }
         modifier = { add = 10  has_trait = content }
-        modifier = { add = -10  has_trait = ambitious }
+        modifier = { add = -15  has_trait = ambitious }
+        modifier = { add = -10  has_trait = craven }
+    }
+}
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Balance amendment, Part B1 (docs/specs/cybernetics_v2_balance.md §5.1)
+#
+# eotg_decision_aug_pursue_next_stage — the player (and AI) asks for the next
+#   stage instead of waiting for the random Upgrade offer. Fires the existing
+#   progression events; it never sets XP (index §1 rule 2: XP only moves in
+#   eotg_aug_set_integration_effect, reached from tier1.022 / tier2.003).
+#
+# Vanilla shape: common/decisions/00_lifestyle_decisions.txt:342
+# (commission_epic_decision: a gold-gated decision that fires an event
+# chain, with a cooldown, ai_check_interval_by_tier and a short_term_gold
+# ai_potential); the custom_tooltip trigger wrapper as :527; the RHS script
+# value in a trigger as 10_religious_decisions.txt:3054.
+# No cost: the fired event charges, as eotg_decision_seek_augmentation's hub
+# does (a decision cost would charge twice). The gold checks in is_valid
+# mirror the events' paying options (eotg_aug_can_afford_upgrade = tier1.002.a;
+# major_gold_value = tier2.003.a).
+# Cooldown authority: the decision's own cooldown block (index §1 rule 5).
+# The 5-year eotg_flag_aug_settling is a world-state gate (minimum time at
+# tier, HQ1), read here and in eotg_can_progress_to_*, never by an event.
+# eotg_flag_aug_sought_upgrade (60 days) is read by tier1.002 / tier2.003
+# (desc_sought, ai_chance) and cleared by tier1.022 and tier2.003.
+# PLACEHOLDER art: vanilla decision_smith.dds, as Seek.
+# ═════════════════════════════════════════════════════════════════════════════
+
+eotg_decision_aug_pursue_next_stage = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_smith.dds"
+    }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 24
+        duchy = 12
+        kingdom = 12
+        empire = 12
+        hegemony = 12
+    }
+
+    # The population the yearly pulse serves (count tier and above)
+    is_shown = {
+        OR = {
+            eotg_is_aug_tier1 = yes
+            eotg_is_aug_tier2 = yes
+        }
+        highest_held_title_tier >= tier_county
+    }
+
+    is_valid_showing_failures_only = {
+        is_available_adult = yes
+    }
+
+    is_valid = {
+        custom_tooltip = {
+            text = eotg_decision_aug_pursue_next_stage_settling_tt
+            NOT = { has_character_flag = eotg_flag_aug_settling }
+        }
+        custom_tooltip = {
+            text = eotg_decision_aug_pursue_next_stage_suppressed_tt
+            NOT = { has_character_flag = eotg_flag_suppress_progression }
+        }
+        trigger_if = {
+            limit = { eotg_is_aug_tier1 = yes }
+            capital_county ?= { development_level >= eotg_aug_dev_gate_enhanced }
+            eotg_aug_can_afford_upgrade = yes
+        }
+        trigger_else = {
+            capital_county ?= { development_level >= eotg_aug_dev_gate_overclocked }
+            gold >= major_gold_value
+        }
+    }
+
+    # Declining in the fired event must not be spammable
+    cooldown = { years = 2 }
+
+    effect = {
+        custom_tooltip = eotg_decision_aug_pursue_next_stage_tooltip
+        add_character_flag = { flag = eotg_flag_aug_sought_upgrade  days = 60 }
+        if = {
+            limit = { eotg_is_aug_tier1 = yes }
+            trigger_event = eotg_aug_tier1.002
+        }
+        else = {
+            trigger_event = eotg_aug_tier2.003
+        }
+    }
+
+    # Cheapest tests first (balance spec §5.2): a plain has_trait rejects
+    # every unaugmented AI before any XP, war, stress or gold check runs.
+    ai_potential = {
+        has_trait = eotg_cybernetics
+        NOT = { has_trait = zealous }
+        NOT = { has_trait = content }
+        is_at_war = no
+        stress_level < 2
+        trigger_if = {
+            limit = { eotg_is_aug_tier1 = yes }
+            short_term_gold >= medium_gold_value
+        }
+        trigger_else = {
+            short_term_gold >= major_gold_value
+        }
+    }
+    ai_will_do = {
+        base = 15
+        modifier = { add = 20  has_trait = ambitious }
+        modifier = { add = 10  has_trait = brave }
+        modifier = { add = 10  has_trait = arrogant }
+        modifier = { add = 10  has_trait = cynical }
+        modifier = { add = -10  has_trait = craven }
+        modifier = { add = -10  has_trait = paranoid }
+        # AI prudence at Enhanced: the AI may read the band; the player never
+        # sees it (hidden-risk rule).
+        modifier = {
+            factor = 0.5
+            eotg_is_aug_tier2 = yes
+            eotg_aug_pressure_flicker = no
+        }
     }
 }

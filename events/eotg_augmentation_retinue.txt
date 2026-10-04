@@ -241,10 +241,14 @@ eotg_aug_retinue.002 = {
         }
     }
 
-    # "The stronger one."
+    # "The stronger one." Coordinator addition (QA round 2): gated on the
+    # candidate existing. c "Neither." stays the ungated option.
     option = {
         name = eotg_aug_retinue.002.b
-        trigger = { gold >= minor_gold_value }
+        trigger = {
+            exists = scope:eotg_cand_a
+            gold >= minor_gold_value
+        }
         remove_short_term_gold = minor_gold_value
         scope:eotg_cand_a = { eotg_aug_retinue_install_effect = yes }
         scope:eotg_cand_b ?= {
@@ -260,7 +264,7 @@ eotg_aug_retinue.002 = {
     # "Neither."
     option = {
         name = eotg_aug_retinue.002.c
-        scope:eotg_cand_a = {
+        scope:eotg_cand_a ?= {
             add_opinion = { modifier = eotg_opinion_aug_passed_over  target = root  years = 5 }
         }
         scope:eotg_cand_b ?= {
@@ -343,7 +347,19 @@ eotg_aug_retinue.002 = {
 eotg_aug_retinue.003 = {
     type = character_event
     title = eotg_aug_retinue.003.t
-    desc = eotg_aug_retinue.003.desc
+    # Balance spec §5.8: an Overclocked owner at voice 2+ notices the model
+    # has started counting them (thread T1).
+    desc = {
+        desc = eotg_aug_retinue.003.desc
+        triggered_desc = {
+            trigger = {
+                eotg_is_aug_tier3 = yes
+                has_variable = eotg_aug_voice
+                var:eotg_aug_voice >= 2
+            }
+            desc = eotg_aug_retinue.003.desc_voice
+        }
+    }
     theme = martial
 
     trigger = { eotg_aug_has_retinue = yes }
@@ -445,6 +461,28 @@ eotg_aug_retinue.003 = {
         }
     }
 
+    # (Overclocked) "Lock their timing to mine." Balance spec §5.8: the
+    # owner's hardware drives the ranks. Each retinue knight risk +5, the
+    # owner risk +5 and the martial lesson. No trait icon: the gate is the
+    # tier.
+    option = {
+        name = eotg_aug_retinue.003.f
+        trigger = { eotg_is_aug_tier3 = yes }
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_martial  years = 5 }
+        every_knight = {
+            limit = { eotg_aug_is_retinue_knight = yes }
+            eotg_add_fracture_risk = { AMOUNT = 5 }
+        }
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        eotg_aug_stress_embrace_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 10  has_trait = callous }
+            modifier = { add = -20  has_trait = compassionate }
+        }
+    }
+
     after = {
         hidden_effect = {
             scope:eotg_retinue_story = { set_variable = { name = eotg_phase  value = 4 } }
@@ -455,8 +493,8 @@ eotg_aug_retinue.003 = {
 
 # ── eotg_aug_retinue.004 ──────────────────────────────────────────────────────
 # The Unaugmented Resent. Every unaugmented knight gets passed_over in
-# immediate. a augments up to three of them (eotg_aug_retinue_pay_all_effect,
-# minor_gold_value each). e sends the most resentful one who is a courtier
+# immediate. a augments up to three of them (minor_gold_value each, charged
+# per install, QA round 2 H4). e sends the most resentful one who is a courtier
 # to the pool (move_to_pool, vanilla hold_court_events_general.txt:508;
 # "most resentful" by the vanilla ordered_vassal shape of tier3.006).
 # Caller: eotg_story_aug_retinue (phase 4; the story checks one exists).
@@ -464,7 +502,18 @@ eotg_aug_retinue.003 = {
 eotg_aug_retinue.004 = {
     type = character_event
     title = eotg_aug_retinue.004.t
-    desc = eotg_aug_retinue.004.desc
+    # Balance spec §5.8: as retinue.003.
+    desc = {
+        desc = eotg_aug_retinue.004.desc
+        triggered_desc = {
+            trigger = {
+                eotg_is_aug_tier3 = yes
+                has_variable = eotg_aug_voice
+                var:eotg_aug_voice >= 2
+            }
+            desc = eotg_aug_retinue.004.desc_voice
+        }
+    }
     theme = martial_chivalry_focus
 
     trigger = {
@@ -519,11 +568,17 @@ eotg_aug_retinue.004 = {
                 multiply = minor_gold_value
             }
         }
-        eotg_aug_retinue_pay_all_effect = yes
+        # QA round 2 H4: max is an inclusive index (0-2 = up to three
+        # knights) and check_range_bounds = no lets one or two run without a
+        # range error (vanilla feast_tsagaan_sar_events.txt:1215-1217). Gold
+        # is charged per knight actually installed, inside the iterator, so
+        # it can never be paid for an install that was skipped.
         ordered_knight = {
             limit = { eotg_aug_retainer_candidate = yes }
             order_by = prowess
-            max = 3
+            max = 2
+            check_range_bounds = no
+            root = { remove_short_term_gold = minor_gold_value }
             remove_opinion = { target = root  modifier = eotg_opinion_aug_passed_over }
             eotg_aug_retinue_install_effect = yes
         }
@@ -629,7 +684,17 @@ eotg_aug_retinue.004 = {
 eotg_aug_retinue.005 = {
     type = character_event
     title = eotg_aug_retinue.005.t
-    desc = eotg_aug_retinue.005.desc
+    # Balance spec §5.8: a Neurofractured owner (the story's short-circuit)
+    # sees desc_fractured in place of the base desc.
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { has_trait = eotg_neurofractured }
+                desc = eotg_aug_retinue.005.desc_fractured
+            }
+            desc = eotg_aug_retinue.005.desc
+        }
+    }
     theme = martial
 
     trigger = { eotg_aug_has_retinue = yes }
@@ -723,8 +788,13 @@ eotg_aug_retinue.005 = {
         }
     }
 
+    # QA round 2 H2: the Program runs once per ruler. The permanent
+    # eotg_flag_aug_retinue_done (a state flag, not a cooldown) is read by
+    # every start path: eotg_aug_start_retinue_effect, the Arms Race entry
+    # in eotg_on_yearly_aug_initiation_check, and eotg_aug_init.019 / .020.
     after = {
         hidden_effect = {
+            add_character_flag = eotg_flag_aug_retinue_done
             scope:eotg_retinue_story ?= { end_story = yes }
         }
     }

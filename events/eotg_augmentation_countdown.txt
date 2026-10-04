@@ -2,9 +2,9 @@
 # The Countdown (O-13): docs/specs/cybernetics_v2_phase5.md §1.
 #
 # eotg_aug_countdown.001 — Minor Anomalies        (risk 50-59)
-# eotg_aug_countdown.002 — Lost Time              (60-69)
-# eotg_aug_countdown.003 — Contradictory Memories (70-74)
-# eotg_aug_countdown.004 — Violence               (75+)
+# eotg_aug_countdown.002 — Lost Time              (60-67; balance spec §5.10)
+# eotg_aug_countdown.003 — Contradictory Memories (68-76)
+# eotg_aug_countdown.004 — Violence               (77+)
 # eotg_aug_countdown.005 — No One Asks Any More   (after .004, Intervention refused)
 # eotg_aug_countdown.006 — The Quiet              (the countdown stops)
 #
@@ -120,9 +120,9 @@ eotg_aug_countdown.001 = {
 # you did not.
 # Caller: eotg_story_aug_countdown (stage 2).
 # d [paranoid]: the suspect comes from the victim picker (family factor 0.05,
-# Overclocked) and is put under house arrest (vanilla imprison type =
-# house_arrest, events/court_events/court_events_general.txt:12361), as
-# tier2.015.d.
+# Overclocked) and is arrested through vanilla imprison_character_effect
+# (00_prison_effects.txt:1644; QA round 2 M5, as tier2.015.d): house arrest
+# for family, else the dungeon, with tyranny and the family's opinion.
 
 eotg_aug_countdown.002 = {
     type = character_event
@@ -201,9 +201,12 @@ eotg_aug_countdown.002 = {
             exists = scope:eotg_suspect
         }
         trait = paranoid
-        imprison = {
-            target = scope:eotg_suspect
-            type = house_arrest
+        if = {
+            limit = { scope:eotg_suspect = { is_imprisoned = no } }
+            imprison_character_effect = {
+                TARGET = scope:eotg_suspect
+                IMPRISONER = root
+            }
         }
         scope:eotg_suspect = {
             add_character_flag = { flag = eotg_flag_aug_breach_victim  days = 30 }
@@ -558,12 +561,20 @@ eotg_aug_countdown.005 = {
 # (eotg_aug_end_countdown_effect).
 # Callers: eotg_story_aug_countdown (branches 1 and 2),
 # eotg_decision_overclock_regression (halved risk < 50).
+# QA round 2 M13: never to someone who cascaded (a landless Overclocked
+# ex-ruler's non-ruler cascade; the story's "no longer Overclocked" branch
+# could otherwise fire The Quiet after the break). World-state guard only.
 
 eotg_aug_countdown.006 = {
     type = character_event
     title = eotg_aug_countdown.006.t
     desc = eotg_aug_countdown.006.desc
     theme = mental_health
+
+    trigger = {
+        NOT = { has_trait = eotg_neurofractured }
+        NOT = { has_trait = eotg_total_integration }
+    }
 
     left_portrait = {
         character = root

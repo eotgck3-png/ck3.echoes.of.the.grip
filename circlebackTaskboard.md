@@ -88,7 +88,15 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **What:** let the game run 50 years in observer mode on the temporary map. Count augmented rulers by tier, how many reach Overclocked and Neurofractured, and how many die in a cascade. This settles round 2's top design issues (progression speed, AI uptake, everyone stuck at Augmented) before any pacing number is tuned.
 - **Blocked by:** B-DESCRIPTOR, B-TEMPMAP
 - **Owner:** human → eotg-architect
-- **Next step:** run it. Read the counts off the character finder by trait, or have the orchestrator add a debug count. Hand the numbers to the architect against `docs/specs/cybernetics_v2_balance.md`.
+- **Next step:** a logging sub-mod is built for this (2026-10-04), kept outside the repo in this session's scratchpad: `eotg_observer_submod/`. Follow its `README.md`:
+  1. Create the main-mod launcher.
+  2. Run `tools/build_observer.py`.
+  3. Copy it into the CK3 mod folder.
+  4. Launch with `-debug_mode`.
+  5. Type `observe`, then run 50 years at speed 5. Do 3 seeds.
+  6. Run `tools/parse_observer_log.py` on each `debug.log`.
+
+  Judge the results against HQ2: 25–40% of AI count+ rulers augmented by year 30, and at least 15% of those at Overclocked or beyond. Hand the report to the architect. Ask the orchestrator to move the sub-mod somewhere permanent first if the scratchpad may be cleared.
 - **Refs:** `docs/qa/cybernetics_qa_round2.md` §4.3, §6.1
 
 ### CB-21: QA round 2 in-game checks
@@ -103,12 +111,6 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Blocked by:** B-DESCRIPTOR, B-TEMPMAP
 - **Owner:** human
 - **Next step:** run these alongside CB-01.
-
-### CB-22: Balance amendment (QA round 2 design issues)
-- **Status:** in progress (2026-10-04)
-- **What:** progression speed, the AI decision layer, AI throttles and an ongoing Augmented cost, Neurofractured agency, the Seamless and Sedation balance, outcome rolls, thread links, coping and congenital hooks, and the non-ruler rate.
-- **Owner:** eotg-architect (writing `docs/specs/cybernetics_v2_balance.md`) → human for any open questions → scripter
-- **Next step:** review the spec when it lands. Anything that adds new events needs your approval.
 
 ### CB-23: Augmented landed barons get no yearly content
 - **Status:** parked (2026-10-04)
@@ -249,18 +251,11 @@ These are shared conditions. Clearing one unblocks every item that names it.
 
 ---
 
-### CB-25: Loc broken by the scope rename (uncommitted round-2 work)
-- **Status:** ready, but wait for the round-2 session to finish (2026-10-04)
-- **What:** the uncommitted round-2 work renamed `aug_spouse` to `eotg_aug_spouse` and `other_machine` to `eotg_other_machine` in script, but not in loc. Ten strings would render broken: loc :1156, :1165–1167, :1272–1273, :1277–1278, :1281–1282. New script also references three keys that have no loc: `eotg_fracture.011.f`, `eotg_fracture.020.d` and `eotg_aug_tier3.014.a.tt`. Tiger reports them as `unknown datafunction` and missing loc.
-- **Owner:** eotg-localizer, or whichever session owns the round-2 change set
-- **Next step:** fix this before the round-2 work is committed. Don't edit the loc while that session is mid-edit.
-- **Refs:** eotg-qa verification of CB-24, 2026-10-04
-
 ### CB-26: Architect: ratify or reject the conformance deviations
 - **Status:** ready (2026-10-04)
 - **What:** the conformance report, `docs/qa/cybernetics_spec_conformance_cloud.md`, covers M1–M6, M9–M12, L1, L4, L6–L12, L14–L24 and S1–S19. Most are commented "final QA" or "orchestrator ruling" deviations that were never written back into the specs. Also: titles retitled in 5a97355 (init.002, init.005, tier2.005, fracture.024) now drift from the spec names.
 - **Owner:** eotg-architect
-- **Next step:** one pass, after CB-22's balance spec settles, because they touch the same files. Read §6 first: L3 is moot, and the line numbers are stale.
+- **Next step:** one pass. CB-22 has settled (2026-10-04), so this can be dispatched as soon as the round-2 and balance work is committed. Until then the two would touch the same files. Read §6 first: L3 is moot, and the line numbers are stale.
 
 ### CB-27: Scripter: conformance bug fixes
 - **Status:** blocked on CB-26 for M1 and M2 (2026-10-04); M7 and M8 are ready once the round-2 edits land
@@ -297,6 +292,8 @@ These are shared conditions. Clearing one unblocks every item that names it.
 
 | ID | Item | Resolved | Date |
 |---|---|---|---|
+| CB-25 | Loc broken by the scope rename | Fixed by the localizer in the round-2 pass. The 10 strings now use `eotg_aug_spouse` / `eotg_other_machine`, and the 3 missing keys (`eotg_fracture.011.f`, `.020.d`, `eotg_aug_tier3.014.a.tt`) were added. QA confirmed 0 missing loc and no `unknown datafunction` | 2026-10-04 |
+| CB-22 | Balance amendment, from QA round 2's design issues | Built and QA-passed: Parts B1 and B2 (`docs/specs/cybernetics_v2_balance.md`) and the round-2 bug and text fixes. Further pacing tuning waits for CB-20, and then touches only the script values, the AI weights and `ai_will_do` | 2026-10-04 |
 | — | Q8: build The Sickly Child (child augmentation) | Human accepted all v2 recommendations; lore-keeper confirmed the drafted tone | 2026-10-03 |
 | — | Cybernetics trait icons, 3 decision pictures, 4 modifier icons | Delivered and converted to vanilla formats | 2026-10-03 |
 | CB-16 | Superseded notes on the 4 pre-v2 cybernetics QA docs | Done by cloud session (CB-24) | 2026-10-04 |

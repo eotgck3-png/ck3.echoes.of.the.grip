@@ -1,0 +1,147 @@
+﻿# -- eotg_augmentation_values.txt ---------------------------------------------
+# Script values for the Cybernetic Augmentation system
+# (docs/specs/cybernetics_v2_balance.md §3.1, Part B1).
+#
+# Vanilla folder (game/common/script_values/), no replace_path. Shapes copied
+# from vanilla common/script_values/00_basic_values.txt: a `value =` block
+# and a conditional value clamped by a trailing `min =` (:2007-2015, :1828).
+#
+# These are the observer run's tuning levers (balance spec §9.2, "Tuning rule
+# after the run"): retune here, not in the triggers or on_actions.
+#
+# Part B2 added eotg_aug_override_chance (§5.4) and
+# eotg_aug_nr_progress_chance (§5.7).
+# -----------------------------------------------------------------------------
+
+# -- §5.1 Development gates (provisional; §9.2 item 8 decides them) ----------
+# Capital development needed to progress. The initiation gate stays a literal
+# 10 in eotg_can_receive_augmented. Vanilla history/titles: 16.3% of
+# development entries reach 20, 1.3% reach 35 (the old Overclocked gate).
+# Readers: eotg_can_progress_to_enhanced / _overclocked,
+# eotg_decision_aug_pursue_next_stage (is_valid).
+eotg_aug_dev_gate_enhanced = {
+    value = 15
+}
+eotg_aug_dev_gate_overclocked = {
+    value = 20
+}
+
+# -- §5.5(a) Neurofractured drift --------------------------------------------
+# Yearly risk drift for a Neurofractured ruler (cybernetics_v2 B1 rows kept:
+# 8, +4 per stress level). Treatments slow it but never pause it: the floor is
+# 2 a year. Hidden: read only by eotg_on_yearly_aug_neurofractured_check
+# (step 1), never shown. Scope: the ruler.
+eotg_aug_nf_drift_value = {
+    value = 8
+    if = {
+        limit = { stress_level >= 3 }
+        add = 12
+    }
+    else_if = {
+        limit = { stress_level = 2 }
+        add = 8
+    }
+    else_if = {
+        limit = { stress_level = 1 }
+        add = 4
+    }
+    if = {
+        limit = { has_character_flag = eotg_flag_aug_sedated }
+        add = eotg_aug_sedation_relief_value
+    }
+    if = {
+        limit = { has_character_flag = eotg_flag_aug_restrained }
+        add = -4
+    }
+    min = 2
+}
+
+# Sedation tolerance: each course works less well than the last. The course
+# counter (eotg_aug_sedation_courses) is incremented by
+# eotg_decision_aug_sedation before the flag is set, so the running course is
+# 1, 2, 3... A ruler sedated before the counter existed counts as course 1.
+# -6 on the first course, -3 on the second, 0 from the third on.
+eotg_aug_sedation_relief_value = {
+    value = 0
+    if = {
+        limit = {
+            OR = {
+                NOT = { has_variable = eotg_aug_sedation_courses }
+                var:eotg_aug_sedation_courses <= 1
+            }
+        }
+        add = -6
+    }
+    else_if = {
+        limit = { var:eotg_aug_sedation_courses = 2 }
+        add = -3
+    }
+}
+
+# -- §5.4 Neurofractured hidden overrides -------------------------------------
+# The % chance that a calm choice in a Fracture- or Storm-band event is
+# replaced by the harsher order (the converted options of fracture.006, .016,
+# .019, .023, .024, .025). Fracture 25, Storm 40; +15 once access was granted
+# (voice 4, fracture.017.a); -10 under Sedation. Clamped 0-60. Flicker stays
+# at 0 whatever the voice: Flicker lies (the misleading descs), it does not
+# seize. Hidden: read only as `random = { chance = ... }` inside
+# hidden_effect (vanilla script-value chance: events/activities/hunt_activity/
+# hunt_events.txt:4196). Scope: the Neurofractured ruler.
+eotg_aug_override_chance = {
+    value = 0
+    if = {
+        limit = { eotg_aug_pressure_flicker = no }
+        if = {
+            limit = { eotg_aug_pressure_storm = yes }
+            add = 40
+        }
+        else = {
+            add = 25
+        }
+        if = {
+            limit = {
+                has_variable = eotg_aug_voice
+                var:eotg_aug_voice >= 4
+            }
+            add = 15
+        }
+        if = {
+            limit = { has_character_flag = eotg_flag_aug_sedated }
+            add = -10
+        }
+    }
+    min = 0
+    max = 60
+}
+
+# -- §5.7 Non-ruler progression ----------------------------------------------
+# Yearly % chance that an augmented knight or courtier (tier 1 or 2) moves up
+# a stage, in eotg_on_yearly_aug_nonruler_check step 2. Base 10; Iron Retinue
+# knight +5, +5 more with the permanent flag (on the knight or the liege, as
+# Phase 6 words it); a child patient (init.014/.015) +5; plus the battle bonus
+# (eotg_aug_nr_battle_bonus, 0-10, +2 per battle from
+# eotg_on_combat_aug_knights, cleared on progression). Scope: the non-ruler.
+eotg_aug_nr_progress_chance = {
+    value = 10
+    if = {
+        limit = { eotg_aug_is_retinue_knight = yes }
+        add = 5
+        if = {
+            limit = {
+                OR = {
+                    has_character_flag = eotg_flag_aug_retinue_permanent
+                    employer ?= { has_character_flag = eotg_flag_aug_retinue_permanent }
+                }
+            }
+            add = 5
+        }
+    }
+    if = {
+        limit = { has_character_flag = eotg_flag_aug_child_patient }
+        add = 5
+    }
+    if = {
+        limit = { has_variable = eotg_aug_nr_battle_bonus }
+        add = var:eotg_aug_nr_battle_bonus
+    }
+}

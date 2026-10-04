@@ -179,7 +179,12 @@ eotg_aug_patron.002 = {
         }
         # Owner-side risk only while the owner still has hardware (final QA: the
         # debt outlives Remove Implants; nothing may recreate the variable).
+        # Balance spec §5.8: +8 at Overclocked (the firmware lever scales).
         if = {
+            limit = { eotg_is_aug_tier3 = yes }
+            eotg_add_fracture_risk = { AMOUNT = 8 }
+        }
+        else_if = {
             limit = { eotg_is_augmented_any = yes }
             eotg_add_fracture_risk = { AMOUNT = 5 }
         }
@@ -274,6 +279,26 @@ eotg_aug_patron.002 = {
         }
     }
 
+    # (Overclocked) "Let their technicians service the debt." Balance spec
+    # §5.8: universal at Overclocked. No gold; the demand counts as paid (the
+    # `after` block increments eotg_demand, as for every option here); their
+    # firmware work costs risk +10, hidden. No trait icon: the gate is the
+    # tier, not a trait.
+    option = {
+        name = eotg_aug_patron.002.f
+        trigger = { eotg_is_aug_tier3 = yes }
+        hidden_effect = {
+            eotg_add_fracture_risk = { AMOUNT = 10 }
+        }
+        eotg_aug_stress_embrace_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = greedy }
+            modifier = { add = 10  has_trait = ambitious }
+            modifier = { add = -20  has_trait = paranoid }
+        }
+    }
+
     after = {
         hidden_effect = { eotg_aug_patron_demand_effect = yes }
     }
@@ -289,7 +314,18 @@ eotg_aug_patron.002 = {
 eotg_aug_patron.003 = {
     type = character_event
     title = eotg_aug_patron.003.t
-    desc = eotg_aug_patron.003.desc
+    # Balance spec §5.8: at voice 2+ the model has already read the clause
+    # (thread T1; register rules, index §5).
+    desc = {
+        desc = eotg_aug_patron.003.desc
+        triggered_desc = {
+            trigger = {
+                has_variable = eotg_aug_voice
+                var:eotg_aug_voice >= 2
+            }
+            desc = eotg_aug_patron.003.desc_voice
+        }
+    }
     theme = stewardship_wealth_focus
 
     trigger = { eotg_aug_has_patron = yes }
@@ -321,7 +357,14 @@ eotg_aug_patron.003 = {
         # only (final QA). b and c stay open to an owner who left the system.
         trigger = { eotg_is_augmented_any = yes }
         add_character_modifier = { modifier = eotg_mod_aug_patron_clause }
-        eotg_add_fracture_risk = { AMOUNT = -5 }
+        # Balance spec §5.8: the firmware lever scales at Overclocked
+        if = {
+            limit = { eotg_is_aug_tier3 = yes }
+            eotg_add_fracture_risk = { AMOUNT = -8 }
+        }
+        else = {
+            eotg_add_fracture_risk = { AMOUNT = -5 }
+        }
         ai_chance = {
             base = 40
             modifier = { add = 20  has_trait = trusting }
@@ -360,7 +403,14 @@ eotg_aug_patron.003 = {
         }
         trait = diligent
         add_character_modifier = { modifier = eotg_mod_aug_patron_clause }
-        eotg_add_fracture_risk = { AMOUNT = -8 }
+        # Balance spec §5.8: the firmware lever scales at Overclocked
+        if = {
+            limit = { eotg_is_aug_tier3 = yes }
+            eotg_add_fracture_risk = { AMOUNT = -12 }
+        }
+        else = {
+            eotg_add_fracture_risk = { AMOUNT = -8 }
+        }
         stress_impact = {
             diligent = minor_stress_impact_loss
         }
@@ -380,7 +430,14 @@ eotg_aug_patron.003 = {
         }
         trait = paranoid
         eotg_aug_patron_grievance_effect = { AMOUNT = 1 }
-        eotg_add_fracture_risk = { AMOUNT = 5 }
+        # Balance spec §5.8: the firmware lever scales at Overclocked
+        if = {
+            limit = { eotg_is_aug_tier3 = yes }
+            eotg_add_fracture_risk = { AMOUNT = 8 }
+        }
+        else = {
+            eotg_add_fracture_risk = { AMOUNT = 5 }
+        }
         stress_impact = {
             paranoid = minor_stress_impact_loss
         }
@@ -717,13 +774,21 @@ eotg_aug_patron.005 = {
 # c/e (and d at 50%) betray: eotg_aug_patron_betray_effect (the envoy dies,
 # throttle 5 years, risk +25, an Overclocked owner's Countdown starts).
 # Buy-out: 2 x major_gold_value, scaled by the terms like every bill.
-# Caller: eotg_story_aug_patron (demand 4+ or grievance 3+).
+# Caller: eotg_story_aug_patron (demand 4+ or grievance 3+; balance spec
+# §5.8: also the Neurofractured write-off entry).
 
 eotg_aug_patron.006 = {
     type = character_event
     title = eotg_aug_patron.006.t
+    # Balance spec §5.8: the syndicate's write-off of a Neurofractured owner
+    # (eotg_flag_aug_patron_writeoff, 60 days, set by the story tick) comes
+    # first and replaces the other two.
     desc = {
         first_valid = {
+            triggered_desc = {
+                trigger = { has_character_flag = eotg_flag_aug_patron_writeoff }
+                desc = eotg_aug_patron.006.desc_writeoff
+            }
             triggered_desc = {
                 trigger = { scope:eotg_patron_story.var:eotg_grievance >= 3 }
                 desc = eotg_aug_patron.006.desc_betrayal
@@ -926,7 +991,12 @@ eotg_aug_patron.007 = {
         add_prestige = 50
         # Owner-side risk only while the owner still has hardware (final QA: the
         # debt outlives Remove Implants; nothing may recreate the variable).
+        # Balance spec §5.8: +8 at Overclocked (the firmware lever scales).
         if = {
+            limit = { eotg_is_aug_tier3 = yes }
+            eotg_add_fracture_risk = { AMOUNT = 8 }
+        }
+        else_if = {
             limit = { eotg_is_augmented_any = yes }
             eotg_add_fracture_risk = { AMOUNT = 5 }
         }

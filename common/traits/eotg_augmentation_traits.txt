@@ -22,14 +22,20 @@ eotg_cybernetics = {
     health = 0.5
     stress_gain_mult = 0.1
     attraction_opinion = -5
+    # Balance spec §5.3(c): firmware licenses and servicing, an ongoing,
+    # realm-relative cost (-3 / -5 / -8% across the track). Precedent:
+    # vanilla profligate, monthly_income_mult = -0.10
+    # (common/traits/00_traits.txt:5067).
+    monthly_income_mult = -0.03
     ai_honor = -1
     ai_energy = 2
     ai_zeal = -1
 
     track = {
         # Enhanced (deltas): totals prowess 4, health 0.5, stress 0.2,
-        # attraction -15, scheme +5, diplomacy -2, fertility -0.2
+        # attraction -15, scheme +5, diplomacy -2, fertility -0.2, income -5%
         50 = {
+            monthly_income_mult = -0.02
             prowess = 2
             stress_gain_mult = 0.1
             attraction_opinion = -10
@@ -41,8 +47,9 @@ eotg_cybernetics = {
         }
         # Overclocked (deltas): totals prowess 8, health 0, stress 0.4,
         # attraction -30, scheme +5 (Q4), diplomacy -5, fertility -0.4,
-        # dread gain 0.3, knight effectiveness 0.1
+        # dread gain 0.3, knight effectiveness 0.1, income -8%
         100 = {
+            monthly_income_mult = -0.03
             prowess = 4
             health = -0.5
             stress_gain_mult = 0.2

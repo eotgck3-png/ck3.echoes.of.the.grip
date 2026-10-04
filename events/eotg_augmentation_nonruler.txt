@@ -14,7 +14,9 @@
 # Root is the LIEGE; scope:eotg_champion is the non-ruler. The liege cooldown
 #   eotg_flag_aug_nr_cooldown is set and checked in the on_action only
 #   (lesson 5): these triggers are the world-state guard "the champion still
-#   exists and lives".
+#   exists, lives, and is still root's courtier or knight" (QA round 2 M9:
+#   the 1-30 day delay lets them leave court, and no option may jail or pay
+#   a stranger).
 # Resource: every event moves the champion's own eotg_fracture_risk or
 #   changes their tier (nr.001 install, nr.006.b removal).
 # Victims come from the picker run in the liege's scope (root = liege, so its
@@ -39,6 +41,10 @@ eotg_aug_nr.001 = {
         exists = scope:eotg_champion
         scope:eotg_champion = {
             is_alive = yes
+            OR = {    # QA round 2 M9: still at root's court
+                is_courtier_of = root
+                is_knight_of = root
+            }
             eotg_is_augmented_any = no
         }
     }
@@ -170,7 +176,13 @@ eotg_aug_nr.002 = {
 
     trigger = {
         exists = scope:eotg_champion
-        scope:eotg_champion = { is_alive = yes }
+        scope:eotg_champion = {
+            is_alive = yes
+            OR = {    # QA round 2 M9: still at root's court
+                is_courtier_of = root
+                is_knight_of = root
+            }
+        }
     }
 
     left_portrait = {
@@ -275,7 +287,13 @@ eotg_aug_nr.003 = {
 
     trigger = {
         exists = scope:eotg_champion
-        scope:eotg_champion = { is_alive = yes }
+        scope:eotg_champion = {
+            is_alive = yes
+            OR = {    # QA round 2 M9: still at root's court
+                is_courtier_of = root
+                is_knight_of = root
+            }
+        }
     }
 
     left_portrait = {
@@ -380,7 +398,9 @@ eotg_aug_nr.003 = {
 # themselves"): the champion gets wounded_1 if unwounded.
 # a-d carry the wound helper for the liege (their champion, their
 # responsibility). e: the victim is killed by the champion.
-# Imprisonment: vanilla `imprison = { target type }` (00_prison_effects.txt).
+# Imprisonment: vanilla imprison_character_effect (00_prison_effects.txt:1644;
+# QA round 2 M5), which picks house arrest or the dungeon and charges
+# tyranny and family opinion like every other arrest in the system.
 # Caller: eotg_on_yearly_aug_nonruler_check (step 5).
 
 eotg_aug_nr.004 = {
@@ -402,6 +422,10 @@ eotg_aug_nr.004 = {
         scope:eotg_champion = {
             is_alive = yes
             is_imprisoned = no
+            OR = {    # QA round 2 M9: still at root's court
+                is_courtier_of = root
+                is_knight_of = root
+            }
         }
     }
 
@@ -449,9 +473,9 @@ eotg_aug_nr.004 = {
     option = {
         name = eotg_aug_nr.004.a
         # Ungated: the event trigger guarantees the champion is free.
-        imprison = {
-            target = scope:eotg_champion
-            type = dungeon
+        imprison_character_effect = {
+            TARGET = scope:eotg_champion
+            IMPRISONER = root
         }
         scope:eotg_champion = {
             eotg_add_fracture_risk = { AMOUNT = -5 }
@@ -511,9 +535,9 @@ eotg_aug_nr.004 = {
         }
         trait = just
         add_prestige = 50
-        imprison = {
-            target = scope:eotg_champion
-            type = dungeon
+        imprison_character_effect = {
+            TARGET = scope:eotg_champion
+            IMPRISONER = root
         }
         scope:eotg_champion = {
             eotg_add_fracture_risk = { AMOUNT = -5 }
@@ -577,7 +601,13 @@ eotg_aug_nr.005 = {
 
     trigger = {
         exists = scope:eotg_champion
-        scope:eotg_champion = { is_alive = yes }
+        scope:eotg_champion = {
+            is_alive = yes
+            OR = {    # QA round 2 M9: still at root's court
+                is_courtier_of = root
+                is_knight_of = root
+            }
+        }
     }
 
     left_portrait = {
@@ -654,8 +684,8 @@ eotg_aug_nr.005 = {
         }
     }
 
-    # [paranoid] "Lock them in their rooms." House arrest (vanilla type,
-    # events/court_events/court_events_general.txt:12361).
+    # [paranoid] "Lock them in their rooms." Vanilla imprison_character_effect
+    # (QA round 2 M5): house arrest for family, else the dungeon.
     option = {
         name = eotg_aug_nr.005.e
         trigger = {
@@ -663,9 +693,9 @@ eotg_aug_nr.005 = {
             scope:eotg_champion = { is_imprisoned = no }
         }
         trait = paranoid
-        imprison = {
-            target = scope:eotg_champion
-            type = house_arrest
+        imprison_character_effect = {
+            TARGET = scope:eotg_champion
+            IMPRISONER = root
         }
         scope:eotg_champion = {
             eotg_add_fracture_risk = { AMOUNT = -3 }
@@ -695,7 +725,13 @@ eotg_aug_nr.006 = {
 
     trigger = {
         exists = scope:eotg_champion
-        scope:eotg_champion = { is_alive = yes }
+        scope:eotg_champion = {
+            is_alive = yes
+            OR = {    # QA round 2 M9: still at root's court
+                is_courtier_of = root
+                is_knight_of = root
+            }
+        }
     }
 
     left_portrait = {
@@ -712,9 +748,9 @@ eotg_aug_nr.006 = {
     option = {
         name = eotg_aug_nr.006.a
         trigger = { scope:eotg_champion = { is_imprisoned = no } }
-        imprison = {
-            target = scope:eotg_champion
-            type = house_arrest
+        imprison_character_effect = {
+            TARGET = scope:eotg_champion
+            IMPRISONER = root
         }
         scope:eotg_champion = {
             eotg_add_fracture_risk = { AMOUNT = -10 }
@@ -777,9 +813,12 @@ eotg_aug_nr.006 = {
         }
     }
 
-    # "Execute them."
+    # "Execute them." A deliberate killing: a family champion makes root a
+    # kinslayer (vanilla add_kinslayer_trait_or_nothing_effect,
+    # 00_secret_effects.txt:433, before the death; QA round 2 M4).
     option = {
         name = eotg_aug_nr.006.d
+        add_kinslayer_trait_or_nothing_effect = { VICTIM = scope:eotg_champion }
         scope:eotg_champion = {
             death = {
                 death_reason = death_execution

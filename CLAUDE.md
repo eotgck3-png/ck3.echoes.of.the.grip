@@ -33,7 +33,7 @@ The setting arrives as Markdown **briefs** per region (`intake/regions/<region>/
 9. Nikios Khanate content is deferred — do not build it.
 
 ## File placement
-Use the table in `OLD PROJECT VERSION/CLAUDE.md` — it is still correct for 1.19 (`common/religion/religion_types/`, `common/bookmarks/bookmarks/`, etc.). Add `map_data/` and `common/dynasties/` to it, plus `common/story_cycles/`, `common/deathreasons/` and `common/scripted_character_templates/` (cybernetics v2, 2026-10-03; shapes per vanilla, cited in `docs/specs/cybernetics_v2.md`).
+Use the table in `OLD PROJECT VERSION/CLAUDE.md` — it is still correct for 1.19 (`common/religion/religion_types/`, `common/bookmarks/bookmarks/`, etc.). Add `map_data/` and `common/dynasties/` to it, plus `common/story_cycles/`, `common/deathreasons/`, `common/scripted_character_templates/` and `common/script_values/` (cybernetics v2, 2026-10-03; shapes per vanilla, cited in `docs/specs/cybernetics_v2.md`).
 
 ## Validation
 Black map, neon borders, or errors in files the mod does not touch: see `docs/pitfalls.md` first — all three have known causes.

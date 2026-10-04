@@ -6,11 +6,14 @@
 #   (stage 1 is eotg_fracture.005 What the Heir Saw)
 # eotg_aug_heir.003 -- The Heir's Warning      (story stage 2)
 # eotg_aug_heir.004 -- The Heir's Choice       (story stage 3; ally / usurp / kill)
-# eotg_aug_heir.005 -- What Must Be Done       (to the heir, on a successful kill)
+# eotg_aug_heir.005 -- What Must Be Done       (to the heir, after the kill)
+# eotg_aug_heir.006 -- (hidden) the kill       (on the ruler, from heir.004)
 #
 # Fires from: the story cycle eotg_story_aug_heir_arc
 #   (common/story_cycles/eotg_augmentation_stories.txt), created by
-#   eotg_on_yearly_aug_neurofractured_check; heir.005 from heir.004's immediate.
+#   eotg_on_yearly_aug_neurofractured_check and (balance spec §5.8)
+#   eotg_on_yearly_aug_overclocked_check; heir.006 from heir.004's
+#   immediate (kill, success); heir.005 from heir.006, after succession.
 # Cooldown: the story's effect_group timing (index §1 rule 5). No flags.
 # Each immediate saves the story as scope:eotg_heir_story and its eotg_heir
 # variable as scope:eotg_heir. Options move the story's eotg_heir_dread, which
@@ -25,11 +28,30 @@ namespace = eotg_aug_heir
 # -- eotg_aug_heir.001 --------------------------------------------------------
 # Concern. The heir comes to you about what they have seen.
 # Caller: eotg_story_aug_heir_arc, stage 0.
+# Balance spec §5.8: the arc can now start at Overclocked; then
+# desc_overclocked replaces the base desc (first triggered_desc of the
+# first_valid). A child the machine saved (eotg_flag_aug_child_patient on the
+# heir) adds desc_patient. scope:eotg_heir is saved in immediate.
 
 eotg_aug_heir.001 = {
     type = character_event
     title = eotg_aug_heir.001.t
-    desc = eotg_aug_heir.001.desc
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { eotg_is_aug_tier3 = yes }
+                desc = eotg_aug_heir.001.desc_overclocked
+            }
+            desc = eotg_aug_heir.001.desc
+        }
+        triggered_desc = {
+            trigger = {
+                exists = scope:eotg_heir
+                scope:eotg_heir = { has_character_flag = eotg_flag_aug_child_patient }
+            }
+            desc = eotg_aug_heir.001.desc_patient
+        }
+    }
     theme = family
 
     trigger = {
@@ -388,6 +410,11 @@ eotg_aug_heir.004 = {
                         opinion = { target = root  value >= 20 }
                     }
                 }
+                # Balance spec §5.8(b): the machine saved them as a child
+                modifier = {
+                    add = 20
+                    scope:eotg_heir = { has_character_flag = eotg_flag_aug_child_patient }
+                }
                 save_scope_value_as = { name = eotg_heir_choice  value = flag:ally }
             }
             # Usurp
@@ -434,6 +461,11 @@ eotg_aug_heir.004 = {
                 modifier = {
                     factor = 0
                     scope:eotg_heir = { has_trait = compassionate }
+                }
+                # Balance spec §5.8(b): the machine saved them as a child
+                modifier = {
+                    factor = 0.5
+                    scope:eotg_heir = { has_character_flag = eotg_flag_aug_child_patient }
                 }
                 # 50% (+20 at heir intrigue >= 15) that the attempt succeeds
                 random_list = {
@@ -509,13 +541,13 @@ eotg_aug_heir.004 = {
                 }
             }
         }
-        # Kill, success: the heir acts (eotg_aug_heir.005 fires to them)
+        # Kill, success: the heir acts. QA round 2 H3: the death happens in
+        # the hidden eotg_aug_heir.006 on the ruler, and heir.005 reaches the
+        # heir only after succession (see heir.006).
         else_if = {
             limit = { scope:eotg_heir_choice = flag:kill_success }
             save_scope_as = eotg_parent_ruler
-            scope:eotg_heir = {
-                trigger_event = { id = eotg_aug_heir.005  days = { 3 7 } }
-            }
+            trigger_event = { id = eotg_aug_heir.006  days = { 3 7 } }
         }
 
         # The story ends after any outcome. The arc runs once per ruler: the
@@ -534,8 +566,8 @@ eotg_aug_heir.004 = {
     #   ally         .ally_a   "Thank them."             risk -10
     #   usurp        .usurp_a  "Let them have it."       -200 prestige, risk -5
     #   kill_failed  .kill_a   "Imprison them."          tyranny stress, risk +5
-    #   kill_success .silent_a the quiet before it (the ruler dies in
-    #                          eotg_aug_heir.005; the heir's event couples)
+    #   kill_success .silent_a the quiet before it (the ruler dies in the
+    #                          hidden eotg_aug_heir.006; heir.005 couples)
     option = {
         name = {
             text = {
@@ -575,7 +607,12 @@ eotg_aug_heir.004 = {
                         is_imprisoned = no
                     }
                 }
-                imprison = { target = scope:eotg_heir  type = dungeon }
+                # QA round 2 M5: vanilla imprison_character_effect
+                # (00_prison_effects.txt:1644): an heir goes to house arrest.
+                imprison_character_effect = {
+                    TARGET = scope:eotg_heir
+                    IMPRISONER = root
+                }
             }
             eotg_aug_stress_tyranny_effect = yes
             eotg_add_fracture_risk = { AMOUNT = 5 }
@@ -657,7 +694,10 @@ eotg_aug_heir.004 = {
                     is_imprisoned = no
                 }
             }
-            imprison = { target = scope:eotg_heir  type = dungeon }
+            imprison_character_effect = {    # QA round 2 M5
+                TARGET = scope:eotg_heir
+                IMPRISONER = root
+            }
             eotg_aug_stress_tyranny_effect = yes
         }
         eotg_add_fracture_risk = { AMOUNT = 10 }
@@ -691,6 +731,10 @@ eotg_aug_heir.004 = {
             has_trait = vengeful
         }
         trait = vengeful
+        # QA round 2 M4: executing one's own heir is a deliberate killing of
+        # family: vanilla add_kinslayer_trait_or_nothing_effect
+        # (00_secret_effects.txt:433), before the death.
+        add_kinslayer_trait_or_nothing_effect = { VICTIM = scope:eotg_heir }
         scope:eotg_heir = {
             death = { death_reason = death_execution  killer = root }
         }
@@ -705,13 +749,60 @@ eotg_aug_heir.004 = {
 }
 
 
-# -- eotg_aug_heir.005 --------------------------------------------------------
-# What Must Be Done. Fires to the HEIR (root = the heir). They kill the
-# Neurofractured ruler (scope:eotg_parent_ruler, saved by heir.004); the
-# player inherits by normal succession. on_death (eotg_on_death_aug_hardware,
-# Phase 2) sets var:eotg_parent_hardware and the fractured flag on the heir,
-# so d installs exactly as eotg_aug_init.013.a would.
+# -- eotg_aug_heir.006 --------------------------------------------------------
+# (Hidden) The kill. QA round 2 H3. Root = the Neurofractured ruler;
+# scope:eotg_heir and scope:eotg_parent_ruler carry over from heir.004. The
+# heir kills the ruler here, and heir.005 is queued to the heir 5 days out,
+# so it arrives after succession: when the ruler was the player, the heir is
+# the player by then and sees the scene; an AI heir resolves it by ai_chance.
+# Vanilla precedent for "an event to the heir a few days after the death":
+# common/on_action/death.txt:191-195 (on_death: player_heir = {
+# trigger_event = { id = bp2_yearly.4010 days = 5 } }) and
+# events/dlc/ep3/ep3_laamp_events.txt:754-772 (a hidden event on the
+# deceased queues ep3_laamps.0011 to the player_heir, days = 5).
+# The event is queued before the death so it is not lost with the ruler.
 # Caller: eotg_aug_heir.004 immediate (Kill, success).
+
+eotg_aug_heir.006 = {
+    type = character_event
+    hidden = yes
+
+    # QA round 2 follow-up (orchestrator ruling): in the 3-7 days since
+    # heir.004 the heir may have been jailed or passed over. Either way the
+    # plot silently aborts: a hidden event whose trigger fails is dropped.
+    trigger = {
+        exists = scope:eotg_heir
+        scope:eotg_heir = {
+            is_alive = yes
+            is_imprisoned = no
+        }
+        primary_heir ?= scope:eotg_heir
+    }
+
+    immediate = {
+        save_scope_as = eotg_parent_ruler
+        scope:eotg_heir = {
+            trigger_event = { id = eotg_aug_heir.005  days = 5 }
+            # Ruling 2026-10-04 (balance spec §5.0): a deliberate killing, so
+            # vanilla add_kinslayer_trait_or_nothing_effect
+            # (common/scripted_effects/00_secret_effects.txt:433), run in the
+            # slayer's scope with the victim as VICTIM, before the death (as
+            # heir.004.kill_c does).
+            add_kinslayer_trait_or_nothing_effect = { VICTIM = root }
+        }
+        death = { death_reason = death_murder  killer = scope:eotg_heir }
+    }
+}
+
+
+# -- eotg_aug_heir.005 --------------------------------------------------------
+# What Must Be Done. Fires to the HEIR (root = the heir) after the ruler's
+# death (QA round 2 H3: the kill is eotg_aug_heir.006, hidden, on the ruler;
+# this event is the aftermath, seen by the heir once they have succeeded).
+# on_death (eotg_on_death_aug_hardware, Phase 2) has already set
+# var:eotg_parent_hardware and the fractured flag on the heir, so d installs
+# exactly as eotg_aug_init.013.a would.
+# Caller: eotg_aug_heir.006 (5 days after the death).
 
 eotg_aug_heir.005 = {
     type = character_event
@@ -721,7 +812,7 @@ eotg_aug_heir.005 = {
 
     trigger = {
         exists = scope:eotg_parent_ruler
-        scope:eotg_parent_ruler = { is_alive = yes }
+        scope:eotg_parent_ruler = { is_alive = no }
     }
 
     left_portrait = {
@@ -733,12 +824,6 @@ eotg_aug_heir.005 = {
         character = scope:eotg_parent_ruler
         animation = dead
         animate_if_dead = yes
-    }
-
-    immediate = {
-        scope:eotg_parent_ruler = {
-            death = { death_reason = death_murder  killer = root }
-        }
     }
 
     # "It was mercy." —

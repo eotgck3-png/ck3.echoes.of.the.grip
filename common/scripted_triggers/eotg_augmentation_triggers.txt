@@ -62,23 +62,33 @@ eotg_can_receive_augmented = {
     }
 }
 
-# Eligible to progress Augmented -> Enhanced
+# Eligible to progress Augmented -> Enhanced.
+# Balance spec §5.1: the development gate is a script value
+# (common/script_values/eotg_augmentation_values.txt; vanilla RHS script-value
+# shape, 10_religious_decisions.txt:3054), and the 5-year
+# eotg_flag_aug_settling (set by eotg_aug_initiate_effect and
+# eotg_aug_set_integration_effect) is a minimum time at tier. A world-state
+# gate, not a cooldown: read here, by eotg_decision_aug_pursue_next_stage's
+# is_valid, and through these triggers by the on_action Upgrade branches;
+# never by an event trigger.
 eotg_can_progress_to_enhanced = {
     eotg_is_aug_tier1 = yes
     NOT = { has_character_flag = eotg_flag_suppress_progression }
+    NOT = { has_character_flag = eotg_flag_aug_settling }
     exists = capital_county
     capital_county = {
-        development_level >= 20
+        development_level >= eotg_aug_dev_gate_enhanced
     }
 }
 
-# Eligible to progress Enhanced -> Overclocked
+# Eligible to progress Enhanced -> Overclocked (same shape)
 eotg_can_progress_to_overclocked = {
     eotg_is_aug_tier2 = yes
     NOT = { has_character_flag = eotg_flag_suppress_progression }
+    NOT = { has_character_flag = eotg_flag_aug_settling }
     exists = capital_county
     capital_county = {
-        development_level >= 35
+        development_level >= eotg_aug_dev_gate_overclocked
     }
 }
 
@@ -135,12 +145,8 @@ eotg_has_physician_access = {
     }
 }
 
-# An augmented character below county tier (courtiers, knights, barons).
-# Includes eotg_total_integration through eotg_is_augmented_any (Phase 3b).
-eotg_aug_is_nonruler = {
-    eotg_is_augmented_any = yes
-    highest_held_title_tier < tier_county
-}
+# (eotg_aug_is_nonruler removed, QA round 2: nothing referenced it; the
+# non-ruler pulse tests highest_held_title_tier inline.)
 
 # Who an episode can hit. Evaluated in the courtier's scope inside
 # eotg_aug_pick_victim_effect; root is the event's root (the ruler).
@@ -303,6 +309,7 @@ eotg_aug_is_retinue_knight = {
 # asks. Users: eotg_story_aug_patron (tick), eotg_aug_patron.004.
 eotg_aug_patron_critic_candidate = {
     is_alive = yes
+    is_adult = yes    # QA round 2 M10: the syndicate never names a child
     is_imprisoned = no
     NOT = { this = $RULER$ }
     NOT = { has_trait = eotg_neurofractured }

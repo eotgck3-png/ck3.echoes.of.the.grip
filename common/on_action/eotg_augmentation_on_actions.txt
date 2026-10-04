@@ -49,8 +49,9 @@
 # Overclocked risk accrual (cybernetics_v2 B2): base 12/year, + 8 per vanilla
 # stress_level (1-3), paranoid +12, at war +10, hidden flaw +4, vendor
 # safe -3 / bold +3. Threshold: 80, always (eotg_neurofracture_threshold_met).
-# Neurofractured drift (B1): +8/year, + 4 per stress_level, sedated -6,
-# restrained -4. Runs every pulse, outside the episode cooldown.
+# Neurofractured drift (B1; balance spec §5.5): eotg_aug_nf_drift_value, +8/year,
+# + 4 per stress_level, sedated -6/-3/0 by course, restrained -4, floor 2.
+# Runs every pulse, outside the episode cooldown.
 # Cooldowns (B4): Overclocked and Neurofractured 11 months, i.e. expired by the
 # next pulse; Court Massacre 23 months. Both are stated as "every pulse /
 # every other pulse" without depending on same-day expiry order.
@@ -90,6 +91,31 @@ random_yearly_everyone_pulse = {
 on_birth_child = {
     on_actions = {
         eotg_on_birth_aug_parent_check
+    }
+}
+
+# Vanilla hooks, extended additively only (invariant 4). Balance spec §5.7:
+# augmented knights accrue in battle. Root = the winning / losing combat side
+# (game/common/on_action/combat_on_actions.txt:12-14 and :523-525; PX
+# script_docs on_actions.log: both "From Code: Yes", expected scope
+# combat_side). Same custom on_action for both sides.
+on_combat_end_winner = {
+    on_actions = {
+        eotg_on_combat_aug_knights
+    }
+}
+on_combat_end_loser = {
+    on_actions = {
+        eotg_on_combat_aug_knights
+    }
+}
+
+# Vanilla hook, extended additively only (invariant 4). Fires once, after the
+# lobby closes (game/common/on_action/game_start.txt:2509-2510: "called once
+# the host exits the lobby"), so a ruler-designer character exists by then.
+on_game_start_after_lobby = {
+    on_actions = {
+        eotg_on_game_start_aug_init
     }
 }
 
@@ -141,12 +167,24 @@ eotg_on_yearly_aug_initiation_check = {
                     add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
                     trigger_event = { id = eotg_aug_init.004  days = { 1 5 } }
                 }
-                # The Prosthetic — a lost limb, eye or sight
+                # The Prosthetic — a lost limb, eye or sight. Balance spec §5.9:
+                # also a congenital clubfoot or hunchback (init.006.f), at half
+                # weight when that is all there is (mirrors init.006's trigger).
                 40 = {
-                    trigger = { eotg_has_physical_loss = yes }
+                    trigger = {
+                        OR = {
+                            eotg_has_physical_loss = yes
+                            has_trait = clubfooted
+                            has_trait = hunchbacked
+                        }
+                    }
                     modifier = {
                         factor = 0.25
                         has_character_flag = eotg_flag_aug_declined_prosthetic
+                    }
+                    modifier = {
+                        factor = 0.5
+                        eotg_has_physical_loss = no
                     }
                     add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
                     trigger_event = { id = eotg_aug_init.006  days = { 1 10 } }
@@ -177,7 +215,10 @@ eotg_on_yearly_aug_initiation_check = {
                 }
                 # A Parent's Hardware — set by eotg_on_death_aug_hardware
                 60 = {
-                    trigger = { has_variable = eotg_parent_hardware }
+                    trigger = {
+                        has_variable = eotg_parent_hardware
+                        exists = var:eotg_parent_hardware    # mirrors init.013
+                    }
                     add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
                     trigger_event = { id = eotg_aug_init.013  days = { 1 20 } }
                 }
@@ -258,7 +299,9 @@ eotg_on_yearly_aug_initiation_check = {
                     add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
                     trigger_event = { id = eotg_aug_init.003  days = { 1 10 } }
                 }
-                # A Familiar Change — peer already augmented
+                # A Familiar Change — peer already augmented. Balance spec
+                # §5.3(a): the contagion branch, halved for the AI (every
+                # augmented vassal or courtier raises it).
                 20 = {
                     trigger = {
                         OR = {
@@ -266,6 +309,7 @@ eotg_on_yearly_aug_initiation_check = {
                             any_courtier = { is_alive = yes  has_trait = eotg_cybernetics }
                         }
                     }
+                    modifier = { factor = 0.5  is_ai = yes }
                     add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 3 }
                     trigger_event = { id = eotg_aug_init.005  days = { 1 20 } }
                 }
@@ -278,6 +322,8 @@ eotg_on_yearly_aug_initiation_check = {
                     }
                     trigger = {
                         eotg_aug_has_retinue = no
+                        # QA round 2 H2: the Program ran and ended (permanent)
+                        NOT = { has_character_flag = eotg_flag_aug_retinue_done }
                         any_knight = {
                             count >= 2
                             eotg_is_augmented_any = yes
@@ -286,8 +332,18 @@ eotg_on_yearly_aug_initiation_check = {
                     add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 3 }
                     trigger_event = { id = eotg_aug_init.019  days = { 1 20 } }
                 }
-                # Nothing this year
-                100 = { }
+                # Nothing this year. Balance spec §5.3(a): AI throttle by title
+                # tier, counts hardest, kings least (vanilla tiered no-event
+                # chances, common/on_action/yearly_on_actions.txt:3022-3030;
+                # AI-only weight modifiers, common/on_action/dlc/mpo/
+                # mpo_on_actions_2.txt:468-474). Milder than vanilla's 95%
+                # for counts: this list creates world state, not flavor.
+                100 = {
+                    # AI count x6 / duke x3 / king+ x2 (first guesses for the observer run)
+                    modifier = { factor = 6  is_ai = yes  highest_held_title_tier < tier_duchy }
+                    modifier = { factor = 3  is_ai = yes  highest_held_title_tier = tier_duchy }
+                    modifier = { factor = 2  is_ai = yes  highest_held_title_tier >= tier_kingdom }
+                }
             }
         }
 
@@ -304,6 +360,30 @@ eotg_on_yearly_aug_initiation_check = {
                 add_character_flag = { flag = eotg_flag_aug_child_offer_cooldown  years = 5 }
                 trigger_event = { id = eotg_aug_init.014  days = { 1 10 } }
             }
+        }
+    }
+}
+
+# QA round 2: a character who starts with eotg_cybernetics without the
+# install effect (the ruler designer sells the trait; a history file may set
+# it) has no risk variable and no tier synergy. Give them what
+# eotg_aug_initiate_effect would have: risk 0 and the synergy modifier. The
+# trait test comes first, so the one-off sweep is cheap.
+eotg_on_game_start_aug_init = {
+    effect = {
+        every_living_character = {
+            limit = { has_trait = eotg_cybernetics }
+            if = {
+                limit = { NOT = { has_variable = eotg_fracture_risk } }
+                set_variable = { name = eotg_fracture_risk  value = 0 }
+                eotg_aug_refresh_synergy_effect = yes
+            }
+            # Balance spec §5.1 item 3 (ruled 2026-10-04): every character
+            # who starts augmented settles for 5 years like any newcomer
+            # (eotg_aug_initiate_effect), so HQ1's 10-year minimum holds
+            # from game start. Outside the variable test: a history file
+            # that set the risk variable still starts settling.
+            add_character_flag = { flag = eotg_flag_aug_settling  years = 5 }
         }
     }
 }
@@ -342,7 +422,14 @@ eotg_on_death_aug_hardware = {
 # the loss for a year; eotg_on_yearly_aug_tier2_check reads it (tier2.008).
 # A killer is remembered for the vengeful option. every_close_family_member:
 # PX effects list (character scope).
+# QA round 2 performance guard: on_death runs for every character, so a
+# trigger rejects the death first on a plain has_trait test (the cheapest
+# check, as eotg_on_death_aug_hardware and the non-ruler pulse lead with
+# one) before the effect walks the family again with the XP-based tier test.
 eotg_on_death_aug_grief = {
+    trigger = {
+        any_close_family_member = { has_trait = eotg_cybernetics }
+    }
     effect = {
         every_close_family_member = {
             limit = { eotg_is_aug_tier2 = yes }
@@ -559,8 +646,12 @@ eotg_on_yearly_aug_tier1_check = {
                     add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
                     trigger_event = { id = eotg_aug_tier1.020  days = { 1 30 } }
                 }
-                # Nothing this year (Phase 4a: 100 -> 150)
-                150 = { }
+                # Nothing this year (Phase 4a: 100 -> 150). Balance spec
+                # §5.3(b): x2 for AI counts only (pure AI noise in a wide
+                # world). Shape: mpo_on_actions_2.txt:468-474.
+                150 = {
+                    modifier = { factor = 2  is_ai = yes  highest_held_title_tier < tier_duchy }
+                }
             }
         }
     }
@@ -626,7 +717,10 @@ eotg_on_yearly_aug_tier2_check = {
                 }
                 # The Late Grief (variable set by eotg_on_death_aug_grief)
                 40 = {
-                    trigger = { has_variable = eotg_aug_grief_for }
+                    trigger = {
+                        has_variable = eotg_aug_grief_for
+                        exists = var:eotg_aug_grief_for    # mirrors tier2.008
+                    }
                     add_character_flag = { flag = eotg_flag_enh_event_cooldown  years = 2 }
                     trigger_event = { id = eotg_aug_tier2.008  days = { 1 30 } }
                 }
@@ -694,8 +788,11 @@ eotg_on_yearly_aug_tier2_check = {
                     add_character_flag = { flag = eotg_flag_enh_event_cooldown  years = 2 }
                     trigger_event = { id = eotg_aug_tier2.020  days = { 1 30 } }
                 }
-                # Nothing this year (Phase 4b: 100 -> 150)
-                150 = { }
+                # Nothing this year (Phase 4b: 100 -> 150). Balance spec
+                # §5.3(b): x2 for AI counts only, as tier 1.
+                150 = {
+                    modifier = { factor = 2  is_ai = yes  highest_held_title_tier < tier_duchy }
+                }
             }
         }
     }
@@ -757,8 +854,11 @@ eotg_on_yearly_aug_overclocked_check = {
             # The Countdown (Phase 5 §1.1): after accrual, before the threshold
             # check. Risk >= 50, or >= 40 with the hidden flaw (thread T6).
             # The story's effect_group then owns its pacing.
+            # QA round 2: not in a pulse that cascades (threshold met): the
+            # cascade below would end it the same day it began.
             if = {
                 limit = {
+                    eotg_neurofracture_threshold_met = no
                     eotg_aug_has_countdown = no
                     has_variable = eotg_fracture_risk
                     OR = {
@@ -770,6 +870,27 @@ eotg_on_yearly_aug_overclocked_check = {
                     }
                 }
                 eotg_aug_try_start_countdown_effect = yes
+            }
+
+            # Balance spec §5.8(a): the Heir's Arc seeds from Overclocked once
+            # the Countdown runs. Same guards as the Neurofractured start
+            # (ruler-only, once: eotg_flag_aug_heir_arc_done). Only stage 0
+            # (heir.001) can fire before the cascade; the story holds the
+            # later stages for a Neurofractured or Seamless owner, and ends
+            # without the done flag if the owner regresses. No cooldown: the
+            # story's effect_group owns its pacing.
+            if = {
+                limit = {
+                    is_landed = yes
+                    eotg_aug_has_countdown = yes
+                    eotg_aug_has_heir_arc = no
+                    NOT = { has_character_flag = eotg_flag_aug_heir_arc_done }
+                    primary_heir ?= {
+                        is_alive = yes
+                        age >= 14
+                    }
+                }
+                create_story = eotg_story_aug_heir_arc
             }
 
             # Threshold check — the cascade replaces this year's flavor roll
@@ -948,6 +1069,11 @@ eotg_on_yearly_aug_overclocked_check = {
                             factor = 2
                             eotg_aug_has_countdown = yes
                         }
+                        # Balance spec §5.10(a): AI-only flavor throttle (stacks with the
+                        # Countdown x2). Accrual and the cascade are not throttled.
+                        modifier = { factor = 3  is_ai = yes  highest_held_title_tier < tier_duchy }
+                        modifier = { factor = 2  is_ai = yes  highest_held_title_tier = tier_duchy }
+                        modifier = { factor = 1.5  is_ai = yes  highest_held_title_tier >= tier_kingdom }
                     }
                 }
             }
@@ -979,27 +1105,18 @@ eotg_on_yearly_aug_neurofractured_check = {
             # 1. Passive pressure drift (cybernetics_v2 B1). Runs every pulse,
             # before the roll, so the roll sees this year's value.
             # Calm: >= 30 in ~4 years, >= 60 in ~8. Stress level 3: >= 60 in ~3.
-            eotg_add_fracture_risk = { AMOUNT = 8 }
+            # QA round 2 M1: not in the cascade pulse itself
+            # (eotg_flag_aug_cascaded_this_pulse, 1 day, set by
+            # eotg_trigger_neurofracture earlier in this pulse): the first
+            # Neurofractured year starts at 0.
+            # Balance spec §5.5(a): one call through the script value
+            # eotg_aug_nf_drift_value (8, +4 per stress level, Sedation with
+            # tolerance, Restraints -4, floor 2: slowed, never paused).
+            # Script value as a change_variable operand: vanilla
+            # common/scripted_effects/00_laamp_effects.txt:1247.
             if = {
-                limit = { stress_level >= 3 }
-                eotg_add_fracture_risk = { AMOUNT = 12 }
-            }
-            else_if = {
-                limit = { stress_level = 2 }
-                eotg_add_fracture_risk = { AMOUNT = 8 }
-            }
-            else_if = {
-                limit = { stress_level = 1 }
-                eotg_add_fracture_risk = { AMOUNT = 4 }
-            }
-            # Decision-owned treatment flags (set in Phase 3b)
-            if = {
-                limit = { has_character_flag = eotg_flag_aug_sedated }
-                eotg_add_fracture_risk = { AMOUNT = -6 }
-            }
-            if = {
-                limit = { has_character_flag = eotg_flag_aug_restrained }
-                eotg_add_fracture_risk = { AMOUNT = -4 }
+                limit = { NOT = { has_character_flag = eotg_flag_aug_cascaded_this_pulse } }
+                eotg_add_fracture_risk = { AMOUNT = eotg_aug_nf_drift_value }
             }
 
             # 2. The Heir's Arc (thread T3): once per ruler, while an heir of 14+
@@ -1008,6 +1125,8 @@ eotg_on_yearly_aug_neurofractured_check = {
             # arc never restarts; the story's effect_group timing paces a live one.
             if = {
                 limit = {
+                    NOT = { has_character_flag = eotg_flag_aug_cascaded_this_pulse }    # M1
+                    is_landed = yes    # QA round 2: a ruler-only arc (see the story)
                     eotg_aug_has_heir_arc = no
                     NOT = { has_character_flag = eotg_flag_aug_heir_arc_done }
                     primary_heir ?= {
@@ -1092,7 +1211,13 @@ eotg_on_yearly_aug_neurofractured_check = {
                             trigger_event = { id = eotg_fracture.007  days = { 1 30 } }
                         }
                         # Nothing this year
-                        40 = { }
+                        40 = {
+                            # Balance spec §5.10(a): AI-only flavor throttle, count x2.5 /
+                            # duke x1.75 / king+ x1.25 (drift and the terminal are not throttled).
+                            modifier = { factor = 2.5  is_ai = yes  highest_held_title_tier < tier_duchy }
+                            modifier = { factor = 1.75  is_ai = yes  highest_held_title_tier = tier_duchy }
+                            modifier = { factor = 1.25  is_ai = yes  highest_held_title_tier >= tier_kingdom }
+                        }
                     }
                 }
                 # ── Fracture band (30-59): violence and lost time ──
@@ -1180,7 +1305,13 @@ eotg_on_yearly_aug_neurofractured_check = {
                             trigger_event = { id = eotg_fracture.007  days = { 1 30 } }
                         }
                         # Nothing this year
-                        60 = { }
+                        60 = {
+                            # Balance spec §5.10(a): AI-only flavor throttle, count x2.5 /
+                            # duke x1.75 / king+ x1.25 (drift and the terminal are not throttled).
+                            modifier = { factor = 2.5  is_ai = yes  highest_held_title_tier < tier_duchy }
+                            modifier = { factor = 1.75  is_ai = yes  highest_held_title_tier = tier_duchy }
+                            modifier = { factor = 1.25  is_ai = yes  highest_held_title_tier >= tier_kingdom }
+                        }
                     }
                 }
                 # ── Flicker band (< 30): eerie, small, wrong ──
@@ -1247,7 +1378,13 @@ eotg_on_yearly_aug_neurofractured_check = {
                             trigger_event = { id = eotg_fracture.015  days = { 1 30 } }
                         }
                         # Nothing this year
-                        60 = { }
+                        60 = {
+                            # Balance spec §5.10(a): AI-only flavor throttle, count x2.5 /
+                            # duke x1.75 / king+ x1.25 (drift and the terminal are not throttled).
+                            modifier = { factor = 2.5  is_ai = yes  highest_held_title_tier < tier_duchy }
+                            modifier = { factor = 1.75  is_ai = yes  highest_held_title_tier = tier_duchy }
+                            modifier = { factor = 1.25  is_ai = yes  highest_held_title_tier >= tier_kingdom }
+                        }
                     }
                 }
             }
@@ -1269,6 +1406,9 @@ eotg_on_yearly_aug_neurofractured_check = {
 # Phase 5 hooks read: eotg_aug_is_retinue_knight, eotg_flag_aug_retinue_permanent
 # (set on the knights by eotg_aug_retinue.005.a; also honoured on the liege,
 # as the Phase 6 spec words it).
+# Balance spec §5.7 rates: progression eotg_aug_nr_progress_chance (about
+# 10% a year, faster for the Retinue, plus battles); Overclocked accrual 10 a
+# year (+6 at stress level 2+); battle accrual in eotg_on_combat_aug_knights.
 eotg_on_yearly_aug_nonruler_check = {
     trigger = {
         OR = {
@@ -1318,7 +1458,11 @@ eotg_on_yearly_aug_nonruler_check = {
         else_if = {
             limit = { eotg_is_augmented_any = yes }
 
-            # 2. Progression: 4% a year, 8% for a permanent Program knight.
+            # 2. Progression. Balance spec §5.7: eotg_aug_nr_progress_chance
+            # (base 10; Iron Retinue +5, +5 more permanent; child patient +5;
+            # plus the battle bonus, 0-10). The battle bonus is spent on
+            # progression. Script-value chance: vanilla
+            # events/activities/hunt_activity/hunt_events.txt:4196.
             # A knight's progression is reported to the liege by nr.002
             # (final QA: fired here, so it only ever reports a real
             # progression). The liege cooldown is set here and step 5 is
@@ -1331,15 +1475,7 @@ eotg_on_yearly_aug_nonruler_check = {
                     }
                 }
                 random = {
-                    chance = 4
-                    modifier = {
-                        add = 4
-                        eotg_aug_is_retinue_knight = yes
-                        OR = {
-                            has_character_flag = eotg_flag_aug_retinue_permanent
-                            scope:eotg_nr_liege = { has_character_flag = eotg_flag_aug_retinue_permanent }
-                        }
-                    }
+                    chance = eotg_aug_nr_progress_chance
                     if = {
                         limit = { eotg_is_aug_tier1 = yes }
                         eotg_aug_set_integration_effect = { XP = 50 }
@@ -1347,6 +1483,7 @@ eotg_on_yearly_aug_nonruler_check = {
                     else = {
                         eotg_aug_set_integration_effect = { XP = 100 }
                     }
+                    remove_variable = eotg_aug_nr_battle_bonus
                     # Your Champion's New Edge
                     if = {
                         limit = {
@@ -1366,10 +1503,12 @@ eotg_on_yearly_aug_nonruler_check = {
                     }
                 }
             }
-            # 3. Accrual at Overclocked; the cascade at 80
+            # 3. Accrual at Overclocked; the cascade at 80. Balance spec §5.7:
+            # base 6 -> 10 (the +6 at stress level 2+ stays); battles add
+            # through eotg_on_combat_aug_knights.
             else_if = {
                 limit = { eotg_is_aug_tier3 = yes }
-                eotg_add_fracture_risk = { AMOUNT = 6 }
+                eotg_add_fracture_risk = { AMOUNT = 10 }
                 if = {
                     limit = { stress_level >= 2 }
                     eotg_add_fracture_risk = { AMOUNT = 6 }
@@ -1469,6 +1608,43 @@ eotg_on_yearly_aug_nonruler_check = {
                     # Nothing this year
                     100 = { }
                 }
+            }
+        }
+    }
+}
+
+# Battle accrual for augmented knights (balance spec §5.7). Root = a combat
+# side (on_combat_end_winner / _loser, game/common/on_action/
+# combat_on_actions.txt:12-14, :523-525). every_side_knight: vanilla, same
+# hook, combat_on_actions.txt:190 (PX effects.log: combat_side scope).
+# Non-rulers only (below county tier: rulers accrue +10 a year at war in the
+# Overclocked check). Tier 1-2: +2 battle bonus (clamped 0-10), read by
+# eotg_aug_nr_progress_chance and spent on progression. Overclocked and
+# Neurofractured: risk +2 (eotg_add_fracture_risk; the Seamless are skipped
+# there). The limit leads with the trait test: this runs on every battle.
+# No event fires, so no cooldown is involved.
+eotg_on_combat_aug_knights = {
+    effect = {
+        every_side_knight = {
+            limit = {
+                OR = {
+                    has_trait = eotg_cybernetics
+                    has_trait = eotg_neurofractured
+                }
+                highest_held_title_tier < tier_county
+            }
+            if = {
+                limit = {
+                    OR = {
+                        eotg_is_aug_tier1 = yes
+                        eotg_is_aug_tier2 = yes
+                    }
+                }
+                change_variable = { name = eotg_aug_nr_battle_bonus  add = 2 }
+                clamp_variable = { name = eotg_aug_nr_battle_bonus  min = 0  max = 10 }
+            }
+            else = {
+                eotg_add_fracture_risk = { AMOUNT = 2 }
             }
         }
     }

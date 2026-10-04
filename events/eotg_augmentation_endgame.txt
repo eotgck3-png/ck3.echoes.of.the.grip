@@ -237,7 +237,17 @@ eotg_aug_end.002 = {
 # Hand Over the Controls (renamed per lore review). The desc lists what goes:
 # friends, personality, children. It speaks of the self / personhood, never
 # "humanity"; no option text contains "open" or "through".
-# Caller: eotg_decision_aug_embrace_cascade.
+# Caller: eotg_decision_aug_embrace_cascade (5-year decision cooldown, which
+# also keeps b's risk -10 from being a repeatable pump).
+# Balance spec §5.5(b): a and c no longer guarantee Seamless. They roll a
+# visible weighted list (vanilla shows option odds; this is not the hidden
+# risk), each branch with its own desc. Weights mirror fracture.027's
+# terminal table (death 30 +15 stress 3 +10 health < 2; Seamless 40 +20 voice
+# 4 +15 may_embrace; +10 more on c). The storm branch flags
+# eotg_flag_aug_embrace_failed (30 days, read by fracture.029's desc) and
+# fires fracture.029 (risk to 60, up to two wounded, +50 dread). Shape:
+# vanilla weighted outcome list with modifiers, events/health_events.txt:11686,
+# and branch descs as health_events.txt:10812-10823.
 
 eotg_aug_end.009 = {
     type = character_event
@@ -257,8 +267,33 @@ eotg_aug_end.009 = {
     # "Yes."
     option = {
         name = eotg_aug_end.009.a
-        eotg_aug_total_integration_effect = yes
-        eotg_aug_stress_embrace_effect = yes
+        eotg_aug_stress_embrace_effect = yes    # before the roll: one branch is death
+        random_list = {
+            # Seamless
+            40 = {
+                desc = eotg_aug_end.009.a.seamless
+                modifier = {
+                    add = 20
+                    has_variable = eotg_aug_voice
+                    var:eotg_aug_voice >= 4
+                }
+                modifier = { add = 15  has_character_flag = eotg_flag_aug_may_embrace }
+                eotg_aug_total_integration_effect = yes    # fires eotg_aug_end.010
+            }
+            # Cascade death
+            30 = {
+                desc = eotg_aug_end.009.a.death
+                modifier = { add = 15  stress_level >= 3 }
+                modifier = { add = 10  health < 2 }
+                eotg_aug_cascade_death_effect = yes
+            }
+            # A Storm episode: it passes, badly (existing fracture.029)
+            30 = {
+                desc = eotg_aug_end.009.a.storm
+                add_character_flag = { flag = eotg_flag_aug_embrace_failed  days = 30 }
+                trigger_event = { id = eotg_fracture.029  days = 3 }
+            }
+        }
         ai_chance = {
             base = 30
             modifier = { add = 20  has_trait = callous }
@@ -284,9 +319,34 @@ eotg_aug_end.009 = {
         name = eotg_aug_end.009.c
         trigger = { has_trait = ambitious }
         trait = ambitious
-        eotg_aug_total_integration_effect = yes
-        add_prestige = 200
-        eotg_aug_stress_embrace_effect = yes
+        eotg_aug_stress_embrace_effect = yes    # before the roll: one branch is death
+        random_list = {
+            # Seamless (base 40, +10 because c leans in)
+            50 = {
+                desc = eotg_aug_end.009.c.seamless
+                modifier = {
+                    add = 20
+                    has_variable = eotg_aug_voice
+                    var:eotg_aug_voice >= 4
+                }
+                modifier = { add = 15  has_character_flag = eotg_flag_aug_may_embrace }
+                eotg_aug_total_integration_effect = yes    # fires eotg_aug_end.010
+                add_prestige = 200
+            }
+            # Cascade death
+            30 = {
+                desc = eotg_aug_end.009.c.death
+                modifier = { add = 15  stress_level >= 3 }
+                modifier = { add = 10  health < 2 }
+                eotg_aug_cascade_death_effect = yes
+            }
+            # A Storm episode: it passes, badly (existing fracture.029)
+            30 = {
+                desc = eotg_aug_end.009.c.storm
+                add_character_flag = { flag = eotg_flag_aug_embrace_failed  days = 30 }
+                trigger_event = { id = eotg_fracture.029  days = 3 }
+            }
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = ambitious }
@@ -381,10 +441,35 @@ eotg_aug_end.011 = {
         }
     }
 
-    # "Hire replacements."
+    # "Hire replacements." QA round 2 M11: gated on the gold, and it hires.
+    # One or two lowborn courtiers from vanilla pool templates
+    # (common/scripted_character_templates/
+    # 00_pool_repopulation_character_templates.txt: pool_repopulate_stewardship
+    # for the household, pool_repopulate_prowess for the guard; both take
+    # root's culture and faith by scope, so map-agnostic), created and added
+    # the way vanilla hires a lowborn (create_character + add_courtier,
+    # events/activities/hold_court_activity/hold_court_events_general.txt:2173-2181).
     option = {
         name = eotg_aug_end.011.a
+        trigger = { gold >= major_gold_value }
         remove_short_term_gold = major_gold_value
+        create_character = {
+            template = pool_repopulate_stewardship
+            location = root.location
+            dynasty = none
+            save_scope_as = eotg_hire_first
+        }
+        add_courtier = scope:eotg_hire_first
+        random = {
+            chance = 50
+            create_character = {
+                template = pool_repopulate_prowess
+                location = root.location
+                dynasty = none
+                save_scope_as = eotg_hire_second
+            }
+            add_courtier = scope:eotg_hire_second
+        }
         ai_chance = {
             base = 40
             modifier = { add = 20  gold >= major_gold_value }
@@ -639,11 +724,42 @@ eotg_aug_end.031 = {
         animation = stress
     }
 
-    # "Keep them comfortable."
+    # "Keep them comfortable." Balance spec §5.6: how well the household is
+    # run is a stewardship check (the successor's) against
+    # medium_skill_rating (10): the old ruler's risk -10 on success, -3 on
+    # failure. Shape: vanilla duel against a fixed value,
+    # events/activities/chariot_race_activity/chariot_race_events.txt:1947.
     option = {
         name = eotg_aug_end.031.a
-        scope:eotg_old_ruler = {
-            eotg_add_fracture_risk = { AMOUNT = -10 }
+        duel = {
+            skill = stewardship
+            value = medium_skill_rating
+            50 = {
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = 3.5
+                    min = -49
+                }
+                desc = eotg_aug_end.031.a.success
+                hidden_effect = {
+                    scope:eotg_old_ruler = {
+                        eotg_add_fracture_risk = { AMOUNT = -10 }
+                    }
+                }
+            }
+            50 = {
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = -3.5
+                    min = -49
+                }
+                desc = eotg_aug_end.031.a.failure
+                hidden_effect = {
+                    scope:eotg_old_ruler = {
+                        eotg_add_fracture_risk = { AMOUNT = -3 }
+                    }
+                }
+            }
         }
         ai_chance = {
             base = 50

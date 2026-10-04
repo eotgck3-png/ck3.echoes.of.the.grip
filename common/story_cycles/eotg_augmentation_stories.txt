@@ -12,10 +12,12 @@
 #   eotg_story_aug_retinue   — The Iron Retinue Program (thread T4)
 #
 # Created by: eotg_on_yearly_aug_neurofractured_check (step 2), once per
-#   Neurofractured ruler with a primary heir aged 14+.
+#   Neurofractured ruler with a primary heir aged 14+; and (balance spec
+#   §5.8a) eotg_on_yearly_aug_overclocked_check, once the Countdown runs.
 # Fires: eotg_aug_heir.001 (stage 0), eotg_fracture.005 (stage 1),
 #   eotg_aug_heir.003 (stage 2), eotg_aug_heir.004 (stage 3, outside the
-#   Flicker band). heir.004 ends the story.
+#   Flicker band). heir.004 ends the story. Stages 1-3 wait for a
+#   Neurofractured or Seamless owner, so at Overclocked only Concern fires.
 #
 # Hidden (index §1 rule 3): visible left at its default (no), no
 # visualization block, no counters. The story's effect_group timing is the
@@ -79,6 +81,15 @@ eotg_story_aug_heir_arc = {
             }
             change_variable = { name = eotg_heir_dread  add = 1 }
         }
+        # Balance spec §5.8(b): a child the machine saved (init.014/.015,
+        # eotg_flag_aug_child_patient) fears it less. Clamped at 0.
+        if = {
+            limit = {
+                var:eotg_heir = { has_character_flag = eotg_flag_aug_child_patient }
+            }
+            change_variable = { name = eotg_heir_dread  add = -1 }
+            clamp_variable = { name = eotg_heir_dread  min = 0  max = 10 }
+        }
     }
 
     on_end = {
@@ -93,13 +104,39 @@ eotg_story_aug_heir_arc = {
         chance = 70
 
         first_valid = {
+            # QA round 2: a ruler-only arc ends when its owner is deposed or
+            # landless (end.030's abdication, a lost war). Vanilla precedent:
+            # story_cycle_take_mandate_of_heaven.txt:172-189 (story_owner
+            # is_landed = no -> end_story).
+            # QA round 2 follow-up: the arc is spent (eotg_flag_aug_heir_arc_done,
+            # read by the arc-start guards in the on_actions), so a ruler who
+            # regains land does not restart it.
+            triggered_effect = {
+                trigger = {
+                    story_owner = { is_landed = no }
+                }
+                effect = {
+                    story_owner = { add_character_flag = eotg_flag_aug_heir_arc_done }
+                    end_story = yes
+                }
+            }
+
             # 0. The owner left the system entirely (no augmentation trait):
             # nothing left to watch. Excision (eotg_aug_excision_effect) also
             # ends the story directly; Total Integration keeps it
             # (eotg_is_augmented_any includes eotg_total_integration).
+            # Balance spec §5.8(a): an arc started at Overclocked also ends
+            # when the owner regresses to Augmented or Enhanced. No done flag,
+            # so a later climb can start it again.
             triggered_effect = {
                 trigger = {
-                    story_owner = { eotg_is_augmented_any = no }
+                    story_owner = {
+                        OR = {
+                            eotg_is_augmented_any = no
+                            eotg_is_aug_tier1 = yes
+                            eotg_is_aug_tier2 = yes
+                        }
+                    }
                 }
                 effect = {
                     end_story = yes
@@ -153,8 +190,18 @@ eotg_story_aug_heir_arc = {
             }
 
             # 3. What the Heir Saw (existing event, re-homed from the random pool)
+            # Balance spec §5.8(a): stages 3-5 wait for the break
+            # (Neurofractured or Seamless); at Overclocked the arc holds here.
             triggered_effect = {
-                trigger = { var:eotg_stage = 1 }
+                trigger = {
+                    var:eotg_stage = 1
+                    story_owner = {
+                        OR = {
+                            has_trait = eotg_neurofractured
+                            has_trait = eotg_total_integration
+                        }
+                    }
+                }
                 effect = {
                     set_variable = { name = eotg_stage  value = 2 }
                     story_owner = {
@@ -165,7 +212,15 @@ eotg_story_aug_heir_arc = {
 
             # 4. The Heir's Warning
             triggered_effect = {
-                trigger = { var:eotg_stage = 2 }
+                trigger = {
+                    var:eotg_stage = 2
+                    story_owner = {
+                        OR = {
+                            has_trait = eotg_neurofractured
+                            has_trait = eotg_total_integration
+                        }
+                    }
+                }
                 effect = {
                     set_variable = { name = eotg_stage  value = 3 }
                     story_owner = {
@@ -182,6 +237,12 @@ eotg_story_aug_heir_arc = {
             triggered_effect = {
                 trigger = {
                     var:eotg_stage = 3
+                    story_owner = {
+                        OR = {
+                            has_trait = eotg_neurofractured
+                            has_trait = eotg_total_integration
+                        }
+                    }
                     story_owner = {
                         OR = {
                             has_trait = eotg_total_integration
@@ -278,13 +339,16 @@ eotg_story_aug_countdown = {
                     }
                 }
             }
-            # 4. Lost Time (60-69)
+            # Balance spec §5.10(b): stage windows 60-67 / 68-76 / >= 77, so
+            # calm accrual (12-15 a year) lands in stage 3's window from more
+            # start points. .001 stays 50-59; eotg_last_stage is unchanged.
+            # 4. Lost Time (60-67)
             triggered_effect = {
                 trigger = {
                     var:eotg_last_stage < 2
                     story_owner = {
                         var:eotg_fracture_risk >= 60
-                        var:eotg_fracture_risk < 70
+                        var:eotg_fracture_risk < 68
                     }
                 }
                 effect = {
@@ -294,13 +358,13 @@ eotg_story_aug_countdown = {
                     }
                 }
             }
-            # 5. Contradictory Memories (70-74)
+            # 5. Contradictory Memories (68-76)
             triggered_effect = {
                 trigger = {
                     var:eotg_last_stage < 3
                     story_owner = {
-                        var:eotg_fracture_risk >= 70
-                        var:eotg_fracture_risk < 75
+                        var:eotg_fracture_risk >= 68
+                        var:eotg_fracture_risk < 77
                     }
                 }
                 effect = {
@@ -310,11 +374,11 @@ eotg_story_aug_countdown = {
                     }
                 }
             }
-            # 6. Violence (75+)
+            # 6. Violence (77+)
             triggered_effect = {
                 trigger = {
                     var:eotg_last_stage < 4
-                    story_owner = { var:eotg_fracture_risk >= 75 }
+                    story_owner = { var:eotg_fracture_risk >= 77 }
                 }
                 effect = {
                     set_variable = { name = eotg_last_stage  value = 4 }
@@ -391,9 +455,26 @@ eotg_story_aug_patron = {
 
     # The open-ended exclusivity clause lasts as long as the debt
     # (patron.003 a/d). The final clause (patron.006 a) is a separate key.
+    # QA round 2 M12: the envoy leaves with the debt. A living envoy who is
+    # free and holds no land goes to the pool (move_to_pool, vanilla
+    # events/activities/hold_court_activity/hold_court_events_general.txt:508),
+    # so each patron.007 replacement does not leave a permanent courtier.
+    # Not tied to the owner's court: on the owner's death the envoy would
+    # otherwise pass to the heir's.
     on_end = {
         story_owner = {
             remove_character_modifier = eotg_mod_aug_patron_clause
+        }
+        if = {
+            limit = {
+                exists = var:eotg_envoy
+                var:eotg_envoy = {
+                    is_alive = yes
+                    is_landed = no
+                    is_imprisoned = no
+                }
+            }
+            var:eotg_envoy = { move_to_pool = yes }
         }
     }
 
@@ -402,6 +483,8 @@ eotg_story_aug_patron = {
     }
 
     # Two cadences: read terms are slower (phase5 §2.3)
+    # Balance spec §5.8: both ticks open (after the landless ending) with the
+    # Neurofractured write-off.
     # The tick (inlined in both cadences so the event graph can follow it;
     # keep the two copies identical). Order, phase5 §2.3 with 1 and 2
     # swapped (deviation): grievance >= 3 or demand >= 4 -> .006 first, so
@@ -413,6 +496,36 @@ eotg_story_aug_patron = {
         years = { 2 3 }
         trigger = { NOT = { var:eotg_terms = flag:read } }
         first_valid = {
+            # QA round 2: a ruler-only arc ends when its owner is deposed or
+            # landless (end.030's abdication, a lost war). Vanilla precedent:
+            # story_cycle_take_mandate_of_heaven.txt:172-189 (story_owner
+            # is_landed = no -> end_story).
+            triggered_effect = {
+                trigger = {
+                    story_owner = { is_landed = no }
+                }
+                effect = {
+                    end_story = yes
+                }
+            }
+            # Balance spec §5.8: the syndicate writes off a Neurofractured
+            # owner. The Final Demand comes now (demand to 4); the timed
+            # owner flag eotg_flag_aug_patron_writeoff (60 days) gives
+            # patron.006 its write-off desc. After the landless ending, which
+            # must still win.
+            triggered_effect = {
+                trigger = {
+                    story_owner = { has_trait = eotg_neurofractured }
+                    var:eotg_demand < 4
+                }
+                effect = {
+                    set_variable = { name = eotg_demand  value = 4 }
+                    story_owner = {
+                        add_character_flag = { flag = eotg_flag_aug_patron_writeoff  days = 60 }
+                        trigger_event = { id = eotg_aug_patron.006  days = { 1 30 } }
+                    }
+                }
+            }
             triggered_effect = {
                 trigger = { always = yes }
                 effect = {
@@ -473,6 +586,36 @@ eotg_story_aug_patron = {
         years = { 3 4 }
         trigger = { var:eotg_terms = flag:read }
         first_valid = {
+            # QA round 2: a ruler-only arc ends when its owner is deposed or
+            # landless (end.030's abdication, a lost war). Vanilla precedent:
+            # story_cycle_take_mandate_of_heaven.txt:172-189 (story_owner
+            # is_landed = no -> end_story).
+            triggered_effect = {
+                trigger = {
+                    story_owner = { is_landed = no }
+                }
+                effect = {
+                    end_story = yes
+                }
+            }
+            # Balance spec §5.8: the syndicate writes off a Neurofractured
+            # owner. The Final Demand comes now (demand to 4); the timed
+            # owner flag eotg_flag_aug_patron_writeoff (60 days) gives
+            # patron.006 its write-off desc. After the landless ending, which
+            # must still win.
+            triggered_effect = {
+                trigger = {
+                    story_owner = { has_trait = eotg_neurofractured }
+                    var:eotg_demand < 4
+                }
+                effect = {
+                    set_variable = { name = eotg_demand  value = 4 }
+                    story_owner = {
+                        add_character_flag = { flag = eotg_flag_aug_patron_writeoff  days = 60 }
+                        trigger_event = { id = eotg_aug_patron.006  days = { 1 30 } }
+                    }
+                }
+            }
             triggered_effect = {
                 trigger = { always = yes }
                 effect = {
@@ -552,6 +695,10 @@ eotg_story_aug_retinue = {
         else = {
             set_variable = { name = eotg_phase  value = 1 }
         }
+        # QA round 2: phase 1 waits for a volunteer at most 2 years, then
+        # advances silently (branch 1b). Timed story variable, as vanilla
+        # story_cycle_party_baron.txt:116-120.
+        set_variable = { name = eotg_phase1_grace  value = yes  years = 2 }
         story_owner = {
             remove_variable = eotg_retinue_phase_passthrough
             # The knights already augmented are the first of the iron
@@ -577,6 +724,46 @@ eotg_story_aug_retinue = {
         chance = 70
 
         first_valid = {
+            # QA round 2: a ruler-only arc ends when its owner is deposed or
+            # landless (end.030's abdication, a lost war). Vanilla precedent:
+            # story_cycle_take_mandate_of_heaven.txt:172-189 (story_owner
+            # is_landed = no -> end_story).
+            # QA round 2 follow-up: this is the Program's only end besides
+            # retinue.005 and the owner's death, so it closes the Program the
+            # same way .005 does: the owner bonus goes (it belongs to the
+            # Program) and eotg_flag_aug_retinue_done blocks every restart
+            # path (eotg_aug_start_retinue_effect, the Arms Race entry,
+            # init.019 / .020).
+            triggered_effect = {
+                trigger = {
+                    story_owner = { is_landed = no }
+                }
+                effect = {
+                    story_owner = {
+                        remove_character_modifier = eotg_mod_aug_iron_retinue
+                        add_character_flag = eotg_flag_aug_retinue_done
+                    }
+                    end_story = yes
+                }
+            }
+
+            # Balance spec §5.8: once the owner breaks, the Program has no one
+            # to answer to. Straight to phase 5, and What the Program Becomes
+            # fires now (retinue.005 shows desc_fractured and still sets the
+            # done flag, QA round 2 H2). After the landless ending.
+            triggered_effect = {
+                trigger = {
+                    story_owner = { has_trait = eotg_neurofractured }
+                    var:eotg_phase < 5
+                }
+                effect = {
+                    set_variable = { name = eotg_phase  value = 5 }
+                    story_owner = {
+                        trigger_event = { id = eotg_aug_retinue.005  days = { 1 30 } }
+                    }
+                }
+            }
+
             # 1. First of the Iron (needs a volunteer; else wait)
             triggered_effect = {
                 trigger = {
@@ -587,6 +774,17 @@ eotg_story_aug_retinue = {
                     story_owner = {
                         trigger_event = { id = eotg_aug_retinue.001  days = { 1 30 } }
                     }
+                }
+            }
+            # 1b. No volunteer for 2 years (eotg_phase1_grace lapsed): the
+            # Program moves on without one, silently (QA round 2).
+            triggered_effect = {
+                trigger = {
+                    var:eotg_phase = 1
+                    NOT = { has_variable = eotg_phase1_grace }
+                }
+                effect = {
+                    set_variable = { name = eotg_phase  value = 2 }
                 }
             }
             # 2. More Ask (no unaugmented knight left: straight to phase 3)

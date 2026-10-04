@@ -63,6 +63,13 @@ def main(out_dir, all_loc):
                 story_roots |= fired
             else:
                 unstarted.append(story)
+    name_re = (r"(?:set_variable|change_variable|remove_variable|has_variable|set_local_variable|"
+               r"save_scope_as|save_temporary_scope_as|save_scope_value_as|save_temporary_scope_value_as|"
+               r"add_character_flag|has_character_flag|remove_character_flag|add_to_variable_list)"
+               r"\s*=\s*(?:\{[^}]*?(?:name|flag)\s*=\s*)?(\w+)")
+    script_names = {n for text in script.values() for n in re.findall(name_re, text)}
+    script_names |= {n for text in script.values() for n in re.findall(r"\b(?:var|scope|local_var|flag):(\w+)", text)}
+
     for story in unstarted:
         print(f"!! story cycle {story} is never started (no create_story); its events count as unreached")
 
@@ -94,8 +101,11 @@ def main(out_dir, all_loc):
         for lang in json.loads(cov_file.read_text(encoding="utf-8")):
             # PX's coverage scan walks every subfolder, including the frozen v1 tree; its
             # definition index does not, so only the coverage needs filtering.
+            # PX also asks for loc on names the mod only uses as variables, saved scopes or
+            # flags (eotg_aug_escrow, eotg_scrambled_into, ...). Those are never displayed.
             live = [m for m in lang["missing"]
-                    if "OLD PROJECT VERSION" not in m["file"] and not KNOWN_BENIGN.search(m["key"])]
+                    if "OLD PROJECT VERSION" not in m["file"] and not KNOWN_BENIGN.search(m["key"])
+                    and m["key"] not in script_names]
             lang["missing"] = live
             missing = [m for m in live if all_loc or m["key"].startswith(("eotg_", "trait_eotg_"))]
             for m in missing:

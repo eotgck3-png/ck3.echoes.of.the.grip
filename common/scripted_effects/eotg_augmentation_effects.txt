@@ -119,10 +119,15 @@ eotg_aug_refresh_synergy_effect = {
 # Final QA: a character coming (back) into the system starts at the install
 # value, risk 0, so stale risk from an earlier augmentation (e.g. one the
 # Patron's debt kept moving) cannot carry into the new one.
+# Balance spec §5.1: a newcomer settles for 5 years before the next stage
+# (eotg_flag_aug_settling, read by eotg_can_progress_to_* and the Pursue
+# decision). Only in the "was unaugmented" branch, so a knight re-initiated
+# while augmented does not reset it.
 eotg_aug_initiate_effect = {
     if = {
         limit = { eotg_is_augmented_any = no }
         set_variable = { name = eotg_fracture_risk  value = 0 }
+        add_character_flag = { flag = eotg_flag_aug_settling  years = 5 }
     }
     add_trait = eotg_cybernetics
     eotg_aug_refresh_synergy_effect = yes
@@ -133,6 +138,9 @@ eotg_aug_initiate_effect = {
 # Callers: eotg_aug_tier1.022 (a, b) XP 50 (Phase 4a: tier1.002 now pays and
 #          fires the First Upgrade chain); eotg_aug_tier2.003 (a, c, d) XP 100;
 #          eotg_decision_partial_removal XP 0; eotg_decision_overclock_regression XP 50.
+# Balance spec §5.1: every tier change, regressions included, starts a fresh
+# 5-year eotg_flag_aug_settling (relapse is slower too). The Pursue decision
+# reaches this only through tier1.022 / tier2.003; it never sets XP itself.
 eotg_aug_set_integration_effect = {
     if = {
         limit = { has_trait = eotg_cybernetics }
@@ -144,6 +152,7 @@ eotg_aug_set_integration_effect = {
             }
         }
         eotg_aug_refresh_synergy_effect = yes
+        add_character_flag = { flag = eotg_flag_aug_settling  years = 5 }
     }
 }
 
@@ -236,9 +245,17 @@ eotg_clean_all_aug_modifiers = {
 # A Seamless character (eotg_total_integration, Phase 3b) has no risk: the
 # variable was removed with the seam, and nothing may recreate it (e.g. the
 # Heir's Arc options, which can reach a Seamless owner).
+# QA round 2 M3: nor may anything recreate it on someone who has left the
+# system (delayed chain stages, e.g. tier1.017, tier2.017/.018/.021, can land
+# after Remove Implants or Excision): the character must be augmented. Every
+# install path adds the trait before it touches risk, so no caller loses a
+# move it meant to make.
 eotg_add_fracture_risk = {
     if = {
-        limit = { NOT = { has_trait = eotg_total_integration } }
+        limit = {
+            eotg_is_augmented_any = yes
+            NOT = { has_trait = eotg_total_integration }
+        }
         if = {
             limit = { NOT = { has_variable = eotg_fracture_risk } }
             set_variable = { name = eotg_fracture_risk  value = 0 }
@@ -259,8 +276,17 @@ eotg_trigger_neurofracture = {
     # days after the cascade. Same duration the on_action uses (11 months, B4: expires
     # before the next pulse, so no same-day race); no event trigger reads it.
     add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 11 }
+    # QA round 2 M1: the cascade year is not also a Neurofractured year. The
+    # NF check runs later in the same pulse; this 1-day flag makes it skip
+    # the drift and the Heir's Arc start. Read only in
+    # eotg_on_yearly_aug_neurofractured_check (no event reads it).
+    add_character_flag = { flag = eotg_flag_aug_cascaded_this_pulse  days = 1 }
     # Phase 5: the cascade is the Countdown's ending (phase5 §1.1)
     eotg_aug_end_countdown_effect = yes
+    # Balance spec §5.6 (B2 QA): a cascade ends any open chain, so its
+    # consumer (e.g. tier3.024, which needs eotg_is_aug_tier3) may never
+    # fire to clear the edge/strain flag; clear it here instead
+    eotg_aug_clear_chain_flags_effect = yes
     trigger_event = { id = eotg_fracture.0001  days = 1 }
 }
 
@@ -322,6 +348,12 @@ eotg_aug_ease_wound_effect = {
 # The ruler is saved as a temporary scope so the family test does not depend on
 # root (a caller may run this on a saved scope, not the event root).
 # Weighted random_courtier shape: vanilla `weight = { base  modifier = { factor } }`.
+# Kinslayer policy (QA round 2 M4): an option where the ruler CHOOSES to kill
+# a picked victim (fracture.002.c, .019.c, tier3.001.c, .015.e, .017.b,
+# heir.004 kill_c, nr.006.d) calls vanilla add_kinslayer_trait_or_nothing_effect
+# (00_secret_effects.txt:433) before the death. Involuntary episode deaths
+# (the cascade, Containment Failure, the Court Massacre, Blood on the Sleeve,
+# The Missing Courtier) carry none: the implant acted, not the ruler.
 eotg_aug_pick_victim_effect = {
     save_temporary_scope_as = eotg_aug_victim_owner
     random_courtier = {
@@ -417,9 +449,51 @@ eotg_aug_remove_all_effect = {
     remove_variable = eotg_fracture_risk
     remove_variable = eotg_aug_voice
     remove_variable = eotg_aug_focus
+    # Balance spec §5.5: the sedation tolerance belongs to this augmentation
+    remove_variable = eotg_aug_sedation_courses
+    # Balance spec §5.7: so does a knight's unspent battle bonus
+    remove_variable = eotg_aug_nr_battle_bonus
     remove_character_flag = eotg_flag_aug_vendor_safe
     remove_character_flag = eotg_flag_aug_vendor_bold
+    # Balance spec §5.9 (ruling 2026-10-04): the prosthesis comes out with
+    # the rest, and a masked congenital trait shows again.
+    eotg_aug_unmask_congenital_effect = yes
     eotg_aug_end_countdown_effect = yes
+    # Balance spec §5.6 (B2 QA): an exit mid-chain (e.g. tier1.014.b) must
+    # not carry an edge or strain flag into a re-initiation
+    eotg_aug_clear_chain_flags_effect = yes
+    # QA round 2: refund a price paid for a chain stage that can no longer
+    # fire (eotg_aug_pay_upgrade_effect; eotg_aug_init.007 a/c/e). The stage
+    # that delivers (tier1.022, init.008) removes the escrow on arrival.
+    if = {
+        limit = { has_variable = eotg_aug_escrow }
+        add_gold = var:eotg_aug_escrow
+        remove_variable = eotg_aug_escrow
+    }
+}
+
+# Balance spec §5.9 (ruling 2026-10-04): the init.006 prosthesis masked a
+# congenital trait (make_trait_inactive; the genes still pass on). When it
+# comes out, the trait shows again. make_trait_active is vanilla's
+# counterpart (PX effects.log; events/trait_specific_events/
+# trait_specific_events.txt:359-361, guarded by has_inactive_trait as here).
+# eotg_flag_aug_congenital_masked is set by eotg_aug_init.006.f (Part B2);
+# until then this is a no-op.
+# Callers: eotg_aug_remove_all_effect, eotg_decision_partial_removal,
+# eotg_decision_overclock_regression.
+eotg_aug_unmask_congenital_effect = {
+    if = {
+        limit = { has_character_flag = eotg_flag_aug_congenital_masked }
+        if = {
+            limit = { has_inactive_trait = clubfooted }
+            make_trait_active = clubfooted
+        }
+        if = {
+            limit = { has_inactive_trait = hunchbacked }
+            make_trait_active = hunchbacked
+        }
+        remove_character_flag = eotg_flag_aug_congenital_masked
+    }
 }
 
 # Removes ONE physical-loss trait, worst first: blind > one_legged > maimed >
@@ -638,43 +712,49 @@ eotg_aug_retainer_install_effect = {
 # fickle/stubborn entries never reach one. Fallback (weight 1) only when the
 # character holds none of the 34 source traits.
 # Callers: eotg_fracture.018 (a, b, c twice, d, e).
+# QA round 2: each swap saves the trait it added as the temporary scope value
+# eotg_scrambled_into, and no branch whose SOURCE is that trait may run in the
+# same effect. So .018.c's second scramble can never swap the first one back
+# (brave -> craven -> brave). If nothing else is left to swap, the second
+# scramble does nothing. `?=` on a scope value that does not exist yet is
+# false (same null-safe compare as var:eotg_aug_focus ?= flag:nerves).
 eotg_aug_scramble_personality_effect = {
     random_list = {
-        10 = { trigger = { has_trait = brave }  remove_trait = brave  add_trait = craven }
-        10 = { trigger = { has_trait = craven }  remove_trait = craven  add_trait = brave }
-        10 = { trigger = { has_trait = calm }  remove_trait = calm  add_trait = wrathful }
-        10 = { trigger = { has_trait = wrathful }  remove_trait = wrathful  add_trait = calm }
-        10 = { trigger = { has_trait = chaste }  remove_trait = chaste  add_trait = lustful }
-        10 = { trigger = { has_trait = lustful }  remove_trait = lustful  add_trait = chaste }
-        10 = { trigger = { has_trait = content }  remove_trait = content  add_trait = ambitious }
-        10 = { trigger = { has_trait = ambitious }  remove_trait = ambitious  add_trait = content }
-        10 = { trigger = { has_trait = diligent }  remove_trait = diligent  add_trait = lazy }
-        10 = { trigger = { has_trait = lazy }  remove_trait = lazy  add_trait = diligent }
-        10 = { trigger = { has_trait = fickle }  remove_trait = fickle  add_trait = stubborn }
-        10 = { trigger = { has_trait = stubborn }  remove_trait = stubborn  add_trait = fickle }
-        10 = { trigger = { has_trait = forgiving }  remove_trait = forgiving  add_trait = vengeful }
-        10 = { trigger = { has_trait = vengeful }  remove_trait = vengeful  add_trait = forgiving }
-        10 = { trigger = { has_trait = generous }  remove_trait = generous  add_trait = greedy }
-        10 = { trigger = { has_trait = greedy }  remove_trait = greedy  add_trait = generous }
-        10 = { trigger = { has_trait = gregarious }  remove_trait = gregarious  add_trait = shy }
-        10 = { trigger = { has_trait = shy }  remove_trait = shy  add_trait = gregarious }
-        10 = { trigger = { has_trait = honest }  remove_trait = honest  add_trait = deceitful }
-        10 = { trigger = { has_trait = deceitful }  remove_trait = deceitful  add_trait = honest }
-        10 = { trigger = { has_trait = humble }  remove_trait = humble  add_trait = arrogant }
-        10 = { trigger = { has_trait = arrogant }  remove_trait = arrogant  add_trait = humble }
-        10 = { trigger = { has_trait = just }  remove_trait = just  add_trait = arbitrary }
-        10 = { trigger = { has_trait = arbitrary }  remove_trait = arbitrary  add_trait = just }
-        10 = { trigger = { has_trait = patient }  remove_trait = patient  add_trait = impatient }
-        10 = { trigger = { has_trait = impatient }  remove_trait = impatient  add_trait = patient }
-        10 = { trigger = { has_trait = temperate }  remove_trait = temperate  add_trait = gluttonous }
-        10 = { trigger = { has_trait = gluttonous }  remove_trait = gluttonous  add_trait = temperate }
-        10 = { trigger = { has_trait = trusting }  remove_trait = trusting  add_trait = paranoid }
-        10 = { trigger = { has_trait = paranoid }  remove_trait = paranoid  add_trait = trusting }
-        10 = { trigger = { has_trait = zealous }  remove_trait = zealous  add_trait = cynical }
-        10 = { trigger = { has_trait = cynical }  remove_trait = cynical  add_trait = zealous }
-        10 = { trigger = { has_trait = compassionate }  remove_trait = compassionate  add_trait = callous }
-        10 = { trigger = { has_trait = callous }  remove_trait = callous  add_trait = compassionate }
-        10 = { trigger = { has_trait = sadistic }  remove_trait = sadistic  add_trait = compassionate }
+        10 = { trigger = { has_trait = brave  NOT = { scope:eotg_scrambled_into ?= flag:brave } }  remove_trait = brave  add_trait = craven  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:craven } }
+        10 = { trigger = { has_trait = craven  NOT = { scope:eotg_scrambled_into ?= flag:craven } }  remove_trait = craven  add_trait = brave  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:brave } }
+        10 = { trigger = { has_trait = calm  NOT = { scope:eotg_scrambled_into ?= flag:calm } }  remove_trait = calm  add_trait = wrathful  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:wrathful } }
+        10 = { trigger = { has_trait = wrathful  NOT = { scope:eotg_scrambled_into ?= flag:wrathful } }  remove_trait = wrathful  add_trait = calm  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:calm } }
+        10 = { trigger = { has_trait = chaste  NOT = { scope:eotg_scrambled_into ?= flag:chaste } }  remove_trait = chaste  add_trait = lustful  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:lustful } }
+        10 = { trigger = { has_trait = lustful  NOT = { scope:eotg_scrambled_into ?= flag:lustful } }  remove_trait = lustful  add_trait = chaste  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:chaste } }
+        10 = { trigger = { has_trait = content  NOT = { scope:eotg_scrambled_into ?= flag:content } }  remove_trait = content  add_trait = ambitious  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:ambitious } }
+        10 = { trigger = { has_trait = ambitious  NOT = { scope:eotg_scrambled_into ?= flag:ambitious } }  remove_trait = ambitious  add_trait = content  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:content } }
+        10 = { trigger = { has_trait = diligent  NOT = { scope:eotg_scrambled_into ?= flag:diligent } }  remove_trait = diligent  add_trait = lazy  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:lazy } }
+        10 = { trigger = { has_trait = lazy  NOT = { scope:eotg_scrambled_into ?= flag:lazy } }  remove_trait = lazy  add_trait = diligent  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:diligent } }
+        10 = { trigger = { has_trait = fickle  NOT = { scope:eotg_scrambled_into ?= flag:fickle } }  remove_trait = fickle  add_trait = stubborn  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:stubborn } }
+        10 = { trigger = { has_trait = stubborn  NOT = { scope:eotg_scrambled_into ?= flag:stubborn } }  remove_trait = stubborn  add_trait = fickle  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:fickle } }
+        10 = { trigger = { has_trait = forgiving  NOT = { scope:eotg_scrambled_into ?= flag:forgiving } }  remove_trait = forgiving  add_trait = vengeful  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:vengeful } }
+        10 = { trigger = { has_trait = vengeful  NOT = { scope:eotg_scrambled_into ?= flag:vengeful } }  remove_trait = vengeful  add_trait = forgiving  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:forgiving } }
+        10 = { trigger = { has_trait = generous  NOT = { scope:eotg_scrambled_into ?= flag:generous } }  remove_trait = generous  add_trait = greedy  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:greedy } }
+        10 = { trigger = { has_trait = greedy  NOT = { scope:eotg_scrambled_into ?= flag:greedy } }  remove_trait = greedy  add_trait = generous  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:generous } }
+        10 = { trigger = { has_trait = gregarious  NOT = { scope:eotg_scrambled_into ?= flag:gregarious } }  remove_trait = gregarious  add_trait = shy  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:shy } }
+        10 = { trigger = { has_trait = shy  NOT = { scope:eotg_scrambled_into ?= flag:shy } }  remove_trait = shy  add_trait = gregarious  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:gregarious } }
+        10 = { trigger = { has_trait = honest  NOT = { scope:eotg_scrambled_into ?= flag:honest } }  remove_trait = honest  add_trait = deceitful  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:deceitful } }
+        10 = { trigger = { has_trait = deceitful  NOT = { scope:eotg_scrambled_into ?= flag:deceitful } }  remove_trait = deceitful  add_trait = honest  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:honest } }
+        10 = { trigger = { has_trait = humble  NOT = { scope:eotg_scrambled_into ?= flag:humble } }  remove_trait = humble  add_trait = arrogant  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:arrogant } }
+        10 = { trigger = { has_trait = arrogant  NOT = { scope:eotg_scrambled_into ?= flag:arrogant } }  remove_trait = arrogant  add_trait = humble  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:humble } }
+        10 = { trigger = { has_trait = just  NOT = { scope:eotg_scrambled_into ?= flag:just } }  remove_trait = just  add_trait = arbitrary  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:arbitrary } }
+        10 = { trigger = { has_trait = arbitrary  NOT = { scope:eotg_scrambled_into ?= flag:arbitrary } }  remove_trait = arbitrary  add_trait = just  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:just } }
+        10 = { trigger = { has_trait = patient  NOT = { scope:eotg_scrambled_into ?= flag:patient } }  remove_trait = patient  add_trait = impatient  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:impatient } }
+        10 = { trigger = { has_trait = impatient  NOT = { scope:eotg_scrambled_into ?= flag:impatient } }  remove_trait = impatient  add_trait = patient  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:patient } }
+        10 = { trigger = { has_trait = temperate  NOT = { scope:eotg_scrambled_into ?= flag:temperate } }  remove_trait = temperate  add_trait = gluttonous  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:gluttonous } }
+        10 = { trigger = { has_trait = gluttonous  NOT = { scope:eotg_scrambled_into ?= flag:gluttonous } }  remove_trait = gluttonous  add_trait = temperate  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:temperate } }
+        10 = { trigger = { has_trait = trusting  NOT = { scope:eotg_scrambled_into ?= flag:trusting } }  remove_trait = trusting  add_trait = paranoid  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:paranoid } }
+        10 = { trigger = { has_trait = paranoid  NOT = { scope:eotg_scrambled_into ?= flag:paranoid } }  remove_trait = paranoid  add_trait = trusting  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:trusting } }
+        10 = { trigger = { has_trait = zealous  NOT = { scope:eotg_scrambled_into ?= flag:zealous } }  remove_trait = zealous  add_trait = cynical  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:cynical } }
+        10 = { trigger = { has_trait = cynical  NOT = { scope:eotg_scrambled_into ?= flag:cynical } }  remove_trait = cynical  add_trait = zealous  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:zealous } }
+        10 = { trigger = { has_trait = compassionate  NOT = { scope:eotg_scrambled_into ?= flag:compassionate } }  remove_trait = compassionate  add_trait = callous  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:callous } }
+        10 = { trigger = { has_trait = callous  NOT = { scope:eotg_scrambled_into ?= flag:callous } }  remove_trait = callous  add_trait = compassionate  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:compassionate } }
+        10 = { trigger = { has_trait = sadistic  NOT = { scope:eotg_scrambled_into ?= flag:sadistic } }  remove_trait = sadistic  add_trait = compassionate  save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:compassionate } }
         # Fallback: none of the source traits held
         1 = {
             trigger = {
@@ -700,6 +780,7 @@ eotg_aug_scramble_personality_effect = {
                 }
             }
             add_trait = paranoid
+            save_temporary_scope_value_as = { name = eotg_scrambled_into  value = flag:paranoid }
         }
     }
 }
@@ -916,9 +997,21 @@ eotg_aug_total_integration_effect = {
     remove_trait = callous
     remove_trait = sadistic
     remove_trait = eccentric
+    # QA round 2: the Iron Retinue's owner bonus belongs to the Program, not
+    # to the owner's own implants, so it survives the clean-up while held.
+    if = {
+        limit = { has_character_modifier = eotg_mod_aug_iron_retinue }
+        save_temporary_scope_value_as = { name = eotg_kept_retinue_bonus  value = yes }
+    }
     eotg_clean_all_aug_modifiers = yes
+    if = {
+        limit = { exists = scope:eotg_kept_retinue_bonus }
+        add_character_modifier = { modifier = eotg_mod_aug_iron_retinue }
+    }
     hidden_effect = {
         remove_variable = eotg_fracture_risk
+        remove_variable = eotg_aug_sedation_courses    # balance spec §5.5
+        remove_variable = eotg_aug_nr_battle_bonus     # balance spec §5.7
         set_variable = { name = eotg_aug_voice  value = 5 }
         remove_character_flag = eotg_flag_aug_restrained
         remove_character_flag = eotg_flag_aug_sedated
@@ -1032,8 +1125,10 @@ eotg_aug_excision_surgery_effect = {
             save_scope_value_as = { name = eotg_excision_outcome  value = flag:clean }
         }
     }
+    # QA round 2 M2: only the survival branches save the outcome, so test
+    # that rather than is_alive (death processing may be deferred).
     if = {
-        limit = { is_alive = yes }
+        limit = { exists = scope:eotg_excision_outcome }
         if = {
             limit = { always = $BRAVE$ }
             add_prestige = 100
@@ -1079,7 +1174,27 @@ eotg_aug_abdicate_effect = {
 # eotg_flag_aug_replace_more for 5 years; paying spends it). Mirror:
 # eotg_aug_can_afford_upgrade. Inline-value shape as eotg_aug_excision_pay_effect.
 # Callers: eotg_aug_tier1.002 (a, d, e).
+# QA round 2: the price is held as escrow (eotg_aug_escrow, 1 year) until
+# the Installation (tier1.022) consumes it; if the ruler leaves the system
+# before then (Remove Implants, Rejection), eotg_aug_remove_all_effect
+# refunds it, so gold is never lost to a chain stage that cannot fire.
+# The price is written out twice (charge, escrow) rather than charging
+# var:eotg_aug_escrow, so the option tooltip shows the real amount: tooltips
+# do not run the hidden set_variable first.
 eotg_aug_pay_upgrade_effect = {
+    hidden_effect = {
+        set_variable = {
+            name = eotg_aug_escrow
+            value = {
+                value = medium_gold_value
+                if = {
+                    limit = { has_character_flag = eotg_flag_aug_replace_more }
+                    multiply = 0.85
+                }
+            }
+            years = 1
+        }
+    }
     remove_short_term_gold = {
         value = medium_gold_value
         if = {
@@ -1108,8 +1223,9 @@ eotg_aug_try_start_countdown_effect = {
     }
 }
 
-# End it. Callers: eotg_trigger_neurofracture (the cascade is the ending),
-# eotg_aug_remove_all_effect, eotg_aug_countdown.006 (The Quiet).
+# End it. Callers: eotg_trigger_neurofracture and eotg_aug_nr_cascade_effect
+# (the cascade is the ending), eotg_aug_remove_all_effect,
+# eotg_aug_countdown.006 (The Quiet), eotg_decision_overclock_regression.
 eotg_aug_end_countdown_effect = {
     if = {
         limit = { eotg_aug_has_countdown = yes }
@@ -1214,9 +1330,14 @@ eotg_aug_retinue_install_effect = {
 # (final QA): exactly one augmented knight -> phase 1, so .001 "First of the
 # Iron" can fire; two or more -> phase 2. Callers: eotg_aug_init.019 (b, d),
 # eotg_aug_init.020 (after).
+# QA round 2 H2: never again after eotg_aug_retinue.005 ended it
+# (eotg_flag_aug_retinue_done, permanent).
 eotg_aug_start_retinue_effect = {
     if = {
-        limit = { eotg_aug_has_retinue = no }
+        limit = {
+            eotg_aug_has_retinue = no
+            NOT = { has_character_flag = eotg_flag_aug_retinue_done }
+        }
         hidden_effect = {
             if = {
                 limit = {
@@ -1255,21 +1376,6 @@ eotg_aug_retinue_reverse_effect = {
     remove_character_modifier = eotg_mod_aug_iron_retinue
 }
 
-# Cost of augmenting the unaugmented knights, minor_gold_value each, cap 3
-# (eotg_aug_retinue.004.a). Script-value iterator shape: vanilla
-# common/script_values/04_ep2_tournament_values.txt:2515 (every_knight, add).
-eotg_aug_retinue_pay_all_effect = {
-    remove_short_term_gold = {
-        value = 0
-        every_knight = {
-            limit = { eotg_aug_retainer_candidate = yes }
-            add = 1
-        }
-        max = 3
-        multiply = minor_gold_value
-    }
-}
-
 # ═════════════════════════════════════════════════════════════════════════════
 # Phase 6 — docs/specs/cybernetics_v2_phase6.md (the non-ruler lifecycle)
 # ═════════════════════════════════════════════════════════════════════════════
@@ -1284,8 +1390,291 @@ eotg_aug_nr_cascade_effect = {
     add_trait = eotg_neurofractured
     eotg_apply_neurofracture_distortion = yes
     set_variable = { name = eotg_fracture_risk  value = 0 }
+    # QA round 2 M13: a landless Overclocked ex-ruler may still own a
+    # Countdown; the cascade is its ending, as in eotg_trigger_neurofracture.
+    eotg_aug_end_countdown_effect = yes
     save_scope_as = eotg_champion
     employer ?= {
         trigger_event = { id = eotg_aug_nr.006  days = { 1 7 } }
     }
+}
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Balance spec Part B2 — docs/specs/cybernetics_v2_balance.md §5.4
+# Option bodies for the hidden overrides. Each converted option shows its own
+# body through show_as_tooltip and runs, inside hidden_effect, either that
+# body or the harsher option's body (eotg_aug_override_chance). One effect per
+# body keeps the tooltip, the honoured path, the overriding path and the
+# harsher option itself from drifting apart. Run in the event root's scope
+# (the Neurofractured ruler); the event's saved scopes are read as saved.
+# Risk moves stay inside the body; callers wrap the roll in hidden_effect.
+# ═════════════════════════════════════════════════════════════════════════════
+
+# -- eotg_fracture.006 The Warrant (scope:eotg_warrant_vassal) ----------------
+# "Crush any who stand against me." Callers: .006.a; the .006.b / .d override.
+eotg_aug_f006_crush_effect = {
+    add_dread = 40
+    add_tyranny = 20
+    add_prestige = -100
+    if = {
+        limit = {
+            exists = scope:eotg_warrant_vassal
+            scope:eotg_warrant_vassal = { is_imprisoned = no }
+        }
+        # QA round 2 M5: vanilla imprison_character_effect
+        # (00_prison_effects.txt:1644): unjust-imprisonment tyranny and the
+        # family's opinion. The flat +20 tyranny above is the crackdown itself.
+        imprison_character_effect = {
+            TARGET = scope:eotg_warrant_vassal
+            IMPRISONER = root
+        }
+    }
+    stress_impact = { base = medium_stress_impact_gain }
+    eotg_aug_stress_tyranny_effect = yes
+}
+
+# "Offer concessions." Caller: .006.b (tooltip and honoured path).
+eotg_aug_f006_concessions_effect = {
+    add_prestige = -200
+    every_vassal = {
+        limit = {
+            is_alive = yes
+            opinion = { target = root  value < -30 }
+        }
+        remove_opinion = { target = root  modifier = eotg_opinion_aug_fear }
+        remove_opinion = { target = root  modifier = eotg_opinion_aug_unease }
+        add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+    }
+    every_targeting_faction = {
+        limit = { NOT = { exists = faction_war } }
+        add_faction_discontent = -50
+    }
+}
+
+# [just] "Submit to their tribunal." Caller: .006.d (tooltip and honoured path).
+eotg_aug_f006_tribunal_effect = {
+    add_prestige = -100
+    every_targeting_faction = {
+        limit = { NOT = { exists = faction_war } }
+        add_faction_discontent = -100
+    }
+    every_vassal = {
+        limit = { opinion = { target = root  value < 0 } }
+        add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+    }
+    eotg_add_fracture_risk = { AMOUNT = -10 }
+}
+
+# -- eotg_fracture.009 Lost Hour (misleading desc) -----------------------------
+# The investigating options (a, c, e) learn the minutes were written
+# afterwards, only when the event was misled (scope value eotg_misled). The
+# toast is hidden from the option tooltip so the choice gives nothing away.
+eotg_aug_f009_misled_toast_effect = {
+    if = {
+        limit = { exists = scope:eotg_misled }
+        hidden_effect = {
+            send_interface_toast = {
+                title = eotg_fracture.009.misled_tt
+                left_icon = root
+            }
+        }
+    }
+}
+
+# -- eotg_fracture.015 The Unsent Letter (misleading desc) ---------------------
+# Send the TRUE letter (scope:eotg_letter_kind), whatever the desc showed
+# (scope:eotg_letter_shown). The reveal toast fires only when the event was
+# misled (lore M5). Callers: .015.b, .015.d, inside hidden_effect behind the
+# neutral tooltip eotg_fracture.015.b.tt.
+eotg_aug_f015_send_effect = {
+    if = {
+        limit = { exists = scope:eotg_addressee }
+        if = {
+            limit = { scope:eotg_letter_kind = flag:confession }
+            scope:eotg_addressee = {
+                add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+            }
+            add_prestige = -50
+        }
+        else_if = {
+            limit = { scope:eotg_letter_kind = flag:threat }
+            scope:eotg_addressee = {
+                add_opinion = { modifier = eotg_opinion_aug_fear  target = root  years = 10 }
+            }
+            add_dread = 10
+            eotg_aug_stress_cruelty_effect = yes
+        }
+        else = {
+            scope:eotg_addressee = {
+                add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
+            }
+        }
+        if = {
+            limit = { exists = scope:eotg_misled }
+            if = {
+                limit = { scope:eotg_letter_kind = flag:confession }
+                send_interface_toast = {
+                    title = eotg_fracture.015.b.reveal_confession
+                    left_icon = scope:eotg_addressee
+                }
+            }
+            else_if = {
+                limit = { scope:eotg_letter_kind = flag:threat }
+                send_interface_toast = {
+                    title = eotg_fracture.015.b.reveal_threat
+                    left_icon = scope:eotg_addressee
+                }
+            }
+            else = {
+                send_interface_toast = {
+                    title = eotg_fracture.015.b.reveal_devotion
+                    left_icon = scope:eotg_addressee
+                }
+            }
+        }
+    }
+}
+
+# -- eotg_fracture.016 Blood on the Sleeve --------------------------------------
+# "Burn the shirt." Callers: .016.b; the .016.c override.
+eotg_aug_f016_burn_effect = {
+    eotg_aug_stress_lie_effect = yes
+    eotg_add_fracture_risk = { AMOUNT = 10 }
+}
+
+# "Confess it to the court." Caller: .016.c (tooltip and honoured path).
+eotg_aug_f016_confess_effect = {
+    add_prestige = -150
+    eotg_add_fracture_risk = { AMOUNT = -8 }
+}
+
+# -- eotg_fracture.019 The False Traitor (scope:eotg_accused) ------------------
+# Each body records the action eotg_fracture.020 reads (QA round 2 H1); the
+# caller fires .020.
+# "Arrest them." Callers: .019.a; the .019.b / .e override.
+eotg_aug_f019_arrest_effect = {
+    imprison_character_effect = {
+        TARGET = scope:eotg_accused
+        IMPRISONER = root
+    }
+    hidden_effect = {
+        set_variable = { name = eotg_aug_accusation_action  value = flag:arrested }
+    }
+    eotg_aug_stress_tyranny_effect = yes
+    eotg_add_fracture_risk = { AMOUNT = 5 }
+}
+
+# "Have them watched." Caller: .019.b.
+eotg_aug_f019_watch_effect = {
+    hidden_effect = {
+        set_variable = { name = eotg_aug_accusation_action  value = flag:watched }
+    }
+    eotg_add_fracture_risk = { AMOUNT = 3 }
+}
+
+# [trusting] "No. Not them." Caller: .019.e.
+eotg_aug_f019_spare_effect = {
+    scope:eotg_accused = {
+        add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+    }
+    hidden_effect = {
+        set_variable = { name = eotg_aug_accusation_action  value = flag:spared }
+    }
+    eotg_add_fracture_risk = { AMOUNT = 5 }
+}
+
+# -- eotg_fracture.023 The Wrong War --------------------------------------------
+# "The enemy is coming." / "They surrendered; I saw it." Callers: .023.b
+# (gated on the gold); the .023.a / .e override, where the gold is spent only
+# if it is there (QA round 2 gold gates: never into debt).
+eotg_aug_f023_muster_effect = {
+    if = {
+        limit = { gold >= minor_gold_value }
+        remove_short_term_gold = minor_gold_value
+    }
+    every_vassal = {
+        limit = { opinion = { target = root  value < 0 } }
+        add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+    }
+    eotg_add_fracture_risk = { AMOUNT = 8 }
+}
+
+# "Stand them down." / "Recall the envoys." Caller: .023.a.
+eotg_aug_f023_stand_down_effect = {
+    add_prestige = -50
+    eotg_add_fracture_risk = { AMOUNT = -3 }
+}
+
+# -- eotg_fracture.024 The Familiar Change (scope:eotg_changed) ----------------
+# "Have them restrained." Callers: .024.c; the .024.d override.
+eotg_aug_f024_restrain_effect = {
+    if = {
+        limit = { scope:eotg_changed = { is_imprisoned = no } }
+        imprison_character_effect = {
+            TARGET = scope:eotg_changed
+            IMPRISONER = root
+        }
+    }
+    scope:eotg_changed = {
+        eotg_add_fracture_risk = { AMOUNT = -10 }
+    }
+    eotg_aug_stress_tyranny_effect = yes
+    eotg_add_fracture_risk = { AMOUNT = 5 }
+}
+
+# [compassionate] "Sit with them." Caller: .024.d.
+eotg_aug_f024_sit_with_effect = {
+    scope:eotg_changed = {
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+    }
+    eotg_add_fracture_risk = { AMOUNT = -5 }
+}
+
+# -- eotg_fracture.025 Containment Regency (scope:eotg_keeper) -----------------
+# [paranoid] "They've planned this for months." Callers: .025.d; the .025.a /
+# .e override (the access is not given up).
+eotg_aug_f025_hold_keeper_effect = {
+    if = {
+        limit = { scope:eotg_keeper = { is_imprisoned = no } }
+        imprison_character_effect = {
+            TARGET = scope:eotg_keeper
+            IMPRISONER = root
+        }
+    }
+    eotg_aug_stress_tyranny_effect = yes
+    eotg_add_fracture_risk = { AMOUNT = 12 }
+}
+
+# "Let them." Caller: .025.a.
+eotg_aug_f025_let_them_effect = {
+    eotg_aug_start_containment_regency_effect = { KEEPER = scope:eotg_keeper  SWING = 60 }
+    add_prestige = -100
+    eotg_add_fracture_risk = { AMOUNT = -10 }
+}
+
+# [content] "Take it. Please, take it." Caller: .025.e.
+eotg_aug_f025_take_it_effect = {
+    eotg_aug_start_containment_regency_effect = { KEEPER = scope:eotg_keeper  SWING = 80 }
+    eotg_add_fracture_risk = { AMOUNT = -15 }
+}
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Balance spec Part B2 — §5.6 chain edge
+# ═════════════════════════════════════════════════════════════════════════════
+
+# A chain head's skill or trait roll leaves eotg_flag_aug_chain_edge (success)
+# or eotg_flag_aug_chain_strain (failure), 2 years; the next stage reads them
+# (+15 to its good outcome / +10 to its bad one) and calls this right after
+# its own roll, so an old edge never leaks into a later chain.
+# Every chain head also calls this before its own roll (B2 QA), so an
+# overlapping chain cannot consume another chain's flag; remove-all and the
+# cascade (eotg_trigger_neurofracture) clear it for chains that never finish.
+# Heads: eotg_aug_init.007.a, eotg_aug_init.010.a, eotg_aug_tier1.002.a,
+# eotg_aug_tier1.013.b, eotg_aug_tier3.016.c, eotg_aug_tier3.023.a.
+# Consumers: eotg_aug_init.008, eotg_aug_init.011, eotg_aug_tier1.015,
+# eotg_aug_tier1.022, eotg_aug_tier3.022, eotg_aug_tier3.024.
+eotg_aug_clear_chain_flags_effect = {
+    remove_character_flag = eotg_flag_aug_chain_edge
+    remove_character_flag = eotg_flag_aug_chain_strain
 }

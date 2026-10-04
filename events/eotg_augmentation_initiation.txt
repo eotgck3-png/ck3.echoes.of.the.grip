@@ -220,6 +220,9 @@ eotg_aug_init.002 = {
             eotg_add_fracture_risk = { AMOUNT = 0 }
         }
         add_dread = 5
+        # QA round 2: putting someone else under the knife first is the
+        # cruelty helper, matching init.017.c "On a volunteer first."
+        eotg_aug_stress_cruelty_effect = yes
         ai_chance = {
             base = 30
             modifier = { add = 20  has_trait = callous }
@@ -467,7 +470,7 @@ eotg_aug_init.005 = {
         animation = personality_rational
     }
     right_portrait = {
-        character = scope:aug_peer
+        character = scope:eotg_aug_peer
         animation = personality_bold
     }
 
@@ -485,13 +488,13 @@ eotg_aug_init.005 = {
                 limit = { any_vassal = { has_trait = eotg_cybernetics } }
                 random_vassal = {
                     limit = { has_trait = eotg_cybernetics }
-                    save_scope_as = aug_peer
+                    save_scope_as = eotg_aug_peer
                 }
             }
             else = {
                 random_courtier = {
                     limit = { is_alive = yes  has_trait = eotg_cybernetics }
-                    save_scope_as = aug_peer
+                    save_scope_as = eotg_aug_peer
                 }
             }
         }
@@ -504,7 +507,7 @@ eotg_aug_init.005 = {
         hidden_effect = {
             set_variable = { name = eotg_fracture_risk  value = 0 }
         }
-        scope:aug_peer = {
+        scope:eotg_aug_peer = {
             add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
         }
         eotg_aug_stress_surgery_effect = yes
@@ -520,7 +523,7 @@ eotg_aug_init.005 = {
         name = eotg_aug_init.005.b
         add_piety = 50
         add_character_flag = { flag = eotg_flag_suppress_progression  years = 5 }
-        scope:aug_peer = {
+        scope:eotg_aug_peer = {
             add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
         }
         ai_chance = {
@@ -559,7 +562,7 @@ eotg_aug_init.005 = {
         hidden_effect = {
             set_variable = { name = eotg_fracture_risk  value = 0 }
         }
-        scope:aug_peer = {
+        scope:eotg_aug_peer = {
             add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
         }
         eotg_aug_stress_surgery_effect = yes
@@ -578,7 +581,7 @@ eotg_aug_init.005 = {
         name = eotg_aug_init.005.e
         trigger = { has_trait = paranoid }
         trait = paranoid
-        scope:aug_peer = {
+        scope:eotg_aug_peer = {
             add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
         }
         add_character_modifier = { modifier = eotg_mod_aug_lesson_intrigue  years = 5 }
@@ -607,8 +610,17 @@ eotg_aug_init.005 = {
 
 # ── eotg_aug_init.006 ─────────────────────────────────────────────────────────
 # The Prosthetic (I-01)
-# Caller: eotg_on_yearly_aug_initiation_check, branch 2 (eotg_has_physical_loss).
-# Resource: a/c/e install and set eotg_fracture_risk.
+# Caller: eotg_on_yearly_aug_initiation_check, branch 2 (eotg_has_physical_loss,
+# or, balance spec §5.9, a congenital clubfoot or hunchback).
+# Resource: a/c/e/f install and set eotg_fracture_risk.
+# Balance spec §5.9 (lore M6): a congenital-only ruler (no physical loss) sees
+# desc_congenital, which REPLACES the base desc (first triggered_desc of the
+# first_valid), and options b, d and f; a, c and e restore a loss and need
+# one. f masks the trait with vanilla make_trait_inactive (the genes still
+# pass on: events/trait_specific_events/trait_specific_events.txt:220) and
+# sets eotg_flag_aug_congenital_masked; eotg_aug_unmask_congenital_effect
+# restores it when the prosthesis comes out. Hardware that compensates,
+# never a cure (lore M6 wording rule).
 
 eotg_aug_init.006 = {
     type = character_event
@@ -616,7 +628,13 @@ eotg_aug_init.006 = {
     # One line per loss, worst first: the same order as
     # eotg_aug_restore_loss_effect, so the desc names the loss that a/c/e restore.
     desc = {
-        desc = eotg_aug_init.006.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { eotg_has_physical_loss = no }
+                desc = eotg_aug_init.006.desc_congenital
+            }
+            desc = eotg_aug_init.006.desc
+        }
         first_valid = {
             triggered_desc = {
                 trigger = { has_trait = blind }
@@ -630,7 +648,10 @@ eotg_aug_init.006 = {
                 trigger = { has_trait = maimed }
                 desc = eotg_aug_init.006.desc_maimed
             }
-            desc = eotg_aug_init.006.desc_one_eyed
+            triggered_desc = {
+                trigger = { has_trait = one_eyed }
+                desc = eotg_aug_init.006.desc_one_eyed
+            }
         }
     }
     theme = healthcare
@@ -647,7 +668,11 @@ eotg_aug_init.006 = {
     }
 
     trigger = {
-        eotg_has_physical_loss = yes
+        OR = {
+            eotg_has_physical_loss = yes
+            has_trait = clubfooted
+            has_trait = hunchbacked
+        }
         eotg_is_augmented_any = no
     }
 
@@ -666,7 +691,10 @@ eotg_aug_init.006 = {
     # only (orchestrator ruling, Phase 2).
     option = {
         name = eotg_aug_init.006.a
-        trigger = { gold >= medium_gold_value }
+        trigger = {
+            eotg_has_physical_loss = yes    # balance spec §5.9
+            gold >= medium_gold_value
+        }
         remove_short_term_gold = medium_gold_value
         eotg_aug_initiate_effect = yes
         eotg_aug_restore_loss_effect = yes
@@ -682,9 +710,19 @@ eotg_aug_init.006 = {
         }
     }
 
-    # "I will learn to live with it."
+    # "I will learn to live with it." / congenital only (balance spec §5.9,
+    # the optional b_congenital): "I have lived with it this long." Same
+    # effects; the name picks by eotg_has_physical_loss (vanilla
+    # `name = { trigger text }`, events/health_events.txt:1141-1148).
     option = {
-        name = eotg_aug_init.006.b
+        name = {
+            trigger = { eotg_has_physical_loss = yes }
+            text = eotg_aug_init.006.b
+        }
+        name = {
+            trigger = { eotg_has_physical_loss = no }
+            text = eotg_aug_init.006.b_congenital
+        }
         add_prestige = 50
         # Declined: the on_action weighs the next offer at 0.25 for 10 years
         hidden_effect = {
@@ -709,6 +747,7 @@ eotg_aug_init.006 = {
     option = {
         name = eotg_aug_init.006.c
         trigger = {
+            eotg_has_physical_loss = yes    # balance spec §5.9
             eotg_has_physician_access = yes
             gold >= { value = medium_gold_value  multiply = 0.75 }
         }
@@ -761,6 +800,7 @@ eotg_aug_init.006 = {
         name = eotg_aug_init.006.e
         trigger = {
             has_trait = cynical
+            eotg_has_physical_loss = yes    # balance spec §5.9
             gold >= {
                 value = medium_gold_value
                 if = {
@@ -788,6 +828,56 @@ eotg_aug_init.006 = {
             base = 30
             modifier = { add = 30  has_trait = cynical }
             modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+
+    # [clubfooted / hunchbacked] Balance spec §5.9, name per the lore-keeper
+    # report (M6: hardware that compensates; never a cure). As a, plus
+    # minor_gold_value (custom work), risk 5. The trait goes inactive
+    # (make_trait_inactive: the genes still pass to children; vanilla
+    # events/trait_specific_events/trait_specific_events.txt:220; genetic =
+    # yes, game/common/traits/00_traits.txt:8093, :8127), and
+    # eotg_flag_aug_congenital_masked lets eotg_aug_unmask_congenital_effect
+    # (Remove Implants, Excision, Rejection failure, both regressions)
+    # re-activate it. Both trait icons listed; the gate is either trait.
+    option = {
+        name = eotg_aug_init.006.f
+        trigger = {
+            OR = {
+                has_trait = clubfooted
+                has_trait = hunchbacked
+            }
+            gold >= {
+                value = medium_gold_value
+                add = minor_gold_value
+            }
+        }
+        trait = clubfooted
+        trait = hunchbacked
+        remove_short_term_gold = {
+            value = medium_gold_value
+            add = minor_gold_value
+        }
+        eotg_aug_initiate_effect = yes
+        if = {
+            limit = { has_trait = clubfooted }
+            make_trait_inactive = clubfooted
+        }
+        if = {
+            limit = { has_trait = hunchbacked }
+            make_trait_inactive = hunchbacked
+        }
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 5 }
+            add_character_flag = eotg_flag_aug_congenital_masked
+        }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = clubfooted }
+            modifier = { add = 30  has_trait = hunchbacked }
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = -30  has_trait = zealous }
         }
     }
 }
@@ -818,6 +908,10 @@ eotg_aug_init.007 = {
     }
 
     # "Build the bridge." A last resort starts hot: risk 30.
+    # Balance spec §5.6: how well you take to the rehabilitation is a
+    # trait-weighted roll (vanilla events/health_events.txt:11686, random_list
+    # with `modifier = { add }`). Success sets eotg_flag_aug_chain_edge
+    # (2 years), read by init.008 (success +15) and cleared there.
     option = {
         name = eotg_aug_init.007.a
         trigger = { gold >= major_gold_value }
@@ -825,8 +919,28 @@ eotg_aug_init.007 = {
         eotg_aug_initiate_effect = yes
         hidden_effect = {
             set_variable = { name = eotg_fracture_risk  value = 30 }
+            # QA round 2 escrow: refunded by eotg_aug_remove_all_effect if
+            # the ruler leaves the system before init.008 delivers
+            set_variable = { name = eotg_aug_escrow  value = major_gold_value  years = 1 }
         }
         add_character_modifier = { modifier = eotg_mod_aug_bridge_strain  years = 2 }
+        # Balance spec §5.6 (B2 QA): clear any other chain's edge/strain first
+        eotg_aug_clear_chain_flags_effect = yes
+        random_list = {
+            60 = {
+                modifier = { add = 20  has_trait = diligent }
+                modifier = { add = 15  has_trait = patient }
+                modifier = { add = -15  has_trait = impatient }
+                modifier = { add = -10  has_trait = craven }
+                desc = eotg_aug_init.007.a.success
+                hidden_effect = {
+                    add_character_flag = { flag = eotg_flag_aug_chain_edge  years = 2 }
+                }
+            }
+            40 = {
+                desc = eotg_aug_init.007.a.failure
+            }
+        }
         trigger_event = { id = eotg_aug_init.008  days = { 90 180 } }
         eotg_aug_stress_surgery_effect = yes
         ai_chance = {
@@ -868,6 +982,11 @@ eotg_aug_init.007 = {
         eotg_aug_initiate_effect = yes
         hidden_effect = {
             set_variable = { name = eotg_fracture_risk  value = 20 }
+            set_variable = {    # QA round 2 escrow (see a)
+                name = eotg_aug_escrow
+                value = { value = major_gold_value  multiply = 0.75 }
+                years = 1
+            }
         }
         add_character_modifier = { modifier = eotg_mod_aug_bridge_strain  years = 2 }
         trigger_event = { id = eotg_aug_init.008  days = { 90 180 } }
@@ -916,6 +1035,7 @@ eotg_aug_init.007 = {
         hidden_effect = {
             set_variable = { name = eotg_fracture_risk  value = 40 }
             add_character_flag = { flag = eotg_flag_aug_bridge_full_current  days = 365 }
+            set_variable = { name = eotg_aug_escrow  value = major_gold_value  years = 1 }    # QA round 2 escrow (see a)
         }
         add_character_modifier = { modifier = eotg_mod_aug_bridge_strain  years = 2 }
         trigger_event = { id = eotg_aug_init.008  days = { 90 180 } }
@@ -969,11 +1089,20 @@ eotg_aug_init.008 = {
     trigger = { has_trait = eotg_cybernetics }
 
     immediate = {
+        # The price paid in .007 is delivered (QA round 2 escrow)
+        hidden_effect = { remove_variable = eotg_aug_escrow }
+        # Balance spec §5.6 chain edge: init.007.a's roll carries here
+        # (edge +15 to success, strain +10 to the complication); both flags
+        # are cleared after the roll so they never leak into a later chain.
         random_list = {
             50 = {
                 modifier = {
                     add = 15
                     eotg_has_physician_access = yes
+                }
+                modifier = {
+                    add = 15
+                    has_character_flag = eotg_flag_aug_chain_edge
                 }
                 save_scope_value_as = { name = eotg_bridge_outcome  value = flag:success }
                 eotg_aug_bridge_success_effect = yes
@@ -987,12 +1116,17 @@ eotg_aug_init.008 = {
                     add = -10
                     eotg_has_physician_access = yes
                 }
+                modifier = {
+                    add = 10
+                    has_character_flag = eotg_flag_aug_chain_strain
+                }
                 save_scope_value_as = { name = eotg_bridge_outcome  value = flag:complication }
                 # No-death step: the ruler cannot die before the event opens
                 increase_wounds_no_death_effect = { REASON = wounds }
                 hidden_effect = { eotg_add_fracture_risk = { AMOUNT = 15 } }
             }
         }
+        eotg_aug_clear_chain_flags_effect = yes
     }
 
     # "Then this is who I am now."
@@ -1200,7 +1334,13 @@ eotg_aug_init.010 = {
 
     trigger = { eotg_is_augmented_any = no }
 
-    # "Cheap is cheap."
+    # "Cheap is cheap." Balance spec §5.6: whether you can tell a good back-
+    # street surgeon from a bad one is an intrigue check against
+    # average_skill_rating (8). Success sets eotg_flag_aug_chain_edge, failure
+    # eotg_flag_aug_chain_strain (2 years); init.011 reads them (clean +15 /
+    # infection +10) and clears both. Shape: vanilla duel against a fixed
+    # value, events/activities/chariot_race_activity/chariot_race_events.txt:1947
+    # (ratings common/script_values/00_basic_values.txt:470-479).
     option = {
         name = eotg_aug_init.010.a
         trigger = { gold >= tiny_gold_value }
@@ -1208,6 +1348,34 @@ eotg_aug_init.010 = {
         eotg_aug_initiate_effect = yes
         hidden_effect = {
             set_variable = { name = eotg_fracture_risk  value = 5 }
+        }
+        # Balance spec §5.6 (B2 QA): clear any other chain's edge/strain first
+        eotg_aug_clear_chain_flags_effect = yes
+        duel = {
+            skill = intrigue
+            value = average_skill_rating
+            50 = {
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = 3.5
+                    min = -49
+                }
+                desc = eotg_aug_init.010.a.success
+                hidden_effect = {
+                    add_character_flag = { flag = eotg_flag_aug_chain_edge  years = 2 }
+                }
+            }
+            50 = {
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = -3.5
+                    min = -49
+                }
+                desc = eotg_aug_init.010.a.failure
+                hidden_effect = {
+                    add_character_flag = { flag = eotg_flag_aug_chain_strain  years = 2 }
+                }
+            }
         }
         trigger_event = { id = eotg_aug_init.011  days = { 180 540 } }
         eotg_aug_stress_surgery_effect = yes
@@ -1342,10 +1510,17 @@ eotg_aug_init.011 = {
 
     trigger = { has_trait = eotg_cybernetics }
 
+    # Balance spec §5.6 chain edge: init.010.a's check carries here (edge +15
+    # to the clean outcome, strain +10 to infection); both flags are cleared
+    # after the roll.
     immediate = {
         hidden_effect = {
             random_list = {
                 35 = {
+                    modifier = {
+                        add = 15
+                        has_character_flag = eotg_flag_aug_chain_edge
+                    }
                     save_scope_value_as = { name = eotg_alley_outcome  value = flag:clean }
                 }
                 15 = {
@@ -1353,6 +1528,10 @@ eotg_aug_init.011 = {
                     add_character_flag = eotg_flag_aug_hidden_flaw
                 }
                 20 = {
+                    modifier = {
+                        add = 10
+                        has_character_flag = eotg_flag_aug_chain_strain
+                    }
                     save_scope_value_as = { name = eotg_alley_outcome  value = flag:infection }
                     add_character_modifier = { modifier = eotg_mod_aug_infection  years = 2 }
                 }
@@ -1371,6 +1550,7 @@ eotg_aug_init.011 = {
             }
             # The discreet flag has done its job for this install
             remove_character_flag = eotg_flag_aug_backalley_discreet
+            eotg_aug_clear_chain_flags_effect = yes
         }
     }
 
@@ -1597,8 +1777,12 @@ eotg_aug_init.013 = {
         animate_if_dead = yes
     }
 
+    # QA round 2: the desc names [eotg_dead_parent.GetName], so the event
+    # needs the variable to still point at someone (a pruned dead character
+    # leaves it empty): exists = var:, not only has_variable.
     trigger = {
         has_variable = eotg_parent_hardware
+        exists = var:eotg_parent_hardware
         eotg_is_augmented_any = no
     }
 
@@ -1797,12 +1981,24 @@ eotg_aug_init.014 = {
     # dies of the treatment, no killer (vanilla death_treatment,
     # common/deathreasons/00_event_deaths.txt:214). Murder helper on root: an
     # unlicensed gamble with a child's life.
+    # Balance spec §5.6: the existing 60/40 is weighted by care (thread T5):
+    # +15 with physician access, +10 if the parent's learning is decent (12,
+    # common/script_values/00_basic_values.txt:470-479). Weighted-list shape:
+    # vanilla events/health_events.txt:11686.
     option = {
         name = eotg_aug_init.014.c
         trigger = { gold >= tiny_gold_value }
         remove_short_term_gold = tiny_gold_value
         random_list = {
             60 = {
+                modifier = {
+                    add = 15
+                    eotg_has_physician_access = yes
+                }
+                modifier = {
+                    add = 10
+                    learning >= decent_skill_rating
+                }
                 scope:eotg_sick_child = { eotg_aug_child_install_effect = yes }
                 trigger_event = { id = eotg_aug_init.015  days = { 365 730 } }
             }
@@ -2557,6 +2753,7 @@ eotg_aug_init.020 = {
             limit = {
                 exists = scope:eotg_retainer_installed
                 eotg_aug_has_retinue = no
+                NOT = { has_character_flag = eotg_flag_aug_retinue_done }    # QA round 2 H2
                 any_knight = { eotg_is_augmented_any = yes }
             }
             eotg_aug_start_retinue_effect = yes
@@ -2573,8 +2770,9 @@ eotg_aug_init.020 = {
 # Resource: a/d install root (tier change, risk 0); b/d start the Iron
 # Retinue (phase 2: the trigger guarantees two augmented knights) and strain each augmented knight (risk +3); c calms up
 # to three knights (risk -5 on knights: they carry their own variable).
-# c: "minor_gold_value per knight (cap 3)", the cost shape of
-# eotg_aug_retinue_pay_all_effect, here over augmented knights.
+# c: "minor_gold_value per knight (cap 3)", counted first and capped, then
+# charged (script-value iterator shape: vanilla
+# common/script_values/04_ep2_tournament_values.txt:2515).
 
 eotg_aug_init.019 = {
     type = character_event
@@ -2583,10 +2781,12 @@ eotg_aug_init.019 = {
     theme = martial_chivalry_focus
 
     # World-state guard mirroring the firing branch: a ruler who already
-    # runs a Retinue is not offered one.
+    # runs a Retinue, or whose Program has run and ended (permanent state
+    # flag eotg_flag_aug_retinue_done, QA round 2 H2), is not offered one.
     trigger = {
         eotg_is_augmented_any = no
         eotg_aug_has_retinue = no
+        NOT = { has_character_flag = eotg_flag_aug_retinue_done }
         any_knight = {
             count >= 2
             eotg_is_augmented_any = yes
@@ -2668,10 +2868,16 @@ eotg_aug_init.019 = {
             max = 3
             multiply = minor_gold_value
         }
+        # QA round 2 H4: max is an inclusive index (0-2 = up to three
+        # knights), and check_range_bounds = no lets one or two knights run
+        # without a range error, as vanilla pairs them
+        # (feast_tsagaan_sar_events.txt:1215-1217). The cost above counts the
+        # knights first and caps at 3, so it matches the knights served.
         ordered_knight = {
             limit = { eotg_is_augmented_any = yes }
             order_by = prowess
-            max = 3
+            max = 2
+            check_range_bounds = no
             add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 2 }
             eotg_add_fracture_risk = { AMOUNT = -5 }
         }
@@ -2688,6 +2894,7 @@ eotg_aug_init.019 = {
         trigger = {
             has_trait = ambitious
             eotg_aug_has_retinue = no
+            NOT = { has_character_flag = eotg_flag_aug_retinue_done }    # QA round 2 H2
             gold >= medium_gold_value
         }
         trait = ambitious
