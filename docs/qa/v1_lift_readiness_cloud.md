@@ -330,3 +330,29 @@ This block is kept inside `docs/qa/` because this task allowed no files outside 
   - Fix the agent files (D, MED).
   - Add the Grip-date canon question.
   - CB-10 and CB-11 now have concrete fix lists here.
+
+---
+
+## 6. Local verification (2026-10-04, eotg-qa; vanilla 1.20.0.3)
+
+**Verdict: PASS, with three corrections.**
+- **Mechanical facts:** high reliability. Every recomputed count matched.
+- **Recommendations:** medium reliability.
+- **Blockers:** none of the 6 is false. B4 (the Myr DLC gate) is OVERSTATED: it copies vanilla's exact shape (`iberian_struggle_history.txt:4-13`), so it's a design ruling for the human, not a defect.
+
+**Corrections:**
+1. **Religions can't be lifted as a stopgap copy.** CK3 1.20 changed the schema:
+   - religion fields sit inside `religion_details = { }`;
+   - faiths live in a separate `common/religion/faith_types/`;
+   - tenets and doctrines are lists, in new `tenet_types/`, `doctrine_types/` and `rite_types/` folders;
+   - the family field `doctrine_background_icon` became `tenet_background_icon`.
+
+   v1 is the 1.19 shape, so religions need a 1.20 port, and Tiger 1.17 can't validate one. Also, `tenet_monasticism` (`eotg_religions.txt:556`) doesn't exist in 1.20. The four suspects in §4.1 all exist.
+2. **Stale against same-day commits.** CB-06 (Helix) and CB-07 (voice) were closed in 1578f85, with errata pasted into SETTING LORE. Every SETTING LORE line citation here is off by about +17 lines.
+3. **"Lift now, no human input" is wrong for Void and Legacies.** Each needs the human to designate it mod-exclusive (§3 Q7 should cover Void too). Void also needs: the Voidwalker bug fixed (confirmed; event 0004 re-rolls every 5 years at −100 piety), an owner for `eotg_grip_survivor` (wider than reported), and the loc rewrites at `:93-95` and `:94`. The cult-branch faith check has **23** call sites, not 11. Legacies loc waits on the "Second Era", "Confluence" and "Hell" ruling.
+
+**Per-item notes:**
+- MAA is SAFE.
+- Cultures are allowed but premature (Pipeline E: stopgaps only when Gate 1 can't close without them).
+- H-V5 (voice-register drift) is confirmed for `:93-95` only.
+- In the `replace/` statistics, deleting the identical copies removes 125 definitions, not 122.
