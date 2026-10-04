@@ -1,0 +1,930 @@
+﻿# ── eotg_augmentation_activities.txt ─────────────────────────────────────────
+# Augmented people at vanilla activities (docs/specs/cybernetics_v2_realm.md
+# §4.7-4.8, G6).
+#
+# eotg_aug_act.001 — The Rules of the Field  (tournament host; AI hosts too)
+# eotg_aug_act.002 — Past Spec               (augmented player contestant)
+# eotg_aug_act.003 — Foul Play?              (player tournament host)
+# eotg_aug_act.004 — A Hum at the Table      (feast; player)
+# eotg_aug_act.005 — Quarry in the Overlay   (hunt; player)
+# eotg_aug_act.006 — At the Holy Site        (pilgrimage; player)
+#
+# Fires from (common/on_action/eotg_augmentation_on_actions.txt; each custom
+# on_action is a child of vanilla activity hooks, extended additively):
+#   eotg_on_tournament_opening_aug (tournament_opening_on_action) -> .001;
+#   eotg_on_tournament_contest_aug (the seven contest random pulses) -> .002;
+#   eotg_on_tournament_active_aug (tournament_active_state_pulse) -> .003;
+#   eotg_on_feast_aug (feast_default_event_selection) -> .004;
+#   eotg_on_hunt_aug (hunt_random_pulse) -> .005;
+#   eotg_on_pilgrimage_aug (pilgrimage_destination_events) -> .006.
+# Cooldown authority lives in those on_actions (character flags, or a
+# variable on the activity); no event trigger here reads them.
+# Tournaments need Tours & Tournaments (the vanilla hooks never fire without
+# it); the feast, hunt and pilgrimage events are the fallback (lesson 12).
+# Resource: eotg_fracture_risk and tier. Every event moves risk in an option
+# or reads the band / tier in a desc or branch trigger (spec §2). All risk
+# moves are hidden; no text quantifies them.
+# Register (lore R5-R7): the field, the bout, the arena, the marshal; the
+# quarry and the trail; the holy site, faith-neutral; physical evidence only.
+# ─────────────────────────────────────────────────────────────────────────────
+
+namespace = eotg_aug_act
+
+
+# ── eotg_aug_act.001 ──────────────────────────────────────────────────────────
+# The Rules of the Field. The marshals ask the host about entrants with
+# hardware. A chosen target (index rule 7 note): the most visible entrant,
+# named in loc. "All entrants" = every attending eotg_aug_tournament_entrant.
+# Caller: eotg_on_tournament_opening_aug, 1-3 days (scope:activity saved).
+
+eotg_aug_act.001 = {
+    type = activity_event
+    window = widget_activity_locale_fullscreen_event
+    title = eotg_aug_act.001.t
+    desc = {
+        desc = eotg_aug_act.001.desc
+        triggered_desc = {
+            trigger = {
+                involved_activity = {
+                    any_attending_character = {
+                        count >= 2
+                        eotg_aug_tournament_entrant = yes
+                    }
+                }
+            }
+            desc = eotg_aug_act.001.desc_many
+        }
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_aug_entrant = { has_trait = eotg_neurofractured } }
+                desc = eotg_aug_act.001.desc_entrant_nf
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_aug_entrant = { eotg_is_aug_tier3 = yes } }
+                desc = eotg_aug_act.001.desc_entrant_oc
+            }
+        }
+        # Lore R1: only an independent ruler reads "your law"
+        triggered_desc = {
+            trigger = {
+                eotg_aug_under_policy = { LAW = ban }
+                is_independent_ruler = yes
+            }
+            desc = eotg_aug_act.001.desc_ban
+        }
+        triggered_desc = {
+            trigger = {
+                eotg_aug_under_policy = { LAW = ban }
+                is_independent_ruler = no
+            }
+            desc = eotg_aug_act.001.desc_ban_v
+        }
+    }
+    theme = tournament_grounds
+
+    trigger = {
+        exists = scope:activity
+        involved_activity ?= {
+            any_attending_character = { eotg_aug_tournament_entrant = yes }
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = thinking
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_aug_entrant }
+        character = scope:eotg_aug_entrant
+        animation = personality_bold
+    }
+
+    immediate = {
+        involved_activity = {
+            random_attending_character = {
+                limit = { eotg_aug_tournament_entrant = yes }
+                weight = {
+                    base = 1
+                    modifier = {
+                        add = 2
+                        eotg_is_aug_tier3 = yes
+                    }
+                }
+                save_scope_as = eotg_aug_entrant
+            }
+        }
+    }
+
+    # "Let them compete." They will run hot.
+    option = {
+        name = eotg_aug_act.001.a
+        involved_activity = {
+            every_attending_character = {
+                limit = { eotg_aug_tournament_entrant = yes }
+                hidden_effect = { eotg_add_fracture_risk = { AMOUNT = 3 } }
+            }
+            every_attending_character = {
+                limit = {
+                    has_trait = zealous
+                    NOT = { this = root }
+                }
+                add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+            }
+        }
+        scope:eotg_aug_entrant ?= {
+            add_opinion = { modifier = eotg_opinion_aug_admiration  target = root }
+        }
+        if = {
+            limit = { eotg_aug_under_policy = { LAW = ban } }
+            eotg_aug_stress_lie_effect = yes
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = cynical }
+            modifier = { add = 10  has_trait = just }
+            modifier = { add = -20  has_trait = zealous }
+        }
+    }
+
+    # "Bar them from the field."
+    option = {
+        name = eotg_aug_act.001.b
+        involved_activity = {
+            every_attending_character = {
+                limit = { eotg_aug_tournament_entrant = yes }
+                eotg_aug_act_withdraw_effect = { HOST = root }
+            }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = zealous }
+            modifier = { add = 10  has_trait = just }
+            modifier = { add = -10  has_trait = cynical }
+        }
+    }
+
+    # "No powered output on the field." A handicap (no-op for anyone not
+    # competing).
+    option = {
+        name = eotg_aug_act.001.c
+        involved_activity = {
+            every_attending_character = {
+                limit = { eotg_aug_tournament_entrant = yes }
+                activity_tournament_change_contestant_score_effect = { SCORE = decrease_minor }
+            }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # [cynical] "Make them the main event."
+    option = {
+        name = eotg_aug_act.001.d
+        trigger = { has_trait = cynical }
+        trait = cynical
+        involved_activity = {
+            every_attending_character = {
+                limit = { eotg_aug_tournament_entrant = yes }
+                hidden_effect = { eotg_add_fracture_risk = { AMOUNT = 5 } }
+            }
+            every_attending_character = {
+                limit = {
+                    has_trait = zealous
+                    NOT = { this = root }
+                }
+                add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+            }
+        }
+        add_prestige = minor_prestige_value
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = cynical }
+            modifier = { add = 10  has_trait = arrogant }
+        }
+    }
+
+    # [zealous] "No one fights with hardware on my field."
+    option = {
+        name = eotg_aug_act.001.e
+        trigger = { has_trait = zealous }
+        trait = zealous
+        involved_activity = {
+            every_attending_character = {
+                limit = { eotg_aug_tournament_entrant = yes }
+                eotg_aug_act_withdraw_effect = { HOST = root }
+            }
+        }
+        add_piety = minor_piety_value
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = zealous }
+            modifier = { add = 10  has_trait = stubborn }
+        }
+    }
+}
+
+
+# ── eotg_aug_act.002 ──────────────────────────────────────────────────────────
+# Past Spec. The hardware could give more than the field's rules expect. The
+# "rigged contest" beat; a carries "someone saw it" for the player.
+# Caller: eotg_on_tournament_contest_aug (player contestant), 1 day.
+
+eotg_aug_act.002 = {
+    type = activity_event
+    window = widget_activity_locale_fullscreen_event
+    title = eotg_aug_act.002.t
+    desc = {
+        desc = eotg_aug_act.002.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { involved_activity ?= { has_current_phase = tournament_phase_board_game } }
+                desc = eotg_aug_act.002.desc_board
+            }
+            desc = eotg_aug_act.002.desc_physical
+        }
+        triggered_desc = {
+            trigger = {
+                OR = {
+                    eotg_is_aug_tier3 = yes
+                    has_trait = eotg_neurofractured
+                    eotg_aug_pressure_flicker = no
+                }
+            }
+            desc = eotg_aug_act.002.desc_hot
+        }
+        triggered_desc = {
+            trigger = {
+                involved_activity.activity_host ?= { eotg_aug_under_policy = { LAW = ban } }
+            }
+            desc = eotg_aug_act.002.desc_ban
+        }
+    }
+    theme = tournament_contest
+
+    trigger = {
+        activity_is_competing_trigger = yes
+        eotg_is_augmented_any = yes
+        NOT = { has_trait = eotg_total_integration }
+    }
+
+    left_portrait = {
+        character = root
+        animation = personality_bold
+    }
+
+    # "Run it past spec."
+    option = {
+        name = eotg_aug_act.002.a
+        activity_tournament_change_contestant_score_effect = { SCORE = increase_major }
+        hidden_effect = {
+            if = {
+                limit = { has_trait = eotg_neurofractured }
+                eotg_add_fracture_risk = { AMOUNT = 8 }
+            }
+            else_if = {
+                limit = { eotg_is_aug_tier3 = yes }
+                eotg_add_fracture_risk = { AMOUNT = 6 }
+            }
+            else = {
+                eotg_add_fracture_risk = { AMOUNT = 4 }
+            }
+        }
+        random = {
+            chance = 25
+            involved_activity.activity_host ?= {
+                if = {
+                    limit = { NOT = { this = root } }
+                    add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+                }
+            }
+            add_prestige = {
+                value = minor_prestige_value
+                multiply = -1
+            }
+            send_interface_toast = {
+                type = event_toast_effect_bad
+                title = eotg_aug_act.002.a.seen
+                left_icon = root
+            }
+        }
+        eotg_aug_stress_embrace_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 20  has_trait = arrogant }
+            modifier = { add = -20  has_trait = craven }
+        }
+    }
+
+    # "Within the rules."
+    option = {
+        name = eotg_aug_act.002.b
+        activity_tournament_change_contestant_score_effect = { SCORE = increase_minor }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = just }
+            modifier = { add = 10  has_trait = honest }
+        }
+    }
+
+    # "Throttle it down."
+    option = {
+        name = eotg_aug_act.002.c
+        activity_tournament_change_contestant_score_effect = { SCORE = decrease_minor }
+        add_prestige = minor_prestige_value
+        if = {
+            limit = { eotg_is_aug_tier3 = yes }
+            hidden_effect = { eotg_add_fracture_risk = { AMOUNT = -3 } }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = humble }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # [deceitful] "Let them think it's skill." No discovery roll.
+    option = {
+        name = eotg_aug_act.002.d
+        trigger = { has_trait = deceitful }
+        trait = deceitful
+        activity_tournament_change_contestant_score_effect = { SCORE = increase_medium }
+        hidden_effect = { eotg_add_fracture_risk = { AMOUNT = 3 } }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = deceitful }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+
+    # [honest] "Declare the hardware to the marshal."
+    option = {
+        name = eotg_aug_act.002.e
+        trigger = { has_trait = honest }
+        trait = honest
+        involved_activity.activity_host ?= {
+            if = {
+                limit = { NOT = { this = root } }
+                add_opinion = { modifier = eotg_opinion_aug_admiration  target = root }
+            }
+        }
+        add_prestige = minor_prestige_value
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = honest }
+            modifier = { add = 10  has_trait = just }
+        }
+    }
+}
+
+
+# ── eotg_aug_act.003 ──────────────────────────────────────────────────────────
+# Foul Play? A contestant accuses an augmented one of winning with hardware.
+# Both are chosen targets, named in loc. Evidence is physical only (lore R6);
+# .c.hot / .c.clean never say who examined (e reaches them too).
+# Caller: eotg_on_tournament_active_aug (player host), 1-5 days.
+
+eotg_aug_act.003 = {
+    type = activity_event
+    window = widget_activity_locale_fullscreen_event
+    title = eotg_aug_act.003.t
+    desc = {
+        desc = eotg_aug_act.003.desc
+        triggered_desc = {
+            trigger = {
+                scope:eotg_aug_accused ?= {
+                    OR = {
+                        eotg_is_aug_tier3 = yes
+                        has_trait = eotg_neurofractured
+                        eotg_aug_pressure_flicker = no
+                    }
+                }
+            }
+            desc = eotg_aug_act.003.desc_hot
+        }
+        # Lore R1 variants
+        first_valid = {
+            triggered_desc = {
+                trigger = {
+                    eotg_aug_under_policy = { LAW = ban }
+                    is_independent_ruler = yes
+                }
+                desc = eotg_aug_act.003.desc_ban
+            }
+            triggered_desc = {
+                trigger = { eotg_aug_under_policy = { LAW = ban } }
+                desc = eotg_aug_act.003.desc_ban_v
+            }
+            triggered_desc = {
+                trigger = {
+                    eotg_aug_under_policy = { LAW = license }
+                    is_independent_ruler = yes
+                }
+                desc = eotg_aug_act.003.desc_license
+            }
+            triggered_desc = {
+                trigger = { eotg_aug_under_policy = { LAW = license } }
+                desc = eotg_aug_act.003.desc_license_v
+            }
+        }
+    }
+    theme = tournament_grounds
+
+    # World-state guard, mirroring the on_action
+    trigger = {
+        exists = scope:activity
+        scope:activity.activity_host ?= root
+        scope:activity = {
+            any_attending_character = {
+                activity_is_competing_trigger = yes
+                eotg_aug_tamper_target = yes
+                NOT = { this = root }
+            }
+            any_attending_character = {
+                count >= 2
+                activity_is_competing_trigger = yes
+                NOT = { this = root }
+            }
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = thinking
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_aug_accused }
+        character = scope:eotg_aug_accused
+        animation = worry
+    }
+    lower_right_portrait = {
+        trigger = { exists = scope:eotg_aug_accuser }
+        character = scope:eotg_aug_accuser
+    }
+
+    immediate = {
+        scope:activity = {
+            random_attending_character = {
+                limit = {
+                    activity_is_competing_trigger = yes
+                    eotg_aug_tamper_target = yes
+                    NOT = { this = root }
+                }
+                weight = {
+                    base = 1
+                    modifier = {
+                        add = 2
+                        eotg_is_aug_tier3 = yes
+                    }
+                }
+                save_scope_as = eotg_aug_accused
+            }
+            random_attending_character = {
+                limit = {
+                    activity_is_competing_trigger = yes
+                    NOT = { this = root }
+                    NOT = { this = scope:eotg_aug_accused }
+                }
+                weight = {
+                    base = 1
+                    modifier = {
+                        add = 5
+                        has_relation_rival = scope:eotg_aug_accused
+                    }
+                }
+                save_scope_as = eotg_aug_accuser
+            }
+        }
+    }
+
+    # "Disqualify them."
+    option = {
+        name = eotg_aug_act.003.a
+        scope:eotg_aug_accused = { eotg_aug_act_withdraw_effect = { HOST = root } }
+        scope:eotg_aug_accuser ?= {
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = zealous }
+            modifier = { add = 10  has_trait = just }
+        }
+    }
+
+    # "The accusation fails."
+    option = {
+        name = eotg_aug_act.003.b
+        scope:eotg_aug_accuser ?= {
+            add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+        }
+        scope:eotg_aug_accused = {
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = cynical }
+            modifier = { add = 10  has_trait = trusting }
+        }
+    }
+
+    # "Have them examined." The branch reads the accused's band.
+    option = {
+        name = eotg_aug_act.003.c
+        trigger = { eotg_aug_has_surgeon_access = yes }
+        eotg_aug_act003_examine_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 10  has_trait = paranoid }
+        }
+    }
+
+    # "Let them settle it on the field."
+    option = {
+        name = eotg_aug_act.003.d
+        scope:eotg_aug_accused = {
+            hidden_effect = { eotg_add_fracture_risk = { AMOUNT = 4 } }
+            activity_tournament_change_contestant_score_effect = { SCORE = increase_minor }
+        }
+        scope:eotg_aug_accuser ?= {
+            activity_tournament_change_contestant_score_effect = { SCORE = decrease_minor }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = arrogant }
+            modifier = { add = 10  has_trait = brave }
+        }
+    }
+
+    # [just] "Hear them both, then rule." As c without the surgeon (the
+    # host's own judgment).
+    option = {
+        name = eotg_aug_act.003.e
+        trigger = { has_trait = just }
+        trait = just
+        eotg_aug_act003_examine_effect = yes
+        add_prestige = minor_prestige_value
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = just }
+            modifier = { add = 10  has_trait = diligent }
+        }
+    }
+}
+
+
+# ── eotg_aug_act.004 ──────────────────────────────────────────────────────────
+# A Hum at the Table. The servo ticks as you lift the cup (lore R7: audible
+# hardware).
+# Caller: eotg_on_feast_aug (player guest or host).
+
+eotg_aug_act.004 = {
+    type = activity_event
+    title = eotg_aug_act.004.t
+    desc = {
+        desc = eotg_aug_act.004.desc
+        triggered_desc = {
+            trigger = { scope:activity.activity_host ?= root }
+            desc = eotg_aug_act.004.desc_host
+        }
+        first_valid = {
+            triggered_desc = {
+                trigger = { has_trait = eotg_neurofractured }
+                desc = eotg_aug_act.004.desc_nf
+            }
+            triggered_desc = {
+                trigger = { eotg_is_aug_tier3 = yes }
+                desc = eotg_aug_act.004.desc_oc
+            }
+        }
+    }
+    theme = feast_activity
+
+    trigger = {
+        exists = scope:activity
+        eotg_is_augmented_any = yes
+        NOT = { has_trait = eotg_total_integration }
+    }
+
+    left_portrait = {
+        character = root
+        animation = personality_bold
+    }
+
+    # "Show them what it does."
+    option = {
+        name = eotg_aug_act.004.a
+        add_prestige = minor_prestige_value
+        hidden_effect = { eotg_add_fracture_risk = { AMOUNT = 3 } }
+        eotg_aug_act004_reactions_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = gregarious }
+            modifier = { add = 20  has_trait = arrogant }
+            modifier = { add = -20  has_trait = shy }
+        }
+    }
+
+    # "Keep it out of sight."
+    option = {
+        name = eotg_aug_act.004.b
+        eotg_aug_stress_lie_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = shy }
+            modifier = { add = 10  has_trait = deceitful }
+        }
+    }
+
+    # "Answer their questions plainly."
+    option = {
+        name = eotg_aug_act.004.c
+        add_prestige = minor_prestige_value
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = honest }
+            modifier = { add = 10  has_trait = diligent }
+        }
+    }
+
+    # [gregarious] "Make it the talk of the feast."
+    option = {
+        name = eotg_aug_act.004.d
+        trigger = { has_trait = gregarious }
+        trait = gregarious
+        add_prestige = medium_prestige_value
+        hidden_effect = { eotg_add_fracture_risk = { AMOUNT = 4 } }
+        eotg_aug_act004_reactions_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = gregarious }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+
+    # [shy] "Excuse yourself early." No risk move.
+    option = {
+        name = eotg_aug_act.004.e
+        trigger = { has_trait = shy }
+        trait = shy
+        add_prestige = {
+            value = minor_prestige_value
+            multiply = -1
+        }
+        eotg_aug_stress_reject_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = shy }
+            modifier = { add = 10  has_trait = craven }
+        }
+    }
+}
+
+
+# ── eotg_aug_act.005 ──────────────────────────────────────────────────────────
+# Quarry in the Overlay. The optics pick out a trail no one else sees.
+# Caller: eotg_on_hunt_aug (player participant).
+
+eotg_aug_act.005 = {
+    type = activity_event
+    title = eotg_aug_act.005.t
+    desc = {
+        desc = eotg_aug_act.005.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { var:eotg_aug_focus ?= flag:senses }
+                desc = eotg_aug_act.005.desc_senses
+            }
+            triggered_desc = {
+                trigger = {
+                    OR = {
+                        eotg_is_aug_tier2 = yes
+                        eotg_is_aug_tier3 = yes
+                        has_trait = eotg_neurofractured
+                    }
+                }
+                desc = eotg_aug_act.005.desc_hum
+            }
+        }
+    }
+    theme = hunt_activity
+
+    trigger = {
+        exists = scope:activity
+        eotg_is_augmented_any = yes
+        NOT = { has_trait = eotg_total_integration }
+    }
+
+    left_portrait = {
+        character = root
+        animation = personality_bold
+    }
+
+    # "Let the optics track it."
+    option = {
+        name = eotg_aug_act.005.a
+        if = {
+            limit = { var:eotg_aug_focus ?= flag:senses }
+            hunt_activity_success_change_effect = { CHANGE = increase_major }
+        }
+        else = {
+            hunt_activity_success_change_effect = { CHANGE = increase_medium }
+        }
+        hidden_effect = {
+            if = {
+                limit = { eotg_is_aug_tier3 = yes }
+                eotg_add_fracture_risk = { AMOUNT = 3 }
+            }
+            else = {
+                eotg_add_fracture_risk = { AMOUNT = 2 }
+            }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 10  has_trait = diligent }
+        }
+    }
+
+    # "Hunt the old way."
+    option = {
+        name = eotg_aug_act.005.b
+        if = {
+            limit = { prowess >= 12 }
+            hunt_activity_success_change_effect = { CHANGE = increase_minor }
+        }
+        add_prestige = minor_prestige_value
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = humble }
+            modifier = { add = 10  has_trait = brave }
+        }
+    }
+
+    # "Power down and wait."
+    option = {
+        name = eotg_aug_act.005.c
+        hunt_activity_success_change_effect = { CHANGE = decrease_minor }
+        if = {
+            limit = { eotg_is_aug_tier3 = yes }
+            hidden_effect = { eotg_add_fracture_risk = { AMOUNT = -3 } }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = patient }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # [brave] "Run it down at full output."
+    option = {
+        name = eotg_aug_act.005.d
+        trigger = { has_trait = brave }
+        trait = brave
+        hunt_activity_success_change_effect = { CHANGE = increase_major }
+        hidden_effect = { eotg_add_fracture_risk = { AMOUNT = 4 } }
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_prowess  years = 5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = brave }
+            modifier = { add = 10  has_trait = wrathful }
+        }
+    }
+
+    # [lifestyle_hunter] "Tune it to the trail."
+    option = {
+        name = eotg_aug_act.005.e
+        trigger = { has_trait = lifestyle_hunter }
+        trait = lifestyle_hunter
+        hunt_activity_success_change_effect = { CHANGE = increase_major }
+        hidden_effect = { eotg_add_fracture_risk = { AMOUNT = 1 } }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = lifestyle_hunter }
+            modifier = { add = 10  has_trait = diligent }
+        }
+    }
+}
+
+
+# ── eotg_aug_act.006 ──────────────────────────────────────────────────────────
+# At the Holy Site. Those who tend the site look at the hardware first (lore
+# R5). Faith-neutral: no doctrine, no god-name.
+# Caller: eotg_on_pilgrimage_aug (player pilgrim at the destination).
+
+eotg_aug_act.006 = {
+    type = activity_event
+    title = eotg_aug_act.006.t
+    desc = {
+        desc = eotg_aug_act.006.desc
+        triggered_desc = {
+            trigger = {
+                OR = {
+                    eotg_is_aug_tier3 = yes
+                    has_trait = eotg_neurofractured
+                    eotg_aug_pressure_flicker = no
+                }
+            }
+            desc = eotg_aug_act.006.desc_hot
+        }
+    }
+    theme = pilgrimage_destination
+
+    trigger = {
+        exists = scope:activity
+        eotg_is_augmented_any = yes
+        NOT = { has_trait = eotg_total_integration }
+    }
+
+    left_portrait = {
+        character = root
+        animation = personality_zealous
+    }
+
+    # "Kneel as I am."
+    option = {
+        name = eotg_aug_act.006.a
+        add_piety = minor_piety_value
+        stress_impact = {
+            zealous = minor_stress_impact_gain
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = humble }
+            modifier = { add = 10  has_trait = just }
+        }
+    }
+
+    # "Cover it, and kneel."
+    option = {
+        name = eotg_aug_act.006.b
+        add_piety = minor_piety_value
+        eotg_aug_stress_lie_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = deceitful }
+            modifier = { add = 10  has_trait = shy }
+        }
+    }
+
+    # "Stay the week, and rest." The hardware cools.
+    option = {
+        name = eotg_aug_act.006.c
+        stress_impact = {
+            base = minor_stress_impact_loss
+        }
+        if = {
+            limit = {
+                OR = {
+                    eotg_is_aug_tier3 = yes
+                    has_trait = eotg_neurofractured
+                }
+            }
+            hidden_effect = { eotg_add_fracture_risk = { AMOUNT = -3 } }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 10  has_trait = lazy }
+        }
+    }
+
+    # [zealous] "Keep the full vigil."
+    option = {
+        name = eotg_aug_act.006.d
+        trigger = { has_trait = zealous }
+        trait = zealous
+        add_piety = medium_piety_value
+        stress_impact = {
+            zealous = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = zealous }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+
+    # [cynical] "Leave before the rites." (impatient is a weight only, not a
+    # stress line: trait-depth §5.2 untouched)
+    option = {
+        name = eotg_aug_act.006.e
+        trigger = { has_trait = cynical }
+        trait = cynical
+        add_piety = {
+            value = minor_piety_value
+            multiply = -1
+        }
+        stress_impact = {
+            cynical = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = cynical }
+            modifier = { add = 10  has_trait = impatient }
+        }
+    }
+}

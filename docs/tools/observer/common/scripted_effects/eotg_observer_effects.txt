@@ -82,6 +82,8 @@ eotg_obs_log_init_effect = {
             else = {
                 debug_log = eotg_obs_init_random
             }
+            # Realm spec §4.9 counter 2: initiations by the governing law
+            eotg_obs_log_law_effect = { PREFIX = init_law }
         }
         else = {
             debug_log = eotg_obs_init_nonruler
@@ -223,6 +225,12 @@ eotg_obs_census_effect = {
                 debug_log = eotg_obs_dev_lt10
             }
         }
+        # Realm spec §4.9 counters 1 and 4: the governing law; technicians
+        eotg_obs_log_law_effect = { PREFIX = census_law }
+        if = {
+            limit = { eotg_aug_own_technician_valid = yes }
+            debug_log = eotg_obs_census_technician
+        }
         # 9. Neurofractured rulers on Sedation
         if = {
             limit = {
@@ -260,5 +268,25 @@ eotg_obs_log_offer_effect = {
         else = {
             debug_log = eotg_obs_int_offer_unlanded
         }
+    }
+}
+
+# Realm spec §4.9: eotg_obs_<PREFIX>_<law> for the Augmentation law the
+# character lives under (none = Tolerate or no realm).
+eotg_obs_log_law_effect = {
+    if = {
+        limit = { eotg_aug_under_policy = { LAW = ban } }
+        debug_log = eotg_obs_$PREFIX$_ban
+    }
+    else_if = {
+        limit = { eotg_aug_under_policy = { LAW = license } }
+        debug_log = eotg_obs_$PREFIX$_license
+    }
+    else_if = {
+        limit = { eotg_aug_under_policy = { LAW = favor } }
+        debug_log = eotg_obs_$PREFIX$_favor
+    }
+    else = {
+        debug_log = eotg_obs_$PREFIX$_none
     }
 }

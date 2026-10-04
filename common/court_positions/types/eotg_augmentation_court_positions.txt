@@ -1,0 +1,273 @@
+﻿# ── eotg_augmentation_court_positions.txt ────────────────────────────────────
+# The Implant Technician (docs/specs/cybernetics_v2_realm.md §4.5, G10).
+#
+# Shape: vanilla court_physician_court_position
+# (common/court_positions/types/00_court_positions.txt:41-562) for aptitude,
+# salary and the AI barony gate; court_artificer_court_position
+# (:10896-11193) for the received/revoked/invalidated/vacated effects, the
+# employee modifier and the candidate score. No DLC gate (the physician has
+# none; lesson 12).
+# What the technician does is script-read, not a modifier (spec §6
+# deviation: no scaling_employer_modifiers, 0 levels is allowed):
+#   - eotg_aug_save_surgeon_effect picks the technician first, and
+#     eotg_aug_proc_bad_factor's technician rows read the aptitude;
+#   - eotg_aug_price_mult_physician is cheaper with a technician;
+#   - eotg_decision_maintenance_protocol costs less and goes deeper;
+#   - eotg_on_yearly_aug_overclocked_check accrues less.
+# No text quantifies any of it (hidden-risk rule).
+# ─────────────────────────────────────────────────────────────────────────────
+
+eotg_aug_implant_technician_court_position = {
+    sort_order = 398
+    max_available_positions = 1
+    skill = learning
+
+    court_position_asset = {
+        animation = physician
+        background = "gfx/interface/illustrations/event_scenes/study_physician.dds"
+    }
+
+    opinion = {
+        value = regular_court_position_opinion
+    }
+
+    aptitude_level_breakpoints = { 20 40 60 80 }
+
+    # Root: the holder
+    aptitude = {
+        value = 1
+        add = {
+            value = learning
+            multiply = 1.5
+            max = 45
+            desc = court_position_skill_learning
+        }
+        if = {
+            limit = { has_trait = lifestyle_physician }
+            if = {
+                limit = {
+                    has_trait_xp = { trait = lifestyle_physician  value >= 100 }
+                }
+                add = {
+                    value = 45
+                    desc = court_position_physician_3_trait
+                }
+            }
+            else_if = {
+                limit = {
+                    has_trait_xp = { trait = lifestyle_physician  value >= 50 }
+                }
+                add = {
+                    value = 30
+                    desc = court_position_physician_2_trait
+                }
+            }
+            else = {
+                add = {
+                    value = 15
+                    desc = court_position_physician_1_trait
+                }
+            }
+        }
+        # Knows the hardware from the inside
+        if = {
+            limit = { eotg_is_augmented_any = yes }
+            add = {
+                value = 15
+                desc = eotg_aug_technician_aptitude_augmented
+            }
+        }
+        if = {
+            limit = { has_variable = eotg_aug_former }
+            add = {
+                value = 5
+                desc = eotg_aug_technician_aptitude_former
+            }
+        }
+        if = {
+            limit = { has_trait = education_learning }
+            add = {
+                if = {
+                    limit = { has_trait = education_learning_2 }
+                    add = 8
+                }
+                else_if = {
+                    limit = { has_trait = education_learning_3 }
+                    add = 12
+                }
+                else_if = {
+                    limit = { has_trait = education_learning_4 }
+                    add = 16
+                }
+                else_if = {
+                    limit = { has_trait = education_learning_5 }
+                    add = 20
+                }
+                else = {
+                    add = 4
+                }
+                desc = education_learning
+            }
+        }
+        if = {
+            limit = { has_trait = blind }
+            add = {
+                value = -50
+                desc = court_position_blind_trait
+            }
+        }
+        add = court_position_aptitude_low_penalty_value
+        add = general_aptitude_bonus
+    }
+
+    # The physician's AI barony gate (:336-344); then rulers with hardware,
+    # or a realm that licenses or favors it, or one already employing one
+    is_shown = {
+        trigger_if = {
+            limit = {
+                is_ai = yes
+                highest_held_title_tier <= tier_barony
+            }
+            always = no
+        }
+        OR = {
+            eotg_is_augmented_any = yes
+            eotg_aug_under_policy = { LAW = license }
+            eotg_aug_under_policy = { LAW = favor }
+            employs_court_position = eotg_aug_implant_technician_court_position
+        }
+    }
+
+    # Under a Ban the position invalidates for everyone but the lawmaker;
+    # vanilla's invalidation handles the holder
+    valid_position = {
+        custom_tooltip = {
+            text = eotg_aug_technician_banned_tt
+            OR = {
+                NOT = { eotg_aug_under_policy = { LAW = ban } }
+                is_independent_ruler = yes
+            }
+        }
+    }
+
+    is_shown_character = {
+        scope:employee = {
+            court_position_employee_shown_trigger = yes
+        }
+    }
+
+    # court_physician_validity_trigger shape (00_court_position_triggers.txt:
+    # 494-497). The same person may hold both physician and technician.
+    valid_character = {
+        scope:employee = {
+            base_court_position_validity_trigger = { EMPLOYER = scope:liege }
+            is_adult = yes
+            is_landed = no
+            OR = {
+                learning >= 8
+                has_trait = lifestyle_physician
+                eotg_is_augmented_any = yes
+            }
+        }
+    }
+
+    revoke_cost = {
+        prestige = minor_court_position_prestige_revoke_cost
+    }
+
+    # The physician's gold / treasury split (:379-411)
+    salary = {
+        gold = {
+            value = 0
+            if = {
+                limit = {
+                    scope:liege = {
+                        has_treasury = no
+                    }
+                }
+                add = eotg_aug_technician_salary_value
+            }
+        }
+        treasury = {
+            value = 0
+            if = {
+                limit = {
+                    scope:liege = {
+                        has_treasury = yes
+                    }
+                }
+                add = eotg_aug_technician_salary_value
+            }
+        }
+        round = no
+    }
+
+    received_salary = {
+        gold = {
+            value = eotg_aug_technician_salary_value
+        }
+        round = no
+    }
+
+    custom_employer_modifier_description = eotg_aug_implant_technician_employer_desc
+
+    # Employee modifier (artificer precedent, :11136-11139)
+    modifier = {
+        monthly_learning_lifestyle_xp_gain_mult = 0.1
+    }
+
+    on_court_position_received = {
+        basic_gained_court_position_effect = yes
+    }
+    on_court_position_revoked = {
+        basic_revoked_court_position_effect = yes
+    }
+    on_court_position_invalidated = {
+        basic_invalidated_court_position_effect = yes
+    }
+    on_court_position_vacated = {
+        court_position_vacated_event_effect = {
+            COURT_POSITION_TYPE = eotg_aug_implant_technician_court_position
+        }
+    }
+
+    # Hire > 0. An unaugmented liege scores -50 and never hires.
+    ai_position_score = {
+        value = -50
+        if = {
+            limit = {
+                scope:liege = {
+                    OR = {
+                        eotg_is_aug_tier2 = yes
+                        eotg_is_aug_tier3 = yes
+                        has_trait = eotg_neurofractured
+                    }
+                }
+            }
+            add = 200
+        }
+        else_if = {
+            limit = { scope:liege = { eotg_is_aug_tier1 = yes } }
+            add = 120
+        }
+        if = {
+            limit = {
+                scope:liege = {
+                    any_knight = {
+                        count >= 2
+                        eotg_is_augmented_any = yes
+                    }
+                }
+            }
+            add = 50
+        }
+        add = court_position_debt_considerations_value
+    }
+
+    # The artificer's set (:11179-11192), without its petition line
+    ai_candidate_score = {
+        value = 50
+        add = court_position_candidate_score_base_value
+        add = court_position_candidate_aptitude_value
+    }
+}

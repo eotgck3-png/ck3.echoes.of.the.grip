@@ -339,9 +339,10 @@ eotg_aug_int.002 = {
 
     # "Have it fitted to me." Tier 1 only, whatever the hardware came from
     # (HQ1: no skipping tiers). Used hardware: half the time a hidden flaw
-    # (thread T6). The physician path needs a court physician who is not
-    # root (procedures QA: eotg_aug_has_court_physician); otherwise the
-    # back-street roll, revealed by init.011.
+    # (thread T6). The physician path needs a surgeon who is not root
+    # (procedures QA rule, eotg_aug_has_surgeon_for: a court physician or an
+    # Implant Technician); otherwise the back-street roll, revealed by
+    # init.011.
     option = {
         name = eotg_aug_int.002.b
         trigger = {
@@ -359,7 +360,7 @@ eotg_aug_int.002 = {
         }
         custom_tooltip = eotg_aug_proc.install_tt
         if = {
-            limit = { eotg_aug_has_court_physician = yes }
+            limit = { eotg_aug_has_surgeon_for = { PATIENT = root } }
             hidden_effect = {
                 eotg_aug_save_surgeon_effect = yes
                 eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = physician  PROCEDURE = install  SURGEON = scope:eotg_proc_surgeon }

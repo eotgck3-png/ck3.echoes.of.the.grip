@@ -253,10 +253,10 @@ eotg_aug_tamper.003 = {
 # (var:eotg_aug_repair_injury = flag:fault, scope:eotg_proc_fault) and rolls
 # a repair (hidden). The sabotaged flag makes this roll x1.5 bad. A repaired
 # fault clears through eotg_aug_repair_injury_effect; a failed one stays.
-# b ("My own physician") needs a court physician who is not root
-# (eotg_aug_has_court_physician), as the procedures QA fixed for proc.003.b;
-# the spec's eotg_has_physician_access would reopen the self-physician
-# exploit (reported).
+# b ("My own physician") needs a surgeon who is not root
+# (eotg_aug_has_surgeon_for, which since the realm batch also offers the
+# Implant Technician), as the procedures QA fixed for proc.003.b. a closes
+# under the target's realm's Ban (realm spec §3.2).
 # Caller: eotg_aug_tamper.002 (a, b), on the target, 3-14 days.
 
 eotg_aug_tamper.004 = {
@@ -332,7 +332,13 @@ eotg_aug_tamper.004 = {
     # "The clinic."
     option = {
         name = eotg_aug_tamper.004.a
+        show_as_unavailable = { eotg_aug_clinic_open = no }
         trigger = {
+            # Realm spec §3.2: sanctioned clinics close under a Ban
+            custom_description = {
+                text = eotg_aug_clinic_closed_tt
+                eotg_aug_clinic_open = yes
+            }
             NOT = { has_trait = eotg_neurofractured }
             eotg_aug_can_afford_procedure = { BASE = medium_gold_value  MULT = 1 }
         }
@@ -353,8 +359,13 @@ eotg_aug_tamper.004 = {
     # (a court physician, not root) "My own physician."
     option = {
         name = eotg_aug_tamper.004.b
+        # Realm spec §3.2: the technician (own or borrowed) is offered here
+        name = {
+            trigger = { eotg_aug_surgeon_is_technician = yes }
+            text = eotg_aug_opt_technician
+        }
         trigger = {
-            eotg_aug_has_court_physician = yes
+            eotg_aug_has_surgeon_for = { PATIENT = root }
             eotg_aug_can_afford_procedure = { BASE = medium_gold_value  MULT = eotg_aug_price_mult_physician }
         }
         eotg_aug_pay_procedure_effect = { BASE = medium_gold_value  MULT = eotg_aug_price_mult_physician }

@@ -152,21 +152,9 @@ eotg_has_physician_access = {
     }
 }
 
-# A court physician who is someone other than the event's root (procedures
-# QA, self-physician fix). The "My own physician." options price and roll a
-# separate surgeon; a lifestyle_physician with no court physician takes the
-# self option (e) at the self price and penalty instead. Filled-position test:
-# employs_court_position (as eotg_has_physician_access); holder link as vanilla
-# events/court_events/01_ep3_court_events_3.txt:379-412. Evaluate in root's
-# scope only.
-# Callers: eotg_aug_proc.001 (b, desc_physician), eotg_aug_proc.003 (b,
-# desc_physician), eotg_aug_tier1.002 (f), eotg_aug_tier2.003 (f).
-eotg_aug_has_court_physician = {
-    employs_court_position = court_physician_court_position
-    court_position:court_physician_court_position ?= {
-        NOT = { this = root }
-    }
-}
+# (eotg_aug_has_court_physician retired by the realm batch: its procedures QA
+# rule, "a surgeon other than the patient", now lives in
+# eotg_aug_has_surgeon_for below, which also covers the Implant Technician.)
 
 # (eotg_aug_is_nonruler removed, QA round 2: nothing referenced it; the
 # non-ruler pulse tests highest_held_title_tier inline.)
@@ -507,4 +495,145 @@ eotg_aug_has_fault = {
         has_character_flag = eotg_flag_aug_hidden_flaw
         has_character_flag = eotg_flag_aug_sabotaged
     }
+}
+
+# -- Realm (docs/specs/cybernetics_v2_realm.md §3.1, G7 / G10 / G6) ---------
+
+# The character lives under their top liege's Augmentation law ($LAW$ = ban /
+# license / tolerate / favor). Realm-local (LAW AT 866): the ruler at the head
+# of the realm sets it, nothing sits above. An independent ruler governs
+# themself; a courtier, knight or spouse follows their employer's top liege.
+# Outside any realm: no law (reads as Tolerate; nothing tests tolerate
+# positively). The only reader of the law group outside the laws' own
+# ai_will_do (spec §9 item 6).
+eotg_aug_under_policy = {
+    top_liege ?= { has_realm_law = eotg_aug_policy_$LAW$ }
+}
+
+# Sanctioned clinics operate: not under a Ban.
+# Users: the clinic options at every provider-choice point and the clinic
+# send options (spec §3.2); eotg_aug_borrow_technician_interaction.
+eotg_aug_clinic_open = {
+    NOT = { eotg_aug_under_policy = { LAW = ban } }
+}
+
+# The procedure just rolled is a crime under the patient's realm's law: any
+# work under a Ban, back-street work under a License. Patient scope; reads
+# scope:eotg_proc_provider, which the roll saved (spec deviation: the spec's
+# PROVIDER parameter would turn that scope value into a literal and back).
+# User: eotg_aug_contraband_effect.
+eotg_aug_is_contraband = {
+    OR = {
+        eotg_aug_under_policy = { LAW = ban }
+        AND = {
+            eotg_aug_under_policy = { LAW = license }
+            scope:eotg_proc_provider ?= flag:backstreet
+        }
+    }
+}
+
+# Refusing $ACTOR$'s order to remove implants is a crime (recipient scope):
+# the actor is the recipient's liege or above, and the recipient's realm bans
+# augmentation, or licenses it and the recipient's hardware is unlicensed.
+# Vanilla shape: refusing_conversion_is_crime_trigger with
+# target_is_liege_or_above (00_religious_interactions.txt:160-180, 640-672).
+# User: eotg_aug_demand_removal_interaction.
+eotg_aug_refusal_is_crime = {
+    target_is_liege_or_above = $ACTOR$
+    OR = {
+        eotg_aug_under_policy = { LAW = ban }
+        AND = {
+            eotg_aug_under_policy = { LAW = license }
+            has_character_modifier = eotg_mod_illegal_implants
+        }
+    }
+}
+
+# The character employs an Implant Technician who can operate (not blind).
+# The first choice of eotg_aug_save_surgeon_effect.
+eotg_aug_own_technician_valid = {
+    employs_court_position = eotg_aug_implant_technician_court_position
+    court_position:eotg_aug_implant_technician_court_position ?= {
+        NOT = { has_trait = blind }
+    }
+}
+
+# A technician lent through Borrow Their Technician (var set for a year by
+# eotg_aug_borrow_technician_interaction) can still operate.
+eotg_aug_borrowed_technician_valid = {
+    var:eotg_aug_borrowed_technician ?= {
+        is_alive = yes
+        is_imprisoned = no
+        has_court_position = eotg_aug_implant_technician_court_position
+        NOT = { has_trait = blind }
+    }
+}
+
+# Someone to operate: a physician (the character, or a court physician), an
+# own technician, or a borrowed one. A technician is a surgeon, not a
+# physician: the T5 uses of eotg_has_physician_access stay as built (spec
+# §4.5 "Not changed").
+eotg_aug_has_surgeon_access = {
+    OR = {
+        eotg_has_physician_access = yes
+        eotg_aug_own_technician_valid = yes
+        eotg_aug_borrowed_technician_valid = yes
+    }
+}
+
+# eotg_aug_save_surgeon_effect would pick a technician (own or borrowed).
+# Used for the option name variant "My implant technician."
+eotg_aug_surgeon_is_technician = {
+    OR = {
+        eotg_aug_own_technician_valid = yes
+        eotg_aug_borrowed_technician_valid = yes
+    }
+}
+
+# Surgeon access, AND the surgeon eotg_aug_save_surgeon_effect would pick
+# (same order: own technician, borrowed technician, court physician, the
+# character) is not $PATIENT$. Run in the scope of whoever provides the
+# surgeon. This keeps the procedures QA fix (the retired
+# eotg_aug_has_court_physician: a physician ruler operating on themself at the
+# physician's price without the self penalty) and the interactions guard
+# (the recipient is not the actor's own physician) now that a technician can
+# be the surgeon (realm spec §3.2 conflict, reported).
+# Users: the "My own physician" options with root as patient (proc.001.b,
+# proc.003.b, tier1.002.f, tier2.003.f, init.018.c, tamper.004.b, int.002.b,
+# and the desc_physician lines), the interactions' physician send options,
+# eotg_aug_realm.001 (b).
+eotg_aug_has_surgeon_for = {
+    eotg_aug_has_surgeon_access = yes
+    trigger_if = {
+        limit = { eotg_aug_own_technician_valid = yes }
+        court_position:eotg_aug_implant_technician_court_position = {
+            NOT = { this = $PATIENT$ }
+        }
+    }
+    trigger_else_if = {
+        limit = { eotg_aug_borrowed_technician_valid = yes }
+        var:eotg_aug_borrowed_technician = {
+            NOT = { this = $PATIENT$ }
+        }
+    }
+    trigger_else_if = {
+        limit = { employs_court_position = court_physician_court_position }
+        court_position:court_physician_court_position = {
+            NOT = { this = $PATIENT$ }
+        }
+    }
+    trigger_else = {
+        NOT = { this = $PATIENT$ }
+    }
+}
+
+# An augmented tournament entrant (character scope): in the contestant subset,
+# a valid contestant, augmented and not Seamless (vanilla
+# 04_ep2_tournament_triggers.txt:21-37).
+# Users: eotg_on_tournament_opening_aug, eotg_aug_act.001.
+eotg_aug_tournament_entrant = {
+    is_in_guest_subset = { name = contestant }
+    activity_is_valid_tournament_contestant = yes
+    eotg_is_augmented_any = yes
+    NOT = { has_trait = eotg_total_integration }
 }

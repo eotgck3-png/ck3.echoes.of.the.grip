@@ -314,7 +314,15 @@ eotg_aug_tier2.003 = {
     # "Proceed" — pay and upgrade
     option = {
         name = eotg_aug_tier2.003.a
-        trigger = { gold >= major_gold_value }
+        show_as_unavailable = { eotg_aug_clinic_open = no }
+        trigger = {
+            # Realm spec §3.2: sanctioned clinics close under a Ban
+            custom_description = {
+                text = eotg_aug_clinic_closed_tt
+                eotg_aug_clinic_open = yes
+            }
+            gold >= major_gold_value
+        }
         remove_short_term_gold = major_gold_value
         eotg_aug_set_integration_effect = { XP = 100 }
         custom_tooltip = eotg_aug_proc.install_tt
@@ -358,7 +366,13 @@ eotg_aug_tier2.003 = {
         name = eotg_aug_tier2.003.c
         # One step below option a's major_gold_value: the prisoners carry the
         # risk, not the purse (phase 0 §1.5 mapping).
+        show_as_unavailable = { eotg_aug_clinic_open = no }
         trigger = {
+            # Realm spec §3.2: sanctioned clinics close under a Ban
+            custom_description = {
+                text = eotg_aug_clinic_closed_tt
+                eotg_aug_clinic_open = yes
+            }
             gold >= medium_gold_value
             any_prisoner = { is_alive = yes }
         }
@@ -387,7 +401,13 @@ eotg_aug_tier2.003 = {
     # [ambitious] "Whatever it costs." - as a, leaning in (risk +5)
     option = {
         name = eotg_aug_tier2.003.d
+        show_as_unavailable = { eotg_aug_clinic_open = no }
         trigger = {
+            # Realm spec §3.2: sanctioned clinics close under a Ban
+            custom_description = {
+                text = eotg_aug_clinic_closed_tt
+                eotg_aug_clinic_open = yes
+            }
             has_trait = ambitious
             gold >= major_gold_value
         }
@@ -441,8 +461,13 @@ eotg_aug_tier2.003 = {
     # this price.
     option = {
         name = eotg_aug_tier2.003.f
+        # Realm spec §3.2: the technician (own or borrowed) is offered here
+        name = {
+            trigger = { eotg_aug_surgeon_is_technician = yes }
+            text = eotg_aug_opt_technician
+        }
         trigger = {
-            eotg_aug_has_court_physician = yes
+            eotg_aug_has_surgeon_for = { PATIENT = root }
             gold >= {
                 value = major_gold_value
                 multiply = eotg_aug_price_mult_physician

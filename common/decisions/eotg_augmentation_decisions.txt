@@ -200,11 +200,16 @@ eotg_decision_maintenance_protocol = {
         }
     }
 
-    # A physician to hand makes the calibration cheaper (thread T5)
+    # A physician to hand makes the calibration cheaper (thread T5); an
+    # Implant Technician cheaper still (realm spec §3.3)
     cost = {
         gold = {
             value = minor_gold_value
             if = {
+                limit = { eotg_aug_own_technician_valid = yes }
+                multiply = 0.5
+            }
+            else_if = {
                 limit = { eotg_has_physician_access = yes }
                 multiply = 0.75
             }
@@ -223,9 +228,17 @@ eotg_decision_maintenance_protocol = {
         # and the stress; the only hidden consequence is the Overclocked
         # risk drop, so the note shows only then (conditional custom_tooltip
         # as vanilla common/decisions/00_guest_decisions.txt:78-85).
+        # Realm spec §3.3: deeper with an Implant Technician (-12, as
+        # Consult the Physician), else -8
         if = {
             limit = { eotg_is_aug_tier3 = yes }
-            eotg_add_fracture_risk = { AMOUNT = -8 }
+            if = {
+                limit = { eotg_aug_own_technician_valid = yes }
+                eotg_add_fracture_risk = { AMOUNT = -12 }
+            }
+            else = {
+                eotg_add_fracture_risk = { AMOUNT = -8 }
+            }
             custom_tooltip = eotg_decision_maintenance_protocol_tooltip
         }
         stress_impact = { base = minor_stress_impact_loss }
@@ -317,6 +330,8 @@ eotg_decision_seek_augmentation = {
         modifier = { add = 10  has_trait = cynical }
         modifier = { add = 10  prowess <= 6 }
         modifier = { factor = 0  has_trait = zealous }
+        # Realm spec §3.3
+        modifier = { factor = 0.5  eotg_aug_under_policy = { LAW = ban } }
     }
 }
 

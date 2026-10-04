@@ -134,6 +134,8 @@ def build_effects():
     o.before(i, "eotg_obs_log_integration_effect = { XP = $XP$ }")
     for name, line in (
         ("eotg_trigger_neurofracture", "eotg_obs_log_effect = { KEY = cascade_ruler }"),
+        # Realm spec §4.9 counter 4: cascades of rulers with a technician
+        ("eotg_trigger_neurofracture", "if = { limit = { eotg_aug_own_technician_valid = yes } eotg_obs_log_effect = { KEY = cascade_tech } }"),
         ("eotg_aug_nr_cascade_effect", "eotg_obs_log_effect = { KEY = cascade_nonruler }"),
         ("eotg_aug_cascade_death_effect", "eotg_obs_log_term_effect = { KIND = death }"),
         ("eotg_aug_total_integration_effect", "eotg_obs_log_term_effect = { KIND = seamless }"),
@@ -155,6 +157,10 @@ def build_effects():
     o.after_line(s, "scope:recipient = { eotg_obs_log_effect = { KEY = int_salvage } }", extra="    ")
     i = o.find(r"add_kinslayer_trait_or_nothing_effect = \{ VICTIM = scope:recipient \}", s, e)[0]
     o.before(i, "eotg_obs_log_effect = { KEY = int_salvage_death }")
+    # Realm spec §4.9 counter 3: contraband crimes (the subject's id)
+    s, e = o.block("eotg_aug_contraband_effect")
+    i = o.find(r"save_scope_as = eotg_contraband_subject", s, e)[0]
+    o.before(i, "eotg_obs_log_effect = { KEY = crime_contraband }")
     for name, story, key in (
         ("eotg_aug_try_start_countdown_effect", "eotg_story_aug_countdown", "cd_start"),
         ("eotg_aug_patron_accept_effect", "eotg_story_aug_patron", "arc_patron_start"),
@@ -224,6 +230,11 @@ def build_interactions():
         s, e = o.block(name)
         i = o.find(r"^    on_accept = \{\s*$", s, e)[0]
         o.after_line(i, f"scope:actor = {{ eotg_obs_log_effect = {{ KEY = {key} }} }}")
+    # Realm spec §4.9 counter 3: a refused Demand that was a crime (the
+    # refuser's id)
+    s, e = o.block("eotg_aug_demand_removal_interaction")
+    i = o.find(r"^\s*reverse_add_opinion = \{", s, e)[0]
+    o.before(i, "eotg_obs_log_effect = { KEY = crime_defied }")
     return o
 
 
@@ -263,6 +274,9 @@ def loc_keys(dec_keys):
     char += ["int_offer_landed", "int_offer_unlanded", "int_demand", "int_examine",
              "tamper_start", "tamper_success", "tamper_failure", "tamper_discovered",
              "int_salvage", "int_salvage_death"]
+    # Realm spec §4.9
+    char += [f"{p}_{law}" for p in ("census_law", "init_law") for law in ("ban", "license", "favor", "none")]
+    char += ["census_technician", "crime_contraband", "crime_defied", "cascade_tech"]
     char += dec_keys
     lines = ["\ufeffl_english:"]
     for k in glob:

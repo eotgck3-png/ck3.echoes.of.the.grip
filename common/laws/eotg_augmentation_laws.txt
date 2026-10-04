@@ -1,0 +1,256 @@
+﻿# ── eotg_augmentation_laws.txt ───────────────────────────────────────────────
+# The four Augmentation laws (docs/specs/cybernetics_v2_realm.md §4.1, G7):
+# Ban, License, Tolerate (default), Favor. Group: eotg_aug_policy_laws
+# (common/law_groups/eotg_augmentation_law_groups.txt).
+#
+# Shapes: a pick-one policy with a prestige pass_cost and trait-weighted
+# ai_will_do (vanilla mandala_decree_*, 00_realm_laws.txt:2554-2646); the
+# cooldown variable set in on_pass and read in can_pass through a
+# custom_description (crown_authority_1, 00_realm_laws.txt:76-118).
+# Vassal opinion goes through the vanilla vassal-stance opinion modifiers in
+# `modifier` (00_realm_laws.txt:24-30): the zealot stance is scored by zealous
+# and cynical, glory hound and belligerent by ambitious, parochial by content
+# (common/vassal_stances/00_vassal_stances.txt:172, 334, 510, 996), so no
+# faith is named.
+# What each law does to procedures, offers and crimes is script-read through
+# eotg_aug_under_policy (the only reader of the group outside the laws' own
+# ai_will_do). The laws carry no gold, clinic or price effect: Favor is
+# regard, not provision (lore Q2).
+# Non-default laws need an independent holder (can_keep); a ruler who becomes
+# a vassal reverts to Tolerated within a month.
+# ─────────────────────────────────────────────────────────────────────────────
+
+@eotg_aug_policy_cooldown_years = 10
+
+eotg_aug_policy_ban = {
+    law_group_type = eotg_aug_policy_laws
+    index = 0
+
+    modifier = {
+        zealot_opinion = 15
+        parochial_opinion = 5
+        glory_hound_opinion = -10
+        belligerent_opinion = -5
+    }
+
+    can_keep = {
+        is_independent_ruler = yes
+    }
+
+    can_pass = {
+        custom_description = {
+            text = eotg_aug_policy_cooldown_tt
+            NOT = { has_variable = eotg_aug_policy_cooldown }
+        }
+    }
+
+    pass_cost = {
+        prestige = major_prestige_value
+    }
+
+    on_pass = {
+        set_variable = {
+            name = eotg_aug_policy_cooldown
+            years = @eotg_aug_policy_cooldown_years
+        }
+        # The augmented among the lawmaker's direct vassals and courtiers
+        every_vassal = {
+            limit = { eotg_is_augmented_any = yes }
+            add_opinion = { modifier = eotg_opinion_aug_outlawed  target = root }
+        }
+        every_courtier = {
+            limit = { eotg_is_augmented_any = yes }
+            add_opinion = { modifier = eotg_opinion_aug_outlawed  target = root }
+        }
+    }
+
+    # Unaugmented zealous independents. Heirs who are cynical or augmented
+    # revert it (eotg_aug_policy_tolerate).
+    ai_will_do = {
+        value = 0
+        if = {
+            limit = {
+                NOT = { has_realm_law = eotg_aug_policy_ban }
+                eotg_is_augmented_any = no
+                has_trait = zealous
+                NOT = { has_trait = cynical }
+            }
+            value = 10
+            if = {
+                limit = {
+                    any_vassal = {
+                        count >= 3
+                        eotg_is_augmented_any = yes
+                    }
+                }
+                add = 5
+            }
+        }
+    }
+}
+
+eotg_aug_policy_license = {
+    law_group_type = eotg_aug_policy_laws
+    index = 1
+
+    modifier = {
+        parochial_opinion = 5
+        courtly_opinion = 5
+        glory_hound_opinion = -5
+    }
+
+    can_keep = {
+        is_independent_ruler = yes
+    }
+
+    can_pass = {
+        custom_description = {
+            text = eotg_aug_policy_cooldown_tt
+            NOT = { has_variable = eotg_aug_policy_cooldown }
+        }
+    }
+
+    pass_cost = {
+        prestige = medium_prestige_value
+    }
+
+    on_pass = {
+        set_variable = {
+            name = eotg_aug_policy_cooldown
+            years = @eotg_aug_policy_cooldown_years
+        }
+    }
+
+    ai_will_do = {
+        value = 0
+        if = {
+            limit = {
+                NOT = { has_realm_law = eotg_aug_policy_license }
+                NOT = { has_trait = zealous }
+                OR = {
+                    has_trait = diligent
+                    has_trait = just
+                }
+                OR = {
+                    eotg_is_augmented_any = yes
+                    any_vassal = {
+                        count >= 2
+                        eotg_is_augmented_any = yes
+                    }
+                }
+            }
+            value = 5
+        }
+    }
+}
+
+# The default: the ruler does not legislate it
+eotg_aug_policy_tolerate = {
+    law_group_type = eotg_aug_policy_laws
+    index = 2
+
+    can_pass = {
+        custom_description = {
+            text = eotg_aug_policy_cooldown_tt
+            NOT = { has_variable = eotg_aug_policy_cooldown }
+        }
+    }
+
+    pass_cost = {
+        prestige = minor_prestige_value
+    }
+
+    on_pass = {
+        set_variable = {
+            name = eotg_aug_policy_cooldown
+            years = @eotg_aug_policy_cooldown_years
+        }
+    }
+
+    # Reverting: a Ban held by someone augmented or cynical, a Favor held by
+    # someone zealous or unaugmented, a License held by someone neither
+    # diligent nor just
+    ai_will_do = {
+        value = 0
+        if = {
+            limit = {
+                has_realm_law = eotg_aug_policy_ban
+                OR = {
+                    eotg_is_augmented_any = yes
+                    has_trait = cynical
+                }
+            }
+            value = 10
+        }
+        else_if = {
+            limit = {
+                has_realm_law = eotg_aug_policy_favor
+                OR = {
+                    has_trait = zealous
+                    eotg_is_augmented_any = no
+                }
+            }
+            value = 10
+        }
+        else_if = {
+            limit = {
+                has_realm_law = eotg_aug_policy_license
+                NOR = {
+                    has_trait = diligent
+                    has_trait = just
+                }
+            }
+            value = 3
+        }
+    }
+}
+
+eotg_aug_policy_favor = {
+    law_group_type = eotg_aug_policy_laws
+    index = 3
+
+    modifier = {
+        glory_hound_opinion = 10
+        belligerent_opinion = 5
+        zealot_opinion = -15
+        parochial_opinion = -5
+    }
+
+    can_keep = {
+        is_independent_ruler = yes
+    }
+
+    can_pass = {
+        custom_description = {
+            text = eotg_aug_policy_cooldown_tt
+            NOT = { has_variable = eotg_aug_policy_cooldown }
+        }
+    }
+
+    pass_cost = {
+        prestige = medium_prestige_value
+    }
+
+    on_pass = {
+        set_variable = {
+            name = eotg_aug_policy_cooldown
+            years = @eotg_aug_policy_cooldown_years
+        }
+    }
+
+    ai_will_do = {
+        value = 0
+        if = {
+            limit = {
+                NOT = { has_realm_law = eotg_aug_policy_favor }
+                NOT = { has_trait = zealous }
+                eotg_is_augmented_any = yes
+                OR = {
+                    has_trait = ambitious
+                    has_trait = cynical
+                }
+            }
+            value = 5
+        }
+    }
+}

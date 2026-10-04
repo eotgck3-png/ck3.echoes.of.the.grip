@@ -65,7 +65,7 @@ eotg_aug_proc.001 = {
             }
         }
         triggered_desc = {
-            trigger = { eotg_aug_has_court_physician = yes }
+            trigger = { eotg_aug_has_surgeon_for = { PATIENT = root } }
             desc = eotg_aug_proc.001.desc_physician
         }
     }
@@ -113,7 +113,13 @@ eotg_aug_proc.001 = {
     # "The clinic."
     option = {
         name = eotg_aug_proc.001.a
+        show_as_unavailable = { eotg_aug_clinic_open = no }
         trigger = {
+            # Realm spec §3.2: sanctioned clinics close under a Ban
+            custom_description = {
+                text = eotg_aug_clinic_closed_tt
+                eotg_aug_clinic_open = yes
+            }
             has_variable = eotg_aug_removal_kind
             eotg_aug_can_afford_procedure = { BASE = eotg_aug_removal_base_value  MULT = 1 }
         }
@@ -131,12 +137,18 @@ eotg_aug_proc.001 = {
         }
     }
 
-    # (a court physician, not root) "My own physician."
+    # (a surgeon other than root: a court physician or a technician) "My
+    # own physician." / "My implant technician."
     option = {
         name = eotg_aug_proc.001.b
+        # Realm spec §3.2: the technician (own or borrowed) is offered here
+        name = {
+            trigger = { eotg_aug_surgeon_is_technician = yes }
+            text = eotg_aug_opt_technician
+        }
         trigger = {
             has_variable = eotg_aug_removal_kind
-            eotg_aug_has_court_physician = yes
+            eotg_aug_has_surgeon_for = { PATIENT = root }
             eotg_aug_can_afford_procedure = { BASE = eotg_aug_removal_base_value  MULT = eotg_aug_price_mult_physician }
         }
         eotg_aug_pay_procedure_effect = { BASE = eotg_aug_removal_base_value  MULT = eotg_aug_price_mult_physician }
@@ -214,7 +226,13 @@ eotg_aug_proc.001 = {
     # clinic at full price; faith-neutral (index §5 deferral note).
     option = {
         name = eotg_aug_proc.001.f
+        show_as_unavailable = { eotg_aug_clinic_open = no }
         trigger = {
+            # Realm spec §3.2: sanctioned clinics close under a Ban
+            custom_description = {
+                text = eotg_aug_clinic_closed_tt
+                eotg_aug_clinic_open = yes
+            }
             has_variable = eotg_aug_removal_kind
             has_trait = zealous
             var:eotg_aug_removal_kind ?= flag:full
@@ -490,7 +508,7 @@ eotg_aug_proc.003 = {
             desc = eotg_aug_proc.003.desc_fractured
         }
         triggered_desc = {
-            trigger = { eotg_aug_has_court_physician = yes }
+            trigger = { eotg_aug_has_surgeon_for = { PATIENT = root } }
             desc = eotg_aug_proc.003.desc_physician
         }
     }
@@ -525,7 +543,13 @@ eotg_aug_proc.003 = {
     # "The clinic."
     option = {
         name = eotg_aug_proc.003.a
+        show_as_unavailable = { eotg_aug_clinic_open = no }
         trigger = {
+            # Realm spec §3.2: sanctioned clinics close under a Ban
+            custom_description = {
+                text = eotg_aug_clinic_closed_tt
+                eotg_aug_clinic_open = yes
+            }
             NOT = { has_trait = eotg_neurofractured }
             eotg_aug_can_afford_procedure = { BASE = medium_gold_value  MULT = 1 }
         }
@@ -543,12 +567,18 @@ eotg_aug_proc.003 = {
         }
     }
 
-    # (a court physician, not root) "My own physician." A physician ruler
-    # without one takes e (self) instead.
+    # (a surgeon other than root: a court physician or a technician) "My
+    # own physician." / "My implant technician." A physician ruler without
+    # one takes e (self) instead.
     option = {
         name = eotg_aug_proc.003.b
+        # Realm spec §3.2: the technician (own or borrowed) is offered here
+        name = {
+            trigger = { eotg_aug_surgeon_is_technician = yes }
+            text = eotg_aug_opt_technician
+        }
         trigger = {
-            eotg_aug_has_court_physician = yes
+            eotg_aug_has_surgeon_for = { PATIENT = root }
             eotg_aug_can_afford_procedure = { BASE = medium_gold_value  MULT = eotg_aug_price_mult_physician }
         }
         eotg_aug_pay_procedure_effect = { BASE = medium_gold_value  MULT = eotg_aug_price_mult_physician }
@@ -626,7 +656,13 @@ eotg_aug_proc.003 = {
     # (a lesson, B6) and more hardware (risk +5, hidden).
     option = {
         name = eotg_aug_proc.003.f
+        show_as_unavailable = { eotg_aug_clinic_open = no }
         trigger = {
+            # Realm spec §3.2: sanctioned clinics close under a Ban
+            custom_description = {
+                text = eotg_aug_clinic_closed_tt
+                eotg_aug_clinic_open = yes
+            }
             has_trait = cynical
             NOT = { has_trait = eotg_neurofractured }
             eotg_aug_can_afford_procedure = { BASE = medium_gold_value  MULT = 1 }

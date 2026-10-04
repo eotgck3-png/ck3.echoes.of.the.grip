@@ -109,3 +109,41 @@ eotg_opinion_aug_tampered = {
     years = 30
     imprisonment_reason = yes
 }
+
+# -- Realm (docs/specs/cybernetics_v2_realm.md §3.1) -------------------------
+
+# The liege's lawful reason after a discovered crime under the realm's Ban or
+# License (vanilla illegal_resisted_conversion_opinion shape,
+# 00_religious_opinions.txt:118-123). Given through reverse_add_opinion.
+# Caller: eotg_aug_contraband_effect; removed by eotg_aug_realm001_forgive_effect.
+eotg_opinion_aug_contraband = {
+    opinion = -15
+    years = 10
+    imprisonment_reason = yes
+    revoke_title_reason = yes
+}
+
+# "Refused a Lawful Order" (lore R2): refusing Demand Implant Removal where
+# that is a crime. Applied with years = 10 through reverse_add_opinion.
+# Caller: eotg_aug_demand_removal_interaction (on_decline).
+eotg_opinion_aug_defied_law = {
+    opinion = -15
+    imprisonment_reason = yes
+    revoke_title_reason = yes
+}
+
+# An augmented vassal or courtier when the Ban passes.
+# Caller: eotg_aug_policy_ban (on_pass).
+eotg_opinion_aug_outlawed = {
+    opinion = -20
+    decaying = yes
+    years = 10
+}
+
+# A contestant barred from the field. Applied with no duration here, so 5
+# years are set in the definition.
+# Caller: eotg_aug_act_withdraw_effect (act.001 b/e, act.003 a/c/e).
+eotg_opinion_aug_barred = {
+    opinion = -15
+    years = 5
+}

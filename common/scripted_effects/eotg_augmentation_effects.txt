@@ -1828,11 +1828,14 @@ eotg_aug_clear_chain_flags_effect = {
 # custom_tooltip saying the outcome is decided on the table (end.001.tt).
 # ═════════════════════════════════════════════════════════════════════════════
 
-# The court physician as scope:eotg_proc_surgeon, else the patient (the
-# patient is the physician, or nobody is and the provider ignores it).
-# Run in the patient's scope. Shape: eotg_aug_end.001's immediate. Vanilla's
-# save_court_physician_as_effect (20_health_effects.txt:1539) is not reused:
-# it adds a court_owner hop and an is_physically_able filter that
+# Who operates, as scope:eotg_proc_surgeon (realm spec §3.2, one place):
+# (1) the character's own Implant Technician, if able to operate;
+# (2) a valid borrowed technician (var:eotg_aug_borrowed_technician);
+# (3) the court physician; (4) the character (the physician, or nobody and
+# the provider ignores it). Run in the scope of whoever provides the surgeon.
+# Mirror: eotg_aug_has_surgeon_for. Shape: eotg_aug_end.001's immediate.
+# Vanilla's save_court_physician_as_effect (20_health_effects.txt:1539) is not
+# reused: it adds a court_owner hop and an is_physically_able filter that
 # eotg_has_physician_access does not mirror.
 # Callers: eotg_aug_proc.001 / .003 (immediate), eotg_aug_tier1.021 (after),
 # eotg_aug_tier2.003 (f), eotg_aug_init.006 (c), eotg_aug_init.017 (a, d),
@@ -1843,6 +1846,14 @@ eotg_aug_clear_chain_flags_effect = {
 # eotg_aug_int.002 (b).
 eotg_aug_save_surgeon_effect = {
     if = {
+        limit = { eotg_aug_own_technician_valid = yes }
+        court_position:eotg_aug_implant_technician_court_position = { save_scope_as = eotg_proc_surgeon }
+    }
+    else_if = {
+        limit = { eotg_aug_borrowed_technician_valid = yes }
+        var:eotg_aug_borrowed_technician = { save_scope_as = eotg_proc_surgeon }
+    }
+    else_if = {
         limit = { employs_court_position = court_physician_court_position }
         court_position:court_physician_court_position = { save_scope_as = eotg_proc_surgeon }
     }
@@ -1990,9 +2001,38 @@ eotg_aug_procedure_roll_effect = {
                 modifier = { factor = 5  has_character_flag = eotg_flag_aug_proc_salvage }
                 save_scope_value_as = { name = eotg_proc_outcome  value = flag:rejection }
             }
-            # Discovered
+            # Discovered. Realm spec §3.2 (G7), the patient's realm's law:
+            # under a Ban all work is illegal (clinic and physician +6, the
+            # physician column covering a technician surgeon; back streets
+            # x2); under a License back streets x1.5; under Favor x0.5. The
+            # factor-0 rows below still apply after these.
             0 = {
                 modifier = { add = 10  scope:eotg_proc_provider = flag:backstreet }
+                modifier = {
+                    add = 6
+                    scope:eotg_proc_provider = flag:clinic
+                    eotg_aug_under_policy = { LAW = ban }
+                }
+                modifier = {
+                    add = 6
+                    scope:eotg_proc_provider = flag:physician
+                    eotg_aug_under_policy = { LAW = ban }
+                }
+                modifier = {
+                    factor = 2
+                    scope:eotg_proc_provider = flag:backstreet
+                    eotg_aug_under_policy = { LAW = ban }
+                }
+                modifier = {
+                    factor = 1.5
+                    scope:eotg_proc_provider = flag:backstreet
+                    eotg_aug_under_policy = { LAW = license }
+                }
+                modifier = {
+                    factor = 0.5
+                    scope:eotg_proc_provider = flag:backstreet
+                    eotg_aug_under_policy = { LAW = favor }
+                }
                 modifier = { factor = eotg_aug_proc_bad_factor  always = yes }
                 modifier = { factor = 0  scope:eotg_proc_kind = flag:removal }
                 modifier = { factor = 0  has_character_flag = eotg_flag_aug_backalley_discreet }
@@ -2219,6 +2259,8 @@ eotg_aug_procedure_apply_effect = {
     else_if = {
         limit = { scope:eotg_proc_outcome ?= flag:discovered }
         add_character_modifier = eotg_mod_illegal_implants
+        # Realm spec §4.2: a crime under the patient's realm's Ban or License
+        eotg_aug_contraband_effect = yes
         if = {
             limit = { scope:eotg_proc_kind ?= flag:repair }
             eotg_aug_repair_injury_effect = yes
@@ -2835,5 +2877,155 @@ eotg_aug_examine_treat_effect = {
             hidden_effect = { eotg_add_fracture_risk = { AMOUNT = -5 } }
         }
         add_opinion = { modifier = eotg_opinion_aug_grateful_patient  target = root  years = 10 }
+    }
+}
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Realm — docs/specs/cybernetics_v2_realm.md §4 (G7 policy, G6 activities)
+# ═════════════════════════════════════════════════════════════════════════════
+
+# Discovery as a crime (spec §4.2; lore Q1). Patient scope; called from the
+# discovered branch of eotg_aug_procedure_apply_effect, at the reveal. Under
+# the patient's realm's Ban (any work) or License (back-street work), the
+# direct liege gains a lawful reason to imprison (the
+# illegal_resisted_conversion_opinion shape, through reverse_add_opinion).
+# The direct liege is who can imprison; the top liege set the law; both are
+# the same realm, so the law never reaches outside it (Q1.5). The
+# independent lawmaker is never a criminal under their own law (Q1.4). A
+# player liege gets eotg_aug_realm.001.
+# COOLDOWN AUTHORITY: eotg_flag_aug_contraband_cd (on the liege, 1 year) is
+# set here and only here; realm.001 never reads it.
+# Spec deviation: no PROVIDER parameter; eotg_aug_is_contraband reads the
+# roll's scope:eotg_proc_provider.
+eotg_aug_contraband_effect = {
+    if = {
+        limit = {
+            eotg_aug_is_contraband = yes
+            is_independent_ruler = no
+            exists = liege
+        }
+        save_scope_as = eotg_contraband_subject
+        reverse_add_opinion = { target = liege  modifier = eotg_opinion_aug_contraband }
+        liege = {
+            if = {
+                limit = {
+                    is_ai = no
+                    NOT = { has_character_flag = eotg_flag_aug_contraband_cd }
+                }
+                add_character_flag = { flag = eotg_flag_aug_contraband_cd  years = 1 }
+                trigger_event = { id = eotg_aug_realm.001  days = { 3 10 } }
+            }
+        }
+    }
+}
+
+# Withdraw a tournament contestant (character scope: the contestant). Vanilla
+# shape: tournament_events.txt:9315-9323 (the flag, the subset swap) and
+# :4498-4499 (the tooltip). HOST is the host who rules it; the contestant
+# resents it, and a player contestant is told.
+# Callers: eotg_aug_act.001 (b, e), eotg_aug_act.003 (a, c, e).
+eotg_aug_act_withdraw_effect = {
+    save_temporary_scope_as = eotg_aug_withdrawn
+    custom_tooltip = tournament_not_competing_tt
+    add_character_flag = tournament_not_competing    # eotg_lint: allow L001 vanilla flag read by activity_is_valid_tournament_contestant
+    involved_activity ?= {
+        remove_from_guest_subset = {
+            name = contestant
+            target = scope:eotg_aug_withdrawn
+        }
+        add_to_guest_subset = {
+            name = spectator
+            target = scope:eotg_aug_withdrawn
+        }
+    }
+    add_opinion = { modifier = eotg_opinion_aug_barred  target = $HOST$ }
+    if = {
+        limit = { is_ai = no }
+        send_interface_toast = {
+            type = event_toast_effect_bad
+            title = eotg_aug_act.001.barred_toast
+            left_icon = $HOST$
+            custom_tooltip = eotg_aug_act.001.barred_toast_desc
+        }
+    }
+}
+
+# Foul Play? (act.003 c, e): examine the accused. The branch reads the
+# accused's band (tier 3, Neurofractured or past the Flicker band: the
+# hardware was run past spec). The verdict is told after the click, by toast
+# (vanilla hunt.8540, events/activities/hunt_activity/jb_hunt_events.txt:2375,
+# as eotg_aug_end.041.c), so the option tooltip does not give away the band.
+# The toasts never say who examined (lore R6: e reaches them too).
+eotg_aug_act003_examine_effect = {
+    custom_tooltip = eotg_aug_act.003.c.tt
+    hidden_effect = {
+        if = {
+            limit = {
+                scope:eotg_aug_accused = {
+                    OR = {
+                        eotg_is_aug_tier3 = yes
+                        has_trait = eotg_neurofractured
+                        eotg_aug_pressure_flicker = no
+                    }
+                }
+            }
+            scope:eotg_aug_accused = { eotg_aug_act_withdraw_effect = { HOST = root } }
+            scope:eotg_aug_accuser ?= {
+                add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+            }
+            send_interface_toast = {
+                type = event_toast_effect_neutral
+                title = eotg_aug_act.003.c.hot
+                left_icon = scope:eotg_aug_accused
+            }
+        }
+        else = {
+            scope:eotg_aug_accuser ?= {
+                add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+            }
+            scope:eotg_aug_accused = {
+                add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+            }
+            send_interface_toast = {
+                type = event_toast_effect_neutral
+                title = eotg_aug_act.003.c.clean
+                left_icon = scope:eotg_aug_accused
+            }
+        }
+    }
+}
+
+# A Hum at the Table (act.004 a, d): the feast reacts. Zealous guests are
+# uneasy, cynical ones admire it. Root is the shower; scope:activity the feast.
+eotg_aug_act004_reactions_effect = {
+    scope:activity = {
+        every_attending_character = {
+            limit = {
+                has_trait = zealous
+                NOT = { this = root }
+            }
+            add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+        }
+        every_attending_character = {
+            limit = {
+                has_trait = cynical
+                NOT = { this = root }
+            }
+            add_opinion = { modifier = eotg_opinion_aug_admiration  target = root }
+        }
+    }
+}
+
+# Contraband Hardware (realm.001 c, d, f): root forgives the crime by giving
+# up the lawful reason (guarded removal).
+eotg_aug_realm001_forgive_effect = {
+    if = {
+        limit = {
+            has_opinion_modifier = {
+                modifier = eotg_opinion_aug_contraband
+                target = scope:eotg_contraband_subject
+            }
+        }
+        remove_opinion = { target = scope:eotg_contraband_subject  modifier = eotg_opinion_aug_contraband }
     }
 }

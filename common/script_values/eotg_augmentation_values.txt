@@ -181,6 +181,50 @@ eotg_aug_proc_bad_factor = {
             limit = { scope:eotg_proc_surgeon ?= { has_trait = lifestyle_physician } }
             multiply = 0.8
         }
+        # Realm spec §3.2 (G10): an Implant Technician as the surgeon (own or
+        # borrowed), by aptitude; on top of the learning rows
+        if = {
+            limit = {
+                scope:eotg_proc_surgeon ?= {
+                    has_court_position = eotg_aug_implant_technician_court_position
+                }
+            }
+            if = {
+                limit = {
+                    scope:eotg_proc_surgeon = {
+                        aptitude = { court_position = eotg_aug_implant_technician_court_position  value >= 4 }
+                    }
+                }
+                multiply = 0.5
+            }
+            else_if = {
+                limit = {
+                    scope:eotg_proc_surgeon = {
+                        aptitude = { court_position = eotg_aug_implant_technician_court_position  value >= 3 }
+                    }
+                }
+                multiply = 0.6
+            }
+            else_if = {
+                limit = {
+                    scope:eotg_proc_surgeon = {
+                        aptitude = { court_position = eotg_aug_implant_technician_court_position  value >= 2 }
+                    }
+                }
+                multiply = 0.75
+            }
+            else = {
+                multiply = 0.9
+            }
+        }
+    }
+    # Realm spec §3.2 (G7): a License vets the sanctioned clinics
+    if = {
+        limit = {
+            scope:eotg_proc_provider ?= flag:clinic
+            eotg_aug_under_policy = { LAW = license }
+        }
+        multiply = 0.8
     }
     # Operating on yourself
     if = {
@@ -218,8 +262,15 @@ eotg_aug_proc_bad_factor = {
 # Price multipliers by provider (spec §3.1). The clinic is x1. Read as the
 # MULT of eotg_aug_can_afford_procedure / eotg_aug_pay_procedure_effect and
 # eotg_aug_can_afford_upgrade / eotg_aug_pay_upgrade_effect.
+# Realm spec §3.2 (G10): cheaper with the payer's own Implant Technician
+# (payer scope). A borrowed technician was paid for by the lending fee and
+# stays at 0.75.
 eotg_aug_price_mult_physician = {
     value = 0.75
+    if = {
+        limit = { eotg_aug_own_technician_valid = yes }
+        value = 0.6
+    }
 }
 eotg_aug_price_mult_self = {
     value = 0.25
@@ -317,4 +368,12 @@ eotg_aug_salvage_sale_value = {
         value = medium_gold_value
         multiply = 1.5
     }
+}
+
+# -- Realm (docs/specs/cybernetics_v2_realm.md §4.5) -------------------------
+# The Implant Technician's salary: the court physician's base salary
+# (vanilla court_position_physician_salary, 00_court_position_values.txt:846).
+# User: eotg_aug_implant_technician_court_position (salary, received_salary).
+eotg_aug_technician_salary_value = {
+    value = court_position_physician_salary
 }

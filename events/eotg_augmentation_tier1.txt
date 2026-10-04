@@ -170,7 +170,15 @@ eotg_aug_tier1.002 = {
     # events/activities/chariot_race_activity/chariot_race_events.txt:1947.
     option = {
         name = eotg_aug_tier1.002.a
-        trigger = { eotg_aug_can_afford_upgrade = { MULT = 1 } }
+        show_as_unavailable = { eotg_aug_clinic_open = no }
+        trigger = {
+            # Realm spec §3.2: sanctioned clinics close under a Ban
+            custom_description = {
+                text = eotg_aug_clinic_closed_tt
+                eotg_aug_clinic_open = yes
+            }
+            eotg_aug_can_afford_upgrade = { MULT = 1 }
+        }
         eotg_aug_pay_upgrade_effect = { MULT = 1 }
         save_scope_value_as = { name = eotg_proc_provider  value = flag:clinic }
         # Balance spec §5.6 (B2 QA): clear any other chain's edge/strain first
@@ -255,7 +263,13 @@ eotg_aug_tier1.002 = {
     # [ambitious] "Because I can." - as a, leaning in (risk +3)
     option = {
         name = eotg_aug_tier1.002.d
+        show_as_unavailable = { eotg_aug_clinic_open = no }
         trigger = {
+            # Realm spec §3.2: sanctioned clinics close under a Ban
+            custom_description = {
+                text = eotg_aug_clinic_closed_tt
+                eotg_aug_clinic_open = yes
+            }
             has_trait = ambitious
             eotg_aug_can_afford_upgrade = { MULT = 1 }
         }
@@ -276,7 +290,13 @@ eotg_aug_tier1.002 = {
     # surgeon's reassurance (flag read by its desc, cleared by .022)
     option = {
         name = eotg_aug_tier1.002.e
+        show_as_unavailable = { eotg_aug_clinic_open = no }
         trigger = {
+            # Realm spec §3.2: sanctioned clinics close under a Ban
+            custom_description = {
+                text = eotg_aug_clinic_closed_tt
+                eotg_aug_clinic_open = yes
+            }
             has_trait = craven
             eotg_aug_can_afford_upgrade = { MULT = 1 }
         }
@@ -302,8 +322,13 @@ eotg_aug_tier1.002 = {
     # ruler with no court physician is not offered this price.
     option = {
         name = eotg_aug_tier1.002.f
+        # Realm spec §3.2: the technician (own or borrowed) is offered here
+        name = {
+            trigger = { eotg_aug_surgeon_is_technician = yes }
+            text = eotg_aug_opt_technician
+        }
         trigger = {
-            eotg_aug_has_court_physician = yes
+            eotg_aug_has_surgeon_for = { PATIENT = root }
             eotg_aug_can_afford_upgrade = { MULT = eotg_aug_price_mult_physician }
         }
         eotg_aug_pay_upgrade_effect = { MULT = eotg_aug_price_mult_physician }

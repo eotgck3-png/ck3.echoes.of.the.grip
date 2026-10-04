@@ -1,0 +1,29 @@
+﻿# ── eotg_augmentation_law_groups.txt ─────────────────────────────────────────
+# Realm policy on augmentation (docs/specs/cybernetics_v2_realm.md §4.1, G7).
+#
+# 1.20 splits laws in two: the group lives here, each law in
+# common/laws/eotg_augmentation_laws.txt with law_group_type and index
+# (vanilla common/law_groups/00_realm_law_groups.txt:22, camp_purpose;
+# common/laws/00_realm_laws.txt:801-833).
+# flag = realm_law lists the group in the My Realm window; realm_law_no_number
+# hides the level number for a pick-one group (vanilla crowned_laws,
+# 00_realm_law_groups.txt:70-76).
+# Realm-local (LAW AT 866): only the independent ruler at the head of a realm
+# changes it; a vassal sees it locked (can_change_law_group, vanilla
+# 00_succession_law_groups.txt:1-15). Everyone in the realm lives under the
+# top liege's law (eotg_aug_under_policy). No required_government_flag: every
+# government can hold it (map-agnostic).
+# ─────────────────────────────────────────────────────────────────────────────
+
+eotg_aug_policy_laws = {
+    default = eotg_aug_policy_tolerate
+    cumulative = no
+    flag = realm_law
+    flag = realm_law_no_number
+    can_change_law_group = {
+        custom_tooltip = {
+            text = eotg_aug_policy_set_by_liege_tt
+            is_independent_ruler = yes
+        }
+    }
+}

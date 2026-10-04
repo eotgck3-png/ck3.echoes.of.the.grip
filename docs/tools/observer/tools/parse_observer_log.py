@@ -1,6 +1,7 @@
 """Turn an observer run's log into the 12 measurements of balance spec §9.2,
 plus [13], the interaction counters of docs/specs/cybernetics_v2_interactions.md
-§9 item 10.
+§9 item 10, and [14], the realm counters of docs/specs/cybernetics_v2_realm.md
+§4.9.
 
 Reads every line that contains "EOTG_OBS <key>" (the resolved loc text) or a
 raw "eotg_obs_<key>" (if the loc did not resolve). Each line may carry
@@ -246,6 +247,38 @@ def report(path, events, marks, start_year):
               f" salvages {c['int_salvage']} (died on the table {c['int_salvage_death']})")
     tot = collections.Counter(k for _, k, _ in events if k.startswith(("int_", "tamper_")))
     print("    whole run:", dict(sorted(tot.items())) or "none (any non-zero count answers engine check (c))")
+    # ---- 14: realm (realm spec 4.9; judged against HQ2 with [1]) ----
+    laws = ("ban", "license", "favor", "none")
+    print("\n[14] REALM (realm spec 4.9): (1) count+ rulers by governing law and technicians")
+    for c in censuses:
+        cc = c["c"]
+        tot_r = sum(cc[f"census_law_{l}"] for l in laws)
+        print(f"  year {c['year']}: " + "  ".join(f"{l} {pct(cc[f'census_law_{l}'], tot_r)}" for l in laws)
+              + f"  | technicians {cc['census_technician']}")
+    print("    (2) initiations per 10 governed rulers, by law, per decade")
+    for d in sorted(by_dec):
+        ys = [y for y in cens_by_year if y0 + 10 * d <= y <= y0 + 10 * d + 10]
+        cells = []
+        for l in laws:
+            n = by_dec[d][f"init_law_{l}"]
+            p = statistics.mean(cens_by_year[y][f"census_law_{l}"] for y in ys) if ys else 0
+            cells.append(f"{l} {n}" + (f" ({10.0 * n / p:.2f}/10)" if p else ""))
+        print(f"  decade {d}: " + "; ".join(cells))
+    print("    (3) crimes per decade: contraband / refused a lawful order")
+    for d in sorted(by_dec):
+        print(f"  decade {d}: contraband {by_dec[d]['crime_contraband']}  defied {by_dec[d]['crime_defied']}")
+    tech_ids = {cid for _, k, cid in events if k == "cascade_tech" and cid}
+    oc = ("prog_23_pursue", "prog_23_offer")
+    def oc_span(with_tech):
+        out = []
+        for (cid, k), y in first.items():
+            if k in oc and ((cid in tech_ids) == with_tech) and (cid, "cascade_ruler") in first:
+                c_y = first[(cid, "cascade_ruler")]
+                if c_y >= y:
+                    out.append(c_y - y)
+        return out
+    print("    (4) Overclocked -> cascade, with a technician at the cascade:", med_iqr(oc_span(True)))
+    print("        without:", med_iqr(oc_span(False)))
 
 
 def main(argv):

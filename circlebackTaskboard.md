@@ -328,6 +328,30 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Owner:** human → orchestrator
 - **Next step:** check alongside CB-31, CB-34 and CB-35.
 
+### CB-39: In-game checks for the Realm batch (G7/G10/G6)
+- **Status:** waiting-human (2026-10-04)
+- **What:** `docs/specs/cybernetics_v2_realm.md` §9 item 12 is the full list:
+  - **the law:** shows in My Realm, its cost and cooldown, the vassal lock, inheritance, and reverting to Tolerated;
+  - **a Ban:** clinics closed, discovery leading to realm.001, the Demand crime line and "Refused a Lawful Order";
+  - **the Implant Technician:** hire, the "My implant technician." option, cheaper Maintenance, and invalidation under a vassal's Ban;
+  - **Borrow Their Technician;**
+  - **activities act.001–.006:** tournaments need Tours & Tournaments; pilgrimages need holy sites.
+
+  Also check:
+  1. **Engine (h):** under a Ban, Offer and Demand open with no provider preselected and the clinic option shown as unavailable.
+  2. **Engine (a):** the child `on_actions` under vanilla activity hooks fire, and the parent's trigger gates them.
+  3. **Engine (c):** the second `realm_law` group renders in My Realm alongside Crown Authority.
+  4. **Engine (g):** an unlanded courtier reads their employer's law through `top_liege`.
+  5. **Observer:** read report section [14] for HQ2. Rebuild the sub-mod first; it now has the realm counters.
+- **Tiger:** 1.17 reports about 68 errors on the 1.20 law split (`law_group_type`, "law not defined"). QA matched the shape to vanilla 1.20 `00_realm_law_groups.txt` / `00_realm_laws.txt`, so treat these as noise until a 1.20-aware Tiger exists (CB-18).
+- **Art debt:** 4 law icons, the Implant Technician court-position icon, and the Borrow interaction icon (placeholder `plague`).
+- **Notes (not blocking):**
+  - Self-surgery under a Ban has no discovery chance.
+  - A Seamless liege's AI never hires a technician.
+  - Borrow's AI only targets war allies.
+- **Owner:** human → orchestrator
+- **Next step:** check alongside CB-38.
+
 ## Tooling and environment
 
 ### CB-18: Game is 1.20.0.3; the tools target older versions

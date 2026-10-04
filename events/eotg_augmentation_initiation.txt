@@ -2630,7 +2630,13 @@ eotg_aug_init.018 = {
     # discount is spent here.
     option = {
         name = eotg_aug_init.018.a
+        show_as_unavailable = { eotg_aug_clinic_open = no }
         trigger = {
+            # Realm spec §3.2: sanctioned clinics close under a Ban
+            custom_description = {
+                text = eotg_aug_clinic_closed_tt
+                eotg_aug_clinic_open = yes
+            }
             gold >= {
                 value = medium_gold_value
                 if = {
@@ -2694,11 +2700,18 @@ eotg_aug_init.018 = {
     # (physician access) "My own physician."
     option = {
         name = eotg_aug_init.018.c
-        trigger = {
-            eotg_has_physician_access = yes
-            gold >= { value = medium_gold_value  multiply = 0.75 }
+        # Realm spec §3.2: the technician (own or borrowed) is offered here
+        name = {
+            trigger = { eotg_aug_surgeon_is_technician = yes }
+            text = eotg_aug_opt_technician
         }
-        remove_short_term_gold = { value = medium_gold_value  multiply = 0.75 }
+        # Realm spec §3.2: a surgeon other than root (procedures QA rule,
+        # now covering the technician); the physician-route price value
+        trigger = {
+            eotg_aug_has_surgeon_for = { PATIENT = root }
+            gold >= { value = medium_gold_value  multiply = eotg_aug_price_mult_physician }
+        }
+        remove_short_term_gold = { value = medium_gold_value  multiply = eotg_aug_price_mult_physician }
         eotg_aug_initiate_effect = yes
         hidden_effect = {
             set_variable = { name = eotg_fracture_risk  value = 0 }

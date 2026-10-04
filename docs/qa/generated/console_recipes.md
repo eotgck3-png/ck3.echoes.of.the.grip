@@ -29,7 +29,9 @@
 | Procedures | `eotg_augmentation_procedures.txt` | 5 | 0 | 2 | 3 |
 | Interactions | `eotg_augmentation_interactions.txt` | 2 | 0 | 0 | 2 |
 | Tamper | `eotg_augmentation_tamper.txt` | 4 | 0 | 0 | 4 |
-| **Total** | | **169** | **39** | **63** | **67** |
+| Activities | `eotg_augmentation_activities.txt` | 6 | 0 | 1 | 5 |
+| Augmentation Realm | `eotg_augmentation_realm.txt` | 1 | 1 | 0 | 0 |
+| **Total** | | **176** | **40** | **64** | **72** |
 
 ## Initiation
 
@@ -269,3 +271,20 @@
 | `eotg_aug_tamper.002`<br>The Work Is Done | **no**: needs scope:owner, saved by event eotg_aug_tamper.001 immediate<br>needs scope:scheme (set by the scheme)<br>needs scope:scheme_discovered, saved by event eotg_aug_tamper.001 immediate<br>needs scope:target, saved by event eotg_aug_tamper.001 immediate | — | `event eotg_aug_tamper.002 <character id>`<br>script fires it on scope:owner; if that is you, plain `event eotg_aug_tamper.002` works, otherwise hover them for their id | event eotg_aug_tamper.001 immediate | no route found in script |
 | `eotg_aug_tamper.003`<br>Hands Withdrawn | **no**: needs scope:owner, saved by event eotg_aug_tamper.001 immediate<br>needs scope:scheme (set by the scheme)<br>needs scope:scheme_discovered, saved by event eotg_aug_tamper.001 immediate<br>needs scope:target, saved by event eotg_aug_tamper.001 immediate | — | `event eotg_aug_tamper.003 <character id>`<br>script fires it on scope:owner; if that is you, plain `event eotg_aug_tamper.003` works, otherwise hover them for their id | event eotg_aug_tamper.001 immediate | no route found in script |
 | `eotg_aug_tamper.004`<br>A Fault in the Hardware | **no**: needs scope:eotg_tamper_signed, saved by event eotg_aug_tamper.002 option b<br>needs scope:owner, saved by event eotg_aug_tamper.001 immediate, scheme eotg_aug_tamper<br>needs scope:scheme_discovered, saved by event eotg_aug_tamper.001 immediate | `effect eotg_aug_initiate_effect = yes`<br>`remove_trait eotg_total_integration`<br>(or instead: has trait eotg_neurofractured; has trait eotg_total_integration) | `event eotg_aug_tamper.004 <character id>`<br>script fires it on scope:target; if that is you, plain `event eotg_aug_tamper.004` works, otherwise hover them for their id | event eotg_aug_tamper.002 option a<br>event eotg_aug_tamper.002 option b | no route found in script |
+
+## Activities
+
+| Event | Fire cold | Setup | Fire | Fired by | Live route |
+|---|---|---|---|---|---|
+| `eotg_aug_act.001`<br>The Rules of the Field | **no**: needs scope:activity (set by the activity) | `involved_activity = { … }`<br>*for realistic content (its usual context):* `involved_activity.activity_host ?= this`<br>needs involved_activity | `event eotg_aug_act.001` | on_action tournament_opening_on_action → eotg_on_tournament_opening_aug | on_action tournament_opening_on_action → eotg_on_tournament_opening_aug → this event; then let time run (yearly pulses and stories pace it) |
+| `eotg_aug_act.002`<br>Past Spec | after setup | `effect eotg_aug_initiate_effect = yes`<br>`remove_trait eotg_total_integration`<br>`activity_is_competing_trigger = yes`<br>(or instead: has trait eotg_neurofractured; has trait eotg_total_integration)<br>*for realistic content (its usual context):* must be the player | `event eotg_aug_act.002` | on_action contest_bout_board_game_random_pulse / contest_bout_duel_random_pulse / contest_bout_joust_random_pulse / contest_bout_wrestling_random_pulse / contest_ongoing_event_archery_random_pulse / contest_ongoing_event_horse_race_random_pulse / contest_ongoing_event_melee_random_pulse → eotg_on_tournament_contest_aug | — |
+| `eotg_aug_act.003`<br>Foul Play? | **no**: needs scope:activity (set by the activity) | *for realistic content (its usual context):* must be the player | `event eotg_aug_act.003` | on_action tournament_active_state_pulse → eotg_on_tournament_active_aug | on_action tournament_active_state_pulse → eotg_on_tournament_active_aug → this event; then let time run (yearly pulses and stories pace it) |
+| `eotg_aug_act.004`<br>A Hum at the Table | **no**: needs scope:activity (set by the activity) | `effect eotg_aug_initiate_effect = yes`<br>`remove_trait eotg_total_integration`<br>(or instead: has trait eotg_neurofractured; has trait eotg_total_integration)<br>*for realistic content (its usual context):* must be the player | `event eotg_aug_act.004` | on_action feast_default_event_selection → eotg_on_feast_aug | on_action feast_default_event_selection → eotg_on_feast_aug → this event; then let time run (yearly pulses and stories pace it) |
+| `eotg_aug_act.005`<br>Quarry in the Overlay | **no**: needs scope:activity (set by the activity) | `effect eotg_aug_initiate_effect = yes`<br>`remove_trait eotg_total_integration`<br>(or instead: has trait eotg_neurofractured; has trait eotg_total_integration)<br>*for realistic content (its usual context):* must be the player | `event eotg_aug_act.005` | on_action hunt_random_pulse → eotg_on_hunt_aug | on_action hunt_random_pulse → eotg_on_hunt_aug → this event; then let time run (yearly pulses and stories pace it) |
+| `eotg_aug_act.006`<br>At the Holy Site | **no**: needs scope:activity (set by the activity) | `effect eotg_aug_initiate_effect = yes`<br>`remove_trait eotg_total_integration`<br>(or instead: has trait eotg_neurofractured; has trait eotg_total_integration)<br>*for realistic content (its usual context):* must be the player | `event eotg_aug_act.006` | on_action pilgrimage_destination_events → eotg_on_pilgrimage_aug | on_action pilgrimage_destination_events → eotg_on_pilgrimage_aug → this event; then let time run (yearly pulses and stories pace it) |
+
+## Augmentation Realm
+
+| Event | Fire cold | Setup | Fire | Fired by | Live route |
+|---|---|---|---|---|---|
+| `eotg_aug_realm.001`<br>Contraband Hardware | yes | — | `event eotg_aug_realm.001 <character id>`<br>script fires it on liege; if that is you, plain `event eotg_aug_realm.001` works, otherwise hover them for their id | effect eotg_aug_contraband_effect ← effect eotg_aug_procedure_apply_effect | — |

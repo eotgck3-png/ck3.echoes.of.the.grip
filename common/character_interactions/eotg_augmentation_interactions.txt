@@ -129,26 +129,28 @@ eotg_aug_offer_augmentation_interaction = {
         flag = eotg_aug_provider_clinic
         localization = eotg_aug_send_clinic
         current_description = eotg_aug_send_clinic_tt
-        starts_enabled = { always = yes }
+        # Matches is_valid: not preselected where the recipient's realm bans it
+        starts_enabled = { scope:recipient = { eotg_aug_clinic_open = yes } }
+        # Realm spec §3.2: the patient's realm decides (LAW AT 866)
+        is_valid = {
+            custom_description = {
+                text = eotg_aug_clinic_closed_tt
+                scope:recipient = { eotg_aug_clinic_open = yes }
+            }
+        }
     }
     send_option = {
         flag = eotg_aug_provider_physician
         localization = eotg_aug_send_physician
         current_description = eotg_aug_send_physician_tt
         # One requirement line (Tiger: an OR is too complex to tooltip in a
-        # failures-only trigger)
+        # failures-only trigger). Realm spec §3.2: any surgeon of the actor's
+        # (physician or Implant Technician, own or borrowed) who is not the
+        # recipient.
         is_valid = {
             custom_description = {
                 text = eotg_aug_send_physician_valid_tt
-                scope:actor = { eotg_has_physician_access = yes }
-                trigger_if = {
-                    limit = { scope:actor = { employs_court_position = court_physician_court_position } }
-                    scope:actor = {
-                        court_position:court_physician_court_position = {
-                            NOT = { this = scope:recipient }
-                        }
-                    }
-                }
+                scope:actor = { eotg_aug_has_surgeon_for = { PATIENT = scope:recipient } }
             }
         }
     }
@@ -302,6 +304,17 @@ eotg_aug_offer_augmentation_interaction = {
             desc = EOTG_AUG_AI_BACKSTREET
             scope:eotg_aug_provider_backstreet ?= yes
         }
+        # Realm spec §3.2: the recipient's realm's law
+        modifier = {
+            add = -25
+            desc = EOTG_AUG_AI_BANNED
+            scope:recipient = { eotg_aug_under_policy = { LAW = ban } }
+        }
+        modifier = {
+            add = 15
+            desc = EOTG_AUG_AI_FAVORED
+            scope:recipient = { eotg_aug_under_policy = { LAW = favor } }
+        }
         modifier = {
             add = 50
             desc = SCHEME_WEAK_HOOK_USED
@@ -385,6 +398,11 @@ eotg_aug_offer_augmentation_interaction = {
             factor = 0.1
             scope:recipient = { is_landed = yes }
         }
+        # Realm spec §3.2: an actor under a Ban rarely offers
+        modifier = {
+            factor = 0.25
+            scope:actor = { eotg_aug_under_policy = { LAW = ban } }
+        }
         # Exactly one provider
         modifier = {
             factor = 0
@@ -437,7 +455,17 @@ eotg_aug_demand_removal_interaction = {
     icon = demand_obedience       # placeholder (spec §3.1, art debt)
     popup_on_receive = yes
     pause_on_receive = yes
-    desc = eotg_aug_demand_removal_interaction_desc
+    # Realm spec §4.3: warn before sending when refusing would be a crime
+    # (vanilla 00_religious_interactions.txt:160-180 shape)
+    desc = {
+        desc = eotg_aug_demand_removal_interaction_desc
+        triggered_desc = {
+            trigger = {
+                scope:recipient = { eotg_aug_refusal_is_crime = { ACTOR = scope:actor } }
+            }
+            desc = eotg_aug_demand_removal_crime_desc
+        }
+    }
     notification_text = eotg_aug_demand_removal_interaction_notification
 
     # Tiers 1-3 only (has_trait = eotg_cybernetics). Neurofractured is
@@ -516,26 +544,28 @@ eotg_aug_demand_removal_interaction = {
         flag = eotg_aug_provider_clinic
         localization = eotg_aug_send_clinic
         current_description = eotg_aug_send_clinic_tt
-        starts_enabled = { always = yes }
+        # Matches is_valid: not preselected where the recipient's realm bans it
+        starts_enabled = { scope:recipient = { eotg_aug_clinic_open = yes } }
+        # Realm spec §3.2: the patient's realm decides (LAW AT 866)
+        is_valid = {
+            custom_description = {
+                text = eotg_aug_clinic_closed_tt
+                scope:recipient = { eotg_aug_clinic_open = yes }
+            }
+        }
     }
     send_option = {
         flag = eotg_aug_provider_physician
         localization = eotg_aug_send_physician
         current_description = eotg_aug_send_physician_tt
         # One requirement line (Tiger: an OR is too complex to tooltip in a
-        # failures-only trigger)
+        # failures-only trigger). Realm spec §3.2: any surgeon of the actor's
+        # (physician or Implant Technician, own or borrowed) who is not the
+        # recipient.
         is_valid = {
             custom_description = {
                 text = eotg_aug_send_physician_valid_tt
-                scope:actor = { eotg_has_physician_access = yes }
-                trigger_if = {
-                    limit = { scope:actor = { employs_court_position = court_physician_court_position } }
-                    scope:actor = {
-                        court_position:court_physician_court_position = {
-                            NOT = { this = scope:recipient }
-                        }
-                    }
-                }
+                scope:actor = { eotg_aug_has_surgeon_for = { PATIENT = scope:recipient } }
             }
         }
     }
@@ -587,21 +617,46 @@ eotg_aug_demand_removal_interaction = {
         }
     }
 
-    # Opinion only, by decision (vanilla demanded_my_conversion_opinion,
-    # 00_religious_interactions.txt:667-672)
+    # Realm spec §4.3: refusing is a crime only under the recipient's realm's
+    # Ban (or License, for unlicensed hardware), and only toward a liege or
+    # above; then the actor gains the lawful reason to imprison or revoke
+    # (vanilla 00_religious_interactions.txt:640-672, reverse_add_opinion).
+    # Otherwise opinion only (vanilla demanded_my_conversion_opinion, :667-672).
     on_decline = {
-        scope:recipient = {
-            add_opinion = {
-                modifier = eotg_opinion_aug_demanded_removal
-                target = scope:actor
-                years = 5
+        if = {
+            limit = {
+                scope:recipient = { eotg_aug_refusal_is_crime = { ACTOR = scope:actor } }
+            }
+            scope:recipient = {
+                reverse_add_opinion = {
+                    target = scope:actor
+                    modifier = eotg_opinion_aug_defied_law
+                    years = 10
+                }
+            }
+            scope:actor = {
+                send_interface_toast = {
+                    type = event_toast_effect_bad
+                    title = eotg_aug_demand_crime_toast
+                    left_icon = scope:recipient
+                    custom_tooltip = eotg_aug_demand_crime_toast_desc
+                }
             }
         }
-        scope:actor = {
-            send_interface_toast = {
-                type = event_toast_effect_bad
-                title = eotg_aug_demand_declined_toast
-                left_icon = scope:recipient
+        else = {
+            scope:recipient = {
+                add_opinion = {
+                    modifier = eotg_opinion_aug_demanded_removal
+                    target = scope:actor
+                    years = 5
+                }
+            }
+            scope:actor = {
+                send_interface_toast = {
+                    type = event_toast_effect_bad
+                    title = eotg_aug_demand_declined_toast
+                    left_icon = scope:recipient
+                }
             }
         }
     }
@@ -705,6 +760,12 @@ eotg_aug_demand_removal_interaction = {
             desc = EOTG_AUG_AI_BACKSTREET
             scope:eotg_aug_provider_backstreet ?= yes
         }
+        # Realm spec §4.3 (00_religion_scripted_modifiers.txt:262-275 shape)
+        modifier = {
+            add = 50
+            desc = EOTG_AUG_AI_REFUSAL_IS_CRIME
+            scope:recipient = { eotg_aug_refusal_is_crime = { ACTOR = scope:actor } }
+        }
         modifier = {
             add = 50
             desc = SCHEME_WEAK_HOOK_USED
@@ -739,6 +800,11 @@ eotg_aug_demand_removal_interaction = {
         modifier = {
             add = 25
             scope:actor = { has_trait = zealous }
+        }
+        # Realm spec §3.2
+        modifier = {
+            add = 30
+            scope:actor = { eotg_aug_under_policy = { LAW = ban } }
         }
         modifier = {
             add = 20
@@ -838,7 +904,7 @@ eotg_aug_examine_interaction = {
 
     # Actor-only state (_character_interactions.info:570-573)
     is_available = {
-        eotg_has_physician_access = yes
+        eotg_aug_has_surgeon_access = yes
     }
 
     # eotg_aug_tamper_target: augmented and not Seamless. Lore ruling (upheld
@@ -1355,19 +1421,13 @@ eotg_aug_salvage_interaction = {
         localization = eotg_aug_send_physician
         current_description = eotg_aug_send_salvage_physician_tt
         # One requirement line (Tiger: an OR is too complex to tooltip in a
-        # failures-only trigger)
+        # failures-only trigger). Realm spec §3.2: any surgeon of the actor's
+        # (physician or Implant Technician, own or borrowed) who is not the
+        # recipient.
         is_valid = {
             custom_description = {
                 text = eotg_aug_send_physician_valid_tt
-                scope:actor = { eotg_has_physician_access = yes }
-                trigger_if = {
-                    limit = { scope:actor = { employs_court_position = court_physician_court_position } }
-                    scope:actor = {
-                        court_position:court_physician_court_position = {
-                            NOT = { this = scope:recipient }
-                        }
-                    }
-                }
+                scope:actor = { eotg_aug_has_surgeon_for = { PATIENT = scope:recipient } }
             }
         }
     }
@@ -1458,6 +1518,220 @@ eotg_aug_salvage_interaction = {
         modifier = {
             factor = 0.25
             scope:recipient = { is_close_family_of = scope:actor }
+        }
+    }
+}
+
+
+# ── Borrow Their Technician (realm spec §4.6, G10) ────────────────────────────
+# The interactions spec's deferred "Lend Your Surgeon". The actor borrows; the
+# recipient lends (the AI can ask the player for theirs). The technician does
+# not move (lore R8): only var:eotg_aug_borrowed_technician is set on the
+# actor for a year, read by eotg_aug_save_surgeon_effect and
+# eotg_aug_has_surgeon_access. The actor pays the fee here and the ordinary
+# physician price afterwards (eotg_aug_price_mult_physician stays 0.75 for a
+# borrowed technician).
+eotg_aug_borrow_technician_interaction = {
+    category = interaction_category_friendly
+    # Placeholder (the spec's `learning` has no file; as Examine)
+    icon = plague
+    desc = eotg_aug_borrow_technician_interaction_desc
+    notification_text = eotg_aug_borrow_technician_interaction_notification
+
+    is_shown = {
+        NOT = { scope:recipient = scope:actor }
+        scope:recipient = { employs_court_position = eotg_aug_implant_technician_court_position }
+        scope:actor = {
+            eotg_is_augmented_any = yes
+            NOT = { employs_court_position = eotg_aug_implant_technician_court_position }
+        }
+        OR = {
+            scope:actor = { is_allied_to = scope:recipient }
+            scope:actor = { is_vassal_of = scope:recipient }
+            scope:recipient = { is_vassal_of = scope:actor }
+            scope:actor = { is_close_family_of = scope:recipient }
+            scope:actor = { is_spouse_of = scope:recipient }
+            scope:actor = { has_relation_friend = scope:recipient }
+        }
+    }
+
+    is_valid_showing_failures_only = {
+        scope:actor = {
+            custom_description = {
+                text = eotg_aug_borrow_none_held_tt
+                eotg_aug_borrowed_technician_valid = no
+            }
+            short_term_gold >= minor_gold_value
+            NOT = { is_at_war_with = scope:recipient }
+            # The work would happen in the actor's realm
+            custom_description = {
+                text = eotg_aug_clinic_closed_tt
+                eotg_aug_clinic_open = yes
+            }
+        }
+        scope:recipient = {
+            court_position:eotg_aug_implant_technician_court_position ?= {
+                is_imprisoned = no
+                NOT = { has_trait = blind }
+            }
+        }
+    }
+
+    cooldown_against_recipient = { years = 3 }
+
+    ai_min_reply_days = 1
+    ai_max_reply_days = 5
+
+    on_accept = {
+        scope:actor = {
+            pay_short_term_gold = {
+                target = scope:recipient
+                gold = minor_gold_value
+            }
+        }
+        scope:recipient.court_position:eotg_aug_implant_technician_court_position = {
+            save_scope_as = eotg_lent_technician
+        }
+        scope:actor = {
+            set_variable = {
+                name = eotg_aug_borrowed_technician
+                value = scope:eotg_lent_technician
+                years = 1
+            }
+            send_interface_toast = {
+                type = event_toast_effect_good
+                title = eotg_aug_borrow_accepted_toast
+                left_icon = scope:recipient
+                right_icon = scope:eotg_lent_technician
+                custom_tooltip = eotg_aug_borrow_accepted_toast_desc
+            }
+        }
+    }
+
+    # No opinion: it was a request
+    on_decline = {
+        scope:actor = {
+            send_interface_toast = {
+                type = event_toast_effect_neutral
+                title = eotg_aug_borrow_declined_toast
+                left_icon = scope:recipient
+            }
+        }
+    }
+
+    # The lender's view (spec §4.6 table)
+    ai_accept = {
+        base = 10
+        opinion_modifier = {
+            who = scope:recipient
+            opinion_target = scope:actor
+            multiplier = 0.5
+            desc = AI_OPINION_REASON
+        }
+        modifier = {
+            add = 20
+            desc = EOTG_AUG_AI_ALLIED
+            scope:recipient = { is_allied_to = scope:actor }
+        }
+        modifier = {
+            add = 25
+            desc = EOTG_AUG_AI_LIEGE
+            scope:recipient = { is_vassal_of = scope:actor }
+        }
+        modifier = {
+            add = 15
+            desc = EOTG_AUG_AI_FAMILY
+            scope:recipient = {
+                OR = {
+                    is_close_family_of = scope:actor
+                    is_spouse_of = scope:actor
+                }
+            }
+        }
+        modifier = {
+            add = 15
+            desc = EOTG_AUG_AI_GREEDY
+            scope:recipient = { has_trait = greedy }
+        }
+        modifier = {
+            add = 10
+            desc = EOTG_AUG_AI_GENEROUS
+            scope:recipient = { has_trait = generous }
+        }
+        modifier = {
+            add = -20
+            desc = EOTG_AUG_AI_PARANOID
+            scope:recipient = { has_trait = paranoid }
+        }
+        modifier = {
+            add = -30
+            desc = EOTG_AUG_AI_NEEDS_TECHNICIAN
+            scope:recipient = {
+                OR = {
+                    eotg_is_aug_tier3 = yes
+                    has_trait = eotg_neurofractured
+                }
+            }
+        }
+    }
+
+    ai_target_quick_trigger = {
+        adult = yes
+    }
+    ai_targets = {
+        ai_recipients = war_allies
+    }
+    ai_targets = {
+        ai_recipients = family
+        max = 5
+    }
+    ai_targets = {
+        ai_recipients = liege
+    }
+    ai_targets = {
+        ai_recipients = vassals
+        max = 10
+    }
+    ai_frequency_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 48
+        kingdom = 36
+        empire = 36
+        hegemony = 36
+    }
+    ai_will_do = {
+        base = 0
+        modifier = {
+            add = 40
+            scope:actor = {
+                OR = {
+                    eotg_is_aug_tier3 = yes
+                    has_trait = eotg_neurofractured
+                }
+            }
+        }
+        modifier = {
+            add = 20
+            scope:actor = {
+                OR = {
+                    has_character_modifier = eotg_mod_aug_infection
+                    has_character_modifier = eotg_mod_aug_fragments
+                    has_character_modifier = eotg_mod_aug_tampered
+                }
+            }
+        }
+        modifier = {
+            add = 20
+            scope:actor = { has_variable = eotg_aug_repair_injury }
+        }
+        modifier = {
+            factor = 0.5
+            scope:actor = { eotg_has_physician_access = yes }
+        }
+        modifier = {
+            factor = 0
+            scope:actor = { short_term_gold < minor_gold_value }
         }
     }
 }

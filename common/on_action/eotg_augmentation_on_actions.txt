@@ -47,6 +47,18 @@
 #   eotg_flag_aug_phantom_done — one-shot per exit (Phantom Static,
 #     eotg_aug_proc.020), set in eotg_on_yearly_aug_former_check; cleared by
 #     eotg_aug_mark_former_effect on the next exit
+#   Realm spec §3.1 (G6, G7), each set only in its custom on_action below or
+#   in eotg_aug_contraband_effect; no event trigger reads them:
+#   eotg_flag_aug_act_tournament_cd — Past Spec (act.002), 1 year
+#   eotg_flag_aug_act_feast_cd    — A Hum at the Table (act.004), 2 years
+#   eotg_flag_aug_act_hunt_cd     — Quarry in the Overlay (act.005), 2 years
+#   eotg_flag_aug_act_pilgrimage_cd — At the Holy Site (act.006), 5 years
+#   eotg_flag_aug_contraband_cd   — on the LIEGE: Contraband Hardware
+#     (realm.001), 1 year, set in eotg_aug_contraband_effect
+#   eotg_aug_act_entrants_ruled   — activity variable, once per tournament
+#     (act.001)
+#   eotg_aug_act_accusation_done  — activity variable, once per tournament
+#     (act.003)
 #
 # Each tier rolls one weighted random_list per pulse (weights = v1 chances),
 # with a "nothing" branch. v1 used independent ifs whose cooldown was set in
@@ -251,6 +263,8 @@ eotg_on_yearly_aug_initiation_check = {
                 # The Physician's Proposal
                 12 = {
                     trigger = { eotg_has_physician_access = yes }
+                    # Realm spec §3.3
+                    modifier = { factor = 0.5  eotg_aug_under_policy = { LAW = ban } }
                     add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
                     trigger_event = { id = eotg_aug_init.017  days = { 1 20 } }
                 }
@@ -271,6 +285,8 @@ eotg_on_yearly_aug_initiation_check = {
                         is_landed = yes
                         gold >= { value = major_gold_value  multiply = 1.5 }
                     }
+                    # Realm spec §3.3: no corporate offer under a Ban
+                    modifier = { factor = 0  eotg_aug_under_policy = { LAW = ban } }
                     add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
                     trigger_event = { id = eotg_aug_init.002  days = { 1 15 } }
                 }
@@ -301,6 +317,10 @@ eotg_on_yearly_aug_initiation_check = {
                             is_at_war = yes
                         }
                     }
+                    # Realm spec §3.3: the back streets are what is left under a
+                    # Ban; a License pushes them down
+                    modifier = { factor = 1.5  eotg_aug_under_policy = { LAW = ban } }
+                    modifier = { factor = 0.5  eotg_aug_under_policy = { LAW = license } }
                     add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
                     trigger_event = { id = eotg_aug_init.010  days = { 1 15 } }
                 }
@@ -372,6 +392,9 @@ eotg_on_yearly_aug_initiation_check = {
                     modifier = { factor = 6  is_ai = yes  highest_held_title_tier < tier_duchy }
                     modifier = { factor = 3  is_ai = yes  highest_held_title_tier = tier_duchy }
                     modifier = { factor = 2  is_ai = yes  highest_held_title_tier >= tier_kingdom }
+                    # Realm spec §3.3: the law shapes how often offers come
+                    modifier = { factor = 2  eotg_aug_under_policy = { LAW = ban } }
+                    modifier = { factor = 0.8  eotg_aug_under_policy = { LAW = favor } }
                 }
             }
         }
@@ -886,6 +909,23 @@ eotg_on_yearly_aug_overclocked_check = {
             if = {
                 limit = { has_character_flag = eotg_flag_aug_vendor_bold }
                 eotg_add_fracture_risk = { AMOUNT = 3 }
+            }
+
+            # Realm spec §3.3 (G10): an Implant Technician keeps the hardware
+            # cooler (-2, excellent aptitude -3), like the safe vendor
+            if = {
+                limit = { eotg_aug_own_technician_valid = yes }
+                if = {
+                    limit = {
+                        court_position:eotg_aug_implant_technician_court_position = {
+                            aptitude = { court_position = eotg_aug_implant_technician_court_position  value >= 4 }
+                        }
+                    }
+                    eotg_add_fracture_risk = { AMOUNT = -3 }
+                }
+                else = {
+                    eotg_add_fracture_risk = { AMOUNT = -2 }
+                }
             }
 
             # The Countdown (Phase 5 §1.1): after accrual, before the threshold
@@ -1883,5 +1923,224 @@ eotg_aug_tamper_ongoing = {
         100 = 0
         2 = intrigue_scheme_ongoing.1001
         3 = agent_events.9801
+    }
+}
+
+
+# ── Realm spec §4.7 (G6): vanilla activity hooks, extended additively ────────
+# Each vanilla hook names only `on_actions = { }` (invariant 4); its own
+# `trigger` still gates our child. Cooldown authority lives in the custom
+# on_actions below (character flags, or a variable on the activity, the
+# vanilla once-per-activity marker shape at feast_on_actions.txt:20-24). No
+# event trigger reads them. Not used: appending random_events to a vanilla
+# pool (whether appended pools merge is not settled by vanilla).
+# Tournaments are Tours & Tournaments content: without the DLC these hooks
+# never fire, and the feast, hunt and pilgrimage children are the fallback.
+
+# Fired on scope:host 20 days in (activity_types/tournament.txt:5617-5622);
+# root = host, involved_activity (ep2_tournament_on_actions.txt:699)
+tournament_opening_on_action = {
+    on_actions = {
+        eotg_on_tournament_opening_aug
+    }
+}
+
+# Player contestants only (04_dlc_ep2_tournament_effects.txt:1994-2018,
+# :599-603). Recital is excluded: an overlay does not sing.
+contest_ongoing_event_melee_random_pulse = {
+    on_actions = {
+        eotg_on_tournament_contest_aug
+    }
+}
+contest_ongoing_event_archery_random_pulse = {
+    on_actions = {
+        eotg_on_tournament_contest_aug
+    }
+}
+contest_bout_joust_random_pulse = {
+    on_actions = {
+        eotg_on_tournament_contest_aug
+    }
+}
+contest_bout_wrestling_random_pulse = {
+    on_actions = {
+        eotg_on_tournament_contest_aug
+    }
+}
+contest_bout_duel_random_pulse = {
+    on_actions = {
+        eotg_on_tournament_contest_aug
+    }
+}
+contest_bout_board_game_random_pulse = {
+    on_actions = {
+        eotg_on_tournament_contest_aug
+    }
+}
+contest_ongoing_event_horse_race_random_pulse = {
+    on_actions = {
+        eotg_on_tournament_contest_aug
+    }
+}
+
+# Each attendee, scope:activity (tournament.txt:6197-6199)
+tournament_active_state_pulse = {
+    on_actions = {
+        eotg_on_tournament_active_aug
+    }
+}
+
+# Guests weekly, hosts through the tombola (feast_on_actions.txt:38-50)
+feast_default_event_selection = {
+    on_actions = {
+        eotg_on_feast_aug
+    }
+}
+
+# Days 7 and 14 for each player participant (activity_types/hunt.txt:5030-5043)
+hunt_random_pulse = {
+    on_actions = {
+        eotg_on_hunt_aug
+    }
+}
+
+# At the destination (activity_types/pilgrimage.txt:2536-2540)
+pilgrimage_destination_events = {
+    on_actions = {
+        eotg_on_pilgrimage_aug
+    }
+}
+
+# The Rules of the Field (act.001): once per tournament, AI hosts included,
+# so a player's augmented entry can be barred by an AI host. Host test:
+# hunt_on_actions.txt:5-8 shape. COOLDOWN AUTHORITY: the activity variable
+# eotg_aug_act_entrants_ruled is set here only. scope:activity is saved for
+# the delayed event.
+eotg_on_tournament_opening_aug = {
+    trigger = {
+        exists = involved_activity
+        involved_activity.activity_host ?= this
+        involved_activity = {
+            NOT = { has_variable = eotg_aug_act_entrants_ruled }
+            any_attending_character = { eotg_aug_tournament_entrant = yes }
+        }
+    }
+    effect = {
+        involved_activity = {
+            set_variable = eotg_aug_act_entrants_ruled
+            save_scope_as = activity
+        }
+        trigger_event = { id = eotg_aug_act.001  days = { 1 3 } }
+    }
+}
+
+# Past Spec (act.002): an augmented player contestant, 40% a bout, once a
+# year. COOLDOWN AUTHORITY: eotg_flag_aug_act_tournament_cd (1 year), here only.
+eotg_on_tournament_contest_aug = {
+    trigger = {
+        is_ai = no
+        activity_is_competing_trigger = yes
+        eotg_is_augmented_any = yes
+        NOT = { has_trait = eotg_total_integration }
+        NOT = { has_character_flag = eotg_flag_aug_act_tournament_cd }
+    }
+    effect = {
+        random = {
+            chance = 40
+            add_character_flag = { flag = eotg_flag_aug_act_tournament_cd  years = 1 }
+            involved_activity = { save_scope_as = activity }
+            trigger_event = { id = eotg_aug_act.002  days = 1 }
+        }
+    }
+}
+
+# Foul Play? (act.003): a player host, a competing augmented contestant (not
+# Seamless, as act.001's entrants) and another contestant. 25%, once per
+# tournament. COOLDOWN AUTHORITY: the activity variable
+# eotg_aug_act_accusation_done, here only.
+eotg_on_tournament_active_aug = {
+    trigger = {
+        is_ai = no
+        exists = scope:activity
+        scope:activity.activity_host ?= this
+        scope:activity = {
+            NOT = { has_variable = eotg_aug_act_accusation_done }
+            any_attending_character = {
+                activity_is_competing_trigger = yes
+                eotg_aug_tamper_target = yes
+                NOT = { this = root }
+            }
+            any_attending_character = {
+                count >= 2
+                activity_is_competing_trigger = yes
+                NOT = { this = root }
+            }
+        }
+    }
+    effect = {
+        random = {
+            chance = 25
+            scope:activity = { set_variable = eotg_aug_act_accusation_done }
+            trigger_event = { id = eotg_aug_act.003  days = { 1 5 } }
+        }
+    }
+}
+
+# A Hum at the Table (act.004): player feast-goers. Player-only: for the AI the
+# outcome is noise against HQ2 (spec §4.7). COOLDOWN AUTHORITY:
+# eotg_flag_aug_act_feast_cd (2 years), here only.
+eotg_on_feast_aug = {
+    trigger = {
+        is_ai = no
+        exists = scope:activity
+        eotg_is_augmented_any = yes
+        NOT = { has_trait = eotg_total_integration }
+        NOT = { has_character_flag = eotg_flag_aug_act_feast_cd }
+    }
+    effect = {
+        random = {
+            chance = 35
+            add_character_flag = { flag = eotg_flag_aug_act_feast_cd  years = 2 }
+            trigger_event = eotg_aug_act.004
+        }
+    }
+}
+
+# Quarry in the Overlay (act.005): player hunters. COOLDOWN AUTHORITY:
+# eotg_flag_aug_act_hunt_cd (2 years), here only.
+eotg_on_hunt_aug = {
+    trigger = {
+        is_ai = no
+        exists = scope:activity
+        eotg_is_augmented_any = yes
+        NOT = { has_trait = eotg_total_integration }
+        NOT = { has_character_flag = eotg_flag_aug_act_hunt_cd }
+    }
+    effect = {
+        random = {
+            chance = 50
+            add_character_flag = { flag = eotg_flag_aug_act_hunt_cd  years = 2 }
+            trigger_event = eotg_aug_act.005
+        }
+    }
+}
+
+# At the Holy Site (act.006): player pilgrims at the destination. Needs holy
+# sites, which the temporary map may not have (spec §9 item 12(d)).
+# COOLDOWN AUTHORITY: eotg_flag_aug_act_pilgrimage_cd (5 years), here only.
+eotg_on_pilgrimage_aug = {
+    trigger = {
+        is_ai = no
+        exists = scope:activity
+        eotg_is_augmented_any = yes
+        NOT = { has_trait = eotg_total_integration }
+        NOT = { has_character_flag = eotg_flag_aug_act_pilgrimage_cd }
+    }
+    effect = {
+        random = {
+            chance = 50
+            add_character_flag = { flag = eotg_flag_aug_act_pilgrimage_cd  years = 5 }
+            trigger_event = eotg_aug_act.006
+        }
     }
 }
