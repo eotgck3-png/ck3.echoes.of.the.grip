@@ -133,6 +133,69 @@ class Analysis(unittest.TestCase):
         self.assertIn("`eotg_secret_effect`", text.split("## In script, mentioned in no spec")[1])
 
 
+class Families(unittest.TestCase):
+    """FIX 10: every docs/specs/*.md with an identifier table, reported per family."""
+
+    @classmethod
+    def setUpClass(cls):
+        files = dict(FILES)
+        files.update({
+            "events/eotg_frontier.txt": "namespace = eotg_frontier\n"
+                                        "eotg_frontier.001 = { option = { name = a } }\n",
+            "common/scripted_effects/eotg_f.txt": "eotg_frontier_start_effect = { }\n",
+            "docs/specs/frontier_v1.md": "# Frontier\n\n### 3.1 New\n\n| Key | Type |\n|---|---|\n"
+                                         "| `eotg_frontier.001` | event |\n"
+                                         "| `eotg_frontier_start_effect` | scripted effect |\n"
+                                         "| `eotg_frontier_gone_effect` | scripted effect |\n",
+            "docs/specs/frontier_v1_test_plan.md": "# Plan\n\nNo table: `eotg_frontier.001`.\n",
+            "docs/specs/void_lift_plan_cloud.md": "# Void plan\n\n| Key | Type |\n|---|---|\n"
+                                                  "| `eotg_void_effect` | scripted effect |\n",
+        })
+        cls.root = tempfile.mkdtemp(prefix="eotg_fam_")
+        for rel, text in files.items():
+            p = os.path.join(cls.root, rel)
+            os.makedirs(os.path.dirname(p), exist_ok=True)
+            with open(p, "w", encoding="utf-8") as fh:
+                fh.write(text)
+        cls.res = S.analyse(cls.root)
+        cls.by = {s["spec"].split("/")[-1]: s for s in cls.res["specs"]}
+        cls.text = S.render(cls.res)
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.root)
+
+    def test_family_names(self):
+        self.assertEqual(S.spec_family("docs/specs/cybernetics_v2_procedures.md"), "cybernetics_v2")
+        self.assertEqual(S.spec_family("docs/specs/frontier_v1_test_plan.md"), "frontier_v1")
+        self.assertEqual(S.spec_family("docs/specs/frontier_v1.md"), "frontier_v1")
+        self.assertEqual(S.spec_family("docs/specs/void_lift_plan_cloud.md"), "void")
+
+    def test_selection(self):
+        self.assertIn("frontier_v1.md", self.by)
+        self.assertNotIn("frontier_v1_test_plan.md", self.by)        # no identifier table
+        self.assertIn("cybernetics_v2_beta_lore.md", self.by)         # companion of a table spec
+        self.assertEqual(self.by["frontier_v1.md"]["family"], "frontier_v1")
+
+    def test_frontier_family_built_with_its_gap(self):
+        f = self.by["frontier_v1.md"]
+        self.assertTrue(f["built"])
+        miss = [r["token"] for r in f["ids"] if r["status"] == "missing"]
+        self.assertEqual(miss, ["eotg_frontier_gone_effect"])
+
+    def test_plan_with_nothing_built_is_unbuilt(self):
+        self.assertFalse(self.by["void_lift_plan_cloud.md"]["built"])
+
+    def test_report_per_family(self):
+        t = self.text
+        self.assertIn("## Summary by family", t)
+        self.assertIn("| `frontier_v1` | 1 | 1 | 3 | 2 | 0 | 1 |", t)
+        self.assertIn("## Family `frontier_v1`", t)
+        self.assertIn("## Family `cybernetics_v2`", t)
+        fam = t.split("## Family `frontier_v1`")[1].split("## Family")[0]
+        self.assertIn("`eotg_frontier_gone_effect` (effect", fam)
+
+
 class CLI(unittest.TestCase):
     def test_write_check_crlf_json(self):
         root = make_mod()

@@ -32,7 +32,33 @@ import pdx_parse as P  # noqa: E402
 
 DEFAULT_ROOT = os.path.dirname(os.path.dirname(HERE))
 OUT_REL = "docs/qa/generated/spec_conformance.md"
-SPEC_GLOB = "docs/specs/cybernetics_v2*.md"
+# FIX 10: every spec family, not only cybernetics. A spec is read when it has
+# an identifier table (a table row naming a backticked eotg_ id), or when it
+# is the *_lore.md companion of one that has.
+SPEC_GLOB = "docs/specs/*.md"
+ID_ROW_RE = re.compile(r"^\s*\|.*`(?:trait_)?eotg_")
+FAMILY_RE = re.compile(r"^([a-z0-9]+?(?:_v\d+)?)(?:_|$)")
+
+
+def spec_family(path):
+    """cybernetics_v2_procedures.md -> cybernetics_v2; frontier_v1_test_plan.md
+    -> frontier_v1; glossary_proposal_cloud.md -> glossary."""
+    stem = os.path.splitext(os.path.basename(path))[0]
+    m = FAMILY_RE.match(stem)
+    return m.group(1) if m else stem
+
+
+def has_identifier_table(path):
+    with open(path, encoding="utf-8-sig") as fh:
+        return any(ID_ROW_RE.match(line) for line in fh)
+
+
+def select_specs(paths):
+    keep = {p for p in paths if has_identifier_table(p)}
+    for p in paths:
+        if p.endswith("_lore.md") and p[:-len("_lore.md")] + ".md" in keep:
+            keep.add(p)
+    return sorted(keep)
 
 EXEMPT_RE = re.compile(r"\b(deferred|rejected|superseded|not built)\b", re.I)
 SPAN_RE = re.compile(r"`([^`]+)`")
@@ -301,7 +327,7 @@ class Script:
 
 # ------------------------------------------------------------------ analysis
 def analyse(root, spec_glob=SPEC_GLOB):
-    paths = sorted(glob.glob(os.path.join(root, *spec_glob.split("/"))))
+    paths = select_specs(sorted(glob.glob(os.path.join(root, *spec_glob.split("/")))))
     script = Script(root)
     known = set(script.defined) | script.loc | script.tokens
     specs = []
@@ -318,7 +344,13 @@ def analyse(root, spec_glob=SPEC_GLOB):
             e["new"] = e["new"] or sid.new
         new_events = [t for t, e in by_tok.items() if (e["kind"] == "event") and
                       (e["new"] or not has_new) and e["lines"]]
-        built = (not new_events) or any(t in script.defined for t in new_events)
+        if new_events:
+            built = any(t in script.defined for t in new_events)
+        else:
+            # no events named: built once anything it names exists (a plan
+            # whose identifiers are all still missing is not built yet)
+            built = any(e["lines"] and script.status(t, e["kind"]) == "defined"
+                        for t, e in by_tok.items())
         rows = []
         for tok, e in by_tok.items():
             kind = e["kind"] or script.defined.get(tok) or "unknown"
@@ -326,7 +358,8 @@ def analyse(root, spec_glob=SPEC_GLOB):
                          "status": script.status(tok, e["kind"]),
                          "line": (e["lines"] or e["exempt_lines"])[0],
                          "exempt": not e["lines"]})
-        specs.append({"spec": rel, "built": built, "new_events": new_events,
+        specs.append({"spec": rel, "family": spec_family(rel), "built": built,
+                      "new_events": new_events,
                       "has_new_section": has_new, "ids": rows,
                       "unresolved_shorthand": ["l.%d: %s" % u for u in unresolved]})
     # a *_lore.md spec is built when its parent spec is
@@ -350,14 +383,44 @@ def _ids(rows):
     return ", ".join("`%s` (%s, l.%d)" % (r["token"], r["kind"], r["line"]) for r in rows)
 
 
+def _family_block(specs, want):
+    out = []
+    for s in specs:
+        if s["built"] != want:
+            continue
+        rows = [r for r in s["ids"] if not r["exempt"]]
+        miss = [r for r in rows if r["status"] == "missing"]
+        ref = [r for r in rows if r["status"] == "referenced"]
+        ex = [r for r in s["ids"] if r["exempt"]]
+        present = sum(1 for r in rows if r["status"] == "defined")
+        out += ["#### `%s`" % s["spec"], ""]
+        if not want:
+            out.append("- New events, none in script yet: %s" % (
+                ", ".join("`%s`" % e for e in s["new_events"]) or "none"))
+        out.append("- Specced and present: %d" % present)
+        out.append("- Specced, missing from script (%d): %s" % (len(miss), _ids(miss) or "none"))
+        out.append("- Referenced only, never defined or set (%d): %s" % (
+            len(ref), _ids(ref) or "none"))
+        out.append("- Exempt (%d): %s" % (len(ex), _ids(ex) or "none"))
+        if s["unresolved_shorthand"]:
+            out.append("- Suffix shorthand that matches no key (%d, not counted): %s" % (
+                len(s["unresolved_shorthand"]), "; ".join(s["unresolved_shorthand"])))
+        out.append("")
+    return out or ["None.", ""]
+
+
 def render(res):
-    out = ["# Spec conformance: cybernetics specs vs script (generated)", "",
+    families = collections.OrderedDict()
+    for s in res["specs"]:
+        families.setdefault(s["family"], []).append(s)
+    out = ["# Spec conformance: specs vs script (generated)", "",
            "> **Generated by `docs/tools/spec_conformance.py`. Do not edit by hand.** "
            "`python docs/tools/spec_conformance.py --check` says whether this file is current.",
            "",
-           "Automates checks 1–2 of `docs/qa/cybernetics_spec_conformance_cloud.md`. Each "
-           "backticked `eotg_` identifier or event id in `docs/specs/cybernetics_v2*.md` is "
-           "looked up in the script:",
+           "Automates checks 1–2 of `docs/qa/cybernetics_spec_conformance_cloud.md` for every "
+           "spec family in `docs/specs/`. A spec is read when it has an identifier table (a "
+           "table row naming a backticked `eotg_` id), plus its `_lore.md` companion. Each "
+           "backticked `eotg_` identifier or event id is looked up in the script:",
            "- **present**: defined (a `common/` key, an event, a namespace, a flag or variable "
            "that is set, a saved scope, or a loc key);",
            "- **referenced only**: it appears in script or loc, but nothing defines or sets it "
@@ -365,52 +428,41 @@ def render(res):
            "- **missing**: it appears nowhere in script or loc.",
            "",
            "A spec is **built** when any of its new events exists (the events in its \"New\" "
-           "identifier section, else every event it names). Unbuilt specs are listed apart, so "
-           "their expected gaps don't hide the real ones. Lines that say *deferred*, "
-           "*rejected*, *superseded* or *not built* are **exempt**. The kind comes from the "
-           "table's Type column, the heading, or the identifier's shape (then from where the "
-           "script defines it); `unknown` when none applies.", "",
-           "## Summary", "",
-           "| Spec | Built | Ids | Present | Referenced only | Missing | Exempt |",
+           "identifier section, else every event it names); a spec that names no event is "
+           "built once anything it names exists. Unbuilt specs are listed apart, so their "
+           "expected gaps don't hide the real ones. Lines that say *deferred*, *rejected*, "
+           "*superseded* or *not built* are **exempt**. The kind comes from the table's Type "
+           "column, the heading, or the identifier's shape (then from where the script "
+           "defines it); `unknown` when none applies.", "",
+           "## Summary by family", "",
+           "| Family | Specs | Built | Ids | Present | Referenced only | Missing in built specs |",
            "|---|---|---|---|---|---|---|"]
+    for fam, specs in families.items():
+        rows = [r for s in specs for r in s["ids"] if not r["exempt"]]
+        c = collections.Counter(r["status"] for r in rows)
+        miss_built = sum(1 for s in specs if s["built"] for r in s["ids"]
+                         if not r["exempt"] and r["status"] == "missing")
+        out.append("| `%s` | %d | %d | %d | %d | %d | %d |" % (
+            fam, len(specs), sum(1 for s in specs if s["built"]), len(rows), c["defined"],
+            c["referenced"], miss_built))
+    out += ["", "## Summary by spec", "",
+            "| Spec | Built | Ids | Present | Referenced only | Missing | Exempt |",
+            "|---|---|---|---|---|---|---|"]
     for s in res["specs"]:
         rows = [r for r in s["ids"] if not r["exempt"]]
         c = collections.Counter(r["status"] for r in rows)
         out.append("| `%s` | %s | %d | %d | %d | %d | %d |" % (
             s["spec"].split("/")[-1], "yes" if s["built"] else "**no**", len(s["ids"]),
             c["defined"], c["referenced"], c["missing"], len(s["ids"]) - len(rows)))
-    for title, want in (("Built specs: gaps", True), ("Unbuilt specs (expected gaps)", False)):
-        out += ["", "## %s" % title, ""]
-        any_spec = False
-        for s in res["specs"]:
-            if s["built"] != want:
-                continue
-            any_spec = True
-            rows = [r for r in s["ids"] if not r["exempt"]]
-            miss = [r for r in rows if r["status"] == "missing"]
-            ref = [r for r in rows if r["status"] == "referenced"]
-            ex = [r for r in s["ids"] if r["exempt"]]
-            present = sum(1 for r in rows if r["status"] == "defined")
-            out.append("### `%s`" % s["spec"])
-            out.append("")
-            if not want:
-                out.append("- New events, none in script yet: %s" % (
-                    ", ".join("`%s`" % e for e in s["new_events"]) or "none"))
-            out.append("- Specced and present: %d" % present)
-            out.append("- Specced, missing from script (%d): %s" % (len(miss), _ids(miss) or "none"))
-            out.append("- Referenced only, never defined or set (%d): %s" % (
-                len(ref), _ids(ref) or "none"))
-            out.append("- Exempt (%d): %s" % (len(ex), _ids(ex) or "none"))
-            if s["unresolved_shorthand"]:
-                out.append("- Suffix shorthand that matches no key (%d, not counted): %s" % (
-                    len(s["unresolved_shorthand"]), "; ".join(s["unresolved_shorthand"])))
-            out.append("")
-        if not any_spec:
-            out.append("None.")
+    for fam, specs in families.items():
+        out += ["", "## Family `%s`" % fam, "", "### Built specs: gaps", ""]
+        out += _family_block(specs, True)
+        out += ["### Unbuilt specs (expected gaps)", ""]
+        out += _family_block(specs, False)
     out += ["## In script, mentioned in no spec", "",
             "Mod definitions (`common/` top-level keys, events, namespaces, flags and variables "
-            "that are set, saved scopes) that no `cybernetics_v2*` spec names. An event also "
-            "counts as mentioned by its short form (`tier1.005`).", ""]
+            "that are set, saved scopes) that no spec read here names. An event also counts as "
+            "mentioned by its short form (`tier1.005`).", ""]
     if not res["unmentioned"]:
         out.append("None.")
     for kind, toks in res["unmentioned"].items():
@@ -421,7 +473,7 @@ def render(res):
 
 def main(argv=None):
     P.utf8_console()
-    ap = argparse.ArgumentParser(description="Cybernetics spec vs script conformance.")
+    ap = argparse.ArgumentParser(description="Spec vs script conformance, per spec family.")
     ap.add_argument("--root", default=DEFAULT_ROOT, help="mod checkout (default: this repo)")
     ap.add_argument("--specs", default=SPEC_GLOB, help="spec glob, relative to --root")
     ap.add_argument("--out", help="output file (default: <root>/%s)" % OUT_REL)
