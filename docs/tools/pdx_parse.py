@@ -23,6 +23,7 @@ Usage::
         print(node.line, node.key, node.op, node.value)
 """
 import re
+import sys
 
 __all__ = [
     "Node", "Document", "ParseError", "OPERATORS", "TAGS",
@@ -115,6 +116,57 @@ class Document:
 
     def __iter__(self):
         return iter(self.nodes)
+
+
+# ------------------------------------------------------------------ console
+# FIX 8: a Windows console or pipe in cp1252 cannot encode the arrows and
+# section signs the tools print. Every CLI calls utf8_console() first.
+ASCII_FALLBACK = {0x2192: "->", 0x2190: "<-", 0x2014: "-", 0x2013: "-", 0x00a7: "S",
+                  0x2026: "...", 0x00d7: "x", 0x2265: ">=", 0x2264: "<="}
+
+
+class _AsciiWriter:
+    """Wraps a text stream that cannot be reconfigured: maps the common
+    non-ASCII symbols to ASCII and replaces anything else it cannot encode."""
+
+    def __init__(self, stream):
+        self._stream = stream
+        self.encoding = getattr(stream, "encoding", None) or "ascii"
+
+    def write(self, text):
+        text = text.translate(ASCII_FALLBACK)
+        text = text.encode(self.encoding, errors="replace").decode(self.encoding, errors="replace")
+        return self._stream.write(text)
+
+    def __getattr__(self, name):
+        return getattr(self._stream, name)
+
+
+def _can_encode(stream, sample="\u2192"):
+    enc = getattr(stream, "encoding", None)
+    if not enc:
+        return True     # e.g. io.StringIO: takes any str
+    try:
+        sample.encode(enc)
+        return True
+    except (UnicodeEncodeError, LookupError):
+        return False
+
+
+def utf8_console():
+    """Make sys.stdout / sys.stderr safe for UTF-8 output: reconfigure to
+    UTF-8 (errors=replace) when the stream allows it, else wrap it so the
+    tool prints ASCII ("->") instead of crashing."""
+    for name in ("stdout", "stderr"):
+        stream = getattr(sys, name)
+        if stream is None or _can_encode(stream):
+            continue
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+            continue
+        except (AttributeError, ValueError, OSError):
+            pass
+        setattr(sys, name, _AsciiWriter(stream))
 
 
 def read_text(path):

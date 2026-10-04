@@ -37,6 +37,8 @@ import tempfile
 import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import pdx_parse as _pdx  # noqa: E402  (utf8_console, FIX 8)
 ROOT = os.path.dirname(os.path.dirname(HERE))
 PY = sys.executable or "python"
 
@@ -260,6 +262,7 @@ def format_table(results):
 
 
 def main(argv=None, checks=None, env=None):
+    _pdx.utf8_console()
     ap = argparse.ArgumentParser(description="Run all repo checks; skip what needs a local install.")
     ap.add_argument("--root", default=ROOT,
                     help="mod checkout to lint and QA (default: this repo)")

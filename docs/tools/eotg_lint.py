@@ -1072,6 +1072,7 @@ def write_json(path, findings, stats=None):
 
 
 def main(argv=None):
+    pdx_parse.utf8_console()
     ap = argparse.ArgumentParser(description="Static linter for the Echoes of the Grip mod.")
     ap.add_argument("paths", nargs="*", help="only report findings under these paths")
     ap.add_argument("--root", default=DEFAULT_ROOT, help="mod repo root (default: this repo)")

@@ -225,6 +225,184 @@ class Recipes(unittest.TestCase):
         self.assertEqual(self.text, again)
 
 
+# -- FIX 9: Frontier-shaped fixtures (title scopes, option saves) --------------
+REGION = {
+    "common/scripted_triggers/eotg_r.txt": """
+eotg_r_is_open = { var:eotg_r_state ?= flag:open }
+eotg_r_done = {
+    var:eotg_r_progress >= 100
+    development_level >= 2
+}
+""",
+    "common/scripted_effects/eotg_r.txt": """
+eotg_r_tick_effect = {
+    save_scope_as = eotg_r_county
+    if = {
+        limit = { eotg_r_done = yes }
+        holder = { trigger_event = eotg_r.2 }
+    }
+    else_if = {
+        limit = { holder = { is_ai = no } }
+        holder = { trigger_event = eotg_r.5 }
+    }
+}
+eotg_r_finish_effect = {
+    save_scope_as = eotg_r_county
+    remove_variable = eotg_r_state
+}
+eotg_r_pick_effect = {
+    random_courtier = { save_scope_as = $NAME$ }
+}
+""",
+    "common/on_action/eotg_r.txt": """
+yearly_playable_pulse = { on_actions = { eotg_on_r } }
+eotg_on_r = {
+    effect = {
+        every_held_title = {
+            limit = { tier = tier_county  eotg_r_is_open = yes }
+            eotg_r_tick_effect = yes
+        }
+    }
+}
+""",
+    "common/decisions/eotg_r.txt": """
+eotg_decision_r_debug = {
+    is_shown = { debug_only = yes }
+    effect = { capital_county = { set_variable = { name = eotg_r_state value = flag:open } } }
+}
+eotg_decision_r_start = {
+    effect = {
+        capital_county = { save_scope_as = eotg_r_county }
+        trigger_event = eotg_r.1
+        trigger_event = eotg_r.3
+        trigger_event = eotg_r.4
+        trigger_event = eotg_r.6
+    }
+}
+""",
+    "events/eotg_r.txt": """
+namespace = eotg_r
+# the Region is passed in by the decision; its state is a title variable
+eotg_r.1 = {
+    title = eotg_r.1.t
+    trigger = { scope:eotg_r_county = { eotg_r_is_open = yes } }
+    option = { name = eotg_r.1.a  scope:eotg_r_county = { set_variable = { name = eotg_r_progress value = 0 } } }
+}
+# fired by a county-scope effect; its option re-saves the Region only AFTER
+# reading it, which does not make it fire cold
+eotg_r.2 = {
+    title = eotg_r.2.t
+    trigger = { scope:eotg_r_county = { eotg_r_done = yes } }
+    option = { name = eotg_r.2.a  scope:eotg_r_county = { eotg_r_finish_effect = yes } }
+}
+# the desc reads a scope only an option saves: missing
+eotg_r.3 = {
+    title = eotg_r.3.t
+    desc = eotg_r.3.desc
+    option = {
+        name = eotg_r.3.a
+        random_courtier = { save_scope_as = eotg_r_helper }
+        scope:eotg_r_helper = { add_gold = 1 }
+    }
+}
+# the same, read only after the option saved it: fire cold
+eotg_r.4 = {
+    title = eotg_r.4.t
+    option = {
+        name = eotg_r.4.a
+        random_courtier = { save_scope_as = eotg_r_helper2 }
+        scope:eotg_r_helper2 = { add_gold = 1 }
+    }
+}
+# a guarded read only: fire cold, with a note
+eotg_r.5 = {
+    title = eotg_r.5.t
+    desc = {
+        first_valid = {
+            triggered_desc = { trigger = { scope:eotg_r_county ?= { tier = tier_county } } desc = eotg_r.5.desc_a }
+            desc = eotg_r.5.desc_b
+        }
+    }
+    option = { name = eotg_r.5.a }
+}
+# a scope saved through an effect parameter in immediate
+eotg_r.6 = {
+    title = eotg_r.6.t
+    immediate = { eotg_r_pick_effect = { NAME = eotg_r_victim } }
+    option = { name = eotg_r.6.a  scope:eotg_r_victim = { add_gold = 1 } }
+}
+""",
+    "localization/english/eotg_r_l_english.yml": BOM + "l_english:\n"
+        ' eotg_decision_r_debug:0 "(Debug) Mark Region Open"\n'
+        ' eotg_r.3.desc:0 "[eotg_r_helper.GetName] waits."\n',
+}
+
+
+class TitleScopesAndOptionSaves(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.root = make_mod(REGION)
+        cls.recipes, cls.text = G.generate(cls.root)
+        cls.by = {r["id"]: r for r in cls.recipes}
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.root)
+
+    def consoles(self, r, key="setup"):
+        return [t for k, t in r[key] if k == "console"]
+
+    def test_title_condition_is_a_county_line_not_a_character_line(self):
+        r = self.by["eotg_r.1"]
+        self.assertEqual(r["fire_cold"], "no")
+        self.assertIn("needs scope:eotg_r_county, saved by decision eotg_decision_r_start",
+                      r["missing"])
+        self.assertIn("effect <county> = { set_variable = { name = eotg_r_state "
+                      "value = flag:open } }", self.consoles(r))
+        self.assertNotIn("effect set_variable = { name = eotg_r_state value = flag:open }",
+                         self.consoles(r))
+        notes = " | ".join(t for k, t in r["setup"] if k == "note")
+        self.assertIn("'(Debug) Mark Region Open' (eotg_decision_r_debug)", notes)
+        self.assertIn("capital_county", notes)
+
+    def test_effect_context_in_county_scope(self):
+        r = self.by["eotg_r.2"]
+        cons = self.consoles(r) + self.consoles(r, "setup_recommended")
+        self.assertIn("effect <county> = { set_variable = { name = eotg_r_progress value = 100 } }",
+                      cons)
+        self.assertIn("effect <county> = { change_development_level = 2 }", cons)
+        self.assertFalse(any(c.startswith("effect set_variable") for c in cons), cons)
+        # fired on the county's holder: the event's root, plain `event`
+        self.assertEqual(r["fire"], "event eotg_r.2")
+        self.assertEqual(r["fired_by"], ["effect eotg_r_tick_effect \u2190 on_action "
+                                         "yearly_playable_pulse \u2192 eotg_on_r"])
+
+    def test_option_save_does_not_provide_for_the_trigger(self):
+        r = self.by["eotg_r.2"]
+        self.assertEqual(r["fire_cold"], "no")
+        self.assertTrue(any("scope:eotg_r_county" in m for m in r["missing"]), r["missing"])
+
+    def test_holder_condition_goes_to_the_root(self):
+        r = self.by["eotg_r.5"]
+        self.assertIn(["note", "must be the player"], r["setup_recommended"])
+
+    def test_option_order(self):
+        self.assertEqual(self.by["eotg_r.3"]["fire_cold"], "no")
+        self.assertIn("needs scope:eotg_r_helper, saved by event eotg_r.3 option a",
+                      self.by["eotg_r.3"]["missing"])
+        self.assertEqual(self.by["eotg_r.4"]["fire_cold"], "yes", self.by["eotg_r.4"]["missing"])
+
+    def test_guarded_read_is_a_note(self):
+        r = self.by["eotg_r.5"]
+        self.assertEqual(r["fire_cold"], "yes", r["missing"])
+        self.assertTrue(any("reads scope:eotg_r_county if present" in t for _, t in r["setup"]),
+                        r["setup"])
+
+    def test_param_save_in_immediate(self):
+        r = self.by["eotg_r.6"]
+        self.assertEqual(r["fire_cold"], "yes", r["missing"])
+
+
 class CLI(unittest.TestCase):
     def setUp(self):
         self.root = make_mod()
