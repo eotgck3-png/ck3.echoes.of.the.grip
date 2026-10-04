@@ -33,7 +33,7 @@ The setting arrives as Markdown **briefs** per region (`intake/regions/<region>/
 9. Nikios Khanate content is deferred — do not build it.
 
 ## File placement
-Use the table in `OLD PROJECT VERSION/CLAUDE.md` — it is still correct for 1.19 (`common/religion/religion_types/`, `common/bookmarks/bookmarks/`, etc.). Add `map_data/` and `common/dynasties/` to it, plus `common/story_cycles/`, `common/deathreasons/`, `common/scripted_character_templates/` and `common/script_values/` (cybernetics v2, 2026-10-03; shapes per vanilla, cited in `docs/specs/cybernetics_v2.md`).
+Use the table in `OLD PROJECT VERSION/CLAUDE.md` (written for 1.19: `common/religion/religion_types/`, `common/bookmarks/bookmarks/`, etc.). **Except religion, which 1.20 split** (2026-10-04): religions go in `religion_types/` with `religion_details = { }`; faiths go in `common/religion/faith_types/` (`faith_details`, list-form `tenets`/`doctrines`); optional `rite_types/`; families take `tenet_background_icon`. v1 religions are the old shape and need a port, not a copy (`docs/qa/v1_lift_readiness_cloud.md` §6). Add `map_data/` and `common/dynasties/` to it, plus `common/story_cycles/`, `common/deathreasons/`, `common/scripted_character_templates/` and `common/script_values/` (cybernetics v2, 2026-10-03; shapes per vanilla, cited in `docs/specs/cybernetics_v2.md`).
 
 ## Validation
 Black map, neon borders, or errors in files the mod does not touch: see `docs/pitfalls.md` first — all three have known causes.
@@ -42,7 +42,7 @@ Tiger 1.17.0 against CK3 1.19. From the Bash tool:
 ```bash
 "/c/Users/river/tools/ck3-tiger-windows-v1.17.0/ck3-tiger.exe" --game "D:/SteamLibrary/steamapps/common/Crusader Kings III/game" "echoes_of_the_grip.mod"
 ```
-Known benign (Tiger predates the 1.19 religion folder rename): ~48 faith/religion-path lookups, ~24 culture lookups, 2 `error(filename)` on the religion folders. Do not "fix" those. Everything else is real. Write Tiger logs to the scratchpad, not the repo.
+Known benign (Tiger predates the 1.19 religion folder rename): ~48 faith/religion-path lookups, ~24 culture lookups, 2 `error(filename)` on the religion folders. Do not "fix" those. Everything else is real. **This exemption covers only lookups into vanilla's religion folders.** Tiger 1.17 doesn't understand the 1.20 religion schema at all, so once the mod ships its own religions or faiths, a clean Tiger run proves nothing about them. Check every ported religion and faith against the vanilla `.info` files and a vanilla example by hand (eotg-vanilla-scout). Write Tiger logs to the scratchpad, not the repo.
 
 **Note (2026-10-03, updated 2026-10-04):** the installed game is now 1.20.0.3 "Crozier", and Tiger 1.17 targets 1.18.3. These are version noise inside vanilla files, so don't "fix" them:
 - **About 48 errors in `20_health_effects.txt`** (`change_spiritual_fulfillment` ×36, `has_personal_tenet_flag` ×12), reached through `increase_wounds_effect`. The count grows with the number of call sites.
