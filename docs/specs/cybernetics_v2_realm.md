@@ -5,10 +5,11 @@
 **Index:** [cybernetics_v2.md](cybernetics_v2.md). Index §1 rules 1–12 and the §5 lore register (with today's never-name extension) apply to everything here.
 **Builds on, does not re-spec:**
 - [cybernetics_v2_procedures.md](cybernetics_v2_procedures.md): the roll (`eotg_aug_procedure_roll_effect` / `eotg_aug_procedure_effect`, params `PATIENT`, `PROVIDER`, `PROCEDURE`, `SURGEON`), `eotg_aug_proc_bad_factor`, `eotg_aug_save_surgeon_effect`, the price multipliers, `eotg_aug_procedure_apply_effect`.
-- [cybernetics_v2_interactions.md](cybernetics_v2_interactions.md): Offer Augmentation, Demand Removal (whose deferred "refusal as a crime" G7 enables, §4.3), and the deferred "Lend Your Surgeon" (built here as §4.6).
+- [cybernetics_v2_interactions.md](cybernetics_v2_interactions.md): Offer Augmentation, Demand Removal (whose deferred "refusal as a crime" G7 enables, §4.3), and the deferred "Lend Your Surgeon" (built here as §4.6, under the name **Borrow Their Technician**).
 - [cybernetics_v2_procedures_lore.md](cybernetics_v2_procedures_lore.md): the 866 tech ceiling, the residue register, "word has got out".
 - [`docs/lore/REVIEW_866.md`](../lore/REVIEW_866.md): LAW AT 866.
 
+**Lore review: done** (eotg-lore-keeper, 2026-10-04): approved with must-fixes R1–R8, all folded in below. **Binding names and loc renderings:** [cybernetics_v2_realm_lore.md](cybernetics_v2_realm_lore.md).
 **Also binding:** [cybernetics_v2_balance.md](cybernetics_v2_balance.md) (HQ1 pacing, HQ2 world targets, §9.2 observer run), [cybernetics_v2_trait_depth.md](cybernetics_v2_trait_depth.md) §5.2 (G9 stress rows: no option here writes its own `stress_impact` line for impatient, gluttonous, temperate or fickle).
 
 **Build state.** Neither the procedures spec nor the interactions spec is built yet: there is no `events/eotg_augmentation_procedures.txt` and no `common/character_interactions/` in the tree. Their pieces that this spec amends (§3.2) are therefore **built together** with them, in the order procedures → interactions → this spec.
@@ -54,7 +55,7 @@ All paths under `D:/SteamLibrary/steamapps/common/Crusader Kings III/game/`.
 The gaps doc's Part 2 headline: the system is rich in events about yourself and thin wherever CK3 lets you act on the realm and the people around you. This spec closes the last three gaps.
 
 - **G7. A realm policy on augmentation.** A vanilla realm-law group, **Augmentation**, with four laws: **Ban**, **License**, **Tolerate** (default) and **Favor**. It changes which providers are open, how often back-street work is discovered, whether discovery and refusing a removal are **crimes** (vanilla's imprisonment-reason mechanism), how often augmentation offers come, and how vassals feel about their liege. It is **realm-local**: the independent ruler at the top of a realm sets it; everyone in the realm lives under it; there is no higher law.
-- **G10. The Implant Technician.** A court position. It is the best surgeon a court can have for the procedure roll (through the roll's `SURGEON` parameter), makes the physician-route price and Maintenance cheaper, and makes Overclocked hardware run slightly cooler. It can be lent to another court (**Lend Your Surgeon**, deferred from the interactions spec, §4.6).
+- **G10. The Implant Technician.** A court position. It is the best surgeon a court can have for the procedure roll (through the roll's `SURGEON` parameter), makes the physician-route price and Maintenance cheaper, and makes Overclocked hardware run slightly cooler. It can be lent to another court (**Borrow Their Technician**, the interactions spec's deferred "Lend Your Surgeon", §4.6).
 - **G6. Activities.** Augmented people at tournaments (barred entrants, running hot to win, cheating accusations), feasts, hunts and pilgrimages, through 6 events hooked additively into vanilla activity on_actions.
 
 **Gate 3 (Systems), built against the temporary map** (`docs/agent_workflow.md` §5 rule 2; `CLAUDE.md` mod-exclusive exception). **Not blocked.**
@@ -73,12 +74,12 @@ The law and the court position are **levers on the resource's sources**, not fla
 |---|---|
 | Augmentation law | Changes the procedure roll (discovered weight, clinic odds), the initiation pulse's weights (how often tier changes begin), and whether discovery and refusal are crimes. Moves nothing directly. |
 | Implant Technician | Better roll odds (`eotg_aug_proc_bad_factor`), and **−2 / −3 a year on Overclocked accrual** at average / excellent aptitude (§4.5). |
-| act.001 *Enhanced Entrants* | a, d move the entrants' risk; desc reads the lead entrant's tier and band. |
-| act.002 *Running Hot* | a, d move root's risk; c moves it down at tier 3; desc reads band. |
+| act.001 *The Rules of the Field* | a, d move the entrants' risk; desc reads the lead entrant's tier and band. |
+| act.002 *Past Spec* | a, d move root's risk; c moves it down at tier 3; desc reads band. |
 | act.003 *Foul Play?* | c reads the accused's band in its branch trigger; d moves the accused's risk; desc reads the band. |
 | act.004 *A Hum at the Table* | a moves root's risk; desc reads tier. |
 | act.005 *Quarry in the Overlay* | a, d, e move root's risk; c moves it down at tier 3; desc reads focus and tier. |
-| act.006 *Hardware at the Shrine* | c moves risk down at tier 3; desc reads band. |
+| act.006 *At the Holy Site* | c moves risk down at tier 3; desc reads band. |
 | realm.001 *Contraband Hardware* | b changes the subject's tier (removal through the roll); desc reads the subject's tier. |
 
 **Hidden-risk rule** (index §1 rule 3) holds everywhere: no tooltip, toast, law `_effects` text, court-position description or desc quantifies risk, odds or chance. Every risk move is in `hidden_effect`. Vanilla UI numbers that are not the signature resource (tournament score, hunt success, law costs, vassal opinion) are fine.
@@ -105,7 +106,7 @@ All keys carry `eotg_`. No landed titles. Loc keys use the dot form for events (
 | scripted trigger | `eotg_aug_refusal_is_crime` (param `ACTOR`; recipient scope): `target_is_liege_or_above = $ACTOR$` AND (`eotg_aug_under_policy = { LAW = ban }` OR (`eotg_aug_under_policy = { LAW = license }` AND `has_character_modifier = eotg_mod_illegal_implants`)) | triggers | scripter |
 | scripted effect | `eotg_aug_contraband_effect` (patient scope; param `PROVIDER`) | `common/scripted_effects/eotg_augmentation_effects.txt` | scripter |
 | opinion modifier | `eotg_opinion_aug_contraband` (−15, 10 years, `imprisonment_reason = yes`, `revoke_title_reason = yes`; the `illegal_resisted_conversion_opinion` shape) | `common/opinion_modifiers/eotg_augmentation_opinions.txt` | scripter |
-| opinion modifier | `eotg_opinion_aug_defied_law` (−15, 10 years, `imprisonment_reason = yes`, `revoke_title_reason = yes`) | opinions | scripter |
+| opinion modifier | `eotg_opinion_aug_defied_law` (−15, 10 years, `imprisonment_reason = yes`, `revoke_title_reason = yes`; loc "Refused a Lawful Order", lore R2) | opinions | scripter |
 | opinion modifier | `eotg_opinion_aug_outlawed` (−20, decaying, `years = 10`) | opinions | scripter |
 | opinion modifier | `eotg_opinion_aug_barred` (−15, `years = 5`) | opinions | scripter |
 | court position | `eotg_aug_implant_technician_court_position` | `common/court_positions/types/eotg_augmentation_court_positions.txt` (**new folder**) | scripter |
@@ -114,16 +115,16 @@ All keys carry `eotg_`. No landed titles. Loc keys use the dot form for events (
 | scripted trigger | `eotg_aug_borrowed_technician_valid`: `var:eotg_aug_borrowed_technician ?= { is_alive = yes  is_imprisoned = no  has_court_position = eotg_aug_implant_technician_court_position  NOT = { has_trait = blind } }` | triggers | scripter |
 | scripted trigger | `eotg_aug_surgeon_is_technician` (true when `eotg_aug_save_surgeon_effect` would pick a technician: own or borrowed; used for option name variants) | triggers | scripter |
 | scripted trigger | `eotg_aug_tournament_entrant` (character scope; §4.7) | triggers | scripter |
-| character interaction | `eotg_aug_borrow_technician_interaction` ("Lend Your Surgeon", §4.6) | `common/character_interactions/eotg_augmentation_interactions.txt` (the interactions spec's file) | scripter |
+| character interaction | `eotg_aug_borrow_technician_interaction` ("Borrow Their Technician"; the deferred "Lend Your Surgeon", §4.6) | `common/character_interactions/eotg_augmentation_interactions.txt` (the interactions spec's file) | scripter |
 | character variable (timed, 1 year) | `eotg_aug_borrowed_technician` → the lent technician | the interaction's `on_accept` | scripter |
 | namespace | `eotg_aug_act` | `events/eotg_augmentation_activities.txt` (**new file**) | scripter |
 | namespace | `eotg_aug_realm` | `events/eotg_augmentation_realm.txt` (**new file**) | scripter |
-| event | `eotg_aug_act.001` *Enhanced Entrants* (tournament host) | activities file | scripter |
-| event | `eotg_aug_act.002` *Running Hot* (augmented player contestant) | activities file | scripter |
+| event | `eotg_aug_act.001` *The Rules of the Field* (tournament host) | activities file | scripter |
+| event | `eotg_aug_act.002` *Past Spec* (augmented player contestant) | activities file | scripter |
 | event | `eotg_aug_act.003` *Foul Play?* (player tournament host) | activities file | scripter |
 | event | `eotg_aug_act.004` *A Hum at the Table* (feast) | activities file | scripter |
 | event | `eotg_aug_act.005` *Quarry in the Overlay* (hunt) | activities file | scripter |
-| event | `eotg_aug_act.006` *Hardware at the Shrine* (pilgrimage) | activities file | scripter |
+| event | `eotg_aug_act.006` *At the Holy Site* (pilgrimage) | activities file | scripter |
 | event | `eotg_aug_realm.001` *Contraband Hardware* (player liege) | realm file | scripter |
 | custom on_action | `eotg_on_tournament_opening_aug` | `common/on_action/eotg_augmentation_on_actions.txt` | scripter |
 | custom on_action | `eotg_on_tournament_contest_aug` | on_actions | scripter |
@@ -260,7 +261,7 @@ Specified in §3.2 (Demand Removal row), following vanilla's conversion demand e
 - **The trigger** `eotg_aug_refusal_is_crime = { ACTOR }`: the actor is the recipient's liege or above, and the recipient's realm bans augmentation, or licenses it and the recipient's hardware is unlicensed (`eotg_mod_illegal_implants`).
 - **The desc** warns the player before sending.
 - **The AI** gets +50 to accept when refusing is a crime.
-- **On decline** the actor gains `eotg_opinion_aug_defied_law` toward the refuser, with `imprisonment_reason` and `revoke_title_reason`: the liege may now lawfully arrest them or revoke a title. No event is needed. The vanilla imprison and revoke interactions do the rest.
+- **On decline** the actor gains `eotg_opinion_aug_defied_law` ("Refused a Lawful Order") toward the refuser, with `imprisonment_reason` and `revoke_title_reason`: the liege may now lawfully arrest them or revoke a title. No event is needed. The vanilla imprison and revoke interactions do the rest.
 
 ### 4.4 realm.001 *Contraband Hardware*
 
@@ -269,7 +270,7 @@ Specified in §3.2 (Demand Removal row), following vanilla's conversion demand e
 - **Portraits:** left root; right `scope:eotg_contraband_subject`.
 - **Desc:**
   - base: word has reached you that `[eotg_contraband_subject.GetName]` has had implant work done in your realm, outside the law;
-  - `desc_ban` or `desc_license` by root's governing law (what the law says);
+  - `desc_ban` or `desc_license` by root's governing law, each in two variants (lore R1): a `first_valid` on root `is_independent_ruler = yes` → `desc_ban` / `desc_license` ("Your law …"), else `desc_ban_v` / `desc_license_v` ("The law of your realm …");
   - a tier line on the subject (`desc_aug` / `_enh` / `_oc` / `_nf`): what was found;
   - `desc_courtier` when the subject is a courtier of root (they live under your roof).
 
@@ -279,7 +280,7 @@ Specified in §3.2 (Demand Removal row), following vanilla's conversion demand e
 | b | "Have it taken out." | subject `is_courtier_of = root`, NOT landed, `eotg_is_augmented_any = yes`, NOT Seamless; afford the removal at the provider below | `eotg_aug_demand_removal_effect = { PROVIDER = physician }` with a surgeon (`eotg_aug_has_surgeon_access`), else `{ PROVIDER = backstreet }`, run with `scope:actor` = root and `scope:recipient` = the subject (save both before the call); the subject gains `eotg_opinion_aug_forced_procedure`; root runs `eotg_aug_stress_tyranny_effect`. **Changes the subject's tier.** | 30; +20 zealous; +10 arbitrary; −20 compassionate |
 | c | "A fine will do." | subject `gold >= minor_gold_value` | the subject `pay_short_term_gold = { target = root  gold = minor_gold_value }`; root `remove_opinion = { target = scope:eotg_contraband_subject  modifier = eotg_opinion_aug_contraband }` | 30; +20 greedy; +10 just |
 | d | "Look the other way." | — | root `remove_opinion` as c; `eotg_aug_stress_lie_effect = yes` (root breaks its own law) | 20; +20 cynical; +10 lazy; −20 zealous |
-| e [just] | "The law is the law." | `has_trait = just` | as a, plus `add_prestige = minor_prestige_value` | 30; +30 just; +10 diligent |
+| e [just] | "The realm's law holds, for everyone." | `has_trait = just` | as a, plus `add_prestige = minor_prestige_value` | 30; +30 just; +10 diligent |
 | f [greedy] | "A fine. A large one." | `has_trait = greedy`; subject `gold >= medium_gold_value` | as c at `medium_gold_value`, plus the subject `add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }` | 30; +30 greedy; +10 arbitrary |
 
 - Option b uses the interactions spec's removal effect and therefore its roll. Because a liege ordering the surgery on a household member is the "forced" case, the forced-procedure opinion applies.
@@ -325,7 +326,7 @@ Specified in §3.2 (Demand Removal row), following vanilla's conversion demand e
 
 **Not changed:** the T5 uses of `eotg_has_physician_access` in built content (init.006–.008, tier1.013–.015, `eotg_decision_consult_physician`, Excision). A technician is a surgeon, not a physician. Folding it into T5 would rewrite many built options for little gain (§10).
 
-### 4.6 G10: Lend Your Surgeon (`eotg_aug_borrow_technician_interaction`)
+### 4.6 G10: Borrow Their Technician (`eotg_aug_borrow_technician_interaction`)
 
 The interactions spec deferred this because "borrowing another court's physician needs a cross-court surgeon scope that G10 would define once". G10 defines it: `var:eotg_aug_borrowed_technician`, read by `eotg_aug_save_surgeon_effect` (§3.2).
 
@@ -341,6 +342,8 @@ The **actor borrows**; the recipient lends. One interaction serves both directio
 | `ai_min_reply_days` / `ai_max_reply_days` | 1 / 5 |
 | `on_accept` | `scope:actor = { pay_short_term_gold = { target = scope:recipient  gold = minor_gold_value } }`; `scope:recipient.court_position:eotg_aug_implant_technician_court_position = { save_scope_as = eotg_lent_technician }`; `scope:actor = { set_variable = { name = eotg_aug_borrowed_technician  value = scope:eotg_lent_technician  years = 1 } }`; actor toast `eotg_aug_borrow_accepted_toast` |
 | `on_decline` | actor toast `eotg_aug_borrow_declined_toast`. No opinion: it was a request. |
+
+**The technician does not move** (lore R8): only the variable is set; no travel, no change of court. Loc says "will see to your implants for a year".
 
 **Effect for a year:** the actor counts as having surgeon access (`eotg_aug_has_surgeon_access`). Every physician-route option in procedures, repairs, removals, Offer, Demand and Examine uses the lent technician as `SURGEON`, with the technician's aptitude rows, at the ordinary physician price (0.75; the actor already paid the fee).
 
@@ -384,10 +387,10 @@ All hooks are extended **additively** (invariant 4): the mod file names the vani
 
 Index §1 rule 6 applies: three universal options plus 1–2 trait-gated ones, every `ai_chance` with ≥ 2 trait modifiers, morally loaded options use a stress helper. **No option writes its own `stress_impact` line for impatient, gluttonous, temperate or fickle** (trait-depth §5.2). Risk moves are in `hidden_effect`. Tournament loc avoids horses and lances (index §5.6): "the arena", "the bout", "the field".
 
-#### act.001 *Enhanced Entrants* (tournament host)
+#### act.001 *The Rules of the Field* (tournament host)
 - **Trigger:** `exists = scope:activity`; `involved_activity = { any_attending_character = { eotg_aug_tournament_entrant = yes } }`.
 - **Immediate:** `involved_activity = { random_attending_character = { limit = { eotg_aug_tournament_entrant = yes }  weight = { base = 1  modifier = { add = 2  eotg_is_aug_tier3 = yes } }  save_scope_as = eotg_aug_entrant } }`. A chosen target (index rule 7 note), named in loc.
-- **Desc:** base (the marshals have a question: some entrants carry hardware, and the rules of the field never imagined it); `desc_many` when two or more entrants qualify; `desc_entrant_oc` / `_nf` on `scope:eotg_aug_entrant` (reads tier); `desc_ban` when root is under a Ban (your own law forbids it).
+- **Desc:** base (the marshals have a question: some entrants carry hardware, and the rules of the field never imagined it); `desc_many` when two or more entrants qualify; `desc_entrant_oc` / `_nf` on `scope:eotg_aug_entrant` (reads tier); `desc_ban` when root is under a Ban: `desc_ban` if root `is_independent_ruler = yes` ("Your law …"), else `desc_ban_v` ("The law of your realm …"; lore R1).
 - **"All entrants"** below means `involved_activity = { every_attending_character = { limit = { eotg_aug_tournament_entrant = yes } … } }`.
 
 | Opt | Text intent | Trigger | Effect | ai_chance |
@@ -400,7 +403,7 @@ Index §1 rule 6 applies: three universal options plus 1–2 trait-gated ones, e
 
 **Coupling:** a and d move risk; the desc reads the entrant's tier.
 
-#### act.002 *Running Hot* (augmented player contestant)
+#### act.002 *Past Spec* (augmented player contestant)
 - **Trigger:** `activity_is_competing_trigger = yes`; `eotg_is_augmented_any = yes`; NOT Seamless.
 - **Desc:** base (the hardware could give more than the field's rules expect); `desc_board` when `involved_activity = { has_current_phase = tournament_phase_board_game }` (the overlay is already three moves ahead; scripter confirms the phase key in `tournament.txt`), else `desc_physical`; `desc_hot` when tier 3 / Neurofractured or `eotg_aug_pressure_flicker = no` (reads band); `desc_ban` when the host is under a Ban.
 
@@ -417,7 +420,7 @@ Index §1 rule 6 applies: three universal options plus 1–2 trait-gated ones, e
 #### act.003 *Foul Play?* (player tournament host)
 - **Trigger:** `exists = scope:activity`; `scope:activity.activity_host = root`; the accused and accuser exist (mirror the on_action).
 - **Immediate:** save `eotg_aug_accused` (a competing augmented contestant, not root; weight +2 at tier 3) and `eotg_aug_accuser` (a competing contestant, not root and not the accused; weight +5 if `has_relation_rival = scope:eotg_aug_accused`). Both are chosen targets, named in loc.
-- **Desc:** base (`[eotg_aug_accuser.GetName]` claims `[eotg_aug_accused.GetName]` fights with hardware, not skill); `desc_hot` when the accused is tier 3 / NF or past the Flicker band (reads band); `desc_ban` / `desc_license` by root's governing law.
+- **Desc:** base (`[eotg_aug_accuser.GetName]` claims `[eotg_aug_accused.GetName]` fights with hardware, not skill); `desc_hot` when the accused is tier 3 / NF or past the Flicker band (reads band); `desc_ban` / `desc_license` by root's governing law, each with its vassal variant `desc_ban_v` / `desc_license_v` (lore R1, as act.001).
 
 | Opt | Text intent | Trigger | Effect | ai_chance |
 |---|---|---|---|---|
@@ -426,6 +429,8 @@ Index §1 rule 6 applies: three universal options plus 1–2 trait-gated ones, e
 | c | "Have them examined." | `eotg_aug_has_surgeon_access = yes` | `if = { limit = { scope:eotg_aug_accused = { OR = { eotg_is_aug_tier3 = yes  eotg_neurofractured = yes  eotg_aug_pressure_flicker = no } } } …` withdraw them as a, toast `.c.hot` `}` `else = {` as b, toast `.c.clean` `}` | 30; +20 diligent; +10 paranoid |
 | d | "Let them settle it on the field." | — | the accused: hidden risk +4, `activity_tournament_change_contestant_score_effect = { SCORE = increase_minor }`; the accuser: `SCORE = decrease_minor` | 30; +20 arrogant; +10 brave |
 | e [just] | "Hear them both, then rule." | `has_trait = just` | as c without the surgeon trigger (the host's own judgment); plus `add_prestige = minor_prestige_value` | 30; +30 just; +10 diligent |
+
+**Evidence is physical only (lore R6):** a strike too fast for an arm, heat off a casing, scorched heat sinks, a hands-on look. Never logs, telemetry, a signal, a jammer, a relay, "hacked", or anyone controlling the hardware. `.c.hot` / `.c.clean` never say who examined, because option e reaches them too.
 
 **Coupling:** c and e read the band in their branch trigger; d moves risk; the desc reads the band.
 
@@ -457,16 +462,16 @@ Index §1 rule 6 applies: three universal options plus 1–2 trait-gated ones, e
 
 **Coupling:** a, d and e move risk; c moves it down at tier 3; the desc reads focus and tier.
 
-#### act.006 *Hardware at the Shrine* (pilgrimage)
+#### act.006 *At the Holy Site* (pilgrimage)
 - **Trigger:** `exists = scope:activity`; `eotg_is_augmented_any = yes`; NOT Seamless.
-- **Desc:** base (the keepers of the site look at the hardware before they look at you); `desc_hot` when tier 3 / NF or past the Flicker band (reads band: the hardware is warm to the touch after the climb). **Faith-neutral**: no doctrine, no god-name, no "blessing of the machine" claim (index §5 item 4; the zealous-vs-Industrial-Survivalism deferral).
+- **Desc:** base (those who tend the site look at the hardware before they look at you; lore R5: never "keepers"); `desc_hot` when tier 3 / NF or past the Flicker band (reads band: the hardware is warm to the touch after the long approach). **Faith-neutral**: no doctrine, no god-name, no "blessing of the machine" claim (index §5 item 4; the zealous-vs-Industrial-Survivalism deferral).
 
 | Opt | Text intent | Trigger | Effect | ai_chance |
 |---|---|---|---|---|
 | a | "Kneel as I am." | — | `add_piety = minor_piety_value`; zealous: `stress_impact = { zealous = minor_stress_impact_gain }` | 30; +20 humble; +10 just |
 | b | "Cover it, and kneel." | — | `add_piety = minor_piety_value`; `eotg_aug_stress_lie_effect = yes` | 30; +20 deceitful; +10 shy |
 | c | "Stay the week, and rest." | — | `stress_impact = { base = minor_stress_impact_loss }` (as Maintenance); tier 3 / NF: hidden risk −3 (the hardware cools) | 30; +20 content; +10 lazy |
-| d [zealous] | "Pray for the strength to bear it." | `has_trait = zealous` | `add_piety = medium_piety_value`; `stress_impact = { zealous = minor_stress_impact_loss }` | 30; +30 zealous; +10 humble |
+| d [zealous] | "Keep the full vigil." | `has_trait = zealous` | `add_piety = medium_piety_value`; `stress_impact = { zealous = minor_stress_impact_loss }` | 30; +30 zealous; +10 humble |
 | e [cynical] | "Leave before the rites." | `has_trait = cynical` | `add_piety = { value = minor_piety_value  multiply = -1 }`; `stress_impact = { cynical = minor_stress_impact_loss }` | 30; +30 cynical; +10 impatient |
 
 e's `ai_chance` names impatient as a weight modifier only, which is not a stress line, so trait-depth §5.2 is not touched.
@@ -484,7 +489,7 @@ HQ2 (balance §0): at game year 30, **25–40%** of AI count-tier-and-above rule
 | **Favor** (AI) | augmented share **up** | augmented, ambitious or cynical, not zealous | nothing ×0.8 in governed realms; Offer acceptance +15. **About +1 to +2 points.** |
 | Crime on discovery and refusal | slower, not fewer | AI lieges imprison at vanilla rates; Demand Removal +50 accept under Ban | **About −0.5 point.** It also feeds Salvage (more augmented prisoners). |
 | **Technician** (AI) | the top band **up slightly** (Overclocked lasts longer) | hired only by augmented AI lieges; −2/−3 accrual a year | calm Overclocked accrual 12 → 10: the cascade comes about one pulse later. Raises the Overclocked share; the cascade and terminal rates fall slightly. Watch the terminal rate. |
-| Lend Your Surgeon (AI) | slower cascades | tier 3 / NF actors without a technician | Small. |
+| Borrow Their Technician (AI) | slower cascades | tier 3 / NF actors without a technician | Small. |
 | Activities | top band **up slightly** | player-only except act.001 | negligible for AI. |
 
 **Net:** the law levers roughly cancel (Ban −2 to −4 against Favor +1 to +2); the realm splits by its ruler's temperament, which is the design intent. The census should stay inside 25–40%.
@@ -554,6 +559,8 @@ HQ2 (balance §0): at game year 30, **25–40%** of AI count-tier-and-above rule
 
 ## 7. Loc surface (eotg-localizer)
 
+**Binding:** [cybernetics_v2_realm_lore.md](cybernetics_v2_realm_lore.md) (eotg-lore-keeper, 2026-10-04) gives the picked names, must-fixes R1–R8 and the exact renderings. Where it gives a rendering, the localizer uses it (polish allowed). The briefs below are fallback guidance only.
+
 Rules:
 - index §5 items 1–8 and today's never-name extension;
 - US spelling ("Favor", "license" as noun and verb);
@@ -561,42 +568,51 @@ Rules:
 - appended desc lines start with `\n\n`;
 - **no tooltip, toast, law `_effects`, court-position text or desc quantifies risk or odds**;
 - **no "Accord", no "galactic", no "programme"/"program", no "subsidy", no "state clinic"**; clinics stay **unnamed** ("a sanctioned clinic", "sanctioned hands"); **no named authority** licenses anything: the ruler's own law does;
-- tournament text: "the field", "the bout", "the arena", "the marshal"; no horses or lances (index §5.6).
+- tournament, hunt and pilgrimage text: per the binding register below (index §5.6).
 
-**Binding register for the law (from LAW AT 866):** the law is the ruler's own. Effects text says "in your realm", never "the law" in the abstract and never anyone's law but the ruler's. **Favor** is the ruler's open regard at court. It never offers money, clinics, schooling or any scheme of the state's (New Cauldron, 1610).
+**Binding register (LAW AT 866; lore R1–R8, Q1, Q2):**
+- The law is never anyone's law but the realm's own, as set by the ruler at its head (R1). A vassal reads "the law of your realm"; only an independent ruler reads "your law".
+- Never an unqualified "the law". Allowed: "your law", "your realm's law", "the law of your realm" (R2).
+- `eotg_aug_policy_set_by_liege_tt`: "Set by the ruler at the head of your realm, for all of it." (R3)
+- **No apparatus** (Q1 boundary, §8): never authorities, enforcers, inspectors, magistrates, tribunals, warrants, registries, permits, certification, regulation(s) or a named licensing body. Discovery is hearsay only ("word has got out", "word has reached you").
+- **Favor** is the ruler's open regard at court. It never offers money, clinics, schooling or any scheme of the state's (New Cauldron, 1610). Never "encourage", "promote", "sponsor", "support", "invest", "programme"/"program", "patron" or "patronage" (Q2). Its `_effects` never implies the ruler pays, supplies or arranges anything.
+- A lent technician "will see to your implants for a year"; never travel or joining your court (R8).
+- **Tournaments:** allowed "the field", "the bout", "the arena", "the marshal", "the stands", "the trial grounds"; banned "lists", "joust", "tilt", "lance", "horse", "squire".
+- **Hunts:** "the quarry" and "the trail" only; no Earth animals, hounds or mounts.
+- **Foul play** is shown by physical evidence only (R6). The hum is audible hardware (R7).
 
 No vanilla string needs a `replace/` override. Vanilla keys reused: `tournament_not_competing_tt`, `AI_OPINION_REASON`, `court_position_skill_learning`, `court_position_physician_1/2/3_trait`, `court_position_blind_trait`, `education_learning`, and the vassal-stance names (shown by the engine in opinion breakdowns).
 
 | Keys | Count |
 |---|---|
-| **Law group and laws:** `eotg_aug_policy_laws`; `eotg_aug_policy_ban`, `_license`, `_tolerate`, `_favor`; each `_effects` | 9 |
+| **Law group and laws:** `eotg_aug_policy_laws`; `eotg_aug_policy_ban`, `_license`, `_tolerate`, `_favor`; each `_effects` and `_desc` (renderings in the lore file) | 13 |
 | **Law tooltips:** `eotg_aug_policy_cooldown_tt`, `eotg_aug_policy_set_by_liege_tt`, `eotg_aug_clinic_closed_tt` | 3 |
-| **Opinions:** `eotg_opinion_aug_contraband` ("Unlawful Implants"), `eotg_opinion_aug_defied_law`, `eotg_opinion_aug_outlawed`, `eotg_opinion_aug_barred` | 4 |
+| **Opinions:** `eotg_opinion_aug_contraband` ("Unlawful Implants"), `eotg_opinion_aug_defied_law` ("Refused a Lawful Order"), `eotg_opinion_aug_outlawed` ("Outlawed My Implants"), `eotg_opinion_aug_barred` ("Barred Me from the Field") | 4 |
 | **Demand Removal amendments:** `eotg_aug_demand_removal_crime_desc`, `eotg_aug_demand_crime_toast`, `EOTG_AUG_AI_REFUSAL_IS_CRIME`; Offer: `EOTG_AUG_AI_BANNED`, `EOTG_AUG_AI_FAVORED` | 5 |
 | **Court position:** `eotg_aug_implant_technician_court_position`, `_desc`, `eotg_aug_implant_technician_employer_desc`, `eotg_aug_technician_aptitude_augmented`, `eotg_aug_technician_aptitude_former`, `eotg_aug_technician_banned_tt` | 6 |
 | **Option name variant:** `eotg_aug_opt_technician` ("My implant technician.") | 1 |
-| **Lend Your Surgeon:** `eotg_aug_borrow_technician_interaction`, `_desc`, `_notification`, `eotg_aug_borrow_accepted_toast`, `eotg_aug_borrow_declined_toast`, `EOTG_AUG_AI_ALLIED`, `EOTG_AUG_AI_FAMILY`, `EOTG_AUG_AI_GENEROUS`, `EOTG_AUG_AI_NEEDS_TECHNICIAN` | 9 |
-| `eotg_aug_act.001.t`, `.desc`, `.desc_many`, `.desc_entrant_oc`, `.desc_entrant_nf`, `.desc_ban`, `.a`–`.e`, `.barred_toast` | 12 |
+| **Borrow Their Technician:** `eotg_aug_borrow_technician_interaction`, `_desc`, `_notification`, `eotg_aug_borrow_accepted_toast`, `eotg_aug_borrow_declined_toast`, `EOTG_AUG_AI_ALLIED`, `EOTG_AUG_AI_FAMILY`, `EOTG_AUG_AI_GENEROUS`, `EOTG_AUG_AI_NEEDS_TECHNICIAN` | 9 |
+| `eotg_aug_act.001.t`, `.desc`, `.desc_many`, `.desc_entrant_oc`, `.desc_entrant_nf`, `.desc_ban`, `.desc_ban_v`, `.a`–`.e`, `.barred_toast` | 13 |
 | `eotg_aug_act.002.t`, `.desc`, `.desc_board`, `.desc_physical`, `.desc_hot`, `.desc_ban`, `.a`–`.e`, `.a.seen` | 12 |
-| `eotg_aug_act.003.t`, `.desc`, `.desc_hot`, `.desc_ban`, `.desc_license`, `.a`–`.e`, `.c.hot`, `.c.clean` | 12 |
+| `eotg_aug_act.003.t`, `.desc`, `.desc_hot`, `.desc_ban`, `.desc_ban_v`, `.desc_license`, `.desc_license_v`, `.a`–`.e`, `.c.hot`, `.c.clean` | 14 |
 | `eotg_aug_act.004.t`, `.desc`, `.desc_host`, `.desc_oc`, `.desc_nf`, `.a`–`.e` | 10 |
 | `eotg_aug_act.005.t`, `.desc`, `.desc_senses`, `.desc_hum`, `.a`–`.e` | 9 |
 | `eotg_aug_act.006.t`, `.desc`, `.desc_hot`, `.a`–`.e` | 8 |
-| `eotg_aug_realm.001.t`, `.desc`, `.desc_ban`, `.desc_license`, `.desc_aug`, `.desc_enh`, `.desc_oc`, `.desc_nf`, `.desc_courtier`, `.a`–`.f` | 15 |
-| **Total** | **~115** |
+| `eotg_aug_realm.001.t`, `.desc`, `.desc_ban`, `.desc_ban_v`, `.desc_license`, `.desc_license_v`, `.desc_aug`, `.desc_enh`, `.desc_oc`, `.desc_nf`, `.desc_courtier`, `.a`–`.f` | 17 |
+| **Total** | **~124**: the first draft's ~115, plus the 5 R1 vassal variants and the 4 law `_desc` keys. Toasts with a title and a body (barred, demand crime, borrow accepted) may each need a body key; the localizer adds them if PX asks. |
 
 **Briefs:**
-- **Law names** are working names for the lore-keeper: group "Augmentation"; laws "Prohibited", "Licensed", "Tolerated", "Favored". `_effects` lines describe consequences plainly ("Sanctioned clinics will not operate in your realm"; "Unsanctioned implant work in your realm is a crime"; "Refusing your order to remove implants is a crime"). The Favor `_effects` must not suggest the ruler pays for, supplies or arranges implants.
-- **`eotg_aug_policy_set_by_liege_tt`:** "Your liege's law decides this for the whole realm."
+- **Law names (picked):** group "Augmentation"; laws "Augmentation Prohibited", "Augmentation Licensed", "Augmentation Tolerated", "Augmentation Favored". `_effects` lines describe consequences plainly ("Sanctioned clinics will not operate in your realm"; "Unsanctioned implant work in your realm is a crime"; "Refusing your order to remove implants is a crime"). The Favor `_effects` must not suggest the ruler pays for, supplies or arranges implants.
+- **`eotg_aug_policy_set_by_liege_tt`:** "Set by the ruler at the head of your realm, for all of it." (R3)
 - **`eotg_aug_clinic_closed_tt`:** "No sanctioned clinic operates where augmentation is prohibited."
 - **Court position:** "Implant Technician". `_desc`: a specialist in fitting and servicing implants, kept at court. Employer text: the brief in §4.5. No numbers.
-- **Lend Your Surgeon:** the interaction name is "Lend Your Surgeon" seen from the lender's side; from the actor's side the button may read "Ask to Borrow Their Technician". The localizer picks one with the lore-keeper. The fee is plain ("for a fee").
-- **realm.001:** "word has reached you", the procedures register. The subject is named. The law named is "your law". Option b is "Have it taken out", clinical, not cruel.
-- **act.001–.003:** the field's rules "never imagined" hardware. "Running hot" means the hardware is pushed past its rated output (bodily, local). No remote control, no signal (interactions §7).
-- **act.004:** the servo tick, the dulled palate (the existing *Dulled Palate* register), the guests' eyes.
+- **Borrow Their Technician** (picked name). The fee is plain ("for a fee"). The technician does not travel (R8).
+- **realm.001:** "word has reached you", the procedures register. The subject is named. The law is "your law" for an independent ruler and "the law of your realm" otherwise (R1). If guards appear: "your guards", not "wardens". Option b is "Have it taken out", clinical, not cruel.
+- **act.001–.003:** the field's rules "never imagined" hardware. "Past spec" means the hardware is pushed past its rated output (bodily, local). act.002 is not titled "Running Hot": that is the shipped modifier `eotg_mod_aug_running_hot` (R4). No remote control, no signal (interactions §7).
+- **act.004:** the servo tick, the dulled palate (the existing *Dulled Palate* register), the guests' eyes. The hum is **audible hardware** (servo tick, coil whine), never "at the edge of hearing" or faint "from somewhere" (lore R7).
 - **act.005:** the optics and the coil whine (init.015's audible hardware, index §5 item 8). Nothing hunts "for" you; you see more.
-- **act.006:** faith-neutral. The keepers react to the person, not to any doctrine on machines. No invocation (index §5 item 4).
-- **Titles to confirm:** *Enhanced Entrants*, *Running Hot*, *Foul Play?*, *A Hum at the Table*, *Quarry in the Overlay*, *Hardware at the Shrine*, *Contraband Hardware*.
+- **act.006:** faith-neutral. Those who tend the site react to the person, not to any doctrine on machines. Say "the holy site" (a building, if one is needed: Sanctum). No god-name, doctrine, pray, bless or sacrament (index §5 item 4; lore R5).
+- **Titles (picked):** *The Rules of the Field*, *Past Spec*, *Foul Play?*, *A Hum at the Table*, *Quarry in the Overlay*, *At the Holy Site*, *Contraband Hardware*.
 
 ---
 
@@ -608,11 +624,17 @@ No vanilla string needs a `replace/` override. Vanilla keys reused: `tournament_
 - **Tech ceiling** (procedures lore): the Technician fits and services. No remote diagnostics, no networked maintenance, no self-repair (975).
 - **Faith:** zealous / cynical / piety only; the zealot vassal stance is personality-scored (§4.1). act.006 is faith-neutral.
 - **Nikios Khanate:** not touched.
-- **For the lore-keeper:**
-  1. **Arrest.** The procedures lore ruling said of discovery "keep 'word has got out'. No arrest, and no authority." That ruling covered discovery with no law in force. This spec adds arrest **only** under the ruler's own Ban or License (realm.001 a/e, and the vanilla imprisonment reason). Confirm this stays inside LAW AT 866.
-  2. **Favor.** Is a ruler's open favor toward the augmented (opinions, AI willingness, no provision) acceptable at 866, or does any "encourage" read as a programme? If not, cut the law: the group works with three.
-  3. **Names:** the law group and law names, "Implant Technician", "Lend Your Surgeon", and the seven event titles.
-  4. **Tournaments and pilgrimages at 866:** vanilla activity names are medieval (lists, pilgrimage). The mod presumably reflavors them elsewhere. Do these events need a register note beyond "the field" / "the keepers of the site"?
+- **Lore review: done** (eotg-lore-keeper, 2026-10-04, [cybernetics_v2_realm_lore.md](cybernetics_v2_realm_lore.md)). Approved with R1–R8 (all wording), folded in above. Names picked (§7).
+- **Q1. Arrest: approved, inside LAW AT 866.** Binding boundary for script and loc:
+  1. The arrest is made by the subject's own liege, inside the realm, under that realm's own law, which the ruler at the head of the realm set.
+  2. **No apparatus.** Never authorities, enforcers, inspectors, magistrates, tribunals, warrants, registries, permits or permit offices, certification, regulation(s), or a named licensing body. "Your court" as a household is fine. A licence is held "under your law".
+  3. Discovery is hearsay only: "word has got out" or "word has reached you". No investigation, records, scans or implant register.
+  4. Under Tolerate or Favor, and for the independent lawmaker themself: no arrest, and no authority (the procedures ruling stands there).
+  5. The law never reaches outside the realm. No extradition, no foreign warrant.
+  6. A Ban never "created or fed" the black market. The back streets are simply what is left under it.
+  - The matching Discovery amendment is applied to [cybernetics_v2_procedures_lore.md](cybernetics_v2_procedures_lore.md).
+- **Q2. Favor: kept; four laws.** Open regard is a personal stance, not provision. Its mechanics are approved (more offers, +15 Offer acceptance, back-street discovery ×0.5). Banned words are in §7.
+- **Open, canon silent (optional vault questions, not blocking):** 866 hunt fauna (keep "the quarry"); who tends holy sites (keep "those who tend the site" until faith loc exists after Gate 1).
 
 ---
 
@@ -634,13 +656,13 @@ No vanilla string needs a `replace/` override. Vanilla keys reused: `tournament_
 7. **Clinic closure:** with a Ban in force, every clinic option listed in §3.2 shows unavailable with the tooltip; the physician (or technician) and back-street options remain.
 8. **Map-agnostic:** `grep -nE "title:|culture:|faith:|religion:|character:[0-9]" common/law_groups common/laws common/court_positions events/eotg_augmentation_activities.txt events/eotg_augmentation_realm.txt` returns nothing.
 9. **Identifiers:** every new global key starts `eotg_`; `grep -rnE 'eotg_[ekdcb]_'` stays empty.
-10. **Lore register:** `grep -niE "accord|galactic|program|subsid|state clinic|remote|signal|blackstar|p&d|calix|pill ?mob|concrete cartel|trauma team"` over the new loc keys returns nothing.
+10. **Lore register:** `grep -niE "accord|galactic|program|subsid|state clinic|remote|signal|blackstar|p&d|calix|pill ?mob|concrete cartel|trauma team|telemetry|jamm|relay|hack|authorit|warrant|magistrat|inspector|registry|encourag|sponsor|patronag"` over the new loc keys returns nothing.
 11. **Loc:** all §7 keys exist exactly once, with BOM and no `[scope:`.
 12. **Human, in game (temporary map):**
     - **Law:** an independent ruler sees the **Augmentation** group in My Realm, can pass each law, pays the cost, and then sees the cooldown tooltip. A vassal sees it locked with the liege tooltip. The realm header still shows Crown Authority (not ours) through `GetActiveLawInGroupWithFlag('realm_law')` (`window_my_realm.gui:436`). Missing law icons render as a blank, not a crash (art debt). An heir inherits the law. A ruler who becomes a vassal reverts to Tolerated within a month.
     - **Ban:** zealot-stance vassals show the law's opinion line, augmented vassals show "Outlawed". Seek → init.018 shows the clinic unavailable. Back streets, 20 reloads → some "discovered", the liege (a player) gets realm.001; an AI liege holds the Unlawful Implants opinion. Demand Removal on an augmented vassal shows the crime line; refusal gives "Defied the Law" with the imprison option available.
     - **Technician:** an augmented ruler sees the position; hire; aptitude breakdown shows the augmented line. Procedure options read "My implant technician." Maintenance costs half. Under a Ban as a vassal, the position invalidates.
-    - **Lend Your Surgeon:** ask an ally who has a technician; after acceptance, procedure options offer the technician for a year.
+    - **Borrow Their Technician:** ask an ally who has a technician; after acceptance, procedure options offer the technician for a year.
     - **Activities:** host a tournament (DLC) with an augmented knight → act.001; bar them → they withdraw without vanilla's empty 0800 window. Compete augmented → act.002, the score moves. Feast, hunt → act.004 / act.005.
     - **Engine checks (not settled by vanilla):**
       - (a) a child `on_actions` block on a vanilla activity on_action fires, and the parent's `trigger` gates it;
@@ -673,10 +695,10 @@ No vanilla string needs a `replace/` override. Vanilla keys reused: `tournament_
 
 ### HANDOFF
 - status: done
-- next: eotg-lore-keeper
-- ask: Review docs/specs/cybernetics_v2_realm.md §8 (arrest under the ruler's own law, the Favor law at 866, names, activity register) and §7 briefs; then route to eotg-scripter to build after the procedures and interactions specs land (§3–§5, including the §3.2 amendments to those two unbuilt specs and the §3.3 changes to built script), then eotg-localizer (§7), then eotg-qa (§9).
-- files: docs/specs/cybernetics_v2_realm.md
-- new events (7; below the ~10 flag): eotg_aug_act.001 Enhanced Entrants (tournament_opening_on_action → eotg_on_tournament_opening_aug); eotg_aug_act.002 Running Hot (7 contest random pulses → eotg_on_tournament_contest_aug); eotg_aug_act.003 Foul Play? (tournament_active_state_pulse → eotg_on_tournament_active_aug); eotg_aug_act.004 A Hum at the Table (feast_default_event_selection → eotg_on_feast_aug); eotg_aug_act.005 Quarry in the Overlay (hunt_random_pulse → eotg_on_hunt_aug); eotg_aug_act.006 Hardware at the Shrine (pilgrimage_destination_events → eotg_on_pilgrimage_aug); eotg_aug_realm.001 Contraband Hardware (eotg_aug_contraband_effect, from the procedure roll's discovered outcome). Also: law group eotg_aug_policy_laws with 4 laws, court position eotg_aug_implant_technician_court_position, interaction eotg_aug_borrow_technician_interaction (Lend Your Surgeon).
-- needs-loc (~115, §7): eotg_aug_policy_laws, the 4 laws and their _effects (9); 3 law tooltips; 4 opinions; Demand/Offer amendment keys (5); court position keys (6); eotg_aug_opt_technician; Lend Your Surgeon keys (9); eotg_aug_act.001–.006.* (63); eotg_aug_realm.001.* (15).
-- needs-lore: arrest only under the ruler's own Ban/License vs the procedures ruling "no arrest, no authority"; whether Favor (regard, no provision) is acceptable at 866 or should be cut; law, position, interaction and event names; tournament/pilgrimage register.
-- needs-human: §9 item 12 in-game checks, including engine checks (a) child on_actions on vanilla activity hooks fire under the parent trigger, (b) activity scope survives the delayed tournament-opening on_action, (c) My Realm lists the modded non-cumulative realm_law group, (d) pilgrimage needs holy sites (may wait for Gate 1); art debt: 4 law icons (gfx/interface/icons/laws/eotg_aug_policy_*.dds), 1 court-position icon, the interaction icon; the observer run's four new counters (§4.9); the orchestrator adds common/law_groups/, common/laws/ and common/court_positions/types/ to the CLAUDE.md placement table.
+- next: eotg-scripter
+- ask: Build docs/specs/cybernetics_v2_realm.md §3–§5 after the procedures and interactions specs land (including the §3.2 amendments to those two specs and the §3.3 changes to built script); then eotg-localizer (§7, renderings from docs/specs/cybernetics_v2_realm_lore.md), then eotg-qa (§9).
+- files: docs/specs/cybernetics_v2_realm.md (lore R1–R8, Q1, Q2 and names folded in); docs/specs/cybernetics_v2_procedures_lore.md (Discovery amendment)
+- new events (7; below the ~10 flag): eotg_aug_act.001 The Rules of the Field (tournament_opening_on_action → eotg_on_tournament_opening_aug); eotg_aug_act.002 Past Spec (7 contest random pulses → eotg_on_tournament_contest_aug); eotg_aug_act.003 Foul Play? (tournament_active_state_pulse → eotg_on_tournament_active_aug); eotg_aug_act.004 A Hum at the Table (feast_default_event_selection → eotg_on_feast_aug); eotg_aug_act.005 Quarry in the Overlay (hunt_random_pulse → eotg_on_hunt_aug); eotg_aug_act.006 At the Holy Site (pilgrimage_destination_events → eotg_on_pilgrimage_aug); eotg_aug_realm.001 Contraband Hardware (eotg_aug_contraband_effect). Also law group eotg_aug_policy_laws (4 laws), court position eotg_aug_implant_technician_court_position, interaction eotg_aug_borrow_technician_interaction (Borrow Their Technician).
+- needs-loc (~124, §7; renderings binding in docs/specs/cybernetics_v2_realm_lore.md): law group, 4 laws with _effects and _desc (13); 3 law tooltips; 4 opinions; Demand/Offer amendment keys (5); court position keys (6); eotg_aug_opt_technician; Borrow Their Technician keys (9); eotg_aug_act.001–.006.* (66, including the R1 desc_ban_v / desc_license_v variants); eotg_aug_realm.001.* (17).
+- needs-lore: none (review done; R1–R8, Q1, Q2 folded in). Optional vault questions: 866 hunt fauna, who tends holy sites.
+- needs-human: §9 item 12 in-game checks, including engine checks (a)–(d) (child on_actions under vanilla activity hooks, activity scope after the delayed tournament opening, My Realm listing a modded realm_law group, pilgrimage needing holy sites); tournaments need the Tours & Tournaments DLC; art debt: 4 law icons, 1 court-position icon, the interaction icon; the observer run's four new counters (§4.9); the orchestrator adds common/law_groups/, common/laws/ and common/court_positions/types/ to the CLAUDE.md placement table.

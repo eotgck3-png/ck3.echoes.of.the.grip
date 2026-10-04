@@ -32,7 +32,7 @@ No never-name violations, no remote-kill, no state programmes. The neutral clini
   - **Tech ceiling:** no upload, backup, copy or transfer of the mind; no datavault or secretariat; the implant is not networked into the treasury or the realm's records; no self-replicating repair.
   - **Phantom Static:** internal and bodily only. No signal arriving, no "someone/something", no whisper or voice. The full §5.2 banned list applies.
 - **(d) Back-street Excision: `PHYSICIAN = no` is upheld.** Option e's text and tooltip never mention the physician.
-- **Discovery:** keep "word has got out". No arrest, and no authority.
+- **Discovery:** keep "word has got out". With no law in force (Tolerate, Favor, or an independent patient), no arrest and no authority. Under the patient's realm's own Ban or License (`cybernetics_v2_realm.md` §4.2), the patient's liege may arrest under that law. See the realm lore boundary ([cybernetics_v2_realm_lore.md](cybernetics_v2_realm_lore.md), Q1). *(Amended 2026-10-04 by the realm lore review.)*
 
 ## Renderings
 The localizer may polish these. Rules:
