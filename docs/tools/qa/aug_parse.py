@@ -4,12 +4,20 @@ A small Paradox-script reader: strips comments, tokenizes and nests blocks
 into lists of (key, operator, value) tuples, where value is a string or a
 nested list. Good enough for counting and graph walks; not a validator.
 Tiger remains the authority on syntax.
+
+Parsing is delegated to the general parser in docs/tools/pdx_parse.py
+(line numbers, @vars, inline math, tagged blocks, BOM/CRLF); ``load`` keeps
+the original tuple shape so every QA script here is unchanged.
 """
 import argparse
 import collections
 import glob
 import os
 import re
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import pdx_parse  # noqa: E402  (docs/tools/pdx_parse.py)
 
 PERS = (
     "lustful chaste gluttonous temperate greedy generous lazy diligent wrathful "
@@ -63,35 +71,9 @@ def strip_comments_fast(text):
     return re.sub(r"#[^\n]*", "", text)
 
 
-def _parse(tokens, i=0):
-    items = []
-    while i < len(tokens):
-        tok = tokens[i]
-        if tok == "}":
-            return items, i + 1
-        if tok == "{":
-            v, i = _parse(tokens, i + 1)
-            items.append((None, None, v))
-            continue
-        if i + 1 < len(tokens) and tokens[i + 1] in ("=", "<", ">", "<=", ">=", "!=", "?="):
-            op = tokens[i + 1]
-            if i + 2 < len(tokens) and tokens[i + 2] == "{":
-                v, i = _parse(tokens, i + 3)
-                items.append((tok, op, v))
-            else:
-                items.append((tok, op, tokens[i + 2] if i + 2 < len(tokens) else None))
-                i += 3
-        else:
-            items.append((tok, None, None))
-            i += 1
-    return items, i
-
-
 def load(path):
     """Parse one script file into nested (key, op, value) tuples."""
-    t = strip_comments(read(path)).replace("?=", " ?= ")
-    toks = re.findall(r'"[^"]*"|[{}]|\?=|[<>!=]=|[<>=]|[^\s{}<>=!?"]+', t)
-    return _parse(toks)[0]
+    return pdx_parse.to_tuples(pdx_parse.parse_file(path).nodes)
 
 
 def walk(items):
