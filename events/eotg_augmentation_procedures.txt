@@ -1,0 +1,818 @@
+﻿# ── eotg_augmentation_procedures.txt ─────────────────────────────────────────
+# Procedures, providers and repairs, and the former marker's aftermath
+# (docs/specs/cybernetics_v2_procedures.md §4.4, §4.10).
+#
+# eotg_aug_proc.001 — Who Takes It Out?    (removal provider)
+# eotg_aug_proc.002 — After the Procedure  (outcome report)
+# eotg_aug_proc.003 — Spare Parts          (repair offer)
+# eotg_aug_proc.004 — A Part Replaced      (Seamless repair; lore N1)
+# eotg_aug_proc.020 — Phantom Static       (after leaving the system, G3)
+#
+# Fires from:
+#   eotg_decision_partial_removal, eotg_decision_overclock_regression,
+#     eotg_decision_remove_implants -> .001;
+#   eotg_aug_procedure_effect (common/scripted_effects/
+#     eotg_augmentation_effects.txt) -> .002;
+#   eotg_on_trait_gained_aug_repair (on_trait_gained) -> .003 / .004;
+#   eotg_on_yearly_aug_former_check (yearly_playable_pulse) -> .020.
+# Cooldowns live in those on_actions and decisions only
+# (eotg_flag_aug_repair_cooldown, eotg_flag_aug_phantom_done); no event
+# trigger here reads a cooldown flag (index §1 rule 5).
+# Resource: eotg_fracture_risk and tier (track XP, moved only by
+# eotg_aug_set_integration_effect). Every paid option of .001 changes tier;
+# every paid option of .003 moves risk inside the shared roll
+# (eotg_aug_procedure_roll_effect). .002 and .004 are chain stages (.004
+# reads the Seamless residue, eotg_aug_residue). .020 reads the former marker
+# (eotg_aug_former) and c/d lead into an install. All risk moves are hidden;
+# no text quantifies them.
+# ─────────────────────────────────────────────────────────────────────────────
+
+namespace = eotg_aug_proc
+
+
+# ── eotg_aug_proc.001 ─────────────────────────────────────────────────────────
+# Who Takes It Out? The removal the decision booked
+# (var:eotg_aug_removal_kind, 30 days) is performed by the provider chosen
+# here. Paid options: pay (eotg_aug_pay_procedure_effect at
+# eotg_aug_removal_base_value x the provider), perform
+# (eotg_aug_removal_perform_effect: the decision's old body, with its own
+# stress, so no surgery helper here), then the shared roll, hidden.
+# Callers: eotg_decision_partial_removal, eotg_decision_overclock_regression,
+# eotg_decision_remove_implants (trigger_event in the decision effect, as Seek
+# fires init.018).
+# Procedures QA: every paid option re-checks the booking (has_variable
+# eotg_aug_removal_kind), so a second queued copy cannot perform an unbooked
+# removal; b needs a court physician other than root
+# (eotg_aug_has_court_physician), so a physician ruler without one takes e.
+
+eotg_aug_proc.001 = {
+    type = character_event
+    title = eotg_aug_proc.001.t
+    desc = {
+        desc = eotg_aug_proc.001.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { var:eotg_aug_removal_kind ?= flag:partial }
+                desc = eotg_aug_proc.001.desc_partial
+            }
+            triggered_desc = {
+                trigger = { var:eotg_aug_removal_kind ?= flag:downgrade }
+                desc = eotg_aug_proc.001.desc_downgrade
+            }
+            triggered_desc = {
+                trigger = { var:eotg_aug_removal_kind ?= flag:full }
+                desc = eotg_aug_proc.001.desc_full
+            }
+        }
+        triggered_desc = {
+            trigger = { eotg_aug_has_court_physician = yes }
+            desc = eotg_aug_proc.001.desc_physician
+        }
+    }
+    theme = medicine
+
+    # World-state guard: the booking, and the tier it was booked at
+    trigger = {
+        has_variable = eotg_aug_removal_kind
+        OR = {
+            AND = {
+                var:eotg_aug_removal_kind = flag:partial
+                eotg_is_aug_tier2 = yes
+            }
+            AND = {
+                var:eotg_aug_removal_kind = flag:downgrade
+                eotg_is_aug_tier3 = yes
+            }
+            AND = {
+                var:eotg_aug_removal_kind = flag:full
+                eotg_is_aug_tier1 = yes
+            }
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = worry
+    }
+    # Guarded (vanilla events/activities/activity_system_events.txt:89-92)
+    right_portrait = {
+        trigger = {
+            exists = scope:eotg_proc_surgeon
+            NOT = { scope:eotg_proc_surgeon = root }
+        }
+        character = scope:eotg_proc_surgeon
+        animation = personality_rational
+    }
+
+    immediate = {
+        hidden_effect = {
+            eotg_aug_save_surgeon_effect = yes
+        }
+    }
+
+    # "The clinic."
+    option = {
+        name = eotg_aug_proc.001.a
+        trigger = {
+            has_variable = eotg_aug_removal_kind
+            eotg_aug_can_afford_procedure = { BASE = eotg_aug_removal_base_value  MULT = 1 }
+        }
+        eotg_aug_pay_procedure_effect = { BASE = eotg_aug_removal_base_value  MULT = 1 }
+        eotg_aug_removal_perform_effect = yes
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = removal  SURGEON = root }
+        }
+        custom_tooltip = eotg_aug_proc.001.tt
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 10  has_trait = craven }
+            modifier = { add = -20  has_trait = greedy }
+        }
+    }
+
+    # (a court physician, not root) "My own physician."
+    option = {
+        name = eotg_aug_proc.001.b
+        trigger = {
+            has_variable = eotg_aug_removal_kind
+            eotg_aug_has_court_physician = yes
+            eotg_aug_can_afford_procedure = { BASE = eotg_aug_removal_base_value  MULT = eotg_aug_price_mult_physician }
+        }
+        eotg_aug_pay_procedure_effect = { BASE = eotg_aug_removal_base_value  MULT = eotg_aug_price_mult_physician }
+        eotg_aug_removal_perform_effect = yes
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = physician  PROCEDURE = removal  SURGEON = scope:eotg_proc_surgeon }
+        }
+        custom_tooltip = eotg_aug_proc.001.tt
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = trusting }
+            modifier = { add = 10  has_trait = diligent }
+        }
+    }
+
+    # "Someone cheaper."
+    option = {
+        name = eotg_aug_proc.001.c
+        trigger = {
+            has_variable = eotg_aug_removal_kind
+            eotg_aug_can_afford_procedure = { BASE = eotg_aug_removal_base_value  MULT = eotg_aug_price_mult_backstreet_removal }
+        }
+        eotg_aug_pay_procedure_effect = { BASE = eotg_aug_removal_base_value  MULT = eotg_aug_price_mult_backstreet_removal }
+        eotg_aug_removal_perform_effect = yes
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = backstreet  PROCEDURE = removal  SURGEON = root }
+        }
+        custom_tooltip = eotg_aug_proc.001.tt
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = greedy }
+            modifier = { add = 10  has_trait = deceitful }
+            modifier = { add = -20  has_trait = craven }
+        }
+    }
+
+    # "Not yet." Ungated. The booking lapses (after).
+    option = {
+        name = eotg_aug_proc.001.d
+        stress_impact = {
+            ambitious = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 10
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 10  has_trait = stubborn }
+        }
+    }
+
+    # [lifestyle_physician] "I'll guide their hands myself." Self-surgery:
+    # the patient is the surgeon (eotg_aug_proc_bad_factor x1.5).
+    option = {
+        name = eotg_aug_proc.001.e
+        trigger = {
+            has_variable = eotg_aug_removal_kind
+            has_trait = lifestyle_physician
+            NOT = { has_trait = blind }
+            eotg_aug_can_afford_procedure = { BASE = eotg_aug_removal_base_value  MULT = eotg_aug_price_mult_self }
+        }
+        trait = lifestyle_physician
+        eotg_aug_pay_procedure_effect = { BASE = eotg_aug_removal_base_value  MULT = eotg_aug_price_mult_self }
+        eotg_aug_removal_perform_effect = yes
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = self  PROCEDURE = removal  SURGEON = root }
+        }
+        custom_tooltip = eotg_aug_proc.001.tt
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = lifestyle_physician }
+            modifier = { add = 10  has_trait = arrogant }
+        }
+    }
+
+    # [zealous] (full removal) "Every piece. I want none of it left." The
+    # clinic at full price; faith-neutral (index §5 deferral note).
+    option = {
+        name = eotg_aug_proc.001.f
+        trigger = {
+            has_variable = eotg_aug_removal_kind
+            has_trait = zealous
+            var:eotg_aug_removal_kind ?= flag:full
+            eotg_aug_can_afford_procedure = { BASE = eotg_aug_removal_base_value  MULT = 1 }
+        }
+        trait = zealous
+        eotg_aug_pay_procedure_effect = { BASE = eotg_aug_removal_base_value  MULT = 1 }
+        eotg_aug_removal_perform_effect = yes
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = removal  SURGEON = root }
+        }
+        custom_tooltip = eotg_aug_proc.001.tt
+        add_piety = 50
+        stress_impact = {
+            zealous = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = zealous }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+
+    # The booking is spent, whichever option is taken
+    after = {
+        remove_variable = eotg_aug_removal_kind
+    }
+}
+
+
+# ── eotg_aug_proc.002 ─────────────────────────────────────────────────────────
+# After the Procedure. The reveal for every non-install procedure with a
+# reportable outcome, and for every repair (installs reveal at
+# eotg_aug_init.011, the Enhanced upgrade at eotg_aug_tier1.022). The saved
+# outcome (scope:eotg_proc_outcome / _kind, carried by trigger_event) is
+# applied here, in immediate, so nothing lands before this explains it.
+# A hidden flaw reads as clean (spec §6.3, thread T6).
+# Chain stage: no world-state guard beyond being alive (the patient may have
+# left the system).
+# Caller: eotg_aug_procedure_effect, 14-45 days.
+
+eotg_aug_proc.002 = {
+    type = character_event
+    title = eotg_aug_proc.002.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_proc_kind ?= flag:upgrade }
+                desc = eotg_aug_proc.002.desc_upgrade
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_proc_kind ?= flag:removal }
+                desc = eotg_aug_proc.002.desc_removal
+            }
+            desc = eotg_aug_proc.002.desc_repair
+        }
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_proc_outcome ?= flag:excellent }
+                desc = eotg_aug_proc.outcome_excellent
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_proc_outcome ?= flag:infection }
+                desc = eotg_aug_proc.outcome_infection
+            }
+            triggered_desc = {
+                trigger = {
+                    scope:eotg_proc_outcome ?= flag:rejection
+                    scope:eotg_proc_kind ?= flag:upgrade
+                }
+                desc = eotg_aug_proc.outcome_complication
+            }
+            triggered_desc = {
+                trigger = {
+                    scope:eotg_proc_outcome ?= flag:rejection
+                    scope:eotg_proc_kind ?= flag:removal
+                }
+                desc = eotg_aug_proc.outcome_fragments
+            }
+            triggered_desc = {
+                trigger = {
+                    scope:eotg_proc_outcome ?= flag:rejection
+                    scope:eotg_proc_kind ?= flag:repair
+                }
+                desc = eotg_aug_proc.outcome_repair_failed
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_proc_outcome ?= flag:discovered }
+                desc = eotg_aug_proc.outcome_discovered
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_proc_outcome ?= flag:maimed }
+                desc = eotg_aug_proc.outcome_maimed
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_proc_outcome ?= flag:one_eyed }
+                desc = eotg_aug_proc.outcome_one_eyed
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_proc_outcome ?= flag:blind }
+                desc = eotg_aug_proc.outcome_blind
+            }
+            # clean AND hidden flaw: one key
+            desc = eotg_aug_proc.outcome_clean
+        }
+    }
+    theme = recovery
+
+    trigger = { is_alive = yes }
+
+    left_portrait = {
+        character = root
+        triggered_animation = {
+            trigger = {
+                OR = {
+                    scope:eotg_proc_outcome ?= flag:infection
+                    scope:eotg_proc_outcome ?= flag:rejection
+                    scope:eotg_proc_outcome ?= flag:maimed
+                    scope:eotg_proc_outcome ?= flag:one_eyed
+                    scope:eotg_proc_outcome ?= flag:blind
+                }
+            }
+            animation = pain
+        }
+        animation = personality_rational
+    }
+
+    immediate = {
+        eotg_aug_procedure_apply_effect = yes
+    }
+
+    # "It is done." / "It will have to do." Two names for one option
+    # (vanilla events/health_events.txt:1141-1148, `name = { trigger text }`).
+    option = {
+        name = eotg_aug_proc.002.a
+        name = {
+            trigger = {
+                OR = {
+                    scope:eotg_proc_outcome ?= flag:infection
+                    scope:eotg_proc_outcome ?= flag:rejection
+                    scope:eotg_proc_outcome ?= flag:discovered
+                    scope:eotg_proc_outcome ?= flag:maimed
+                    scope:eotg_proc_outcome ?= flag:one_eyed
+                    scope:eotg_proc_outcome ?= flag:blind
+                }
+            }
+            text = eotg_aug_proc.002.a_grim
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 10  has_trait = content }
+            modifier = { add = 10  has_trait = lazy }
+        }
+    }
+
+    # (infection or fragments) "Fetch a physician." As init.011.b: free with
+    # physician access (thread T5), else minor_gold_value.
+    option = {
+        name = eotg_aug_proc.002.b
+        trigger = {
+            OR = {
+                scope:eotg_proc_outcome ?= flag:infection
+                AND = {
+                    scope:eotg_proc_outcome ?= flag:rejection
+                    scope:eotg_proc_kind ?= flag:removal
+                }
+            }
+            OR = {
+                eotg_has_physician_access = yes
+                gold >= minor_gold_value
+            }
+        }
+        if = {
+            limit = { eotg_has_physician_access = no }
+            remove_short_term_gold = minor_gold_value
+        }
+        if = {
+            limit = { has_character_modifier = eotg_mod_aug_infection }
+            remove_character_modifier = eotg_mod_aug_infection
+        }
+        if = {
+            limit = { has_character_modifier = eotg_mod_aug_fragments }
+            remove_character_modifier = eotg_mod_aug_fragments
+        }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 20  has_trait = craven }
+            modifier = { add = -20  has_trait = greedy }
+        }
+    }
+
+    # (infection, still augmented) "Sweat it out." As init.011.c; the risk
+    # move is hidden, and gated on the system so a former never regains risk.
+    option = {
+        name = eotg_aug_proc.002.c
+        trigger = {
+            scope:eotg_proc_outcome ?= flag:infection
+            eotg_is_augmented_any = yes
+        }
+        hidden_effect = {
+            eotg_add_fracture_risk = { AMOUNT = 5 }
+        }
+        random = {
+            chance = 25
+            add_trait = ill
+        }
+        eotg_aug_stress_neglect_effect = yes
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = stubborn }
+            modifier = { add = 20  has_trait = greedy }
+        }
+    }
+}
+
+
+# ── eotg_aug_proc.003 ─────────────────────────────────────────────────────────
+# Spare Parts. An augmented ruler took a real injury; the hardware already in
+# them has fittings for a replacement. Paid options pay at medium_gold_value
+# x the provider, then roll a repair (hidden): the injury is mended on most
+# outcomes, and every repair adds risk scaled by tier (more in the back
+# streets). Neurofractured (gaps F call 3): clinics refuse (a and f are
+# hidden, desc_fractured says why); the physician and the back streets roll
+# at x1.5 bad and pressure +8, inside the roll. No episode fires on the table
+# (it would bypass the band pools' cooldown, lesson 5).
+# Caller: eotg_on_trait_gained_aug_repair (non-Seamless), 7-30 days.
+
+eotg_aug_proc.003 = {
+    type = character_event
+    title = eotg_aug_proc.003.t
+    desc = {
+        desc = eotg_aug_proc.003.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { var:eotg_aug_repair_injury ?= flag:wounded }
+                desc = eotg_aug_proc.003.desc_wounded
+            }
+            triggered_desc = {
+                trigger = { var:eotg_aug_repair_injury ?= flag:maimed }
+                desc = eotg_aug_proc.003.desc_maimed
+            }
+            triggered_desc = {
+                trigger = { var:eotg_aug_repair_injury ?= flag:one_legged }
+                desc = eotg_aug_proc.003.desc_one_legged
+            }
+            triggered_desc = {
+                trigger = { var:eotg_aug_repair_injury ?= flag:one_eyed }
+                desc = eotg_aug_proc.003.desc_one_eyed
+            }
+            triggered_desc = {
+                trigger = { var:eotg_aug_repair_injury ?= flag:blind }
+                desc = eotg_aug_proc.003.desc_blind
+            }
+            triggered_desc = {
+                trigger = { var:eotg_aug_repair_injury ?= flag:disfigured }
+                desc = eotg_aug_proc.003.desc_disfigured
+            }
+        }
+        triggered_desc = {
+            trigger = { has_trait = eotg_neurofractured }
+            desc = eotg_aug_proc.003.desc_fractured
+        }
+        triggered_desc = {
+            trigger = { eotg_aug_has_court_physician = yes }
+            desc = eotg_aug_proc.003.desc_physician
+        }
+    }
+    theme = healthcare
+
+    # World-state guard, mirroring the on_action branch
+    trigger = {
+        eotg_is_augmented_any = yes
+        NOT = { has_trait = eotg_total_integration }
+        eotg_aug_has_repair_injury = yes
+    }
+
+    left_portrait = {
+        character = root
+        animation = pain
+    }
+    right_portrait = {
+        trigger = {
+            exists = scope:eotg_proc_surgeon
+            NOT = { scope:eotg_proc_surgeon = root }
+        }
+        character = scope:eotg_proc_surgeon
+        animation = personality_rational
+    }
+
+    immediate = {
+        hidden_effect = {
+            eotg_aug_save_surgeon_effect = yes
+        }
+    }
+
+    # "The clinic."
+    option = {
+        name = eotg_aug_proc.003.a
+        trigger = {
+            NOT = { has_trait = eotg_neurofractured }
+            eotg_aug_can_afford_procedure = { BASE = medium_gold_value  MULT = 1 }
+        }
+        eotg_aug_pay_procedure_effect = { BASE = medium_gold_value  MULT = 1 }
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = repair  SURGEON = root }
+        }
+        custom_tooltip = eotg_aug_proc.003.tt
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 10  has_trait = just }
+            modifier = { add = -20  has_trait = greedy }
+        }
+    }
+
+    # (a court physician, not root) "My own physician." A physician ruler
+    # without one takes e (self) instead.
+    option = {
+        name = eotg_aug_proc.003.b
+        trigger = {
+            eotg_aug_has_court_physician = yes
+            eotg_aug_can_afford_procedure = { BASE = medium_gold_value  MULT = eotg_aug_price_mult_physician }
+        }
+        eotg_aug_pay_procedure_effect = { BASE = medium_gold_value  MULT = eotg_aug_price_mult_physician }
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = physician  PROCEDURE = repair  SURGEON = scope:eotg_proc_surgeon }
+        }
+        custom_tooltip = eotg_aug_proc.003.tt
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = trusting }
+            modifier = { add = 10  has_trait = diligent }
+        }
+    }
+
+    # "The back streets."
+    option = {
+        name = eotg_aug_proc.003.c
+        trigger = {
+            eotg_aug_can_afford_procedure = { BASE = medium_gold_value  MULT = eotg_aug_price_mult_backstreet_repair }
+        }
+        eotg_aug_pay_procedure_effect = { BASE = medium_gold_value  MULT = eotg_aug_price_mult_backstreet_repair }
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = backstreet  PROCEDURE = repair  SURGEON = root }
+        }
+        custom_tooltip = eotg_aug_proc.003.tt
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 25
+            modifier = { add = 20  has_trait = greedy }
+            modifier = { add = 10  has_trait = deceitful }
+            modifier = { add = -20  has_trait = craven }
+        }
+    }
+
+    # "Live with it." Ungated. No risk move: the repair did not happen.
+    option = {
+        name = eotg_aug_proc.003.d
+        eotg_aug_stress_reject_effect = yes
+        if = {
+            limit = { has_trait = zealous }
+            add_piety = 25
+        }
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 20  has_trait = zealous }
+            modifier = { add = -10  has_trait = ambitious }
+        }
+    }
+
+    # [lifestyle_physician] "Hand me the tools." Self-surgery.
+    option = {
+        name = eotg_aug_proc.003.e
+        trigger = {
+            has_trait = lifestyle_physician
+            NOT = { has_trait = blind }
+            eotg_aug_can_afford_procedure = { BASE = medium_gold_value  MULT = eotg_aug_price_mult_self }
+        }
+        trait = lifestyle_physician
+        eotg_aug_pay_procedure_effect = { BASE = medium_gold_value  MULT = eotg_aug_price_mult_self }
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = self  PROCEDURE = repair  SURGEON = root }
+        }
+        custom_tooltip = eotg_aug_proc.003.tt
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = lifestyle_physician }
+            modifier = { add = 10  has_trait = brave }
+        }
+    }
+
+    # [cynical] "Improve it while you're in there." The clinic, a better part
+    # (a lesson, B6) and more hardware (risk +5, hidden).
+    option = {
+        name = eotg_aug_proc.003.f
+        trigger = {
+            has_trait = cynical
+            NOT = { has_trait = eotg_neurofractured }
+            eotg_aug_can_afford_procedure = { BASE = medium_gold_value  MULT = 1 }
+        }
+        trait = cynical
+        eotg_aug_pay_procedure_effect = { BASE = medium_gold_value  MULT = 1 }
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_prowess  years = 5 }
+        hidden_effect = {
+            eotg_add_fracture_risk = { AMOUNT = 5 }
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = repair  SURGEON = root }
+        }
+        custom_tooltip = eotg_aug_proc.003.tt
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = cynical }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+}
+
+
+# ── eotg_aug_proc.004 ─────────────────────────────────────────────────────────
+# A Part Replaced (lore N1). The Seamless repair: no roll, no gold, no risk
+# (risk is a no-op at Seamless by design). Not self-repairing machinery
+# (post-866): the system logs the injury, orders the part against the
+# existing fittings and books the technicians; the cost was already budgeted.
+# Applied in immediate, before the notice. Reads the residue (desc_residue).
+# One-option notification (index §1 rule 6, S12).
+# Caller: eotg_on_trait_gained_aug_repair (Seamless), 7-30 days.
+
+eotg_aug_proc.004 = {
+    type = character_event
+    title = eotg_aug_proc.004.t
+    desc = {
+        desc = eotg_aug_proc.004.desc
+        triggered_desc = {
+            trigger = {
+                has_variable = eotg_aug_residue
+                var:eotg_aug_residue >= 1
+            }
+            desc = eotg_aug_proc.004.desc_residue
+        }
+    }
+    theme = medicine
+
+    trigger = {
+        has_trait = eotg_total_integration
+        eotg_aug_has_repair_injury = yes
+    }
+
+    left_portrait = {
+        character = root
+        animation = idle
+    }
+
+    immediate = {
+        eotg_aug_repair_injury_effect = yes
+    }
+
+    # "Continue."
+    option = {
+        name = eotg_aug_proc.004.a
+        ai_chance = {
+            base = 100
+        }
+    }
+}
+
+
+# ── eotg_aug_proc.020 ─────────────────────────────────────────────────────────
+# Phantom Static (G3). Someone who has left the system: a reflex reaches for
+# an overlay that is not there. Internal and bodily only (lore ruling (c)):
+# nothing external, no voice. The desc reads the former marker
+# (var:eotg_aug_former) and the fragments. c and d lead back into an install
+# (tier); init.018's options and init.006's trigger re-check eligibility on
+# arrival.
+# Caller: eotg_on_yearly_aug_former_check (35% a year once settled; one per
+# exit; eotg_flag_aug_phantom_done is set there, never read here).
+
+eotg_aug_proc.020 = {
+    type = character_event
+    title = eotg_aug_proc.020.t
+    desc = {
+        desc = eotg_aug_proc.020.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { var:eotg_aug_former ?= flag:excised }
+                desc = eotg_aug_proc.020.desc_excised
+            }
+            triggered_desc = {
+                trigger = { var:eotg_aug_former ?= flag:rejected }
+                desc = eotg_aug_proc.020.desc_rejected
+            }
+            desc = eotg_aug_proc.020.desc_removed
+        }
+        triggered_desc = {
+            trigger = { has_character_modifier = eotg_mod_aug_fragments }
+            desc = eotg_aug_proc.020.desc_fragments
+        }
+    }
+    theme = mental_health
+
+    # World-state guard, mirroring the on_action
+    trigger = {
+        eotg_is_augmented_any = no
+        has_variable = eotg_aug_former
+    }
+
+    left_portrait = {
+        character = root
+        animation = thinking
+    }
+
+    # "It will fade." Ungated.
+    option = {
+        name = eotg_aug_proc.020.a
+        stress_impact = {
+            content = minor_stress_impact_loss
+            ambitious = minor_stress_impact_gain
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 10  has_trait = patient }
+        }
+    }
+
+    # (physician access) "See my physician."
+    option = {
+        name = eotg_aug_proc.020.b
+        trigger = { eotg_has_physician_access = yes }
+        stress_impact = { base = medium_stress_impact_loss }
+        if = {
+            limit = { has_character_modifier = eotg_mod_aug_fragments }
+            remove_character_modifier = eotg_mod_aug_fragments
+        }
+        if = {
+            limit = { has_character_modifier = eotg_mod_aug_infection }
+            remove_character_modifier = eotg_mod_aug_infection
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 10  has_trait = craven }
+        }
+    }
+
+    # "Put it back." The provider hub (init.018) charges per path.
+    option = {
+        name = eotg_aug_proc.020.c
+        trigger = {
+            eotg_can_receive_augmented = yes
+            NOT = { has_character_modifier = eotg_mod_aug_excision_recovery }
+            gold >= tiny_gold_value
+        }
+        custom_tooltip = eotg_aug_proc.020.c.tt
+        trigger_event = eotg_aug_init.018
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 10  has_trait = cynical }
+            modifier = { add = -30  has_trait = zealous }
+        }
+    }
+
+    # (a lost limb, eye or sight) "Replace what was lost." The Prosthetic
+    # (init.006). Its tooltip reuses c's: both send for an installation and
+    # the reply names its price (no new key, spec §7).
+    option = {
+        name = eotg_aug_proc.020.d
+        trigger = {
+            eotg_has_physical_loss = yes
+            NOT = { has_character_modifier = eotg_mod_aug_excision_recovery }
+        }
+        custom_tooltip = eotg_aug_proc.020.c.tt
+        trigger_event = eotg_aug_init.006
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = brave }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+
+    # [zealous] "As I was made." Faith-neutral (index §5 deferral note).
+    option = {
+        name = eotg_aug_proc.020.e
+        trigger = { has_trait = zealous }
+        trait = zealous
+        add_piety = 50
+        stress_impact = {
+            zealous = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = zealous }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+}

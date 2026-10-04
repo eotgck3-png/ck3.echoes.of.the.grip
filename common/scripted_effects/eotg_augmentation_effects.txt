@@ -140,8 +140,10 @@ eotg_aug_initiate_effect = {
 # THE ONLY place add_trait_xp on eotg_cybernetics may appear (spec §2.2 rule 2).
 # Sets XP to exactly $XP$ (0, 50 or 100) and refreshes the synergy modifier.
 # Callers: eotg_aug_tier1.022 (a, b) XP 50 (Phase 4a: tier1.002 now pays and
-#          fires the First Upgrade chain); eotg_aug_tier2.003 (a, c, d) XP 100;
-#          eotg_decision_partial_removal XP 0; eotg_decision_overclock_regression XP 50.
+#          fires the First Upgrade chain); eotg_aug_tier2.003 (a, c, d, f, g) XP 100;
+#          eotg_aug_removal_perform_effect (eotg_aug_proc.001, booked by
+#          eotg_decision_partial_removal: XP 0; eotg_decision_overclock_regression:
+#          XP 50).
 # Balance spec §5.1: every tier change, regressions included, starts a fresh
 # 5-year eotg_flag_aug_settling (relapse is slower too). The Pursue decision
 # reaches this only through tier1.022 / tier2.003; it never sets XP itself.
@@ -250,6 +252,8 @@ eotg_clean_all_aug_modifiers = {
     # firmware, so it goes with the firmware (CB-26 W3).
     if = { limit = { has_character_modifier = eotg_mod_aug_patron_throttle }  remove_character_modifier = eotg_mod_aug_patron_throttle }
     if = { limit = { has_character_modifier = eotg_mod_aug_iron_retinue }  remove_character_modifier = eotg_mod_aug_iron_retinue }
+    # Procedures spec §4.2: a careless removal's fragments (eotg_aug_proc.002)
+    if = { limit = { has_character_modifier = eotg_mod_aug_fragments }  remove_character_modifier = eotg_mod_aug_fragments }
 }
 
 # Increment fracture risk variable — expects $AMOUNT$ parameter.
@@ -439,6 +443,8 @@ eotg_aug_pick_second_victim_effect = {
 # clause modifiers stay (the debt survives the implants). Patron events guard
 # their owner-side risk moves on eotg_is_augmented_any, so nothing recreates
 # eotg_fracture_risk afterwards.
+# Procedures spec G2/G3: the Seamless residue goes with the seam, and every
+# exit ends in eotg_aug_mark_former_effect (the permanent former marker).
 eotg_aug_remove_all_effect = {
     if = {
         limit = { has_trait = eotg_cybernetics }
@@ -481,6 +487,10 @@ eotg_aug_remove_all_effect = {
         add_gold = var:eotg_aug_escrow
         remove_variable = eotg_aug_escrow
     }
+    # Procedures spec §3.2 (G2): residue is Seamless-only
+    remove_variable = eotg_aug_residue
+    # Procedures spec §4.10 (G3): last, so every exit is marked
+    eotg_aug_mark_former_effect = yes
 }
 
 # Balance spec §5.9 (ruling 2026-10-04): the init.006 prosthesis masked a
@@ -490,8 +500,8 @@ eotg_aug_remove_all_effect = {
 # trait_specific_events.txt:359-361, guarded by has_inactive_trait as here).
 # eotg_flag_aug_congenital_masked is set by eotg_aug_init.006.f (Part B2);
 # until then this is a no-op.
-# Callers: eotg_aug_remove_all_effect, eotg_decision_partial_removal,
-# eotg_decision_overclock_regression.
+# Callers: eotg_aug_remove_all_effect, eotg_aug_removal_perform_effect
+# (partial and downgrade removals, eotg_aug_proc.001).
 eotg_aug_unmask_congenital_effect = {
     if = {
         limit = { has_character_flag = eotg_flag_aug_congenital_masked }
@@ -1015,6 +1025,10 @@ eotg_aug_cascade_death_effect = {
 # Caller: eotg_aug_excision_surgery_effect (both survival branches).
 eotg_aug_excision_effect = {
     eotg_aug_remove_all_effect = yes
+    # Procedures spec §3.2 (G3): overrides remove-all's flag:removed
+    hidden_effect = {
+        set_variable = { name = eotg_aug_former  value = flag:excised }
+    }
     add_character_modifier = { modifier = eotg_mod_aug_excision_recovery  years = 5 }
     if = {
         limit = { NOT = { has_trait = scarred } }
@@ -1094,6 +1108,10 @@ eotg_aug_total_integration_effect = {
         remove_variable = eotg_aug_sedation_courses    # balance spec §5.5
         remove_variable = eotg_aug_nr_battle_bonus     # balance spec §5.7
         set_variable = { name = eotg_aug_voice  value = 5 }
+        # Procedures spec §2 (G2): the habits the integration has not yet
+        # optimised away. Only ever falls (end.040 b/d, end.041 b/c,
+        # end.042); read by the Seamless events. Never shown.
+        set_variable = { name = eotg_aug_residue  value = 3 }
         remove_character_flag = eotg_flag_aug_restrained
         remove_character_flag = eotg_flag_aug_sedated
         remove_character_flag = eotg_flag_aug_containment_regency
@@ -1161,6 +1179,11 @@ eotg_aug_excision_pay_effect = {
 # death_treatment (game/common/deathreasons/00_event_deaths.txt:214).
 # Callers: eotg_aug_end.001 (a: 15/no, c: 25/no, d: 15/yes), inside
 # hidden_effect (the desc gives the odds in words).
+# Procedures spec §4.7: MAIMED_BASE replaces the literal 30, and PHYSICIAN
+# gates both physician modifiers (`always = $PHYSICIAN$`, the BRAVE shape).
+# a/c/d pass MAIMED_BASE = 30, PHYSICIAN = yes; the back-street option e
+# passes 40 / no (the physician's table is the sanctioned one; ruling upheld
+# 2026-10-04).
 eotg_aug_excision_surgery_effect = {
     random_list = {
         # Death on the table
@@ -1177,6 +1200,7 @@ eotg_aug_excision_surgery_effect = {
             modifier = {
                 add = -15
                 eotg_has_physician_access = yes
+                always = $PHYSICIAN$
             }
             modifier = {
                 add = -10
@@ -1185,7 +1209,7 @@ eotg_aug_excision_surgery_effect = {
             death = { death_reason = death_treatment }
         }
         # Survive, maimed
-        30 = {
+        $MAIMED_BASE$ = {
             modifier = {
                 factor = 0
                 always = $BRAVE$
@@ -1202,6 +1226,7 @@ eotg_aug_excision_surgery_effect = {
             modifier = {
                 add = 15
                 eotg_has_physician_access = yes
+                always = $PHYSICIAN$
             }
             modifier = {
                 add = 30
@@ -1259,7 +1284,10 @@ eotg_aug_abdicate_effect = {
 # "What else can I replace?" (eotg_aug_tier1.020.c sets
 # eotg_flag_aug_replace_more for 5 years; paying spends it). Mirror:
 # eotg_aug_can_afford_upgrade. Inline-value shape as eotg_aug_excision_pay_effect.
-# Callers: eotg_aug_tier1.002 (a, d, e).
+# Procedures spec §4.6: MULT is the provider's price multiplier; the escrow
+# and the charge are both multiplied.
+# Callers: eotg_aug_tier1.002 (a, d, e: MULT = 1; f: physician; g: back
+# streets).
 # QA round 2: the price is held as escrow (eotg_aug_escrow, 1 year) until
 # the Installation (tier1.022) consumes it; if the ruler leaves the system
 # before then (Remove Implants, Rejection), eotg_aug_remove_all_effect
@@ -1277,6 +1305,7 @@ eotg_aug_pay_upgrade_effect = {
                     limit = { has_character_flag = eotg_flag_aug_replace_more }
                     multiply = 0.85
                 }
+                multiply = $MULT$
             }
             years = 1
         }
@@ -1287,6 +1316,7 @@ eotg_aug_pay_upgrade_effect = {
             limit = { has_character_flag = eotg_flag_aug_replace_more }
             multiply = 0.85
         }
+        multiply = $MULT$
     }
     remove_character_flag = eotg_flag_aug_replace_more
 }
@@ -1311,7 +1341,8 @@ eotg_aug_try_start_countdown_effect = {
 
 # End it. Callers: eotg_trigger_neurofracture and eotg_aug_nr_cascade_effect
 # (the cascade is the ending), eotg_aug_remove_all_effect,
-# eotg_aug_countdown.006 (The Quiet), eotg_decision_overclock_regression.
+# eotg_aug_countdown.006 (The Quiet), eotg_aug_removal_perform_effect (the
+# downgrade booked by eotg_decision_overclock_regression).
 eotg_aug_end_countdown_effect = {
     if = {
         limit = { eotg_aug_has_countdown = yes }
@@ -1699,7 +1730,7 @@ eotg_aug_f023_muster_effect = {
     eotg_add_fracture_risk = { AMOUNT = 8 }
 }
 
-# "Stand them down." / "Recall the envoys." Caller: .023.a.
+# "Stand them down." Caller: .023.a.
 eotg_aug_f023_stand_down_effect = {
     add_prestige = -50
     eotg_add_fracture_risk = { AMOUNT = -3 }
@@ -1777,4 +1808,591 @@ eotg_aug_f025_take_it_effect = {
 eotg_aug_clear_chain_flags_effect = {
     remove_character_flag = eotg_flag_aug_chain_edge
     remove_character_flag = eotg_flag_aug_chain_strain
+}
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Procedures — docs/specs/cybernetics_v2_procedures.md §4 (providers, repairs,
+# the former marker)
+#
+# Roll at the table, apply at the reveal (spec §4.1):
+#   - eotg_aug_procedure_roll_effect runs on a click (an option or an option's
+#     `after`), never in an immediate. It saves the outcome as
+#     scope:eotg_proc_outcome; only death on the table is applied there.
+#   - eotg_aug_procedure_apply_effect applies everything else in the reveal
+#     event's immediate (init.011 for installs, tier1.022 for the Enhanced
+#     upgrade, eotg_aug_proc.002 for the rest), so nothing lands on the
+#     character sheet before the event that explains it.
+#   - Saved scopes travel with trigger_event (end.001 -> end.002,
+#     tier2.013 -> .014).
+# Callers wrap the roll in hidden_effect (hidden-risk rule) and show a
+# custom_tooltip saying the outcome is decided on the table (end.001.tt).
+# ═════════════════════════════════════════════════════════════════════════════
+
+# The court physician as scope:eotg_proc_surgeon, else the patient (the
+# patient is the physician, or nobody is and the provider ignores it).
+# Run in the patient's scope. Shape: eotg_aug_end.001's immediate. Vanilla's
+# save_court_physician_as_effect (20_health_effects.txt:1539) is not reused:
+# it adds a court_owner hop and an is_physically_able filter that
+# eotg_has_physician_access does not mirror.
+# Callers: eotg_aug_proc.001 / .003 (immediate), eotg_aug_tier1.021 (after),
+# eotg_aug_tier2.003 (f), eotg_aug_init.006 (c), eotg_aug_init.017 (a, d),
+# eotg_aug_init.018 (c).
+eotg_aug_save_surgeon_effect = {
+    if = {
+        limit = { employs_court_position = court_physician_court_position }
+        court_position:court_physician_court_position = { save_scope_as = eotg_proc_surgeon }
+    }
+    else = {
+        save_scope_as = eotg_proc_surgeon
+    }
+}
+
+# Pay BASE x MULT (mirror: eotg_aug_can_afford_procedure). Shape:
+# eotg_aug_patron_pay_effect.
+# Callers: eotg_aug_proc.001 (a-c, e, f), eotg_aug_proc.003 (a-c, e, f),
+# eotg_aug_end.001 (e).
+eotg_aug_pay_procedure_effect = {
+    remove_short_term_gold = {
+        value = $BASE$
+        multiply = $MULT$
+    }
+}
+
+# The shared roll (spec §4.2). PATIENT and SURGEON are scopes; PROVIDER is
+# clinic / physician / self / backstreet and PROCEDURE is install / upgrade /
+# removal / repair (literals). Clinic and back streets ignore SURGEON (pass
+# the patient). Weights are in units of 0.5%: every entry has base 0 and gets
+# its provider column through `modifier = { add }`, each column summing to
+# 200 (vanilla shape: common/scripted_effects/00_scheme_scripted_effects.txt:
+# 692-745, base-0 entries, `add = $PARAM$`, a script-value `factor`, and
+# flag:$PARAM$ saved as a scope value as 20_health_effects.txt:1102-1105).
+#
+#   outcome     clinic  physician/self  back streets
+#   clean         190        180            129
+#   excellent       2          4              6
+#   infection       6         10             20
+#   flaw            0          2             16
+#   rejection       2          4             12
+#   discovered      0          0             10
+#   maimed          0          0              2
+#   one_eyed        0          0              2
+#   blind           0          0              2
+#   death           0          0              1
+#
+# The severe tail (maimed, one_eyed, blind, death) and discovered exist only
+# in the back streets. Every bad entry takes eotg_aug_proc_bad_factor.
+# Death on the table is applied here (death_treatment, "died due to a
+# botched treatment", common/deathreasons/00_event_deaths.txt:214), as
+# Excision does; there is no reveal for it.
+# Callers: eotg_aug_procedure_effect, eotg_aug_procedure_roll_booked_effect,
+# eotg_aug_init.010 (a, c, d), eotg_aug_init.018 (b).
+eotg_aug_procedure_roll_effect = {
+    $PATIENT$ = { save_scope_as = eotg_proc_patient }
+    $SURGEON$ = { save_scope_as = eotg_proc_surgeon }
+    save_scope_value_as = { name = eotg_proc_provider  value = flag:$PROVIDER$ }
+    save_scope_value_as = { name = eotg_proc_kind  value = flag:$PROCEDURE$ }
+    $PATIENT$ = {
+        random_list = {
+            # Clean
+            0 = {
+                modifier = { add = 190  scope:eotg_proc_provider = flag:clinic }
+                modifier = {
+                    add = 180
+                    OR = {
+                        scope:eotg_proc_provider = flag:physician
+                        scope:eotg_proc_provider = flag:self
+                    }
+                }
+                modifier = { add = 129  scope:eotg_proc_provider = flag:backstreet }
+                save_scope_value_as = { name = eotg_proc_outcome  value = flag:clean }
+            }
+            # Excellent
+            0 = {
+                modifier = { add = 2  scope:eotg_proc_provider = flag:clinic }
+                modifier = {
+                    add = 4
+                    OR = {
+                        scope:eotg_proc_provider = flag:physician
+                        scope:eotg_proc_provider = flag:self
+                    }
+                }
+                modifier = { add = 6  scope:eotg_proc_provider = flag:backstreet }
+                modifier = {
+                    factor = 2
+                    scope:eotg_proc_kind = flag:upgrade
+                    has_character_flag = eotg_flag_aug_vendor_bold
+                }
+                save_scope_value_as = { name = eotg_proc_outcome  value = flag:excellent }
+            }
+            # Infection
+            0 = {
+                modifier = { add = 6  scope:eotg_proc_provider = flag:clinic }
+                modifier = {
+                    add = 10
+                    OR = {
+                        scope:eotg_proc_provider = flag:physician
+                        scope:eotg_proc_provider = flag:self
+                    }
+                }
+                modifier = { add = 20  scope:eotg_proc_provider = flag:backstreet }
+                # A chain head's strain (replaces init.011's +10 and
+                # tier1.022's +10, at the new scale)
+                modifier = { add = 20  has_character_flag = eotg_flag_aug_chain_strain }
+                modifier = { factor = eotg_aug_proc_bad_factor  always = yes }
+                modifier = { factor = 2  scope:eotg_proc_kind = flag:upgrade }
+                modifier = {
+                    factor = 1.5
+                    scope:eotg_proc_kind = flag:upgrade
+                    has_character_flag = eotg_flag_aug_vendor_bold
+                }
+                save_scope_value_as = { name = eotg_proc_outcome  value = flag:infection }
+            }
+            # Hidden flaw (reported as clean; thread T6)
+            0 = {
+                modifier = {
+                    add = 2
+                    OR = {
+                        scope:eotg_proc_provider = flag:physician
+                        scope:eotg_proc_provider = flag:self
+                    }
+                }
+                modifier = { add = 16  scope:eotg_proc_provider = flag:backstreet }
+                modifier = { factor = eotg_aug_proc_bad_factor  always = yes }
+                modifier = { factor = 0  scope:eotg_proc_kind = flag:removal }
+                modifier = { factor = 0  has_character_flag = eotg_flag_aug_hidden_flaw }
+                save_scope_value_as = { name = eotg_proc_outcome  value = flag:flaw }
+            }
+            # Rejection (install: init.012 path; upgrade: complication;
+            # removal: fragments; repair: failed)
+            0 = {
+                modifier = { add = 2  scope:eotg_proc_provider = flag:clinic }
+                modifier = {
+                    add = 4
+                    OR = {
+                        scope:eotg_proc_provider = flag:physician
+                        scope:eotg_proc_provider = flag:self
+                    }
+                }
+                modifier = { add = 12  scope:eotg_proc_provider = flag:backstreet }
+                modifier = { factor = eotg_aug_proc_bad_factor  always = yes }
+                modifier = { factor = 2  scope:eotg_proc_kind = flag:upgrade }
+                save_scope_value_as = { name = eotg_proc_outcome  value = flag:rejection }
+            }
+            # Discovered
+            0 = {
+                modifier = { add = 10  scope:eotg_proc_provider = flag:backstreet }
+                modifier = { factor = eotg_aug_proc_bad_factor  always = yes }
+                modifier = { factor = 0  scope:eotg_proc_kind = flag:removal }
+                modifier = { factor = 0  has_character_flag = eotg_flag_aug_backalley_discreet }
+                modifier = { factor = 0  has_character_modifier = eotg_mod_illegal_implants }
+                save_scope_value_as = { name = eotg_proc_outcome  value = flag:discovered }
+            }
+            # Maimed on the table
+            0 = {
+                modifier = { add = 2  scope:eotg_proc_provider = flag:backstreet }
+                modifier = { factor = eotg_aug_proc_bad_factor  always = yes }
+                modifier = { factor = 2  has_character_flag = eotg_flag_aug_proc_under }
+                modifier = { factor = 0  has_trait = maimed }
+                save_scope_value_as = { name = eotg_proc_outcome  value = flag:maimed }
+            }
+            # An eye lost on the table
+            0 = {
+                modifier = { add = 2  scope:eotg_proc_provider = flag:backstreet }
+                modifier = { factor = eotg_aug_proc_bad_factor  always = yes }
+                modifier = { factor = 2  has_character_flag = eotg_flag_aug_proc_under }
+                modifier = {
+                    factor = 0
+                    OR = {
+                        has_trait = one_eyed
+                        has_trait = blind
+                    }
+                }
+                save_scope_value_as = { name = eotg_proc_outcome  value = flag:one_eyed }
+            }
+            # Blinded on the table
+            0 = {
+                modifier = { add = 2  scope:eotg_proc_provider = flag:backstreet }
+                modifier = { factor = eotg_aug_proc_bad_factor  always = yes }
+                modifier = { factor = 2  has_character_flag = eotg_flag_aug_proc_under }
+                modifier = { factor = 0  has_trait = blind }
+                save_scope_value_as = { name = eotg_proc_outcome  value = flag:blind }
+            }
+            # Death on the table (never on a repair)
+            0 = {
+                modifier = { add = 1  scope:eotg_proc_provider = flag:backstreet }
+                modifier = { factor = eotg_aug_proc_bad_factor  always = yes }
+                modifier = { factor = 2  has_character_flag = eotg_flag_aug_proc_under }
+                modifier = { factor = 0  scope:eotg_proc_kind = flag:repair }
+                save_scope_value_as = { name = eotg_proc_outcome  value = flag:death }
+            }
+        }
+        # Procedure-kind risk (hidden; eotg_add_fracture_risk is already a
+        # no-op for the Seamless and for anyone who has left the system).
+        # A repair always adds risk, scaled by tier; the back streets add
+        # more on an upgrade or a repair.
+        hidden_effect = {
+            if = {
+                limit = { scope:eotg_proc_kind = flag:repair }
+                if = {
+                    limit = { has_trait = eotg_neurofractured }
+                    eotg_add_fracture_risk = { AMOUNT = 8 }
+                }
+                else_if = {
+                    limit = { eotg_is_aug_tier3 = yes }
+                    eotg_add_fracture_risk = { AMOUNT = 6 }
+                }
+                else_if = {
+                    limit = { eotg_is_aug_tier2 = yes }
+                    eotg_add_fracture_risk = { AMOUNT = 4 }
+                }
+                else = {
+                    eotg_add_fracture_risk = { AMOUNT = 2 }
+                }
+            }
+            if = {
+                limit = {
+                    scope:eotg_proc_provider = flag:backstreet
+                    OR = {
+                        scope:eotg_proc_kind = flag:upgrade
+                        scope:eotg_proc_kind = flag:repair
+                    }
+                }
+                eotg_add_fracture_risk = { AMOUNT = 3 }
+            }
+            # The one-shot modifier flags are spent on this roll
+            remove_character_flag = eotg_flag_aug_proc_under
+            remove_character_flag = eotg_flag_aug_backalley_discreet
+            eotg_aug_clear_chain_flags_effect = yes
+        }
+        if = {
+            limit = { scope:eotg_proc_outcome = flag:death }
+            death = { death_reason = death_treatment }
+        }
+    }
+}
+
+# The roll for a stage whose provider was chosen earlier in the chain
+# (scope:eotg_proc_provider, saved by the paying option). An if-ladder that
+# calls the roll with the matching literal; clinic when none was saved.
+# Caller: eotg_aug_tier1.021 (after; chosen in tier1.002).
+eotg_aug_procedure_roll_booked_effect = {
+    if = {
+        limit = { scope:eotg_proc_provider ?= flag:physician }
+        eotg_aug_procedure_roll_effect = { PATIENT = $PATIENT$  PROVIDER = physician  PROCEDURE = $PROCEDURE$  SURGEON = $SURGEON$ }
+    }
+    else_if = {
+        limit = { scope:eotg_proc_provider ?= flag:self }
+        eotg_aug_procedure_roll_effect = { PATIENT = $PATIENT$  PROVIDER = self  PROCEDURE = $PROCEDURE$  SURGEON = $PATIENT$ }
+    }
+    else_if = {
+        limit = { scope:eotg_proc_provider ?= flag:backstreet }
+        eotg_aug_procedure_roll_effect = { PATIENT = $PATIENT$  PROVIDER = backstreet  PROCEDURE = $PROCEDURE$  SURGEON = $PATIENT$ }
+    }
+    else = {
+        eotg_aug_procedure_roll_effect = { PATIENT = $PATIENT$  PROVIDER = clinic  PROCEDURE = $PROCEDURE$  SURGEON = $PATIENT$ }
+    }
+}
+
+# Apply the saved outcome (spec §4.2 table, last column). No params; run in
+# the patient's scope, in the reveal event's immediate, or silently by
+# eotg_aug_procedure_effect for a plain reputable outcome. Risk moves are
+# hidden. A severe outcome sets eotg_flag_aug_procedure_injury (30 days)
+# first, so eotg_on_trait_gained_aug_repair does not offer to repair what the
+# table just did. Severe shapes: vanilla apply_maimed_trait_and_modifier_effect
+# (20_health_effects.txt:1398), maimed_in_battle_effect's
+# add_trait_force_tooltip (:1355-1395), the guarded blind
+# (events/activities/coronation_activity/coronation_events_1.txt:8719-8726),
+# and the no-death wound step (:1101), so death odds stay exactly the death
+# weight.
+# Callers: eotg_aug_procedure_effect, eotg_aug_init.011, eotg_aug_tier1.022,
+# eotg_aug_proc.002 (immediate).
+eotg_aug_procedure_apply_effect = {
+    # Clean: only a repair has anything to do
+    if = {
+        limit = { scope:eotg_proc_outcome ?= flag:clean }
+        if = {
+            limit = { scope:eotg_proc_kind ?= flag:repair }
+            eotg_aug_repair_injury_effect = yes
+        }
+    }
+    else_if = {
+        limit = { scope:eotg_proc_outcome ?= flag:excellent }
+        if = {
+            limit = { scope:eotg_proc_kind ?= flag:repair }
+            eotg_aug_repair_injury_effect = yes
+            add_character_modifier = { modifier = eotg_mod_aug_clean_install  years = 5 }
+        }
+        else_if = {
+            limit = { scope:eotg_proc_kind ?= flag:removal }
+            if = {
+                limit = { has_character_modifier = eotg_mod_aug_removal_withdrawal }
+                remove_character_modifier = eotg_mod_aug_removal_withdrawal
+            }
+        }
+        else = {
+            add_character_modifier = { modifier = eotg_mod_aug_clean_install  years = 10 }
+        }
+    }
+    else_if = {
+        limit = { scope:eotg_proc_outcome ?= flag:infection }
+        if = {
+            limit = { scope:eotg_proc_kind ?= flag:install }
+            add_character_modifier = { modifier = eotg_mod_aug_infection  years = 2 }
+        }
+        else = {
+            add_character_modifier = { modifier = eotg_mod_aug_infection  years = 1 }
+        }
+        if = {
+            limit = { scope:eotg_proc_kind ?= flag:repair }
+            eotg_aug_repair_injury_effect = yes
+        }
+    }
+    else_if = {
+        limit = { scope:eotg_proc_outcome ?= flag:flaw }
+        hidden_effect = { add_character_flag = eotg_flag_aug_hidden_flaw }
+        if = {
+            limit = { scope:eotg_proc_kind ?= flag:repair }
+            eotg_aug_repair_injury_effect = yes
+        }
+    }
+    else_if = {
+        limit = { scope:eotg_proc_outcome ?= flag:rejection }
+        # Install: nothing here; init.011 d/e lead to init.012
+        if = {
+            limit = { scope:eotg_proc_kind ?= flag:upgrade }
+            hidden_effect = { eotg_add_fracture_risk = { AMOUNT = 10 } }
+            add_character_modifier = { modifier = eotg_mod_aug_infection  years = 1 }
+        }
+        else_if = {
+            limit = { scope:eotg_proc_kind ?= flag:removal }
+            add_character_modifier = { modifier = eotg_mod_aug_fragments  years = 5 }
+        }
+        else_if = {
+            limit = { scope:eotg_proc_kind ?= flag:repair }
+            # The repair failed: the injury stays
+            hidden_effect = {
+                eotg_add_fracture_risk = { AMOUNT = 5 }
+                remove_variable = eotg_aug_repair_injury
+            }
+        }
+    }
+    else_if = {
+        limit = { scope:eotg_proc_outcome ?= flag:discovered }
+        add_character_modifier = eotg_mod_illegal_implants
+        if = {
+            limit = { scope:eotg_proc_kind ?= flag:repair }
+            eotg_aug_repair_injury_effect = yes
+        }
+    }
+    else_if = {
+        limit = { scope:eotg_proc_outcome ?= flag:maimed }
+        hidden_effect = { add_character_flag = { flag = eotg_flag_aug_procedure_injury  days = 30 } }
+        if = {
+            limit = { NOT = { has_trait = maimed } }
+            apply_maimed_trait_and_modifier_effect = yes
+        }
+        increase_wounds_no_death_effect = { REASON = treatment }
+    }
+    else_if = {
+        limit = { scope:eotg_proc_outcome ?= flag:one_eyed }
+        hidden_effect = { add_character_flag = { flag = eotg_flag_aug_procedure_injury  days = 30 } }
+        add_trait_force_tooltip = one_eyed
+        increase_wounds_no_death_effect = { REASON = treatment }
+    }
+    else_if = {
+        limit = { scope:eotg_proc_outcome ?= flag:blind }
+        hidden_effect = { add_character_flag = { flag = eotg_flag_aug_procedure_injury  days = 30 } }
+        if = {
+            limit = { has_trait = one_eyed }
+            remove_trait = one_eyed
+        }
+        if = {
+            limit = { NOT = { has_trait = blind } }
+            add_trait = blind
+        }
+        increase_wounds_no_death_effect = { REASON = treatment }
+    }
+}
+
+# The public entry point (spec §4.1): roll, then report or apply.
+#   - death: nothing more (applied in the roll);
+#   - a repair always reports (eotg_aug_proc.002): the result is the payoff;
+#   - clean or a hidden flaw is applied silently (a flaw is never reported);
+#   - an install with anything else is revealed by eotg_aug_init.011;
+#   - everything else by eotg_aug_proc.002.
+# Callers wrap it in hidden_effect.
+# Callers: eotg_aug_proc.001 (a-c, e, f), eotg_aug_proc.003 (a-c, e, f),
+# eotg_aug_tier2.003 (a, c, d, f, g), and the ruler install offers
+# init.001 (a, d, e), .002 (a, d), .003 (a, d), .004 (a, e), .005 (a, d),
+# .006 (a, c, e, f), .009 (a, d), .016 (a, e), .017 (a, d), .018 (a, c),
+# .019 (a, d).
+eotg_aug_procedure_effect = {
+    eotg_aug_procedure_roll_effect = { PATIENT = $PATIENT$  PROVIDER = $PROVIDER$  PROCEDURE = $PROCEDURE$  SURGEON = $SURGEON$ }
+    if = {
+        limit = { NOT = { scope:eotg_proc_outcome = flag:death } }
+        if = {
+            limit = { scope:eotg_proc_kind = flag:repair }
+            $PATIENT$ = { trigger_event = { id = eotg_aug_proc.002  days = { 14 45 } } }
+        }
+        else_if = {
+            limit = {
+                OR = {
+                    scope:eotg_proc_outcome = flag:clean
+                    scope:eotg_proc_outcome = flag:flaw
+                }
+            }
+            $PATIENT$ = { eotg_aug_procedure_apply_effect = yes }
+        }
+        else_if = {
+            limit = { scope:eotg_proc_kind = flag:install }
+            $PATIENT$ = { trigger_event = { id = eotg_aug_init.011  days = { 30 90 } } }
+        }
+        else = {
+            $PATIENT$ = { trigger_event = { id = eotg_aug_proc.002  days = { 14 45 } } }
+        }
+    }
+}
+
+# A removal's body (spec §4.4, proc.001): the three removal decisions' old
+# effect bodies, moved unchanged into one ladder on var:eotg_aug_removal_kind
+# (set by the decision). Each carries its decision's original stress: the
+# reject helper for a full removal, medium_stress_impact_loss for partial and
+# downgrade, so proc.001's paid options run no surgery helper.
+# The tooltips are proc.001's own (eotg_aug_proc.001.tt_partial /
+# .tt_downgrade), not the decisions' keys: those end by asking who performs
+# it, which is already chosen here (procedures QA).
+# Caller: eotg_aug_proc.001 (a-c, e, f).
+eotg_aug_removal_perform_effect = {
+    if = {
+        limit = { var:eotg_aug_removal_kind ?= flag:partial }
+        eotg_aug_set_integration_effect = { XP = 0 }
+        # Balance spec §5.9: a masked congenital trait shows again
+        eotg_aug_unmask_congenital_effect = yes
+        stress_impact = { base = medium_stress_impact_loss }
+        custom_tooltip = eotg_aug_proc.001.tt_partial
+    }
+    else_if = {
+        limit = { var:eotg_aug_removal_kind ?= flag:downgrade }
+        # Some of the damage remains: risk is halved, not cleared (B3). Halved
+        # before the tier change so the Enhanced character carries it forward.
+        if = {
+            limit = { has_variable = eotg_fracture_risk }
+            change_variable = { name = eotg_fracture_risk  multiply = 0.5 }
+        }
+        eotg_aug_set_integration_effect = { XP = 50 }
+        # Phase 5 §1.1: a running Countdown stops if the halved risk is < 50
+        # (eotg_aug_countdown.006 The Quiet ends the story). At 50+ the story
+        # sees the lost tier at its next tick and fires The Quiet itself.
+        if = {
+            limit = {
+                eotg_aug_has_countdown = yes
+                OR = {
+                    NOT = { has_variable = eotg_fracture_risk }
+                    var:eotg_fracture_risk < 50
+                }
+            }
+            # End the story now (final QA): otherwise its next tick could see
+            # the lost tier inside the 3 days and fire The Quiet a second time.
+            eotg_aug_end_countdown_effect = yes
+            trigger_event = { id = eotg_aug_countdown.006  days = 3 }
+        }
+        add_character_modifier = { modifier = eotg_mod_oc_regression_recovery  years = 5 }
+        remove_character_flag = eotg_flag_aug_intervention_discount
+        # Balance spec §5.9: a masked congenital trait shows again
+        eotg_aug_unmask_congenital_effect = yes
+        stress_impact = { base = medium_stress_impact_loss }
+        custom_tooltip = eotg_aug_proc.001.tt_downgrade
+    }
+    else_if = {
+        limit = { var:eotg_aug_removal_kind ?= flag:full }
+        # Leaving the system: eotg_aug_remove_all_effect (index §1 rule 2),
+        # then the withdrawal (the helper adds none; callers choose).
+        eotg_aug_remove_all_effect = yes
+        add_character_modifier = { modifier = eotg_mod_aug_removal_withdrawal  years = 3 }
+        eotg_aug_stress_reject_effect = yes
+    }
+}
+
+# Repair the injury named by var:eotg_aug_repair_injury (spec §4.9). Wounds
+# heal fully (eotg_aug_heal_wounds_effect); a lost part's trait is removed if
+# still held, and maimed's vanilla recently_maimed_modifier with it. Removals
+# guarded (CB-27 tooltip pattern). Counterpart: eotg_aug_has_repair_injury.
+# Callers: eotg_aug_procedure_apply_effect (repair outcomes), eotg_aug_proc.004
+# (immediate).
+eotg_aug_repair_injury_effect = {
+    if = {
+        limit = { var:eotg_aug_repair_injury ?= flag:wounded }
+        eotg_aug_heal_wounds_effect = yes
+    }
+    else_if = {
+        limit = { var:eotg_aug_repair_injury ?= flag:maimed }
+        if = {
+            limit = { has_trait = maimed }
+            remove_trait = maimed
+        }
+        if = {
+            limit = { has_character_modifier = recently_maimed_modifier }
+            remove_character_modifier = recently_maimed_modifier
+        }
+    }
+    else_if = {
+        limit = { var:eotg_aug_repair_injury ?= flag:one_legged }
+        if = {
+            limit = { has_trait = one_legged }
+            remove_trait = one_legged
+        }
+    }
+    else_if = {
+        limit = { var:eotg_aug_repair_injury ?= flag:one_eyed }
+        if = {
+            limit = { has_trait = one_eyed }
+            remove_trait = one_eyed
+        }
+    }
+    else_if = {
+        limit = { var:eotg_aug_repair_injury ?= flag:blind }
+        if = {
+            limit = { has_trait = blind }
+            remove_trait = blind
+        }
+    }
+    else_if = {
+        limit = { var:eotg_aug_repair_injury ?= flag:disfigured }
+        if = {
+            limit = { has_trait = disfigured }
+            remove_trait = disfigured
+        }
+    }
+    hidden_effect = { remove_variable = eotg_aug_repair_injury }
+}
+
+# The former marker (spec §4.10, G3). Called last in eotg_aug_remove_all_effect,
+# so every exit gets it: Remove Implants, Excision, Rejection (init.012,
+# tier1.014/.015), nr.006 and the retinue reversal. Excision, init.012 and
+# tier1.015 then overwrite flag:removed with flag:excised / flag:rejected
+# (flag:salvaged is reserved). A variable holding a flag, as vanilla records
+# a history state (00_scheme_scripted_effects.txt:729-732): permanent, and
+# kept on re-installation. Each exit gets its own aftermath (Phantom Static,
+# eotg_aug_proc.020, through eotg_on_yearly_aug_former_check).
+# Welcome back (no event): a landed character's zealous vassals and courtiers
+# are reassured; the cynical do not warm. The leaver is saved as a temporary
+# scope: root may be someone else (the retinue reversal runs on knights).
+eotg_aug_mark_former_effect = {
+    save_temporary_scope_as = eotg_former_self
+    hidden_effect = {
+        set_variable = { name = eotg_aug_former  value = flag:removed }
+        add_character_flag = { flag = eotg_flag_aug_former_settling  years = 1 }
+        remove_character_flag = eotg_flag_aug_phantom_done
+    }
+    if = {
+        limit = { is_landed = yes }
+        every_vassal = {
+            limit = { has_trait = zealous }
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = scope:eotg_former_self  years = 5 }
+        }
+        every_courtier = {
+            limit = { has_trait = zealous }
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = scope:eotg_former_self  years = 5 }
+        }
+    }
 }

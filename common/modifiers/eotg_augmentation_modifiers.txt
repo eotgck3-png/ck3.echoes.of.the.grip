@@ -322,3 +322,14 @@ eotg_mod_aug_iron_retinue = {
     icon = martial_positive
     knight_effectiveness_mult = 0.1
 }
+
+# Procedures spec §3.1: a careless removal left wire and casing in the tissue
+# (the removal form of the shared roll's rejection outcome).
+# Caller: eotg_aug_procedure_apply_effect (5 years). Removed by
+# eotg_aug_proc.002 (b), eotg_aug_proc.020 (b), eotg_decision_consult_physician
+# and eotg_clean_all_aug_modifiers.
+eotg_mod_aug_fragments = {
+    icon = health_negative
+    health = -0.25
+    stress_gain_mult = 0.05
+}

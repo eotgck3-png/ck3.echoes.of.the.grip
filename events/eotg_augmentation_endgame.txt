@@ -9,6 +9,9 @@
 # eotg_aug_end.020 -- Appoint a Warden            (Containment Regency by choice)
 # eotg_aug_end.030 -- Into Restraints             (abdication)
 # eotg_aug_end.031 -- The Locked Wing             (to the successor)
+# eotg_aug_end.040 -- The Ledger Balances         (Seamless, G2)
+# eotg_aug_end.041 -- A Resignation               (Seamless, G2)
+# eotg_aug_end.042 -- A Flicker                   (Seamless, G2)
 #
 # Fires from: eotg_decision_aug_excision, eotg_fracture.026 (d),
 #   eotg_fracture.027 (excision outcome), eotg_fracture.007 (f) and
@@ -16,12 +19,16 @@
 #   eotg_decision_aug_embrace_cascade -> .009;
 #   eotg_aug_total_integration_effect -> .010; .010 immediate -> .011;
 #   eotg_decision_aug_appoint_warden -> .020; eotg_fracture.027 (abdication
-#   outcome) and .020 (d) -> .030; eotg_aug_abdicate_effect -> .031.
-# Cooldowns live in the decisions (cooldown = {} or flag); chain stages carry
-# none (index §1 rule 5).
+#   outcome) and .020 (d) -> .030; eotg_aug_abdicate_effect -> .031;
+#   eotg_on_yearly_aug_seamless_check (yearly_playable_pulse) -> .040-.042.
+# Cooldowns live in the decisions (cooldown = {} or flag) and, for .040-.042,
+# in eotg_on_yearly_aug_seamless_check (eotg_flag_aug_seamless_cooldown);
+# chain stages carry none (index §1 rule 5).
 # Resource: every event here changes tier (exits the system, becomes
 # Seamless, or dies) or moves eotg_fracture_risk; chain stages (.002, .010,
-# .011) couple through the tier change that fired them.
+# .011) couple through the tier change that fired them. The Seamless events
+# (.040-.042) read and move the Seamless resource, eotg_aug_residue (hidden,
+# 0-3, only falls; procedures spec §2), since a Seamless ruler has no risk.
 # Loc register: "self" / "personhood", never "humanity" (index §5.5).
 # -----------------------------------------------------------------------------
 
@@ -101,7 +108,7 @@ eotg_aug_end.001 = {
         eotg_aug_excision_pay_effect = yes
         custom_tooltip = eotg_aug_end.001.tt
         hidden_effect = {
-            eotg_aug_excision_surgery_effect = { DEATH_BASE = 15  BRAVE = no }
+            eotg_aug_excision_surgery_effect = { DEATH_BASE = 15  BRAVE = no  MAIMED_BASE = 30  PHYSICIAN = yes }
         }
         eotg_aug_stress_reject_effect = yes
         ai_chance = {
@@ -142,7 +149,7 @@ eotg_aug_end.001 = {
         eotg_aug_excision_pay_effect = yes
         custom_tooltip = eotg_aug_end.001.tt
         hidden_effect = {
-            eotg_aug_excision_surgery_effect = { DEATH_BASE = 25  BRAVE = no }
+            eotg_aug_excision_surgery_effect = { DEATH_BASE = 25  BRAVE = no  MAIMED_BASE = 30  PHYSICIAN = yes }
         }
         stress_impact = {
             craven = medium_stress_impact_loss
@@ -156,6 +163,8 @@ eotg_aug_end.001 = {
 
     # [brave] "Awake. I want to watch them take it out." As a; the maimed
     # outcome becomes clean, +100 prestige on survival.
+    # (Procedures spec §4.7: a, c and d keep the physician at the table,
+    # PHYSICIAN = yes, MAIMED_BASE = 30.)
     option = {
         name = eotg_aug_end.001.d
         trigger = {
@@ -166,12 +175,38 @@ eotg_aug_end.001 = {
         eotg_aug_excision_pay_effect = yes
         custom_tooltip = eotg_aug_end.001.d.tt
         hidden_effect = {
-            eotg_aug_excision_surgery_effect = { DEATH_BASE = 15  BRAVE = yes }
+            eotg_aug_excision_surgery_effect = { DEATH_BASE = 15  BRAVE = yes  MAIMED_BASE = 30  PHYSICIAN = yes }
         }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = brave }
             modifier = { add = 10  has_trait = stubborn }
+        }
+    }
+
+    # "Not their table. Somewhere cheaper." (procedures spec §4.7) The back
+    # streets: x0.4 of the full price (the Heir's Arc promise was to the real
+    # surgeons, so it does not apply), death 25 and maimed 40 (the gaps
+    # doc's back-street table, +10 each), and no physician at the table
+    # (PHYSICIAN = no; lore ruling (d), upheld 2026-10-04). Not offered when
+    # the surgeons are already in the room (the free table).
+    option = {
+        name = eotg_aug_end.001.e
+        trigger = {
+            NOT = { has_character_flag = eotg_flag_aug_excision_free }
+            eotg_aug_can_afford_procedure = { BASE = major_gold_value  MULT = eotg_aug_price_mult_backstreet_removal }
+        }
+        eotg_aug_pay_procedure_effect = { BASE = major_gold_value  MULT = eotg_aug_price_mult_backstreet_removal }
+        custom_tooltip = eotg_aug_end.001.tt
+        hidden_effect = {
+            eotg_aug_excision_surgery_effect = { DEATH_BASE = 25  BRAVE = no  MAIMED_BASE = 40  PHYSICIAN = no }
+        }
+        eotg_aug_stress_reject_effect = yes
+        ai_chance = {
+            base = 15
+            modifier = { add = 20  has_trait = greedy }
+            modifier = { add = 10  has_trait = brave }
+            modifier = { add = -20  has_trait = craven }
         }
     }
 }
@@ -820,6 +855,319 @@ eotg_aug_end.031 = {
             modifier = { add = 20  has_trait = callous }
             modifier = { add = 20  has_trait = ambitious }
             modifier = { add = -30  has_trait = compassionate }
+        }
+    }
+}
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# The Seamless life (docs/specs/cybernetics_v2_procedures.md §4.11, G2)
+#
+# Caller: eotg_on_yearly_aug_seamless_check (yearly_playable_pulse; the 2-year
+# eotg_flag_aug_seamless_cooldown is set there, never read here).
+# Resource: eotg_aug_residue (hidden, 0-3, set to 3 by
+# eotg_aug_total_integration_effect; it only falls). Every desc reads it; one
+# option in each choice event, and the Flicker itself, moves it (always in
+# hidden_effect, clamped at 0). Residue is habit, not a person (lore ruling
+# (a)): the voice-5 line stays true.
+# A Seamless ruler has no personality traits (the 36 go at Total
+# Integration), so trait options and ai_chance use education traits (the one
+# family a Seamless ruler keeps; game/common/traits/00_traits.txt:67, 208,
+# 234, 368, 394, 428, 549, 774, 816), and the stress helpers are omitted.
+# ═════════════════════════════════════════════════════════════════════════════
+
+
+# -- eotg_aug_end.040 ---------------------------------------------------------
+# The Ledger Balances. The accounts are costed line by line. b and d cut what
+# does not pay (the windfall grows as residue falls,
+# eotg_aug_seamless_windfall_value) and spend a residue; a banks a little;
+# c returns it to the realm.
+
+eotg_aug_end.040 = {
+    type = character_event
+    title = eotg_aug_end.040.t
+    desc = {
+        desc = eotg_aug_end.040.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = {
+                    has_variable = eotg_aug_residue
+                    var:eotg_aug_residue >= 2
+                }
+                desc = eotg_aug_end.040.desc_residue_high
+            }
+            desc = eotg_aug_end.040.desc_residue_low
+        }
+    }
+    theme = stewardship_wealth_focus
+
+    trigger = {
+        has_trait = eotg_total_integration
+    }
+
+    left_portrait = {
+        character = root
+        animation = idle
+    }
+
+    # "Bank the surplus." Ungated.
+    option = {
+        name = eotg_aug_end.040.a
+        add_gold = minor_gold_value
+        ai_chance = {
+            base = 30
+            modifier = { add = 10  has_trait = education_stewardship_3 }
+            modifier = { add = 10  has_trait = education_learning_3 }
+        }
+    }
+
+    # "Cut what does not pay."
+    option = {
+        name = eotg_aug_end.040.b
+        add_gold = eotg_aug_seamless_windfall_value
+        every_vassal = {
+            add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+        }
+        hidden_effect = {
+            if = {
+                limit = { has_variable = eotg_aug_residue }
+                change_variable = { name = eotg_aug_residue  add = -1 }
+                clamp_variable = { name = eotg_aug_residue  min = 0  max = 3 }
+            }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = education_stewardship_4 }
+            modifier = { add = 10  has_trait = education_intrigue_3 }
+        }
+    }
+
+    # "Return it to the realm."
+    option = {
+        name = eotg_aug_end.040.c
+        add_prestige = 150
+        ai_chance = {
+            base = 30
+            modifier = { add = 10  has_trait = education_diplomacy_3 }
+            modifier = { add = 10  has_trait = education_martial_3 }
+        }
+    }
+
+    # [education_stewardship_4 / _5] "Rebalance every ledger." As b, with no
+    # one the poorer for it.
+    option = {
+        name = eotg_aug_end.040.d
+        trigger = {
+            OR = {
+                has_trait = education_stewardship_4
+                has_trait = education_stewardship_5
+            }
+        }
+        trait = education_stewardship_4
+        trait = education_stewardship_5
+        add_gold = eotg_aug_seamless_windfall_value
+        hidden_effect = {
+            if = {
+                limit = { has_variable = eotg_aug_residue }
+                change_variable = { name = eotg_aug_residue  add = -1 }
+                clamp_variable = { name = eotg_aug_residue  min = 0  max = 3 }
+            }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = education_stewardship_4 }
+            modifier = { add = 20  has_trait = education_stewardship_5 }
+        }
+    }
+}
+
+
+# -- eotg_aug_end.041 ---------------------------------------------------------
+# A Resignation. A landless councillor asks to be released: the work is
+# correct and there is no one to report to. A chosen target, not an episode
+# victim (index §1 rule 7; CB-26 L4): picked here and named in loc.
+# random_councillor / any_councillor: PX script_docs effects.log:7786,
+# triggers.log:1455 (character scope). move_to_pool: effects.log:5261.
+# c depends on the hidden residue, so it runs in hidden_effect and reports
+# after the click by toast (vanilla hunt.8540,
+# events/activities/hunt_activity/jb_hunt_events.txt:2375, as
+# eotg_aug_tier3.014.b).
+# Procedures QA: the councillor is never the spouse or close family (a and
+# the c "leaves" branch move_to_pool). Vanilla seats a spouse councillor
+# (common/council_positions/00_council_positions.txt:1012) and excludes the
+# spouse by hand (mpo_nomads_season_events.txt:732). The same three limits
+# appear in the trigger, the immediate and the on_action branch
+# (eotg_on_yearly_aug_seamless_check).
+
+eotg_aug_end.041 = {
+    type = character_event
+    title = eotg_aug_end.041.t
+    desc = {
+        desc = eotg_aug_end.041.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = {
+                    has_variable = eotg_aug_residue
+                    var:eotg_aug_residue >= 2
+                }
+                desc = eotg_aug_end.041.desc_residue_high
+            }
+            desc = eotg_aug_end.041.desc_residue_low
+        }
+    }
+    theme = court
+
+    # World-state guard, mirroring the on_action branch
+    trigger = {
+        has_trait = eotg_total_integration
+        any_councillor = {
+            is_landed = no
+            NOT = { this = root }
+            NOT = { is_spouse_of = root }
+            NOT = { is_close_family_of = root }
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = idle
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_resigner }
+        character = scope:eotg_resigner
+        animation = worry
+    }
+
+    immediate = {
+        hidden_effect = {
+            random_councillor = {
+                limit = {
+                    is_landed = no
+                    NOT = { this = root }
+                    NOT = { is_spouse_of = root }
+                    NOT = { is_close_family_of = root }
+                }
+                save_scope_as = eotg_resigner
+            }
+        }
+    }
+
+    # "Accept it." Ungated.
+    option = {
+        name = eotg_aug_end.041.a
+        scope:eotg_resigner = { move_to_pool = yes }
+        ai_chance = {
+            base = 30
+            modifier = { add = 10  has_trait = education_diplomacy_3 }
+            modifier = { add = 10  has_trait = education_learning_3 }
+        }
+    }
+
+    # "Order them to stay."
+    option = {
+        name = eotg_aug_end.041.b
+        add_dread = 15
+        scope:eotg_resigner = {
+            add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+        }
+        hidden_effect = {
+            if = {
+                limit = { has_variable = eotg_aug_residue }
+                change_variable = { name = eotg_aug_residue  add = -1 }
+                clamp_variable = { name = eotg_aug_residue  min = 0  max = 3 }
+            }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = education_martial_3 }
+            modifier = { add = 10  has_trait = education_intrigue_3 }
+        }
+    }
+
+    # "Ask them why." With residue left, the old question comes out in the
+    # old words and they stay (answering spends a residue); with none, no
+    # answer is possible and they go.
+    option = {
+        name = eotg_aug_end.041.c
+        hidden_effect = {
+            if = {
+                limit = {
+                    has_variable = eotg_aug_residue
+                    var:eotg_aug_residue >= 1
+                }
+                scope:eotg_resigner = {
+                    add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
+                }
+                change_variable = { name = eotg_aug_residue  add = -1 }
+                clamp_variable = { name = eotg_aug_residue  min = 0  max = 3 }
+                send_interface_toast = {
+                    title = eotg_aug_end.041.c.stays
+                    left_icon = scope:eotg_resigner
+                }
+            }
+            else = {
+                send_interface_toast = {
+                    title = eotg_aug_end.041.c.leaves
+                    left_icon = scope:eotg_resigner
+                }
+                scope:eotg_resigner = { move_to_pool = yes }
+            }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = education_diplomacy_4 }
+            modifier = { add = 10  has_trait = education_learning_4 }
+        }
+    }
+}
+
+
+# -- eotg_aug_end.042 ---------------------------------------------------------
+# A Flicker (lore N2). A scheduled motor routine fires at the hour the court
+# once gathered; it is logged as redundant and pruned. It never reaches for a
+# person. Spends one residue in immediate (hidden); desc_last when that was
+# the last of it. One-option notification (S12; the gaps doc's "one option,
+# no choice").
+
+eotg_aug_end.042 = {
+    type = character_event
+    title = eotg_aug_end.042.t
+    desc = {
+        desc = eotg_aug_end.042.desc
+        triggered_desc = {
+            trigger = {
+                has_variable = eotg_aug_residue
+                var:eotg_aug_residue <= 0
+            }
+            desc = eotg_aug_end.042.desc_last
+        }
+    }
+    theme = mental_health
+
+    # World-state guard, mirroring the on_action branch
+    trigger = {
+        has_trait = eotg_total_integration
+        has_variable = eotg_aug_residue
+        var:eotg_aug_residue >= 1
+    }
+
+    left_portrait = {
+        character = root
+        animation = idle
+    }
+
+    immediate = {
+        hidden_effect = {
+            change_variable = { name = eotg_aug_residue  add = -1 }
+            clamp_variable = { name = eotg_aug_residue  min = 0  max = 3 }
+        }
+    }
+
+    # "Continue." (a separate key from end.010.a)
+    option = {
+        name = eotg_aug_end.042.a
+        ai_chance = {
+            base = 100
         }
     }
 }

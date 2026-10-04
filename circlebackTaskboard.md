@@ -290,6 +290,17 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Owner:** human → orchestrator
 - **Next step:** check alongside CB-31 during normal play.
 
+### CB-35: In-game checks for the Procedures batch (G2/G3)
+- **Status:** waiting-human (2026-10-04)
+- **What:** `docs/specs/cybernetics_v2_procedures.md` §9 item 11 is the full list (Seek and Clinic rolls, Pursue g/f, Remove Implants → proc.001/.002, injuries → proc.003/.004, proc.020, Seamless Ledger/Resignation/Flicker). Also check:
+  1. The end.041 resigner is never the spouse or close family, and the end.041.c toast shows.
+  2. A booked removal blocks a second booking. The decisions show "No procedure is already booked".
+  3. A ruler who is their own physician gets no option b in proc.001/.003, only e (self).
+  4. **Engine Q1:** does a wound pushed to rank 3 by `increase_wounds_no_death_effect` fire `on_trait_gained` for `wounded_3`? If not, proc.003 misses wound-ranked injuries. Report to the scripter.
+  5. **Engine Q2:** starting characters with a listed trait get no proc.003 on day 1. Deferred until `history/` exists.
+- **Owner:** human → orchestrator
+- **Next step:** check alongside CB-31 and CB-34.
+
 ## Tooling and environment
 
 ### CB-18: Game is 1.20.0.3; the tools target older versions

@@ -152,6 +152,22 @@ eotg_has_physician_access = {
     }
 }
 
+# A court physician who is someone other than the event's root (procedures
+# QA, self-physician fix). The "My own physician." options price and roll a
+# separate surgeon; a lifestyle_physician with no court physician takes the
+# self option (e) at the self price and penalty instead. Filled-position test:
+# employs_court_position (as eotg_has_physician_access); holder link as vanilla
+# events/court_events/01_ep3_court_events_3.txt:379-412. Evaluate in root's
+# scope only.
+# Callers: eotg_aug_proc.001 (b, desc_physician), eotg_aug_proc.003 (b,
+# desc_physician), eotg_aug_tier1.002 (f), eotg_aug_tier2.003 (f).
+eotg_aug_has_court_physician = {
+    employs_court_position = court_physician_court_position
+    court_position:court_physician_court_position ?= {
+        NOT = { this = root }
+    }
+}
+
 # (eotg_aug_is_nonruler removed, QA round 2: nothing referenced it; the
 # non-ruler pulse tests highest_held_title_tier inline.)
 
@@ -280,8 +296,11 @@ eotg_aug_has_warden_candidate = {
 
 # -- Phase 4 (docs/specs/cybernetics_v2_phase4.md) ----------------------------
 # The First Upgrade can be paid for (mirror: eotg_aug_pay_upgrade_effect).
-# Users: eotg_on_yearly_aug_tier1_check (The Upgrade branch),
-# eotg_aug_tier1.002 (a, d, e).
+# Procedures spec §4.6: MULT is the provider's price multiplier (1 at the
+# clinic; eotg_aug_price_mult_* otherwise).
+# Users: eotg_on_yearly_aug_tier1_check (The Upgrade branch, MULT = 1),
+# eotg_aug_tier1.002 (a, d, e: 1; f: physician; g: back streets),
+# eotg_decision_aug_pursue_next_stage (is_valid: back streets, the cheapest).
 eotg_aug_can_afford_upgrade = {
     gold >= {
         value = medium_gold_value
@@ -289,6 +308,7 @@ eotg_aug_can_afford_upgrade = {
             limit = { has_character_flag = eotg_flag_aug_replace_more }
             multiply = 0.85
         }
+        multiply = $MULT$
     }
 }
 
@@ -381,5 +401,50 @@ eotg_aug_patron_can_pay = {
             multiply = 0.75
         }
         multiply = $MULT$
+    }
+}
+
+# -- Procedures (docs/specs/cybernetics_v2_procedures.md §4.6, §4.9) ----------
+# A procedure can be paid for: gold >= BASE x MULT (mirror:
+# eotg_aug_pay_procedure_effect). Shape: eotg_aug_patron_can_pay above.
+# Users: eotg_aug_proc.001 (a-c, e, f), eotg_aug_proc.003 (a-c, e, f),
+# eotg_aug_end.001 (e).
+eotg_aug_can_afford_procedure = {
+    gold >= {
+        value = $BASE$
+        multiply = $MULT$
+    }
+}
+
+# The injury named by var:eotg_aug_repair_injury (set for 365 days by
+# eotg_on_trait_gained_aug_repair) is still held. A world-state guard, not a
+# cooldown. Counterpart: eotg_aug_repair_injury_effect.
+# Users: eotg_aug_proc.003 and eotg_aug_proc.004 (trigger).
+eotg_aug_has_repair_injury = {
+    OR = {
+        AND = {
+            var:eotg_aug_repair_injury ?= flag:wounded
+            has_trait = wounded_3
+        }
+        AND = {
+            var:eotg_aug_repair_injury ?= flag:maimed
+            has_trait = maimed
+        }
+        AND = {
+            var:eotg_aug_repair_injury ?= flag:one_legged
+            has_trait = one_legged
+        }
+        AND = {
+            var:eotg_aug_repair_injury ?= flag:one_eyed
+            has_trait = one_eyed
+        }
+        AND = {
+            var:eotg_aug_repair_injury ?= flag:blind
+            has_trait = blind
+        }
+        AND = {
+            var:eotg_aug_repair_injury ?= flag:disfigured
+            has_trait = disfigured
+        }
     }
 }

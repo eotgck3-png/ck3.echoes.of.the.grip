@@ -257,6 +257,13 @@ eotg_aug_tier2.002 = {
 # §5.1). Sought (eotg_flag_aug_sought_upgrade, 60 days): the sought desc
 # replaces the base line, the AI follows through (declines b, e x0.1), and the
 # `after` block clears the flag whichever option is taken.
+# Procedures spec §4.6: the surgery happens on the click. a, c and d are the
+# clinic; f (physician) and g (the back streets) are new. Each paying option
+# runs the shared roll after its XP line (eotg_aug_procedure_effect, hidden;
+# the outcome is reported by eotg_aug_proc.002, or applied silently when
+# plain). The Bidding War (tier2.013) folds in through the roll
+# (eotg_flag_aug_vendor_safe / _bold). The rolled options reuse
+# eotg_aug_proc.install_tt ("decided on the table"; no new key).
 
 eotg_aug_tier2.003 = {
     type = character_event
@@ -310,6 +317,10 @@ eotg_aug_tier2.003 = {
         trigger = { gold >= major_gold_value }
         remove_short_term_gold = major_gold_value
         eotg_aug_set_integration_effect = { XP = 100 }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = upgrade  SURGEON = root }
+        }
         stress_impact = {
             base = minor_stress_impact_gain
         }
@@ -359,6 +370,10 @@ eotg_aug_tier2.003 = {
         add_dread = 15
         eotg_add_fracture_risk = { AMOUNT = 5 }
         eotg_aug_set_integration_effect = { XP = 100 }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = upgrade  SURGEON = root }
+        }
         eotg_aug_stress_wound_effect = yes
         ai_chance = {
             base = 30
@@ -380,6 +395,10 @@ eotg_aug_tier2.003 = {
         remove_short_term_gold = major_gold_value
         eotg_aug_set_integration_effect = { XP = 100 }
         eotg_add_fracture_risk = { AMOUNT = 5 }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = upgrade  SURGEON = root }
+        }
         # One helper only (Phase 1 QA): the surgery helper already gives
         # ambitious minor relief; the gating trait gets one more minor line.
         stress_impact = {
@@ -412,6 +431,73 @@ eotg_aug_tier2.003 = {
                 factor = 0.1
                 has_character_flag = eotg_flag_aug_sought_upgrade
             }
+        }
+    }
+
+    # (a court physician, not root) "My own physician." (procedures spec
+    # §4.6) As a, at the physician's price; their skill sets the odds
+    # (eotg_aug_proc_bad_factor). A follow-through: no sought factor.
+    # Procedures QA: a physician ruler with no court physician is not offered
+    # this price.
+    option = {
+        name = eotg_aug_tier2.003.f
+        trigger = {
+            eotg_aug_has_court_physician = yes
+            gold >= {
+                value = major_gold_value
+                multiply = eotg_aug_price_mult_physician
+            }
+        }
+        remove_short_term_gold = {
+            value = major_gold_value
+            multiply = eotg_aug_price_mult_physician
+        }
+        eotg_aug_set_integration_effect = { XP = 100 }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_save_surgeon_effect = yes
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = physician  PROCEDURE = upgrade  SURGEON = scope:eotg_proc_surgeon }
+        }
+        stress_impact = {
+            base = minor_stress_impact_gain
+        }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 35
+            modifier = { add = 20  has_trait = trusting }
+            modifier = { add = 10  has_trait = diligent }
+        }
+    }
+
+    # "Someone cheaper." (procedures spec §4.6) As a, at the back-street
+    # price: the cheapest path, offered to everyone (the Pursue decision's
+    # gold floor). A follow-through: no sought factor.
+    option = {
+        name = eotg_aug_tier2.003.g
+        trigger = {
+            gold >= {
+                value = major_gold_value
+                multiply = eotg_aug_price_mult_backstreet_upgrade
+            }
+        }
+        remove_short_term_gold = {
+            value = major_gold_value
+            multiply = eotg_aug_price_mult_backstreet_upgrade
+        }
+        eotg_aug_set_integration_effect = { XP = 100 }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = backstreet  PROCEDURE = upgrade  SURGEON = root }
+        }
+        stress_impact = {
+            base = minor_stress_impact_gain
+        }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = greedy }
+            modifier = { add = 10  has_trait = ambitious }
+            modifier = { add = -20  has_trait = craven }
         }
     }
 

@@ -11,6 +11,16 @@
 # The engine blocks an unaffordable `cost` by itself (skill reference
 # decisions/_decisions.info, `minimum_cost` note; vanilla puts no gold test in
 # is_valid), so is_valid carries no gold check that could drift from the cost.
+# Procedures spec §4.6 (supersedes ruling L1 for the three removal decisions:
+# partial removal, overclock regression, remove implants): no `cost`. Each
+# books its removal (eotg_aug_removal_kind, 30 days) and fires
+# eotg_aug_proc.001 Who Takes It Out?, which charges per provider, as Seek's
+# hub does (vanilla common/decisions/00_lifestyle_decisions.txt:342,
+# commission_epic_decision: no cost, the fired event pays). A cost here would
+# charge twice. is_valid's gold floor is the cheapest provider (the back
+# streets): eotg_aug_can_afford_procedure at eotg_aug_removal_base_value x
+# eotg_aug_price_mult_backstreet_removal (the value reads the tier until the
+# booking exists).
 #
 # Regression is open at any stress (cybernetics_v2 B3): prudence must be possible.
 # The discount (stress level 2+, or the Intervention flag from Phase 4c) is 25%.
@@ -42,33 +52,35 @@ eotg_decision_partial_removal = {
         eotg_is_aug_tier2 = yes
     }
 
-    cost = {
-        gold = {
-            value = medium_gold_value
-            if = {
-                limit = {
-                    OR = {
-                        stress_level >= 2
-                        has_character_flag = eotg_flag_aug_intervention_discount
-                    }
-                }
-                multiply = 0.75
-            }
+    # Procedures spec §4.6: the back-street price (x0.4) of the clinic's
+    # medium_gold_value, with the B3 discount (eotg_aug_removal_base_value)
+    is_valid = {
+        eotg_aug_can_afford_procedure = { BASE = eotg_aug_removal_base_value  MULT = eotg_aug_price_mult_backstreet_removal }
+        # Procedures QA: one booking at a time (the 30-day booking would be
+        # overwritten and proc.001 queued twice). Wrapped so the tooltip
+        # names the reason, not the variable (as Maintenance's cooldown).
+        custom_description = {
+            text = eotg_decision_aug_removal_booked_tt
+            NOT = { has_variable = eotg_aug_removal_kind }
         }
     }
 
+    # The body (XP 0, unmask, stress) moved unchanged into
+    # eotg_aug_removal_perform_effect, run by proc.001's paying options.
     effect = {
-        eotg_aug_set_integration_effect = { XP = 0 }
-        # Balance spec §5.9: a masked congenital trait shows again
-        eotg_aug_unmask_congenital_effect = yes
-        stress_impact = { base = medium_stress_impact_loss }
+        set_variable = { name = eotg_aug_removal_kind  value = flag:partial  days = 30 }
         custom_tooltip = eotg_decision_partial_removal_tooltip
+        trigger_event = eotg_aug_proc.001
     }
 
     # AI only regresses when it is hurting (balance spec §5.2)
     ai_potential = {
         eotg_is_aug_tier2 = yes
         stress_level >= 2
+        short_term_gold >= {
+            value = eotg_aug_removal_base_value
+            multiply = eotg_aug_price_mult_backstreet_removal
+        }
     }
     ai_will_do = {
         base = 5
@@ -97,51 +109,26 @@ eotg_decision_overclock_regression = {
         eotg_is_aug_tier3 = yes
     }
 
-    cost = {
-        gold = {
-            value = major_gold_value
-            if = {
-                limit = {
-                    OR = {
-                        stress_level >= 2
-                        has_character_flag = eotg_flag_aug_intervention_discount
-                    }
-                }
-                multiply = 0.75
-            }
+    # Procedures spec §4.6: the back-street price (x0.4) of the clinic's
+    # major_gold_value, with the B3 discount (eotg_aug_removal_base_value)
+    is_valid = {
+        eotg_aug_can_afford_procedure = { BASE = eotg_aug_removal_base_value  MULT = eotg_aug_price_mult_backstreet_removal }
+        # Procedures QA: one booking at a time (the 30-day booking would be
+        # overwritten and proc.001 queued twice). Wrapped so the tooltip
+        # names the reason, not the variable (as Maintenance's cooldown).
+        custom_description = {
+            text = eotg_decision_aug_removal_booked_tt
+            NOT = { has_variable = eotg_aug_removal_kind }
         }
     }
 
+    # The body (risk halved, XP 50, the Countdown, recovery, unmask, stress)
+    # moved unchanged into eotg_aug_removal_perform_effect, run by proc.001's
+    # paying options.
     effect = {
-        # Some of the damage remains: risk is halved, not cleared (B3). Halved
-        # before the tier change so the Enhanced character carries it forward.
-        if = {
-            limit = { has_variable = eotg_fracture_risk }
-            change_variable = { name = eotg_fracture_risk  multiply = 0.5 }
-        }
-        eotg_aug_set_integration_effect = { XP = 50 }
-        # Phase 5 §1.1: a running Countdown stops if the halved risk is < 50
-        # (eotg_aug_countdown.006 The Quiet ends the story). At 50+ the story
-        # sees the lost tier at its next tick and fires The Quiet itself.
-        if = {
-            limit = {
-                eotg_aug_has_countdown = yes
-                OR = {
-                    NOT = { has_variable = eotg_fracture_risk }
-                    var:eotg_fracture_risk < 50
-                }
-            }
-            # End the story now (final QA): otherwise its next tick could see
-            # the lost tier inside the 3 days and fire The Quiet a second time.
-            eotg_aug_end_countdown_effect = yes
-            trigger_event = { id = eotg_aug_countdown.006  days = 3 }
-        }
-        add_character_modifier = { modifier = eotg_mod_oc_regression_recovery  years = 5 }
-        remove_character_flag = eotg_flag_aug_intervention_discount
-        # Balance spec §5.9: a masked congenital trait shows again
-        eotg_aug_unmask_congenital_effect = yes
-        stress_impact = { base = medium_stress_impact_loss }
+        set_variable = { name = eotg_aug_removal_kind  value = flag:downgrade  days = 30 }
         custom_tooltip = eotg_decision_overclock_regression_tooltip
+        trigger_event = eotg_aug_proc.001
     }
 
     # Balance spec §5.2: the AI steps back when it is hurting or the
@@ -152,6 +139,10 @@ eotg_decision_overclock_regression = {
             stress_level >= 2
             eotg_aug_has_countdown = yes
             eotg_aug_pressure_storm = yes
+        }
+        short_term_gold >= {
+            value = eotg_aug_removal_base_value
+            multiply = eotg_aug_price_mult_backstreet_removal
         }
     }
     ai_will_do = {
@@ -349,20 +340,27 @@ eotg_decision_remove_implants = {
         eotg_is_aug_tier1 = yes
     }
 
-    cost = {
-        gold = {
-            value = medium_gold_value
+    # Procedures spec §4.6: the back-street price (x0.4) of the clinic's
+    # medium_gold_value (eotg_aug_removal_base_value)
+    is_valid = {
+        eotg_aug_can_afford_procedure = { BASE = eotg_aug_removal_base_value  MULT = eotg_aug_price_mult_backstreet_removal }
+        # Procedures QA: one booking at a time (the 30-day booking would be
+        # overwritten and proc.001 queued twice). Wrapped so the tooltip
+        # names the reason, not the variable (as Maintenance's cooldown).
+        custom_description = {
+            text = eotg_decision_aug_removal_booked_tt
+            NOT = { has_variable = eotg_aug_removal_kind }
         }
     }
 
-    # Leaving the system: eotg_aug_remove_all_effect (index §1 rule 2), then
-    # the withdrawal (the helper adds none; callers choose).
+    # Leaving the system (eotg_aug_remove_all_effect, the withdrawal, the
+    # reject helper) moved unchanged into eotg_aug_removal_perform_effect,
+    # run by proc.001's paying options. The tooltip key exists (it is also
+    # the list hover) and now says the provider is chosen next.
     effect = {
-        eotg_aug_remove_all_effect = yes
-        add_character_modifier = { modifier = eotg_mod_aug_removal_withdrawal  years = 3 }
-        eotg_aug_stress_reject_effect = yes
-        # Tooltip sweep: no custom line. The engine lists the traits lost,
-        # the withdrawal modifier and the stress; nothing hidden is left to say.
+        set_variable = { name = eotg_aug_removal_kind  value = flag:full  days = 30 }
+        custom_tooltip = eotg_decision_remove_implants_tooltip
+        trigger_event = eotg_aug_proc.001
     }
 
     # Balance spec §5.2
@@ -371,6 +369,10 @@ eotg_decision_remove_implants = {
         OR = {
             stress_level >= 2
             has_trait = zealous
+        }
+        short_term_gold >= {
+            value = eotg_aug_removal_base_value
+            multiply = eotg_aug_price_mult_backstreet_removal
         }
     }
     ai_will_do = {
@@ -402,8 +404,16 @@ eotg_decision_consult_physician = {
         hegemony = 12
     }
 
+    # Procedures spec §4.8: also shown to someone out of the system who
+    # still carries a careless removal's fragments (eotg_mod_aug_fragments)
     is_shown = {
-        has_trait = eotg_cybernetics
+        OR = {
+            has_trait = eotg_cybernetics
+            AND = {
+                eotg_is_augmented_any = no
+                has_character_modifier = eotg_mod_aug_fragments
+            }
+        }
         eotg_has_physician_access = yes
     }
 
@@ -421,10 +431,18 @@ eotg_decision_consult_physician = {
     cooldown = { years = 3 }
 
     effect = {
-        add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 5 }
+        # Procedures spec §4.8: a former character is not "calibrated"
+        if = {
+            limit = { has_trait = eotg_cybernetics }
+            add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 5 }
+        }
         if = {
             limit = { has_character_modifier = eotg_mod_aug_infection }
             remove_character_modifier = eotg_mod_aug_infection
+        }
+        if = {
+            limit = { has_character_modifier = eotg_mod_aug_fragments }
+            remove_character_modifier = eotg_mod_aug_fragments
         }
         # Deeper than maintenance at Overclocked (maintenance gives -8).
         # Tooltip sweep: the note shows only at Overclocked (as Maintenance).
@@ -441,9 +459,15 @@ eotg_decision_consult_physician = {
         }
     }
 
-    # Balance spec §5.2: potential as is_shown
+    # Balance spec §5.2: potential as is_shown (procedures spec §4.8)
     ai_potential = {
-        has_trait = eotg_cybernetics
+        OR = {
+            has_trait = eotg_cybernetics
+            AND = {
+                eotg_is_augmented_any = no
+                has_character_modifier = eotg_mod_aug_fragments
+            }
+        }
         eotg_has_physician_access = yes
     }
     ai_will_do = {
@@ -840,8 +864,10 @@ eotg_decision_aug_excision = {
 # value in a trigger as 10_religious_decisions.txt:3054.
 # No cost: the fired event charges, as eotg_decision_seek_augmentation's hub
 # does (a decision cost would charge twice). The gold checks in is_valid
-# mirror the events' paying options (eotg_aug_can_afford_upgrade = tier1.002.a;
-# major_gold_value = tier2.003.a).
+# are the cheapest paying option, the back streets (procedures spec §4.6,
+# amending balance §5.1's "mirror option a"): tier1.002.g and tier2.003.g,
+# offered to everyone, so the decision never opens an event the ruler cannot
+# act on.
 # Cooldown authority: the decision's own cooldown block (index §1 rule 5).
 # The 5-year eotg_flag_aug_settling is a world-state gate (minimum time at
 # tier, HQ1), read here and in eotg_can_progress_to_*, never by an event.
@@ -888,11 +914,14 @@ eotg_decision_aug_pursue_next_stage = {
         trigger_if = {
             limit = { eotg_is_aug_tier1 = yes }
             capital_county ?= { development_level >= eotg_aug_dev_gate_enhanced }
-            eotg_aug_can_afford_upgrade = yes
+            eotg_aug_can_afford_upgrade = { MULT = eotg_aug_price_mult_backstreet_upgrade }
         }
         trigger_else = {
             capital_county ?= { development_level >= eotg_aug_dev_gate_overclocked }
-            gold >= major_gold_value
+            gold >= {
+                value = major_gold_value
+                multiply = eotg_aug_price_mult_backstreet_upgrade
+            }
         }
     }
 
@@ -919,12 +948,20 @@ eotg_decision_aug_pursue_next_stage = {
         NOT = { has_trait = content }
         is_at_war = no
         stress_level < 2
+        # Procedures spec §4.3: the cheapest provider (the back streets),
+        # so gold-poor AI can progress; the event offers every price
         trigger_if = {
             limit = { eotg_is_aug_tier1 = yes }
-            short_term_gold >= medium_gold_value
+            short_term_gold >= {
+                value = medium_gold_value
+                multiply = eotg_aug_price_mult_backstreet_upgrade
+            }
         }
         trigger_else = {
-            short_term_gold >= major_gold_value
+            short_term_gold >= {
+                value = major_gold_value
+                multiply = eotg_aug_price_mult_backstreet_upgrade
+            }
         }
     }
     ai_will_do = {

@@ -20,6 +20,18 @@
 # install/refuse options, scaled gold, lesson modifiers instead of permanent skill.
 # Where an option had a bespoke stress line for a trait the helper also covers,
 # the helper's line replaces it (spec "How to read the tables").
+#
+# Procedures spec §4.5 (docs/specs/cybernetics_v2_procedures.md): every ruler
+# self-install runs the shared roll on the click, after its install lines,
+# with a provider by fiction (eotg_aug_procedure_effect, hidden, plus the
+# eotg_aug_proc.install_tt tooltip). Clinic: init.001 a/d/e, .002 a, .003
+# a/d, .005 a/d, .006 a/e/f, .009 a/d, .016 a/e, .018 a, .019 a/d.
+# Physician: init.006 c, .017 a/d, .018 c. Back streets: init.002 d, .004
+# a/e (their existing illegal modifier and hidden flaw switch the matching
+# outcomes off), and init.010 a/c/d and .018 b, which roll only and keep
+# their own reveal (init.011). Not rolled: init.007/.008 (the Bridge's own
+# settle stage), .013 (a parent's hardware: own flaw), .014/.015 (the child),
+# .017 c and .002 c (a knight), .020 (a retainer, not root).
 # ─────────────────────────────────────────────────────────────────────────────
 
 namespace = eotg_aug_init
@@ -51,6 +63,10 @@ eotg_aug_init.001 = {
         eotg_aug_heal_wounds_effect = yes
         hidden_effect = {
             set_variable = { name = eotg_fracture_risk  value = 0 }
+        }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = install  SURGEON = root }
         }
         stress_impact = {
             base = minor_stress_impact_loss
@@ -116,6 +132,10 @@ eotg_aug_init.001 = {
         hidden_effect = {
             set_variable = { name = eotg_fracture_risk  value = 5 }
         }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = install  SURGEON = root }
+        }
         stress_impact = {
             craven = minor_stress_impact_loss
             zealous = medium_stress_impact_gain
@@ -140,6 +160,10 @@ eotg_aug_init.001 = {
         eotg_aug_heal_wounds_effect = yes
         hidden_effect = {
             set_variable = { name = eotg_fracture_risk  value = 0 }
+        }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = install  SURGEON = root }
         }
         add_prestige = 50
         add_piety = -50
@@ -184,6 +208,10 @@ eotg_aug_init.002 = {
         eotg_aug_initiate_effect = yes
         hidden_effect = {
             set_variable = { name = eotg_fracture_risk  value = 0 }
+        }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = install  SURGEON = root }
         }
         eotg_aug_stress_surgery_effect = yes
         ai_chance = {
@@ -245,6 +273,10 @@ eotg_aug_init.002 = {
             set_variable = { name = eotg_fracture_risk  value = 5 }
             add_character_flag = eotg_flag_aug_hidden_flaw
         }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = backstreet  PROCEDURE = install  SURGEON = root }
+        }
         eotg_aug_stress_surgery_effect = yes
         ai_chance = {
             base = 30
@@ -280,6 +312,10 @@ eotg_aug_init.003 = {
         eotg_aug_initiate_effect = yes
         hidden_effect = {
             set_variable = { name = eotg_fracture_risk  value = 0 }
+        }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = install  SURGEON = root }
         }
         stress_impact = {
             base = 0
@@ -318,6 +354,10 @@ eotg_aug_init.003 = {
         eotg_aug_initiate_effect = yes
         hidden_effect = {
             set_variable = { name = eotg_fracture_risk  value = 5 }
+        }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = install  SURGEON = root }
         }
         add_prestige = 100
         stress_impact = {
@@ -380,6 +420,10 @@ eotg_aug_init.004 = {
         hidden_effect = {
             set_variable = { name = eotg_fracture_risk  value = 10 }
         }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = backstreet  PROCEDURE = install  SURGEON = root }
+        }
         stress_impact = {
             base = minor_stress_impact_loss
             content = minor_stress_impact_gain
@@ -435,6 +479,10 @@ eotg_aug_init.004 = {
         eotg_aug_heal_wounds_effect = yes
         hidden_effect = {
             set_variable = { name = eotg_fracture_risk  value = 15 }
+        }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = backstreet  PROCEDURE = install  SURGEON = root }
         }
         add_character_modifier = { modifier = eotg_mod_aug_lesson_prowess  years = 5 }
         stress_impact = {
@@ -507,6 +555,10 @@ eotg_aug_init.005 = {
         hidden_effect = {
             set_variable = { name = eotg_fracture_risk  value = 0 }
         }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = install  SURGEON = root }
+        }
         scope:eotg_aug_peer = {
             add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
         }
@@ -561,6 +613,10 @@ eotg_aug_init.005 = {
         eotg_aug_initiate_effect = yes
         hidden_effect = {
             set_variable = { name = eotg_fracture_risk  value = 0 }
+        }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = install  SURGEON = root }
         }
         scope:eotg_aug_peer = {
             add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
@@ -653,6 +709,12 @@ eotg_aug_init.006 = {
                 desc = eotg_aug_init.006.desc_one_eyed
             }
         }
+        # Procedures spec §4.5 (G3, "What Was Taken"): the surgeons who took
+        # the hardware took this too
+        triggered_desc = {
+            trigger = { var:eotg_aug_former ?= flag:excised }
+            desc = eotg_aug_init.006.desc_former
+        }
     }
     theme = healthcare
 
@@ -700,6 +762,10 @@ eotg_aug_init.006 = {
         eotg_aug_restore_loss_effect = yes
         hidden_effect = {
             set_variable = { name = eotg_fracture_risk  value = 0 }
+        }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = install  SURGEON = root }
         }
         eotg_aug_stress_surgery_effect = yes
         ai_chance = {
@@ -757,6 +823,11 @@ eotg_aug_init.006 = {
         hidden_effect = {
             set_variable = { name = eotg_fracture_risk  value = 0 }
         }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_save_surgeon_effect = yes
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = physician  PROCEDURE = install  SURGEON = scope:eotg_proc_surgeon }
+        }
         add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 3 }
         if = {
             limit = { exists = scope:eotg_physician }
@@ -811,6 +882,10 @@ eotg_aug_init.006 = {
         hidden_effect = {
             set_variable = { name = eotg_fracture_risk  value = 5 }
         }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = install  SURGEON = root }
+        }
         add_character_modifier = { modifier = eotg_mod_aug_lesson_prowess  years = 5 }
         eotg_aug_stress_surgery_effect = yes
         ai_chance = {
@@ -859,6 +934,10 @@ eotg_aug_init.006 = {
         hidden_effect = {
             set_variable = { name = eotg_fracture_risk  value = 5 }
             add_character_flag = eotg_flag_aug_congenital_masked
+        }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = install  SURGEON = root }
         }
         eotg_aug_stress_surgery_effect = yes
         ai_chance = {
@@ -1211,6 +1290,10 @@ eotg_aug_init.009 = {
         hidden_effect = {
             set_variable = { name = eotg_fracture_risk  value = 0 }
         }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = install  SURGEON = root }
+        }
         add_piety = -50
         every_courtier = {
             limit = { has_trait = zealous }
@@ -1269,6 +1352,10 @@ eotg_aug_init.009 = {
         hidden_effect = {
             set_variable = { name = eotg_fracture_risk  value = 5 }
         }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = install  SURGEON = root }
+        }
         add_piety = -50
         add_prestige = 50
         every_courtier = {
@@ -1309,6 +1396,10 @@ eotg_aug_init.009 = {
 # Caller: eotg_on_yearly_aug_initiation_check, branch 10 (poor, deceitful or at
 #   war), and the retry branch (eotg_flag_aug_backalley_retry, set by init.012.b).
 # Resource: a/c/d install and set eotg_fracture_risk. Stage 2: eotg_aug_init.011.
+# Procedures spec §4.5: a/c/d roll the back streets on the click (after a's
+# duel, which sets the edge or strain the roll reads; c's discreet flag and
+# d's "put me under" flag are set before it). Death on the table skips
+# init.011, which reveals and applies every other outcome.
 
 eotg_aug_init.010 = {
     type = character_event
@@ -1366,7 +1457,14 @@ eotg_aug_init.010 = {
                 }
             }
         }
-        trigger_event = { id = eotg_aug_init.011  days = { 180 540 } }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_procedure_roll_effect = { PATIENT = root  PROVIDER = backstreet  PROCEDURE = install  SURGEON = root }
+        }
+        if = {
+            limit = { NOT = { scope:eotg_proc_outcome = flag:death } }
+            trigger_event = { id = eotg_aug_init.011  days = { 180 540 } }
+        }
         eotg_aug_stress_surgery_effect = yes
         ai_chance = {
             base = 30
@@ -1406,7 +1504,14 @@ eotg_aug_init.010 = {
             set_variable = { name = eotg_fracture_risk  value = 5 }
             add_character_flag = eotg_flag_aug_backalley_discreet
         }
-        trigger_event = { id = eotg_aug_init.011  days = { 180 540 } }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_procedure_roll_effect = { PATIENT = root  PROVIDER = backstreet  PROCEDURE = install  SURGEON = root }
+        }
+        if = {
+            limit = { NOT = { scope:eotg_proc_outcome = flag:death } }
+            trigger_event = { id = eotg_aug_init.011  days = { 180 540 } }
+        }
         eotg_aug_stress_surgery_effect = yes
         eotg_aug_stress_lie_effect = yes
         ai_chance = {
@@ -1431,7 +1536,17 @@ eotg_aug_init.010 = {
         hidden_effect = {
             set_variable = { name = eotg_fracture_risk  value = 10 }
         }
-        trigger_event = { id = eotg_aug_init.011  days = { 180 540 } }
+        # Procedures spec §4.5: "put me under" doubles the severe tail
+        # (eotg_flag_aug_proc_under, one-shot; the roll consumes it)
+        hidden_effect = { add_character_flag = eotg_flag_aug_proc_under }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_procedure_roll_effect = { PATIENT = root  PROVIDER = backstreet  PROCEDURE = install  SURGEON = root }
+        }
+        if = {
+            limit = { NOT = { scope:eotg_proc_outcome = flag:death } }
+            trigger_event = { id = eotg_aug_init.011  days = { 180 540 } }
+        }
         stress_impact = {
             craven = medium_stress_impact_loss
             zealous = medium_stress_impact_gain
@@ -1449,12 +1564,17 @@ eotg_aug_init.010 = {
 
 
 # ── eotg_aug_init.011 ─────────────────────────────────────────────────────────
-# The Scar Itches (I-04 stage 2; also the back-streets path of init.018)
-# Caller: eotg_aug_init.010 (a, c, d) and eotg_aug_init.018 (b), 180-540 days.
+# The Scar Itches (I-04 stage 2; the reveal for every rolled install)
+# Callers: eotg_aug_init.010 (a, c, d) and eotg_aug_init.018 (b), 180-540
+# days; eotg_aug_procedure_effect (any non-plain install outcome), 30-90 days.
 # Resource: c/e/f raise eotg_fracture_risk; the hidden flaw (thread T6) raises
 # Overclocked accrual later.
-# Outcome kept as scope:eotg_alley_outcome. The hidden flaw stores flag:clean:
-# it shares the clean desc and options, so the player cannot tell (spec §6.3).
+# Procedures spec §4.5: the outcome was rolled on the click by the shared roll
+# (scope:eotg_proc_outcome, carried by trigger_event) and is applied here
+# (eotg_aug_procedure_apply_effect), replacing this event's own roll and its
+# flag clean-up. A hidden flaw shares the clean desc and options, so the
+# player cannot tell (spec §6.3). The three severe outcomes come first in the
+# desc and share a's grim name.
 
 eotg_aug_init.011 = {
     type = character_event
@@ -1462,19 +1582,31 @@ eotg_aug_init.011 = {
     desc = {
         first_valid = {
             triggered_desc = {
-                trigger = { scope:eotg_alley_outcome = flag:infection }
+                trigger = { scope:eotg_proc_outcome ?= flag:maimed }
+                desc = eotg_aug_init.011.desc_maimed
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_proc_outcome ?= flag:one_eyed }
+                desc = eotg_aug_init.011.desc_one_eyed
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_proc_outcome ?= flag:blind }
+                desc = eotg_aug_init.011.desc_blind
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_proc_outcome ?= flag:infection }
                 desc = eotg_aug_init.011.desc_infection
             }
             triggered_desc = {
-                trigger = { scope:eotg_alley_outcome = flag:rejection }
+                trigger = { scope:eotg_proc_outcome ?= flag:rejection }
                 desc = eotg_aug_init.011.desc_rejection
             }
             triggered_desc = {
-                trigger = { scope:eotg_alley_outcome = flag:discovered }
+                trigger = { scope:eotg_proc_outcome ?= flag:discovered }
                 desc = eotg_aug_init.011.desc_discovered
             }
             triggered_desc = {
-                trigger = { scope:eotg_alley_outcome = flag:excellent }
+                trigger = { scope:eotg_proc_outcome ?= flag:excellent }
                 desc = eotg_aug_init.011.desc_excellent
             }
             # clean AND hidden flaw: one key
@@ -1488,8 +1620,11 @@ eotg_aug_init.011 = {
         triggered_animation = {
             trigger = {
                 OR = {
-                    scope:eotg_alley_outcome = flag:infection
-                    scope:eotg_alley_outcome = flag:rejection
+                    scope:eotg_proc_outcome ?= flag:infection
+                    scope:eotg_proc_outcome ?= flag:rejection
+                    scope:eotg_proc_outcome ?= flag:maimed
+                    scope:eotg_proc_outcome ?= flag:one_eyed
+                    scope:eotg_proc_outcome ?= flag:blind
                 }
             }
             animation = pain
@@ -1499,48 +1634,8 @@ eotg_aug_init.011 = {
 
     trigger = { has_trait = eotg_cybernetics }
 
-    # Balance spec §5.6 chain edge: init.010.a's check carries here (edge +15
-    # to the clean outcome, strain +10 to infection); both flags are cleared
-    # after the roll.
     immediate = {
-        hidden_effect = {
-            random_list = {
-                35 = {
-                    modifier = {
-                        add = 15
-                        has_character_flag = eotg_flag_aug_chain_edge
-                    }
-                    save_scope_value_as = { name = eotg_alley_outcome  value = flag:clean }
-                }
-                15 = {
-                    save_scope_value_as = { name = eotg_alley_outcome  value = flag:clean }
-                    add_character_flag = eotg_flag_aug_hidden_flaw
-                }
-                20 = {
-                    modifier = {
-                        add = 10
-                        has_character_flag = eotg_flag_aug_chain_strain
-                    }
-                    save_scope_value_as = { name = eotg_alley_outcome  value = flag:infection }
-                    add_character_modifier = { modifier = eotg_mod_aug_infection  years = 2 }
-                }
-                15 = {
-                    save_scope_value_as = { name = eotg_alley_outcome  value = flag:rejection }
-                }
-                10 = {
-                    trigger = { NOT = { has_character_flag = eotg_flag_aug_backalley_discreet } }
-                    save_scope_value_as = { name = eotg_alley_outcome  value = flag:discovered }
-                    add_character_modifier = eotg_mod_illegal_implants
-                }
-                5 = {
-                    save_scope_value_as = { name = eotg_alley_outcome  value = flag:excellent }
-                    add_character_modifier = { modifier = eotg_mod_aug_clean_install  years = 10 }
-                }
-            }
-            # The discreet flag has done its job for this install
-            remove_character_flag = eotg_flag_aug_backalley_discreet
-            eotg_aug_clear_chain_flags_effect = yes
-        }
+        eotg_aug_procedure_apply_effect = yes
     }
 
     # "Good." / "Keep going." Two names for one option (vanilla
@@ -1550,9 +1645,12 @@ eotg_aug_init.011 = {
         name = {
             trigger = {
                 OR = {
-                    scope:eotg_alley_outcome = flag:infection
-                    scope:eotg_alley_outcome = flag:rejection
-                    scope:eotg_alley_outcome = flag:discovered
+                    scope:eotg_proc_outcome ?= flag:infection
+                    scope:eotg_proc_outcome ?= flag:rejection
+                    scope:eotg_proc_outcome ?= flag:discovered
+                    scope:eotg_proc_outcome ?= flag:maimed
+                    scope:eotg_proc_outcome ?= flag:one_eyed
+                    scope:eotg_proc_outcome ?= flag:blind
                 }
             }
             text = eotg_aug_init.011.a_grim
@@ -1568,7 +1666,7 @@ eotg_aug_init.011 = {
     option = {
         name = eotg_aug_init.011.b
         trigger = {
-            scope:eotg_alley_outcome = flag:infection
+            scope:eotg_proc_outcome ?= flag:infection
             OR = {
                 eotg_has_physician_access = yes
                 gold >= minor_gold_value
@@ -1593,7 +1691,7 @@ eotg_aug_init.011 = {
     # (infection) "Sweat it out."
     option = {
         name = eotg_aug_init.011.c
-        trigger = { scope:eotg_alley_outcome = flag:infection }
+        trigger = { scope:eotg_proc_outcome ?= flag:infection }
         eotg_add_fracture_risk = { AMOUNT = 5 }
         random = {
             chance = 25
@@ -1610,7 +1708,7 @@ eotg_aug_init.011 = {
     # (rejection) "Cut it out before it spreads."
     option = {
         name = eotg_aug_init.011.d
-        trigger = { scope:eotg_alley_outcome = flag:rejection }
+        trigger = { scope:eotg_proc_outcome ?= flag:rejection }
         # Tooltip sweep: the option otherwise renders an empty tooltip.
         custom_tooltip = eotg_aug_init.011.d.tt
         trigger_event = { id = eotg_aug_init.012  days = { 3 10 } }
@@ -1624,7 +1722,7 @@ eotg_aug_init.011 = {
     # (rejection) "It will settle."
     option = {
         name = eotg_aug_init.011.e
-        trigger = { scope:eotg_alley_outcome = flag:rejection }
+        trigger = { scope:eotg_proc_outcome ?= flag:rejection }
         eotg_add_fracture_risk = { AMOUNT = 10 }
         random = {
             chance = 30
@@ -1643,7 +1741,7 @@ eotg_aug_init.011 = {
         name = eotg_aug_init.011.f
         trigger = {
             has_trait = lazy
-            scope:eotg_alley_outcome = flag:infection
+            scope:eotg_proc_outcome ?= flag:infection
         }
         trait = lazy
         eotg_add_fracture_risk = { AMOUNT = 5 }
@@ -1693,6 +1791,10 @@ eotg_aug_init.012 = {
             60 = {
                 save_scope_value_as = { name = eotg_rejection_outcome  value = flag:lost }
                 eotg_aug_remove_all_effect = yes
+                # Procedures spec §4.5 (G3): the body threw it out
+                hidden_effect = {
+                    set_variable = { name = eotg_aug_former  value = flag:rejected }
+                }
                 # Spec: add_trait = wounded_1. Vanilla's no-death wound step is
                 # used instead so an already-wounded ruler is not reset to
                 # rank 1 (common/scripted_effects/20_health_effects.txt,
@@ -2201,6 +2303,10 @@ eotg_aug_init.016 = {
         hidden_effect = {
             set_variable = { name = eotg_fracture_risk  value = 0 }
         }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = install  SURGEON = root }
+        }
         eotg_aug_stress_surgery_effect = yes
         ai_chance = {
             base = 30
@@ -2297,6 +2403,10 @@ eotg_aug_init.016 = {
         hidden_effect = {
             set_variable = { name = eotg_fracture_risk  value = 5 }
         }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = install  SURGEON = root }
+        }
         add_dread = 10
         eotg_aug_stress_surgery_effect = yes
         ai_chance = {
@@ -2378,6 +2488,11 @@ eotg_aug_init.017 = {
         hidden_effect = {
             set_variable = { name = eotg_fracture_risk  value = 0 }
         }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_save_surgeon_effect = yes
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = physician  PROCEDURE = install  SURGEON = scope:eotg_proc_surgeon }
+        }
         add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 3 }
         if = {
             limit = { NOT = { scope:eotg_physician = root } }
@@ -2435,6 +2550,11 @@ eotg_aug_init.017 = {
         eotg_aug_initiate_effect = yes
         hidden_effect = {
             set_variable = { name = eotg_fracture_risk  value = 0 }
+        }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_save_surgeon_effect = yes
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = physician  PROCEDURE = install  SURGEON = scope:eotg_proc_surgeon }
         }
         add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 3 }
         if = {
@@ -2531,6 +2651,10 @@ eotg_aug_init.018 = {
         hidden_effect = {
             set_variable = { name = eotg_fracture_risk  value = 0 }
         }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = install  SURGEON = root }
+        }
         add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 2 }
         eotg_aug_stress_surgery_effect = yes
         ai_chance = {
@@ -2550,7 +2674,14 @@ eotg_aug_init.018 = {
         hidden_effect = {
             set_variable = { name = eotg_fracture_risk  value = 5 }
         }
-        trigger_event = { id = eotg_aug_init.011  days = { 180 540 } }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_procedure_roll_effect = { PATIENT = root  PROVIDER = backstreet  PROCEDURE = install  SURGEON = root }
+        }
+        if = {
+            limit = { NOT = { scope:eotg_proc_outcome = flag:death } }
+            trigger_event = { id = eotg_aug_init.011  days = { 180 540 } }
+        }
         eotg_aug_stress_surgery_effect = yes
         ai_chance = {
             base = 30
@@ -2571,6 +2702,11 @@ eotg_aug_init.018 = {
         eotg_aug_initiate_effect = yes
         hidden_effect = {
             set_variable = { name = eotg_fracture_risk  value = 0 }
+        }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_save_surgeon_effect = yes
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = physician  PROCEDURE = install  SURGEON = scope:eotg_proc_surgeon }
         }
         add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 3 }
         eotg_aug_stress_surgery_effect = yes
@@ -2834,6 +2970,10 @@ eotg_aug_init.019 = {
         remove_short_term_gold = medium_gold_value
         eotg_aug_initiate_effect = yes
         eotg_add_fracture_risk = { AMOUNT = 0 }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = install  SURGEON = root }
+        }
         eotg_aug_stress_surgery_effect = yes
         ai_chance = {
             base = 40
@@ -2915,6 +3055,10 @@ eotg_aug_init.019 = {
         remove_short_term_gold = medium_gold_value
         eotg_aug_initiate_effect = yes
         eotg_add_fracture_risk = { AMOUNT = 0 }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = install  SURGEON = root }
+        }
         eotg_aug_start_retinue_effect = yes
         every_knight = {
             limit = { eotg_is_augmented_any = yes }

@@ -40,6 +40,13 @@
 #     while it holds
 #   eotg_flag_aug_backalley_retry — not a cooldown: a one-shot pass that lets
 #     init.010 fire past eotg_flag_aug_event_cooldown (set by init.012.b)
+#   eotg_flag_aug_repair_cooldown — repair offers (proc.003 / .004), 3 years,
+#     set in eotg_on_trait_gained_aug_repair (procedures spec §4.9)
+#   eotg_flag_aug_seamless_cooldown — the Seamless pool (end.040-.042 and the
+#     Heir's Arc start), 2 years, set in eotg_on_yearly_aug_seamless_check
+#   eotg_flag_aug_phantom_done — one-shot per exit (Phantom Static,
+#     eotg_aug_proc.020), set in eotg_on_yearly_aug_former_check; cleared by
+#     eotg_aug_mark_former_effect on the next exit
 #
 # Each tier rolls one weighted random_list per pulse (weights = v1 chances),
 # with a "nothing" branch. v1 used independent ifs whose cooldown was set in
@@ -64,6 +71,9 @@ yearly_playable_pulse = {
         eotg_on_yearly_aug_tier2_check
         eotg_on_yearly_aug_overclocked_check
         eotg_on_yearly_aug_neurofractured_check
+        # Procedures spec §4.10-4.11 (G3, G2)
+        eotg_on_yearly_aug_former_check
+        eotg_on_yearly_aug_seamless_check
     }
 }
 
@@ -107,6 +117,16 @@ on_combat_end_winner = {
 on_combat_end_loser = {
     on_actions = {
         eotg_on_combat_aug_knights
+    }
+}
+
+# Vanilla hook, extended additively only (invariant 4). Root = the character
+# gaining a trait, scope:trait = the trait (game/common/on_action/
+# traits_on_actions.txt:3-6, tested as `scope:trait = trait:x` at :13).
+# Procedures spec §4.9: a cybernetic repair for a real injury.
+on_trait_gained = {
+    on_actions = {
+        eotg_on_trait_gained_aug_repair
     }
 }
 
@@ -185,6 +205,12 @@ eotg_on_yearly_aug_initiation_check = {
                     modifier = {
                         factor = 0.5
                         eotg_has_physical_loss = no
+                    }
+                    # Procedures spec §4.5 (G3, "What Was Taken"): someone
+                    # who has been out of the system before looks again
+                    modifier = {
+                        factor = 2
+                        has_variable = eotg_aug_former
                     }
                     add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
                     trigger_event = { id = eotg_aug_init.006  days = { 1 10 } }
@@ -516,7 +542,10 @@ eotg_on_yearly_aug_tier1_check = {
                 30 = {
                     trigger = {
                         eotg_can_progress_to_enhanced = yes
-                        eotg_aug_can_afford_upgrade = yes    # mirrors eotg_aug_tier1.002.a
+                        # Procedures spec §4.3/§4.6: the cheapest provider
+                        # (tier1.002.g, the back streets), so gold-poor
+                        # rulers can progress; the event offers every price
+                        eotg_aug_can_afford_upgrade = { MULT = eotg_aug_price_mult_backstreet_upgrade }
                     }
                     add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
                     trigger_event = { id = eotg_aug_tier1.002  days = { 1 20 } }
@@ -684,7 +713,12 @@ eotg_on_yearly_aug_tier2_check = {
                 25 = {
                     trigger = {
                         eotg_can_progress_to_overclocked = yes
-                        gold >= major_gold_value    # mirrors eotg_aug_tier2.003.a
+                        # Procedures spec §4.3/§4.6: the cheapest provider
+                        # (tier2.003.g, the back streets)
+                        gold >= {
+                            value = major_gold_value
+                            multiply = eotg_aug_price_mult_backstreet_upgrade
+                        }
                     }
                     add_character_flag = { flag = eotg_flag_enh_event_cooldown  years = 2 }
                     trigger_event = { id = eotg_aug_tier2.003  days = { 1 20 } }
@@ -1648,6 +1682,187 @@ eotg_on_combat_aug_knights = {
             }
             else = {
                 eotg_add_fracture_risk = { AMOUNT = 2 }
+            }
+        }
+    }
+}
+
+# ── Procedures (docs/specs/cybernetics_v2_procedures.md §4.9-4.11) ───────────
+
+# Repairs (§4.9). Hooked on on_trait_gained (root = the character, scope:trait
+# = the trait gained; game/common/on_action/traits_on_actions.txt:3-13).
+# A permanent loss or a near-death wound on an augmented ruler (players at any
+# tier, the AI at count+) offers a cybernetic repair: eotg_aug_proc.004 for
+# the Seamless (the system orders the part itself), else eotg_aug_proc.003.
+# wounded_1/2 are excluded: routine battle wounds, which vanilla's own wound
+# treatment covers (decide_who_picks_wound_treatment_effect,
+# common/scripted_effects/20_health_effects.txt:3730).
+# COOLDOWN AUTHORITY: eotg_flag_aug_repair_cooldown (3 years) is set here and
+# only here; proc.003 / .004 never read it. eotg_flag_aug_procedure_injury
+# (30 days, set by eotg_aug_procedure_apply_effect before a severe outcome's
+# trait) keeps the table's own damage from being offered a repair.
+# The trait test leads: this runs on every trait gained in the world.
+# In-game check (spec §4.9, human): whether change_trait_rank (used by the
+# wound effects) fires on_trait_gained for wounded_3, and that characters
+# who start with a listed trait get no offer on day 1. No guard is guessed.
+eotg_on_trait_gained_aug_repair = {
+    trigger = {
+        OR = {
+            scope:trait = trait:wounded_3
+            scope:trait = trait:maimed
+            scope:trait = trait:one_legged
+            scope:trait = trait:one_eyed
+            scope:trait = trait:blind
+            scope:trait = trait:disfigured
+        }
+        is_alive = yes
+        eotg_is_augmented_any = yes
+        OR = {
+            is_ai = no
+            highest_held_title_tier >= tier_county
+        }
+        NOT = { has_character_flag = eotg_flag_aug_repair_cooldown }
+        NOT = { has_character_flag = eotg_flag_aug_procedure_injury }
+    }
+    effect = {
+        add_character_flag = { flag = eotg_flag_aug_repair_cooldown  years = 3 }
+        # What is to be repaired (read by eotg_aug_has_repair_injury and
+        # eotg_aug_repair_injury_effect)
+        if = {
+            limit = { scope:trait = trait:wounded_3 }
+            set_variable = { name = eotg_aug_repair_injury  value = flag:wounded  days = 365 }
+        }
+        else_if = {
+            limit = { scope:trait = trait:maimed }
+            set_variable = { name = eotg_aug_repair_injury  value = flag:maimed  days = 365 }
+        }
+        else_if = {
+            limit = { scope:trait = trait:one_legged }
+            set_variable = { name = eotg_aug_repair_injury  value = flag:one_legged  days = 365 }
+        }
+        else_if = {
+            limit = { scope:trait = trait:one_eyed }
+            set_variable = { name = eotg_aug_repair_injury  value = flag:one_eyed  days = 365 }
+        }
+        else_if = {
+            limit = { scope:trait = trait:blind }
+            set_variable = { name = eotg_aug_repair_injury  value = flag:blind  days = 365 }
+        }
+        else = {
+            set_variable = { name = eotg_aug_repair_injury  value = flag:disfigured  days = 365 }
+        }
+        if = {
+            limit = { has_trait = eotg_total_integration }
+            trigger_event = { id = eotg_aug_proc.004  days = { 7 30 } }
+        }
+        else = {
+            trigger_event = { id = eotg_aug_proc.003  days = { 7 30 } }
+        }
+    }
+}
+
+# The former marker's aftermath (§4.10, G3). On yearly_playable_pulse. Once
+# the year of settling is over, someone who has left the system has a 35%
+# chance a year of one Phantom Static (eotg_aug_proc.020) per exit.
+# COOLDOWN AUTHORITY: eotg_flag_aug_phantom_done is set here and only here
+# (eotg_aug_mark_former_effect clears it on the next exit; it also sets the
+# 1-year eotg_flag_aug_former_settling). proc.020's trigger reads neither.
+eotg_on_yearly_aug_former_check = {
+    trigger = {
+        has_variable = eotg_aug_former
+        eotg_is_augmented_any = no
+        NOT = { has_character_flag = eotg_flag_aug_former_settling }
+        NOT = { has_character_flag = eotg_flag_aug_phantom_done }
+    }
+    effect = {
+        random = {
+            chance = 35
+            add_character_flag = eotg_flag_aug_phantom_done
+            trigger_event = { id = eotg_aug_proc.020  days = { 1 60 } }
+        }
+    }
+}
+
+# The Seamless life (§4.11, G2). On yearly_playable_pulse, after the
+# Neurofractured check. eotg_fracture_risk is gone at Total Integration, so
+# this pool reads the Seamless resource, eotg_aug_residue (0-3, hidden; it
+# only falls). One weighted list a pulse, the tier checks' shape.
+# COOLDOWN AUTHORITY: eotg_flag_aug_seamless_cooldown (2 years) is set here
+# and only here, in the branch that fires; end.040-.042 never read it.
+# The Heir's Arc branch starts eotg_story_aug_heir_arc as the Overclocked
+# check does (same guards: ruler-only, once, eotg_flag_aug_heir_arc_done) and
+# jumps it to stage 3, the same jump eotg_aug_total_integration_effect makes:
+# the story's next tick fires heir.004 (the Choice), which reads a Seamless
+# owner (desc_seamless). No new event.
+# Nothing-weight AI throttle as the Neurofractured pools (balance spec
+# §5.10(a): count x2.5, duke x1.75, king+ x1.25).
+eotg_on_yearly_aug_seamless_check = {
+    trigger = {
+        has_trait = eotg_total_integration
+    }
+    effect = {
+        if = {
+            limit = { NOT = { has_character_flag = eotg_flag_aug_seamless_cooldown } }
+            random_list = {
+                # The Ledger Balances
+                30 = {
+                    add_character_flag = { flag = eotg_flag_aug_seamless_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_end.040  days = { 1 30 } }
+                }
+                # A Resignation (mirrors end.041's trigger: never the spouse
+                # or close family)
+                25 = {
+                    trigger = {
+                        any_councillor = {
+                            is_landed = no
+                            NOT = { this = root }
+                            NOT = { is_spouse_of = root }
+                            NOT = { is_close_family_of = root }
+                        }
+                    }
+                    add_character_flag = { flag = eotg_flag_aug_seamless_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_end.041  days = { 1 30 } }
+                }
+                # A Flicker (mirrors end.042's trigger)
+                10 = {
+                    trigger = {
+                        has_variable = eotg_aug_residue
+                        var:eotg_aug_residue >= 1
+                    }
+                    add_character_flag = { flag = eotg_flag_aug_seamless_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_end.042  days = { 1 30 } }
+                }
+                # The heir confronts what is in the chair (the Heir's Arc,
+                # straight to the Choice)
+                20 = {
+                    trigger = {
+                        is_landed = yes
+                        eotg_aug_has_heir_arc = no
+                        NOT = { has_character_flag = eotg_flag_aug_heir_arc_done }
+                        primary_heir ?= {
+                            is_alive = yes
+                            is_adult = yes
+                        }
+                    }
+                    add_character_flag = { flag = eotg_flag_aug_seamless_cooldown  years = 2 }
+                    # The new story by saved scope, not a later search
+                    # (vanilla scripted_effect
+                    # ep3_story_cycle_admin_eunuch_create_story_effect,
+                    # events/dlc/ep3/ep3_story_cycle_admin_eunuch_events.txt:82-89)
+                    create_story = {
+                        type = eotg_story_aug_heir_arc
+                        save_scope_as = eotg_seamless_heir_arc
+                    }
+                    scope:eotg_seamless_heir_arc = {
+                        set_variable = { name = eotg_stage  value = 3 }
+                    }
+                }
+                # Nothing this year
+                100 = {
+                    modifier = { factor = 2.5  is_ai = yes  highest_held_title_tier < tier_duchy }
+                    modifier = { factor = 1.75  is_ai = yes  highest_held_title_tier = tier_duchy }
+                    modifier = { factor = 1.25  is_ai = yes  highest_held_title_tier >= tier_kingdom }
+                }
             }
         }
     }

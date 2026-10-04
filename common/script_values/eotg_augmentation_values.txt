@@ -145,3 +145,146 @@ eotg_aug_nr_progress_chance = {
         add = var:eotg_aug_nr_battle_bonus
     }
 }
+
+# -- Procedures (docs/specs/cybernetics_v2_procedures.md §4.2, §4.6) ----------
+# The shared roll's "bad outcome" factor (eotg_aug_procedure_roll_effect:
+# every bad entry takes `modifier = { factor = eotg_aug_proc_bad_factor }`).
+# Evaluated in the patient's scope inside the roll, after it has saved
+# scope:eotg_proc_provider / _kind / _surgeon. Stepped surgeon-skill factors
+# in the shape of vanilla risky_wound_treatment_effect
+# (common/scripted_effects/20_health_effects.txt:2368-2420; ratings
+# common/script_values/00_basic_values.txt:474-476). A learning-16 physician
+# with the physician lifestyle runs at about 4% bad (8% x 0.6 x 0.8).
+# The place a later technician or licence line is added (spec §10).
+eotg_aug_proc_bad_factor = {
+    value = 1
+    if = {
+        limit = {
+            OR = {
+                scope:eotg_proc_provider ?= flag:physician
+                scope:eotg_proc_provider ?= flag:self
+            }
+        }
+        if = {
+            limit = { scope:eotg_proc_surgeon ?= { learning < medium_skill_rating } }
+            multiply = 1.25
+        }
+        else_if = {
+            limit = { scope:eotg_proc_surgeon ?= { learning >= high_skill_rating } }
+            multiply = 0.6
+        }
+        else_if = {
+            limit = { scope:eotg_proc_surgeon ?= { learning >= decent_skill_rating } }
+            multiply = 0.8
+        }
+        if = {
+            limit = { scope:eotg_proc_surgeon ?= { has_trait = lifestyle_physician } }
+            multiply = 0.8
+        }
+    }
+    # Operating on yourself
+    if = {
+        limit = { scope:eotg_proc_provider ?= flag:self }
+        multiply = 1.5
+    }
+    # A chain head's edge (replaces the old "clean +15", balance spec §5.6)
+    if = {
+        limit = { has_character_flag = eotg_flag_aug_chain_edge }
+        multiply = 0.6
+    }
+    # The Bidding War's safe vendor (tier2.013), on an upgrade
+    if = {
+        limit = {
+            scope:eotg_proc_kind ?= flag:upgrade
+            has_character_flag = eotg_flag_aug_vendor_safe
+        }
+        multiply = 0.75
+    }
+    # Unstable hardware
+    if = {
+        limit = { has_trait = eotg_neurofractured }
+        multiply = 1.5
+    }
+    min = 0.2
+}
+
+# Price multipliers by provider (spec §3.1). The clinic is x1. Read as the
+# MULT of eotg_aug_can_afford_procedure / eotg_aug_pay_procedure_effect and
+# eotg_aug_can_afford_upgrade / eotg_aug_pay_upgrade_effect.
+eotg_aug_price_mult_physician = {
+    value = 0.75
+}
+eotg_aug_price_mult_self = {
+    value = 0.25
+}
+eotg_aug_price_mult_backstreet_upgrade = {
+    value = 0.5
+}
+eotg_aug_price_mult_backstreet_removal = {
+    value = 0.4
+}
+eotg_aug_price_mult_backstreet_repair = {
+    value = 0.5
+}
+
+# The clinic price of a removal, by eotg_aug_removal_kind (set by the three
+# removal decisions; read in eotg_aug_proc.001): partial and full
+# medium_gold_value, downgrade major_gold_value; x0.75 for partial and
+# downgrade at stress level 2+ or with the Intervention discount (B3, as the
+# decisions' old cost blocks).
+# Before the booking exists (the decisions' is_valid / ai_potential run before
+# their effect sets the variable) the kind is read from the tier instead: the
+# three decisions are tier-gated one to one (partial = Enhanced, downgrade =
+# Overclocked, full = Augmented), as proc.001's trigger mirrors. This keeps
+# the decisions' gold floor in the spec's own form (eotg_aug_can_afford_procedure
+# with this BASE) and the discount flag out of their is_valid tooltips.
+eotg_aug_removal_base_value = {
+    value = medium_gold_value
+    if = {
+        limit = {
+            OR = {
+                var:eotg_aug_removal_kind ?= flag:downgrade
+                AND = {
+                    NOT = { has_variable = eotg_aug_removal_kind }
+                    eotg_is_aug_tier3 = yes
+                }
+            }
+        }
+        value = major_gold_value
+    }
+    if = {
+        limit = {
+            OR = {
+                var:eotg_aug_removal_kind ?= flag:partial
+                var:eotg_aug_removal_kind ?= flag:downgrade
+                AND = {
+                    NOT = { has_variable = eotg_aug_removal_kind }
+                    OR = {
+                        eotg_is_aug_tier2 = yes
+                        eotg_is_aug_tier3 = yes
+                    }
+                }
+            }
+            OR = {
+                stress_level >= 2
+                has_character_flag = eotg_flag_aug_intervention_discount
+            }
+        }
+        multiply = 0.75
+    }
+}
+
+# -- Seamless (spec §4.11) ----------------------------------------------------
+# The Ledger's windfall (eotg_aug_end.040 b, d): medium_gold_value x
+# (1 + 0.5 x (3 - residue)). The less residue is left, the cleaner the books.
+# A missing variable counts as 0.
+eotg_aug_seamless_windfall_value = {
+    value = 3
+    if = {
+        limit = { has_variable = eotg_aug_residue }
+        subtract = var:eotg_aug_residue
+    }
+    multiply = 0.5
+    add = 1
+    multiply = medium_gold_value
+}

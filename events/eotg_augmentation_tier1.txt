@@ -134,6 +134,10 @@ eotg_aug_tier1.001 = {
 # Sought (eotg_flag_aug_sought_upgrade, 60 days, set by the decision): the
 # sought desc replaces the base one, and the AI follows through (b, c x0.1).
 # tier1.022 clears the flag on delivery; b and c clear it here.
+# Procedures spec §4.6: the provider is chosen here and the surgery happens
+# at .021. Every paying option saves scope:eotg_proc_provider (clinic for a,
+# d, e; physician for f; the back streets for g), carried to .021 by
+# trigger_event, where eotg_aug_procedure_roll_booked_effect rolls it.
 
 eotg_aug_tier1.002 = {
     type = character_event
@@ -166,8 +170,9 @@ eotg_aug_tier1.002 = {
     # events/activities/chariot_race_activity/chariot_race_events.txt:1947.
     option = {
         name = eotg_aug_tier1.002.a
-        trigger = { eotg_aug_can_afford_upgrade = yes }
-        eotg_aug_pay_upgrade_effect = yes
+        trigger = { eotg_aug_can_afford_upgrade = { MULT = 1 } }
+        eotg_aug_pay_upgrade_effect = { MULT = 1 }
+        save_scope_value_as = { name = eotg_proc_provider  value = flag:clinic }
         # Balance spec §5.6 (B2 QA): clear any other chain's edge/strain first
         eotg_aug_clear_chain_flags_effect = yes
         duel = {
@@ -252,10 +257,11 @@ eotg_aug_tier1.002 = {
         name = eotg_aug_tier1.002.d
         trigger = {
             has_trait = ambitious
-            eotg_aug_can_afford_upgrade = yes
+            eotg_aug_can_afford_upgrade = { MULT = 1 }
         }
         trait = ambitious
-        eotg_aug_pay_upgrade_effect = yes
+        eotg_aug_pay_upgrade_effect = { MULT = 1 }
+        save_scope_value_as = { name = eotg_proc_provider  value = flag:clinic }
         eotg_add_fracture_risk = { AMOUNT = 3 }
         trigger_event = { id = eotg_aug_tier1.021  days = 1 }
         eotg_aug_stress_surgery_effect = yes
@@ -272,10 +278,11 @@ eotg_aug_tier1.002 = {
         name = eotg_aug_tier1.002.e
         trigger = {
             has_trait = craven
-            eotg_aug_can_afford_upgrade = yes
+            eotg_aug_can_afford_upgrade = { MULT = 1 }
         }
         trait = craven
-        eotg_aug_pay_upgrade_effect = yes
+        eotg_aug_pay_upgrade_effect = { MULT = 1 }
+        save_scope_value_as = { name = eotg_proc_provider  value = flag:clinic }
         add_character_flag = { flag = eotg_flag_aug_upgrade_reassured  days = 120 }
         trigger_event = { id = eotg_aug_tier1.021  days = 1 }
         stress_impact = {
@@ -285,6 +292,61 @@ eotg_aug_tier1.002 = {
             base = 30
             modifier = { add = 20  has_trait = craven }
             modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+
+    # (a court physician, not root) "My own physician." (procedures spec
+    # §4.6) As a, at the physician's price; the physician operates at .021
+    # (their skill sets the odds, eotg_aug_proc_bad_factor). A follow-through,
+    # so no sought factor (balance §5.1 item 3). Procedures QA: a physician
+    # ruler with no court physician is not offered this price.
+    option = {
+        name = eotg_aug_tier1.002.f
+        trigger = {
+            eotg_aug_has_court_physician = yes
+            eotg_aug_can_afford_upgrade = { MULT = eotg_aug_price_mult_physician }
+        }
+        eotg_aug_pay_upgrade_effect = { MULT = eotg_aug_price_mult_physician }
+        save_scope_value_as = { name = eotg_proc_provider  value = flag:physician }
+        # As a: clear any other chain's edge/strain first (balance spec §5.6)
+        eotg_aug_clear_chain_flags_effect = yes
+        trigger_event = { id = eotg_aug_tier1.021  days = 1 }
+        stress_impact = {
+            base = 0
+            compassionate = minor_stress_impact_gain
+            humble = minor_stress_impact_gain
+        }
+        ai_chance = {
+            base = 35
+            modifier = { add = 20  has_trait = trusting }
+            modifier = { add = 10  has_trait = diligent }
+        }
+    }
+
+    # "Someone cheaper." (procedures spec §4.6) As a, at the back-street
+    # price, and without a's stewardship check: nobody is vetted. The
+    # cheapest path, offered to everyone, so the Pursue decision's gold floor
+    # never opens an event the ruler cannot act on.
+    option = {
+        name = eotg_aug_tier1.002.g
+        trigger = {
+            eotg_aug_can_afford_upgrade = { MULT = eotg_aug_price_mult_backstreet_upgrade }
+        }
+        eotg_aug_pay_upgrade_effect = { MULT = eotg_aug_price_mult_backstreet_upgrade }
+        save_scope_value_as = { name = eotg_proc_provider  value = flag:backstreet }
+        # As a: clear any other chain's edge/strain first (balance spec §5.6)
+        eotg_aug_clear_chain_flags_effect = yes
+        trigger_event = { id = eotg_aug_tier1.021  days = 1 }
+        stress_impact = {
+            base = 0
+            compassionate = minor_stress_impact_gain
+            humble = minor_stress_impact_gain
+        }
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = greedy }
+            modifier = { add = 10  has_trait = ambitious }
+            modifier = { add = -20  has_trait = craven }
         }
     }
 }
@@ -1814,6 +1876,10 @@ eotg_aug_tier1.015 = {
         if = {
             limit = { scope:eotg_rejection_outcome = flag:failed }
             eotg_aug_remove_all_effect = yes
+            # Procedures spec §4.5 (G3): the body threw it out
+            hidden_effect = {
+                set_variable = { name = eotg_aug_former  value = flag:rejected }
+            }
             if = {
                 limit = { NOT = { has_trait = wounded } }
                 add_trait = wounded_1
@@ -2611,7 +2677,11 @@ eotg_aug_tier1.020 = {
 # The First Upgrade, stage 2: What Will You Change? (A-12; thread T7).
 # Sets eotg_aug_focus (flag:limbs / flag:senses / flag:nerves). Fires .022 in
 # 30-60 days from `after` (every option).
-# Caller: eotg_aug_tier1.002 (a, d, e), 1 day later.
+# Caller: eotg_aug_tier1.002 (a, d, e, f, g), 1 day later.
+# Procedures spec §4.6: the focus choice is the consent at the table. The
+# surgery is rolled in `after` with the provider booked at .002
+# (eotg_aug_procedure_roll_booked_effect, hidden); .022 reveals and applies
+# it. Death on the table skips .022.
 
 eotg_aug_tier1.021 = {
     type = character_event
@@ -2700,7 +2770,14 @@ eotg_aug_tier1.021 = {
     }
 
     after = {
-        trigger_event = { id = eotg_aug_tier1.022  days = { 30 60 } }
+        eotg_aug_save_surgeon_effect = yes
+        hidden_effect = {
+            eotg_aug_procedure_roll_booked_effect = { PATIENT = root  PROCEDURE = upgrade  SURGEON = scope:eotg_proc_surgeon }
+        }
+        if = {
+            limit = { NOT = { scope:eotg_proc_outcome = flag:death } }
+            trigger_event = { id = eotg_aug_tier1.022  days = { 30 60 } }
+        }
     }
 }
 
@@ -2708,8 +2785,16 @@ eotg_aug_tier1.021 = {
 # ── eotg_aug_tier1.022 ────────────────────────────────────────────────────────
 # The First Upgrade, stage 3: Installation. Augmented -> Enhanced: every
 # option runs eotg_aug_set_integration_effect = { XP = 50 } (the only tier1
-# caller; spec §9 item 2). Rolled in immediate: clean 70 (+15 physician,
-# thread T5) / complication 30 (risk +10, infection 1 year).
+# caller; spec §9 item 2). The tier change stands on every outcome (death on
+# the table never reaches here).
+# Procedures spec §4.6: the outcome was rolled at .021 by the shared roll
+# (scope:eotg_proc_outcome, carried by trigger_event) and is applied here
+# (eotg_aug_procedure_apply_effect). The old clean 70 / complication 30 roll
+# is folded into it: the physician, the chain edge and strain now act
+# through the roll. desc_complication reads the infection outcome;
+# desc_rejection the body fighting the hardware (risk +10, infection); the
+# shared outcome lines cover the rest; desc_clean stays the fallback (clean
+# and the hidden flaw, which is never reported).
 # Caller: eotg_aug_tier1.021 (after), 30-60 days later.
 
 eotg_aug_tier1.022 = {
@@ -2719,8 +2804,32 @@ eotg_aug_tier1.022 = {
         desc = eotg_aug_tier1.022.desc
         first_valid = {
             triggered_desc = {
-                trigger = { scope:eotg_install_outcome = flag:complication }
+                trigger = { scope:eotg_proc_outcome ?= flag:infection }
                 desc = eotg_aug_tier1.022.desc_complication
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_proc_outcome ?= flag:rejection }
+                desc = eotg_aug_tier1.022.desc_rejection
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_proc_outcome ?= flag:excellent }
+                desc = eotg_aug_proc.outcome_excellent
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_proc_outcome ?= flag:discovered }
+                desc = eotg_aug_proc.outcome_discovered
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_proc_outcome ?= flag:maimed }
+                desc = eotg_aug_proc.outcome_maimed
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_proc_outcome ?= flag:one_eyed }
+                desc = eotg_aug_proc.outcome_one_eyed
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_proc_outcome ?= flag:blind }
+                desc = eotg_aug_proc.outcome_blind
             }
             desc = eotg_aug_tier1.022.desc_clean
         }
@@ -2732,47 +2841,29 @@ eotg_aug_tier1.022 = {
     left_portrait = {
         character = root
         triggered_animation = {
-            trigger = { scope:eotg_install_outcome = flag:complication }
+            trigger = {
+                OR = {
+                    scope:eotg_proc_outcome ?= flag:infection
+                    scope:eotg_proc_outcome ?= flag:rejection
+                    scope:eotg_proc_outcome ?= flag:maimed
+                    scope:eotg_proc_outcome ?= flag:one_eyed
+                    scope:eotg_proc_outcome ?= flag:blind
+                }
+            }
             animation = pain
         }
         animation = personality_bold
     }
 
     immediate = {
+        eotg_aug_procedure_apply_effect = yes
         hidden_effect = {
-            # Balance spec §5.6 chain edge: tier1.002.a's check carries here
-            # (edge +15 clean, strain +10 complication); both cleared after.
-            random_list = {
-                70 = {
-                    modifier = {
-                        add = 15
-                        eotg_has_physician_access = yes
-                    }
-                    modifier = {
-                        add = 15
-                        has_character_flag = eotg_flag_aug_chain_edge
-                    }
-                    save_scope_value_as = { name = eotg_install_outcome  value = flag:clean }
-                }
-                30 = {
-                    modifier = {
-                        add = 10
-                        has_character_flag = eotg_flag_aug_chain_strain
-                    }
-                    save_scope_value_as = { name = eotg_install_outcome  value = flag:complication }
-                }
-            }
             eotg_aug_clear_chain_flags_effect = yes
             remove_character_flag = eotg_flag_aug_upgrade_reassured
             # Balance spec §5.1: the sought upgrade is delivered
             remove_character_flag = eotg_flag_aug_sought_upgrade
             # The price paid in .002 is delivered (QA round 2 escrow)
             remove_variable = eotg_aug_escrow
-        }
-        if = {
-            limit = { scope:eotg_install_outcome = flag:complication }
-            eotg_add_fracture_risk = { AMOUNT = 10 }
-            add_character_modifier = { modifier = eotg_mod_aug_infection  years = 1 }
         }
     }
 
