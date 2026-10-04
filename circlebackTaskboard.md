@@ -158,7 +158,7 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Status:** waiting-human (2026-10-04)
 - **What:** the precedence ruling and errata are done (2026-10-04): docs/lore's dated entries win, Yu is freed, and LAW AT 866 is pasted. That resolved most of the 16 contradictions. Seven small points remain, where the sources are silent or disagree with each other. They're listed in `docs/lore/REVIEW_866.md` under "Still open".
 - **Owner:** human
-- **Next step:** answer when convenient. None blocks current work.
+- **Next step:** settled 2026-10-04 except the Vaelorin/Xerxes question (see `docs/lore/REVIEW_866.md`). Answer that one when convenient.
 
 ### CB-08: Glossary ruling on medieval game terms
 - **Status:** waiting-human (2026-10-03)

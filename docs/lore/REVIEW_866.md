@@ -65,14 +65,16 @@ The dated docs/lore entries win, so the following now hold at 866:
 - **Orro:** a necromantic nation in the Outer Ring.
 - **The Warrens:** in revolution (860–915).
 
-**Still open** (the sources are silent, or disagree with each other); see circlebackTaskboard CB-32:
-1. The Elrossi Emperor at 851: Frederick III (NA:4422, summary) or Ferdinand IV (NA:4430, dated). By precedence, Ferdinand IV.
-2. The Exodus start: 131 (EV:59) or 150 (NA:216). Does it "wane after 1000"? Not in the sources.
-3. Carrigore's alignment: silent.
-4. Thorum, the Pale Hand, the Laughing Blades: absent from the sources. Is Thorum the Gob-Ogre Trade Federation?
-5. XERXES ERRATA: Vaelorin "the Tide-Crowned" against the drowned city (850) and New Xerxes (Corbin David, 851).
-6. Helix: its government after 850, its leader (Clayd), Pale Hand ties. Are its AI fleets canon for its MAA?
-7. Legacies text: "eight centuries" is wrong (it should be more than 866 years). "Confluence" has no source.
+**Settled 2026-10-04** (the human said to proceed with the recommendations):
+1. **The Elrossi Emperor at 851 is Ferdinand IV.** The dated entry (NA:4430) beats the summary.
+2. **The Exodus begins in 131 AG** (EV:59, dated). At 866 it is ongoing, with **no end date fixed**. Drop "wanes after 1000".
+3. **Carrigore's alignment is left unstated** ("born of despair", a fledgling god).
+4. **Thorum, the Pale Hand and the Laughing Blades** keep their SETTING LORE body descriptions. The docs/lore files are silent on them, so the lower source stands. They are not the Gob-Ogre Trade Federation unless a brief says so.
+5. **Helix's AI fleets (EV:464-468) are canon** for the remnant's military flavour and MAA. Its government, its leader (Clayd) and the Pale Hand ties stay silent until the Helix region brief.
+6. **Legacies text:** replace "eight centuries" with a figure over 866 years when Legacies is lifted. "Confluence" needs a source or a rename at that time.
+7. **Hunt fauna:** keep "the quarry" generic until region briefs name species. **Who tends holy sites:** "those who tend the site" until faith loc exists.
+
+**Still open:** XERXES ERRATA. Does Vaelorin "the Tide-Crowned" rule the drowned old city (flooded 850), and how does that relate to New Xerxes (Corbin David, 851)?
 
 ## Draft errata
 LAW AT 866 was pasted 2026-10-04. The human did not choose ERAS; its content now follows from SOURCE PRECEDENCE anyway.
