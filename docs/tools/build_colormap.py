@@ -1,6 +1,10 @@
 """
 Generate gfx/map/terrain/colormap.dds for Echoes of the Grip.
 
+WARNING (2026-10-04): the shipped, tracked colormap.dds was made by an earlier, uncommitted
+version of this script, and no arguments to this version reproduce it (the default output is
+much darker). Running this overwrites the shipped look. See docs/pitfalls.md §13.
+
 The colormap is soft-light blended over the blended detail materials:
 
     Diffuse = SoftLight( DetailDiffuse, ToLinear(colormap), (1 - properties.R) * 1.0 )

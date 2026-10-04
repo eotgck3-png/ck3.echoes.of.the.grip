@@ -220,12 +220,14 @@ top-level key in `common/on_action/` that is neither in the engine dump nor defi
 Run it on every lift. Never take a hook name from an `.info` file without finding it defined in
 a vanilla `.txt`.
 
-## 13. Rerunning the terrain build tool destroys the current map look
+## 13. Rerunning a terrain generator destroys the current map look
 
 **Symptom.** After an unrelated terrain tweak, the terrain structure looks different and nobody changed it on purpose.
 
 **Cause.** The `eotg_structure_{a,b,c}_{diffuse,normal}.dds` bakes in game since 2026-10-01 came from `docs/tools/build_terrain_hybrid.py --source <image>` run against an image that isn't in the repo and can't be found. No invocation of the committed tool reproduces them: procedural, `eotg_hologram_source.png` and `--cloud` all give 0/6 matches. The tool is deterministic and unchanged since 09-27. `build_terrain_hybrid.py` rewrites these files unconditionally.
 
-**Rule.** These nine files are tracked inputs now (`.gitignore` exception, 2026-10-04). Don't run `build_terrain_hybrid.py` over them unless you mean to replace the look. If you do, commit the new bakes together with the exact command and its source image.
+**Same trap, second case:** `gfx/map/terrain/colormap.dds` (09-25) predates the only committed `build_colormap.py` (643b6e7, 09-26). No `--level` or `--drift` reproduces it: the default output is visibly darker (mean 106 vs 131). Only the holding decals (`build_holding_decals.py`) were verified to reproduce byte for byte.
+
+**Rule.** These files (9 structure bakes + colormap) are tracked inputs now (`.gitignore` exception, 2026-10-04). Don't run `build_terrain_hybrid.py` or `build_colormap.py` over them unless you mean to replace the look. If you do, commit the new bakes together with the exact command and its source image.
 
 **Confirm.** `git status gfx/map/terrain/` shows them modified after any tool run. `git checkout` restores them.
