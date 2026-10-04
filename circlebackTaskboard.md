@@ -83,6 +83,39 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Next step:** do these alongside CB-01, using `add_trait eotg_cybernetics` and then `effect add_trait_xp = { trait = eotg_cybernetics value = 50 }`.
 - **Refs:** `docs/specs/cybernetics_track.md` §9
 
+### CB-20: 50-year observer run (QA round 2)
+- **Status:** blocked (2026-10-04)
+- **What:** let the game run 50 years in observer mode on the temporary map. Count augmented rulers by tier, how many reach Overclocked and Neurofractured, and how many die in a cascade. This settles round 2's top design issues (progression speed, AI uptake, everyone stuck at Augmented) before any pacing number is tuned.
+- **Blocked by:** B-DESCRIPTOR, B-TEMPMAP
+- **Owner:** human → eotg-architect
+- **Next step:** run it. Read the counts off the character finder by trait, or have the orchestrator add a debug count. Hand the numbers to the architect against `docs/specs/cybernetics_v2_balance.md`.
+- **Refs:** `docs/qa/cybernetics_qa_round2.md` §4.3, §6.1
+
+### CB-21: QA round 2 in-game checks
+- **Status:** blocked (2026-10-04)
+- **What:** round 2 §6 items 2–7:
+  - **Regency (M15):** the containment regency is still active after 2–3 months on a healthy adult.
+  - **Heir event (H3):** who sees heir.005 after the restructure.
+  - **Error log (H4):** no range error after init.019.c and retinue.004.a with 1–2 knights.
+  - **Excision (M2):** an excision death gives no survival event.
+  - **Cascade (M1):** next year's risk starts at about 8 after a cascade.
+  - **Display:** the trait tooltip shows Augmented, Enhanced and Overclocked with the Integration bar, and end.011 shows a whole number.
+- **Blocked by:** B-DESCRIPTOR, B-TEMPMAP
+- **Owner:** human
+- **Next step:** run these alongside CB-01.
+
+### CB-22: Balance amendment (QA round 2 design issues)
+- **Status:** in progress (2026-10-04)
+- **What:** progression speed, the AI decision layer, AI throttles and an ongoing Augmented cost, Neurofractured agency, the Seamless and Sedation balance, outcome rolls, thread links, coping and congenital hooks, and the non-ruler rate.
+- **Owner:** eotg-architect (writing `docs/specs/cybernetics_v2_balance.md`) → human for any open questions → scripter
+- **Next step:** review the spec when it lands. Anything that adds new events needs your approval.
+
+### CB-23: Augmented landed barons get no yearly content
+- **Status:** parked (2026-10-04)
+- **What:** the ruler checks run for county tier and up, and the non-ruler checks for employed knights and courtiers. A landed baron fits neither, so an augmented baron never progresses or gets events. Not a bug, but a design gap.
+- **Trigger to revisit:** if baron-tier play matters for the setting.
+- **Owner:** eotg-architect
+
 ---
 
 ## Art
@@ -208,7 +241,8 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Owner:** eotg-scripter
 
 ### CB-16: Superseded cybernetics QA docs
-- **Status:** ready (2026-10-03)
+- **Status:** dispatched to cloud (2026-10-04), see CB-24
+- **Status (earlier):** ready (2026-10-03)
 - **What:** `docs/qa/cybernetics_system_overview.md`, `cybernetics_content_gaps.md`, `cybernetics_logic_audit.md` and `cybernetics_event_content_proposal.md` describe the system before v2 was built. They're useful history but now misleading as a current description.
 - **Owner:** orchestrator
 - **Next step:** add a one-line "superseded by `docs/specs/cybernetics_v2.md` and `docs/qa/cybernetics_test_plan.md` (2026-10-03)" note to the top of each.
@@ -221,6 +255,12 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Next step:** spec it using culture traditions or pillars rather than hard-coded culture keys, if possible.
 
 ---
+
+### CB-24: Cloud session, CB-16 + static cybernetics conformance audit
+- **Status:** waiting-human (2026-10-04)
+- **What:** a cloud Claude Code session (GitHub only: no game files, Tiger or PX) does CB-16, then a read-only audit of the cybernetics v2 script against `docs/specs/cybernetics_v2*.md`, written to `docs/qa/cybernetics_spec_conformance_cloud.md`. It's report-only, so it can't conflict with the CB-22 balance work. The prompt template is `docs/cloud_agent_prompt.md`.
+- **Owner:** human (send the prompt) → orchestrator
+- **Next step:** when the cloud branch (`claude/...`) comes back, tell the orchestrator its name. The orchestrator pulls it and has eotg-qa triage the findings against Tiger and PX. Every `UNVERIFIED-VANILLA` claim gets checked against game files, and the handoff in `docs/handoffs/` is copied here.
 
 ## Tooling and environment
 
