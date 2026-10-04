@@ -71,7 +71,7 @@ The localizer may polish these. Rules:
 - infection "\n\nThe incision is hot and swollen, and a fever is building under it."
 - complication "\n\nThe body is fighting the new hardware. The incision weeps and the readings stutter. The surgeon says it will hold. It will also hurt."
 - fragments "\n\nThey missed some. Wire and splinters of casing are still in the tissue, and the body knows it before the scans do."
-- repair_failed "\n\nThe repair did not take. The part sits where it was fitted and does nothing, and the injury is as it was."
+- repair_failed "\n\nThe repair did not take. The part sits where it was fitted and does nothing, and nothing is better than it was." *(Amended 2026-10-04 by the interactions lore review, I3: injury-neutral, because a fault repair from tamper.004 and int.001.b also lands in proc.002.)*
 - discovered "\n\nWord has got out. Someone saw the work, or the place it was done, or paid to know."
 - maimed "\n\nSomething was cut on the table that was not hardware. The use of the limb has not come back."
 - one_eyed "\n\nAn optic line was severed on the table. One eye has stayed dark."

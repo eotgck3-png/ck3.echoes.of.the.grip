@@ -4,6 +4,7 @@
 **Authorised by:** the human, 2026-10-04 (relayed by the coordinator): G4 (character interactions), G5 (the "sabotage their implants" hostile scheme) and G8 (prisoner Salvage), all from [`docs/qa/cybernetics_content_gaps_v2.md`](../qa/cybernetics_content_gaps_v2.md) Part 2.
 **Index:** [cybernetics_v2.md](cybernetics_v2.md). Index §1 rules 1–12 and the §5 lore register (with today's never-name extension) apply to everything here.
 **Builds on:** [cybernetics_v2_procedures.md](cybernetics_v2_procedures.md) (committed, in lore review). This spec **uses** its roll (`eotg_aug_procedure_roll_effect` / `eotg_aug_procedure_effect`, params `PATIENT`, `PROVIDER`, `PROCEDURE`, `SURGEON`), its pricing helpers, `eotg_aug_save_surgeon_effect`, `eotg_aug_removal_perform_effect`, `eotg_aug_repair_injury_effect`, proc.002 and proc.020, and the reserved `eotg_aug_former = flag:salvaged`. It does **not** re-spec the roll. §3.2 lists five small additive amendments to the procedures spec's not-yet-built pieces.
+**Lore review:** approved 2026-10-04 with must-fixes I1–I7, all folded in below. The verdict and its loc renderings are in [cybernetics_v2_interactions_lore.md](cybernetics_v2_interactions_lore.md), which is **binding** for script and loc (§7, §8).
 **Also binding:** [cybernetics_v2_balance.md](cybernetics_v2_balance.md) (HQ1 pacing, HQ2 world targets, §9.2 observer run), [cybernetics_v2_trait_depth.md](cybernetics_v2_trait_depth.md) §5.2 (G9 stress rows), [cybernetics_v2_new_beats.md](cybernetics_v2_new_beats.md) (patron.008 fires after any exit), [`docs/lore/REVIEW_866.md`](../lore/REVIEW_866.md).
 
 **Size.**
@@ -47,9 +48,9 @@ All paths under `D:/SteamLibrary/steamapps/common/Crusader Kings III/game/`.
 ## 1. Purpose & gate
 
 The system is rich in events about yourself and has no levers over other people (gaps doc Part 2 headline). This spec adds them:
-- **G4.** Three interactions: **Offer Augmentation** (to a spouse, family member, courtier or vassal), **Demand Removal** (from a vassal, courtier, spouse or family member), **Have Them Examined** (your physician looks at someone's hardware).
+- **G4.** Three interactions: **Offer Augmentation** (to a spouse, family member, courtier or vassal), **Demand Implant Removal** (from a vassal, courtier, spouse or family member), **Have Them Examined** (your physician looks at someone's hardware).
 - **G5.** A hostile scheme, **Tamper with Implants**. Agents get physical access to the target's hardware. Success raises risk by tier, leaves a visible fault, and makes the target's **next procedure roll** worse until it is repaired.
-- **G8.** A prisoner interaction, **Salvage**. The prisoner's implants are cut out through the procedure roll, so the prisoner can die or be maimed, and Fragments are likely. Dread, opinion and kinslayer follow vanilla's prisoner-maiming shape. The salvaged hardware can be sold, fitted, or destroyed.
+- **G8.** A prisoner interaction, **Salvage Implants**. The prisoner's implants are cut out through the procedure roll, so the prisoner can die or be maimed, and Fragments are likely. Dread, opinion and kinslayer follow vanilla's prisoner-maiming shape. The salvaged hardware can be sold, fitted, or destroyed.
 
 **Gate 3 (Systems), built against the temporary map** (`docs/agent_workflow.md` §5 rule 2; the mod-exclusive-system exception in `CLAUDE.md`). **Not blocked.**
 - Map-agnostic: no title, province, character, culture or faith keys. Relations go through scope tests (`is_vassal_of`, `is_courtier_of`, …) only.
@@ -98,7 +99,7 @@ All keys carry `eotg_`. No landed titles.
 | event (hidden) | `eotg_aug_tamper.001` (result roll) | tamper event file | scripter |
 | event | `eotg_aug_tamper.002` *The Work Is Done* (owner, success) | tamper event file | scripter |
 | event | `eotg_aug_tamper.003` *Hands Withdrawn* (owner, failure) | tamper event file | scripter |
-| event | `eotg_aug_tamper.004` *Something in the Hardware* (target) | tamper event file | scripter |
+| event | `eotg_aug_tamper.004` *A Fault in the Hardware* (target) | tamper event file | scripter |
 | custom on_action | `eotg_aug_tamper_ongoing` | `common/on_action/eotg_augmentation_on_actions.txt` | scripter |
 | scripted effect | `eotg_aug_offer_install_effect` (param `PROVIDER` = clinic / physician / backstreet) | `common/scripted_effects/eotg_augmentation_effects.txt` | scripter |
 | scripted effect | `eotg_aug_demand_removal_effect` (param `PROVIDER`) | effects | scripter |
@@ -113,7 +114,7 @@ All keys carry `eotg_`. No landed titles.
 | script value | `eotg_aug_salvage_sale_value` (reads `scope:eotg_salvage_tier`) | `common/script_values/eotg_augmentation_values.txt` | scripter |
 | opinion modifier | `eotg_opinion_aug_forced_procedure` (−30, decaying, 20 years) | `common/opinion_modifiers/eotg_augmentation_opinions.txt` | scripter |
 | opinion modifier | `eotg_opinion_aug_demanded_removal` (−10; applied with `years = 5`) | opinions | scripter |
-| opinion modifier | `eotg_opinion_aug_salvaged_me` (−50, decaying, 50 years, `imprisonment_reason = yes`) | opinions | scripter |
+| opinion modifier | `eotg_opinion_aug_salvaged_me` (−50, decaying, 50 years, `imprisonment_reason = yes`; displayed "Cut Out My Implants") | opinions | scripter |
 | opinion modifier | `eotg_opinion_aug_salvaged_family_member` (−20, decaying, 20 years) | opinions | scripter |
 | opinion modifier | `eotg_opinion_aug_tampered` (−40, decaying, 30 years, `imprisonment_reason = yes`) | opinions | scripter |
 | character flag (timed, 5 years) | `eotg_flag_aug_sabotaged` | `eotg_aug_sabotage_apply_effect`; read by `eotg_aug_proc_bad_factor`; consumed by the roll; removed by a fault repair | scripter |
@@ -260,7 +261,7 @@ The reveal goes to the recipient (init.011 or silent), per the procedures routin
 |---|---|---|
 | `category` / `icon` | `interaction_category_vassal` / `demand_obedience` | |
 | `popup_on_receive` / `pause_on_receive` | yes / yes | `00_religious_interactions.txt:511-512` |
-| `is_shown` | `scope:recipient = { has_trait = eotg_cybernetics  eotg_aug_in_charge_of = { ACTOR = scope:actor }  is_imprisoned = no }`. Tiers 1–3 only. **Neurofractured is excluded:** its exit is Excision (`eotg_decision_aug_excision`), deliberately dangerous. **Seamless is excluded:** there is no one left to consent. | |
+| `is_shown` | `scope:recipient = { has_trait = eotg_cybernetics  eotg_aug_in_charge_of = { ACTOR = scope:actor }  is_imprisoned = no }`. Tiers 1–3 only. **Neurofractured is excluded:** its exit is Excision (`eotg_decision_aug_excision`), deliberately dangerous. **Seamless is excluded** (lore ruling, upheld): at 866 tech no surgeon can find where Seamless hardware ends and the body begins, so there is nothing a removal could take out. | |
 | `is_valid_showing_failures_only` | afford by flag: base `medium_gold_value` (the full-removal clinic price, procedures `eotg_aug_removal_base_value`); multipliers 1 / `eotg_aug_price_mult_physician` / `eotg_aug_price_mult_backstreet_removal` | |
 | `cooldown_against_recipient` | `{ years = 10 }` | demand_conversion: 15 (:544) |
 | `auto_accept` | strong hook | |
@@ -319,7 +320,7 @@ The same desc key is used whichever direction the number points. The sign tells 
 |---|---|
 | `category` / `icon` | `interaction_category_friendly` / `learning` |
 | `is_available` | `eotg_has_physician_access = yes` (actor-only state belongs in `is_available`, `.info:570-573`) |
-| `is_shown` | `scope:recipient != scope:actor`; recipient `eotg_aug_tamper_target = yes` (augmented, not Seamless); recipient `OR = { eotg_aug_in_charge_of = { ACTOR = scope:actor }  is_imprisoned_by = scope:actor }` |
+| `is_shown` | `scope:recipient != scope:actor`; recipient `eotg_aug_tamper_target = yes` (augmented, not Seamless; lore ruling: at 866 tech no one can tell where Seamless hardware ends and the body begins, so there is no hardware to examine apart from the body); recipient `OR = { eotg_aug_in_charge_of = { ACTOR = scope:actor }  is_imprisoned_by = scope:actor }` |
 | `cooldown_against_recipient` | `{ years = 2 }` |
 | `auto_accept` | `OR = { scope:recipient = { is_courtier_of = scope:actor }  scope:recipient = { is_imprisoned_by = scope:actor } }`. Your own household and your prisoners do not get a say. |
 | `on_accept` | `scope:recipient = { save_scope_as = eotg_examined }`; `scope:actor = { eotg_aug_save_surgeon_effect = yes  trigger_event = { id = eotg_aug_int.001  days = { 3 10 } } }` |
@@ -404,7 +405,7 @@ The vanilla script values and scripted modifiers named here exist: `common/scrip
 - `scope:target = { is_alive = yes  is_imprisoned = no  exists = location  in_diplomatic_range = scope:owner  eotg_aug_tamper_target = yes }`;
 - the `no_scheming_allowed_var` block (:75-81).
 
-A target who leaves the system, or reaches Seamless, invalidates the scheme.
+A target who leaves the system, or reaches Seamless, invalidates the scheme. The Seamless exclusion is upheld by lore: at 866 tech no one can find where Seamless hardware ends and the body begins, so there is no panel to open.
 
 **`base_success_chance`.** Vanilla core first: `scheme_type_skill_success_chance_modifier = { SKILL = INTRIGUE }`, `hostile_scheme_base_chance_modifier = yes`, `apply_calculated_scheme_success_chance_adjustments_modifier = yes` (`abduct_scheme.txt:106-113`). Then:
 
@@ -513,11 +514,11 @@ scheme_critical_moments.0002 (vanilla) --execute--> eotg_aug_tamper.001 (hidden)
 | a | "Let it go." | `scope:scheme = { end_scheme = yes }`; `stress_impact = { stubborn = medium_stress_impact_gain }` (vanilla :496-498) | 50; +20 craven; +10 content |
 | b | "Again." | `custom_tooltip = restart_scheme_tt` (vanilla); `scope:scheme = { reset_failed_scheme_effect = yes }` | 10; +200 stubborn (vanilla :513-518); +20 vengeful |
 
-**tamper.004 *Something in the Hardware*** (target). This is the reveal: the consequences land here (procedures §4.1 rule 2).
+**tamper.004 *A Fault in the Hardware*** (target; retitled by lore I1, because the old title implied a presence inside the hardware). This is the reveal: the consequences land here (procedures §4.1 rule 2).
 - **Trigger:** `is_alive = yes`, `eotg_aug_tamper_target = yes`. A target who has left since gets nothing: there is no hardware to fail.
 - **Immediate:** `eotg_aug_save_surgeon_effect = yes`; `eotg_aug_sabotage_apply_effect = yes`; if `OR = { exists = scope:scheme_discovered  exists = scope:eotg_tamper_signed }`, `add_opinion = { modifier = eotg_opinion_aug_tampered  target = scope:owner }`.
 - **Desc:**
-  - base: the hardware misbehaves. The overlay stutters, and a limb answers late;
+  - base: the hardware misbehaves. Bodily and hardware symptoms only (lore I2): the overlay stutters, a sensor drifts, a limb **responds** late. Never a forecast, and never "answers";
   - a tier line (`desc_aug` / `_enh` / `_oc` / `_nf`);
   - `desc_known` (names `[owner.GetName]`) when discovered or signed, else `desc_unknown` (someone had their hands on it).
 - **Portraits:** left root (`paranoia`); right owner when known.
@@ -551,7 +552,7 @@ A fault repair adds the repair risk (+2 to +8 by tier, back streets +3), and the
 | b | "My own physician." | `eotg_has_physician_access`; afford × `eotg_aug_price_mult_physician` | physician, `SURGEON = scope:eotg_proc_surgeon` | — | 40; +20 trusting; +10 diligent |
 | c | "Someone cheaper." | afford × `eotg_aug_price_mult_backstreet_repair` | backstreet | — | 25; +20 greedy; +10 deceitful; −20 craven |
 | d | "Live with it." | — | — | `eotg_aug_stress_neglect_effect = yes`. The fault stays (2-year modifier, 5-year flag). | 20; +20 lazy; +10 stubborn |
-| e [paranoid] | "Find the hands." | `has_trait = paranoid`; NOT known (no `scheme_discovered`, no `eotg_tamper_signed`); `scope:owner ?= { is_alive = yes }` | — | intrigue `duel` vs `scope:owner` (tier2.015.a shape, `compare_modifier` ×2.5); success: `add_opinion = { modifier = eotg_opinion_aug_tampered  target = scope:owner }`, toast `.e.success`; failure: toast `.e.failure` | 30; +30 paranoid; +10 vengeful |
+| e [paranoid] | "Find the hands." (physical evidence only, lore I5; §7) | `has_trait = paranoid`; NOT known (no `scheme_discovered`, no `eotg_tamper_signed`); `scope:owner ?= { is_alive = yes }` | — | intrigue `duel` vs `scope:owner` (tier2.015.a shape, `compare_modifier` ×2.5); success: `add_opinion = { modifier = eotg_opinion_aug_tampered  target = scope:owner }`, toast `.e.success`; failure: toast `.e.failure` | 30; +30 paranoid; +10 vengeful |
 
 **Coupling:** the immediate moves risk; a/b/c move risk inside the roll; the desc reads the tier.
 
@@ -575,7 +576,7 @@ Shape: `blind_interaction` (`00_prison_interactions.txt:8150-8344`).
 |---|---|
 | `category` / `icon` / `interface_priority` | `interaction_category_prison` / `blind` / 30 |
 | `desc` | `eotg_aug_salvage_interaction_desc` |
-| `is_shown` | `scope:actor = { is_adult = yes }`; `scope:recipient = { is_imprisoned_by = scope:actor  eotg_aug_tamper_target = yes }`. **Seamless is excluded** (lore question §8). |
+| `is_shown` | `scope:actor = { is_adult = yes }`; `scope:recipient = { is_imprisoned_by = scope:actor  eotg_aug_tamper_target = yes }`. **Seamless is excluded** for now (option A, lore's recommendation). **Open human decision** (§8 ruling 2): A, exclude; or B, allow it with death on the table forced. Build A. B would be a later change to `is_shown` and `eotg_aug_salvage_effect`. |
 | `is_valid_showing_failures_only` | recipient NOT `is_being_tortured`, NOT `is_currently_being_purged` (vanilla `custom_description` keys `currently_being_tortured`, `is_currently_being_purged_tt`; :8175-8194) |
 | `is_highlighted` | actor sadistic, or rival of the recipient (:8196-8213, minus the cultural lines) |
 | send options | physician (needs access, `localization = eotg_aug_send_physician`) / rough (`flag = eotg_aug_provider_backstreet`, `localization = eotg_aug_send_rough`, `starts_enabled`) |
@@ -655,7 +656,7 @@ All `character_event`, in `events/eotg_augmentation_interactions.txt`, namespace
 | a | "Treat what you can." | examined holds infection, fragments or `eotg_mod_aug_tampered`, OR is tier 3 / NF; `gold >= minor_gold_value` | pay `minor_gold_value`; on the examined: remove infection, fragments and tampered (guarded); hidden risk −5 if tier 3 or NF; `eotg_opinion_aug_grateful_patient` 10 years | 40; +20 diligent; +20 compassionate |
 | b | "Fix the fault." | examined `eotg_aug_has_fault = yes`; afford `medium_gold_value` × `eotg_aug_price_mult_physician` | pay; on the examined `eotg_aug_repair_injury = flag:fault` (365 days); `save_scope_value_as eotg_proc_fault`; `hidden_effect = { eotg_aug_procedure_effect = { PATIENT = scope:eotg_examined  PROVIDER = physician  PROCEDURE = repair  SURGEON = scope:eotg_proc_surgeon } }`; `custom_tooltip = eotg_aug_int.001.b.tt` | 30; +20 diligent; +10 paranoid; −20 greedy |
 | c | "Note it." | — | `eotg_aug_stress_neglect_effect = yes` | 20; +20 lazy; +10 content |
-| d | "Trace the tampering." | `scope:eotg_examined.var:eotg_aug_sabotaged_by ?= { is_alive = yes }` (save as `eotg_saboteur` in the immediate) | intrigue `duel` vs `scope:eotg_saboteur` (×2.5); success: the examined **and** root `add_opinion = { modifier = eotg_opinion_aug_tampered  target = scope:eotg_saboteur }`, toast `.d.success`; failure: toast `.d.failure` | 30; +20 paranoid; +10 vengeful |
+| d | "Trace the tampering." (physical evidence only, lore I5; §7) | `scope:eotg_examined.var:eotg_aug_sabotaged_by ?= { is_alive = yes }` (save as `eotg_saboteur` in the immediate) | intrigue `duel` vs `scope:eotg_saboteur` (×2.5); success: the examined **and** root `add_opinion = { modifier = eotg_opinion_aug_tampered  target = scope:eotg_saboteur }`, toast `.d.success`; failure: toast `.d.failure` | 30; +20 paranoid; +10 vengeful |
 | e [lifestyle_physician] | "Let me do it myself." | `has_trait = lifestyle_physician`, NOT blind; the same state trigger as a | as a, but free, plus `eotg_mod_aug_lesson_learning` 5 years | 30; +30 lifestyle_physician; +10 diligent |
 
 **Coupling:** the desc reads the band; a and e move risk at tier 3 / NF; b moves risk through the roll.
@@ -759,9 +760,22 @@ Rules:
 - appended desc lines start with `\n\n`;
 - **no tooltip, toast or desc quantifies risk or odds**. The scheme's vanilla success-chance UI is not ours.
 
-**Register for the tampering (binding, from today's lore review):** physical and local. Agents with hands: someone at the maintenance hatch, a bribed technician, a dose before sleep, a panel opened while the target slept.
-- **Never** "signal", "transmit", "remote", "from afar", "kill switch", "override code", "shut down", "terminate", "brick". Remote implant control is Blackstar technology of 1300.
+**The renderings in [cybernetics_v2_interactions_lore.md](cybernetics_v2_interactions_lore.md) §Renderings are binding.** The localizer may polish them within the rules below, but does not rewrite them. Display names follow that file: *Offer Augmentation*, *Demand Implant Removal* (bare "Removal" reads as removal from office), *Have Them Examined*, *Tamper with Implants*, *Salvage Implants* (bare "Salvage" reads as rescue).
+
+**Pronouns:** the mod's loc uses gendered pronouns for scoped single characters (human request, 2026-10-04): `[x.GetSheHe]` and its siblings, never singular "they". Some renderings say "their" or "they" of one character (for example `EOTG_AUG_AI_LIEGE`, `_COUNTDOWN`, `EOTG_AUG_TAMPER_TARGET_PHYSICIAN`, `EOTG_AUG_TAMPER_DISCOVERY_DESC`, the Offer and Demand `_desc`). The localizer genders them when a scope is available in that string. Where none is (some engine-drawn descs), it rephrases to avoid the pronoun.
+
+**Register for the tampering (binding, lore review):** physical and local. Agents with hands: someone at the maintenance hatch, a bribed technician, a panel opened while the target slept.
+- **"A dose" is a sedative for the sleeper** (lore I6). It never acts on the hardware: no nanites, nothing in the bloodstream that reaches the implants.
+- **Firmware is changed only by hand, at an open panel** (I6).
+- **Never** "signal", "transmit", "remote", "from afar", "kill switch", "override code", "shut down", "terminate", "brick", "hack", "virus", "upload", "network". Remote implant control is Blackstar technology of 1300.
 - The voice register (index §5.1–2) does not appear.
+
+**Tracing (int.001.d, tamper.004.e; lore I5):** physical evidence only: tool marks, a replaced seal, a bribed technician who talks, who had access. At most, the implant's own record of a change made at its panel. Never a connection log, a signal path or a network trace.
+
+**Salvage register (Salvage Implants, int.002, proc.002 and proc.020 `desc_salvaged`; lore I4):**
+- Never "harvest", "reap", "farm", "strip for parts", or "scrap" / "wreck" applied to the person.
+- No gore past init.012's level ("the socket is empty and raw").
+- Removed hardware carries nothing of its wearer: no memory, replay or connection, and never "someone else wears it now".
 
 No vanilla string needs a `replace/` override. Vanilla keys reused as-is: `START_SCHEME`, `SCHEME_HOOK`, `SCHEME_WEAK_HOOK_USED`, `AI_OPINION_REASON`, `schemes.t.agent_packages`, `agent_focus_*`, `restart_scheme_tt`, `sway_foreign_target`, `FABRICATE_HOOK_RULER_TARGET`, `SCHEME_AT_WAR`, `SCHEME_AT_WAR_WITH_LIEGE`, `currently_being_tortured`, `is_currently_being_purged_tt`, `scheme_target_not_in_diplomatic_range`.
 
@@ -788,9 +802,9 @@ No vanilla string needs a `replace/` override. Vanilla keys reused as-is: `START
 - **Demand Removal:** the liege's own will, no law cited. Zealous lines are faith-neutral ("as you were made").
 - **int.001:** a physician's plain report. Bands as prose ("running hot", "within tolerance", "unstable"). `desc_tampered`: "someone has had a panel open". `desc_illegal`: back-street work, unnamed.
 - **Salvage and int.002:** clinical and cold, no gore past init.012's level. The buyer of salvage is "a dealer" or "someone who asks no questions". **Never the Concrete Cartel**, or any named salvage trade. `desc_died`: they did not survive the table, and the hardware came out anyway.
-- **tamper.004:** the target's experience: a stutter, a late limb, a forecast that arrives wrong. `desc_unknown`: someone had their hands on it. `desc_known` names `[owner.GetName]`.
-- **proc.002 `desc_repair` and `outcome_repair_failed`** (procedures loc, not yet written) **must read injury-neutral**, because a fault repair also lands there. For example "the work didn't take", not "the wound is still there".
-- **Titles to confirm:** *The Physician's Report*, *What Came Out*, *The Work Is Done*, *Hands Withdrawn*, *Something in the Hardware*; the interactions *Offer Augmentation*, *Demand Removal*, *Have Them Examined*, *Salvage*; the scheme *Tamper with Implants*.
+- **tamper.004 *A Fault in the Hardware*:** bodily and hardware symptoms only (lore I2): the overlay stutters, a sensor drifts, a limb **responds** late. No forecast, and never "answers". `desc_unknown`: new seals; someone had their hands on it. `desc_known` names `[owner.GetName]`.
+- **proc.002 `desc_repair` and `outcome_repair_failed`** (procedures loc) **must read injury-neutral**, because a fault repair also lands there. Binding text (lore I3, also updated in [cybernetics_v2_procedures_lore.md](cybernetics_v2_procedures_lore.md)): `eotg_aug_proc.outcome_repair_failed` = "\n\nThe repair did not take. The part sits where it was fitted and does nothing, and nothing is better than it was."
+- **Titles (ratified by lore):** *The Physician's Report*, *What Came Out*, *The Work Is Done*, *Hands Withdrawn*, *A Fault in the Hardware* (I1); the interactions *Offer Augmentation*, *Demand Implant Removal*, *Have Them Examined*, *Salvage Implants*; the scheme *Tamper with Implants*; the opinion `eotg_opinion_aug_salvaged_me` "Cut Out My Implants".
 
 ---
 
@@ -801,11 +815,13 @@ No vanilla string needs a `replace/` override. Vanilla keys reused as-is: `START
 - **No supranational authority** (LAW AT 866). Demand Removal is the liege's own will. Discovery is answered by the victim's own power to imprison (`imprisonment_reason`). No court, tribunal or licensing body is named or implied.
 - **Never name the implant players** (index §5.3, extended today): Blackstar, Shadow Markets, Black Contract(s), Blackline, P&D, Calix, Pill Mob / Pillwake / Red Pills, Concrete Cartel, "Trauma Team".
 - **Nikios Khanate:** not touched.
-- **For the lore-keeper:**
-  1. **Seamless is excluded** from Salvage, Tamper, Examine and Demand Removal. The reasoning: there is no risk to move, and "the person is gone". Is excluding them from Salvage right, or should a Seamless prisoner be salvageable, leaving an empty body? (The mechanic is easy either way; this is a canon call.)
-  2. Salvage at 866: is cutting a prisoner's hardware out for resale consistent with the setting's tone? The trade exists (the Cartel deals in salvage).
-  3. The titles in §7.
-  4. **Existing content, found while checking the remote rule (not in this spec's scope):** `localization/english/eotg_augmentation_l_english.yml:1593`, `eotg_mod_aug_patron_throttle_desc`, says "a **remote** throttle". The throttle is a firmware restriction left by the syndicate's technicians (phase 5 §2). It is not a kill or a shutdown, but the word "remote" may now be off-register. Rule on whether it needs a wording change.
+- **Lore rulings (2026-10-04, [cybernetics_v2_interactions_lore.md](cybernetics_v2_interactions_lore.md)):**
+  1. **Seamless exclusions from Demand Implant Removal, Tamper and Examine: upheld.** The reason, to be kept in the trigger comments: at 866 tech no surgeon can find where Seamless hardware ends and the body begins. There is no panel to open, nothing to take out, and nothing to examine apart from the body.
+  2. **Salvage of Seamless prisoners: open human decision.** Option A, exclude (lore's recommendation, and what this spec builds now). Option B, allow it with death on the table forced; lore does not recommend it.
+  3. **Salvage tone at 866: approved.** The trade stays unnamed: the buyer is only "a dealer" or "someone who asks no questions". The prose is clinical, and the cruelty is the actor's choice. Register in §7 (I4).
+  4. **Titles:** ratified, with *Demand Implant Removal*, *Salvage Implants*, *A Fault in the Hardware* and "Cut Out My Implants" (§7).
+  5. **Throttle wording (shipped loc, outside this spec's build):** `eotg_mod_aug_patron_throttle_desc` takes the lore file's text ("The syndicate's technicians wrote a throttle into the firmware at installation, … The body feels the limit as stress and weakness."). The trigger is a local absence (the servicing stopped), never a remote signal. This is a localizer task. The index's thread T2 now says "the firmware throttle" (I7).
+  6. **Noted for later:** vanilla scheme agent names ("Physic", "Smith", "Footpad") and the generic scheme-ongoing loc are medieval leaks. They affect every scheme in the mod and belong to the vanilla reflavor pass, not to this spec.
 
 ---
 
@@ -830,7 +846,7 @@ No vanilla string needs a `replace/` override. Vanilla keys reused as-is: `START
 6. **Hidden rule:** no new tooltip, toast, desc or `ai_accept` desc contains a number, or the words "risk", "odds" or "chance", about the signature resource. Every risk move is in `hidden_effect`.
 7. **Map-agnostic:** `grep -nE "title:|culture:|faith:|character:[0-9]" common/character_interactions common/schemes events/eotg_augmentation_interactions.txt events/eotg_augmentation_tamper.txt` returns nothing.
 8. **Identifiers:** every new global key starts `eotg_` (except the documented `agent_focus_*` local flags and vanilla `scheme_successful` / `scheme_discovered` scope values). `grep -rnE 'eotg_[ekdcb]_'` stays empty.
-9. **Lore register:** `grep -niE "remote|signal|transmit|from afar|kill.?switch|override code|shut ?down|terminate|brick|blackstar|concrete cartel|p&d|calix|pill ?mob|pillwake|trauma team"` over the new loc keys returns nothing.
+9. **Lore register:** `grep -niE "remote|signal|transmit|from afar|kill.?switch|override code|shut ?down|terminate|brick|hack|virus|upload|network|harvest|\breap|strip for parts|nanite|blackstar|concrete cartel|p&d|calix|pill ?mob|pillwake|trauma team"` over the new loc keys returns nothing. (`hack|virus|upload|network|harvest` were added by lore I6; `reap|strip for parts|nanite` come from I4 and I6.) Also: tamper.004's loc contains neither "forecast" nor "answer" (I2), and `eotg_aug_proc.outcome_repair_failed` matches the I3 text exactly.
 10. **Observer run** (balance §9.2) **adds five counters** per decade: Offer installs (landed / unlanded), Demand removals, Examinations, Tamper starts / successes / discoveries, Salvages (and deaths on the table). Judged against HQ2 (§4.7).
 11. **Loc:** all §7 keys exist exactly once, with BOM and no `[scope:`.
 12. **Human, in game (temporary map):**
@@ -850,7 +866,7 @@ No vanilla string needs a `replace/` override. Vanilla keys reused as-is: `START
 
 | Item | Why |
 |---|---|
-| **Offer to children** | The Sickly Child arc (init.014, Q8) already covers a sick child under a tone ruling. A healthy-child augmentation is a new moral beat that needs the human's and the lore-keeper's tone call. Recommendation if wanted: adults-only stays; children only through init.014. |
+| **Offer to children** | **Pending the human.** The Sickly Child arc (init.014, Q8) already covers a sick child under a tone ruling. A healthy-child augmentation is a new moral beat. **Lore recommends adults only**, citing init.014's own line that the procedure is "never done on the very young". Until the human rules, `is_adult = yes` stays in `eotg_aug_offer_candidate`. |
 | **Lend Your Surgeon** (gaps G4, optional) | It is the court-position problem (G10, the Implant Technician). Borrowing another court's physician needs a cross-court surgeon scope that G10 would define once. |
 | **Higher ransom for augmented prisoners** (gaps G8) | Vanilla computes ransom in its own script values. Changing it means overriding a vanilla file, which this project avoids (collisions are silent, and one-definition rules apply). Revisit if vanilla exposes a hook. |
 | **Refusal as a crime** (Demand Removal) | Belongs to G7's Augmentation Edict (ban), as vanilla gates refusal-crime on law. The hook: `on_decline` gains `reverse_add_opinion` with an `imprisonment_reason` opinion when the actor's realm holds the ban flag. |
@@ -866,10 +882,10 @@ No vanilla string needs a `replace/` override. Vanilla keys reused as-is: `START
 
 ### HANDOFF
 - status: done
-- next: eotg-lore-keeper
-- ask: Review docs/specs/cybernetics_v2_interactions.md §8 (the Seamless exclusions, Salvage's tone at 866, the event, interaction and scheme titles in §7, and the "remote throttle" wording in existing loc line 1593) and the §7 tampering register. Then route to eotg-scripter: build after the procedures spec lands, §3–§5 including the §3.2 procedures amendments. Then eotg-localizer (§7), then eotg-qa (§9).
-- files: docs/specs/cybernetics_v2_interactions.md
-- new events (6; below the ~10 flag): eotg_aug_int.001 The Physician's Report (eotg_aug_examine_interaction on_accept); eotg_aug_int.002 What Came Out (eotg_aug_salvage_interaction on_accept); eotg_aug_tamper.001 hidden result (eotg_aug_tamper_prep_effect → vanilla scheme_critical_moments.0002 → saved follow_up_event); eotg_aug_tamper.002 The Work Is Done and eotg_aug_tamper.003 Hands Withdrawn (both from tamper.001); eotg_aug_tamper.004 Something in the Hardware (tamper.002 a/b, on the target). Also 5 interactions, 1 scheme type (eotg_aug_tamper), 1 custom on_action (eotg_aug_tamper_ongoing).
-- needs-loc (~144, +2 conditional, §7): 5 interaction names/descs/notifications (11); send options eotg_aug_send_* (9); eotg_aug_start_tamper_* (6); toasts and tooltips (8); EOTG_AUG_AI_* acceptance descs (25); scheme eotg_aug_tamper* and EOTG_AUG_TAMPER_* (14, +2 engine modifier names if PX asks); 5 opinions; eotg_aug_int.001.* (18); eotg_aug_int.002.* (14); eotg_aug_tamper.002.* (9), .003.* (6), .004.* (16); eotg_aug_proc.002.desc_salvaged, eotg_aug_proc.002.desc_repair_fault, eotg_aug_proc.020.desc_salvaged. Constraint: procedures' proc.002 desc_repair and outcome_repair_failed must be written injury-neutral.
-- needs-lore: Seamless excluded from Salvage, Tamper, Examine and Demand (canon call); Salvage tone at 866 with the trade unnamed; titles; the tampering register (physical and local, no remote words); existing eotg_mod_aug_patron_throttle_desc "a remote throttle" against today's remote rule
-- needs-human: the §9 item 12 in-game checks, including engine checks (a) saved_event_id reaching tamper.001, (b) the saved roll outcome readable in on_accept and int.002, (c) a non-zero AI use of each lever in the observer run; the observer run's five new counters (§9 item 10); placeholder icons as art debt; optional tone call on offering augmentation to healthy children (deferred, §10); the orchestrator adds common/character_interactions/ and common/schemes/scheme_types/ to the CLAUDE.md placement table
+- next: eotg-scripter
+- ask: Build docs/specs/cybernetics_v2_interactions.md §3–§5 (including the §3.2 procedures amendments) after the procedures spec lands. The lore review is folded in (I1–I7). Salvage Implants builds option A (Seamless excluded) until the human decides. Then eotg-localizer: §7, with docs/specs/cybernetics_v2_interactions_lore.md §Renderings binding, the gendered-pronoun rule, the I3 text for eotg_aug_proc.outcome_repair_failed, and the rewrite of the shipped eotg_mod_aug_patron_throttle_desc (§8 ruling 5). Then eotg-qa (§9, with item 9's extended grep).
+- files: docs/specs/cybernetics_v2_interactions.md; docs/specs/cybernetics_v2_interactions_lore.md (binding renderings); docs/specs/cybernetics_v2_procedures_lore.md (I3 line)
+- new events (6; below the ~10 flag): eotg_aug_int.001 The Physician's Report (eotg_aug_examine_interaction on_accept); eotg_aug_int.002 What Came Out (eotg_aug_salvage_interaction on_accept); eotg_aug_tamper.001 hidden result (eotg_aug_tamper_prep_effect → vanilla scheme_critical_moments.0002 → saved follow_up_event); eotg_aug_tamper.002 The Work Is Done and eotg_aug_tamper.003 Hands Withdrawn (both from tamper.001); eotg_aug_tamper.004 A Fault in the Hardware (tamper.002 a/b, on the target). Also 5 interactions, 1 scheme type (eotg_aug_tamper), 1 custom on_action (eotg_aug_tamper_ongoing).
+- needs-loc (~144, +2 conditional, §7): as listed in §7; the lore file's renderings are binding.
+- needs-lore: none open (I1–I7 folded in)
+- needs-human: Salvage of Seamless prisoners, option A (exclude, built) or B (forced death) (§8 ruling 2); offering augmentation to healthy children (§10; lore recommends adults only); the §9 item 12 in-game checks, including engine checks (a)–(c); the observer run's five new counters (§9 item 10); placeholder icons as art debt; the orchestrator adds common/character_interactions/ and common/schemes/scheme_types/ to the CLAUDE.md placement table, and the vanilla scheme-agent-name leak (§8 ruling 6) to the circleback board

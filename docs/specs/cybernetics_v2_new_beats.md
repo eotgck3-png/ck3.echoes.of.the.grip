@@ -7,7 +7,7 @@
 
 **Gate.** 3 (Systems), on the temporary map under `docs/agent_workflow.md` §5 rule 2. **Not blocked.** Neither beat references a title, province, character, culture or faith.
 
-**Size.** 2 new events (heir.007, patron.008), 2 new desc variants on existing events (heir.003, heir.004), 4 new story variables, 1 new scripted effect (a refactor), 21 loc keys. No new modifier, opinion, flag key type, decision or on_action.
+**Size.** 2 new events (heir.007, patron.008), 2 new desc variants on existing events (heir.003, heir.004), 4 new story variables, 1 new scripted effect (a refactor), 1 new permanent character flag (the once-per-life Patron guard, §5.2, added 2026-10-04 from QA), 21 loc keys. No new modifier, opinion, decision or on_action.
 
 ---
 
@@ -42,6 +42,7 @@ Gate 3. Not blocked.
 | `eotg_prior_heir` | story variable (character) | scripter | The first heir, copied from `eotg_heir` at the reprise |
 | `eotg_prior_choice` | story variable (`flag:ally` / `usurp` / `kill_failed` / `kill_success` / `executed`) | scripter | Written by heir.004 (immediate) and heir.004 `kill_c` |
 | `eotg_paper_served` | story variable on `eotg_story_aug_patron` (bare, one-shot) | scripter | Set by the tick when it fires patron.008 |
+| `eotg_flag_aug_had_patron` | character flag (permanent) | scripter | Set in `eotg_story_aug_patron` `on_setup`; read at every Patron offer site. One syndicate debt per life (§5.2, "Once per life"; QA 2026-10-04) |
 | `eotg_aug_heir_seed_dread_effect` | scripted effect (story scope) | scripter | **Refactor only**: the five dread seeds now inlined in the arc's `on_setup` (absent at birth, intervention refused, estranged parent, opinion < −20, child patient −1 with clamp), moved verbatim into an effect so `on_setup` and the reprise share them |
 
 Story variables follow the existing `eotg_` prefix convention for story variables (`eotg_heir`, `eotg_stage`, `eotg_demand` …).
@@ -52,7 +53,7 @@ Story variables follow the existing `eotg_` prefix convention for story variable
 
 ### 3.3 Not new
 
-No modifier, opinion, trait, character flag, decision, on_action, namespace, icon or art. Art: both events use existing themes and portraits.
+No modifier, opinion, trait, decision, on_action, namespace, icon or art. One character flag is new (`eotg_flag_aug_had_patron`, §3.1). Art: both events use existing themes and portraits.
 
 ---
 
@@ -65,6 +66,9 @@ No modifier, opinion, trait, character flag, decision, on_action, namespace, ico
 | `events/eotg_augmentation_heir.txt` | New heir.007. heir.003: desc variant. heir.004: desc variant, prior-choice write, round-dependent ending. `kill_c`: prior-choice write. File header updated. |
 | `events/eotg_augmentation_fracture.txt` | fracture.026 b: add a stage guard (§5.1 step 5). Nothing else. |
 | `events/eotg_augmentation_patron.txt` | New patron.008. File header updated. **No change to .001–.007.** |
+| `common/story_cycles/eotg_augmentation_stories.txt` (Patron `on_setup`) | `story_owner = { add_character_flag = eotg_flag_aug_had_patron }` (§5.2, "Once per life") |
+| `common/on_action/eotg_augmentation_on_actions.txt` | Patron entry (weight 15) of the initiation check: add `NOT = { has_character_flag = eotg_flag_aug_had_patron }` beside `eotg_aug_has_patron = no` |
+| `events/eotg_augmentation_initiation.txt` | init.018: the same `NOT` on `desc_syndicate`'s trigger and on option e's trigger |
 | `localization/english/eotg_augmentation_l_english.yml` | 21 keys (§7). UTF-8 BOM. |
 
 No new folder. No `replace_path`.
@@ -138,7 +142,12 @@ No new folder. No `replace_path`.
        else = { set_variable = { name = eotg_stage  value = 5 } }
    }
    ```
-   In **`kill_c`** ("Execute them."), before the death, add `scope:eotg_heir_story = { set_variable = { name = eotg_prior_choice  value = flag:executed } }`. The option runs after the immediate, so it overwrites `kill_failed`. On kill success the owner dies in heir.006, and `on_owner_death` ends the dormant story as it does now.
+   In **`kill_c`** ("Execute them."), before the death, add `scope:eotg_heir_story = { set_variable = { name = eotg_prior_choice  value = flag:executed } }`. The option runs after the immediate, so it overwrites `kill_failed`.
+
+   **On kill success (amended 2026-10-04, QA).** heir.004 parks the story at stage 5 with `eotg_prior_choice = flag:kill_success` and queues the hidden heir.006. Two cases follow:
+   - **heir.006 runs:** the owner dies, and `on_owner_death` ends the dormant story as it does now.
+   - **heir.006 aborts** (its trigger fails: in the 3–7 days the heir was imprisoned, died, or stopped being primary heir; a hidden event whose trigger fails is dropped). The owner lives, and the story **stays parked at stage 5** like any other round-1 ending. The dormant entry (step 2) then behaves as usual. If a different character is now primary heir, round 2 starts with heir.007, using `desc_dead` or `desc_displaced`. If the same heir is still primary heir (imprisoned but not disinherited), the story waits, exactly as for an imprisoned usurper.
+   - `flag:kill_success` adds **no** dread at the reprise (step 2 bumps only `executed`, `usurp` and `kill_failed`). That is deliberate: the plot aborted silently, so the next heir has seen nothing to fear. No script change; this paragraph corrects the earlier statement that the owner always dies.
 
 5. **Stage writers outside the story must not wake a dormant arc.** Each of these gets `var:eotg_stage < 4` added to the `limit` of its `random_owned_story`:
    - `eotg_aug_total_integration_effect` (sets stage 3);
@@ -215,6 +224,11 @@ triggered_effect = {
 - **Final Demand first.** If the Final Demand is already due (demand ≥ 4 or grievance ≥ 3), the entry yields and .006 comes as it does now. The .006 descs already work for an absent envoy (M7).
 - **Envoy present.** If the envoy is dead or gone, the entry yields to the existing `.007` *A New Envoy*, and the paper comes on the next tick with the new envoy. So patron.008 needs no `_absent` desc.
 - **Re-install, then remove again.** If the owner re-installs (c) and later removes the implants a second time, nothing new fires, because the variable is set. The normal demand sequence continues, as it does today.
+- **Once per life (added 2026-10-04, QA).** patron.008 a, b and e(success) end the debt with the owner out of the system. patron.001's only world-state guards are `eotg_is_augmented_any = no` and `eotg_aug_has_patron = no`, so that owner can be offered a **second** Patron. A second debt would end the same way and add `eotg_mod_aug_patron_clause_final` a second time. The same holds after any .006 ending followed by a later removal.
+  - **Guard chosen: a permanent flag that blocks the second offer**, not a guard on the add. `eotg_story_aug_patron` `on_setup` runs `story_owner = { add_character_flag = eotg_flag_aug_had_patron }`. Every offer site adds `NOT = { has_character_flag = eotg_flag_aug_had_patron }` next to its `eotg_aug_has_patron = no`: the initiation on_action's Patron entry (weight 15), and init.018's `desc_syndicate` and option e.
+  - **Vanilla precedent:** `common/story_cycles/story_cycle_murders_at_court.txt:9` sets the permanent `had_murderer_at_court_story_cycle` in `on_setup`, and the starting events gate on it (`events/yearly_events/yearly_events_4.txt:1636, 1719`). The same shape appears in `story_cycle_hunt_mystical_animal.txt:52` and `story_cycle_peasant_affair.txt:21`.
+  - **Why the flag and not a guarded add:** a guarded add stops the stacked modifier but still lets a syndicate bankroll someone who is already carrying its permanent lien, and that reads wrong. The flag removes both problems at the source, and it matches the arc's own `eotg_flag_aug_heir_arc_done` (a permanent flag read at the start sites).
+  - **Where the check lives:** at the offer sites (on_action authority, index §1 rule 5), **not** in patron.001's `trigger`, which stays a world-state guard.
 
 **How the story can end, for an owner with no implants:**
 
@@ -327,6 +341,7 @@ No deviation from vanilla shape.
 5. `eotg_aug_total_integration_effect` and fracture.026 b set stage 3 only when `var:eotg_stage < 4`.
 6. The two Patron tick copies are identical (a diff of the two `first_valid` blocks shows no difference).
 7. `grep -n "eotg_paper_served" common events` shows one `set_variable` and one `has_variable` per cadence, and nothing in `events/`.
+7a. **Once per life:** `grep -rn eotg_flag_aug_had_patron common events` shows one `add_character_flag` (Patron `on_setup`) and three reads (the on_action Patron entry, init.018 `desc_syndicate`, init.018 e). patron.001's `trigger` does not read it. In game: settle a Patron debt through patron.008 a; no second patron.001 fires over 10+ years of initiation checks (console `effect = { trigger_event = eotg_aug_patron.001 }` bypasses the gate and is not a test).
 8. Loc: all 21 keys exist once, BOM, no `[scope:`.
 9. **Human, in game (temporary map):**
    - NF count with an adult primary heir and a second child aged 14+. Drive the arc to heir.004 (console-set the story's stage to 3). Take kill_failed, then "Execute them."
@@ -373,9 +388,11 @@ No deviation from vanilla shape.
 **Verdict:** no canon contradiction and no design change. Both titles are approved. patron.008.e's premise is approved: there is no authority above the polity at 866 AG. Its text always says "your court" / "your law", never an abstract or higher authority, never the liege's law, and "court" stays faith-neutral.
 
 **Must-fix: use this exact text.**
-- **N1** `eotg_aug_heir.007.desc_dead`: "[eotg_prior_heir.GetFirstName] is dead, and [eotg_heir.GetFirstName] is first in line now. They know what was asked of the last heir, and what you answered. They have inherited the question along with the place."
-- **N2** `eotg_aug_heir.003.desc_successor`: "[eotg_heir.GetFirstName] has brought the incident logs and a date. This has been said to you once before, by [eotg_prior_heir.GetFirstName], and [eotg_heir.GetFirstName] knows how that went. They do not rehearse it. 'Step aside,' they say, 'or I will make you.'"
-- **N3** `eotg_aug_heir.004.desc_successor`: "[eotg_heir.GetFirstName] has decided. They know how this went the last time, and they have decided anyway. The question is settled, and only the method remains." This one must not name `eotg_prior_heir`, because the descs that follow open with "They…" and would read as the predecessor.
+**Pronoun rule (human request, 2026-10-04): the whole mod's loc uses gendered pronouns for scoped single characters** (`[x.GetSheHe]`, `[x.GetHerHis]`, `[x.GetHerHim]`, with `|U` at sentence start), never singular "they". N1–N3 below are the ratified gendered text and replace the earlier "They" versions.
+
+- **N1** `eotg_aug_heir.007.desc_dead`: "[eotg_prior_heir.GetFirstName] is dead, and [eotg_heir.GetFirstName] is first in line now. [eotg_heir.GetSheHe|U] knows what was asked of the last heir, and what you answered. [eotg_heir.GetSheHe|U] has inherited the question along with the place."
+- **N2** `eotg_aug_heir.003.desc_successor`: "[eotg_heir.GetFirstName] has brought the incident logs and a date. This has been said to you once before, by [eotg_prior_heir.GetFirstName], and [eotg_heir.GetFirstName] knows how that went. [eotg_heir.GetSheHe|U] does not rehearse it. 'Step aside,' [eotg_heir.GetSheHe] says, 'or I will make you.'"
+- **N3** `eotg_aug_heir.004.desc_successor`: "[eotg_heir.GetFirstName] has decided. [eotg_heir.GetSheHe|U] knows how this went the last time, and has decided anyway. The question is settled, and only the method remains." This one must not name `eotg_prior_heir`, because the descs that follow refer back to the heir and would read as the predecessor.
 - **N4** `eotg_aug_patron.008.desc`: "The hardware is out of you, and the syndicate knows it. The debt is not. The paper names you, not the implants, and the syndicate still holds the paper. The terms have been re-priced for a body it no longer services."
 - **N5** `eotg_aug_patron.008.e.success`: "Your court finds the contract has no standing under your law. The syndicate does not contest it. There is nowhere else to take it."
 
@@ -386,5 +403,6 @@ No deviation from vanilla shape.
 - `patron.008.b`: "Sign the lien on my revenues."
 - `patron.008.e.failure`: "Your court upholds the contract. The syndicate is sent a copy of the ruling."
 - `patron.008.desc_clause` starts with `\n\n`.
+- **Pronoun rule applied to `heir.007.desc_executed`** (mechanical, no wording change; the lore-keeper may confirm at the loc check): "[eotg_heir.GetFirstName] comes to you knowing that you had [eotg_prior_heir.GetFirstName] put to death. [eotg_heir.GetSheHe|U] is first in line now because the one before [eotg_heir.GetHerHim] is not. [eotg_heir.GetSheHe|U] speaks evenly, and keeps [eotg_heir.GetHerHis] hands where you can see them." Option texts that refer to a single scoped character (heir.007.a "What happened to them will not happen to you." refers to `eotg_prior_heir`; heir.007.e "They will try what the last one tried." refers to `eotg_heir`) are the localizer's to gender the same way, using the character each pronoun refers to.
 
 **Noted for a later loc pass (out of scope):** the shipped `eotg_aug_heir.001.e` "They want the throne." uses a medieval word. If a region brief ever puts the Pill Boys (a First-Era "criminal syndicate in salvage economy") in play at 866, keep salvage imagery out of Patron text.

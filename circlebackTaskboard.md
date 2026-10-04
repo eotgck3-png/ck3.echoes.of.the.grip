@@ -262,6 +262,13 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Owner:** human → orchestrator (route failures to the Cybernetics session)
 - **Next step:** play-check during normal testing. Screenshots are enough.
 
+### CB-33: Vanilla scheme agent names and generic scheme loc are medieval
+- **Status:** parked (2026-10-04)
+- **What:** the Tamper scheme (interactions spec) reuses vanilla agent roles, which show as "Physic", "Smith", "Footpad" and so on in the agent slots. It also reuses the generic `intrigue_scheme_ongoing.1001` ("servant…", "a few coins…"). This affects every scheme in the mod, not only Tamper.
+- **Trigger to revisit:** the vanilla reflavor / `replace/` pass (CB-08 glossary).
+- **Owner:** eotg-localizer
+- **Next step:** reflavor them through `localization/english/replace/` (e.g. Technician, Fitter, Sneak) when the glossary is decided.
+
 ## Tooling and environment
 
 ### CB-18: Game is 1.20.0.3; the tools target older versions
