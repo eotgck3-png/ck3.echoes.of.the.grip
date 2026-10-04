@@ -529,11 +529,40 @@ def rule_l008(mod):
     return out
 
 
-def rule_l009(mod):
-    out = []
-    defined = {eid: (rel, node) for rel, eid, node in mod.events()}
-    fired = set()
-    for rel, doc in mod.docs.items():
+FOLDER_KINDS = (("events/", "event"), ("common/on_action/", "on_action"),
+                ("common/decisions/", "decision"), ("common/story_cycles/", "story"),
+                ("common/scripted_effects/", "effect"),
+                ("common/character_interactions/", "interaction"),
+                ("common/schemes/", "scheme"), ("common/activities/", "activity"))
+
+
+class FireSite:
+    """One place that references (fires) an event: the event-graph edge.
+
+    kind/owner name the top-level definition that holds the reference
+    (event, on_action, decision, story, effect, ...); parents are the blocks
+    from that definition down to ``node`` (the definition first)."""
+    __slots__ = ("event", "rel", "line", "kind", "owner", "parents", "node")
+
+    def __init__(self, event, rel, line, kind, owner, parents, node):
+        self.event, self.rel, self.line = event, rel, line
+        self.kind, self.owner, self.parents, self.node = kind, owner, parents, node
+
+
+def file_kind(rel):
+    for prefix, kind in FOLDER_KINDS:
+        if rel.startswith(prefix):
+            return kind
+    return rel.split("/")[1] if rel.startswith("common/") else rel.split("/")[0]
+
+
+def fire_sites(mod):
+    """{event_id: [FireSite]} for every reference to a defined event outside its
+    own definition (a string value or a bare list item equal to the id)."""
+    defined = {eid for _, eid, _ in mod.events()}
+    sites = collections.defaultdict(list)
+    for rel, doc in sorted(mod.docs.items()):
+        kind = file_kind(rel)
         for top in doc.nodes:
             own = top.key if (top.key in defined and rel.startswith("events/")) else None
             for n, parents in pdx_parse.walk([top]):
@@ -546,9 +575,15 @@ def rule_l009(mod):
                     cand.append(n.key)
                 for c in cand:
                     if c in defined and c != own:
-                        fired.add(c)
-    for eid, (rel, node) in sorted(defined.items()):
-        if eid not in fired:
+                        sites[c].append(FireSite(c, rel, n.line, kind, top.key, parents, n))
+    return sites
+
+
+def rule_l009(mod):
+    out = []
+    sites = fire_sites(mod)
+    for rel, eid, node in sorted(mod.events(), key=lambda e: e[1]):
+        if eid not in sites:
             out.append(Finding("L009", rel, node.line,
                                "event %s is defined but nothing fires it" % eid))
     return out
