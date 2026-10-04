@@ -1,0 +1,939 @@
+﻿# ── eotg_augmentation_patron.txt ─────────────────────────────────────────────
+# The Patron's debt (I-05, thread T2): docs/specs/cybernetics_v2_phase5.md §2.
+# Somebody paid; they were buying you.
+#
+# eotg_aug_patron.001 — The Patron's Offer
+# eotg_aug_patron.002 — Repayment              (demand 0)
+# eotg_aug_patron.003 — Exclusivity            (demand 1)
+# eotg_aug_patron.004 — The Errand             (demand 2)
+# eotg_aug_patron.005 — The Family Clause      (demand 3)
+# eotg_aug_patron.006 — The Final Demand       (demand 4+, or grievance 3+)
+# eotg_aug_patron.007 — A New Envoy            (the envoy is dead or gone)
+#
+# Fires from: .001 from eotg_on_yearly_aug_initiation_check (Patron entry) and
+#   eotg_aug_init.018 (e); .002-.007 from the story eotg_story_aug_patron
+#   through its effect_group tick. Cooldown authority: the story's
+#   effect_group (2-3 years, 3-4 on read terms). No event checks a flag.
+# Naming (index §5.3, §5.7): the patron is never named. Loc says "the
+#   syndicate" and "the syndicate envoy"; never Helix, Pale Hand, Consortium,
+#   Compact, Continuity, Rooks, "Corp"/"Co.", or white-glove imagery.
+# Resource: demands move eotg_fracture_risk through the firmware the syndicate
+#   controls; the betrayal path (eotg_aug_patron_betray_effect) can start the
+#   Countdown.
+# Every event from .002 saves scope:eotg_patron_story and scope:eotg_patron_envoy
+# in immediate. Demand events count up in `after` (every option).
+# ─────────────────────────────────────────────────────────────────────────────
+
+namespace = eotg_aug_patron
+
+
+# ── eotg_aug_patron.001 ───────────────────────────────────────────────────────
+# The Patron's Offer. "We would like to pay for it."
+# Callers: eotg_on_yearly_aug_initiation_check (Patron entry, weight 15),
+# eotg_aug_init.018 (e), 1 day later.
+# a/c/d accept through eotg_aug_patron_accept_effect (install at risk 0, the
+# envoy from eotg_aug_patron_envoy_template with root's culture and faith by
+# scope, the story with standard / read / greedy terms).
+
+eotg_aug_patron.001 = {
+    type = character_event
+    title = eotg_aug_patron.001.t
+    desc = eotg_aug_patron.001.desc
+    theme = stewardship_wealth_focus
+
+    trigger = {
+        eotg_is_augmented_any = no
+        eotg_aug_has_patron = no
+    }
+
+    left_portrait = {
+        character = root
+        animation = thinking
+    }
+
+    # "Accept."
+    option = {
+        name = eotg_aug_patron.001.a
+        eotg_aug_patron_accept_effect = { TERMS = standard }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 10  has_trait = brave }
+            modifier = { add = -20  has_trait = zealous }
+        }
+    }
+
+    # "Decline."
+    option = {
+        name = eotg_aug_patron.001.b
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 20  has_trait = zealous }
+        }
+    }
+
+    # "Accept, after reading every clause." Slower demands, smaller bills.
+    option = {
+        name = eotg_aug_patron.001.c
+        eotg_aug_patron_accept_effect = { TERMS = read }
+        stress_impact = { base = minor_stress_impact_gain }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 10  has_trait = patient }
+        }
+    }
+
+    # [greedy] "Accept, and ask for a stipend." Bills x1.5.
+    option = {
+        name = eotg_aug_patron.001.d
+        trigger = { has_trait = greedy }
+        trait = greedy
+        eotg_aug_patron_accept_effect = { TERMS = greedy }
+        add_gold = minor_gold_value
+        stress_impact = {
+            greedy = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = greedy }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+
+    # [paranoid] "Who are you, really?" Decline.
+    option = {
+        name = eotg_aug_patron.001.e
+        trigger = { has_trait = paranoid }
+        trait = paranoid
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_intrigue  years = 5 }
+        stress_impact = {
+            paranoid = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = paranoid }
+            modifier = { add = 10  has_trait = craven }
+        }
+    }
+}
+
+
+# ── eotg_aug_patron.002 ───────────────────────────────────────────────────────
+# Repayment. "A small matter of the invoice." Bills scale with the terms
+# (eotg_aug_patron_pay_effect: greedy x1.5, read x0.75).
+# c: diplomacy duel against the envoy (shape of tier2.005.e, vanilla
+# false_conversion.2000.a).
+# Caller: eotg_story_aug_patron (demand 0).
+
+eotg_aug_patron.002 = {
+    type = character_event
+    title = eotg_aug_patron.002.t
+    desc = eotg_aug_patron.002.desc
+    theme = stewardship_wealth_focus
+
+    trigger = { eotg_aug_has_patron = yes }
+
+    left_portrait = {
+        character = root
+        animation = personality_greedy
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_patron_envoy }
+        character = scope:eotg_patron_envoy
+        animation = steward
+    }
+
+    immediate = {
+        hidden_effect = {
+            random_owned_story = {
+                limit = { story_type = eotg_story_aug_patron }
+                save_scope_as = eotg_patron_story
+                var:eotg_envoy ?= { save_scope_as = eotg_patron_envoy }
+            }
+        }
+    }
+
+    # "Pay."
+    option = {
+        name = eotg_aug_patron.002.a
+        trigger = { eotg_aug_patron_can_pay = { BASE = medium_gold_value  MULT = 1 } }
+        eotg_aug_patron_pay_effect = { BASE = medium_gold_value  MULT = 1 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = honest }
+            modifier = { add = 10  has_trait = content }
+            modifier = { add = -20  has_trait = greedy }
+        }
+    }
+
+    # "Refuse." The firmware hesitates.
+    option = {
+        name = eotg_aug_patron.002.b
+        eotg_aug_patron_grievance_effect = { AMOUNT = 1 }
+        scope:eotg_patron_envoy ?= {
+            add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 5 }
+        }
+        # Owner-side risk only while the owner still has hardware (final QA: the
+        # debt outlives Remove Implants; nothing may recreate the variable).
+        if = {
+            limit = { eotg_is_augmented_any = yes }
+            eotg_add_fracture_risk = { AMOUNT = 5 }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = greedy }
+            modifier = { add = 10  has_trait = stubborn }
+        }
+    }
+
+    # "Renegotiate."
+    option = {
+        name = eotg_aug_patron.002.c
+        trigger = {
+            exists = scope:eotg_patron_envoy
+            eotg_aug_patron_can_pay = { BASE = major_gold_value  MULT = 1 }
+        }
+        duel = {
+            skill = diplomacy
+            target = scope:eotg_patron_envoy
+            50 = {
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = 2.5
+                }
+                desc = eotg_aug_patron.002.c.success
+                eotg_aug_patron_pay_effect = { BASE = minor_gold_value  MULT = 1 }
+            }
+            50 = {
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = -2.5
+                }
+                desc = eotg_aug_patron.002.c.failure
+                eotg_aug_patron_pay_effect = { BASE = major_gold_value  MULT = 1 }
+            }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = gregarious }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+
+    # [deceitful] "Pay in promises." The envoy holds a debt hook.
+    option = {
+        name = eotg_aug_patron.002.d
+        trigger = {
+            has_trait = deceitful
+            exists = scope:eotg_patron_envoy
+        }
+        trait = deceitful
+        scope:eotg_patron_envoy = {
+            add_hook = {
+                type = indebted_hook
+                target = root
+            }
+        }
+        eotg_aug_stress_lie_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = deceitful }
+            modifier = { add = 10  has_trait = greedy }
+        }
+    }
+
+    # [honest] "Ask for honest terms." 50%: half the bill; 50%: offence taken.
+    option = {
+        name = eotg_aug_patron.002.e
+        trigger = {
+            has_trait = honest
+            eotg_aug_patron_can_pay = { BASE = medium_gold_value  MULT = 0.5 }
+        }
+        trait = honest
+        random_list = {
+            50 = {
+                desc = eotg_aug_patron.002.e.success
+                eotg_aug_patron_pay_effect = { BASE = medium_gold_value  MULT = 0.5 }
+            }
+            50 = {
+                desc = eotg_aug_patron.002.e.failure
+                eotg_aug_patron_grievance_effect = { AMOUNT = 1 }
+            }
+        }
+        stress_impact = {
+            honest = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = honest }
+            modifier = { add = 10  has_trait = just }
+        }
+    }
+
+    after = {
+        hidden_effect = { eotg_aug_patron_demand_effect = yes }
+    }
+}
+
+
+# ── eotg_aug_patron.003 ───────────────────────────────────────────────────────
+# Exclusivity. "Only our technicians may touch you now."
+# a/d: eotg_mod_aug_patron_clause for as long as the debt lasts (the story's
+# on_end removes it); c: 3 years.
+# Caller: eotg_story_aug_patron (demand 1).
+
+eotg_aug_patron.003 = {
+    type = character_event
+    title = eotg_aug_patron.003.t
+    desc = eotg_aug_patron.003.desc
+    theme = stewardship_wealth_focus
+
+    trigger = { eotg_aug_has_patron = yes }
+
+    left_portrait = {
+        character = root
+        animation = thinking
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_patron_envoy }
+        character = scope:eotg_patron_envoy
+        animation = steward
+    }
+
+    immediate = {
+        hidden_effect = {
+            random_owned_story = {
+                limit = { story_type = eotg_story_aug_patron }
+                save_scope_as = eotg_patron_story
+                var:eotg_envoy ?= { save_scope_as = eotg_patron_envoy }
+            }
+        }
+    }
+
+    # "Agree." Their technicians are good.
+    option = {
+        name = eotg_aug_patron.003.a
+        # Hardware-specific (their technicians service it): augmented owners
+        # only (final QA). b and c stay open to an owner who left the system.
+        trigger = { eotg_is_augmented_any = yes }
+        add_character_modifier = { modifier = eotg_mod_aug_patron_clause }
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = trusting }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # "Refuse."
+    option = {
+        name = eotg_aug_patron.003.b
+        eotg_aug_patron_grievance_effect = { AMOUNT = 1 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = stubborn }
+            modifier = { add = 10  has_trait = greedy }
+        }
+    }
+
+    # "Agree, on a trial basis."
+    option = {
+        name = eotg_aug_patron.003.c
+        add_character_modifier = { modifier = eotg_mod_aug_patron_clause  years = 3 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = patient }
+            modifier = { add = 10  has_trait = diligent }
+        }
+    }
+
+    # [diligent] "Agree, but I audit their work."
+    option = {
+        name = eotg_aug_patron.003.d
+        trigger = {
+            has_trait = diligent
+            eotg_is_augmented_any = yes
+        }
+        trait = diligent
+        add_character_modifier = { modifier = eotg_mod_aug_patron_clause }
+        eotg_add_fracture_risk = { AMOUNT = -8 }
+        stress_impact = {
+            diligent = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = diligent }
+            modifier = { add = 10  has_trait = paranoid }
+        }
+    }
+
+    # [paranoid] "Their hands will never touch me."
+    option = {
+        name = eotg_aug_patron.003.e
+        trigger = {
+            has_trait = paranoid
+            eotg_is_augmented_any = yes
+        }
+        trait = paranoid
+        eotg_aug_patron_grievance_effect = { AMOUNT = 1 }
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        stress_impact = {
+            paranoid = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = paranoid }
+            modifier = { add = 10  has_trait = stubborn }
+        }
+    }
+
+    after = {
+        hidden_effect = { eotg_aug_patron_demand_effect = yes }
+    }
+}
+
+
+# ── eotg_aug_patron.004 ───────────────────────────────────────────────────────
+# The Errand. "There is a critic at your court." May stay ambiguous in loc
+# ("reported but unconfirmed"). Saved eotg_critic: a zealous courtier, else
+# any courtier, both through eotg_aug_patron_critic_candidate (the victim
+# candidate terms, never close family or spouse). Not the weighted picker:
+# family must be excluded outright, which the picker's FAMILY_FACTOR cannot
+# guarantee (same reasoning as fracture.021's guard). The story tick skips
+# this demand when no one qualifies.
+# Caller: eotg_story_aug_patron (demand 2).
+
+eotg_aug_patron.004 = {
+    type = character_event
+    title = eotg_aug_patron.004.t
+    desc = eotg_aug_patron.004.desc
+    theme = intrigue
+
+    trigger = {
+        eotg_aug_has_patron = yes
+        any_courtier = { eotg_aug_patron_critic_candidate = { RULER = root } }
+    }
+
+    left_portrait = {
+        character = root
+        animation = scheme
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_critic }
+        character = scope:eotg_critic
+        animation = personality_zealous
+    }
+    lower_right_portrait = {
+        trigger = { exists = scope:eotg_patron_envoy }
+        character = scope:eotg_patron_envoy
+    }
+
+    immediate = {
+        hidden_effect = {
+            random_owned_story = {
+                limit = { story_type = eotg_story_aug_patron }
+                save_scope_as = eotg_patron_story
+                var:eotg_envoy ?= { save_scope_as = eotg_patron_envoy }
+            }
+            if = {
+                limit = {
+                    any_courtier = {
+                        eotg_aug_patron_critic_candidate = { RULER = root }
+                        has_trait = zealous
+                    }
+                }
+                random_courtier = {
+                    limit = {
+                        eotg_aug_patron_critic_candidate = { RULER = root }
+                        has_trait = zealous
+                    }
+                    save_scope_as = eotg_critic
+                }
+            }
+            else = {
+                random_courtier = {
+                    limit = { eotg_aug_patron_critic_candidate = { RULER = root } }
+                    save_scope_as = eotg_critic
+                }
+            }
+        }
+    }
+
+    # "It will be done."
+    option = {
+        name = eotg_aug_patron.004.a
+        scope:eotg_critic = {
+            add_character_flag = { flag = eotg_flag_aug_breach_victim  days = 30 }
+            death = {
+                death_reason = death_murder
+                killer = root
+            }
+        }
+        # Owner-side risk only while the owner still has hardware (final QA: the
+        # debt outlives Remove Implants; nothing may recreate the variable).
+        if = {
+            limit = { eotg_is_augmented_any = yes }
+            eotg_add_fracture_risk = { AMOUNT = 5 }
+        }
+        eotg_aug_stress_murder_effect = yes
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = 10  has_trait = ambitious }
+            modifier = { add = -30  has_trait = compassionate }
+        }
+    }
+
+    # "No."
+    option = {
+        name = eotg_aug_patron.004.b
+        eotg_aug_patron_grievance_effect = { AMOUNT = 1 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = just }
+            modifier = { add = 10  has_trait = honest }
+        }
+    }
+
+    # "Warn the critic instead."
+    option = {
+        name = eotg_aug_patron.004.c
+        scope:eotg_critic = {
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+        }
+        eotg_aug_patron_grievance_effect = { AMOUNT = 2 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 10  has_trait = honest }
+        }
+    }
+
+    # [sadistic] "With pleasure."
+    option = {
+        name = eotg_aug_patron.004.d
+        trigger = { has_trait = sadistic }
+        trait = sadistic
+        scope:eotg_critic = {
+            add_character_flag = { flag = eotg_flag_aug_breach_victim  days = 30 }
+            death = {
+                death_reason = death_murder
+                killer = root
+            }
+        }
+        # Owner-side risk only while the owner still has hardware (final QA: the
+        # debt outlives Remove Implants; nothing may recreate the variable).
+        if = {
+            limit = { eotg_is_augmented_any = yes }
+            eotg_add_fracture_risk = { AMOUNT = 5 }
+        }
+        eotg_aug_stress_murder_effect = yes
+        stress_impact = {
+            sadistic = medium_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = sadistic }
+            modifier = { add = 10  has_trait = callous }
+        }
+    }
+
+    # [just] "Never, and they will hear of your asking."
+    option = {
+        name = eotg_aug_patron.004.e
+        trigger = { has_trait = just }
+        trait = just
+        add_prestige = 50
+        eotg_aug_patron_grievance_effect = { AMOUNT = 2 }
+        stress_impact = {
+            just = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = just }
+            modifier = { add = 10  has_trait = brave }
+        }
+    }
+
+    after = {
+        hidden_effect = { eotg_aug_patron_demand_effect = yes }
+    }
+}
+
+
+# ── eotg_aug_patron.005 ───────────────────────────────────────────────────────
+# The Family Clause. "Your heir's implants will be ours." Saved eotg_heir:
+# the primary heir, 12+, unaugmented. Without one ("your next child",
+# desc_no_heir) only the grievance options (b, d) remain.
+# a/e: the heir is installed at risk 10 (thread T4: an augmented heir).
+# Caller: eotg_story_aug_patron (demand 3).
+
+eotg_aug_patron.005 = {
+    type = character_event
+    title = eotg_aug_patron.005.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { exists = scope:eotg_heir }
+                desc = eotg_aug_patron.005.desc
+            }
+            desc = eotg_aug_patron.005.desc_no_heir
+        }
+    }
+    theme = family
+
+    trigger = { eotg_aug_has_patron = yes }
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_heir }
+        character = scope:eotg_heir
+        animation = worry
+    }
+    lower_right_portrait = {
+        trigger = { exists = scope:eotg_patron_envoy }
+        character = scope:eotg_patron_envoy
+    }
+
+    immediate = {
+        hidden_effect = {
+            random_owned_story = {
+                limit = { story_type = eotg_story_aug_patron }
+                save_scope_as = eotg_patron_story
+                var:eotg_envoy ?= { save_scope_as = eotg_patron_envoy }
+            }
+            primary_heir ?= {
+                if = {
+                    limit = { eotg_aug_patron_heir_candidate = yes }
+                    save_scope_as = eotg_heir
+                }
+            }
+        }
+    }
+
+    # "Agreed."
+    option = {
+        name = eotg_aug_patron.005.a
+        trigger = { exists = scope:eotg_heir }
+        scope:eotg_heir = {
+            eotg_aug_initiate_effect = yes
+            eotg_add_fracture_risk = { AMOUNT = 10 }
+            add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+        }
+        eotg_aug_stress_cruelty_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = 10  has_trait = greedy }
+            modifier = { add = -20  has_trait = compassionate }
+        }
+    }
+
+    # "Never."
+    option = {
+        name = eotg_aug_patron.005.b
+        eotg_aug_patron_grievance_effect = { AMOUNT = 2 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = stubborn }
+            modifier = { add = 10  has_trait = brave }
+        }
+    }
+
+    # "Take more of me instead."
+    option = {
+        name = eotg_aug_patron.005.c
+        # Hardware-specific: there is no "more of me" without implants
+        # (final QA). b "Never." is the ungated option.
+        trigger = {
+            exists = scope:eotg_heir
+            eotg_is_augmented_any = yes
+        }
+        eotg_add_fracture_risk = { AMOUNT = 15 }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = brave }
+            modifier = { add = 10  has_trait = compassionate }
+        }
+    }
+
+    # [compassionate] "Not my child."
+    option = {
+        name = eotg_aug_patron.005.d
+        trigger = { has_trait = compassionate }
+        trait = compassionate
+        eotg_aug_patron_grievance_effect = { AMOUNT = 2 }
+        stress_impact = {
+            compassionate = medium_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = compassionate }
+            modifier = { add = 10  has_trait = forgiving }
+        }
+    }
+
+    # [ambitious] "A strong heir is a strong house."
+    option = {
+        name = eotg_aug_patron.005.e
+        trigger = {
+            has_trait = ambitious
+            exists = scope:eotg_heir
+        }
+        trait = ambitious
+        scope:eotg_heir = {
+            eotg_aug_initiate_effect = yes
+            eotg_add_fracture_risk = { AMOUNT = 10 }
+            add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
+        }
+        stress_impact = {
+            ambitious = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = ambitious }
+            modifier = { add = 10  has_trait = arrogant }
+        }
+    }
+
+    after = {
+        hidden_effect = { eotg_aug_patron_demand_effect = yes }
+    }
+}
+
+
+# ── eotg_aug_patron.006 ───────────────────────────────────────────────────────
+# The Final Demand. Tone by how it was reached: grievance >= 3 (betrayal,
+# desc_betrayal) or demand >= 4 (settlement, desc_settlement). Every option
+# ends the story (`after`).
+# c/e (and d at 50%) betray: eotg_aug_patron_betray_effect (the envoy dies,
+# throttle 5 years, risk +25, an Overclocked owner's Countdown starts).
+# Buy-out: 2 x major_gold_value, scaled by the terms like every bill.
+# Caller: eotg_story_aug_patron (demand 4+ or grievance 3+).
+
+eotg_aug_patron.006 = {
+    type = character_event
+    title = eotg_aug_patron.006.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_patron_story.var:eotg_grievance >= 3 }
+                desc = eotg_aug_patron.006.desc_betrayal
+            }
+            desc = eotg_aug_patron.006.desc_settlement
+        }
+    }
+    theme = intrigue
+
+    trigger = { eotg_aug_has_patron = yes }
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_patron_envoy }
+        character = scope:eotg_patron_envoy
+        animation = schadenfreude
+    }
+
+    immediate = {
+        hidden_effect = {
+            random_owned_story = {
+                limit = { story_type = eotg_story_aug_patron }
+                save_scope_as = eotg_patron_story
+                var:eotg_envoy ?= { save_scope_as = eotg_patron_envoy }
+            }
+        }
+    }
+
+    # "Sign over the revenues."
+    option = {
+        name = eotg_aug_patron.006.a
+        remove_character_modifier = eotg_mod_aug_patron_clause
+        add_character_modifier = { modifier = eotg_mod_aug_patron_clause_final }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 10  has_trait = craven }
+        }
+    }
+
+    # "Buy them out."
+    option = {
+        name = eotg_aug_patron.006.b
+        trigger = { eotg_aug_patron_can_pay = { BASE = major_gold_value  MULT = 2 } }
+        eotg_aug_patron_pay_effect = { BASE = major_gold_value  MULT = 2 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 10  has_trait = just }
+            modifier = { add = -20  has_trait = greedy }
+        }
+    }
+
+    # "Betray them."
+    option = {
+        name = eotg_aug_patron.006.c
+        eotg_aug_patron_betray_effect = yes
+        eotg_aug_stress_murder_effect = yes
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = wrathful }
+            modifier = { add = 10  has_trait = vengeful }
+            modifier = { add = -20  has_trait = compassionate }
+        }
+    }
+
+    # [deceitful] "Sell them to a rival syndicate." 50%: a clean exit and a
+    # fee; 50%: as c.
+    option = {
+        name = eotg_aug_patron.006.d
+        trigger = { has_trait = deceitful }
+        trait = deceitful
+        random_list = {
+            50 = {
+                desc = eotg_aug_patron.006.d.success
+                add_gold = medium_gold_value
+            }
+            50 = {
+                desc = eotg_aug_patron.006.d.failure
+                eotg_aug_patron_betray_effect = yes
+                eotg_aug_stress_murder_effect = yes
+            }
+        }
+        eotg_aug_stress_lie_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = deceitful }
+            modifier = { add = 10  has_trait = greedy }
+        }
+    }
+
+    # [brave] "Come and take it from me."
+    option = {
+        name = eotg_aug_patron.006.e
+        trigger = { has_trait = brave }
+        trait = brave
+        eotg_aug_patron_betray_effect = yes
+        add_prestige = 200
+        eotg_aug_stress_murder_effect = yes
+        stress_impact = {
+            brave = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = brave }
+            modifier = { add = 10  has_trait = arrogant }
+        }
+    }
+
+    after = {
+        hidden_effect = {
+            scope:eotg_patron_story ?= { end_story = yes }
+        }
+    }
+}
+
+
+# ── eotg_aug_patron.007 ───────────────────────────────────────────────────────
+# A New Envoy. The old one is dead or gone; the syndicate sends another from
+# the same template (root's culture and faith by scope) and the story's
+# eotg_envoy is reset. Does not count as a demand.
+# Caller: eotg_story_aug_patron (the envoy is dead or left court).
+
+eotg_aug_patron.007 = {
+    type = character_event
+    title = eotg_aug_patron.007.t
+    desc = eotg_aug_patron.007.desc
+    theme = intrigue
+
+    trigger = { eotg_aug_has_patron = yes }
+
+    left_portrait = {
+        character = root
+        animation = thinking
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_patron_envoy }
+        character = scope:eotg_patron_envoy
+        animation = obsequious_bow
+    }
+
+    immediate = {
+        hidden_effect = {
+            random_owned_story = {
+                limit = { story_type = eotg_story_aug_patron }
+                save_scope_as = eotg_patron_story
+            }
+        }
+        create_character = {
+            template = eotg_aug_patron_envoy_template
+            location = root.location
+            culture = root.culture
+            faith = root.faith
+            save_scope_as = eotg_patron_envoy
+        }
+        add_courtier = scope:eotg_patron_envoy
+        hidden_effect = {
+            scope:eotg_patron_story = {
+                set_variable = { name = eotg_envoy  value = scope:eotg_patron_envoy }
+            }
+        }
+    }
+
+    # "Welcome them."
+    option = {
+        name = eotg_aug_patron.007.a
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = gregarious }
+            modifier = { add = 10  has_trait = trusting }
+        }
+    }
+
+    # [paranoid] "And how did the last one die?"
+    option = {
+        name = eotg_aug_patron.007.b
+        trigger = { has_trait = paranoid }
+        trait = paranoid
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_intrigue  years = 5 }
+        stress_impact = {
+            paranoid = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = paranoid }
+            modifier = { add = 10  has_trait = vengeful }
+        }
+    }
+
+    # "Refuse them entry." The firmware notices.
+    option = {
+        name = eotg_aug_patron.007.c
+        scope:eotg_patron_envoy = { move_to_pool = yes }
+        eotg_aug_patron_grievance_effect = { AMOUNT = 1 }
+        # Rule 6 (final QA): a cost nothing and c only cost, so the refusal
+        # is at least seen to be made.
+        add_prestige = 50
+        # Owner-side risk only while the owner still has hardware (final QA: the
+        # debt outlives Remove Implants; nothing may recreate the variable).
+        if = {
+            limit = { eotg_is_augmented_any = yes }
+            eotg_add_fracture_risk = { AMOUNT = 5 }
+        }
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = stubborn }
+            modifier = { add = 10  has_trait = arrogant }
+        }
+    }
+}

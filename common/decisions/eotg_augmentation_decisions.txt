@@ -93,6 +93,22 @@ eotg_decision_overclock_regression = {
             change_variable = { name = eotg_fracture_risk  multiply = 0.5 }
         }
         eotg_aug_set_integration_effect = { XP = 50 }
+        # Phase 5 §1.1: a running Countdown stops if the halved risk is < 50
+        # (eotg_aug_countdown.006 The Quiet ends the story). At 50+ the story
+        # sees the lost tier at its next tick and fires The Quiet itself.
+        if = {
+            limit = {
+                eotg_aug_has_countdown = yes
+                OR = {
+                    NOT = { has_variable = eotg_fracture_risk }
+                    var:eotg_fracture_risk < 50
+                }
+            }
+            # End the story now (final QA): otherwise its next tick could see
+            # the lost tier inside the 3 days and fire The Quiet a second time.
+            eotg_aug_end_countdown_effect = yes
+            trigger_event = { id = eotg_aug_countdown.006  days = 3 }
+        }
         add_character_modifier = { modifier = eotg_mod_oc_regression_recovery  years = 5 }
         remove_character_flag = eotg_flag_aug_intervention_discount
         stress_impact = { base = medium_stress_impact_loss }

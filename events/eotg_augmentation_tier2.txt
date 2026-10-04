@@ -8,6 +8,19 @@
 # eotg_aug_tier2.005 — The Confessor's Warning (zealous courtier)
 # eotg_aug_tier2.006 — Cold Detachment         (emotional processing anomaly)
 #
+# Phase 4b (docs/specs/cybernetics_v2_phase4.md §4):
+# eotg_aug_tier2.007 — Numbers, Not Faces
+# eotg_aug_tier2.008 — The Late Grief          (eotg_on_death_aug_grief)
+# eotg_aug_tier2.009 — Perfect Recall
+# eotg_aug_tier2.010 — Absent at the Birth     (on_birth_child)
+# eotg_aug_tier2.011 — Market Ledger
+# eotg_aug_tier2.012 / .021 — Trust Protocol / The Report Was Wrong
+# eotg_aug_tier2.013 / .014 — The Bidding War / The Vendors Return
+# eotg_aug_tier2.015 / .016 — Tampering / What Was Done
+# eotg_aug_tier2.004 / .017 / .018 — The Space Between Us (stages 1-3)
+# eotg_aug_tier2.019 — The Cold Calculation
+# eotg_aug_tier2.020 — The Second Self         (thread T1, voice beat 1)
+#
 # Fires from: eotg_on_yearly_aug_tier2_check
 #   (common/on_action/eotg_augmentation_on_actions.txt, via yearly_playable_pulse).
 # Cooldown eotg_flag_enh_event_cooldown is set and checked there only.
@@ -241,7 +254,32 @@ eotg_aug_tier2.002 = {
 eotg_aug_tier2.003 = {
     type = character_event
     title = eotg_aug_tier2.003.t
-    desc = eotg_aug_tier2.003.desc
+    # E-12 (Phase 4b): what was replaced first (thread T7) and, once the
+    # second self exists, "it wants this too" (thread T1).
+    desc = {
+        desc = eotg_aug_tier2.003.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { var:eotg_aug_focus ?= flag:limbs }
+                desc = eotg_aug_tier2.003.desc_limbs
+            }
+            triggered_desc = {
+                trigger = { var:eotg_aug_focus ?= flag:senses }
+                desc = eotg_aug_tier2.003.desc_senses
+            }
+            triggered_desc = {
+                trigger = { var:eotg_aug_focus ?= flag:nerves }
+                desc = eotg_aug_tier2.003.desc_nerves
+            }
+        }
+        triggered_desc = {
+            trigger = {
+                has_variable = eotg_aug_voice
+                var:eotg_aug_voice >= 1
+            }
+            desc = eotg_aug_tier2.003.desc_voice
+        }
+    }
     theme = physical_health
 
     # World-state tier guard (mirrors the on_action branch): a regression
@@ -359,6 +397,9 @@ eotg_aug_tier2.003 = {
 # ── eotg_aug_tier2.004 ────────────────────────────────────────────────────────
 # The Space Between Us
 # A spouse confronts the Enhanced character about the widening emotional distance.
+# Phase 4b (E-09): stage 1 of 3. Each option sets eotg_aug_marriage_strain
+# (a 0, b +1, c +2, d 0) and fires .017 in 180-365 days; .017's trigger
+# checks the marriage still stands. .018 removes the variable.
 
 eotg_aug_tier2.004 = {
     type = character_event
@@ -392,6 +433,8 @@ eotg_aug_tier2.004 = {
             add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
         }
         eotg_add_fracture_risk = { AMOUNT = -3 }
+        set_variable = { name = eotg_aug_marriage_strain  value = 0 }
+        trigger_event = { id = eotg_aug_tier2.017  days = { 180 365 } }
         stress_impact = { base = minor_stress_impact_loss }
         ai_chance = {
             base = 40
@@ -404,6 +447,8 @@ eotg_aug_tier2.004 = {
     # (dominated fix, audit §2.5): the spouse believes it, or sees through it.
     option = {
         name = eotg_aug_tier2.004.b
+        set_variable = { name = eotg_aug_marriage_strain  value = 1 }
+        trigger_event = { id = eotg_aug_tier2.017  days = { 180 365 } }
         random_list = {
             50 = {
                 scope:aug_spouse = {
@@ -434,6 +479,8 @@ eotg_aug_tier2.004 = {
             add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 8 }
         }
         eotg_add_fracture_risk = { AMOUNT = 5 }
+        set_variable = { name = eotg_aug_marriage_strain  value = 2 }
+        trigger_event = { id = eotg_aug_tier2.017  days = { 180 365 } }
         stress_impact = { base = medium_stress_impact_gain }
         ai_chance = {
             base = 30
@@ -452,6 +499,8 @@ eotg_aug_tier2.004 = {
             add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
         }
         eotg_add_fracture_risk = { AMOUNT = 3 }
+        set_variable = { name = eotg_aug_marriage_strain  value = 0 }
+        trigger_event = { id = eotg_aug_tier2.017  days = { 180 365 } }
         eotg_aug_stress_lie_effect = yes
         ai_chance = {
             base = 30
@@ -693,6 +742,1782 @@ eotg_aug_tier2.006 = {
             base = 30
             modifier = { add = 30  has_trait = stubborn }
             modifier = { add = 10  has_trait = compassionate }
+        }
+    }
+}
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Phase 4b — Enhanced: "This is becoming part of me."
+# docs/specs/cybernetics_v2_phase4.md §4. Universal options a-c, trait options
+# d-f. Risk moves are + only below Overclocked (index §1 rule 4).
+# ═════════════════════════════════════════════════════════════════════════════
+
+
+# ── eotg_aug_tier2.007 ────────────────────────────────────────────────────────
+# Numbers, Not Faces (E-01). A case before you, reduced to probabilities.
+# Saved eotg_petitioner: an adult courtier (a speaker, not a victim: plain
+# random_courtier + save_scope_as, index §6 item 6).
+# Caller: eotg_on_yearly_aug_tier2_check (Phase 4b branch).
+
+eotg_aug_tier2.007 = {
+    type = character_event
+    title = eotg_aug_tier2.007.t
+    desc = eotg_aug_tier2.007.desc
+    theme = stewardship
+
+    trigger = {
+        any_courtier = {
+            is_alive = yes
+            is_adult = yes
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_petitioner }
+        character = scope:eotg_petitioner
+        animation = beg
+    }
+
+    immediate = {
+        hidden_effect = {
+            random_courtier = {
+                limit = {
+                    is_alive = yes
+                    is_adult = yes
+                }
+                save_scope_as = eotg_petitioner
+            }
+        }
+    }
+
+    # "Follow the numbers."
+    option = {
+        name = eotg_aug_tier2.007.a
+        add_gold = minor_gold_value
+        scope:eotg_petitioner = {
+            add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 5 }
+        }
+        eotg_add_fracture_risk = { AMOUNT = 4 }
+        eotg_aug_stress_cruelty_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = greedy }
+            modifier = { add = 10  has_trait = callous }
+            modifier = { add = -20  has_trait = compassionate }
+        }
+    }
+
+    # "Follow my conscience."
+    option = {
+        name = eotg_aug_tier2.007.b
+        add_prestige = 50
+        stress_impact = { base = minor_stress_impact_gain }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 10  has_trait = honest }
+        }
+    }
+
+    # "Split the difference."
+    option = {
+        name = eotg_aug_tier2.007.c
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 10  has_trait = patient }
+        }
+    }
+
+    # [just] "The law, not the ledger."
+    option = {
+        name = eotg_aug_tier2.007.d
+        trigger = { has_trait = just }
+        trait = just
+        add_prestige = 100
+        stress_impact = {
+            just = medium_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = just }
+            modifier = { add = 10  has_trait = honest }
+        }
+    }
+
+    # [arbitrary] "The ledger is the law now."
+    option = {
+        name = eotg_aug_tier2.007.e
+        trigger = { has_trait = arbitrary }
+        trait = arbitrary
+        add_gold = medium_gold_value
+        add_tyranny = 5
+        scope:eotg_petitioner = {
+            add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 5 }
+        }
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        eotg_aug_stress_tyranny_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = arbitrary }
+            modifier = { add = 10  has_trait = greedy }
+        }
+    }
+}
+
+
+# ── eotg_aug_tier2.008 ────────────────────────────────────────────────────────
+# The Late Grief (E-02). A close relative died months ago; the grief arrives
+# now. Saved eotg_mourned = var:eotg_aug_grief_for (set for a year by
+# eotg_on_death_aug_grief); eotg_grief_killer = var:eotg_aug_grief_killer
+# when a killer was recorded. Every option clears both variables.
+# Caller: eotg_on_yearly_aug_tier2_check (Phase 4b branch).
+
+eotg_aug_tier2.008 = {
+    type = character_event
+    title = eotg_aug_tier2.008.t
+    desc = eotg_aug_tier2.008.desc
+    theme = death
+
+    trigger = { has_variable = eotg_aug_grief_for }
+
+    left_portrait = {
+        character = root
+        animation = grief
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_mourned }
+        character = scope:eotg_mourned
+        animation = dead
+        animate_if_dead = yes
+    }
+
+    immediate = {
+        hidden_effect = {
+            var:eotg_aug_grief_for = { save_scope_as = eotg_mourned }
+            if = {
+                limit = { has_variable = eotg_aug_grief_killer }
+                var:eotg_aug_grief_killer = { save_scope_as = eotg_grief_killer }
+            }
+        }
+    }
+
+    # "Grieve now. Alone."
+    option = {
+        name = eotg_aug_tier2.008.a
+        stress_impact = { base = medium_stress_impact_loss }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 10  has_trait = shy }
+        }
+    }
+
+    # "It was months ago. Move on."
+    option = {
+        name = eotg_aug_tier2.008.b
+        eotg_add_fracture_risk = { AMOUNT = 4 }
+        eotg_aug_stress_embrace_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+
+    # "Visit the grave."
+    option = {
+        name = eotg_aug_tier2.008.c
+        add_piety = 25
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = zealous }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+
+    # [forgiving] "Forgive them what was left unsaid."
+    option = {
+        name = eotg_aug_tier2.008.d
+        trigger = { has_trait = forgiving }
+        trait = forgiving
+        stress_impact = {
+            forgiving = medium_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = forgiving }
+            modifier = { add = 10  has_trait = compassionate }
+        }
+    }
+
+    # [vengeful] "Someone did this." - only when a killer was recorded
+    option = {
+        name = eotg_aug_tier2.008.e
+        trigger = {
+            has_trait = vengeful
+            exists = scope:eotg_grief_killer
+            scope:eotg_grief_killer = { is_alive = yes }
+        }
+        trait = vengeful
+        add_dread = 10
+        scope:eotg_grief_killer = {
+            add_opinion = { modifier = eotg_opinion_aug_fear  target = root  years = 10 }
+        }
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        stress_impact = {
+            vengeful = minor_stress_impact_loss
+        }
+        eotg_aug_stress_cruelty_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = vengeful }
+            modifier = { add = 10  has_trait = wrathful }
+        }
+    }
+
+    after = {
+        hidden_effect = {
+            remove_variable = eotg_aug_grief_for
+            remove_variable = eotg_aug_grief_killer
+        }
+    }
+}
+
+
+# ── eotg_aug_tier2.009 ────────────────────────────────────────────────────────
+# Perfect Recall (E-03). The implant has kept every word ever said to you.
+# Caller: eotg_on_yearly_aug_tier2_check (Phase 4b branch).
+
+eotg_aug_tier2.009 = {
+    type = character_event
+    title = eotg_aug_tier2.009.t
+    desc = eotg_aug_tier2.009.desc
+    theme = learning
+
+    left_portrait = {
+        character = root
+        animation = thinking
+    }
+
+    # "Forget nothing."
+    option = {
+        name = eotg_aug_tier2.009.a
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_intrigue  years = 5 }
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = paranoid }
+            modifier = { add = 10  has_trait = vengeful }
+        }
+    }
+
+    # "Purge the archive."
+    option = {
+        name = eotg_aug_tier2.009.b
+        stress_impact = { base = minor_stress_impact_loss }
+        eotg_aug_stress_reject_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = forgiving }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # "Bring it to council."
+    option = {
+        name = eotg_aug_tier2.009.c
+        add_prestige = 50
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 10  has_trait = gregarious }
+        }
+    }
+
+    # [honest] "And remind everyone of every promise they made."
+    option = {
+        name = eotg_aug_tier2.009.d
+        trigger = { has_trait = honest }
+        trait = honest
+        add_prestige = 100
+        every_vassal = {
+            limit = {
+                is_alive = yes
+                opinion = { target = root  value < 0 }
+            }
+            add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+        }
+        stress_impact = {
+            honest = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = honest }
+            modifier = { add = 10  has_trait = just }
+        }
+    }
+
+    # [deceitful] "Know every lie, and keep telling mine."
+    option = {
+        name = eotg_aug_tier2.009.e
+        trigger = { has_trait = deceitful }
+        trait = deceitful
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_intrigue  years = 5 }
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        eotg_aug_stress_lie_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = deceitful }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+}
+
+
+# ── eotg_aug_tier2.010 ────────────────────────────────────────────────────────
+# Absent at the Birth (E-04). Fired from on_birth_child through
+# eotg_on_birth_aug_parent_check (3-year per-parent cooldown there). Root is
+# the Enhanced or Overclocked parent; saved eotg_newborn; eotg_other_parent is
+# the child's other parent ("the spouse" in the spec), when there is one.
+# a, b and e set eotg_flag_aug_absent_at_birth on the child (thread T3; read
+# by eotg_story_aug_heir_arc on_setup).
+
+eotg_aug_tier2.010 = {
+    type = character_event
+    title = eotg_aug_tier2.010.t
+    desc = eotg_aug_tier2.010.desc
+    theme = family
+
+    trigger = {
+        exists = scope:eotg_newborn
+        scope:eotg_newborn = { is_alive = yes }
+    }
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_other_parent }
+        character = scope:eotg_other_parent
+        animation = worry
+    }
+    lower_right_portrait = {
+        character = scope:eotg_newborn
+    }
+
+    immediate = {
+        hidden_effect = {
+            scope:eotg_newborn = {
+                if = {
+                    limit = { mother ?= root }
+                    father ?= { save_scope_as = eotg_other_parent }
+                }
+                else = {
+                    mother ?= { save_scope_as = eotg_other_parent }
+                }
+            }
+        }
+    }
+
+    # "Hold the child. Feel nothing."
+    option = {
+        name = eotg_aug_tier2.010.a
+        scope:eotg_newborn = { add_character_flag = eotg_flag_aug_absent_at_birth }
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = 10  has_trait = stubborn }
+        }
+    }
+
+    # "Leave the room."
+    option = {
+        name = eotg_aug_tier2.010.b
+        scope:eotg_newborn = { add_character_flag = eotg_flag_aug_absent_at_birth }
+        scope:eotg_other_parent ?= {
+            add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = shy }
+            modifier = { add = 10  has_trait = craven }
+        }
+    }
+
+    # "Switch it off for the day." - no flag
+    option = {
+        name = eotg_aug_tier2.010.c
+        stress_impact = { base = medium_stress_impact_gain }
+        eotg_aug_stress_reject_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 10  has_trait = brave }
+        }
+    }
+
+    # [compassionate] "Stay until something comes." - no flag
+    option = {
+        name = eotg_aug_tier2.010.d
+        trigger = { has_trait = compassionate }
+        trait = compassionate
+        scope:eotg_other_parent ?= {
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+        }
+        stress_impact = { base = minor_stress_impact_gain }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = compassionate }
+            modifier = { add = 10  has_trait = patient }
+        }
+    }
+
+    # [callous] "There will be others."
+    option = {
+        name = eotg_aug_tier2.010.e
+        trigger = { has_trait = callous }
+        trait = callous
+        scope:eotg_newborn = { add_character_flag = eotg_flag_aug_absent_at_birth }
+        scope:eotg_other_parent ?= {
+            add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 5 }
+        }
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        stress_impact = {
+            callous = minor_stress_impact_loss
+        }
+        eotg_aug_stress_cruelty_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = callous }
+            modifier = { add = 10  has_trait = arrogant }
+        }
+    }
+}
+
+
+# ── eotg_aug_tier2.011 ────────────────────────────────────────────────────────
+# Market Ledger (E-05). The implant has optimised the levies.
+# Caller: eotg_on_yearly_aug_tier2_check (Phase 4b branch).
+# Deviation: c's success is "as a, but the steward did the arithmetic, not the
+# implant" (no risk), rather than "without the vassal penalty": the spec's §7
+# list has no penalty-free variant of eotg_mod_aug_optimised_levies, and a 7th
+# modifier would be an identifier the spec does not list. The steward is
+# cp:councillor_steward (guarded); 50% +stewardship x2.
+
+eotg_aug_tier2.011 = {
+    type = character_event
+    title = eotg_aug_tier2.011.t
+    desc = eotg_aug_tier2.011.desc
+    theme = stewardship
+
+    trigger = { is_landed = yes }
+
+    left_portrait = {
+        character = root
+        animation = personality_greedy
+    }
+    right_portrait = {
+        trigger = { exists = cp:councillor_steward }
+        character = cp:councillor_steward
+        animation = steward
+    }
+
+    # "Implement it."
+    option = {
+        name = eotg_aug_tier2.011.a
+        add_character_modifier = { modifier = eotg_mod_aug_optimised_levies  years = 3 }
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        eotg_aug_stress_embrace_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = greedy }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+
+    # "Ignore it."
+    option = {
+        name = eotg_aug_tier2.011.b
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 10  has_trait = generous }
+        }
+    }
+
+    # "Have the steward check the arithmetic."
+    option = {
+        name = eotg_aug_tier2.011.c
+        trigger = {
+            cp:councillor_steward ?= {
+                is_alive = yes
+                NOT = { this = root }
+            }
+        }
+        random_list = {
+            50 = {
+                modifier = {
+                    add = {
+                        value = cp:councillor_steward.stewardship
+                        multiply = 2
+                    }
+                }
+                desc = eotg_aug_tier2.011.c.success
+                add_character_modifier = { modifier = eotg_mod_aug_optimised_levies  years = 3 }
+            }
+            50 = {
+                desc = eotg_aug_tier2.011.c.failure
+            }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 10  has_trait = trusting }
+        }
+    }
+
+    # [greedy] "Squeeze harder."
+    option = {
+        name = eotg_aug_tier2.011.d
+        trigger = { has_trait = greedy }
+        trait = greedy
+        add_character_modifier = { modifier = eotg_mod_aug_optimised_levies  years = 3 }
+        add_gold = medium_gold_value
+        add_tyranny = 5
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        stress_impact = {
+            greedy = minor_stress_impact_loss
+        }
+        eotg_aug_stress_tyranny_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = greedy }
+            modifier = { add = 10  has_trait = arbitrary }
+        }
+    }
+
+    # [generous] "Spend the surplus on alms."
+    option = {
+        name = eotg_aug_tier2.011.e
+        trigger = {
+            has_trait = generous
+            gold >= minor_gold_value
+        }
+        trait = generous
+        remove_short_term_gold = minor_gold_value
+        add_piety = 50
+        every_vassal = {
+            limit = { is_alive = yes }
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+        }
+        stress_impact = {
+            generous = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = generous }
+            modifier = { add = 10  has_trait = compassionate }
+        }
+    }
+}
+
+
+# ── eotg_aug_tier2.012 ────────────────────────────────────────────────────────
+# Trust Protocol (E-06). The implant flags the spymaster as a risk. Saved
+# eotg_flagged = cp:councillor_spymaster. Truth rolled in immediate: 30%
+# true, +20 at senses focus (thread T7); only the senses focus lets the desc
+# say which. b and e fire .021 when the report was false.
+# Caller: eotg_on_yearly_aug_tier2_check (Phase 4b branch).
+
+eotg_aug_tier2.012 = {
+    type = character_event
+    title = eotg_aug_tier2.012.t
+    desc = {
+        desc = eotg_aug_tier2.012.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = {
+                    var:eotg_aug_focus ?= flag:senses
+                    scope:eotg_report_truth = flag:true
+                }
+                desc = eotg_aug_tier2.012.desc_senses_true
+            }
+            triggered_desc = {
+                trigger = {
+                    var:eotg_aug_focus ?= flag:senses
+                    scope:eotg_report_truth = flag:false
+                }
+                desc = eotg_aug_tier2.012.desc_senses_false
+            }
+        }
+    }
+    theme = intrigue
+
+    trigger = {
+        cp:councillor_spymaster ?= {
+            is_alive = yes
+            NOT = { this = root }
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = paranoia
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_flagged }
+        character = scope:eotg_flagged
+        animation = spymaster
+    }
+
+    immediate = {
+        hidden_effect = {
+            cp:councillor_spymaster = { save_scope_as = eotg_flagged }
+            random_list = {
+                30 = {
+                    modifier = {
+                        add = 20
+                        var:eotg_aug_focus ?= flag:senses
+                    }
+                    save_scope_value_as = { name = eotg_report_truth  value = flag:true }
+                }
+                70 = {
+                    save_scope_value_as = { name = eotg_report_truth  value = flag:false }
+                }
+            }
+        }
+    }
+
+    # "Investigate quietly."
+    option = {
+        name = eotg_aug_tier2.012.a
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_intrigue  years = 5 }
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = patient }
+            modifier = { add = 10  has_trait = diligent }
+        }
+    }
+
+    # "Take their keys."
+    option = {
+        name = eotg_aug_tier2.012.b
+        scope:eotg_flagged = {
+            add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 5 }
+        }
+        if = {
+            limit = { scope:eotg_report_truth = flag:false }
+            hidden_effect = {
+                trigger_event = { id = eotg_aug_tier2.021  days = { 60 120 } }
+            }
+        }
+        eotg_aug_stress_tyranny_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = paranoid }
+            modifier = { add = 10  has_trait = arbitrary }
+        }
+    }
+
+    # "Ignore it."
+    option = {
+        name = eotg_aug_tier2.012.c
+        eotg_add_fracture_risk = { AMOUNT = 4 }
+        eotg_aug_stress_neglect_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = trusting }
+            modifier = { add = 10  has_trait = lazy }
+        }
+    }
+
+    # [trusting] "I trust them more than it."
+    option = {
+        name = eotg_aug_tier2.012.d
+        trigger = { has_trait = trusting }
+        trait = trusting
+        scope:eotg_flagged = {
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+        }
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        stress_impact = {
+            trusting = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = trusting }
+            modifier = { add = 10  has_trait = honest }
+        }
+    }
+
+    # [paranoid] "Arrest them." Vanilla wrapper as tier3.004.e
+    # (common/scripted_effects/00_prison_effects.txt imprison_character_effect).
+    option = {
+        name = eotg_aug_tier2.012.e
+        trigger = { has_trait = paranoid }
+        trait = paranoid
+        imprison_character_effect = {
+            IMPRISONER = root
+            TARGET = scope:eotg_flagged
+        }
+        if = {
+            limit = { scope:eotg_report_truth = flag:false }
+            hidden_effect = {
+                trigger_event = { id = eotg_aug_tier2.021  days = { 60 120 } }
+            }
+        }
+        eotg_aug_stress_tyranny_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = paranoid }
+            modifier = { add = -20  has_trait = just }
+        }
+    }
+}
+
+
+# ── eotg_aug_tier2.021 ────────────────────────────────────────────────────────
+# The Report Was Wrong (E-06 follow-up). It establishes, before Overclocked,
+# that the implant can be wrong. The wronged spymaster gets
+# eotg_opinion_aug_falsely_accused in immediate; a replaces it with reassured.
+# Caller: eotg_aug_tier2.012 (b, e) when the report was false.
+
+eotg_aug_tier2.021 = {
+    type = character_event
+    title = eotg_aug_tier2.021.t
+    desc = eotg_aug_tier2.021.desc
+    theme = intrigue
+
+    trigger = {
+        exists = scope:eotg_flagged
+        scope:eotg_flagged = { is_alive = yes }
+    }
+
+    left_portrait = {
+        character = root
+        animation = shame
+    }
+    right_portrait = {
+        character = scope:eotg_flagged
+        animation = anger
+    }
+
+    immediate = {
+        scope:eotg_flagged = {
+            add_opinion = { modifier = eotg_opinion_aug_falsely_accused  target = root  years = 10 }
+        }
+    }
+
+    # "Apologise." - release if held; accusation replaced with reassurance
+    option = {
+        name = eotg_aug_tier2.021.a
+        scope:eotg_flagged = {
+            if = {
+                limit = { is_imprisoned_by = root }
+                release_from_prison = yes
+            }
+            remove_opinion = { target = root  modifier = eotg_opinion_aug_falsely_accused }
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+        }
+        eotg_add_fracture_risk = { AMOUNT = 2 }
+        stress_impact = {
+            honest = minor_stress_impact_loss
+            arrogant = minor_stress_impact_gain
+        }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = honest }
+            modifier = { add = 10  has_trait = humble }
+            modifier = { add = -20  has_trait = arrogant }
+        }
+    }
+
+    # "It was right to be careful."
+    option = {
+        name = eotg_aug_tier2.021.b
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        eotg_aug_stress_lie_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = arrogant }
+            modifier = { add = 10  has_trait = paranoid }
+        }
+    }
+}
+
+
+# ── eotg_aug_tier2.013 ────────────────────────────────────────────────────────
+# The Bidding War (E-07). Two firmware vendors. The choice sets the
+# Overclocked accrual curve (eotg_flag_aug_vendor_safe -3 / _bold +3 in
+# eotg_on_yearly_aug_overclocked_check), not Integration. The vendor flags
+# are exclusive and last until removal (eotg_aug_remove_all_effect).
+# Caller: eotg_on_yearly_aug_tier2_check (Phase 4b branch; one-time flag
+# eotg_flag_aug_vendor_done set there). c (success) and e fire .014.
+# c: intrigue random_list, 50 + intrigue x2 (shape of tier2.011.c).
+
+eotg_aug_tier2.013 = {
+    type = character_event
+    title = eotg_aug_tier2.013.t
+    desc = eotg_aug_tier2.013.desc
+    theme = stewardship
+
+    left_portrait = {
+        character = root
+        animation = thinking
+    }
+
+    # "The careful vendor."
+    option = {
+        name = eotg_aug_tier2.013.a
+        remove_character_flag = eotg_flag_aug_vendor_bold
+        add_character_flag = eotg_flag_aug_vendor_safe
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = craven }
+            modifier = { add = 10  has_trait = patient }
+        }
+    }
+
+    # "The bold vendor."
+    option = {
+        name = eotg_aug_tier2.013.b
+        remove_character_flag = eotg_flag_aug_vendor_safe
+        add_character_flag = eotg_flag_aug_vendor_bold
+        add_character_modifier = { modifier = eotg_mod_aug_bold_firmware }
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        eotg_aug_stress_embrace_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = brave }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+
+    # "Play them against each other."
+    option = {
+        name = eotg_aug_tier2.013.c
+        random_list = {
+            50 = {
+                modifier = {
+                    add = {
+                        value = intrigue
+                        multiply = 2
+                    }
+                }
+                desc = eotg_aug_tier2.013.c.success
+                save_scope_value_as = { name = eotg_vendor_return  value = flag:played }
+                trigger_event = { id = eotg_aug_tier2.014  days = { 30 60 } }
+            }
+            50 = {
+                desc = eotg_aug_tier2.013.c.failure
+            }
+        }
+        eotg_aug_stress_lie_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = deceitful }
+            modifier = { add = 10  has_trait = greedy }
+        }
+    }
+
+    # [greedy] "Take money from both." - the bold firmware, cheaply made
+    # (thread T6: eotg_flag_aug_hidden_flaw)
+    option = {
+        name = eotg_aug_tier2.013.d
+        trigger = { has_trait = greedy }
+        trait = greedy
+        add_gold = major_gold_value
+        remove_character_flag = eotg_flag_aug_vendor_safe
+        add_character_flag = eotg_flag_aug_vendor_bold
+        add_character_flag = eotg_flag_aug_hidden_flaw
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        stress_impact = {
+            greedy = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = greedy }
+            modifier = { add = 10  has_trait = deceitful }
+        }
+    }
+
+    # [patient] "Wait for a better offer."
+    option = {
+        name = eotg_aug_tier2.013.e
+        trigger = { has_trait = patient }
+        trait = patient
+        save_scope_value_as = { name = eotg_vendor_return  value = flag:waited }
+        trigger_event = { id = eotg_aug_tier2.014  days = 365 }
+        stress_impact = {
+            patient = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = patient }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+}
+
+
+# ── eotg_aug_tier2.014 ────────────────────────────────────────────────────────
+# The Bidding War: The Vendors Return. Caller: eotg_aug_tier2.013 (c on
+# success, e). The desc says why they came back (scope:eotg_vendor_return).
+
+eotg_aug_tier2.014 = {
+    type = character_event
+    title = eotg_aug_tier2.014.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_vendor_return ?= flag:waited }
+                desc = eotg_aug_tier2.014.desc_waited
+            }
+            desc = eotg_aug_tier2.014.desc_played
+        }
+    }
+    theme = stewardship
+
+    trigger = { has_trait = eotg_cybernetics }
+
+    left_portrait = {
+        character = root
+        animation = personality_greedy
+    }
+
+    # "The careful vendor." - and a rebate
+    option = {
+        name = eotg_aug_tier2.014.a
+        remove_character_flag = eotg_flag_aug_vendor_bold
+        add_character_flag = eotg_flag_aug_vendor_safe
+        add_gold = minor_gold_value
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = craven }
+            modifier = { add = 10  has_trait = greedy }
+        }
+    }
+
+    # "The bold vendor."
+    option = {
+        name = eotg_aug_tier2.014.b
+        remove_character_flag = eotg_flag_aug_vendor_safe
+        add_character_flag = eotg_flag_aug_vendor_bold
+        add_character_modifier = { modifier = eotg_mod_aug_bold_firmware }
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        eotg_aug_stress_embrace_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = brave }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+
+    # "Neither."
+    option = {
+        name = eotg_aug_tier2.014.c
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 10  has_trait = stubborn }
+        }
+    }
+}
+
+
+# ── eotg_aug_tier2.015 ────────────────────────────────────────────────────────
+# Tampering (E-08). Someone has been inside the firmware. Saved
+# eotg_tamperer: a rival, else a courtier from the victim picker (family
+# factor 0.05: they may be imprisoned or executed in .016), else a vassal.
+# Caller: eotg_on_yearly_aug_tier2_check (Phase 4b branch).
+# a, c and d fire .016. b ("Purge and reinstall") ends the chain: there is
+# nothing left to find (deviation: the spec's ".016 ... else rolled" is read
+# as the options that leave the tampering in place).
+# a: intrigue duel, shape of tier2.005.e (vanilla false_conversion.2000.a).
+
+eotg_aug_tier2.015 = {
+    type = character_event
+    title = eotg_aug_tier2.015.t
+    desc = eotg_aug_tier2.015.desc
+    theme = intrigue
+
+    trigger = {
+        OR = {
+            any_relation = { type = rival }
+            any_courtier = { eotg_aug_victim_candidate = yes }
+            any_vassal = { is_alive = yes }
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = paranoia
+    }
+
+    immediate = {
+        hidden_effect = {
+            if = {
+                limit = { any_relation = { type = rival } }
+                random_relation = {
+                    type = rival
+                    save_scope_as = eotg_tamperer
+                }
+            }
+            else_if = {
+                limit = { any_courtier = { eotg_aug_victim_candidate = yes } }
+                eotg_aug_pick_victim_effect = { NAME = eotg_tamperer  FAMILY_FACTOR = 0.05 }
+            }
+            else = {
+                random_vassal = {
+                    limit = { is_alive = yes }
+                    save_scope_as = eotg_tamperer
+                }
+            }
+        }
+    }
+
+    # "Trace it."
+    option = {
+        name = eotg_aug_tier2.015.a
+        trigger = { exists = scope:eotg_tamperer }
+        duel = {
+            skill = intrigue
+            target = scope:eotg_tamperer
+            50 = {
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = 2.5
+                }
+                desc = eotg_aug_tier2.015.a.success
+                save_scope_value_as = { name = eotg_tamper_trace  value = flag:found }
+            }
+            50 = {
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = -2.5
+                }
+                desc = eotg_aug_tier2.015.a.failure
+                save_scope_value_as = { name = eotg_tamper_trace  value = flag:lost }
+            }
+        }
+        trigger_event = { id = eotg_aug_tier2.016  days = { 20 40 } }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 10  has_trait = paranoid }
+        }
+    }
+
+    # "Purge and reinstall."
+    option = {
+        name = eotg_aug_tier2.015.b
+        trigger = { gold >= medium_gold_value }
+        remove_short_term_gold = medium_gold_value
+        eotg_add_fracture_risk = { AMOUNT = 2 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = craven }
+            modifier = { add = 10  has_trait = patient }
+        }
+    }
+
+    # "Say nothing."
+    option = {
+        name = eotg_aug_tier2.015.c
+        eotg_add_fracture_risk = { AMOUNT = 8 }
+        trigger_event = { id = eotg_aug_tier2.016  days = { 20 40 } }
+        eotg_aug_stress_neglect_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = lazy }
+            modifier = { add = 10  has_trait = trusting }
+        }
+    }
+
+    # [paranoid] "Lock down the court." - 50%: the tamperer is put under
+    # house arrest (vanilla imprison type = house_arrest,
+    # events/court_events/court_events_general.txt:12361), if they are
+    # yours to hold
+    option = {
+        name = eotg_aug_tier2.015.d
+        trigger = { has_trait = paranoid }
+        trait = paranoid
+        if = {
+            limit = {
+                scope:eotg_tamperer ?= {
+                    is_imprisoned = no
+                    OR = {
+                        is_courtier_of = root
+                        is_vassal_of = root
+                    }
+                }
+            }
+            random = {
+                chance = 50
+                imprison = {
+                    target = scope:eotg_tamperer
+                    type = house_arrest
+                }
+                save_scope_value_as = { name = eotg_tamper_trace  value = flag:found }
+            }
+        }
+        trigger_event = { id = eotg_aug_tier2.016  days = { 20 40 } }
+        eotg_aug_stress_tyranny_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = paranoid }
+            modifier = { add = -20  has_trait = trusting }
+        }
+    }
+}
+
+
+# ── eotg_aug_tier2.016 ────────────────────────────────────────────────────────
+# Tampering: What Was Done. Caller: eotg_aug_tier2.015 (a, c, d).
+# Outcome: culprit named when .015 a/d found them (scope:eotg_tamper_trace =
+# flag:found); otherwise rolled in immediate: malfunction 35
+# (eotg_mod_aug_tampered 1 year) / risk +10 (35) / "nothing found" 30, which
+# still costs risk +10, hidden: the implant is unreliable.
+# b executes a culprit you hold (death_execution; vanilla
+# common/deathreasons/00_event_deaths.txt); c imprisons one you can.
+
+eotg_aug_tier2.016 = {
+    type = character_event
+    title = eotg_aug_tier2.016.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_tamper_outcome = flag:culprit }
+                desc = eotg_aug_tier2.016.desc_culprit
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_tamper_outcome = flag:malfunction }
+                desc = eotg_aug_tier2.016.desc_malfunction
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_tamper_outcome = flag:risk }
+                desc = eotg_aug_tier2.016.desc_risk
+            }
+            desc = eotg_aug_tier2.016.desc_nothing
+        }
+    }
+    theme = intrigue
+
+    trigger = { has_trait = eotg_cybernetics }
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+    right_portrait = {
+        trigger = {
+            scope:eotg_tamper_outcome = flag:culprit
+            exists = scope:eotg_tamperer
+        }
+        character = scope:eotg_tamperer
+        animation = fear
+    }
+
+    immediate = {
+        hidden_effect = {
+            if = {
+                limit = {
+                    scope:eotg_tamper_trace ?= flag:found
+                    exists = scope:eotg_tamperer
+                    scope:eotg_tamperer = { is_alive = yes }
+                }
+                save_scope_value_as = { name = eotg_tamper_outcome  value = flag:culprit }
+            }
+            else = {
+                random_list = {
+                    35 = {
+                        save_scope_value_as = { name = eotg_tamper_outcome  value = flag:malfunction }
+                    }
+                    35 = {
+                        save_scope_value_as = { name = eotg_tamper_outcome  value = flag:risk }
+                    }
+                    30 = {
+                        save_scope_value_as = { name = eotg_tamper_outcome  value = flag:nothing }
+                    }
+                }
+            }
+            # "Nothing found" still costs: the implant is unreliable
+            if = {
+                limit = { scope:eotg_tamper_outcome = flag:nothing }
+                eotg_add_fracture_risk = { AMOUNT = 10 }
+            }
+        }
+        if = {
+            limit = { scope:eotg_tamper_outcome = flag:culprit }
+            scope:eotg_tamperer = {
+                add_opinion = { modifier = eotg_opinion_aug_fear  target = root  years = 10 }
+            }
+        }
+        else_if = {
+            limit = { scope:eotg_tamper_outcome = flag:malfunction }
+            add_character_modifier = { modifier = eotg_mod_aug_tampered  years = 1 }
+        }
+        else_if = {
+            limit = { scope:eotg_tamper_outcome = flag:risk }
+            eotg_add_fracture_risk = { AMOUNT = 10 }
+        }
+    }
+
+    # "Understood."
+    option = {
+        name = eotg_aug_tier2.016.a
+        ai_chance = {
+            base = 50
+            modifier = { add = 20  has_trait = forgiving }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # (culprit, held) "Make an example."
+    option = {
+        name = eotg_aug_tier2.016.b
+        trigger = {
+            scope:eotg_tamper_outcome = flag:culprit
+            scope:eotg_tamperer = { is_imprisoned_by = root }
+        }
+        scope:eotg_tamperer = {
+            add_character_flag = { flag = eotg_flag_aug_breach_victim  days = 30 }
+            death = {
+                death_reason = death_execution
+                killer = root
+            }
+        }
+        add_dread = 15
+        eotg_aug_stress_murder_effect = yes
+        ai_chance = {
+            base = 20
+            modifier = { add = 30  has_trait = vengeful }
+            modifier = { add = 20  has_trait = sadistic }
+            modifier = { add = -30  has_trait = compassionate }
+        }
+    }
+
+    # (culprit, not held) "Imprison them."
+    option = {
+        name = eotg_aug_tier2.016.c
+        trigger = {
+            scope:eotg_tamper_outcome = flag:culprit
+            scope:eotg_tamperer = {
+                is_imprisoned = no
+                OR = {
+                    is_courtier_of = root
+                    is_vassal_of = root
+                }
+            }
+        }
+        imprison_character_effect = {
+            IMPRISONER = root
+            TARGET = scope:eotg_tamperer
+        }
+        eotg_aug_stress_tyranny_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = just }
+            modifier = { add = 10  has_trait = paranoid }
+        }
+    }
+}
+
+
+# ── eotg_aug_tier2.017 ────────────────────────────────────────────────────────
+# The Space Between Us, stage 2: Confrontation (E-09). The spouse demands
+# change. Moves eotg_aug_marriage_strain; every option fires .018 a year on.
+# Caller: eotg_aug_tier2.004 (every option), 180-365 days later.
+
+eotg_aug_tier2.017 = {
+    type = character_event
+    title = eotg_aug_tier2.017.t
+    desc = eotg_aug_tier2.017.desc
+    theme = marriage
+
+    trigger = {
+        exists = scope:aug_spouse
+        is_spouse_of = scope:aug_spouse
+    }
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+    right_portrait = {
+        character = scope:aug_spouse
+        animation = anger
+    }
+
+    # "I'll have it dialled down."
+    option = {
+        name = eotg_aug_tier2.017.a
+        trigger = { gold >= minor_gold_value }
+        remove_short_term_gold = minor_gold_value
+        remove_character_modifier = eotg_mod_aug_affect_dampened
+        change_variable = { name = eotg_aug_marriage_strain  add = -1 }
+        eotg_aug_stress_reject_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+
+    # "This is who I am now."
+    option = {
+        name = eotg_aug_tier2.017.b
+        change_variable = { name = eotg_aug_marriage_strain  add = 1 }
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        eotg_aug_stress_embrace_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = 10  has_trait = arrogant }
+        }
+    }
+
+    # "Then let us start again." - a gift
+    option = {
+        name = eotg_aug_tier2.017.c
+        trigger = { gold >= medium_gold_value }
+        remove_short_term_gold = medium_gold_value
+        change_variable = { name = eotg_aug_marriage_strain  add = -1 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = generous }
+            modifier = { add = 10  has_trait = gregarious }
+        }
+    }
+
+    # [lustful] "Remind them what remains."
+    option = {
+        name = eotg_aug_tier2.017.d
+        trigger = { has_trait = lustful }
+        trait = lustful
+        change_variable = { name = eotg_aug_marriage_strain  add = -1 }
+        eotg_add_fracture_risk = { AMOUNT = 2 }
+        stress_impact = {
+            lustful = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = lustful }
+            modifier = { add = 10  has_trait = gregarious }
+        }
+    }
+
+    # [stubborn] "No."
+    option = {
+        name = eotg_aug_tier2.017.e
+        trigger = { has_trait = stubborn }
+        trait = stubborn
+        change_variable = { name = eotg_aug_marriage_strain  add = 2 }
+        stress_impact = {
+            stubborn = medium_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = stubborn }
+            modifier = { add = 10  has_trait = arrogant }
+        }
+    }
+
+    after = {
+        trigger_event = { id = eotg_aug_tier2.018  days = 365 }
+    }
+}
+
+
+# ── eotg_aug_tier2.018 ────────────────────────────────────────────────────────
+# The Space Between Us, stage 3: Resolution, by eotg_aug_marriage_strain:
+# <= 0 reconciliation (admiration, stress medium loss); 1-2 estrangement
+# (disgust, eotg_flag_aug_estranged on the spouse, read by the Heir's Arc
+# on_setup; risk +5); >= 3 divorce (a grant / b refuse). Removes the variable.
+# Caller: eotg_aug_tier2.017 (after), a year later. Divorce: vanilla
+# `divorce = <spouse>` in the divorcing character's scope
+# (events/activities/hold_court_activity/hold_court_events_general.txt:14292).
+
+eotg_aug_tier2.018 = {
+    type = character_event
+    title = eotg_aug_tier2.018.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { var:eotg_aug_marriage_strain >= 3 }
+                desc = eotg_aug_tier2.018.desc_divorce
+            }
+            triggered_desc = {
+                trigger = { var:eotg_aug_marriage_strain >= 1 }
+                desc = eotg_aug_tier2.018.desc_estranged
+            }
+            desc = eotg_aug_tier2.018.desc_reconciled
+        }
+    }
+    theme = marriage
+
+    trigger = {
+        has_variable = eotg_aug_marriage_strain
+        exists = scope:aug_spouse
+        is_spouse_of = scope:aug_spouse
+    }
+
+    left_portrait = {
+        character = root
+        animation = sadness
+    }
+    right_portrait = {
+        character = scope:aug_spouse
+        triggered_animation = {
+            trigger = { var:eotg_aug_marriage_strain <= 0 }
+            animation = love
+        }
+        animation = disgust
+    }
+
+    # (divorce) "Grant it."
+    option = {
+        name = eotg_aug_tier2.018.a
+        trigger = { var:eotg_aug_marriage_strain >= 3 }
+        divorce = scope:aug_spouse
+        stress_impact = {
+            compassionate = minor_stress_impact_gain
+            content = minor_stress_impact_gain
+        }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = just }
+            modifier = { add = 10  has_trait = callous }
+        }
+    }
+
+    # Ungated fallback (final QA, vanilla "Fallback option" shape:
+    # chariot_race_ongoing_events.txt). Former b and c, mutually exclusive on
+    # the strain; merged so one option is always valid.
+    # (divorce) .018.b "Refuse." / (reconciled / estranged) .018.c "So it is."
+    option = {
+        name = {
+            text = {
+                first_valid = {
+                    triggered_desc = {
+                        trigger = { var:eotg_aug_marriage_strain >= 3 }
+                        desc = eotg_aug_tier2.018.b
+                    }
+                    desc = eotg_aug_tier2.018.c
+                }
+            }
+        }
+        if = {
+            limit = { var:eotg_aug_marriage_strain >= 3 }
+            scope:aug_spouse = {
+                add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 10 }
+            }
+            eotg_add_fracture_risk = { AMOUNT = 5 }
+            eotg_aug_stress_tyranny_effect = yes
+        }
+        else_if = {
+            limit = { var:eotg_aug_marriage_strain <= 0 }
+            scope:aug_spouse = {
+                add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
+            }
+            stress_impact = { base = medium_stress_impact_loss }
+        }
+        else = {
+            scope:aug_spouse = {
+                add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 5 }
+                add_character_flag = eotg_flag_aug_estranged
+            }
+            eotg_add_fracture_risk = { AMOUNT = 5 }
+        }
+        ai_chance = {
+            base = 100
+            modifier = {
+                add = -70
+                var:eotg_aug_marriage_strain >= 3
+            }
+            modifier = {
+                add = 20
+                has_trait = stubborn
+                var:eotg_aug_marriage_strain >= 3
+            }
+            modifier = {
+                add = 10
+                has_trait = arbitrary
+                var:eotg_aug_marriage_strain >= 3
+            }
+            modifier = {
+                add = 10
+                has_trait = content
+                var:eotg_aug_marriage_strain < 3
+            }
+            modifier = {
+                add = 10
+                has_trait = compassionate
+                var:eotg_aug_marriage_strain < 3
+            }
+        }
+    }
+
+    after = {
+        hidden_effect = {
+            remove_variable = eotg_aug_marriage_strain
+        }
+    }
+}
+
+
+# ── eotg_aug_tier2.019 ────────────────────────────────────────────────────────
+# The Cold Calculation (E-10). The optimal solution costs lives.
+# Caller: eotg_on_yearly_aug_tier2_check (Phase 4b branch).
+# c: 50/50, +learning x2 on success (shape of tier2.011.c). f [just]: the
+# council decides, 50/50.
+
+eotg_aug_tier2.019 = {
+    type = character_event
+    title = eotg_aug_tier2.019.t
+    desc = eotg_aug_tier2.019.desc
+    theme = stewardship
+
+    left_portrait = {
+        character = root
+        animation = personality_callous
+    }
+
+    # "Do it."
+    option = {
+        name = eotg_aug_tier2.019.a
+        add_gold = medium_gold_value
+        add_prestige = 50
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        eotg_aug_stress_cruelty_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = greedy }
+            modifier = { add = 10  has_trait = ambitious }
+            modifier = { add = -20  has_trait = compassionate }
+        }
+    }
+
+    # "Refuse."
+    option = {
+        name = eotg_aug_tier2.019.b
+        stress_impact = { base = minor_stress_impact_gain }
+        eotg_aug_stress_reject_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # "Find a third way."
+    option = {
+        name = eotg_aug_tier2.019.c
+        random_list = {
+            50 = {
+                modifier = {
+                    add = {
+                        value = learning
+                        multiply = 2
+                    }
+                }
+                desc = eotg_aug_tier2.019.c.success
+                add_gold = {
+                    value = medium_gold_value
+                    multiply = 0.5
+                }
+            }
+            50 = {
+                desc = eotg_aug_tier2.019.c.failure
+            }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = erudite }
+            modifier = { add = 10  has_trait = patient }
+        }
+    }
+
+    # [compassionate] "No sum is worth that."
+    option = {
+        name = eotg_aug_tier2.019.d
+        trigger = { has_trait = compassionate }
+        trait = compassionate
+        add_piety = 50
+        stress_impact = {
+            compassionate = medium_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = compassionate }
+            modifier = { add = 10  has_trait = just }
+        }
+    }
+
+    # [callous] "The arithmetic is clear."
+    option = {
+        name = eotg_aug_tier2.019.e
+        trigger = { has_trait = callous }
+        trait = callous
+        add_gold = major_gold_value
+        add_dread = 10
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        stress_impact = {
+            callous = minor_stress_impact_loss
+        }
+        eotg_aug_stress_cruelty_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = callous }
+            modifier = { add = 10  has_trait = greedy }
+        }
+    }
+
+    # [just] "Put it before the council." - accepted: as a, without the
+    # cruelty stress (the decision was shared); refused: nothing
+    option = {
+        name = eotg_aug_tier2.019.f
+        trigger = { has_trait = just }
+        trait = just
+        random_list = {
+            50 = {
+                desc = eotg_aug_tier2.019.f.success
+                add_gold = medium_gold_value
+                add_prestige = 50
+                eotg_add_fracture_risk = { AMOUNT = 5 }
+            }
+            50 = {
+                desc = eotg_aug_tier2.019.f.failure
+            }
+        }
+        stress_impact = {
+            just = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = just }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+}
+
+
+# ── eotg_aug_tier2.020 ────────────────────────────────────────────────────────
+# The Second Self (E-11; thread T1, voice beat 1). A thought that arrives a
+# half-second before you think it. Every option runs
+# eotg_aug_voice_advance_effect = { STAGE = 1 } (raises only).
+# Voice register (index §5.1): internal, precise, you a half-second early;
+# never external, never a speaker. Banned words (§5.2) apply to the loc;
+# no identifier here uses them. c "Designate it": the designation is never
+# shown (loc: "you designated it"); it is a tool.
+# `curious` / `pensive` are childhood traits: d is eccentric, e is shy.
+# Caller: eotg_on_yearly_aug_tier2_check (Phase 4b branch: voice < 1 and
+# risk >= 10 or nerves focus).
+
+eotg_aug_tier2.020 = {
+    type = character_event
+    title = eotg_aug_tier2.020.t
+    desc = {
+        desc = eotg_aug_tier2.020.desc
+        # [voice] nerves focus (thread T7): it was always going to start here
+        triggered_desc = {
+            trigger = { var:eotg_aug_focus ?= flag:nerves }
+            desc = eotg_aug_tier2.020.desc_nerves
+        }
+    }
+    theme = mental_health
+
+    trigger = {
+        OR = {
+            NOT = { has_variable = eotg_aug_voice }
+            var:eotg_aug_voice < 1
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = thinking
+    }
+
+    # "Reject the thought."
+    option = {
+        name = eotg_aug_tier2.020.a
+        eotg_aug_voice_advance_effect = { STAGE = 1 }
+        stress_impact = { base = minor_stress_impact_gain }
+        eotg_aug_stress_reject_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = zealous }
+            modifier = { add = 10  has_trait = craven }
+        }
+    }
+
+    # "Encourage it."
+    option = {
+        name = eotg_aug_tier2.020.b
+        eotg_aug_voice_advance_effect = { STAGE = 1 }
+        eotg_add_fracture_risk = { AMOUNT = 6 }
+        eotg_aug_stress_embrace_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 10  has_trait = arrogant }
+        }
+    }
+
+    # "Designate it."
+    option = {
+        name = eotg_aug_tier2.020.c
+        eotg_aug_voice_advance_effect = { STAGE = 1 }
+        eotg_add_fracture_risk = { AMOUNT = 4 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 10  has_trait = cynical }
+        }
+    }
+
+    # [eccentric] "Talk back."
+    option = {
+        name = eotg_aug_tier2.020.d
+        trigger = { has_trait = eccentric }
+        trait = eccentric
+        eotg_aug_voice_advance_effect = { STAGE = 1 }
+        eotg_add_fracture_risk = { AMOUNT = 6 }
+        stress_impact = {
+            eccentric = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = eccentric }
+            modifier = { add = 10  has_trait = gregarious }
+        }
+    }
+
+    # [shy] "At last, someone who understands."
+    option = {
+        name = eotg_aug_tier2.020.e
+        trigger = { has_trait = shy }
+        trait = shy
+        eotg_aug_voice_advance_effect = { STAGE = 1 }
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        stress_impact = {
+            shy = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = shy }
+            modifier = { add = 10  has_trait = content }
         }
     }
 }

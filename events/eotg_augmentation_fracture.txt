@@ -97,7 +97,10 @@ eotg_fracture.0001 = {
 # Containment Failure (renamed from Containment Breach, lore review)
 # The Neurofractured character loses control -- court casualties, picked and
 # named: wounded 50% (scope:eotg_victim), killed 20% (scope:eotg_victim_dead,
-# never the wounded one). Family factor 0.05 per the spec.
+# never the wounded one). Family factor 0.05, or 0.25 in the Storm band: the
+# event sits in both the Fracture and the Storm pools, and the picker's
+# Storm-band rule (eotg_aug_pick_victim_effect header) follows the band it
+# fired in. The parameter is textual, so each pick is an if/else pair.
 
 eotg_fracture.002 = {
     type = character_event
@@ -145,7 +148,13 @@ eotg_fracture.002 = {
         hidden_effect = {
             random = {
                 chance = 50
-                eotg_aug_pick_victim_effect = { NAME = eotg_victim  FAMILY_FACTOR = 0.05 }
+                if = {
+                    limit = { eotg_aug_pressure_storm = yes }
+                    eotg_aug_pick_victim_effect = { NAME = eotg_victim  FAMILY_FACTOR = 0.25 }
+                }
+                else = {
+                    eotg_aug_pick_victim_effect = { NAME = eotg_victim  FAMILY_FACTOR = 0.05 }
+                }
             }
             if = {
                 limit = { exists = scope:eotg_victim }
@@ -156,10 +165,20 @@ eotg_fracture.002 = {
             }
             random = {
                 chance = 20
-                eotg_aug_pick_second_victim_effect = {
-                    NAME = eotg_victim_dead
-                    FAMILY_FACTOR = 0.05
-                    EXCLUDE = eotg_victim
+                if = {
+                    limit = { eotg_aug_pressure_storm = yes }
+                    eotg_aug_pick_second_victim_effect = {
+                        NAME = eotg_victim_dead
+                        FAMILY_FACTOR = 0.25
+                        EXCLUDE = eotg_victim
+                    }
+                }
+                else = {
+                    eotg_aug_pick_second_victim_effect = {
+                        NAME = eotg_victim_dead
+                        FAMILY_FACTOR = 0.05
+                        EXCLUDE = eotg_victim
+                    }
                 }
             }
             if = {
@@ -172,6 +191,17 @@ eotg_fracture.002 = {
             # name them. After the death above, so the picker's is_alive test
             # excludes the dead victim; EXCLUDE keeps the wounded one out.
             if = {
+                limit = {
+                    has_trait = sadistic
+                    eotg_aug_pressure_storm = yes
+                }
+                eotg_aug_pick_second_victim_effect = {
+                    NAME = eotg_victim_extra
+                    FAMILY_FACTOR = 0.25
+                    EXCLUDE = eotg_victim
+                }
+            }
+            else_if = {
                 limit = { has_trait = sadistic }
                 eotg_aug_pick_second_victim_effect = {
                     NAME = eotg_victim_extra
@@ -2756,40 +2786,59 @@ eotg_fracture.020 = {
         }
     }
 
-    # (false) "I was right anyway."
+    # Ungated fallback (final QA, vanilla "Fallback option" shape:
+    # chariot_race_ongoing_events.txt). Former b and c, which were mutually
+    # exclusive on the truth flag; merged so one option is always valid.
+    # (false) .020.b "I was right anyway." / (true) .020.c "As I knew." The
+    # implant was right this once; you will trust it next time.
     option = {
-        name = eotg_fracture.020.b
-        trigger = { var:eotg_aug_accusation_true = flag:no }
-        add_tyranny = 10
-        eotg_aug_stress_lie_effect = yes
-        eotg_add_fracture_risk = { AMOUNT = 10 }
+        name = {
+            text = {
+                first_valid = {
+                    triggered_desc = {
+                        trigger = { var:eotg_aug_accusation_true = flag:yes }
+                        desc = eotg_fracture.020.c
+                    }
+                    desc = eotg_fracture.020.b
+                }
+            }
+        }
+        if = {
+            limit = { var:eotg_aug_accusation_true = flag:yes }
+            add_prestige = 100
+            eotg_add_fracture_risk = { AMOUNT = 5 }
+        }
+        else = {
+            add_tyranny = 10
+            eotg_aug_stress_lie_effect = yes
+            eotg_add_fracture_risk = { AMOUNT = 10 }
+        }
         hidden_effect = {
             remove_variable = eotg_aug_accusation_true
             remove_variable = eotg_aug_accusation_action
         }
         ai_chance = {
             base = 30
+            modifier = {
+                add = 20
+                var:eotg_aug_accusation_true = flag:yes
+            }
             modifier = { add = 20  has_trait = arrogant }
-            modifier = { add = 20  has_trait = stubborn }
-            modifier = { add = -20  has_trait = honest }
-        }
-    }
-
-    # (true) "As I knew." The implant was right this once; you will trust it
-    # next time.
-    option = {
-        name = eotg_fracture.020.c
-        trigger = { var:eotg_aug_accusation_true = flag:yes }
-        add_prestige = 100
-        eotg_add_fracture_risk = { AMOUNT = 5 }
-        hidden_effect = {
-            remove_variable = eotg_aug_accusation_true
-            remove_variable = eotg_aug_accusation_action
-        }
-        ai_chance = {
-            base = 50
-            modifier = { add = 20  has_trait = arrogant }
-            modifier = { add = 10  has_trait = paranoid }
+            modifier = {
+                add = 20
+                has_trait = stubborn
+                var:eotg_aug_accusation_true = flag:no
+            }
+            modifier = {
+                add = -20
+                has_trait = honest
+                var:eotg_aug_accusation_true = flag:no
+            }
+            modifier = {
+                add = 10
+                has_trait = paranoid
+                var:eotg_aug_accusation_true = flag:yes
+            }
         }
     }
 }
@@ -2810,6 +2859,7 @@ eotg_fracture.021 = {
         any_courtier = {
             eotg_aug_victim_candidate = yes
             NOT = { is_close_family_of = root }
+            NOT = { is_spouse_of = root }
         }
     }
 

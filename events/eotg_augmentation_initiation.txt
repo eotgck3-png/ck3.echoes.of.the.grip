@@ -7,6 +7,7 @@
 #
 # eotg_aug_init.004 — Desperation Protocol     (at war + wounded)
 # eotg_aug_init.005 — A Familiar Change        (augmented peer at court)
+# eotg_aug_init.019 — The Arms Race            (Phase 5: two augmented knights)
 #
 # Fires from: eotg_on_yearly_aug_initiation_check
 #   (common/on_action/eotg_augmentation_on_actions.txt, via yearly_playable_pulse).
@@ -2387,7 +2388,19 @@ eotg_aug_init.018 = {
         }
     }
 
-    # (Phase 5 adds e "A patron will pay." -> eotg_story_aug_patron.)
+    # "A patron will pay." (Phase 5, thread T2) The syndicate's offer,
+    # eotg_aug_patron.001, a day later; it starts eotg_story_aug_patron.
+    option = {
+        name = eotg_aug_init.018.e
+        trigger = { eotg_aug_has_patron = no }
+        trigger_event = { id = eotg_aug_patron.001  days = 1 }
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 20  has_trait = greedy }
+            modifier = { add = -20  has_trait = paranoid }
+        }
+    }
 }
 
 
@@ -2458,6 +2471,7 @@ eotg_aug_init.020 = {
         }
         remove_short_term_gold = minor_gold_value
         scope:eotg_cand_best = { eotg_aug_retainer_install_effect = yes }
+        save_scope_value_as = { name = eotg_retainer_installed  value = flag:knight }
         ai_chance = {
             base = 40
             modifier = { add = 20  has_trait = ambitious }
@@ -2474,6 +2488,7 @@ eotg_aug_init.020 = {
         }
         remove_short_term_gold = minor_gold_value
         scope:eotg_cand_any = { eotg_aug_retainer_install_effect = yes }
+        save_scope_value_as = { name = eotg_retainer_installed  value = flag:knight }
         ai_chance = {
             base = 20
             modifier = { add = 10  has_trait = arbitrary }
@@ -2490,6 +2505,7 @@ eotg_aug_init.020 = {
         }
         remove_short_term_gold = minor_gold_value
         scope:eotg_cand_courtier = { eotg_aug_retainer_install_effect = yes }
+        save_scope_value_as = { name = eotg_retainer_installed  value = flag:courtier }
         ai_chance = {
             base = 20
             modifier = { add = 10  has_trait = eccentric }
@@ -2513,6 +2529,7 @@ eotg_aug_init.020 = {
             eotg_add_fracture_risk = { AMOUNT = 0 }
             add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
         }
+        save_scope_value_as = { name = eotg_retainer_installed  value = flag:knight }
         eotg_aug_stress_cruelty_effect = yes
         ai_chance = {
             base = 30
@@ -2531,5 +2548,178 @@ eotg_aug_init.020 = {
         }
     }
 
-    # (Phase 5: the second a/b/c/d resolution starts eotg_story_aug_retinue.)
+    # Phase 5 (§3.1): a retainer was installed (a-d) and the court has an
+    # augmented knight -> the Iron Retinue starts. Final QA: the effect picks
+    # the phase, 1 with exactly one augmented knight (the first; .001 "First
+    # of the Iron" follows), 2 with two or more.
+    after = {
+        if = {
+            limit = {
+                exists = scope:eotg_retainer_installed
+                eotg_aug_has_retinue = no
+                any_knight = { eotg_is_augmented_any = yes }
+            }
+            eotg_aug_start_retinue_effect = yes
+        }
+    }
+}
+
+
+# ── eotg_aug_init.019 ─────────────────────────────────────────────────────────
+# The Arms Race (I-09; docs/specs/cybernetics_v2_phase5.md §3.3). Two of your
+# knights are augmented and you are not.
+# Caller: eotg_on_yearly_aug_initiation_check (Arms Race entry, weight 20,
+# 3-year cooldown set there).
+# Resource: a/d install root (tier change, risk 0); b/d start the Iron
+# Retinue (phase 2: the trigger guarantees two augmented knights) and strain each augmented knight (risk +3); c calms up
+# to three knights (risk -5 on knights: they carry their own variable).
+# c: "minor_gold_value per knight (cap 3)", the cost shape of
+# eotg_aug_retinue_pay_all_effect, here over augmented knights.
+
+eotg_aug_init.019 = {
+    type = character_event
+    title = eotg_aug_init.019.t
+    desc = eotg_aug_init.019.desc
+    theme = martial_chivalry_focus
+
+    # World-state guard mirroring the firing branch: a ruler who already
+    # runs a Retinue is not offered one.
+    trigger = {
+        eotg_is_augmented_any = no
+        eotg_aug_has_retinue = no
+        any_knight = {
+            count >= 2
+            eotg_is_augmented_any = yes
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = thinking
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_iron_knight }
+        character = scope:eotg_iron_knight
+        animation = personality_bold
+    }
+
+    immediate = {
+        hidden_effect = {
+            ordered_knight = {
+                limit = { eotg_is_augmented_any = yes }
+                order_by = prowess
+                save_scope_as = eotg_iron_knight
+            }
+        }
+    }
+
+    # "Then improve myself."
+    option = {
+        name = eotg_aug_init.019.a
+        trigger = { gold >= medium_gold_value }
+        remove_short_term_gold = medium_gold_value
+        eotg_aug_initiate_effect = yes
+        eotg_add_fracture_risk = { AMOUNT = 0 }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 10  has_trait = brave }
+            modifier = { add = -20  has_trait = zealous }
+        }
+    }
+
+    # "Start a Program."
+    option = {
+        name = eotg_aug_init.019.b
+        # Ungated: the event trigger guarantees no Retinue exists yet.
+        eotg_aug_start_retinue_effect = yes
+        every_knight = {
+            limit = { eotg_is_augmented_any = yes }
+            eotg_add_fracture_risk = { AMOUNT = 3 }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 10  has_trait = arrogant }
+        }
+    }
+
+    # "Look after the ones I have."
+    option = {
+        name = eotg_aug_init.019.c
+        trigger = {
+            gold >= {
+                value = 0
+                every_knight = {
+                    limit = { eotg_is_augmented_any = yes }
+                    add = 1
+                }
+                max = 3
+                multiply = minor_gold_value
+            }
+        }
+        remove_short_term_gold = {
+            value = 0
+            every_knight = {
+                limit = { eotg_is_augmented_any = yes }
+                add = 1
+            }
+            max = 3
+            multiply = minor_gold_value
+        }
+        ordered_knight = {
+            limit = { eotg_is_augmented_any = yes }
+            order_by = prowess
+            max = 3
+            add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 2 }
+            eotg_add_fracture_risk = { AMOUNT = -5 }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 10  has_trait = generous }
+        }
+    }
+
+    # [ambitious] "All of it." a + b.
+    option = {
+        name = eotg_aug_init.019.d
+        trigger = {
+            has_trait = ambitious
+            eotg_aug_has_retinue = no
+            gold >= medium_gold_value
+        }
+        trait = ambitious
+        remove_short_term_gold = medium_gold_value
+        eotg_aug_initiate_effect = yes
+        eotg_add_fracture_risk = { AMOUNT = 0 }
+        eotg_aug_start_retinue_effect = yes
+        every_knight = {
+            limit = { eotg_is_augmented_any = yes }
+            eotg_add_fracture_risk = { AMOUNT = 3 }
+        }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = ambitious }
+            modifier = { add = -20  has_trait = zealous }
+        }
+    }
+
+    # "Two is enough." Universal decline (final QA): a and c cost gold and b
+    # commits to a Program, so this is the option nobody is locked out of.
+    # Content characters still get the stress relief.
+    option = {
+        name = eotg_aug_init.019.e
+        add_character_flag = { flag = eotg_flag_suppress_progression  years = 3 }
+        stress_impact = {
+            content = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = content }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
 }

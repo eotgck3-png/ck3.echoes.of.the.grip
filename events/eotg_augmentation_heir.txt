@@ -518,21 +518,111 @@ eotg_aug_heir.004 = {
             }
         }
 
-        # The story ends after any outcome
+        # The story ends after any outcome. The arc runs once per ruler: the
+        # permanent flag is read by the arc-start guard in
+        # eotg_on_yearly_aug_neurofractured_check (on_action authority, lesson 5).
         hidden_effect = {
+            add_character_flag = eotg_flag_aug_heir_arc_done
             scope:eotg_heir_story = { end_story = yes }
         }
     }
 
-    # Ally — "Thank them."
+    # Ungated fallback (final QA, vanilla "Fallback option" shape:
+    # chariot_race_ongoing_events.txt). The first option of each outcome,
+    # formerly four options gated on mutually exclusive outcome flags, merged
+    # so one option is always valid. Per outcome:
+    #   ally         .ally_a   "Thank them."             risk -10
+    #   usurp        .usurp_a  "Let them have it."       -200 prestige, risk -5
+    #   kill_failed  .kill_a   "Imprison them."          tyranny stress, risk +5
+    #   kill_success .silent_a the quiet before it (the ruler dies in
+    #                          eotg_aug_heir.005; the heir's event couples)
     option = {
-        name = eotg_aug_heir.004.ally_a
-        trigger = { scope:eotg_heir_choice = flag:ally }
-        eotg_add_fracture_risk = { AMOUNT = -10 }
+        name = {
+            text = {
+                first_valid = {
+                    triggered_desc = {
+                        trigger = { scope:eotg_heir_choice = flag:ally }
+                        desc = eotg_aug_heir.004.ally_a
+                    }
+                    triggered_desc = {
+                        trigger = { scope:eotg_heir_choice = flag:usurp }
+                        desc = eotg_aug_heir.004.usurp_a
+                    }
+                    triggered_desc = {
+                        trigger = { scope:eotg_heir_choice = flag:kill_failed }
+                        desc = eotg_aug_heir.004.kill_a
+                    }
+                    desc = eotg_aug_heir.004.silent_a
+                }
+            }
+        }
+        if = {
+            limit = { scope:eotg_heir_choice = flag:ally }
+            eotg_add_fracture_risk = { AMOUNT = -10 }
+        }
+        else_if = {
+            limit = { scope:eotg_heir_choice = flag:usurp }
+            add_prestige = -200
+            eotg_add_fracture_risk = { AMOUNT = -5 }
+            eotg_aug_stress_reject_effect = yes
+        }
+        else_if = {
+            limit = { scope:eotg_heir_choice = flag:kill_failed }
+            if = {
+                limit = {
+                    scope:eotg_heir = {
+                        is_alive = yes
+                        is_imprisoned = no
+                    }
+                }
+                imprison = { target = scope:eotg_heir  type = dungeon }
+            }
+            eotg_aug_stress_tyranny_effect = yes
+            eotg_add_fracture_risk = { AMOUNT = 5 }
+        }
         ai_chance = {
-            base = 50
-            modifier = { add = 20  has_trait = humble }
-            modifier = { add = 20  has_trait = compassionate }
+            base = 40
+            modifier = {
+                add = 10
+                OR = {
+                    scope:eotg_heir_choice = flag:ally
+                    scope:eotg_heir_choice = flag:kill_failed
+                }
+            }
+            modifier = {
+                add = 60
+                scope:eotg_heir_choice = flag:kill_success
+            }
+            modifier = {
+                add = 20
+                has_trait = humble
+                scope:eotg_heir_choice = flag:ally
+            }
+            modifier = {
+                add = 20
+                has_trait = compassionate
+                scope:eotg_heir_choice = flag:ally
+            }
+            modifier = {
+                add = 20
+                has_trait = content
+                scope:eotg_heir_choice = flag:usurp
+            }
+            modifier = {
+                add = 20
+                has_trait = craven
+                scope:eotg_heir_choice = flag:usurp
+            }
+            modifier = {
+                add = 20
+                has_trait = just
+                scope:eotg_heir_choice = flag:kill_failed
+            }
+            modifier = {
+                add = 20
+                has_trait = paranoid
+                scope:eotg_heir_choice = flag:kill_failed
+            }
         }
     }
 
@@ -552,20 +642,6 @@ eotg_aug_heir.004 = {
             base = 30
             modifier = { add = 30  has_trait = arrogant }
             modifier = { add = 10  has_trait = stubborn }
-        }
-    }
-
-    # Usurp — "Let them have it."
-    option = {
-        name = eotg_aug_heir.004.usurp_a
-        trigger = { scope:eotg_heir_choice = flag:usurp }
-        add_prestige = -200
-        eotg_add_fracture_risk = { AMOUNT = -5 }
-        eotg_aug_stress_reject_effect = yes
-        ai_chance = {
-            base = 40
-            modifier = { add = 20  has_trait = content }
-            modifier = { add = 20  has_trait = craven }
         }
     }
 
@@ -589,28 +665,6 @@ eotg_aug_heir.004 = {
             base = 40
             modifier = { add = 20  has_trait = ambitious }
             modifier = { add = 20  has_trait = wrathful }
-        }
-    }
-
-    # Kill, failed — "Imprison them."
-    option = {
-        name = eotg_aug_heir.004.kill_a
-        trigger = { scope:eotg_heir_choice = flag:kill_failed }
-        if = {
-            limit = {
-                scope:eotg_heir = {
-                    is_alive = yes
-                    is_imprisoned = no
-                }
-            }
-            imprison = { target = scope:eotg_heir  type = dungeon }
-        }
-        eotg_aug_stress_tyranny_effect = yes
-        eotg_add_fracture_risk = { AMOUNT = 5 }
-        ai_chance = {
-            base = 50
-            modifier = { add = 20  has_trait = just }
-            modifier = { add = 20  has_trait = paranoid }
         }
     }
 
@@ -646,18 +700,6 @@ eotg_aug_heir.004 = {
             base = 30
             modifier = { add = 30  has_trait = vengeful }
             modifier = { add = 10  has_trait = wrathful }
-        }
-    }
-
-    # Kill, succeeded — the ruler sees only the quiet before it. — (the
-    # ruler dies in eotg_aug_heir.005 days later; the heir's event couples).
-    option = {
-        name = eotg_aug_heir.004.silent_a
-        trigger = { scope:eotg_heir_choice = flag:kill_success }
-        ai_chance = {
-            base = 100
-            modifier = { add = 10  has_trait = paranoid }
-            modifier = { add = 10  has_trait = trusting }
         }
     }
 }

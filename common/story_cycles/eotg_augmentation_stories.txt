@@ -6,6 +6,10 @@
 #   break. Shape copied from vanilla
 #   game/common/story_cycles/story_cycle_murders_at_court.txt (on_setup
 #   variables, on_owner_death, first_valid effect_group).
+# Phase 5 (docs/specs/cybernetics_v2_phase5.md), further down:
+#   eotg_story_aug_countdown — The Countdown (O-13)
+#   eotg_story_aug_patron    — The Patron's debt (thread T2)
+#   eotg_story_aug_retinue   — The Iron Retinue Program (thread T4)
 #
 # Created by: eotg_on_yearly_aug_neurofractured_check (step 2), once per
 #   Neurofractured ruler with a primary heir aged 14+.
@@ -40,7 +44,8 @@ eotg_story_aug_heir_arc = {
         set_variable = { name = eotg_stage  value = 0 }
         set_variable = { name = eotg_heir_dread  value = 0 }
         # Seeds only shift weights (index §4 T3). Absent at the birth: tier2.010
-        # (Phase 4b); intervention refused: tier3.020 (Phase 4c).
+        # (Phase 4b); intervention refused: tier3.020 (Phase 4c); estranged
+        # parent: tier2.018 (Phase 4b).
         if = {
             limit = {
                 var:eotg_heir = { has_character_flag = eotg_flag_aug_absent_at_birth }
@@ -50,6 +55,19 @@ eotg_story_aug_heir_arc = {
         if = {
             limit = {
                 story_owner = { has_character_flag = eotg_flag_aug_intervention_refused }
+            }
+            change_variable = { name = eotg_heir_dread  add = 1 }
+        }
+        # Estranged parent: tier2.018 (Phase 4b) flags a spouse the marriage
+        # was lost to; if that spouse is the heir's parent, the heir saw it.
+        if = {
+            limit = {
+                var:eotg_heir = {
+                    OR = {
+                        mother ?= { has_character_flag = eotg_flag_aug_estranged }
+                        father ?= { has_character_flag = eotg_flag_aug_estranged }
+                    }
+                }
             }
             change_variable = { name = eotg_heir_dread  add = 1 }
         }
@@ -175,6 +193,451 @@ eotg_story_aug_heir_arc = {
                     set_variable = { name = eotg_stage  value = 4 }
                     story_owner = {
                         trigger_event = { id = eotg_aug_heir.004  days = { 1 30 } }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Phase 5 — the large arcs (docs/specs/cybernetics_v2_phase5.md)
+# Same shape and rules as the Heir's Arc above: hidden (no `visible`, no
+# counters, no number on eotg_fracture_risk), effect_group timing is the
+# cooldown authority, and the events they fire check no flags.
+# ═════════════════════════════════════════════════════════════════════════════
+
+# ── eotg_story_aug_countdown — The Countdown (O-13, §1) ──────────────────────
+# Created by: eotg_aug_try_start_countdown_effect (OC on_action at risk >= 50,
+#   or >= 40 with eotg_flag_aug_hidden_flaw; eotg_aug_patron_betray_effect).
+# Ended by: eotg_aug_end_countdown_effect (the cascade, full removal, The
+#   Quiet), the first two branches below, or the owner's death.
+# Fires: eotg_aug_countdown.001-.006 and eotg_aug_tier3.020 (stage 5).
+# Stages are chosen BY eotg_fracture_risk, never shown as a number. Each fires
+# at most once (eotg_last_stage); stages can skip.
+# Story variable: eotg_last_stage 0-5 (spec: last_stage).
+eotg_story_aug_countdown = {
+    on_setup = {
+        set_variable = { name = eotg_last_stage  value = 0 }
+    }
+
+    on_end = {
+    }
+
+    on_owner_death = {
+        end_story = yes
+    }
+
+    effect_group = {
+        months = { 3 5 }
+
+        first_valid = {
+            # 1. No longer Overclocked (regressed, removed): The Quiet
+            triggered_effect = {
+                trigger = {
+                    story_owner = { eotg_is_aug_tier3 = no }
+                }
+                effect = {
+                    story_owner = {
+                        trigger_event = { id = eotg_aug_countdown.006  days = { 1 10 } }
+                    }
+                    end_story = yes
+                }
+            }
+            # 2. Maintenance got ahead of it: The Quiet
+            triggered_effect = {
+                trigger = {
+                    story_owner = {
+                        OR = {
+                            NOT = { has_variable = eotg_fracture_risk }
+                            var:eotg_fracture_risk < 35
+                        }
+                    }
+                }
+                effect = {
+                    story_owner = {
+                        trigger_event = { id = eotg_aug_countdown.006  days = { 1 10 } }
+                    }
+                    end_story = yes
+                }
+            }
+            # 3. Minor Anomalies (risk 50-59)
+            triggered_effect = {
+                trigger = {
+                    var:eotg_last_stage < 1
+                    story_owner = {
+                        var:eotg_fracture_risk >= 50
+                        var:eotg_fracture_risk < 60
+                    }
+                }
+                effect = {
+                    set_variable = { name = eotg_last_stage  value = 1 }
+                    story_owner = {
+                        trigger_event = { id = eotg_aug_countdown.001  days = { 1 20 } }
+                    }
+                }
+            }
+            # 4. Lost Time (60-69)
+            triggered_effect = {
+                trigger = {
+                    var:eotg_last_stage < 2
+                    story_owner = {
+                        var:eotg_fracture_risk >= 60
+                        var:eotg_fracture_risk < 70
+                    }
+                }
+                effect = {
+                    set_variable = { name = eotg_last_stage  value = 2 }
+                    story_owner = {
+                        trigger_event = { id = eotg_aug_countdown.002  days = { 1 20 } }
+                    }
+                }
+            }
+            # 5. Contradictory Memories (70-74)
+            triggered_effect = {
+                trigger = {
+                    var:eotg_last_stage < 3
+                    story_owner = {
+                        var:eotg_fracture_risk >= 70
+                        var:eotg_fracture_risk < 75
+                    }
+                }
+                effect = {
+                    set_variable = { name = eotg_last_stage  value = 3 }
+                    story_owner = {
+                        trigger_event = { id = eotg_aug_countdown.003  days = { 1 20 } }
+                    }
+                }
+            }
+            # 6. Violence (75+)
+            triggered_effect = {
+                trigger = {
+                    var:eotg_last_stage < 4
+                    story_owner = { var:eotg_fracture_risk >= 75 }
+                }
+                effect = {
+                    set_variable = { name = eotg_last_stage  value = 4 }
+                    story_owner = {
+                        trigger_event = { id = eotg_aug_countdown.004  days = { 1 20 } }
+                    }
+                }
+            }
+            # 7a. After Violence, having refused the Intervention: No One Asks
+            triggered_effect = {
+                trigger = {
+                    var:eotg_last_stage = 4
+                    story_owner = { has_character_flag = eotg_flag_aug_intervention_refused }
+                }
+                effect = {
+                    set_variable = { name = eotg_last_stage  value = 5 }
+                    story_owner = {
+                        trigger_event = { id = eotg_aug_countdown.005  days = { 1 20 } }
+                    }
+                }
+            }
+            # 7b. After Violence: someone intervenes (Phase 4c tier3.020)
+            triggered_effect = {
+                trigger = {
+                    var:eotg_last_stage = 4
+                    story_owner = {
+                        OR = {
+                            exists = primary_spouse
+                            primary_heir ?= { is_adult = yes }
+                        }
+                    }
+                }
+                effect = {
+                    set_variable = { name = eotg_last_stage  value = 5 }
+                    story_owner = {
+                        trigger_event = { id = eotg_aug_tier3.020  days = { 1 20 } }
+                    }
+                }
+            }
+            # 8. Otherwise nothing: the dread is in the silence.
+        }
+    }
+}
+
+
+# ── eotg_story_aug_patron — The Patron's debt (I-05, thread T2, §2) ──────────
+# Created by: eotg_aug_patron_accept_effect (patron.001 a, c, d).
+# Fires: eotg_aug_patron.002-.007. Ended by: patron.006 (every option) or the
+#   owner's death (inherited debt is deferred, §5).
+# The syndicate is never named (index §5.7): "the syndicate", "the syndicate
+#   envoy".
+# Story variables (spec: envoy / demand / grievance / terms):
+#   eotg_envoy      the syndicate envoy at court (character)
+#   eotg_demand     demands made, 0-4
+#   eotg_grievance  refusals; >= 3 brings the Final Demand early (betrayal tone)
+#   eotg_terms      flag:standard / flag:read / flag:greedy (patron.001)
+eotg_story_aug_patron = {
+    on_setup = {
+        set_variable = {
+            name = eotg_envoy
+            value = story_owner.var:eotg_patron_envoy_passthrough
+        }
+        set_variable = {
+            name = eotg_terms
+            value = story_owner.var:eotg_patron_terms_passthrough
+        }
+        set_variable = { name = eotg_demand  value = 0 }
+        set_variable = { name = eotg_grievance  value = 0 }
+        story_owner = {
+            remove_variable = eotg_patron_envoy_passthrough
+            remove_variable = eotg_patron_terms_passthrough
+        }
+    }
+
+    # The open-ended exclusivity clause lasts as long as the debt
+    # (patron.003 a/d). The final clause (patron.006 a) is a separate key.
+    on_end = {
+        story_owner = {
+            remove_character_modifier = eotg_mod_aug_patron_clause
+        }
+    }
+
+    on_owner_death = {
+        end_story = yes
+    }
+
+    # Two cadences: read terms are slower (phase5 §2.3)
+    # The tick (inlined in both cadences so the event graph can follow it;
+    # keep the two copies identical). Order, phase5 §2.3 with 1 and 2
+    # swapped (deviation): grievance >= 3 or demand >= 4 -> .006 first, so
+    # refusing every new envoy (.007 c) ends in the Final Demand; then the
+    # envoy dead or gone -> .007; then by demand 0-3 -> .002-.005. The
+    # Errand (.004) needs someone to name; with no one the syndicate moves on
+    # to the Family Clause (demand 3, .005) instead of stalling.
+    effect_group = {
+        years = { 2 3 }
+        trigger = { NOT = { var:eotg_terms = flag:read } }
+        first_valid = {
+            triggered_effect = {
+                trigger = { always = yes }
+                effect = {
+                    if = {
+                        limit = {
+                            OR = {
+                                var:eotg_grievance >= 3
+                                var:eotg_demand >= 4
+                            }
+                        }
+                        story_owner = { trigger_event = { id = eotg_aug_patron.006  days = { 1 30 } } }
+                    }
+                    else_if = {
+                        limit = {
+                            OR = {
+                                NOT = { exists = var:eotg_envoy }
+                                var:eotg_envoy = {
+                                    OR = {
+                                        is_alive = no
+                                        NOT = { is_courtier_of = scope:story.story_owner }
+                                    }
+                                }
+                            }
+                        }
+                        story_owner = { trigger_event = { id = eotg_aug_patron.007  days = { 1 30 } } }
+                    }
+                    else_if = {
+                        limit = { var:eotg_demand = 0 }
+                        story_owner = { trigger_event = { id = eotg_aug_patron.002  days = { 1 30 } } }
+                    }
+                    else_if = {
+                        limit = { var:eotg_demand = 1 }
+                        story_owner = { trigger_event = { id = eotg_aug_patron.003  days = { 1 30 } } }
+                    }
+                    else_if = {
+                        limit = { var:eotg_demand = 2 }
+                        if = {
+                            limit = {
+                                story_owner = {
+                                    any_courtier = { eotg_aug_patron_critic_candidate = { RULER = scope:story.story_owner } }
+                                }
+                            }
+                            story_owner = { trigger_event = { id = eotg_aug_patron.004  days = { 1 30 } } }
+                        }
+                        else = {
+                            set_variable = { name = eotg_demand  value = 3 }
+                            story_owner = { trigger_event = { id = eotg_aug_patron.005  days = { 1 30 } } }
+                        }
+                    }
+                    else = {
+                        story_owner = { trigger_event = { id = eotg_aug_patron.005  days = { 1 30 } } }
+                    }
+                }
+            }
+        }
+    }
+    effect_group = {
+        years = { 3 4 }
+        trigger = { var:eotg_terms = flag:read }
+        first_valid = {
+            triggered_effect = {
+                trigger = { always = yes }
+                effect = {
+                    if = {
+                        limit = {
+                            OR = {
+                                var:eotg_grievance >= 3
+                                var:eotg_demand >= 4
+                            }
+                        }
+                        story_owner = { trigger_event = { id = eotg_aug_patron.006  days = { 1 30 } } }
+                    }
+                    else_if = {
+                        limit = {
+                            OR = {
+                                NOT = { exists = var:eotg_envoy }
+                                var:eotg_envoy = {
+                                    OR = {
+                                        is_alive = no
+                                        NOT = { is_courtier_of = scope:story.story_owner }
+                                    }
+                                }
+                            }
+                        }
+                        story_owner = { trigger_event = { id = eotg_aug_patron.007  days = { 1 30 } } }
+                    }
+                    else_if = {
+                        limit = { var:eotg_demand = 0 }
+                        story_owner = { trigger_event = { id = eotg_aug_patron.002  days = { 1 30 } } }
+                    }
+                    else_if = {
+                        limit = { var:eotg_demand = 1 }
+                        story_owner = { trigger_event = { id = eotg_aug_patron.003  days = { 1 30 } } }
+                    }
+                    else_if = {
+                        limit = { var:eotg_demand = 2 }
+                        if = {
+                            limit = {
+                                story_owner = {
+                                    any_courtier = { eotg_aug_patron_critic_candidate = { RULER = scope:story.story_owner } }
+                                }
+                            }
+                            story_owner = { trigger_event = { id = eotg_aug_patron.004  days = { 1 30 } } }
+                        }
+                        else = {
+                            set_variable = { name = eotg_demand  value = 3 }
+                            story_owner = { trigger_event = { id = eotg_aug_patron.005  days = { 1 30 } } }
+                        }
+                    }
+                    else = {
+                        story_owner = { trigger_event = { id = eotg_aug_patron.005  days = { 1 30 } } }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+# ── eotg_story_aug_retinue — The Iron Retinue (A-10, thread T4, §3) ──────────
+# Created by: eotg_aug_start_retinue_effect (init.019 b/d, init.020 after).
+#   Phase 1 with exactly one augmented knight, else phase 2 (final QA). Fires: eotg_aug_retinue.001-.005; .005 ends the story.
+# Knights the Program touches carry eotg_flag_aug_iron_retinue (permanent);
+# .005.a adds eotg_flag_aug_retinue_permanent. Both are Phase 6 hooks: the
+# non-ruler lifecycle reads them for weights only (index §4 T4). The owner's
+# death ends the story; the knights keep their flags and implants.
+# Story variable: eotg_phase 1-5 (spec: phase).
+eotg_story_aug_retinue = {
+    on_setup = {
+        if = {
+            limit = { story_owner = { has_variable = eotg_retinue_phase_passthrough } }
+            set_variable = {
+                name = eotg_phase
+                value = story_owner.var:eotg_retinue_phase_passthrough
+            }
+        }
+        else = {
+            set_variable = { name = eotg_phase  value = 1 }
+        }
+        story_owner = {
+            remove_variable = eotg_retinue_phase_passthrough
+            # The knights already augmented are the first of the iron
+            every_knight = {
+                limit = {
+                    is_alive = yes
+                    eotg_is_augmented_any = yes
+                }
+                add_character_flag = eotg_flag_aug_iron_retinue
+            }
+        }
+    }
+
+    on_end = {
+    }
+
+    on_owner_death = {
+        end_story = yes
+    }
+
+    effect_group = {
+        years = { 1 2 }
+        chance = 70
+
+        first_valid = {
+            # 1. First of the Iron (needs a volunteer; else wait)
+            triggered_effect = {
+                trigger = {
+                    var:eotg_phase = 1
+                    story_owner = { any_knight = { eotg_aug_retainer_candidate = yes } }
+                }
+                effect = {
+                    story_owner = {
+                        trigger_event = { id = eotg_aug_retinue.001  days = { 1 30 } }
+                    }
+                }
+            }
+            # 2. More Ask (no unaugmented knight left: straight to phase 3)
+            triggered_effect = {
+                trigger = { var:eotg_phase = 2 }
+                effect = {
+                    if = {
+                        limit = {
+                            story_owner = { any_knight = { eotg_aug_retainer_candidate = yes } }
+                        }
+                        story_owner = {
+                            trigger_event = { id = eotg_aug_retinue.002  days = { 1 30 } }
+                        }
+                    }
+                    else = {
+                        set_variable = { name = eotg_phase  value = 3 }
+                    }
+                }
+            }
+            # 3. The Iron Ranks
+            triggered_effect = {
+                trigger = { var:eotg_phase = 3 }
+                effect = {
+                    story_owner = {
+                        trigger_event = { id = eotg_aug_retinue.003  days = { 1 30 } }
+                    }
+                }
+            }
+            # 4. The Unaugmented Resent (none left: straight to phase 5)
+            triggered_effect = {
+                trigger = { var:eotg_phase = 4 }
+                effect = {
+                    if = {
+                        limit = {
+                            story_owner = { any_knight = { eotg_aug_retainer_candidate = yes } }
+                        }
+                        story_owner = {
+                            trigger_event = { id = eotg_aug_retinue.004  days = { 1 30 } }
+                        }
+                    }
+                    else = {
+                        set_variable = { name = eotg_phase  value = 5 }
+                    }
+                }
+            }
+            # 5. What the Program Becomes (ends the story)
+            triggered_effect = {
+                trigger = { var:eotg_phase >= 5 }
+                effect = {
+                    story_owner = {
+                        trigger_event = { id = eotg_aug_retinue.005  days = { 1 30 } }
                     }
                 }
             }

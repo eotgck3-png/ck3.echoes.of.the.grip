@@ -159,5 +159,5 @@ Every agent ends its report with exactly this, so the orchestrator can dispatch 
 | 0 Skeleton | in progress | `descriptor.mod` + `.mod` + `.gitignore` at root; first region briefs | — |
 | 1 World loads | not started | Gate 0; human-supplied `map_data/` files; build order for the first region | — |
 | 2 Governments | not started | Gate 1 | — |
-| 3 Systems | in progress against the temporary map — cybernetics first: lifted 2026-10-02, converted 2026-10-03 to one XP-track trait `eotg_cybernetics` (`docs/specs/cybernetics_track.md`), awaiting in-game check §9.11 on the temporary map | temporary map (art delivered 2026-10-03: 2 trait icons, 4 modifier icons, 3 decision illustrations) | 2026-10-03 cybernetics track: PASS (static) |
+| 3 Systems | in progress against the temporary map — cybernetics v2 Phases 0–6 built 2026-10-03 (152 events, 4 story cycles, 4 endgames, 12 decisions; spec `docs/specs/cybernetics_v2.md`; test plan `docs/qa/cybernetics_test_plan.md`), awaiting in-game test on the temporary map | `.mod` descriptor (Gate 0); temporary map; 1 trait icon (Seamless) | 2026-10-03 cybernetics v2 Phases 0–6: PASS (static); lore PASS |
 | 4 Presentation | not started (space-map presentation shipped early in `gfx/`: shaders + terrain material pipeline — `docs/stellar_rivers_shader.md`, `docs/terrain_materials.md`, 2026-09-21/24) | Gate 1 | — |

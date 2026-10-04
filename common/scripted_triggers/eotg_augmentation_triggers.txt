@@ -259,3 +259,77 @@ eotg_aug_has_warden_candidate = {
         cp:councillor_chancellor ?= { eotg_aug_keeper_candidate = { RULER = $RULER$ } }
     }
 }
+
+# -- Phase 4 (docs/specs/cybernetics_v2_phase4.md) ----------------------------
+# The First Upgrade can be paid for (mirror: eotg_aug_pay_upgrade_effect).
+# Users: eotg_on_yearly_aug_tier1_check (The Upgrade branch),
+# eotg_aug_tier1.002 (a, d, e).
+eotg_aug_can_afford_upgrade = {
+    gold >= {
+        value = medium_gold_value
+        if = {
+            limit = { has_character_flag = eotg_flag_aug_replace_more }
+            multiply = 0.85
+        }
+    }
+}
+
+# -- Phase 5 (docs/specs/cybernetics_v2_phase5.md) ----------------------------
+# The three story arcs exist for this character. Story-type test shape as
+# eotg_aug_has_heir_arc.
+eotg_aug_has_countdown = {
+    any_owned_story = { story_type = eotg_story_aug_countdown }
+}
+
+eotg_aug_has_patron = {
+    any_owned_story = { story_type = eotg_story_aug_patron }
+}
+
+eotg_aug_has_retinue = {
+    any_owned_story = { story_type = eotg_story_aug_retinue }
+}
+
+# A knight who belongs to the Iron Retinue Program (thread T4; Phase 6 weights
+# by it). Evaluated in the knight's scope.
+eotg_aug_is_retinue_knight = {
+    is_alive = yes
+    has_character_flag = eotg_flag_aug_iron_retinue
+}
+
+# Someone the syndicate's Errand (eotg_aug_patron.004) can name: the victim
+# candidate terms (eotg_aug_victim_candidate) against $RULER$, never the
+# ruler's close family or spouse. Evaluated in the courtier's scope. A
+# parameter, not root, because the Patron story's tick (story scope) also
+# asks. Users: eotg_story_aug_patron (tick), eotg_aug_patron.004.
+eotg_aug_patron_critic_candidate = {
+    is_alive = yes
+    is_imprisoned = no
+    NOT = { this = $RULER$ }
+    NOT = { has_trait = eotg_neurofractured }
+    NOT = { is_close_family_of = $RULER$ }
+    NOT = { is_spouse_of = $RULER$ }
+}
+
+# The Family Clause's heir (eotg_aug_patron.005): 12+, unaugmented.
+eotg_aug_patron_heir_candidate = {
+    is_alive = yes
+    age >= 12
+    eotg_is_augmented_any = no
+}
+
+# The syndicate's bill can be paid (mirror: eotg_aug_patron_pay_effect). Run in
+# the ruler's scope; scope:eotg_patron_story must be saved.
+eotg_aug_patron_can_pay = {
+    gold >= {
+        value = $BASE$
+        if = {
+            limit = { scope:eotg_patron_story.var:eotg_terms = flag:greedy }
+            multiply = 1.5
+        }
+        else_if = {
+            limit = { scope:eotg_patron_story.var:eotg_terms = flag:read }
+            multiply = 0.75
+        }
+        multiply = $MULT$
+    }
+}

@@ -239,3 +239,78 @@ eotg_mod_aug_excision_recovery = {
     prowess = -4
     stress_gain_mult = 0.2
 }
+
+# -- Phase 4 states (docs/specs/cybernetics_v2_phase4.md §7) ------------------
+# All six are removed by eotg_clean_all_aug_modifiers.
+
+# Caller: eotg_aug_tier1.008 (b, 3 years)
+eotg_mod_aug_dulled_senses = {
+    icon = health_negative
+    stress_loss_mult = -0.1
+}
+
+# Callers: eotg_aug_tier2.013 (b), eotg_aug_tier2.014 (b). No expiry: removed
+# with the implants (eotg_clean_all_aug_modifiers).
+eotg_mod_aug_bold_firmware = {
+    icon = prowess_positive
+    prowess = 2
+}
+
+# Callers: eotg_aug_tier2.011 (a, c at 50%, d; 3 years)
+eotg_mod_aug_optimised_levies = {
+    icon = stewardship_positive
+    domain_tax_mult = 0.1
+    vassal_opinion = -5
+}
+
+# Caller: eotg_aug_tier2.016 (malfunction outcome, 1 year)
+eotg_mod_aug_tampered = {
+    icon = intrigue_negative
+    prowess = -2
+    diplomacy = -2
+}
+
+# Callers: eotg_aug_tier3.010 (b, d; 1 year), eotg_aug_tier3.022 (scarring, 3 years)
+eotg_mod_aug_overheated = {
+    icon = health_negative
+    health = -0.5
+    prowess = 2
+}
+
+# Callers: eotg_aug_tier3.023 (a, d; 1 year). The war itself is not touched.
+eotg_mod_aug_clarity_campaign = {
+    icon = martial_positive
+    advantage = 15
+    enemy_hard_casualty_modifier = 0.15
+}
+
+# -- Phase 5 states (docs/specs/cybernetics_v2_phase5.md §4) ------------------
+# Only eotg_mod_aug_iron_retinue is removed by eotg_clean_all_aug_modifiers.
+# The three Patron clauses survive Remove Implants (final QA: the debt does).
+
+# Callers: eotg_aug_patron.003 (a, d: until the Patron story ends, removed in
+# its on_end; c: 3 years)
+eotg_mod_aug_patron_clause = {
+    icon = stewardship_negative
+    monthly_income_mult = -0.05
+}
+
+# Caller: eotg_aug_patron.006 (a, permanent: the revenues are signed over)
+eotg_mod_aug_patron_clause_final = {
+    icon = stewardship_negative
+    monthly_income_mult = -0.15
+}
+
+# Caller: eotg_aug_patron_betray_effect (patron.006 c, d at 50%, e; 5 years)
+eotg_mod_aug_patron_throttle = {
+    icon = health_negative
+    stress_gain_mult = 0.15
+    prowess = -2
+}
+
+# Caller: eotg_aug_retinue.003 (owner; until eotg_aug_retinue.005 c/e reverse
+# the Program)
+eotg_mod_aug_iron_retinue = {
+    icon = martial_positive
+    knight_effectiveness_mult = 0.1
+}

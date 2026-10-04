@@ -116,14 +116,22 @@ eotg_aug_refresh_synergy_effect = {
 # eotg_aug_init.002 (c, knight), eotg_aug_tier1.004 (a, d: knight).
 # Phase 2: eotg_aug_init.006-.018 install options, init.017.c (knight),
 # init.020.d, eotg_aug_child_install_effect, eotg_aug_retainer_install_effect.
+# Final QA: a character coming (back) into the system starts at the install
+# value, risk 0, so stale risk from an earlier augmentation (e.g. one the
+# Patron's debt kept moving) cannot carry into the new one.
 eotg_aug_initiate_effect = {
+    if = {
+        limit = { eotg_is_augmented_any = no }
+        set_variable = { name = eotg_fracture_risk  value = 0 }
+    }
     add_trait = eotg_cybernetics
     eotg_aug_refresh_synergy_effect = yes
 }
 
 # THE ONLY place add_trait_xp on eotg_cybernetics may appear (spec §2.2 rule 2).
 # Sets XP to exactly $XP$ (0, 50 or 100) and refreshes the synergy modifier.
-# Callers: eotg_aug_tier1.002 (a) XP 50; eotg_aug_tier2.003 (a, c, d) XP 100;
+# Callers: eotg_aug_tier1.022 (a, b) XP 50 (Phase 4a: tier1.002 now pays and
+#          fires the First Upgrade chain); eotg_aug_tier2.003 (a, c, d) XP 100;
 #          eotg_decision_partial_removal XP 0; eotg_decision_overclock_regression XP 50.
 eotg_aug_set_integration_effect = {
     if = {
@@ -210,6 +218,18 @@ eotg_clean_all_aug_modifiers = {
     remove_character_modifier = eotg_mod_aug_restrained
     remove_character_modifier = eotg_mod_aug_sedated
     remove_character_modifier = eotg_mod_aug_excision_recovery
+    # Phase 4 states (cybernetics_v2_phase4.md §7)
+    remove_character_modifier = eotg_mod_aug_dulled_senses
+    remove_character_modifier = eotg_mod_aug_bold_firmware
+    remove_character_modifier = eotg_mod_aug_optimised_levies
+    remove_character_modifier = eotg_mod_aug_tampered
+    remove_character_modifier = eotg_mod_aug_overheated
+    remove_character_modifier = eotg_mod_aug_clarity_campaign
+    # Phase 5 states (cybernetics_v2_phase5.md §4). The Patron's clause
+    # modifiers are NOT removed here (final QA): removing the implants does
+    # not escape the debt. eotg_mod_aug_patron_clause ends with the story's
+    # on_end; _clause_final is permanent; _throttle runs out (5 years).
+    remove_character_modifier = eotg_mod_aug_iron_retinue
 }
 
 # Increment fracture risk variable — expects $AMOUNT$ parameter.
@@ -239,6 +259,8 @@ eotg_trigger_neurofracture = {
     # days after the cascade. Same duration the on_action uses (11 months, B4: expires
     # before the next pulse, so no same-day race); no event trigger reads it.
     add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 11 }
+    # Phase 5: the cascade is the Countdown's ending (phase5 §1.1)
+    eotg_aug_end_countdown_effect = yes
     trigger_event = { id = eotg_fracture.0001  days = 1 }
 }
 
@@ -367,7 +389,13 @@ eotg_aug_pick_second_victim_effect = {
 # failure, Remove Implants and Excision instead of setting XP. Adds no
 # withdrawal modifier: callers choose their own consequence.
 # Phase 3b: eotg_total_integration and the Neurofractured treatment flags.
-# Phase 5 ends an owned Countdown story.
+# Phase 5: ends an owned Countdown story (phase5 §1.1). The Patron's debt and
+# the Iron Retinue Program outlive the owner's implants on purpose: the
+# syndicate is still owed, and the knights keep theirs. The Retinue's
+# owner-side modifier goes with eotg_clean_all_aug_modifiers; the Patron's
+# clause modifiers stay (the debt survives the implants). Patron events guard
+# their owner-side risk moves on eotg_is_augmented_any, so nothing recreates
+# eotg_fracture_risk afterwards.
 eotg_aug_remove_all_effect = {
     if = {
         limit = { has_trait = eotg_cybernetics }
@@ -391,6 +419,7 @@ eotg_aug_remove_all_effect = {
     remove_variable = eotg_aug_focus
     remove_character_flag = eotg_flag_aug_vendor_safe
     remove_character_flag = eotg_flag_aug_vendor_bold
+    eotg_aug_end_countdown_effect = yes
 }
 
 # Removes ONE physical-loss trait, worst first: blind > one_legged > maimed >
@@ -1031,5 +1060,225 @@ eotg_aug_abdicate_effect = {
     add_character_flag = eotg_flag_aug_abdicated
     scope:eotg_successor = {
         trigger_event = { id = eotg_aug_end.031  days = 30 }
+    }
+}
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Phase 4 helpers — docs/specs/cybernetics_v2_phase4.md
+# ═════════════════════════════════════════════════════════════════════════════
+
+# The First Upgrade's price (A-12): medium_gold_value, x0.85 after
+# "What else can I replace?" (eotg_aug_tier1.020.c sets
+# eotg_flag_aug_replace_more for 5 years; paying spends it). Mirror:
+# eotg_aug_can_afford_upgrade. Inline-value shape as eotg_aug_excision_pay_effect.
+# Callers: eotg_aug_tier1.002 (a, d, e).
+eotg_aug_pay_upgrade_effect = {
+    remove_short_term_gold = {
+        value = medium_gold_value
+        if = {
+            limit = { has_character_flag = eotg_flag_aug_replace_more }
+            multiply = 0.85
+        }
+    }
+    remove_character_flag = eotg_flag_aug_replace_more
+}
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Phase 5 helpers — docs/specs/cybernetics_v2_phase5.md (the three arcs)
+# ═════════════════════════════════════════════════════════════════════════════
+
+# ── The Countdown (§1) ──────────────────────────────────────────────────────
+# Start it: Overclocked and none running. Callers:
+# eotg_on_yearly_aug_overclocked_check (risk >= 50, or >= 40 with the hidden
+# flaw; the caller checks risk), eotg_aug_patron_betray_effect.
+eotg_aug_try_start_countdown_effect = {
+    if = {
+        limit = {
+            eotg_is_aug_tier3 = yes
+            eotg_aug_has_countdown = no
+        }
+        create_story = eotg_story_aug_countdown
+    }
+}
+
+# End it. Callers: eotg_trigger_neurofracture (the cascade is the ending),
+# eotg_aug_remove_all_effect, eotg_aug_countdown.006 (The Quiet).
+eotg_aug_end_countdown_effect = {
+    if = {
+        limit = { eotg_aug_has_countdown = yes }
+        random_owned_story = {
+            limit = { story_type = eotg_story_aug_countdown }
+            end_story = yes
+        }
+    }
+}
+
+# ── The Patron (§2) ─────────────────────────────────────────────────────────
+# Accept the syndicate's money: install at risk 0, create the envoy from the
+# template with root's culture and faith by scope (create_character shape:
+# vanilla events/court_events/court_events_general.txt:431, template +
+# culture/faith from a scope), and start the story with $TERMS$
+# (standard / read / greedy) through the passthrough-variable pattern (skill
+# story_cycles.md "Passing Variables to a Story").
+# Callers: eotg_aug_patron.001 (a standard, c read, d greedy).
+eotg_aug_patron_accept_effect = {
+    eotg_aug_initiate_effect = yes
+    eotg_add_fracture_risk = { AMOUNT = 0 }
+    create_character = {
+        template = eotg_aug_patron_envoy_template
+        location = root.location
+        culture = root.culture
+        faith = root.faith
+        save_scope_as = eotg_patron_envoy
+    }
+    add_courtier = scope:eotg_patron_envoy
+    hidden_effect = {
+        set_variable = { name = eotg_patron_envoy_passthrough  value = scope:eotg_patron_envoy }
+        set_variable = { name = eotg_patron_terms_passthrough  value = flag:$TERMS$ }
+        create_story = eotg_story_aug_patron
+    }
+}
+
+# Pay the syndicate $BASE$ x $MULT$, scaled by the terms (greedy x1.5,
+# read x0.75). Mirror: eotg_aug_patron_can_pay. scope:eotg_patron_story must
+# be saved. Callers: eotg_aug_patron.002 (a, c), .006 (b).
+eotg_aug_patron_pay_effect = {
+    remove_short_term_gold = {
+        value = $BASE$
+        if = {
+            limit = { scope:eotg_patron_story.var:eotg_terms = flag:greedy }
+            multiply = 1.5
+        }
+        else_if = {
+            limit = { scope:eotg_patron_story.var:eotg_terms = flag:read }
+            multiply = 0.75
+        }
+        multiply = $MULT$
+    }
+}
+
+# Move the story's demand / grievance counters. Callers: the patron events.
+eotg_aug_patron_demand_effect = {
+    scope:eotg_patron_story = {
+        change_variable = { name = eotg_demand  add = 1 }
+    }
+}
+
+eotg_aug_patron_grievance_effect = {
+    scope:eotg_patron_story = {
+        change_variable = { name = eotg_grievance  add = $AMOUNT$ }
+    }
+}
+
+# Betray the syndicate: the envoy dies, the firmware is throttled, risk +25,
+# and an Overclocked owner's Countdown starts (phase5 §2.4 .006 c).
+# Callers: eotg_aug_patron.006 (c, d at 50%, e).
+eotg_aug_patron_betray_effect = {
+    scope:eotg_patron_envoy ?= {
+        if = {
+            limit = { is_alive = yes }
+            death = {
+                death_reason = death_murder
+                killer = root
+            }
+        }
+    }
+    add_character_modifier = { modifier = eotg_mod_aug_patron_throttle  years = 5 }
+    # An owner who has left the system keeps the debt but has no hardware
+    # for the syndicate to punish (final QA).
+    if = {
+        limit = { eotg_is_augmented_any = yes }
+        eotg_add_fracture_risk = { AMOUNT = 25 }
+        eotg_aug_try_start_countdown_effect = yes
+    }
+}
+
+# ── The Iron Retinue (§3) ───────────────────────────────────────────────────
+# Install on a knight through the Program: tier change, risk variable created
+# at 0, and the Program flag (thread T4; Phase 6 weights by it).
+# Callers: eotg_aug_retinue.001-.004 install options.
+eotg_aug_retinue_install_effect = {
+    eotg_aug_initiate_effect = yes
+    eotg_add_fracture_risk = { AMOUNT = 0 }
+    add_character_flag = eotg_flag_aug_iron_retinue
+}
+
+# Start the Program (passthrough as above). The phase follows the court
+# (final QA): exactly one augmented knight -> phase 1, so .001 "First of the
+# Iron" can fire; two or more -> phase 2. Callers: eotg_aug_init.019 (b, d),
+# eotg_aug_init.020 (after).
+eotg_aug_start_retinue_effect = {
+    if = {
+        limit = { eotg_aug_has_retinue = no }
+        hidden_effect = {
+            if = {
+                limit = {
+                    any_knight = {
+                        count >= 2
+                        eotg_is_augmented_any = yes
+                    }
+                }
+                set_variable = { name = eotg_retinue_phase_passthrough  value = 2 }
+            }
+            else = {
+                set_variable = { name = eotg_retinue_phase_passthrough  value = 1 }
+            }
+            create_story = eotg_story_aug_retinue
+        }
+    }
+}
+
+# Reverse the Program (eotg_aug_retinue.005 c, e): every retinue knight has
+# a 15% chance to die on the table (death_treatment); the rest leave the
+# system (index §1 rule 2) with withdrawal. The owner loses the bonus.
+eotg_aug_retinue_reverse_effect = {
+    every_knight = {
+        limit = { eotg_aug_is_retinue_knight = yes }
+        random_list = {
+            15 = {
+                death = { death_reason = death_treatment }
+            }
+            85 = {
+                eotg_aug_remove_all_effect = yes
+                add_character_modifier = { modifier = eotg_mod_aug_removal_withdrawal  years = 2 }
+                remove_character_flag = eotg_flag_aug_iron_retinue
+            }
+        }
+    }
+    remove_character_modifier = eotg_mod_aug_iron_retinue
+}
+
+# Cost of augmenting the unaugmented knights, minor_gold_value each, cap 3
+# (eotg_aug_retinue.004.a). Script-value iterator shape: vanilla
+# common/script_values/04_ep2_tournament_values.txt:2515 (every_knight, add).
+eotg_aug_retinue_pay_all_effect = {
+    remove_short_term_gold = {
+        value = 0
+        every_knight = {
+            limit = { eotg_aug_retainer_candidate = yes }
+            add = 1
+        }
+        max = 3
+        multiply = minor_gold_value
+    }
+}
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Phase 6 — docs/specs/cybernetics_v2_phase6.md (the non-ruler lifecycle)
+# ═════════════════════════════════════════════════════════════════════════════
+
+# The non-ruler cascade. Run on the non-ruler (a knight or courtier).
+# eotg_trigger_neurofracture is NOT reused: it fires eotg_fracture.0001, a
+# ruler event, and opens the ruler cooldown. This tells the employer instead
+# (eotg_aug_nr.006, outside the liege cooldown).
+# Caller: eotg_on_yearly_aug_nonruler_check (step 3, risk >= 80).
+eotg_aug_nr_cascade_effect = {
+    remove_trait = eotg_cybernetics    # discards the track XP
+    add_trait = eotg_neurofractured
+    eotg_apply_neurofracture_distortion = yes
+    set_variable = { name = eotg_fracture_risk  value = 0 }
+    save_scope_as = eotg_champion
+    employer ?= {
+        trigger_event = { id = eotg_aug_nr.006  days = { 1 7 } }
     }
 }

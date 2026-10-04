@@ -53,13 +53,17 @@ eotg_aug_end.001 = {
             trigger = { eotg_has_physician_access = yes }
             desc = eotg_aug_end.001.desc_physician
         }
-        triggered_desc = {
-            trigger = { has_character_flag = eotg_flag_aug_promised_treatment }
-            desc = eotg_aug_end.001.desc_promised
-        }
-        triggered_desc = {
-            trigger = { has_character_flag = eotg_flag_aug_excision_free }
-            desc = eotg_aug_end.001.desc_free
+        # Free outranks promised: a free table makes the half-price promise
+        # moot, so only one of the two lines shows.
+        first_valid = {
+            triggered_desc = {
+                trigger = { has_character_flag = eotg_flag_aug_excision_free }
+                desc = eotg_aug_end.001.desc_free
+            }
+            triggered_desc = {
+                trigger = { has_character_flag = eotg_flag_aug_promised_treatment }
+                desc = eotg_aug_end.001.desc_promised
+            }
         }
     }
     theme = medicine
