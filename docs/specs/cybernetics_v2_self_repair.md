@@ -78,7 +78,7 @@ All keys carry the `eotg_` prefix. No landed titles. Loc keys use the dot form f
 | scripted effect | `eotg_aug_self_repair_fit_effect` (no params; patient scope: adds the modifier, then the tier-scaled risk in `hidden_effect`) | `common/scripted_effects/eotg_augmentation_effects.txt` | scripter |
 | scripted trigger | `eotg_aug_can_self_repair` (culture has the innovation; `has_trait = eotg_cybernetics`; NOT the modifier) | `common/scripted_triggers/eotg_augmentation_triggers.txt` | scripter |
 | script value | `eotg_aug_self_repair_price_value` (= `massive_gold_value` × 2) | `common/script_values/eotg_augmentation_values.txt` | scripter |
-| script value | `eotg_aug_oc_wear_relief_value` (≤ 0; sum of the three wear-relief rows, no cap, down to −9; §4.3) | values file | scripter |
+| script value | `eotg_aug_oc_wear_relief_value` (≤ 0; sum of the three wear-relief rows, no cap, down to −8; §4.3) | values file | scripter |
 | saved scope value (event chain) | `eotg_proc_refit` (`yes`; read by proc.002's opener) | proc.005 options | scripter |
 
 ### 3.2 Changed (key kept)
@@ -86,7 +86,7 @@ All keys carry the `eotg_` prefix. No landed titles. Loc keys use the dot form f
 | Key | Change | § |
 |---|---|---|
 | `eotg_on_yearly_aug_overclocked_check` | The vendor-safe row (−3) and the realm technician row (−2 / −3) are **replaced** by one call: `eotg_add_fracture_risk = { AMOUNT = eotg_aug_oc_wear_relief_value }`. The vendor-bold row (+3) stays separate. All other rows unchanged. | 4.3 |
-| `eotg_on_yearly_aug_nonruler_check` | Step 3, the Overclocked accrual (base 10, +6 at stress level 2+): one row, `has_character_modifier = eotg_mod_aug_self_repair` → −3. | 4.3 |
+| `eotg_on_yearly_aug_nonruler_check` | Step 3, the Overclocked accrual (base 10, +6 at stress level 2+): one row, `has_character_modifier = eotg_mod_aug_self_repair` → −2. | 4.3 |
 | `eotg_decision_maintenance_protocol` | Calibration lasts **5 years** with the modifier (else 3). Cooldown flag unchanged at 3 years. `ai_will_do` gains `modifier = { add = -10  has_character_modifier = eotg_mod_aug_self_repair  eotg_is_aug_tier3 = no }`. | 4.3 |
 | `eotg_decision_consult_physician` | Calibration lasts **7 years** with the modifier (else 5). | 4.3 |
 | `eotg_clean_all_aug_modifiers` | One guarded line: remove `eotg_mod_aug_self_repair`. That clears it on a full exit (`eotg_aug_remove_all_effect`) and at Total Integration (`eotg_aug_total_integration_effect`), the effect's only two callers. | 4.5 |
@@ -125,7 +125,13 @@ All keys carry the `eotg_` prefix. No landed titles. Loc keys use the dot form f
 | **B. Mid era, cost through ahead-of-time** | `culture_era = culture_era_early_medieval`; no `can_progress`; AI fascination × 0 until in era | After the culture joins early medieval (spread from 900; vanilla history joins most at 950): **roughly 940–1000 AG**, which brackets canon's 975. Spread then carries it to neighbours. | From day one, by fascinating it ahead of time at ÷5, and paying vanilla's ahead-of-time penalty on later research. **About 5T**, where T is an in-era fascination (to be measured on the test map; §9). | **Recommended; decided by the human 2026-10-04.** |
 | **C. Mid era with a prerequisite** | as B, plus `can_progress = { has_cultural_era_or_later = culture_era_early_medieval }` | As B. | Only after the culture joins the era: as the AI, plus T. | The fallback if B proves too fast in testing (one line). |
 
-**Decided: B** (human, 2026-10-04; the architect's recommendation). Price `massive_gold_value` × 2 decided the same day.
+**Decided: B** (human, 2026-10-04; the architect's recommendation).
+
+**Decision record (human, 2026-10-04):**
+1. gating option B;
+2. price `massive_gold_value` × 2;
+3. no cap on stacked Overclocked relief; the realm spec's values and its −6 best case are unchanged;
+4. after seeing the no-cap pacing, the self-repair Overclocked row was **softened from −3 to −2** a year (full stack −8, still no `min`). §4.3 has the consequences.
 - It is the vanilla cost lever. CK3 has no "expensive innovation" field. What it has is research ahead of your era: slow (÷5), and taxing (later ahead-of-time progress halves).
 - The AI follows the vanilla pattern, so the world gets the advance around canon's date. A player who wants it can buy it early with research priority. That fits "a culture's scholars advancing".
 - It needs no prerequisite on a vanilla innovation key. v2 may ship its own innovations later, and a `has_innovation = innovation_x` prerequisite would then break silently.
@@ -185,7 +191,7 @@ eotg_innovation_self_repairing_machinery = {
 | # | Effect | Where | Tiers |
 |---|---|---|---|
 | 1 | **Calibration lasts longer.** Maintenance gives Calibrated Systems for **5 years** (was 3); Consult the Physician for **7** (was 5). Cooldowns unchanged (Maintenance 3 years, Consult 3 years). | the two decisions | Augmented, Enhanced, Overclocked |
-| 2 | **Slower wear at Overclocked.** **−3 a year** on accrual, through `eotg_aug_oc_wear_relief_value`. It **stacks fully** with the vendor-safe firmware (−3) and the Implant Technician (−2 / −3): **no cap** (human, 2026-10-04). Full stack: −9 a year. | Overclocked check; −3 in the non-ruler check | Overclocked |
+| 2 | **Slower wear at Overclocked.** **−2 a year** on accrual, through `eotg_aug_oc_wear_relief_value` (human, 2026-10-04: softened from the proposed −3). It **stacks fully** with the vendor-safe firmware (−3) and the Implant Technician (−2 / −3): **no cap** (human, 2026-10-04). Full stack: **−8 a year**. | Overclocked check; −2 in the non-ruler check | Overclocked |
 | 3 | **Nothing else.** The stress rows (+8 / +16 / +24), paranoid (+12), war (+10), vendor-bold (+3), the hidden-flaw row (+4), the Countdown, the cascade threshold (80), Neurofractured drift and the terminal are all untouched. | — | — |
 
 ```
@@ -193,7 +199,7 @@ eotg_aug_oc_wear_relief_value = {             # character scope (the ruler)
     value = 0
     if = { limit = { has_character_flag = eotg_flag_aug_vendor_safe }  subtract = 3 }
     # realm §3.2 technician rows, moved here verbatim (−3 at aptitude >= 4, else −2)
-    if = { limit = { has_character_modifier = eotg_mod_aug_self_repair }  subtract = 3 }
+    if = { limit = { has_character_modifier = eotg_mod_aug_self_repair }  subtract = 2 }   # human 2026-10-04 (was −3)
     # no min: the rows stack fully (human, 2026-10-04)
 }
 ```
@@ -203,54 +209,81 @@ eotg_aug_oc_wear_relief_value = {             # character scope (the ruler)
 **Rejected, with reasons:**
 - **Shortening the Maintenance cooldown.** It makes the ruler calibrate *more* often, the opposite of the brief. At Overclocked it would also turn Maintenance's one-off −8 (−12 with a technician) into a bigger lever.
 - **Removing the cooldown.** Unbounded −8s. That trivialises Overclocked.
-- *(A shared −5 ceiling on the three wear rows was proposed and **not taken**: human decision 2026-10-04, no cap. Its consequence is stated in the pacing below.)*
+- *(A shared −5 ceiling on the three wear rows was proposed and **not taken**: human decision 2026-10-04, no cap. Instead, the human softened the self-repair row from −3 to −2 the same day. The consequence is stated in the pacing below.)*
 
 **Neurofractured is not trivialised. By construction:**
 - Maintenance and Consult are shown only with `eotg_cybernetics`, which the cascade removes (`eotg_trigger_neurofracture`). So package item 1 cannot reach a Neurofractured character.
 - The relief value is read only in the Overclocked branches.
 - The modifier stays on a Neurofractured character (no clean-up runs at the cascade) and does nothing but `health = 0.1`. Its desc says so ("it stays in tolerance; you do not").
 
-**Pacing against HQ1 / HQ2.** Cascade at risk 80, Maintenance taken whenever its 3-year cooldown allows (−8 each), no technician:
+**Pacing against HQ1 / HQ2.** Self-repair row **−2** (decided by the human, 2026-10-04).
 
-| Overclocked ruler | Pulses to the cascade today | With self-repair | Change |
+**Model** (recomputed 2026-10-04; it replaces the earlier tables' unclamped arithmetic):
+- risk enters Overclocked at 0 and is clamped at 0;
+- each yearly pulse adds the net accrual, and the cascade comes at the first pulse that reaches 80;
+- Maintenance is taken right after every 3rd pulse (the cooldown), −8 plain or −12 with a technician.
+
+| Overclocked ruler (no technician) | Pulses to the cascade today | With self-repair (−2) | Change |
 |---|---|---|---|
-| calm (+12) | 9 (7 with no Maintenance) | 14 (9 with no Maintenance; 12 when calibrating every 5 years, as the longer modifier invites) | +3 to +5 years |
-| stress level 1 (+20) | 5 | 6 | +1 |
-| at war, calm (+22) | 5 | 6 | +1 |
-| stress level 2 (+28) | 4 | 4 | none |
-| stress level 3 (+36) | 3 | 3 | none |
+| calm (+12 → 10) | 8 (7 with no Maintenance) | 11 (8 with no Maintenance; 9 when calibrating every 5 years, as the longer modifier invites) | +3 (+1 with no Maintenance) |
+| stress level 1 (+20 → 18) | 5 | 5 | none |
+| at war, calm (+22 → 20) | 4 | 5 | +1 |
+| stress level 2 (+28 → 26) | 3 | 4 | +1 |
+| stress level 3 (+36 → 34) | 3 | 3 | none |
 
-**The uncapped best case: full stack** (vendor-safe −3, excellent technician −3, self-repair −3 = **−9 a year**; Maintenance −12 with the technician, every 3 years):
+**The uncapped best case: full stack** (vendor-safe −3, excellent technician −3, self-repair −2 = **−8 a year**; the technician's Maintenance −12):
 
-| Overclocked ruler | Realm spec's best case today (−6) | Full stack (−9) | Change |
+| Overclocked ruler | Realm spec's best case today (−6) | Full stack (−8) | Change |
 |---|---|---|---|
-| calm (+12 → net 3 a year) | 42 pulses | **never, while Maintenance is kept up**: +9 over three years against −12, so risk sits near 0. With no Maintenance at all: 27 pulses. | the cascade leaves the reign |
-| stress level 1 (+20 → 11) | 9 | 12 | +3 |
-| at war, calm (+22 → 13) | 8 | 9 | +1 |
-| stress level 2 (+28 → 19) | 5 | 6 | +1 |
-| stress level 3 (+36 → 27) | 4 | 4 | none |
+| calm (+12 → net 4), Maintenance **every 3 years exactly** | 36 | **never.** +12 over three pulses against −12 is exact break-even, so risk cycles between 0 and 12. | the cascade leaves the reign |
+| calm, Maintenance every 4 years | — | **68** | — |
+| calm, Maintenance every 5 years (the calibration's new length) | — | **44** | — |
+| calm, no Maintenance | — | **20** | — |
+| calm, **AI cadence** (yearly check at about 60% once the cooldown ends; Monte Carlo, 20,000 runs) | median 28 | **median 96** (10th–90th percentile: 69–129) | — |
+| stress level 1 (+20 → 12) | 8 | 9 | +1 |
+| at war, calm (+22 → 14) | 6 | 8 | +2 |
+| stress level 2 (+28 → 20) | 5 | 5 | none |
+| stress level 3 (+36 → 28) | 3 | 3 | none |
 
-Self-repair with only one of the other two (−6) is exactly the realm spec's current best case: 42 calm pulses with the technician's Maintenance, 24 with plain Maintenance.
+Self-repair with only one of the other two (−5):
+- with the technician: 24 calm pulses with the technician's Maintenance;
+- with vendor-safe: 18 calm pulses with plain Maintenance.
 
-**Stated plainly.** A fully equipped, calm, peaceful, non-paranoid Overclocked ruler who keeps Maintenance up **does not cascade, and does not reach the Countdown's threshold (50)**. Their Overclocked state is stable for as long as those conditions hold. It ends only through stress, war, paranoia, the hidden flaw (+4), vendor-bold, or events that move risk directly. This was already nearly true under the realm spec (42 pulses); self-repair makes it fully true. The cost of the full stack:
+The realm spec's own −6 best case is unchanged (36 on this model).
+
+**Stated plainly: −2 does not, by itself, make the calm full stack cascade.**
+- At −8 the calm full stack gains exactly what the technician's Maintenance removes.
+- A ruler (in practice, a player) who calibrates on the day the 3-year cooldown ends still **never cascades and never reaches the Countdown's threshold (50)**.
+- **One slipped year changes that:** 68 pulses on a 4-year cadence, 44 on a 5-year cadence, 20 with no Maintenance.
+- **The AI does cascade eventually.** It checks the decision every 12 months at about 60% at Overclocked (balance §5.2: base 10, +50 tier 3), so a fully equipped calm AI ruler cascades after a median of about 96 pulses. That is longer than a reign, but not never.
+- Compared with the −3 proposal (−9), the softening turns "never, for anyone keeping up Maintenance" into "never only with exact Maintenance". It also brings the stressed and warring rows back toward the realm spec's numbers.
+
+**If the human wants the calm, exactly maintained full stack to cascade within a reign**, the knobs are, one number each:
+- a −1 self-repair row (net +15 against −12): 69 pulses. That is still slow, because the technician's −12 Maintenance dominates;
+- a `min = -6` on `eotg_aug_oc_wear_relief_value`: the realm's 36;
+- the technician's Maintenance drop, which is a realm value and outside this spec.
+
+The cost of the full stack:
 - one Bidding War outcome (vendor-safe);
 - an excellent technician's salary;
 - about three years' income for the refit (§4.4);
-- Maintenance every 3 years;
-- staying calm.
+- Maintenance on the day it comes off cooldown;
+- staying calm, at peace and not paranoid.
+
+The stable state ends through stress, war, paranoia, the hidden flaw (+4), vendor-bold, or events that move risk directly.
 
 **What still holds:**
 - Neurofractured, its drift and the terminal outcome are unchanged.
 - Stressed and warring rulers still cascade within a reign.
-- The AI rarely assembles all three pieces.
+- The AI rarely assembles all three pieces, and is never exact about Maintenance.
 
-The observer run (below) measures how often it does.
+The observer run (below) measures both.
 
 **Effect on the targets:**
 - **HQ1** (minimum 10 years initiation → Overclocked): untouched. The refit is not a tier change and moves no time floor.
-- **HQ2** (25–40% augmented, ≥ 15% Overclocked or beyond, at year 30): **untouched at its checkpoint**. Under option B, no AI culture fascinates the innovation before it joins the early medieval era (spread from 900), so no AI ruler is fitted at year 30 (896 AG). Later, the refit costs about three years' income (§4.4), so it is a minority purchase among count+ rulers whose culture has it. Expected effect: the Overclocked share rises slightly, and that rise is what HQ2's "≥ 15%" band wants. The cascade rate falls among calm fitted rulers, to zero for the calm fully equipped ones (above).
+- **HQ2** (25–40% augmented, ≥ 15% Overclocked or beyond, at year 30): **untouched at its checkpoint**. Under option B, no AI culture fascinates the innovation before it joins the early medieval era (spread from 900), so no AI ruler is fitted at year 30 (896 AG). Later, the refit costs about three years' income (§4.4), so it is a minority purchase among count+ rulers whose culture has it. Expected effect: the Overclocked share rises slightly, and that rise is what HQ2's "≥ 15%" band wants. The cascade rate falls among calm fitted rulers. For the calm, fully equipped ones it falls to zero under exact 3-year Maintenance, and to about one cascade per century of AI play otherwise (above).
 - **"One terminal per 10 Neurofractured rulers per decade":** untouched (Neurofractured is not affected).
-- **Observer run (balance §9.2) gains two counters per decade:** (1) cultures with the innovation, and AI rulers fitted; (2) the Overclocked→cascade median for fitted and unfitted rulers. Add a third counter: AI Overclocked rulers holding all three wear rows, and how many of them cascaded. **Tuning knobs, if the human wants them later:** the self-repair row (−3 → −2), or a `min` on `eotg_aug_oc_wear_relief_value`. Each is one number.
+- **Observer run (balance §9.2) gains two counters per decade:** (1) cultures with the innovation, and AI rulers fitted; (2) the Overclocked→cascade median for fitted and unfitted rulers. Add a third counter: AI Overclocked rulers holding all three wear rows, and how many of them cascaded. **Tuning knobs, if the human wants them later:** the self-repair row (now −2), or a `min` on `eotg_aug_oc_wear_relief_value`. Each is one number.
 
 ### 4.4 The refit: decision and provider event
 
@@ -471,9 +504,9 @@ No vanilla string needs a `replace/` override. The Maintenance and Consult toolt
    - Under a Ban (realm): the clinic option is greyed with its reason. With no physician or technician, the decision is invalid with `_no_provider_tt`.
    - Maintenance, with the modifier: Calibrated Systems for 5 years. Consult: 7.
    - Overclocked, calm, fitted (`var:eotg_fracture_risk` before and after the yearly pulse):
-     - no vendor flag, no technician: rises 9 a year (12 unfitted);
-     - with vendor-safe as well: 6;
-     - with vendor-safe and an excellent technician: 3.
+     - no vendor flag, no technician: rises 10 a year (12 unfitted; self-repair row −2);
+     - with vendor-safe as well: 7;
+     - with vendor-safe and an excellent technician: 4.
    - Remove Implants: the modifier is gone. Total Integration: the modifier is gone, and A Part Replaced still reads as before.
 10. **Observer run (balance §9.2):** the three counters in §4.3 are recorded.
 
@@ -482,7 +515,7 @@ No vanilla string needs a `replace/` override. The Maintenance and Consult toolt
 ## 10. Deferred
 
 - **Option C's prerequisite and option A's era.** Not built (the human picked B, 2026-10-04); one line each if testing shows B too fast or too slow.
-- **A cap on stacked Overclocked relief.** Not built (human, 2026-10-04). If the observer run shows fully equipped AI rulers never cascading, a `min` on `eotg_aug_oc_wear_relief_value` is a one-line change (§4.3).
+- **A cap on stacked Overclocked relief.** Not built (human, 2026-10-04: no cap, and the self-repair row softened to −2 instead). A calm full stack under exact Maintenance still never cascades (§4.3). If the human wants that closed, a `min` on `eotg_aug_oc_wear_relief_value` or a −1 row is a one-line change.
 - **Gate 1 coupling (taskboard CB-36):**
   - Move the innovation one era up if the mod's 866 cultures start in the early medieval era, and re-point the era keys if v2 replaces the eras (§4.1 rule).
   - **S5:** the cartographer's `history/cultures` must not grant the innovation, and no bookmark or history character may carry `eotg_mod_aug_self_repair` (DoD 2 grep).
@@ -499,8 +532,8 @@ No vanilla string needs a `replace/` override. The Maintenance and Consult toolt
 ### HANDOFF
 - status: done
 - next: eotg-scripter (when the queue reaches it: after procedures → interactions → realm → reprisal)
-- ask: Build docs/specs/cybernetics_v2_self_repair.md §3–§5: option B gating; price massive_gold_value × 2; the wear-relief value with NO cap; the realm technician values unchanged. Run the three validators, then hand §7 to eotg-localizer, who uses docs/specs/cybernetics_v2_self_repair_lore.md renderings. Then eotg-qa runs §9.
-- files: docs/specs/cybernetics_v2_self_repair.md (S1–S7, names, human decisions folded in); docs/specs/cybernetics_v2_procedures_lore.md (N1 rationale restated, U3)
+- ask: Build docs/specs/cybernetics_v2_self_repair.md §3–§5: option B gating; price massive_gold_value × 2; self-repair Overclocked relief −2 (also −2 in the non-ruler check); eotg_aug_oc_wear_relief_value with NO min; the realm technician values unchanged. Run the three validators, then hand §7 to eotg-localizer (renderings binding in docs/specs/cybernetics_v2_self_repair_lore.md). Then eotg-qa runs §9.
+- files: docs/specs/cybernetics_v2_self_repair.md
 - needs-loc (20, §7; binding renderings in docs/specs/cybernetics_v2_self_repair_lore.md): eotg_innovation_self_repairing_machinery (+_desc, _custom); eotg_decision_aug_self_repair (+_desc, _tooltip, _confirm, _selection_tt, _no_provider_tt); eotg_mod_aug_self_repair (+_desc); eotg_aug_proc.005.t/.desc/.desc_overclocked/.desc_surgeon/.a/.b/.c/.tt; eotg_aug_proc.002.desc_refit
-- needs-lore: none (review done; S1–S7 folded in)
-- needs-human: (a) acknowledge §4.3's stated consequence of no cap: a calm, fully equipped Overclocked ruler who keeps Maintenance up never cascades and never reaches the Countdown; (b) the orchestrator adds `common/culture/innovations/` to the CLAUDE.md placement table; (c) the §9 item 9 in-game checks, especially whether a later-era innovation can be chosen as the fascination
+- needs-lore: none
+- needs-human: (a) note §4.3: at −2 the calm full stack (−8) exactly breaks even against the technician's −12 Maintenance, so a ruler who calibrates the day the cooldown ends still never cascades. A 4-year cadence cascades at 68 pulses, a 5-year at 44, none at 20, and the AI's cadence at a median of 96. To close it within a reign: a `min = -6` (36 pulses) or a −1 row (69); (b) the orchestrator adds `common/culture/innovations/` to the CLAUDE.md placement table; (c) the §9 item 9 in-game checks
