@@ -356,3 +356,25 @@ This block is kept inside `docs/qa/` because this task allowed no files outside 
 - Cultures are allowed but premature (Pipeline E: stopgaps only when Gate 1 can't close without them).
 - H-V5 (voice-register drift) is confirmed for `:93-95` only.
 - In the `replace/` statistics, deleting the identical copies removes 125 definitions, not 122.
+
+### §4 settled against vanilla 1.20.0.3 (eotg-vanilla-scout)
+
+**Key gaps (only three):**
+- `tenet_monasticism` is now a doctrine group, `doctrine_monasticism_encouraged|accepted|absent|forbidden` (`doctrine_types/20_doctrines.txt:2071`). v1 coldiron already has `tenet_asceticism`.
+- Ethnicities `caucasian_northern` and `caucasian_southern` are missing. Only the hair-colour variants exist (e.g. `caucasian_northern_blond`, `caucasian_dark_hair`).
+- Family field `doctrine_background_icon` became `tenet_background_icon`, plus `_heretical_`, `_neutral_` and `_unknown_` siblings, as extensionless `tenet_banner_*` keys.
+
+**Exists:** every other doctrine, tenet, virtue/sin, tradition, language colour, name list and gfx key; the MAA shapes, `subject_men_at_arms` and the 7 regiment icons; `hegemony` (required); `monthly_county_control_*`; `end_struggle` / `change_struggle_phase`; all 4 hooks; the 5 event themes; `advantage`, `max_hostile_schemes_add`, `every_knight`, `lunatic_1`, `possessed_1`; and `trigger` in a `random_list`. Unescaped inner `"` is tolerated (vanilla relies on it).
+
+**Religions port shape (1.20):**
+- A religion wraps `family`, `graphical_faith` and `piety_icon_group` in `religion_details = { }`.
+- Faiths move to `common/religion/faith_types/`, with `faith_details = { religion = … }` (required) and list-form `tenets = {}` / `doctrines = {}`.
+- Rites (`rite_types/`) are optional.
+- A nested `faiths = {}` is undocumented and unused in vanilla, so treat it as unsupported.
+
+**Behaviour; needs an in-game test:**
+- Whether `add_character_modifier` stacks or refreshes. Vanilla guards with `has_character_modifier`, so do the same.
+- `localization/replace/` override semantics.
+- Whether a phase change alone ends a struggle.
+- Whether struggle `on_start` fires from history.
+- The order in which `on_actions` list entries run (don't rely on it).
