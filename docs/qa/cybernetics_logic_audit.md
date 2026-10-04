@@ -1,3 +1,5 @@
+> Superseded by `docs/specs/cybernetics_v2.md` and `docs/qa/cybernetics_test_plan.md` (2026-10-03). Kept as history; do not use as a current description.
+
 # Cybernetics (Augmentation) — Logic QA Audit
 
 > **Note (2026-10-03):** this audit predates the conversion to one track trait (`eotg_cybernetics`, spec `docs/specs/cybernetics_track.md`). Findings §1.1, §1.7a, §1.7h and the knight synergy part of §1.7i are fixed. The rest still stand, with trait names now read as tiers of `eotg_cybernetics`. See [cybernetics_system_overview.md](cybernetics_system_overview.md) §6.

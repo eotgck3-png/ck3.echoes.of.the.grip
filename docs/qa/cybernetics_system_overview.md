@@ -1,3 +1,5 @@
+> Superseded by `docs/specs/cybernetics_v2.md` and `docs/qa/cybernetics_test_plan.md` (2026-10-03). Kept as history; do not use as a current description.
+
 # Cybernetics — System Overview and Goals
 
 **Date:** 2026-10-03 · **State described:** the files on disk after the 2026-10-03 track conversion ([docs/specs/cybernetics_track.md](../specs/cybernetics_track.md)).
