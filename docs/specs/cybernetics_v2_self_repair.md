@@ -73,12 +73,12 @@ All keys carry the `eotg_` prefix. No landed titles. Loc keys use the dot form f
 | innovation icon | stopgap `gfx/interface/icons/culture_innovations/innovation_misc_inventions.dds` (vanilla, the `@misc_inventions` icon used by `innovation_armilary_sphere`, `00_early_medieval_innovations.txt:30, :413`) | same file | scripter (stopgap); **human** if bespoke art is wanted (not blocking) |
 | decision | `eotg_decision_aug_self_repair` | `common/decisions/eotg_augmentation_decisions.txt` | scripter |
 | decision picture | placeholder: `gfx/interface/illustrations/decisions/eotg_decision_maintenance_protocol.dds` (the Seek decision already reuses it) | same | scripter; human if bespoke |
-| event | `eotg_aug_proc.005` (working title *Built to Mend Itself*; lore-keeper names it) | `events/eotg_augmentation_procedures.txt` | scripter |
+| event | `eotg_aug_proc.005` *Within Tolerance* (lore-keeper's name) | `events/eotg_augmentation_procedures.txt` | scripter |
 | static modifier | `eotg_mod_aug_self_repair` (`icon = eotg_implant_calibrated`, the existing mod icon; `health = 0.1`) | `common/modifiers/eotg_augmentation_modifiers.txt` | scripter |
 | scripted effect | `eotg_aug_self_repair_fit_effect` (no params; patient scope: adds the modifier, then the tier-scaled risk in `hidden_effect`) | `common/scripted_effects/eotg_augmentation_effects.txt` | scripter |
 | scripted trigger | `eotg_aug_can_self_repair` (culture has the innovation; `has_trait = eotg_cybernetics`; NOT the modifier) | `common/scripted_triggers/eotg_augmentation_triggers.txt` | scripter |
 | script value | `eotg_aug_self_repair_price_value` (= `massive_gold_value` × 2) | `common/script_values/eotg_augmentation_values.txt` | scripter |
-| script value | `eotg_aug_oc_wear_relief_value` (≤ 0; sum of the wear-relief rows, `min = -5`; §4.3) | values file | scripter |
+| script value | `eotg_aug_oc_wear_relief_value` (≤ 0; sum of the three wear-relief rows, no cap, down to −9; §4.3) | values file | scripter |
 | saved scope value (event chain) | `eotg_proc_refit` (`yes`; read by proc.002's opener) | proc.005 options | scripter |
 
 ### 3.2 Changed (key kept)
@@ -91,7 +91,7 @@ All keys carry the `eotg_` prefix. No landed titles. Loc keys use the dot form f
 | `eotg_decision_consult_physician` | Calibration lasts **7 years** with the modifier (else 5). | 4.3 |
 | `eotg_clean_all_aug_modifiers` | One guarded line: remove `eotg_mod_aug_self_repair`. That clears it on a full exit (`eotg_aug_remove_all_effect`) and at Total Integration (`eotg_aug_total_integration_effect`), the effect's only two callers. | 4.5 |
 | proc.002 *After the Procedure* | One new opener, `desc_refit`, **first** in its opener `first_valid`, when `exists = scope:eotg_proc_refit`. | 4.4 |
-| realm spec §3.2, technician accrual row | Its two values move unchanged into `eotg_aug_oc_wear_relief_value`. Its combined ceiling with vendor-safe becomes **−5** (realm alone allowed −6). Realm is unbuilt, so this is an amendment to a spec, not to script. | 4.3 |
+| realm spec §3.2, technician accrual row | **Location only:** its two values (−2 / −3) move unchanged into `eotg_aug_oc_wear_relief_value`. No change to its numbers; the realm spec's −6 best case stands (human, 2026-10-04). | 4.3 |
 
 **Reused, not new:** `eotg_aug_procedure_effect`, `eotg_aug_save_surgeon_effect`, `eotg_aug_pay_procedure_effect`, `eotg_aug_can_afford_procedure`, `eotg_aug_price_mult_physician`, `eotg_aug_stress_surgery_effect`, `eotg_add_fracture_risk`, `eotg_aug_clinic_open`, `eotg_aug_has_surgeon_access`, `eotg_aug_surgeon_is_technician`, the loc key `eotg_aug_opt_technician`, `eotg_aug_clinic_closed_tt`, `eotg_is_aug_tier1/2/3`, `eotg_aug_has_countdown`.
 
@@ -122,10 +122,10 @@ All keys carry the `eotg_` prefix. No landed titles. Loc keys use the dot form f
 | | Placement | When the AI world gets it | When a determined player gets it | Verdict |
 |---|---|---|---|---|
 | **A. Late era** | `culture_era = culture_era_high_medieval` | Not before the culture joins high medieval (base spread from 1050; vanilla pacing ~1100). | Ahead of time from a tribal culture at ÷10 (two eras behind). Over a century. | Canon-safe, but the human would not see it in a normal playthrough. **Not recommended.** |
-| **B. Mid era, cost through ahead-of-time** | `culture_era = culture_era_early_medieval`; no `can_progress`; AI fascination × 0 until in era | After the culture joins early medieval (spread from 900; vanilla history joins most at 950): **roughly 940–1000 AG**, which brackets canon's 975. Spread then carries it to neighbours. | From day one, by fascinating it ahead of time at ÷5, and paying vanilla's ahead-of-time penalty on later research. **About 5T**, where T is an in-era fascination (to be measured on the test map; §9). | **Recommended.** |
+| **B. Mid era, cost through ahead-of-time** | `culture_era = culture_era_early_medieval`; no `can_progress`; AI fascination × 0 until in era | After the culture joins early medieval (spread from 900; vanilla history joins most at 950): **roughly 940–1000 AG**, which brackets canon's 975. Spread then carries it to neighbours. | From day one, by fascinating it ahead of time at ÷5, and paying vanilla's ahead-of-time penalty on later research. **About 5T**, where T is an in-era fascination (to be measured on the test map; §9). | **Recommended; decided by the human 2026-10-04.** |
 | **C. Mid era with a prerequisite** | as B, plus `can_progress = { has_cultural_era_or_later = culture_era_early_medieval }` | As B. | Only after the culture joins the era: as the AI, plus T. | The fallback if B proves too fast in testing (one line). |
 
-**Recommendation: B.**
+**Decided: B** (human, 2026-10-04; the architect's recommendation). Price `massive_gold_value` × 2 decided the same day.
 - It is the vanilla cost lever. CK3 has no "expensive innovation" field. What it has is research ahead of your era: slow (÷5), and taxing (later ahead-of-time progress halves).
 - The AI follows the vanilla pattern, so the world gets the advance around canon's date. A player who wants it can buy it early with research priority. That fits "a culture's scholars advancing".
 - It needs no prerequisite on a vanilla innovation key. v2 may ship its own innovations later, and a `has_innovation = innovation_x` prerequisite would then break silently.
@@ -173,14 +173,19 @@ eotg_innovation_self_repairing_machinery = {
 
 ### 4.3 What the hardware does (the package), and its pacing
 
-**Fiction (binding for the localizer; lore-keeper to confirm, §8).** The hardware notices its own wear and corrects it. It re-zeroes its tolerances, re-seats a contact that has worked loose, routes around a failed path, and logs the part it will need replaced. It is machinery: no swarm, no growth, no replication, no agency, no voice. It **does not fix the mind**. A self-repairing implant stays in tolerance; the person wearing it does not.
+**Fiction (binding for the localizer; lore review S1, S6).**
+- The hardware **measures its own wear** and corrects it (S6: never "notices" or "senses").
+- It re-zeroes its tolerances, re-seats a contact that has worked loose, routes around a failed path, and logs the part it will need replaced.
+- **It cannot make a part, and it does not order one. A worn part is still replaced by hand** (S1). It only puts off the day a part is needed.
+- It is machinery: no swarm, no growth, no replication, no agency, no voice. Say nothing about arcana either way (lore Q3).
+- It **does not fix the mind**. A self-repairing implant stays in tolerance; the person wearing it does not.
 
 **The package:**
 
 | # | Effect | Where | Tiers |
 |---|---|---|---|
 | 1 | **Calibration lasts longer.** Maintenance gives Calibrated Systems for **5 years** (was 3); Consult the Physician for **7** (was 5). Cooldowns unchanged (Maintenance 3 years, Consult 3 years). | the two decisions | Augmented, Enhanced, Overclocked |
-| 2 | **Slower wear at Overclocked.** **−3 a year** on accrual, through `eotg_aug_oc_wear_relief_value`. It shares one ceiling of **−5** with the vendor-safe firmware (−3) and the Implant Technician (−2 / −3). | Overclocked check; −3 in the non-ruler check | Overclocked |
+| 2 | **Slower wear at Overclocked.** **−3 a year** on accrual, through `eotg_aug_oc_wear_relief_value`. It **stacks fully** with the vendor-safe firmware (−3) and the Implant Technician (−2 / −3): **no cap** (human, 2026-10-04). Full stack: −9 a year. | Overclocked check; −3 in the non-ruler check | Overclocked |
 | 3 | **Nothing else.** The stress rows (+8 / +16 / +24), paranoid (+12), war (+10), vendor-bold (+3), the hidden-flaw row (+4), the Countdown, the cascade threshold (80), Neurofractured drift and the terminal are all untouched. | — | — |
 
 ```
@@ -189,16 +194,16 @@ eotg_aug_oc_wear_relief_value = {             # character scope (the ruler)
     if = { limit = { has_character_flag = eotg_flag_aug_vendor_safe }  subtract = 3 }
     # realm §3.2 technician rows, moved here verbatim (−3 at aptitude >= 4, else −2)
     if = { limit = { has_character_modifier = eotg_mod_aug_self_repair }  subtract = 3 }
-    min = -5
+    # no min: the rows stack fully (human, 2026-10-04)
 }
 ```
 - Script value as the `AMOUNT` operand: the mod's own `eotg_aug_nf_drift_value` (vanilla `common/scripted_effects/00_laamp_effects.txt:1247`).
-- `min` in a script value: vanilla `common/script_values/01_dynamic_values.txt` (every `*_gold_value`).
+- **Why one value, with no cap.** It keeps the three wear rows in one place for the observer run, and makes a cap a one-line change if the human later wants one (vanilla `min` in a script value: `common/script_values/01_dynamic_values.txt`, every `*_gold_value`). The realm spec's rows and values are unchanged; they only move here.
 
 **Rejected, with reasons:**
 - **Shortening the Maintenance cooldown.** It makes the ruler calibrate *more* often, the opposite of the brief. At Overclocked it would also turn Maintenance's one-off −8 (−12 with a technician) into a bigger lever.
 - **Removing the cooldown.** Unbounded −8s. That trivialises Overclocked.
-- **Uncapped stacking.** Before this spec, the realm spec already allows vendor-safe plus an excellent technician at −6. Adding −3 uncapped would let calm Overclocked accrual fall to 3 a year.
+- *(A shared −5 ceiling on the three wear rows was proposed and **not taken**: human decision 2026-10-04, no cap. Its consequence is stated in the pacing below.)*
 
 **Neurofractured is not trivialised. By construction:**
 - Maintenance and Consult are shown only with `eotg_cybernetics`, which the cascade removes (`eotg_trigger_neurofracture`). So package item 1 cannot reach a Neurofractured character.
@@ -215,15 +220,37 @@ eotg_aug_oc_wear_relief_value = {             # character scope (the ruler)
 | stress level 2 (+28) | 4 | 4 | none |
 | stress level 3 (+36) | 3 | 3 | none |
 
-With an excellent technician (realm: −3, Maintenance −12), self-repair adds only **−2** before the cap: calm accrual 9 → 7.
-- The realm spec's own best case (vendor-safe plus an excellent technician, −6) **drops to −5** under the shared cap.
-- So this spec **tightens** the calm, maintained ceiling the realm spec allowed. It does not loosen it.
+**The uncapped best case: full stack** (vendor-safe −3, excellent technician −3, self-repair −3 = **−9 a year**; Maintenance −12 with the technician, every 3 years):
+
+| Overclocked ruler | Realm spec's best case today (−6) | Full stack (−9) | Change |
+|---|---|---|---|
+| calm (+12 → net 3 a year) | 42 pulses | **never, while Maintenance is kept up**: +9 over three years against −12, so risk sits near 0. With no Maintenance at all: 27 pulses. | the cascade leaves the reign |
+| stress level 1 (+20 → 11) | 9 | 12 | +3 |
+| at war, calm (+22 → 13) | 8 | 9 | +1 |
+| stress level 2 (+28 → 19) | 5 | 6 | +1 |
+| stress level 3 (+36 → 27) | 4 | 4 | none |
+
+Self-repair with only one of the other two (−6) is exactly the realm spec's current best case: 42 calm pulses with the technician's Maintenance, 24 with plain Maintenance.
+
+**Stated plainly.** A fully equipped, calm, peaceful, non-paranoid Overclocked ruler who keeps Maintenance up **does not cascade, and does not reach the Countdown's threshold (50)**. Their Overclocked state is stable for as long as those conditions hold. It ends only through stress, war, paranoia, the hidden flaw (+4), vendor-bold, or events that move risk directly. This was already nearly true under the realm spec (42 pulses); self-repair makes it fully true. The cost of the full stack:
+- one Bidding War outcome (vendor-safe);
+- an excellent technician's salary;
+- about three years' income for the refit (§4.4);
+- Maintenance every 3 years;
+- staying calm.
+
+**What still holds:**
+- Neurofractured, its drift and the terminal outcome are unchanged.
+- Stressed and warring rulers still cascade within a reign.
+- The AI rarely assembles all three pieces.
+
+The observer run (below) measures how often it does.
 
 **Effect on the targets:**
 - **HQ1** (minimum 10 years initiation → Overclocked): untouched. The refit is not a tier change and moves no time floor.
-- **HQ2** (25–40% augmented, ≥ 15% Overclocked or beyond, at year 30): **untouched at its checkpoint**. Under option B, no AI culture fascinates the innovation before it joins the early medieval era (spread from 900), so no AI ruler is fitted at year 30 (896 AG). Later, the refit costs about three years' income (§4.4), so it is a minority purchase among count+ rulers whose culture has it. Expected effect: the Overclocked share rises slightly, and that rise is what HQ2's "≥ 15%" band wants. The cascade rate falls slightly among calm fitted rulers only.
+- **HQ2** (25–40% augmented, ≥ 15% Overclocked or beyond, at year 30): **untouched at its checkpoint**. Under option B, no AI culture fascinates the innovation before it joins the early medieval era (spread from 900), so no AI ruler is fitted at year 30 (896 AG). Later, the refit costs about three years' income (§4.4), so it is a minority purchase among count+ rulers whose culture has it. Expected effect: the Overclocked share rises slightly, and that rise is what HQ2's "≥ 15%" band wants. The cascade rate falls among calm fitted rulers, to zero for the calm fully equipped ones (above).
 - **"One terminal per 10 Neurofractured rulers per decade":** untouched (Neurofractured is not affected).
-- **Observer run (balance §9.2) gains two counters per decade:** (1) cultures with the innovation, and AI rulers fitted; (2) the Overclocked→cascade median for fitted and unfitted rulers. **Tuning knob:** the cap. If fitted calm rulers stop cascading in practice, lower it to −4. One number.
+- **Observer run (balance §9.2) gains two counters per decade:** (1) cultures with the innovation, and AI rulers fitted; (2) the Overclocked→cascade median for fitted and unfitted rulers. Add a third counter: AI Overclocked rulers holding all three wear rows, and how many of them cascaded. **Tuning knobs, if the human wants them later:** the self-repair row (−3 → −2), or a `min` on `eotg_aug_oc_wear_relief_value`. Each is one number.
 
 ### 4.4 The refit: decision and provider event
 
@@ -245,7 +272,7 @@ With an excellent technician (realm: −3, Maintenance −12), self-repair adds 
 
 **No back streets and no self-surgery.** The hardware comes from the scholars' workshops, and fitting it takes a team. No cheap copy exists yet. This also means the severe tail and death on the table **cannot** happen on this procedure: the clinic and physician columns weigh them 0 (procedures §4.2, DoD 5).
 
-#### proc.005 (working title *Built to Mend Itself*)
+#### proc.005 *Within Tolerance*
 - `character_event`, `events/eotg_augmentation_procedures.txt`, namespace `eotg_aug_proc`.
 - **Fired by:** `eotg_decision_aug_self_repair` only.
 - **Trigger** (world-state guard; no cooldown read): `eotg_aug_can_self_repair = yes`.
@@ -277,7 +304,7 @@ No trait-gated option. This is a purchase point like proc.001, and index §1 rul
 | Cascade to Neurofractured | **kept, inert** | §4.3: no reader at Neurofractured. |
 | Full exit (Remove Implants, Excision, Rejection, nr.006, retinue reversal) | **removed** | `eotg_aug_remove_all_effect` → `eotg_clean_all_aug_modifiers`. It came out with the rest. A later re-entry pays again. |
 | Total Integration | **removed** | `eotg_aug_total_integration_effect` → `eotg_clean_all_aug_modifiers`. Seamless has no risk to slow. |
-| **proc.004 *A Part Replaced*** | **unchanged** | Lore N1 stands as written: the Seamless repair is ordered parts and booked technicians, **even if the culture has the innovation**. No desc variant. |
+| **proc.004 *A Part Replaced*** | **unchanged** | Lore N1 (rationale restated by U3): self-repairing machinery makes no part, so the Seamless repair is ordered parts and booked technicians, **even if the culture has the innovation**. No desc variant. |
 
 **Not affected by the refit:** the syndicate's firmware throttle (reprisal), a tamper (`eotg_flag_aug_sabotaged`, interactions), the hidden flaw (`eotg_flag_aug_hidden_flaw`, thread T6), infections. Each is a fault that someone made or bought, not wear.
 
@@ -336,28 +363,51 @@ All under `D:/SteamLibrary/steamapps/common/Crusader Kings III/game/`.
 
 ## 7. Loc surface (eotg-localizer)
 
-Rules:
+**Binding renderings:** [cybernetics_v2_self_repair_lore.md](cybernetics_v2_self_repair_lore.md) (eotg-lore-keeper, 2026-10-04, approved with S1–S7). Where it gives a rendering, the localizer uses it, polishing only within the rules below. The briefs in the table are a fallback.
+
+**Names (fixed by the review):**
+- innovation: **"Self-Repairing Machinery"**;
+- decision: **"Commission Self-Repairing Hardware"**;
+- modifier: **"Self-Repairing Hardware"**;
+- proc.005: **"Within Tolerance"**.
+
+**General rules:**
 - index §5 items 1–8, plus the never-name list (index §5.3 and its extensions in the procedures, realm and reprisal lore files);
 - US spelling; bare `[x.GetName]`; appended lines start with `\n\n`;
 - **no number, and no "risk", "odds" or "chance"** in any tooltip or desc (the hidden rule). The engine's own modifier tooltip shows `health`; nothing else is quantified.
 
-**Never in this text:**
-- the Gnomish Technocracy, Gnomes as the inventors, the Mechanized Renaissance, the year 975, any named nation, school or authority;
-- "programme", "state", "decree", "subsidy", "issued";
-- self-**replicating**, nanite(s), swarm, colony, "grows", "learns", "wants", "decides";
-- any voice or speaker in the hardware;
-- the banned list of index §5.2.
+**The hardware's register.** With the hardware as subject, never:
+- **S1.** fabricate, print, build or make (a part), order, requisition, send for, copy, replicate. It never makes or orders a part.
+- **S6.** notices, senses, heals, feels, knows, alive, living, instinct, organic. It **measures** its wear.
+- **Q3.** grows, learns, wants, decides. The passive "How it goes is decided on the table" is allowed. Say nothing about arcana either way.
+- No swarm, nanite(s) or colony. No voice or speaker in the hardware.
 
-The advance belongs to **"our scholars"** or **"the culture's scholars"**, unnamed.
+**S2: the log.** Its record is read **at the panel, by hands**. Never "alert", "message", "notifies", "tells you", "reports to you", or an overlay readout.
 
-| Keys | Count | Brief |
+**S3: whose scholars.**
+- The innovation's `_desc` and `_custom` are descriptive with no possessive, so they read true before the research is done.
+- "Our scholars" appears only in decision and event text.
+- Never "the realm's", the court's or the ruler's scholars.
+- Never "programme", "state", "decree", "subsidy" or "issued".
+
+**S4: date-free.** Never:
+- the Gnomish Technocracy, Gnomes as the inventors, the year 975, any named nation, school or authority;
+- first, "the first to", "before anyone", "ahead of its time", "only we", secret;
+- "new age", "new era", renaissance, "golden age", "rogue scholars", "from across the galaxy";
+- Council of Innovation, Technarch, technomagic, Core Purity Doctrine.
+
+**S7: no promises.** Loc may say calibration holds longer and the hardware stays in tolerance. Never safer, protects, prevents, "slows the cascade", fracture, or "a longer life".
+
+Also: the banned list of index §5.2.
+
+| Keys | Count | Brief (fallback; the lore file's renderings bind) |
 |---|---|---|
-| `eotg_innovation_self_repairing_machinery`, `_desc` | 2 | Name: the canon term ("Self-Repairing Machinery") unless the lore-keeper rules otherwise. Desc: our scholars have built mechanisms that sense their own wear and correct it. Workshop register; no implant jargon beyond "hardware". |
-| `eotg_innovation_self_repairing_machinery_custom` | 1 | "Augmented characters of this culture can have [self-repairing hardware] fitted." Plain text; no concept link needed. |
-| `eotg_decision_aug_self_repair`, `_desc`, `_tooltip`, `_confirm`, `_selection_tt`, `_no_provider_tt` | 6 | Name, e.g. "Commission Self-Repairing Hardware". Desc: the price is ruinous; the hardware keeps itself in tolerance and needs calibrating less often. `_no_provider_tt`: no clinic will do this work here and you have no one at court who can. |
-| `eotg_mod_aug_self_repair`, `_desc` | 2 | Name, e.g. "Self-Repairing Hardware". Desc: it keeps itself in tolerance; you are another matter. |
-| `eotg_aug_proc.005.t`, `.desc`, `.desc_overclocked`, `.desc_surgeon`, `.a`, `.b`, `.c`, `.tt` | 8 | .a "The clinic." .b "My own physician." (the technician name variant reuses `eotg_aug_opt_technician`). .c "Not yet." .tt as proc.001.tt ("How it goes is decided on the table."). |
-| `eotg_aug_proc.002.desc_refit` | 1 | Opener: the new hardware has been in some weeks, and has already logged and corrected its first fault. |
+| `eotg_innovation_self_repairing_machinery`, `_desc` | 2 | "Self-Repairing Machinery". Desc: mechanisms that measure their own wear and correct it; they cannot make a part. No possessive (S3). |
+| `eotg_innovation_self_repairing_machinery_custom` | 1 | "Augmented characters of this culture can have self-repairing hardware fitted." |
+| `eotg_decision_aug_self_repair`, `_desc`, `_tooltip`, `_confirm`, `_selection_tt`, `_no_provider_tt` | 6 | "Commission Self-Repairing Hardware". Desc: our scholars' hardware keeps itself in tolerance; calibrating less often; the price is ruinous. |
+| `eotg_mod_aug_self_repair`, `_desc` | 2 | "Self-Repairing Hardware". Desc: it measures its own wear and holds its calibration longer; you are another matter. |
+| `eotg_aug_proc.005.t`, `.desc`, `.desc_overclocked`, `.desc_surgeon`, `.a`, `.b`, `.c`, `.tt` | 8 | .t "Within Tolerance". .a "The clinic." .b "My own physician." (the technician variant reuses `eotg_aug_opt_technician`). .c "Not yet." |
+| `eotg_aug_proc.002.desc_refit` | 1 | Its record, read at the panel, already shows the first fault it found and corrected (S2). |
 | **Total** | **20 new, 0 revised** | |
 
 No vanilla string needs a `replace/` override. The Maintenance and Consult tooltips are unchanged: the engine shows the modifier's new duration itself.
@@ -366,14 +416,25 @@ No vanilla string needs a `replace/` override. The Maintenance and Consult toolt
 
 ## 8. Lore constraints
 
-- **ERRATA, CYBERNETICS AT 866 (2026-10-04):** self-repairing machinery does not exist at 866; it is researchable, and only then can its hardware be fitted. This spec gates the hardware on the innovation. Nothing exists before it.
+**Lore review: done** (eotg-lore-keeper, 2026-10-04, [cybernetics_v2_self_repair_lore.md](cybernetics_v2_self_repair_lore.md)). Approved with must-fixes S1–S7, all folded in (§4.3, §7, §9, §10).
+
+- **ERRATA, CYBERNETICS AT 866 (2026-10-04; sub-bullet refined by the review):**
+  - Self-repairing machinery does not exist at 866. It is researchable by a culture's scholars, and only then can its hardware be fitted.
+  - A self-repairing unit adjusts, re-seats, reroutes and records. **It never makes a part.**
+  - This spec gates the hardware on the innovation. Nothing exists before it.
+- **S5: nothing has it at 866.1.1.**
+  - No `history/cultures` grant of the innovation.
+  - No bookmark or history character carries the modifier (DoD 2).
+  - Note for the cartographer at Gate 1: **CB-36**.
 - **Future tech not built:** remote kill (Blackstar, 1300), state programmes (New Cauldron, 1610), uploads, datavaults, secretariats (c. 1825). None is here. The innovation is not a programme (§1).
-- **Tech ceiling** (procedures lore (c)): no self-replicating repair. **Flag for the lore-keeper:** the source line for 975 reads "self-replicating machinery" (`docs/lore/Third era Nations.md:4241-4242`), while the ERRATA says "self-repairing". This spec follows the ERRATA (higher precedence) and bans "replicating" in loc. Confirm.
-- **Never name** the Gnomish Technocracy or the Mechanized Renaissance (brief), nor the index §5.3 implant players.
+- **Tech ceiling** (procedures lore (c)): no self-replicating repair. **Ruled (Q1):** "self-repairing" stands, and "replicating" is banned in loc.
+- **Procedures lore N1:** its rationale is restated by U3 in [cybernetics_v2_procedures_lore.md](cybernetics_v2_procedures_lore.md). proc.004 is ordered parts either way.
+- **Never name** the Gnomish Technocracy or the Mechanized Renaissance, nor the index §5.3 implant players (S4).
+- **Culture gate accepted (U1):** the scholars belong to a culture. There is no liege read.
 - **Voice register** (index §5.1–2): the hardware has no voice and gives the voice nothing new. A Neurofractured character's modifier desc must not suggest the hardware is fighting, helping or answering them.
-- **Seamless:** A Part Replaced (proc.004, lore N1) is separate and unchanged.
+- **Seamless:** A Part Replaced (proc.004) is separate and unchanged. The modifier is removed at Total Integration (U2).
 - **Multi-species:** "self", never "humanity" (index §5.5).
-- **Alternate timing.** Under option B a culture may reach the advance before 975. CK3 history diverges from the bookmark by design. **Lore-keeper to confirm** that an earlier date for another culture contradicts no canon fact.
+- **Alternate timing (Q4):** a culture reaching the advance before 975 is alternate history, not a contradiction, provided nothing has it at 866.1.1 (S5). The loc is date-free and culture-agnostic (S3, S4).
 - **Nikios Khanate:** not touched.
 
 ---
@@ -386,16 +447,22 @@ No vanilla string needs a `replace/` override. The Maintenance and Consult toolt
 2. **Gating:**
    - `grep -rn "eotg_innovation_self_repairing_machinery" common` finds only the innovation, `eotg_aug_can_self_repair`, and the decision's `unlock_decision` line;
    - `eotg_aug_can_self_repair` is the only `has_innovation` test;
+   - **S5:** `grep -rn "eotg_innovation_self_repairing_machinery\|eotg_mod_aug_self_repair" history common/bookmarks` returns nothing;
    - no culture, title, faith or province key anywhere in the change.
 3. **Cooldown authority:** the decision's `cooldown = { years = 1 }` is the only cooldown. proc.005's trigger reads no flag. `eotg_flag_maintenance_cooldown` is still 3 years.
 4. **Package bounds:**
    - `eotg_mod_aug_self_repair` is read only in `eotg_aug_oc_wear_relief_value`, the non-ruler Overclocked row, Maintenance, Consult, `eotg_aug_can_self_repair`, and the clean-up line;
    - no Neurofractured or Seamless event or on_action reads it;
-   - `eotg_aug_oc_wear_relief_value` has `min = -5`, and the Overclocked check has no separate vendor-safe or technician row left.
+   - `eotg_aug_oc_wear_relief_value` has **no** `min` (no cap, human 2026-10-04);
+   - the Overclocked check has no separate vendor-safe or technician row left;
+   - the technician values are the realm spec's, unchanged.
 5. **Severe tail:** proc.005 calls the roll only with `PROVIDER = clinic` or `physician`.
 6. **Coupling (QA audit 8):** proc.005 a/b call `eotg_aug_self_repair_fit_effect` (risk) and the roll.
 7. **Hidden rule:** no new tooltip or desc contains a number or "risk", "odds" or "chance". All risk moves are in `hidden_effect`.
-8. **Loc:** all §7 keys exist exactly once, with BOM and no `[scope:`. `grep -rniE "gnom|technocra|renaissance|975|replicat|nanite|swarm"` over the new keys is empty.
+8. **Loc:**
+   - all §7 keys exist exactly once, with BOM and no `[scope:`;
+   - **S4 grep:** `grep -rniE "gnom|technocra|technarch|renaissance|golden age|council of innovation|technomag|975|replicat|nanite|swarm|before anyone|ahead of its time|the first to"` over the new keys is empty;
+   - a reviewer reads the 20 keys against the S1, S2, S6 and S7 word lists in §7. Those lists have hardware-as-subject conditions, so they are not grep-clean.
 9. **Human, in game (temporary map, vanilla cultures):**
    - The culture window lists the innovation in the civic group, early medieval column, for any culture. Its tooltip shows the decision unlock and the custom line.
    - **Engine check:** from a tribal-era culture at the start, the player can choose it as the **fascination** (ahead of time), and it shows progress. Note the rate the UI shows, and the rate for an in-era innovation (T). If the ahead-of-time choice is not offered, report it: option B then behaves like C.
@@ -403,16 +470,22 @@ No vanilla string needs a `replace/` override. The Maintenance and Consult toolt
    - Clinic route: gold drops by the full price and the modifier appears. Reload until a bad outcome: proc.002 opens with `desc_refit`. Physician route: cheaper price. With a technician (after realm) the option reads "My implant technician."
    - Under a Ban (realm): the clinic option is greyed with its reason. With no physician or technician, the decision is invalid with `_no_provider_tt`.
    - Maintenance, with the modifier: Calibrated Systems for 5 years. Consult: 7.
-   - Overclocked, calm, fitted, no vendor flag: `var:eotg_fracture_risk` rises 9 a year (12 unfitted). With vendor-safe as well: 7.
+   - Overclocked, calm, fitted (`var:eotg_fracture_risk` before and after the yearly pulse):
+     - no vendor flag, no technician: rises 9 a year (12 unfitted);
+     - with vendor-safe as well: 6;
+     - with vendor-safe and an excellent technician: 3.
    - Remove Implants: the modifier is gone. Total Integration: the modifier is gone, and A Part Replaced still reads as before.
-10. **Observer run (balance §9.2):** the two counters in §4.3 are recorded.
+10. **Observer run (balance §9.2):** the three counters in §4.3 are recorded.
 
 ---
 
 ## 10. Deferred
 
-- **Option C's prerequisite and option A's era.** Not built; one line each if testing shows B too fast or too slow.
-- **Gate 1 coupling:** move the innovation one era up if the mod's 866 cultures start in the early medieval era, and re-point the era keys if v2 replaces the eras (§4.1 rule). **For the taskboard.**
+- **Option C's prerequisite and option A's era.** Not built (the human picked B, 2026-10-04); one line each if testing shows B too fast or too slow.
+- **A cap on stacked Overclocked relief.** Not built (human, 2026-10-04). If the observer run shows fully equipped AI rulers never cascading, a `min` on `eotg_aug_oc_wear_relief_value` is a one-line change (§4.3).
+- **Gate 1 coupling (taskboard CB-36):**
+  - Move the innovation one era up if the mod's 866 cultures start in the early medieval era, and re-point the era keys if v2 replaces the eras (§4.1 rule).
+  - **S5:** the cartographer's `history/cultures` must not grant the innovation, and no bookmark or history character may carry `eotg_mod_aug_self_repair` (DoD 2 grep).
 - **Buying from a foreign culture** (a patient whose culture lacks the innovation, buying from one that has it, at a premium). Cut: it needs a cross-culture provider scope, and the fiction of traders and imports needs a lore pass.
 - **Back-street copies** once the advance has spread. Cut: a cheap, unreliable copy is a good later beat, but it reopens the severe tail and needs its own weights.
 - **Offering the refit to others** (the interactions spec's Offer Augmentation) and **Borrow Their Technician** fitting it. The roll already takes `PATIENT`, so this is an option row later.
@@ -425,9 +498,9 @@ No vanilla string needs a `replace/` override. The Maintenance and Consult toolt
 
 ### HANDOFF
 - status: done
-- next: eotg-lore-keeper
-- ask: Review docs/specs/cybernetics_v2_self_repair.md against the ERRATA "CYBERNETICS AT 866", the procedures-lore tech ceiling and the never-name list. Rule on: (1) self-repairing vs the source's "self-replicating" (§8); (2) names for the innovation, decision, modifier and proc.005 (working title *Built to Mend Itself*); (3) the fiction register in §4.3 and the loc bans in §7; (4) whether a culture reaching the advance before 975 under option B contradicts canon. Then the human picks the gating option (B recommended) and the relief cap (−5), and the scripter builds it after procedures → interactions → realm → reprisal.
-- files: docs/specs/cybernetics_v2_self_repair.md
-- needs-loc (20, §7; after the lore review): eotg_innovation_self_repairing_machinery(+_desc, _custom); eotg_decision_aug_self_repair(+_desc, _tooltip, _confirm, _selection_tt, _no_provider_tt); eotg_mod_aug_self_repair(+_desc); eotg_aug_proc.005.t/.desc/.desc_overclocked/.desc_surgeon/.a/.b/.c/.tt; eotg_aug_proc.002.desc_refit
-- needs-lore: §8 items above (replicating vs repairing; names; register; pre-975 timing)
-- needs-human: (a) the gating option: A late era / **B mid era with the ahead-of-time cost (recommended)** / C mid era with an in-era prerequisite; (b) the shared wear-relief cap of −5, which lowers the unbuilt realm spec's −6 best case; (c) the price, massive_gold_value × 2; (d) the orchestrator adds `common/culture/innovations/` to the CLAUDE.md placement table, and puts the Gate 1 era coupling (§10) on circlebackTaskboard.md; (e) the in-game checks in §9 item 9, especially whether a future-era innovation can be chosen as the fascination
+- next: eotg-scripter (when the queue reaches it: after procedures → interactions → realm → reprisal)
+- ask: Build docs/specs/cybernetics_v2_self_repair.md §3–§5: option B gating; price massive_gold_value × 2; the wear-relief value with NO cap; the realm technician values unchanged. Run the three validators, then hand §7 to eotg-localizer, who uses docs/specs/cybernetics_v2_self_repair_lore.md renderings. Then eotg-qa runs §9.
+- files: docs/specs/cybernetics_v2_self_repair.md (S1–S7, names, human decisions folded in); docs/specs/cybernetics_v2_procedures_lore.md (N1 rationale restated, U3)
+- needs-loc (20, §7; binding renderings in docs/specs/cybernetics_v2_self_repair_lore.md): eotg_innovation_self_repairing_machinery (+_desc, _custom); eotg_decision_aug_self_repair (+_desc, _tooltip, _confirm, _selection_tt, _no_provider_tt); eotg_mod_aug_self_repair (+_desc); eotg_aug_proc.005.t/.desc/.desc_overclocked/.desc_surgeon/.a/.b/.c/.tt; eotg_aug_proc.002.desc_refit
+- needs-lore: none (review done; S1–S7 folded in)
+- needs-human: (a) acknowledge §4.3's stated consequence of no cap: a calm, fully equipped Overclocked ruler who keeps Maintenance up never cascades and never reaches the Countdown; (b) the orchestrator adds `common/culture/innovations/` to the CLAUDE.md placement table; (c) the §9 item 9 in-game checks, especially whether a later-era innovation can be chosen as the fascination

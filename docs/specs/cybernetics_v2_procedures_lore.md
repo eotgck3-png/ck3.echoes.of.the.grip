@@ -8,7 +8,7 @@
 No never-name violations, no remote-kill, no state programmes. The neutral clinic wording stands: under LAW AT 866, licensing is local and unnamed.
 
 ## Must-fix
-- **N1. proc.004 is over the 866 tech level.** Self-repairing machinery belongs to the Gnomish Mechanized Renaissance, 975 (`Third era Nations.md:4241-4242`).
+- **N1. proc.004 is over the 866 tech level.** Self-repairing machinery does not exist at 866; it is researchable, and once researched it still makes no part. proc.004 is ordered parts either way. *(Rationale restated 2026-10-04, self-repair lore review U3; see [cybernetics_v2_self_repair_lore.md](cybernetics_v2_self_repair_lore.md). Historical pointer: `Third era Nations.md:4241-4242`.)*
   - Keep the mechanic: no roll, no gold, no risk.
   - Change the fiction: the system orders the part and books the technicians itself, and the cost was already budgeted.
   - **Retitle it "A Part Replaced".**
