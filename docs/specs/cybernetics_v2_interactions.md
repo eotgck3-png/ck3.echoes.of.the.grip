@@ -203,7 +203,7 @@ send_option = { flag = eotg_aug_provider_backstreet  localization = eotg_aug_sen
 | `on_decline` | actor toast `eotg_aug_offer_declined_toast`. **No opinion penalty:** it was a gift. | |
 
 **`eotg_aug_offer_candidate`** (recipient scope):
-- `is_adult = yes`, `is_alive = yes`, `eotg_is_augmented_any = no`;
+- `is_adult = yes`, `is_alive = yes`, `eotg_is_augmented_any = no`. **Adults only: DECIDED by the human 2026-10-04**, on lore's recommendation, citing init.014's own line that the procedure is "never done on the very young". The trigger comment quotes that line. A sick child stays with the Sickly Child arc (init.014, Q8); there is no healthy-child Offer;
 - NOT `eotg_flag_suppress_progression`;
 - NOT `has_character_modifier = eotg_mod_aug_excision_recovery`;
 - `trigger_if = { limit = { is_landed = yes }  eotg_can_receive_augmented = yes }`. A landed recipient meets the ruler development gate, as every other ruler install does. That keeps HQ2's development gating.
@@ -576,7 +576,7 @@ Shape: `blind_interaction` (`00_prison_interactions.txt:8150-8344`).
 |---|---|
 | `category` / `icon` / `interface_priority` | `interaction_category_prison` / `blind` / 30 |
 | `desc` | `eotg_aug_salvage_interaction_desc` |
-| `is_shown` | `scope:actor = { is_adult = yes }`; `scope:recipient = { is_imprisoned_by = scope:actor  eotg_aug_tamper_target = yes }`. **Seamless is excluded** for now (option A, lore's recommendation). **Open human decision** (§8 ruling 2): A, exclude; or B, allow it with death on the table forced. Build A. B would be a later change to `is_shown` and `eotg_aug_salvage_effect`. |
+| `is_shown` | `scope:actor = { is_adult = yes }`; `scope:recipient = { is_imprisoned_by = scope:actor  eotg_aug_tamper_target = yes }`. **Seamless is excluded** (option A; **decided by the human 2026-10-04**, §8 ruling 2). `eotg_aug_tamper_target` already excludes Seamless, so no extra clause is needed. The trigger comment carries the lore reason (§8 ruling 1). |
 | `is_valid_showing_failures_only` | recipient NOT `is_being_tortured`, NOT `is_currently_being_purged` (vanilla `custom_description` keys `currently_being_tortured`, `is_currently_being_purged_tt`; :8175-8194) |
 | `is_highlighted` | actor sadistic, or rival of the recipient (:8196-8213, minus the cultural lines) |
 | send options | physician (needs access, `localization = eotg_aug_send_physician`) / rough (`flag = eotg_aug_provider_backstreet`, `localization = eotg_aug_send_rough`, `starts_enabled`) |
@@ -817,7 +817,7 @@ No vanilla string needs a `replace/` override. Vanilla keys reused as-is: `START
 - **Nikios Khanate:** not touched.
 - **Lore rulings (2026-10-04, [cybernetics_v2_interactions_lore.md](cybernetics_v2_interactions_lore.md)):**
   1. **Seamless exclusions from Demand Implant Removal, Tamper and Examine: upheld.** The reason, to be kept in the trigger comments: at 866 tech no surgeon can find where Seamless hardware ends and the body begins. There is no panel to open, nothing to take out, and nothing to examine apart from the body.
-  2. **Salvage of Seamless prisoners: open human decision.** Option A, exclude (lore's recommendation, and what this spec builds now). Option B, allow it with death on the table forced; lore does not recommend it.
+  2. **Salvage of Seamless prisoners: DECIDED, option A, exclude** (the human, 2026-10-04, accepting lore's recommendation). A Seamless prisoner never sees *Salvage Implants*, for the same reason as ruling 1: there is nothing to cut out apart from the body. Option B (allow it with death on the table forced) is rejected and is not a deferral.
   3. **Salvage tone at 866: approved.** The trade stays unnamed: the buyer is only "a dealer" or "someone who asks no questions". The prose is clinical, and the cruelty is the actor's choice. Register in §7 (I4).
   4. **Titles:** ratified, with *Demand Implant Removal*, *Salvage Implants*, *A Fault in the Hardware* and "Cut Out My Implants" (§7).
   5. **Throttle wording (shipped loc, outside this spec's build):** `eotg_mod_aug_patron_throttle_desc` takes the lore file's text ("The syndicate's technicians wrote a throttle into the firmware at installation, … The body feels the limit as stress and weakness."). The trigger is a local absence (the servicing stopped), never a remote signal. This is a localizer task. The index's thread T2 now says "the firmware throttle" (I7).
@@ -864,9 +864,10 @@ No vanilla string needs a `replace/` override. Vanilla keys reused as-is: `START
 
 ## 10. Deferred
 
+**Decided, no longer deferred (the human, 2026-10-04):** Offer Augmentation to healthy children is **not** built. Adults only (§4.1, `eotg_aug_offer_candidate`), citing init.014's "never done on the very young". Salvage of Seamless prisoners is option A, exclude (§8 ruling 2).
+
 | Item | Why |
 |---|---|
-| **Offer to children** | **Pending the human.** The Sickly Child arc (init.014, Q8) already covers a sick child under a tone ruling. A healthy-child augmentation is a new moral beat. **Lore recommends adults only**, citing init.014's own line that the procedure is "never done on the very young". Until the human rules, `is_adult = yes` stays in `eotg_aug_offer_candidate`. |
 | **Lend Your Surgeon** (gaps G4, optional) | It is the court-position problem (G10, the Implant Technician). Borrowing another court's physician needs a cross-court surgeon scope that G10 would define once. |
 | **Higher ransom for augmented prisoners** (gaps G8) | Vanilla computes ransom in its own script values. Changing it means overriding a vanilla file, which this project avoids (collisions are silent, and one-definition rules apply). Revisit if vanilla exposes a hook. |
 | **Refusal as a crime** (Demand Removal) | Belongs to G7's Augmentation Edict (ban), as vanilla gates refusal-crime on law. The hook: `on_decline` gains `reverse_add_opinion` with an `imprisonment_reason` opinion when the actor's realm holds the ban flag. |
@@ -883,9 +884,9 @@ No vanilla string needs a `replace/` override. Vanilla keys reused as-is: `START
 ### HANDOFF
 - status: done
 - next: eotg-scripter
-- ask: Build docs/specs/cybernetics_v2_interactions.md §3–§5 (including the §3.2 procedures amendments) after the procedures spec lands. The lore review is folded in (I1–I7). Salvage Implants builds option A (Seamless excluded) until the human decides. Then eotg-localizer: §7, with docs/specs/cybernetics_v2_interactions_lore.md §Renderings binding, the gendered-pronoun rule, the I3 text for eotg_aug_proc.outcome_repair_failed, and the rewrite of the shipped eotg_mod_aug_patron_throttle_desc (§8 ruling 5). Then eotg-qa (§9, with item 9's extended grep).
+- ask: Build docs/specs/cybernetics_v2_interactions.md §3–§5 (including the §3.2 procedures amendments) after the procedures spec lands. The lore review is folded in (I1–I7). Salvage Implants builds option A (Seamless excluded; decided 2026-10-04). Then eotg-localizer: §7, with docs/specs/cybernetics_v2_interactions_lore.md §Renderings binding, the gendered-pronoun rule, the I3 text for eotg_aug_proc.outcome_repair_failed, and the rewrite of the shipped eotg_mod_aug_patron_throttle_desc (§8 ruling 5). Then eotg-qa (§9, with item 9's extended grep).
 - files: docs/specs/cybernetics_v2_interactions.md; docs/specs/cybernetics_v2_interactions_lore.md (binding renderings); docs/specs/cybernetics_v2_procedures_lore.md (I3 line)
 - new events (6; below the ~10 flag): eotg_aug_int.001 The Physician's Report (eotg_aug_examine_interaction on_accept); eotg_aug_int.002 What Came Out (eotg_aug_salvage_interaction on_accept); eotg_aug_tamper.001 hidden result (eotg_aug_tamper_prep_effect → vanilla scheme_critical_moments.0002 → saved follow_up_event); eotg_aug_tamper.002 The Work Is Done and eotg_aug_tamper.003 Hands Withdrawn (both from tamper.001); eotg_aug_tamper.004 A Fault in the Hardware (tamper.002 a/b, on the target). Also 5 interactions, 1 scheme type (eotg_aug_tamper), 1 custom on_action (eotg_aug_tamper_ongoing).
 - needs-loc (~144, +2 conditional, §7): as listed in §7; the lore file's renderings are binding.
 - needs-lore: none open (I1–I7 folded in)
-- needs-human: Salvage of Seamless prisoners, option A (exclude, built) or B (forced death) (§8 ruling 2); offering augmentation to healthy children (§10; lore recommends adults only); the §9 item 12 in-game checks, including engine checks (a)–(c); the observer run's five new counters (§9 item 10); placeholder icons as art debt; the orchestrator adds common/character_interactions/ and common/schemes/scheme_types/ to the CLAUDE.md placement table, and the vanilla scheme-agent-name leak (§8 ruling 6) to the circleback board
+- needs-human: (decided 2026-10-04: Salvage of Seamless prisoners is option A, exclude, §8 ruling 2; Offer is adults only, §4.1 and §10) the §9 item 12 in-game checks, including engine checks (a)–(c); the observer run's five new counters (§9 item 10); placeholder icons as art debt; the orchestrator adds common/character_interactions/ and common/schemes/scheme_types/ to the CLAUDE.md placement table, and the vanilla scheme-agent-name leak (§8 ruling 6) to the circleback board

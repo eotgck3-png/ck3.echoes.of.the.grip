@@ -205,7 +205,7 @@ The `_absent` variants deliver the terms by sealed message or courier, and never
 1. **If** `eotg_aug_patron_envoy_present`: the envoy dies (`death_murder`, killer root). The effect never murders someone who is not there. c and e are gated on the same test, so the guard matters only for d's failure branch.
 2. **If** `eotg_is_augmented_any = yes`: `eotg_mod_aug_patron_throttle` for 5 years, risk +25, and `eotg_aug_try_start_countdown_effect` (which starts the Countdown only at tier 3 with none running). The throttle is a firmware restriction (CB-26 M6/W3), so it goes inside the augmented branch, with the risk. An owner who has left the system gets none of the three. This was the rulings §2 follow-up, now built.
 
-**What betrayal costs, by case.** This records the built behavior. The open question is in [new_beats](cybernetics_v2_new_beats.md) §10.
+**What betrayal costs, by case.** This records the built behavior. The open question in [new_beats](cybernetics_v2_new_beats.md) §10 is **resolved by [cybernetics_v2_reprisal.md](cybernetics_v2_reprisal.md)** (2026-10-04; .006 option f, and the collector, patron.009). Its §5.1 table supersedes this one once built.
 
 | Owner | Envoy | Betrayal routes | Cost of betraying |
 |---|---|---|---|
@@ -304,7 +304,7 @@ On the owner's full removal (`eotg_clean_all_aug_modifiers`), `eotg_mod_aug_iron
 
 ## 5. Deferred
 - Inherited patron debt (the story passing to the heir).
-- **Betrayal with no hardware or no envoy** (§2.4 .006, cost table): a non-deceitful owner has no betrayal route while the envoy is absent, and an owner with no implants faces little or no reprisal. This is one open question for the human, recorded in [new_beats](cybernetics_v2_new_beats.md) §10. Nothing is specced.
+- ~~**Betrayal with no hardware or no envoy**~~ **Specced 2026-10-04** in [cybernetics_v2_reprisal.md](cybernetics_v2_reprisal.md) (human-approved): .006 f and the collector (patron.009).
 - A visible story-cycle panel for the Patron / Retinue: it would need art, and the Countdown must stay invisible regardless.
 - Retinue knights as a men-at-arms-like unit.
 

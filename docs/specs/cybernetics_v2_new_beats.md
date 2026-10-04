@@ -359,6 +359,7 @@ No deviation from vanilla shape.
 ## 10. Deferred
 
 - **A third round.** The arc ends after round 2. Two climaxes per ruler is the cap. M11's reason (no loop) still holds past two.
+- **RESOLVED 2026-10-04: specced in [cybernetics_v2_reprisal.md](cybernetics_v2_reprisal.md)** (human-approved new content). All three cases below close there: .006 gains option f (defiance when the envoy is absent), and a betrayal by an owner with no implants keeps the story alive so that the next tick sends a collector (patron.009). The history of the question is kept below for reference.
 - **Syndicate retaliation against an owner with no hardware** (after .008 d → .006 betrayal). Today the only cost is the envoy's murder. A real reprisal (a vanilla hostile scheme by a created agent, or a claim on revenues) is new scope. It would also change `eotg_aug_patron_betray_effect`, which this spec was asked not to touch beyond need. For the human.
   - **Same open question, two more cases (from CB-27 M7, recorded 2026-10-04; not designed).** Both come from .006 firing before .007 (phase5 §2.3) with the envoy dead or gone, and both are in phase5 §2.4's cost table.
     - **Envoy absent: no betrayal route for a non-deceitful owner.** c and e need the envoy present, and d is deceitful-only. Such an owner can only sign (a) or buy out (b). This holds whether or not the owner has implants.
