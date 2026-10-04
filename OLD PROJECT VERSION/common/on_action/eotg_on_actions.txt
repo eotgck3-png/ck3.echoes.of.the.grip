@@ -1,0 +1,2535 @@
+﻿# ── eotg_on_actions.txt ───────────────────────────────────────────────────────
+# Event hooks for Echoes of the Grip.
+#
+# IMPORTANT: The `events` and `random_events` sub-blocks are additive.
+# The `effect = {}` key is NOT additive — it overwrites vanilla.
+# Always chain via `on_actions = { eotg_my_action }` instead of
+# adding effect = {} directly to a vanilla on_action.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Hook into vanilla yearly character pulse (fires once per year for count+ chars)
+on_yearly_playable = {
+    on_actions = {
+        eotg_on_yearly_void_check
+        eotg_on_yearly_corporate_faction_check
+        eotg_on_yearly_corp_board_influence_decay
+        eotg_on_yearly_cartel_paranoia_check
+        eotg_on_yearly_elven_isolationism_update
+        eotg_on_yearly_pmc_controversy_check
+        eotg_on_yearly_pmc_loss_of_command_check
+        eotg_on_yearly_pmc_legitimacy_check
+        eotg_on_yearly_nc_campaign_check
+        eotg_on_yearly_nc_election_check
+        eotg_on_yearly_nc_senate_check
+        eotg_on_yearly_fringe_check
+        eotg_on_yearly_fringe_flavor
+        eotg_on_yearly_gobcorp_flavor
+        eotg_on_yearly_corp_flavor
+        eotg_on_yearly_cartel_flavor
+        eotg_on_yearly_pmc_flavor
+        eotg_on_yearly_elven_flavor
+        eotg_on_yearly_nc_flavor
+        eotg_on_yearly_exodus_pulse
+        eotg_on_yearly_myr_pulse
+    }
+}
+
+# Hook into war declaration to offer contracts to eligible Contractor-Generals
+# and to feed the Myr Cluster Wars struggle
+on_war_started = {
+    on_actions = {
+        eotg_on_war_started_pmc_check
+        eotg_on_war_started_myr_catalyst
+    }
+}
+
+# Hook into raid start to check if a Fringe Overlord is raiding an ally
+on_raid_action_start = {
+    on_actions = { eotg_on_raid_fringe_ally_check }
+}
+
+# Hook into title gain to set/clear the corporate government flag
+on_title_gain = {
+    on_actions = {
+        eotg_on_title_gain_corporate_flag
+        eotg_on_title_gain_corp_board_influence
+        eotg_on_title_gain_fringe_init
+    }
+}
+
+# Hook into character death to fire Corporation election event chain and NC VP succession
+on_death = {
+    on_actions = {
+        eotg_on_death_ceo_election
+        eotg_on_death_elven_monarch
+        eotg_on_death_nc_president
+        eotg_on_death_fringe_overlord
+        eotg_on_death_myr_catalyst
+    }
+}
+
+# ── Custom on_actions ─────────────────────────────────────────────────────────
+
+# Yearly Void corruption check.
+# Chains to the sub-hooks in eotg_void_on_actions.txt. Order is load-bearing:
+# accrual must run before any stage gate reads exposure in the same year.
+eotg_on_yearly_void_check = {
+    on_actions = {
+        eotg_on_yearly_void_accrual
+        eotg_on_yearly_void_contact
+        eotg_on_yearly_void_whispers
+        eotg_on_yearly_void_touched
+        eotg_on_yearly_void_hollowed
+    }
+}
+
+# Yearly check to start the market faction story cycle on newly-powerful
+# corporate vassals who don't have it yet
+eotg_on_yearly_corporate_faction_check = {
+    effect = {
+        if = {
+            limit = {
+                is_powerful_vassal = yes
+                NOT = { has_character_flag = eotg_market_faction_active }
+                liege = { government_has_flag = eotg_government_is_corporate }
+            }
+            create_story = eotg_market_faction_cycle
+        }
+    }
+}
+
+# Yearly decay of Corporation board influence for CEO characters
+eotg_on_yearly_corp_board_influence_decay = {
+    effect = {
+        if = {
+            limit = { eotg_st_is_ceo = yes }
+            eotg_se_corp_decay_board_influence = yes
+        }
+    }
+}
+
+# On title gain: set/clear the corporate government flag used by story cycle
+eotg_on_title_gain_corporate_flag = {
+    effect = {
+        if = {
+            limit = {
+                government_has_flag = eotg_government_is_corporate
+                highest_held_title_tier = tier_empire
+            }
+            add_character_flag = eotg_flag_corporate_government
+        }
+        else_if = {
+            limit = {
+                NOT = { government_has_flag = eotg_government_is_corporate }
+                has_character_flag = eotg_flag_corporate_government
+            }
+            remove_character_flag = eotg_flag_corporate_government
+        }
+    }
+}
+
+# On title gain: initialize board influence when a CEO takes power
+eotg_on_title_gain_corp_board_influence = {
+    effect = {
+        if = {
+            limit = {
+                eotg_st_is_ceo = yes
+                NOT = { has_variable = eotg_board_influence }
+            }
+            eotg_se_corp_init_board_influence = yes
+        }
+    }
+}
+
+# Monthly scheme pulse for Sabotage Rival — placeholder for future periodic events
+eotg_sabotage_rival_ongoing = {
+    effect = {
+        # Reserved for periodic mid-scheme narrative events
+    }
+}
+
+# Yearly update of elven isolationism tier modifier based on current title tier
+eotg_on_yearly_elven_isolationism_update = {
+    effect = {
+        if = {
+            limit = { eotg_st_is_elven_monarch = yes }
+            eotg_se_elven_update_isolationism = yes
+        }
+    }
+}
+
+# On death: fire Eternal Court confirmation on the new Elven Monarchy ruler.
+# on_death fires BEFORE succession — primary_heir is the incoming ruler, not primary_title.holder.
+eotg_on_death_elven_monarch = {
+    effect = {
+        if = {
+            limit = {
+                eotg_st_is_elven_monarch = yes
+                exists = primary_heir
+            }
+            primary_heir = {
+                if = {
+                    limit = { eotg_st_is_elven_monarch = yes }
+                    trigger_event = { id = eotg_elven_court.0001  days = 7 }
+                }
+            }
+        }
+    }
+}
+
+# Yearly controversy backlash check — fires eotg_pmc_contract.0004 for active CGs
+eotg_on_yearly_pmc_controversy_check = {
+    effect = {
+        if = {
+            limit = {
+                eotg_st_is_contractor_general = yes
+                OR = {
+                    has_character_modifier = eotg_pmc_controversy_minor
+                    has_character_modifier = eotg_pmc_controversy_standard
+                    has_character_modifier = eotg_pmc_controversy_exclusive
+                }
+            }
+            trigger_event = { id = eotg_pmc_contract.0004  days = 3 }
+        }
+    }
+}
+
+# Yearly check — if CG Loss of Command flag has expired naturally, fire consequence event
+eotg_on_yearly_pmc_loss_of_command_check = {
+    effect = {
+        if = {
+            limit = {
+                eotg_st_is_contractor_general = yes
+                eotg_sv_pmc_withdrawal_count >= eotg_sv_pmc_withdrawal_threshold
+                NOT = { has_character_flag = eotg_pmc_loss_of_command_flag }
+            }
+            # Flag expired without buyback — consequence
+            trigger_event = { id = eotg_pmc_command.0003  days = 5 }
+        }
+    }
+}
+
+# Yearly ally intervention check — chance for allied vassal to fire 0002
+eotg_on_yearly_pmc_ally_check = {
+    effect = {
+        if = {
+            limit = {
+                eotg_st_pmc_loss_of_command_active = yes
+                any_vassal = {
+                    is_powerful_vassal = yes
+                    NOT = { has_character_flag = eotg_pmc_withdrew_forces }
+                    opinion = { target = root  value >= 30 }
+                }
+            }
+            random = {
+                chance = 30
+                trigger_event = { id = eotg_pmc_command.0002  days = 5 }
+            }
+        }
+    }
+}
+
+# Yearly check: apply or clear Grand Underlord paranoia based on current dread
+eotg_on_yearly_cartel_paranoia_check = {
+    effect = {
+        if = {
+            limit = { eotg_st_is_grand_underlord = yes }
+            eotg_se_cartel_yearly_paranoia_check = yes
+        }
+    }
+}
+
+# On character death: fire the Corporation election chain if CEO died
+eotg_on_death_ceo_election = {
+    effect = {
+        if = {
+            limit = { eotg_st_is_ceo = yes }
+            eotg_se_corp_trigger_election = yes
+        }
+    }
+}
+
+# On war started: check if any Contractor-General can receive a contract offer
+eotg_on_war_started_pmc_check = {
+    effect = {
+        scope:attacker = { save_scope_as = eotg_pmc_war_client }
+        every_independent_ruler = {
+            limit = {
+                eotg_st_pmc_contract_available = yes
+                NOT = { this = scope:eotg_pmc_war_client }
+                opinion = { target = scope:eotg_pmc_war_client  value >= 20 }
+            }
+            set_variable = { name = eotg_pmc_contract_client  value = scope:eotg_pmc_war_client }
+            trigger_event = { id = eotg_pmc_contract.0001  days = 5 }
+        }
+    }
+}
+
+# Yearly check — if President's pre-election flag has expired, start campaign phase.
+eotg_on_yearly_nc_campaign_check = {
+    effect = {
+        if = {
+            limit = {
+                eotg_st_is_president = yes
+                has_character_flag = eotg_nc_term_active
+                NOT = { has_character_flag = eotg_nc_pre_election }
+                NOT = { has_character_flag = eotg_nc_campaign_phase }
+            }
+            eotg_se_nc_start_campaign = yes
+        }
+    }
+}
+
+# Yearly check — if President's term has expired, resolve the election.
+eotg_on_yearly_nc_election_check = {
+    effect = {
+        if = {
+            limit = {
+                eotg_st_is_president = yes
+                NOT = { has_character_flag = eotg_nc_term_active }
+                has_character_flag = eotg_nc_campaign_phase
+            }
+            trigger_event = { id = eotg_nc_election.0002  days = 5 }
+        }
+    }
+}
+
+# Yearly check — fire Senate dissatisfaction event if senate support is low.
+eotg_on_yearly_nc_senate_check = {
+    effect = {
+        if = {
+            limit = {
+                eotg_st_nc_senate_hostile = yes
+                NOT = { has_character_flag = eotg_nc_senate_hostile_notified }
+            }
+            add_character_flag = { flag = eotg_nc_senate_hostile_notified  years = 3 }
+            trigger_event = { id = eotg_nc_senate.0001  days = 7 }
+        }
+    }
+}
+
+# On death: fire NC VP succession event if President dies with a VP available.
+# on_death fires BEFORE succession. The VP is still the dying president's vassal at this point,
+# so random_vassal correctly finds them. The event fires at days = 1 so it lands before
+# the normal succession heir can consolidate — the VP event handles the title transfer.
+eotg_on_death_nc_president = {
+    effect = {
+        if = {
+            limit = {
+                eotg_st_is_president = yes
+                any_vassal = { has_character_flag = eotg_nc_vice_president }
+            }
+            random_vassal = {
+                limit = { has_character_flag = eotg_nc_vice_president }
+                trigger_event = { id = eotg_nc_election.0005  days = 1 }
+            }
+        }
+    }
+}
+
+# Yearly Fringe maintenance — update Grip and all decay modifiers for Fringe Overlords.
+eotg_on_yearly_fringe_check = {
+    effect = {
+        if = {
+            limit = { eotg_st_is_fringe_overlord = yes }
+            eotg_se_fringe_yearly_maintenance = yes
+        }
+    }
+}
+
+# On title gain — initialize Grip for a new Fringe ruler who doesn't have it yet.
+eotg_on_title_gain_fringe_init = {
+    effect = {
+        if = {
+            limit = {
+                eotg_st_is_fringe_overlord = yes
+                NOT = { has_variable = eotg_fringe_grip }
+            }
+            eotg_se_fringe_init_grip = yes
+        }
+    }
+}
+
+# On death — apply succession chaos to the new Fringe Overlord.
+# The deceased character is in scope; check their primary title's new holder.
+# On death: apply succession chaos to the incoming Fringe Overlord.
+# on_death fires BEFORE succession — use primary_heir to reach the new ruler.
+# primary_heir is the character who will inherit the primary title after death.
+eotg_on_death_fringe_overlord = {
+    effect = {
+        if = {
+            limit = {
+                eotg_st_is_fringe_overlord = yes
+                exists = primary_heir
+            }
+            primary_heir = {
+                if = {
+                    limit = { eotg_st_is_fringe_overlord = yes }
+                    eotg_se_fringe_succession_chaos = yes
+                    trigger_event = { id = eotg_fringe.0005  days = 7 }
+                    if = {
+                        limit = { realm_size >= 30 }
+                        trigger_event = { id = eotg_fringe.0006  days = 14 }
+                    }
+                    # Heir challenge fires if an ambitious captain exists
+                    random = {
+                        chance = 50
+                        trigger_event = { id = eotg_fringe.0018  days = 21 }
+                    }
+                }
+            }
+        }
+    }
+}
+
+# Yearly flavor event rotation for Fringe Overlords.
+# Uses if/limit/random blocks so multiple events can fire in the same year,
+# each gated by its own cooldown flag to prevent spam.
+eotg_on_yearly_fringe_flavor = {
+    effect = {
+        # ── Section A — any Fringe ruler, at any tier ─────────────────────
+        # Re-gated 2026-08-29: these events name no top role and depend on no
+        # vassals, so a county- or duchy-tier holder can receive them as written.
+        if = {
+            limit = { eotg_st_is_fringe_ruler = yes }
+
+            # The Ghost Fleet — only after a mutiny was faced down (eotg_fringe.0004) (35%, 6yr)
+            if = {
+                limit = {
+                    has_character_flag = eotg_fringe_mutiny_failed
+                    NOT = { has_character_flag = eotg_fringe_0029_recent }
+                }
+                random = {
+                    chance = 35
+                    add_character_flag = { flag = eotg_fringe_0029_recent  years = 6 }
+                    trigger_event = { id = eotg_fringe.0029  days = 7 }
+                }
+            }
+
+            # Refugees Join the Fringe — fires while at peace, any tier (25%, 2yr cooldown)
+            if = {
+                limit = {
+                    NOT = { is_at_war = yes }
+                    NOT = { has_character_flag = eotg_fringe_0023_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_fringe_0023_recent  years = 2 }
+                    trigger_event = { id = eotg_fringe.0023  days = 5 }
+                }
+            }
+
+            # Songs of the Fringe — prestigious Fringe ruler, any tier (15%, 4yr cooldown)
+            if = {
+                limit = {
+                    prestige >= 1000
+                    NOT = { has_character_flag = eotg_fringe_0028_recent }
+                }
+                random = {
+                    chance = 15
+                    add_character_flag = { flag = eotg_fringe_0028_recent  years = 4 }
+                    trigger_event = { id = eotg_fringe.0028  days = 7 }
+                }
+            }
+            # Crew Demands Their Due — gold >= 100 (30%, 4yr cooldown)
+            if = {
+                limit = {
+                    gold >= 100
+                    any_vassal = { is_alive = yes }
+                    NOT = { has_character_flag = eotg_fringe_0031_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_fringe_0031_recent  years = 4 }
+                    trigger_event = { id = eotg_fringe.0031  days = 5 }
+                }
+            }
+        }
+
+        # ── Section B — top-tier holder only ────────────────────────────────────
+        if = {
+            limit = { eotg_st_is_fringe_overlord = yes }
+
+            # ── Wired 2026-08-28: previously-unreachable fringe events ───────
+            # Each gate is matched to the state the event's text describes.
+
+            # The Captains Demand Their Share — spoils owed after a war (45%, 2yr)
+            if = {
+                limit = {
+                    has_character_flag = eotg_fringe_was_at_war
+                    is_at_war = no
+                    gold >= 100
+                    any_vassal = { eotg_st_is_fringe_captain = yes }
+                    NOT = { has_character_flag = eotg_fringe_captain_paid }
+                    NOT = { has_character_flag = eotg_fringe_0001_recent }
+                }
+                random = {
+                    chance = 45
+                    add_character_flag = { flag = eotg_fringe_0001_recent  years = 2 }
+                    trigger_event = { id = eotg_fringe.0001  days = 5 }
+                }
+            }
+
+            # A Captain Refuses Orders — public insubordination (35%, 3yr)
+            if = {
+                limit = {
+                    any_vassal = {
+                        eotg_st_is_fringe_captain = yes
+                        opinion = { target = root  value < 0 }
+                    }
+                    NOT = { eotg_st_fringe_grip_high = yes }
+                    NOT = { has_character_flag = eotg_fringe_0002_recent }
+                }
+                random = {
+                    chance = 35
+                    add_character_flag = { flag = eotg_fringe_0002_recent  years = 3 }
+                    trigger_event = { id = eotg_fringe.0002  days = 5 }
+                }
+            }
+
+            # Mutiny in the Void — authority has all but collapsed (50%, 5yr)
+            if = {
+                limit = {
+                    eotg_st_fringe_grip_critical = yes
+                    any_vassal = { eotg_st_is_fringe_captain = yes }
+                    NOT = { has_character_flag = eotg_fringe_0004_recent }
+                }
+                random = {
+                    chance = 50
+                    add_character_flag = { flag = eotg_fringe_0004_recent  years = 5 }
+                    trigger_event = { id = eotg_fringe.0004  days = 3 }
+                }
+            }
+
+            # Loot Riots — campaign ended with the treasury empty (40%, 3yr)
+            if = {
+                limit = {
+                    has_character_flag = eotg_fringe_was_at_war
+                    is_at_war = no
+                    gold < 50
+                    NOT = { has_character_flag = eotg_fringe_0008_recent }
+                }
+                random = {
+                    chance = 40
+                    add_character_flag = { flag = eotg_fringe_0008_recent  years = 3 }
+                    trigger_event = { id = eotg_fringe.0008  days = 5 }
+                }
+            }
+
+            # The Captains Grow Restless — idle warbands (35%, 3yr)
+            if = {
+                limit = {
+                    is_at_war = no
+                    has_variable = eotg_fringe_peace_years
+                    var:eotg_fringe_peace_years >= 4
+                    NOT = { has_character_flag = eotg_fringe_0009_recent }
+                }
+                random = {
+                    chance = 35
+                    add_character_flag = { flag = eotg_fringe_0009_recent  years = 3 }
+                    trigger_event = { id = eotg_fringe.0009  days = 5 }
+                }
+            }
+
+            # The Captains Smell Weakness — a challenger speaks openly (40%, 3yr)
+            if = {
+                limit = {
+                    eotg_st_fringe_grip_low = yes
+                    any_vassal = { eotg_st_is_fringe_captain = yes }
+                    NOT = { has_character_flag = eotg_fringe_0015_recent }
+                }
+                random = {
+                    chance = 40
+                    add_character_flag = { flag = eotg_fringe_0015_recent  years = 3 }
+                    trigger_event = { id = eotg_fringe.0015  days = 5 }
+                }
+            }
+
+            # Supply Lines Collapse — overextended mid-campaign (40%, 3yr)
+            if = {
+                limit = {
+                    is_at_war = yes
+                    eotg_st_fringe_overextended = yes
+                    NOT = { has_character_flag = eotg_fringe_0020_recent }
+                }
+                random = {
+                    chance = 40
+                    add_character_flag = { flag = eotg_fringe_0020_recent  years = 3 }
+                    trigger_event = { id = eotg_fringe.0020  days = 5 }
+                }
+            }
+
+            # The Great Plunder — the raid came back heavy (30%, 4yr)
+            if = {
+                limit = {
+                    eotg_st_fringe_grip_high = yes
+                    gold >= 200
+                    any_vassal = { eotg_st_is_fringe_captain = yes }
+                    NOT = { has_character_flag = eotg_fringe_0021_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_fringe_0021_recent  years = 4 }
+                    trigger_event = { id = eotg_fringe.0021  days = 5 }
+                }
+            }
+
+            # Raid Gone Wrong — fleet home empty-handed and short of hulls (30%, 4yr)
+            if = {
+                limit = {
+                    eotg_st_fringe_grip_low = yes
+                    gold < 150
+                    any_vassal = { eotg_st_is_fringe_captain = yes }
+                    NOT = { has_character_flag = eotg_fringe_0022_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_fringe_0022_recent  years = 4 }
+                    trigger_event = { id = eotg_fringe.0022  days = 5 }
+                }
+            }
+
+            # The Old Ways Die Hard — traditionalists resist reform (40%, 5yr)
+            if = {
+                limit = {
+                    eotg_st_fringe_reform_ready = yes
+                    any_vassal = {
+                        eotg_st_is_fringe_captain = yes
+                        opinion = { target = root  value < 0 }
+                    }
+                    NOT = { has_character_flag = eotg_fringe_0026_recent }
+                }
+                random = {
+                    chance = 40
+                    add_character_flag = { flag = eotg_fringe_0026_recent  years = 5 }
+                    trigger_event = { id = eotg_fringe.0026  days = 7 }
+                }
+            }
+
+            # The Grip Weakens — fires when Grip is low (50% chance, 2yr cooldown)
+            if = {
+                limit = {
+                    eotg_st_fringe_grip_low = yes
+                    realm_size >= 8
+                    NOT = { has_character_flag = eotg_fringe_0014_recent }
+                }
+                random = {
+                    chance = 50
+                    add_character_flag = { flag = eotg_fringe_0014_recent  years = 2 }
+                    trigger_event = { id = eotg_fringe.0014  days = 3 }
+                }
+            }
+
+            # The Fringe Hungers — fires after 3+ peace years (40% chance, 2yr cooldown)
+            if = {
+                limit = {
+                    has_variable = eotg_fringe_peace_years
+                    var:eotg_fringe_peace_years >= 3
+                    NOT = { has_character_flag = eotg_fringe_0016_recent }
+                }
+                random = {
+                    chance = 40
+                    add_character_flag = { flag = eotg_fringe_0016_recent  years = 2 }
+                    trigger_event = { id = eotg_fringe.0016  days = 5 }
+                }
+            }
+
+            # Raiders Desert the Cause — 5+ peace years + broke (35%, 2yr cooldown)
+            if = {
+                limit = {
+                    has_variable = eotg_fringe_peace_years
+                    var:eotg_fringe_peace_years >= 5
+                    gold < 100
+                    NOT = { has_character_flag = eotg_fringe_0017_recent }
+                }
+                random = {
+                    chance = 35
+                    add_character_flag = { flag = eotg_fringe_0017_recent  years = 2 }
+                    trigger_event = { id = eotg_fringe.0017  days = 7 }
+                }
+            }
+
+            # The Realm Fractures — large realm + low Grip (30%, 3yr cooldown)
+            if = {
+                limit = {
+                    realm_size >= 20
+                    eotg_st_fringe_grip_low = yes
+                    NOT = { has_character_flag = eotg_fringe_0019_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_fringe_0019_recent  years = 3 }
+                    trigger_event = { id = eotg_fringe.0019  days = 5 }
+                }
+            }
+
+            # The Raiders Grow Fat — 3+ peace years + wealthy + sized realm (20%, 3yr cooldown)
+            if = {
+                limit = {
+                    has_variable = eotg_fringe_peace_years
+                    var:eotg_fringe_peace_years >= 3
+                    gold > 200
+                    realm_size >= 8
+                    NOT = { has_character_flag = eotg_fringe_0024_recent }
+                }
+                random = {
+                    chance = 20
+                    add_character_flag = { flag = eotg_fringe_0024_recent  years = 3 }
+                    trigger_event = { id = eotg_fringe.0024  days = 5 }
+                }
+            }
+
+            # Discipline Over Chaos — high martial (15%, 4yr cooldown)
+            if = {
+                limit = {
+                    martial >= 14
+                    realm_size >= 8
+                    NOT = { has_character_flag = eotg_fringe_0025_recent }
+                }
+                random = {
+                    chance = 15
+                    add_character_flag = { flag = eotg_fringe_0025_recent  years = 4 }
+                    trigger_event = { id = eotg_fringe.0025  days = 5 }
+                }
+            }
+
+            # A Warlord of Legend Emerges — rare (10%, 5yr cooldown)
+            if = {
+                limit = {
+                    any_vassal = {
+                        eotg_st_is_fringe_captain = yes
+                        prowess >= 16
+                    }
+                    NOT = { has_character_flag = eotg_fringe_0027_recent }
+                }
+                random = {
+                    chance = 10
+                    add_character_flag = { flag = eotg_fringe_0027_recent  years = 5 }
+                    trigger_event = { id = eotg_fringe.0027  days = 5 }
+                }
+            }
+            # Captain Demands Equipment — any captain vassal present (35%, 4yr cooldown)
+            if = {
+                limit = {
+                    any_vassal = { eotg_st_is_fringe_captain = yes }
+                    NOT = { has_character_flag = eotg_fringe_0030_recent }
+                }
+                random = {
+                    chance = 35
+                    add_character_flag = { flag = eotg_fringe_0030_recent  years = 4 }
+                    trigger_event = { id = eotg_fringe.0030  days = 7 }
+                }
+            }
+            # Captain Challenges Overlord — captain with prowess >= 12 (20%, 5yr cooldown)
+            if = {
+                limit = {
+                    any_vassal = {
+                        eotg_st_is_fringe_captain = yes
+                        prowess >= 12
+                    }
+                    NOT = { has_character_flag = eotg_fringe_0032_recent }
+                }
+                random = {
+                    chance = 20
+                    add_character_flag = { flag = eotg_fringe_0032_recent  years = 5 }
+                    trigger_event = { id = eotg_fringe.0032  days = 5 }
+                }
+            }
+
+# ── Government Flavor on_actions (Phase 1 expanded events) ───────────────────
+
+        }
+    }
+}
+eotg_on_yearly_gobcorp_flavor = {
+    effect = {
+        # ── Section A — any Gob-Ogre ruler, at any tier ─────────────────────
+        # Re-gated 2026-08-29: these events name no top role and depend on no
+        # vassals, so a county- or duchy-tier holder can receive them as written.
+        if = {
+            limit = { eotg_st_is_gobcorp_ruler = yes }
+            if = {
+                limit = {
+                    realm_size >= 10
+                    NOT = { has_character_flag = eotg_gobcorp_0018_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_gobcorp_0018_recent  years = 5 }
+                    trigger_event = { id = eotg_gobcorp_flavor.0018  days = 5 }
+                }
+            }
+        }
+
+        # ── Section B — top-tier holder only ────────────────────────────────────
+        if = {
+            limit = { eotg_st_is_director_general = yes }
+            if = {
+                limit = {
+                    any_vassal = { is_powerful_vassal = yes  has_trait = greedy }
+                    NOT = { has_character_flag = eotg_gobcorp_0002_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_gobcorp_0002_recent  years = 4 }
+                    trigger_event = { id = eotg_gobcorp_flavor.0002  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    vassal_count >= 3
+                    NOT = { has_character_flag = eotg_gobcorp_0003_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_gobcorp_0003_recent  years = 4 }
+                    trigger_event = { id = eotg_gobcorp_flavor.0003  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    any_vassal = { is_powerful_vassal = yes }
+                    NOT = { has_character_flag = eotg_gobcorp_0004_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_gobcorp_0004_recent  years = 4 }
+                    trigger_event = { id = eotg_gobcorp_flavor.0004  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    vassal_count >= 2
+                    NOT = { has_character_flag = eotg_gobcorp_0005_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_gobcorp_0005_recent  years = 4 }
+                    trigger_event = { id = eotg_gobcorp_flavor.0005  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    any_vassal = { gold > 200 }
+                    NOT = { has_character_flag = eotg_gobcorp_0006_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_gobcorp_0006_recent  years = 4 }
+                    trigger_event = { id = eotg_gobcorp_flavor.0006  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    NOT = { has_character_flag = eotg_gobcorp_0010_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_gobcorp_0010_recent  years = 4 }
+                    trigger_event = { id = eotg_gobcorp_flavor.0010  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    eotg_st_gobcorp_dg_vulnerable = yes
+                    vassal_count >= 3
+                    NOT = { has_character_flag = eotg_gobcorp_0011_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_gobcorp_0011_recent  years = 4 }
+                    trigger_event = { id = eotg_gobcorp_flavor.0011  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    intrigue >= 10
+                    NOT = { has_character_flag = eotg_gobcorp_0012_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_gobcorp_0012_recent  years = 4 }
+                    trigger_event = { id = eotg_gobcorp_flavor.0012  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    vassal_count >= 2
+                    NOT = { has_character_flag = eotg_gobcorp_0013_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_gobcorp_0013_recent  years = 4 }
+                    trigger_event = { id = eotg_gobcorp_flavor.0013  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    any_child = { is_alive = yes  stewardship >= 10 }
+                    NOT = { has_character_flag = eotg_gobcorp_0015_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_gobcorp_0015_recent  years = 4 }
+                    trigger_event = { id = eotg_gobcorp_flavor.0015  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    eotg_st_gobcorp_dg_vulnerable = yes
+                    NOT = { has_character_flag = eotg_gobcorp_0007_recent }
+                }
+                random = {
+                    chance = 50
+                    add_character_flag = { flag = eotg_gobcorp_0007_recent  years = 3 }
+                    trigger_event = { id = eotg_gobcorp_flavor.0007  days = 3 }
+                }
+            }
+            if = {
+                limit = {
+                    any_vassal = { is_powerful_vassal = yes }
+                    NOT = { has_character_flag = eotg_gobcorp_0001_recent }
+                }
+                random = {
+                    chance = 35
+                    add_character_flag = { flag = eotg_gobcorp_0001_recent  years = 4 }
+                    trigger_event = { id = eotg_gobcorp_flavor.0001  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    stewardship < 10
+                    NOT = { has_character_flag = eotg_gobcorp_0008_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_gobcorp_0008_recent  years = 4 }
+                    trigger_event = { id = eotg_gobcorp_flavor.0008  days = 7 }
+                }
+            }
+            if = {
+                limit = {
+                    NOT = { has_character_flag = eotg_gobcorp_0009_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_gobcorp_0009_recent  years = 3 }
+                    trigger_event = { id = eotg_gobcorp_flavor.0009  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    gold > 100
+                    NOT = { has_character_flag = eotg_gobcorp_0014_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_gobcorp_0014_recent  years = 3 }
+                    trigger_event = { id = eotg_gobcorp_flavor.0014  days = 7 }
+                }
+            }
+            if = {
+                limit = {
+                    age >= 50
+                    NOT = { has_character_flag = eotg_gobcorp_0016_recent }
+                }
+                random = {
+                    chance = 20
+                    add_character_flag = { flag = eotg_gobcorp_0016_recent  years = 5 }
+                    trigger_event = { id = eotg_gobcorp_flavor.0016  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    any_vassal = { is_powerful_vassal = yes }
+                    NOT = { has_character_flag = eotg_gobcorp_0017_recent }
+                }
+                random = {
+                    chance = 35
+                    add_character_flag = { flag = eotg_gobcorp_0017_recent  years = 4 }
+                    trigger_event = { id = eotg_gobcorp_flavor.0017  days = 7 }
+                }
+            }
+            if = {
+                limit = {
+                    OR = {
+                        prestige < 300
+                        stewardship < 8
+                    }
+                    NOT = { has_character_flag = eotg_gobcorp_0019_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_gobcorp_0019_recent  years = 5 }
+                    trigger_event = { id = eotg_gobcorp_flavor.0019  days = 5 }
+                }
+            }
+
+        }
+    }
+}
+eotg_on_yearly_corp_flavor = {
+    effect = {
+        # ── Section A — any Corporation ruler, at any tier ─────────────────────
+        # Re-gated 2026-08-29: these events name no top role and depend on no
+        # vassals, so a county- or duchy-tier holder can receive them as written.
+        if = {
+            limit = { eotg_st_is_corporation_ruler = yes }
+            if = {
+                limit = {
+                    NOT = { has_character_flag = eotg_corp_0003_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_corp_0003_recent  years = 4 }
+                    trigger_event = { id = eotg_corp_flavor.0003  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    gold > 100
+                    NOT = { has_character_flag = eotg_corp_0007_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_corp_0007_recent  years = 4 }
+                    trigger_event = { id = eotg_corp_flavor.0007  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    gold > 80
+                    NOT = { has_character_flag = eotg_corp_0012_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_corp_0012_recent  years = 4 }
+                    trigger_event = { id = eotg_corp_flavor.0012  days = 5 }
+                }
+            }
+        }
+
+        # ── Section B — top-tier holder only ────────────────────────────────────
+        if = {
+            limit = { eotg_st_is_ceo = yes }
+            if = {
+                limit = {
+                    intrigue >= 8
+                    NOT = { has_character_flag = eotg_corp_0002_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_corp_0002_recent  years = 4 }
+                    trigger_event = { id = eotg_corp_flavor.0002  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    any_vassal = { is_powerful_vassal = yes  diplomacy >= 12 }
+                    NOT = { has_character_flag = eotg_corp_0005_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_corp_0005_recent  years = 4 }
+                    trigger_event = { id = eotg_corp_flavor.0005  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    prestige < 200
+                    NOT = { has_character_flag = eotg_corp_0006_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_corp_0006_recent  years = 4 }
+                    trigger_event = { id = eotg_corp_flavor.0006  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    gold > 150
+                    NOT = { has_character_flag = eotg_corp_0008_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_corp_0008_recent  years = 4 }
+                    trigger_event = { id = eotg_corp_flavor.0008  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    vassal_count >= 2
+                    NOT = { has_character_flag = eotg_corp_0009_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_corp_0009_recent  years = 4 }
+                    trigger_event = { id = eotg_corp_flavor.0009  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    NOT = { has_character_flag = eotg_corp_0010_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_corp_0010_recent  years = 4 }
+                    trigger_event = { id = eotg_corp_flavor.0010  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    any_vassal = { intrigue >= 12 }
+                    NOT = { has_character_flag = eotg_corp_0013_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_corp_0013_recent  years = 4 }
+                    trigger_event = { id = eotg_corp_flavor.0013  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    prestige < 150
+                    NOT = { has_character_flag = eotg_corp_0011_recent }
+                }
+                random = {
+                    chance = 45
+                    add_character_flag = { flag = eotg_corp_0011_recent  years = 3 }
+                    trigger_event = { id = eotg_corp_flavor.0011  days = 3 }
+                }
+            }
+            if = {
+                limit = {
+                    intrigue >= 10
+                    vassal_count >= 2
+                    NOT = { has_character_flag = eotg_corp_0001_recent }
+                }
+                random = {
+                    chance = 35
+                    add_character_flag = { flag = eotg_corp_0001_recent  years = 3 }
+                    trigger_event = { id = eotg_corp_flavor.0001  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    vassal_count >= 2
+                    NOT = { has_character_flag = eotg_corp_0004_recent }
+                }
+                random = {
+                    chance = 35
+                    add_character_flag = { flag = eotg_corp_0004_recent  years = 3 }
+                    trigger_event = { id = eotg_corp_flavor.0004  days = 7 }
+                }
+            }
+            if = {
+                limit = {
+                    gold < 50
+                    NOT = { has_character_flag = eotg_corp_0015_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_corp_0015_recent  years = 3 }
+                    trigger_event = { id = eotg_corp_flavor.0015  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    age >= 50
+                    NOT = { has_character_flag = eotg_corp_0014_recent }
+                }
+                random = {
+                    chance = 20
+                    add_character_flag = { flag = eotg_corp_0014_recent  years = 5 }
+                    trigger_event = { id = eotg_corp_flavor.0014  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    vassal_count >= 2
+                    NOT = { has_character_flag = eotg_corp_0016_recent }
+                }
+                random = {
+                    chance = 35
+                    add_character_flag = { flag = eotg_corp_0016_recent  years = 4 }
+                    trigger_event = { id = eotg_corp_flavor.0016  days = 7 }
+                }
+            }
+            if = {
+                limit = {
+                    vassal_count >= 3
+                    NOT = { has_character_flag = eotg_corp_0017_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_corp_0017_recent  years = 5 }
+                    trigger_event = { id = eotg_corp_flavor.0017  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    OR = {
+                        prestige < 200
+                        stewardship < 8
+                    }
+                    NOT = { has_character_flag = eotg_corp_0018_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_corp_0018_recent  years = 5 }
+                    trigger_event = { id = eotg_corp_flavor.0018  days = 5 }
+                }
+            }
+
+        }
+    }
+}
+eotg_on_yearly_cartel_flavor = {
+    effect = {
+        # ── Section A — any Cartel ruler, at any tier ─────────────────────
+        # Re-gated 2026-08-29: these events name no top role and depend on no
+        # vassals, so a county- or duchy-tier holder can receive them as written.
+        if = {
+            limit = { eotg_st_is_cartel_ruler = yes }
+            if = {
+                limit = {
+                    has_character_modifier = eotg_cartel_smuggling_network
+                    NOT = { has_character_flag = eotg_cartel_0005_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_cartel_0005_recent  years = 4 }
+                    trigger_event = { id = eotg_cartel_flavor.0005  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    NOT = { has_character_flag = eotg_cartel_0009_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_cartel_0009_recent  years = 4 }
+                    trigger_event = { id = eotg_cartel_flavor.0009  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    has_character_modifier = eotg_cartel_smuggling_network
+                    NOT = { has_character_flag = eotg_cartel_0011_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_cartel_0011_recent  years = 4 }
+                    trigger_event = { id = eotg_cartel_flavor.0011  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    NOT = { has_character_flag = eotg_cartel_0010_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_cartel_0010_recent  years = 3 }
+                    trigger_event = { id = eotg_cartel_flavor.0010  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    dread >= 40
+                    NOT = { has_character_flag = eotg_cartel_0012_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_cartel_0012_recent  years = 3 }
+                    trigger_event = { id = eotg_cartel_flavor.0012  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    vassal_count >= 2
+                    NOT = { has_character_flag = eotg_cartel_0018_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_cartel_0018_recent  years = 5 }
+                    trigger_event = { id = eotg_cartel_flavor.0018  days = 5 }
+                }
+            }
+        }
+
+        # ── Section B — top-tier holder only ────────────────────────────────────
+        if = {
+            limit = { eotg_st_is_grand_underlord = yes }
+            if = {
+                limit = {
+                    any_vassal = { eotg_st_is_boss = yes  opinion = { target = root  value < -10 } }
+                    NOT = { has_character_flag = eotg_cartel_0003_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_cartel_0003_recent  years = 4 }
+                    trigger_event = { id = eotg_cartel_flavor.0003  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    has_character_modifier = eotg_cartel_smuggling_network
+                    NOT = { has_character_flag = eotg_cartel_0006_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_cartel_0006_recent  years = 4 }
+                    trigger_event = { id = eotg_cartel_flavor.0006  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    vassal_count >= 2
+                    NOT = { has_character_flag = eotg_cartel_0007_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_cartel_0007_recent  years = 4 }
+                    trigger_event = { id = eotg_cartel_flavor.0007  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    any_vassal = { eotg_st_is_boss = yes  martial >= 12 }
+                    NOT = { has_character_flag = eotg_cartel_0008_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_cartel_0008_recent  years = 4 }
+                    trigger_event = { id = eotg_cartel_flavor.0008  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    dread >= 40
+                    NOT = { has_character_flag = eotg_cartel_0013_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_cartel_0013_recent  years = 4 }
+                    trigger_event = { id = eotg_cartel_flavor.0013  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    age >= 50
+                    NOT = { has_character_flag = eotg_cartel_0014_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_cartel_0014_recent  years = 4 }
+                    trigger_event = { id = eotg_cartel_flavor.0014  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    gold > 100
+                    has_character_modifier = eotg_cartel_smuggling_network
+                    NOT = { has_character_flag = eotg_cartel_0016_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_cartel_0016_recent  years = 4 }
+                    trigger_event = { id = eotg_cartel_flavor.0016  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    dread >= 30
+                    NOT = { has_character_flag = eotg_cartel_0001_recent }
+                }
+                random = {
+                    chance = 40
+                    add_character_flag = { flag = eotg_cartel_0001_recent  years = 3 }
+                    trigger_event = { id = eotg_cartel_flavor.0001  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    dread >= 60
+                    NOT = { has_character_flag = eotg_cartel_0002_recent }
+                }
+                random = {
+                    chance = 35
+                    add_character_flag = { flag = eotg_cartel_0002_recent  years = 3 }
+                    trigger_event = { id = eotg_cartel_flavor.0002  days = 7 }
+                }
+            }
+            if = {
+                limit = {
+                    NOT = { has_character_flag = eotg_cartel_0004_recent }
+                }
+                random = {
+                    chance = 35
+                    add_character_flag = { flag = eotg_cartel_0004_recent  years = 3 }
+                    trigger_event = { id = eotg_cartel_flavor.0004  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    years_as_ruler >= 15
+                    NOT = { has_character_flag = eotg_cartel_0015_recent }
+                }
+                random = {
+                    chance = 20
+                    add_character_flag = { flag = eotg_cartel_0015_recent  years = 5 }
+                    trigger_event = { id = eotg_cartel_flavor.0015  days = 7 }
+                }
+            }
+            if = {
+                limit = {
+                    any_vassal = { is_alive = yes }
+                    NOT = { has_character_flag = eotg_cartel_0017_recent }
+                }
+                random = {
+                    chance = 35
+                    add_character_flag = { flag = eotg_cartel_0017_recent  years = 4 }
+                    trigger_event = { id = eotg_cartel_flavor.0017  days = 7 }
+                }
+            }
+            if = {
+                limit = {
+                    OR = {
+                        prestige < 400
+                        dread < 30
+                    }
+                    NOT = { has_character_flag = eotg_cartel_0019_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_cartel_0019_recent  years = 5 }
+                    trigger_event = { id = eotg_cartel_flavor.0019  days = 5 }
+                }
+            }
+            # Collective defiance — two or more Bosses refusing at once.
+            # Counted live off the defiance modifiers; replaces retired tax.0004.
+            if = {
+                limit = {
+                    any_vassal = {
+                        count >= 2
+                        has_character_modifier = eotg_cartel_defiant_boss
+                    }
+                    NOT = { has_character_modifier = eotg_cartel_shakedown_standoff }
+                    NOT = { has_character_flag = eotg_cartel_tax_0005_recent }
+                }
+                random = {
+                    chance = 50
+                    add_character_flag = { flag = eotg_cartel_tax_0005_recent  years = 3 }
+                    trigger_event = { id = eotg_cartel_tax.0005  days = 5 }
+                }
+            }
+
+        }
+    }
+}
+eotg_on_yearly_pmc_flavor = {
+    effect = {
+        # ── Section A — any PMC ruler, at any tier ─────────────────────
+        # Re-gated 2026-08-29: these events name no top role and depend on no
+        # vassals, so a county- or duchy-tier holder can receive them as written.
+        if = {
+            limit = { eotg_st_is_pmc_ruler = yes }
+            if = {
+                limit = {
+                    has_character_modifier = eotg_pmc_active_contract
+                    NOT = { has_character_flag = eotg_pmc_0002_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_pmc_0002_recent  years = 4 }
+                    trigger_event = { id = eotg_pmc_flavor.0002  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    has_character_modifier = eotg_pmc_active_contract
+                    NOT = { has_character_flag = eotg_pmc_0003_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_pmc_0003_recent  years = 4 }
+                    trigger_event = { id = eotg_pmc_flavor.0003  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    martial >= 12
+                    NOT = { has_character_flag = eotg_pmc_0006_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_pmc_0006_recent  years = 4 }
+                    trigger_event = { id = eotg_pmc_flavor.0006  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    has_character_modifier = eotg_pmc_active_contract
+                    NOT = { has_character_flag = eotg_pmc_0009_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_pmc_0009_recent  years = 4 }
+                    trigger_event = { id = eotg_pmc_flavor.0009  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    is_at_war = yes
+                    NOT = { has_character_flag = eotg_pmc_0010_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_pmc_0010_recent  years = 4 }
+                    trigger_event = { id = eotg_pmc_flavor.0010  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    has_character_modifier = eotg_pmc_operator_discontent
+                    NOT = { has_character_flag = eotg_pmc_0007_recent }
+                }
+                random = {
+                    chance = 35
+                    add_character_flag = { flag = eotg_pmc_0007_recent  years = 3 }
+                    trigger_event = { id = eotg_pmc_flavor.0007  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    is_at_war = no
+                    NOT = { has_character_modifier = eotg_pmc_active_contract }
+                    gold < 50
+                    NOT = { has_character_flag = eotg_pmc_0014_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_pmc_0014_recent  years = 3 }
+                    trigger_event = { id = eotg_pmc_flavor.0014  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    vassal_count >= 2
+                    NOT = { has_character_flag = eotg_pmc_0016_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_pmc_0016_recent  years = 5 }
+                    trigger_event = { id = eotg_pmc_flavor.0016  days = 5 }
+                }
+            }
+
+            # ── Legitimacy Events ─────────────────────────────────────────────
+
+            # The Record Speaks for Itself — prestigious, controversy-free, at peace
+            if = {
+                limit = {
+                    NOT = { is_at_war = yes }
+                    prestige >= 400
+                    NOT = { has_character_modifier = eotg_pmc_controversy_standard }
+                    NOT = { has_character_modifier = eotg_pmc_controversy_exclusive }
+                    NOT = { has_character_flag = eotg_pmc_0018_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_pmc_0018_recent  years = 5 }
+                    trigger_event = { id = eotg_pmc_flavor.0018  days = 5 }
+                }
+            }
+
+            # War Crimes Tribunal — active controversy modifier required
+            if = {
+                limit = {
+                    OR = {
+                        has_character_modifier = eotg_pmc_controversy_standard
+                        has_character_modifier = eotg_pmc_controversy_exclusive
+                    }
+                    NOT = { has_character_flag = eotg_pmc_0019_recent }
+                }
+                random = {
+                    chance = 40
+                    add_character_flag = { flag = eotg_pmc_0019_recent  years = 4 }
+                    trigger_event = { id = eotg_pmc_flavor.0019  days = 3 }
+                }
+            }
+
+            # A Rival Command Rises — any other PMC exists
+            if = {
+                limit = {
+                    any_independent_ruler = {
+                        NOT = { this = root }
+                        eotg_st_is_contractor_general = yes
+                    }
+                    NOT = { has_character_flag = eotg_pmc_0020_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_pmc_0020_recent  years = 4 }
+                    trigger_event = { id = eotg_pmc_flavor.0020  days = 7 }
+                }
+            }
+
+            # The Old Client's Endorsement — proven legitimacy active, decent prestige
+            if = {
+                limit = {
+                    has_character_modifier = eotg_pmc_proven_legitimacy
+                    prestige >= 200
+                    NOT = { has_character_flag = eotg_pmc_0021_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_pmc_0021_recent  years = 5 }
+                    trigger_event = { id = eotg_pmc_flavor.0021  days = 5 }
+                }
+            }
+
+            # A Dirty Contract — at peace, no active contract
+            if = {
+                limit = {
+                    NOT = { is_at_war = yes }
+                    NOT = { has_character_modifier = eotg_pmc_active_contract }
+                    NOT = { has_character_flag = eotg_pmc_0022_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_pmc_0022_recent  years = 4 }
+                    trigger_event = { id = eotg_pmc_flavor.0022  days = 7 }
+                }
+            }
+
+            # The Industry Symposium — prestigious, not questioned
+            if = {
+                limit = {
+                    prestige >= 500
+                    NOT = { has_character_modifier = eotg_pmc_legitimacy_questioned }
+                    NOT = { has_character_flag = eotg_pmc_0023_recent }
+                }
+                random = {
+                    chance = 20
+                    add_character_flag = { flag = eotg_pmc_0023_recent  years = 5 }
+                    trigger_event = { id = eotg_pmc_flavor.0023  days = 7 }
+                }
+            }
+        }
+
+        # ── Section B — top-tier holder only ────────────────────────────────────
+        if = {
+            limit = { eotg_st_is_contractor_general = yes }
+            if = {
+                limit = {
+                    martial < 10
+                    NOT = { has_character_flag = eotg_pmc_0005_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_pmc_0005_recent  years = 4 }
+                    trigger_event = { id = eotg_pmc_flavor.0005  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    is_at_war = yes
+                    NOT = { has_character_flag = eotg_pmc_0008_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_pmc_0008_recent  years = 4 }
+                    trigger_event = { id = eotg_pmc_flavor.0008  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    any_vassal = { eotg_st_is_executive_commander = yes  martial >= 14 }
+                    NOT = { has_character_flag = eotg_pmc_0011_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_pmc_0011_recent  years = 4 }
+                    trigger_event = { id = eotg_pmc_flavor.0011  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    martial < 10
+                    any_vassal = { eotg_st_is_executive_commander = yes  martial >= 14 }
+                    NOT = { has_character_flag = eotg_pmc_0012_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_pmc_0012_recent  years = 4 }
+                    trigger_event = { id = eotg_pmc_flavor.0012  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    is_at_war = no
+                    NOT = { has_character_modifier = eotg_pmc_active_contract }
+                    NOT = { has_character_flag = eotg_pmc_0001_recent }
+                }
+                random = {
+                    chance = 40
+                    add_character_flag = { flag = eotg_pmc_0001_recent  years = 3 }
+                    trigger_event = { id = eotg_pmc_flavor.0001  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    gold < 60
+                    NOT = { has_character_flag = eotg_pmc_0004_recent }
+                }
+                random = {
+                    chance = 40
+                    add_character_flag = { flag = eotg_pmc_0004_recent  years = 3 }
+                    trigger_event = { id = eotg_pmc_flavor.0004  days = 7 }
+                }
+            }
+            if = {
+                limit = {
+                    has_character_modifier = eotg_pmc_active_contract
+                    NOT = { has_character_flag = eotg_pmc_0013_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_pmc_0013_recent  years = 4 }
+                    trigger_event = { id = eotg_pmc_flavor.0013  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    any_vassal = { is_alive = yes }
+                    NOT = { has_character_flag = eotg_pmc_0015_recent }
+                }
+                random = {
+                    chance = 35
+                    add_character_flag = { flag = eotg_pmc_0015_recent  years = 4 }
+                    trigger_event = { id = eotg_pmc_flavor.0015  days = 7 }
+                }
+            }
+            if = {
+                limit = {
+                    is_at_war = no
+                    OR = {
+                        prestige < 200
+                        martial < 10
+                    }
+                    NOT = { has_character_flag = eotg_pmc_0017_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_pmc_0017_recent  years = 5 }
+                    trigger_event = { id = eotg_pmc_flavor.0017  days = 5 }
+                }
+            }
+
+        }
+    }
+}
+eotg_on_yearly_elven_flavor = {
+    effect = {
+        if = {
+            limit = { eotg_st_is_starborn_sovereign = yes }
+
+            # ── The Edict of Displacement (eotg_expulsion.0001) ──────────────
+            # Wired 2026-08-28. The whole 6-event cultural-displacement chain
+            # hung off this one call and was unreachable without it; the file's
+            # own header always specified a yearly elven on_action as its home.
+            #
+            # The limit is deliberately thin. eotg_expulsion.0001 already carries
+            # a full trigger (elven heritage + a non-elven sub-realm county + a
+            # neighbour to receive the displaced), so re-stating those conditions
+            # here would only duplicate them. No cooldown flag is set on this
+            # side either: the event sets its own 20-year
+            # eotg_expulsion_edict_issued flag in immediate, and setting it here
+            # would make the event's own trigger cancel the event.
+            if = {
+                limit = {
+                    NOT = { has_character_flag = eotg_expulsion_edict_issued }
+                }
+                random = {
+                    chance = 30
+                    trigger_event = { id = eotg_expulsion.0001  days = 7 }
+                }
+            }
+            if = {
+                limit = {
+                    any_child = { is_alive = yes  age >= 16 }
+                    any_vassal = { eotg_st_is_celestial_lord = yes  diplomacy >= 12 }
+                    NOT = { has_character_flag = eotg_elven_0002_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_elven_0002_recent  years = 4 }
+                    trigger_event = { id = eotg_elven_flavor.0002  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    vassal_count >= 4
+                    NOT = { has_character_flag = eotg_elven_0003_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_elven_0003_recent  years = 4 }
+                    trigger_event = { id = eotg_elven_flavor.0003  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    any_vassal = { eotg_st_is_non_elven = yes }
+                    NOT = { has_character_flag = eotg_elven_0006_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_elven_0006_recent  years = 4 }
+                    trigger_event = { id = eotg_elven_flavor.0006  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    any_vassal = { eotg_st_is_non_elven = yes  stewardship >= 14 }
+                    NOT = { has_character_flag = eotg_elven_0008_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_elven_0008_recent  years = 4 }
+                    trigger_event = { id = eotg_elven_flavor.0008  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    any_vassal = { eotg_st_is_non_elven = yes }
+                    NOT = { has_character_modifier = eotg_elven_subject_unrest }
+                    NOT = { has_character_flag = eotg_elven_0009_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_elven_0009_recent  years = 4 }
+                    trigger_event = { id = eotg_elven_flavor.0009  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    has_character_modifier = eotg_elven_court_contested
+                    NOT = { has_character_flag = eotg_elven_0011_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_elven_0011_recent  years = 4 }
+                    trigger_event = { id = eotg_elven_flavor.0011  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    has_character_modifier = eotg_elven_succession_crisis
+                    NOT = { has_character_flag = eotg_elven_0012_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_elven_0012_recent  years = 4 }
+                    trigger_event = { id = eotg_elven_flavor.0012  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    vassal_count >= 3
+                    NOT = { has_character_flag = eotg_elven_0013_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_elven_0013_recent  years = 4 }
+                    trigger_event = { id = eotg_elven_flavor.0013  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    NOT = { has_character_flag = eotg_elven_0015_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_elven_0015_recent  years = 4 }
+                    trigger_event = { id = eotg_elven_flavor.0015  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    vassal_count >= 3
+                    NOT = { has_character_flag = eotg_elven_0001_recent }
+                }
+                random = {
+                    chance = 40
+                    add_character_flag = { flag = eotg_elven_0001_recent  years = 4 }
+                    trigger_event = { id = eotg_elven_flavor.0001  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    any_vassal = { eotg_st_is_non_elven = yes }
+                    NOT = { has_character_flag = eotg_elven_0005_recent }
+                }
+                random = {
+                    chance = 35
+                    add_character_flag = { flag = eotg_elven_0005_recent  years = 4 }
+                    trigger_event = { id = eotg_elven_flavor.0005  days = 7 }
+                }
+            }
+            if = {
+                limit = {
+                    has_character_modifier = eotg_elven_subject_unrest
+                    NOT = { has_character_flag = eotg_elven_0007_recent }
+                }
+                random = {
+                    chance = 45
+                    add_character_flag = { flag = eotg_elven_0007_recent  years = 3 }
+                    trigger_event = { id = eotg_elven_flavor.0007  days = 3 }
+                }
+            }
+            if = {
+                limit = {
+                    NOT = { has_character_flag = eotg_elven_0004_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_elven_0004_recent  years = 3 }
+                    trigger_event = { id = eotg_elven_flavor.0004  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    has_character_modifier = eotg_elven_isolationist_posture
+                    NOT = { has_character_flag = eotg_elven_0014_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_elven_0014_recent  years = 4 }
+                    trigger_event = { id = eotg_elven_flavor.0014  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    eotg_st_elven_court_pending = yes
+                    NOT = { has_character_flag = eotg_elven_0010_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_elven_0010_recent  years = 5 }
+                    trigger_event = { id = eotg_elven_flavor.0010  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    vassal_count >= 2
+                    NOT = { has_character_flag = eotg_elven_0016_recent }
+                }
+                random = {
+                    chance = 35
+                    add_character_flag = { flag = eotg_elven_0016_recent  years = 4 }
+                    trigger_event = { id = eotg_elven_flavor.0016  days = 7 }
+                }
+            }
+            if = {
+                limit = {
+                    any_vassal = { has_dynasty = yes }
+                    NOT = { has_character_flag = eotg_elven_0017_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_elven_0017_recent  years = 5 }
+                    trigger_event = { id = eotg_elven_flavor.0017  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    OR = {
+                        prestige < 300
+                        legitimacy < 30
+                    }
+                    NOT = { has_character_flag = eotg_elven_0018_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_elven_0018_recent  years = 5 }
+                    trigger_event = { id = eotg_elven_flavor.0018  days = 5 }
+                }
+            }
+            # Confirmation aftermath — the Eternal Court's long tail.
+            # Replaces retired court.0002/.0003, gated on the modifier the
+            # confirmation in court.0001 left behind.
+            if = {
+                limit = {
+                    has_character_modifier = eotg_elven_court_confirmed
+                    NOT = { has_character_flag = eotg_elven_court_0005_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_elven_court_0005_recent  years = 6 }
+                    trigger_event = { id = eotg_elven_court.0005  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    has_character_modifier = eotg_elven_court_contested
+                    NOT = { has_character_flag = eotg_elven_court_0006_recent }
+                }
+                random = {
+                    chance = 40
+                    add_character_flag = { flag = eotg_elven_court_0006_recent  years = 4 }
+                    trigger_event = { id = eotg_elven_court.0006  days = 5 }
+                }
+            }
+        }
+    }
+}
+
+eotg_on_yearly_nc_flavor = {
+    effect = {
+        if = {
+            limit = { eotg_st_is_president = yes }
+            if = {
+                limit = {
+                    any_vassal = { eotg_st_is_nc_senator = yes  opinion = { target = root  value < 10 } }
+                    NOT = { has_character_flag = eotg_nc_0002_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_nc_0002_recent  years = 4 }
+                    trigger_event = { id = eotg_nc_flavor.0002  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    vassal_count >= 4
+                    NOT = { has_character_flag = eotg_nc_0003_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_nc_0003_recent  years = 4 }
+                    trigger_event = { id = eotg_nc_flavor.0003  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    has_character_modifier = eotg_nc_campaign_season
+                    NOT = { has_character_flag = eotg_nc_0006_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_nc_0006_recent  years = 4 }
+                    trigger_event = { id = eotg_nc_flavor.0006  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    has_character_modifier = eotg_nc_campaign_season
+                    NOT = { has_character_flag = eotg_nc_0007_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_nc_0007_recent  years = 4 }
+                    trigger_event = { id = eotg_nc_flavor.0007  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    gold > 80
+                    eotg_st_nc_senate_hostile = yes
+                    NOT = { has_character_flag = eotg_nc_0008_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_nc_0008_recent  years = 4 }
+                    trigger_event = { id = eotg_nc_flavor.0008  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    has_character_modifier = eotg_nc_senate_corruption
+                    has_character_modifier = eotg_nc_public_discontent
+                    NOT = { has_character_flag = eotg_nc_0010_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_nc_0010_recent  years = 4 }
+                    trigger_event = { id = eotg_nc_flavor.0010  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    eotg_st_nc_senate_hostile = yes
+                    is_at_war = no
+                    NOT = { has_character_flag = eotg_nc_0011_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_nc_0011_recent  years = 4 }
+                    trigger_event = { id = eotg_nc_flavor.0011  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    has_character_modifier = eotg_nc_emergency_powers
+                    NOT = { has_character_flag = eotg_nc_0012_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_nc_0012_recent  years = 4 }
+                    trigger_event = { id = eotg_nc_flavor.0012  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    any_vassal = { eotg_st_is_nc_governor = yes  opinion = { target = root  value < -20 } }
+                    NOT = { has_character_flag = eotg_nc_0014_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_nc_0014_recent  years = 4 }
+                    trigger_event = { id = eotg_nc_flavor.0014  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    OR = {
+                    	has_character_modifier = eotg_nc_senate_corruption
+                    	has_character_modifier = eotg_nc_emergency_powers
+                    }
+                    NOT = { has_character_flag = eotg_nc_0016_recent }
+                }
+                random = {
+                    chance = 25
+                    add_character_flag = { flag = eotg_nc_0016_recent  years = 4 }
+                    trigger_event = { id = eotg_nc_flavor.0016  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    eotg_st_nc_senate_hostile = yes
+                    NOT = { has_character_flag = eotg_nc_0001_recent }
+                }
+                random = {
+                    chance = 45
+                    add_character_flag = { flag = eotg_nc_0001_recent  years = 3 }
+                    trigger_event = { id = eotg_nc_flavor.0001  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    eotg_st_nc_campaign_eligible = yes
+                    NOT = { has_character_modifier = eotg_nc_campaign_season }
+                    NOT = { has_character_flag = eotg_nc_0004_recent }
+                }
+                random = {
+                    chance = 40
+                    add_character_flag = { flag = eotg_nc_0004_recent  years = 3 }
+                    trigger_event = { id = eotg_nc_flavor.0004  days = 7 }
+                }
+            }
+            if = {
+                limit = {
+                    has_character_modifier = eotg_nc_campaign_season
+                    NOT = { has_character_flag = eotg_nc_0005_recent }
+                }
+                random = {
+                    chance = 35
+                    add_character_flag = { flag = eotg_nc_0005_recent  years = 3 }
+                    trigger_event = { id = eotg_nc_flavor.0005  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    has_character_modifier = eotg_nc_senate_corruption
+                    NOT = { has_character_flag = eotg_nc_0009_recent }
+                }
+                random = {
+                    chance = 35
+                    add_character_flag = { flag = eotg_nc_0009_recent  years = 3 }
+                    trigger_event = { id = eotg_nc_flavor.0009  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    has_character_modifier = eotg_nc_emergency_powers
+                    NOT = { has_character_flag = eotg_nc_0013_recent }
+                }
+                random = {
+                    chance = 40
+                    add_character_flag = { flag = eotg_nc_0013_recent  years = 3 }
+                    trigger_event = { id = eotg_nc_flavor.0013  days = 3 }
+                }
+            }
+            if = {
+                limit = {
+                    prestige < 150
+                    NOT = { has_character_flag = eotg_nc_0015_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_nc_0015_recent  years = 3 }
+                    trigger_event = { id = eotg_nc_flavor.0015  days = 7 }
+                }
+            }
+            if = {
+                limit = {
+                    vassal_count >= 2
+                    NOT = { has_character_flag = eotg_nc_0017_recent }
+                }
+                random = {
+                    chance = 35
+                    add_character_flag = { flag = eotg_nc_0017_recent  years = 4 }
+                    trigger_event = { id = eotg_nc_flavor.0017  days = 7 }
+                }
+            }
+            if = {
+                limit = {
+                    realm_size >= 8
+                    NOT = { has_character_flag = eotg_nc_0018_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_nc_0018_recent  years = 5 }
+                    trigger_event = { id = eotg_nc_flavor.0018  days = 5 }
+                }
+            }
+            if = {
+                limit = {
+                    OR = {
+                        prestige < 300
+                        has_character_modifier = eotg_nc_public_discontent
+                    }
+                    NOT = { has_character_flag = eotg_nc_0019_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_nc_0019_recent  years = 5 }
+                    trigger_event = { id = eotg_nc_flavor.0019  days = 5 }
+                }
+            }
+        }
+    }
+}
+
+# Yearly PMC legitimacy check — applies proven_legitimacy when at war/on contract,
+# applies legitimacy_questioned when idle too long. 3-year cooldown on each state.
+eotg_on_yearly_pmc_legitimacy_check = {
+    effect = {
+        if = {
+            limit = { eotg_st_is_contractor_general = yes }
+
+            # Proven: at war — remove questioned modifier, apply proven if not already set
+            if = {
+                limit = { is_at_war = yes }
+                if = {
+                    limit = { has_character_modifier = eotg_pmc_legitimacy_questioned }
+                    remove_character_modifier = eotg_pmc_legitimacy_questioned
+                }
+                if = {
+                    limit = { NOT = { has_character_modifier = eotg_pmc_proven_legitimacy } }
+                    add_character_modifier = {
+                        modifier = eotg_pmc_proven_legitimacy
+                        years = 3
+                    }
+                }
+            }
+
+            # Questioned: idle for 3+ years without war
+            else_if = {
+                limit = {
+                    NOT = { is_at_war = yes }
+                    NOT = { has_character_modifier = eotg_pmc_proven_legitimacy }
+                    NOT = { has_character_flag = eotg_pmc_active_contract }
+                    NOT = { has_character_modifier = eotg_pmc_legitimacy_questioned }
+                }
+                add_character_modifier = {
+                    modifier = eotg_pmc_legitimacy_questioned
+                    years = 3
+                }
+            }
+        }
+    }
+}
+
+# Yearly Titan Exodus pulse — refugee fleets arrive in settled space.
+# One arrival event at most per pulse, gated by a shared 2-year cooldown flag
+# plus longer per-event cooldowns so the same story doesn't repeat quickly.
+#
+# THE WANING (1000 AG): the Titanworld is nearly empty by the year 1000.
+# Each ruler sees the one-time eotg_exodus.0009 transition event, every
+# arrival weight is cut to a fifth, the no-arrival weight grows, and only the
+# rare Stragglers event (eotg_exodus.0010) is added to the late-era rotation.
+eotg_on_yearly_exodus_pulse = {
+    effect = {
+        # One-time "The Last Fleets" transition beat once the waning begins
+        if = {
+            limit = {
+                current_year >= 1000
+                eotg_st_exodus_eligible = yes
+                NOT = { has_character_flag = eotg_exodus_waning_seen }
+            }
+            add_character_flag = eotg_exodus_waning_seen
+            trigger_event = { id = eotg_exodus.0009  days = { 5 30 } }
+        }
+        else_if = {
+            limit = {
+                eotg_st_exodus_eligible = yes
+                NOT = { has_character_flag = eotg_exodus_recent }
+            }
+            random_list = {
+                # Most years, no fleet arrives — near-certain after the waning
+                60 = {
+                    modifier = {
+                        add = 40
+                        current_year >= 1000
+                    }
+                }
+
+                # Ragged Survivors — the bread-and-butter arrival
+                14 = {
+                    trigger = {
+                        NOT = { has_character_flag = eotg_exodus_0001_recent }
+                    }
+                    modifier = {
+                        factor = 0.2
+                        current_year >= 1000
+                    }
+                    add_character_flag = { flag = eotg_exodus_recent  years = 2 }
+                    add_character_flag = { flag = eotg_exodus_0001_recent  years = 5 }
+                    trigger_event = { id = eotg_exodus.0001  days = { 5 30 } }
+                }
+
+                # A Master of the Old Arts — rare skilled specialist
+                6 = {
+                    trigger = {
+                        NOT = { has_character_flag = eotg_exodus_0004_recent }
+                    }
+                    modifier = {
+                        factor = 0.2
+                        current_year >= 1000
+                    }
+                    add_character_flag = { flag = eotg_exodus_recent  years = 2 }
+                    add_character_flag = { flag = eotg_exodus_0004_recent  years = 10 }
+                    trigger_event = { id = eotg_exodus.0004  days = { 5 30 } }
+                }
+
+                # An Organized Remnant — needs a realm worth arriving at.
+                # No organized courts remain to flee after the waning.
+                7 = {
+                    trigger = {
+                        realm_size >= 10
+                        current_year < 1000
+                        NOT = { has_character_flag = eotg_exodus_0005_recent }
+                    }
+                    add_character_flag = { flag = eotg_exodus_recent  years = 2 }
+                    add_character_flag = { flag = eotg_exodus_0005_recent  years = 10 }
+                    trigger_event = { id = eotg_exodus.0005  days = { 5 30 } }
+                }
+
+                # Pilgrims of the Firstlight — religious order seeking sanctuary.
+                # The temple convoys also stop coming once the Titanworld empties.
+                7 = {
+                    trigger = {
+                        current_year < 1000
+                        NOT = { has_character_flag = eotg_exodus_0007_recent }
+                    }
+                    add_character_flag = { flag = eotg_exodus_recent  years = 2 }
+                    add_character_flag = { flag = eotg_exodus_0007_recent  years = 8 }
+                    trigger_event = { id = eotg_exodus.0007  days = { 5 30 } }
+                }
+
+                # The Fever Ships — sickness rides the Exodus
+                6 = {
+                    trigger = {
+                        NOT = { has_character_flag = eotg_exodus_0008_recent }
+                    }
+                    modifier = {
+                        factor = 0.2
+                        current_year >= 1000
+                    }
+                    add_character_flag = { flag = eotg_exodus_recent  years = 2 }
+                    add_character_flag = { flag = eotg_exodus_0008_recent  years = 8 }
+                    trigger_event = { id = eotg_exodus.0008  days = { 5 30 } }
+                }
+
+                # Stragglers of a Dead World — late-era only, rare, long cooldown
+                5 = {
+                    trigger = {
+                        current_year >= 1000
+                        NOT = { has_character_flag = eotg_exodus_0010_recent }
+                    }
+                    add_character_flag = { flag = eotg_exodus_recent  years = 2 }
+                    add_character_flag = { flag = eotg_exodus_0010_recent  years = 10 }
+                    trigger_event = { id = eotg_exodus.0010  days = { 5 30 } }
+                }
+            }
+        }
+    }
+}
+
+# ── Myr Cluster Wars struggle hooks ──────────────────────────────────────────
+
+# On war declaration: an involved attacker declaring war feeds escalation.
+eotg_on_war_started_myr_catalyst = {
+    effect = {
+        if = {
+            limit = {
+                scope:attacker = { eotg_st_myr_involved = yes }
+            }
+            scope:attacker = {
+                eotg_se_myr_catalyst = {
+                    CATALYST = eotg_catalyst_myr_war_declared
+                    CHARACTER = scope:attacker
+                }
+            }
+        }
+    }
+}
+
+# On death: an involved ruler dying with the wars unresolved shifts the balance.
+eotg_on_death_myr_catalyst = {
+    effect = {
+        if = {
+            limit = {
+                is_ruler = yes
+                eotg_st_myr_involved = yes
+            }
+            eotg_se_myr_catalyst = {
+                CATALYST = eotg_catalyst_myr_ruler_slain
+                CHARACTER = root
+            }
+        }
+    }
+}
+
+# Yearly Myr pulse — passing-of-time catalyst, war-conclusion catalyst,
+# and per-phase flavor events for involved rulers.
+eotg_on_yearly_myr_pulse = {
+    effect = {
+        if = {
+            limit = { eotg_st_myr_involved = yes }
+
+            # The wars grind on — slow background pressure toward the next phase
+            random = {
+                chance = 25
+                eotg_se_myr_catalyst = {
+                    CATALYST = eotg_catalyst_myr_time
+                    CHARACTER = root
+                }
+            }
+
+            # A long peace among the involved feeds de-escalation
+            if = {
+                limit = {
+                    is_at_war = no
+                    has_variable = eotg_myr_peace_years
+                    var:eotg_myr_peace_years >= 3
+                }
+                random = {
+                    chance = 20
+                    eotg_se_myr_catalyst = {
+                        CATALYST = eotg_catalyst_myr_war_concluded
+                        CHARACTER = root
+                    }
+                }
+            }
+
+            # Track consecutive peace years for the check above
+            if = {
+                limit = { is_at_war = no }
+                if = {
+                    limit = { NOT = { has_variable = eotg_myr_peace_years } }
+                    set_variable = { name = eotg_myr_peace_years  value = 0 }
+                }
+                change_variable = { name = eotg_myr_peace_years  add = 1 }
+            }
+            else = {
+                set_variable = { name = eotg_myr_peace_years  value = 0 }
+            }
+
+            # ── Phase flavor events (one per phase, cooldown-gated) ──────────
+
+            # Ignition: border skirmishes
+            if = {
+                limit = {
+                    eotg_st_myr_phase = { PHASE = struggle_eotg_myr_phase_ignition }
+                    NOT = { has_character_flag = eotg_myr_0011_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_myr_0011_recent  years = 4 }
+                    trigger_event = { id = eotg_myr.0011  days = { 5 30 } }
+                }
+            }
+
+            # Escalation: the mercenary boom
+            if = {
+                limit = {
+                    eotg_st_myr_phase = { PHASE = struggle_eotg_myr_phase_escalation }
+                    NOT = { has_character_flag = eotg_myr_0012_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_myr_0012_recent  years = 4 }
+                    trigger_event = { id = eotg_myr.0012  days = { 5 30 } }
+                }
+            }
+
+            # Attrition: the long war grinds
+            if = {
+                limit = {
+                    eotg_st_myr_phase = { PHASE = struggle_eotg_myr_phase_attrition }
+                    NOT = { has_character_flag = eotg_myr_0013_recent }
+                }
+                random = {
+                    chance = 30
+                    add_character_flag = { flag = eotg_myr_0013_recent  years = 4 }
+                    trigger_event = { id = eotg_myr.0013  days = { 5 30 } }
+                }
+            }
+
+            # Settlement: envoys in neutral space
+            if = {
+                limit = {
+                    eotg_st_myr_phase = { PHASE = struggle_eotg_myr_phase_settlement }
+                    NOT = { has_character_flag = eotg_myr_0014_recent }
+                }
+                random = {
+                    chance = 35
+                    add_character_flag = { flag = eotg_myr_0014_recent  years = 3 }
+                    trigger_event = { id = eotg_myr.0014  days = { 5 30 } }
+                }
+            }
+        }
+    }
+}
+
+# on_raid_action_start: Fringe Overlord ally-raid check.
+# root = raid army; scope:raider = raider char; scope:barony = target barony title.
+eotg_on_raid_fringe_ally_check = {
+    effect = {
+        if = {
+            limit = {
+                scope:raider = { eotg_st_is_fringe_overlord = yes }
+                scope:barony = {
+                    holder = {
+                        is_allied_to = scope:raider
+                        NOT = { this = scope:raider }
+                    }
+                }
+                NOT = { scope:raider = { has_character_flag = eotg_ally_raid_chain_active } }
+            }
+            # Save ally reference and raider reference on each other for cross-event communication
+            scope:raider = {
+                set_variable = { name = eotg_ally_raid_target  value = scope:barony.holder }
+                add_character_flag = { flag = eotg_ally_raid_chain_active  years = 1 }
+                trigger_event = { id = eotg_fringe_ally_raid.0001  days = 1 }
+            }
+            scope:barony.holder = {
+                set_variable = { name = eotg_ally_raid_raider  value = scope:raider }
+            }
+        }
+    }
+}

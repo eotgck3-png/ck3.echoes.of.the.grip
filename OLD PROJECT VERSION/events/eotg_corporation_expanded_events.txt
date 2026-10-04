@@ -1,0 +1,732 @@
+﻿namespace = eotg_corp_flavor
+
+# ── Corporation Government Flavor Events (Phase 1) ────────────────────────────
+# Yearly flavor events fired via eotg_on_yearly_corp_flavor on_action.
+# Covers: Sabotage, Board Influence, Hostile Acquisitions, Executive Warfare,
+# Public Image, Lower Executive Politics, and Succession.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# eotg_corp_flavor.0001 — Financial Irregularities Detected
+# Evidence emerges that a rival executive's division suffers unexplained losses.
+eotg_corp_flavor.0001 = {
+	type = character_event
+	title = eotg_corp_flavor_0001_title
+	desc = eotg_corp_flavor_0001_desc
+	theme = intrigue
+
+	left_portrait = { character = root  animation = personality_rational }
+
+	trigger = {
+		eotg_st_is_ceo = yes
+		intrigue >= 10
+		vassal_count >= 2
+	}
+
+	option = {
+		name = eotg_corp_flavor_0001_opt_leak
+		every_vassal = {
+			limit = { is_powerful_vassal = yes  intrigue < 8 }
+			add_prestige = -25
+		}
+		add_character_flag = { flag = eotg_corp_0001_recent  years = 3 }
+		ai_chance = { base = 35  modifier = { add = 15  has_trait = brave } }
+	}
+	option = {
+		name = eotg_corp_flavor_0001_opt_blackmail
+		every_vassal = {
+			limit = { is_powerful_vassal = yes  intrigue < 8 }
+			add_hook = {
+				type = strong_favor_hook
+				target = prev
+			}
+		}
+		add_character_modifier = { modifier = eotg_corporation_financial_sabotage  years = 2 }
+		add_character_flag = { flag = eotg_corp_0001_recent  years = 3 }
+		ai_chance = { base = 40  modifier = { add = 20  has_trait = deceitful } }
+	}
+	option = {
+		name = eotg_corp_flavor_0001_opt_profit
+		add_gold = 40
+		add_character_flag = { flag = eotg_corp_0001_recent  years = 3 }
+		ai_chance = { base = 25  modifier = { add = 15  has_trait = greedy } }
+	}
+}
+
+# eotg_corp_flavor.0002 — Internal Systems Breach
+# Corporate infrastructure mysteriously fails across rival holdings.
+eotg_corp_flavor.0002 = {
+	type = character_event
+	title = eotg_corp_flavor_0002_title
+	desc = eotg_corp_flavor_0002_desc
+	theme = intrigue
+
+	left_portrait = { character = root  animation = stress }
+
+	trigger = {
+		eotg_st_is_ceo = yes
+		intrigue >= 8
+	}
+
+	option = {
+		name = eotg_corp_flavor_0002_opt_escalate
+		add_intrigue_skill = 1
+		every_vassal = {
+			limit = { is_powerful_vassal = yes }
+			add_character_modifier = { modifier = eotg_corporation_financial_sabotage  years = 2 }
+		}
+		add_character_flag = { flag = eotg_corp_0002_recent  years = 3 }
+		ai_chance = { base = 35  modifier = { add = 20  has_trait = deceitful } }
+	}
+	option = {
+		name = eotg_corp_flavor_0002_opt_sympathy
+		add_diplomacy_skill = 1
+		add_prestige = 15
+		add_character_flag = { flag = eotg_corp_0002_recent  years = 3 }
+		ai_chance = { base = 35  modifier = { add = 15  has_trait = gregarious } }
+	}
+	option = {
+		name = eotg_corp_flavor_0002_opt_blameforeign
+		add_prestige = 10
+		add_character_flag = { flag = eotg_corp_0002_recent  years = 3 }
+		ai_chance = { base = 30  modifier = { add = 10  has_trait = arbitrary } }
+	}
+}
+
+# eotg_corp_flavor.0003 — Sabotage Discovered
+# Evidence points back to the schemer.
+eotg_corp_flavor.0003 = {
+	type = character_event
+	title = eotg_corp_flavor_0003_title
+	desc = eotg_corp_flavor_0003_desc
+	theme = intrigue
+
+	left_portrait = { character = root  animation = stress }
+
+	trigger = {
+		eotg_st_is_ceo = yes
+	}
+
+	option = {
+		name = eotg_corp_flavor_0003_opt_deny
+		add_intrigue_skill = 1
+		add_character_modifier = { modifier = eotg_corporation_exposed_schemer  years = 3 }
+		add_character_flag = { flag = eotg_corp_0003_recent  years = 3 }
+		ai_chance = { base = 35  modifier = { add = 20  has_trait = deceitful } }
+	}
+	option = {
+		name = eotg_corp_flavor_0003_opt_sacrifice
+		every_courtier = {
+			limit = { intrigue > 8  NOT = { this = root } }
+			add_opinion = { target = root  modifier = eotg_fringe_reform_resentment }
+		}
+		add_character_flag = { flag = eotg_corp_0003_recent  years = 3 }
+		ai_chance = { base = 35  modifier = { add = 10  has_trait = callous } }
+	}
+	option = {
+		name = eotg_corp_flavor_0003_opt_threaten
+		add_dread = 15
+		add_character_modifier = { modifier = eotg_corporation_exposed_schemer  years = 2 }
+		add_character_flag = { flag = eotg_corp_0003_recent  years = 3 }
+		ai_chance = { base = 30  modifier = { add = 15  has_trait = wrathful } }
+	}
+}
+
+# eotg_corp_flavor.0004 — Board Members Demand Favors
+# Regional Directors demand concessions in exchange for support.
+eotg_corp_flavor.0004 = {
+	type = character_event
+	title = eotg_corp_flavor_0004_title
+	desc = eotg_corp_flavor_0004_desc
+	theme = diplomacy
+
+	left_portrait = { character = root  animation = personality_rational }
+
+	trigger = {
+		eotg_st_is_ceo = yes
+		vassal_count >= 2
+	}
+
+	option = {
+		name = eotg_corp_flavor_0004_opt_grant
+		every_vassal = {
+			limit = { is_powerful_vassal = yes }
+			add_opinion = { target = root  modifier = eotg_pmc_loyalty_restored }
+		}
+		remove_short_term_gold = 30
+		add_character_flag = { flag = eotg_corp_0004_recent  years = 3 }
+		ai_chance = { base = 40  modifier = { add = 10  has_trait = gregarious } }
+	}
+	option = {
+		name = eotg_corp_flavor_0004_opt_promise
+		add_prestige = 10
+		add_character_modifier = { modifier = eotg_gobcorp_faction_favoritism  years = 2 }
+		add_character_flag = { flag = eotg_corp_0004_recent  years = 3 }
+		ai_chance = { base = 35  modifier = { add = 10  has_trait = patient } }
+	}
+	option = {
+		name = eotg_corp_flavor_0004_opt_refuse
+		every_vassal = {
+			limit = { is_powerful_vassal = yes }
+			add_opinion = { target = root  modifier = eotg_fringe_reform_resentment }
+		}
+		add_character_flag = { flag = eotg_corp_0004_recent  years = 3 }
+		ai_chance = { base = 25  modifier = { add = 15  has_trait = arrogant } }
+	}
+}
+
+# eotg_corp_flavor.0005 — A Director Questions Leadership
+# A powerful Regional Director publicly criticizes leadership.
+eotg_corp_flavor.0005 = {
+	type = character_event
+	title = eotg_corp_flavor_0005_title
+	desc = eotg_corp_flavor_0005_desc
+	theme = intrigue
+
+	left_portrait = { character = root  animation = stress }
+
+	trigger = {
+		eotg_st_is_ceo = yes
+		any_vassal = { is_powerful_vassal = yes  diplomacy >= 12 }
+	}
+
+	option = {
+		name = eotg_corp_flavor_0005_opt_debate
+		add_diplomacy_skill = 1
+		add_prestige = 15
+		add_character_flag = { flag = eotg_corp_0005_recent  years = 4 }
+		ai_chance = { base = 40  modifier = { add = 15  has_trait = gregarious } }
+	}
+	option = {
+		name = eotg_corp_flavor_0005_opt_blackmail
+		add_intrigue_skill = 1
+		every_vassal = {
+			limit = { is_powerful_vassal = yes  diplomacy >= 12 }
+			add_hook = {
+				type = favor_hook
+				target = prev
+			}
+		}
+		add_character_flag = { flag = eotg_corp_0005_recent  years = 4 }
+		ai_chance = { base = 35  modifier = { add = 20  has_trait = deceitful } }
+	}
+	option = {
+		name = eotg_corp_flavor_0005_opt_remove
+		add_dread = 10
+		every_vassal = {
+			limit = { is_powerful_vassal = yes  diplomacy >= 12 }
+			add_opinion = { target = root  modifier = eotg_fringe_public_punishment }
+		}
+		add_character_flag = { flag = eotg_corp_0005_recent  years = 4 }
+		ai_chance = { base = 25  modifier = { add = 10  has_trait = wrathful } }
+	}
+}
+
+# eotg_corp_flavor.0006 — Board Influence Drains Away
+# Confidence in executive leadership erodes.
+eotg_corp_flavor.0006 = {
+	type = character_event
+	title = eotg_corp_flavor_0006_title
+	desc = eotg_corp_flavor_0006_desc
+	theme = diplomacy
+
+	left_portrait = { character = root  animation = stress }
+
+	trigger = {
+		eotg_st_is_ceo = yes
+		prestige < 200
+	}
+
+	option = {
+		name = eotg_corp_flavor_0006_opt_prcampaign
+		remove_short_term_gold = 60
+		add_prestige = 40
+		add_character_flag = { flag = eotg_corp_0006_recent  years = 3 }
+		ai_chance = { base = 35  modifier = { add = 10  gold > 80 } }
+	}
+	option = {
+		name = eotg_corp_flavor_0006_opt_contracts
+		every_vassal = {
+			limit = { is_powerful_vassal = yes }
+			add_opinion = { target = root  modifier = eotg_pmc_loyalty_restored }
+		}
+		remove_short_term_gold = 40
+		add_character_flag = { flag = eotg_corp_0006_recent  years = 3 }
+		ai_chance = { base = 35  modifier = { add = 10  has_trait = gregarious } }
+	}
+	option = {
+		name = eotg_corp_flavor_0006_opt_threaten
+		add_dread = 15
+		add_character_flag = { flag = eotg_corp_0006_recent  years = 3 }
+		ai_chance = { base = 30  modifier = { add = 15  has_trait = callous } }
+	}
+}
+
+# eotg_corp_flavor.0007 — Acquisition Proposal Sent
+# A rival receives an offer to surrender assets peacefully.
+eotg_corp_flavor.0007 = {
+	type = character_event
+	title = eotg_corp_flavor_0007_title
+	desc = eotg_corp_flavor_0007_desc
+	theme = stewardship
+
+	left_portrait = { character = root  animation = personality_bold }
+
+	trigger = {
+		eotg_st_is_ceo = yes
+		gold > 100
+	}
+
+	option = {
+		name = eotg_corp_flavor_0007_opt_accept
+		add_prestige = 25
+		add_character_flag = { flag = eotg_corp_0007_recent  years = 5 }
+		ai_chance = { base = 40  modifier = { add = 10  has_trait = patient } }
+	}
+	option = {
+		name = eotg_corp_flavor_0007_opt_negotiate
+		add_diplomacy_skill = 1
+		add_character_flag = { flag = eotg_corp_0007_recent  years = 5 }
+		ai_chance = { base = 35  modifier = { add = 10  has_trait = gregarious } }
+	}
+	option = {
+		name = eotg_corp_flavor_0007_opt_reject
+		add_prestige = -15
+		add_character_flag = { flag = eotg_corp_0007_recent  years = 5 }
+		ai_chance = { base = 25  modifier = { add = 10  has_trait = brave } }
+	}
+}
+
+# eotg_corp_flavor.0008 — Shareholders Demand Expansion
+# Investors demand aggressive growth.
+eotg_corp_flavor.0008 = {
+	type = character_event
+	title = eotg_corp_flavor_0008_title
+	desc = eotg_corp_flavor_0008_desc
+	theme = stewardship
+
+	left_portrait = { character = root  animation = personality_bold }
+
+	trigger = {
+		eotg_st_is_ceo = yes
+		gold > 150
+	}
+
+	option = {
+		name = eotg_corp_flavor_0008_opt_pursue
+		add_stewardship_skill = 1
+		remove_short_term_gold = 60
+		add_prestige = 20
+		add_character_flag = { flag = eotg_corp_0008_recent  years = 4 }
+		ai_chance = { base = 35  modifier = { add = 15  has_trait = ambitious } }
+	}
+	option = {
+		name = eotg_corp_flavor_0008_opt_stability
+		add_prestige = 25
+		capital_county = { change_development_level = 1 }
+		add_character_flag = { flag = eotg_corp_0008_recent  years = 4 }
+		ai_chance = { base = 35  modifier = { add = 10  has_trait = patient } }
+	}
+	option = {
+		name = eotg_corp_flavor_0008_opt_manipulate
+		add_intrigue_skill = 1
+		add_gold = 20
+		add_character_flag = { flag = eotg_corp_0008_recent  years = 4 }
+		ai_chance = { base = 30  modifier = { add = 15  has_trait = deceitful } }
+	}
+}
+
+# eotg_corp_flavor.0009 — Executive Assassination Rumors
+# Rumors spread that executives hire killers against competitors.
+eotg_corp_flavor.0009 = {
+	type = character_event
+	title = eotg_corp_flavor_0009_title
+	desc = eotg_corp_flavor_0009_desc
+	theme = intrigue
+
+	left_portrait = { character = root  animation = stress }
+
+	trigger = {
+		eotg_st_is_ceo = yes
+		vassal_count >= 2
+	}
+
+	option = {
+		name = eotg_corp_flavor_0009_opt_investigate
+		add_intrigue_skill = 1
+		add_character_flag = { flag = eotg_corp_0009_recent  years = 3 }
+		ai_chance = { base = 40  modifier = { add = 10  has_trait = diligent } }
+	}
+	option = {
+		name = eotg_corp_flavor_0009_opt_ignore
+		add_character_flag = { flag = eotg_corp_0009_recent  years = 3 }
+		ai_chance = { base = 30  modifier = { add = 10  has_trait = lazy } }
+	}
+	option = {
+		name = eotg_corp_flavor_0009_opt_weaponize
+		every_vassal = {
+			limit = { is_powerful_vassal = yes  intrigue < 8 }
+			add_prestige = -20
+		}
+		add_character_flag = { flag = eotg_corp_0009_recent  years = 3 }
+		ai_chance = { base = 30  modifier = { add = 15  has_trait = deceitful } }
+	}
+}
+
+# eotg_corp_flavor.0010 — Corporate Espionage Leak
+# Sensitive internal documents leak publicly.
+eotg_corp_flavor.0010 = {
+	type = character_event
+	title = eotg_corp_flavor_0010_title
+	desc = eotg_corp_flavor_0010_desc
+	theme = intrigue
+
+	left_portrait = { character = root  animation = stress }
+
+	trigger = {
+		eotg_st_is_ceo = yes
+	}
+
+	option = {
+		name = eotg_corp_flavor_0010_opt_suppress
+		add_intrigue_skill = 1
+		remove_short_term_gold = 30
+		add_character_flag = { flag = eotg_corp_0010_recent  years = 3 }
+		ai_chance = { base = 35  modifier = { add = 15  has_trait = deceitful } }
+	}
+	option = {
+		name = eotg_corp_flavor_0010_opt_blameriva
+		every_vassal = {
+			limit = { is_powerful_vassal = yes }
+			add_opinion = { target = root  modifier = eotg_fringe_fear_rule_resentment }
+		}
+		add_character_flag = { flag = eotg_corp_0010_recent  years = 3 }
+		ai_chance = { base = 35  modifier = { add = 10  has_trait = arbitrary } }
+	}
+	option = {
+		name = eotg_corp_flavor_0010_opt_exploit
+		add_intrigue_skill = 2
+		add_character_flag = { flag = eotg_corp_0010_recent  years = 3 }
+		ai_chance = { base = 30  modifier = { add = 15  has_trait = ambitious } }
+	}
+}
+
+# eotg_corp_flavor.0011 — Public Relations Crisis
+# Public trust in the corporation collapses.
+eotg_corp_flavor.0011 = {
+	type = character_event
+	title = eotg_corp_flavor_0011_title
+	desc = eotg_corp_flavor_0011_desc
+	theme = diplomacy
+
+	left_portrait = { character = root  animation = stress }
+
+	trigger = {
+		eotg_st_is_ceo = yes
+		prestige < 150
+	}
+
+	option = {
+		name = eotg_corp_flavor_0011_opt_prcampaign
+		remove_short_term_gold = 80
+		add_prestige = 50
+		remove_character_modifier = eotg_corporation_pr_crisis
+		add_character_flag = { flag = eotg_corp_0011_recent  years = 3 }
+		ai_chance = { base = 35  modifier = { add = 15  gold > 100 } }
+	}
+	option = {
+		name = eotg_corp_flavor_0011_opt_suppress
+		add_character_modifier = { modifier = eotg_corporation_pr_crisis  years = 3 }
+		add_intrigue_skill = 1
+		add_character_flag = { flag = eotg_corp_0011_recent  years = 3 }
+		ai_chance = { base = 35  modifier = { add = 15  has_trait = deceitful } }
+	}
+	option = {
+		name = eotg_corp_flavor_0011_opt_blame
+		add_character_modifier = { modifier = eotg_corporation_pr_crisis  years = 2 }
+		add_character_flag = { flag = eotg_corp_0011_recent  years = 3 }
+		ai_chance = { base = 30  modifier = { add = 10  has_trait = arbitrary } }
+	}
+}
+
+# eotg_corp_flavor.0012 — Executive Charity Event
+# The corporation publicly funds humanitarian projects.
+eotg_corp_flavor.0012 = {
+	type = character_event
+	title = eotg_corp_flavor_0012_title
+	desc = eotg_corp_flavor_0012_desc
+	theme = diplomacy
+
+	left_portrait = { character = root  animation = personality_bold }
+
+	trigger = {
+		eotg_st_is_ceo = yes
+		gold > 80
+	}
+
+	option = {
+		name = eotg_corp_flavor_0012_opt_genuine
+		remove_short_term_gold = 50
+		add_prestige = 30
+		remove_character_modifier = eotg_corporation_pr_crisis
+		stress_impact = { base = minor_stress_impact_loss  callous = minor_stress_impact_gain }
+		add_character_flag = { flag = eotg_corp_0012_recent  years = 4 }
+		ai_chance = { base = 35  modifier = { add = 10  has_trait = generous } }
+	}
+	option = {
+		name = eotg_corp_flavor_0012_opt_hidden
+		add_gold = 10
+		add_prestige = 15
+		add_character_flag = { flag = eotg_corp_0012_recent  years = 4 }
+		ai_chance = { base = 35  modifier = { add = 20  has_trait = deceitful } }
+	}
+	option = {
+		name = eotg_corp_flavor_0012_opt_propaganda
+		add_prestige = 20
+		add_character_flag = { flag = eotg_corp_0012_recent  years = 4 }
+		ai_chance = { base = 30  modifier = { add = 15  has_trait = ambitious } }
+	}
+}
+
+# eotg_corp_flavor.0013 — Promotion by Betrayal
+# An executive sabotages coworkers for advancement.
+eotg_corp_flavor.0013 = {
+	type = character_event
+	title = eotg_corp_flavor_0013_title
+	desc = eotg_corp_flavor_0013_desc
+	theme = intrigue
+
+	left_portrait = { character = root  animation = personality_rational }
+
+	trigger = {
+		eotg_st_is_ceo = yes
+		any_vassal = { intrigue >= 12 }
+	}
+
+	option = {
+		name = eotg_corp_flavor_0013_opt_reward
+		add_intrigue_skill = 1
+		add_character_flag = { flag = eotg_corp_0013_recent  years = 3 }
+		ai_chance = { base = 30  modifier = { add = 15  has_trait = deceitful } }
+	}
+	option = {
+		name = eotg_corp_flavor_0013_opt_punish
+		add_prestige = 20
+		every_vassal = {
+			limit = { intrigue >= 12 }
+			add_opinion = { target = root  modifier = eotg_fringe_reform_resentment }
+		}
+		add_character_flag = { flag = eotg_corp_0013_recent  years = 3 }
+		ai_chance = { base = 40  modifier = { add = 15  has_trait = just } }
+	}
+	option = {
+		name = eotg_corp_flavor_0013_opt_encourage
+		add_character_modifier = { modifier = eotg_corporation_pr_crisis  years = 2 }
+		add_intrigue_skill = 2
+		add_character_flag = { flag = eotg_corp_0013_recent  years = 3 }
+		ai_chance = { base = 30  modifier = { add = 10  has_trait = callous } }
+	}
+}
+
+# eotg_corp_flavor.0014 — The Succession Race Begins
+# Executives begin maneuvering for leadership.
+eotg_corp_flavor.0014 = {
+	type = character_event
+	title = eotg_corp_flavor_0014_title
+	desc = eotg_corp_flavor_0014_desc
+	theme = diplomacy
+
+	left_portrait = { character = root  animation = personality_bold }
+
+	trigger = {
+		eotg_st_is_ceo = yes
+		age >= 50
+	}
+
+	option = {
+		name = eotg_corp_flavor_0014_opt_endorse
+		add_prestige = 25
+		add_diplomacy_skill = 1
+		add_character_flag = { flag = eotg_corp_0014_recent  years = 5 }
+		ai_chance = { base = 35  modifier = { add = 10  has_trait = gregarious } }
+	}
+	option = {
+		name = eotg_corp_flavor_0014_opt_sabotage
+		add_intrigue_skill = 2
+		add_character_flag = { flag = eotg_corp_0014_recent  years = 5 }
+		ai_chance = { base = 35  modifier = { add = 20  has_trait = deceitful } }
+	}
+	option = {
+		name = eotg_corp_flavor_0014_opt_neutral
+		add_prestige = 30
+		add_character_flag = { flag = eotg_corp_0014_recent  years = 5 }
+		ai_chance = { base = 30  modifier = { add = 10  has_trait = just } }
+	}
+}
+
+# eotg_corp_flavor.0015 — Investor Panic
+# Major investors fear corporate collapse.
+eotg_corp_flavor.0015 = {
+	type = character_event
+	title = eotg_corp_flavor_0015_title
+	desc = eotg_corp_flavor_0015_desc
+	theme = stewardship
+
+	left_portrait = { character = root  animation = stress }
+
+	trigger = {
+		eotg_st_is_ceo = yes
+		gold < 50
+	}
+
+	option = {
+		name = eotg_corp_flavor_0015_opt_reassure
+		add_diplomacy_skill = 1
+		add_prestige = 20
+		add_character_flag = { flag = eotg_corp_0015_recent  years = 3 }
+		ai_chance = { base = 40  modifier = { add = 10  has_trait = gregarious } }
+	}
+	option = {
+		name = eotg_corp_flavor_0015_opt_hidenumbers
+		add_intrigue_skill = 1
+		add_character_modifier = { modifier = eotg_corporation_financial_sabotage  years = 2 }
+		add_character_flag = { flag = eotg_corp_0015_recent  years = 3 }
+		ai_chance = { base = 35  modifier = { add = 15  has_trait = deceitful } }
+	}
+	option = {
+		name = eotg_corp_flavor_0015_opt_sacrifice
+		every_vassal = {
+			limit = { stewardship < 8 }
+			add_opinion = { target = root  modifier = eotg_fringe_reform_resentment }
+		}
+		add_prestige = 15
+		add_character_flag = { flag = eotg_corp_0015_recent  years = 3 }
+		ai_chance = { base = 25  modifier = { add = 10  has_trait = callous } }
+	}
+}
+
+# ── eotg_corp_flavor.0016 ─────────────────────────────────────────────────────
+# A Director demands their division receives priority resource allocation.
+# Fires from: eotg_on_yearly_corp_flavor (vassal_count >= 2)
+eotg_corp_flavor.0016 = {
+	type = character_event
+	title = eotg_corp_flavor_0016_title
+	desc = eotg_corp_flavor_0016_desc
+	theme = stewardship
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	option = {
+		name = eotg_corp_flavor_0016_opt_fund
+		# Fund the division. Loyalty is an investment.
+		remove_short_term_gold = 100
+		add_prestige = 75
+		add_character_flag = { flag = eotg_corp_0016_recent  years = 4 }
+		ai_chance = { base = 35  modifier = { add = 15  has_trait = generous } }
+	}
+
+	option = {
+		name = eotg_corp_flavor_0016_opt_partial
+		# A partial allocation. Nobody gets everything they ask for.
+		add_prestige = 50
+		add_stewardship_skill = 1
+		add_character_flag = { flag = eotg_corp_0016_recent  years = 4 }
+		ai_chance = { base = 40  modifier = { add = 10  stewardship >= 10 } }
+	}
+
+	option = {
+		name = eotg_corp_flavor_0016_opt_deny
+		# Denied. Resource queues exist for a reason.
+		add_dread = 10
+		add_prestige = -50
+		add_character_flag = { flag = eotg_corp_0016_recent  years = 3 }
+		ai_chance = { base = 25  modifier = { add = 15  has_trait = greedy } }
+	}
+}
+
+# ── eotg_corp_flavor.0017 ─────────────────────────────────────────────────────
+# Junior Directors petition for seats on the executive board.
+# Fires from: eotg_on_yearly_corp_flavor (vassal_count >= 3)
+eotg_corp_flavor.0017 = {
+	type = character_event
+	title = eotg_corp_flavor_0017_title
+	desc = eotg_corp_flavor_0017_desc
+	theme = intrigue
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	option = {
+		name = eotg_corp_flavor_0017_opt_grant
+		# Grant limited board representation. Inclusion is cheaper than rebellion.
+		add_prestige = 100
+		add_diplomacy_skill = 1
+		add_character_flag = { flag = eotg_corp_0017_recent  years = 5 }
+		ai_chance = { base = 40  modifier = { add = 15  has_trait = gregarious } }
+	}
+
+	option = {
+		name = eotg_corp_flavor_0017_opt_assign
+		# Give them visible projects. Let them prove themselves first.
+		add_prestige = 50
+		add_character_flag = { flag = eotg_corp_0017_recent  years = 5 }
+		ai_chance = { base = 35  modifier = { add = 10  has_trait = just } }
+	}
+
+	option = {
+		name = eotg_corp_flavor_0017_opt_dismiss
+		# The board earns its seats. This petition is denied.
+		add_dread = 5
+		add_prestige = -25
+		add_character_flag = { flag = eotg_corp_0017_recent  years = 4 }
+		ai_chance = { base = 25  modifier = { add = 15  has_trait = arrogant } }
+	}
+}
+
+# ── eotg_corp_flavor.0018 ─────────────────────────────────────────────────────
+# A Director publicly calls for a CEO performance audit.
+# Fires from: eotg_on_yearly_corp_flavor (prestige < 200 or stewardship < 8)
+eotg_corp_flavor.0018 = {
+	type = character_event
+	title = eotg_corp_flavor_0018_title
+	desc = eotg_corp_flavor_0018_desc
+	theme = stewardship
+
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+
+	option = {
+		name = eotg_corp_flavor_0018_opt_publish
+		# Release the performance data. Transparency is its own defense.
+		add_stewardship_skill = 1
+		add_prestige = 75
+		add_legitimacy = 15
+		add_character_flag = { flag = eotg_corp_0018_recent  years = 5 }
+		ai_chance = { base = 40  modifier = { add = 15  stewardship >= 10 } }
+	}
+
+	option = {
+		name = eotg_corp_flavor_0018_opt_review
+		# Commission an independent review. A controlled audit is better than a hostile one.
+		remove_short_term_gold = 150
+		add_legitimacy = 20
+		add_character_flag = { flag = eotg_corp_0018_recent  years = 5 }
+		ai_chance = { base = 30  modifier = { add = 10  gold >= 150 } }
+	}
+
+	option = {
+		name = eotg_corp_flavor_0018_opt_shut_down
+		# The CEO answers to no Director. Shut the audit down.
+		add_dread = 15
+		add_prestige = -50
+		add_legitimacy = -10
+		add_character_flag = { flag = eotg_corp_0018_recent  years = 4 }
+		ai_chance = { base = 30  modifier = { add = 20  has_trait = arrogant } }
+	}
+}

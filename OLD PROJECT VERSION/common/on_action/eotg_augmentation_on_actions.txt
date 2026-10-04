@@ -1,0 +1,431 @@
+﻿# ── eotg_augmentation_on_actions.txt ─────────────────────────────────────────
+# Yearly hooks for the Cybernetic Augmentation system.
+#
+# Wired into on_yearly_playable (fires once per year for count+ characters).
+# Risk values are scaled annually: base 12/year (was 1/month in design),
+# stress bonus 24/year (was 2/month for persistent stress), combat bonus
+# approximated at 10/year for characters at war.
+#
+# Neurofracture threshold: 80 (normal) / 60 + stress >= 200 (stressed).
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Hook augmentation yearly checks into vanilla yearly playable pulse
+on_yearly_playable = {
+    on_actions = {
+        eotg_on_yearly_aug_initiation_check
+        eotg_on_yearly_aug_tier1_check
+        eotg_on_yearly_aug_tier2_check
+        eotg_on_yearly_aug_overclocked_check
+        eotg_on_yearly_aug_neurofractured_check
+    }
+}
+
+# ── Custom on_actions ─────────────────────────────────────────────────────────
+
+# Initiation checks — offer augmentation to eligible rulers
+eotg_on_yearly_aug_initiation_check = {
+    effect = {
+        # Desperation Protocol — at war + wounded (higher urgency than init.001)
+        if = {
+            limit = {
+                eotg_can_receive_augmented = yes
+                has_trait = wounded
+                is_at_war = yes
+                NOT = { has_character_flag = eotg_flag_aug_event_cooldown }
+            }
+            random = {
+                chance = 50
+                trigger_event = { id = eotg_aug_init.004  days = { 1 5 } }
+            }
+        }
+        # Post-wound offer (wounded ruler not at war)
+        else_if = {
+            limit = {
+                eotg_can_receive_augmented = yes
+                has_trait = wounded
+                NOT = { has_character_flag = eotg_flag_aug_event_cooldown }
+            }
+            random = {
+                chance = 40
+                trigger_event = { id = eotg_aug_init.001  days = { 1 10 } }
+            }
+        }
+        # Corporate offer (wealthy landed ruler)
+        else_if = {
+            limit = {
+                eotg_can_receive_augmented = yes
+                is_landed = yes
+                gold >= 500
+                NOT = { has_character_flag = eotg_flag_aug_event_cooldown }
+            }
+            random = {
+                chance = 10
+                trigger_event = { id = eotg_aug_init.002  days = { 1 15 } }
+            }
+        }
+        # Aging ruler with low prowess
+        else_if = {
+            limit = {
+                eotg_can_receive_augmented = yes
+                age >= 50
+                prowess <= 8
+                NOT = { has_character_flag = eotg_flag_aug_event_cooldown }
+            }
+            random = {
+                chance = 15
+                trigger_event = { id = eotg_aug_init.003  days = { 1 10 } }
+            }
+        }
+        # A Familiar Change — peer already augmented
+        else_if = {
+            limit = {
+                eotg_can_receive_augmented = yes
+                NOT = { has_character_flag = eotg_flag_aug_event_cooldown }
+                OR = {
+                    any_vassal = { has_trait = eotg_augmented }
+                    any_courtier = { is_alive = yes  has_trait = eotg_augmented }
+                }
+            }
+            random = {
+                chance = 20
+                trigger_event = { id = eotg_aug_init.005  days = { 1 20 } }
+            }
+        }
+    }
+}
+
+# Tier 1 — random events for Augmented characters
+eotg_on_yearly_aug_tier1_check = {
+    effect = {
+        # Phantom Sensation — general flavor
+        if = {
+            limit = {
+                has_trait = eotg_augmented
+                NOT = { has_character_flag = eotg_flag_aug_event_cooldown }
+            }
+            random = {
+                chance = 25
+                trigger_event = { id = eotg_aug_tier1.001  days = { 1 30 } }
+            }
+        }
+        # Vassal's Suspicion — one-time
+        if = {
+            limit = {
+                has_trait = eotg_augmented
+                any_vassal = { is_alive = yes }
+                NOT = { has_character_flag = eotg_flag_tier1_vassal_suspicion_fired }
+            }
+            random = {
+                chance = 60
+                trigger_event = { id = eotg_aug_tier1.003  days = { 1 20 } }
+            }
+        }
+        # Knight's Petition
+        if = {
+            limit = {
+                has_trait = eotg_augmented
+                any_knight = { is_alive = yes }
+                NOT = { has_character_flag = eotg_flag_aug_event_cooldown }
+            }
+            random = {
+                chance = 20
+                trigger_event = { id = eotg_aug_tier1.004  days = { 1 20 } }
+            }
+        }
+        # Weight of Silence — court social moment
+        if = {
+            limit = {
+                has_trait = eotg_augmented
+                NOT = { has_character_flag = eotg_flag_aug_event_cooldown }
+            }
+            random = {
+                chance = 20
+                trigger_event = { id = eotg_aug_tier1.005  days = { 1 30 } }
+            }
+        }
+        # The Faster Hand — at war combat advantage
+        if = {
+            limit = {
+                has_trait = eotg_augmented
+                is_at_war = yes
+                NOT = { has_character_flag = eotg_flag_aug_event_cooldown }
+            }
+            random = {
+                chance = 35
+                trigger_event = { id = eotg_aug_tier1.006  days = { 1 15 } }
+            }
+        }
+        # Progression gate — offer upgrade when eligible
+        if = {
+            limit = {
+                eotg_can_progress_to_enhanced = yes
+                gold >= 100
+                NOT = { has_character_flag = eotg_flag_aug_event_cooldown }
+            }
+            random = {
+                chance = 30
+                trigger_event = { id = eotg_aug_tier1.002  days = { 1 20 } }
+            }
+        }
+    }
+}
+
+# Tier 2 — random events for Enhanced characters
+eotg_on_yearly_aug_tier2_check = {
+    effect = {
+        # Emotional Delay — general flavor
+        if = {
+            limit = {
+                has_trait = eotg_enhanced
+                NOT = { has_character_flag = eotg_flag_enh_event_cooldown }
+            }
+            random = {
+                chance = 30
+                trigger_event = { id = eotg_aug_tier2.001  days = { 1 30 } }
+            }
+        }
+        # Children Fear Me
+        if = {
+            limit = {
+                has_trait = eotg_enhanced
+                any_child = { is_alive = yes  age < 16 }
+                NOT = { has_character_flag = eotg_flag_enh_event_cooldown }
+            }
+            random = {
+                chance = 15
+                trigger_event = { id = eotg_aug_tier2.002  days = { 1 20 } }
+            }
+        }
+        # The Space Between Us — married characters
+        if = {
+            limit = {
+                has_trait = eotg_enhanced
+                is_married = yes
+                NOT = { has_character_flag = eotg_flag_enh_event_cooldown }
+            }
+            random = {
+                chance = 25
+                trigger_event = { id = eotg_aug_tier2.004  days = { 1 20 } }
+            }
+        }
+        # The Confessor's Warning — zealous courtier at court
+        if = {
+            limit = {
+                has_trait = eotg_enhanced
+                any_courtier = { is_alive = yes  has_trait = zealous }
+                NOT = { has_character_flag = eotg_flag_enh_event_cooldown }
+            }
+            random = {
+                chance = 20
+                trigger_event = { id = eotg_aug_tier2.005  days = { 1 20 } }
+            }
+        }
+        # Cold Detachment — general flavor
+        if = {
+            limit = {
+                has_trait = eotg_enhanced
+                NOT = { has_character_flag = eotg_flag_enh_event_cooldown }
+            }
+            random = {
+                chance = 20
+                trigger_event = { id = eotg_aug_tier2.006  days = { 1 30 } }
+            }
+        }
+        # Progression gate
+        if = {
+            limit = {
+                eotg_can_progress_to_overclocked = yes
+                gold >= 200
+                NOT = { has_character_flag = eotg_flag_enh_event_cooldown }
+            }
+            random = {
+                chance = 25
+                trigger_event = { id = eotg_aug_tier2.003  days = { 1 20 } }
+            }
+        }
+    }
+}
+
+# Tier 3 — Overclocked risk accumulation and random events
+eotg_on_yearly_aug_overclocked_check = {
+    effect = {
+        if = {
+            limit = { has_trait = eotg_overclocked }
+
+            # Passive annual risk accumulation (12 per year = 1/month equivalent)
+            eotg_add_fracture_risk = { AMOUNT = 12 }
+
+            # Stress accelerates risk (24 extra per year if persistently stressed)
+            if = {
+                limit = { stress >= 200 }
+                eotg_add_fracture_risk = { AMOUNT = 24 }
+            }
+
+            # Paranoid rulers spiral faster
+            if = {
+                limit = { has_trait = paranoid }
+                eotg_add_fracture_risk = { AMOUNT = 12 }
+            }
+
+            # Combat exposure (character at war adds risk from battlefield stress)
+            if = {
+                limit = { is_at_war = yes }
+                eotg_add_fracture_risk = { AMOUNT = 10 }
+            }
+
+            # Threshold check — trigger neurofracture if threshold met
+            if = {
+                limit = { eotg_neurofracture_threshold_met = yes }
+                eotg_trigger_neurofracture = yes
+            }
+
+            # Violent Impulse
+            if = {
+                limit = { NOT = { has_character_flag = eotg_flag_oc_event_cooldown } }
+                random = {
+                    chance = 35
+                    trigger_event = { id = eotg_aug_tier3.001  days = { 1 15 } }
+                }
+            }
+            # The Mirror
+            if = {
+                limit = { NOT = { has_character_flag = eotg_flag_oc_event_cooldown } }
+                random = {
+                    chance = 25
+                    trigger_event = { id = eotg_aug_tier3.002  days = { 1 20 } }
+                }
+            }
+            # Sleepless
+            if = {
+                limit = { NOT = { has_character_flag = eotg_flag_oc_event_cooldown } }
+                random = {
+                    chance = 20
+                    trigger_event = { id = eotg_aug_tier3.003  days = { 1 20 } }
+                }
+            }
+            # Signal Noise
+            if = {
+                limit = { NOT = { has_character_flag = eotg_flag_oc_event_cooldown } }
+                random = {
+                    chance = 30
+                    trigger_event = { id = eotg_aug_tier3.004  days = { 1 20 } }
+                }
+            }
+            # Clarity — at war
+            if = {
+                limit = {
+                    is_at_war = yes
+                    NOT = { has_character_flag = eotg_flag_oc_event_cooldown }
+                }
+                random = {
+                    chance = 35
+                    trigger_event = { id = eotg_aug_tier3.005  days = { 1 15 } }
+                }
+            }
+            # The Delegation — disaffected vassals
+            if = {
+                limit = {
+                    NOT = { has_character_flag = eotg_flag_oc_event_cooldown }
+                    any_vassal = {
+                        is_alive = yes
+                        opinion = { target = root  value < -20 }
+                    }
+                }
+                random = {
+                    chance = 40
+                    trigger_event = { id = eotg_aug_tier3.006  days = { 1 15 } }
+                }
+            }
+            # Two Machines — another overclocked character in range
+            if = {
+                limit = {
+                    NOT = { has_character_flag = eotg_flag_oc_event_cooldown }
+                    OR = {
+                        any_vassal = { is_alive = yes  has_trait = eotg_overclocked }
+                        any_courtier = { is_alive = yes  has_trait = eotg_overclocked }
+                    }
+                }
+                random = {
+                    chance = 25
+                    trigger_event = { id = eotg_aug_tier3.007  days = { 1 20 } }
+                }
+            }
+        }
+    }
+}
+
+# Neurofractured — ongoing random events
+eotg_on_yearly_aug_neurofractured_check = {
+    effect = {
+        if = {
+            limit = { has_trait = eotg_neurofractured }
+
+            # High-frequency random events
+            if = {
+                limit = { NOT = { has_character_flag = eotg_flag_nf_event_cooldown } }
+                random = {
+                    chance = 50
+                    trigger_event = { id = eotg_fracture.002  days = { 1 20 } }
+                }
+            }
+
+            # Lucid Moment — rare
+            if = {
+                limit = { NOT = { has_character_flag = eotg_flag_nf_event_cooldown } }
+                random = {
+                    chance = 15
+                    trigger_event = { id = eotg_fracture.003  days = { 1 30 } }
+                }
+            }
+
+            # Court Massacre — fires when very high stress
+            if = {
+                limit = {
+                    stress >= 300
+                    NOT = { has_character_flag = eotg_flag_nf_event_cooldown }
+                }
+                random = {
+                    chance = 60
+                    trigger_event = { id = eotg_fracture.004  days = { 1 10 } }
+                }
+            }
+
+            # What the Heir Saw — primary heir is old enough to witness
+            if = {
+                limit = {
+                    NOT = { has_character_flag = eotg_flag_nf_event_cooldown }
+                    exists = primary_heir
+                    primary_heir = { age >= 12  is_alive = yes }
+                }
+                random = {
+                    chance = 30
+                    trigger_event = { id = eotg_fracture.005  days = { 1 20 } }
+                }
+            }
+
+            # The Warrant — disaffected vassal rebels on cognitive grounds
+            if = {
+                limit = {
+                    NOT = { has_character_flag = eotg_flag_nf_event_cooldown }
+                    any_vassal = {
+                        is_alive = yes
+                        opinion = { target = root  value < -30 }
+                    }
+                }
+                random = {
+                    chance = 35
+                    trigger_event = { id = eotg_fracture.006  days = { 1 15 } }
+                }
+            }
+
+            # Dead Reckoning — rare clarity
+            if = {
+                limit = { NOT = { has_character_flag = eotg_flag_nf_event_cooldown } }
+                random = {
+                    chance = 8
+                    trigger_event = { id = eotg_fracture.007  days = { 1 30 } }
+                }
+            }
+        }
+    }
+}

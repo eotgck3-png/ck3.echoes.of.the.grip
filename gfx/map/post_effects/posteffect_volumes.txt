@@ -1,0 +1,174 @@
+﻿# MOD(eotg) copy of game/gfx/map/post_effects/posteffect_volumes.txt (CK3 1.19).
+# Only the `standard` entry is changed - see the note there. Everything below is vanilla.
+
+##reload posteffectvolumes
+#PostEffectVolumes.Enabled
+#PostEffectVolumes.ForceUpdate
+#Draw.DebugPostEffectVolumes
+
+posteffect_values = {
+	name = standard
+	# Hologram grade: blacks crushed to true black, midtones cooled, highlights left alone,
+	# so the map reads as emitted light rather than a lit surface.
+	#
+	# Terrain separation was measured before shipping it, because a grade that flattens the
+	# palette would undo the work check_terrain_distinctness.py exists to protect. Mean
+	# CIEDE2000 over all 105 terrain pairs goes 33.8 -> 36.0 and no pair falls below dE 10,
+	# so it slightly improves separation: crushing the floor pulls the dark terrains apart.
+	# A stronger near-monochrome version was rejected on the same measurement - it put 27 of
+	# the 105 pairs under dE 10, with a minimum of 0.4.
+	#
+	# SCOPE, verified in game with eotg_scope_test.tga (a LUT with the green channel forced
+	# to zero, so anything it reaches goes pink): terrain, water, borders and the holding
+	# markers change. UI panels, character portraits and the on-map coat-of-arms shields do
+	# NOT - the shields turn out to be a GUI layer over map coordinates, not map geometry.
+	# Keep that test file: it answers "what does this touch" in one launch.
+	#
+	# TINT FIX: the cool tint was [0.62, 1.02, 1.16], which cut red hard while lifting green
+	# and blue. On a SATURATED colour that just cools it. On a near-neutral one it inverts
+	# which channel dominates, and the hue swings: hills #85796a (R133 G121 B106) came out
+	# R115 G122 B112 - green wins - so a warm stone-grey rendered as olive across whole
+	# regions. Measured hue shift 55.5 degrees, against under 13 for everything else.
+	# Now [0.86, 0.95, 1.16]: red is cut gently enough not to reorder channels and green is
+	# pulled slightly DOWN so it cannot win. Max hue shift across the palette 55.5 -> 7.2
+	# degrees, with mean terrain dE unchanged at 36.0 and still no pair under dE 10.
+	#
+	# Revert by pointing this back at colorcorrection_neutral.tga.
+	lut = "gfx/map/post_effects/eotg_hologram_a.tga"
+
+	# MOD(eotg) darker ambience. Everything else in this file inherits from standard, directly
+	# or through zoom_step_00, so one value here moves every zoom level together.
+	#
+	# Done here rather than in the shaders on purpose: EOTG_TERRAIN_EMISSIVE would darken the
+	# land and leave the water, the nebula and the markers where they were, and the balance
+	# between those took a long time to settle. value_scale is applied after everything is
+	# composited, so the relationship between them is preserved.
+	value_scale = 0.82
+}
+
+posteffect_values = {
+	name = cold
+	inherit = standard
+	saturation_scale = 1
+	colorbalance = { 1 1 1 }
+	fog_begin = 150
+	fog_end = 400
+}
+
+posteffect_values = {
+	name = hot
+	inherit = standard
+	# MOD(eotg) vanilla set value_scale = 1.0 here. That is an absolute, not a relative, so it
+	# cancelled the 0.82 on `standard` for everything using `hot` - which is the "south" volume,
+	# a 3000-unit band across the bottom of the map. The result would be Africa and Arabia at
+	# full brightness with a fade seam against the darker rest. Dropped so it inherits, and so a
+	# future change to `standard` carries here too.
+	colorbalance = { 1.0 1 1 }
+}
+
+posteffect_values = {
+	name = default
+	inherit = standard
+}
+
+posteffect_values = {
+	name = zoom_step_00
+	inherit = standard
+}
+posteffect_values = {
+	name = zoom_step_01
+	inherit = zoom_step_00
+	fog_begin = 2000
+	fog_end = 5000
+}
+posteffect_values = {
+	name = flatmap
+	inherit = zoom_step_01
+	exposure = 1.0
+	fog_max = 0
+
+	# MOD(eotg) the strategic view leans harder into the hologram, but NOT with a stronger
+	# colour grade. That was the plan and the measurement killed it: the argument was that
+	# terrain colour is hidden at this zoom so a near-monochrome LUT costs nothing. It ignored
+	# what replaces it. At this zoom REALM colours are the map, and pushing the grade collapses
+	# them too - a full teal grade puts 22 of 78 realm pairs under dE 10, minimum 0.2, which
+	# means you cannot tell France from the Holy Roman Empire.
+	#
+	# So: darker base, slightly higher saturation. The void goes deeper while the realm colours
+	# sitting on it get MORE separable, not less, which is the honest way to read as emitted
+	# light. value_scale is absolute, not relative, so 0.72 replaces standard's 0.82.
+	value_scale = 0.72
+	saturation_scale = 1.15
+}
+
+#################################
+
+############ VOLUMES ############
+############ HEIGHTS ############
+
+#################################
+
+posteffect_volumes = {
+
+	posteffect_height_volume = {
+		name = "zoom_step_00"
+
+		posteffect_values_day = zoom_step_00
+		posteffect_values_night = zoom_step_00
+
+		height = 50
+		fade_distance = 0
+	}
+
+	posteffect_height_volume = {
+		name = "zoom_step_01"
+	
+		posteffect_values_day = zoom_step_01
+		posteffect_values_night = zoom_step_01
+	
+		height = 100
+		fade_distance = 800
+	}
+
+	posteffect_height_volume = {
+		name = "flatmap"
+	
+		posteffect_values_day = flatmap
+		posteffect_values_night = flatmap
+	
+		height = 1218
+		fade_distance = 142
+	}
+}
+
+################################# 
+
+############ VOLUMES ############ 
+############ BOXES	 ############ 
+
+#################################
+
+	
+posteffect_volume = {
+	name = "north"
+	
+	posteffect_values_day = cold
+	posteffect_values_night = cold
+	
+	position = { 4000 0 4000 }
+	size = { 20000 2000 3000 }
+	fade_distance = 1000
+}
+
+posteffect_volume = {
+	name = "south"
+	
+	posteffect_values_day = hot
+	posteffect_values_night = hot
+	
+	position = { 4000 0 500 }
+	size = { 20000 2000 3000 }
+	fade_distance =  1000
+}
+	
+	

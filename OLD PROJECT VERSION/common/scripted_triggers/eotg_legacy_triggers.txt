@@ -1,0 +1,126 @@
+﻿# ── eotg_legacy_triggers.txt ─────────────────────────────────────────────────
+# Scripted triggers for the Confluence Legacies system.
+# See docs/confluence_legacies_system_pitch.md for the design.
+#
+# Data model (variables on the county title):
+#   eotg_legacy_family    1 Buried Metropolis | 2 Archive Fragment
+#                         3 Relic Works       | 4 Hell Pocket
+#   eotg_legacy_known     exists = the site has been discovered
+#   eotg_legacy_condition 1 dormant | 2 exposed | 3 governed
+#                         4 extracted | 5 sealed | 6 unstable
+#   eotg_legacy_integrity 0–100 (how much of the Legacy remains)
+#   eotg_legacy_attention 0–100 (Obscure <25, Rumoured 25–49,
+#                         Contested 50–74, Renowned 75+)
+#   eotg_legacy_cooldown  timed variable — site is quiet while it exists
+# ─────────────────────────────────────────────────────────────────────────────
+
+# County scope: any Confluence Legacy site here (known or hidden)?
+eotg_st_legacy_site = {
+    has_variable = eotg_legacy_family
+}
+
+# County scope: a discovered site
+eotg_st_legacy_known_site = {
+    has_variable = eotg_legacy_family
+    has_variable = eotg_legacy_known
+}
+
+# County scope: a site nobody has found yet
+eotg_st_legacy_hidden_site = {
+    has_variable = eotg_legacy_family
+    NOT = { has_variable = eotg_legacy_known }
+}
+
+# County scope: the site is in the given condition ($CONDITION$ = 1–6)
+eotg_st_legacy_condition = {
+    has_variable = eotg_legacy_condition
+    var:eotg_legacy_condition = $CONDITION$
+}
+
+# County scope: attention is at or above $VALUE$
+eotg_st_legacy_attention_at_least = {
+    has_variable = eotg_legacy_attention
+    var:eotg_legacy_attention >= $VALUE$
+}
+
+# County scope: integrity is at or below $VALUE$
+eotg_st_legacy_integrity_at_most = {
+    has_variable = eotg_legacy_integrity
+    var:eotg_legacy_integrity <= $VALUE$
+}
+
+# County scope: no recent major event at this site
+eotg_st_legacy_ready = {
+    NOT = { has_variable = eotg_legacy_cooldown }
+}
+
+# Character scope: does the ruler directly hold a county with a known site?
+eotg_st_holds_known_legacy = {
+    any_sub_realm_county = {
+        holder = root
+        eotg_st_legacy_known_site = yes
+    }
+}
+
+# Character scope: does the ruler directly hold a county with a hidden site?
+eotg_st_holds_hidden_legacy = {
+    any_sub_realm_county = {
+        holder = root
+        eotg_st_legacy_hidden_site = yes
+    }
+}
+
+# Character scope: education gates (level 2+) used across Legacy options
+eotg_st_edu_learning_2 = {
+    OR = {
+        has_trait = education_learning_2
+        has_trait = education_learning_3
+        has_trait = education_learning_4
+    }
+}
+eotg_st_edu_stewardship_2 = {
+    OR = {
+        has_trait = education_stewardship_2
+        has_trait = education_stewardship_3
+        has_trait = education_stewardship_4
+    }
+}
+eotg_st_edu_martial_2 = {
+    OR = {
+        has_trait = education_martial_2
+        has_trait = education_martial_3
+        has_trait = education_martial_4
+    }
+}
+eotg_st_edu_diplomacy_2 = {
+    OR = {
+        has_trait = education_diplomacy_2
+        has_trait = education_diplomacy_3
+        has_trait = education_diplomacy_4
+    }
+}
+eotg_st_edu_intrigue_2 = {
+    OR = {
+        has_trait = education_intrigue_2
+        has_trait = education_intrigue_3
+        has_trait = education_intrigue_4
+    }
+}
+eotg_st_edu_intrigue_3 = {
+    OR = {
+        has_trait = education_intrigue_3
+        has_trait = education_intrigue_4
+    }
+}
+eotg_st_edu_stewardship_3 = {
+    OR = {
+        has_trait = education_stewardship_3
+        has_trait = education_stewardship_4
+    }
+}
+eotg_st_edu_diplomacy_3 = {
+    OR = {
+        has_trait = education_diplomacy_3
+        has_trait = education_diplomacy_4
+    }
+}

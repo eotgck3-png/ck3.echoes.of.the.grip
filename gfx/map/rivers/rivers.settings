@@ -1,0 +1,17 @@
+# MOD(eotg) Stellar Rivers - override of game/gfx/map/rivers/rivers.settings
+# These feed the JominiRiver constant buffer. Only the first two (and NoiseScale) matter for the
+# energy shader; the rest are kept at vanilla values so nothing else in the engine changes.
+"FlowNormalUvScale" = 0.400000		# tiling of the streak noise along/across the stream (smaller = bigger streaks)
+"FlowNormalSpeed" = 0.120000		# base scroll speed of the streaks (vanilla water: 0.075)
+"FoamFactorNear" = 0.500000
+"FoamFactorFar" = 1.000000
+"FoamFactorFarZoomstep" = 10
+"NoiseScale" = 0.250000			# scale of the slow world-space turbulence layer
+"NoiseSpeed" = 2.000000
+"FlattenMult" = 1.000000
+"DepthFakeFactor" = 2.000000
+"OceanFadeRate" = 0.800000
+"Depth" = 0.150000
+"Bottom.DiffuseTexture" = "gfx/map/rivers/river_bottom_diffuse.dds"
+"Bottom.NormalTexture" = "gfx/map/rivers/river_bottom_normal.dds"
+"Bottom.MaterialTexture" = "gfx/map/rivers/river_bottom_gloss.dds"

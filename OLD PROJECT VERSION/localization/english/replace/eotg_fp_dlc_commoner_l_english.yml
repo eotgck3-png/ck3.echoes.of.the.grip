@@ -1,0 +1,114 @@
+﻿l_english:
+ # ── FP1/FP2/FP3 DLC — EotG Setting Overrides ─────────────────────────────────
+ # Sources (FP1): dlc_fp1_modifiers_l_english.yml,
+ #                dlc_fp1_jomsviking_events_l_english.yml,
+ #                dlc_fp1_shieldmaiden_events_l_english.yml,
+ #                dlc_fp1_other_decisions_events_l_english.yml,
+ #                dlc_fp1_custom_loc_l_english.yml
+ # Sources (FP2): dlc_fp2_events_amalgamated_l_english.yml,
+ #                dlc_fp2_game_concepts_l_english.yml
+ # Sources (FP3): dlc_fp3_decision_events_l_english.yml,
+ #                dlc_fp3_modifiers_l_english.yml,
+ #                dlc_fp3_yearly_events_l_english.yml
+ # Replaces: "peasant/peasants/peasantry" → "commoner/commoners/commonfolk".
+ # ─────────────────────────────────────────────────────────────────────────────
+
+ # ── FP1: Modifiers ────────────────────────────────────────────────────────────
+
+ # "Superstitious Peasants" — modifier name
+ draugr_nothing_found_fp1_modifier:0 "Superstitious Commoners"
+
+ # "The peasants of this county rest easy"
+ held_grand_sacrifice_fp1_modifier_desc:0 "The commoners of this county rest easy, knowing that the gods smile on those who pay tribute."
+
+ # "The peasants in this county still talk of how they mixed freely"
+ commoners_grand_sacrifice_fp1_modifier_desc:0 "The commoners in this county still talk of how they mixed freely with the nobility at the last mighty feast held in honor of their gods."
+
+ # "The peasantry are up in arms"
+ held_human_sacrifice_fp1_modifier_desc:0 "The commonfolk are up in arms at being ruled over by a character who practices the ritual murder of other humans."
+
+ # ── FP1: Jomsviking Events ────────────────────────────────────────────────────
+
+ # "who kills ten peasants each day abroad,"
+ fp1_jomsvikings.0001.desc.viking:0 "who kills ten commoners each day abroad,"
+
+ # ── FP1: Shieldmaiden Events ──────────────────────────────────────────────────
+
+ # "mercilessly dispatched the peasants within striking range"
+ fp1_shieldmaiden.0021.desc.mob:0 "While the mob I incited to kill [target.GetTitledFirstName] managed to drag [target.GetHerHim] off [target.GetHerHis] horse, they were unable to finish the job before [target.GetFirstNamePossessiveNoTooltip] [shieldmaiden.Custom('ShieldPersonFemaleMale')] intervened. [shieldmaiden.GetSheHe|U] mercilessly dispatched the commoners within striking range of [target.GetFirstNameNoTooltip] and scared the others into fleeing."
+
+ # "mob of screaming and shouting peasants descends" + "the peasants who were striking me"
+ fp1_shieldmaiden.0022.desc.mob:0 "I am riding through the streets of [home_province.GetName] when a mob of screaming and shouting commoners descends on my retinue. Before I realize what is happening, the commoners tear me from my horse and start beating me!\n\nMy [shieldmaiden.Custom('ShieldPersonFemaleMale')] [shieldmaiden.GetFirstName] rushes to my defense with [shieldmaiden.Custom('signature_weapon')] in hand, mercilessly [shieldmaiden.Custom('SignatureWeaponWoundVerb1PresentParticiple')] at the commoners who were striking me and, perhaps inglamorously, protecting me from further harm as I get buried underneath their corpses."
+
+ # ── FP1: Other Decisions Events ───────────────────────────────────────────────
+
+ # "peasant and noble alike"
+ fp1_other_decisions.0004.desc:0 "There are those within my lands who believe in holding grand sacrificial slaughters for their fictional gods. My own enlightened [blotter.GetFaith.GetAdjective] faith endorses no such butchery, and yet a curious property of many such [blotter.Custom('GruesomeFestivalNamePlural')] is that they hinge on the active participation of the [blotter.GetTitleAsNameNoTooltip].\n\nI need not convert to their beliefs to administer their ways, but it would doubtless win me many friends among my less-enlightened subjects, commoner and noble alike, to agree to host a great [blotter.Custom('GruesomeFestivalName')] for their faith."
+
+ # "From the smallest peasant to a [RulerTitle]"
+ fp1_other_decisions.0101.desc:0 "Every runestone tells a message of some significant event in the life of the commissioner. From the most common subject to a [ROOT.Char.GetTitleAsNameNoTooltip] like myself, the stone records all.\n\nWhat shall this monument speak of?"
+
+ # ── FP1: Custom Loc ───────────────────────────────────────────────────────────
+
+ # "[ancestor's] name was feared by every peasant who ever heard it"
+ SteleCommemoratesAncestors_Viking:0 "$SteleCommemoratesAncestors_Intro$. [second.MakeScope.Var('stele_container').Char.GetHerHis|U] name was feared by every commoner who ever heard it. $SteleCommemoratesCarver$."
+
+ # ── FP2: Events ───────────────────────────────────────────────────────────────
+
+ # "Peasants in this County are growing nutritious rice"
+ rice_fields_modifier_desc:0 "Commoners in this County are growing nutritious rice, filling their bellies and inspiring new cuisine."
+
+ # "The peasants of [capital] are fat and happy" + "productive peasantry"
+ fp2_flavor.0001.desc:0 "[rice_propagator.GetTitledFirstNamePossessive] capital is truly prosperous. The commoners of [rice_propagator_capital.GetNameNoTier] are fat and happy – and #EMP productive!#!\n\nThe Muslims have brought a new crop to their lands, rice. It is easy to grow and feeds the people well. Is this part of their success, I wonder? I would not mind more productive commonfolk myself...\n\nPerhaps I should establish rice fields in my own capital? But how should I get started?"
+
+ # "carried in by several peasants" + "the peasants tell me they found"
+ fp2_yearly.1003.desc:0 "A commotion in my courtyard catches my attention as [injured_knight.Custom2('MyCharacterIntroduction', ROOT.Char)] is carried in by several commoners. [injured_knight.GetSheHe|U] is obviously badly injured.\n\nWhen I demand to know what happened, the commoners tell me they found [injured_knight.GetHerHim] in a field where [injured_knight.GetSheHe] claimed to have just barely fought off a giant.\n\nHis squire pulls me aside after the story is over, "The truth is that [injured_knight.GetSheHe] tried to joust with a windmill and lost my lord, but these villagers seems quite taken with [injured_knight.GetHerHis] story.""
+
+ # "Several peasants confirm [hidden_viking.GetHerHis] story"
+ # Setting pass: "viking" -> "raider"; "villagers" -> "settlers". The
+ # hidden_viking / viking_county scope names are script-side and stay as they are.
+ fp2_yearly.1005.desc:0 "Struggling and shouting, a large [hidden_viking.GetWomanMan] is dragged before me. [hidden_viking.GetSheHe|U] is clearly a fringe raider, the type who has sown chaos in our realm for decades.\n\n"Please have mercy. My name is [hidden_viking.GetName] and I've been living in [viking_county.GetNameNoTooltip] for years. I was left behind because I was injured. The settlers saved me; they're my family now."\n\nThe raider falls to [hidden_viking.GetHerHis] knees, hoping I'll spare [hidden_viking.GetHerHis] life. Several commoners confirm [hidden_viking.GetHerHis] story."
+
+ # "some of the less wretched peasants to attend our meetings"
+ fp2_yearly.8001.desc:0 "My [commoner_enthusiast.GetCouncilTitle] [commoner_enthusiast.GetTitledFirstName] has long pondered our finances, and now suggests it is time to assemble the #italic cortes#!, a novel form of parliament where elected representatives of the free municipalities take part in the deliberations of the royal council.\n\n"In return for this privilege", [commoner_enthusiast.GetSheHe] says, "we could tax the cities even more. If we truly need gold, [ROOT.Char.Custom('FormOfAddressForLiege')], we could even allow some of the less wretched commoners to attend our meetings, though I would advice against that, since it would surely infuriate the nobles.""
+
+ # "a peasant elder approaches me"
+ fp2_struggle.2001.desc:0 "As I tour my [ROOT.GetCharacter.Custom('FortifiedBuilding')] grounds, a commoner elder approaches me.\n\n"Great [ROOT.Char.GetLadyLord], please have mercy upon us and save our village from the tyranny of [fp2_2001_desperate_county.GetHolder.GetName]". [fp2_2001_desperate_county.GetHolder.GetSheHe|U] has neglected our settlement for far too long. The people yearn for a new ruler; they yearn for you, [ROOT.Char.GetLadyLord].""
+
+ # "Helping the peasants would be a breach of this agreement"
+ fp2_struggle.2001.desc.extra.b:0 "[fp2_2001_desperate_county.GetHolder.GetName], who owns the [fp2_2001_desperate_county.GetName], has an existing truce with you. Helping the commoners would be a breach of this agreement."
+
+ # "You abandon the peasants to their fate"
+ fp2_struggle.2001.e.desc:0 "You abandon the commoners to their fate under the rule of [fp2_2001_desperate_county.GetHolder.GetName]"
+
+ # "a peasant woman offers me a refreshing mug of milk"
+ fp2_struggle.2020.desc:0 "Passing through [fp2_2020_valencia.GetName], a commoner woman offers me a refreshing mug of milk with a taste sweeter than anything I've tasted before. "What is this marvelous drink you've offered me?" I ask, to which she responds "milk from an earth almond."\n\nThere is no person who could resist the allure of this concoction on a hot summer day, no child who could avoid smiling when offered a mug, and no Valencian without a sweet tooth for it. #EMP This beverage isn't milk, it's gold!#!"
+
+ # "You force the peasants to exclusively grow earth almonds"
+ fp2_struggle.2020.a.desc:0 "You force the commoners to exclusively grow earth almonds, creating luxury products for your capital."
+
+ # "The peasants lead blessed lives in that respect"
+ fp2_yearly.4001.desc:0 "My goodness! Being a [ROOT.Char.GetTitleAsNameNoTooltip] really does take it out of you. I have to toil all day and much of the night too in order to stay on top of things. The commoners lead blessed lives in that respect; they don't have such pressures, weighing them down, causing them so much lethargy!\n\nPerhaps a little nap would do me good? I can sleep off the exertions of lunch and be ready to tackle the rest of the day!"
+
+ # ── FP2: Game Concepts ───────────────────────────────────────────────────────
+
+ # "Peasantry and nobility alike are comfortable"
+ game_concept_struggle_phase_iberia_opportunity_desc:0 "After a long period of relatively peaceful coexistence during the [struggle_phase_iberia_conciliation|E], complacency begins to set in. Commonfolk and nobility alike are comfortable that things just #EMP work#!, allowing more shrewd [characters|E] to take advantage of their naivety.\n\nEventually, fresh abuses will either cause an escalation into the [struggle_phase_iberia_hostility|E], or else savvy politicking reaches an uneasy equilibrium through the [struggle_phase_iberia_conciliation|E]."
+
+ # ── FP3: Decision Events ──────────────────────────────────────────────────────
+
+ # "the peasant leader Babak ensconced himself"
+ fp3_decision.0003.desc_recently:0 "Just a few decades ago, during the height of the Khurramite rebellion against the Abbasids, the commoner leader Babak ensconced himself and his followers in an ancient Parthian fortress. That became his last stand, but the Abbasids paid dearly for their victory."
+
+ # "The peasants and herders of these rugged mountains are notoriously unruly"
+ fp3_decision.0003.desc_zandik:0 "The commoners and herders of these rugged mountains are notoriously unruly, but they loathe the old [ROOT.Char.GetFaith.GetReligion.GetAdjectiveNoTooltip] clergy, and have promised me their support.\n\n"
+
+ # ── FP3: Modifiers ────────────────────────────────────────────────────────────
+
+ # "leaving not even a maund for the peasants"
+ fp3_wheat_shortage_modifier_desc:0 "The royal baker in this county is hoarding wheat, leaving not even a maund for the commoners."
+
+ # ── FP3: Yearly Events ────────────────────────────────────────────────────────
+
+ # "The peasants are often troubled by [sinful_tax_collector.GetHerHis] inconsistent collections"
+ fp3_yearly.2021.desc_arbitrary:0 ""[sinful_tax_collector.GetTitledFirstNameNoTooltip] rarely heeds any laws or regulations, instead collecting taxes based on [sinful_tax_collector.GetHerHis] whims. The commoners are often troubled by [sinful_tax_collector.GetHerHis] inconsistent collections.""

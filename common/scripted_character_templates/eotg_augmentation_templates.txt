@@ -1,0 +1,28 @@
+﻿# ── eotg_augmentation_templates.txt ─────────────────────────────────────────
+# Character templates for the Cybernetic Augmentation system.
+# Shape: vanilla common/scripted_character_templates/01_ep1_character_templates.txt
+# (prince_ali_template). Culture and faith are NOT set here: callers pass
+# root.culture / root.faith by scope (index §1 rule 9, map-agnostic).
+# ─────────────────────────────────────────────────────────────────────────────
+
+# The syndicate envoy (cybernetics_v2_phase5.md §2.2). Callers:
+# eotg_aug_patron_accept_effect (patron.001 a, c, d) and eotg_aug_patron.007.
+eotg_aug_patron_envoy_template = {
+    age = { 35 55 }
+
+    random_traits_list = {
+        count = 1
+        greedy = {}
+        ambitious = {}
+        deceitful = {}
+    }
+    random_traits_list = {
+        count = 1
+        education_stewardship_3 = {}
+        education_intrigue_3 = {}
+    }
+    random_traits = yes
+
+    stewardship = { 10 14 }
+    intrigue = { 10 14 }
+}

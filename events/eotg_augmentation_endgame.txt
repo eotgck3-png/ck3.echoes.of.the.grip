@@ -1,0 +1,701 @@
+﻿# -- eotg_augmentation_endgame.txt --------------------------------------------
+# The Neurofractured endgames (docs/specs/cybernetics_v2_phase3.md §7).
+#
+# eotg_aug_end.001 -- Excision: The Surgeons      (leave the system, or die)
+# eotg_aug_end.002 -- Silence                     (Excision survivors)
+# eotg_aug_end.009 -- Hand Over the Controls      (choose Total Integration)
+# eotg_aug_end.010 -- There Is No Static          (Total Integration notice)
+# eotg_aug_end.011 -- The Empty Hall              (the court leaves)
+# eotg_aug_end.020 -- Appoint a Warden            (Containment Regency by choice)
+# eotg_aug_end.030 -- Into Restraints             (abdication)
+# eotg_aug_end.031 -- The Locked Wing             (to the successor)
+#
+# Fires from: eotg_decision_aug_excision, eotg_fracture.026 (d),
+#   eotg_fracture.027 (excision outcome), eotg_fracture.007 (f) and
+#   eotg_aug_end.031 (c) -> .001; eotg_aug_excision_surgery_effect -> .002;
+#   eotg_decision_aug_embrace_cascade -> .009;
+#   eotg_aug_total_integration_effect -> .010; .010 immediate -> .011;
+#   eotg_decision_aug_appoint_warden -> .020; eotg_fracture.027 (abdication
+#   outcome) and .020 (d) -> .030; eotg_aug_abdicate_effect -> .031.
+# Cooldowns live in the decisions (cooldown = {} or flag); chain stages carry
+# none (index §1 rule 5).
+# Resource: every event here changes tier (exits the system, becomes
+# Seamless, or dies) or moves eotg_fracture_risk; chain stages (.002, .010,
+# .011) couple through the tier change that fired them.
+# Loc register: "self" / "personhood", never "humanity" (index §5.5).
+# -----------------------------------------------------------------------------
+
+namespace = eotg_aug_end
+
+
+# -- eotg_aug_end.001 ---------------------------------------------------------
+# Excision — The Surgeons. The odds are given in words (desc variants by tier,
+# physician, promise and a free table), never numbers; the roll is hidden in
+# eotg_aug_excision_surgery_effect. Surgical odds, not fracture risk.
+
+eotg_aug_end.001 = {
+    type = character_event
+    title = eotg_aug_end.001.t
+    desc = {
+        desc = eotg_aug_end.001.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { has_trait = eotg_neurofractured }
+                desc = eotg_aug_end.001.desc_odds_grim
+            }
+            triggered_desc = {
+                trigger = { eotg_is_aug_tier3 = yes }
+                desc = eotg_aug_end.001.desc_odds_poor
+            }
+            desc = eotg_aug_end.001.desc_odds_fair
+        }
+        triggered_desc = {
+            trigger = { eotg_has_physician_access = yes }
+            desc = eotg_aug_end.001.desc_physician
+        }
+        # Free outranks promised: a free table makes the half-price promise
+        # moot, so only one of the two lines shows.
+        first_valid = {
+            triggered_desc = {
+                trigger = { has_character_flag = eotg_flag_aug_excision_free }
+                desc = eotg_aug_end.001.desc_free
+            }
+            triggered_desc = {
+                trigger = { has_character_flag = eotg_flag_aug_promised_treatment }
+                desc = eotg_aug_end.001.desc_promised
+            }
+        }
+    }
+    theme = medicine
+
+    trigger = {
+        OR = {
+            has_trait = eotg_cybernetics
+            has_trait = eotg_neurofractured
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = worry
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_surgeon }
+        character = scope:eotg_surgeon
+        animation = personality_rational
+    }
+
+    immediate = {
+        hidden_effect = {
+            if = {
+                limit = { employs_court_position = court_physician_court_position }
+                court_position:court_physician_court_position = { save_scope_as = eotg_surgeon }
+            }
+        }
+    }
+
+    # "Begin."
+    option = {
+        name = eotg_aug_end.001.a
+        trigger = { eotg_aug_can_afford_excision = yes }
+        eotg_aug_excision_pay_effect = yes
+        custom_tooltip = eotg_aug_end.001.tt
+        hidden_effect = {
+            eotg_aug_excision_surgery_effect = { DEATH_BASE = 15  BRAVE = no }
+        }
+        eotg_aug_stress_reject_effect = yes
+        ai_chance = {
+            base = 50
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 20  has_trait = zealous }
+            modifier = { add = -20  has_trait = ambitious }
+        }
+    }
+
+    # "Not today." The free table does not wait.
+    option = {
+        name = eotg_aug_end.001.b
+        hidden_effect = {
+            remove_character_flag = eotg_flag_aug_excision_free
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = craven }
+            modifier = { add = 20  has_trait = ambitious }
+        }
+    }
+
+    # [craven] "Put me under. Don't wake me if it goes wrong." As a, death +10.
+    option = {
+        name = eotg_aug_end.001.c
+        trigger = {
+            has_trait = craven
+            eotg_aug_can_afford_excision = yes
+        }
+        trait = craven
+        eotg_aug_excision_pay_effect = yes
+        custom_tooltip = eotg_aug_end.001.tt
+        hidden_effect = {
+            eotg_aug_excision_surgery_effect = { DEATH_BASE = 25  BRAVE = no }
+        }
+        stress_impact = {
+            craven = medium_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = craven }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # [brave] "Awake. I want to watch them take it out." As a; the maimed
+    # outcome becomes clean, +100 prestige on survival.
+    option = {
+        name = eotg_aug_end.001.d
+        trigger = {
+            has_trait = brave
+            eotg_aug_can_afford_excision = yes
+        }
+        trait = brave
+        eotg_aug_excision_pay_effect = yes
+        custom_tooltip = eotg_aug_end.001.d.tt
+        hidden_effect = {
+            eotg_aug_excision_surgery_effect = { DEATH_BASE = 15  BRAVE = yes }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = brave }
+            modifier = { add = 10  has_trait = stubborn }
+        }
+    }
+}
+
+
+# -- eotg_aug_end.002 ---------------------------------------------------------
+# Silence. The implants are out. Chain stage of a tier exit
+# (eotg_aug_excision_surgery_effect, survivors). scope:eotg_excision_outcome
+# (flag:maimed / flag:clean) carries over for the desc.
+
+eotg_aug_end.002 = {
+    type = character_event
+    title = eotg_aug_end.002.t
+    desc = {
+        desc = eotg_aug_end.002.desc
+        triggered_desc = {
+            trigger = {
+                exists = scope:eotg_excision_outcome
+                scope:eotg_excision_outcome = flag:maimed
+            }
+            desc = eotg_aug_end.002.desc_maimed
+        }
+    }
+    theme = recovery
+
+    left_portrait = {
+        character = root
+        animation = sadness
+    }
+
+    # "It's quiet."
+    option = {
+        name = eotg_aug_end.002.a
+        stress_impact = { base = medium_stress_impact_loss }
+        ai_chance = {
+            base = 50
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 20  has_trait = calm }
+        }
+    }
+
+    # "I miss it."
+    option = {
+        name = eotg_aug_end.002.b
+        stress_impact = { base = minor_stress_impact_gain }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 20  has_trait = cynical }
+        }
+    }
+
+    # [zealous] "Quiet. At last."
+    option = {
+        name = eotg_aug_end.002.c
+        trigger = { has_trait = zealous }
+        trait = zealous
+        add_piety = 100
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = zealous }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+}
+
+
+# -- eotg_aug_end.009 ---------------------------------------------------------
+# Hand Over the Controls (renamed per lore review). The desc lists what goes:
+# friends, personality, children. It speaks of the self / personhood, never
+# "humanity"; no option text contains "open" or "through".
+# Caller: eotg_decision_aug_embrace_cascade.
+
+eotg_aug_end.009 = {
+    type = character_event
+    title = eotg_aug_end.009.t
+    desc = eotg_aug_end.009.desc
+    theme = mental_health
+
+    trigger = {
+        has_trait = eotg_neurofractured
+    }
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+
+    # "Yes."
+    option = {
+        name = eotg_aug_end.009.a
+        eotg_aug_total_integration_effect = yes
+        eotg_aug_stress_embrace_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = 20  has_trait = cynical }
+            modifier = { add = -30  has_trait = compassionate }
+        }
+    }
+
+    # "...No."
+    option = {
+        name = eotg_aug_end.009.b
+        eotg_add_fracture_risk = { AMOUNT = -10 }
+        eotg_aug_stress_reject_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 20  has_trait = zealous }
+        }
+    }
+
+    # [ambitious] "Yes. All of it."
+    option = {
+        name = eotg_aug_end.009.c
+        trigger = { has_trait = ambitious }
+        trait = ambitious
+        eotg_aug_total_integration_effect = yes
+        add_prestige = 200
+        eotg_aug_stress_embrace_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = ambitious }
+            modifier = { add = 10  has_trait = arrogant }
+        }
+    }
+}
+
+
+# -- eotg_aug_end.010 ---------------------------------------------------------
+# There Is No Static (Total Integration notification). Voice is 5: "There is
+# no voice now. There is no one left for it to speak to."
+# Caller: eotg_aug_total_integration_effect. Fires eotg_aug_end.011 in 180 days.
+
+eotg_aug_end.010 = {
+    type = character_event
+    title = eotg_aug_end.010.t
+    desc = eotg_aug_end.010.desc
+    theme = mental_health
+
+    left_portrait = {
+        character = root
+        animation = idle
+    }
+
+    immediate = {
+        trigger_event = { id = eotg_aug_end.011  days = 180 }
+    }
+
+    # "Continue."
+    option = {
+        name = eotg_aug_end.010.a
+    }
+}
+
+
+# -- eotg_aug_end.011 ---------------------------------------------------------
+# The Empty Hall. Every courtier who is not close family or a spouse and
+# thinks ill of you has already gone (move_to_pool in immediate); the count
+# is root variable eotg_hall_gone for the desc
+# ([ROOT.Char.MakeScope.Var('eotg_hall_gone').GetValue], vanilla loc form),
+# cleared in `after`. Option c only sets the tone: the departures happened.
+# Caller: eotg_aug_end.010 (180 days). Coupling: reads the Seamless trait.
+
+eotg_aug_end.011 = {
+    type = character_event
+    title = eotg_aug_end.011.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { var:eotg_hall_gone > 0 }
+                desc = eotg_aug_end.011.desc
+            }
+            desc = eotg_aug_end.011.desc_none
+        }
+    }
+    theme = court
+
+    trigger = {
+        has_trait = eotg_total_integration
+    }
+
+    left_portrait = {
+        character = root
+        animation = idle
+    }
+
+    immediate = {
+        set_variable = {
+            name = eotg_hall_gone
+            value = {
+                value = 0
+                every_courtier = {
+                    limit = {
+                        is_imprisoned = no
+                        NOT = { is_close_family_of = root }
+                        NOT = { is_spouse_of = root }
+                        opinion = { target = root  value < 0 }
+                    }
+                    add = 1
+                }
+            }
+        }
+        every_courtier = {
+            limit = {
+                is_imprisoned = no
+                NOT = { is_close_family_of = root }
+                NOT = { is_spouse_of = root }
+                opinion = { target = root  value < 0 }
+            }
+            move_to_pool = yes
+        }
+    }
+
+    # "Hire replacements."
+    option = {
+        name = eotg_aug_end.011.a
+        remove_short_term_gold = major_gold_value
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  gold >= major_gold_value }
+            modifier = { add = 10  is_at_war = yes }
+        }
+    }
+
+    # "Let them go."
+    option = {
+        name = eotg_aug_end.011.b
+        ai_chance = {
+            base = 50
+            modifier = { add = 20  gold < major_gold_value }
+            modifier = { add = 10  is_at_war = no }
+        }
+    }
+
+    # "Make them stay." Too late: it only sets the tone.
+    option = {
+        name = eotg_aug_end.011.c
+        add_dread = 50
+        add_tyranny = 20
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  dread >= 50 }
+            modifier = { add = 10  gold < minor_gold_value }
+        }
+    }
+
+    after = {
+        remove_variable = eotg_hall_gone
+    }
+}
+
+
+# -- eotg_aug_end.020 ---------------------------------------------------------
+# Appoint a Warden (renamed per lore review: "Keeper" sat too close to the
+# Name-Keepers clergy). Candidates: the primary spouse, the adult primary
+# heir, the chancellor (each a valid keeper, never the same person twice).
+# Caller: eotg_decision_aug_appoint_warden.
+
+eotg_aug_end.020 = {
+    type = character_event
+    title = eotg_aug_end.020.t
+    desc = eotg_aug_end.020.desc
+    theme = realm
+
+    trigger = {
+        eotg_aug_has_warden_candidate = { RULER = root }
+    }
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_warden_spouse }
+        character = scope:eotg_warden_spouse
+        animation = worry
+    }
+    lower_left_portrait = {
+        trigger = { exists = scope:eotg_warden_heir }
+        character = scope:eotg_warden_heir
+    }
+    lower_right_portrait = {
+        trigger = { exists = scope:eotg_warden_chancellor }
+        character = scope:eotg_warden_chancellor
+    }
+
+    immediate = {
+        hidden_effect = {
+            if = {
+                limit = {
+                    primary_spouse ?= { eotg_aug_keeper_candidate = { RULER = root } }
+                }
+                primary_spouse = { save_scope_as = eotg_warden_spouse }
+            }
+            if = {
+                limit = {
+                    primary_heir ?= {
+                        eotg_aug_keeper_candidate = { RULER = root }
+                        NOT = { is_spouse_of = root }
+                    }
+                }
+                primary_heir = { save_scope_as = eotg_warden_heir }
+            }
+            if = {
+                limit = {
+                    cp:councillor_chancellor ?= {
+                        eotg_aug_keeper_candidate = { RULER = root }
+                        NOT = { is_spouse_of = root }
+                        NOT = { is_primary_heir_of = root }
+                    }
+                }
+                cp:councillor_chancellor = { save_scope_as = eotg_warden_chancellor }
+            }
+        }
+    }
+
+    # The spouse
+    option = {
+        name = eotg_aug_end.020.a
+        trigger = { exists = scope:eotg_warden_spouse }
+        eotg_aug_start_containment_regency_effect = { KEEPER = scope:eotg_warden_spouse  SWING = 50 }
+        eotg_add_fracture_risk = { AMOUNT = -8 }
+        eotg_aug_stress_reject_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = trusting }
+            modifier = { add = 20  has_trait = compassionate }
+        }
+    }
+
+    # The heir
+    option = {
+        name = eotg_aug_end.020.b
+        trigger = { exists = scope:eotg_warden_heir }
+        eotg_aug_start_containment_regency_effect = { KEEPER = scope:eotg_warden_heir  SWING = 50 }
+        eotg_add_fracture_risk = { AMOUNT = -8 }
+        eotg_aug_stress_reject_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = humble }
+            modifier = { add = 20  has_trait = content }
+        }
+    }
+
+    # The chancellor
+    option = {
+        name = eotg_aug_end.020.c
+        trigger = { exists = scope:eotg_warden_chancellor }
+        eotg_aug_start_containment_regency_effect = { KEEPER = scope:eotg_warden_chancellor  SWING = 50 }
+        eotg_add_fracture_risk = { AMOUNT = -8 }
+        eotg_aug_stress_reject_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 20  has_trait = paranoid }
+        }
+    }
+
+    # "And give them the crown." Abdication to the primary heir.
+    option = {
+        name = eotg_aug_end.020.d
+        trigger = { exists = primary_heir }
+        trigger_event = { id = eotg_aug_end.030  days = { 1 3 } }
+        ai_chance = {
+            base = 10
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 20  has_trait = humble }
+            modifier = { add = -30  has_trait = ambitious }
+        }
+    }
+
+    # "No one."
+    option = {
+        name = eotg_aug_end.020.e
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = arrogant }
+            modifier = { add = 20  has_trait = stubborn }
+        }
+    }
+}
+
+
+# -- eotg_aug_end.030 ---------------------------------------------------------
+# Into Restraints (abdication). Both options run eotg_aug_abdicate_effect:
+# the player moves to the primary heir (vanilla set_player_character), the
+# ruler is deposed, restrained for good, and eotg_aug_end.031 reaches the
+# successor in 30 days. The hand-off runs in the option, not immediate, so
+# the player clicks before control moves (vanilla diarchy.9002.b).
+# Callers: eotg_fracture.027 (abdication outcome), eotg_aug_end.020 (d).
+
+eotg_aug_end.030 = {
+    type = character_event
+    title = eotg_aug_end.030.t
+    desc = eotg_aug_end.030.desc
+    theme = realm
+
+    trigger = {
+        exists = primary_heir
+        primary_heir = { is_alive = yes }
+    }
+
+    left_portrait = {
+        character = root
+        animation = sadness
+    }
+    right_portrait = {
+        trigger = { exists = primary_heir }
+        character = primary_heir
+        animation = worry
+    }
+
+    # "Go quietly."
+    option = {
+        name = eotg_aug_end.030.a
+        eotg_aug_abdicate_effect = yes
+        eotg_aug_stress_reject_effect = yes
+        ai_chance = {
+            base = 50
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 20  has_trait = humble }
+        }
+    }
+
+    # [stubborn] "Drag me." The successor takes the dread of it.
+    option = {
+        name = eotg_aug_end.030.b
+        trigger = { has_trait = stubborn }
+        trait = stubborn
+        primary_heir = { add_dread = 20 }
+        eotg_aug_abdicate_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = stubborn }
+            modifier = { add = 10  has_trait = wrathful }
+        }
+    }
+}
+
+
+# -- eotg_aug_end.031 ---------------------------------------------------------
+# The Locked Wing. To the successor (root); the old ruler
+# (scope:eotg_old_ruler, saved by eotg_aug_abdicate_effect) is a courtier
+# now, still Neurofractured.
+# Caller: eotg_aug_abdicate_effect (30 days).
+# Coupling: moves the old ruler's risk, or changes their tier (c, d).
+
+eotg_aug_end.031 = {
+    type = character_event
+    title = eotg_aug_end.031.t
+    desc = eotg_aug_end.031.desc
+    theme = dungeon
+
+    trigger = {
+        exists = scope:eotg_old_ruler
+        scope:eotg_old_ruler = {
+            is_alive = yes
+            has_character_flag = eotg_flag_aug_abdicated
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = worry
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_old_ruler }
+        character = scope:eotg_old_ruler
+        animation = stress
+    }
+
+    # "Keep them comfortable."
+    option = {
+        name = eotg_aug_end.031.a
+        scope:eotg_old_ruler = {
+            eotg_add_fracture_risk = { AMOUNT = -10 }
+        }
+        ai_chance = {
+            base = 50
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 20  has_trait = forgiving }
+        }
+    }
+
+    # "Keep them chained."
+    option = {
+        name = eotg_aug_end.031.b
+        scope:eotg_old_ruler = {
+            eotg_add_fracture_risk = { AMOUNT = 5 }
+        }
+        eotg_aug_stress_cruelty_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = 20  has_trait = paranoid }
+        }
+    }
+
+    # "Have it cut out of them." The successor pays; the old ruler gets the
+    # Surgeons with a free table.
+    option = {
+        name = eotg_aug_end.031.c
+        trigger = { gold >= major_gold_value }
+        remove_short_term_gold = major_gold_value
+        scope:eotg_old_ruler = {
+            add_character_flag = { flag = eotg_flag_aug_excision_free  days = 60 }
+            trigger_event = { id = eotg_aug_end.001  days = { 3 10 } }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = -20  has_trait = greedy }
+        }
+    }
+
+    # "End it quietly."
+    option = {
+        name = eotg_aug_end.031.d
+        scope:eotg_old_ruler = {
+            death = { death_reason = death_murder  killer = root }
+        }
+        eotg_aug_stress_murder_effect = yes
+        ai_chance = {
+            base = 10
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = -30  has_trait = compassionate }
+        }
+    }
+}

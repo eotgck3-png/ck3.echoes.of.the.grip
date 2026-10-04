@@ -1,0 +1,731 @@
+﻿# ── eotg_augmentation_retinue.txt ────────────────────────────────────────────
+# The Iron Retinue (A-10, thread T4): docs/specs/cybernetics_v2_phase5.md §3.
+# Augmentation spreads to the people around you.
+#
+# eotg_aug_retinue.001 — First of the Iron          (phase 1)
+# eotg_aug_retinue.002 — More Ask                   (phase 2)
+# eotg_aug_retinue.003 — The Iron Ranks             (phase 3; renamed, lore review)
+# eotg_aug_retinue.004 — The Unaugmented Resent     (phase 4)
+# eotg_aug_retinue.005 — What the Program Becomes   (phase 5; ends the story)
+#
+# Fires from: the story cycle eotg_story_aug_retinue (started by
+#   eotg_aug_init.019 b/d and eotg_aug_init.020). Cooldown authority: the
+#   story's effect_group (1-2 years, 70%). No event checks a flag.
+# Every option advances the story's eotg_phase in `after` (the spec's "all
+#   set phase = N"), except .001.b ("Not yet": the phase stays).
+# Resource: events change knights' tiers (eotg_aug_retinue_install_effect) or
+#   move retinue knights' eotg_fracture_risk.
+# Phase 6 hooks: eotg_flag_aug_iron_retinue (every Program knight) and
+#   eotg_flag_aug_retinue_permanent (.005.a) on the knights; Phase 6 reads
+#   them for weights only.
+# Knight picks are non-violent (someone to honour), each followed by
+#   save_scope_as; eotg_aug_retainer_candidate (Phase 2) is the shared filter.
+# ─────────────────────────────────────────────────────────────────────────────
+
+namespace = eotg_aug_retinue
+
+
+# ── eotg_aug_retinue.001 ──────────────────────────────────────────────────────
+# First of the Iron. Saved eotg_volunteer: an unaugmented knight (the
+# strongest); d also takes eotg_volunteer_b, the next by prowess.
+# Caller: eotg_story_aug_retinue (phase 1; the story checks a volunteer exists).
+
+eotg_aug_retinue.001 = {
+    type = character_event
+    title = eotg_aug_retinue.001.t
+    desc = eotg_aug_retinue.001.desc
+    theme = martial_chivalry_focus
+
+    trigger = {
+        eotg_aug_has_retinue = yes
+        any_knight = { eotg_aug_retainer_candidate = yes }
+    }
+
+    left_portrait = {
+        character = root
+        animation = personality_bold
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_volunteer }
+        character = scope:eotg_volunteer
+        animation = war_attacker
+    }
+
+    immediate = {
+        hidden_effect = {
+            random_owned_story = {
+                limit = { story_type = eotg_story_aug_retinue }
+                save_scope_as = eotg_retinue_story
+            }
+            ordered_knight = {
+                limit = { eotg_aug_retainer_candidate = yes }
+                order_by = prowess
+                save_scope_as = eotg_volunteer
+            }
+            ordered_knight = {
+                limit = {
+                    eotg_aug_retainer_candidate = yes
+                    NOT = { this = scope:eotg_volunteer }
+                }
+                order_by = prowess
+                save_scope_as = eotg_volunteer_b
+            }
+        }
+    }
+
+    # "Augment them."
+    option = {
+        name = eotg_aug_retinue.001.a
+        trigger = { gold >= minor_gold_value }
+        remove_short_term_gold = minor_gold_value
+        scope:eotg_volunteer = { eotg_aug_retinue_install_effect = yes }
+        hidden_effect = {
+            scope:eotg_retinue_story = { set_variable = { name = eotg_phase  value = 2 } }
+        }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 10  has_trait = brave }
+        }
+    }
+
+    # "Not yet." The phase stays.
+    option = {
+        name = eotg_aug_retinue.001.b
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = patient }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # "The best hardware there is."
+    option = {
+        name = eotg_aug_retinue.001.c
+        trigger = { gold >= medium_gold_value }
+        remove_short_term_gold = medium_gold_value
+        scope:eotg_volunteer = {
+            eotg_aug_retinue_install_effect = yes
+            add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 3 }
+        }
+        hidden_effect = {
+            scope:eotg_retinue_story = { set_variable = { name = eotg_phase  value = 2 } }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = generous }
+            modifier = { add = 10  has_trait = diligent }
+        }
+    }
+
+    # [ambitious] "Them, and the next." Two knights; straight to phase 3.
+    option = {
+        name = eotg_aug_retinue.001.d
+        trigger = {
+            has_trait = ambitious
+            exists = scope:eotg_volunteer_b
+            gold >= { value = minor_gold_value  multiply = 2 }
+        }
+        trait = ambitious
+        remove_short_term_gold = { value = minor_gold_value  multiply = 2 }
+        scope:eotg_volunteer = { eotg_aug_retinue_install_effect = yes }
+        scope:eotg_volunteer_b = { eotg_aug_retinue_install_effect = yes }
+        hidden_effect = {
+            scope:eotg_retinue_story = { set_variable = { name = eotg_phase  value = 3 } }
+        }
+        stress_impact = {
+            ambitious = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = ambitious }
+            modifier = { add = 10  has_trait = arrogant }
+        }
+    }
+
+    # [compassionate] "Only if they truly want it."
+    option = {
+        name = eotg_aug_retinue.001.e
+        trigger = {
+            has_trait = compassionate
+            gold >= minor_gold_value
+        }
+        trait = compassionate
+        remove_short_term_gold = minor_gold_value
+        scope:eotg_volunteer = {
+            eotg_aug_retinue_install_effect = yes
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+        }
+        hidden_effect = {
+            scope:eotg_retinue_story = { set_variable = { name = eotg_phase  value = 2 } }
+        }
+        stress_impact = {
+            compassionate = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = compassionate }
+            modifier = { add = 10  has_trait = honest }
+        }
+    }
+}
+
+
+# ── eotg_aug_retinue.002 ──────────────────────────────────────────────────────
+# More Ask. Saved eotg_cand_a (the stronger) and eotg_cand_b (the next). With
+# one candidate only, the two-knight options (a, d, e) fall away and b
+# installs the one.
+# Caller: eotg_story_aug_retinue (phase 2).
+
+eotg_aug_retinue.002 = {
+    type = character_event
+    title = eotg_aug_retinue.002.t
+    desc = eotg_aug_retinue.002.desc
+    theme = martial_chivalry_focus
+
+    trigger = {
+        eotg_aug_has_retinue = yes
+        any_knight = { eotg_aug_retainer_candidate = yes }
+    }
+
+    left_portrait = {
+        character = root
+        animation = thinking
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_cand_a }
+        character = scope:eotg_cand_a
+        animation = personality_bold
+    }
+    lower_right_portrait = {
+        trigger = { exists = scope:eotg_cand_b }
+        character = scope:eotg_cand_b
+    }
+
+    immediate = {
+        hidden_effect = {
+            random_owned_story = {
+                limit = { story_type = eotg_story_aug_retinue }
+                save_scope_as = eotg_retinue_story
+            }
+            ordered_knight = {
+                limit = { eotg_aug_retainer_candidate = yes }
+                order_by = prowess
+                save_scope_as = eotg_cand_a
+            }
+            ordered_knight = {
+                limit = {
+                    eotg_aug_retainer_candidate = yes
+                    NOT = { this = scope:eotg_cand_a }
+                }
+                order_by = prowess
+                save_scope_as = eotg_cand_b
+            }
+        }
+    }
+
+    # "Both."
+    option = {
+        name = eotg_aug_retinue.002.a
+        trigger = {
+            exists = scope:eotg_cand_b
+            gold >= { value = minor_gold_value  multiply = 2 }
+        }
+        remove_short_term_gold = { value = minor_gold_value  multiply = 2 }
+        scope:eotg_cand_a = { eotg_aug_retinue_install_effect = yes }
+        scope:eotg_cand_b = { eotg_aug_retinue_install_effect = yes }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 10  has_trait = generous }
+        }
+    }
+
+    # "The stronger one."
+    option = {
+        name = eotg_aug_retinue.002.b
+        trigger = { gold >= minor_gold_value }
+        remove_short_term_gold = minor_gold_value
+        scope:eotg_cand_a = { eotg_aug_retinue_install_effect = yes }
+        scope:eotg_cand_b ?= {
+            add_opinion = { modifier = eotg_opinion_aug_passed_over  target = root  years = 5 }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 10  has_trait = callous }
+        }
+    }
+
+    # "Neither."
+    option = {
+        name = eotg_aug_retinue.002.c
+        scope:eotg_cand_a = {
+            add_opinion = { modifier = eotg_opinion_aug_passed_over  target = root  years = 5 }
+        }
+        scope:eotg_cand_b ?= {
+            add_opinion = { modifier = eotg_opinion_aug_passed_over  target = root  years = 5 }
+        }
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 10  has_trait = zealous }
+        }
+    }
+
+    # [greedy] "They pay for it themselves."
+    option = {
+        name = eotg_aug_retinue.002.d
+        trigger = {
+            has_trait = greedy
+            exists = scope:eotg_cand_b
+        }
+        trait = greedy
+        scope:eotg_cand_a = {
+            eotg_aug_retinue_install_effect = yes
+            add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+        }
+        scope:eotg_cand_b = {
+            eotg_aug_retinue_install_effect = yes
+            add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+        }
+        stress_impact = {
+            greedy = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = greedy }
+            modifier = { add = 10  has_trait = arbitrary }
+        }
+    }
+
+    # [generous] "At my expense, and with care."
+    option = {
+        name = eotg_aug_retinue.002.e
+        trigger = {
+            has_trait = generous
+            exists = scope:eotg_cand_b
+            gold >= medium_gold_value
+        }
+        trait = generous
+        remove_short_term_gold = medium_gold_value
+        scope:eotg_cand_a = {
+            eotg_aug_retinue_install_effect = yes
+            add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 3 }
+        }
+        scope:eotg_cand_b = {
+            eotg_aug_retinue_install_effect = yes
+            add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 3 }
+        }
+        stress_impact = {
+            generous = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = generous }
+            modifier = { add = 10  has_trait = compassionate }
+        }
+    }
+
+    after = {
+        hidden_effect = {
+            scope:eotg_retinue_story = { set_variable = { name = eotg_phase  value = 3 } }
+        }
+    }
+}
+
+
+# ── eotg_aug_retinue.003 ──────────────────────────────────────────────────────
+# The Iron Ranks (renamed per lore review). The owner gains
+# eotg_mod_aug_iron_retinue in immediate (until .005 c/e reverse the Program).
+# Caller: eotg_story_aug_retinue (phase 3).
+
+eotg_aug_retinue.003 = {
+    type = character_event
+    title = eotg_aug_retinue.003.t
+    desc = eotg_aug_retinue.003.desc
+    theme = martial
+
+    trigger = { eotg_aug_has_retinue = yes }
+
+    left_portrait = {
+        character = root
+        animation = marshal
+    }
+
+    immediate = {
+        hidden_effect = {
+            random_owned_story = {
+                limit = { story_type = eotg_story_aug_retinue }
+                save_scope_as = eotg_retinue_story
+            }
+        }
+        add_character_modifier = { modifier = eotg_mod_aug_iron_retinue }
+    }
+
+    # "Parade them."
+    option = {
+        name = eotg_aug_retinue.003.a
+        add_prestige = 100
+        every_knight = {
+            limit = { eotg_aug_is_retinue_knight = yes }
+            eotg_add_fracture_risk = { AMOUNT = 3 }
+        }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = gregarious }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+
+    # "Keep them quiet."
+    option = {
+        name = eotg_aug_retinue.003.b
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = shy }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+
+    # "Train them harder."
+    option = {
+        name = eotg_aug_retinue.003.c
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_martial  years = 5 }
+        every_knight = {
+            limit = { eotg_aug_is_retinue_knight = yes }
+            eotg_add_fracture_risk = { AMOUNT = 8 }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 10  has_trait = wrathful }
+        }
+    }
+
+    # [arrogant] "Parade them past the vassals' gates."
+    option = {
+        name = eotg_aug_retinue.003.d
+        trigger = { has_trait = arrogant }
+        trait = arrogant
+        add_prestige = 150
+        add_dread = 10
+        every_knight = {
+            limit = { eotg_aug_is_retinue_knight = yes }
+            eotg_add_fracture_risk = { AMOUNT = 3 }
+        }
+        stress_impact = {
+            arrogant = minor_stress_impact_loss
+        }
+        eotg_aug_stress_cruelty_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = arrogant }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+
+    # [paranoid] "And who watches the iron?"
+    option = {
+        name = eotg_aug_retinue.003.e
+        trigger = { has_trait = paranoid }
+        trait = paranoid
+        every_knight = {
+            limit = { eotg_aug_is_retinue_knight = yes }
+            add_opinion = { modifier = eotg_opinion_aug_fear  target = root  years = 10 }
+            eotg_add_fracture_risk = { AMOUNT = -3 }
+        }
+        stress_impact = {
+            paranoid = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = paranoid }
+            modifier = { add = 10  has_trait = vengeful }
+        }
+    }
+
+    after = {
+        hidden_effect = {
+            scope:eotg_retinue_story = { set_variable = { name = eotg_phase  value = 4 } }
+        }
+    }
+}
+
+
+# ── eotg_aug_retinue.004 ──────────────────────────────────────────────────────
+# The Unaugmented Resent. Every unaugmented knight gets passed_over in
+# immediate. a augments up to three of them (eotg_aug_retinue_pay_all_effect,
+# minor_gold_value each). e sends the most resentful one who is a courtier
+# to the pool (move_to_pool, vanilla hold_court_events_general.txt:508;
+# "most resentful" by the vanilla ordered_vassal shape of tier3.006).
+# Caller: eotg_story_aug_retinue (phase 4; the story checks one exists).
+
+eotg_aug_retinue.004 = {
+    type = character_event
+    title = eotg_aug_retinue.004.t
+    desc = eotg_aug_retinue.004.desc
+    theme = martial_chivalry_focus
+
+    trigger = {
+        eotg_aug_has_retinue = yes
+        any_knight = { eotg_aug_retainer_candidate = yes }
+    }
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_resentful }
+        character = scope:eotg_resentful
+        animation = anger
+    }
+
+    immediate = {
+        hidden_effect = {
+            random_owned_story = {
+                limit = { story_type = eotg_story_aug_retinue }
+                save_scope_as = eotg_retinue_story
+            }
+        }
+        every_knight = {
+            limit = { eotg_aug_retainer_candidate = yes }
+            add_opinion = { modifier = eotg_opinion_aug_passed_over  target = root  years = 5 }
+        }
+        hidden_effect = {
+            ordered_knight = {
+                limit = { eotg_aug_retainer_candidate = yes }
+                order_by = {
+                    value = 0
+                    subtract = "opinion(root)"
+                }
+                save_scope_as = eotg_resentful
+            }
+        }
+    }
+
+    # "Augment them too." Up to three, the strongest first.
+    option = {
+        name = eotg_aug_retinue.004.a
+        trigger = {
+            gold >= {
+                value = 0
+                every_knight = {
+                    limit = { eotg_aug_retainer_candidate = yes }
+                    add = 1
+                }
+                max = 3
+                multiply = minor_gold_value
+            }
+        }
+        eotg_aug_retinue_pay_all_effect = yes
+        ordered_knight = {
+            limit = { eotg_aug_retainer_candidate = yes }
+            order_by = prowess
+            max = 3
+            remove_opinion = { target = root  modifier = eotg_opinion_aug_passed_over }
+            eotg_aug_retinue_install_effect = yes
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 10  has_trait = generous }
+        }
+    }
+
+    # "Honour the unaugmented."
+    option = {
+        name = eotg_aug_retinue.004.b
+        trigger = { gold >= medium_gold_value }
+        remove_short_term_gold = medium_gold_value
+        every_knight = {
+            limit = { eotg_aug_retainer_candidate = yes }
+            remove_opinion = { target = root  modifier = eotg_opinion_aug_passed_over }
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = just }
+            modifier = { add = 10  has_trait = compassionate }
+        }
+    }
+
+    # "Let them resent." The iron keeps to itself.
+    option = {
+        name = eotg_aug_retinue.004.c
+        every_knight = {
+            limit = { eotg_aug_is_retinue_knight = yes }
+            eotg_add_fracture_risk = { AMOUNT = 3 }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = 10  has_trait = stubborn }
+        }
+    }
+
+    # [just] "Equal pay. Equal honour."
+    option = {
+        name = eotg_aug_retinue.004.d
+        trigger = {
+            has_trait = just
+            gold >= minor_gold_value
+        }
+        trait = just
+        remove_short_term_gold = minor_gold_value
+        every_knight = {
+            limit = { eotg_aug_retainer_candidate = yes }
+            remove_opinion = { target = root  modifier = eotg_opinion_aug_passed_over }
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+        }
+        stress_impact = {
+            just = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = just }
+            modifier = { add = 10  has_trait = honest }
+        }
+    }
+
+    # [callous] "Replace them."
+    option = {
+        name = eotg_aug_retinue.004.e
+        trigger = {
+            has_trait = callous
+            exists = scope:eotg_resentful
+            scope:eotg_resentful = { is_courtier_of = root }
+        }
+        trait = callous
+        scope:eotg_resentful = { move_to_pool = yes }
+        eotg_aug_stress_cruelty_effect = yes
+        stress_impact = {
+            callous = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = callous }
+            modifier = { add = 10  has_trait = arbitrary }
+        }
+    }
+
+    after = {
+        hidden_effect = {
+            scope:eotg_retinue_story = { set_variable = { name = eotg_phase  value = 5 } }
+        }
+    }
+}
+
+
+# ── eotg_aug_retinue.005 ──────────────────────────────────────────────────────
+# What the Program Becomes. Ends the story (`after`).
+# a: eotg_flag_aug_retinue_permanent on every retinue knight (Phase 6 hook:
+#    progression x2 for flagged knights).
+# c/e: eotg_aug_retinue_reverse_effect (15% death_treatment each, else full
+#    removal with withdrawal; the owner loses the bonus).
+# Caller: eotg_story_aug_retinue (phase 5).
+
+eotg_aug_retinue.005 = {
+    type = character_event
+    title = eotg_aug_retinue.005.t
+    desc = eotg_aug_retinue.005.desc
+    theme = martial
+
+    trigger = { eotg_aug_has_retinue = yes }
+
+    left_portrait = {
+        character = root
+        animation = thinking
+    }
+
+    immediate = {
+        hidden_effect = {
+            random_owned_story = {
+                limit = { story_type = eotg_story_aug_retinue }
+                save_scope_as = eotg_retinue_story
+            }
+        }
+    }
+
+    # "Continue."
+    option = {
+        name = eotg_aug_retinue.005.a
+        every_knight = {
+            limit = { eotg_aug_is_retinue_knight = yes }
+            add_character_flag = eotg_flag_aug_retinue_permanent
+            eotg_add_fracture_risk = { AMOUNT = 3 }
+        }
+        eotg_aug_stress_embrace_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 10  has_trait = arrogant }
+        }
+    }
+
+    # "Stop recruiting."
+    option = {
+        name = eotg_aug_retinue.005.b
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 10  has_trait = patient }
+        }
+    }
+
+    # "Reverse it."
+    option = {
+        name = eotg_aug_retinue.005.c
+        eotg_aug_retinue_reverse_effect = yes
+        eotg_aug_stress_wound_effect = yes
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 10  has_trait = humble }
+            modifier = { add = -20  has_trait = ambitious }
+        }
+    }
+
+    # "Make it a privilege."
+    option = {
+        name = eotg_aug_retinue.005.d
+        every_knight = {
+            limit = { eotg_aug_is_retinue_knight = yes }
+            add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
+        }
+        every_knight = {
+            limit = { eotg_aug_retainer_candidate = yes }
+            add_opinion = { modifier = eotg_opinion_aug_passed_over  target = root  years = 10 }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = arrogant }
+            modifier = { add = 10  has_trait = arbitrary }
+        }
+    }
+
+    # [zealous] "Undo it. All of it."
+    option = {
+        name = eotg_aug_retinue.005.e
+        trigger = { has_trait = zealous }
+        trait = zealous
+        eotg_aug_retinue_reverse_effect = yes
+        add_piety = 100
+        eotg_aug_stress_wound_effect = yes
+        stress_impact = {
+            zealous = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = zealous }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+
+    after = {
+        hidden_effect = {
+            scope:eotg_retinue_story ?= { end_story = yes }
+        }
+    }
+}

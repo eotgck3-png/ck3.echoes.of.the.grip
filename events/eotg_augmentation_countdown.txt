@@ -1,0 +1,606 @@
+﻿# ── eotg_augmentation_countdown.txt ──────────────────────────────────────────
+# The Countdown (O-13): docs/specs/cybernetics_v2_phase5.md §1.
+#
+# eotg_aug_countdown.001 — Minor Anomalies        (risk 50-59)
+# eotg_aug_countdown.002 — Lost Time              (60-69)
+# eotg_aug_countdown.003 — Contradictory Memories (70-74)
+# eotg_aug_countdown.004 — Violence               (75+)
+# eotg_aug_countdown.005 — No One Asks Any More   (after .004, Intervention refused)
+# eotg_aug_countdown.006 — The Quiet              (the countdown stops)
+#
+# Fires from: the story cycle eotg_story_aug_countdown
+#   (common/story_cycles/eotg_augmentation_stories.txt); .006 also from
+#   eotg_decision_overclock_regression (halved risk < 50).
+# Cooldown authority: the story's effect_group (months 3-5) and its
+#   eotg_last_stage. These events check no flags (lesson 5); .001-.005 carry
+#   only a world-state tier guard.
+# Hidden risk (index §1 rule 3): the stages are chosen by eotg_fracture_risk
+#   and every stage moves it; no text quantifies it. The register escalates.
+# [voice] desc variants at eotg_aug_voice >= 2 follow index §5.1-2 (the
+#   implant's model of you, internal, a half-second early; never external).
+# ─────────────────────────────────────────────────────────────────────────────
+
+namespace = eotg_aug_countdown
+
+
+# ── eotg_aug_countdown.001 ────────────────────────────────────────────────────
+# Minor Anomalies. Clocks run wrong; cups are dropped.
+# Caller: eotg_story_aug_countdown (stage 1).
+
+eotg_aug_countdown.001 = {
+    type = character_event
+    title = eotg_aug_countdown.001.t
+    desc = eotg_aug_countdown.001.desc
+    theme = mental_health
+
+    trigger = { eotg_is_aug_tier3 = yes }
+
+    left_portrait = {
+        character = root
+        animation = worry
+    }
+
+    # "Maintenance. Now."
+    option = {
+        name = eotg_aug_countdown.001.a
+        trigger = { gold >= medium_gold_value }
+        remove_short_term_gold = medium_gold_value
+        eotg_add_fracture_risk = { AMOUNT = -8 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = craven }
+            modifier = { add = 10  has_trait = diligent }
+            modifier = { add = -20  has_trait = greedy }
+        }
+    }
+
+    # "Keep going."
+    option = {
+        name = eotg_aug_countdown.001.b
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        eotg_aug_stress_neglect_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = stubborn }
+            modifier = { add = 10  has_trait = lazy }
+        }
+    }
+
+    # "Tell no one."
+    option = {
+        name = eotg_aug_countdown.001.c
+        # Rule 6 (final QA): b beat c outright; the secret keeps up appearances.
+        add_prestige = 25
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        eotg_aug_stress_lie_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = deceitful }
+            modifier = { add = 10  has_trait = shy }
+        }
+    }
+
+    # [diligent] "Log every anomaly."
+    option = {
+        name = eotg_aug_countdown.001.d
+        trigger = { has_trait = diligent }
+        trait = diligent
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        stress_impact = {
+            diligent = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = diligent }
+            modifier = { add = 10  has_trait = patient }
+        }
+    }
+
+    # [ambitious] "Not now. Not when I am this close."
+    option = {
+        name = eotg_aug_countdown.001.e
+        trigger = { has_trait = ambitious }
+        trait = ambitious
+        add_prestige = 50
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        stress_impact = {
+            ambitious = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = ambitious }
+            modifier = { add = 10  has_trait = arrogant }
+        }
+    }
+}
+
+
+# ── eotg_aug_countdown.002 ────────────────────────────────────────────────────
+# Lost Time. Days, not hours. [voice] at voice >= 2: the logs kept the days
+# you did not.
+# Caller: eotg_story_aug_countdown (stage 2).
+# d [paranoid]: the suspect comes from the victim picker (family factor 0.05,
+# Overclocked) and is put under house arrest (vanilla imprison type =
+# house_arrest, events/court_events/court_events_general.txt:12361), as
+# tier2.015.d.
+
+eotg_aug_countdown.002 = {
+    type = character_event
+    title = eotg_aug_countdown.002.t
+    desc = {
+        desc = eotg_aug_countdown.002.desc
+        triggered_desc = {
+            trigger = {
+                has_variable = eotg_aug_voice
+                var:eotg_aug_voice >= 2
+            }
+            desc = eotg_aug_countdown.002.desc_voice
+        }
+    }
+    theme = mental_health
+
+    trigger = { eotg_is_aug_tier3 = yes }
+
+    left_portrait = {
+        character = root
+        animation = shock
+    }
+
+    immediate = {
+        hidden_effect = {
+            if = {
+                limit = { has_trait = paranoid }
+                eotg_aug_pick_victim_effect = { NAME = eotg_suspect  FAMILY_FACTOR = 0.05 }
+            }
+        }
+    }
+
+    # "Reconstruct the days."
+    option = {
+        name = eotg_aug_countdown.002.a
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_intrigue  years = 5 }
+        eotg_add_fracture_risk = { AMOUNT = -3 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 10  has_trait = patient }
+        }
+    }
+
+    # "Let them go."
+    option = {
+        name = eotg_aug_countdown.002.b
+        # Rule 6 (final QA): a beat b outright; letting go is a relief.
+        add_stress = minor_stress_loss
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        eotg_aug_stress_neglect_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = lazy }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # "An archivist logs my every hour."
+    option = {
+        name = eotg_aug_countdown.002.c
+        add_prestige = -50
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = humble }
+            modifier = { add = 10  has_trait = craven }
+        }
+    }
+
+    # [paranoid] "Someone took them from me."
+    option = {
+        name = eotg_aug_countdown.002.d
+        trigger = {
+            has_trait = paranoid
+            exists = scope:eotg_suspect
+        }
+        trait = paranoid
+        imprison = {
+            target = scope:eotg_suspect
+            type = house_arrest
+        }
+        scope:eotg_suspect = {
+            add_character_flag = { flag = eotg_flag_aug_breach_victim  days = 30 }
+        }
+        eotg_add_fracture_risk = { AMOUNT = 8 }
+        eotg_aug_stress_tyranny_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = paranoid }
+            modifier = { add = -20  has_trait = just }
+        }
+    }
+
+    # [calm] "Breathe."
+    option = {
+        name = eotg_aug_countdown.002.e
+        trigger = { has_trait = calm }
+        trait = calm
+        eotg_add_fracture_risk = { AMOUNT = -6 }
+        stress_impact = {
+            calm = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = calm }
+            modifier = { add = 10  has_trait = patient }
+        }
+    }
+}
+
+
+# ── eotg_aug_countdown.003 ────────────────────────────────────────────────────
+# Contradictory Memories. Two versions of one evening. [voice] at voice >= 2:
+# "one of them is its reconstruction".
+# Caller: eotg_story_aug_countdown (stage 3).
+
+eotg_aug_countdown.003 = {
+    type = character_event
+    title = eotg_aug_countdown.003.t
+    desc = {
+        desc = eotg_aug_countdown.003.desc
+        triggered_desc = {
+            trigger = {
+                has_variable = eotg_aug_voice
+                var:eotg_aug_voice >= 2
+            }
+            desc = eotg_aug_countdown.003.desc_voice
+        }
+    }
+    theme = mental_health
+
+    trigger = { eotg_is_aug_tier3 = yes }
+
+    left_portrait = {
+        character = root
+        animation = disbelief
+    }
+
+    # "Trust the first."
+    option = {
+        name = eotg_aug_countdown.003.a
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = stubborn }
+            modifier = { add = 10  has_trait = trusting }
+        }
+    }
+
+    # "Trust the second."
+    option = {
+        name = eotg_aug_countdown.003.b
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        eotg_aug_stress_embrace_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = fickle }
+            modifier = { add = 10  has_trait = eccentric }
+        }
+    }
+
+    # "Trust neither."
+    option = {
+        name = eotg_aug_countdown.003.c
+        stress_impact = { base = medium_stress_impact_gain }
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = paranoid }
+            modifier = { add = 10  has_trait = calm }
+        }
+    }
+
+    # [honest] "Ask the court which is true."
+    option = {
+        name = eotg_aug_countdown.003.d
+        trigger = { has_trait = honest }
+        trait = honest
+        add_prestige = -50
+        eotg_add_fracture_risk = { AMOUNT = -6 }
+        stress_impact = {
+            honest = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = honest }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+
+    # [stubborn] "Both are true."
+    option = {
+        name = eotg_aug_countdown.003.e
+        trigger = { has_trait = stubborn }
+        trait = stubborn
+        eotg_add_fracture_risk = { AMOUNT = 8 }
+        stress_impact = {
+            stubborn = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = stubborn }
+            modifier = { add = 10  has_trait = arrogant }
+        }
+    }
+}
+
+
+# ── eotg_aug_countdown.004 ────────────────────────────────────────────────────
+# Violence. Picker(eotg_victim, 0.05) is wounded (attacked) and flagged.
+# No one near: "the wall, the door, your own hand" (desc_none), and the
+# victim options fall away. [voice] at voice >= 2.
+# Caller: eotg_story_aug_countdown (stage 4).
+# Dead/hurt portrait guard: vanilla events/activities/activity_system_events.txt:89-92.
+
+eotg_aug_countdown.004 = {
+    type = character_event
+    title = eotg_aug_countdown.004.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { exists = scope:eotg_victim }
+                desc = eotg_aug_countdown.004.desc
+            }
+            desc = eotg_aug_countdown.004.desc_none
+        }
+        triggered_desc = {
+            trigger = {
+                has_variable = eotg_aug_voice
+                var:eotg_aug_voice >= 2
+            }
+            desc = eotg_aug_countdown.004.desc_voice
+        }
+    }
+    theme = dread
+
+    trigger = { eotg_is_aug_tier3 = yes }
+
+    left_portrait = {
+        character = root
+        animation = rage
+    }
+    # The wound can kill (increase_wounds_effect): dead-portrait shape as in
+    # eotg_fracture.002 (vanilla chariot_ongoing_events_jp.txt:2544).
+    right_portrait = {
+        trigger = { exists = scope:eotg_victim }
+        character = scope:eotg_victim
+        triggered_animation = {
+            trigger = { is_alive = no }
+            animation = dead
+        }
+        animation = pain
+        animate_if_dead = yes
+    }
+
+    immediate = {
+        hidden_effect = {
+            eotg_aug_pick_victim_effect = { NAME = eotg_victim  FAMILY_FACTOR = 0.05 }
+        }
+        scope:eotg_victim ?= {
+            increase_wounds_effect = { REASON = attacked }
+            add_character_flag = { flag = eotg_flag_aug_breach_victim  days = 30 }
+        }
+    }
+
+    # "Pay their family."
+    option = {
+        name = eotg_aug_countdown.004.a
+        trigger = {
+            exists = scope:eotg_victim
+            gold >= medium_gold_value
+        }
+        remove_short_term_gold = medium_gold_value
+        eotg_add_fracture_risk = { AMOUNT = -3 }
+        eotg_aug_stress_wound_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = generous }
+            modifier = { add = 10  has_trait = just }
+        }
+    }
+
+    # "It was an accident."
+    option = {
+        name = eotg_aug_countdown.004.b
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        eotg_aug_stress_lie_effect = yes
+        eotg_aug_stress_wound_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = deceitful }
+            modifier = { add = 10  has_trait = callous }
+        }
+    }
+
+    # "Lock myself away."
+    option = {
+        name = eotg_aug_countdown.004.c
+        add_character_modifier = { modifier = eotg_mod_withdrawn_from_court  years = 1 }
+        eotg_add_fracture_risk = { AMOUNT = -8 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = craven }
+            modifier = { add = 10  has_trait = shy }
+        }
+    }
+
+    # [sadistic] "It felt like clarity."
+    option = {
+        name = eotg_aug_countdown.004.d
+        trigger = { has_trait = sadistic }
+        trait = sadistic
+        add_dread = 20
+        eotg_add_fracture_risk = { AMOUNT = 10 }
+        eotg_aug_stress_cruelty_effect = yes
+        stress_impact = {
+            sadistic = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = sadistic }
+            modifier = { add = 10  has_trait = wrathful }
+        }
+    }
+
+    # [compassionate] "Sit with them while they heal."
+    option = {
+        name = eotg_aug_countdown.004.e
+        # The wound in immediate can kill; no sitting with the dead.
+        trigger = {
+            has_trait = compassionate
+            exists = scope:eotg_victim
+            scope:eotg_victim = { is_alive = yes }
+        }
+        trait = compassionate
+        scope:eotg_victim = {
+            add_opinion = { modifier = eotg_opinion_aug_grateful_patient  target = root  years = 10 }
+        }
+        add_prestige = -25
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        stress_impact = {
+            compassionate = medium_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = compassionate }
+            modifier = { add = 10  has_trait = forgiving }
+        }
+    }
+}
+
+
+# ── eotg_aug_countdown.005 ────────────────────────────────────────────────────
+# No One Asks Any More. You refused them, and the court stopped asking.
+# b and c lift the refusal (eotg_flag_aug_intervention_refused, set by
+# tier3.020) and fire tier3.020 The Intervention in 30 days.
+# Caller: eotg_story_aug_countdown (stage 5, refused branch).
+
+eotg_aug_countdown.005 = {
+    type = character_event
+    title = eotg_aug_countdown.005.t
+    desc = eotg_aug_countdown.005.desc
+    theme = family
+
+    trigger = { eotg_is_aug_tier3 = yes }
+
+    left_portrait = {
+        character = root
+        animation = sadness
+    }
+
+    # "Good."
+    option = {
+        name = eotg_aug_countdown.005.a
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        eotg_aug_stress_embrace_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = arrogant }
+            modifier = { add = 10  has_trait = stubborn }
+        }
+    }
+
+    # "Ask them to ask again."
+    option = {
+        name = eotg_aug_countdown.005.b
+        trigger = {
+            OR = {
+                exists = primary_spouse
+                primary_heir ?= { is_adult = yes }
+            }
+        }
+        remove_character_flag = eotg_flag_aug_intervention_refused
+        trigger_event = { id = eotg_aug_tier3.020  days = 30 }
+        eotg_add_fracture_risk = { AMOUNT = -3 }
+        eotg_aug_stress_reject_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 10  has_trait = honest }
+        }
+    }
+
+    # [humble] "Go to them yourself."
+    option = {
+        name = eotg_aug_countdown.005.c
+        trigger = {
+            has_trait = humble
+            OR = {
+                exists = primary_spouse
+                primary_heir ?= { is_adult = yes }
+            }
+        }
+        trait = humble
+        remove_character_flag = eotg_flag_aug_intervention_refused
+        trigger_event = { id = eotg_aug_tier3.020  days = 30 }
+        eotg_add_fracture_risk = { AMOUNT = -6 }
+        stress_impact = {
+            humble = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = humble }
+            modifier = { add = 10  has_trait = compassionate }
+        }
+    }
+}
+
+
+# ── eotg_aug_countdown.006 ────────────────────────────────────────────────────
+# The Quiet. The countdown stops, for now. Ends any Countdown still running
+# (eotg_aug_end_countdown_effect).
+# Callers: eotg_story_aug_countdown (branches 1 and 2),
+# eotg_decision_overclock_regression (halved risk < 50).
+
+eotg_aug_countdown.006 = {
+    type = character_event
+    title = eotg_aug_countdown.006.t
+    desc = eotg_aug_countdown.006.desc
+    theme = mental_health
+
+    left_portrait = {
+        character = root
+        animation = personality_content
+    }
+
+    immediate = {
+        hidden_effect = {
+            eotg_aug_end_countdown_effect = yes
+        }
+    }
+
+    # "Breathe."
+    option = {
+        name = eotg_aug_countdown.006.a
+        stress_impact = { base = minor_stress_impact_loss }
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        ai_chance = {
+            base = 50
+            modifier = { add = 20  has_trait = calm }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # [paranoid] "It's waiting."
+    option = {
+        name = eotg_aug_countdown.006.b
+        trigger = { has_trait = paranoid }
+        trait = paranoid
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        stress_impact = {
+            paranoid = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = paranoid }
+            modifier = { add = 10  has_trait = vengeful }
+        }
+    }
+}

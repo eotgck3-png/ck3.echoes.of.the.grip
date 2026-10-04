@@ -1,0 +1,255 @@
+﻿# -- eotg_void_effects.txt ----------------------------------------------------
+# Scripted effects for the Void Corruption system.
+# Prefix: eotg_se_void_
+#
+# LORE BASIS (docs/SETTING LORE): the Void is Orrin the Eye's prison. He cannot
+# act directly, but the Grip-era rift scars are re-activating across 850-866 AG
+# and the seals are weakening. Exposure is what leaks through. The Voidwalkers
+# -- Malvrick's hunted sect -- are the only ones who still know the wards.
+#
+# The signature resource is the character variable eotg_void_exposure (0-100).
+# Because CK3 cannot surface a raw variable on the character sheet, every
+# change routes through eotg_se_void_add_exposure, which refreshes a visible
+# band modifier so the player can always read their own state.
+# -----------------------------------------------------------------------------
+
+# -- Core resource -------------------------------------------------------------
+
+# eotg_se_void_init_exposure
+# Idempotent initialiser. Safe to call before any read.
+eotg_se_void_init_exposure = {
+    if = {
+        limit = { NOT = { has_variable = eotg_void_exposure } }
+        set_variable = { name = eotg_void_exposure  value = 0 }
+    }
+}
+
+# eotg_se_void_add_exposure = { AMOUNT = <int> }
+# The only supported way to move exposure. Negative amounts cleanse.
+eotg_se_void_add_exposure = {
+    eotg_se_void_init_exposure = yes
+    change_variable = { name = eotg_void_exposure  add = $AMOUNT$ }
+    clamp_variable = { name = eotg_void_exposure  min = 0  max = 100 }
+    eotg_se_void_refresh_band = yes
+}
+
+# eotg_se_void_refresh_band
+# Swaps the visible band modifier to match current exposure. Called by
+# eotg_se_void_add_exposure -- rarely needs calling directly.
+eotg_se_void_refresh_band = {
+    remove_character_modifier = eotg_mod_void_whispers
+    remove_character_modifier = eotg_mod_void_pressure
+    remove_character_modifier = eotg_mod_void_saturation
+
+    if = {
+        limit = { var:eotg_void_exposure >= 75 }
+        add_character_modifier = { modifier = eotg_mod_void_saturation }
+    }
+    else_if = {
+        limit = { var:eotg_void_exposure >= 50 }
+        add_character_modifier = { modifier = eotg_mod_void_pressure }
+    }
+    else_if = {
+        limit = { var:eotg_void_exposure >= 25 }
+        add_character_modifier = { modifier = eotg_mod_void_whispers }
+    }
+}
+
+# eotg_se_void_seed
+# Marks a character as having stood at a reactivating Grip-era rift scar.
+# This is how exposure begins for someone with no bloodline or cult connection.
+eotg_se_void_seed = {
+    add_character_flag = eotg_flag_void_seeded
+    eotg_se_void_init_exposure = yes
+}
+
+# eotg_se_void_shelter_voidwalker
+# Takes a Malvrick heretic into the court. They know the wards; sheltering
+# them is a standing liability with anyone devout.
+eotg_se_void_shelter_voidwalker = {
+    add_character_flag = eotg_flag_void_voidwalker
+}
+
+# -- Yearly accrual ------------------------------------------------------------
+
+# eotg_se_void_yearly_accrual
+# One year of drift toward the Void. Called from eotg_on_yearly_void_check.
+#
+# Pressure sources are additive and deliberately legible: bloodline, worship,
+# proximity, and the unravelling of the self. Resistance sources subtract.
+# A warded, learned, pious ruler with no proximity can hold at zero net.
+eotg_se_void_yearly_accrual = {
+    eotg_se_void_init_exposure = yes
+
+    # -- Pressure --
+    # Baseline pull on anyone the Void can reach at all.
+    eotg_se_void_add_exposure = { AMOUNT = 2 }
+
+    # The Grip bloodline is thin at the boundary -- it always was.
+    if = {
+        limit = { has_trait = eotg_grip_survivor }
+        eotg_se_void_add_exposure = { AMOUNT = 3 }
+    }
+    # Void Cult faithful walk toward it on purpose.
+    if = {
+        limit = { eotg_st_void_venerates = yes }
+        eotg_se_void_add_exposure = { AMOUNT = 5 }
+    }
+    # Proximity to someone already taken.
+    if = {
+        limit = { eotg_st_void_near_touched = yes }
+        eotg_se_void_add_exposure = { AMOUNT = 4 }
+    }
+    # Already touched -- the channel is open and widens on its own.
+    if = {
+        limit = { has_trait = eotg_void_touched }
+        eotg_se_void_add_exposure = { AMOUNT = 6 }
+    }
+    # It speaks loudest to those already coming apart.
+    if = {
+        limit = { stress >= 200 }
+        eotg_se_void_add_exposure = { AMOUNT = 4 }
+    }
+    if = {
+        limit = {
+            OR = {
+                has_trait = lunatic_1
+                has_trait = lunatic_genetic
+                has_trait = possessed_1
+                has_trait = possessed_genetic
+            }
+        }
+        eotg_se_void_add_exposure = { AMOUNT = 4 }
+    }
+    # A long life is a long exposure.
+    if = {
+        limit = { age >= 60 }
+        eotg_se_void_add_exposure = { AMOUNT = 2 }
+    }
+
+    # -- Resistance --
+    # Those who refused it once carry the refusal.
+    if = {
+        limit = { has_trait = eotg_void_defiant }
+        eotg_se_void_add_exposure = { AMOUNT = -4 }
+    }
+    # An active ward.
+    if = {
+        limit = { has_character_modifier = eotg_mod_void_warded }
+        eotg_se_void_add_exposure = { AMOUNT = -5 }
+    }
+    # A learned ruler knows what the old charts warn about.
+    if = {
+        limit = { has_education_learning_trigger = yes }
+        eotg_se_void_add_exposure = { AMOUNT = -3 }
+    }
+    # A sheltered Voidwalker maintains the wards Malvrick's sect died holding.
+    if = {
+        limit = { eotg_st_void_has_voidwalker = yes }
+        eotg_se_void_add_exposure = { AMOUNT = -6 }
+    }
+    # Faith holds the line -- unless the faith is the Void's own.
+    if = {
+        limit = {
+            piety_level >= 3
+            eotg_st_void_venerates = no
+        }
+        eotg_se_void_add_exposure = { AMOUNT = -3 }
+    }
+}
+
+# -- Stage transitions ---------------------------------------------------------
+
+# eotg_se_void_become_touched
+# Crossing into Void-touched. Clears any prior defiance -- the ward is spent.
+eotg_se_void_become_touched = {
+    if = {
+        limit = { has_trait = eotg_void_defiant }
+        remove_trait = eotg_void_defiant
+    }
+    if = {
+        limit = { NOT = { has_trait = eotg_void_touched } }
+        add_trait = eotg_void_touched
+    }
+    remove_character_modifier = eotg_mod_void_warded
+    add_character_modifier = { modifier = eotg_mod_void_aura }
+}
+
+# eotg_se_void_become_defiant
+# Refusing the bargain. Costly in the moment, protective afterward.
+eotg_se_void_become_defiant = {
+    if = {
+        limit = { NOT = { has_trait = eotg_void_defiant } }
+        add_trait = eotg_void_defiant
+    }
+    eotg_se_void_add_exposure = { AMOUNT = -25 }
+    add_character_modifier = { modifier = eotg_mod_void_warded  years = 10 }
+}
+
+# eotg_se_void_become_hollowed
+# The terminal stage. Power at the cost of everything that made it worth having.
+eotg_se_void_become_hollowed = {
+    if = {
+        limit = { has_trait = eotg_void_touched }
+        remove_trait = eotg_void_touched
+    }
+    add_trait = eotg_void_hollowed
+    remove_character_modifier = eotg_mod_void_aura
+    remove_character_modifier = eotg_mod_void_whispers
+    remove_character_modifier = eotg_mod_void_pressure
+    remove_character_modifier = eotg_mod_void_saturation
+    set_variable = { name = eotg_void_exposure  value = 100 }
+    add_dread = 40
+    every_courtier = {
+        limit = { is_alive = yes }
+        add_opinion = { modifier = eotg_opinion_void_revulsion  target = root }
+    }
+}
+
+# -- Education-differentiated payoff -------------------------------------------
+
+# eotg_se_void_edu_insight
+# What the Void shows a character depends on how they were taught to look.
+# Each education yields a different, permanent advantage -- this is the main
+# reward for engaging with exposure rather than warding it away.
+eotg_se_void_edu_insight = {
+    if = {
+        limit = { has_education_learning_trigger = yes }
+        add_learning_skill = 2
+        add_character_modifier = { modifier = eotg_mod_void_deep_charts }
+    }
+    else_if = {
+        limit = { has_education_intrigue_trigger = yes }
+        add_intrigue_skill = 2
+        add_character_modifier = { modifier = eotg_mod_void_unseen_step }
+    }
+    else_if = {
+        limit = { has_education_martial_trigger = yes }
+        add_martial_skill = 2
+        add_character_modifier = { modifier = eotg_mod_void_cold_hand }
+    }
+    else_if = {
+        limit = { has_education_stewardship_trigger = yes }
+        add_stewardship_skill = 2
+        add_character_modifier = { modifier = eotg_mod_void_long_ledger }
+    }
+    else_if = {
+        limit = { has_education_diplomacy_trigger = yes }
+        add_diplomacy_skill = 2
+        add_character_modifier = { modifier = eotg_mod_void_borrowed_voice }
+    }
+    else = {
+        add_prowess_skill = 2
+        add_character_modifier = { modifier = eotg_mod_void_cold_hand }
+    }
+}
+
+# -- Cleansing -----------------------------------------------------------------
+
+# eotg_se_void_ward
+# Applies a ward and cleanses exposure. Used by the Warding Rite decision.
+eotg_se_void_ward = {
+    eotg_se_void_add_exposure = { AMOUNT = -20 }
+    add_character_modifier = { modifier = eotg_mod_void_warded  years = 8 }
+    add_character_flag = { flag = eotg_flag_void_ward_cooldown  years = 10 }
+}

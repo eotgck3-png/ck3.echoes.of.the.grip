@@ -1,0 +1,119 @@
+﻿# ── eotg_myr_interactions.txt ────────────────────────────────────────────────
+# Character interactions for the Myr Cluster Wars struggle.
+#
+# eotg_direct_proxy_war_interaction — an emperor-tier struggle participant
+# funds and directs a lesser co-religionist fighting in the Cluster (the
+# Elrossi Imperium's Prince of Myr pattern). Accepting arms the proxy and
+# hands them a directive event; their answer feeds the struggle's catalysts.
+# ─────────────────────────────────────────────────────────────────────────────
+
+eotg_direct_proxy_war_interaction = {
+	category = interaction_category_diplomacy
+	icon = icon_ally
+
+	interface_priority = 55
+	common_interaction = no
+
+	desc = eotg_direct_proxy_war_interaction_desc
+	greeting = positive
+	notification_text = eotg_direct_proxy_war_notification
+
+	is_shown = {
+		scope:actor = {
+			highest_held_title_tier = tier_empire
+			eotg_st_myr_involved = yes
+		}
+		scope:recipient = {
+			eotg_st_myr_involved = yes
+			is_independent_ruler = yes
+			highest_held_title_tier <= tier_kingdom
+			faith = scope:actor.faith
+			this != scope:actor
+		}
+	}
+
+	is_valid_showing_failures_only = {
+		scope:actor = {
+			gold >= 100
+		}
+		scope:recipient = {
+			is_imprisoned = no
+			is_at_war = no
+		}
+	}
+
+	cost = {
+		gold = 100
+	}
+
+	ai_targets = {
+		ai_recipients = neighboring_rulers
+	}
+
+	ai_target_quick_trigger = {
+		adult = yes
+	}
+
+	ai_frequency_by_tier = {
+		barony = 0
+		county = 0
+		duchy = 0
+		kingdom = 0
+		empire = 36
+		hegemony = 36
+	}
+
+	ai_accept = {
+		base = 30
+		modifier = {
+			add = 25
+			scope:recipient = {
+				opinion = {
+					target = scope:actor
+					value >= 20
+				}
+			}
+		}
+		modifier = {
+			add = 15
+			scope:recipient = { has_trait = ambitious }
+		}
+		modifier = {
+			add = -25
+			scope:recipient = { has_trait = content }
+		}
+		modifier = {
+			add = -20
+			scope:recipient = {
+				opinion = {
+					target = scope:actor
+					value <= -20
+				}
+			}
+		}
+	}
+
+	on_accept = {
+		scope:recipient = {
+			add_character_modifier = {
+				modifier = eotg_myr_veteran_companies
+				years = 3
+			}
+			add_opinion = {
+				target = scope:actor
+				modifier = eotg_myr_proxy_funded
+			}
+			trigger_event = { id = eotg_myr.0020  days = 3 }
+		}
+	}
+
+	on_decline = {
+		scope:actor = {
+			add_prestige = -50
+			add_opinion = {
+				target = scope:recipient
+				modifier = eotg_myr_proxy_defied
+			}
+		}
+	}
+}

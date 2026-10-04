@@ -1,0 +1,16 @@
+### HANDOFF (cloud session, unvalidated)
+- branch: claude/focused-dirac-ixo81h (built from v2-space-map @ 8e28720)
+- status: done
+- summary: CB-16 is done. The four pre-v2 cybernetics QA docs now carry a one-line "superseded" note, with no other change. The static spec-conformance audit of cybernetics v2 is in docs/qa/cybernetics_spec_conformance_cloud.md: 0 HIGH, 12 MEDIUM, 43 LOW. The mechanical checks pass: 0 orphan events, 0 missing or duplicate loc keys, BOM present, no `[scope:`, no `eotg_[ekdcb]_`, additive on_actions, map-agnostic. Most findings are commented "final QA" or "orchestrator ruling" deviations that were never written back into the specs, plus 19 contradictions between the specs. No script, event or loc file was edited.
+- files: docs/qa/cybernetics_system_overview.md, docs/qa/cybernetics_content_gaps.md, docs/qa/cybernetics_logic_audit.md, docs/qa/cybernetics_event_content_proposal.md (one line each); docs/qa/cybernetics_spec_conformance_cloud.md (new); this handoff (new)
+- unverified-vanilla:
+  - common/decisions/eotg_augmentation_decisions.txt:19-128 — whether a `cost` alone blocks an unaffordable decision and shows the reason
+  - events/eotg_augmentation_initiation.txt:992, 1522-1526 — whether `increase_wounds_no_death_effect` accepts REASON = wounds / treatment
+  - common/decisions/eotg_augmentation_decisions.txt:204-532 — whether the vanilla decision_{smith,physician,knight_kneeling,prison,realm,misc}.dds pictures exist in 1.20
+  - events/eotg_augmentation_tier3.txt:1609-1643 — whether `send_interface_toast` shows from inside `hidden_effect`
+  - common/scripted_triggers/eotg_augmentation_triggers.txt:228,280-290 — whether `story_type` is the correct story filter field (the specs say `type`)
+- needs-local-validation: none for this branch (docs only). Tiger + PX on any fix that comes out of the report.
+- needs-loc: none now. The report flags M1 (tier2.011.c success text), L14 (eotg_forgotten never named) and L15 (sixth fracture.020 reveal variant) for the localizer, pending architect calls.
+- needs-lore: none
+- needs-human: none directly. The architect's ratify-or-reject pass (report §5 step 1) may raise design questions.
+- taskboard: CB-16 → done. CB-24 → returned; branch claude/focused-dirac-ixo81h. Proposed new items: "Architect: ratify cybernetics v2 deviations and fix spec contradictions (conformance report §1/§3)"; "Scripter: conformance fixes M7 (dead-envoy guard), M8 (envoy as critic), M1/M2/M10, L2/L3/L5/L13".

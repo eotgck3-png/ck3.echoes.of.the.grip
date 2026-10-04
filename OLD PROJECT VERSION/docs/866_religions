@@ -1,0 +1,357 @@
+================================================================================
+866 AG — RELIGION SPECIFICATION
+================================================================================
+Canonical spec for every religion, faith and religion family in Echoes of the
+Grip. Reconciled against docs/SETTING LORE (+ its ERRATA block), the shipped
+script in common/religion/, and real CK3 1.19 syntax.
+
+Last rewritten: 2026-08-29
+Supersedes: the "27 religions" implementation guide previously in this file.
+
+--------------------------------------------------------------------------------
+WHY THIS FILE WAS REWRITTEN
+--------------------------------------------------------------------------------
+The previous draft could not be implemented as written. It specified religions
+using field names that do not exist in CK3 (`mercenary_troops`, `type =
+"organized"`, `category`, `religious_head_title`, `preach_to_other_flocks`),
+doctrine names that do not exist in any CK3 version (`marriage_doctrine_no_-
+clergy_marriage`, `pluralism_doctrine_singular_god`, `religious_authority_-
+doctrine_hidden`), and modifiers that are not CK3 modifiers (`trade_value_-
+multiplier`, `corruption_gain`, `holy_war_cb`, `excommunication_ineffective`).
+
+It also used unprefixed identifiers (`elrossi_faith`, `frozt_worship`), which
+violates the one rule in CLAUDE.md that cannot be broken, and it conflicted
+with names already shipped in script.
+
+This file now records what is actually implemented, what the real schema is,
+and what remains on the backlog.
+
+--------------------------------------------------------------------------------
+CANON CORRECTIONS APPLIED
+--------------------------------------------------------------------------------
+1. XERXES IS A MAN, AND ALSO THREE PLACES. Xerxes is a half-elf half-human
+   individual; the city, the planet and the system are all named after him
+   (author, 2026-08-30). The place the mod currently scripts is ruled by
+   Vaelorin Sylvaerath, "The Tide-Crowned" (see events/eotg_xerxes_events.txt),
+   and its faith is eotg_faith_firstlight — Vaelorin rules the city named for
+   Xerxes, he is not Xerxes.
+   A hero-veneration faith is therefore viable, but the old draft's supporting
+   details are not yet canon: that Xerxes is dead, and that he led a resistance
+   against the Elrossi Crusade, appear nowhere except that draft. See BACKLOG F.
+
+2. ORRIN IS NOT IMPRISONED. Per the SETTING LORE ERRATA (2026-08-29), the Void
+   was Orrin's prison but no longer holds him; he is in the material plane. The
+   Void still exerts an influence and that influence is UNEXPLAINED. The old
+   draft's "imprisoned deity" framing for Orrin's Conquest is superseded. In
+   text, attributing Void phenomena to Orrin is a BELIEF characters hold, never
+   narrated fact.
+
+3. THE GOBLINS HAVE THEIR OWN RELIGION. Two things are true at once (author,
+   2026-08-30): canon puts Bohemut, Son of Yu (Balance, Knowledge, Equilibrium)
+   at the centre of merchant and scholarly worship, AND the goblins — merchant-
+   focused as they are — follow a religion of their own rather than his. Both
+   are now implemented and they are deliberately not the same religion:
+   eotg_religion_commerce (the Profitable Path, Bohemite, Divine Order) and
+   eotg_religion_plutocracy (the Plutocracy, goblin, Pragmatic Codes). They
+   trade side by side inside the Gob-Ogre Trade League and argue about whether
+   the sacred act is the exchange or the accumulation.
+
+4. THE RATFOLK FAITH IS ANCESTOR VENERATION, AND IT IS CALLED DEEP WARREN
+   (author, 2026-08-30). Note the near-collision: eotg_religion_deep_warren is
+   the ratfolk ancestor faith, while eotg_religion_ancestor_veneration is the
+   *Broken Daimyo* lineage faith of Titanworld refugees. Two ancestor religions,
+   two different peoples, similar-sounding keys — check which one you mean.
+   Both sit in eotg_rf_ancestral.
+
+5. DEITIES THE OLD DRAFT MISSED. Canon includes FERROS (Lawful Evil; Conquest,
+   Tyranny, Domination — Orrin pantheon) and THE HIEROPHANT (Divine Judge, of
+   unclear origin and allegiance). Neither appeared in the 27.
+
+6. ORRO BELONGS TO THE ORRIN PANTHEON (author, 2026-08-30). SETTING LORE lists
+   him under CURRENT DIVINE ENTITIES ("Death God, ACTIVE, OMINOUS") but omitted
+   him from the COSMOLOGY & DEITIES roster, leaving his alignment ambiguous.
+   Resolved: he is an Orrin-pantheon deity, alongside Ferros, Sanguis, Kyros,
+   Ravos, Vexis and Ikarath. Applied throughout — Orro is now named in the
+   EvilGodNames of the order-aligned faiths and among the Void cult's own.
+
+--------------------------------------------------------------------------------
+REAL CK3 1.19 SCHEMA
+--------------------------------------------------------------------------------
+Paths (1.19 layout — Tiger 1.17 still expects the old 1.16 paths, see GAPS):
+  common/religion/religion_types/          religions + their faiths
+  common/religion/religion_family_types/   families
+  common/religion/doctrine_types/          (vanilla; we define none)
+  common/religion/holy_site_types/         holy sites
+
+A religion takes: family, graphical_faith, piety_icon_group,
+doctrine_background_icon, pagan_roots, doctrine (single-pick only),
+traits = { virtues sins }, reserved_male_names / reserved_female_names,
+custom_faith_icons, localization = { }, holy_order_names, holy_order_maa,
+and finally faiths = { }. Doctrines cannot appear after the faiths block.
+
+A faith takes: color, icon, religious_head, holy_site (any number),
+doctrine, reserved names, localization, holy_order_names.
+
+TENETS ARE FAITH-LEVEL, NOT RELIGION-LEVEL. doctrine_core_tenets has
+number_of_picks = 3, and the engine forbids multi-pick doctrine groups at
+religion level (there is no override system that would work). Every faith
+therefore carries exactly three `doctrine = tenet_*` lines.
+
+There are no per-faith "modifiers" blocks. Mechanical effects come from the
+tenets and doctrines you pick; anything beyond that needs a real system
+(scripted modifiers, on_actions, events) built separately.
+
+Family-level `hostility_doctrine` sets cross-family hostility. Only four exist:
+abrahamic_, pagan_, eastern_ and sinitic_hostility_doctrine.
+
+--------------------------------------------------------------------------------
+RELIGION FAMILIES (4)
+--------------------------------------------------------------------------------
+eotg_rf_divine_order    hostility: abrahamic    Yu and his sons.
+  Elross, Commerce (Bohemut), Coldiron (Frozt), Firstlight.
+
+eotg_rf_titan_worship   hostility: pagan        Looks past the sons to the Titans.
+  Void Reverence. Reserved for future Carrigore and Orrin cults.
+
+eotg_rf_ancestral       hostility: pagan        The dead, the lineage, the work.
+  Stampede, Ancestor Veneration, Forge Tradition, Deep Warren.
+
+eotg_rf_pragmatic       hostility: pagan        Non-theistic codes and craft.
+  Survivalism, Secular Codes, Plutocracy.
+  The odd one out is the Plutocracy, which is materialist rather than civic —
+  it grants the Hoard exactly the reverence the other two refuse any god. It
+  belongs here on the shared premise (nothing above you is owed obedience for
+  its own sake) rather than on temperament, and the three would argue.
+
+NOTE ON COMMERCE: it previously sat in eotg_rf_titan_worship behind a "TODO:
+define proper mercantile faith family" comment, which contradicted its own
+localization — Bohemut is explicitly a Son of Yu. Moved to Divine Order.
+
+UNRESOLVED TENSION — VOID REVERENCE: the religion description is Malvrick-
+centric, and Malvrick is a Son of Yu, which argues for Divine Order. The faith
+beneath it (eotg_faith_void_cult) venerates the breach itself and argues about
+what answers from the empty prison, which is Titan-facing. It stays in
+eotg_rf_titan_worship on the strength of the faith rather than the religion.
+Worth revisiting if a second, more orthodox Malvrick faith is ever added.
+
+--------------------------------------------------------------------------------
+IMPLEMENTED — 12 RELIGIONS, 13 FAITHS
+--------------------------------------------------------------------------------
+All shipped in common/religion/religion_types/eotg_religions.txt with full
+adjective / adherent / adherent_plural / desc localization in
+localization/english/eotg_religions_l_english.yml, and god-name localization
+blocks backed by localization/english/eotg_religion_gods_l_english.yml.
+
+1. eotg_religion_elross — family eotg_rf_divine_order
+   Elross, Son of Yu: light as obligation, justice owed, righteousness enforced.
+   Backbone of the Second Elrossi Imperium. Acting openly since 850 AG.
+   virtues = { just brave zealous }   sins = { arbitrary craven cynical }
+   FAITH eotg_faith_elross_canonical — Orthodox Elrossi, governed from Elyria.
+     tenets: unrelenting_faith, armed_pilgrimages, legalism
+
+2. eotg_religion_commerce — family eotg_rf_divine_order
+   Bohemut, Son of Yu: balance as accounting. Merchants and scholars read the
+   same scripture and reliably take different lessons from it.
+   virtues = { diligent honest temperate }   sins = { lazy deceitful greedy }
+   FAITH eotg_faith_commerce — Creed-Sworn; a contract honoured is a prayer
+     completed. tenets: pursuit_of_knowledge, ritual_hospitality, legalism
+
+2b. eotg_religion_plutocracy — family eotg_rf_pragmatic
+   The goblin faith. Not Bohemut's balance and not a rival reading of it — a
+   different religion, which holds that the sacred act is accumulation rather
+   than exchange, and that a sum which stops growing has died. Recognises no
+   god because it considers one unnecessary: the Hoard is observable and
+   answers in proportion to effort invested.
+   virtues = { greedy diligent ambitious }   sins = { generous lazy content }
+   FAITH eotg_faith_goblin_plutocracy — as kept in the counting-vaults of the
+     Gob-Ogre Trade League. Worth is public and continuously measured, which
+     makes it brutally meritocratic. Its assessors tax unbelievers as a
+     devotional act. tenets: tax_nonbelievers, pursuit_of_power, adaptive
+
+3. eotg_religion_coldiron — family eotg_rf_divine_order
+   Frozt: cold and loss as curriculum. Warrior-monks of the Caliphate who treat
+   comfort as a form of dishonesty.
+   virtues = { temperate patient brave }   sins = { gluttonous impatient craven }
+   FAITH eotg_faith_coldiron — the Covenant; endurance rather than victory.
+     tenets: exaltation_of_pain, monasticism, asceticism
+
+4. eotg_religion_firstlight — family eotg_rf_divine_order
+   The elven light-faith, older than the Elrossi canon and unwilling to be
+   absorbed into it. Light is tended, not obeyed.
+   virtues = { patient compassionate humble }   sins = { impatient callous arrogant }
+   FAITH eotg_faith_firstlight — dawn observances, unbroken lamps, long memory.
+     tenets: sun_worship, ritual_celebrations, pursuit_of_knowledge
+
+5. eotg_religion_void_reverence — family eotg_rf_titan_worship
+   Malvrick, the son nobody wants: darkness, secrets, and the Void that was
+   built as Orrin's prison, does not hold him, and has not gone quiet.
+   virtues = { eccentric ambitious callous }   sins = { content humble compassionate }
+   FAITH eotg_faith_void_cult — venerates the breach itself. Capital offence
+     across most of settled space. tenets: esotericism, sacred_destruction,
+     human_sacrifice
+
+6. eotg_religion_stampede — family eotg_rf_ancestral
+   The centaur faith: the dead run ahead, the living are obliged not to break
+   stride. Clan oaths are sworn to the Run, so breaking one is theft from the dead.
+   virtues = { honest brave gregarious }   sins = { deceitful craven lazy }
+   FAITH eotg_faith_stampede — the Khanate's codified Run, hardened by the War
+     of Broken Hooves. tenets: ancestor_worship, ritual_hospitality,
+     communal_identity
+
+7. eotg_religion_ancestor_veneration — family eotg_rf_ancestral
+   Broken Daimyo lineage faith. Asks nothing of the pantheons and everything of
+   lineage. The Grip killed enough ancestors to make the practice urgent.
+   virtues = { humble diligent honest }   sins = { arrogant lazy deceitful }
+   FAITH eotg_faith_ancestor_veneration — Name-Keepers; the rolls are kept,
+     recited, and consulted before anything irreversible.
+     tenets: ancestor_worship, filial_piety, communal_identity
+
+8. eotg_religion_forge_tradition — family eotg_rf_ancestral
+   Stone endures. Foundation over flourish; haste is a species of cowardice.
+   Absorbs the old draft's "Thalvoria's Foundation" (mountains, stability,
+   building) — the mountain halls and the ogre foundries share this faith.
+   virtues = { patient diligent stubborn }   sins = { impatient lazy fickle }
+   FAITH eotg_faith_forge_tradition — a life measured by what it left standing.
+     tenets: mountain_worship, megaliths, communal_identity
+
+9. eotg_religion_deep_warren — family eotg_rf_ancestral
+   The ratfolk ancestor faith. Each deep gallery was cut by a named generation
+   and the names are kept, so going further down is going further back. Depth is
+   holy, and abandoning a gallery is desertion rather than retreat.
+   virtues = { patient paranoid diligent }   sins = { trusting arrogant lazy }
+   FAITH eotg_faith_deep_warren — a Deepkeeper can recite which forebear cut
+     which gallery, and consults them before digging: the dead are asked for
+     precedent rather than blessing.
+     tenets: ancestor_worship, cthonic_redoubts, pastoral_isolation
+
+10. eotg_religion_survivalism — family eotg_rf_pragmatic
+    The Grip proved the universe will not catch you; machinery did. The sacred
+    act is maintenance; a god who needs prayer is less use than a working pump.
+    virtues = { diligent temperate patient }   sins = { lazy gluttonous wrathful }
+    FAITH eotg_faith_industrial_survivalism — Creedwrights of the salvage
+      sectors and Helix remnants. Scripture is a maintenance log.
+      tenets: communal_identity, pursuit_of_knowledge, adaptive
+
+11. eotg_religion_secular_codes — family eotg_rf_pragmatic
+    Not a denial that the gods exist — since 850 AG that is hard to hold in
+    public — but a refusal to let them hold office. Power that cannot be
+    audited is owed no obedience.
+    virtues = { just honest diligent }   sins = { arbitrary deceitful lazy }
+    FAITH eotg_faith_secular_contract — the mercenary companies' code. Terms are
+      met, clients are not betrayed mid-engagement.
+      tenets: warmonger, legalism, adaptive
+    FAITH eotg_faith_civic_secular — New Cauldron's founding conviction, kept
+      seven centuries. The franchise itself is the sacred thing.
+      tenets: legalism, communal_identity, pursuit_of_knowledge
+
+--------------------------------------------------------------------------------
+DISPOSITION OF THE OLD 27
+--------------------------------------------------------------------------------
+(The old draft's own counts did not reconcile — it claimed 27 with a 13/14
+organized/unreformed split, then listed 26 entries in an 11/15 split.)
+
+  1  Elrossi Faith .............. DONE  → eotg_faith_elross_canonical
+  2  Frozt Worship .............. DONE  → eotg_faith_coldiron
+  3  Goblin Plutocracy .......... DONE  → eotg_faith_goblin_plutocracy, as its
+                                          own religion beside the Bohemite one
+                                          (see canon #3)
+  4  Carrigore Worship .......... BACKLOG (see below)
+  4B Cult of the Cosmos ......... BACKLOG
+  4D Feral Star Cult ............ BACKLOG
+  5  Exodus Agnosticism ......... SPLIT → eotg_religion_survivalism (Helix) and
+                                          eotg_religion_secular_codes (Legion,
+                                          New Cauldron)
+  6  Ogre Traditionalism ........ BACKLOG (war-cult; distinct from Forge)
+  7  Ogre Market Faith .......... BACKLOG (faith under eotg_religion_commerce)
+  7B Ancestor Veneration ........ DONE  → eotg_religion_deep_warren, see canon #4
+  8  Xerxes Heroism ............. BACKLOG, see canon #1 and BACKLOG F
+  9  Gorgath's Mysteries ........ BACKLOG (high priority — Aphionian Consortium)
+  10 Serephios Diplomacy ........ BACKLOG (likely a faith, not a religion)
+  11 Solena's Passion ........... BACKLOG
+  12 Mystara's Prophecy ......... BACKLOG (deity is ACTIVE at 866)
+  13 Core's Desperation ......... BACKLOG
+  14 Vexis Deception ............ BACKLOG (Orrin pantheon)
+  15 Ikarath's Shadow ........... BACKLOG (Orrin pantheon)
+  16 Kyros Madness .............. BACKLOG (Orrin pantheon)
+  17 Ravos Storms ............... BACKLOG (Orrin pantheon)
+  18 Orrin's Conquest ........... BACKLOG — apply the errata, see canon #2
+  19 Thalvoria's Foundation ..... MERGED→ eotg_religion_forge_tradition
+  20 Zephyrion's Freedom ........ BACKLOG
+  21 Sanguis Blood Rites ........ BACKLOG (Orrin pantheon)
+  22 Lunara's Remnant ........... BACKLOG (deity confirmed DECEASED — a faith
+                                  whose god is definitely dead is good material)
+  23 Malvrick Void .............. DONE  → eotg_religion_void_reverence
+  24 Orro Death ................. BACKLOG, unblocked by canon #6 — Orro is an
+                                  Orrin-pantheon deity, so this belongs as a
+                                  faith under eotg_religion_orrin (BACKLOG C)
+
+--------------------------------------------------------------------------------
+BACKLOG — PRIORITY ORDER
+--------------------------------------------------------------------------------
+A. eotg_religion_carrigore (family eotg_rf_titan_worship). The rising threat all
+   major powers fear. Two faiths: eotg_faith_cult_of_cosmos (organised, ambitious,
+   Samulo the Stardrinker as demigod exemplar) and eotg_faith_feral_star
+   (uncoordinated frontier shamans practising crude star drinking). Needs the
+   Star Drinking system to mean anything mechanically; until then it is two
+   faiths with tenets and no unique behaviour. Coordinate with the existing Void
+   Corruption system — Carrigore corruption must not simply mirror it.
+
+B. eotg_religion_gorgath (family eotg_rf_divine_order — Gorgath is a Yu-aligned
+   elder deity). The Aphionian Consortium's secret society. Obvious tenets:
+   esotericism, pursuit_of_knowledge, astrology.
+
+C. eotg_religion_orrin (family eotg_rf_titan_worship). Orrin Warparty. Must be
+   written under the errata: Orrin is loose in the material plane, and nobody
+   in-world can say what still speaks from the empty Void.
+
+D. Secondary Yu deities as FAITHS rather than religions — Serephios, Solena,
+   Mystara, Core, Zephyrion, Lunara. Each is one deity with a following, not a
+   separate cosmology; folding them in as faiths under existing religions is
+   cheaper and reads better than eleven near-empty religions.
+
+E. Orrin pantheon secondaries — Ferros, Sanguis, Kyros, Ravos, Vexis, Ikarath
+   and Orro. Same reasoning: faiths under eotg_religion_orrin.
+
+F. A Xerxes hero-veneration faith. Viable now that Xerxes is established as a
+   person (canon #1), but two things must be settled first, because the only
+   source for either is the discarded draft:
+     - Is Xerxes dead? A veneration cult reads very differently if he is not.
+     - Did he lead a resistance against the Elrossi Crusade? The draft built the
+       whole faith on this and nothing else in the project corroborates it.
+   If both hold, it slots in as a faith rather than a religion — most likely
+   under eotg_religion_firstlight, since the city named for him already keeps
+   that faith, which would make the cult a schism among the Firstlit rather
+   than a new cosmology. That is a more interesting position than the draft's
+   free-floating resistance religion, and it costs one faith instead of eleven.
+
+--------------------------------------------------------------------------------
+KNOWN GAPS
+--------------------------------------------------------------------------------
+HOLY SITES — none defined, for any faith. Blocked on the map pass: baronies have
+no province IDs yet, so there is nothing to anchor a holy site to. Faiths
+currently run with zero holy sites, which leaves the faith screen's five slots
+empty and gives Great Holy Wars nothing to target. Unblock with the map pass,
+then add 3–5 per major faith.
+
+TIGER IS BLIND HERE — ck3-tiger 1.17 looks for religions in
+common/religion/religions/ (the 1.16 layout) and CK3 1.19 uses
+common/religion/religion_types/. Tiger therefore never parses these files and
+reports every faith reference elsewhere in the mod as "not defined in
+common/religion/religions/". Those ~54 errors are false positives, and the
+corollary matters more: Tiger provides NO validation of religion content. Every
+doctrine, tenet and trait name in these files has to be checked against vanilla
+by hand.
+
+GRAPHICAL FAITH — all families still borrow vanilla gfx (christian_gfx,
+pagan_gfx) and vanilla doctrine background icons. Tracked in docs/art_needed.txt.
+
+HOLY ORDERS — no holy_order_names or holy_order_maa on any religion, so holy
+orders fall back to "holy_order_default" with randomly generated coats of arms.
+Cheap to fix once the sci-fi men-at-arms set is settled.
+
+RESERVED NAMES — no reserved_male_names / reserved_female_names on any religion.
+Low priority.
+
+================================================================================
+END SPECIFICATION
+================================================================================

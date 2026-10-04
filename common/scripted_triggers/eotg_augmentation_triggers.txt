@@ -2,21 +2,61 @@
 # Scripted triggers for the Cybernetic Augmentation system.
 # -----------------------------------------------------------------------------
 
-# True if the character has any augmentation trait
+# True if the character has any augmentation trait (Phase 3b adds
+# eotg_total_integration, spec phase3 §5)
 eotg_is_augmented_any = {
     OR = {
-        has_trait = eotg_augmented
-        has_trait = eotg_enhanced
-        has_trait = eotg_overclocked
+        has_trait = eotg_cybernetics
         has_trait = eotg_neurofractured
+        has_trait = eotg_total_integration
+    }
+}
+
+# Tier tests on the eotg_cybernetics track (XP is only ever 0 / 50 / 100).
+# Tier 1 = Augmented (XP 0)
+eotg_is_aug_tier1 = {
+    has_trait = eotg_cybernetics
+    NOT = {
+        has_trait_xp = {
+            trait = eotg_cybernetics
+            value >= 50
+        }
+    }
+}
+
+# Tier 2 = Enhanced (XP 50)
+eotg_is_aug_tier2 = {
+    has_trait = eotg_cybernetics
+    has_trait_xp = {
+        trait = eotg_cybernetics
+        value >= 50
+    }
+    NOT = {
+        has_trait_xp = {
+            trait = eotg_cybernetics
+            value >= 100
+        }
+    }
+}
+
+# Tier 3 = Overclocked (XP 100)
+eotg_is_aug_tier3 = {
+    has_trait = eotg_cybernetics
+    has_trait_xp = {
+        trait = eotg_cybernetics
+        value >= 100
     }
 }
 
 # Eligible for initial augmentation
+# eotg_flag_suppress_progression also blocks initiation: eotg_aug_init.005 (b, c)
+# set it as "resist / delay", which in v1 had no effect on an unaugmented ruler.
 eotg_can_receive_augmented = {
     is_adult = yes
     is_alive = yes
     NOT = { eotg_is_augmented_any = yes }
+    NOT = { has_character_flag = eotg_flag_suppress_progression }
+    exists = capital_county
     capital_county = {
         development_level >= 10
     }
@@ -24,8 +64,9 @@ eotg_can_receive_augmented = {
 
 # Eligible to progress Augmented -> Enhanced
 eotg_can_progress_to_enhanced = {
-    has_trait = eotg_augmented
+    eotg_is_aug_tier1 = yes
     NOT = { has_character_flag = eotg_flag_suppress_progression }
+    exists = capital_county
     capital_county = {
         development_level >= 20
     }
@@ -33,23 +74,84 @@ eotg_can_progress_to_enhanced = {
 
 # Eligible to progress Enhanced -> Overclocked
 eotg_can_progress_to_overclocked = {
-    has_trait = eotg_enhanced
+    eotg_is_aug_tier2 = yes
     NOT = { has_character_flag = eotg_flag_suppress_progression }
+    exists = capital_county
     capital_county = {
         development_level >= 35
     }
 }
 
-# Neurofracture risk threshold -- checked yearly for Overclocked characters
+# Neurofracture risk threshold -- checked yearly for Overclocked characters.
+# Fixed at 80 (cybernetics_v2 B2): stress now acts through graded accrual in
+# eotg_on_yearly_aug_overclocked_check, not through a lower threshold.
 eotg_neurofracture_threshold_met = {
-    has_trait = eotg_overclocked
+    eotg_is_aug_tier3 = yes
+    has_variable = eotg_fracture_risk
+    var:eotg_fracture_risk >= 80
+}
+
+# -- Pressure bands (cybernetics_v2 phase 0 §2.1) -----------------------------
+# Read eotg_fracture_risk as a band, never as a number (hidden-risk rule).
+# Named for the Neurofractured bands; also used at Overclocked. A missing
+# variable counts as 0.
+eotg_aug_pressure_flicker = {
     OR = {
-        var:eotg_fracture_risk >= 80
-        AND = {
-            var:eotg_fracture_risk >= 60
-            stress >= 200
-        }
+        NOT = { has_variable = eotg_fracture_risk }
+        var:eotg_fracture_risk < 30
     }
+}
+
+eotg_aug_pressure_fracture = {
+    has_variable = eotg_fracture_risk
+    var:eotg_fracture_risk >= 30
+    var:eotg_fracture_risk < 60
+}
+
+eotg_aug_pressure_storm = {
+    has_variable = eotg_fracture_risk
+    var:eotg_fracture_risk >= 60
+}
+
+# -- Shared state tests (phase 0 §2.1) ----------------------------------------
+# Any vanilla physical-loss trait the implants can replace.
+# Counterpart: eotg_aug_restore_loss_effect.
+eotg_has_physical_loss = {
+    OR = {
+        has_trait = maimed
+        has_trait = one_legged
+        has_trait = one_eyed
+        has_trait = blind
+    }
+}
+
+# A physician to hand: the character is one, or employs one.
+# employs_court_position form: vanilla events/activities/hold_court_activity/
+# hold_court_events_general.txt (court_physician_court_position).
+eotg_has_physician_access = {
+    OR = {
+        has_trait = lifestyle_physician
+        employs_court_position = court_physician_court_position
+    }
+}
+
+# An augmented character below county tier (courtiers, knights, barons).
+# Includes eotg_total_integration through eotg_is_augmented_any (Phase 3b).
+eotg_aug_is_nonruler = {
+    eotg_is_augmented_any = yes
+    highest_held_title_tier < tier_county
+}
+
+# Who an episode can hit. Evaluated in the courtier's scope inside
+# eotg_aug_pick_victim_effect; root is the event's root (the ruler).
+# `NOT = { this = root }` excludes the event root on purpose: the episode's
+# owner is never their own victim, even when the picker runs on a saved scope
+# (where root is still the ruler whose event this is).
+eotg_aug_victim_candidate = {
+    is_alive = yes
+    is_imprisoned = no
+    NOT = { this = root }
+    NOT = { has_trait = eotg_neurofractured }
 }
 
 # AI augmentation interest
@@ -65,5 +167,169 @@ eotg_ai_wants_augmentation = {
             has_trait = zealous
             has_trait = content
         }
+    }
+}
+
+# -- Phase 2 (docs/specs/cybernetics_v2_phase2.md) ----------------------------
+# A child the Sickly Child offer (eotg_aug_init.014) is about. Evaluated in the
+# child's scope. Used by the on_action child block, init.014's trigger and its
+# ordered_child pick, so the three never drift apart.
+eotg_aug_sick_child_candidate = {
+    is_alive = yes
+    age < 16
+    OR = {
+        has_trait = ill
+        has_trait = incapable
+    }
+    eotg_is_augmented_any = no
+}
+
+# A retainer who can be augmented (adult, alive, unaugmented). Evaluated in
+# the knight's or courtier's scope. Used by eotg_decision_augment_retainer's
+# is_valid and the eotg_aug_init.020 candidate picks.
+eotg_aug_retainer_candidate = {
+    is_alive = yes
+    is_adult = yes
+    eotg_is_augmented_any = no
+}
+
+# -- Phase 3a (docs/specs/cybernetics_v2_phase3.md) ---------------------------
+# Someone who can hold a Containment Regency for $RULER$: alive, adult, free,
+# and in the ruler's court or a direct vassal (vanilla diarchs are courtiers or
+# vassals). Used by the NF on_action Storm branch (through
+# eotg_aug_containment_possible), eotg_fracture.025's keeper pick,
+# eotg_fracture.026 (a) and the Heir's Arc regency options, so the branch and
+# the events never drift apart.
+eotg_aug_keeper_candidate = {
+    is_alive = yes
+    is_adult = yes
+    is_imprisoned = no
+    OR = {
+        is_courtier_of = $RULER$
+        is_vassal_of = $RULER$
+    }
+}
+
+# The Containment Regency can be offered to $RULER$ (run in the ruler's
+# scope): vanilla eligibility, no diarchy yet, and a keeper (the primary
+# spouse, else the adult primary heir). Mirrored by the Storm branch and
+# eotg_fracture.025's trigger.
+eotg_aug_containment_possible = {
+    basic_eligible_for_diarchy_trigger = yes
+    has_active_diarchy = no
+    OR = {
+        primary_spouse ?= { eotg_aug_keeper_candidate = { RULER = $RULER$ } }
+        primary_heir ?= { eotg_aug_keeper_candidate = { RULER = $RULER$ } }
+    }
+}
+
+# The Heir's Arc story exists for this character (thread T3).
+eotg_aug_has_heir_arc = {
+    any_owned_story = { story_type = eotg_story_aug_heir_arc }
+}
+
+# -- Phase 3b (docs/specs/cybernetics_v2_phase3.md §6-8) ----------------------
+# Excision can be paid for: free when the surgeons are already in the room
+# (eotg_flag_aug_excision_free: eotg_fracture.027's excision outcome, or a
+# successor who paid in eotg_aug_end.031.c), else major_gold_value, halved by
+# the Heir's Arc promise (eotg_flag_aug_promised_treatment). Mirrors
+# eotg_aug_excision_pay_effect. Users: eotg_decision_aug_excision (is_valid),
+# eotg_aug_end.001 (a, c, d).
+eotg_aug_can_afford_excision = {
+    OR = {
+        has_character_flag = eotg_flag_aug_excision_free
+        gold >= {
+            value = major_gold_value
+            if = {
+                limit = { has_character_flag = eotg_flag_aug_promised_treatment }
+                multiply = 0.5
+            }
+        }
+    }
+}
+
+# A Warden can be appointed for $RULER$ (run in the ruler's scope): the
+# primary spouse, the adult primary heir or the chancellor, each a valid
+# keeper. Users: eotg_decision_aug_appoint_warden (is_valid),
+# eotg_aug_end.020 (trigger).
+eotg_aug_has_warden_candidate = {
+    OR = {
+        primary_spouse ?= { eotg_aug_keeper_candidate = { RULER = $RULER$ } }
+        primary_heir ?= { eotg_aug_keeper_candidate = { RULER = $RULER$ } }
+        cp:councillor_chancellor ?= { eotg_aug_keeper_candidate = { RULER = $RULER$ } }
+    }
+}
+
+# -- Phase 4 (docs/specs/cybernetics_v2_phase4.md) ----------------------------
+# The First Upgrade can be paid for (mirror: eotg_aug_pay_upgrade_effect).
+# Users: eotg_on_yearly_aug_tier1_check (The Upgrade branch),
+# eotg_aug_tier1.002 (a, d, e).
+eotg_aug_can_afford_upgrade = {
+    gold >= {
+        value = medium_gold_value
+        if = {
+            limit = { has_character_flag = eotg_flag_aug_replace_more }
+            multiply = 0.85
+        }
+    }
+}
+
+# -- Phase 5 (docs/specs/cybernetics_v2_phase5.md) ----------------------------
+# The three story arcs exist for this character. Story-type test shape as
+# eotg_aug_has_heir_arc.
+eotg_aug_has_countdown = {
+    any_owned_story = { story_type = eotg_story_aug_countdown }
+}
+
+eotg_aug_has_patron = {
+    any_owned_story = { story_type = eotg_story_aug_patron }
+}
+
+eotg_aug_has_retinue = {
+    any_owned_story = { story_type = eotg_story_aug_retinue }
+}
+
+# A knight who belongs to the Iron Retinue Program (thread T4; Phase 6 weights
+# by it). Evaluated in the knight's scope.
+eotg_aug_is_retinue_knight = {
+    is_alive = yes
+    has_character_flag = eotg_flag_aug_iron_retinue
+}
+
+# Someone the syndicate's Errand (eotg_aug_patron.004) can name: the victim
+# candidate terms (eotg_aug_victim_candidate) against $RULER$, never the
+# ruler's close family or spouse. Evaluated in the courtier's scope. A
+# parameter, not root, because the Patron story's tick (story scope) also
+# asks. Users: eotg_story_aug_patron (tick), eotg_aug_patron.004.
+eotg_aug_patron_critic_candidate = {
+    is_alive = yes
+    is_imprisoned = no
+    NOT = { this = $RULER$ }
+    NOT = { has_trait = eotg_neurofractured }
+    NOT = { is_close_family_of = $RULER$ }
+    NOT = { is_spouse_of = $RULER$ }
+}
+
+# The Family Clause's heir (eotg_aug_patron.005): 12+, unaugmented.
+eotg_aug_patron_heir_candidate = {
+    is_alive = yes
+    age >= 12
+    eotg_is_augmented_any = no
+}
+
+# The syndicate's bill can be paid (mirror: eotg_aug_patron_pay_effect). Run in
+# the ruler's scope; scope:eotg_patron_story must be saved.
+eotg_aug_patron_can_pay = {
+    gold >= {
+        value = $BASE$
+        if = {
+            limit = { scope:eotg_patron_story.var:eotg_terms = flag:greedy }
+            multiply = 1.5
+        }
+        else_if = {
+            limit = { scope:eotg_patron_story.var:eotg_terms = flag:read }
+            multiply = 0.75
+        }
+        multiply = $MULT$
     }
 }

@@ -1,0 +1,20 @@
+# MOD(eotg) partial define overrides for the space map look. Only the keys listed here change;
+# CK3 merges define files, so vanilla keys not mentioned keep their values.
+
+NFogOfWar = {
+	ALPHA_MIN = 0.18			# vanilla 0.5: unexplored space is much darker (terrain still faintly readable)
+	PATTERN_STRENGTH = 0.25		# vanilla 0.6: less of the drifting parchment-cloud pattern in the fog
+	CONTRAST = -0.35			# vanilla -0.8: vanilla washes fogged areas to grey; keep some contrast in the dark
+	BRIGHTNESS = -0.15			# vanilla 0: pull fogged areas down toward black
+}
+
+NMapName = {
+	# vanilla 50. A sans reads visually larger than a script at the same point size, so keeping
+	# 50 after the face swap would add clutter rather than hold the weight steady.
+	NAME_FONT_SIZE = 44
+
+	# vanilla 0.85 / 0.95 - nearly solid, so the labels sit ON the map like ink. Lower makes
+	# them read as projected into it, which is the whole point of the grade they sit on.
+	MIN_OPACITY = 0.55
+	MAX_OPACITY = 0.70
+}

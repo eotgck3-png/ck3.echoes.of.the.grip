@@ -1,0 +1,464 @@
+﻿# -- eotg_augmentation_fracture.txt -------------------------------------------
+# Neurofracture transformation event and Neurofractured ongoing events.
+#
+# eotg_fracture.0001 -- Neural Cascade          (transformation reveal)
+# eotg_fracture.002  -- Containment Breach      (random ongoing)
+# eotg_fracture.003  -- Lucid Moment            (rare ongoing)
+# eotg_fracture.004  -- The Court Massacre      (high-stress trigger)
+# eotg_fracture.005  -- What the Heir Saw       (primary heir witness)
+# eotg_fracture.006  -- The Warrant             (rebel declaration)
+# eotg_fracture.007  -- Dead Reckoning          (rare clarity)
+#
+# Fires from: eotg_trigger_neurofracture scripted effect (0001);
+#             eotg_augmentation_on_actions.txt yearly checks (002-007)
+# -----------------------------------------------------------------------------
+
+namespace = eotg_fracture
+
+
+# -- eotg_fracture.0001 -------------------------------------------------------
+# Neural Cascade -- Transformation Event
+
+eotg_fracture.0001 = {
+    type = character_event
+    title = eotg_fracture.0001.t
+    desc = eotg_fracture.0001.desc
+    theme = battle
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+
+    immediate = {
+        hidden_effect = {
+            add_dread = 40
+            random = {
+                chance = 40
+                random_courtier = {
+                    limit = { is_alive = yes }
+                    add_trait = wounded
+                }
+            }
+        }
+    }
+
+    option = {
+        name = eotg_fracture.0001.a
+        stress_impact = { base = massive_stress_impact_gain }
+    }
+}
+
+
+# -- eotg_fracture.002 --------------------------------------------------------
+# Containment Breach
+# The Neurofractured character loses control -- random court casualties.
+
+eotg_fracture.002 = {
+    type = character_event
+    title = eotg_fracture.002.t
+    desc = eotg_fracture.002.desc
+    theme = battle
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+
+    immediate = {
+        hidden_effect = {
+            add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 12 }
+            random = {
+                chance = 50
+                random_courtier = {
+                    limit = { is_alive = yes }
+                    add_trait = wounded
+                }
+            }
+            random = {
+                chance = 20
+                random_courtier = {
+                    limit = { is_alive = yes }
+                    death = { death_reason = death_murder }
+                }
+            }
+        }
+    }
+
+    # "No chains"
+    option = {
+        name = eotg_fracture.002.a
+        add_dread = 30
+        add_tyranny = 5
+        ai_chance = {
+            base = 50
+            modifier = { add = 20  has_trait = callous }
+        }
+    }
+
+    # "Someone help me"
+    option = {
+        name = eotg_fracture.002.b
+        stress_impact = { base = medium_stress_impact_gain }
+        add_character_modifier = { modifier = eotg_mod_withdrawn_from_court  years = 2 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+
+    # "Execute the survivors"
+    option = {
+        name = eotg_fracture.002.c
+        every_courtier = {
+            limit = { is_alive = yes  has_trait = wounded }
+            death = { death_reason = death_murder }
+        }
+        add_dread = 50
+        add_tyranny = 20
+        ai_chance = {
+            base = 20
+            modifier = { add = 30  has_trait = callous }
+            modifier = { add = 20  has_trait = wrathful }
+        }
+    }
+}
+
+
+# -- eotg_fracture.003 --------------------------------------------------------
+# Lucid Moment
+# A rare window of clarity in the fracture.
+
+eotg_fracture.003 = {
+    type = character_event
+    title = eotg_fracture.003.t
+    desc = eotg_fracture.003.desc
+    theme = intrigue
+
+    left_portrait = {
+        character = root
+        animation = worry
+    }
+
+    # "End this" -- suicide attempt (40% chance, higher if health is low)
+    option = {
+        name = eotg_fracture.003.a
+        random = {
+            chance = 40
+            modifier = { add = 20  health < 3 }
+            death = { death_reason = death_suicide }
+        }
+        stress_impact = { base = massive_stress_impact_gain }
+        ai_chance = {
+            base = 10
+            modifier = { add = 20  stress >= 300 }
+        }
+    }
+
+    # "Isolate myself" -- withdraw from court, reduce stress
+    option = {
+        name = eotg_fracture.003.b
+        add_character_modifier = { modifier = eotg_mod_withdrawn_from_court  years = 3 }
+        stress_impact = { base = minor_stress_impact_loss }
+        ai_chance = {
+            base = 50
+            modifier = { add = 20  has_trait = humble }
+            modifier = { add = 10  has_trait = compassionate }
+        }
+    }
+
+    # "Weakness disgusts me" -- deny and push deeper
+    option = {
+        name = eotg_fracture.003.c
+        stress_impact = { base = massive_stress_impact_loss }
+        add_dread = 20
+        eotg_add_fracture_risk = { AMOUNT = 10 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 30  has_trait = callous }
+            modifier = { add = 20  has_trait = ambitious }
+        }
+    }
+}
+
+
+# -- eotg_fracture.004 --------------------------------------------------------
+# The Court Massacre
+# Fires when stress >= 300.
+
+eotg_fracture.004 = {
+    type = character_event
+    title = eotg_fracture.004.t
+    desc = eotg_fracture.004.desc
+    theme = battle
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+
+    immediate = {
+        hidden_effect = {
+            add_character_flag = { flag = eotg_flag_nf_event_cooldown  years = 2 }
+            random_courtier = {
+                limit = { is_alive = yes }
+                death = { death_reason = death_murder }
+            }
+            random_courtier = {
+                limit = { is_alive = yes }
+                add_trait = wounded
+            }
+            random = {
+                chance = 20
+                if = {
+                    limit = { is_married = yes }
+                    random_spouse = { death = { death_reason = death_murder } }
+                }
+            }
+        }
+    }
+
+    # "They were threats"
+    option = {
+        name = eotg_fracture.004.a
+        add_dread = 40
+        ai_chance = {
+            base = 60
+            modifier = { add = 20  has_trait = callous }
+        }
+    }
+
+    # "I do not remember"
+    option = {
+        name = eotg_fracture.004.b
+        stress_impact = { base = medium_stress_impact_gain }
+        random = {
+            chance = 30
+            add_trait = depressed_1
+        }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = compassionate }
+        }
+    }
+}
+
+
+# -- eotg_fracture.005 --------------------------------------------------------
+# What the Heir Saw
+# The primary heir was present during a fracture episode.
+
+eotg_fracture.005 = {
+    type = character_event
+    title = eotg_fracture.005.t
+    desc = eotg_fracture.005.desc
+    theme = family
+
+    trigger = {
+        exists = primary_heir
+        primary_heir = { age >= 12  is_alive = yes }
+    }
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+    right_portrait = {
+        character = scope:watching_heir
+        animation = worry
+    }
+
+    immediate = {
+        hidden_effect = {
+            add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 12 }
+            primary_heir = {
+                save_scope_as = watching_heir
+            }
+        }
+    }
+
+    # "They will understand eventually." — heir fears you
+    option = {
+        name = eotg_fracture.005.a
+        scope:watching_heir = {
+            add_opinion = { modifier = eotg_opinion_aug_fear  target = root }
+        }
+        add_dread = 15
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = -30  has_trait = compassionate }
+        }
+    }
+
+    # "Call them in. Explain as much as you can." — heir uneasy but closer
+    option = {
+        name = eotg_fracture.005.b
+        scope:watching_heir = {
+            add_opinion = { modifier = eotg_opinion_aug_unease  target = root }
+        }
+        stress_impact = { base = medium_stress_impact_gain }
+        ai_chance = {
+            base = 40
+            modifier = { add = 30  has_trait = compassionate }
+            modifier = { add = 20  has_trait = humble }
+        }
+    }
+
+    # "It was necessary. Prepare them." — heir disgusted, may gain callous
+    option = {
+        name = eotg_fracture.005.c
+        scope:watching_heir = {
+            add_opinion = { modifier = eotg_opinion_aug_disgust  target = root }
+            random = {
+                chance = 30
+                add_trait = callous
+            }
+        }
+        add_dread = 30
+        ai_chance = {
+            base = 20
+            modifier = { add = 30  has_trait = callous }
+            modifier = { add = -30  has_trait = compassionate }
+        }
+    }
+}
+
+
+# -- eotg_fracture.006 --------------------------------------------------------
+# The Warrant
+# A vassal files a formal rebellion citing cognitive corruption.
+
+eotg_fracture.006 = {
+    type = character_event
+    title = eotg_fracture.006.t
+    desc = eotg_fracture.006.desc
+    theme = realm
+
+    trigger = {
+        any_vassal = {
+            is_alive = yes
+            opinion = { target = root  value < -30 }
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+
+    immediate = {
+        hidden_effect = {
+            add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 12 }
+        }
+    }
+
+    # "Crush any who stand against me." — dread, tyranny, stress
+    option = {
+        name = eotg_fracture.006.a
+        add_dread = 40
+        add_tyranny = 20
+        add_prestige = -100
+        stress_impact = { base = medium_stress_impact_gain }
+        ai_chance = {
+            base = 50
+            modifier = { add = 20  has_trait = wrathful }
+            modifier = { add = 20  has_trait = callous }
+        }
+    }
+
+    # "Offer concessions. This is not the time." — prestige loss, opinion improves
+    option = {
+        name = eotg_fracture.006.b
+        add_prestige = -200
+        every_vassal = {
+            limit = {
+                is_alive = yes
+                opinion = { target = root  value < -30 }
+            }
+            add_opinion = { modifier = eotg_opinion_aug_unease  target = root }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = patient }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+
+    # "Let the implant decide." — fracture risk spikes, dread surge
+    option = {
+        name = eotg_fracture.006.c
+        add_dread = 60
+        add_tyranny = 30
+        eotg_add_fracture_risk = { AMOUNT = 20 }
+        ai_chance = {
+            base = 20
+            modifier = { add = 30  has_trait = callous }
+            modifier = { add = 20  has_trait = paranoid }
+        }
+    }
+}
+
+
+# -- eotg_fracture.007 --------------------------------------------------------
+# Dead Reckoning
+# A rare clear hour. The implant has been running logistics in the background.
+
+eotg_fracture.007 = {
+    type = character_event
+    title = eotg_fracture.007.t
+    desc = eotg_fracture.007.desc
+    theme = intrigue
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+
+    immediate = {
+        hidden_effect = {
+            add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 12 }
+        }
+    }
+
+    # "Write them down." — gold and prestige, fracture risk from the clarity
+    option = {
+        name = eotg_fracture.007.a
+        add_gold = 75
+        add_prestige = 150
+        eotg_add_fracture_risk = { AMOUNT = 15 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 20  has_trait = greedy }
+        }
+    }
+
+    # "Give them to your heir." — heir gains prestige, you get stress relief
+    option = {
+        name = eotg_fracture.007.b
+        trigger = { exists = primary_heir }
+        primary_heir = {
+            add_prestige = 100
+        }
+        stress_impact = { base = minor_stress_impact_loss }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 20  has_trait = content }
+        }
+    }
+
+    # "Burn them. Let it go." — massive stress loss, prestige loss
+    option = {
+        name = eotg_fracture.007.c
+        stress_impact = { base = massive_stress_impact_loss }
+        add_prestige = -50
+        ai_chance = {
+            base = 20
+            modifier = { add = 30  has_trait = content }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+}

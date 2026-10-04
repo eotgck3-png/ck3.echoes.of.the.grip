@@ -1,0 +1,836 @@
+﻿# ── eotg_augmentation_nonruler.txt ───────────────────────────────────────────
+# The non-ruler lifecycle: docs/specs/cybernetics_v2_phase6.md.
+# Augmented knights and courtiers progress, break, and reach their liege.
+#
+# eotg_aug_nr.001 — The Champion Volunteers
+# eotg_aug_nr.002 — Your Champion's New Edge
+# eotg_aug_nr.003 — Something Is Wrong With Them
+# eotg_aug_nr.004 — The Champion's Mistake
+# eotg_aug_nr.005 — The Familiar Change
+# eotg_aug_nr.006 — The Broken Champion       (the non-ruler cascade)
+#
+# Fires from: eotg_on_yearly_aug_nonruler_check (via random_yearly_everyone_pulse)
+#   for .001-.005; eotg_aug_nr_cascade_effect for .006.
+# Root is the LIEGE; scope:eotg_champion is the non-ruler. The liege cooldown
+#   eotg_flag_aug_nr_cooldown is set and checked in the on_action only
+#   (lesson 5): these triggers are the world-state guard "the champion still
+#   exists and lives".
+# Resource: every event moves the champion's own eotg_fracture_risk or
+#   changes their tier (nr.001 install, nr.006.b removal).
+# Victims come from the picker run in the liege's scope (root = liege, so its
+#   root exclusions are right), with the champion excluded through the
+#   second-victim picker's EXCLUDE.
+# ─────────────────────────────────────────────────────────────────────────────
+
+namespace = eotg_aug_nr
+
+
+# ── eotg_aug_nr.001 ───────────────────────────────────────────────────────────
+# The Champion Volunteers (NR-01). An unaugmented knight asks for the
+# implant. Caller: eotg_on_yearly_aug_nonruler_check (step 1).
+
+eotg_aug_nr.001 = {
+    type = character_event
+    title = eotg_aug_nr.001.t
+    desc = eotg_aug_nr.001.desc
+    theme = martial_chivalry_focus
+
+    trigger = {
+        exists = scope:eotg_champion
+        scope:eotg_champion = {
+            is_alive = yes
+            eotg_is_augmented_any = no
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = thinking
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_champion }
+        character = scope:eotg_champion
+        animation = personality_bold
+    }
+
+    # "Granted."
+    option = {
+        name = eotg_aug_nr.001.a
+        trigger = { gold >= minor_gold_value }
+        remove_short_term_gold = minor_gold_value
+        scope:eotg_champion = {
+            eotg_aug_initiate_effect = yes
+            eotg_add_fracture_risk = { AMOUNT = 0 }
+        }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 10  has_trait = brave }
+        }
+    }
+
+    # "Denied."
+    option = {
+        name = eotg_aug_nr.001.b
+        scope:eotg_champion = {
+            add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = zealous }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # "Granted, if they pay for it."
+    option = {
+        name = eotg_aug_nr.001.c
+        scope:eotg_champion = {
+            eotg_aug_initiate_effect = yes
+            eotg_add_fracture_risk = { AMOUNT = 0 }
+            add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = greedy }
+            modifier = { add = 10  has_trait = arbitrary }
+        }
+    }
+
+    # [generous] "At my expense, and properly."
+    option = {
+        name = eotg_aug_nr.001.d
+        trigger = {
+            has_trait = generous
+            gold >= medium_gold_value
+        }
+        trait = generous
+        remove_short_term_gold = medium_gold_value
+        scope:eotg_champion = {
+            eotg_aug_initiate_effect = yes
+            eotg_add_fracture_risk = { AMOUNT = 0 }
+            add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 3 }
+            add_opinion = { modifier = eotg_opinion_aug_grateful_patient  target = root  years = 10 }
+        }
+        stress_impact = {
+            generous = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = generous }
+            modifier = { add = 10  has_trait = compassionate }
+        }
+    }
+
+    # [paranoid] "Why do you want to be stronger than me?"
+    option = {
+        name = eotg_aug_nr.001.e
+        trigger = { has_trait = paranoid }
+        trait = paranoid
+        scope:eotg_champion = {
+            add_opinion = { modifier = eotg_opinion_aug_fear  target = root  years = 10 }
+        }
+        stress_impact = {
+            paranoid = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = paranoid }
+            modifier = { add = 10  has_trait = vengeful }
+        }
+    }
+}
+
+
+# ── eotg_aug_nr.002 ───────────────────────────────────────────────────────────
+# Your Champion's New Edge (NR-02). The desc names their tier: it fires only
+# from a real progression (step 2), so the champion is Enhanced or Overclocked.
+# d [ambitious] sets eotg_flag_aug_want_more on the liege for 5 years: nr.001
+# at 6% and the Arms Race weight x1.5 (both on_action reads).
+# Caller: eotg_on_yearly_aug_nonruler_check (step 2, progression success;
+# the liege cooldown is set there).
+
+eotg_aug_nr.002 = {
+    type = character_event
+    title = eotg_aug_nr.002.t
+    desc = {
+        desc = eotg_aug_nr.002.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_champion = { eotg_is_aug_tier2 = yes } }
+                desc = eotg_aug_nr.002.desc_enhanced
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_champion = { eotg_is_aug_tier3 = yes } }
+                desc = eotg_aug_nr.002.desc_overclocked
+            }
+        }
+    }
+    theme = martial
+
+    trigger = {
+        exists = scope:eotg_champion
+        scope:eotg_champion = { is_alive = yes }
+    }
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_champion }
+        character = scope:eotg_champion
+        animation = war_attacker
+    }
+
+    # "Reward them."
+    option = {
+        name = eotg_aug_nr.002.a
+        trigger = { gold >= minor_gold_value }
+        remove_short_term_gold = minor_gold_value
+        scope:eotg_champion = {
+            add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
+            eotg_add_fracture_risk = { AMOUNT = 3 }
+        }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = generous }
+            modifier = { add = 10  has_trait = gregarious }
+        }
+    }
+
+    # "Keep an eye on them."
+    option = {
+        name = eotg_aug_nr.002.b
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = paranoid }
+            modifier = { add = 10  has_trait = patient }
+        }
+    }
+
+    # "Front line, every battle."
+    option = {
+        name = eotg_aug_nr.002.c
+        add_prestige = 50
+        scope:eotg_champion = {
+            eotg_add_fracture_risk = { AMOUNT = 8 }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = brave }
+            modifier = { add = 10  has_trait = callous }
+        }
+    }
+
+    # [ambitious] "I want more of them."
+    option = {
+        name = eotg_aug_nr.002.d
+        trigger = { has_trait = ambitious }
+        trait = ambitious
+        add_character_flag = { flag = eotg_flag_aug_want_more  years = 5 }
+        scope:eotg_champion = {
+            eotg_add_fracture_risk = { AMOUNT = 3 }
+        }
+        stress_impact = {
+            ambitious = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = ambitious }
+            modifier = { add = 10  has_trait = arrogant }
+        }
+    }
+
+    # [craven] "Keep them beside me."
+    option = {
+        name = eotg_aug_nr.002.e
+        trigger = { has_trait = craven }
+        trait = craven
+        scope:eotg_champion = {
+            add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
+            eotg_add_fracture_risk = { AMOUNT = -3 }
+        }
+        stress_impact = {
+            craven = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = craven }
+            modifier = { add = 10  has_trait = paranoid }
+        }
+    }
+}
+
+
+# ── eotg_aug_nr.003 ───────────────────────────────────────────────────────────
+# Something Is Wrong With Them (NR-03).
+# Caller: eotg_on_yearly_aug_nonruler_check (step 5).
+
+eotg_aug_nr.003 = {
+    type = character_event
+    title = eotg_aug_nr.003.t
+    desc = eotg_aug_nr.003.desc
+    theme = mental_health
+
+    trigger = {
+        exists = scope:eotg_champion
+        scope:eotg_champion = { is_alive = yes }
+    }
+
+    left_portrait = {
+        character = root
+        animation = worry
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_champion }
+        character = scope:eotg_champion
+        animation = stress
+    }
+
+    # "Pay for their maintenance."
+    option = {
+        name = eotg_aug_nr.003.a
+        trigger = { gold >= minor_gold_value }
+        remove_short_term_gold = minor_gold_value
+        scope:eotg_champion = {
+            eotg_add_fracture_risk = { AMOUNT = -10 }
+        }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 10  has_trait = generous }
+            modifier = { add = -20  has_trait = greedy }
+        }
+    }
+
+    # "Relieve them of duty."
+    option = {
+        name = eotg_aug_nr.003.b
+        scope:eotg_champion = {
+            add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 5 }
+            eotg_add_fracture_risk = { AMOUNT = -5 }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = just }
+            modifier = { add = 10  has_trait = craven }
+        }
+    }
+
+    # "Ignore it."
+    option = {
+        name = eotg_aug_nr.003.c
+        scope:eotg_champion = {
+            eotg_add_fracture_risk = { AMOUNT = 5 }
+        }
+        eotg_aug_stress_neglect_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = lazy }
+            modifier = { add = 10  has_trait = callous }
+        }
+    }
+
+    # [compassionate] "Sit with them."
+    option = {
+        name = eotg_aug_nr.003.d
+        trigger = { has_trait = compassionate }
+        trait = compassionate
+        scope:eotg_champion = {
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+            eotg_add_fracture_risk = { AMOUNT = -8 }
+        }
+        stress_impact = {
+            compassionate = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = compassionate }
+            modifier = { add = 10  has_trait = patient }
+        }
+    }
+
+    # [callous] "Work them until it breaks."
+    option = {
+        name = eotg_aug_nr.003.e
+        trigger = { has_trait = callous }
+        trait = callous
+        add_prestige = 25
+        scope:eotg_champion = {
+            eotg_add_fracture_risk = { AMOUNT = 10 }
+        }
+        stress_impact = {
+            callous = minor_stress_impact_loss
+        }
+        eotg_aug_stress_cruelty_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = callous }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+}
+
+
+# ── eotg_aug_nr.004 ───────────────────────────────────────────────────────────
+# The Champion's Mistake (NR-04). Victim: the second-victim picker in the
+# liege's scope, family factor 0.05, EXCLUDE = eotg_champion; wounded
+# (attacked) and flagged. No victim (desc_none, "a door, a bulkhead,
+# themselves"): the champion gets wounded_1 if unwounded.
+# a-d carry the wound helper for the liege (their champion, their
+# responsibility). e: the victim is killed by the champion.
+# Imprisonment: vanilla `imprison = { target type }` (00_prison_effects.txt).
+# Caller: eotg_on_yearly_aug_nonruler_check (step 5).
+
+eotg_aug_nr.004 = {
+    type = character_event
+    title = eotg_aug_nr.004.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { exists = scope:eotg_victim }
+                desc = eotg_aug_nr.004.desc
+            }
+            desc = eotg_aug_nr.004.desc_none
+        }
+    }
+    theme = dread
+
+    trigger = {
+        exists = scope:eotg_champion
+        scope:eotg_champion = {
+            is_alive = yes
+            is_imprisoned = no
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = shock
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_champion }
+        character = scope:eotg_champion
+        animation = rage
+    }
+    lower_right_portrait = {
+        trigger = { exists = scope:eotg_victim }
+        character = scope:eotg_victim
+        animate_if_dead = yes
+    }
+
+    immediate = {
+        hidden_effect = {
+            eotg_aug_pick_second_victim_effect = {
+                NAME = eotg_victim
+                FAMILY_FACTOR = 0.05
+                EXCLUDE = eotg_champion
+            }
+        }
+        if = {
+            limit = { exists = scope:eotg_victim }
+            scope:eotg_victim = {
+                increase_wounds_effect = { REASON = attacked }
+                add_character_flag = { flag = eotg_flag_aug_breach_victim  days = 30 }
+            }
+        }
+        else = {
+            scope:eotg_champion = {
+                if = {
+                    limit = { NOT = { has_trait = wounded } }
+                    add_trait = wounded_1
+                }
+            }
+        }
+    }
+
+    # "Imprison them."
+    option = {
+        name = eotg_aug_nr.004.a
+        # Ungated: the event trigger guarantees the champion is free.
+        imprison = {
+            target = scope:eotg_champion
+            type = dungeon
+        }
+        scope:eotg_champion = {
+            eotg_add_fracture_risk = { AMOUNT = -5 }
+        }
+        eotg_aug_stress_tyranny_effect = yes
+        eotg_aug_stress_wound_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = just }
+            modifier = { add = 10  has_trait = paranoid }
+        }
+    }
+
+    # "Pay off the victim."
+    option = {
+        name = eotg_aug_nr.004.b
+        # The wound in immediate can kill; no paying off the dead.
+        trigger = {
+            exists = scope:eotg_victim
+            scope:eotg_victim = { is_alive = yes }
+            gold >= minor_gold_value
+        }
+        remove_short_term_gold = minor_gold_value
+        scope:eotg_champion = {
+            eotg_add_fracture_risk = { AMOUNT = 5 }
+        }
+        eotg_aug_stress_wound_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = greedy }
+            modifier = { add = 10  has_trait = deceitful }
+        }
+    }
+
+    # "Restrain them, and have them treated."
+    option = {
+        name = eotg_aug_nr.004.c
+        trigger = { gold >= medium_gold_value }
+        remove_short_term_gold = medium_gold_value
+        scope:eotg_champion = {
+            eotg_add_fracture_risk = { AMOUNT = -10 }
+        }
+        eotg_aug_stress_wound_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 10  has_trait = diligent }
+        }
+    }
+
+    # [just] "A trial." Then as a.
+    option = {
+        name = eotg_aug_nr.004.d
+        trigger = {
+            has_trait = just
+            scope:eotg_champion = { is_imprisoned = no }
+        }
+        trait = just
+        add_prestige = 50
+        imprison = {
+            target = scope:eotg_champion
+            type = dungeon
+        }
+        scope:eotg_champion = {
+            eotg_add_fracture_risk = { AMOUNT = -5 }
+        }
+        eotg_aug_stress_wound_effect = yes
+        stress_impact = {
+            just = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = just }
+            modifier = { add = 10  has_trait = honest }
+        }
+    }
+
+    # [sadistic] "Let them finish."
+    option = {
+        name = eotg_aug_nr.004.e
+        # Killing: family must be impossible here, not merely unlikely
+        trigger = {
+            has_trait = sadistic
+            exists = scope:eotg_victim
+            scope:eotg_victim = {
+                is_alive = yes
+                NOT = { is_close_family_of = root }
+                NOT = { is_spouse_of = root }
+            }
+        }
+        trait = sadistic
+        scope:eotg_victim = {
+            death = {
+                death_reason = death_murder
+                killer = scope:eotg_champion
+            }
+        }
+        add_dread = 20
+        scope:eotg_champion = {
+            eotg_add_fracture_risk = { AMOUNT = 5 }
+        }
+        eotg_aug_stress_murder_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = sadistic }
+            modifier = { add = 10  has_trait = callous }
+        }
+    }
+}
+
+
+# ── eotg_aug_nr.005 ───────────────────────────────────────────────────────────
+# The Familiar Change (NR-05). In immediate the champion's personality
+# shifts (eotg_aug_scramble_personality_effect, Phase 3a; the trait swap
+# shows as vanilla trait-gain/loss tooltips). The desc is generic.
+# Caller: eotg_on_yearly_aug_nonruler_check (step 5, courtiers).
+
+eotg_aug_nr.005 = {
+    type = character_event
+    title = eotg_aug_nr.005.t
+    desc = eotg_aug_nr.005.desc
+    theme = mental_health
+
+    trigger = {
+        exists = scope:eotg_champion
+        scope:eotg_champion = { is_alive = yes }
+    }
+
+    left_portrait = {
+        character = root
+        animation = worry
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_champion }
+        character = scope:eotg_champion
+        animation = personality_irrational
+    }
+
+    immediate = {
+        scope:eotg_champion = { eotg_aug_scramble_personality_effect = yes }
+    }
+
+    # "Talk to them."
+    option = {
+        name = eotg_aug_nr.005.a
+        scope:eotg_champion = {
+            eotg_add_fracture_risk = { AMOUNT = -5 }
+        }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = gregarious }
+            modifier = { add = 10  has_trait = honest }
+        }
+    }
+
+    # "Send them away."
+    option = {
+        name = eotg_aug_nr.005.b
+        trigger = { scope:eotg_champion = { is_courtier_of = root } }
+        scope:eotg_champion = { move_to_pool = yes }
+        eotg_aug_stress_cruelty_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = 10  has_trait = paranoid }
+        }
+    }
+
+    # "Watch."
+    option = {
+        name = eotg_aug_nr.005.c
+        # Rule 6 (final QA): a beat c outright; watching teaches you something.
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_intrigue  years = 5 }
+        scope:eotg_champion = {
+            eotg_add_fracture_risk = { AMOUNT = 3 }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = patient }
+            modifier = { add = 10  has_trait = shy }
+        }
+    }
+
+    # [compassionate] "They're still in there."
+    option = {
+        name = eotg_aug_nr.005.d
+        trigger = { has_trait = compassionate }
+        trait = compassionate
+        scope:eotg_champion = {
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+            eotg_add_fracture_risk = { AMOUNT = -8 }
+        }
+        stress_impact = {
+            compassionate = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = compassionate }
+            modifier = { add = 10  has_trait = forgiving }
+        }
+    }
+
+    # [paranoid] "Lock them in their rooms." House arrest (vanilla type,
+    # events/court_events/court_events_general.txt:12361).
+    option = {
+        name = eotg_aug_nr.005.e
+        trigger = {
+            has_trait = paranoid
+            scope:eotg_champion = { is_imprisoned = no }
+        }
+        trait = paranoid
+        imprison = {
+            target = scope:eotg_champion
+            type = house_arrest
+        }
+        scope:eotg_champion = {
+            eotg_add_fracture_risk = { AMOUNT = -3 }
+        }
+        eotg_aug_stress_tyranny_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = paranoid }
+            modifier = { add = -20  has_trait = trusting }
+        }
+    }
+}
+
+
+# ── eotg_aug_nr.006 ───────────────────────────────────────────────────────────
+# The Broken Champion (NR-06). The non-ruler cascaded.
+# b: surgery. 30 death (death_treatment; -15 with physician access, thread
+#    T5) / 70 full removal (eotg_aug_remove_all_effect; tier exit) plus 30%
+#    maimed. d: execution (death_execution, killer root).
+# Caller: eotg_aug_nr_cascade_effect (outside the liege cooldown).
+
+eotg_aug_nr.006 = {
+    type = character_event
+    title = eotg_aug_nr.006.t
+    desc = eotg_aug_nr.006.desc
+    theme = dread
+
+    trigger = {
+        exists = scope:eotg_champion
+        scope:eotg_champion = { is_alive = yes }
+    }
+
+    left_portrait = {
+        character = root
+        animation = shock
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_champion }
+        character = scope:eotg_champion
+        animation = rage
+    }
+
+    # "Restrain them."
+    option = {
+        name = eotg_aug_nr.006.a
+        trigger = { scope:eotg_champion = { is_imprisoned = no } }
+        imprison = {
+            target = scope:eotg_champion
+            type = house_arrest
+        }
+        scope:eotg_champion = {
+            eotg_add_fracture_risk = { AMOUNT = -10 }
+        }
+        eotg_aug_stress_tyranny_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = craven }
+            modifier = { add = 10  has_trait = paranoid }
+        }
+    }
+
+    # "Cut it out of them."
+    option = {
+        name = eotg_aug_nr.006.b
+        trigger = { gold >= medium_gold_value }
+        remove_short_term_gold = medium_gold_value
+        scope:eotg_champion = {
+            random_list = {
+                30 = {
+                    modifier = {
+                        add = -15
+                        root = { eotg_has_physician_access = yes }
+                    }
+                    desc = eotg_aug_nr.006.b.death
+                    death = { death_reason = death_treatment }
+                }
+                70 = {
+                    desc = eotg_aug_nr.006.b.survive
+                    eotg_aug_remove_all_effect = yes
+                    random = {
+                        chance = 30
+                        if = {
+                            limit = { NOT = { has_trait = maimed } }
+                            add_trait = maimed
+                        }
+                    }
+                }
+            }
+        }
+        eotg_aug_stress_wound_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 10  has_trait = diligent }
+        }
+    }
+
+    # "Protect them." A Neurofractured knight who stays.
+    option = {
+        name = eotg_aug_nr.006.c
+        scope:eotg_champion = {
+            add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
+            eotg_add_fracture_risk = { AMOUNT = 5 }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = brave }
+            modifier = { add = 10  has_trait = stubborn }
+        }
+    }
+
+    # "Execute them."
+    option = {
+        name = eotg_aug_nr.006.d
+        scope:eotg_champion = {
+            death = {
+                death_reason = death_execution
+                killer = root
+            }
+        }
+        eotg_aug_stress_murder_effect = yes
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = wrathful }
+            modifier = { add = 10  has_trait = callous }
+            modifier = { add = -30  has_trait = compassionate }
+        }
+    }
+
+    # [compassionate] "I'll care for them myself."
+    option = {
+        name = eotg_aug_nr.006.e
+        trigger = { has_trait = compassionate }
+        trait = compassionate
+        scope:eotg_champion = {
+            add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+            eotg_add_fracture_risk = { AMOUNT = -5 }
+        }
+        stress_impact = {
+            compassionate = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = compassionate }
+            modifier = { add = 10  has_trait = forgiving }
+        }
+    }
+
+    # [callous] "Point them at the enemy."
+    option = {
+        name = eotg_aug_nr.006.f
+        trigger = { has_trait = callous }
+        trait = callous
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_martial  years = 5 }
+        scope:eotg_champion = {
+            eotg_add_fracture_risk = { AMOUNT = 10 }
+        }
+        stress_impact = {
+            callous = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = callous }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+}

@@ -1,16 +1,62 @@
 ﻿# ── eotg_augmentation_on_actions.txt ─────────────────────────────────────────
 # Yearly hooks for the Cybernetic Augmentation system.
 #
-# Wired into on_yearly_playable (fires once per year for count+ characters).
-# Risk values are scaled annually: base 12/year (was 1/month in design),
-# stress bonus 24/year (was 2/month for persistent stress), combat bonus
-# approximated at 10/year for characters at war.
+# Signature resource: character variable eotg_fracture_risk (0-100, hidden).
+# Set at initiation, carried through Augmented/Enhanced, accumulates yearly
+# while Overclocked, and triggers the Neural Cascade at the threshold in
+# eotg_neurofracture_threshold_met. After the cascade it is reset to 0 and
+# then read here as "episode pressure": three hidden bands (Flicker < 30,
+# Fracture 30-59, Storm >= 60) each select their own event pool, and >= 95
+# fires the terminal event (cybernetics_v2_phase3.md §1).
 #
-# Neurofracture threshold: 80 (normal) / 60 + stress >= 200 (stressed).
+# Tier state: the XP on trait eotg_cybernetics (exactly 0 / 50 / 100), read
+# through eotg_is_aug_tier1/2/3 (docs/specs/cybernetics_track.md).
+#
+# Wired into yearly_playable_pulse (fires once per year for count+ characters,
+# on a per-character date). v1 hooked `on_yearly_playable`, a stale name that
+# survives only in vanilla's _on_actions.info; the engine never fires it, so
+# no augmentation content ever ran in v1.
+#
+# COOLDOWN AUTHORITY lives here and only here (catalog §4 lesson 5): each
+# branch sets the cooldown flag at the moment it fires the event. The events
+# never check or set these flags. Flags:
+#   eotg_flag_aug_event_cooldown  — initiation + Augmented tier
+#   eotg_flag_enh_event_cooldown  — Enhanced tier
+#   eotg_flag_oc_event_cooldown   — Overclocked tier
+#   eotg_flag_nf_event_cooldown   — Neurofractured tier
+#   eotg_flag_aug_terminal_cooldown — The Cascade (eotg_fracture.027), 11 months
+#   eotg_flag_aug_scramble_cooldown — Scrambled (eotg_fracture.018), 5 years
+#   eotg_flag_aug_last_lucid      — The Last Lucid Moment (eotg_fracture.026), 5 years
+#   eotg_flag_tier1_vassal_suspicion_fired — one-time (eotg_aug_tier1.003)
+#   eotg_flag_aug_child_offer_cooldown — Sickly Child offer, 5 years (init.014)
+#   eotg_flag_aug_birth_cooldown  — Absent at the Birth (tier2.010), 3 years,
+#     per parent, set in eotg_on_birth_aug_parent_check
+#   eotg_flag_aug_vendor_done     — one-time (The Bidding War, tier2.013)
+#   eotg_flag_aug_first_contact_done — one-time (First Contact, tier3.012)
+#   eotg_flag_aug_nr_cooldown     — on the LIEGE: one non-ruler event a year
+#     (eotg_on_yearly_aug_nonruler_check; nr.006 ignores it)
+#   eotg_flag_aug_intervention_refused — not a cooldown: tier3.020's 2-year
+#     "refused" state (T3), read here so the Intervention does not repeat
+#     while it holds
+#   eotg_flag_aug_backalley_retry — not a cooldown: a one-shot pass that lets
+#     init.010 fire past eotg_flag_aug_event_cooldown (set by init.012.b)
+#
+# Each tier rolls one weighted random_list per pulse (weights = v1 chances),
+# with a "nothing" branch. v1 used independent ifs whose cooldown was set in
+# the event's immediate, days later, so up to seven events could fire in the
+# same pulse; random_list removes that and the first-listed bias.
+#
+# Overclocked risk accrual (cybernetics_v2 B2): base 12/year, + 8 per vanilla
+# stress_level (1-3), paranoid +12, at war +10, hidden flaw +4, vendor
+# safe -3 / bold +3. Threshold: 80, always (eotg_neurofracture_threshold_met).
+# Neurofractured drift (B1): +8/year, + 4 per stress_level, sedated -6,
+# restrained -4. Runs every pulse, outside the episode cooldown.
+# Cooldowns (B4): Overclocked and Neurofractured 11 months, i.e. expired by the
+# next pulse; Court Massacre 23 months. Both are stated as "every pulse /
+# every other pulse" without depending on same-day expiry order.
 # ─────────────────────────────────────────────────────────────────────────────
 
-# Hook augmentation yearly checks into vanilla yearly playable pulse
-on_yearly_playable = {
+yearly_playable_pulse = {
     on_actions = {
         eotg_on_yearly_aug_initiation_check
         eotg_on_yearly_aug_tier1_check
@@ -20,75 +66,330 @@ on_yearly_playable = {
     }
 }
 
+# Vanilla hook, extended additively only (invariant 4).
+on_death = {
+    on_actions = {
+        eotg_on_death_aug_hardware
+        eotg_on_death_aug_grief
+    }
+}
+
+# Vanilla hook, extended additively only (invariant 4). Fires once a year for
+# EVERY character (game/common/on_action/yearly_on_actions.txt:3170), so the
+# custom on_action gates on a cheap trigger first, the way vanilla's own
+# children of this pulse do (prison_maintenance_pulse, yearly_on_actions.txt:3366;
+# house_feud_ai_scheme_pulse, story_cycles/story_cycle_house_feud_on_actions.txt:37).
+random_yearly_everyone_pulse = {
+    on_actions = {
+        eotg_on_yearly_aug_nonruler_check
+    }
+}
+
+# Vanilla hook, extended additively only (invariant 4). Root = the newborn;
+# scope:mother / scope:father (game/common/on_action/child_birth_on_actions.txt:855).
+on_birth_child = {
+    on_actions = {
+        eotg_on_birth_aug_parent_check
+    }
+}
+
 # ── Custom on_actions ─────────────────────────────────────────────────────────
 
-# Initiation checks — offer augmentation to eligible rulers
+# Initiation checks — offer augmentation to eligible rulers.
+# One weighted random_list per pulse, the same shape as the tier checks below
+# (orchestrator ruling S2, Phase 2 follow-up). The former if/else_if priority
+# chain let a persistent condition (physician access, a physical loss,
+# infirmity) claim the pulse and then fire nothing, starving every later
+# branch. Each entry keeps its old limit as `trigger` and its old chance as the
+# weight (docs/specs/cybernetics_v2_phase2.md §1.1 order), and sets
+# eotg_flag_aug_event_cooldown inside the entry. Cooldown authority stays here.
+# Declined offers (init.006.b, init.007.b set 10-year flags) weigh 0.25: an
+# on_action weight, not an event trigger (lesson 5).
+# Two blocks sit outside the list:
+#   - the back-alley retry (eotg_flag_aug_backalley_retry, set by init.012.b),
+#     which skips the cooldown on purpose (spec: "regardless of cooldown");
+#   - the Sickly Child offer, which has its own 5-year cooldown and does not
+#     require the ruler to be unaugmented (the child must be).
 eotg_on_yearly_aug_initiation_check = {
     effect = {
-        # Desperation Protocol — at war + wounded (higher urgency than init.001)
+        # Back-Alley retry: a brave ruler who lost the implant looks again.
+        # Spends the retry flag; still sets the normal cooldown.
         if = {
             limit = {
                 eotg_can_receive_augmented = yes
-                has_trait = wounded
-                is_at_war = yes
-                NOT = { has_character_flag = eotg_flag_aug_event_cooldown }
+                has_character_flag = eotg_flag_aug_backalley_retry
             }
             random = {
                 chance = 50
-                trigger_event = { id = eotg_aug_init.004  days = { 1 5 } }
+                remove_character_flag = eotg_flag_aug_backalley_retry
+                add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
+                trigger_event = { id = eotg_aug_init.010  days = { 1 15 } }
             }
         }
-        # Post-wound offer (wounded ruler not at war)
-        else_if = {
-            limit = {
-                eotg_can_receive_augmented = yes
-                has_trait = wounded
-                NOT = { has_character_flag = eotg_flag_aug_event_cooldown }
-            }
-            random = {
-                chance = 40
-                trigger_event = { id = eotg_aug_init.001  days = { 1 10 } }
-            }
-        }
-        # Corporate offer (wealthy landed ruler)
-        else_if = {
-            limit = {
-                eotg_can_receive_augmented = yes
-                is_landed = yes
-                gold >= 500
-                NOT = { has_character_flag = eotg_flag_aug_event_cooldown }
-            }
-            random = {
-                chance = 10
-                trigger_event = { id = eotg_aug_init.002  days = { 1 15 } }
-            }
-        }
-        # Aging ruler with low prowess
-        else_if = {
-            limit = {
-                eotg_can_receive_augmented = yes
-                age >= 50
-                prowess <= 8
-                NOT = { has_character_flag = eotg_flag_aug_event_cooldown }
-            }
-            random = {
-                chance = 15
-                trigger_event = { id = eotg_aug_init.003  days = { 1 10 } }
-            }
-        }
-        # A Familiar Change — peer already augmented
         else_if = {
             limit = {
                 eotg_can_receive_augmented = yes
                 NOT = { has_character_flag = eotg_flag_aug_event_cooldown }
-                OR = {
-                    any_vassal = { has_trait = eotg_augmented }
-                    any_courtier = { is_alive = yes  has_trait = eotg_augmented }
+            }
+            random_list = {
+                # Desperation Protocol — at war + wounded
+                50 = {
+                    trigger = {
+                        has_trait = wounded
+                        is_at_war = yes
+                    }
+                    add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_init.004  days = { 1 5 } }
                 }
+                # The Prosthetic — a lost limb, eye or sight
+                40 = {
+                    trigger = { eotg_has_physical_loss = yes }
+                    modifier = {
+                        factor = 0.25
+                        has_character_flag = eotg_flag_aug_declined_prosthetic
+                    }
+                    add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_init.006  days = { 1 10 } }
+                }
+                # Post-wound offer (wounded ruler not at war)
+                40 = {
+                    trigger = {
+                        has_trait = wounded
+                        is_at_war = no
+                    }
+                    add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_init.001  days = { 1 10 } }
+                }
+                # The Neural Bridge — incapable or infirm
+                30 = {
+                    trigger = {
+                        OR = {
+                            has_trait = incapable
+                            has_trait = infirm
+                        }
+                    }
+                    modifier = {
+                        factor = 0.25
+                        has_character_flag = eotg_flag_aug_declined_bridge
+                    }
+                    add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_init.007  days = { 1 10 } }
+                }
+                # A Parent's Hardware — set by eotg_on_death_aug_hardware
+                60 = {
+                    trigger = { has_variable = eotg_parent_hardware }
+                    add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_init.013  days = { 1 20 } }
+                }
+                # The Physician's Proposal
+                12 = {
+                    trigger = { eotg_has_physician_access = yes }
+                    add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_init.017  days = { 1 20 } }
+                }
+                # The Cynic's Argument
+                20 = {
+                    trigger = {
+                        has_trait = cynical
+                        learning >= 12
+                    }
+                    add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_init.009  days = { 1 20 } }
+                }
+                # Corporate offer (wealthy landed ruler). B5 scaled gold (phase 0
+                # §1.5); inline-value form as vanilla
+                # common/character_interactions/00_tribal_interactions.txt
+                10 = {
+                    trigger = {
+                        is_landed = yes
+                        gold >= { value = major_gold_value  multiply = 1.5 }
+                    }
+                    add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_init.002  days = { 1 15 } }
+                }
+                # The Patron (Phase 5, thread T2): ambitious or greedy, short of
+                # money, landed, no debt running
+                15 = {
+                    trigger = {
+                        OR = {
+                            has_trait = ambitious
+                            has_trait = greedy
+                        }
+                        gold < medium_gold_value
+                        is_landed = yes
+                        eotg_aug_has_patron = no
+                    }
+                    add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_patron.001  days = { 1 20 } }
+                }
+                # Back-Alley Surgery — poor, deceitful or at war
+                10 = {
+                    trigger = {
+                        OR = {
+                            gold < medium_gold_value
+                            has_trait = deceitful
+                            is_at_war = yes
+                        }
+                    }
+                    add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_init.010  days = { 1 15 } }
+                }
+                # The Duel Shame — weak, and someone strong is watching
+                15 = {
+                    trigger = {
+                        prowess <= 6
+                        OR = {
+                            any_relation = {
+                                type = rival
+                                prowess >= 12
+                            }
+                            is_at_war = yes
+                        }
+                    }
+                    add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_init.016  days = { 1 20 } }
+                }
+                # Aging ruler with low prowess
+                15 = {
+                    trigger = {
+                        age >= 50
+                        prowess <= 8
+                    }
+                    add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_init.003  days = { 1 10 } }
+                }
+                # A Familiar Change — peer already augmented
+                20 = {
+                    trigger = {
+                        OR = {
+                            any_vassal = { has_trait = eotg_cybernetics }
+                            any_courtier = { is_alive = yes  has_trait = eotg_cybernetics }
+                        }
+                    }
+                    add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 3 }
+                    trigger_event = { id = eotg_aug_init.005  days = { 1 20 } }
+                }
+                # The Arms Race (Phase 5) — two augmented knights, you are not.
+                # x1.5 with eotg_flag_aug_want_more (Phase 6, nr.002.d).
+                20 = {
+                    modifier = {
+                        factor = 1.5
+                        has_character_flag = eotg_flag_aug_want_more
+                    }
+                    trigger = {
+                        eotg_aug_has_retinue = no
+                        any_knight = {
+                            count >= 2
+                            eotg_is_augmented_any = yes
+                        }
+                    }
+                    add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 3 }
+                    trigger_event = { id = eotg_aug_init.019  days = { 1 20 } }
+                }
+                # Nothing this year
+                100 = { }
+            }
+        }
+
+        # The Sickly Child — outside the unaugmented gate: the ruler may be
+        # augmented or not; the child must not be. Own cooldown, set here.
+        if = {
+            limit = {
+                NOT = { has_character_flag = eotg_flag_aug_child_offer_cooldown }
+                gold >= minor_gold_value
+                any_child = { eotg_aug_sick_child_candidate = yes }
             }
             random = {
-                chance = 20
-                trigger_event = { id = eotg_aug_init.005  days = { 1 20 } }
+                chance = 25
+                add_character_flag = { flag = eotg_flag_aug_child_offer_cooldown  years = 5 }
+                trigger_event = { id = eotg_aug_init.014  days = { 1 10 } }
+            }
+        }
+    }
+}
+
+# Inherited hardware (cybernetics_v2_phase2.md §1.2). Root = the dying
+# character (game/common/on_action/death.txt:7). Each living, unaugmented child
+# is offered the parent's implants for 5 years (read by initiation branch 5,
+# eotg_aug_init.013); a Neurofractured parent also flags the children.
+eotg_on_death_aug_hardware = {
+    trigger = {
+        OR = {
+            has_trait = eotg_cybernetics
+            has_trait = eotg_neurofractured
+        }
+    }
+    effect = {
+        every_child = {
+            limit = {
+                is_alive = yes
+                eotg_is_augmented_any = no
+            }
+            set_variable = { name = eotg_parent_hardware  value = root  years = 5 }
+        }
+        if = {
+            limit = { has_trait = eotg_neurofractured }
+            every_child = {
+                limit = { is_alive = yes }
+                add_character_flag = { flag = eotg_flag_aug_hardware_fractured  years = 5 }
+            }
+        }
+    }
+}
+
+# The Late Grief (cybernetics_v2_phase4.md §3). Root = the dying character
+# (game/common/on_action/death.txt:7). Every Enhanced close relative carries
+# the loss for a year; eotg_on_yearly_aug_tier2_check reads it (tier2.008).
+# A killer is remembered for the vengeful option. every_close_family_member:
+# PX effects list (character scope).
+eotg_on_death_aug_grief = {
+    effect = {
+        every_close_family_member = {
+            limit = { eotg_is_aug_tier2 = yes }
+            set_variable = { name = eotg_aug_grief_for  value = root  years = 1 }
+            if = {
+                limit = { exists = scope:killer }
+                set_variable = { name = eotg_aug_grief_killer  value = scope:killer  years = 1 }
+            }
+            else = {
+                remove_variable = eotg_aug_grief_killer
+            }
+        }
+    }
+}
+
+# Absent at the Birth (cybernetics_v2_phase4.md §3). Root = the newborn
+# (game/common/on_action/child_birth_on_actions.txt:855: scope:mother,
+# scope:father). Each Enhanced or Overclocked parent is checked on its own;
+# the 3-year per-parent cooldown lives here (lesson 5).
+eotg_on_birth_aug_parent_check = {
+    effect = {
+        scope:father ?= {
+            if = {
+                limit = {
+                    OR = {
+                        eotg_is_aug_tier2 = yes
+                        eotg_is_aug_tier3 = yes
+                    }
+                    NOT = { has_character_flag = eotg_flag_aug_birth_cooldown }
+                }
+                add_character_flag = { flag = eotg_flag_aug_birth_cooldown  years = 3 }
+                root = { save_scope_as = eotg_newborn }
+                trigger_event = { id = eotg_aug_tier2.010  days = 3 }
+            }
+        }
+        scope:mother ?= {
+            if = {
+                limit = {
+                    OR = {
+                        eotg_is_aug_tier2 = yes
+                        eotg_is_aug_tier3 = yes
+                    }
+                    NOT = { has_character_flag = eotg_flag_aug_birth_cooldown }
+                }
+                add_character_flag = { flag = eotg_flag_aug_birth_cooldown  years = 3 }
+                root = { save_scope_as = eotg_newborn }
+                trigger_event = { id = eotg_aug_tier2.010  days = 3 }
             }
         }
     }
@@ -97,74 +398,169 @@ eotg_on_yearly_aug_initiation_check = {
 # Tier 1 — random events for Augmented characters
 eotg_on_yearly_aug_tier1_check = {
     effect = {
-        # Phantom Sensation — general flavor
+        # Vassal's Suspicion — one-time, outside the tier cooldown (as v1)
         if = {
             limit = {
-                has_trait = eotg_augmented
-                NOT = { has_character_flag = eotg_flag_aug_event_cooldown }
-            }
-            random = {
-                chance = 25
-                trigger_event = { id = eotg_aug_tier1.001  days = { 1 30 } }
-            }
-        }
-        # Vassal's Suspicion — one-time
-        if = {
-            limit = {
-                has_trait = eotg_augmented
+                eotg_is_aug_tier1 = yes
                 any_vassal = { is_alive = yes }
                 NOT = { has_character_flag = eotg_flag_tier1_vassal_suspicion_fired }
             }
             random = {
                 chance = 60
+                add_character_flag = eotg_flag_tier1_vassal_suspicion_fired
                 trigger_event = { id = eotg_aug_tier1.003  days = { 1 20 } }
             }
         }
-        # Knight's Petition
         if = {
             limit = {
-                has_trait = eotg_augmented
-                any_knight = { is_alive = yes }
+                eotg_is_aug_tier1 = yes
                 NOT = { has_character_flag = eotg_flag_aug_event_cooldown }
             }
-            random = {
-                chance = 20
-                trigger_event = { id = eotg_aug_tier1.004  days = { 1 20 } }
-            }
-        }
-        # Weight of Silence — court social moment
-        if = {
-            limit = {
-                has_trait = eotg_augmented
-                NOT = { has_character_flag = eotg_flag_aug_event_cooldown }
-            }
-            random = {
-                chance = 20
-                trigger_event = { id = eotg_aug_tier1.005  days = { 1 30 } }
-            }
-        }
-        # The Faster Hand — at war combat advantage
-        if = {
-            limit = {
-                has_trait = eotg_augmented
-                is_at_war = yes
-                NOT = { has_character_flag = eotg_flag_aug_event_cooldown }
-            }
-            random = {
-                chance = 35
-                trigger_event = { id = eotg_aug_tier1.006  days = { 1 15 } }
-            }
-        }
-        # Progression gate — offer upgrade when eligible
-        if = {
-            limit = {
-                eotg_can_progress_to_enhanced = yes
-                gold >= 100
-                NOT = { has_character_flag = eotg_flag_aug_event_cooldown }
-            }
-            random = {
-                chance = 30
-                trigger_event = { id = eotg_aug_tier1.002  days = { 1 20 } }
+            random_list = {
+                # Phantom Sensation — general flavor
+                25 = {
+                    add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_tier1.001  days = { 1 30 } }
+                }
+                # The Upgrade — progression gate (A-12: stage 1 of The First Upgrade)
+                30 = {
+                    trigger = {
+                        eotg_can_progress_to_enhanced = yes
+                        eotg_aug_can_afford_upgrade = yes    # mirrors eotg_aug_tier1.002.a
+                    }
+                    add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_tier1.002  days = { 1 20 } }
+                }
+                # Knight's Petition
+                20 = {
+                    trigger = { any_knight = { is_alive = yes  eotg_is_augmented_any = no } }
+                    add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_tier1.004  days = { 1 20 } }
+                }
+                # Weight of Silence — court social moment
+                20 = {
+                    add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_tier1.005  days = { 1 30 } }
+                }
+                # The Faster Hand — at war combat advantage
+                35 = {
+                    trigger = { is_at_war = yes }
+                    add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_tier1.006  days = { 1 15 } }
+                }
+                # ── Phase 4a (docs/specs/cybernetics_v2_phase4.md §1) ──
+                # Firmware Itch
+                20 = {
+                    add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_tier1.007  days = { 1 30 } }
+                }
+                # Dulled Palate
+                15 = {
+                    add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_tier1.008  days = { 1 30 } }
+                }
+                # A Lover's Touch
+                15 = {
+                    trigger = {
+                        OR = {
+                            is_married = yes
+                            any_relation = { type = lover }
+                        }
+                    }
+                    add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_tier1.009  days = { 1 30 } }
+                }
+                # The Training Yard
+                15 = {
+                    trigger = {
+                        any_knight = {
+                            is_alive = yes
+                            NOT = { this = root }
+                        }
+                    }
+                    add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_tier1.010  days = { 1 30 } }
+                }
+                # The Stare
+                20 = {
+                    add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_tier1.011  days = { 1 30 } }
+                }
+                # A Tithe for Purity. Someone must ask: a zealous or theologian
+                # courtier, or a zealous ruler's own conscience. Deviation from
+                # the spec's bare `has_trait = cynical`, which let the event fire
+                # for a cynical ruler with no one to ask for the tithe.
+                15 = {
+                    trigger = {
+                        OR = {
+                            has_trait = zealous
+                            any_courtier = {
+                                is_alive = yes
+                                OR = {
+                                    has_trait = zealous
+                                    has_trait = theologian
+                                }
+                            }
+                        }
+                    }
+                    add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_tier1.012  days = { 1 30 } }
+                }
+                # Rejection (stage 1)
+                8 = {
+                    add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_tier1.013  days = { 1 30 } }
+                }
+                # The Challenge. x2 after losing the Training Yard bout
+                # (eotg_flag_aug_challenge_due, tier1.010.f, 2 years).
+                12 = {
+                    trigger = {
+                        OR = {
+                            any_knight = {
+                                is_alive = yes
+                                NOT = { this = root }
+                                eotg_is_augmented_any = no
+                                prowess >= 10
+                            }
+                            any_relation = { type = rival }
+                        }
+                    }
+                    modifier = {
+                        factor = 2
+                        has_character_flag = eotg_flag_aug_challenge_due
+                    }
+                    add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_tier1.016  days = { 1 30 } }
+                }
+                # Copycat (never close family or spouse)
+                10 = {
+                    trigger = {
+                        OR = {
+                            any_vassal = {
+                                is_alive = yes
+                                eotg_is_augmented_any = no
+                                NOT = { is_close_family_of = root }
+                                NOT = { is_spouse_of = root }
+                            }
+                            any_courtier = {
+                                is_alive = yes
+                                eotg_is_augmented_any = no
+                                NOT = { is_close_family_of = root }
+                                NOT = { is_spouse_of = root }
+                                is_adult = yes
+                            }
+                        }
+                    }
+                    add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_tier1.018  days = { 1 30 } }
+                }
+                # Something Is Missing
+                15 = {
+                    add_character_flag = { flag = eotg_flag_aug_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_tier1.020  days = { 1 30 } }
+                }
+                # Nothing this year (Phase 4a: 100 -> 150)
+                150 = { }
             }
         }
     }
@@ -173,74 +569,133 @@ eotg_on_yearly_aug_tier1_check = {
 # Tier 2 — random events for Enhanced characters
 eotg_on_yearly_aug_tier2_check = {
     effect = {
-        # Emotional Delay — general flavor
         if = {
             limit = {
-                has_trait = eotg_enhanced
+                eotg_is_aug_tier2 = yes
                 NOT = { has_character_flag = eotg_flag_enh_event_cooldown }
             }
-            random = {
-                chance = 30
-                trigger_event = { id = eotg_aug_tier2.001  days = { 1 30 } }
-            }
-        }
-        # Children Fear Me
-        if = {
-            limit = {
-                has_trait = eotg_enhanced
-                any_child = { is_alive = yes  age < 16 }
-                NOT = { has_character_flag = eotg_flag_enh_event_cooldown }
-            }
-            random = {
-                chance = 15
-                trigger_event = { id = eotg_aug_tier2.002  days = { 1 20 } }
-            }
-        }
-        # The Space Between Us — married characters
-        if = {
-            limit = {
-                has_trait = eotg_enhanced
-                is_married = yes
-                NOT = { has_character_flag = eotg_flag_enh_event_cooldown }
-            }
-            random = {
-                chance = 25
-                trigger_event = { id = eotg_aug_tier2.004  days = { 1 20 } }
-            }
-        }
-        # The Confessor's Warning — zealous courtier at court
-        if = {
-            limit = {
-                has_trait = eotg_enhanced
-                any_courtier = { is_alive = yes  has_trait = zealous }
-                NOT = { has_character_flag = eotg_flag_enh_event_cooldown }
-            }
-            random = {
-                chance = 20
-                trigger_event = { id = eotg_aug_tier2.005  days = { 1 20 } }
-            }
-        }
-        # Cold Detachment — general flavor
-        if = {
-            limit = {
-                has_trait = eotg_enhanced
-                NOT = { has_character_flag = eotg_flag_enh_event_cooldown }
-            }
-            random = {
-                chance = 20
-                trigger_event = { id = eotg_aug_tier2.006  days = { 1 30 } }
-            }
-        }
-        # Progression gate
-        if = {
-            limit = {
-                eotg_can_progress_to_overclocked = yes
-                gold >= 200
-                NOT = { has_character_flag = eotg_flag_enh_event_cooldown }
-            }
-            random = {
-                chance = 25
-                trigger_event = { id = eotg_aug_tier2.003  days = { 1 20 } }
+            random_list = {
+                # Emotional Delay — general flavor
+                30 = {
+                    add_character_flag = { flag = eotg_flag_enh_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_tier2.001  days = { 1 30 } }
+                }
+                # Children Fear Me
+                15 = {
+                    trigger = { any_child = { is_alive = yes  age < 16 } }
+                    add_character_flag = { flag = eotg_flag_enh_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_tier2.002  days = { 1 20 } }
+                }
+                # The Next Stage — progression gate
+                25 = {
+                    trigger = {
+                        eotg_can_progress_to_overclocked = yes
+                        gold >= major_gold_value    # mirrors eotg_aug_tier2.003.a
+                    }
+                    add_character_flag = { flag = eotg_flag_enh_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_tier2.003  days = { 1 20 } }
+                }
+                # The Space Between Us — married characters
+                25 = {
+                    trigger = { is_married = yes }
+                    add_character_flag = { flag = eotg_flag_enh_event_cooldown  years = 3 }
+                    trigger_event = { id = eotg_aug_tier2.004  days = { 1 20 } }
+                }
+                # The Confessor's Warning — zealous courtier at court
+                20 = {
+                    trigger = { any_courtier = { is_alive = yes  has_trait = zealous } }
+                    add_character_flag = { flag = eotg_flag_enh_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_tier2.005  days = { 1 20 } }
+                }
+                # Cold Detachment — general flavor
+                20 = {
+                    add_character_flag = { flag = eotg_flag_enh_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_tier2.006  days = { 1 30 } }
+                }
+                # ── Phase 4b (docs/specs/cybernetics_v2_phase4.md §3) ──
+                # Numbers, Not Faces
+                20 = {
+                    trigger = {
+                        any_courtier = {
+                            is_alive = yes
+                            is_adult = yes
+                        }
+                    }
+                    add_character_flag = { flag = eotg_flag_enh_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_tier2.007  days = { 1 30 } }
+                }
+                # The Late Grief (variable set by eotg_on_death_aug_grief)
+                40 = {
+                    trigger = { has_variable = eotg_aug_grief_for }
+                    add_character_flag = { flag = eotg_flag_enh_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_tier2.008  days = { 1 30 } }
+                }
+                # Perfect Recall
+                20 = {
+                    add_character_flag = { flag = eotg_flag_enh_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_tier2.009  days = { 1 30 } }
+                }
+                # Market Ledger
+                15 = {
+                    trigger = { is_landed = yes }
+                    add_character_flag = { flag = eotg_flag_enh_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_tier2.011  days = { 1 30 } }
+                }
+                # Trust Protocol
+                20 = {
+                    trigger = {
+                        cp:councillor_spymaster ?= {
+                            is_alive = yes
+                            NOT = { this = root }
+                        }
+                    }
+                    add_character_flag = { flag = eotg_flag_enh_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_tier2.012  days = { 1 30 } }
+                }
+                # The Bidding War — once per character (flag set here)
+                12 = {
+                    trigger = { NOT = { has_character_flag = eotg_flag_aug_vendor_done } }
+                    add_character_flag = eotg_flag_aug_vendor_done
+                    add_character_flag = { flag = eotg_flag_enh_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_tier2.013  days = { 1 30 } }
+                }
+                # Tampering — someone to suspect
+                10 = {
+                    trigger = {
+                        OR = {
+                            any_relation = { type = rival }
+                            any_courtier = { eotg_aug_victim_candidate = yes }
+                            any_vassal = { is_alive = yes }
+                        }
+                    }
+                    add_character_flag = { flag = eotg_flag_enh_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_tier2.015  days = { 1 30 } }
+                }
+                # The Cold Calculation
+                15 = {
+                    add_character_flag = { flag = eotg_flag_enh_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_tier2.019  days = { 1 30 } }
+                }
+                # The Second Self (thread T1, beat 1)
+                20 = {
+                    trigger = {
+                        OR = {
+                            NOT = { has_variable = eotg_aug_voice }
+                            var:eotg_aug_voice < 1
+                        }
+                        OR = {
+                            AND = {
+                                has_variable = eotg_fracture_risk
+                                var:eotg_fracture_risk >= 10
+                            }
+                            var:eotg_aug_focus ?= flag:nerves
+                        }
+                    }
+                    add_character_flag = { flag = eotg_flag_enh_event_cooldown  years = 2 }
+                    trigger_event = { id = eotg_aug_tier2.020  days = { 1 30 } }
+                }
+                # Nothing this year (Phase 4b: 100 -> 150)
+                150 = { }
             }
         }
     }
@@ -250,15 +705,25 @@ eotg_on_yearly_aug_tier2_check = {
 eotg_on_yearly_aug_overclocked_check = {
     effect = {
         if = {
-            limit = { has_trait = eotg_overclocked }
+            limit = { eotg_is_aug_tier3 = yes }
 
-            # Passive annual risk accumulation (12 per year = 1/month equivalent)
+            # Risk accrual (cybernetics_v2 B2). Graded by vanilla stress_level so
+            # stress matters at every level with no single-point cliff.
+            # Calm: cascade on the 7th pulse; level 1: 4th; levels 2-3: 3rd.
             eotg_add_fracture_risk = { AMOUNT = 12 }
 
-            # Stress accelerates risk (24 extra per year if persistently stressed)
+            # Stress level rows are mutually exclusive
             if = {
-                limit = { stress >= 200 }
+                limit = { stress_level >= 3 }
                 eotg_add_fracture_risk = { AMOUNT = 24 }
+            }
+            else_if = {
+                limit = { stress_level = 2 }
+                eotg_add_fracture_risk = { AMOUNT = 16 }
+            }
+            else_if = {
+                limit = { stress_level = 1 }
+                eotg_add_fracture_risk = { AMOUNT = 8 }
             }
 
             # Paranoid rulers spiral faster
@@ -273,157 +738,736 @@ eotg_on_yearly_aug_overclocked_check = {
                 eotg_add_fracture_risk = { AMOUNT = 10 }
             }
 
-            # Threshold check — trigger neurofracture if threshold met
+            # Cheap hardware comes due (thread T6; flag set in Phase 2)
+            if = {
+                limit = { has_character_flag = eotg_flag_aug_hidden_flaw }
+                eotg_add_fracture_risk = { AMOUNT = 4 }
+            }
+
+            # Firmware vendor choice (flags set in Phase 4b)
+            if = {
+                limit = { has_character_flag = eotg_flag_aug_vendor_safe }
+                eotg_add_fracture_risk = { AMOUNT = -3 }
+            }
+            if = {
+                limit = { has_character_flag = eotg_flag_aug_vendor_bold }
+                eotg_add_fracture_risk = { AMOUNT = 3 }
+            }
+
+            # The Countdown (Phase 5 §1.1): after accrual, before the threshold
+            # check. Risk >= 50, or >= 40 with the hidden flaw (thread T6).
+            # The story's effect_group then owns its pacing.
+            if = {
+                limit = {
+                    eotg_aug_has_countdown = no
+                    has_variable = eotg_fracture_risk
+                    OR = {
+                        var:eotg_fracture_risk >= 50
+                        AND = {
+                            has_character_flag = eotg_flag_aug_hidden_flaw
+                            var:eotg_fracture_risk >= 40
+                        }
+                    }
+                }
+                eotg_aug_try_start_countdown_effect = yes
+            }
+
+            # Threshold check — the cascade replaces this year's flavor roll
             if = {
                 limit = { eotg_neurofracture_threshold_met = yes }
                 eotg_trigger_neurofracture = yes
             }
-
-            # Violent Impulse
-            if = {
+            else_if = {
                 limit = { NOT = { has_character_flag = eotg_flag_oc_event_cooldown } }
-                random = {
-                    chance = 35
-                    trigger_event = { id = eotg_aug_tier3.001  days = { 1 15 } }
-                }
-            }
-            # The Mirror
-            if = {
-                limit = { NOT = { has_character_flag = eotg_flag_oc_event_cooldown } }
-                random = {
-                    chance = 25
-                    trigger_event = { id = eotg_aug_tier3.002  days = { 1 20 } }
-                }
-            }
-            # Sleepless
-            if = {
-                limit = { NOT = { has_character_flag = eotg_flag_oc_event_cooldown } }
-                random = {
-                    chance = 20
-                    trigger_event = { id = eotg_aug_tier3.003  days = { 1 20 } }
-                }
-            }
-            # Signal Noise
-            if = {
-                limit = { NOT = { has_character_flag = eotg_flag_oc_event_cooldown } }
-                random = {
-                    chance = 30
-                    trigger_event = { id = eotg_aug_tier3.004  days = { 1 20 } }
-                }
-            }
-            # Clarity — at war
-            if = {
-                limit = {
-                    is_at_war = yes
-                    NOT = { has_character_flag = eotg_flag_oc_event_cooldown }
-                }
-                random = {
-                    chance = 35
-                    trigger_event = { id = eotg_aug_tier3.005  days = { 1 15 } }
-                }
-            }
-            # The Delegation — disaffected vassals
-            if = {
-                limit = {
-                    NOT = { has_character_flag = eotg_flag_oc_event_cooldown }
-                    any_vassal = {
-                        is_alive = yes
-                        opinion = { target = root  value < -20 }
+                random_list = {
+                    # Violent Impulse
+                    35 = {
+                        add_character_flag = { flag = eotg_flag_oc_event_cooldown  months = 11 }
+                        trigger_event = { id = eotg_aug_tier3.001  days = { 1 15 } }
                     }
-                }
-                random = {
-                    chance = 40
-                    trigger_event = { id = eotg_aug_tier3.006  days = { 1 15 } }
-                }
-            }
-            # Two Machines — another overclocked character in range
-            if = {
-                limit = {
-                    NOT = { has_character_flag = eotg_flag_oc_event_cooldown }
-                    OR = {
-                        any_vassal = { is_alive = yes  has_trait = eotg_overclocked }
-                        any_courtier = { is_alive = yes  has_trait = eotg_overclocked }
+                    # The Mirror
+                    25 = {
+                        add_character_flag = { flag = eotg_flag_oc_event_cooldown  months = 11 }
+                        trigger_event = { id = eotg_aug_tier3.002  days = { 1 20 } }
                     }
-                }
-                random = {
-                    chance = 25
-                    trigger_event = { id = eotg_aug_tier3.007  days = { 1 20 } }
+                    # Sleepless
+                    20 = {
+                        add_character_flag = { flag = eotg_flag_oc_event_cooldown  months = 11 }
+                        trigger_event = { id = eotg_aug_tier3.003  days = { 1 20 } }
+                    }
+                    # Signal Noise
+                    30 = {
+                        add_character_flag = { flag = eotg_flag_oc_event_cooldown  months = 11 }
+                        trigger_event = { id = eotg_aug_tier3.004  days = { 1 20 } }
+                    }
+                    # Clarity — at war
+                    35 = {
+                        trigger = { is_at_war = yes }
+                        add_character_flag = { flag = eotg_flag_oc_event_cooldown  months = 11 }
+                        trigger_event = { id = eotg_aug_tier3.005  days = { 1 15 } }
+                    }
+                    # The Delegation — disaffected vassals
+                    40 = {
+                        trigger = {
+                            any_vassal = {
+                                is_alive = yes
+                                opinion = { target = root  value < -20 }
+                            }
+                        }
+                        add_character_flag = { flag = eotg_flag_oc_event_cooldown  months = 11 }
+                        trigger_event = { id = eotg_aug_tier3.006  days = { 1 15 } }
+                    }
+                    # Two Machines — another overclocked character in range
+                    25 = {
+                        trigger = {
+                            OR = {
+                                any_vassal = { is_alive = yes  eotg_is_aug_tier3 = yes }
+                                any_courtier = { is_alive = yes  eotg_is_aug_tier3 = yes }
+                            }
+                        }
+                        add_character_flag = { flag = eotg_flag_oc_event_cooldown  months = 11 }
+                        trigger_event = { id = eotg_aug_tier3.007  days = { 1 20 } }
+                    }
+                    # ── Phase 4c (docs/specs/cybernetics_v2_phase4.md §5) ──
+                    # Tremor
+                    20 = {
+                        add_character_flag = { flag = eotg_flag_oc_event_cooldown  months = 11 }
+                        trigger_event = { id = eotg_aug_tier3.008  days = { 1 20 } }
+                    }
+                    # Phantom Orders
+                    20 = {
+                        trigger = {
+                            any_courtier = {
+                                is_alive = yes
+                                is_adult = yes
+                            }
+                        }
+                        add_character_flag = { flag = eotg_flag_oc_event_cooldown  months = 11 }
+                        trigger_event = { id = eotg_aug_tier3.009  days = { 1 20 } }
+                    }
+                    # Heat Spike
+                    15 = {
+                        add_character_flag = { flag = eotg_flag_oc_event_cooldown  months = 11 }
+                        trigger_event = { id = eotg_aug_tier3.010  days = { 1 20 } }
+                    }
+                    # The Feast You Did Not Eat
+                    15 = {
+                        add_character_flag = { flag = eotg_flag_oc_event_cooldown  months = 11 }
+                        trigger_event = { id = eotg_aug_tier3.011  days = { 1 20 } }
+                    }
+                    # First Contact (thread T1, beat 2): once (flag set here).
+                    # Nerves focus brings the voice early (thread T7): x1.5.
+                    30 = {
+                        trigger = {
+                            OR = {
+                                NOT = { has_variable = eotg_aug_voice }
+                                var:eotg_aug_voice < 2
+                            }
+                            NOT = { has_character_flag = eotg_flag_aug_first_contact_done }
+                        }
+                        modifier = {
+                            factor = 1.5
+                            var:eotg_aug_focus ?= flag:nerves
+                        }
+                        add_character_flag = eotg_flag_aug_first_contact_done
+                        add_character_flag = { flag = eotg_flag_oc_event_cooldown  months = 11 }
+                        trigger_event = { id = eotg_aug_tier3.012  days = { 1 20 } }
+                    }
+                    # Sleepwalker
+                    15 = {
+                        add_character_flag = { flag = eotg_flag_oc_event_cooldown  months = 11 }
+                        trigger_event = { id = eotg_aug_tier3.013  days = { 1 20 } }
+                    }
+                    # The Missing Conversation
+                    15 = {
+                        trigger = {
+                            any_courtier = {
+                                is_alive = yes
+                                is_adult = yes
+                            }
+                        }
+                        add_character_flag = { flag = eotg_flag_oc_event_cooldown  months = 11 }
+                        trigger_event = { id = eotg_aug_tier3.014  days = { 1 20 } }
+                    }
+                    # The Bleed
+                    10 = {
+                        add_character_flag = { flag = eotg_flag_oc_event_cooldown  months = 11 }
+                        trigger_event = { id = eotg_aug_tier3.016  days = { 1 20 } }
+                    }
+                    # The Plot
+                    20 = {
+                        trigger = {
+                            OR = {
+                                any_vassal = { is_alive = yes }
+                                any_courtier = { eotg_aug_victim_candidate = yes }
+                            }
+                        }
+                        add_character_flag = { flag = eotg_flag_oc_event_cooldown  months = 11 }
+                        trigger_event = { id = eotg_aug_tier3.017  days = { 1 20 } }
+                    }
+                    # The Delegation, Revisited
+                    15 = {
+                        trigger = {
+                            OR = {
+                                is_married = yes
+                                cp:councillor_chancellor ?= {
+                                    is_alive = yes
+                                    NOT = { this = root }
+                                }
+                            }
+                        }
+                        add_character_flag = { flag = eotg_flag_oc_event_cooldown  months = 11 }
+                        trigger_event = { id = eotg_aug_tier3.019  days = { 1 20 } }
+                    }
+                    # The Intervention (thread T3 seed). The refused flag is
+                    # tier3.020's 2-year state; only this branch reads it.
+                    30 = {
+                        trigger = {
+                            has_variable = eotg_fracture_risk
+                            var:eotg_fracture_risk >= 40
+                            OR = {
+                                is_married = yes
+                                primary_heir ?= { is_adult = yes }
+                            }
+                            NOT = { has_character_flag = eotg_flag_aug_intervention_refused }
+                        }
+                        add_character_flag = { flag = eotg_flag_oc_event_cooldown  months = 11 }
+                        trigger_event = { id = eotg_aug_tier3.020  days = { 1 20 } }
+                    }
+                    # The Clarity Campaign — at war
+                    30 = {
+                        trigger = { is_at_war = yes }
+                        add_character_flag = { flag = eotg_flag_oc_event_cooldown  months = 11 }
+                        trigger_event = { id = eotg_aug_tier3.023  days = { 1 15 } }
+                    }
+                    # Nothing this year (Phase 4c: 100 -> 200). B4 (deferred from
+                    # Phase 0, wired in Phase 5): x2 while the Countdown runs; the
+                    # Countdown carries the Overclocked drama then.
+                    200 = {
+                        modifier = {
+                            factor = 2
+                            eotg_aug_has_countdown = yes
+                        }
+                    }
                 }
             }
         }
     }
 }
 
-# Neurofractured — ongoing random events
+# Neurofractured — pressure, the Heir's Arc, the terminal event and the band
+# pools (docs/specs/cybernetics_v2_phase3.md §1). Order, all under
+# has_trait = eotg_neurofractured:
+#   1. drift (B1), every pulse;
+#   2. Heir's Arc start (no cooldown: the story's effect_group owns its pacing);
+#   3. terminal: risk >= 95 fires eotg_fracture.027 The Cascade, replacing the
+#      year's roll (own 11-month guard, eotg_flag_aug_terminal_cooldown);
+#   4. else, off cooldown: one weighted list per pressure band
+#      (eotg_aug_pressure_storm / _fracture / else flicker).
+# Each branch sets eotg_flag_nf_event_cooldown (11 months; the Court Massacre
+# 23) where it fires. Scrambled and The Last Lucid Moment also set their own
+# 5-year flags here. No fracture event's trigger reads any of these flags; the
+# event triggers mirror only the world-state part of their branch.
+# Violent branches (V: .002, .004, .016) weigh x0.25 while
+# eotg_flag_aug_restrained is set (decision, Phase 3b).
+# eotg_fracture.005 is no longer in any list: the Heir's Arc fires it.
 eotg_on_yearly_aug_neurofractured_check = {
     effect = {
         if = {
             limit = { has_trait = eotg_neurofractured }
 
-            # High-frequency random events
+            # 1. Passive pressure drift (cybernetics_v2 B1). Runs every pulse,
+            # before the roll, so the roll sees this year's value.
+            # Calm: >= 30 in ~4 years, >= 60 in ~8. Stress level 3: >= 60 in ~3.
+            eotg_add_fracture_risk = { AMOUNT = 8 }
             if = {
-                limit = { NOT = { has_character_flag = eotg_flag_nf_event_cooldown } }
-                random = {
-                    chance = 50
-                    trigger_event = { id = eotg_fracture.002  days = { 1 20 } }
-                }
+                limit = { stress_level >= 3 }
+                eotg_add_fracture_risk = { AMOUNT = 12 }
+            }
+            else_if = {
+                limit = { stress_level = 2 }
+                eotg_add_fracture_risk = { AMOUNT = 8 }
+            }
+            else_if = {
+                limit = { stress_level = 1 }
+                eotg_add_fracture_risk = { AMOUNT = 4 }
+            }
+            # Decision-owned treatment flags (set in Phase 3b)
+            if = {
+                limit = { has_character_flag = eotg_flag_aug_sedated }
+                eotg_add_fracture_risk = { AMOUNT = -6 }
+            }
+            if = {
+                limit = { has_character_flag = eotg_flag_aug_restrained }
+                eotg_add_fracture_risk = { AMOUNT = -4 }
             }
 
-            # Lucid Moment — rare
-            if = {
-                limit = { NOT = { has_character_flag = eotg_flag_nf_event_cooldown } }
-                random = {
-                    chance = 15
-                    trigger_event = { id = eotg_fracture.003  days = { 1 30 } }
-                }
-            }
-
-            # Court Massacre — fires when very high stress
+            # 2. The Heir's Arc (thread T3): once per ruler, while an heir of 14+
+            # exists. eotg_aug_heir.004 sets the permanent
+            # eotg_flag_aug_heir_arc_done when the arc concludes, so a finished
+            # arc never restarts; the story's effect_group timing paces a live one.
             if = {
                 limit = {
-                    stress >= 300
-                    NOT = { has_character_flag = eotg_flag_nf_event_cooldown }
-                }
-                random = {
-                    chance = 60
-                    trigger_event = { id = eotg_fracture.004  days = { 1 10 } }
-                }
-            }
-
-            # What the Heir Saw — primary heir is old enough to witness
-            if = {
-                limit = {
-                    NOT = { has_character_flag = eotg_flag_nf_event_cooldown }
-                    exists = primary_heir
-                    primary_heir = { age >= 12  is_alive = yes }
-                }
-                random = {
-                    chance = 30
-                    trigger_event = { id = eotg_fracture.005  days = { 1 20 } }
-                }
-            }
-
-            # The Warrant — disaffected vassal rebels on cognitive grounds
-            if = {
-                limit = {
-                    NOT = { has_character_flag = eotg_flag_nf_event_cooldown }
-                    any_vassal = {
+                    eotg_aug_has_heir_arc = no
+                    NOT = { has_character_flag = eotg_flag_aug_heir_arc_done }
+                    primary_heir ?= {
                         is_alive = yes
-                        opinion = { target = root  value < -30 }
+                        age >= 14
+                    }
+                }
+                create_story = eotg_story_aug_heir_arc
+            }
+
+            # 3. Terminal — The Cascade replaces this year's roll
+            if = {
+                limit = {
+                    has_variable = eotg_fracture_risk
+                    var:eotg_fracture_risk >= 95
+                    NOT = { has_character_flag = eotg_flag_aug_terminal_cooldown }
+                }
+                add_character_flag = { flag = eotg_flag_aug_terminal_cooldown  months = 11 }
+                trigger_event = { id = eotg_fracture.027  days = { 1 10 } }
+            }
+            # 4. The band pools
+            else_if = {
+                limit = { NOT = { has_character_flag = eotg_flag_nf_event_cooldown } }
+
+                # ── Storm band (risk >= 60): the realm reacts ──
+                if = {
+                    limit = { eotg_aug_pressure_storm = yes }
+                    random_list = {
+                        # The Warrant (made real)
+                        35 = {
+                            trigger = {
+                                any_vassal = {
+                                    is_alive = yes
+                                    opinion = { target = root  value < -30 }
+                                }
+                            }
+                            add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 11 }
+                            trigger_event = { id = eotg_fracture.006  days = { 1 15 } }
+                        }
+                        # Containment Regency
+                        30 = {
+                            trigger = { eotg_aug_containment_possible = { RULER = root } }
+                            add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 11 }
+                            trigger_event = { id = eotg_fracture.025  days = { 1 15 } }
+                        }
+                        # V — The Court Massacre (23-month cooldown, B4)
+                        40 = {
+                            trigger = { stress_level >= 2 }
+                            modifier = {
+                                factor = 0.25
+                                has_character_flag = eotg_flag_aug_restrained
+                            }
+                            add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 23 }
+                            trigger_event = { id = eotg_fracture.004  days = { 1 10 } }
+                        }
+                        # V — Containment Failure
+                        30 = {
+                            modifier = {
+                                factor = 0.25
+                                has_character_flag = eotg_flag_aug_restrained
+                            }
+                            add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 11 }
+                            trigger_event = { id = eotg_fracture.002  days = { 1 20 } }
+                        }
+                        # Scrambled (own 5-year flag, set here)
+                        20 = {
+                            trigger = { NOT = { has_character_flag = eotg_flag_aug_scramble_cooldown } }
+                            add_character_flag = { flag = eotg_flag_aug_scramble_cooldown  years = 5 }
+                            add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 11 }
+                            trigger_event = { id = eotg_fracture.018  days = { 1 20 } }
+                        }
+                        # The Last Lucid Moment (own 5-year flag, set here)
+                        10 = {
+                            trigger = { NOT = { has_character_flag = eotg_flag_aug_last_lucid } }
+                            add_character_flag = { flag = eotg_flag_aug_last_lucid  years = 5 }
+                            add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 11 }
+                            trigger_event = { id = eotg_fracture.026  days = { 1 30 } }
+                        }
+                        # Dead Reckoning
+                        8 = {
+                            add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 11 }
+                            trigger_event = { id = eotg_fracture.007  days = { 1 30 } }
+                        }
+                        # Nothing this year
+                        40 = { }
+                    }
+                }
+                # ── Fracture band (30-59): violence and lost time ──
+                else_if = {
+                    limit = { eotg_aug_pressure_fracture = yes }
+                    random_list = {
+                        # V — Containment Failure
+                        40 = {
+                            modifier = {
+                                factor = 0.25
+                                has_character_flag = eotg_flag_aug_restrained
+                            }
+                            add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 11 }
+                            trigger_event = { id = eotg_fracture.002  days = { 1 20 } }
+                        }
+                        # V — Blood on the Sleeve
+                        30 = {
+                            modifier = {
+                                factor = 0.25
+                                has_character_flag = eotg_flag_aug_restrained
+                            }
+                            add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 11 }
+                            trigger_event = { id = eotg_fracture.016  days = { 1 20 } }
+                        }
+                        # Terms of Access (thread T1, beat 4)
+                        25 = {
+                            add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 11 }
+                            trigger_event = { id = eotg_fracture.017  days = { 1 20 } }
+                        }
+                        # Scrambled (own 5-year flag, set here)
+                        20 = {
+                            trigger = { NOT = { has_character_flag = eotg_flag_aug_scramble_cooldown } }
+                            add_character_flag = { flag = eotg_flag_aug_scramble_cooldown  years = 5 }
+                            add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 11 }
+                            trigger_event = { id = eotg_fracture.018  days = { 1 20 } }
+                        }
+                        # The False Traitor
+                        25 = {
+                            trigger = { any_courtier = { eotg_aug_victim_candidate = yes } }
+                            add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 11 }
+                            trigger_event = { id = eotg_fracture.019  days = { 1 20 } }
+                        }
+                        # The Missing Courtier (never family or spouse: picker factor 0)
+                        15 = {
+                            trigger = {
+                                any_courtier = {
+                                    eotg_aug_victim_candidate = yes
+                                    NOT = { is_close_family_of = root }
+                                    NOT = { is_spouse_of = root }
+                                }
+                            }
+                            add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 11 }
+                            trigger_event = { id = eotg_fracture.021  days = { 1 20 } }
+                        }
+                        # The Second Voice (thread T1, beat 3)
+                        20 = {
+                            trigger = {
+                                OR = {
+                                    NOT = { has_variable = eotg_aug_voice }
+                                    var:eotg_aug_voice < 3
+                                }
+                            }
+                            add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 11 }
+                            trigger_event = { id = eotg_fracture.022  days = { 1 20 } }
+                        }
+                        # The Wrong War
+                        15 = {
+                            add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 11 }
+                            trigger_event = { id = eotg_fracture.023  days = { 1 20 } }
+                        }
+                        # The Familiar Change (thread T4)
+                        20 = {
+                            trigger = {
+                                any_courtier = {
+                                    is_alive = yes
+                                    eotg_is_augmented_any = yes
+                                }
+                            }
+                            add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 11 }
+                            trigger_event = { id = eotg_fracture.024  days = { 1 20 } }
+                        }
+                        # Dead Reckoning
+                        5 = {
+                            add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 11 }
+                            trigger_event = { id = eotg_fracture.007  days = { 1 30 } }
+                        }
+                        # Nothing this year
+                        60 = { }
+                    }
+                }
+                # ── Flicker band (< 30): eerie, small, wrong ──
+                else = {
+                    random_list = {
+                        # Lucid Moment
+                        15 = {
+                            add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 11 }
+                            trigger_event = { id = eotg_fracture.003  days = { 1 30 } }
+                        }
+                        # Wrong Name
+                        25 = {
+                            trigger = {
+                                OR = {
+                                    exists = primary_heir
+                                    is_married = yes
+                                }
+                            }
+                            add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 11 }
+                            trigger_event = { id = eotg_fracture.008  days = { 1 30 } }
+                        }
+                        # Lost Hour
+                        25 = {
+                            add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 11 }
+                            trigger_event = { id = eotg_fracture.009  days = { 1 30 } }
+                        }
+                        # The Mirror Doesn't Blink
+                        20 = {
+                            add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 11 }
+                            trigger_event = { id = eotg_fracture.010  days = { 1 30 } }
+                        }
+                        # Conversations With No One
+                        20 = {
+                            trigger = { any_courtier = { eotg_aug_victim_candidate = yes } }
+                            add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 11 }
+                            trigger_event = { id = eotg_fracture.011  days = { 1 30 } }
+                        }
+                        # The Familiar Stranger
+                        20 = {
+                            trigger = {
+                                OR = {
+                                    any_relation = { type = friend }
+                                    any_relation = { type = lover }
+                                    is_married = yes
+                                }
+                            }
+                            add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 11 }
+                            trigger_event = { id = eotg_fracture.012  days = { 1 30 } }
+                        }
+                        # Memory of Tomorrow
+                        15 = {
+                            add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 11 }
+                            trigger_event = { id = eotg_fracture.013  days = { 1 30 } }
+                        }
+                        # The Door
+                        15 = {
+                            add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 11 }
+                            trigger_event = { id = eotg_fracture.014  days = { 1 30 } }
+                        }
+                        # The Unsent Letter
+                        15 = {
+                            trigger = { any_vassal = { is_alive = yes } }
+                            add_character_flag = { flag = eotg_flag_nf_event_cooldown  months = 11 }
+                            trigger_event = { id = eotg_fracture.015  days = { 1 30 } }
+                        }
+                        # Nothing this year
+                        60 = { }
+                    }
+                }
+            }
+        }
+    }
+}
+
+# ── Non-rulers (docs/specs/cybernetics_v2_phase6.md) ──────────────────────────
+# The non-ruler lifecycle. Root = a knight or courtier below county tier,
+# employed by a count+ liege (`employer`, vanilla event target). Hooked on
+# random_yearly_everyone_pulse, so the trigger is ordered cheapest first: the
+# trait/knight OR rejects almost every character in the world before any
+# scope link is walked.
+# Steps (spec §1): 1 the offer (unaugmented knight), 2 progression (tier 1-2),
+# 3 accrual and the non-ruler cascade (tier 3; eotg_aug_nr_cascade_effect,
+# never eotg_trigger_neurofracture), 4 Neurofractured drift, 5 one liege event.
+# COOLDOWN: eotg_flag_aug_nr_cooldown lives on the LIEGE and is set only here
+# (lesson 5); no eotg_aug_nr event checks it. nr.006 (the cascade) ignores it.
+# Phase 5 hooks read: eotg_aug_is_retinue_knight, eotg_flag_aug_retinue_permanent
+# (set on the knights by eotg_aug_retinue.005.a; also honoured on the liege,
+# as the Phase 6 spec words it).
+eotg_on_yearly_aug_nonruler_check = {
+    trigger = {
+        OR = {
+            has_trait = eotg_cybernetics
+            has_trait = eotg_neurofractured
+            is_knight = yes
+        }
+        highest_held_title_tier < tier_county
+        is_alive = yes
+        is_adult = yes
+        exists = employer
+        employer = { highest_held_title_tier >= tier_county }
+    }
+    effect = {
+        employer = { save_scope_as = eotg_nr_liege }
+
+        # 1. NR-01: an unaugmented knight asks (3%, 6% with want_more)
+        if = {
+            limit = {
+                is_knight = yes
+                eotg_is_augmented_any = no
+                scope:eotg_nr_liege = {
+                    NOT = { has_character_flag = eotg_flag_aug_nr_cooldown }
+                    OR = {
+                        has_trait = eotg_cybernetics
+                        has_character_flag = eotg_flag_aug_want_more
+                        any_knight = { eotg_is_augmented_any = yes }
+                    }
+                }
+            }
+            random = {
+                chance = 3
+                modifier = {
+                    add = 3
+                    scope:eotg_nr_liege = { has_character_flag = eotg_flag_aug_want_more }
+                }
+                scope:eotg_nr_liege = {
+                    add_character_flag = { flag = eotg_flag_aug_nr_cooldown  years = 1 }
+                }
+                save_scope_as = eotg_champion
+                scope:eotg_nr_liege = {
+                    trigger_event = { id = eotg_aug_nr.001  days = { 1 30 } }
+                }
+            }
+        }
+        # 2-4 only apply to the augmented
+        else_if = {
+            limit = { eotg_is_augmented_any = yes }
+
+            # 2. Progression: 4% a year, 8% for a permanent Program knight.
+            # A knight's progression is reported to the liege by nr.002
+            # (final QA: fired here, so it only ever reports a real
+            # progression). The liege cooldown is set here and step 5 is
+            # skipped for this character this year.
+            if = {
+                limit = {
+                    OR = {
+                        eotg_is_aug_tier1 = yes
+                        eotg_is_aug_tier2 = yes
                     }
                 }
                 random = {
-                    chance = 35
-                    trigger_event = { id = eotg_fracture.006  days = { 1 15 } }
+                    chance = 4
+                    modifier = {
+                        add = 4
+                        eotg_aug_is_retinue_knight = yes
+                        OR = {
+                            has_character_flag = eotg_flag_aug_retinue_permanent
+                            scope:eotg_nr_liege = { has_character_flag = eotg_flag_aug_retinue_permanent }
+                        }
+                    }
+                    if = {
+                        limit = { eotg_is_aug_tier1 = yes }
+                        eotg_aug_set_integration_effect = { XP = 50 }
+                    }
+                    else = {
+                        eotg_aug_set_integration_effect = { XP = 100 }
+                    }
+                    # Your Champion's New Edge
+                    if = {
+                        limit = {
+                            is_knight = yes
+                            scope:eotg_nr_liege = {
+                                NOT = { has_character_flag = eotg_flag_aug_nr_cooldown }
+                            }
+                        }
+                        scope:eotg_nr_liege = {
+                            add_character_flag = { flag = eotg_flag_aug_nr_cooldown  years = 1 }
+                        }
+                        save_scope_value_as = { name = eotg_nr_reported  value = yes }
+                        save_scope_as = eotg_champion
+                        scope:eotg_nr_liege = {
+                            trigger_event = { id = eotg_aug_nr.002  days = { 1 30 } }
+                        }
+                    }
                 }
             }
+            # 3. Accrual at Overclocked; the cascade at 80
+            else_if = {
+                limit = { eotg_is_aug_tier3 = yes }
+                eotg_add_fracture_risk = { AMOUNT = 6 }
+                if = {
+                    limit = { stress_level >= 2 }
+                    eotg_add_fracture_risk = { AMOUNT = 6 }
+                }
+                if = {
+                    limit = { var:eotg_fracture_risk >= 80 }
+                    eotg_aug_nr_cascade_effect = yes
+                    save_scope_value_as = { name = eotg_nr_cascaded  value = yes }
+                }
+            }
+            # 4. Drift once fractured
+            else_if = {
+                limit = { has_trait = eotg_neurofractured }
+                eotg_add_fracture_risk = { AMOUNT = 6 }
+            }
 
-            # Dead Reckoning — rare clarity
+            # 5. One liege event a year (not in a cascade year: nr.006 is it;
+            # not when step 2 already reported a progression: nr.002 is it)
             if = {
-                limit = { NOT = { has_character_flag = eotg_flag_nf_event_cooldown } }
-                random = {
-                    chance = 8
-                    trigger_event = { id = eotg_fracture.007  days = { 1 30 } }
+                limit = {
+                    NOT = { exists = scope:eotg_nr_cascaded }
+                    NOT = { exists = scope:eotg_nr_reported }
+                    scope:eotg_nr_liege = {
+                        NOT = { has_character_flag = eotg_flag_aug_nr_cooldown }
+                    }
+                }
+                random_list = {
+                    # Something Is Wrong With Them
+                    15 = {
+                        trigger = {
+                            OR = {
+                                eotg_is_aug_tier2 = yes
+                                eotg_is_aug_tier3 = yes
+                            }
+                            has_variable = eotg_fracture_risk
+                            var:eotg_fracture_risk >= 30
+                        }
+                        modifier = {
+                            factor = 1.5
+                            eotg_aug_is_retinue_knight = yes
+                        }
+                        scope:eotg_nr_liege = {
+                            add_character_flag = { flag = eotg_flag_aug_nr_cooldown  years = 1 }
+                        }
+                        save_scope_as = eotg_champion
+                        scope:eotg_nr_liege = {
+                            trigger_event = { id = eotg_aug_nr.003  days = { 1 30 } }
+                        }
+                    }
+                    # The Champion's Mistake
+                    20 = {
+                        trigger = {
+                            is_imprisoned = no
+                            OR = {
+                                has_trait = eotg_neurofractured
+                                AND = {
+                                    eotg_is_aug_tier3 = yes
+                                    has_variable = eotg_fracture_risk
+                                    var:eotg_fracture_risk >= 60
+                                }
+                            }
+                        }
+                        modifier = {
+                            factor = 1.5
+                            eotg_aug_is_retinue_knight = yes
+                        }
+                        scope:eotg_nr_liege = {
+                            add_character_flag = { flag = eotg_flag_aug_nr_cooldown  years = 1 }
+                        }
+                        save_scope_as = eotg_champion
+                        scope:eotg_nr_liege = {
+                            trigger_event = { id = eotg_aug_nr.004  days = { 1 30 } }
+                        }
+                    }
+                    # The Familiar Change (courtiers)
+                    10 = {
+                        trigger = {
+                            is_knight = no
+                            OR = {
+                                eotg_is_aug_tier2 = yes
+                                eotg_is_aug_tier3 = yes
+                                has_trait = eotg_neurofractured
+                            }
+                        }
+                        modifier = {
+                            factor = 1.5
+                            eotg_aug_is_retinue_knight = yes
+                        }
+                        scope:eotg_nr_liege = {
+                            add_character_flag = { flag = eotg_flag_aug_nr_cooldown  years = 1 }
+                        }
+                        save_scope_as = eotg_champion
+                        scope:eotg_nr_liege = {
+                            trigger_event = { id = eotg_aug_nr.005  days = { 1 30 } }
+                        }
+                    }
+                    # Nothing this year
+                    100 = { }
                 }
             }
         }
