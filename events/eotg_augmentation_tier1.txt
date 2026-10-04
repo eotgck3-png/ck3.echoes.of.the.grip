@@ -1598,6 +1598,8 @@ eotg_aug_tier1.013 = {
         name = eotg_aug_tier1.013.c
         trigger = { eotg_has_physician_access = yes }
         add_character_flag = { flag = eotg_flag_aug_rejection_treated  days = 180 }
+        # Tooltip sweep: the option otherwise renders an empty tooltip.
+        custom_tooltip = eotg_aug_tier1.013.c.tt
         trigger_event = { id = eotg_aug_tier1.014  days = { 30 60 } }
         ai_chance = {
             base = 50
@@ -1645,6 +1647,8 @@ eotg_aug_tier1.014 = {
     # "Fight it."
     option = {
         name = eotg_aug_tier1.014.a
+        # Tooltip sweep: the option otherwise renders an empty tooltip.
+        custom_tooltip = eotg_aug_tier1.014.a.tt
         trigger_event = { id = eotg_aug_tier1.015  days = { 10 20 } }
         ai_chance = {
             base = 50
@@ -1892,6 +1896,8 @@ eotg_aug_tier1.016 = {
     option = {
         name = eotg_aug_tier1.016.a
         eotg_add_fracture_risk = { AMOUNT = 2 }
+        # Tooltip sweep: the option otherwise renders an empty tooltip.
+        custom_tooltip = eotg_aug_tier1.016.a.tt
         trigger_event = { id = eotg_aug_tier1.017  days = { 3 7 } }
         ai_chance = {
             base = 40
@@ -2441,7 +2447,10 @@ eotg_aug_tier1.019 = {
         scope:eotg_copycat = {
             if = {
                 limit = { scope:eotg_copycat_outcome = flag:recovered }
-                remove_character_modifier = eotg_mod_aug_infection
+                if = {
+                    limit = { has_character_modifier = eotg_mod_aug_infection }
+                    remove_character_modifier = eotg_mod_aug_infection
+                }
                 add_opinion = { modifier = eotg_opinion_aug_grateful_patient  target = root  years = 10 }
             }
             else_if = {

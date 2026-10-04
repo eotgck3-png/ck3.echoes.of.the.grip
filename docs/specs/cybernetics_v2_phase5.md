@@ -119,15 +119,30 @@ Culture and faith come from root **by scope** (map-agnostic). The envoy is passe
 - **`on_setup`:** `envoy` (from passthrough), `demand = 0`, `grievance = 0`, `terms` (`flag:standard` / `flag:read` / `flag:greedy` from patron.001's option).
 - **`on_owner_death`:** `end_story = yes`. Inherited debt is deferred (§5).
 - **Amended 2026-10-04 by [cybernetics_v2_new_beats.md](cybernetics_v2_new_beats.md) §5.2 (human-approved):** a new tick entry, after the write-off and before the demand sequence, in both cadences. It fires **patron.008** *The Paper* once per story (story variable `eotg_paper_served`), when the owner has no implants, the envoy is present, demand < 4 and grievance < 3. That file is the authority.
-- **`effect_group`:** `years = { 2 3 }` (`{ 3 4 }` if terms = read), `first_valid`:
-  1. `var:envoy` is dead or not the owner's courtier → **.007** *A New Envoy* (it creates the replacement and resets `envoy`).
-  2. `grievance >= 3` → **.006** *The Final Demand* (betrayal framing).
-  3. `demand = 0` → **.002**; `demand = 1` → **.003**; `demand = 2` → **.004**; `demand = 3` → **.005**; `demand >= 4` → **.006**.
+- **`on_end`:** removes the open-ended `eotg_mod_aug_patron_clause`, and sends a living, free, landless envoy to the pool (round 2 M12; vanilla `hold_court_events_general.txt:508`).
+- **`effect_group`:** `years = { 2 3 }` (`{ 3 4 }` if terms = read). Two `effect_group`s, one per cadence, with **identical** `first_valid` bodies. Script names: `eotg_envoy`, `eotg_demand`, `eotg_grievance`, `eotg_terms`.
 
-  Each demand event increments `demand` in every option.
+  **Ratified 2026-10-04 (CB-26/CB-27 M7).** This is the order in `common/story_cycles/eotg_augmentation_stories.txt` (`eotg_story_aug_patron`). It replaces the order first specced here, which checked the envoy first.
+  1. Owner `is_landed = no` → `end_story` (round 2; `story_cycle_take_mandate_of_heaven.txt:172-189`).
+  2. Owner Neurofractured and `demand < 4` → set `demand = 4`, owner flag `eotg_flag_aug_patron_writeoff` (60 days), **.006** (balance §5.8 write-off).
+  3. *(Specced, not yet built: the paper entry, patron.008, per [new_beats](cybernetics_v2_new_beats.md) §5.2.)*
+  4. The `always` entry, an `if` / `else_if` chain:
+     1. `grievance >= 3` **or** `demand >= 4` → **.006** *The Final Demand*.
+     2. `var:envoy` missing, dead, or not the owner's courtier → **.007** *A New Envoy* (it creates the replacement and resets `envoy`).
+     3. `demand = 0` → **.002**; `demand = 1` → **.003**.
+     4. `demand = 2` → **.004** if any courtier passes `eotg_aug_patron_critic_candidate = { RULER = story_owner }`; otherwise set `demand = 3` and fire **.005**. The syndicate moves on to the Family Clause instead of stalling.
+     5. Otherwise (`demand = 3`) → **.005**.
+
+  **Why .006 comes before .007.** .007 c "Refuse them entry." adds grievance but no demand. With the envoy check first, an owner who refuses every new envoy has no envoy at court on the next tick, gets .007 again, and never reaches the Final Demand. With .006 first, the third refusal ends the loop. **The cost:** .006 can fire while the envoy is dead or has left court. §2.4 handles that case (the `_absent` descs, and the presence gate on the envoy's portrait and on the options that act on the envoy).
+
+  **Why .004 is skipped.** With no valid critic, .004 would have nothing to name. If the last candidate goes in the 1–30 days before .004 fires, the event's own trigger fails, `demand` stays at 2, and the next tick tries again (or skips).
+
+  Each demand event (.002–.005) increments `demand` in every option, in `after`. .006 ends the story in `after`. .007 does not count as a demand.
 
 ### 2.4 Events (`events/eotg_augmentation_patron.txt`, namespace `eotg_aug_patron`)
-The envoy is saved as `scope:eotg_patron_envoy` from the story variable in each `immediate`.
+The envoy is saved as `scope:eotg_patron_envoy` from the story variable in each `immediate` (`var:eotg_envoy ?= { save_scope_as = … }`).
+
+**Envoy presence (CB-27 M7, ratified 2026-10-04).** The tick fires 1–30 days before the event, and (§2.3) it can fire .006 with no envoy at court. So every place in .002–.006 that **shows, names or acts on** the envoy is gated on the scripted trigger `eotg_aug_patron_envoy_present`: `scope:eotg_patron_envoy ?= { is_alive = yes  is_courtier_of = root }`, evaluated in the event's root after `immediate`. Vanilla precedent: `events/story_cycles/peasant_affair/story_cycle_peasant_affair_events.txt:1173-1178` (an option acting on a story character requires them alive and at root's court). .007 creates its envoy in `immediate`, so it uses `exists`.
 
 **.001 The Patron's Offer.** "We would like to pay for it."
 - **a** "Accept." Install (risk 0). Create the envoy. Start the story with terms = standard.
@@ -142,6 +157,7 @@ The envoy is saved as `scope:eotg_patron_envoy` from the story variable in each 
 - **c** "Renegotiate." `duel = { skill = diplomacy  target = scope:eotg_patron_envoy }`. Win: pay `minor_gold_value`. Lose: pay `major_gold_value`.
 - **d [deceitful]** "Pay in promises." The envoy gets `add_hook = { type = indebted_hook  target = root }`. No gold.
 - **e [honest]** "Ask for honest terms." 50%: halve the payment. 50%: `grievance +1`.
+- **Presence gates (CB-27 follow-up):** the envoy's right portrait; c's duel and d's hook need `eotg_aug_patron_envoy_present`. On b, the envoy's disgust is applied only if present, and the grievance always is. a, b and e stay open with no envoy.
 
 **.003 Exclusivity.** "Only our technicians may touch you now."
 - **a** "Agree." `eotg_mod_aug_patron_clause` (until the story ends). Risk −5: their technicians are good.
@@ -149,8 +165,12 @@ The envoy is saved as `scope:eotg_patron_envoy` from the story variable in each 
 - **c** "Agree, on a trial basis." The clause for 3 years (`years = 3`).
 - **d [diligent]** "Agree, but I audit their work." As a. Risk −8.
 - **e [paranoid]** "Their hands will never touch me." `grievance +1`. Risk +5.
+- **Presence gate (CB-27 follow-up):** the envoy's right portrait only. No option acts on the envoy.
 
 **.004 The Errand.** "There is a critic at your court." Saved `eotg_critic`: a zealous courtier, else any courtier, both filtered by `eotg_aug_patron_critic_candidate` (adult, free, not root, not close family or spouse, not Neurofractured). The critic is a **chosen target**, not an episode victim, so index rule 7's picker does not apply (*CB-26 L4/S5*). The critic is named in loc.
+- **Never the envoy (CB-27 M8, ratified 2026-10-04).** The envoy is a courtier, so without this the `else` branch could ask the owner to murder the syndicate's own envoy. `eotg_aug_patron_critic_candidate` itself excludes the owner's Patron story's `var:eotg_envoy`: it saves the candidate as a temporary scope and tests `NOT = { $RULER$ = { any_owned_story = { story_type = eotg_story_aug_patron  var:eotg_envoy ?= scope:eotg_critic_check } } }`. Vanilla shape: `events/court_events/01_ep3_court_events.txt:557-570`. It is in the trigger, not in a caller, so all three users get it with no new parameter: the tick's skip test, .004's `trigger`, and .004's pick.
+- **The envoy as the only candidate.** If the envoy is the only courtier who would otherwise qualify, nobody passes, so the tick takes the §2.3 skip (`demand = 3`, **.005**). .004 never fires with the envoy as its only possible target.
+- **Presence gate:** the envoy's lower-right portrait. The critic's right portrait is gated on `exists`.
 - **a** "It will be done." `scope:eotg_critic = { death = { death_reason = death_murder  killer = root } }`. Helper murder. Risk +5.
 - **b** "No." `grievance +1`.
 - **c** "Warn the critic instead." The critic gets reassured. `grievance +2`.
@@ -163,13 +183,36 @@ The envoy is saved as `scope:eotg_patron_envoy` from the story variable in each 
 - **c** "Take more of me instead." Root risk +15.
 - **d [compassionate]** "Not my child." As b; stress: compassionate medium loss.
 - **e [ambitious]** "A strong heir is a strong house." As a; the heir gets admiration instead.
+- **Presence gate (CB-27 follow-up):** the envoy's lower-right portrait. The heir's right portrait is gated on `exists`.
 
-**.006 The Final Demand.** The desc depends on whether it was reached through `grievance` (betrayal tone) or `demand >= 4` (settlement tone).
-- **a** "Sign over the revenues." `eotg_mod_aug_patron_clause` becomes permanent (`monthly_income_mult -0.15`; use the `_final` variant key, see §4). `end_story`.
-- **b** "Buy them out." `{ value = major_gold_value multiply = 2 }`. `end_story`.
-- **c** "Betray them." The envoy dies (`death_murder`, killer root); helper murder. `eotg_mod_aug_patron_throttle` 5 years. Risk +25. **If** tier 3 and no Countdown, start it. `end_story`.
-- **d [deceitful]** "Sell them to a rival syndicate." 50%: clean exit, `add_gold = medium_gold_value`. 50%: as c. `end_story`.
-- **e [brave]** "Come and take it from me." As c, +200 prestige.
+**.006 The Final Demand.** The desc depends on how it was reached, and on whether the envoy is present. `first_valid`, six keys (CB-27 M7, ratified 2026-10-04):
+
+| Reached by | Envoy present | Envoy absent (`eotg_aug_patron_envoy_present = no`) |
+|---|---|---|
+| Write-off (`eotg_flag_aug_patron_writeoff`, balance §5.8) | `desc_writeoff` | `desc_writeoff_absent` |
+| `grievance >= 3` (betrayal tone) | `desc_betrayal` | `desc_betrayal_absent` |
+| `demand >= 4` (settlement tone) | `desc_settlement` | `desc_settlement_absent` |
+
+The `_absent` variants deliver the terms by sealed message or courier, and never put the envoy in the room. The envoy's right portrait is gated on presence.
+
+- **a** "Sign over the revenues." `eotg_mod_aug_patron_clause` becomes permanent (`monthly_income_mult -0.15`; use the `_final` variant key, see §4). Ungated: always available. `end_story`.
+- **b** "Buy them out." `{ value = major_gold_value multiply = 2 }`, scaled by the terms like every bill. `end_story`.
+- **c** "Betray them." `trigger = { eotg_aug_patron_envoy_present = yes }`: the envoy must be at court to be killed in person. `eotg_aug_patron_betray_effect` plus the murder stress helper. `end_story`.
+- **d [deceitful]** "Sell them to a rival syndicate." 50%: clean exit, `add_gold = medium_gold_value`. 50%: `eotg_aug_patron_betray_effect`, with the murder stress helper only if the envoy is present. The lie stress helper applies on both branches. Not presence-gated: selling the syndicate out needs no envoy in the room. `end_story`.
+- **e [brave]** "Come and take it from me." As c (same presence gate), +200 prestige.
+
+**`eotg_aug_patron_betray_effect`** (ratified 2026-10-04; it supersedes the first spec of c, which applied every consequence unconditionally):
+1. **If** `eotg_aug_patron_envoy_present`: the envoy dies (`death_murder`, killer root). The effect never murders someone who is not there. c and e are gated on the same test, so the guard matters only for d's failure branch.
+2. **If** `eotg_is_augmented_any = yes`: `eotg_mod_aug_patron_throttle` for 5 years, risk +25, and `eotg_aug_try_start_countdown_effect` (which starts the Countdown only at tier 3 with none running). The throttle is a firmware restriction (CB-26 M6/W3), so it goes inside the augmented branch, with the risk. An owner who has left the system gets none of the three. This was the rulings §2 follow-up, now built.
+
+**What betrayal costs, by case.** This records the built behavior. The open question is in [new_beats](cybernetics_v2_new_beats.md) §10.
+
+| Owner | Envoy | Betrayal routes | Cost of betraying |
+|---|---|---|---|
+| augmented | present | c, e, d (50%) | murder, throttle, risk +25, maybe the Countdown |
+| augmented | absent | d [deceitful] (50%) only | throttle, risk +25, maybe the Countdown; no murder |
+| no implants | present | c, e, d (50%) | the envoy's murder (helper + vanilla consequences) only |
+| no implants | absent | d [deceitful] only | **lie stress only**: d's failure does nothing else |
 
 **.007 A New Envoy.** It creates the replacement (same template).
 - **a** "Welcome them." —
@@ -250,6 +293,10 @@ All set `phase = 3`.
 | `eotg_mod_aug_iron_retinue` | modifier | `icon = martial_positive`, `knight_effectiveness_mult = 0.1` |
 | `eotg_opinion_aug_passed_over` | opinion | −15, applied `years = 5`; retinue.005.d applies `years = 10` (*CB-26 S17*) |
 | `eotg_aug_patron_envoy_template` | character template | §2.2 |
+| `eotg_aug_patron_envoy_present` | scripted trigger | §2.4 envoy presence (CB-27 M7). Users: patron.002–.006 portraits and options, `eotg_aug_patron_betray_effect` |
+| `eotg_aug_patron_critic_candidate` | scripted trigger, `RULER` param | §2.4 .004; excludes the story's own envoy (CB-27 M8). Users: the tick (both cadences), patron.004 trigger and pick |
+| `eotg_aug_patron_betray_effect` | scripted effect | §2.4 .006 (c, d failure, e) |
+| `eotg_flag_aug_patron_writeoff` | character flag, 60 days | §2.3 entry 2; .006 desc |
 
 On the owner's full removal (`eotg_clean_all_aug_modifiers`), `eotg_mod_aug_iron_retinue` and `eotg_mod_aug_patron_throttle` (a firmware restriction) are removed. **`eotg_mod_aug_patron_clause` and `_clause_final` stay:** the debt is contractual and survives the implants. The clause ends with the story's `on_end`; the final lien is permanent. *CB-26 M6.*
 
@@ -257,13 +304,14 @@ On the owner's full removal (`eotg_clean_all_aug_modifiers`), `eotg_mod_aug_iron
 
 ## 5. Deferred
 - Inherited patron debt (the story passing to the heir).
+- **Betrayal with no hardware or no envoy** (§2.4 .006, cost table): a non-deceitful owner has no betrayal route while the envoy is absent, and an owner with no implants faces little or no reprisal. This is one open question for the human, recorded in [new_beats](cybernetics_v2_new_beats.md) §10. Nothing is specced.
 - A visible story-cycle panel for the Patron / Retinue: it would need art, and the Countdown must stay invisible regardless.
 - Retinue knights as a men-at-arms-like unit.
 
 ## 6. Loc (≈ 140 keys)
 - countdown.001–.006, patron.001–.007, retinue.001–.005 and init.019, at ~6 keys each;
 - countdown **[voice]** variants (3);
-- patron .006 tone variants (2);
+- patron .006 desc variants: betrayal, settlement and write-off, each with an `_absent` form (6 keys; CB-27 M7);
 - .005 no-heir variant;
 - 4 modifiers and 1 opinion × 2 (`_retinue_resentment` was dropped; *CB-26 S18*).
 
@@ -277,3 +325,8 @@ On the owner's full removal (`eotg_clean_all_aug_modifiers`), `eotg_mod_aug_iron
    - Console-set an Overclocked count to risk 55: Minor Anomalies within ~5 months.
    - Accept a patron: Repayment arrives in 2–3 years.
    - Augment one knight through the decision: the retinue story starts at phase 1, and *First of the Iron* follows (*CB-26 M5*).
+6. **Patron tick and envoy (CB-27 M7/M8):**
+   - The two Patron `first_valid` blocks are identical, in the §2.3 order.
+   - `grep -n "scope:eotg_patron_envoy" events/eotg_augmentation_patron.txt`: in .002–.006, every portrait, option effect and opinion on the envoy sits under `eotg_aug_patron_envoy_present` (or inside the betray effect's own guard). The only exception is the `immediate` save.
+   - `eotg_aug_patron_betray_effect` adds the throttle, the risk and the Countdown only inside `eotg_is_augmented_any = yes`.
+   - **Human, in game:** kill the envoy by console after grievance reaches 3. .006 fires with `desc_betrayal_absent`, no right portrait, and no c or e; a non-deceitful owner sees a and b only.

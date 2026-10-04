@@ -676,8 +676,14 @@ eotg_aug_tier3.006 = {
                 is_alive = yes
                 opinion = { target = root  value < -20 }
             }
-            remove_opinion = { target = root  modifier = eotg_opinion_aug_fear }
-            remove_opinion = { target = root  modifier = eotg_opinion_aug_unease }
+            if = {
+                limit = { has_opinion_modifier = { target = root  modifier = eotg_opinion_aug_fear } }
+                remove_opinion = { target = root  modifier = eotg_opinion_aug_fear }
+            }
+            if = {
+                limit = { has_opinion_modifier = { target = root  modifier = eotg_opinion_aug_unease } }
+                remove_opinion = { target = root  modifier = eotg_opinion_aug_unease }
+            }
             add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
         }
         stress_impact = { base = minor_stress_impact_gain }
@@ -1672,6 +1678,8 @@ eotg_aug_tier3.014 = {
     # "Investigate."
     option = {
         name = eotg_aug_tier3.014.b
+        # Tooltip sweep: neutral, like a's (the outcome stays hidden).
+        custom_tooltip = eotg_aug_tier3.014.b.tt
         hidden_effect = {
             random_list = {
                 # Learned the truth
@@ -2005,6 +2013,8 @@ eotg_aug_tier3.016 = {
     # "Lie down. Wait."
     option = {
         name = eotg_aug_tier3.016.a
+        # Tooltip sweep: the option otherwise renders an empty tooltip.
+        custom_tooltip = eotg_aug_tier3.016.a.tt
         trigger_event = { id = eotg_aug_tier3.022  days = { 7 14 } }
         ai_chance = {
             base = 40
@@ -2946,7 +2956,8 @@ eotg_aug_tier3.020 = {
 #   early cascade 20 (+20 at eotg_neurofracture_threshold_met; x0.5 purged):
 #     eotg_trigger_neurofracture (which fires eotg_fracture.0001);
 #   scarring 45: scarred, eotg_mod_aug_overheated 3 years;
-#   insight 35 (+15 ridden): lesson learning + lesson intrigue, voice 2.
+#   insight 35 (+15 ridden): lesson learning + lesson intrigue, voice 1
+#     (CB-26 S10/W6: a first notice, so First Contact keeps its scene).
 # Caller: eotg_aug_tier3.016 (every option), 7-14 days later.
 
 eotg_aug_tier3.022 = {
@@ -3032,7 +3043,7 @@ eotg_aug_tier3.022 = {
         else = {
             add_character_modifier = { modifier = eotg_mod_aug_lesson_learning  years = 5 }
             add_character_modifier = { modifier = eotg_mod_aug_lesson_intrigue  years = 5 }
-            eotg_aug_voice_advance_effect = { STAGE = 2 }
+            eotg_aug_voice_advance_effect = { STAGE = 1 }
         }
     }
 

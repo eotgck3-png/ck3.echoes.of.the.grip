@@ -51,11 +51,18 @@ eotg_is_aug_tier3 = {
 # Eligible for initial augmentation
 # eotg_flag_suppress_progression also blocks initiation: eotg_aug_init.005 (b, c)
 # set it as "resist / delay", which in v1 had no effect on an unaugmented ruler.
+# The flag test is wrapped so eotg_decision_seek_augmentation's is_valid
+# tooltip names the reason instead of the raw flag (vanilla
+# common/decisions/10_culture_conversion_decisions.txt:25-27,
+# custom_description around NOT = { has_character_flag }).
 eotg_can_receive_augmented = {
     is_adult = yes
     is_alive = yes
     NOT = { eotg_is_augmented_any = yes }
-    NOT = { has_character_flag = eotg_flag_suppress_progression }
+    custom_description = {
+        text = eotg_can_receive_augmented_suppressed_tt
+        NOT = { has_character_flag = eotg_flag_suppress_progression }
+    }
     exists = capital_county
     capital_county = {
         development_level >= 10
@@ -241,9 +248,14 @@ eotg_aug_has_heir_arc = {
 # the Heir's Arc promise (eotg_flag_aug_promised_treatment). Mirrors
 # eotg_aug_excision_pay_effect. Users: eotg_decision_aug_excision (is_valid),
 # eotg_aug_end.001 (a, c, d).
+# The free-excision flag is wrapped for the decision tooltip (as
+# eotg_can_receive_augmented).
 eotg_aug_can_afford_excision = {
     OR = {
-        has_character_flag = eotg_flag_aug_excision_free
+        custom_description = {
+            text = eotg_aug_can_afford_excision_free_tt
+            has_character_flag = eotg_flag_aug_excision_free
+        }
         gold >= {
             value = major_gold_value
             if = {
@@ -315,6 +327,37 @@ eotg_aug_patron_critic_candidate = {
     NOT = { has_trait = eotg_neurofractured }
     NOT = { is_close_family_of = $RULER$ }
     NOT = { is_spouse_of = $RULER$ }
+    # CB-27 M8: never the Patron story's own envoy (story var eotg_envoy),
+    # who is a courtier like any other. Compared against a temporary scope so
+    # every caller (the tick, patron.004's trigger and its pick) gets it with
+    # no new parameter. Vanilla shape: events/court_events/
+    # 01_ep3_court_events.txt:557-570 (save_temporary_scope_as in a limit,
+    # then `var:hostage_target ?= scope:hostage_temp` in any_owned_story).
+    save_temporary_scope_as = eotg_critic_check
+    NOT = {
+        $RULER$ = {
+            any_owned_story = {
+                story_type = eotg_story_aug_patron
+                var:eotg_envoy ?= scope:eotg_critic_check
+            }
+        }
+    }
+}
+
+# The Patron envoy is alive and still at the owner's court, so the Final
+# Demand (eotg_aug_patron.006) can show them, say they came, and let the
+# owner kill them in person. Evaluated in the event's root (the story owner)
+# after patron.006's immediate has saved scope:eotg_patron_envoy.
+# CB-27 M7. Vanilla precedent: events/story_cycles/peasant_affair/
+# story_cycle_peasant_affair_events.txt:1173-1178 (an option that acts on a
+# story character requires them alive and at root's court).
+# Users: eotg_aug_patron.006 (right portrait, desc, options c and e),
+# eotg_aug_patron_betray_effect (the kill).
+eotg_aug_patron_envoy_present = {
+    scope:eotg_patron_envoy ?= {
+        is_alive = yes
+        is_courtier_of = root
+    }
 }
 
 # The Family Clause's heir (eotg_aug_patron.005): 12+, unaugmented.

@@ -8,22 +8,26 @@
 # synergy refresh lives inside the one effect allowed to change XP.
 
 # Remove all 15 tier synergy modifiers.
+# CB-27 follow-up (tooltip): every removal is guarded on the modifier being
+# held, so an option tooltip lists only what the character actually loses.
+# Vanilla pattern: common/scripted_effects/00_prison_effects.txt:2572-2575
+# (if has_character_modifier -> remove_character_modifier).
 eotg_aug_clear_synergy_effect = {
-    remove_character_modifier = eotg_mod_aug_martial_bonus
-    remove_character_modifier = eotg_mod_aug_steward_bonus
-    remove_character_modifier = eotg_mod_aug_intrigue_bonus
-    remove_character_modifier = eotg_mod_aug_learning_bonus
-    remove_character_modifier = eotg_mod_aug_diplomacy_bonus
-    remove_character_modifier = eotg_mod_enh_martial_bonus
-    remove_character_modifier = eotg_mod_enh_steward_bonus
-    remove_character_modifier = eotg_mod_enh_intrigue_bonus
-    remove_character_modifier = eotg_mod_enh_learning_bonus
-    remove_character_modifier = eotg_mod_enh_diplomacy_bonus
-    remove_character_modifier = eotg_mod_oc_martial_bonus
-    remove_character_modifier = eotg_mod_oc_steward_bonus
-    remove_character_modifier = eotg_mod_oc_intrigue_bonus
-    remove_character_modifier = eotg_mod_oc_learning_bonus
-    remove_character_modifier = eotg_mod_oc_diplomacy_bonus
+    if = { limit = { has_character_modifier = eotg_mod_aug_martial_bonus }  remove_character_modifier = eotg_mod_aug_martial_bonus }
+    if = { limit = { has_character_modifier = eotg_mod_aug_steward_bonus }  remove_character_modifier = eotg_mod_aug_steward_bonus }
+    if = { limit = { has_character_modifier = eotg_mod_aug_intrigue_bonus }  remove_character_modifier = eotg_mod_aug_intrigue_bonus }
+    if = { limit = { has_character_modifier = eotg_mod_aug_learning_bonus }  remove_character_modifier = eotg_mod_aug_learning_bonus }
+    if = { limit = { has_character_modifier = eotg_mod_aug_diplomacy_bonus }  remove_character_modifier = eotg_mod_aug_diplomacy_bonus }
+    if = { limit = { has_character_modifier = eotg_mod_enh_martial_bonus }  remove_character_modifier = eotg_mod_enh_martial_bonus }
+    if = { limit = { has_character_modifier = eotg_mod_enh_steward_bonus }  remove_character_modifier = eotg_mod_enh_steward_bonus }
+    if = { limit = { has_character_modifier = eotg_mod_enh_intrigue_bonus }  remove_character_modifier = eotg_mod_enh_intrigue_bonus }
+    if = { limit = { has_character_modifier = eotg_mod_enh_learning_bonus }  remove_character_modifier = eotg_mod_enh_learning_bonus }
+    if = { limit = { has_character_modifier = eotg_mod_enh_diplomacy_bonus }  remove_character_modifier = eotg_mod_enh_diplomacy_bonus }
+    if = { limit = { has_character_modifier = eotg_mod_oc_martial_bonus }  remove_character_modifier = eotg_mod_oc_martial_bonus }
+    if = { limit = { has_character_modifier = eotg_mod_oc_steward_bonus }  remove_character_modifier = eotg_mod_oc_steward_bonus }
+    if = { limit = { has_character_modifier = eotg_mod_oc_intrigue_bonus }  remove_character_modifier = eotg_mod_oc_intrigue_bonus }
+    if = { limit = { has_character_modifier = eotg_mod_oc_learning_bonus }  remove_character_modifier = eotg_mod_oc_learning_bonus }
+    if = { limit = { has_character_modifier = eotg_mod_oc_diplomacy_bonus }  remove_character_modifier = eotg_mod_oc_diplomacy_bonus }
 }
 
 # Clear, then apply the current tier's synergy by highest_skill (martial fallback).
@@ -186,59 +190,66 @@ eotg_apply_neurofracture_distortion = {
 }
 
 # Remove all augmentation modifiers — call on death or full removal
+# CB-27 follow-up (tooltip): every removal is guarded on the modifier being
+# held, so an option tooltip lists only what the character actually loses.
+# Vanilla pattern: common/scripted_effects/00_prison_effects.txt:2572-2575
+# (if has_character_modifier -> remove_character_modifier).
 eotg_clean_all_aug_modifiers = {
-    remove_character_modifier = eotg_mod_aug_martial_bonus
-    remove_character_modifier = eotg_mod_aug_steward_bonus
-    remove_character_modifier = eotg_mod_aug_intrigue_bonus
-    remove_character_modifier = eotg_mod_aug_learning_bonus
-    remove_character_modifier = eotg_mod_aug_diplomacy_bonus
-    remove_character_modifier = eotg_mod_enh_martial_bonus
-    remove_character_modifier = eotg_mod_enh_steward_bonus
-    remove_character_modifier = eotg_mod_enh_intrigue_bonus
-    remove_character_modifier = eotg_mod_enh_learning_bonus
-    remove_character_modifier = eotg_mod_enh_diplomacy_bonus
-    remove_character_modifier = eotg_mod_oc_martial_bonus
-    remove_character_modifier = eotg_mod_oc_steward_bonus
-    remove_character_modifier = eotg_mod_oc_intrigue_bonus
-    remove_character_modifier = eotg_mod_oc_learning_bonus
-    remove_character_modifier = eotg_mod_oc_diplomacy_bonus
-    remove_character_modifier = eotg_mod_nf_martial_distortion
-    remove_character_modifier = eotg_mod_nf_steward_distortion
-    remove_character_modifier = eotg_mod_nf_intrigue_distortion
-    remove_character_modifier = eotg_mod_nf_learning_distortion
-    remove_character_modifier = eotg_mod_nf_diplomacy_distortion
-    remove_character_modifier = eotg_mod_implant_calibrated
-    remove_character_modifier = eotg_mod_illegal_implants
-    remove_character_modifier = eotg_mod_withdrawn_from_court
-    remove_character_modifier = eotg_mod_oc_regression_recovery
-    remove_character_modifier = eotg_mod_aug_affect_dampened
-    remove_character_modifier = eotg_mod_aug_running_hot
+    if = { limit = { has_character_modifier = eotg_mod_aug_martial_bonus }  remove_character_modifier = eotg_mod_aug_martial_bonus }
+    if = { limit = { has_character_modifier = eotg_mod_aug_steward_bonus }  remove_character_modifier = eotg_mod_aug_steward_bonus }
+    if = { limit = { has_character_modifier = eotg_mod_aug_intrigue_bonus }  remove_character_modifier = eotg_mod_aug_intrigue_bonus }
+    if = { limit = { has_character_modifier = eotg_mod_aug_learning_bonus }  remove_character_modifier = eotg_mod_aug_learning_bonus }
+    if = { limit = { has_character_modifier = eotg_mod_aug_diplomacy_bonus }  remove_character_modifier = eotg_mod_aug_diplomacy_bonus }
+    if = { limit = { has_character_modifier = eotg_mod_enh_martial_bonus }  remove_character_modifier = eotg_mod_enh_martial_bonus }
+    if = { limit = { has_character_modifier = eotg_mod_enh_steward_bonus }  remove_character_modifier = eotg_mod_enh_steward_bonus }
+    if = { limit = { has_character_modifier = eotg_mod_enh_intrigue_bonus }  remove_character_modifier = eotg_mod_enh_intrigue_bonus }
+    if = { limit = { has_character_modifier = eotg_mod_enh_learning_bonus }  remove_character_modifier = eotg_mod_enh_learning_bonus }
+    if = { limit = { has_character_modifier = eotg_mod_enh_diplomacy_bonus }  remove_character_modifier = eotg_mod_enh_diplomacy_bonus }
+    if = { limit = { has_character_modifier = eotg_mod_oc_martial_bonus }  remove_character_modifier = eotg_mod_oc_martial_bonus }
+    if = { limit = { has_character_modifier = eotg_mod_oc_steward_bonus }  remove_character_modifier = eotg_mod_oc_steward_bonus }
+    if = { limit = { has_character_modifier = eotg_mod_oc_intrigue_bonus }  remove_character_modifier = eotg_mod_oc_intrigue_bonus }
+    if = { limit = { has_character_modifier = eotg_mod_oc_learning_bonus }  remove_character_modifier = eotg_mod_oc_learning_bonus }
+    if = { limit = { has_character_modifier = eotg_mod_oc_diplomacy_bonus }  remove_character_modifier = eotg_mod_oc_diplomacy_bonus }
+    if = { limit = { has_character_modifier = eotg_mod_nf_martial_distortion }  remove_character_modifier = eotg_mod_nf_martial_distortion }
+    if = { limit = { has_character_modifier = eotg_mod_nf_steward_distortion }  remove_character_modifier = eotg_mod_nf_steward_distortion }
+    if = { limit = { has_character_modifier = eotg_mod_nf_intrigue_distortion }  remove_character_modifier = eotg_mod_nf_intrigue_distortion }
+    if = { limit = { has_character_modifier = eotg_mod_nf_learning_distortion }  remove_character_modifier = eotg_mod_nf_learning_distortion }
+    if = { limit = { has_character_modifier = eotg_mod_nf_diplomacy_distortion }  remove_character_modifier = eotg_mod_nf_diplomacy_distortion }
+    if = { limit = { has_character_modifier = eotg_mod_implant_calibrated }  remove_character_modifier = eotg_mod_implant_calibrated }
+    if = { limit = { has_character_modifier = eotg_mod_illegal_implants }  remove_character_modifier = eotg_mod_illegal_implants }
+    if = { limit = { has_character_modifier = eotg_mod_withdrawn_from_court }  remove_character_modifier = eotg_mod_withdrawn_from_court }
+    if = { limit = { has_character_modifier = eotg_mod_oc_regression_recovery }  remove_character_modifier = eotg_mod_oc_regression_recovery }
+    if = { limit = { has_character_modifier = eotg_mod_aug_affect_dampened }  remove_character_modifier = eotg_mod_aug_affect_dampened }
+    if = { limit = { has_character_modifier = eotg_mod_aug_running_hot }  remove_character_modifier = eotg_mod_aug_running_hot }
     # Lesson modifiers (cybernetics_v2 B6)
-    remove_character_modifier = eotg_mod_aug_lesson_prowess
-    remove_character_modifier = eotg_mod_aug_lesson_learning
-    remove_character_modifier = eotg_mod_aug_lesson_intrigue
-    remove_character_modifier = eotg_mod_aug_lesson_martial
+    if = { limit = { has_character_modifier = eotg_mod_aug_lesson_prowess }  remove_character_modifier = eotg_mod_aug_lesson_prowess }
+    if = { limit = { has_character_modifier = eotg_mod_aug_lesson_learning }  remove_character_modifier = eotg_mod_aug_lesson_learning }
+    if = { limit = { has_character_modifier = eotg_mod_aug_lesson_intrigue }  remove_character_modifier = eotg_mod_aug_lesson_intrigue }
+    if = { limit = { has_character_modifier = eotg_mod_aug_lesson_martial }  remove_character_modifier = eotg_mod_aug_lesson_martial }
     # Phase 2 states (cybernetics_v2_phase2.md §4)
-    remove_character_modifier = eotg_mod_aug_removal_withdrawal
-    remove_character_modifier = eotg_mod_aug_infection
-    remove_character_modifier = eotg_mod_aug_clean_install
-    remove_character_modifier = eotg_mod_aug_bridge_strain
+    if = { limit = { has_character_modifier = eotg_mod_aug_removal_withdrawal }  remove_character_modifier = eotg_mod_aug_removal_withdrawal }
+    if = { limit = { has_character_modifier = eotg_mod_aug_infection }  remove_character_modifier = eotg_mod_aug_infection }
+    if = { limit = { has_character_modifier = eotg_mod_aug_clean_install }  remove_character_modifier = eotg_mod_aug_clean_install }
+    if = { limit = { has_character_modifier = eotg_mod_aug_bridge_strain }  remove_character_modifier = eotg_mod_aug_bridge_strain }
     # Phase 3b states (cybernetics_v2_phase3.md §5)
-    remove_character_modifier = eotg_mod_aug_restrained
-    remove_character_modifier = eotg_mod_aug_sedated
-    remove_character_modifier = eotg_mod_aug_excision_recovery
+    if = { limit = { has_character_modifier = eotg_mod_aug_restrained }  remove_character_modifier = eotg_mod_aug_restrained }
+    if = { limit = { has_character_modifier = eotg_mod_aug_sedated }  remove_character_modifier = eotg_mod_aug_sedated }
+    if = { limit = { has_character_modifier = eotg_mod_aug_excision_recovery }  remove_character_modifier = eotg_mod_aug_excision_recovery }
     # Phase 4 states (cybernetics_v2_phase4.md §7)
-    remove_character_modifier = eotg_mod_aug_dulled_senses
-    remove_character_modifier = eotg_mod_aug_bold_firmware
-    remove_character_modifier = eotg_mod_aug_optimised_levies
-    remove_character_modifier = eotg_mod_aug_tampered
-    remove_character_modifier = eotg_mod_aug_overheated
-    remove_character_modifier = eotg_mod_aug_clarity_campaign
+    if = { limit = { has_character_modifier = eotg_mod_aug_dulled_senses }  remove_character_modifier = eotg_mod_aug_dulled_senses }
+    if = { limit = { has_character_modifier = eotg_mod_aug_bold_firmware }  remove_character_modifier = eotg_mod_aug_bold_firmware }
+    if = { limit = { has_character_modifier = eotg_mod_aug_optimised_levies }  remove_character_modifier = eotg_mod_aug_optimised_levies }
+    if = { limit = { has_character_modifier = eotg_mod_aug_optimised_levies_trimmed }  remove_character_modifier = eotg_mod_aug_optimised_levies_trimmed }    # CB-26 W1
+    if = { limit = { has_character_modifier = eotg_mod_aug_tampered }  remove_character_modifier = eotg_mod_aug_tampered }
+    if = { limit = { has_character_modifier = eotg_mod_aug_overheated }  remove_character_modifier = eotg_mod_aug_overheated }
+    if = { limit = { has_character_modifier = eotg_mod_aug_clarity_campaign }  remove_character_modifier = eotg_mod_aug_clarity_campaign }
     # Phase 5 states (cybernetics_v2_phase5.md §4). The Patron's clause
-    # modifiers are NOT removed here (final QA): removing the implants does
-    # not escape the debt. eotg_mod_aug_patron_clause ends with the story's
-    # on_end; _clause_final is permanent; _throttle runs out (5 years).
-    remove_character_modifier = eotg_mod_aug_iron_retinue
+    # modifiers stay (final QA; CB-26 M6): the debt is contractual and
+    # survives the implants. eotg_mod_aug_patron_clause ends with the story's
+    # on_end; _clause_final is permanent. The throttle is a restriction in the
+    # firmware, so it goes with the firmware (CB-26 W3).
+    if = { limit = { has_character_modifier = eotg_mod_aug_patron_throttle }  remove_character_modifier = eotg_mod_aug_patron_throttle }
+    if = { limit = { has_character_modifier = eotg_mod_aug_iron_retinue }  remove_character_modifier = eotg_mod_aug_iron_retinue }
 }
 
 # Increment fracture risk variable — expects $AMOUNT$ parameter.
@@ -267,7 +278,7 @@ eotg_add_fracture_risk = {
 
 # Trigger the Neural Cascade (fracture transformation)
 eotg_trigger_neurofracture = {
-    remove_trait = eotg_cybernetics    # discards the track XP
+    if = { limit = { has_trait = eotg_cybernetics }  remove_trait = eotg_cybernetics }    # discards the track XP
     add_trait = eotg_neurofractured
     eotg_apply_neurofracture_distortion = yes
     set_variable = { name = eotg_fracture_risk  value = 0 }
@@ -786,8 +797,8 @@ eotg_aug_scramble_personality_effect = {
 }
 
 # Forget the closest person: the first held of soulmate > best friend > lover
-# > friend. Saves them as scope:eotg_forgotten (callers name them in loc,
-# guarded on exists) and gives them unease for 5 years.
+# > friend. Saves them as scope:eotg_forgotten, gives them unease for 5
+# years, and names them in a toast (eotg_aug_forget_relation_toast).
 # Callers: eotg_fracture.018 (a, at 25%).
 eotg_aug_forget_relation_effect = {
     if = {
@@ -826,6 +837,15 @@ eotg_aug_forget_relation_effect = {
         limit = { exists = scope:eotg_forgotten }
         scope:eotg_forgotten = {
             add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+        }
+        # CB-26 W4: the forgetting is a roll on the click, so no tooltip can
+        # name them in advance; report it after the fact. Hidden-outcome
+        # toast as eotg_aug_tier3.014.b (vanilla hunt.8540).
+        hidden_effect = {
+            send_interface_toast = {
+                title = eotg_aug_forget_relation_toast
+                left_icon = scope:eotg_forgotten
+            }
         }
     }
 }
@@ -950,53 +970,54 @@ eotg_aug_excision_effect = {
 }
 
 # Total Integration (Q9): "Seamless" replaces eotg_neurofractured. Personality
-# goes (the 36 personality traits, including eccentric; remove_trait on a trait
-# not held does nothing), the close relations go, the vassals recoil, the
+# goes (the 36 personality traits, including eccentric; each removal is
+# guarded on has_trait so the tooltip lists only what is held, CB-27
+# follow-up), the close relations go, the vassals recoil, the
 # Heir's Arc jumps to the Choice (the heir must decide about the machine), and
 # the voice is retired at 5 (no seam, no second voice). Relation removal shape:
 # vanilla events/health_events.txt:6568 (every_relation, remove_relation_X =
 # prev). Fires eotg_aug_end.010.
 # Callers: eotg_fracture.027 (total integration outcome), eotg_aug_end.009 (a, c).
 eotg_aug_total_integration_effect = {
-    remove_trait = eotg_neurofractured
+    if = { limit = { has_trait = eotg_neurofractured }  remove_trait = eotg_neurofractured }
     add_trait = eotg_total_integration
     # The self goes
-    remove_trait = brave
-    remove_trait = craven
-    remove_trait = calm
-    remove_trait = wrathful
-    remove_trait = chaste
-    remove_trait = lustful
-    remove_trait = content
-    remove_trait = ambitious
-    remove_trait = diligent
-    remove_trait = lazy
-    remove_trait = fickle
-    remove_trait = stubborn
-    remove_trait = forgiving
-    remove_trait = vengeful
-    remove_trait = generous
-    remove_trait = greedy
-    remove_trait = gregarious
-    remove_trait = shy
-    remove_trait = honest
-    remove_trait = deceitful
-    remove_trait = humble
-    remove_trait = arrogant
-    remove_trait = just
-    remove_trait = arbitrary
-    remove_trait = patient
-    remove_trait = impatient
-    remove_trait = temperate
-    remove_trait = gluttonous
-    remove_trait = trusting
-    remove_trait = paranoid
-    remove_trait = zealous
-    remove_trait = cynical
-    remove_trait = compassionate
-    remove_trait = callous
-    remove_trait = sadistic
-    remove_trait = eccentric
+    if = { limit = { has_trait = brave }  remove_trait = brave }
+    if = { limit = { has_trait = craven }  remove_trait = craven }
+    if = { limit = { has_trait = calm }  remove_trait = calm }
+    if = { limit = { has_trait = wrathful }  remove_trait = wrathful }
+    if = { limit = { has_trait = chaste }  remove_trait = chaste }
+    if = { limit = { has_trait = lustful }  remove_trait = lustful }
+    if = { limit = { has_trait = content }  remove_trait = content }
+    if = { limit = { has_trait = ambitious }  remove_trait = ambitious }
+    if = { limit = { has_trait = diligent }  remove_trait = diligent }
+    if = { limit = { has_trait = lazy }  remove_trait = lazy }
+    if = { limit = { has_trait = fickle }  remove_trait = fickle }
+    if = { limit = { has_trait = stubborn }  remove_trait = stubborn }
+    if = { limit = { has_trait = forgiving }  remove_trait = forgiving }
+    if = { limit = { has_trait = vengeful }  remove_trait = vengeful }
+    if = { limit = { has_trait = generous }  remove_trait = generous }
+    if = { limit = { has_trait = greedy }  remove_trait = greedy }
+    if = { limit = { has_trait = gregarious }  remove_trait = gregarious }
+    if = { limit = { has_trait = shy }  remove_trait = shy }
+    if = { limit = { has_trait = honest }  remove_trait = honest }
+    if = { limit = { has_trait = deceitful }  remove_trait = deceitful }
+    if = { limit = { has_trait = humble }  remove_trait = humble }
+    if = { limit = { has_trait = arrogant }  remove_trait = arrogant }
+    if = { limit = { has_trait = just }  remove_trait = just }
+    if = { limit = { has_trait = arbitrary }  remove_trait = arbitrary }
+    if = { limit = { has_trait = patient }  remove_trait = patient }
+    if = { limit = { has_trait = impatient }  remove_trait = impatient }
+    if = { limit = { has_trait = temperate }  remove_trait = temperate }
+    if = { limit = { has_trait = gluttonous }  remove_trait = gluttonous }
+    if = { limit = { has_trait = trusting }  remove_trait = trusting }
+    if = { limit = { has_trait = paranoid }  remove_trait = paranoid }
+    if = { limit = { has_trait = zealous }  remove_trait = zealous }
+    if = { limit = { has_trait = cynical }  remove_trait = cynical }
+    if = { limit = { has_trait = compassionate }  remove_trait = compassionate }
+    if = { limit = { has_trait = callous }  remove_trait = callous }
+    if = { limit = { has_trait = sadistic }  remove_trait = sadistic }
+    if = { limit = { has_trait = eccentric }  remove_trait = eccentric }
     # QA round 2: the Iron Retinue's owner bonus belongs to the Program, not
     # to the owner's own implants, so it survives the clean-up while held.
     if = {
@@ -1296,21 +1317,26 @@ eotg_aug_patron_grievance_effect = {
 # Betray the syndicate: the envoy dies, the firmware is throttled, risk +25,
 # and an Overclocked owner's Countdown starts (phase5 §2.4 .006 c).
 # Callers: eotg_aug_patron.006 (c, d at 50%, e).
+# CB-27 M7: the envoy dies only if alive and still at court
+# (eotg_aug_patron_envoy_present); c and e are gated on the same trigger, and
+# d's failure branch against an absent envoy keeps the retaliation without a
+# remote murder.
 eotg_aug_patron_betray_effect = {
-    scope:eotg_patron_envoy ?= {
-        if = {
-            limit = { is_alive = yes }
+    if = {
+        limit = { eotg_aug_patron_envoy_present = yes }
+        scope:eotg_patron_envoy = {
             death = {
                 death_reason = death_murder
                 killer = root
             }
         }
     }
-    add_character_modifier = { modifier = eotg_mod_aug_patron_throttle  years = 5 }
     # An owner who has left the system keeps the debt but has no hardware
-    # for the syndicate to punish (final QA).
+    # for the syndicate to punish (final QA), so no throttle either (CB-26
+    # follow-up to CB-27 M7: the throttle is firmware, as W3).
     if = {
         limit = { eotg_is_augmented_any = yes }
+        add_character_modifier = { modifier = eotg_mod_aug_patron_throttle  years = 5 }
         eotg_add_fracture_risk = { AMOUNT = 25 }
         eotg_aug_try_start_countdown_effect = yes
     }
@@ -1373,7 +1399,7 @@ eotg_aug_retinue_reverse_effect = {
             }
         }
     }
-    remove_character_modifier = eotg_mod_aug_iron_retinue
+    if = { limit = { has_character_modifier = eotg_mod_aug_iron_retinue }  remove_character_modifier = eotg_mod_aug_iron_retinue }
 }
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -1386,7 +1412,7 @@ eotg_aug_retinue_reverse_effect = {
 # (eotg_aug_nr.006, outside the liege cooldown).
 # Caller: eotg_on_yearly_aug_nonruler_check (step 3, risk >= 80).
 eotg_aug_nr_cascade_effect = {
-    remove_trait = eotg_cybernetics    # discards the track XP
+    if = { limit = { has_trait = eotg_cybernetics }  remove_trait = eotg_cybernetics }    # discards the track XP
     add_trait = eotg_neurofractured
     eotg_apply_neurofracture_distortion = yes
     set_variable = { name = eotg_fracture_risk  value = 0 }
@@ -1434,6 +1460,9 @@ eotg_aug_f006_crush_effect = {
 }
 
 # "Offer concessions." Caller: .006.b (tooltip and honoured path).
+# Opinion removals guarded on has_opinion_modifier so the tooltip lists only
+# what a vassal holds (vanilla events/councillor_task_events/
+# marshal_task_events.txt:937-947).
 eotg_aug_f006_concessions_effect = {
     add_prestige = -200
     every_vassal = {
@@ -1441,8 +1470,14 @@ eotg_aug_f006_concessions_effect = {
             is_alive = yes
             opinion = { target = root  value < -30 }
         }
-        remove_opinion = { target = root  modifier = eotg_opinion_aug_fear }
-        remove_opinion = { target = root  modifier = eotg_opinion_aug_unease }
+        if = {
+            limit = { has_opinion_modifier = { target = root  modifier = eotg_opinion_aug_fear } }
+            remove_opinion = { target = root  modifier = eotg_opinion_aug_fear }
+        }
+        if = {
+            limit = { has_opinion_modifier = { target = root  modifier = eotg_opinion_aug_unease } }
+            remove_opinion = { target = root  modifier = eotg_opinion_aug_unease }
+        }
         add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
     }
     every_targeting_faction = {

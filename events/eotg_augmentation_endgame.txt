@@ -115,6 +115,12 @@ eotg_aug_end.001 = {
     # "Not today." The free table does not wait.
     option = {
         name = eotg_aug_end.001.b
+        # Tooltip sweep: the hidden consequence (a free excision is lost)
+        # is named only when there is one.
+        if = {
+            limit = { has_character_flag = eotg_flag_aug_excision_free }
+            custom_tooltip = eotg_aug_end.001.b.tt
+        }
         hidden_effect = {
             remove_character_flag = eotg_flag_aug_excision_free
         }
@@ -615,6 +621,8 @@ eotg_aug_end.020 = {
     option = {
         name = eotg_aug_end.020.d
         trigger = { exists = primary_heir }
+        # Tooltip sweep: the option otherwise renders an empty tooltip.
+        custom_tooltip = eotg_aug_end.020.d.tt
         trigger_event = { id = eotg_aug_end.030  days = { 1 3 } }
         ai_chance = {
             base = 10

@@ -184,6 +184,8 @@ Universal options do not dominate one another: a is calm and cheap, b buys fear 
 
 ### 5.2 Beat B: the paper (`eotg_story_aug_patron`)
 
+**Depends on (ratified 2026-10-04):** the tick order in phase5 §2.3, the presence gate `eotg_aug_patron_envoy_present` and the betrayal cost table in phase5 §2.4 (.006), and the throttle inside the augmented branch of `eotg_aug_patron_betray_effect` (rulings §4).
+
 **Where it fires.** A new `triggered_effect` in the Patron tick, in **both** cadences (`years = { 2 3 }` and the read-terms `years = { 3 4 }`). The two copies stay identical, per the file's own rule. Order inside `first_valid`:
 1. landless → end (unchanged);
 2. Neurofractured write-off (unchanged; an owner with no implants is never Neurofractured);
@@ -251,7 +253,7 @@ triggered_effect = {
 - e is a just ruler's due process. It is a gamble on prestige, consistent with the trait-option rule.
 - c is the only way back into the system from this event. It re-enters at tier 1 with risk 15 and the settling flag from `eotg_aug_initiate_effect`, which is a real cost for someone who chose to leave.
 
-**Known consequence (deferred, §10).** If d leads to .006 and the owner betrays the syndicate there, the owner has no hardware to punish. Once the W3 follow-up is in (throttle inside the augmented branch of `eotg_aug_patron_betray_effect`), the only cost is the envoy's murder (the murder stress helper, plus vanilla murder consequences). This spec does not touch the betray effect.
+**Known consequence (deferred, §10).** If d leads to .006 and the owner betrays the syndicate there, the owner has no hardware to punish. The W3 follow-up is now in (throttle inside the augmented branch of `eotg_aug_patron_betray_effect`; rulings §4), so the only cost is the envoy's murder (the murder stress helper, plus vanilla murder consequences). If the envoy has also died or left court by the time .006 fires, only d [deceitful] is left as a betrayal route, and its failure costs nothing but lie stress (phase5 §2.4 cost table). This spec does not touch the betray effect.
 
 ---
 
@@ -343,12 +345,15 @@ No deviation from vanilla shape.
 
 - **A third round.** The arc ends after round 2. Two climaxes per ruler is the cap. M11's reason (no loop) still holds past two.
 - **Syndicate retaliation against an owner with no hardware** (after .008 d → .006 betrayal). Today the only cost is the envoy's murder. A real reprisal (a vanilla hostile scheme by a created agent, or a claim on revenues) is new scope. It would also change `eotg_aug_patron_betray_effect`, which this spec was asked not to touch beyond need. For the human.
+  - **Same open question, two more cases (from CB-27 M7, recorded 2026-10-04; not designed).** Both come from .006 firing before .007 (phase5 §2.3) with the envoy dead or gone, and both are in phase5 §2.4's cost table.
+    - **Envoy absent: no betrayal route for a non-deceitful owner.** c and e need the envoy present, and d is deceitful-only. Such an owner can only sign (a) or buy out (b). This holds whether or not the owner has implants.
+    - **No implants, envoy absent, d fails: lie stress only.** The betray effect neither kills (no envoy) nor punishes (no hardware), and the murder stress is gated on presence. In practice d is a free exit for a deceitful owner who has left the system.
+  - One answer settles all three. Whatever reprisal the syndicate takes when it cannot reach the hardware, or when its envoy is not there, is the human's call. Until then the script stays as built.
 - **Inherited patron debt** (phase 5 §5), unchanged. The paper still dies with the owner.
 - **A paper beat for a Neurofractured owner.** The write-off already covers it (balance §5.8).
 - **Dependencies, not deferrals:**
-  - **W3** (the throttle removed in `eotg_clean_all_aug_modifiers`) is **not yet in the working tree**. The clean-up comment still says "_throttle runs out (5 years)".
-  - patron.008 does not depend on it, and its loc must not mention the throttle.
-  - The rulings §2 follow-up (throttle into the augmented branch of the betray effect) lands after CB-27 M7, as already planned.
+  - **W3** (the throttle removed in `eotg_clean_all_aug_modifiers`) and the rulings §2 follow-up (throttle into the augmented branch of the betray effect) are **both in the working tree** as of 2026-10-04: uncommitted, QA-passed for script, ratified in rulings §4.
+  - patron.008 does not depend on them, and its loc must not mention the throttle.
 
 ---
 

@@ -7,6 +7,7 @@
 
 **Not ruled here:**
 - **M7 and M8.** The Cybernetics session is fixing these in script under CB-27. This file gives no instruction that touches patron.004, patron.006, `eotg_aug_patron_critic_candidate` or `eotg_aug_patron_betray_effect`. The architect's half of M7 (ratifying the Patron tick order in phase 5 §2.3) waits for that fix to land.
+  > **2026-10-04: landed and ratified, §4.** CB-27 M7/M8 and the throttle follow-up are in the working tree (QA-passed for script). The "do not touch" notes in this file applied while the CB-27 fix was in progress. They no longer apply.
 - **L2, L5, L13.** These belong to the scripter and need no spec ruling. **L3** is moot (§6 of the report).
 
 **Verdicts:**
@@ -112,14 +113,14 @@ All are small. None touches patron.004, patron.006, the critic trigger or the be
 | **W1** | scripter | M1 | (1) `common/modifiers/eotg_augmentation_modifiers.txt`, next to `eotg_mod_aug_optimised_levies`: add `eotg_mod_aug_optimised_levies_trimmed = { icon = stewardship_positive  domain_tax_mult = 0.05 }`, with no `vassal_opinion`. (2) In `eotg_aug_tier2.011` option c, change the success branch's `add_character_modifier` to the trimmed key (still `years = 3`). Keep the steward gate and the weight. (3) Add `remove_character_modifier = eotg_mod_aug_optimised_levies_trimmed` to `eotg_clean_all_aug_modifiers`, under the Phase 4 block. |
 | **W1-loc** | localizer | M1 | Add `eotg_mod_aug_optimised_levies_trimmed` (name, e.g. "Trimmed Levy Plan") and `eotg_mod_aug_optimised_levies_trimmed_desc`. The desc says the steward cut the parts the vassals would have felt; it does not quantify. `eotg_aug_tier2.011.c.success` is unchanged. US spelling. |
 | **W2** | scripter | M4 | `eotg_aug_init.006` option e: replace both the `gold >=` trigger value and the `remove_short_term_gold` value with plain `medium_gold_value` (drop the physician `if`/`multiply = 0.75`). Fix the comment: "As a, plus a lesson; full price, as a." |
-| **W3** | scripter | M6 | `eotg_clean_all_aug_modifiers`: add `remove_character_modifier = eotg_mod_aug_patron_throttle`. Reword the Phase 5 comment: the clause modifiers stay (the debt survives), and the throttle goes with the firmware. Do not touch `eotg_aug_patron_betray_effect` (CB-27 M7 is in it). |
+| **W3** | scripter | M6 | `eotg_clean_all_aug_modifiers`: add `remove_character_modifier = eotg_mod_aug_patron_throttle`. Reword the Phase 5 comment: the clause modifiers stay (the debt survives), and the throttle goes with the firmware. Do not touch `eotg_aug_patron_betray_effect` (CB-27 M7 is in it). **Done.** The betray-effect half followed after M7, as the follow-up below; see §4. |
 | **W4** | scripter | L14 | `eotg_aug_forget_relation_effect`: inside the closing `if = { limit = { exists = scope:eotg_forgotten } … }`, after the opinion, add `hidden_effect = { send_interface_toast = { title = eotg_aug_forget_relation_toast  left_icon = scope:eotg_forgotten } }`. Same shape as tier3.014.b (vanilla hunt.8540). |
 | **W4-loc** | localizer | L14 | `eotg_aug_forget_relation_toast`: one line naming `[eotg_forgotten.GetName]`. The ruler looks at them and the relationship is not there any more. Neurofractured register (index §5 items 1–2: no "whisper", "Void", "possess"). Do not name the relation type (it varies). |
 | **W5** | scripter | L15 | `eotg_fracture.020`: (1) in the desc `first_valid`, **before** `desc_true`, add `triggered_desc = { trigger = { var:eotg_aug_accusation_true = flag:yes  var:eotg_aug_accusation_action = flag:spared }  desc = eotg_fracture.020.desc_true_spared }`. (2) In the merged fallback option's `name` block, add a first entry for the same condition, with text `eotg_fracture.020.c_spared`. (3) In that option's true branch, give the +100 prestige only when the action is **not** `flag:spared`. Risk +5 stays on every true path. Keep round 2 H1's opinion logic as it is. |
 | **W5-loc** | localizer | L15 | `eotg_fracture.020.desc_true_spared`: [eotg_accused.GetName] was what the flag said, and you refused to act on it. Voice register; do not say the implant "was right" in the voice's own words. `eotg_fracture.020.c_spared`: a short admission, e.g. "It was right. I was not." |
 | **W6** | scripter | S10 | `eotg_aug_tier3.022`, insight branch: `eotg_aug_voice_advance_effect = { STAGE = 2 }` → `{ STAGE = 1 }`. No loc change. |
 
-**Follow-up after CB-27 M7 lands (scripter, not now):** `eotg_aug_patron_betray_effect` adds the throttle even to an owner who has left the system. Put the `add_character_modifier` inside the existing `eotg_is_augmented_any = yes` branch, as the risk already is.
+**Follow-up after CB-27 M7 lands (scripter, not now):** `eotg_aug_patron_betray_effect` adds the throttle even to an owner who has left the system. Put the `add_character_modifier` inside the existing `eotg_is_augmented_any = yes` branch, as the risk already is. **Done, ratified (§4).** Together with W3, the throttle is now firmware at both ends: it is never applied to an owner with no implants, and full removal clears it.
 
 **Validation for W1–W6:** Tiger, `px_lsp_diagnostics.js` and `px_vocab_check.py` on the touched files, except the known-benign items in `CLAUDE.md` §Validation. QA re-runs audit 8 (coupling) on tier2.011, fracture.020 and tier3.022.
 
@@ -132,6 +133,21 @@ These would add beats. They are listed so the choice is visible. Nothing is buil
 > **2026-10-04: both approved by the human and specced in [cybernetics_v2_new_beats.md](cybernetics_v2_new_beats.md).** M11 is amended there: two climaxes per ruler at most, no on_action restart.
 1. **A second Heir's Arc for a later heir** (M11), for example after heir.004 executes the first heir. Today the arc runs once per ruler.
 2. **A Patron arc beat for an owner who has had the implants removed** (M6). Today the debt simply continues: the clause keeps charging, and the story's demands go on reading the variable.
+
+---
+
+## 4. CB-27 M7/M8 and the throttle follow-up: ratified (2026-10-04)
+
+Checked against the working tree (uncommitted, QA-passed for script): `events/eotg_augmentation_patron.txt`, `eotg_aug_patron_betray_effect` and `eotg_clean_all_aug_modifiers` in `common/scripted_effects/eotg_augmentation_effects.txt`, `eotg_aug_patron_critic_candidate` and `eotg_aug_patron_envoy_present` in `common/scripted_triggers/eotg_augmentation_triggers.txt`, and `eotg_story_aug_patron` in `common/story_cycles/eotg_augmentation_stories.txt`.
+
+| # | Verdict | Ruling | Spec edited |
+|---|---|---|---|
+| M7 (order) | **RATIFY** | The tick order is landless → Neurofractured write-off → (.006 if grievance ≥ 3 or demand ≥ 4) → (.007 if the envoy is gone) → demand sequence, with the .004 → .005 skip when no critic qualifies. .006 before .007 is what ends the refuse-every-envoy loop. | phase5 §2.3 |
+| M7 (guard) | **RATIFY** | `eotg_aug_patron_envoy_present` (alive and a courtier of root) gates .006's portrait, the c and e options, and the kill inside the betray effect. There are six descs, each tone with an `_absent` variant. The same gate is applied to the envoy portraits on .002–.005, and to .002's c, d and the disgust opinion on b. | phase5 §2.4, §4, §6, §7 item 6 |
+| M8 | **RATIFY** | `eotg_aug_patron_critic_candidate` excludes the story's own envoy inside the trigger, so the tick, .004's trigger and .004's pick all get it. When the envoy is the only would-be candidate, the tick skips to .005. | phase5 §2.4 (.004) |
+| W3 follow-up | **RATIFY** | The throttle, the risk and the Countdown start sit inside the augmented branch of `eotg_aug_patron_betray_effect`. Phase 5's "unconditional" text for .006 c is superseded. | phase5 §2.4 (.006); this file, W3 row |
+
+**Gaps, not ruled:** with the envoy absent, a non-deceitful owner cannot betray. With no implants and no envoy, d's failure costs only lie stress. Both are the same open human question as the existing "reprisal against an owner with no hardware" item, in [new_beats](cybernetics_v2_new_beats.md) §10.
 
 ---
 

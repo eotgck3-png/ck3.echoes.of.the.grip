@@ -779,7 +779,10 @@ eotg_aug_tier2.006 = {
         name = eotg_aug_tier2.006.e
         trigger = { has_trait = stubborn }
         trait = stubborn
-        remove_character_modifier = eotg_mod_aug_affect_dampened
+        if = {
+            limit = { has_character_modifier = eotg_mod_aug_affect_dampened }
+            remove_character_modifier = eotg_mod_aug_affect_dampened
+        }
         eotg_add_fracture_risk = { AMOUNT = 2 }
         stress_impact = {
             base = minor_stress_impact_gain
@@ -1260,11 +1263,10 @@ eotg_aug_tier2.010 = {
 # ── eotg_aug_tier2.011 ────────────────────────────────────────────────────────
 # Market Ledger (E-05). The implant has optimised the levies.
 # Caller: eotg_on_yearly_aug_tier2_check (Phase 4b branch).
-# Deviation: c's success is "as a, but the steward did the arithmetic, not the
-# implant" (no risk), rather than "without the vassal penalty": the spec's §7
-# list has no penalty-free variant of eotg_mod_aug_optimised_levies, and a 7th
-# modifier would be an identifier the spec does not list. The steward is
-# cp:councillor_steward (guarded); 50% +stewardship x2.
+# c's success (CB-26 M1/W1): the steward trims the plan, giving
+# eotg_mod_aug_optimised_levies_trimmed (half the gain, no vassal penalty, no
+# risk). The steward is cp:councillor_steward (guarded; vanilla gates options
+# on a councillor, ep3_yearly_1.txt:174); 50% +stewardship x2.
 
 eotg_aug_tier2.011 = {
     type = character_event
@@ -1325,7 +1327,7 @@ eotg_aug_tier2.011 = {
                     }
                 }
                 desc = eotg_aug_tier2.011.c.success
-                add_character_modifier = { modifier = eotg_mod_aug_optimised_levies  years = 3 }
+                add_character_modifier = { modifier = eotg_mod_aug_optimised_levies_trimmed  years = 3 }
             }
             50 = {
                 desc = eotg_aug_tier2.011.c.failure
@@ -1626,7 +1628,10 @@ eotg_aug_tier2.021 = {
                 limit = { is_imprisoned_by = root }
                 release_from_prison = yes
             }
-            remove_opinion = { target = root  modifier = eotg_opinion_aug_falsely_accused }
+            if = {
+                limit = { has_opinion_modifier = { target = root  modifier = eotg_opinion_aug_falsely_accused } }
+                remove_opinion = { target = root  modifier = eotg_opinion_aug_falsely_accused }
+            }
             add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
         }
         eotg_add_fracture_risk = { AMOUNT = 2 }
@@ -2164,7 +2169,10 @@ eotg_aug_tier2.017 = {
         name = eotg_aug_tier2.017.a
         trigger = { gold >= minor_gold_value }
         remove_short_term_gold = minor_gold_value
-        remove_character_modifier = eotg_mod_aug_affect_dampened
+        if = {
+            limit = { has_character_modifier = eotg_mod_aug_affect_dampened }
+            remove_character_modifier = eotg_mod_aug_affect_dampened
+        }
         change_variable = { name = eotg_aug_marriage_strain  add = -1 }
         eotg_aug_stress_reject_effect = yes
         ai_chance = {

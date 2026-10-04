@@ -142,7 +142,9 @@ eotg_aug_patron.002 = {
         animation = personality_greedy
     }
     right_portrait = {
-        trigger = { exists = scope:eotg_patron_envoy }
+        # CB-27 M7 pattern (as patron.006): never a dead envoy, or one who
+        # has left court since the tick.
+        trigger = { eotg_aug_patron_envoy_present = yes }
         character = scope:eotg_patron_envoy
         animation = steward
     }
@@ -174,8 +176,12 @@ eotg_aug_patron.002 = {
     option = {
         name = eotg_aug_patron.002.b
         eotg_aug_patron_grievance_effect = { AMOUNT = 1 }
-        scope:eotg_patron_envoy ?= {
-            add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 5 }
+        # CB-27 follow-up: only an envoy alive and at court takes offence.
+        if = {
+            limit = { eotg_aug_patron_envoy_present = yes }
+            scope:eotg_patron_envoy = {
+                add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 5 }
+            }
         }
         # Owner-side risk only while the owner still has hardware (final QA: the
         # debt outlives Remove Implants; nothing may recreate the variable).
@@ -198,8 +204,9 @@ eotg_aug_patron.002 = {
     # "Renegotiate."
     option = {
         name = eotg_aug_patron.002.c
+        # CB-27 follow-up: a duel needs the envoy alive and at court.
         trigger = {
-            exists = scope:eotg_patron_envoy
+            eotg_aug_patron_envoy_present = yes
             eotg_aug_patron_can_pay = { BASE = major_gold_value  MULT = 1 }
         }
         duel = {
@@ -232,9 +239,10 @@ eotg_aug_patron.002 = {
     # [deceitful] "Pay in promises." The envoy holds a debt hook.
     option = {
         name = eotg_aug_patron.002.d
+        # CB-27 follow-up: the hook goes to an envoy alive and at court.
         trigger = {
             has_trait = deceitful
-            exists = scope:eotg_patron_envoy
+            eotg_aug_patron_envoy_present = yes
         }
         trait = deceitful
         scope:eotg_patron_envoy = {
@@ -335,7 +343,9 @@ eotg_aug_patron.003 = {
         animation = thinking
     }
     right_portrait = {
-        trigger = { exists = scope:eotg_patron_envoy }
+        # CB-27 M7 pattern (as patron.006): never a dead envoy, or one who
+        # has left court since the tick.
+        trigger = { eotg_aug_patron_envoy_present = yes }
         character = scope:eotg_patron_envoy
         animation = steward
     }
@@ -458,7 +468,8 @@ eotg_aug_patron.003 = {
 # The Errand. "There is a critic at your court." May stay ambiguous in loc
 # ("reported but unconfirmed"). Saved eotg_critic: a zealous courtier, else
 # any courtier, both through eotg_aug_patron_critic_candidate (the victim
-# candidate terms, never close family or spouse). Not the weighted picker:
+# candidate terms, never close family or spouse, never the story's own envoy
+# (CB-27 M8)). Not the weighted picker:
 # family must be excluded outright, which the picker's FAMILY_FACTOR cannot
 # guarantee (same reasoning as fracture.021's guard). The story tick skips
 # this demand when no one qualifies.
@@ -485,7 +496,9 @@ eotg_aug_patron.004 = {
         animation = personality_zealous
     }
     lower_right_portrait = {
-        trigger = { exists = scope:eotg_patron_envoy }
+        # CB-27 M7 pattern (as patron.006's right portrait): never a dead
+        # envoy, or one who has left court in the 1-30 days since the tick.
+        trigger = { eotg_aug_patron_envoy_present = yes }
         character = scope:eotg_patron_envoy
     }
 
@@ -655,7 +668,9 @@ eotg_aug_patron.005 = {
         animation = worry
     }
     lower_right_portrait = {
-        trigger = { exists = scope:eotg_patron_envoy }
+        # CB-27 M7 pattern (as patron.006): never a dead envoy, or one who
+        # has left court since the tick.
+        trigger = { eotg_aug_patron_envoy_present = yes }
         character = scope:eotg_patron_envoy
     }
 
@@ -773,6 +788,8 @@ eotg_aug_patron.005 = {
 # ends the story (`after`).
 # c/e (and d at 50%) betray: eotg_aug_patron_betray_effect (the envoy dies,
 # throttle 5 years, risk +25, an Overclocked owner's Countdown starts).
+# c/e need the envoy alive and at court (eotg_aug_patron_envoy_present, CB-27
+# M7); a is always available.
 # Buy-out: 2 x major_gold_value, scaled by the terms like every bill.
 # Caller: eotg_story_aug_patron (demand 4+ or grievance 3+; balance spec
 # §5.8: also the Neurofractured write-off entry).
@@ -783,17 +800,39 @@ eotg_aug_patron.006 = {
     # Balance spec §5.8: the syndicate's write-off of a Neurofractured owner
     # (eotg_flag_aug_patron_writeoff, 60 days, set by the story tick) comes
     # first and replaces the other two.
+    # CB-27 M7: the three tone descs open with the envoy in the room. The tick
+    # fires .006 before it checks the envoy, so each tone has an _absent
+    # variant for an envoy who is dead or has left court
+    # (eotg_aug_patron_envoy_present = no): the terms arrive by message.
     desc = {
         first_valid = {
             triggered_desc = {
-                trigger = { has_character_flag = eotg_flag_aug_patron_writeoff }
+                trigger = {
+                    has_character_flag = eotg_flag_aug_patron_writeoff
+                    eotg_aug_patron_envoy_present = yes
+                }
                 desc = eotg_aug_patron.006.desc_writeoff
             }
             triggered_desc = {
-                trigger = { scope:eotg_patron_story.var:eotg_grievance >= 3 }
+                trigger = { has_character_flag = eotg_flag_aug_patron_writeoff }
+                desc = eotg_aug_patron.006.desc_writeoff_absent
+            }
+            triggered_desc = {
+                trigger = {
+                    scope:eotg_patron_story.var:eotg_grievance >= 3
+                    eotg_aug_patron_envoy_present = yes
+                }
                 desc = eotg_aug_patron.006.desc_betrayal
             }
-            desc = eotg_aug_patron.006.desc_settlement
+            triggered_desc = {
+                trigger = { scope:eotg_patron_story.var:eotg_grievance >= 3 }
+                desc = eotg_aug_patron.006.desc_betrayal_absent
+            }
+            triggered_desc = {
+                trigger = { eotg_aug_patron_envoy_present = yes }
+                desc = eotg_aug_patron.006.desc_settlement
+            }
+            desc = eotg_aug_patron.006.desc_settlement_absent
         }
     }
     theme = intrigue
@@ -805,7 +844,8 @@ eotg_aug_patron.006 = {
         animation = stress
     }
     right_portrait = {
-        trigger = { exists = scope:eotg_patron_envoy }
+        # CB-27 M7: never a dead envoy, or one who has left court.
+        trigger = { eotg_aug_patron_envoy_present = yes }
         character = scope:eotg_patron_envoy
         animation = schadenfreude
     }
@@ -823,7 +863,10 @@ eotg_aug_patron.006 = {
     # "Sign over the revenues."
     option = {
         name = eotg_aug_patron.006.a
-        remove_character_modifier = eotg_mod_aug_patron_clause
+        if = {
+            limit = { has_character_modifier = eotg_mod_aug_patron_clause }
+            remove_character_modifier = eotg_mod_aug_patron_clause
+        }
         add_character_modifier = { modifier = eotg_mod_aug_patron_clause_final }
         ai_chance = {
             base = 30
@@ -846,8 +889,12 @@ eotg_aug_patron.006 = {
     }
 
     # "Betray them."
+    # CB-27 M7: the envoy must be alive and at court to be killed in person;
+    # otherwise the option is unavailable (a stays ungated). Vanilla precedent:
+    # story_cycle_peasant_affair_events.txt:1173-1178.
     option = {
         name = eotg_aug_patron.006.c
+        trigger = { eotg_aug_patron_envoy_present = yes }
         eotg_aug_patron_betray_effect = yes
         eotg_aug_stress_murder_effect = yes
         ai_chance = {
@@ -871,8 +918,14 @@ eotg_aug_patron.006 = {
             }
             50 = {
                 desc = eotg_aug_patron.006.d.failure
+                # CB-27 M7: the betrayal kills the envoy only if present
+                # (checked before the effect kills them), so the murder
+                # stress follows the same test.
+                if = {
+                    limit = { eotg_aug_patron_envoy_present = yes }
+                    eotg_aug_stress_murder_effect = yes
+                }
                 eotg_aug_patron_betray_effect = yes
-                eotg_aug_stress_murder_effect = yes
             }
         }
         eotg_aug_stress_lie_effect = yes
@@ -884,9 +937,13 @@ eotg_aug_patron.006 = {
     }
 
     # [brave] "Come and take it from me."
+    # CB-27 M7: as c, the envoy must be alive and at court.
     option = {
         name = eotg_aug_patron.006.e
-        trigger = { has_trait = brave }
+        trigger = {
+            has_trait = brave
+            eotg_aug_patron_envoy_present = yes
+        }
         trait = brave
         eotg_aug_patron_betray_effect = yes
         add_prestige = 200

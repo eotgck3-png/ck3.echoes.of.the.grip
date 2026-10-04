@@ -3183,13 +3183,23 @@ eotg_fracture.019 = {
 # years). A watched accused who learns of it gets unease at most; a spared
 # accused (.019.e already reassured them) gets nothing new. Watched and
 # spared take their own fallback text (.020.d "So I was right not to."):
-# no tyranny, no lie stress, risk -5.
+# no tyranny, no lie stress, risk -5. A TRUE accusation that was spared
+# (CB-26 W5) has its own desc and option text (desc_true_spared, c_spared):
+# no prestige, risk +5.
 
 eotg_fracture.020 = {
     type = character_event
     title = eotg_fracture.020.t
     desc = {
         first_valid = {
+            # CB-26 L15/W5: a real traitor the ruler spared (.019.e)
+            triggered_desc = {
+                trigger = {
+                    var:eotg_aug_accusation_true = flag:yes
+                    var:eotg_aug_accusation_action = flag:spared
+                }
+                desc = eotg_fracture.020.desc_true_spared
+            }
             triggered_desc = {
                 trigger = { var:eotg_aug_accusation_true = flag:yes }
                 desc = eotg_fracture.020.desc_true
@@ -3311,6 +3321,14 @@ eotg_fracture.020 = {
         name = {
             text = {
                 first_valid = {
+                    # CB-26 L15/W5: true, and spared ("It was right. I was not.")
+                    triggered_desc = {
+                        trigger = {
+                            var:eotg_aug_accusation_true = flag:yes
+                            var:eotg_aug_accusation_action = flag:spared
+                        }
+                        desc = eotg_fracture.020.c_spared
+                    }
                     triggered_desc = {
                         trigger = { var:eotg_aug_accusation_true = flag:yes }
                         desc = eotg_fracture.020.c
@@ -3330,7 +3348,12 @@ eotg_fracture.020 = {
         }
         if = {
             limit = { var:eotg_aug_accusation_true = flag:yes }
-            add_prestige = 100
+            # CB-26 W5: no prestige for a ruler who overruled the implant and
+            # was wrong; risk +5 on every true path (it was right).
+            if = {
+                limit = { NOT = { var:eotg_aug_accusation_action = flag:spared } }
+                add_prestige = 100
+            }
             eotg_add_fracture_risk = { AMOUNT = 5 }
         }
         else_if = {

@@ -579,7 +579,10 @@ eotg_aug_retinue.004 = {
             max = 2
             check_range_bounds = no
             root = { remove_short_term_gold = minor_gold_value }
-            remove_opinion = { target = root  modifier = eotg_opinion_aug_passed_over }
+            if = {
+                limit = { has_opinion_modifier = { target = root  modifier = eotg_opinion_aug_passed_over } }
+                remove_opinion = { target = root  modifier = eotg_opinion_aug_passed_over }
+            }
             eotg_aug_retinue_install_effect = yes
         }
         ai_chance = {
@@ -596,7 +599,10 @@ eotg_aug_retinue.004 = {
         remove_short_term_gold = medium_gold_value
         every_knight = {
             limit = { eotg_aug_retainer_candidate = yes }
-            remove_opinion = { target = root  modifier = eotg_opinion_aug_passed_over }
+            if = {
+                limit = { has_opinion_modifier = { target = root  modifier = eotg_opinion_aug_passed_over } }
+                remove_opinion = { target = root  modifier = eotg_opinion_aug_passed_over }
+            }
             add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
         }
         ai_chance = {
@@ -631,7 +637,10 @@ eotg_aug_retinue.004 = {
         remove_short_term_gold = minor_gold_value
         every_knight = {
             limit = { eotg_aug_retainer_candidate = yes }
-            remove_opinion = { target = root  modifier = eotg_opinion_aug_passed_over }
+            if = {
+                limit = { has_opinion_modifier = { target = root  modifier = eotg_opinion_aug_passed_over } }
+                remove_opinion = { target = root  modifier = eotg_opinion_aug_passed_over }
+            }
             add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
         }
         stress_impact = {

@@ -794,29 +794,18 @@ eotg_aug_init.006 = {
         }
     }
 
-    # [cynical] "Make it better than the original." As a, plus a lesson; the
+    # [cynical] "Make it better than the original." As a, plus a lesson;
+    # full price, as a (CB-26 M4/W2: the physician discount is c's). The
     # better limb runs warmer (risk 5).
     option = {
         name = eotg_aug_init.006.e
         trigger = {
             has_trait = cynical
             eotg_has_physical_loss = yes    # balance spec §5.9
-            gold >= {
-                value = medium_gold_value
-                if = {
-                    limit = { eotg_has_physician_access = yes }
-                    multiply = 0.75
-                }
-            }
+            gold >= medium_gold_value
         }
         trait = cynical
-        remove_short_term_gold = {
-            value = medium_gold_value
-            if = {
-                limit = { eotg_has_physician_access = yes }
-                multiply = 0.75
-            }
-        }
+        remove_short_term_gold = medium_gold_value
         eotg_aug_initiate_effect = yes
         eotg_aug_restore_loss_effect = yes
         hidden_effect = {
@@ -1589,7 +1578,10 @@ eotg_aug_init.011 = {
             limit = { eotg_has_physician_access = no }
             remove_short_term_gold = minor_gold_value
         }
-        remove_character_modifier = eotg_mod_aug_infection
+        if = {
+            limit = { has_character_modifier = eotg_mod_aug_infection }
+            remove_character_modifier = eotg_mod_aug_infection
+        }
         ai_chance = {
             base = 40
             modifier = { add = 20  has_trait = diligent }
@@ -1619,6 +1611,8 @@ eotg_aug_init.011 = {
     option = {
         name = eotg_aug_init.011.d
         trigger = { scope:eotg_alley_outcome = flag:rejection }
+        # Tooltip sweep: the option otherwise renders an empty tooltip.
+        custom_tooltip = eotg_aug_init.011.d.tt
         trigger_event = { id = eotg_aug_init.012  days = { 3 10 } }
         ai_chance = {
             base = 30
@@ -2491,7 +2485,16 @@ eotg_aug_init.017 = {
 eotg_aug_init.018 = {
     type = character_event
     title = eotg_aug_init.018.t
-    desc = eotg_aug_init.018.desc
+    # Tooltip sweep: an unasked-for reply from a syndicate, shown when e is
+    # offered (same gate). Concatenated desc as vanilla
+    # events/court_position_management_events.txt:10-19.
+    desc = {
+        desc = eotg_aug_init.018.desc
+        triggered_desc = {
+            trigger = { eotg_aug_has_patron = no }
+            desc = eotg_aug_init.018.desc_syndicate
+        }
+    }
     theme = stewardship_wealth_focus
 
     left_portrait = {
@@ -2589,6 +2592,8 @@ eotg_aug_init.018 = {
     option = {
         name = eotg_aug_init.018.e
         trigger = { eotg_aug_has_patron = no }
+        # Tooltip sweep: otherwise empty, and read exactly like d.
+        custom_tooltip = eotg_aug_init.018.e.tt
         trigger_event = { id = eotg_aug_patron.001  days = 1 }
         ai_chance = {
             base = 20

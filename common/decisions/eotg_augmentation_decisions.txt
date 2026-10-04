@@ -181,6 +181,11 @@ eotg_decision_maintenance_protocol = {
     picture = {
         reference = "gfx/interface/illustrations/decisions/eotg_decision_maintenance_protocol.dds"
     }
+    # The default hover is <key>_tooltip, which now holds only the
+    # Overclocked effect note; explicit list hover (skill
+    # reference/common/decisions/_decisions.info:121; vanilla
+    # common/decisions/00_holy_order_decisions.txt:287).
+    selection_tooltip = eotg_decision_maintenance_protocol_selection_tt
     ai_check_interval_by_tier = {
         barony = 0
         county = 12
@@ -194,9 +199,14 @@ eotg_decision_maintenance_protocol = {
         has_trait = eotg_cybernetics
     }
 
-    # Decision-owned cooldown (index §1 rule 5)
+    # Decision-owned cooldown (index §1 rule 5). Wrapped so the tooltip
+    # names the reason, not the flag (vanilla
+    # common/decisions/10_culture_conversion_decisions.txt:25-27).
     is_valid = {
-        NOT = { has_character_flag = eotg_flag_maintenance_cooldown }
+        custom_description = {
+            text = eotg_decision_maintenance_protocol_cooldown_tt
+            NOT = { has_character_flag = eotg_flag_maintenance_cooldown }
+        }
     }
 
     # A physician to hand makes the calibration cheaper (thread T5)
@@ -214,13 +224,20 @@ eotg_decision_maintenance_protocol = {
         add_character_flag = { flag = eotg_flag_maintenance_cooldown  years = 3 }
         add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 3 }
         # Recalibration replaces black-market hardware (audit §1.7c)
-        remove_character_modifier = eotg_mod_illegal_implants
+        if = {
+            limit = { has_character_modifier = eotg_mod_illegal_implants }
+            remove_character_modifier = eotg_mod_illegal_implants
+        }
+        # Tooltip sweep: the engine already lists the modifier, the removal
+        # and the stress; the only hidden consequence is the Overclocked
+        # risk drop, so the note shows only then (conditional custom_tooltip
+        # as vanilla common/decisions/00_guest_decisions.txt:78-85).
         if = {
             limit = { eotg_is_aug_tier3 = yes }
             eotg_add_fracture_risk = { AMOUNT = -8 }
+            custom_tooltip = eotg_decision_maintenance_protocol_tooltip
         }
         stress_impact = { base = minor_stress_impact_loss }
-        custom_tooltip = eotg_decision_maintenance_protocol_tooltip
     }
 
     # Balance spec §5.2
@@ -291,6 +308,12 @@ eotg_decision_seek_augmentation = {
 
     effect = {
         custom_tooltip = eotg_decision_seek_augmentation_tooltip
+        # Tooltip sweep: init.018.c needs physician access, so it is named
+        # only when it will be offered.
+        if = {
+            limit = { eotg_has_physician_access = yes }
+            custom_tooltip = eotg_decision_seek_augmentation_physician_tt
+        }
         trigger_event = eotg_aug_init.018
     }
 
@@ -338,7 +361,8 @@ eotg_decision_remove_implants = {
         eotg_aug_remove_all_effect = yes
         add_character_modifier = { modifier = eotg_mod_aug_removal_withdrawal  years = 3 }
         eotg_aug_stress_reject_effect = yes
-        custom_tooltip = eotg_decision_remove_implants_tooltip
+        # Tooltip sweep: no custom line. The engine lists the traits lost,
+        # the withdrawal modifier and the stress; nothing hidden is left to say.
     }
 
     # Balance spec §5.2
@@ -364,6 +388,11 @@ eotg_decision_consult_physician = {
     picture = {
         reference = "gfx/interface/illustrations/decisions/decision_physician.dds"
     }
+    # The default hover is <key>_tooltip, which now holds only the
+    # Overclocked effect note; explicit list hover (skill
+    # reference/common/decisions/_decisions.info:121; vanilla
+    # common/decisions/00_holy_order_decisions.txt:287).
+    selection_tooltip = eotg_decision_consult_physician_selection_tt
     ai_check_interval_by_tier = {
         barony = 0
         county = 12
@@ -393,11 +422,16 @@ eotg_decision_consult_physician = {
 
     effect = {
         add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 5 }
-        remove_character_modifier = eotg_mod_aug_infection
-        # Deeper than maintenance at Overclocked (maintenance gives -8)
+        if = {
+            limit = { has_character_modifier = eotg_mod_aug_infection }
+            remove_character_modifier = eotg_mod_aug_infection
+        }
+        # Deeper than maintenance at Overclocked (maintenance gives -8).
+        # Tooltip sweep: the note shows only at Overclocked (as Maintenance).
         if = {
             limit = { eotg_is_aug_tier3 = yes }
             eotg_add_fracture_risk = { AMOUNT = -12 }
+            custom_tooltip = eotg_decision_consult_physician_tooltip
         }
         if = {
             limit = { employs_court_position = court_physician_court_position }
@@ -405,7 +439,6 @@ eotg_decision_consult_physician = {
                 add_character_modifier = { modifier = eotg_mod_aug_lesson_learning  years = 5 }
             }
         }
-        custom_tooltip = eotg_decision_consult_physician_tooltip
     }
 
     # Balance spec §5.2: potential as is_shown
