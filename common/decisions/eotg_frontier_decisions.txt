@@ -9,17 +9,17 @@
 # Establish takes the most developed eligible Region; Invest and Abandon the
 # taker's most advanced / most strained Frontier.
 #
-# UNVERIFIED-VANILLA: ordered_held_title / any_held_title / every_held_title
-# with tier = tier_county (spec §16 V13); the vanilla decision picture path
-# below (gfx is not this system's to add); debug_only = yes in is_shown
-# (spec §16 V10; fallbacks in spec §8.5).
+# Confirmed against vanilla 1.20 (verification §3): the held-title iterators
+# with tier = tier_county (V13), the picture decision_realm.dds, and
+# debug_only = yes in is_shown (V10; test_decision.txt:9): the debug
+# decisions show only when the game runs with -debug_mode (E4).
 # -----------------------------------------------------------------------------
 
 # Establish a Frontier (spec §8.1). The event .001 picks the project type and
 # charges the cost (as Seek Augmentation: no `cost`, the event pays).
 eotg_decision_frontier_establish = {
     picture = {
-        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"    # UNVERIFIED-VANILLA: path
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
     }
     ai_check_interval_by_tier = {
         barony = 0
@@ -104,7 +104,7 @@ eotg_decision_frontier_establish = {
 # once a year per Region.
 eotg_decision_frontier_invest = {
     picture = {
-        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"    # UNVERIFIED-VANILLA: path
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
     }
     ai_check_interval_by_tier = {
         barony = 0
@@ -147,10 +147,23 @@ eotg_decision_frontier_invest = {
             save_scope_as = eotg_frontier_county
         }
         custom_tooltip = eotg_decision_frontier_invest_effect_tt
+        # Q4b: say what a finished Frontier is waiting on
+        if = {
+            limit = {
+                scope:eotg_frontier_county = {
+                    OR = {
+                        has_county_modifier = eotg_frontier_mod_waiting_development
+                        has_county_modifier = eotg_frontier_mod_waiting_control
+                    }
+                }
+            }
+            custom_tooltip = eotg_decision_frontier_invest_waiting_tt
+        }
         hidden_effect = {
             scope:eotg_frontier_county = {
                 set_variable = { name = eotg_frontier_invested  value = yes  years = 1 }
-                eotg_frontier_add_progress_effect = { AMOUNT = 10 }
+                # Halved with the doubled pacing (verification §4)
+                eotg_frontier_add_progress_effect = { AMOUNT = 5 }
             }
         }
     }
@@ -169,7 +182,7 @@ eotg_decision_frontier_invest = {
             any_held_title = {
                 tier = tier_county
                 eotg_frontier_is_frontier = yes
-                var:eotg_frontier_strain >= 2
+                var:eotg_frontier_strain >= 4
             }
         }
         modifier = { add = -10  has_trait = greedy }
@@ -180,7 +193,7 @@ eotg_decision_frontier_invest = {
 # holder answers in .003. A sponsor backs one Frontier at a time.
 eotg_decision_frontier_sponsor = {
     picture = {
-        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"    # UNVERIFIED-VANILLA: path
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
     }
     ai_check_interval_by_tier = {
         barony = 0
@@ -191,7 +204,7 @@ eotg_decision_frontier_sponsor = {
         hegemony = 36
     }
 
-    # UNVERIFIED-VANILLA (spec §16 V2): any_in_global_list over title scopes
+    # any_in_global_list over title scopes: confirmed (verification V2)
     is_shown = {
         eotg_frontier_can_sponsor = yes
         any_in_global_list = {
@@ -224,7 +237,7 @@ eotg_decision_frontier_sponsor = {
 # Withdraw sponsorship (spec §8.3; open Q9): ends this character's backing.
 eotg_decision_frontier_withdraw = {
     picture = {
-        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"    # UNVERIFIED-VANILLA: path
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
     }
     ai_check_interval_by_tier = {
         barony = 0
@@ -284,7 +297,7 @@ eotg_decision_frontier_withdraw = {
 # Abandoned, never erased: the Region keeps its traces and can be resettled.
 eotg_decision_frontier_abandon = {
     picture = {
-        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"    # UNVERIFIED-VANILLA: path
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
     }
     ai_check_interval_by_tier = {
         barony = 0
@@ -320,7 +333,7 @@ eotg_decision_frontier_abandon = {
         any_held_title = {
             tier = tier_county
             eotg_frontier_is_frontier = yes
-            var:eotg_frontier_strain >= 3
+            var:eotg_frontier_strain >= 6
         }
     }
     ai_will_do = {
@@ -335,10 +348,10 @@ eotg_decision_frontier_abandon = {
 # -- Debug only (spec §8.5) ----------------------------------------------------
 # Marks the taker's capital Region Unsettled so the whole loop can be tested
 # on the vanilla map. Any other Region: the console line in
-# docs/qa/frontier_test_plan.md.
+# docs/specs/frontier_v1_test_plan.md.
 eotg_decision_frontier_debug_mark_unsettled = {
     picture = {
-        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"    # UNVERIFIED-VANILLA: path
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
     }
     ai_check_interval_by_tier = {
         barony = 0
@@ -349,8 +362,8 @@ eotg_decision_frontier_debug_mark_unsettled = {
         hegemony = 0
     }
 
-    # UNVERIFIED-VANILLA (spec §16 V10): debug_only = yes. Fallbacks in spec
-    # §8.5 (a game rule, or a console-set flag).
+    # debug_only = yes: confirmed (verification V10; test_decision.txt:9).
+    # Shown only when the game runs with -debug_mode.
     is_shown = {
         debug_only = yes
     }
@@ -383,7 +396,7 @@ eotg_decision_frontier_debug_mark_unsettled = {
 # tick cooldown.
 eotg_decision_frontier_debug_tick = {
     picture = {
-        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"    # UNVERIFIED-VANILLA: path
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
     }
     ai_check_interval_by_tier = {
         barony = 0
@@ -407,6 +420,39 @@ eotg_decision_frontier_debug_tick = {
             }
             eotg_frontier_tick_effect = yes
         }
+    }
+
+    ai_potential = {
+        always = no
+    }
+    ai_will_do = {
+        base = 0
+    }
+}
+
+# The hidden numbers, for testing (verification §2 "Readout", APPROVED as
+# test tooling): a toast per Frontier the taker holds with progress, strain
+# and the completion floors against the current values.
+eotg_decision_frontier_debug_readout = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 0
+        kingdom = 0
+        empire = 0
+        hegemony = 0
+    }
+
+    is_shown = {
+        debug_only = yes
+        eotg_frontier_holds_frontier = yes
+    }
+
+    effect = {
+        eotg_frontier_debug_readout_effect = yes
     }
 
     ai_potential = {

@@ -15,22 +15,45 @@ yearly_playable_pulse = {
 
 # The yearly Frontier tick (spec §6.1). Root = a playable character; each of
 # its held Regions in the Frontier state is ticked once a year.
-# COOLDOWN AUTHORITY: eotg_frontier_ticked (300 days, on the county), set here
-# and nowhere else, so a Region that changes holder mid-year is not ticked
-# twice. No event trigger reads it.
-# UNVERIFIED-VANILLA (spec §16 V13): every_held_title with tier = tier_county;
-# yearly_playable_pulse reaches every county holder.
+# COOLDOWN AUTHORITY: the calendar-year marker eotg_frontier_tick_year (on the
+# county), set here and nowhere else: exactly one tick per in-game year, even
+# when the Region changes holder (verification Q9, orchestrator ruling). No
+# event trigger reads it.
+# every_held_title with tier = tier_county, and yearly_playable_pulse reaching
+# every county holder: confirmed (verification V13).
+# UNVERIFIED-VANILLA: current_year as a value in set_variable / a comparison.
 eotg_on_yearly_frontier_tick = {
     effect = {
         every_held_title = {
             limit = {
                 tier = tier_county
                 eotg_frontier_is_frontier = yes
-                NOT = { has_variable = eotg_frontier_ticked }
+                OR = {
+                    NOT = { has_variable = eotg_frontier_tick_year }
+                    var:eotg_frontier_tick_year < current_year
+                }
             }
-            set_variable = { name = eotg_frontier_ticked  value = yes  days = 300 }
+            set_variable = { name = eotg_frontier_tick_year  value = current_year }
             eotg_frontier_tick_effect = yes
         }
+    }
+}
+
+# Vanilla hook, extended additively only (invariant 4). Root = the dying
+# character, still alive inside the hook; vanilla reads primary_heir only here
+# (death.txt:31-51), so the sponsor hand-off runs now (verification E2).
+on_death = {
+    on_actions = {
+        eotg_frontier_on_sponsor_death
+    }
+}
+
+eotg_frontier_on_sponsor_death = {
+    trigger = {
+        has_variable = eotg_frontier_sponsoring
+    }
+    effect = {
+        eotg_frontier_on_sponsor_death_effect = yes
     }
 }
 
@@ -45,8 +68,10 @@ eotg_on_yearly_frontier_tick = {
 #   scope:eotg_frontier_founder the founder, when there is one
 #   scope:eotg_frontier_sponsor the sponsor, when there is one
 #   scope:eotg_frontier_old_sponsor  (sponsor_changed only) the previous one
-# UNVERIFIED-VANILLA (spec §16 V12): trigger_event = { on_action = x } keeps
-# these scopes. Fallback: empty scripted effects.
+# trigger_event = { on_action = x }: confirmed (verification V12).
+# TEST-IN-GAME (V12): the saved scopes reach these on_actions. Fallback
+# (verification E5): empty scripted effects, documented at
+# eotg_frontier_fire_hook_effect.
 
 eotg_frontier_on_project_started = {
 }

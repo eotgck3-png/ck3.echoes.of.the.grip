@@ -29,7 +29,8 @@
 | Procedures | `eotg_augmentation_procedures.txt` | 5 | 0 | 2 | 3 |
 | Interactions | `eotg_augmentation_interactions.txt` | 2 | 0 | 0 | 2 |
 | Tamper | `eotg_augmentation_tamper.txt` | 4 | 0 | 0 | 4 |
-| **Total** | | **169** | **39** | **63** | **67** |
+| Frontier Events | `eotg_frontier_events.txt` | 6 | 5 | 0 | 1 |
+| **Total** | | **175** | **44** | **63** | **68** |
 
 ## Initiation
 
@@ -269,3 +270,14 @@
 | `eotg_aug_tamper.002`<br>The Work Is Done | **no**: needs scope:owner, saved by event eotg_aug_tamper.001 immediate<br>needs scope:scheme (set by the scheme)<br>needs scope:scheme_discovered, saved by event eotg_aug_tamper.001 immediate<br>needs scope:target, saved by event eotg_aug_tamper.001 immediate | — | `event eotg_aug_tamper.002 <character id>`<br>script fires it on scope:owner; if that is you, plain `event eotg_aug_tamper.002` works, otherwise hover them for their id | event eotg_aug_tamper.001 immediate | no route found in script |
 | `eotg_aug_tamper.003`<br>Hands Withdrawn | **no**: needs scope:owner, saved by event eotg_aug_tamper.001 immediate<br>needs scope:scheme (set by the scheme)<br>needs scope:scheme_discovered, saved by event eotg_aug_tamper.001 immediate<br>needs scope:target, saved by event eotg_aug_tamper.001 immediate | — | `event eotg_aug_tamper.003 <character id>`<br>script fires it on scope:owner; if that is you, plain `event eotg_aug_tamper.003` works, otherwise hover them for their id | event eotg_aug_tamper.001 immediate | no route found in script |
 | `eotg_aug_tamper.004`<br>A Fault in the Hardware | **no**: needs scope:eotg_tamper_signed, saved by event eotg_aug_tamper.002 option b<br>needs scope:owner, saved by event eotg_aug_tamper.001 immediate, scheme eotg_aug_tamper<br>needs scope:scheme_discovered, saved by event eotg_aug_tamper.001 immediate | `effect eotg_aug_initiate_effect = yes`<br>`remove_trait eotg_total_integration`<br>(or instead: has trait eotg_neurofractured; has trait eotg_total_integration) | `event eotg_aug_tamper.004 <character id>`<br>script fires it on scope:target; if that is you, plain `event eotg_aug_tamper.004` works, otherwise hover them for their id | event eotg_aug_tamper.002 option a<br>event eotg_aug_tamper.002 option b | no route found in script |
+
+## Frontier Events
+
+| Event | Fire cold | Setup | Fire | Fired by | Live route |
+|---|---|---|---|---|---|
+| `eotg_frontier.001`<br>An Opportunity Here | **no**: needs scope:eotg_frontier_candidate, saved by decision eotg_decision_frontier_establish | *for realistic content (its usual context):* gold >= eotg_frontier_establish_cost_value (`effect add_gold = 500` usually covers it)<br>must be at peace<br>eotg_frontier_holds_establishable = yes (see common/scripted_triggers) | `event eotg_frontier.001` | decision eotg_decision_frontier_establish | decision eotg_decision_frontier_establish → this event |
+| `eotg_frontier.002`<br>The Frontier Without a Founder | yes | *for realistic content (its usual context):* `holder = { … }` | `event eotg_frontier.002` | effect eotg_frontier_event_roll_effect ← effect eotg_frontier_tick_effect | — |
+| `eotg_frontier.003`<br>An Offer of Backing | yes | — | `event eotg_frontier.003`<br>also fired on scope:eotg_frontier_offer_1 / scope:eotg_frontier_offer_2 / scope:eotg_frontier_offer_3 | effect eotg_frontier_event_roll_effect ← effect eotg_frontier_tick_effect<br>event eotg_frontier.010 option a<br>event eotg_frontier.010 option b<br>event eotg_frontier.010 option c | — |
+| `eotg_frontier.004`<br>No Longer a Frontier | yes | *for realistic content (its usual context):* `effect set_variable = { name = eotg_frontier_progress value = 100 }`<br>eotg_frontier_completion_met = yes (see common/scripted_triggers) | `event eotg_frontier.004` | effect eotg_frontier_tick_effect ← decision eotg_decision_frontier_debug_tick, on_action eotg_on_yearly_frontier_tick | — |
+| `eotg_frontier.005`<br>The Frontier Falters | yes | *for realistic content (its usual context):* `var:eotg_frontier_strain >= eotg_frontier_strain_fail_value` | `event eotg_frontier.005` | effect eotg_frontier_tick_effect ← decision eotg_decision_frontier_debug_tick, on_action eotg_on_yearly_frontier_tick | — |
+| `eotg_frontier.010`<br>Whom to Back | yes | *for realistic content (its usual context):* needs in global list who/which: `variable = eotg_frontier_active`; not: `holder = root`<br>eotg_frontier_can_sponsor = yes (see common/scripted_triggers) | `event eotg_frontier.010` | decision eotg_decision_frontier_sponsor | — |

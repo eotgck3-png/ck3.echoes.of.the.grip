@@ -48,7 +48,10 @@ eotg_frontier_base_rate_value = {
     # military, religious, administrative: 10
 }
 
-# Completion floor: development_level (spec §5.2)
+# Completion floor: development_level (spec §5.2), RELATIVE (verification Q4,
+# orchestrator ruling): min(type floor, the development this project can still
+# reach). eotg_frontier_dev_reachable is recorded at start: starting
+# development + the milestone development not yet granted to this Region.
 eotg_frontier_min_dev_value = {
     value = 2
     if = {
@@ -61,6 +64,30 @@ eotg_frontier_min_dev_value = {
         }
         value = 3
     }
+    if = {
+        limit = { has_variable = eotg_frontier_dev_reachable }
+        max = var:eotg_frontier_dev_reachable
+    }
+}
+
+# Recorded by eotg_frontier_start_effect (county scope): development now +
+# the milestones (+1 each, at most 2) this Region has not been granted yet
+# (Q5: once per Region, ever).
+eotg_frontier_dev_reachable_value = {
+    value = development_level
+    add = 2
+    if = {
+        limit = { has_variable = eotg_frontier_dev_granted }
+        subtract = var:eotg_frontier_dev_granted
+    }
+}
+
+# Current values, for the debug readout (county scope)
+eotg_frontier_current_dev_value = {
+    value = development_level
+}
+eotg_frontier_current_control_value = {
+    value = county_control
 }
 
 # Completion floor: county_control (spec §5.2)
@@ -150,14 +177,30 @@ eotg_frontier_trace_bonus_value = {
     }
 }
 
-# Establishment gained this year (spec §6.1 step 3)
+# Establishment gained this year (spec §6.1 step 3). Owner decision
+# (verification §4): pacing DOUBLED, about 10-16 years unsponsored and 8-10
+# sponsored. Every input above keeps its relative weight; the sum is halved
+# here (eotg_frontier_pace_value), so retuning the pace is one number.
 eotg_frontier_yearly_gain_value = {
     value = eotg_frontier_base_rate_value
     add = eotg_frontier_dev_bonus_value
     add = eotg_frontier_control_bonus_value
     add = eotg_frontier_founder_bonus_value
     add = eotg_frontier_sponsor_bonus_value
+    multiply = eotg_frontier_pace_value
     min = 0
+}
+
+eotg_frontier_pace_value = {
+    value = 0.5
+}
+
+# Strain at which the project falters (.005). Doubled with the pacing (0-4
+# became 0-8), so a cause held for the same share of the project fails it
+# equally often. Desc bands in .002 and the AI gates use half and
+# three-quarters of it (4 and 6).
+eotg_frontier_strain_fail_value = {
+    value = 8
 }
 
 # -- AI throttle ----------------------------------------------------------------

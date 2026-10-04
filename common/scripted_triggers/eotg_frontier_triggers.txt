@@ -2,9 +2,10 @@
 # Scripted triggers for Frontier Systems v1 (docs/specs/frontier_v1.md §3.3).
 #
 # Frontier state lives on the COUNTY TITLE (a Region), never on a character
-# (spec §R). UNVERIFIED-VANILLA (spec §16 V1): variables on a landed_title
-# scope, persisting through save/reload and holder changes. Fallback if not:
-# a story cycle holds the state (never the founder).
+# (spec §R). Title variables are confirmed in vanilla 1.20 (verification V1:
+# province_on_actions.txt:904). TEST-IN-GAME (V1): they persist through
+# save/reload and a holder change. Fallback if not: a story cycle holds the
+# state (never the founder).
 #
 # Comparisons against flag values use `?=`, as the mod's v2 script does
 # (events/eotg_augmentation_procedures.txt, eotg_aug_proc.001).
@@ -24,9 +25,8 @@ eotg_frontier_is_abandoned = {
 }
 
 # A project can start here: Unsettled, or Abandoned and resettlable
-# (spec §6.6), and the Region's capital is not occupied.
-# UNVERIFIED-VANILLA (spec §16 V7, V11): title_province on a county is its
-# capital province; is_occupied on a province.
+# (spec §6.6), and the Region's capital is not occupied (title_province,
+# is_occupied: confirmed, verification V7, V11).
 eotg_frontier_can_establish = {
     OR = {
         eotg_frontier_is_unsettled = yes
@@ -49,21 +49,25 @@ eotg_frontier_admin_eligible = {
 }
 
 # The founder can still lead the project (spec §4.1, §R; ruling Q2: an invalid
-# founder is the strain cause No Founder). Alive, adult, free, and the holder
-# or someone in the holder's realm.
-# UNVERIFIED-VANILLA (spec §16, open question Q14): `prev` inside var:x = { }
-# is the county; is_vassal_or_below_of; employer.
+# founder is the strain cause No Founder). Orchestrator ruling (verification
+# Q3): alive, adult, free, and any of:
+#   - the founder is the holder;
+#   - the founder is in the holder's realm (employer, or vassal or below);
+#   - the holder is vassal or below of the founder (the founder granted the
+#     Region away: the founder stays valid).
+# Each `prev` is one step from the county (into the founder, or the holder).
 eotg_frontier_has_valid_founder = {
     exists = var:eotg_frontier_founder
     var:eotg_frontier_founder = {
         is_alive = yes
         is_adult = yes
         is_imprisoned = no
-        OR = {
-            this = prev.holder
-            employer ?= prev.holder
-            is_vassal_or_below_of = prev.holder
-        }
+    }
+    OR = {
+        holder = var:eotg_frontier_founder
+        var:eotg_frontier_founder = { employer ?= prev.holder }
+        var:eotg_frontier_founder = { is_vassal_or_below_of = prev.holder }
+        holder = { is_vassal_or_below_of = prev.var:eotg_frontier_founder }
     }
 }
 
@@ -73,7 +77,8 @@ eotg_frontier_has_valid_sponsor = {
     var:eotg_frontier_sponsor = { is_alive = yes }
 }
 
-# Establishment has reached Settled, and the type's floors are met (spec §5.2)
+# Establishment has reached Settled, and the type's floors are met (spec §5.2;
+# the development floor is relative, Q4)
 eotg_frontier_completion_met = {
     eotg_frontier_is_frontier = yes
     var:eotg_frontier_progress >= 100
@@ -82,7 +87,7 @@ eotg_frontier_completion_met = {
 }
 
 # -- Character scope -----------------------------------------------------------
-# UNVERIFIED-VANILLA (spec §16 V13): any_held_title / tier = tier_county.
+# any_held_title with tier = tier_county: confirmed (verification V13).
 eotg_frontier_holds_frontier = {
     any_held_title = {
         tier = tier_county
@@ -120,11 +125,25 @@ eotg_frontier_can_sponsor = {
 
 # -- Global ---------------------------------------------------------------------
 # Room for another AI Frontier (spec §8.4: at most eotg_frontier_ai_cap_value
-# active on the map). The count is kept in a global variable by the start,
-# settle and abandon effects (one writer each).
+# active on the map). Read from the active list itself, the one record of
+# active Frontiers (verification Q-B1; `count` form: yearly_on_actions.txt:846).
 eotg_frontier_ai_room = {
-    OR = {
-        NOT = { has_global_variable = eotg_frontier_active_count }
-        global_var:eotg_frontier_active_count < eotg_frontier_ai_cap_value
+    NOT = {
+        any_in_global_list = {
+            variable = eotg_frontier_active
+            count >= eotg_frontier_ai_cap_value
+        }
+    }
+}
+
+# An AI ruler who would back a Frontier: can sponsor, and has gold for four
+# payments (the Sponsor decision's own ai_potential; verification notes:
+# AI-to-AI offers apply the same gate). Character scope.
+eotg_frontier_ai_would_sponsor = {
+    is_ai = yes
+    eotg_frontier_can_sponsor = yes
+    gold >= {
+        value = eotg_frontier_sponsor_payment_value
+        multiply = 4
     }
 }

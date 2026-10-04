@@ -16,8 +16,11 @@
 # Root is always a character (the Region's holder, or the decision taker);
 # the Region arrives as scope:eotg_frontier_county.
 #
-# UNVERIFIED-VANILLA: theme = realm (a vanilla event theme); title-scope
-# GetName in loc ([eotg_frontier_county.GetName]).
+# theme = realm: confirmed (verification §3). Every option that changes a
+# Region re-checks its state (verification Q-B1), and each event that can be
+# left open while the state moves on has a "the moment has passed" option, so
+# it never opens with nothing to click. Gains are halved with the doubled
+# pacing and strain bands follow the 0-8 scale (verification §4).
 # -----------------------------------------------------------------------------
 
 namespace = eotg_frontier
@@ -31,6 +34,17 @@ eotg_frontier.001 = {
     title = eotg_frontier.001.t
     desc = {
         desc = eotg_frontier.001.desc
+        # Lore I1: never tell the player about themselves in the third person
+        first_valid = {
+            triggered_desc = {
+                trigger = {
+                    exists = scope:eotg_frontier_candidate
+                    NOT = { scope:eotg_frontier_candidate = root }
+                }
+                desc = eotg_frontier.001.desc_other
+            }
+            desc = eotg_frontier.001.desc_self
+        }
         triggered_desc = {
             trigger = {
                 scope:eotg_frontier_county = { eotg_frontier_is_abandoned = yes }
@@ -61,12 +75,15 @@ eotg_frontier.001 = {
     # "Settlers first."
     option = {
         name = eotg_frontier.001.a
-        trigger = { gold >= eotg_frontier_establish_cost_value }
+        trigger = {
+            gold >= eotg_frontier_establish_cost_value
+            scope:eotg_frontier_county = { eotg_frontier_can_establish = yes }
+        }
         remove_short_term_gold = eotg_frontier_establish_cost_value
         scope:eotg_frontier_county = {
             eotg_frontier_start_effect = { TYPE = settlement  FOUNDER = scope:eotg_frontier_candidate }
         }
-        custom_tooltip = eotg_frontier.001.start_tt
+        eotg_frontier_start_tooltip_effect = yes
         ai_chance = {
             base = 30
         }
@@ -75,12 +92,15 @@ eotg_frontier.001 = {
     # "A trading post."
     option = {
         name = eotg_frontier.001.b
-        trigger = { gold >= eotg_frontier_establish_cost_value }
+        trigger = {
+            gold >= eotg_frontier_establish_cost_value
+            scope:eotg_frontier_county = { eotg_frontier_can_establish = yes }
+        }
         remove_short_term_gold = eotg_frontier_establish_cost_value
         scope:eotg_frontier_county = {
             eotg_frontier_start_effect = { TYPE = trade  FOUNDER = scope:eotg_frontier_candidate }
         }
-        custom_tooltip = eotg_frontier.001.start_tt
+        eotg_frontier_start_tooltip_effect = yes
         ai_chance = {
             base = 15
             modifier = { add = 10  has_trait = greedy }
@@ -90,12 +110,15 @@ eotg_frontier.001 = {
     # "Mine it."
     option = {
         name = eotg_frontier.001.c
-        trigger = { gold >= eotg_frontier_establish_cost_value }
+        trigger = {
+            gold >= eotg_frontier_establish_cost_value
+            scope:eotg_frontier_county = { eotg_frontier_can_establish = yes }
+        }
         remove_short_term_gold = eotg_frontier_establish_cost_value
         scope:eotg_frontier_county = {
             eotg_frontier_start_effect = { TYPE = mining  FOUNDER = scope:eotg_frontier_candidate }
         }
-        custom_tooltip = eotg_frontier.001.start_tt
+        eotg_frontier_start_tooltip_effect = yes
         ai_chance = {
             base = 15
         }
@@ -104,12 +127,15 @@ eotg_frontier.001 = {
     # "Hold it."
     option = {
         name = eotg_frontier.001.d
-        trigger = { gold >= eotg_frontier_establish_cost_value }
+        trigger = {
+            gold >= eotg_frontier_establish_cost_value
+            scope:eotg_frontier_county = { eotg_frontier_can_establish = yes }
+        }
         remove_short_term_gold = eotg_frontier_establish_cost_value
         scope:eotg_frontier_county = {
             eotg_frontier_start_effect = { TYPE = military  FOUNDER = scope:eotg_frontier_candidate }
         }
-        custom_tooltip = eotg_frontier.001.start_tt
+        eotg_frontier_start_tooltip_effect = yes
         ai_chance = {
             base = 10
             modifier = { add = 15  martial >= 12 }
@@ -120,12 +146,15 @@ eotg_frontier.001 = {
     # "A place of faith."
     option = {
         name = eotg_frontier.001.e
-        trigger = { gold >= eotg_frontier_establish_cost_value }
+        trigger = {
+            gold >= eotg_frontier_establish_cost_value
+            scope:eotg_frontier_county = { eotg_frontier_can_establish = yes }
+        }
         remove_short_term_gold = eotg_frontier_establish_cost_value
         scope:eotg_frontier_county = {
             eotg_frontier_start_effect = { TYPE = religious  FOUNDER = scope:eotg_frontier_candidate }
         }
-        custom_tooltip = eotg_frontier.001.start_tt
+        eotg_frontier_start_tooltip_effect = yes
         ai_chance = {
             base = 5
             modifier = { add = 20  has_trait = zealous }
@@ -135,12 +164,15 @@ eotg_frontier.001 = {
     # "Study what is out there."
     option = {
         name = eotg_frontier.001.f
-        trigger = { gold >= eotg_frontier_establish_cost_value }
+        trigger = {
+            gold >= eotg_frontier_establish_cost_value
+            scope:eotg_frontier_county = { eotg_frontier_can_establish = yes }
+        }
         remove_short_term_gold = eotg_frontier_establish_cost_value
         scope:eotg_frontier_county = {
             eotg_frontier_start_effect = { TYPE = research  FOUNDER = scope:eotg_frontier_candidate }
         }
-        custom_tooltip = eotg_frontier.001.start_tt
+        eotg_frontier_start_tooltip_effect = yes
         ai_chance = {
             base = 5
             modifier = { add = 15  learning >= 12 }
@@ -158,7 +190,7 @@ eotg_frontier.001 = {
         scope:eotg_frontier_county = {
             eotg_frontier_start_effect = { TYPE = administrative  FOUNDER = scope:eotg_frontier_candidate }
         }
-        custom_tooltip = eotg_frontier.001.start_tt
+        eotg_frontier_start_tooltip_effect = yes
         ai_chance = {
             base = 5
             modifier = { add = 10  stewardship >= 14 }
@@ -202,13 +234,13 @@ eotg_frontier.002 = {
             }
             triggered_desc = {
                 trigger = {
-                    scope:eotg_frontier_county = { var:eotg_frontier_strain >= 3 }
+                    scope:eotg_frontier_county = { var:eotg_frontier_strain >= 6 }
                 }
                 desc = eotg_frontier.002.desc_high
             }
             triggered_desc = {
                 trigger = {
-                    scope:eotg_frontier_county = { var:eotg_frontier_strain >= 2 }
+                    scope:eotg_frontier_county = { var:eotg_frontier_strain >= 4 }
                 }
                 desc = eotg_frontier.002.desc_mid
             }
@@ -260,7 +292,10 @@ eotg_frontier.002 = {
     option = {
         name = eotg_frontier.002.a
         trigger = {
-            scope:eotg_frontier_county = { eotg_frontier_has_valid_founder = yes }
+            scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
+                eotg_frontier_has_valid_founder = yes
+            }
             gold >= minor_gold_value
         }
         remove_short_term_gold = minor_gold_value
@@ -276,11 +311,14 @@ eotg_frontier.002 = {
     option = {
         name = eotg_frontier.002.b
         trigger = {
-            scope:eotg_frontier_county = { eotg_frontier_has_valid_founder = yes }
+            scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
+                eotg_frontier_has_valid_founder = yes
+            }
         }
         scope:eotg_frontier_county = {
-            add_county_modifier = { modifier = eotg_frontier_mod_hard_season  years = 2 }
-            eotg_frontier_add_progress_effect = { AMOUNT = 8 }
+            add_county_modifier = { modifier = eotg_frontier_mod_hard_year  years = 2 }
+            eotg_frontier_add_progress_effect = { AMOUNT = 4 }
             eotg_frontier_add_strain_effect = { CAUSE = hardship }
         }
         custom_tooltip = eotg_frontier.002.push_tt
@@ -295,6 +333,7 @@ eotg_frontier.002 = {
         name = eotg_frontier.002.c
         trigger = {
             scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
                 eotg_frontier_has_valid_founder = yes
                 eotg_frontier_has_valid_sponsor = yes
                 var:eotg_frontier_sponsor = { gold >= eotg_frontier_sponsor_payment_value }
@@ -316,7 +355,10 @@ eotg_frontier.002 = {
     option = {
         name = eotg_frontier.002.d
         trigger = {
-            scope:eotg_frontier_county = { eotg_frontier_has_valid_founder = no }
+            scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
+                eotg_frontier_has_valid_founder = no
+            }
             exists = scope:eotg_frontier_candidate
         }
         scope:eotg_frontier_county = {
@@ -332,7 +374,10 @@ eotg_frontier.002 = {
     option = {
         name = eotg_frontier.002.e
         trigger = {
-            scope:eotg_frontier_county = { eotg_frontier_has_valid_founder = no }
+            scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
+                eotg_frontier_has_valid_founder = no
+            }
         }
         scope:eotg_frontier_county = {
             eotg_frontier_set_founder_effect = { FOUNDER = root }
@@ -348,12 +393,26 @@ eotg_frontier.002 = {
     option = {
         name = eotg_frontier.002.f
         trigger = {
-            scope:eotg_frontier_county = { eotg_frontier_has_valid_founder = no }
+            scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
+                eotg_frontier_has_valid_founder = no
+            }
         }
         custom_tooltip = eotg_frontier.002.f_tt
         ai_chance = {
             base = 5
             modifier = { add = 20  has_trait = lazy }
+        }
+    }
+    # The Region is no longer in this state (it moved on while the event was
+    # open): a way out with no effect (verification Q-B1)
+    option = {
+        name = eotg_frontier.option_passed
+        trigger = {
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = no }
+        }
+        ai_chance = {
+            base = 100
         }
     }
 }
@@ -396,11 +455,12 @@ eotg_frontier.003 = {
     option = {
         name = eotg_frontier.003.a
         trigger = {
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
             scope:eotg_frontier_sponsor = { eotg_frontier_can_sponsor = yes }
         }
         scope:eotg_frontier_county = {
             eotg_frontier_set_sponsor_effect = { SPONSOR = scope:eotg_frontier_sponsor }
-            eotg_frontier_add_progress_effect = { AMOUNT = 5 }
+            eotg_frontier_add_progress_effect = { AMOUNT = 3 }
         }
         custom_tooltip = eotg_frontier.003.accept_tt
         hidden_effect = {
@@ -510,7 +570,10 @@ eotg_frontier.004 = {
     option = {
         name = eotg_frontier.004.a
         trigger = {
-            scope:eotg_frontier_county = { eotg_frontier_has_valid_founder = yes }
+            scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
+                eotg_frontier_has_valid_founder = yes
+            }
             NOT = { scope:eotg_frontier_founder = root }
             gold >= minor_gold_value
         }
@@ -529,7 +592,10 @@ eotg_frontier.004 = {
     option = {
         name = eotg_frontier.004.b
         trigger = {
-            scope:eotg_frontier_county = { eotg_frontier_has_valid_founder = yes }
+            scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
+                eotg_frontier_has_valid_founder = yes
+            }
             NOT = { scope:eotg_frontier_founder = root }
         }
         scope:eotg_frontier_founder = { add_prestige = 100 }
@@ -544,11 +610,25 @@ eotg_frontier.004 = {
     # "The work is its own reward."
     option = {
         name = eotg_frontier.004.c
+        trigger = {
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
         scope:eotg_frontier_county = { eotg_frontier_complete_effect = yes }
         custom_tooltip = eotg_frontier.004.complete_tt
         ai_chance = {
             base = 20
             modifier = { add = 20  has_trait = greedy }
+        }
+    }
+    # The Region is no longer in this state (it moved on while the event was
+    # open): a way out with no effect (verification Q-B1)
+    option = {
+        name = eotg_frontier.option_passed
+        trigger = {
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = no }
+        }
+        ai_chance = {
+            base = 100
         }
     }
 }
@@ -592,7 +672,7 @@ eotg_frontier.005 = {
         exists = scope:eotg_frontier_county
         scope:eotg_frontier_county = {
             eotg_frontier_is_frontier = yes
-            var:eotg_frontier_strain >= 4
+            var:eotg_frontier_strain >= eotg_frontier_strain_fail_value
         }
     }
 
@@ -618,6 +698,9 @@ eotg_frontier.005 = {
     # "Let it go."
     option = {
         name = eotg_frontier.005.a
+        trigger = {
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
         scope:eotg_frontier_county = {
             eotg_frontier_abandon_effect = { FAILED = yes }
         }
@@ -631,6 +714,7 @@ eotg_frontier.005 = {
     option = {
         name = eotg_frontier.005.b
         trigger = {
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
             exists = scope:eotg_frontier_candidate
             gold >= minor_gold_value
         }
@@ -650,6 +734,7 @@ eotg_frontier.005 = {
         name = eotg_frontier.005.c
         trigger = {
             scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
                 NOT = { var:eotg_frontier_type ?= flag:settlement }
             }
         }
@@ -668,6 +753,7 @@ eotg_frontier.005 = {
         name = eotg_frontier.005.d
         trigger = {
             scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
                 eotg_frontier_has_valid_sponsor = yes
                 var:eotg_frontier_sponsor = {
                     gold >= {
@@ -684,9 +770,20 @@ eotg_frontier.005 = {
                     multiply = 2
                 }
             }
-            set_variable = { name = eotg_frontier_strain  value = 1 }
+            set_variable = { name = eotg_frontier_strain  value = 2 }
         }
         custom_tooltip = eotg_frontier.005.sponsor_tt
+        ai_chance = {
+            base = 100
+        }
+    }
+    # The Region is no longer in this state (it moved on while the event was
+    # open): a way out with no effect (verification Q-B1)
+    option = {
+        name = eotg_frontier.option_passed
+        trigger = {
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = no }
+        }
         ai_chance = {
             base = 100
         }
@@ -697,11 +794,56 @@ eotg_frontier.005 = {
 # Whom to Back: the Sponsor decision's pick. Up to three unsponsored
 # Frontiers held by others, most advanced first (reads Establishment). The
 # chosen holder answers in .003.
-# UNVERIFIED-VANILLA (spec §16 V2): ordered_in_global_list over title scopes.
+# ordered_in_global_list over title scopes: confirmed (verification V2).
 eotg_frontier.010 = {
     type = character_event
     title = eotg_frontier.010.t
-    desc = eotg_frontier.010.desc
+    # Each offer's stage, in words (verification Q7)
+    desc = {
+        desc = eotg_frontier.010.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_offer_1 ?= { var:eotg_frontier_progress >= 66 } }
+                desc = eotg_frontier.010.desc_offer_1_late
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_offer_1 ?= { var:eotg_frontier_progress >= 33 } }
+                desc = eotg_frontier.010.desc_offer_1_mid
+            }
+            triggered_desc = {
+                trigger = { exists = scope:eotg_frontier_offer_1 }
+                desc = eotg_frontier.010.desc_offer_1_early
+            }
+        }
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_offer_2 ?= { var:eotg_frontier_progress >= 66 } }
+                desc = eotg_frontier.010.desc_offer_2_late
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_offer_2 ?= { var:eotg_frontier_progress >= 33 } }
+                desc = eotg_frontier.010.desc_offer_2_mid
+            }
+            triggered_desc = {
+                trigger = { exists = scope:eotg_frontier_offer_2 }
+                desc = eotg_frontier.010.desc_offer_2_early
+            }
+        }
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_offer_3 ?= { var:eotg_frontier_progress >= 66 } }
+                desc = eotg_frontier.010.desc_offer_3_late
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_offer_3 ?= { var:eotg_frontier_progress >= 33 } }
+                desc = eotg_frontier.010.desc_offer_3_mid
+            }
+            triggered_desc = {
+                trigger = { exists = scope:eotg_frontier_offer_3 }
+                desc = eotg_frontier.010.desc_offer_3_early
+            }
+        }
+    }
     theme = realm
 
     left_portrait = {

@@ -3,12 +3,9 @@
 # §3.1, §6.2). One modifier per Frontier stage is all the player sees; the
 # Establishment and strain numbers stay hidden (spec §R).
 #
-# UNVERIFIED-VANILLA (spec §16 V4, V18): the modifier keys below as COUNTY
-# modifier keys (tax_mult, levy_size, development_growth_factor,
-# monthly_county_control_growth_add / _factor; the last two are used by this
-# mod's buildings), and the vanilla county-modifier icon keys
-# county_modifier_development_positive / _negative and
-# county_modifier_control_positive / _negative.
+# County modifiers and the icon keys county_modifier_development_positive /
+# _negative and county_modifier_control_positive / _negative: confirmed
+# (verification V4, V18). Tiger reports no unknown modifier key here.
 # -----------------------------------------------------------------------------
 
 # A Region with no recognized settlement yet: Systems remain open
@@ -41,6 +38,17 @@ eotg_frontier_mod_established = {
     development_growth_factor = 0.1
 }
 
+# Full Establishment, but a completion floor is unmet: says what completion is
+# waiting on (verification Q4b). No effect beyond the outpost-level lines.
+eotg_frontier_mod_waiting_development = {
+    icon = county_modifier_development_negative
+    tax_mult = -0.1
+}
+eotg_frontier_mod_waiting_control = {
+    icon = county_modifier_control_negative
+    tax_mult = -0.1
+}
+
 # Ten years after a project completes (spec §5.3; one shared modifier, Q6)
 eotg_frontier_mod_new_settlement = {
     icon = county_modifier_development_positive
@@ -55,8 +63,9 @@ eotg_frontier_mod_abandoned_works = {
     tax_mult = -0.05
 }
 
-# Two years after .002 option a ("ship in supplies") in a lean year
-eotg_frontier_mod_hard_season = {
+# Two years after .002 option b ("push through") in a lean year (lore S1:
+# "a year" is time- and planet-neutral; "season" was not)
+eotg_frontier_mod_hard_year = {
     icon = county_modifier_control_negative
     monthly_county_control_growth_factor = -0.1
 }
