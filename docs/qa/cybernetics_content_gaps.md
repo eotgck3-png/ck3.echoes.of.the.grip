@@ -1,3 +1,5 @@
+> Superseded by `docs/specs/cybernetics_v2.md` and `docs/qa/cybernetics_test_plan.md` (2026-10-03). Kept as history; do not use as a current description.
+
 # Cybernetics — Content Gaps and What's Needed
 
 > **Note (2026-10-03):** the "make fracture risk visible" items (§2.5, §5 Visibility, §6 step 1) conflict with the decision that risk stays hidden (spec Q1). Treat them as input for the deferred "qualitative hint" design call. See [cybernetics_system_overview.md](cybernetics_system_overview.md) §6.

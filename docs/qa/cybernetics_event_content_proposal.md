@@ -1,3 +1,5 @@
+> Superseded by `docs/specs/cybernetics_v2.md` and `docs/qa/cybernetics_test_plan.md` (2026-10-03). Kept as history; do not use as a current description.
+
 # Cybernetics — Proposed Event & Story-Cycle Content
 
 **Date:** 2026-10-03  

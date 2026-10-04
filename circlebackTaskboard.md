@@ -240,13 +240,6 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Trigger to revisit:** the next time those events are edited.
 - **Owner:** eotg-scripter
 
-### CB-16: Superseded cybernetics QA docs
-- **Status:** dispatched to cloud (2026-10-04), see CB-24
-- **Status (earlier):** ready (2026-10-03)
-- **What:** `docs/qa/cybernetics_system_overview.md`, `cybernetics_content_gaps.md`, `cybernetics_logic_audit.md` and `cybernetics_event_content_proposal.md` describe the system before v2 was built. They're useful history but now misleading as a current description.
-- **Owner:** orchestrator
-- **Next step:** add a one-line "superseded by `docs/specs/cybernetics_v2.md` and `docs/qa/cybernetics_test_plan.md` (2026-10-03)" note to the top of each.
-
 ### CB-17: Culture reactions to augmentation
 - **Status:** blocked (2026-10-03)
 - **What:** v1's design had per-culture reactions to augmented rulers. They were deferred because they would reference culture keys, which breaks the temporary-map rule.
@@ -256,11 +249,27 @@ These are shared conditions. Clearing one unblocks every item that names it.
 
 ---
 
-### CB-24: Cloud session, CB-16 + static cybernetics conformance audit
-- **Status:** waiting-human (2026-10-04)
-- **What:** a cloud Claude Code session (GitHub only: no game files, Tiger or PX) does CB-16, then a read-only audit of the cybernetics v2 script against `docs/specs/cybernetics_v2*.md`, written to `docs/qa/cybernetics_spec_conformance_cloud.md`. It's report-only, so it can't conflict with the CB-22 balance work. The prompt template is `docs/cloud_agent_prompt.md`.
-- **Owner:** human (send the prompt) → orchestrator
-- **Next step:** when the cloud branch (`claude/...`) comes back, tell the orchestrator its name. The orchestrator pulls it and has eotg-qa triage the findings against Tiger and PX. Every `UNVERIFIED-VANILLA` claim gets checked against game files, and the handoff in `docs/handoffs/` is copied here.
+### CB-25: Loc broken by the scope rename (uncommitted round-2 work)
+- **Status:** ready, but wait for the round-2 session to finish (2026-10-04)
+- **What:** the uncommitted round-2 work renamed `aug_spouse` to `eotg_aug_spouse` and `other_machine` to `eotg_other_machine` in script, but not in loc. Ten strings would render broken: loc :1156, :1165–1167, :1272–1273, :1277–1278, :1281–1282. New script also references three keys that have no loc: `eotg_fracture.011.f`, `eotg_fracture.020.d` and `eotg_aug_tier3.014.a.tt`. Tiger reports them as `unknown datafunction` and missing loc.
+- **Owner:** eotg-localizer, or whichever session owns the round-2 change set
+- **Next step:** fix this before the round-2 work is committed. Don't edit the loc while that session is mid-edit.
+- **Refs:** eotg-qa verification of CB-24, 2026-10-04
+
+### CB-26: Architect: ratify or reject the conformance deviations
+- **Status:** ready (2026-10-04)
+- **What:** the conformance report, `docs/qa/cybernetics_spec_conformance_cloud.md`, covers M1–M6, M9–M12, L1, L4, L6–L12, L14–L24 and S1–S19. Most are commented "final QA" or "orchestrator ruling" deviations that were never written back into the specs. Also: titles retitled in 5a97355 (init.002, init.005, tier2.005, fracture.024) now drift from the spec names.
+- **Owner:** eotg-architect
+- **Next step:** one pass, after CB-22's balance spec settles, because they touch the same files. Read §6 first: L3 is moot, and the line numbers are stale.
+
+### CB-27: Scripter: conformance bug fixes
+- **Status:** blocked on CB-26 for M1 and M2 (2026-10-04); M7 and M8 are ready once the round-2 edits land
+- **What:**
+  - **M8:** exclude the patron envoy from `eotg_aug_patron_critic_candidate` and the patron.004 pick.
+  - **M7:** guard patron.006's portrait and descs against a dead envoy, and decide what happens to an envoy who has left court.
+  - **After rulings:** M1 (penalty text vs modifier), M2, M10, L2, L5 and L13.
+- **Owner:** eotg-scripter (eotg-localizer for any text)
+- **Next step:** dispatch after the round-2 session commits, to avoid edit collisions.
 
 ## Tooling and environment
 
@@ -290,3 +299,5 @@ These are shared conditions. Clearing one unblocks every item that names it.
 |---|---|---|---|
 | — | Q8: build The Sickly Child (child augmentation) | Human accepted all v2 recommendations; lore-keeper confirmed the drafted tone | 2026-10-03 |
 | — | Cybernetics trait icons, 3 decision pictures, 4 modifier icons | Delivered and converted to vanilla formats | 2026-10-03 |
+| CB-16 | Superseded notes on the 4 pre-v2 cybernetics QA docs | Done by cloud session (CB-24) | 2026-10-04 |
+| CB-24 | Cloud conformance audit | Merged from `claude/focused-dirac-ixo81h`. Verified locally: 12/12 MEDIUM confirmed and 5 vanilla claims settled (report §6). Follow-ups are CB-25 to CB-27. | 2026-10-04 |
