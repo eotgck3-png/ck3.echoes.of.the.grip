@@ -756,6 +756,11 @@ eotg_aug_forget_relation_effect = {
 # `NOT = { exists = faction_war }` guard: discontent on a faction already at war
 # does nothing. Liberty first ("bind the mad ruler"), independence as fallback;
 # the vanilla factions and CBs run any war. No title is referenced.
+# QA round 2: create_faction never conscripts a player (multiplayer) vassal:
+# the vassal must be is_ai = yes, as vanilla filters the guest whose grudge
+# raises the faction (prelude_events.txt:209-211,
+# prelude_events_0010_appropriate_guest). A player vassal falls through to
+# "the warrant circulates".
 # Saves scope:eotg_warrant_result = flag:discontent / flag:faction /
 # flag:circulated so the caller's desc can say what happened.
 # Callers: eotg_fracture.006 (immediate), eotg_fracture.025 (b, 30%),
@@ -774,6 +779,7 @@ eotg_aug_raise_warrant_effect = {
     else_if = {
         limit = {
             scope:eotg_warrant_vassal = {
+                is_ai = yes
                 can_create_faction = { type = liberty_faction  target = root }
             }
         }
@@ -785,6 +791,7 @@ eotg_aug_raise_warrant_effect = {
     else_if = {
         limit = {
             scope:eotg_warrant_vassal = {
+                is_ai = yes
                 can_create_faction = { type = independence_faction  target = root }
             }
         }

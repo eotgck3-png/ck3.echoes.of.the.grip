@@ -252,6 +252,14 @@ eotg_fracture.002 = {
     # 30 days (eotg_flag_aug_breach_victim), never every wounded courtier
     # (audit §1.5). Hidden when there is no survivor to execute (an option with
     # no target is a dead button; vanilla gates target options on existence).
+    # QA round 2: an execution, so vanilla death_execution
+    # (game/common/deathreasons/00_event_deaths.txt), and a deliberate killing,
+    # so family victims make the ruler a kinslayer through vanilla
+    # add_kinslayer_trait_or_nothing_effect (00_secret_effects.txt:433), called
+    # before the death as vanilla execute_prisoner_effect does
+    # (00_prison_effects.txt). The involuntary episode deaths (immediate above,
+    # and every other Containment Failure / Massacre victim) carry no
+    # kinslayer: the machine did it, not a decision (QA round 2 M4).
     option = {
         name = eotg_fracture.002.c
         trigger = {
@@ -265,7 +273,9 @@ eotg_fracture.002 = {
                 is_alive = yes
                 has_character_flag = eotg_flag_aug_breach_victim
             }
-            death = { death_reason = death_murder  killer = root }
+            save_scope_as = eotg_executed
+            root = { add_kinslayer_trait_or_nothing_effect = { VICTIM = scope:eotg_executed } }
+            death = { death_reason = death_execution  killer = root }
         }
         add_dread = 50
         add_tyranny = 20
@@ -663,8 +673,15 @@ eotg_fracture.005 = {
         scope:eotg_heir_story = { change_variable = { name = eotg_heir_dread  add = 2 } }
         scope:watching_heir = {
             add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 8 }
+            # callous is opposite to compassionate AND sadistic
+            # (game/common/traits/00_traits.txt `opposites`); guard both
+            # (QA round 2, trait guards).
             if = {
-                limit = { NOT = { has_trait = compassionate } }    # callous/compassionate are opposites
+                limit = {
+                    NOT = { has_trait = compassionate }
+                    NOT = { has_trait = sadistic }
+                    NOT = { has_trait = callous }
+                }
                 random = {
                     chance = 30
                     add_trait = callous
@@ -802,7 +819,14 @@ eotg_fracture.006 = {
                 exists = scope:eotg_warrant_vassal
                 scope:eotg_warrant_vassal = { is_imprisoned = no }
             }
-            imprison = { target = scope:eotg_warrant_vassal  type = dungeon }
+            # QA round 2 M5: vanilla imprison_character_effect
+            # (00_prison_effects.txt:1644): unjust-imprisonment tyranny and the
+            # family's opinion, as tier3 does. The flat +20 tyranny above is
+            # the crackdown itself and stays.
+            imprison_character_effect = {
+                TARGET = scope:eotg_warrant_vassal
+                IMPRISONER = root
+            }
         }
         stress_impact = { base = medium_stress_impact_gain }
         eotg_aug_stress_tyranny_effect = yes
@@ -855,7 +879,10 @@ eotg_fracture.006 = {
                             exists = scope:eotg_warrant_vassal
                             scope:eotg_warrant_vassal = { is_imprisoned = no }
                         }
-                        imprison = { target = scope:eotg_warrant_vassal  type = dungeon }
+                        imprison_character_effect = {    # QA round 2 M5
+                            TARGET = scope:eotg_warrant_vassal
+                            IMPRISONER = root
+                        }
                     }
                 }
                 50 = {
