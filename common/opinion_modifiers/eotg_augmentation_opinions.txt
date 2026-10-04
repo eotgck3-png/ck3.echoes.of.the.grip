@@ -64,3 +64,48 @@ eotg_opinion_aug_passed_over = {
     opinion = -15
     decaying = no
 }
+
+# -- Interactions (docs/specs/cybernetics_v2_interactions.md §3.1) -----------
+# Shapes: vanilla 00_crime_and_prison_opinions.txt:453-465 (blinded_me,
+# blinded_family_member); demanded_my_conversion_opinion for the timed -10.
+
+# A hook-forced Offer or Demand. Callers: eotg_aug_offer_install_effect,
+# eotg_aug_demand_removal_effect.
+eotg_opinion_aug_forced_procedure = {
+    opinion = -30
+    decaying = yes
+    years = 20
+}
+
+# Refused a Demand Implant Removal; applied with years = 5.
+# Caller: eotg_aug_demand_removal_interaction (on_decline).
+eotg_opinion_aug_demanded_removal = {
+    opinion = -10
+}
+
+# Salvage Implants, on the prisoner ("Cut Out My Implants") and their spouse
+# and close family, built by vanilla torture_blind_castrate_disfigure_
+# opinion_effect with VERB = eotg_opinion_aug_salvaged.
+# Caller: eotg_aug_salvage_interaction (on_accept).
+eotg_opinion_aug_salvaged_me = {
+    opinion = -50
+    decaying = yes
+    years = 50
+    imprisonment_reason = yes
+}
+
+eotg_opinion_aug_salvaged_family_member = {
+    opinion = -20
+    decaying = yes
+    years = 20
+}
+
+# A discovered tampering: a lawful reason to imprison, the vanilla way.
+# Callers: eotg_aug_tamper.001 (failure, discovered), eotg_aug_tamper.004
+# (immediate when known; e), eotg_aug_int.001 (d).
+eotg_opinion_aug_tampered = {
+    opinion = -40
+    decaying = yes
+    years = 30
+    imprisonment_reason = yes
+}

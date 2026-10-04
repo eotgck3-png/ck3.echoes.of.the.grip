@@ -1836,7 +1836,11 @@ eotg_aug_clear_chain_flags_effect = {
 # eotg_has_physician_access does not mirror.
 # Callers: eotg_aug_proc.001 / .003 (immediate), eotg_aug_tier1.021 (after),
 # eotg_aug_tier2.003 (f), eotg_aug_init.006 (c), eotg_aug_init.017 (a, d),
-# eotg_aug_init.018 (c).
+# eotg_aug_init.018 (c). Interactions: in scope:actor (the actor's surgeon
+# operates on someone else) from eotg_aug_examine_interaction,
+# eotg_aug_offer_install_effect, eotg_aug_demand_removal_effect,
+# eotg_aug_salvage_effect; on root from eotg_aug_tamper.004 (immediate) and
+# eotg_aug_int.002 (b).
 eotg_aug_save_surgeon_effect = {
     if = {
         limit = { employs_court_position = court_physician_court_position }
@@ -1881,11 +1885,18 @@ eotg_aug_pay_procedure_effect = {
 #
 # The severe tail (maimed, one_eyed, blind, death) and discovered exist only
 # in the back streets. Every bad entry takes eotg_aug_proc_bad_factor.
+# Interactions spec §3.2: a Salvage patient (eotg_flag_aug_proc_salvage,
+# eotg_aug_salvage_effect) is cut for the parts, not the patient: rejection
+# x5, maimed / one_eyed / blind x2, death x3. The severe weights stay 0 at
+# the clinic and the physician before factors, so procedures DoD 5 holds. The
+# sabotage fault (eotg_flag_aug_sabotaged) is read by eotg_aug_proc_bad_factor.
+# Both flags are spent by the roll (step 5 below).
 # Death on the table is applied here (death_treatment, "died due to a
 # botched treatment", common/deathreasons/00_event_deaths.txt:214), as
 # Excision does; there is no reveal for it.
 # Callers: eotg_aug_procedure_effect, eotg_aug_procedure_roll_booked_effect,
-# eotg_aug_init.010 (a, c, d), eotg_aug_init.018 (b).
+# eotg_aug_init.010 (a, c, d), eotg_aug_init.018 (b),
+# eotg_aug_offer_install_effect (back streets), eotg_aug_int.002 (b).
 eotg_aug_procedure_roll_effect = {
     $PATIENT$ = { save_scope_as = eotg_proc_patient }
     $SURGEON$ = { save_scope_as = eotg_proc_surgeon }
@@ -1976,6 +1987,7 @@ eotg_aug_procedure_roll_effect = {
                 modifier = { add = 12  scope:eotg_proc_provider = flag:backstreet }
                 modifier = { factor = eotg_aug_proc_bad_factor  always = yes }
                 modifier = { factor = 2  scope:eotg_proc_kind = flag:upgrade }
+                modifier = { factor = 5  has_character_flag = eotg_flag_aug_proc_salvage }
                 save_scope_value_as = { name = eotg_proc_outcome  value = flag:rejection }
             }
             # Discovered
@@ -1993,6 +2005,7 @@ eotg_aug_procedure_roll_effect = {
                 modifier = { factor = eotg_aug_proc_bad_factor  always = yes }
                 modifier = { factor = 2  has_character_flag = eotg_flag_aug_proc_under }
                 modifier = { factor = 0  has_trait = maimed }
+                modifier = { factor = 2  has_character_flag = eotg_flag_aug_proc_salvage }
                 save_scope_value_as = { name = eotg_proc_outcome  value = flag:maimed }
             }
             # An eye lost on the table
@@ -2007,6 +2020,7 @@ eotg_aug_procedure_roll_effect = {
                         has_trait = blind
                     }
                 }
+                modifier = { factor = 2  has_character_flag = eotg_flag_aug_proc_salvage }
                 save_scope_value_as = { name = eotg_proc_outcome  value = flag:one_eyed }
             }
             # Blinded on the table
@@ -2015,6 +2029,7 @@ eotg_aug_procedure_roll_effect = {
                 modifier = { factor = eotg_aug_proc_bad_factor  always = yes }
                 modifier = { factor = 2  has_character_flag = eotg_flag_aug_proc_under }
                 modifier = { factor = 0  has_trait = blind }
+                modifier = { factor = 2  has_character_flag = eotg_flag_aug_proc_salvage }
                 save_scope_value_as = { name = eotg_proc_outcome  value = flag:blind }
             }
             # Death on the table (never on a repair)
@@ -2023,6 +2038,7 @@ eotg_aug_procedure_roll_effect = {
                 modifier = { factor = eotg_aug_proc_bad_factor  always = yes }
                 modifier = { factor = 2  has_character_flag = eotg_flag_aug_proc_under }
                 modifier = { factor = 0  scope:eotg_proc_kind = flag:repair }
+                modifier = { factor = 3  has_character_flag = eotg_flag_aug_proc_salvage }
                 save_scope_value_as = { name = eotg_proc_outcome  value = flag:death }
             }
         }
@@ -2063,6 +2079,30 @@ eotg_aug_procedure_roll_effect = {
             remove_character_flag = eotg_flag_aug_proc_under
             remove_character_flag = eotg_flag_aug_backalley_discreet
             eotg_aug_clear_chain_flags_effect = yes
+            # Interactions spec §3.2. Exception (§4.4.3, the specific rule;
+            # coordinator ruling): a fault repair that does not repair leaves
+            # the fault in place, so the sabotage flag survives it (x1.5 still
+            # applies, eotg_aug_has_fault stays true, matching
+            # eotg_mod_aug_tampered). "Does not repair" = every repair outcome
+            # whose branch in eotg_aug_procedure_apply_effect skips
+            # eotg_aug_repair_injury_effect: rejection, maimed, one_eyed,
+            # blind (death has weight 0 on a repair).
+            remove_character_flag = eotg_flag_aug_proc_salvage
+            if = {
+                limit = {
+                    NAND = {
+                        scope:eotg_proc_kind = flag:repair
+                        OR = {
+                            scope:eotg_proc_outcome = flag:rejection
+                            scope:eotg_proc_outcome = flag:maimed
+                            scope:eotg_proc_outcome = flag:one_eyed
+                            scope:eotg_proc_outcome = flag:blind
+                        }
+                        var:eotg_aug_repair_injury ?= flag:fault
+                    }
+                }
+                remove_character_flag = eotg_flag_aug_sabotaged
+            }
         }
         if = {
             limit = { scope:eotg_proc_outcome = flag:death }
@@ -2225,7 +2265,9 @@ eotg_aug_procedure_apply_effect = {
 # eotg_aug_tier2.003 (a, c, d, f, g), and the ruler install offers
 # init.001 (a, d, e), .002 (a, d), .003 (a, d), .004 (a, e), .005 (a, d),
 # .006 (a, c, e, f), .009 (a, d), .016 (a, e), .017 (a, d), .018 (a, c),
-# .019 (a, d).
+# .019 (a, d). Interactions spec: eotg_aug_offer_install_effect,
+# eotg_aug_demand_removal_effect, eotg_aug_salvage_effect, eotg_aug_int.001
+# (b), eotg_aug_int.002 (b), eotg_aug_tamper.004 (a, b, c).
 eotg_aug_procedure_effect = {
     eotg_aug_procedure_roll_effect = { PATIENT = $PATIENT$  PROVIDER = $PROVIDER$  PROCEDURE = $PROCEDURE$  SURGEON = $SURGEON$ }
     if = {
@@ -2317,6 +2359,11 @@ eotg_aug_removal_perform_effect = {
 # heal fully (eotg_aug_heal_wounds_effect); a lost part's trait is removed if
 # still held, and maimed's vanilla recently_maimed_modifier with it. Removals
 # guarded (CB-27 tooltip pattern). Counterpart: eotg_aug_has_repair_injury.
+# Interactions spec §3.2: flag:fault (set by eotg_aug_fault_repair_book_effect
+# for tamper.004 a/b/c and int.001.b) clears the hidden flaw, the sabotage
+# flag and the tampered modifier. The flags are hidden state, so their
+# removal is hidden. Not in eotg_aug_has_repair_injury: proc.003 never offers
+# to repair a fault.
 # Callers: eotg_aug_procedure_apply_effect (repair outcomes), eotg_aug_proc.004
 # (immediate).
 eotg_aug_repair_injury_effect = {
@@ -2363,6 +2410,17 @@ eotg_aug_repair_injury_effect = {
             remove_trait = disfigured
         }
     }
+    else_if = {
+        limit = { var:eotg_aug_repair_injury ?= flag:fault }
+        hidden_effect = {
+            remove_character_flag = eotg_flag_aug_hidden_flaw
+            remove_character_flag = eotg_flag_aug_sabotaged
+        }
+        if = {
+            limit = { has_character_modifier = eotg_mod_aug_tampered }
+            remove_character_modifier = eotg_mod_aug_tampered
+        }
+    }
     hidden_effect = { remove_variable = eotg_aug_repair_injury }
 }
 
@@ -2394,5 +2452,388 @@ eotg_aug_mark_former_effect = {
             limit = { has_trait = zealous }
             add_opinion = { modifier = eotg_opinion_aug_reassured  target = scope:eotg_former_self  years = 5 }
         }
+    }
+}
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Interactions — docs/specs/cybernetics_v2_interactions.md §4 (G4, G5, G8)
+# Every procedure here goes through the shared roll (eotg_aug_procedure_effect
+# / _roll_effect), inside hidden_effect, on a click (an interaction's
+# on_accept or an event option), followed by a custom_tooltip.
+# ═════════════════════════════════════════════════════════════════════════════
+
+# Offer Augmentation's install (spec §4.1), mirroring init.018's three paths
+# with PATIENT = scope:recipient. PROVIDER: clinic / physician / backstreet.
+# Price: minor_gold_value (the price for installing on someone else,
+# init.020), x eotg_aug_price_mult_physician for the physician;
+# tiny_gold_value in the back streets (mirror: the interaction's
+# is_valid_showing_failures_only). The offer doubles as a prosthetic: one
+# physical loss is restored (The Prosthetic, init.006). The reveal goes to the
+# recipient (init.011 or silent). Willing: gratitude; hook-forced: Forced
+# Procedure.
+# Caller: eotg_aug_offer_augmentation_interaction (on_accept).
+eotg_aug_offer_install_effect = {
+    save_temporary_scope_value_as = { name = eotg_offer_provider  value = flag:$PROVIDER$ }
+    # 1. The actor pays
+    scope:actor = {
+        if = {
+            limit = { scope:eotg_offer_provider = flag:physician }
+            eotg_aug_pay_procedure_effect = { BASE = minor_gold_value  MULT = eotg_aug_price_mult_physician }
+        }
+        else_if = {
+            limit = { scope:eotg_offer_provider = flag:backstreet }
+            eotg_aug_pay_procedure_effect = { BASE = tiny_gold_value  MULT = 1 }
+        }
+        else = {
+            eotg_aug_pay_procedure_effect = { BASE = minor_gold_value  MULT = 1 }
+        }
+    }
+    # 2. Install, and restore one loss
+    scope:recipient = {
+        eotg_aug_initiate_effect = yes
+        if = {
+            limit = { eotg_has_physical_loss = yes }
+            eotg_aug_restore_loss_effect = yes
+        }
+    }
+    # 4. The back streets (init.018.b): risk 5, roll, the reveal at init.011
+    if = {
+        limit = { scope:eotg_offer_provider = flag:backstreet }
+        scope:recipient = {
+            hidden_effect = {
+                set_variable = { name = eotg_fracture_risk  value = 5 }
+            }
+        }
+        custom_tooltip = eotg_aug_proc.install_tt
+        hidden_effect = {
+            eotg_aug_procedure_roll_effect = { PATIENT = scope:recipient  PROVIDER = backstreet  PROCEDURE = install  SURGEON = scope:recipient }
+        }
+        if = {
+            limit = { NOT = { scope:eotg_proc_outcome = flag:death } }
+            scope:recipient = {
+                trigger_event = { id = eotg_aug_init.011  days = { 180 540 } }
+            }
+        }
+    }
+    # 3. Clinic or physician (init.018 a / c)
+    else = {
+        scope:recipient = {
+            if = {
+                limit = { scope:eotg_offer_provider = flag:physician }
+                add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 3 }
+            }
+            else = {
+                add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 2 }
+            }
+        }
+        custom_tooltip = eotg_aug_proc.install_tt
+        if = {
+            limit = { scope:eotg_offer_provider = flag:physician }
+            hidden_effect = {
+                scope:actor = { eotg_aug_save_surgeon_effect = yes }
+                eotg_aug_procedure_effect = { PATIENT = scope:recipient  PROVIDER = physician  PROCEDURE = install  SURGEON = scope:eotg_proc_surgeon }
+            }
+        }
+        else = {
+            hidden_effect = {
+                eotg_aug_procedure_effect = { PATIENT = scope:recipient  PROVIDER = clinic  PROCEDURE = install  SURGEON = scope:recipient }
+            }
+        }
+    }
+    # 5. Opinion (the willing shape: eotg_aug_retainer_install_effect)
+    scope:recipient = {
+        if = {
+            limit = { is_alive = yes }
+            if = {
+                limit = { scope:hook ?= yes }
+                add_opinion = { modifier = eotg_opinion_aug_forced_procedure  target = scope:actor }
+            }
+            else = {
+                add_opinion = { modifier = eotg_opinion_aug_grateful_patient  target = scope:actor  years = 10 }
+            }
+        }
+    }
+}
+
+# Demand Implant Removal (spec §4.2). Same order as proc.001: pay, perform,
+# roll. The full-removal body (eotg_aug_removal_perform_effect: remove-all,
+# 3-year withdrawal, the reject stress; former flag:removed) runs on the
+# recipient through a 30-day booking that is spent at once. The interaction's
+# is_valid_showing_failures_only refuses while the recipient has a booking of
+# their own (the procedures QA booking guard), so none is overwritten.
+# PROVIDER: clinic / physician / backstreet.
+# Caller: eotg_aug_demand_removal_interaction (on_accept).
+eotg_aug_demand_removal_effect = {
+    save_temporary_scope_value_as = { name = eotg_demand_provider  value = flag:$PROVIDER$ }
+    # 1. The actor pays (full-removal clinic price, medium_gold_value)
+    scope:actor = {
+        if = {
+            limit = { scope:eotg_demand_provider = flag:physician }
+            eotg_aug_pay_procedure_effect = { BASE = medium_gold_value  MULT = eotg_aug_price_mult_physician }
+        }
+        else_if = {
+            limit = { scope:eotg_demand_provider = flag:backstreet }
+            eotg_aug_pay_procedure_effect = { BASE = medium_gold_value  MULT = eotg_aug_price_mult_backstreet_removal }
+        }
+        else = {
+            eotg_aug_pay_procedure_effect = { BASE = medium_gold_value  MULT = 1 }
+        }
+    }
+    # 2. The actor's surgeon
+    if = {
+        limit = { scope:eotg_demand_provider = flag:physician }
+        scope:actor = { eotg_aug_save_surgeon_effect = yes }
+    }
+    # 3. Perform, on the recipient
+    scope:recipient = {
+        hidden_effect = {
+            set_variable = { name = eotg_aug_removal_kind  value = flag:full  days = 30 }
+        }
+        eotg_aug_removal_perform_effect = yes
+    }
+    # 4. Roll
+    custom_tooltip = eotg_aug_demand_removal_effect_tt
+    if = {
+        limit = { scope:eotg_demand_provider = flag:physician }
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = scope:recipient  PROVIDER = physician  PROCEDURE = removal  SURGEON = scope:eotg_proc_surgeon }
+        }
+    }
+    else_if = {
+        limit = { scope:eotg_demand_provider = flag:backstreet }
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = scope:recipient  PROVIDER = backstreet  PROCEDURE = removal  SURGEON = scope:recipient }
+        }
+    }
+    else = {
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = scope:recipient  PROVIDER = clinic  PROCEDURE = removal  SURGEON = scope:recipient }
+        }
+    }
+    # 5. The booking is spent
+    scope:recipient = {
+        hidden_effect = { remove_variable = eotg_aug_removal_kind }
+    }
+    # 6. Opinion: forced, or a willing zealot reassured; otherwise none
+    scope:recipient = {
+        if = {
+            limit = { is_alive = yes }
+            if = {
+                limit = { scope:hook ?= yes }
+                add_opinion = { modifier = eotg_opinion_aug_forced_procedure  target = scope:actor }
+            }
+            else_if = {
+                limit = { has_trait = zealous }
+                add_opinion = { modifier = eotg_opinion_aug_reassured  target = scope:actor  years = 5 }
+            }
+        }
+    }
+    # 7. The actor's stress: only a hook-forced demand
+    if = {
+        limit = { scope:hook ?= yes }
+        scope:actor = { eotg_aug_stress_tyranny_effect = yes }
+    }
+}
+
+# Salvage Implants (spec §4.5). The roll comes first, so a death on the table
+# ends it with the trait still on the corpse, and the Neurofractured x1.5
+# applies. eotg_flag_aug_proc_salvage weights the roll (§3.2) and is spent by
+# it. On survival: out of the system, the former marker overridden to
+# flag:salvaged (procedures §4.10 rule), withdrawal, and the victim's stress
+# (vanilla 06_ep3_interactions.txt:4585). On a death: kinslayer is the
+# actor's, as an execution (vanilla calls it on a victim already dead,
+# diarchy_events.txt:11370-11383; policy: balance §10 M4).
+# PROVIDER: physician / backstreet. No price.
+# Caller: eotg_aug_salvage_interaction (on_accept).
+eotg_aug_salvage_effect = {
+    save_temporary_scope_value_as = { name = eotg_salvage_provider  value = flag:$PROVIDER$ }
+    scope:recipient = {
+        if = {
+            limit = { eotg_is_aug_tier1 = yes }
+            save_scope_value_as = { name = eotg_salvage_tier  value = flag:augmented }
+        }
+        else_if = {
+            limit = { eotg_is_aug_tier2 = yes }
+            save_scope_value_as = { name = eotg_salvage_tier  value = flag:enhanced }
+        }
+        else_if = {
+            limit = { eotg_is_aug_tier3 = yes }
+            save_scope_value_as = { name = eotg_salvage_tier  value = flag:overclocked }
+        }
+        else = {
+            save_scope_value_as = { name = eotg_salvage_tier  value = flag:fractured }
+        }
+        save_scope_value_as = { name = eotg_proc_salvage  value = yes }
+        hidden_effect = { add_character_flag = eotg_flag_aug_proc_salvage }
+    }
+    custom_tooltip = eotg_aug_salvage_effect_tt
+    if = {
+        limit = { scope:eotg_salvage_provider = flag:physician }
+        hidden_effect = {
+            scope:actor = { eotg_aug_save_surgeon_effect = yes }
+            eotg_aug_procedure_effect = { PATIENT = scope:recipient  PROVIDER = $PROVIDER$  PROCEDURE = removal  SURGEON = scope:eotg_proc_surgeon }
+        }
+    }
+    else = {
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = scope:recipient  PROVIDER = $PROVIDER$  PROCEDURE = removal  SURGEON = scope:recipient }
+        }
+    }
+    if = {
+        limit = { NOT = { scope:eotg_proc_outcome = flag:death } }
+        scope:recipient = {
+            eotg_aug_remove_all_effect = yes
+            hidden_effect = {
+                set_variable = { name = eotg_aug_former  value = flag:salvaged }
+            }
+            add_character_modifier = { modifier = eotg_mod_aug_removal_withdrawal  years = 3 }
+            add_stress = major_stress_gain
+        }
+    }
+    else = {
+        scope:actor = {
+            add_kinslayer_trait_or_nothing_effect = { VICTIM = scope:recipient }
+            eotg_aug_stress_murder_effect = yes
+        }
+    }
+}
+
+# The actor's side of Salvage: the wound stress helper and vanilla's maiming
+# dread tiers (00_interaction_effects.txt:530-552, blind_castrate_and_
+# disfigure_effect). Caller: eotg_aug_salvage_interaction (on_accept).
+eotg_aug_salvage_actor_effect = {
+    scope:actor = {
+        eotg_aug_stress_wound_effect = yes
+        if = {
+            limit = {
+                OR = {
+                    is_spouse_of = scope:recipient
+                    is_close_family_of = scope:recipient
+                    scope:recipient = { tier_or_related_liege_tier_greater_or_equal_trigger = { TIER = tier_kingdom } }
+                }
+            }
+            add_dread = major_dread_gain
+        }
+        else_if = {
+            limit = {
+                OR = {
+                    scope:recipient = { tier_or_related_liege_tier_equal_trigger = { TIER = tier_duchy } }
+                    scope:recipient = { tier_or_related_liege_tier_equal_trigger = { TIER = tier_county } }
+                }
+            }
+            add_dread = medium_dread_gain
+        }
+        else = {
+            add_dread = minor_dread_gain
+        }
+    }
+}
+
+# A successful tampering (spec §4.4.3), run on the target (tamper.004
+# immediate; scope:owner saved). Risk by tier (tier2.016's tampering is +10;
+# scaled), the saboteur remembered for 10 years (int.001.d), a Countdown
+# start at the Overclocked check's own threshold (patron betrayal precedent),
+# the visible fault (2 years), a 50% infection, and the 5-year flag that
+# makes the next procedure roll x1.5 bad (eotg_aug_proc_bad_factor). No
+# episode is fired (lesson 5).
+eotg_aug_sabotage_apply_effect = {
+    hidden_effect = {
+        if = {
+            limit = { has_trait = eotg_neurofractured }
+            eotg_add_fracture_risk = { AMOUNT = 20 }
+        }
+        else_if = {
+            limit = { eotg_is_aug_tier3 = yes }
+            eotg_add_fracture_risk = { AMOUNT = 16 }
+        }
+        else_if = {
+            limit = { eotg_is_aug_tier2 = yes }
+            eotg_add_fracture_risk = { AMOUNT = 12 }
+        }
+        else = {
+            eotg_add_fracture_risk = { AMOUNT = 8 }
+        }
+        set_variable = { name = eotg_aug_sabotaged_by  value = scope:owner  years = 10 }
+        if = {
+            limit = {
+                eotg_is_aug_tier3 = yes
+                has_variable = eotg_fracture_risk
+                OR = {
+                    var:eotg_fracture_risk >= 50
+                    AND = {
+                        var:eotg_fracture_risk >= 40
+                        has_character_flag = eotg_flag_aug_hidden_flaw
+                    }
+                }
+            }
+            eotg_aug_try_start_countdown_effect = yes
+        }
+        add_character_flag = { flag = eotg_flag_aug_sabotaged  years = 5 }
+    }
+    add_character_modifier = { modifier = eotg_mod_aug_tampered  years = 2 }
+    random = {
+        chance = 50
+        add_character_modifier = { modifier = eotg_mod_aug_infection  years = 1 }
+    }
+}
+
+# The scheme's prep (scheme scope). Shape: vanilla
+# steal_back_artifact_scheme_prep_effect (00_scheme_scripted_effects.txt:
+# 11884-11898): save the follow-up and open the shared preparations window
+# (scheme_critical_moments.0002), whose "execute" fires it.
+# Callers: eotg_aug_tamper (on_phase_completed, on_hud_click, on_semiyearly).
+eotg_aug_tamper_prep_effect = {
+    save_scope_as = scheme
+    save_scope_value_as = {
+        name = follow_up_event
+        value = event_id:eotg_aug_tamper.001
+    }
+    if = {
+        limit = {
+            NOT = { exists = scope:suppress_next_event }
+        }
+        scheme_owner = { trigger_event = scheme_critical_moments.0002 }
+    }
+}
+
+# A fault booked as the repair (run in the patient's scope): the repair roll
+# reads var:eotg_aug_repair_injury = flag:fault (eotg_aug_repair_injury_effect)
+# and proc.002 opens with desc_repair_fault (scope:eotg_proc_fault).
+# Callers: eotg_aug_tamper.004 (a, b, c), eotg_aug_int.001 (b).
+eotg_aug_fault_repair_book_effect = {
+    hidden_effect = {
+        set_variable = { name = eotg_aug_repair_injury  value = flag:fault  days = 365 }
+    }
+    save_scope_value_as = { name = eotg_proc_fault  value = yes }
+}
+
+# Have Them Examined, "Treat what you can" (int.001 a, and e free): on the
+# examined, infection, fragments and the tampered fault come off (guarded);
+# at tier 3 / Neurofractured the hardware is eased (hidden); gratitude toward
+# the ruler. Caller: eotg_aug_int.001 (a, e).
+eotg_aug_examine_treat_effect = {
+    scope:eotg_examined = {
+        if = {
+            limit = { has_character_modifier = eotg_mod_aug_infection }
+            remove_character_modifier = eotg_mod_aug_infection
+        }
+        if = {
+            limit = { has_character_modifier = eotg_mod_aug_fragments }
+            remove_character_modifier = eotg_mod_aug_fragments
+        }
+        if = {
+            limit = { has_character_modifier = eotg_mod_aug_tampered }
+            remove_character_modifier = eotg_mod_aug_tampered
+        }
+        if = {
+            limit = {
+                OR = {
+                    eotg_is_aug_tier3 = yes
+                    has_trait = eotg_neurofractured
+                }
+            }
+            hidden_effect = { eotg_add_fracture_risk = { AMOUNT = -5 } }
+        }
+        add_opinion = { modifier = eotg_opinion_aug_grateful_patient  target = root  years = 10 }
     }
 }

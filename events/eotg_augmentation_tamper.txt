@@ -1,0 +1,455 @@
+﻿# ── eotg_augmentation_tamper.txt ─────────────────────────────────────────────
+# Tamper with Implants, the scheme's outcome stages
+# (docs/specs/cybernetics_v2_interactions.md §4.4.3).
+#
+# eotg_aug_tamper.001 — (hidden) result roll
+# eotg_aug_tamper.002 — The Work Is Done        (owner, success)
+# eotg_aug_tamper.003 — Hands Withdrawn          (owner, failure)
+# eotg_aug_tamper.004 — A Fault in the Hardware  (target; lore I1)
+#
+# Fires from:
+#   eotg_aug_tamper_prep_effect (scheme eotg_aug_tamper: on_phase_completed,
+#     on_hud_click, on_semiyearly) saves follow_up_event = eotg_aug_tamper.001
+#     and opens vanilla scheme_critical_moments.0002, whose "execute" fires
+#     it with trigger_event = { saved_event_id = scope:follow_up_event }
+#     (vanilla scheme_critical_moments_events.txt:219) -> .001;
+#   .001 -> .002 (success) / .003 (failure), 1 day;
+#   .002 (a, b) -> .004 on the target, 3-14 days.
+# No cooldown is read here: the scheme's is `cooldown = { years = 10 }`.
+# Resource: eotg_fracture_risk and tier. .004's immediate moves the target's
+# risk by tier (eotg_aug_sabotage_apply_effect) and sets the fault the
+# procedure roll reads (eotg_flag_aug_sabotaged); its a/b/c move risk inside
+# the roll. .002/.003 descs read the target's tier. .001 is hidden plumbing.
+# Register (lore I2, I5, I6): physical and local; hands at an open panel,
+# a sedative for the sleeper; never anything at a distance.
+# ─────────────────────────────────────────────────────────────────────────────
+
+namespace = eotg_aug_tamper
+
+
+# ── eotg_aug_tamper.001 ───────────────────────────────────────────────────────
+# Hidden result roll. Shape: vanilla scheme_critical_moments.1111
+# (scheme_critical_moments_events.txt:1630-1661) plus .1071's discovery roll
+# (:1394-1407, 100 - secrecy).
+# Caller: vanilla scheme_critical_moments.0002 (execute), via the saved
+# follow_up_event from eotg_aug_tamper_prep_effect.
+# eotg_lint: allow L009 fired by vanilla scheme_critical_moments.0002 through the saved follow_up_event (event_id value set in eotg_aug_tamper_prep_effect)
+eotg_aug_tamper.001 = {
+    hidden = yes
+
+    immediate = {
+        scope:scheme = {
+            scheme_owner = { save_scope_as = owner }
+            scheme_target_character = { save_scope_as = target }
+            random = {
+                chance = scope:scheme.scheme_success_chance
+                save_scope_value_as = {
+                    name = scheme_successful
+                    value = yes
+                }
+            }
+            random = {
+                chance = {
+                    value = 100
+                    subtract = scope:scheme.scheme_secrecy
+                }
+                save_scope_value_as = {
+                    name = scheme_discovered
+                    value = yes
+                }
+            }
+        }
+        if = {
+            limit = { exists = scope:scheme_successful }
+            scope:owner = {
+                mandala_trickster_increment_successful_schemes_effect = yes
+                trigger_event = { id = eotg_aug_tamper.002  days = 1 }
+            }
+        }
+        else = {
+            scope:owner = {
+                trigger_event = { id = eotg_aug_tamper.003  days = 1 }
+            }
+            if = {
+                limit = { exists = scope:scheme_discovered }
+                scope:target = {
+                    add_opinion = { modifier = eotg_opinion_aug_tampered  target = scope:owner }
+                    send_interface_toast = {
+                        type = event_toast_effect_bad
+                        title = eotg_aug_tamper_foiled_toast
+                        left_icon = scope:owner
+                        custom_tooltip = eotg_aug_tamper_foiled_toast_desc
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+# ── eotg_aug_tamper.002 ───────────────────────────────────────────────────────
+# The Work Is Done (owner, success). Outcome stage, two options (S12). .004
+# is fired from the options, not from .001, so b can sign the deed (saved
+# scopes are captured when trigger_event runs).
+# Window and widget: vanilla steal_back_artifact_outcome.1001
+# (steal_back_artifact_outcome_events.txt:11-33).
+# Caller: eotg_aug_tamper.001 (success), 1 day.
+
+eotg_aug_tamper.002 = {
+    type = character_event
+    window = scheme_successful_event
+    title = eotg_aug_tamper.002.t
+    desc = {
+        desc = eotg_aug_tamper.002.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:target = { has_trait = eotg_neurofractured } }
+                desc = eotg_aug_tamper.002.desc_fractured
+            }
+            triggered_desc = {
+                trigger = { scope:target = { eotg_is_aug_tier3 = yes } }
+                desc = eotg_aug_tamper.002.desc_tier3
+            }
+            triggered_desc = {
+                trigger = { scope:target = { eotg_is_aug_tier2 = yes } }
+                desc = eotg_aug_tamper.002.desc_tier2
+            }
+            desc = eotg_aug_tamper.002.desc_tier1
+        }
+        triggered_desc = {
+            trigger = { exists = scope:scheme_discovered }
+            desc = eotg_aug_tamper.002.desc_discovered
+        }
+    }
+    theme = generic_intrigue_scheme
+
+    left_portrait = {
+        character = scope:owner
+        animation = schadenfreude
+    }
+    lower_right_portrait = scope:target
+
+    widget = {
+        gui = "event_window_widget_scheme"
+        container = "custom_widgets_container"
+    }
+
+    # "Quietly done."
+    option = {
+        name = eotg_aug_tamper.002.a
+        scope:scheme = {
+            end_scheme = yes
+        }
+        scope:target = {
+            trigger_event = { id = eotg_aug_tamper.004  days = { 3 14 } }
+        }
+        ai_chance = {
+            base = 50
+            modifier = { add = 20  has_trait = deceitful }
+            modifier = { add = 10  has_trait = patient }
+        }
+    }
+
+    # [sadistic] "Let them know whose hands."
+    option = {
+        name = eotg_aug_tamper.002.b
+        trigger = { has_trait = sadistic }
+        trait = sadistic
+        save_scope_value_as = { name = eotg_tamper_signed  value = yes }
+        add_dread = minor_dread_gain
+        eotg_aug_stress_cruelty_effect = yes
+        scope:scheme = {
+            end_scheme = yes
+        }
+        scope:target = {
+            trigger_event = { id = eotg_aug_tamper.004  days = { 3 14 } }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 40  has_trait = sadistic }
+            modifier = { add = 10  has_trait = arrogant }
+        }
+    }
+}
+
+
+# ── eotg_aug_tamper.003 ───────────────────────────────────────────────────────
+# Hands Withdrawn (owner, failure). Abandon or retry: vanilla
+# abduct_outcome.4001 (abduct_outcome_events.txt:491-520).
+# Caller: eotg_aug_tamper.001 (failure), 1 day.
+
+eotg_aug_tamper.003 = {
+    type = character_event
+    window = scheme_failed_event
+    title = eotg_aug_tamper.003.t
+    desc = {
+        desc = eotg_aug_tamper.003.desc
+        triggered_desc = {
+            trigger = {
+                scope:target = {
+                    OR = {
+                        eotg_is_aug_tier3 = yes
+                        has_trait = eotg_neurofractured
+                    }
+                }
+            }
+            desc = eotg_aug_tamper.003.desc_tier3
+        }
+        triggered_desc = {
+            trigger = { exists = scope:scheme_discovered }
+            desc = eotg_aug_tamper.003.desc_discovered
+        }
+    }
+    theme = generic_intrigue_scheme
+
+    left_portrait = {
+        character = scope:owner
+        animation = dismissal
+    }
+    lower_right_portrait = scope:target
+
+    widget = {
+        gui = "event_window_widget_scheme"
+        container = "custom_widgets_container"
+    }
+
+    # "Let it go."
+    option = {
+        name = eotg_aug_tamper.003.a
+        scope:scheme = {
+            end_scheme = yes
+        }
+        stress_impact = {
+            stubborn = medium_stress_impact_gain
+        }
+        ai_chance = {
+            base = 50
+            modifier = { add = 20  has_trait = craven }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # "Again."
+    option = {
+        name = eotg_aug_tamper.003.b
+        custom_tooltip = restart_scheme_tt
+        scope:scheme = {
+            reset_failed_scheme_effect = yes
+        }
+        ai_chance = {
+            base = 10
+            modifier = { add = 200  has_trait = stubborn }
+            modifier = { add = 20  has_trait = vengeful }
+        }
+    }
+}
+
+
+# ── eotg_aug_tamper.004 ───────────────────────────────────────────────────────
+# A Fault in the Hardware (target). The reveal: the consequences land here
+# (procedures §4.1 rule 2). Bodily and hardware symptoms only (lore I2).
+# Options: the Spare Parts shape (eotg_aug_proc.003). Every paid option pays
+# at medium_gold_value x the provider, names the fault as the repair
+# (var:eotg_aug_repair_injury = flag:fault, scope:eotg_proc_fault) and rolls
+# a repair (hidden). The sabotaged flag makes this roll x1.5 bad. A repaired
+# fault clears through eotg_aug_repair_injury_effect; a failed one stays.
+# b ("My own physician") needs a court physician who is not root
+# (eotg_aug_has_court_physician), as the procedures QA fixed for proc.003.b;
+# the spec's eotg_has_physician_access would reopen the self-physician
+# exploit (reported).
+# Caller: eotg_aug_tamper.002 (a, b), on the target, 3-14 days.
+
+eotg_aug_tamper.004 = {
+    type = character_event
+    title = eotg_aug_tamper.004.t
+    desc = {
+        desc = eotg_aug_tamper.004.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { has_trait = eotg_neurofractured }
+                desc = eotg_aug_tamper.004.desc_nf
+            }
+            triggered_desc = {
+                trigger = { eotg_is_aug_tier3 = yes }
+                desc = eotg_aug_tamper.004.desc_oc
+            }
+            triggered_desc = {
+                trigger = { eotg_is_aug_tier2 = yes }
+                desc = eotg_aug_tamper.004.desc_enh
+            }
+            desc = eotg_aug_tamper.004.desc_aug
+        }
+        first_valid = {
+            triggered_desc = {
+                trigger = {
+                    OR = {
+                        exists = scope:scheme_discovered
+                        exists = scope:eotg_tamper_signed
+                    }
+                }
+                desc = eotg_aug_tamper.004.desc_known
+            }
+            desc = eotg_aug_tamper.004.desc_unknown
+        }
+    }
+    theme = intrigue
+
+    # A target who has left the system since has no hardware to fail
+    trigger = {
+        is_alive = yes
+        eotg_aug_tamper_target = yes
+    }
+
+    left_portrait = {
+        character = root
+        animation = paranoia
+    }
+    right_portrait = {
+        trigger = {
+            OR = {
+                exists = scope:scheme_discovered
+                exists = scope:eotg_tamper_signed
+            }
+        }
+        character = scope:owner
+        animation = schadenfreude
+    }
+
+    immediate = {
+        eotg_aug_save_surgeon_effect = yes
+        eotg_aug_sabotage_apply_effect = yes
+        if = {
+            limit = {
+                OR = {
+                    exists = scope:scheme_discovered
+                    exists = scope:eotg_tamper_signed
+                }
+            }
+            add_opinion = { modifier = eotg_opinion_aug_tampered  target = scope:owner }
+        }
+    }
+
+    # "The clinic."
+    option = {
+        name = eotg_aug_tamper.004.a
+        trigger = {
+            NOT = { has_trait = eotg_neurofractured }
+            eotg_aug_can_afford_procedure = { BASE = medium_gold_value  MULT = 1 }
+        }
+        eotg_aug_pay_procedure_effect = { BASE = medium_gold_value  MULT = 1 }
+        eotg_aug_fault_repair_book_effect = yes
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = repair  SURGEON = root }
+        }
+        custom_tooltip = eotg_aug_tamper.004.tt
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 10  has_trait = craven }
+            modifier = { add = -20  has_trait = greedy }
+        }
+    }
+
+    # (a court physician, not root) "My own physician."
+    option = {
+        name = eotg_aug_tamper.004.b
+        trigger = {
+            eotg_aug_has_court_physician = yes
+            eotg_aug_can_afford_procedure = { BASE = medium_gold_value  MULT = eotg_aug_price_mult_physician }
+        }
+        eotg_aug_pay_procedure_effect = { BASE = medium_gold_value  MULT = eotg_aug_price_mult_physician }
+        eotg_aug_fault_repair_book_effect = yes
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = physician  PROCEDURE = repair  SURGEON = scope:eotg_proc_surgeon }
+        }
+        custom_tooltip = eotg_aug_tamper.004.tt
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = trusting }
+            modifier = { add = 10  has_trait = diligent }
+        }
+    }
+
+    # "Someone cheaper."
+    option = {
+        name = eotg_aug_tamper.004.c
+        trigger = {
+            eotg_aug_can_afford_procedure = { BASE = medium_gold_value  MULT = eotg_aug_price_mult_backstreet_repair }
+        }
+        eotg_aug_pay_procedure_effect = { BASE = medium_gold_value  MULT = eotg_aug_price_mult_backstreet_repair }
+        eotg_aug_fault_repair_book_effect = yes
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = backstreet  PROCEDURE = repair  SURGEON = root }
+        }
+        custom_tooltip = eotg_aug_tamper.004.tt
+        ai_chance = {
+            base = 25
+            modifier = { add = 20  has_trait = greedy }
+            modifier = { add = 10  has_trait = deceitful }
+            modifier = { add = -20  has_trait = craven }
+        }
+    }
+
+    # "Live with it." Ungated. The fault stays (2-year modifier, 5-year flag).
+    option = {
+        name = eotg_aug_tamper.004.d
+        eotg_aug_stress_neglect_effect = yes
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = lazy }
+            modifier = { add = 10  has_trait = stubborn }
+        }
+    }
+
+    # [paranoid] "Find the hands." Physical evidence only (lore I5). The
+    # intrigue duel of eotg_aug_tier2.015.a (x2.5); the branch descs do not
+    # name the owner (it would show before the roll), the toast does.
+    option = {
+        name = eotg_aug_tamper.004.e
+        trigger = {
+            has_trait = paranoid
+            NOT = { exists = scope:scheme_discovered }
+            NOT = { exists = scope:eotg_tamper_signed }
+            scope:owner ?= { is_alive = yes }
+        }
+        trait = paranoid
+        duel = {
+            skill = intrigue
+            target = scope:owner
+            50 = {
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = 2.5
+                }
+                desc = eotg_aug_trace_success_tt
+                hidden_effect = {
+                    add_opinion = { modifier = eotg_opinion_aug_tampered  target = scope:owner }
+                    send_interface_toast = {
+                        type = event_toast_effect_good
+                        title = eotg_aug_tamper.004.e.success
+                        left_icon = scope:owner
+                    }
+                }
+            }
+            50 = {
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = -2.5
+                }
+                desc = eotg_aug_trace_failure_tt
+                hidden_effect = {
+                    send_interface_toast = {
+                        type = event_toast_effect_neutral
+                        title = eotg_aug_tamper.004.e.failure
+                        left_icon = root
+                    }
+                }
+            }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = paranoid }
+            modifier = { add = 10  has_trait = vengeful }
+        }
+    }
+}

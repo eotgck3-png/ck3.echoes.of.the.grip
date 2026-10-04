@@ -1,6 +1,6 @@
 # EotG Observer: logging sub-mod for the 50-year run
 
-This is the tool for **CB-20** on `circlebackTaskboard.md`: the observer run in `docs/specs/cybernetics_v2_balance.md` §9.2. It logs the 12 measurements listed there so the cybernetics pacing can be judged against the targets you set (HQ2). It changes no gameplay.
+This is the tool for **CB-20** on `circlebackTaskboard.md`: the observer run in `docs/specs/cybernetics_v2_balance.md` §9.2. It logs the 12 measurements listed there, plus the five interaction counters of `docs/specs/cybernetics_v2_interactions.md` §9 item 10, so the cybernetics pacing can be judged against the targets you set (HQ2). It changes no gameplay.
 
 **These sources are versioned here, but the main mod never loads them.** CK3 only reads its known folders at the mod root, and this folder is under `docs/`. A build step creates the installable sub-mod **outside** the repo.
 
@@ -16,9 +16,9 @@ This is the tool for **CB-20** on `circlebackTaskboard.md`: the observer run in 
 | `localization/english/eotg_observer_l_english.yml` | Reference copy of the log text. The build regenerates it. |
 | `descriptor.mod`, `eotg_observer_submod.mod` | The sub-mod's descriptor and its launcher file. The launcher depends on **"Echoes of the Grip"**. |
 | `tools/build_observer.py` | Builds the installable sub-mod. |
-| `tools/parse_observer_log.py` | Turns the logs into the §9.2 report. |
+| `tools/parse_observer_log.py` | Turns the logs into the §9.2 report, plus section [13] (interactions). |
 
-**What the build adds.** Logging needs hooks inside four main-mod files: the augmentation effects, on_actions, decisions and stories. So the build writes **overlay copies** of those four files into the output folder, with one-line hooks, each tagged `# eotg_obs`.
+**What the build adds.** Logging needs hooks inside six main-mod files: the augmentation effects, on_actions, decisions and stories, plus the character interactions (`common/character_interactions/eotg_augmentation_interactions.txt`: Examine and Tamper start, on the click) and the tamper outcome events (`events/eotg_augmentation_tamper.txt`: tamper.001's success, failure and discovery). Offer, Demand and Salvage are hooked in their scripted effects. So the build writes **overlay copies** of those six files into the output folder, with one-line hooks, each tagged `# eotg_obs`.
 - CK3 loads the sub-mod after the main mod, so the overlays replace the originals.
 - Every hook sits inside `hidden_effect`. The hooks only write `debug_log` lines, a counter (`eotg_obs_tick`), and two flags only the observer reads (`eotg_obs_sought`, `eotg_obs_pursued`).
 - The build checks that deleting every tagged line gives back the main-mod file byte for byte.
@@ -93,6 +93,7 @@ The report has one section per §9.2 measurement. **The headline check is item 1
 | 10 | Countdown stage hits; stage 3 seen in Countdowns that reach stage 4 | ≥ 60% |
 | 11 | Heir's Arc, Patron, Retinue: starts and ends | — |
 | 12 | Game days per real minute, years 40–50 | flag a drop over 10% |
+| 13 | Interactions per decade (interactions spec §9 item 10): Offer installs (landed / unlanded), Demand removals, Examinations, Tamper starts / successes / failures / discoveries at execution, Salvages (and deaths on the table) | judged against HQ2 with [1]; any non-zero count answers engine check (c) |
 
 **How some figures are approximated:**
 - **Per-ruler-year rates (4, 6):** each decade is divided by the mean of the two censuses around it.

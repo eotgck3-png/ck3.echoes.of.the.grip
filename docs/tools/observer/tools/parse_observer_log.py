@@ -1,4 +1,6 @@
-"""Turn an observer run's log into the 12 measurements of balance spec §9.2.
+"""Turn an observer run's log into the 12 measurements of balance spec §9.2,
+plus [13], the interaction counters of docs/specs/cybernetics_v2_interactions.md
+§9 item 10.
 
 Reads every line that contains "EOTG_OBS <key>" (the resolved loc text) or a
 raw "eotg_obs_<key>" (if the loc did not resolve). Each line may carry
@@ -233,6 +235,17 @@ def report(path, events, marks, start_year):
         print(f"    {365.0 * years / (secs / 60.0):.0f} days/min over {years} years ({secs} s)" if secs else "    n/a")
     else:
         print("    n/a: no time-stamped year markers for years 40-50 in this log")
+    # ---- 13: interactions (interactions spec §9 item 10; judged against HQ2, §4.7) ----
+    print("\n[13] INTERACTIONS per decade (interactions spec 9.10; read beside [1] and [2])")
+    for d in sorted(by_dec):
+        c = by_dec[d]
+        print(f"  decade {d}: offer installs landed {c['int_offer_landed']} unlanded {c['int_offer_unlanded']};"
+              f" demand removals {c['int_demand']}; examinations {c['int_examine']};"
+              f" tamper starts {c['tamper_start']} successes {c['tamper_success']}"
+              f" failures {c['tamper_failure']} discovered {c['tamper_discovered']};"
+              f" salvages {c['int_salvage']} (died on the table {c['int_salvage_death']})")
+    tot = collections.Counter(k for _, k, _ in events if k.startswith(("int_", "tamper_")))
+    print("    whole run:", dict(sorted(tot.items())) or "none (any non-zero count answers engine check (c))")
 
 
 def main(argv):

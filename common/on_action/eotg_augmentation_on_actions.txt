@@ -1867,3 +1867,21 @@ eotg_on_yearly_aug_seamless_check = {
         }
     }
 }
+
+
+# Tamper with Implants, ongoing (interactions spec §4.4.1). A custom
+# on_action fired by the scheme eotg_aug_tamper's on_monthly; no vanilla hook
+# is touched. Copy of vanilla common/on_action/schemes/
+# steal_back_artifact_on_actions.txt:70-87: vanilla's generic scheme events,
+# which have fallback descs for unknown scheme types
+# (intrigue_scheme_ongoing_events.txt:16, agent_events.txt:5011).
+eotg_aug_tamper_ongoing = {
+    trigger = {
+        is_travelling = no
+    }
+    random_events = {
+        100 = 0
+        2 = intrigue_scheme_ongoing.1001
+        3 = agent_events.9801
+    }
+}

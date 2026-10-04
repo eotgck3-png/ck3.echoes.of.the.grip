@@ -1,0 +1,350 @@
+﻿# ── eotg_augmentation_schemes.txt ────────────────────────────────────────────
+# Scheme types for the Cybernetic Augmentation system
+# (docs/specs/cybernetics_v2_interactions.md §4.4.1).
+#
+# eotg_aug_tamper — Tamper with Implants (G5). Started by
+#   eotg_aug_start_tamper_interaction. Phase completion runs
+#   eotg_aug_tamper_prep_effect, which saves follow_up_event =
+#   eotg_aug_tamper.001 and opens vanilla's shared preparations window
+#   (scheme_critical_moments.0002); its "execute" fires tamper.001.
+#
+# Shape: vanilla common/schemes/scheme_types/steal_back_artifact_scheme.txt
+# (hostile, character target, agents, one result) with abduct_scheme.txt's
+# tier-2 difficulty and location/war penalties (:16-21, :131-189). The 1.20
+# field names (base_maximum_success, phases_per_agent_charge, success_desc,
+# discovery_desc) follow vanilla, not the older _schemes.info (spec §0).
+# Physical and local only (lore I6): agents need access, location penalties
+# apply, nothing acts at a distance.
+# ─────────────────────────────────────────────────────────────────────────────
+
+eotg_aug_tamper = {
+    # Basic Setup
+    skill = intrigue
+    desc = eotg_aug_tamper_desc_general
+    success_desc = "EOTG_AUG_TAMPER_SUCCESS_DESC"
+    discovery_desc = "EOTG_AUG_TAMPER_DISCOVERY_DESC"
+    icon = icon_scheme_hostile        # placeholder (spec §3.1, art debt)
+    illustration = "gfx/interface/illustrations/event_scenes/corridor.dds"
+    category = hostile
+    target_type = character
+    is_secret = yes
+    maximum_breaches = 5
+    cooldown = { years = 10 }
+
+    # Parameters (abduct_scheme.txt:16-21, tier-2 difficulty)
+    speed_per_skill_point = t2_spsp_owner_value
+    speed_per_target_skill_point = t2_spsp_target_value
+    base_progress_goal = t2_base_phase_length_value
+    maximum_secrecy = 85
+    base_maximum_success = t2_base_max_success_value
+    phases_per_agent_charge = 1
+    success_chance_growth_per_skill_point = t2_scgpsp_value
+
+    # Core Triggers (steal_back_artifact_scheme.txt:24-69)
+    allow = {
+        is_adult = yes
+        is_imprisoned = no
+
+        scope:target = {
+            is_adult = yes
+            is_imprisoned = no
+            eotg_aug_tamper_target = yes
+        }
+
+        # AI blockers
+        trigger_if = {
+            limit = { is_ai = yes }
+
+            scope:target = { # AI won't tamper with someone who likes them
+                opinion = {
+                    target = scope:owner
+                    value <= 50
+                }
+
+                trigger_if = { # ...nor with friends, unless greedy or deceitful
+                    limit = {
+                        OR = {
+                            has_relation_friend = scope:owner
+                            has_relation_best_friend = scope:owner
+                        }
+                    }
+                    scope:owner = {
+                        OR = {
+                            has_trait = greedy
+                            has_trait = deceitful
+                        }
+                    }
+                }
+                trigger_if = { # So players are not spammed by AI tampering
+                    limit = {
+                        is_ai = no
+                    }
+                    NOT = {
+                        any_targeting_scheme = {
+                            scheme_type = eotg_aug_tamper
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    # abduct_scheme.txt:44-82 shape. A target who leaves the system, or
+    # reaches Seamless, invalidates the scheme (eotg_aug_tamper_target). Lore
+    # ruling (upheld 2026-10-04): at 866 tech no one can find where Seamless
+    # hardware ends and the body begins, so there is no panel to open.
+    valid = {
+        is_incapable = no
+        scope:target = {
+            is_alive = yes
+            is_imprisoned = no
+            exists = location
+            in_diplomatic_range = scope:owner
+            eotg_aug_tamper_target = yes
+        }
+        trigger_if = {
+            limit = { has_variable = no_scheming_allowed_var }
+            custom_tooltip = {
+                text = no_scheming_allowed_var_tt
+                var:no_scheming_allowed_var != scope:target
+            }
+        }
+    }
+
+    # Agents
+    agent_leave_threshold = -25
+    agent_join_chance = {
+        base = 0
+
+        ai_agent_join_chance_basic_suite_modifier = yes
+        ai_agent_join_chance_hostile_grievous_modifier = yes
+    }
+    valid_agent = { is_valid_agent_standard_trigger = yes }
+    agent_groups_owner_perspective = { courtiers guests scripted_relations puppets }
+    agent_groups_target_character_perspective = { courtiers vassals }
+
+    # The mod's own success lines are left out of the prediction (spec §10)
+    odds_prediction = {
+        add = hostile_scheme_base_odds_prediction_target_is_char_value
+        add = odds_skill_contribution_intrigue_value
+        add = agent_groups_owner_perspective_value
+        add = agent_groups_target_character_perspective_value
+        min = 0
+    }
+
+    # Base Chances (vanilla core first, abduct_scheme.txt:106-113)
+    base_success_chance = {
+        base = 0
+        scheme_type_skill_success_chance_modifier = { SKILL = INTRIGUE }
+
+        hostile_scheme_base_chance_modifier = yes
+
+        # Countermeasures.
+        apply_calculated_scheme_success_chance_adjustments_modifier = yes
+
+        # Location penalties: half of abduct's (:131-156). Hands on hardware,
+        # not the whole body.
+        first_valid = {
+            modifier = {
+                add = -40
+                desc = "sway_foreign_target"
+                scope:target = {
+                    is_ruler = yes
+                    scope:target.top_liege != scope:owner.top_liege
+                }
+            }
+            modifier = {
+                add = -20
+                desc = "sway_foreign_target"
+                scope:target = {
+                    is_foreign_court_or_pool_guest = no
+                    scope:target.top_liege != scope:owner.top_liege
+                }
+            }
+            modifier = {
+                add = -20
+                desc = "FABRICATE_HOOK_RULER_TARGET"
+                scope:target = {
+                    is_ruler = yes
+                    scope:target.top_liege = scope:owner.top_liege
+                }
+            }
+        }
+
+        # At War (abduct :158-189, verbatim)
+        first_valid = {
+            modifier = {
+                add = -500
+                desc = "SCHEME_AT_WAR"
+                scope:target = {
+                    is_at_war_with = scope:owner
+                }
+            }
+            modifier = {
+                add = -350
+                scope:target = {
+                    is_playable_character = no
+                    this != top_liege
+                    any_liege_or_above = {
+                        is_at_war_with = scope:owner
+                    }
+                }
+                desc = "SCHEME_AT_WAR_WITH_LIEGE"
+            }
+            modifier = {
+                add = -250
+                scope:target = {
+                    is_playable_character = yes
+                    this != top_liege
+                    any_liege_or_above = {
+                        is_at_war_with = scope:owner
+                    }
+                }
+                desc = "SCHEME_AT_WAR_WITH_LIEGE"
+            }
+        }
+
+        # The hardware itself (spec §4.4.1 table)
+        modifier = {
+            add = -10
+            desc = EOTG_AUG_TAMPER_TARGET_PHYSICIAN
+            scope:target = { eotg_has_physician_access = yes }
+        }
+        modifier = {
+            add = 15
+            desc = EOTG_AUG_TAMPER_TARGET_ILLEGAL
+            scope:target = { has_character_modifier = eotg_mod_illegal_implants }
+        }
+        modifier = {
+            add = -10
+            desc = EOTG_AUG_TAMPER_TARGET_HARDENED
+            scope:target = { eotg_is_aug_tier3 = yes }
+        }
+        modifier = {
+            add = 15
+            desc = EOTG_AUG_TAMPER_TARGET_FRACTURED
+            scope:target = { has_trait = eotg_neurofractured }
+        }
+        modifier = {
+            add = 10
+            desc = EOTG_AUG_TAMPER_OWNER_KNOWS
+            scope:owner = {
+                OR = {
+                    eotg_is_augmented_any = yes
+                    has_trait = lifestyle_physician
+                }
+            }
+        }
+    }
+    base_secrecy = {
+        add = secrecy_base_value
+        add = countermeasure_apply_secrecy_maluses_value
+    }
+
+    # On Actions (steal_back_artifact_scheme.txt:170-275)
+    on_start = {
+        set_variable = { # eotg_lint: allow L001 vanilla scheme variable read by vanilla countermeasure script
+            name = apply_countermeasures
+            value = flag:calculating
+        }
+        add_scheme_starting_opportunities_intrigue_effect = yes
+        # Fallback agents: a balanced set if the scheme is started from script
+        if = {
+            limit = {
+                scheme_owner = {
+                    NOT = { has_variable = agents_added }
+                }
+            }
+            add_agent_slot = agent_physic
+            add_agent_slot = agent_smith
+            add_agent_slot = agent_infiltrator
+            add_agent_slot = agent_footpad
+            add_agent_slot = agent_lookout
+        }
+    }
+    on_phase_completed = {
+        suppress_scheme_follow_up_event_till_input_given_effect = yes
+        eotg_aug_tamper_prep_effect = yes
+        cap_schemes_and_fire_reminders_effect = yes
+    }
+    on_hud_click = { eotg_aug_tamper_prep_effect = yes }
+    on_semiyearly = {
+        if = {
+            limit = {
+                scheme_owner = { is_ai = yes }
+            }
+            eotg_aug_tamper_prep_effect = yes
+            purge_ai_scheme_slots_effect = yes
+        }
+    }
+    on_monthly = {
+        save_scope_as = scheme
+        scheme_owner = { save_scope_as = owner }
+        scheme_target_character = { save_scope_as = target }
+
+        hostile_scheme_monthly_discovery_chance_effect = yes
+
+        if = {
+            limit = {
+                NOT = { exists = scope:discovery_event_happening }
+            }
+            scheme_owner = {
+                trigger_event = {
+                    on_action = eotg_aug_tamper_ongoing
+                    days = { 1 15 }
+                }
+            }
+        }
+    }
+    on_invalidated = {
+        scheme_target_character = {
+            save_scope_as = target
+        }
+        scheme_owner = {
+            save_scope_as = owner
+        }
+        if = {
+            limit = {
+                scope:target = { is_alive = no }
+            }
+            scope:owner = {
+                send_interface_toast = {
+                    title = eotg_aug_tamper_invalidated_title
+                    custom_tooltip = eotg_aug_tamper_invalidated_dead
+                    left_icon = scope:target
+                }
+            }
+        }
+        else_if = {
+            limit = {
+                scope:target = { eotg_aug_tamper_target = no }
+            }
+            scope:owner = {
+                send_interface_toast = {
+                    title = eotg_aug_tamper_invalidated_title
+                    custom_tooltip = eotg_aug_tamper_invalidated_removed
+                    left_icon = scope:target
+                }
+            }
+        }
+
+        if = {
+            limit = {
+                scope:target = {
+                    is_alive = yes
+                    NOT = { in_diplomatic_range = scope:owner }
+                }
+            }
+            scope:owner = {
+                send_interface_toast = {
+                    title = eotg_aug_tamper_invalidated_title
+                    left_icon = scope:target
+                    custom_description_no_bullet = {
+                        object = scope:target
+                        text = scheme_target_not_in_diplomatic_range
+                    }
+                }
+            }
+        }
+    }
+}

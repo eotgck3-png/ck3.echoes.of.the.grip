@@ -448,3 +448,63 @@ eotg_aug_has_repair_injury = {
         }
     }
 }
+
+# -- Interactions (docs/specs/cybernetics_v2_interactions.md §3.1, §4) ------
+
+# Offer Augmentation's recipient (recipient scope). Adults only: DECIDED by
+# the human 2026-10-04, on lore's advice, citing init.014's own line that the
+# procedure is "never done on the very young". A sick child stays with the
+# Sickly Child arc (init.014); there is no healthy-child Offer. A landed
+# recipient meets the ruler development gate (eotg_can_receive_augmented), as
+# every other ruler install does (HQ2 development gating). The waiting flag
+# is wrapped so the tooltip names the reason, not the flag.
+# User: eotg_aug_offer_augmentation_interaction (is_valid_showing_failures_only).
+eotg_aug_offer_candidate = {
+    is_adult = yes
+    is_alive = yes
+    eotg_is_augmented_any = no
+    custom_description = {
+        text = eotg_can_receive_augmented_suppressed_tt
+        NOT = { has_character_flag = eotg_flag_suppress_progression }
+    }
+    NOT = { has_character_modifier = eotg_mod_aug_excision_recovery }
+    trigger_if = {
+        limit = { is_landed = yes }
+        eotg_can_receive_augmented = yes
+    }
+}
+
+# The character is a courtier, vassal, spouse or close family of $ACTOR$.
+# Users: eotg_aug_offer_augmentation_interaction,
+# eotg_aug_demand_removal_interaction, eotg_aug_examine_interaction (is_shown).
+eotg_aug_in_charge_of = {
+    OR = {
+        is_courtier_of = $ACTOR$
+        is_vassal_of = $ACTOR$
+        is_spouse_of = $ACTOR$
+        is_close_family_of = $ACTOR$
+    }
+}
+
+# Hardware someone can lay hands on: augmented, and not Seamless. Lore ruling
+# (upheld 2026-10-04): at 866 tech no surgeon can find where Seamless
+# hardware ends and the body begins. There is no panel to open, nothing to
+# take out, and nothing to examine apart from the body.
+# Users: eotg_aug_examine_interaction, eotg_aug_start_tamper_interaction,
+# eotg_aug_salvage_interaction (is_shown), the scheme eotg_aug_tamper (allow,
+# valid, on_invalidated), eotg_aug_int.001 and eotg_aug_tamper.004 (trigger).
+eotg_aug_tamper_target = {
+    eotg_is_augmented_any = yes
+    NOT = { has_trait = eotg_total_integration }
+}
+
+# A fault in the hardware: a hidden flaw (thread T6) or a tampering
+# (eotg_flag_aug_sabotaged). Cleared by a fault repair
+# (eotg_aug_repair_injury_effect, flag:fault).
+# Users: eotg_aug_int.001 (b), eotg_aug_examine_interaction (ai_will_do).
+eotg_aug_has_fault = {
+    OR = {
+        has_character_flag = eotg_flag_aug_hidden_flaw
+        has_character_flag = eotg_flag_aug_sabotaged
+    }
+}

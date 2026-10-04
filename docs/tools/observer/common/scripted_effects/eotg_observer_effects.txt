@@ -247,3 +247,18 @@ eotg_obs_census_effect = {
     }
     debug_log = eotg_obs_census_end
 }
+
+# Interactions spec §9 item 10: an Offer install, split by whether the
+# recipient is landed. Run in the recipient's scope (hook in
+# eotg_aug_offer_install_effect).
+eotg_obs_log_offer_effect = {
+    hidden_effect = {
+        if = {
+            limit = { is_landed = yes }
+            debug_log = eotg_obs_int_offer_landed
+        }
+        else = {
+            debug_log = eotg_obs_int_offer_unlanded
+        }
+    }
+}

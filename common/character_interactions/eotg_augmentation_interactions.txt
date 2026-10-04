@@ -1,0 +1,1463 @@
+﻿# ── eotg_augmentation_interactions.txt ───────────────────────────────────────
+# Character interactions for the Cybernetic Augmentation system
+# (docs/specs/cybernetics_v2_interactions.md §4).
+#
+# eotg_aug_offer_augmentation_interaction — Offer Augmentation (G4)
+# eotg_aug_demand_removal_interaction     — Demand Implant Removal (G4)
+# eotg_aug_examine_interaction            — Have Them Examined (G4) -> eotg_aug_int.001
+# eotg_aug_start_tamper_interaction       — Tamper with Implants (G5): starts
+#                                           the scheme eotg_aug_tamper
+# eotg_aug_salvage_interaction            — Salvage Implants (G8) -> eotg_aug_int.002
+#
+# Shared rules (spec §4.0):
+#   - scope:actor / scope:recipient, the shape of
+#     ask_for_conversion_courtier_interaction (vanilla
+#     00_religious_interactions.txt:158-505). Puppet actors
+#     (scope:puppet_or_actor) are not supported (spec §10).
+#   - Every procedure roll runs in on_accept (the click), inside hidden_effect,
+#     followed by a custom_tooltip. No tooltip quantifies odds.
+#   - The actor pays in on_accept (eotg_aug_pay_procedure_effect), never with
+#     `cost` (charged on send, _character_interactions.info:484-487, so a
+#     player's refusal would still cost the actor).
+#   - Cooldowns: cooldown_against_recipient only (index §1 rule 5).
+#   - Provider send options (Offer, Demand). The spec asks for exclusive
+#     provider options AND a hook send option. send_options_exclusive is
+#     interaction-wide (_character_interactions.info:372), so with it the hook
+#     would deselect the provider. These two interactions are therefore
+#     non-exclusive (as the hook + influence pair in vanilla
+#     ask_for_conversion_courtier_interaction), and
+#     is_valid_showing_failures_only requires exactly one provider
+#     (eotg_aug_send_one_provider_tt); ai_will_do zeroes every other
+#     combination. Salvage has no hook and stays exclusive.
+#   - "My own physician" in an interaction is the ACTOR's surgeon operating on
+#     someone else (eotg_aug_save_surgeon_effect in scope:actor), so a
+#     lifestyle_physician actor qualifies (spec §4.0). It is invalid when the
+#     recipient is the actor's own court physician, who would then operate on
+#     themself at the physician's price without the self penalty (the
+#     exploit the procedures QA closed with eotg_aug_has_court_physician).
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+# ── Offer Augmentation (spec §4.1) ────────────────────────────────────────────
+# A gift: the actor pays for the recipient's first implants and chooses the
+# hands. eotg_aug_offer_install_effect mirrors init.018's three paths.
+eotg_aug_offer_augmentation_interaction = {
+    category = interaction_category_friendly
+    icon = icon_personal          # placeholder (spec §3.1, art debt)
+    interface_priority = 40
+    desc = eotg_aug_offer_augmentation_interaction_desc
+    notification_text = eotg_aug_offer_augmentation_interaction_notification
+
+    # Actor-only state belongs here (_character_interactions.info:570-573);
+    # the AI half as vanilla 00_artifact_interactions.txt:2828-2847
+    is_available = {
+        is_adult = yes
+        is_imprisoned = no
+        trigger_if = {
+            limit = { is_ai = yes }
+            OR = {
+                eotg_is_augmented_any = yes
+                has_trait = ambitious
+                has_trait = cynical
+            }
+            NOT = { has_trait = zealous }
+        }
+    }
+
+    is_shown = {
+        NOT = { scope:recipient = scope:actor }
+        scope:recipient = {
+            eotg_aug_in_charge_of = { ACTOR = scope:actor }
+            eotg_is_augmented_any = no
+            is_imprisoned = no
+        }
+    }
+
+    is_valid_showing_failures_only = {
+        scope:recipient = { eotg_aug_offer_candidate = yes }
+        custom_description = {
+            text = eotg_aug_send_one_provider_tt
+            # Exactly one: an explicit comparator pair (vanilla never writes
+            # a bare `amount =`)
+            calc_true_if = {
+                amount >= 1
+                scope:eotg_aug_provider_clinic ?= yes
+                scope:eotg_aug_provider_physician ?= yes
+                scope:eotg_aug_provider_backstreet ?= yes
+            }
+            calc_true_if = {
+                amount <= 1
+                scope:eotg_aug_provider_clinic ?= yes
+                scope:eotg_aug_provider_physician ?= yes
+                scope:eotg_aug_provider_backstreet ?= yes
+            }
+        }
+        # The price by provider (spec §4.1 step 1; mirror:
+        # eotg_aug_offer_install_effect)
+        trigger_if = {
+            limit = { scope:eotg_aug_provider_clinic ?= yes }
+            scope:actor = { eotg_aug_can_afford_procedure = { BASE = minor_gold_value  MULT = 1 } }
+        }
+        trigger_if = {
+            limit = { scope:eotg_aug_provider_physician ?= yes }
+            scope:actor = { eotg_aug_can_afford_procedure = { BASE = minor_gold_value  MULT = eotg_aug_price_mult_physician } }
+        }
+        trigger_if = {
+            limit = { scope:eotg_aug_provider_backstreet ?= yes }
+            scope:actor = { eotg_aug_can_afford_procedure = { BASE = tiny_gold_value  MULT = 1 } }
+        }
+    }
+
+    cooldown_against_recipient = { years = 5 }
+
+    ai_min_reply_days = 1
+    ai_max_reply_days = 5
+
+    # Strong hook: auto-accept (vanilla 00_religious_interactions.txt:236-245)
+    auto_accept = {
+        custom_description = {
+            text = "spending_hook"
+            subject = scope:actor
+            object = scope:recipient
+            scope:hook = yes
+            scope:actor = { has_strong_hook = scope:recipient }
+        }
+    }
+
+    options_heading = eotg_aug_send_provider_heading
+    send_option = {
+        flag = eotg_aug_provider_clinic
+        localization = eotg_aug_send_clinic
+        current_description = eotg_aug_send_clinic_tt
+        starts_enabled = { always = yes }
+    }
+    send_option = {
+        flag = eotg_aug_provider_physician
+        localization = eotg_aug_send_physician
+        current_description = eotg_aug_send_physician_tt
+        # One requirement line (Tiger: an OR is too complex to tooltip in a
+        # failures-only trigger)
+        is_valid = {
+            custom_description = {
+                text = eotg_aug_send_physician_valid_tt
+                scope:actor = { eotg_has_physician_access = yes }
+                trigger_if = {
+                    limit = { scope:actor = { employs_court_position = court_physician_court_position } }
+                    scope:actor = {
+                        court_position:court_physician_court_position = {
+                            NOT = { this = scope:recipient }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    send_option = {
+        flag = eotg_aug_provider_backstreet
+        localization = eotg_aug_send_backstreet
+        current_description = eotg_aug_send_backstreet_tt
+    }
+    # Use hook (vanilla 00_religious_interactions.txt:362-378)
+    send_option = {
+        is_valid = {
+            scope:actor = { has_usable_hook = scope:recipient }
+        }
+        flag = hook
+        localization = SCHEME_HOOK
+    }
+    should_use_extra_icon = {
+        scope:actor = { has_usable_hook = scope:recipient }
+    }
+    extra_icon = "gfx/interface/icons/character_interactions/hook_icon.dds"
+    send_options_exclusive = no
+
+    on_accept = {
+        if = {
+            limit = { scope:eotg_aug_provider_physician ?= yes }
+            eotg_aug_offer_install_effect = { PROVIDER = physician }
+        }
+        else_if = {
+            limit = { scope:eotg_aug_provider_backstreet ?= yes }
+            eotg_aug_offer_install_effect = { PROVIDER = backstreet }
+        }
+        else = {
+            eotg_aug_offer_install_effect = { PROVIDER = clinic }
+        }
+        if = {
+            limit = { scope:hook ?= yes }
+            scope:actor = {
+                if = {
+                    limit = { has_usable_hook = scope:recipient }
+                    use_hook = scope:recipient
+                }
+            }
+        }
+        scope:actor = {
+            send_interface_toast = {
+                type = event_toast_effect_good
+                title = eotg_aug_offer_accepted_toast
+                left_icon = scope:recipient
+            }
+        }
+    }
+
+    # No opinion penalty: it was a gift (spec §4.1)
+    on_decline = {
+        scope:actor = {
+            send_interface_toast = {
+                type = event_toast_effect_neutral
+                title = eotg_aug_offer_declined_toast
+                left_icon = scope:recipient
+            }
+        }
+    }
+
+    # The recipient's view (spec §4.1 table). Opinion shape: vanilla
+    # 00_alliance.txt:626-631; weak hook: 00_religion_scripted_modifiers.txt:72-76.
+    ai_accept = {
+        base = 0
+        modifier = {
+            add = 25
+            desc = EOTG_AUG_AI_LIEGE
+            scope:recipient = {
+                OR = {
+                    is_courtier_of = scope:actor
+                    is_vassal_of = scope:actor
+                }
+            }
+        }
+        opinion_modifier = {
+            who = scope:recipient
+            opinion_target = scope:actor
+            multiplier = 0.5
+            desc = AI_OPINION_REASON
+        }
+        modifier = {
+            add = 30
+            desc = EOTG_AUG_AI_AMBITIOUS
+            scope:recipient = { has_trait = ambitious }
+        }
+        modifier = {
+            add = 20
+            desc = EOTG_AUG_AI_CYNICAL
+            scope:recipient = { has_trait = cynical }
+        }
+        modifier = {
+            add = 10
+            desc = EOTG_AUG_AI_BRAVE
+            scope:recipient = { has_trait = brave }
+        }
+        modifier = {
+            add = 10
+            desc = EOTG_AUG_AI_GREEDY
+            scope:recipient = { has_trait = greedy }
+        }
+        modifier = {
+            add = 40
+            desc = EOTG_AUG_AI_LOSS
+            scope:recipient = { eotg_has_physical_loss = yes }
+        }
+        modifier = {
+            add = -30
+            desc = EOTG_AUG_AI_CRAVEN
+            scope:recipient = { has_trait = craven }
+        }
+        modifier = {
+            add = -20
+            desc = EOTG_AUG_AI_CONTENT
+            scope:recipient = { has_trait = content }
+        }
+        modifier = {
+            add = -15
+            desc = EOTG_AUG_AI_PARANOID
+            scope:recipient = { has_trait = paranoid }
+        }
+        modifier = {
+            add = -15
+            desc = EOTG_AUG_AI_HUMBLE
+            scope:recipient = { has_trait = humble }
+        }
+        modifier = {
+            add = -100
+            desc = EOTG_AUG_AI_ZEALOUS
+            scope:recipient = { has_trait = zealous }
+        }
+        modifier = {
+            add = -20
+            desc = EOTG_AUG_AI_FORMER
+            scope:recipient = { has_variable = eotg_aug_former }
+        }
+        modifier = {
+            add = 10
+            desc = EOTG_AUG_AI_CLINIC
+            scope:eotg_aug_provider_clinic ?= yes
+        }
+        modifier = {
+            add = 5
+            desc = EOTG_AUG_AI_PHYSICIAN
+            scope:eotg_aug_provider_physician ?= yes
+        }
+        modifier = {
+            add = -25
+            desc = EOTG_AUG_AI_BACKSTREET
+            scope:eotg_aug_provider_backstreet ?= yes
+        }
+        modifier = {
+            add = 50
+            desc = SCHEME_WEAK_HOOK_USED
+            scope:hook ?= yes
+        }
+    }
+
+    # AI sending (spec §4.1, §4.7). Courtiers and knights are left to
+    # eotg_decision_augment_retainer (no double-dip).
+    ai_target_quick_trigger = {
+        adult = yes
+    }
+    ai_targets = {
+        ai_recipients = spouses
+    }
+    ai_targets = {
+        ai_recipients = vassals
+        max = 10
+    }
+    ai_targets = {
+        ai_recipients = family
+        max = 5
+    }
+    ai_frequency_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 60
+        kingdom = 36
+        empire = 36
+        hegemony = 36
+    }
+    ai_will_do = {
+        base = 0
+        modifier = {
+            add = 20
+            scope:actor = { eotg_is_augmented_any = yes }
+        }
+        modifier = {
+            add = 10
+            scope:actor = { has_trait = ambitious }
+        }
+        modifier = {
+            add = 10
+            scope:actor = { has_trait = cynical }
+        }
+        modifier = {
+            add = 25
+            scope:recipient = { eotg_has_physical_loss = yes }
+        }
+        modifier = {
+            add = 10
+            scope:recipient = { eotg_has_physical_loss = yes }
+            scope:actor = { has_trait = compassionate }
+        }
+        modifier = {
+            add = 15
+            scope:actor = {
+                primary_heir ?= { this = scope:recipient }
+            }
+        }
+        modifier = {
+            add = -15
+            scope:eotg_aug_provider_backstreet ?= yes
+        }
+        modifier = {
+            add = 20
+            scope:eotg_aug_provider_backstreet ?= yes
+            scope:actor = { has_trait = greedy }
+        }
+        modifier = {
+            add = 5
+            scope:eotg_aug_provider_physician ?= yes
+        }
+        # The AI uses a hook only if it must (vanilla :404-407)
+        modifier = {
+            add = -1
+            scope:hook ?= yes
+        }
+        # HQ2 throttle (balance §0)
+        modifier = {
+            factor = 0.1
+            scope:recipient = { is_landed = yes }
+        }
+        # Exactly one provider
+        modifier = {
+            factor = 0
+            # Not exactly one (explicit comparators)
+            OR = {
+                calc_true_if = {
+                    amount < 1
+                    scope:eotg_aug_provider_clinic ?= yes
+                    scope:eotg_aug_provider_physician ?= yes
+                    scope:eotg_aug_provider_backstreet ?= yes
+                }
+                calc_true_if = {
+                    amount > 1
+                    scope:eotg_aug_provider_clinic ?= yes
+                    scope:eotg_aug_provider_physician ?= yes
+                    scope:eotg_aug_provider_backstreet ?= yes
+                }
+            }
+        }
+        # Cannot afford the chosen price
+        modifier = {
+            factor = 0
+            scope:eotg_aug_provider_clinic ?= yes
+            scope:actor = { short_term_gold < minor_gold_value }
+        }
+        modifier = {
+            factor = 0
+            scope:eotg_aug_provider_physician ?= yes
+            scope:actor = {
+                short_term_gold < {
+                    value = minor_gold_value
+                    multiply = eotg_aug_price_mult_physician
+                }
+            }
+        }
+        modifier = {
+            factor = 0
+            scope:eotg_aug_provider_backstreet ?= yes
+            scope:actor = { short_term_gold < tiny_gold_value }
+        }
+    }
+}
+
+
+# ── Demand Implant Removal (spec §4.2) ────────────────────────────────────────
+# The liege's own will; no law is cited. Refusal costs opinion only (the
+# crime line is G7's Augmentation Edict hook, spec §10).
+eotg_aug_demand_removal_interaction = {
+    category = interaction_category_vassal
+    icon = demand_obedience       # placeholder (spec §3.1, art debt)
+    popup_on_receive = yes
+    pause_on_receive = yes
+    desc = eotg_aug_demand_removal_interaction_desc
+    notification_text = eotg_aug_demand_removal_interaction_notification
+
+    # Tiers 1-3 only (has_trait = eotg_cybernetics). Neurofractured is
+    # excluded: its exit is Excision (eotg_decision_aug_excision), deliberately
+    # dangerous. Seamless is excluded (lore ruling, upheld 2026-10-04): at 866
+    # tech no surgeon can find where Seamless hardware ends and the body
+    # begins, so there is nothing a removal could take out.
+    is_shown = {
+        NOT = { scope:recipient = scope:actor }
+        scope:recipient = {
+            has_trait = eotg_cybernetics
+            eotg_aug_in_charge_of = { ACTOR = scope:actor }
+            is_imprisoned = no
+        }
+    }
+
+    is_valid_showing_failures_only = {
+        # Procedures QA booking guard: a removal the recipient booked
+        # themself (eotg_aug_removal_kind, 30 days) is not overwritten
+        scope:recipient = {
+            custom_description = {
+                text = eotg_decision_aug_removal_booked_tt
+                NOT = { has_variable = eotg_aug_removal_kind }
+            }
+        }
+        custom_description = {
+            text = eotg_aug_send_one_provider_tt
+            # Exactly one: an explicit comparator pair (vanilla never writes
+            # a bare `amount =`)
+            calc_true_if = {
+                amount >= 1
+                scope:eotg_aug_provider_clinic ?= yes
+                scope:eotg_aug_provider_physician ?= yes
+                scope:eotg_aug_provider_backstreet ?= yes
+            }
+            calc_true_if = {
+                amount <= 1
+                scope:eotg_aug_provider_clinic ?= yes
+                scope:eotg_aug_provider_physician ?= yes
+                scope:eotg_aug_provider_backstreet ?= yes
+            }
+        }
+        # The full-removal price (medium_gold_value, procedures
+        # eotg_aug_removal_base_value for a full removal) by provider
+        trigger_if = {
+            limit = { scope:eotg_aug_provider_clinic ?= yes }
+            scope:actor = { eotg_aug_can_afford_procedure = { BASE = medium_gold_value  MULT = 1 } }
+        }
+        trigger_if = {
+            limit = { scope:eotg_aug_provider_physician ?= yes }
+            scope:actor = { eotg_aug_can_afford_procedure = { BASE = medium_gold_value  MULT = eotg_aug_price_mult_physician } }
+        }
+        trigger_if = {
+            limit = { scope:eotg_aug_provider_backstreet ?= yes }
+            scope:actor = { eotg_aug_can_afford_procedure = { BASE = medium_gold_value  MULT = eotg_aug_price_mult_backstreet_removal } }
+        }
+    }
+
+    cooldown_against_recipient = { years = 10 }
+
+    ai_min_reply_days = 1
+    ai_max_reply_days = 5
+
+    auto_accept = {
+        custom_description = {
+            text = "spending_hook"
+            subject = scope:actor
+            object = scope:recipient
+            scope:hook = yes
+            scope:actor = { has_strong_hook = scope:recipient }
+        }
+    }
+
+    options_heading = eotg_aug_send_provider_heading
+    send_option = {
+        flag = eotg_aug_provider_clinic
+        localization = eotg_aug_send_clinic
+        current_description = eotg_aug_send_clinic_tt
+        starts_enabled = { always = yes }
+    }
+    send_option = {
+        flag = eotg_aug_provider_physician
+        localization = eotg_aug_send_physician
+        current_description = eotg_aug_send_physician_tt
+        # One requirement line (Tiger: an OR is too complex to tooltip in a
+        # failures-only trigger)
+        is_valid = {
+            custom_description = {
+                text = eotg_aug_send_physician_valid_tt
+                scope:actor = { eotg_has_physician_access = yes }
+                trigger_if = {
+                    limit = { scope:actor = { employs_court_position = court_physician_court_position } }
+                    scope:actor = {
+                        court_position:court_physician_court_position = {
+                            NOT = { this = scope:recipient }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    send_option = {
+        flag = eotg_aug_provider_backstreet
+        localization = eotg_aug_send_backstreet
+        current_description = eotg_aug_send_backstreet_tt
+    }
+    send_option = {
+        is_valid = {
+            scope:actor = { has_usable_hook = scope:recipient }
+        }
+        flag = hook
+        localization = SCHEME_HOOK
+    }
+    should_use_extra_icon = {
+        scope:actor = { has_usable_hook = scope:recipient }
+    }
+    extra_icon = "gfx/interface/icons/character_interactions/hook_icon.dds"
+    send_options_exclusive = no
+
+    on_accept = {
+        if = {
+            limit = { scope:eotg_aug_provider_physician ?= yes }
+            eotg_aug_demand_removal_effect = { PROVIDER = physician }
+        }
+        else_if = {
+            limit = { scope:eotg_aug_provider_backstreet ?= yes }
+            eotg_aug_demand_removal_effect = { PROVIDER = backstreet }
+        }
+        else = {
+            eotg_aug_demand_removal_effect = { PROVIDER = clinic }
+        }
+        if = {
+            limit = { scope:hook ?= yes }
+            scope:actor = {
+                if = {
+                    limit = { has_usable_hook = scope:recipient }
+                    use_hook = scope:recipient
+                }
+            }
+        }
+        scope:actor = {
+            send_interface_toast = {
+                type = event_toast_effect_good
+                title = eotg_aug_demand_accepted_toast
+                left_icon = scope:recipient
+            }
+        }
+    }
+
+    # Opinion only, by decision (vanilla demanded_my_conversion_opinion,
+    # 00_religious_interactions.txt:667-672)
+    on_decline = {
+        scope:recipient = {
+            add_opinion = {
+                modifier = eotg_opinion_aug_demanded_removal
+                target = scope:actor
+                years = 5
+            }
+        }
+        scope:actor = {
+            send_interface_toast = {
+                type = event_toast_effect_bad
+                title = eotg_aug_demand_declined_toast
+                left_icon = scope:recipient
+            }
+        }
+    }
+
+    # The recipient's view (spec §4.2 table)
+    ai_accept = {
+        base = -10
+        modifier = {
+            add = 50
+            desc = EOTG_AUG_AI_LIEGE
+            scope:recipient = {
+                OR = {
+                    is_courtier_of = scope:actor
+                    is_vassal_of = scope:actor
+                }
+            }
+        }
+        opinion_modifier = {
+            who = scope:recipient
+            opinion_target = scope:actor
+            multiplier = 0.5
+            desc = AI_OPINION_REASON
+        }
+        modifier = {
+            add = 10
+            desc = EOTG_AUG_AI_TIER_AUGMENTED
+            scope:recipient = { eotg_is_aug_tier1 = yes }
+        }
+        modifier = {
+            add = -20
+            desc = EOTG_AUG_AI_TIER_ENHANCED
+            scope:recipient = { eotg_is_aug_tier2 = yes }
+        }
+        modifier = {
+            add = -40
+            desc = EOTG_AUG_AI_TIER_OVERCLOCKED
+            scope:recipient = { eotg_is_aug_tier3 = yes }
+        }
+        modifier = {
+            add = 30
+            desc = EOTG_AUG_AI_ZEALOUS
+            scope:recipient = { has_trait = zealous }
+        }
+        modifier = {
+            add = 15
+            desc = EOTG_AUG_AI_CONTENT
+            scope:recipient = { has_trait = content }
+        }
+        modifier = {
+            add = 10
+            desc = EOTG_AUG_AI_CRAVEN
+            scope:recipient = { has_trait = craven }
+        }
+        modifier = {
+            add = -30
+            desc = EOTG_AUG_AI_AMBITIOUS
+            scope:recipient = { has_trait = ambitious }
+        }
+        modifier = {
+            add = -20
+            desc = EOTG_AUG_AI_CYNICAL
+            scope:recipient = { has_trait = cynical }
+        }
+        modifier = {
+            add = -20
+            desc = EOTG_AUG_AI_STUBBORN
+            scope:recipient = { has_trait = stubborn }
+        }
+        modifier = {
+            add = -10
+            desc = EOTG_AUG_AI_ARROGANT
+            scope:recipient = { has_trait = arrogant }
+        }
+        modifier = {
+            add = 20
+            desc = EOTG_AUG_AI_STRESS
+            scope:recipient = { stress_level >= 2 }
+        }
+        modifier = {
+            add = 25
+            desc = EOTG_AUG_AI_COUNTDOWN
+            scope:recipient = { eotg_aug_has_countdown = yes }
+        }
+        modifier = {
+            add = 10
+            desc = EOTG_AUG_AI_ILLEGAL
+            scope:recipient = { has_character_modifier = eotg_mod_illegal_implants }
+        }
+        modifier = {
+            add = 10
+            desc = EOTG_AUG_AI_CLINIC
+            scope:eotg_aug_provider_clinic ?= yes
+        }
+        modifier = {
+            add = 5
+            desc = EOTG_AUG_AI_PHYSICIAN
+            scope:eotg_aug_provider_physician ?= yes
+        }
+        modifier = {
+            add = -30
+            desc = EOTG_AUG_AI_BACKSTREET
+            scope:eotg_aug_provider_backstreet ?= yes
+        }
+        modifier = {
+            add = 50
+            desc = SCHEME_WEAK_HOOK_USED
+            scope:hook ?= yes
+        }
+    }
+
+    ai_target_quick_trigger = {
+        adult = yes
+    }
+    ai_targets = {
+        ai_recipients = vassals
+        max = 10
+    }
+    ai_targets = {
+        ai_recipients = spouses
+    }
+    ai_targets = {
+        ai_recipients = courtiers
+        chance = 0.25
+    }
+    ai_frequency_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 60
+        kingdom = 36
+        empire = 36
+        hegemony = 36
+    }
+    ai_will_do = {
+        base = 0
+        modifier = {
+            add = 25
+            scope:actor = { has_trait = zealous }
+        }
+        modifier = {
+            add = 20
+            scope:recipient = {
+                eotg_is_aug_tier3 = yes
+                eotg_aug_has_countdown = yes
+            }
+        }
+        modifier = {
+            add = 15
+            scope:recipient = { eotg_is_aug_tier3 = yes }
+            OR = {
+                scope:recipient = { is_spouse_of = scope:actor }
+                scope:actor = {
+                    primary_heir ?= { this = scope:recipient }
+                }
+            }
+        }
+        modifier = {
+            add = -20
+            scope:eotg_aug_provider_backstreet ?= yes
+        }
+        modifier = {
+            add = 5
+            scope:eotg_aug_provider_physician ?= yes
+        }
+        modifier = {
+            add = -1
+            scope:hook ?= yes
+        }
+        modifier = {
+            factor = 0
+            scope:actor = { eotg_is_augmented_any = yes }
+        }
+        modifier = {
+            factor = 0
+            scope:actor = { has_trait = cynical }
+        }
+        modifier = {
+            factor = 0
+            # Not exactly one (explicit comparators)
+            OR = {
+                calc_true_if = {
+                    amount < 1
+                    scope:eotg_aug_provider_clinic ?= yes
+                    scope:eotg_aug_provider_physician ?= yes
+                    scope:eotg_aug_provider_backstreet ?= yes
+                }
+                calc_true_if = {
+                    amount > 1
+                    scope:eotg_aug_provider_clinic ?= yes
+                    scope:eotg_aug_provider_physician ?= yes
+                    scope:eotg_aug_provider_backstreet ?= yes
+                }
+            }
+        }
+        modifier = {
+            factor = 0
+            scope:eotg_aug_provider_clinic ?= yes
+            scope:actor = { short_term_gold < medium_gold_value }
+        }
+        modifier = {
+            factor = 0
+            scope:eotg_aug_provider_physician ?= yes
+            scope:actor = {
+                short_term_gold < {
+                    value = medium_gold_value
+                    multiply = eotg_aug_price_mult_physician
+                }
+            }
+        }
+        modifier = {
+            factor = 0
+            scope:eotg_aug_provider_backstreet ?= yes
+            scope:actor = {
+                short_term_gold < {
+                    value = medium_gold_value
+                    multiply = eotg_aug_price_mult_backstreet_removal
+                }
+            }
+        }
+    }
+}
+
+
+# ── Have Them Examined (spec §4.3) ────────────────────────────────────────────
+# The actor's physician looks at someone's hardware; the report comes as
+# eotg_aug_int.001 to the actor. Precedent: the actor's physician, then an
+# actor follow-up event (vanilla 06_ep3_interactions.txt:4461-4464, :4613).
+eotg_aug_examine_interaction = {
+    category = interaction_category_friendly
+    # Placeholder: the spec's `learning` has no file under
+    # gfx/interface/icons/character_interactions/; `plague` is the nearest
+    # medical icon there (art debt, spec §3.1).
+    icon = plague
+    desc = eotg_aug_examine_interaction_desc
+
+    # Actor-only state (_character_interactions.info:570-573)
+    is_available = {
+        eotg_has_physician_access = yes
+    }
+
+    # eotg_aug_tamper_target: augmented and not Seamless. Lore ruling (upheld
+    # 2026-10-04): at 866 tech no one can tell where Seamless hardware ends
+    # and the body begins, so there is no hardware to examine apart from the
+    # body.
+    is_shown = {
+        NOT = { scope:recipient = scope:actor }
+        scope:recipient = {
+            eotg_aug_tamper_target = yes
+            OR = {
+                eotg_aug_in_charge_of = { ACTOR = scope:actor }
+                is_imprisoned_by = scope:actor
+            }
+        }
+    }
+
+    cooldown_against_recipient = { years = 2 }
+
+    ai_min_reply_days = 1
+    ai_max_reply_days = 5
+
+    # Your own household and your prisoners do not get a say
+    auto_accept = {
+        OR = {
+            scope:recipient = { is_courtier_of = scope:actor }
+            scope:recipient = { is_imprisoned_by = scope:actor }
+        }
+    }
+
+    on_accept = {
+        scope:recipient = { save_scope_as = eotg_examined }
+        scope:actor = {
+            eotg_aug_save_surgeon_effect = yes
+            trigger_event = { id = eotg_aug_int.001  days = { 3 10 } }
+        }
+    }
+
+    on_decline = {
+        scope:actor = {
+            send_interface_toast = {
+                type = event_toast_effect_neutral
+                title = eotg_aug_examine_declined_toast
+                left_icon = scope:recipient
+            }
+        }
+    }
+
+    # Vassals, spouses and family at other courts (spec §4.3 table)
+    ai_accept = {
+        base = 25
+        opinion_modifier = {
+            who = scope:recipient
+            opinion_target = scope:actor
+            multiplier = 0.5
+            desc = AI_OPINION_REASON
+        }
+        modifier = {
+            add = 20
+            desc = EOTG_AUG_AI_TRUSTING
+            scope:recipient = { has_trait = trusting }
+        }
+        modifier = {
+            add = -40
+            desc = EOTG_AUG_AI_PARANOID
+            scope:recipient = { has_trait = paranoid }
+        }
+        modifier = {
+            add = -10
+            desc = EOTG_AUG_AI_DECEITFUL
+            scope:recipient = { has_trait = deceitful }
+        }
+        modifier = {
+            add = 15
+            desc = EOTG_AUG_AI_STRESS
+            scope:recipient = { stress_level >= 2 }
+        }
+        modifier = {
+            add = 20
+            desc = EOTG_AUG_AI_COUNTDOWN
+            scope:recipient = { eotg_aug_has_countdown = yes }
+        }
+        modifier = {
+            add = -20
+            desc = EOTG_AUG_AI_ILLEGAL
+            scope:recipient = { has_character_modifier = eotg_mod_illegal_implants }
+        }
+    }
+
+    ai_target_quick_trigger = {
+        adult = yes
+    }
+    ai_targets = {
+        ai_recipients = spouses
+    }
+    ai_targets = {
+        ai_recipients = family
+        max = 5
+    }
+    ai_targets = {
+        ai_recipients = vassals
+        max = 10
+    }
+    ai_frequency_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 60
+        kingdom = 36
+        empire = 36
+        hegemony = 36
+    }
+    ai_will_do = {
+        base = 0
+        modifier = {
+            add = 40
+            scope:recipient = {
+                OR = {
+                    eotg_is_aug_tier3 = yes
+                    has_trait = eotg_neurofractured
+                }
+            }
+        }
+        modifier = {
+            add = 20
+            scope:recipient = {
+                OR = {
+                    has_character_modifier = eotg_mod_aug_infection
+                    has_character_modifier = eotg_mod_aug_fragments
+                    has_character_modifier = eotg_mod_aug_tampered
+                }
+            }
+        }
+        modifier = {
+            add = 20
+            scope:recipient = { eotg_aug_has_fault = yes }
+        }
+        modifier = {
+            add = 10
+            scope:actor = { has_trait = diligent }
+        }
+        modifier = {
+            factor = 0
+            scope:recipient = {
+                OR = {
+                    eotg_is_aug_tier1 = yes
+                    eotg_is_aug_tier2 = yes
+                }
+                NOR = {
+                    has_character_modifier = eotg_mod_aug_infection
+                    has_character_modifier = eotg_mod_aug_fragments
+                    has_character_modifier = eotg_mod_aug_tampered
+                    eotg_aug_has_fault = yes
+                }
+            }
+        }
+    }
+}
+
+
+# ── Tamper with Implants: start the scheme (spec §4.4.2) ──────────────────────
+# Shape: vanilla start_abduct (00_scheme_interactions.txt:251-509) for the
+# body; start_stealing_back_artifact (00_artifact_interactions.txt:2813-3330)
+# for the AI. The agent-package flags keep vanilla's names (spec §3.1: local
+# to this interaction; vanilla loc for the labels).
+eotg_aug_start_tamper_interaction = {
+    icon = icon_scheme_steal_back_artifact    # placeholder (spec §3.1, art debt)
+    interface_priority = 70
+    category = interaction_category_hostile
+
+    send_name = START_SCHEME
+
+    scheme = eotg_aug_tamper
+    ignores_pending_interaction_block = yes
+
+    is_available = {
+        trigger_if = {
+            limit = { is_ai = yes }
+            intrigue >= low_skill_rating
+            NOT = {
+                any_scheme = {
+                    OR = {
+                        scheme_type = murder
+                        scheme_type = abduct
+                        scheme_type = eotg_aug_tamper
+                    }
+                }
+            }
+            is_imprisoned = no
+        }
+    }
+
+    # eotg_aug_tamper_target: augmented, not Seamless. Lore ruling (upheld
+    # 2026-10-04): at 866 tech no one can find where Seamless hardware ends
+    # and the body begins, so there is no panel to open.
+    is_shown = {
+        NOR = {
+            scope:recipient = scope:actor
+            scope:recipient = { is_imprisoned_by = scope:actor }
+        }
+        scope:recipient = { eotg_aug_tamper_target = yes }
+
+        NAND = { # Game Rules! (vanilla start_abduct)
+            has_game_rule = no_players_multiplayer_murder_schemes
+            scope:actor = {
+                is_ai = no
+            }
+            scope:recipient = {
+                is_ai = no
+            }
+        }
+
+        NAND = {
+            has_game_rule = no_player_families_multiplayer_murder_schemes
+            scope:actor = {
+                is_ai = no
+            }
+            scope:recipient = {
+                OR = {
+                    is_ai = no
+                    any_close_family_member = {
+                        AND = {
+                            is_ai = no
+                            this != scope:actor
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    is_valid_showing_failures_only = {
+        scope:actor = {
+            can_start_scheme = {
+                type = eotg_aug_tamper
+                target_character = scope:recipient
+            }
+        }
+        scope:recipient = { NOT = { has_strong_hook = scope:actor } }
+        trigger_if = {
+            limit = { scope:actor = { has_variable = no_scheming_allowed_var } }
+            custom_tooltip = {
+                text = no_scheming_allowed_var_tt
+                scope:actor.var:no_scheming_allowed_var != scope:recipient
+            }
+        }
+    }
+
+    desc = {
+        triggered_desc = {
+            trigger = {
+                scope:actor = {
+                    can_start_scheme = {
+                        type = eotg_aug_tamper
+                        target_character = scope:recipient
+                    }
+                }
+            }
+            desc = eotg_aug_start_tamper_approved_tt
+        }
+    }
+
+    # Scheme Starter Packages (vanilla start_abduct). Every package has at
+    # least one pair of hands (agent_physic or agent_smith).
+    options_heading = schemes.t.agent_packages
+    send_options_exclusive = yes
+    send_option = {
+        flag = agent_focus_balance
+        current_description = eotg_aug_start_tamper.tt.agent_focus_balance
+    }
+    send_option = {
+        flag = agent_focus_success
+        current_description = eotg_aug_start_tamper.tt.agent_focus_success
+    }
+    send_option = {
+        flag = agent_focus_speed
+        current_description = eotg_aug_start_tamper.tt.agent_focus_speed
+    }
+    send_option = {
+        flag = agent_focus_secrecy
+        current_description = eotg_aug_start_tamper.tt.agent_focus_secrecy
+    }
+
+    on_accept = {
+        scope:actor = {
+            # Stress on start (vanilla abduct :405-415, steal_back :3033-3040)
+            eotg_aug_stress_wound_effect = yes
+            send_interface_toast = {
+                type = event_toast_effect_neutral
+                title = eotg_aug_start_tamper_notification
+
+                left_icon = scope:actor
+                right_icon = scope:recipient
+
+                # Success.
+                if = {
+                    limit = { scope:agent_focus_success ?= yes }
+                    begin_scheme_with_agents_effect = {
+                        SCHEME_TYPE = eotg_aug_tamper
+                        TARGET_TYPE = target_character
+                        TARGET_SCOPE = scope:recipient
+                        AGENT_1 = agent_physic
+                        AGENT_2 = agent_physic
+                        AGENT_3 = agent_smith
+                        AGENT_4 = agent_infiltrator
+                        AGENT_5 = agent_lookout
+                    }
+                }
+                # Speed.
+                else_if = {
+                    limit = { scope:agent_focus_speed ?= yes }
+                    begin_scheme_with_agents_effect = {
+                        SCHEME_TYPE = eotg_aug_tamper
+                        TARGET_TYPE = target_character
+                        TARGET_SCOPE = scope:recipient
+                        AGENT_1 = agent_infiltrator
+                        AGENT_2 = agent_infiltrator
+                        AGENT_3 = agent_footpad
+                        AGENT_4 = agent_physic
+                        AGENT_5 = agent_lookout
+                    }
+                }
+                # Secrecy.
+                else_if = {
+                    limit = { scope:agent_focus_secrecy ?= yes }
+                    begin_scheme_with_agents_effect = {
+                        SCHEME_TYPE = eotg_aug_tamper
+                        TARGET_TYPE = target_character
+                        TARGET_SCOPE = scope:recipient
+                        AGENT_1 = agent_lookout
+                        AGENT_2 = agent_lookout
+                        AGENT_3 = agent_decoy
+                        AGENT_4 = agent_physic
+                        AGENT_5 = agent_infiltrator
+                    }
+                }
+                # Balanced.
+                else = {
+                    begin_scheme_with_agents_effect = {
+                        SCHEME_TYPE = eotg_aug_tamper
+                        TARGET_TYPE = target_character
+                        TARGET_SCOPE = scope:recipient
+                        AGENT_1 = agent_physic
+                        AGENT_2 = agent_smith
+                        AGENT_3 = agent_infiltrator
+                        AGENT_4 = agent_footpad
+                        AGENT_5 = agent_lookout
+                    }
+                }
+            }
+        }
+    }
+
+    auto_accept = yes
+
+    # AI (vanilla 00_artifact_interactions.txt:3237-3330)
+    ai_target_quick_trigger = {
+        adult = yes
+    }
+    ai_targets = {
+        ai_recipients = scripted_relations
+    }
+    ai_targets = {
+        ai_recipients = liege
+    }
+    ai_targets = {
+        ai_recipients = neighboring_rulers
+        ai_recipients = peer_vassals
+        max = 10
+    }
+    ai_targets = {
+        ai_recipients = family
+        max = 10
+    }
+    ai_targets = {
+        ai_recipients = vassals
+        max = 10
+    }
+    ai_frequency_by_tier = {
+        barony = 0
+        county = 144
+        duchy = 72
+        kingdom = 36
+        empire = 36
+        hegemony = 36
+    }
+    ai_will_do = {
+        base = -30
+        # Factor for personality (excluding realism)
+        modifier = {
+            add = {
+                value = ai_boldness
+                multiply = -1
+            }
+        }
+        modifier = {
+            ai_vengefulness > 0
+            add = ai_vengefulness
+        }
+        modifier = {
+            add = {
+                value = ai_compassion
+                multiply = -0.25
+            }
+        }
+        modifier = {
+            scope:actor = { has_relation_rival = scope:recipient }
+            add = 60
+        }
+        modifier = {
+            scope:actor = { has_relation_nemesis = scope:recipient }
+            add = 150
+        }
+        # Added (spec §4.4.2)
+        modifier = {
+            add = 15
+            scope:actor = { has_trait = cynical }
+        }
+        modifier = {
+            add = 10
+            scope:actor = { has_trait = zealous }
+        }
+        # Envy: an augmented actor at tier 1-2 against tier 3 or Neurofractured
+        modifier = {
+            add = 20
+            scope:actor = {
+                OR = {
+                    eotg_is_aug_tier1 = yes
+                    eotg_is_aug_tier2 = yes
+                }
+            }
+            scope:recipient = {
+                OR = {
+                    eotg_is_aug_tier3 = yes
+                    has_trait = eotg_neurofractured
+                }
+            }
+        }
+        modifier = {
+            scope:actor = {
+                opinion = {
+                    target = scope:recipient
+                    value >= medium_positive_opinion
+                }
+                ai_greed <= high_positive_ai_value
+            }
+            factor = 0
+        }
+        modifier = {
+            scope:recipient = {
+                OR = {
+                    has_relation_friend = scope:actor
+                    has_relation_lover = scope:actor
+                }
+            }
+            factor = 0
+        }
+    }
+}
+
+
+# ── Salvage Implants (spec §4.5) ──────────────────────────────────────────────
+# Shape: vanilla blind_interaction (00_prison_interactions.txt:8150-8344).
+# The roll comes first (eotg_aug_salvage_effect), then the follow-up
+# eotg_aug_int.002 to the actor. The prisoner stays imprisoned.
+eotg_aug_salvage_interaction = {
+    interface_priority = 30
+    icon = blind                  # placeholder (spec §3.1, art debt)
+    category = interaction_category_prison
+    desc = eotg_aug_salvage_interaction_desc
+
+    # Seamless prisoners are excluded (option A, decided by the human
+    # 2026-10-04, spec §8 ruling 2): at 866 tech no surgeon can find where
+    # Seamless hardware ends and the body begins, so there is nothing to cut
+    # out apart from the body. eotg_aug_tamper_target already excludes them.
+    is_shown = {
+        scope:actor = { is_adult = yes }
+        scope:recipient = {
+            is_imprisoned_by = scope:actor
+            eotg_aug_tamper_target = yes
+        }
+    }
+
+    # Vanilla blind_interaction :8175-8194
+    is_valid_showing_failures_only = {
+        scope:recipient = {
+            custom_description = {
+                text = "currently_being_tortured"
+                NOT = { has_character_flag = is_being_tortured }
+            }
+        }
+        custom_tooltip = {
+            text = is_currently_being_purged_tt
+            scope:recipient = {
+                NOT = {
+                    has_character_flag = is_currently_being_purged
+                }
+            }
+        }
+    }
+
+    is_highlighted = {
+        OR = {
+            scope:actor = { has_trait = sadistic }
+            scope:actor = { has_relation_rival = scope:recipient }
+        }
+    }
+
+    # No clinic (spec §4.5). The physician works free here; the rough way is
+    # free and dangerous.
+    options_heading = eotg_aug_send_provider_heading
+    send_options_exclusive = yes
+    send_option = {
+        flag = eotg_aug_provider_physician
+        localization = eotg_aug_send_physician
+        current_description = eotg_aug_send_salvage_physician_tt
+        # One requirement line (Tiger: an OR is too complex to tooltip in a
+        # failures-only trigger)
+        is_valid = {
+            custom_description = {
+                text = eotg_aug_send_physician_valid_tt
+                scope:actor = { eotg_has_physician_access = yes }
+                trigger_if = {
+                    limit = { scope:actor = { employs_court_position = court_physician_court_position } }
+                    scope:actor = {
+                        court_position:court_physician_court_position = {
+                            NOT = { this = scope:recipient }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    send_option = {
+        flag = eotg_aug_provider_backstreet
+        localization = eotg_aug_send_rough
+        current_description = eotg_aug_send_rough_tt
+        starts_enabled = { always = yes }
+    }
+
+    on_accept = {
+        eotg_aug_salvage_actor_effect = yes
+        torture_blind_castrate_disfigure_opinion_effect = { VERB = eotg_opinion_aug_salvaged }
+        if = {
+            limit = { scope:eotg_aug_provider_physician ?= yes }
+            eotg_aug_salvage_effect = { PROVIDER = physician }
+        }
+        else = {
+            eotg_aug_salvage_effect = { PROVIDER = backstreet }
+        }
+        scope:actor = {
+            trigger_event = { id = eotg_aug_int.002  days = { 7 14 } }
+        }
+    }
+
+    auto_accept = yes
+
+    ai_targets = {
+        ai_recipients = prisoners
+    }
+    ai_frequency_by_tier = {
+        barony = 0
+        county = 144
+        duchy = 48
+        kingdom = 36
+        empire = 12
+        hegemony = 12
+    }
+    ai_will_do = {
+        base = -20
+        modifier = {
+            add = 20
+            scope:actor = { has_trait = sadistic }
+        }
+        modifier = {
+            add = 20
+            scope:actor = { has_trait = greedy }
+        }
+        modifier = {
+            add = 15
+            scope:actor = { has_trait = cynical }
+        }
+        modifier = {
+            add = 10
+            scope:actor = { has_trait = zealous }
+        }
+        ai_value_modifier = {
+            ai_compassion = tiny_chance_impact_negative_ai_value
+        }
+        opinion_modifier = {
+            opinion_target = scope:recipient
+            multiplier = -0.25
+        }
+        # The valuable hardware
+        modifier = {
+            add = 20
+            scope:recipient = {
+                OR = {
+                    eotg_is_aug_tier3 = yes
+                    has_trait = eotg_neurofractured
+                }
+            }
+        }
+        modifier = {
+            add = 15
+            scope:actor = {
+                OR = {
+                    eotg_is_augmented_any = yes
+                    eotg_can_receive_augmented = yes
+                }
+            }
+        }
+        modifier = {
+            add = 10
+            scope:eotg_aug_provider_physician ?= yes
+            scope:actor = { has_trait = compassionate }
+        }
+        modifier = {
+            factor = 0.25
+            scope:recipient = { is_close_family_of = scope:actor }
+        }
+    }
+}

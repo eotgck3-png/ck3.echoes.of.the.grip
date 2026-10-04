@@ -1,8 +1,9 @@
 """Build the EotG observer sub-mod's overlay files (balance spec §9.2).
 
 The observer needs hooks inside the main mod's scripted effects, on_actions,
-decisions and story cycles. CK3 replaces a file when a later-loaded mod ships
-the same relative path, so this script copies those four main-mod files into
+decisions, story cycles, character interactions and tamper events. CK3
+replaces a file when a later-loaded mod ships the same relative path, so this
+script copies those six main-mod files into
 the sub-mod and inserts one-line hooks, each tagged `# eotg_obs`. It then
 checks that removing every tagged line gives back the main-mod file byte for
 byte: the overlay changes nothing but logging.
@@ -11,7 +12,7 @@ The sources live in the repo at docs/tools/observer/ and are never loaded by
 the main mod. The build writes a complete, installable sub-mod to --out, which
 is normally the CK3 mod folder, so the generated overlays never enter the repo.
 
-RE-RUN THIS AFTER EVERY CHANGE TO THE MAIN MOD'S FOUR FILES. A stale overlay
+RE-RUN THIS AFTER EVERY CHANGE TO THE MAIN MOD'S SIX FILES. A stale overlay
 would run old gameplay code. The header of each overlay records the source
 file's SHA-1; `--check` reports a mismatch.
 
@@ -35,6 +36,9 @@ FILES = {
     "on_actions": "common/on_action/eotg_augmentation_on_actions.txt",
     "decisions": "common/decisions/eotg_augmentation_decisions.txt",
     "stories": "common/story_cycles/eotg_augmentation_stories.txt",
+    # Interactions spec §9 item 10 (the five interaction counters)
+    "interactions": "common/character_interactions/eotg_augmentation_interactions.txt",
+    "tamper": "events/eotg_augmentation_tamper.txt",
 }
 YEARLY_LISTS = (
     "eotg_on_yearly_aug_initiation_check",
@@ -141,6 +145,16 @@ def build_effects():
     s, e = o.block("eotg_aug_excision_surgery_effect")
     i = o.find(r"death = \{ death_reason = death_treatment \}", s, e)[0]
     o.before(i, "eotg_obs_log_term_effect = { KIND = excision_death }")
+    # Interactions spec §9 item 10: Offer (landed / unlanded), Demand,
+    # Salvage and deaths on the table
+    s, e = o.block("eotg_aug_offer_install_effect")
+    o.after_line(s, "scope:recipient = { eotg_obs_log_offer_effect = yes }", extra="    ")
+    s, e = o.block("eotg_aug_demand_removal_effect")
+    o.after_line(s, "scope:recipient = { eotg_obs_log_effect = { KEY = int_demand } }", extra="    ")
+    s, e = o.block("eotg_aug_salvage_effect")
+    o.after_line(s, "scope:recipient = { eotg_obs_log_effect = { KEY = int_salvage } }", extra="    ")
+    i = o.find(r"add_kinslayer_trait_or_nothing_effect = \{ VICTIM = scope:recipient \}", s, e)[0]
+    o.before(i, "eotg_obs_log_effect = { KEY = int_salvage_death }")
     for name, story, key in (
         ("eotg_aug_try_start_countdown_effect", "eotg_story_aug_countdown", "cd_start"),
         ("eotg_aug_patron_accept_effect", "eotg_story_aug_patron", "arc_patron_start"),
@@ -202,6 +216,29 @@ def build_stories():
     return o
 
 
+def build_interactions():
+    """Examine and Tamper start: logged on the click (on_accept), actor's id."""
+    o = Overlay(FILES["interactions"])
+    for name, key in (("eotg_aug_examine_interaction", "int_examine"),
+                      ("eotg_aug_start_tamper_interaction", "tamper_start")):
+        s, e = o.block(name)
+        i = o.find(r"^    on_accept = \{\s*$", s, e)[0]
+        o.after_line(i, f"scope:actor = {{ eotg_obs_log_effect = {{ KEY = {key} }} }}")
+    return o
+
+
+def build_tamper():
+    """tamper.001's result roll: success / failure, and the execution-roll
+    discovery (owner's id). Mid-scheme breaches are vanilla's and not counted."""
+    o = Overlay(FILES["tamper"])
+    s, e = o.block("eotg_aug_tamper.001")
+    for event, key in (("eotg_aug_tamper.002", "tamper_success"), ("eotg_aug_tamper.003", "tamper_failure")):
+        i = o.find(r"trigger_event = \{ id = " + re.escape(event), s, e)[0]
+        o.before(i, f"eotg_obs_log_effect = {{ KEY = {key} }}")
+        o.before(i, "if = { limit = { exists = scope:scheme_discovered } eotg_obs_log_effect = { KEY = tamper_discovered } }")
+    return o
+
+
 STATES = ("none", "t1", "t2", "t3", "nf", "ti")
 TTS = ("county", "duchy", "kingdom")
 
@@ -223,6 +260,9 @@ def loc_keys(dec_keys):
              "arc_heir_start_oc", "arc_heir_start_nf", "arc_patron_start", "arc_retinue_start"]
     char += [f"term_{k}" for k in ("death", "seamless", "excision", "abdication", "excision_death")]
     char += [f"arc_{a}_{x}" for a in ("heir", "cd", "patron", "retinue") for x in ("end", "end_death")]
+    char += ["int_offer_landed", "int_offer_unlanded", "int_demand", "int_examine",
+             "tamper_start", "tamper_success", "tamper_failure", "tamper_discovered",
+             "int_salvage", "int_salvage_death"]
     char += dec_keys
     lines = ["\ufeffl_english:"]
     for k in glob:
@@ -262,7 +302,9 @@ def main(argv):
     oa = build_on_actions()
     dec, dec_keys = build_decisions()
     st = build_stories()
-    for o in (eff, oa, dec, st):
+    ia = build_interactions()
+    tp = build_tamper()
+    for o in (eff, oa, dec, st, ia, tp):
         write(o.rel, o.render())
         print(f"{o.rel}: {o.count} hook lines")
     write("localization/english/eotg_observer_l_english.yml", loc_keys(dec_keys))

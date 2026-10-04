@@ -254,13 +254,24 @@ eotg_aug_proc.001 = {
 # A hidden flaw reads as clean (spec §6.3, thread T6).
 # Chain stage: no world-state guard beyond being alive (the patient may have
 # left the system).
-# Caller: eotg_aug_procedure_effect, 14-45 days.
+# Caller: eotg_aug_procedure_effect, 14-45 days (also reached from the
+# interactions: Demand Implant Removal, Salvage Implants, the fault repairs).
 
 eotg_aug_proc.002 = {
     type = character_event
     title = eotg_aug_proc.002.t
     desc = {
         first_valid = {
+            # Interactions spec §3.2: a salvaged prisoner, and a fault repair
+            # (tamper.004 a/b/c, int.001.b), before the kind openers
+            triggered_desc = {
+                trigger = { exists = scope:eotg_proc_salvage }
+                desc = eotg_aug_proc.002.desc_salvaged
+            }
+            triggered_desc = {
+                trigger = { exists = scope:eotg_proc_fault }
+                desc = eotg_aug_proc.002.desc_repair_fault
+            }
             triggered_desc = {
                 trigger = { scope:eotg_proc_kind ?= flag:upgrade }
                 desc = eotg_aug_proc.002.desc_upgrade
@@ -702,6 +713,12 @@ eotg_aug_proc.020 = {
     desc = {
         desc = eotg_aug_proc.020.desc
         first_valid = {
+            # Interactions spec §3.2: the reserved value, now set by
+            # eotg_aug_salvage_effect
+            triggered_desc = {
+                trigger = { var:eotg_aug_former ?= flag:salvaged }
+                desc = eotg_aug_proc.020.desc_salvaged
+            }
             triggered_desc = {
                 trigger = { var:eotg_aug_former ?= flag:excised }
                 desc = eotg_aug_proc.020.desc_excised

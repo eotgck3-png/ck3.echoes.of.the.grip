@@ -1,0 +1,432 @@
+﻿# ── eotg_augmentation_interactions.txt ───────────────────────────────────────
+# Follow-ups to the cybernetics character interactions
+# (docs/specs/cybernetics_v2_interactions.md §4.6).
+#
+# eotg_aug_int.001 — The Physician's Report  (Have Them Examined)
+# eotg_aug_int.002 — What Came Out           (Salvage Implants)
+#
+# Fires from:
+#   eotg_aug_examine_interaction (on_accept, to the actor) -> .001, 3-10 days;
+#   eotg_aug_salvage_interaction (on_accept, to the actor) -> .002, 7-14 days
+#   (common/character_interactions/eotg_augmentation_interactions.txt).
+# No cooldown is read here: the interactions own theirs
+# (cooldown_against_recipient; index §1 rule 5).
+# Resource: eotg_fracture_risk and tier. .001's desc reads the examined
+# character's band and faults; a and e move risk at tier 3 / Neurofractured,
+# b moves it through the shared roll. .002's desc reads the tier the hardware
+# came from; b changes the actor's tier, c and e move risk. All risk moves are
+# hidden; no text quantifies them.
+# ─────────────────────────────────────────────────────────────────────────────
+
+namespace = eotg_aug_int
+
+
+# ── eotg_aug_int.001 ──────────────────────────────────────────────────────────
+# The Physician's Report. The actor's physician (scope:eotg_proc_surgeon,
+# saved by the interaction) has examined scope:eotg_examined.
+# Caller: eotg_aug_examine_interaction (on_accept), 3-10 days.
+
+eotg_aug_int.001 = {
+    type = character_event
+    title = eotg_aug_int.001.t
+    desc = {
+        desc = eotg_aug_int.001.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_examined = { has_trait = eotg_neurofractured } }
+                desc = eotg_aug_int.001.desc_fractured
+            }
+            triggered_desc = {
+                trigger = {
+                    scope:eotg_examined = {
+                        eotg_is_aug_tier3 = yes
+                        eotg_aug_pressure_flicker = no
+                    }
+                }
+                desc = eotg_aug_int.001.desc_oc_bad
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_examined = { eotg_is_aug_tier3 = yes } }
+                desc = eotg_aug_int.001.desc_oc_ok
+            }
+            desc = eotg_aug_int.001.desc_stable
+        }
+        triggered_desc = {
+            trigger = { scope:eotg_examined = { has_character_flag = eotg_flag_aug_hidden_flaw } }
+            desc = eotg_aug_int.001.desc_flaw
+        }
+        triggered_desc = {
+            trigger = { scope:eotg_examined = { has_character_flag = eotg_flag_aug_sabotaged } }
+            desc = eotg_aug_int.001.desc_tampered
+        }
+        triggered_desc = {
+            trigger = {
+                scope:eotg_examined = {
+                    OR = {
+                        has_character_modifier = eotg_mod_aug_infection
+                        has_character_modifier = eotg_mod_aug_fragments
+                    }
+                }
+            }
+            desc = eotg_aug_int.001.desc_infection
+        }
+        triggered_desc = {
+            trigger = { scope:eotg_examined = { has_character_modifier = eotg_mod_illegal_implants } }
+            desc = eotg_aug_int.001.desc_illegal
+        }
+    }
+    theme = healthcare
+
+    # World-state guard: the examined is still alive and still has hardware
+    # to examine (not left, not Seamless)
+    trigger = {
+        scope:eotg_examined ?= {
+            is_alive = yes
+            eotg_aug_tamper_target = yes
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+    right_portrait = {
+        character = scope:eotg_examined
+        animation = worry
+    }
+    # Guarded (vanilla events/activities/activity_system_events.txt:89-94)
+    lower_left_portrait = {
+        trigger = {
+            exists = scope:eotg_proc_surgeon
+            NOT = { scope:eotg_proc_surgeon = root }
+            NOT = { scope:eotg_proc_surgeon = scope:eotg_examined }
+        }
+        character = scope:eotg_proc_surgeon
+    }
+
+    immediate = {
+        hidden_effect = {
+            scope:eotg_examined = {
+                if = {
+                    limit = { exists = var:eotg_aug_sabotaged_by }
+                    var:eotg_aug_sabotaged_by = { save_scope_as = eotg_saboteur }
+                }
+            }
+        }
+    }
+
+    # "Treat what you can." Infection, fragments and the tampered fault come
+    # off; at tier 3 / Neurofractured the hardware is eased (hidden).
+    option = {
+        name = eotg_aug_int.001.a
+        trigger = {
+            gold >= minor_gold_value
+            scope:eotg_examined = {
+                OR = {
+                    has_character_modifier = eotg_mod_aug_infection
+                    has_character_modifier = eotg_mod_aug_fragments
+                    has_character_modifier = eotg_mod_aug_tampered
+                    eotg_is_aug_tier3 = yes
+                    has_trait = eotg_neurofractured
+                }
+            }
+        }
+        remove_short_term_gold = minor_gold_value
+        eotg_aug_examine_treat_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 20  has_trait = compassionate }
+        }
+    }
+
+    # "Fix the fault." A repair roll on the examined, by the actor's
+    # physician. Not when the physician is the one examined (self-surgery at
+    # the physician's price; procedures QA).
+    option = {
+        name = eotg_aug_int.001.b
+        trigger = {
+            scope:eotg_examined = { eotg_aug_has_fault = yes }
+            exists = scope:eotg_proc_surgeon
+            NOT = { scope:eotg_proc_surgeon = scope:eotg_examined }
+            eotg_aug_can_afford_procedure = { BASE = medium_gold_value  MULT = eotg_aug_price_mult_physician }
+        }
+        eotg_aug_pay_procedure_effect = { BASE = medium_gold_value  MULT = eotg_aug_price_mult_physician }
+        scope:eotg_examined = { eotg_aug_fault_repair_book_effect = yes }
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = scope:eotg_examined  PROVIDER = physician  PROCEDURE = repair  SURGEON = scope:eotg_proc_surgeon }
+        }
+        custom_tooltip = eotg_aug_int.001.b.tt
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 10  has_trait = paranoid }
+            modifier = { add = -20  has_trait = greedy }
+        }
+    }
+
+    # "Note it." Ungated.
+    option = {
+        name = eotg_aug_int.001.c
+        eotg_aug_stress_neglect_effect = yes
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = lazy }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # "Trace the tampering." Physical evidence only (lore I5). Shape: the
+    # intrigue duel of eotg_aug_tier2.015.a (x2.5). The branch descs do not
+    # name the saboteur (the name would show before the roll); the toast does.
+    option = {
+        name = eotg_aug_int.001.d
+        trigger = {
+            scope:eotg_saboteur ?= { is_alive = yes }
+        }
+        duel = {
+            skill = intrigue
+            target = scope:eotg_saboteur
+            50 = {
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = 2.5
+                }
+                desc = eotg_aug_trace_success_tt
+                hidden_effect = {
+                    scope:eotg_examined = {
+                        add_opinion = { modifier = eotg_opinion_aug_tampered  target = scope:eotg_saboteur }
+                    }
+                    if = {
+                        limit = { NOT = { scope:eotg_examined = root } }
+                        add_opinion = { modifier = eotg_opinion_aug_tampered  target = scope:eotg_saboteur }
+                    }
+                    send_interface_toast = {
+                        type = event_toast_effect_good
+                        title = eotg_aug_int.001.d.success
+                        left_icon = scope:eotg_saboteur
+                    }
+                }
+            }
+            50 = {
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = -2.5
+                }
+                desc = eotg_aug_trace_failure_tt
+                hidden_effect = {
+                    send_interface_toast = {
+                        type = event_toast_effect_neutral
+                        title = eotg_aug_int.001.d.failure
+                        left_icon = scope:eotg_examined
+                    }
+                }
+            }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = paranoid }
+            modifier = { add = 10  has_trait = vengeful }
+        }
+    }
+
+    # [lifestyle_physician] "Let me do it myself." As a, but free, and the
+    # ruler learns from it.
+    option = {
+        name = eotg_aug_int.001.e
+        trigger = {
+            has_trait = lifestyle_physician
+            NOT = { has_trait = blind }
+            scope:eotg_examined = {
+                OR = {
+                    has_character_modifier = eotg_mod_aug_infection
+                    has_character_modifier = eotg_mod_aug_fragments
+                    has_character_modifier = eotg_mod_aug_tampered
+                    eotg_is_aug_tier3 = yes
+                    has_trait = eotg_neurofractured
+                }
+            }
+        }
+        trait = lifestyle_physician
+        eotg_aug_examine_treat_effect = yes
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_learning  years = 5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = lifestyle_physician }
+            modifier = { add = 10  has_trait = diligent }
+        }
+    }
+}
+
+
+# ── eotg_aug_int.002 ──────────────────────────────────────────────────────────
+# What Came Out. The salvaged hardware is the actor's. Saved by the
+# interaction and the roll: recipient, eotg_salvage_tier, eotg_proc_outcome,
+# eotg_proc_salvage. The buyer is never named (spec §8). Register: clinical,
+# no gore past init.012 (lore I4).
+# Caller: eotg_aug_salvage_interaction (on_accept), 7-14 days.
+
+eotg_aug_int.002 = {
+    type = character_event
+    title = eotg_aug_int.002.t
+    desc = {
+        desc = eotg_aug_int.002.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_salvage_tier ?= flag:augmented }
+                desc = eotg_aug_int.002.desc_augmented
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_salvage_tier ?= flag:enhanced }
+                desc = eotg_aug_int.002.desc_enhanced
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_salvage_tier ?= flag:overclocked }
+                desc = eotg_aug_int.002.desc_overclocked
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_salvage_tier ?= flag:fractured }
+                desc = eotg_aug_int.002.desc_fractured
+            }
+        }
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_proc_outcome ?= flag:death }
+                desc = eotg_aug_int.002.desc_died
+            }
+            triggered_desc = {
+                trigger = {
+                    OR = {
+                        scope:eotg_proc_outcome ?= flag:maimed
+                        scope:eotg_proc_outcome ?= flag:one_eyed
+                        scope:eotg_proc_outcome ?= flag:blind
+                    }
+                }
+                desc = eotg_aug_int.002.desc_maimed
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_proc_outcome ?= flag:rejection }
+                desc = eotg_aug_int.002.desc_fragments
+            }
+        }
+    }
+    theme = prison
+
+    trigger = { is_alive = yes }
+
+    left_portrait = {
+        character = root
+        animation = personality_callous
+    }
+    # Shape: vanilla hunt_events.txt:27175-27181
+    right_portrait = {
+        trigger = { scope:recipient ?= { is_alive = yes } }
+        character = scope:recipient
+        animation = pain
+        override_imprisonment_visuals = yes
+    }
+
+    # "Sell it to a dealer."
+    option = {
+        name = eotg_aug_int.002.a
+        add_gold = eotg_aug_salvage_sale_value
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = greedy }
+            modifier = { add = 10  has_trait = cynical }
+        }
+    }
+
+    # "Have it fitted to me." Tier 1 only, whatever the hardware came from
+    # (HQ1: no skipping tiers). Used hardware: half the time a hidden flaw
+    # (thread T6). The physician path needs a court physician who is not
+    # root (procedures QA: eotg_aug_has_court_physician); otherwise the
+    # back-street roll, revealed by init.011.
+    option = {
+        name = eotg_aug_int.002.b
+        trigger = {
+            eotg_can_receive_augmented = yes
+            gold >= tiny_gold_value
+        }
+        remove_short_term_gold = tiny_gold_value
+        eotg_aug_initiate_effect = yes
+        hidden_effect = {
+            set_variable = { name = eotg_fracture_risk  value = 5 }
+            random = {
+                chance = 50
+                add_character_flag = eotg_flag_aug_hidden_flaw
+            }
+        }
+        custom_tooltip = eotg_aug_proc.install_tt
+        if = {
+            limit = { eotg_aug_has_court_physician = yes }
+            hidden_effect = {
+                eotg_aug_save_surgeon_effect = yes
+                eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = physician  PROCEDURE = install  SURGEON = scope:eotg_proc_surgeon }
+            }
+        }
+        else = {
+            hidden_effect = {
+                eotg_aug_procedure_roll_effect = { PATIENT = root  PROVIDER = backstreet  PROCEDURE = install  SURGEON = root }
+            }
+            if = {
+                limit = { NOT = { scope:eotg_proc_outcome ?= flag:death } }
+                trigger_event = { id = eotg_aug_init.011  days = { 180 540 } }
+            }
+        }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 10  has_trait = cynical }
+            modifier = { factor = 0  has_trait = zealous }
+        }
+    }
+
+    # (augmented) "Keep it for spare parts."
+    option = {
+        name = eotg_aug_int.002.c
+        trigger = { has_trait = eotg_cybernetics }
+        add_character_modifier = { modifier = eotg_mod_aug_clean_install  years = 5 }
+        hidden_effect = {
+            eotg_add_fracture_risk = { AMOUNT = 3 }
+            random = {
+                chance = 25
+                add_character_flag = eotg_flag_aug_hidden_flaw
+            }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 10  has_trait = greedy }
+        }
+    }
+
+    # "Destroy it." Ungated.
+    option = {
+        name = eotg_aug_int.002.d
+        add_piety = minor_piety_gain
+        eotg_aug_stress_reject_effect = yes
+        ai_chance = {
+            base = 20
+            modifier = { add = 30  has_trait = zealous }
+            modifier = { add = 10  has_trait = humble }
+        }
+    }
+
+    # [cynical] "Take it apart. Learn how it was made."
+    option = {
+        name = eotg_aug_int.002.e
+        trigger = { has_trait = cynical }
+        trait = cynical
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_learning  years = 5 }
+        hidden_effect = {
+            eotg_add_fracture_risk = { AMOUNT = 2 }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = cynical }
+            modifier = { add = 10  has_trait = education_learning_3 }
+        }
+    }
+}

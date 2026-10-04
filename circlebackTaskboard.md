@@ -315,6 +315,19 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Next step:** review the cloud spec when it lands. Answer its UNVERIFIED-VANILLA list with eotg-vanilla-scout, and its canon questions with eotg-lore-keeper.
 - **Note:** a mod-exclusive system built on the vanilla/temporary map before Gate 1 (CLAUDE.md). It must not reference specific titles, provinces, cultures or faiths. "Unsettled" is marked by data or a variable, never by hard-coded title keys.
 
+### CB-38: In-game checks for the Interactions batch (G4/G5/G8)
+- **Status:** waiting-human (2026-10-04)
+- **What:** `docs/specs/cybernetics_v2_interactions.md` §9 item 12 is the full list: Offer, Demand, Examine, Tamper (each agent package, execute, discovery, invalidation) and Salvage (rough ×20, physician, kin death → kinslayer, the prisoner stays imprisoned, int.002 a/b/c). Also check:
+  1. **Engine (a):** the Tamper preparations window (`scheme_critical_moments.0002`) opens at phase completion, and "execute" fires tamper.001. Vanilla settles this on paper (steal_back_artifact).
+  2. **Engine (b):** int.002's outcome lines match what actually happened on the table (`scope:eotg_proc_outcome` saved inside `hidden_effect`).
+  3. Ticking two providers on Offer or Demand disables the send button.
+  4. A back-street fault repair that comes out maimed leaves the fault in place: Examine still shows desc_tampered.
+  5. **Engine (c):** does the AI use the interactions? Read section [13] of the observer report (rebuild the sub-mod first; it now overlays 6 files). This feeds into CB-20.
+- **Art debt:** 6 placeholder interaction/scheme icons (Examine uses `plague`).
+- **Later (not blocking):** fault repairs and injury repairs share the variable `eotg_aug_repair_injury`. If an injury lands during a pending fault repair, the reveal repairs the injury instead of the fault.
+- **Owner:** human → orchestrator
+- **Next step:** check alongside CB-31, CB-34 and CB-35.
+
 ## Tooling and environment
 
 ### CB-18: Game is 1.20.0.3; the tools target older versions
