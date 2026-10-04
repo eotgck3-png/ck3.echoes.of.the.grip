@@ -36,6 +36,8 @@ RULES = {
     "L010": (ERROR, "loc key referenced but not defined"),
     "L011": (WARNING, "single named character referred to as they/them (house rule: gendered)"),
     "L012": (ERROR, "cybernetics loc: never-name (ERROR) or register word to triage (WARNING)"),
+    "L013": (WARNING, "loc house style: dash, British spelling, stray space, appended desc without \\n\\n"),
+    "L014": (WARNING, "eotg_ loc key defined but never referenced"),
 }
 
 SCRIPT_DIRS = ("common", "events")
@@ -113,6 +115,8 @@ DEFAULT_ROOT = os.path.dirname(os.path.dirname(HERE))
 ALLOWLIST = os.path.join(HERE, "eotg_lint_loc_allowlist.txt")
 PRONOUN_ALLOWLIST = os.path.join(HERE, "eotg_lint_pronoun_allowlist.txt")
 REGISTER_FILE = os.path.join(HERE, "eotg_lint_register.json")
+STYLE_FILE = os.path.join(HERE, "eotg_lint_style.json")
+CONVENTIONS_FILE = os.path.join(HERE, "eotg_lint_loc_conventions.json")
 
 
 class Finding:
@@ -172,6 +176,7 @@ class Mod:
         self.loc_files = [_rel(self.root, f) for f in
                           _iter_files(self.root, "localization", (".yml",))]
         self.loc = collections.defaultdict(dict)   # lang -> key -> (rel, line)
+        self.skipped = collections.defaultdict(list)   # rule -> [what was not checked]
 
     # --- helpers
     def files_in(self, prefix):
@@ -723,6 +728,189 @@ def rule_l012(mod, register=None):
     return out
 
 
+# ------------------------------------------------------------------ L013 / L014
+def load_style(path=STYLE_FILE):
+    with open(path, encoding="utf-8") as fh:
+        data = json.load(fh)
+    br = data["british"]
+    return {
+        "dashes": tuple(data["dashes"]["chars"]),
+        "words": [(re.compile(r"\b(%s)\b" % w["regex"], re.I), w["us"]) for w in br["words"]],
+        "ise": re.compile(r"\b(%s)\b" % br["ise_regex"], re.I),
+        "ise_us": br.get("ise_us", "-ize"),
+        "ise_exceptions": {w.lower() for w in br["ise_exceptions"]},
+        "exceptions": list(br.get("exceptions", [])),
+        "append_prefix": data["append"]["prefix"],
+    }
+
+
+def _ise_base(word):
+    return re.sub(r"is(e|ed|es|ing|ation|ations)$", "ise", word.lower())
+
+
+def appended_desc_keys(mod):
+    """Classify event desc keys by position in a desc = { } concatenation.
+
+    Returns (appended {key: (rel, line, event)}, skipped [str]). A key is
+    'appended' when it is the desc of a triggered_desc (or a plain desc) that
+    is a direct child of an event's desc block and not its first segment.
+    first_valid / random_valid alternatives are never appended when they open
+    the block; later ones (an alternative appended as a whole), nested desc
+    blocks, and keys that also appear in another role are skipped.
+    """
+    roles = collections.defaultdict(set)
+    where = {}
+    skipped = []
+    for rel, eid, ev in mod.events():
+        for d in pdx_parse.find(ev.value, "desc"):
+            if not d.is_block:
+                roles[d.value].add("opener")
+                continue
+            segs = [c for c in d.value if c.key != "#"]
+            for i, seg in enumerate(segs):
+                if seg.key == "triggered_desc" and seg.is_block:
+                    inner = pdx_parse.first(seg.value, "desc")
+                    if inner is None:
+                        continue
+                    if inner.is_block:
+                        skipped.append("%s: nested desc block in triggered_desc (line %d)"
+                                       % (eid, seg.line))
+                        continue
+                    role = "opener" if i == 0 else "appended"
+                    roles[inner.value].add(role)
+                    where.setdefault(inner.value, (rel, inner.line, eid))
+                elif seg.key == "desc" and isinstance(seg.value, str):
+                    roles[seg.value].add("opener" if i == 0 else "appended")
+                    where.setdefault(seg.value, (rel, seg.line, eid))
+                elif seg.key in ("first_valid", "random_valid") and seg.is_block:
+                    acc = []
+                    _loc_refs_in(seg, acc)
+                    for k, ln in acc:
+                        if i == 0:
+                            roles[k].add("alternative")
+                        else:
+                            roles[k].add("ambiguous")
+                            skipped.append("%s: %s inside a %s that follows the opener (line %d)"
+                                           % (eid, k, seg.key, ln))
+                else:
+                    skipped.append("%s: unrecognised desc segment '%s' (line %d)"
+                                   % (eid, seg.key, seg.line))
+    appended = {}
+    for k, r in sorted(roles.items()):
+        if r == {"appended"}:
+            appended[k] = where[k]
+        elif "appended" in r:
+            skipped.append("%s: used both appended and as %s" % (
+                k, "/".join(sorted(r - {"appended"}))))
+    return appended, sorted(set(skipped))
+
+
+def rule_l013(mod, style=None):
+    st = load_style() if style is None else style
+    out = []
+    values = {}
+    for rel, line, key, value in iter_loc_values(mod, "eotg_*.yml"):
+        values[key] = (rel, line, value)
+        for ch in st["dashes"]:
+            if ch in value:
+                out.append(Finding("L013", rel, line, "L013a %s: %s in value (house style: no em/en "
+                                   "dashes)" % (key, "em dash" if ch == "\u2014" else
+                                                "en dash" if ch == "\u2013" else repr(ch))))
+        text = _visible_text(value)
+        for ex in st["exceptions"]:
+            text = text.replace(ex, " ")
+        hits = []
+        for rx, us in st["words"]:
+            hits += [(m.group(1), us) for m in rx.finditer(text)]
+        for m in st["ise"].finditer(text):
+            if _ise_base(m.group(1)) not in st["ise_exceptions"]:
+                hits.append((m.group(1), st["ise_us"]))
+        for word, us in sorted(set(hits), key=lambda h: h[0].lower()):
+            out.append(Finding("L013", rel, line, "L013b %s: British spelling '%s' (US: %s)"
+                               % (key, word, us)))
+        probs = []
+        if "  " in value:
+            probs.append("double space")
+        if value[:1].isspace():
+            probs.append("leading whitespace")
+        if value[-1:].isspace():
+            probs.append("trailing whitespace")
+        if probs:
+            out.append(Finding("L013", rel, line, "L013c %s: %s inside the quoted value"
+                               % (key, ", ".join(probs))))
+    appended, skipped = appended_desc_keys(mod)
+    mod.skipped["L013d"] = skipped
+    for key, (srel, sline, eid) in sorted(appended.items()):
+        if key not in values:
+            continue        # undefined key: L010's job
+        rel, line, value = values[key]
+        if not value.startswith(st["append_prefix"]):
+            out.append(Finding("L013", rel, line,
+                               "L013d %s: appended after the opener in %s (%s:%d) but does not "
+                               "start with \\n\\n" % (key, eid, srel, sline)))
+    return out
+
+
+def load_conventions(path=CONVENTIONS_FILE):
+    with open(path, encoding="utf-8") as fh:
+        data = json.load(fh)
+    return data
+
+
+def _convention_regex(conv, mod):
+    """One regex matching every loc key implied by a defined object."""
+    alts = []
+    for folder, spec in sorted(conv["folders"].items()):
+        keys = [n.key for _, doc in mod.common_dir(folder) for n in doc.nodes
+                if n.is_block and n.key and not n.key.startswith("@")]
+        for key in keys:
+            for pat in spec["patterns"]:
+                alts.append(re.escape(pat).replace(r"\{key\}", re.escape(key))
+                            .replace(r"\{n\}", r"\d+"))
+    if not alts:
+        return None
+    return re.compile(r"^(?:%s)$" % "|".join(alts))
+
+
+def script_tokens(mod):
+    """Every key and string value in script, plus identifier-like words in .gui files."""
+    toks = set()
+    for doc in mod.docs.values():
+        for n, _ in pdx_parse.walk(doc.nodes):
+            if n.key:
+                toks.add(n.key)
+            if isinstance(n.value, str):
+                toks.add(n.value)
+    for f in _iter_files(mod.root, "gfx", (".gui",)):
+        text, _ = pdx_parse.read_text(f)
+        toks |= set(re.findall(r"[A-Za-z_][\w.\-]*", text))
+    return toks
+
+
+def rule_l014(mod, conventions=None):
+    conv = load_conventions() if conventions is None else conventions
+    defined = {}
+    loc_refs = set()
+    ref_res = [re.compile(r) for r in conv.get("loc_reference_regexes", [])]
+    for rel, line, key, value in iter_loc_values(mod):
+        if "eotg_" in key:
+            defined.setdefault(key, (rel, line))
+        for rx in ref_res:
+            loc_refs |= {m.group(1) for m in rx.finditer(value)}
+    if not defined:
+        return []
+    used = script_tokens(mod) | loc_refs
+    implied = _convention_regex(conv, mod)
+    out = []
+    for key, (rel, line) in sorted(defined.items()):
+        if key in used or (implied and implied.match(key)):
+            continue
+        out.append(Finding("L014", rel, line,
+                           "loc key '%s' is defined but nothing references it (script, "
+                           "naming convention or $KEY$)" % key))
+    return out
+
+
 # ------------------------------------------------------------------ suppression
 ALLOW_RE = re.compile(r"#\s*eotg_lint:\s*allow\b(.*)$")
 ALLOW_ARGS_RE = re.compile(r"^\s*((?:L\d{3})(?:\s*,\s*L\d{3})*)\s*(.*)$")
@@ -771,11 +959,14 @@ RULE_FUNCS = [
     ("L001", rule_l001), ("L002", rule_l002), ("L003", rule_l003), ("L004", rule_l004),
     ("L005", rule_l005), ("L006", rule_l006), ("L007", rule_l007), ("L008", rule_l008),
     ("L009", rule_l009), ("L010", rule_l010), ("L011", rule_l011), ("L012", rule_l012),
+    ("L013", rule_l013), ("L014", rule_l014),
 ]
 
 
-def lint(root, rules=None, allowlist=None):
-    """Run the rules over the mod at root. Returns a sorted list of Findings."""
+def lint(root, rules=None, allowlist=None, stats=None):
+    """Run the rules over the mod at root. Returns a sorted list of Findings.
+
+    ``stats``, if a dict, receives {"skipped": {rule: [items not checked]}}."""
     mod = Mod(root)
     out = [f for f in mod.findings if not rules or "L000" in rules]
     for rid, fn in RULE_FUNCS:
@@ -791,6 +982,8 @@ def lint(root, rules=None, allowlist=None):
     if not rules or "L000" in rules:
         out.extend(bad)
     out.sort(key=lambda f: (f.file, f.line, f.rule, f.message))
+    if stats is not None:
+        stats["skipped"] = {k: list(v) for k, v in sorted(mod.skipped.items())}
     return out
 
 
@@ -832,10 +1025,12 @@ def split_baseline(findings, baseline):
     return new, known
 
 
-def write_json(path, findings):
+def write_json(path, findings, stats=None):
     data = {"version": 1,
             "tool": "docs/tools/eotg_lint.py",
             "findings": [f.as_dict() for f in findings]}
+    if stats:
+        data["skipped"] = stats.get("skipped", {})
     with open(path, "w", encoding="utf-8", newline="\n") as fh:
         json.dump(data, fh, indent=1, sort_keys=True)
         fh.write("\n")
@@ -861,10 +1056,11 @@ def main(argv=None):
         ap.error("unknown rule(s): %s" % ", ".join(sorted(unknown)))
 
     root = os.path.abspath(args.root)
-    findings = filter_paths(lint(root, rules or None), root, args.paths)
+    stats = {}
+    findings = filter_paths(lint(root, rules or None, stats=stats), root, args.paths)
 
     if args.json:
-        write_json(args.json, findings)
+        write_json(args.json, findings, stats)
     if args.write_baseline:
         write_json(args.write_baseline, findings)
 

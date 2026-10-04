@@ -8,7 +8,7 @@
 python docs/tools/eotg_lint.py                                   # every rule, whole mod
 python docs/tools/eotg_lint.py --baseline docs/tools/eotg_lint_baseline.json   # only NEW findings fail
 python docs/tools/eotg_lint.py events/ --rule L005,L007          # filter by path and rule
-python docs/tools/eotg_lint.py --json out.json                   # machine-readable
+python docs/tools/eotg_lint.py --json out.json                   # machine-readable, incl. "skipped"
 python docs/tools/eotg_lint.py --write-baseline docs/tools/eotg_lint_baseline.json  # accept current
 ```
 
@@ -27,6 +27,8 @@ python docs/tools/eotg_lint.py --write-baseline docs/tools/eotg_lint_baseline.js
 | `docs/tools/eotg_lint_loc_allowlist.txt` | Vanilla loc keys the mod borrows on purpose (L010). |
 | `docs/tools/eotg_lint_pronoun_allowlist.txt` | Loc keys where they/them is plural (L011), each with a reason. |
 | `docs/tools/eotg_lint_register.json` | The cybernetics never-name and register terms (L012), as data. |
+| `docs/tools/eotg_lint_style.json` | The loc house-style data (L013): dash characters, British spellings and their US forms, the `-ise` exceptions, literal exceptions, the appended-desc prefix. |
+| `docs/tools/eotg_lint_loc_conventions.json` | Engine naming conventions per `common/` folder (L014): which loc keys a defined object makes "referenced". |
 | `docs/tools/tests/test_eotg_lint.py`, `test_pdx_parse.py` | Fixture tests: one hit and one non-hit for every rule. Run `python -m unittest discover -s docs/tools/tests`. |
 
 ## Rules
@@ -193,6 +195,49 @@ The rules are data, in `docs/tools/eotg_lint_register.json`, encoded from:
 
 Edit the JSON, not the code, when the rules change. Each entry has `term`, `regex`, `case` (true means case-sensitive) and `source`.
 
+### L013 — loc house style (WARNING)
+From the owner's loc review (2026-10-04). Applies to values in `localization/**/eotg_*.yml`. The data lives in `docs/tools/eotg_lint_style.json`; edit it, not the code. The message starts with the sub-rule id, so the four can be told apart in the output and the baseline.
+
+**L013a: em or en dash.** Any `—` or `–` in a value. *Why:* the owner removed them all from mod prose. Use a comma, colon, full stop or parentheses. *False positives:* none expected; a hyphen `-` is not flagged.
+
+**L013b: British spelling.** *Why:* the house standard is US English.
+- **How it matches:** whole words, case-insensitive, on the **visible text** (`[functions]`, `$KEYS$` and `#formatting` removed first).
+- **The list:** catalogue, afterwards, colour, armour, honour, favour, behaviour, rumour, labour, valour, vigour, neighbour, harbour, splendour, defence, offence, centre, metre, programme, travelled/-ing/-er, cancelled/-ing, labelled/-ing, grey, plough, analyse/paralyse, each with its inflections.
+- **`-ise` forms:** any word ending in -ise/-ised/-ises/-ising/-isation(s) is flagged, unless its base form (turned back into `-ise`) is in `ise_exceptions`. That list covers rise, wise, noise, promise, precise, otherwise, raise, surprise, exercise and about 60 more.
+- **`exceptions`:** literal strings such as `Tide-Crowned` are blanked out before matching. This is for proper nouns.
+- **False positives:** a new `-ise` word that isn't a British spelling (e.g. "franchise" if it were missing) gets flagged. Add it to `ise_exceptions`. A proper noun that happens to be a British spelling (a "Grey" house) goes in `exceptions`.
+
+**L013c: stray whitespace.** A double space, or leading or trailing whitespace, inside the quoted value. *Why:* it renders as a visible gap, and an edge space misaligns concatenated descs. *False positives:* a deliberate double space (none known).
+
+**L013d: appended desc without `\n\n`.** *Why:* a desc appended after the opener runs into the previous sentence unless it opens its own paragraph.
+- **What is "appended":** the structure is read from each event's `desc = { … }` block. A key is appended when it is the `desc` of a `triggered_desc`, or a plain `desc = key`, that is a **direct child** of the block and **not its first segment**. Such a key's value must start with `\n\n`.
+- **Not required:** keys inside a `first_valid` / `random_valid` that opens the block (alternatives for the opener), and a single `desc = key`.
+- **Skipped (ambiguous), listed under `"skipped": {"L013d": [...]}` in `--json`:**
+  - a `first_valid` / `random_valid` that follows the opener: the whole choice is appended, but whether each alternative should open a paragraph is a writing decision;
+  - a nested desc block inside a `triggered_desc`;
+  - an unrecognised segment;
+  - a key used appended in one place and in another role elsewhere.
+- **On the current tree:** 34 appended keys are checked and all pass. 108 are skipped, all `first_valid` after the opener, and all 108 happen to start with `\n\n` anyway.
+- **UNVERIFIED-VANILLA:** that the engine concatenates `desc = { }` children in order with no separator. This matches how the mod's loc is written, but wasn't checked against vanilla 1.20 code.
+
+### L014 — `eotg_` loc key defined but never referenced (WARNING)
+A loc key containing `eotg_` that is defined in `localization/` and reached by none of these:
+- **a literal in script:** any key or string value in `common/` or `events/` (quoted or not), or any identifier-like word in a `gfx/**/*.gui` file;
+- **another loc value:** `$KEY$` or `Localize('KEY')` (the regexes are in the JSON);
+- **an engine naming convention:** for every object defined at the top level of `common/<folder>/`, the patterns in `docs/tools/eotg_lint_loc_conventions.json` (`{key}` = the object, `{n}` = any number). They start from what L010 already implies: decision `<d>`/`_desc`/`_tooltip`/`_confirm`; trait `trait_<t>`/`_desc`/`_character_desc`, leveled `trait_<t>_<n>…` and `trait_track_<t>`; modifier `<m>`/`_desc`; opinion `<o>`. Also deathreasons, character_interactions, scheme_types, laws, law_groups, court_positions/types, story_cycles and buildings.
+
+*Why:* dead loc rots. It gets reviewed, translated and register-checked for nothing, and it often marks an option or branch that was cut in script but not in loc.
+
+**False positives:**
+- a key built at runtime from pieces (`[Concatenate]`, a scripted loc that picks a key by name);
+- a convention the JSON doesn't know yet.
+
+Add the convention to the JSON, or an inline `# eotg_lint: allow L014 <reason>` on the loc line.
+
+**UNVERIFIED-VANILLA:** each folder entry has `"verified"`.
+- **Verified:** decisions, traits, modifiers and opinion modifiers (what L010 already used, plus the leveled-trait keys in the mod's own loc).
+- **Not verified against vanilla 1.20:** deathreasons (`_killer` / `_unknown`), character_interactions (`_extra_icon`), scheme_types (`_action`, `_name`, `_success_desc`…), laws (`_effects`), law_groups, court positions (`court_position_<x>`), story_cycles and buildings. These only widen what counts as referenced, so a wrong pattern can hide a dead key but never invent one.
+
 ## Inline suppression
 To silence one finding, put this on the finding's line or on the line directly before it:
 
@@ -205,7 +250,7 @@ To silence one finding, put this on the finding's line or on the line directly b
 - **Where it works:** script (`.txt`) and loc (`.yml`) files alike. For L007, the finding's line is the `option = {` line.
 - **Suppression vs baseline:** use suppression for a deliberate, reviewed exception that should stay quiet forever. Use the baseline for known debt that should be fixed later.
 
-## Current baseline (2026-10-04, tree at `43057db`)
+## Current baseline (2026-10-04, tree at `33f27a4`)
 | Rule | Count | What |
 |---|---|---|
 | L012 | 14 | All WARNING (register triage), 0 never-name ERRORs. The hits are "warrant" ×6 (fracture.006 *The Warrant*), "program" ×4 (the Iron Retinue's Program, init.019.b), "encourage" ×2, "answers" ×2. |
@@ -214,6 +259,8 @@ Every other rule is at 0:
 - **L007:** the 24 earlier hits were hidden-resource moves; it is now narrowed to deferred-only options (FIX 2).
 - **L006:** the 4 earlier hits were all in `is_shown` (FIX 3).
 - **L011:** 3 hits, all plural "they", so allowlisted.
+- **L013:** 0. No dashes, British spellings or stray spaces in `eotg_*.yml`. All 34 checkable appended descs start with `\n\n`; 108 were skipped as ambiguous.
+- **L014:** 0. Every one of the 1,576 keys containing `eotg_` is referenced by script, a convention or `$KEY$`.
 
 **Cross-checks:**
 - On `OLD PROJECT VERSION/` the linter reports L002 1,009, L003 169, L004 3, L005 129 and L010 88.

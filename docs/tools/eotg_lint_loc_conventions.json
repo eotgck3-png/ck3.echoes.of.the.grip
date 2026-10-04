@@ -1,0 +1,132 @@
+{
+ "_comment": "Data for eotg_lint rule L014 (defined but unused loc keys). For each object defined at the top level of common/<folder>/*.txt, the engine reads these loc keys by naming convention; {key} is the object's key, {n} any number (trait levels). A loc key that matches one of these is 'referenced'. 'verified' says whether the convention was checked against vanilla 1.20 files; unverified ones are listed in eotg_lint.md as UNVERIFIED-VANILLA. Add folders/patterns here, not to the code.",
+ "folders": {
+  "decisions": {
+   "patterns": [
+    "{key}",
+    "{key}_desc",
+    "{key}_tooltip",
+    "{key}_confirm"
+   ],
+   "verified": true,
+   "source": "L010 implied title/desc; vanilla decisions loc uses _desc/_tooltip/_confirm"
+  },
+  "traits": {
+   "patterns": [
+    "trait_{key}",
+    "trait_{key}_desc",
+    "trait_{key}_character_desc",
+    "trait_{key}_{n}",
+    "trait_{key}_{n}_desc",
+    "trait_{key}_{n}_character_desc",
+    "trait_track_{key}",
+    "trait_track_{key}_desc"
+   ],
+   "verified": true,
+   "source": "L010 implied trait_<x>/_desc; leveled traits in this mod's loc"
+  },
+  "modifiers": {
+   "patterns": [
+    "{key}",
+    "{key}_desc"
+   ],
+   "verified": true,
+   "source": "L010 implied modifier name/desc"
+  },
+  "opinion_modifiers": {
+   "patterns": [
+    "{key}"
+   ],
+   "verified": true,
+   "source": "vanilla opinion modifier name is the key"
+  },
+  "deathreasons": {
+   "patterns": [
+    "{key}",
+    "{key}_killer",
+    "{key}_unknown",
+    "{key}_desc"
+   ],
+   "verified": false,
+   "source": "vanilla death reasons; _killer/_unknown forms not checked against 1.20"
+  },
+  "character_interactions": {
+   "patterns": [
+    "{key}",
+    "{key}_desc",
+    "{key}_extra_icon"
+   ],
+   "verified": false,
+   "source": "vanilla interactions; not built in the mod yet"
+  },
+  "schemes/scheme_types": {
+   "patterns": [
+    "{key}",
+    "{key}_name",
+    "{key}_action",
+    "{key}_desc",
+    "{key}_success_desc",
+    "{key}_discovery_desc",
+    "{key}_agent_desc"
+   ],
+   "verified": false,
+   "source": "1.20 scheme_types; not built in the mod yet"
+  },
+  "laws": {
+   "patterns": [
+    "{key}",
+    "{key}_desc",
+    "{key}_effects"
+   ],
+   "verified": false,
+   "source": "1.20 laws; not built in the mod yet"
+  },
+  "law_groups": {
+   "patterns": [
+    "{key}",
+    "{key}_desc"
+   ],
+   "verified": false,
+   "source": "1.20 law_groups; not built in the mod yet"
+  },
+  "court_positions/types": {
+   "patterns": [
+    "{key}",
+    "{key}_desc",
+    "{key}_effect_desc",
+    "{key}_skill_desc",
+    "court_position_{key}",
+    "court_position_{key}_desc"
+   ],
+   "verified": false,
+   "source": "1.20 court positions; not built in the mod yet"
+  },
+  "story_cycles": {
+   "patterns": [
+    "{key}"
+   ],
+   "verified": false,
+   "source": "story name, if shown"
+  },
+  "scripted_character_templates": {
+   "patterns": [],
+   "verified": true,
+   "source": "no loc"
+  },
+  "buildings": {
+   "patterns": [
+    "building_{key}",
+    "building_{key}_desc",
+    "building_type_{key}",
+    "building_type_{key}_desc"
+   ],
+   "verified": false,
+   "source": "vanilla buildings"
+  }
+ },
+ "loc_reference_regexes": [
+  "\\$([A-Za-z0-9_.\\-]+)\\$",
+  "Localize\\(\\s*'([A-Za-z0-9_.\\-]+)'\\s*\\)"
+ ],
+ "_loc_reference_note": "Patterns inside loc values that reference another loc key (first group)."
+}

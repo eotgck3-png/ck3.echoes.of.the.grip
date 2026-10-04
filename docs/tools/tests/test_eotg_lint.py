@@ -397,6 +397,138 @@ class L012(LintCase):
         self.assertGreaterEqual(len(reg["warning"]), 29)
 
 
+class L013(LintCase):
+    LOC = "localization/english/eotg_a_l_english.yml"
+
+    def loc(self, *entries):
+        return LOC_OK + "".join(' %s:0 "%s"\n' % e for e in entries)
+
+    def test_a_dashes(self):
+        self.assertHit({self.LOC: self.loc(("eotg_x.1.desc", "A pause \u2014 then nothing."))},
+                       "L013", "L013a eotg_x.1.desc: em dash")
+        self.assertHit({self.LOC: self.loc(("eotg_x.1.desc", "years 850\u2013866"))},
+                       "L013", "en dash")
+        self.assertClean({self.LOC: self.loc(("eotg_x.1.desc", "A pause, then nothing - fine."))},
+                         "L013")
+
+    def test_b_british(self):
+        res = self.assertHit({self.LOC: self.loc(
+            ("eotg_x.1.desc", "The Colour of honour; they realised it afterwards."))}, "L013",
+            count=4)
+        msgs = " | ".join(f.message for f in res)
+        for w in ("'Colour'", "'honour'", "'realised'", "'afterwards'"):
+            self.assertIn(w, msgs)
+        self.assertIn("(US: color)", msgs)
+        self.assertHit({self.LOC: self.loc(("eotg_x.1.desc", "its organisation"))}, "L013",
+                       "'organisation'")
+
+    def test_b_clean_and_exceptions(self):
+        self.assertClean({self.LOC: self.loc(
+            ("eotg_x.1.desc", "The color of honor. They rise; the wise promise, otherwise noise. "
+                              "Raised, rising, surprised, precise, exercise, the Tide-Crowned. "
+                              "[ROOT.Char.GetColour] $honour_key$ #colour text#!"))}, "L013")
+        # exceptions are data: an extra exception silences a word
+        root = make_mod({self.LOC: self.loc(("eotg_x.1.desc", "the Grey Margrave"))})
+        self.addCleanup(shutil.rmtree, root)
+        st = L.load_style()
+        self.assertTrue(L.rule_l013(L.Mod(root), st))
+        st["exceptions"].append("Grey Margrave")
+        self.assertEqual(L.rule_l013(L.Mod(root), st), [])
+
+    def test_c_whitespace(self):
+        for v, needle in (("Two  spaces.", "double space"), (" Leading.", "leading whitespace"),
+                          ("Trailing. ", "trailing whitespace")):
+            self.assertHit({self.LOC: self.loc(("eotg_x.1.desc", v))}, "L013", needle)
+        self.assertClean({self.LOC: self.loc(("eotg_x.1.desc", "One space. \\n\\nThen more."))},
+                         "L013")
+
+    EV = """namespace = eotg_x
+eotg_x.1 = {
+    desc = {
+        first_valid = {
+            triggered_desc = { trigger = { always = yes } desc = eotg_x.1.desc_a }
+            desc = eotg_x.1.desc_b
+        }
+        triggered_desc = { trigger = { always = yes } desc = eotg_x.1.desc_app }
+        first_valid = {
+            triggered_desc = { trigger = { always = no } desc = eotg_x.1.desc_late }
+        }
+    }
+    option = { name = eotg_x.1.a }
+}
+"""
+
+    def test_d_appended_desc(self):
+        files = {"events/e.txt": self.EV, self.LOC: self.loc(
+            ("eotg_x.1.desc_a", "Opener."), ("eotg_x.1.desc_b", "Other opener."),
+            ("eotg_x.1.desc_app", "Runs on."), ("eotg_x.1.desc_late", "Late."))}
+        res = self.assertHit(files, "L013", "L013d eotg_x.1.desc_app", count=1)
+        self.assertIn("eotg_x.1", res[0].message)
+
+    def test_d_clean_and_skipped(self):
+        files = {"events/e.txt": self.EV, self.LOC: self.loc(
+            ("eotg_x.1.desc_a", "Opener."), ("eotg_x.1.desc_b", "Other opener."),
+            ("eotg_x.1.desc_app", "\\n\\nNew paragraph."), ("eotg_x.1.desc_late", "Late."))}
+        self.assertClean(files, "L013")
+        root = make_mod(files)
+        self.addCleanup(shutil.rmtree, root)
+        stats = {}
+        L.lint(root, {"L013"}, stats=stats)
+        self.assertEqual(len(stats["skipped"]["L013d"]), 1)
+        self.assertIn("eotg_x.1.desc_late", stats["skipped"]["L013d"][0])
+
+    def test_d_simple_desc_and_first_segment(self):
+        ev = ("namespace = eotg_x\neotg_x.2 = { desc = eotg_x.2.desc option = { name = a } }\n"
+              "eotg_x.3 = { desc = { triggered_desc = { trigger = { always = yes } "
+              "desc = eotg_x.3.desc } } }\n")
+        self.assertClean({"events/e.txt": ev, self.LOC: self.loc(
+            ("eotg_x.2.desc", "No prefix."), ("eotg_x.3.desc", "Opener, no prefix."))}, "L013")
+
+
+class L014(LintCase):
+    LOC = "localization/english/eotg_a_l_english.yml"
+
+    def files(self, *keys, **extra):
+        f = {self.LOC: LOC_OK + "".join(' %s:0 "x"\n' % k for k in keys)}
+        f.update(extra)
+        return f
+
+    def test_dead_key(self):
+        self.assertHit(self.files("eotg_x.1.desc_orphan"), "L014",
+                       "'eotg_x.1.desc_orphan' is defined but nothing references it", count=1)
+
+    def test_referenced(self):
+        files = self.files(
+            "eotg_x.1.t",                       # literal in script
+            "eotg_tt_quoted",                   # quoted literal in script
+            "eotg_decision_d", "eotg_decision_d_desc", "eotg_decision_d_tooltip",
+            "eotg_decision_d_confirm",          # decision conventions
+            "eotg_mod_m", "eotg_mod_m_desc",    # modifier
+            "trait_eotg_t", "trait_eotg_t_1_desc", "trait_eotg_t_2_character_desc",
+            "trait_track_eotg_t",               # leveled trait
+            "eotg_opinion_o",                   # opinion modifier
+            "eotg_inner", "eotg_outer",         # $KEY$ in loc ($eotg_inner$ inside eotg_outer)
+            "eotg_gui_label",                   # referenced from a .gui
+            "not_ours_key",                     # not an eotg key: never checked
+            **{"events/e.txt": 'namespace = eotg_x\neotg_x.1 = { title = eotg_x.1.t '
+                               'option = { name = eotg_outer custom_tooltip = "eotg_tt_quoted" } }',
+               "common/decisions/d.txt": "eotg_decision_d = { }",
+               "common/modifiers/m.txt": "eotg_mod_m = { }",
+               "common/traits/t.txt": "eotg_t = { }",
+               "common/opinion_modifiers/o.txt": "eotg_opinion_o = { opinion = 5 }",
+               "gfx/interface/x.gui": 'text = "eotg_gui_label"'})
+        files[self.LOC] = files[self.LOC].replace(' eotg_outer:0 "x"', ' eotg_outer:0 "$eotg_inner$"')
+        self.assertClean(files, "L014")
+        # conventions are data: drop decisions and their keys become dead
+        root = make_mod(files)
+        self.addCleanup(shutil.rmtree, root)
+        conv = L.load_conventions()
+        del conv["folders"]["decisions"]
+        dead = sorted(f.message.split("'")[1] for f in L.rule_l014(L.Mod(root), conv))
+        self.assertEqual(dead, ["eotg_decision_d_confirm", "eotg_decision_d_desc",
+                                "eotg_decision_d_tooltip"])
+
+
 class CLI(unittest.TestCase):
     def setUp(self):
         self.root = make_mod({

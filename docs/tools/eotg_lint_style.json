@@ -1,0 +1,194 @@
+{
+ "_comment": "Data for eotg_lint rule L013 (loc house style, owner's loc review 2026-10-04). Edit freely; no code change needed. Regexes are Python 're' syntax, matched as whole words, case-insensitively, against the visible text of a value ([functions], $KEYS$ and #formatting removed). See docs/tools/eotg_lint.md, L013.",
+ "dashes": {
+  "chars": [
+   "\u2014",
+   "\u2013"
+  ],
+  "why": "The owner removed every em and en dash from mod prose; use a comma, colon, full stop or parentheses."
+ },
+ "british": {
+  "words": [
+   {
+    "regex": "catalogues?",
+    "us": "catalog"
+   },
+   {
+    "regex": "afterwards",
+    "us": "afterward"
+   },
+   {
+    "regex": "(dis)?colour(s|ed|ful|ing|less)?",
+    "us": "color"
+   },
+   {
+    "regex": "armour(s|ed|y|er|ers)?",
+    "us": "armor"
+   },
+   {
+    "regex": "(dis)?honour(s|ed|ing|able|ably)?",
+    "us": "honor"
+   },
+   {
+    "regex": "(dis)?favour(s|ed|ing|able|ably|ite|ites|itism)?",
+    "us": "favor"
+   },
+   {
+    "regex": "(mis)?behaviour(s|al)?",
+    "us": "behavior"
+   },
+   {
+    "regex": "rumour(s|ed)?",
+    "us": "rumor"
+   },
+   {
+    "regex": "labour(s|ed|ing|er|ers)?",
+    "us": "labor"
+   },
+   {
+    "regex": "valour",
+    "us": "valor"
+   },
+   {
+    "regex": "vigour",
+    "us": "vigor"
+   },
+   {
+    "regex": "neighbour(s|ing|hood|hoods|ly)?",
+    "us": "neighbor"
+   },
+   {
+    "regex": "harbour(s|ed|ing)?",
+    "us": "harbor"
+   },
+   {
+    "regex": "splendour",
+    "us": "splendor"
+   },
+   {
+    "regex": "defences?",
+    "us": "defense"
+   },
+   {
+    "regex": "offences?",
+    "us": "offense"
+   },
+   {
+    "regex": "centre(s|d)?",
+    "us": "center"
+   },
+   {
+    "regex": "metres?",
+    "us": "meter"
+   },
+   {
+    "regex": "programmes?",
+    "us": "program"
+   },
+   {
+    "regex": "travell(ed|ing|er|ers)",
+    "us": "traveled / traveling / traveler"
+   },
+   {
+    "regex": "cancell(ed|ing)",
+    "us": "canceled / canceling"
+   },
+   {
+    "regex": "labell(ed|ing)",
+    "us": "labeled / labeling"
+   },
+   {
+    "regex": "grey(s|ed|ing|ish|ness)?",
+    "us": "gray"
+   },
+   {
+    "regex": "plough(s|ed|ing|man|men)?",
+    "us": "plow"
+   },
+   {
+    "regex": "(analy|paraly)s(e|ed|es|ing)",
+    "us": "-yze (analyze, paralyze)"
+   }
+  ],
+  "ise_regex": "[a-z]+is(e|ed|es|ing|ation|ations)",
+  "ise_us": "-ize / -ization",
+  "ise_exceptions": [
+   "advertise",
+   "advise",
+   "anise",
+   "appraise",
+   "apprise",
+   "arise",
+   "bruise",
+   "chastise",
+   "circumcise",
+   "clockwise",
+   "comprise",
+   "compromise",
+   "concise",
+   "crosswise",
+   "cruise",
+   "demise",
+   "despise",
+   "devise",
+   "disguise",
+   "edgewise",
+   "enterprise",
+   "excise",
+   "exercise",
+   "expertise",
+   "franchise",
+   "guise",
+   "imprecise",
+   "improvise",
+   "incise",
+   "lengthwise",
+   "likewise",
+   "merchandise",
+   "moonrise",
+   "mortise",
+   "noise",
+   "noncompromise",
+   "otherwise",
+   "paradise",
+   "poise",
+   "porpoise",
+   "praise",
+   "precise",
+   "premise",
+   "promise",
+   "raise",
+   "reappraise",
+   "reprise",
+   "revise",
+   "rise",
+   "streetwise",
+   "sunrise",
+   "supervise",
+   "surmise",
+   "surprise",
+   "televise",
+   "tortoise",
+   "treatise",
+   "turquoise",
+   "unwise",
+   "upraise",
+   "uprise",
+   "valise",
+   "wise"
+  ],
+  "_ise_note": "An -ise word is flagged unless its base form (the word with -ed/-es/-ing/-ation(s) turned back into -e) is in ise_exceptions. Add words here, not to the code.",
+  "exceptions": [
+   "Tide-Crowned"
+  ],
+  "_exceptions_note": "Literal strings (proper nouns, fixed names) blanked out before matching.",
+  "why": "House standard is US English."
+ },
+ "whitespace": {
+  "why": "Doubled or edge spaces render as visible gaps or misalign concatenated descs."
+ },
+ "append": {
+  "prefix": "\\n\\n",
+  "why": "A desc appended after the opener (triggered_desc in a desc = { } concatenation) must open its own paragraph, or it runs into the previous sentence."
+ }
+}
