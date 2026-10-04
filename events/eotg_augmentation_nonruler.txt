@@ -584,6 +584,42 @@ eotg_aug_nr.004 = {
             modifier = { add = 10  has_trait = callous }
         }
     }
+
+    # [forgiving] "They did not choose this. Let it go." - no prison, no
+    # treatment: the champion's risk climbs (+5, as b); a living victim
+    # resents it. Omits eotg_aug_stress_wound_effect, whose forgiving gain
+    # would cancel this option's relief (conformance ruling M10). Inline
+    # stress after vanilla court.0111.b (events/court_events/
+    # court_events_general.txt:1246); vengeful dropped (forgiving's
+    # opposite). The event trigger guarantees the champion is free.
+    # Spec cybernetics_v2_trait_depth §5.1 #8.
+    option = {
+        name = eotg_aug_nr.004.f
+        trigger = { has_trait = forgiving }
+        trait = forgiving
+        scope:eotg_champion = {
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+            eotg_add_fracture_risk = { AMOUNT = 5 }
+        }
+        if = {
+            limit = {
+                exists = scope:eotg_victim
+                scope:eotg_victim = { is_alive = yes }
+            }
+            scope:eotg_victim = {
+                add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 5 }
+            }
+        }
+        stress_impact = {
+            forgiving = minor_stress_impact_loss
+            just = minor_stress_impact_gain
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = forgiving }
+            modifier = { add = 10  has_trait = compassionate }
+        }
+    }
 }
 
 

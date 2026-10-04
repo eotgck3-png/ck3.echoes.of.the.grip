@@ -358,6 +358,25 @@ eotg_aug_tier3.003 = {
             modifier = { add = 10  has_trait = content }
         }
     }
+
+    # [lustful] "Then I won't spend them alone." - the nights go to company,
+    # not work: d's risk (+10), stress relief instead of gold. Non-explicit,
+    # the register of vanilla stress_threshold.2301.desc.lustful. Spec
+    # cybernetics_v2_trait_depth §5.1 #5.
+    option = {
+        name = eotg_aug_tier3.003.f
+        trigger = { has_trait = lustful }
+        trait = lustful
+        eotg_add_fracture_risk = { AMOUNT = 10 }
+        stress_impact = {
+            lustful = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = lustful }
+            modifier = { add = 10  has_trait = gregarious }
+        }
+    }
 }
 
 
@@ -1224,6 +1243,26 @@ eotg_aug_tier3.010 = {
             base = 30
             modifier = { add = 30  has_trait = craven }
             modifier = { add = 10  has_trait = paranoid }
+        }
+    }
+
+    # [temperate] "Run it at half, and keep it there." - the sustainable
+    # setting, not the shutdown: less risk off than c/e (-8), no prestige, two
+    # dulled years. The one minus move of G9, at Overclocked (index §1
+    # rule 4). Spec cybernetics_v2_trait_depth §5.1 #6.
+    option = {
+        name = eotg_aug_tier3.010.f
+        trigger = { has_trait = temperate }
+        trait = temperate
+        add_character_modifier = { modifier = eotg_mod_aug_dulled_senses  years = 2 }
+        eotg_add_fracture_risk = { AMOUNT = -8 }
+        stress_impact = {
+            temperate = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = temperate }
+            modifier = { add = 10  has_trait = patient }
         }
     }
 }
@@ -2794,6 +2833,28 @@ eotg_aug_tier3.021 = {
             base = 30
             modifier = { add = 20  has_trait = diligent }
             modifier = { add = 10  has_trait = paranoid }
+        }
+    }
+
+    # [arbitrary] "It was their hand. It is their fault." - blame without
+    # reading scope:eotg_order_truth; the delegate acted in good faith either
+    # way, so the opinion is always falsely accused. The tyranny helper
+    # already carries arbitrary relief: no inline row (no double relief).
+    # Spec cybernetics_v2_trait_depth §5.1 #7.
+    option = {
+        name = eotg_aug_tier3.021.d
+        trigger = { has_trait = arbitrary }
+        trait = arbitrary
+        scope:eotg_delegate = {
+            add_opinion = { modifier = eotg_opinion_aug_falsely_accused  target = root  years = 10 }
+        }
+        add_dread = 10
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        eotg_aug_stress_tyranny_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = arbitrary }
+            modifier = { add = 10  has_trait = callous }
         }
     }
 }

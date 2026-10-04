@@ -553,6 +553,40 @@ eotg_aug_tier2.004 = {
             modifier = { add = -20  has_trait = honest }
         }
     }
+
+    # [chaste] "We were never held together by hands." - a chaste spouse
+    # agrees (strain 0); anyone else hears an evasion (strain 1, as b). The
+    # affect channel is left as it is (risk +2). Fires stage 2 like every
+    # option. Spec cybernetics_v2_trait_depth §5.1 #3.
+    option = {
+        name = eotg_aug_tier2.004.e
+        trigger = { has_trait = chaste }
+        trait = chaste
+        if = {
+            limit = { scope:eotg_aug_spouse = { has_trait = chaste } }
+            scope:eotg_aug_spouse = {
+                add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+            }
+            set_variable = { name = eotg_aug_marriage_strain  value = 0 }
+        }
+        else = {
+            scope:eotg_aug_spouse = {
+                add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+            }
+            set_variable = { name = eotg_aug_marriage_strain  value = 1 }
+        }
+        add_piety = 50
+        eotg_add_fracture_risk = { AMOUNT = 2 }
+        trigger_event = { id = eotg_aug_tier2.017  days = { 180 365 } }
+        stress_impact = {
+            chaste = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = chaste }
+            modifier = { add = 10  has_trait = zealous }
+        }
+    }
 }
 
 
@@ -2626,6 +2660,26 @@ eotg_aug_tier2.020 = {
             base = 30
             modifier = { add = 30  has_trait = shy }
             modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # [fickle] "Let it guess. I will have changed my mind." - the one self the
+    # model cannot pin down, so it keeps re-learning (risk +5, between c and
+    # b). Advances the voice like every option. Spec
+    # cybernetics_v2_trait_depth §5.1 #4.
+    option = {
+        name = eotg_aug_tier2.020.f
+        trigger = { has_trait = fickle }
+        trait = fickle
+        eotg_aug_voice_advance_effect = { STAGE = 1 }
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        stress_impact = {
+            fickle = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = fickle }
+            modifier = { add = 10  has_trait = eccentric }
         }
     }
 }

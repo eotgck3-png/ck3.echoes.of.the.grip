@@ -614,6 +614,24 @@ eotg_aug_tier1.005 = {
             modifier = { add = 10  has_trait = arrogant }
         }
     }
+
+    # [gluttonous] "Reach for the platter." - the pause is covered by eating,
+    # so the court reads appetite, not malfunction: no prestige cost, but the
+    # hidden symptom grows (risk +3, as a). Spec cybernetics_v2_trait_depth §5.1 #1.
+    option = {
+        name = eotg_aug_tier1.005.f
+        trigger = { has_trait = gluttonous }
+        trait = gluttonous
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        stress_impact = {
+            gluttonous = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = gluttonous }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
 }
 
 
@@ -814,6 +832,25 @@ eotg_aug_tier1.007 = {
             base = 30
             modifier = { add = 30  has_trait = lazy }
             modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # [impatient] "Now. Not this week. Now." - the update goes in mid-court,
+    # without the technicians' preparation: calibrated for the year as a, at
+    # no cost, but risk +4. Spec cybernetics_v2_trait_depth §5.1 #2.
+    option = {
+        name = eotg_aug_tier1.007.f
+        trigger = { has_trait = impatient }
+        trait = impatient
+        add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 1 }
+        eotg_add_fracture_risk = { AMOUNT = 4 }
+        stress_impact = {
+            impatient = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = impatient }
+            modifier = { add = 10  has_trait = arrogant }
         }
     }
 }

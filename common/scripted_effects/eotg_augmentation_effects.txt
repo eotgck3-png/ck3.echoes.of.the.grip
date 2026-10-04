@@ -572,14 +572,20 @@ eotg_aug_stress_embrace_effect = {
 }
 
 # Refuse or restrain it
+# G9 (cybernetics_v2_trait_depth §5.2): impatient and gluttonous gain,
+# temperate loss, from vanilla co-occurrence (jb_hunt_events.txt:1288,
+# legend_spread_events_nick.txt:2802, ep3_laamp_flavor.txt:602).
 eotg_aug_stress_reject_effect = {
     stress_impact = {
         ambitious = minor_stress_impact_gain
         arrogant = minor_stress_impact_gain
         cynical = minor_stress_impact_gain
+        impatient = minor_stress_impact_gain    # G9
+        gluttonous = minor_stress_impact_gain   # G9
         content = minor_stress_impact_loss
         zealous = minor_stress_impact_loss
         humble = minor_stress_impact_loss
+        temperate = minor_stress_impact_loss    # G9
     }
 }
 
@@ -639,11 +645,14 @@ eotg_aug_stress_lie_effect = {
 }
 
 # Ignore symptoms or skip maintenance
+# G9 (cybernetics_v2_trait_depth §5.2): fickle loss, as vanilla pairs it with
+# lazy (bp2_adult_education_activity_events.txt:1475, epidemic_events.txt:6119).
 eotg_aug_stress_neglect_effect = {
     stress_impact = {
         diligent = minor_stress_impact_gain
         paranoid = minor_stress_impact_gain
         lazy = minor_stress_impact_loss
+        fickle = minor_stress_impact_loss       # G9
     }
 }
 

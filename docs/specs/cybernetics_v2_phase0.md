@@ -143,13 +143,13 @@ Victims hurt in an episode get `add_character_flag = { flag = eotg_flag_aug_brea
 |---|---|---|
 | `eotg_aug_stress_surgery_effect` (undergo or deepen implants) | craven medium, zealous medium, humble minor | brave minor, cynical minor, ambitious minor |
 | `eotg_aug_stress_embrace_effect` (lean into the machine) | zealous medium, content minor, humble minor | cynical minor, ambitious minor, eccentric minor |
-| `eotg_aug_stress_reject_effect` (refuse or restrain it) | ambitious minor, arrogant minor, cynical minor | content minor, zealous minor, humble minor |
+| `eotg_aug_stress_reject_effect` (refuse or restrain it) | ambitious minor, arrogant minor, cynical minor, impatient minor (G9), gluttonous minor (G9) | content minor, zealous minor, humble minor, temperate minor (G9) |
 | `eotg_aug_stress_wound_effect` (harm someone, non-lethal) | compassionate medium, forgiving minor, just minor | sadistic minor, wrathful minor |
 | `eotg_aug_stress_murder_effect` (kill, execute) | compassionate **major**, just medium, forgiving medium | sadistic medium, wrathful minor |
 | `eotg_aug_stress_cruelty_effect` (menace, mass fear) | compassionate minor, forgiving minor, shy minor | sadistic minor, arrogant minor, wrathful minor |
 | `eotg_aug_stress_tyranny_effect` (arrest, punish vassals) | just medium, compassionate minor, trusting minor | arbitrary minor, paranoid minor, vengeful minor |
 | `eotg_aug_stress_lie_effect` (deceive) | honest medium, just minor | deceitful minor |
-| `eotg_aug_stress_neglect_effect` (ignore symptoms or maintenance) | diligent minor, paranoid minor | lazy minor |
+| `eotg_aug_stress_neglect_effect` (ignore symptoms or maintenance) | diligent minor, paranoid minor | lazy minor, fickle minor (G9) |
 
 "minor/medium/major" means `minor_stress_impact_gain` / `_loss` etc. (vanilla values 20/40/80 and −15/−30/−65; `common/script_values/`).
 
