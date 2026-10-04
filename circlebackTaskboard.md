@@ -46,7 +46,7 @@ These are shared conditions. Clearing one unblocks every item that names it.
 
 | ID | Blocker | Clears when | Holding |
 |---|---|---|---|
-| **B-DESCRIPTOR** | No mod descriptor (`descriptor.mod` + `echoes_of_the_grip.mod`) at the repo root, the Gate 0 item. The launcher can't load the mod; Tiger only runs with a scratch descriptor. | The cartographer writes both files. Per `CLAUDE.md`, `replace_path` only for folders the mod actually ships. | CB-01, CB-02, CB-03 |
+| ~~**B-DESCRIPTOR**~~ | **Cleared 2026-10-04** (39b8bda): `descriptor.mod` + `echoes_of_the_grip.mod` at the repo root, "Echoes of the Grip", 1.20.*, no `replace_path`. | — | — |
 | **B-TEMPMAP** | The temporary map isn't in yet. Systems are map-agnostic, but in-game tests need rulers, courts and conditions to exist. | The human brings it in. Check `docs/qa/cybernetics_test_plan.md` §1c against it, especially **capital county development 10+**. | CB-01, CB-02, CB-03 |
 | **B-FAITHS** | No faiths or religions exist in v2 yet (Gate 1 / intake work). | Religions are lifted or built from the briefs. | CB-12 |
 | **B-CULTURES** | No cultures exist in v2 yet. | Cultures are lifted or built from the briefs. | CB-17 |
@@ -264,18 +264,6 @@ These are shared conditions. Clearing one unblocks every item that names it.
 
 ---
 
-### CB-29: Junction the game's mod folder to the repo
-- **Status:** ready, but diff first (2026-10-04)
-- **What:** the human chose one copy. `Documents/Paradox Interactive/Crusader Kings III/mod/eotg_stellar_rivers` is a hand-synced copy. Shader edits are made there and don't reach the repo, and repo commits don't reach the game. Replace it with a directory junction to the repo.
-- **Owner:** orchestrator, with both map sessions
-- **Next step:**
-  1. Diff the mod folder against the repo.
-  2. Have the map sessions commit anything that exists only in the mod folder.
-  3. Back up the folder, then create the junction.
-  4. Make the launcher `.mod` file's `path=` point at it.
-  5. Rebuild the gitignored generated art with `docs/tools/`. See `docs/pitfalls.md`: a stale generated artifact means a black map.
-- **Note:** this overlaps B-DESCRIPTOR. The repo still needs its own `descriptor.mod` with `supported_version="1.20.*"`.
-
 ## Done
 
 | ID | Item | Resolved | Date |
@@ -288,5 +276,6 @@ These are shared conditions. Clearing one unblocks every item that names it.
 | CB-07 | Cybernetic voice errata | Approved by the human, pasted into SETTING LORE | 2026-10-04 |
 | CB-09 | Commit the cybernetics work | 2e6cef2 (round 2 + balance B1/B2), pushed | 2026-10-04 |
 | CB-30 | Marker model questions | Human: keep the 7 colours for now (placeholders); every model sits on the shared plinth; leave the `map-presentation-good` tag at 69b1f5f | 2026-10-04 |
+| CB-29 | Junction the game's mod folder to the repo | `mod/eotg_stellar_rivers` is now a junction to the repo. The launcher file `eotg_stellar_rivers.mod` was renamed to "Echoes of the Grip" (Total Conversion, 1.20.*). Old folder kept as `mod/eotg_stellar_rivers_backup_20261004` (with the old `.mod` as `.mod.bak`); delete it once the game is confirmed loading. Before switching, a full diff showed: 4 settings files differed only by a BOM (kept the repo versions, which match vanilla); the lane ramp and the table_styles BOM were committed; 12 gitignored generated textures (colormap, 5 holding decals, 6 structure textures, the newer 10-01 bakes) were copied into the working tree. **Uncommitted working-tree edits are now live in game.** | 2026-10-04 |
 | CB-16 | Superseded notes on the 4 pre-v2 cybernetics QA docs | Done by cloud session (CB-24) | 2026-10-04 |
 | CB-24 | Cloud conformance audit | Merged from `claude/focused-dirac-ixo81h`. Verified locally: 12/12 MEDIUM confirmed and 5 vanilla claims settled (report §6). Follow-ups are CB-25 to CB-27. | 2026-10-04 |

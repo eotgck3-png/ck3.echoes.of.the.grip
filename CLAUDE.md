@@ -48,7 +48,7 @@ Known benign (Tiger predates the 1.19 religion folder rename): ~48 faith/religio
 - **About 48 errors in `20_health_effects.txt`** (`change_spiritual_fulfillment` ×36, `has_personal_tenet_flag` ×12), reached through `increase_wounds_effect`. The count grows with the number of call sites.
 - **Errors from the kinslayer path** (`add_kinslayer_trait_or_nothing_effect` → `00_secret_effects` / `00_religious_triggers`): `knows_doctrine` / `add_known_doctrine` (about 14), `rite` / `rite_has_parameter` (about 28), and strict-scopes warnings that `check_rite` / `check_rite_liege` are unset. Vanilla sets those scopes itself with `save_temporary_scope_as` (`00_religious_triggers.txt:389,397`).
 
-A new descriptor must say `supported_version="1.20.*"`. The repo has no `echoes_of_the_grip.mod` yet (a Gate 0 item), so run Tiger with a scratch descriptor whose `path=` points at the repo.
+A new descriptor must say `supported_version="1.20.*"`. `echoes_of_the_grip.mod` at the repo root is the Tiger descriptor. The game loads the repo directly: `Documents/Paradox Interactive/Crusader Kings III/mod/eotg_stellar_rivers` is a directory junction to it (2026-10-04), so the working tree, including uncommitted edits, is what the game runs.
 
 **PX Toolkit checks** run alongside Tiger on every script or loc change. They come from the VS Code extension `jdeffner.px-toolkit`, and each catches things the others miss:
 ```bash
