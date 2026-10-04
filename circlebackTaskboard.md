@@ -156,9 +156,9 @@ These are shared conditions. Clearing one unblocks every item that names it.
 
 ### CB-32: Canon rulings from the docs/lore review
 - **Status:** waiting-human (2026-10-04)
-- **What:** 16 contradictions between the new docs/lore files and older canon, plus a precedence ruling and two draft errata (LAW AT 866, ERAS). They're listed in `docs/lore/REVIEW_866.md`. None blocks current cybernetics work: patron.008 and the licensing rule were confirmed.
-- **Owner:** human → orchestrator (pastes errata) → eotg-lore-keeper
-- **Next step:** rule on precedence first. Most of the rest follow from it.
+- **What:** the precedence ruling and errata are done (2026-10-04): docs/lore's dated entries win, Yu is freed, and LAW AT 866 is pasted. That resolved most of the 16 contradictions. Seven small points remain, where the sources are silent or disagree with each other. They're listed in `docs/lore/REVIEW_866.md` under "Still open".
+- **Owner:** human
+- **Next step:** answer when convenient. None blocks current work.
 
 ### CB-08: Glossary ruling on medieval game terms
 - **Status:** waiting-human (2026-10-03)

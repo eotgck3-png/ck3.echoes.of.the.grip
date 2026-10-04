@@ -72,7 +72,7 @@ Neither checks scope (e.g. `add_gold` inside `capital_county`); Tiger does. Know
 If a lower source contradicts a higher one, follow the higher and report the contradiction rather than silently picking.
 
 ## Canon
-`OLD PROJECT VERSION/docs/SETTING LORE` (ERRATA block at the top overrides the body) and `866_bookmark_design.md`. 866 AG: the Grip was 866 years ago and is living history; the Titan Exodus is ongoing; the Myr Cluster Wars ignited 850 AG; no Galactic League yet.
+`OLD PROJECT VERSION/docs/SETTING LORE` ERRATA block first, then the **dated** entries in the `docs/lore/` histories (only what exists by 866 AG), then `866_bookmark_design.md`, then the SETTING LORE body (human ruling, 2026-10-04). Start from `docs/lore/REVIEW_866.md`, the digest of what holds at 866. The undated "Nation in 851" summaries in `Third era Nations.md` often describe later states, so never cite them over a dated entry. 866 AG: the Grip was 866 years ago and is living history; the Titan Exodus is ongoing; the Myr Cluster Wars ignited 850 AG; no Galactic League yet.
 
 ## Reference material in the old tree
 - `docs/CK3_Modding_Complete_Reference_v1_19.md` — 1,770-line syntax reference. Known error: it teaches `[scope:x.GetName]` in loc.

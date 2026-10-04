@@ -12,7 +12,7 @@
 - Each NA entry has four parts: "Nation in early 3E", an undated "Nation in 851" summary, a dated "From 851 to 1851" list, and "In 1851".
   - **The undated 851 summaries often describe later states.** For example, Galactic League membership appears in at least 8 of them, but the League dates from 1650.
   - **When the summary and the dated entries disagree, the dated entries win.**
-- **Precedence (proposed; awaiting the human's ruling):**
+- **Precedence (RULED by the human, 2026-10-04; recorded in SETTING LORE ERRATA "SOURCE PRECEDENCE"):**
   1. ERRATA
   2. Dated entries in docs/lore (up to 866)
   3. `866_bookmark_design.md`
@@ -48,25 +48,34 @@
   - New Cauldron Cybernetics Accord (1610)
   - Orro invasion (1700)
 
-## Contradictions with older canon (human rulings pending; see circlebackTaskboard CB-32)
-1. **Grip date and eras.** SETTING LORE puts the Grip about 1,000 years earlier, with First Era 0–131 and Third from 850.
-2. **Titans.** SETTING LORE lists Carrigore as a third.
-3. **Yu.** Sealed in the Dream (SETTING LORE), or freed (EV:51,64; NA:3124)?
-4. **Elrossi Imperium:** "Second" (NA:4406) or "First" (bookmark:44)? Is the Emperor at 851 Frederick III or Ferdinand IV?
-5. **Major-power roster.** Thorum, the Pale Hand and the Laughing Blades are absent from NA.
-6. **Gorgath:** Orrinic Neutral Evil (FE), or Yu-aligned Neutral?
-7. **Malvrick:** an open Confederated Orders (NA:3114-3131) or an underground cult? Does it belong to Divine Order?
-8. **Voidwalkers at 866:** a Malvrick martial order, or an underground remnant?
-9. **Orro:** a necromantic nation (NA:3820-3835) or an underground cult?
-10. **Broken Daimyos:** the Eighth Sengoku at 851 (NA), or none declared (bookmark)?
-11. **GOTL:** under Karim's attack since 851 (NA/EV), or at "peak confidence" (bookmark:50)?
-12. **XERXES ERRATA:** Vaelorin "the Tide-Crowned" against the drowned city and New Xerxes.
-13. **Carrigore's alignment:** canon is silent.
-14. **"Exodus wanes after 1000":** canon is silent.
-15. **Helix:** government after 850, leader (Clayd), Pale Hand ties: silent. Is the AI-fleet character canon for its MAA?
-16. **Shardbearers** at 850–851 (EV) against ~131–180 (SETTING LORE). Gods "in stasis" (EV:334) against the "Divine Awakening".
+## Contradictions with older canon: resolved by the precedence ruling (2026-10-04)
 
-## Draft errata (held until precedence is ruled)
+The dated docs/lore entries win, so the following now hold at 866:
+- **Grip and eras:** the Grip is 0 AG; the Third Era runs from 0 AG.
+- **Titans:** Orrin and Yu. Carrigore is an aspiring Titan.
+- **Yu is freed** (ERRATA YU).
+- **Elrossi:** the **Second** Elrossi Imperium (founded 500).
+- **Shardbearers:** 850–851.
+- **Gods:** left in stasis by Zer'kaath in 850.
+- **Gob-Ogre League:** under Karim's attack from 851.
+- **Broken Daimyos:** the Eighth Sengoku Jidai is under way.
+- **Carrigore Space:** Titanworld warbands; Samulo absent, Shaxius regent.
+- **Malvrick:** the open Malvrick Confederated Orders (a Divine Order fit). Voidwalkers are their warrior order (handling Void and Rift relics), not worshippers.
+- **Gorgath:** Orrinic, Neutral Evil.
+- **Orro:** a necromantic nation in the Outer Ring.
+- **The Warrens:** in revolution (860–915).
+
+**Still open** (the sources are silent, or disagree with each other); see circlebackTaskboard CB-32:
+1. The Elrossi Emperor at 851: Frederick III (NA:4422, summary) or Ferdinand IV (NA:4430, dated). By precedence, Ferdinand IV.
+2. The Exodus start: 131 (EV:59) or 150 (NA:216). Does it "wane after 1000"? Not in the sources.
+3. Carrigore's alignment: silent.
+4. Thorum, the Pale Hand, the Laughing Blades: absent from the sources. Is Thorum the Gob-Ogre Trade Federation?
+5. XERXES ERRATA: Vaelorin "the Tide-Crowned" against the drowned city (850) and New Xerxes (Corbin David, 851).
+6. Helix: its government after 850, its leader (Clayd), Pale Hand ties. Are its AI fleets canon for its MAA?
+7. Legacies text: "eight centuries" is wrong (it should be more than 866 years). "Confluence" has no source.
+
+## Draft errata
+LAW AT 866 was pasted 2026-10-04. The human did not choose ERAS; its content now follows from SOURCE PRECEDENCE anyway.
 ```
 - LAW AT 866 (draft): No authority above the polity exists at 866 AG. The
   Galactic League of States is informal from 1650 and founded in 1750. The
