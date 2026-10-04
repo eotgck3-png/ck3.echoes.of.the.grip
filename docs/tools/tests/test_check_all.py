@@ -93,7 +93,8 @@ class RunLogic(unittest.TestCase):
     def test_default_checks_cover_tools(self):
         names = [c.name for c in C.default_checks()]
         for n in ("eotg_lint (vs baseline)", "px_vocab_check", "px_lsp_diagnostics", "ck3-tiger",
-                  "qa/event_graph.py", "qa/show_option.py"):
+                  "qa/event_graph.py", "qa/show_option.py", "gen_test_recipes --check",
+                  "spec_conformance --check"):
             self.assertIn(n, names)
         self.assertNotIn("qa/aug_parse.py", names)
         by = {c.name: c for c in C.default_checks()}
@@ -114,6 +115,31 @@ class RootAndLogs(unittest.TestCase):
             self.assertEqual(by["px_vocab_check"].env_extra["EOTG_MOD_ROOT"], os.path.abspath(d))
             # no v1 sources in that checkout -> the port check is skipped, not failed
             self.assertIsNotNone(by["port_religions_1_20 --check"].skip_reason)
+            # nor generated reports: skipped too
+            for n in ("gen_test_recipes --check", "spec_conformance --check"):
+                self.assertIsNotNone(by[n].skip_reason, n)
+                self.assertIn(os.path.abspath(d), by[n].cmd)
+
+    def test_generators_run_against_root(self):
+        import gen_test_recipes as G
+        import spec_conformance as S
+        with tempfile.TemporaryDirectory() as d:
+            ev = os.path.join(d, "events")
+            os.makedirs(ev)
+            with open(os.path.join(ev, "eotg_x.txt"), "w") as fh:
+                fh.write("namespace = eotg_x\neotg_x.1 = { option = { name = a } }\n")
+            with redirect_stdout(io.StringIO()):
+                G.main(["--root", d])
+                S.main(["--root", d])
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = C.main(["--root", d, "--only= --check"])
+            out = buf.getvalue()
+            self.assertIn("gen_test_recipes --check", out)
+            self.assertIn("recipes are current", out)
+            self.assertIn("spec conformance report is current", out)
+            self.assertNotIn("FAIL ", out.split("summary")[0].replace("fail,", ""))
+            self.assertEqual(rc, 0, out)
 
     def test_root_must_look_like_a_mod(self):
         with tempfile.TemporaryDirectory() as d, redirect_stdout(io.StringIO()):
