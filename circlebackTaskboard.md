@@ -142,26 +142,17 @@ These are shared conditions. Clearing one unblocks every item that names it.
 
 ## Decisions for the human
 
-### CB-06: Helix Corporation at 866 AG, active or remnant?
-- **Status:** waiting-human (2026-10-03)
-- **What:** canon contradicts itself. `SETTING LORE:302-306` says it's "active and growing"; `Bookmark-Characters:51`, `EOTG_Events_Characters:593` and `866_religions:232` say it's a remnant. Until you rule, the cybernetics syndicate stays unnamed.
-- **Owner:** human → eotg-lore-keeper
-- **Next step:** pick one. The lore-keeper's two drafted ERRATA texts (one for remnant, one for "active but splintered") are in its first cybernetics review. Ask the orchestrator to reproduce them. Then paste the chosen one into the ERRATA block of `OLD PROJECT VERSION/docs/SETTING LORE`.
-- **Refs:** lore-keeper reviews, 2026-10-02/03
-
-### CB-07: The cybernetic "voice" errata
-- **Status:** waiting-human (2026-10-03)
-- **What:** add a canon note that the implant's "voice" is technological (the implant's predictive model of its user) and has no connection to the Void, Orrin or Kyros. The rule already binds all text through `docs/specs/cybernetics_v2.md` §5; this would put it in canon too.
-- **Owner:** human
-- **Next step:** approve, then paste into SETTING LORE's ERRATA block. Draft text:
-  ```
-  - CYBERNETIC "VOICE" (2026-10-03): Deeply integrated augmentation users
-    report a second perspective — the implant's predictive model of its user,
-    running ahead of them. It is TECHNOLOGICAL. It has no connection to the
-    Void, Orrin, Kyros, or any planar entity, and in-world text never frames it
-    as possession, a pact, or a whisper. It is not what "speaks from the empty
-    Void"; that remains unexplained.
-  ```
+### CB-28: Open Helix questions (follow-up to the CB-06 ruling)
+- **Status:** waiting-human (2026-10-04)
+- **What:** the ruling is in SETTING LORE's ERRATA: a remnant that is active and growing, holding 3 counties in different duchies. These points are still open:
+  1. Which duchies or region? The never-applied v1 draft `title_hierarchy.md:163-185, 251-257` gives Helix whole duchies. **The cartographer must not lift it as written.**
+  2. Is any of the 3 counties on or near Xerxes? (Clayd's arc is "The Ghosts Beneath Xerxes".)
+  3. Its government type. v1 had a corporation government.
+  4. Who leads it? Does Clayd Kestrel-Vire hold all 3 counties, or do vassals or rivals hold some?
+  5. Are the Pale Hand ties still only suspected? The lore-keeper reads it that way.
+- **Settled:** the cybernetics syndicate stays unnamed, under the map-agnostic rule and `cybernetics_v2.md:227`. Once a Helix title exists, the human could choose a gated "Helix envoy" variant; that would be new content.
+- **Owner:** human → intake (vault questions) → eotg-cartographer
+- **Next step:** answer here or in the Helix region brief.
 
 ### CB-08: Glossary ruling on medieval game terms
 - **Status:** waiting-human (2026-10-03)
@@ -169,21 +160,6 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Owner:** human → eotg-localizer
 - **Next step:** decide which terms get renamed (e.g. knight → ?, gold → ?). If any are renamed, the localizer updates the glossary and the `replace/` layer, and greps the cybernetics loc for them.
 - **Refs:** `OLD PROJECT VERSION/docs/localization_crusade.md`
-
-### CB-09: Commit the cybernetics work
-- **Status:** waiting-human (2026-10-03)
-- **What:** none of the cybernetics work is committed: v1 lift, track conversion, art, v2 Phases 0–6, the PX tools, and the docs. It sits in the working tree alongside your uncommitted map and marker changes, so it needs a selective commit.
-- **Owner:** human → orchestrator
-- **Next step:** say "commit cybernetics". The orchestrator stages only the cybernetics paths:
-  - `common/*/eotg_augmentation_*`, `common/story_cycles/`, `common/deathreasons/`, `common/scripted_character_templates/`
-  - `events/eotg_augmentation_*`, `localization/`
-  - `gfx/interface/icons/{traits,modifiers}/eotg_*`, `gfx/interface/illustrations/decisions/eotg_*`
-  - `docs/specs/cybernetics_*`, `docs/qa/`
-  - `docs/tools/px_*`, this file, and the `CLAUDE.md`, `agent_workflow.md` and catalog edits
-  
-  It leaves your map, marker and shader files unstaged.
-
----
 
 ## Parked until something else exists
 
@@ -258,7 +234,7 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Next step:** one pass. CB-22 has settled (2026-10-04), so this can be dispatched as soon as the round-2 and balance work is committed. Until then the two would touch the same files. Read §6 first: L3 is moot, and the line numbers are stale.
 
 ### CB-27: Scripter: conformance bug fixes
-- **Status:** blocked on CB-26 for M1 and M2 (2026-10-04); M7 and M8 are ready once the round-2 edits land
+- **Status:** M7 and M8 ready (2026-10-04, round-2 work committed in 2e6cef2; round 2 already added `is_adult` to the critic trigger and moves a living landless envoy to the pool on `on_end`; the envoy exclusion is still open). The rest are blocked on CB-26.
 - **What:**
   - **M8:** exclude the patron envoy from `eotg_aug_patron_critic_candidate` and the patron.004 pick.
   - **M7:** guard patron.006's portrait and descs against a dead envoy, and decide what happens to an envoy who has left court.
@@ -288,6 +264,26 @@ These are shared conditions. Clearing one unblocks every item that names it.
 
 ---
 
+### CB-29: Junction the game's mod folder to the repo
+- **Status:** ready, but diff first (2026-10-04)
+- **What:** the human chose one copy. `Documents/Paradox Interactive/Crusader Kings III/mod/eotg_stellar_rivers` is a hand-synced copy. Shader edits are made there and don't reach the repo, and repo commits don't reach the game. Replace it with a directory junction to the repo.
+- **Owner:** orchestrator, with both map sessions
+- **Next step:**
+  1. Diff the mod folder against the repo.
+  2. Have the map sessions commit anything that exists only in the mod folder.
+  3. Back up the folder, then create the junction.
+  4. Make the launcher `.mod` file's `path=` point at it.
+  5. Rebuild the gitignored generated art with `docs/tools/`. See `docs/pitfalls.md`: a stale generated artifact means a black map.
+- **Note:** this overlaps B-DESCRIPTOR. The repo still needs its own `descriptor.mod` with `supported_version="1.20.*"`.
+
+### CB-30: Marker model questions (from the map/marker session)
+- **Status:** waiting-human (2026-10-04)
+- **What:** for the custom per-holding `.obj` models (`docs/marker_model_brief.md`):
+  - (a) Are the 7 holding colours still wanted once the silhouettes differ?
+  - (b) Should any model REPLACE the shared plinth instead of sitting on it? If so, the beam and the emissive mask need authoring per model.
+  - Also: the `map-presentation-good` tag is stale at 69b1f5f. Move it?
+- **Owner:** human
+
 ## Done
 
 | ID | Item | Resolved | Date |
@@ -296,5 +292,8 @@ These are shared conditions. Clearing one unblocks every item that names it.
 | CB-22 | Balance amendment, from QA round 2's design issues | Built and QA-passed: Parts B1 and B2 (`docs/specs/cybernetics_v2_balance.md`) and the round-2 bug and text fixes. Further pacing tuning waits for CB-20, and then touches only the script values, the AI weights and `ai_will_do` | 2026-10-04 |
 | — | Q8: build The Sickly Child (child augmentation) | Human accepted all v2 recommendations; lore-keeper confirmed the drafted tone | 2026-10-03 |
 | — | Cybernetics trait icons, 3 decision pictures, 4 modifier icons | Delivered and converted to vanilla formats | 2026-10-03 |
+| CB-06 | Helix at 866 AG | Ruling: a remnant that is active and growing, with 3 counties in different duchies. Lore-keeper ERRATA pasted into SETTING LORE. Open points are in CB-28 | 2026-10-04 |
+| CB-07 | Cybernetic voice errata | Approved by the human, pasted into SETTING LORE | 2026-10-04 |
+| CB-09 | Commit the cybernetics work | 2e6cef2 (round 2 + balance B1/B2), pushed | 2026-10-04 |
 | CB-16 | Superseded notes on the 4 pre-v2 cybernetics QA docs | Done by cloud session (CB-24) | 2026-10-04 |
 | CB-24 | Cloud conformance audit | Merged from `claude/focused-dirac-ixo81h`. Verified locally: 12/12 MEDIUM confirmed and 5 vanilla claims settled (report §6). Follow-ups are CB-25 to CB-27. | 2026-10-04 |

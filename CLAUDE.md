@@ -44,7 +44,11 @@ Tiger 1.17.0 against CK3 1.19. From the Bash tool:
 ```
 Known benign (Tiger predates the 1.19 religion folder rename): ~48 faith/religion-path lookups, ~24 culture lookups, 2 `error(filename)` on the religion folders. Do not "fix" those. Everything else is real. Write Tiger logs to the scratchpad, not the repo.
 
-**Note (2026-10-03):** the installed game is now 1.20.0.3, and Tiger 1.17 targets 1.18.3. `16` errors inside vanilla `20_health_effects.txt` (`change_spiritual_fulfillment`, `has_personal_tenet_flag`), reached through `increase_wounds_effect`, are version noise. The repo has no `echoes_of_the_grip.mod` yet (a Gate 0 item), so run Tiger with a scratch descriptor whose `path=` points at the repo.
+**Note (2026-10-03, updated 2026-10-04):** the installed game is now 1.20.0.3 "Crozier", and Tiger 1.17 targets 1.18.3. These are version noise inside vanilla files, so don't "fix" them:
+- **About 48 errors in `20_health_effects.txt`** (`change_spiritual_fulfillment` ×36, `has_personal_tenet_flag` ×12), reached through `increase_wounds_effect`. The count grows with the number of call sites.
+- **Errors from the kinslayer path** (`add_kinslayer_trait_or_nothing_effect` → `00_secret_effects` / `00_religious_triggers`): `knows_doctrine` / `add_known_doctrine` (about 14), `rite` / `rite_has_parameter` (about 28), and strict-scopes warnings that `check_rite` / `check_rite_liege` are unset. Vanilla sets those scopes itself with `save_temporary_scope_as` (`00_religious_triggers.txt:389,397`).
+
+A new descriptor must say `supported_version="1.20.*"`. The repo has no `echoes_of_the_grip.mod` yet (a Gate 0 item), so run Tiger with a scratch descriptor whose `path=` points at the repo.
 
 **PX Toolkit checks** run alongside Tiger on every script or loc change. They come from the VS Code extension `jdeffner.px-toolkit`, and each catches things the others miss:
 ```bash
