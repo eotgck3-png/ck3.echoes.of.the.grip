@@ -14,7 +14,7 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | Family | Specs | Built | Ids | Present | Referenced only | Missing in built specs |
 |---|---|---|---|---|---|---|
 | `cybernetics` | 1 | 1 | 66 | 53 | 0 | 13 |
-| `cybernetics_v2` | 22 | 18 | 1263 | 1194 | 28 | 6 |
+| `cybernetics_v2` | 22 | 20 | 1264 | 1207 | 29 | 6 |
 | `glossary` | 1 | 0 | 1 | 0 | 0 | 0 |
 | `void` | 1 | 0 | 86 | 0 | 0 | 0 |
 
@@ -40,8 +40,8 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | `cybernetics_v2_procedures_lore.md` | yes | 7 | 7 | 0 | 0 | 0 |
 | `cybernetics_v2_realm.md` | yes | 120 | 115 | 3 | 1 | 1 |
 | `cybernetics_v2_realm_lore.md` | yes | 2 | 2 | 0 | 0 | 0 |
-| `cybernetics_v2_reprisal.md` | **no** | 36 | 25 | 0 | 11 | 0 |
-| `cybernetics_v2_reprisal_lore.md` | **no** | 3 | 1 | 0 | 2 | 0 |
+| `cybernetics_v2_reprisal.md` | yes | 37 | 36 | 1 | 0 | 0 |
+| `cybernetics_v2_reprisal_lore.md` | yes | 3 | 3 | 0 | 0 | 0 |
 | `cybernetics_v2_self_repair.md` | **no** | 53 | 34 | 1 | 18 | 0 |
 | `cybernetics_v2_self_repair_lore.md` | **no** | 5 | 1 | 0 | 4 | 0 |
 | `cybernetics_v2_trait_depth.md` | yes | 42 | 41 | 1 | 0 | 0 |
@@ -191,6 +191,20 @@ None.
 - Referenced only, never defined or set (0): none
 - Exempt (0): none
 
+#### `docs/specs/cybernetics_v2_reprisal.md`
+
+- Specced and present: 36
+- Specced, missing from script (0): none
+- Referenced only, never defined or set (1): `eotg_patron_collector.GetSheHe` (loc, l.303)
+- Exempt (0): none
+
+#### `docs/specs/cybernetics_v2_reprisal_lore.md`
+
+- Specced and present: 3
+- Specced, missing from script (0): none
+- Referenced only, never defined or set (0): none
+- Exempt (0): none
+
 #### `docs/specs/cybernetics_v2_trait_depth.md`
 
 - Specced and present: 41
@@ -199,22 +213,6 @@ None.
 - Exempt (0): none
 
 ### Unbuilt specs (expected gaps)
-
-#### `docs/specs/cybernetics_v2_reprisal.md`
-
-- New events, none in script yet: `eotg_aug_patron.009`
-- Specced and present: 25
-- Specced, missing from script (11): `eotg_paper_sold` (variable, l.41), `eotg_aug_patron.009` (event, l.55), `eotg_aug_patron_collect_effect` (effect, l.58), `eotg_patron_collector` (scope, l.58), `eotg_aug_patron.009.desc` (loc, l.198), `eotg_aug_patron.009.desc_envoy_dead` (loc, l.198), `eotg_aug_patron.009.d.tt` (loc, l.206), `eotg_aug_patron.006.f` (loc, l.291), `eotg_aug_patron_paper_sold_tt` (loc, l.292), `eotg_aug_patron.009.t` (loc, l.293), `eotg_aug_patron.009.a` (loc, l.294)
-- Referenced only, never defined or set (0): none
-- Exempt (0): none
-
-#### `docs/specs/cybernetics_v2_reprisal_lore.md`
-
-- New events, none in script yet: none
-- Specced and present: 1
-- Specced, missing from script (2): `eotg_aug_patron.006.f` (loc, l.37), `eotg_aug_patron_paper_sold_tt` (loc, l.38)
-- Referenced only, never defined or set (0): none
-- Exempt (0): none
 
 #### `docs/specs/cybernetics_v2_self_repair.md`
 

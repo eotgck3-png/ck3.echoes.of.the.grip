@@ -11,10 +11,13 @@
 # eotg_aug_patron.007 — A New Envoy            (the envoy is dead or gone)
 # eotg_aug_patron.008 — The Paper              (the owner has no implants;
 #                                               once per story)
+# eotg_aug_patron.009 — The Collector          (the paper was sold; reprisal
+#                                               spec §5.4)
 #
 # Fires from: .001 from eotg_on_yearly_aug_initiation_check (Patron entry) and
-#   eotg_aug_init.018 (e); .002-.008 from the story eotg_story_aug_patron
-#   through its effect_group tick. Cooldown authority: the story's
+#   eotg_aug_init.018 (e); .002-.009 from the story eotg_story_aug_patron
+#   through its effect_group tick (.009 from the collection entry, both
+#   cadences). Cooldown authority: the story's
 #   effect_group (2-3 years, 3-4 on read terms). No event checks a flag.
 # Naming (index §5.3, §5.7): the patron is never named. Loc says "the
 #   syndicate" and "the syndicate envoy"; never Helix, Pale Hand, Consortium,
@@ -788,7 +791,11 @@ eotg_aug_patron.005 = {
 # ── eotg_aug_patron.006 ───────────────────────────────────────────────────────
 # The Final Demand. Tone by how it was reached: grievance >= 3 (betrayal,
 # desc_betrayal) or demand >= 4 (settlement, desc_settlement). Every option
-# ends the story (`after`).
+# ends the story (`after`), except a betrayal by an owner with no implants:
+# then the paper is sold and the story parks for the collector (reprisal spec
+# §5.2; eotg_paper_sold).
+# f (reprisal spec §5.2, lore P2): with the envoy absent, the universal
+# defiance. It refuses the message, not a messenger, so it names none.
 # c/e (and d at 50%) betray: eotg_aug_patron_betray_effect (the envoy dies,
 # throttle 5 years, risk +25, an Overclocked owner's Countdown starts).
 # c/e need the envoy alive and at court (eotg_aug_patron_envoy_present, CB-27
@@ -961,9 +968,32 @@ eotg_aug_patron.006 = {
         }
     }
 
+    # "Burn the terms. Send no answer." (reprisal spec §5.2, lore P2) Shown
+    # only when the envoy is absent: the mirror of c. Nobody dies, so no
+    # murder stress; the refusal is seen to be made (+50, as .007 c, .008 d).
+    option = {
+        name = eotg_aug_patron.006.f
+        trigger = { eotg_aug_patron_envoy_present = no }
+        eotg_aug_patron_betray_effect = yes
+        add_prestige = 50
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = stubborn }
+            modifier = { add = 10  has_trait = arrogant }
+            modifier = { add = -20  has_trait = craven }
+        }
+    }
+
+    # Reprisal spec §5.2: the story parks (does not end) when the paper was
+    # sold; a, b and d (success) never set it
     after = {
         hidden_effect = {
-            scope:eotg_patron_story ?= { end_story = yes }
+            scope:eotg_patron_story ?= {
+                if = {
+                    limit = { NOT = { has_variable = eotg_paper_sold } }
+                    end_story = yes
+                }
+            }
         }
     }
 }
@@ -1250,6 +1280,194 @@ eotg_aug_patron.008 = {
             base = 30
             modifier = { add = 30  has_trait = just }
             modifier = { add = 10  has_trait = honest }
+        }
+    }
+}
+
+
+# ── eotg_aug_patron.009 ───────────────────────────────────────────────────────
+# The Collector (docs/specs/cybernetics_v2_reprisal.md §5.4). The syndicate
+# sold the paper after a betrayal by an owner with no implants
+# (eotg_aug_patron_betray_effect, eotg_paper_sold). The collector holds it now
+# and arrives in person, as a guest: on business, not in the ruler's service
+# (add_visiting_courtier, vanilla hold_court_events_general.txt:590-600).
+# Created from the envoy template with root's culture and faith by scope, the
+# shape of .007.
+# Caller: eotg_story_aug_patron, the collection entry (both cadences), 1-30
+# days. The trigger is a world-state guard; it reads no flag and not
+# eotg_paper_sold (the tick is the cooldown authority).
+# Resource (the "owner with no implants" coupling, new beats §2): c changes
+# tier (into the system at tier 1, risk 25); a, b and e (success) close the
+# debt; d and e (failure) turn it into the collector's scheme. The desc reads
+# how the betrayal happened (the envoy dead or not).
+# c is a sale of the syndicate's stock against the debt (lore P7): stock made
+# to this ruler's measure, taken at the paper's price and fitted without
+# care. Afterwards the ruler holds the hardware outright, and nothing in c
+# gives the syndicate any hold. Not rolled: a patron install (procedures §4.5
+# "Not rolled").
+# e: a seizure of a guest under the ruler's own roof costs tyranny through
+# imprison_character_effect (00_prison_effects.txt:1644); that is the point.
+# Roll shape: patron.002.e / .008.e (random_list with a desc per branch). On a
+# failure the collector's people stop the seizure and the collector stays
+# (lore P5).
+# Every option ends the story (`after`).
+
+eotg_aug_patron.009 = {
+    type = character_event
+    title = eotg_aug_patron.009.t
+    desc = {
+        desc = eotg_aug_patron.009.desc
+        triggered_desc = {
+            trigger = { scope:eotg_patron_envoy ?= { is_alive = no } }
+            desc = eotg_aug_patron.009.desc_envoy_dead
+        }
+    }
+    theme = intrigue
+
+    trigger = { eotg_aug_has_patron = yes }
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_patron_collector }
+        character = scope:eotg_patron_collector
+        animation = scheme
+    }
+
+    immediate = {
+        hidden_effect = {
+            random_owned_story = {
+                limit = { story_type = eotg_story_aug_patron }
+                save_scope_as = eotg_patron_story
+                var:eotg_envoy ?= { save_scope_as = eotg_patron_envoy }
+            }
+        }
+        create_character = {
+            template = eotg_aug_patron_envoy_template
+            location = root.location
+            culture = root.culture
+            faith = root.faith
+            save_scope_as = eotg_patron_collector
+        }
+        add_visiting_courtier = scope:eotg_patron_collector
+    }
+
+    # "Pay what the paper says." The .006 buy-out price, scaled by the terms:
+    # betraying saved nothing.
+    option = {
+        name = eotg_aug_patron.009.a
+        trigger = { eotg_aug_patron_can_pay = { BASE = major_gold_value  MULT = 2 } }
+        eotg_aug_patron_pay_effect = { BASE = major_gold_value  MULT = 2 }
+        scope:eotg_patron_collector = { move_to_pool = yes }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = honest }
+            modifier = { add = 10  has_trait = diligent }
+            modifier = { add = -20  has_trait = greedy }
+        }
+    }
+
+    # "Sign the lien on my revenues." The ungated fallback. The once-per-life
+    # flag already makes a second lien impossible; the guard is belt-and-braces.
+    option = {
+        name = eotg_aug_patron.009.b
+        if = {
+            limit = { has_character_modifier = eotg_mod_aug_patron_clause }
+            remove_character_modifier = eotg_mod_aug_patron_clause
+        }
+        if = {
+            limit = { NOT = { has_character_modifier = eotg_mod_aug_patron_clause_final } }
+            add_character_modifier = { modifier = eotg_mod_aug_patron_clause_final }
+        }
+        scope:eotg_patron_collector = { move_to_pool = yes }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 10  has_trait = craven }
+            modifier = { add = -20  has_trait = ambitious }
+        }
+    }
+
+    # "Take the hardware against the debt." (lore P7) Tier change: into the
+    # system at tier 1, risk 25 (the betrayal's own number: stock fitted
+    # without care). No lien, no gold. Not while the body is still recovering
+    # from Excision.
+    option = {
+        name = eotg_aug_patron.009.c
+        trigger = {
+            eotg_is_augmented_any = no
+            NOT = { has_character_modifier = eotg_mod_aug_excision_recovery }
+        }
+        eotg_aug_initiate_effect = yes
+        hidden_effect = {
+            eotg_add_fracture_risk = { AMOUNT = 25 }
+        }
+        eotg_aug_stress_surgery_effect = yes
+        scope:eotg_patron_collector = { move_to_pool = yes }
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 10  has_trait = cynical }
+            modifier = { factor = 0  has_trait = zealous }
+        }
+    }
+
+    # "There is no debt. We are done." (lore P4) Not an expulsion: the
+    # collector chooses to stay as a guest, and the people come later.
+    option = {
+        name = eotg_aug_patron.009.d
+        add_prestige = 50
+        hidden_effect = { eotg_aug_patron_collect_effect = yes }
+        custom_tooltip = eotg_aug_patron.009.d.tt
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = stubborn }
+            modifier = { add = 10  has_trait = brave }
+            modifier = { add = -20  has_trait = craven }
+        }
+    }
+
+    # [wrathful] "Seize the collector, and the paper." 50% (+15 at prowess
+    # 12+): taken; 50%: the seizure is stopped and the collector stays
+    # (lore P5), with the scheme.
+    option = {
+        name = eotg_aug_patron.009.e
+        trigger = { has_trait = wrathful }
+        trait = wrathful
+        random_list = {
+            50 = {
+                modifier = {
+                    add = 15
+                    prowess >= 12
+                }
+                desc = eotg_aug_patron.009.e.success
+                imprison_character_effect = {
+                    TARGET = scope:eotg_patron_collector
+                    IMPRISONER = root
+                }
+                add_dread = minor_dread_gain
+            }
+            50 = {
+                desc = eotg_aug_patron.009.e.failure
+                add_prestige = -50
+                hidden_effect = { eotg_aug_patron_collect_effect = yes }
+            }
+        }
+        stress_impact = {
+            wrathful = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = wrathful }
+            modifier = { add = 10  has_trait = vengeful }
+        }
+    }
+
+    after = {
+        hidden_effect = {
+            scope:eotg_patron_story ?= { end_story = yes }
         }
     }
 }

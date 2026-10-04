@@ -1,7 +1,8 @@
 """Turn an observer run's log into the 12 measurements of balance spec §9.2,
 plus [13], the interaction counters of docs/specs/cybernetics_v2_interactions.md
-§9 item 10, and [14], the realm counters of docs/specs/cybernetics_v2_realm.md
-§4.9.
+§9 item 10, [14], the realm counters of docs/specs/cybernetics_v2_realm.md
+§4.9, and [15], the reprisal counters of docs/specs/cybernetics_v2_reprisal.md
+§9 item 7.
 
 Reads every line that contains "EOTG_OBS <key>" (the resolved loc text) or a
 raw "eotg_obs_<key>" (if the loc did not resolve). Each line may carry
@@ -279,6 +280,14 @@ def report(path, events, marks, start_year):
         return out
     print("    (4) Overclocked -> cascade, with a technician at the cascade:", med_iqr(oc_span(True)))
     print("        without:", med_iqr(oc_span(False)))
+    # ---- 15: reprisal (reprisal spec 9.7) ----
+    print("\n[15] REPRISAL per decade (reprisal spec 9.7)")
+    for d in sorted(by_dec):
+        c = by_dec[d]
+        print(f"  decade {d}: 006.f augmented {c['patron_f_aug']} no implants {c['patron_f_none']};"
+              f" 009 fired {c['patron_009']} (a {c['patron_009_a']} b {c['patron_009_b']} c {c['patron_009_c']}"
+              f" d {c['patron_009_d']} e {c['patron_009_e']}); collector schemes {c['collector_scheme']}"
+              f" (fallback {c['collector_fallback']}), succeeded {c['collector_kill']}")
 
 
 def main(argv):

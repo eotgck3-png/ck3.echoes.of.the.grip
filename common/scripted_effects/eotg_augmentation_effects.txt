@@ -1412,7 +1412,11 @@ eotg_aug_patron_grievance_effect = {
 
 # Betray the syndicate: the envoy dies, the firmware is throttled, risk +25,
 # and an Overclocked owner's Countdown starts (phase5 §2.4 .006 c).
-# Callers: eotg_aug_patron.006 (c, d at 50%, e).
+# Reprisal spec §5.2: for an owner with none of the syndicate's hardware left
+# in them, the syndicate sells the paper instead (story variable
+# eotg_paper_sold; the tick then sends the collector, patron.009). The
+# firmware punishment and the paper never stack.
+# Callers: eotg_aug_patron.006 (c, d at 50%, e, f).
 # CB-27 M7: the envoy dies only if alive and still at court
 # (eotg_aug_patron_envoy_present); c and e are gated on the same trigger, and
 # d's failure branch against an absent envoy keeps the retaliation without a
@@ -1435,6 +1439,50 @@ eotg_aug_patron_betray_effect = {
         add_character_modifier = { modifier = eotg_mod_aug_patron_throttle  years = 5 }
         eotg_add_fracture_risk = { AMOUNT = 25 }
         eotg_aug_try_start_countdown_effect = yes
+    }
+    else = {
+        # Reprisal spec §5.2: none of the syndicate's hardware is left in the
+        # owner to stop servicing. The syndicate sells the paper; the story
+        # stays alive and its next tick sends the collector (.009).
+        # scope:eotg_patron_story is saved in .006's immediate, the only
+        # caller; the ?= is belt-and-braces.
+        scope:eotg_patron_story ?= { set_variable = eotg_paper_sold }
+        custom_tooltip = eotg_aug_patron_paper_sold_tt
+    }
+}
+
+# The collector's reprisal (reprisal spec §5.4). Owner scope;
+# scope:eotg_patron_collector saved by patron.009. The collector's people come
+# for the ruler: a vanilla murder scheme (agents, physical, local; discovery
+# is vanilla's breach machinery). Started as vanilla starts one from script:
+# hold_court_events_general.txt:20705-20722 (can_start_scheme guard),
+# :20808-20822 (start_scheme). An AI scheme owner executes it through
+# murder_scheme.txt:337-343 (the semiyearly prep). A guest owning the scheme
+# is the spec's deviation (§6; engine check (a)). If the scheme cannot
+# start, the collector's people take what they can carry instead; the
+# fallback may put the ruler into debt, which is intended.
+# Callers: eotg_aug_patron.009 (d, e failure), inside hidden_effect.
+eotg_aug_patron_collect_effect = {
+    if = {
+        limit = {
+            scope:eotg_patron_collector ?= {
+                is_alive = yes
+                is_imprisoned = no
+                can_start_scheme = {
+                    type = murder
+                    target_character = root
+                }
+            }
+        }
+        scope:eotg_patron_collector = {
+            start_scheme = {
+                type = murder
+                target_character = root
+            }
+        }
+    }
+    else = {
+        remove_short_term_gold = medium_gold_value
     }
 }
 

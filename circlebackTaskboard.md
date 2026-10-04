@@ -352,6 +352,24 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Owner:** human → orchestrator
 - **Next step:** check alongside CB-38.
 
+### CB-40: In-game checks for the Reprisal batch (the paper is sold)
+- **Status:** waiting-human (2026-10-04)
+- **What:** `docs/specs/cybernetics_v2_reprisal.md` §9 item 9 is the full list:
+  - **case a:** envoy murdered → .009 with desc_envoy_dead;
+  - **case b:** .006 f with the throttle for an augmented owner; .006 f then .009 for an owner with no implants;
+  - **case c:** a deceitful owner's d fails;
+  - **.009 c:** back at tier 1, with no lien;
+  - **.009 d:** the murder scheme shows in the scheme list or console, and vanilla discovery names the collector;
+  - **.009 e:** the collector becomes a prisoner, with the tyranny tooltip; on failure, the collector stays as a guest who owns the scheme.
+
+  Also check:
+  1. **Engine (a):** does a guest created by `create_character` + `add_visiting_courtier` actually progress and execute the murder scheme? Vanilla `allow`/`valid` permit it on paper.
+  2. **Engine (b):** can the `remove_short_term_gold` fallback take a ruler into debt?
+  3. **Observer:** read report section [15]. Rebuild the sub-mod first; it now has 7 overlays.
+- **Known deferral (spec §10):** .009 c, like patron.008 c, ignores a realm Ban.
+- **Owner:** human → orchestrator
+- **Next step:** check alongside CB-38 and CB-39.
+
 ## Tooling and environment
 
 ### CB-18: Game is 1.20.0.3; the tools target older versions

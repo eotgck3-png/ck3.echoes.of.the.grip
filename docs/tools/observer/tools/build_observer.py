@@ -1,9 +1,9 @@
 """Build the EotG observer sub-mod's overlay files (balance spec §9.2).
 
 The observer needs hooks inside the main mod's scripted effects, on_actions,
-decisions, story cycles, character interactions and tamper events. CK3
-replaces a file when a later-loaded mod ships the same relative path, so this
-script copies those six main-mod files into
+decisions, story cycles, character interactions, tamper events and patron
+events. CK3 replaces a file when a later-loaded mod ships the same relative
+path, so this script copies those seven main-mod files into
 the sub-mod and inserts one-line hooks, each tagged `# eotg_obs`. It then
 checks that removing every tagged line gives back the main-mod file byte for
 byte: the overlay changes nothing but logging.
@@ -12,7 +12,7 @@ The sources live in the repo at docs/tools/observer/ and are never loaded by
 the main mod. The build writes a complete, installable sub-mod to --out, which
 is normally the CK3 mod folder, so the generated overlays never enter the repo.
 
-RE-RUN THIS AFTER EVERY CHANGE TO THE MAIN MOD'S SIX FILES. A stale overlay
+RE-RUN THIS AFTER EVERY CHANGE TO THE MAIN MOD'S SEVEN FILES. A stale overlay
 would run old gameplay code. The header of each overlay records the source
 file's SHA-1; `--check` reports a mismatch.
 
@@ -39,6 +39,8 @@ FILES = {
     # Interactions spec §9 item 10 (the five interaction counters)
     "interactions": "common/character_interactions/eotg_augmentation_interactions.txt",
     "tamper": "events/eotg_augmentation_tamper.txt",
+    # Reprisal spec §9 item 7 (the three reprisal counters)
+    "patron": "events/eotg_augmentation_patron.txt",
 }
 YEARLY_LISTS = (
     "eotg_on_yearly_aug_initiation_check",
@@ -157,6 +159,14 @@ def build_effects():
     o.after_line(s, "scope:recipient = { eotg_obs_log_effect = { KEY = int_salvage } }", extra="    ")
     i = o.find(r"add_kinslayer_trait_or_nothing_effect = \{ VICTIM = scope:recipient \}", s, e)[0]
     o.before(i, "eotg_obs_log_effect = { KEY = int_salvage_death }")
+    # Reprisal spec §9 item 7: collector schemes started (the collector's id,
+    # flagged for the observer's on_death), and the fallback
+    s, e = o.block("eotg_aug_patron_collect_effect")
+    i = o.find(r"^\s*start_scheme = \{", s, e)[0]
+    o.before(i, "add_character_flag = eotg_obs_collector")
+    o.before(i, "eotg_obs_log_effect = { KEY = collector_scheme }")
+    i = o.find(r"remove_short_term_gold = medium_gold_value", s, e)[0]
+    o.before(i, "eotg_obs_log_effect = { KEY = collector_fallback }")
     # Realm spec §4.9 counter 3: contraband crimes (the subject's id)
     s, e = o.block("eotg_aug_contraband_effect")
     i = o.find(r"save_scope_as = eotg_contraband_subject", s, e)[0]
@@ -250,6 +260,23 @@ def build_tamper():
     return o
 
 
+def build_patron():
+    """Reprisal spec §9 item 7: .006 f by owner state; .009 fired and the
+    option taken (owner's id)."""
+    o = Overlay(FILES["patron"])
+    s, e = o.block("eotg_aug_patron.006")
+    i = o.find(r"name = eotg_aug_patron" + re.escape(".006.f") + r"$", s, e)[0]
+    o.after_line(i, "if = { limit = { eotg_is_augmented_any = yes } eotg_obs_log_effect = { KEY = patron_f_aug } } "
+                    "else = { eotg_obs_log_effect = { KEY = patron_f_none } }", extra="")
+    s, e = o.block("eotg_aug_patron.009")
+    i = o.find(r"^    immediate = \{\s*$", s, e)[0]
+    o.after_line(i, "eotg_obs_log_effect = { KEY = patron_009 }")
+    for x in "abcde":
+        i = o.find(r"name = eotg_aug_patron" + re.escape(".009." + x) + r"$", s, e)[0]
+        o.after_line(i, f"eotg_obs_log_effect = {{ KEY = patron_009_{x} }}", extra="")
+    return o
+
+
 STATES = ("none", "t1", "t2", "t3", "nf", "ti")
 TTS = ("county", "duchy", "kingdom")
 
@@ -277,6 +304,9 @@ def loc_keys(dec_keys):
     # Realm spec §4.9
     char += [f"{p}_{law}" for p in ("census_law", "init_law") for law in ("ban", "license", "favor", "none")]
     char += ["census_technician", "crime_contraband", "crime_defied", "cascade_tech"]
+    # Reprisal spec §9 item 7
+    char += ["patron_f_aug", "patron_f_none", "patron_009"] + [f"patron_009_{x}" for x in "abcde"]
+    char += ["collector_scheme", "collector_fallback", "collector_kill"]
     char += dec_keys
     lines = ["\ufeffl_english:"]
     for k in glob:
@@ -318,7 +348,8 @@ def main(argv):
     st = build_stories()
     ia = build_interactions()
     tp = build_tamper()
-    for o in (eff, oa, dec, st, ia, tp):
+    pt = build_patron()
+    for o in (eff, oa, dec, st, ia, tp, pt):
         write(o.rel, o.render())
         print(f"{o.rel}: {o.count} hook lines")
     write("localization/english/eotg_observer_l_english.yml", loc_keys(dec_keys))

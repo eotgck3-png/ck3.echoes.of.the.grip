@@ -465,9 +465,9 @@ eotg_story_aug_countdown = {
 
 # ── eotg_story_aug_patron — The Patron's debt (I-05, thread T2, §2) ──────────
 # Created by: eotg_aug_patron_accept_effect (patron.001 a, c, d).
-# Fires: eotg_aug_patron.002-.008. Ended by: patron.006 (every option),
-#   patron.008 (a, b, e success), or the owner's death (inherited debt is
-#   deferred, §5).
+# Fires: eotg_aug_patron.002-.009. Ended by: patron.006 (every option,
+#   unless the paper was sold), patron.008 (a, b, e success), patron.009
+#   (every option), or the owner's death (inherited debt is deferred, §5).
 # The syndicate is never named (index §5.7): "the syndicate", "the syndicate
 #   envoy".
 # Story variables (spec: envoy / demand / grievance / terms):
@@ -477,6 +477,10 @@ eotg_story_aug_countdown = {
 #   eotg_terms      flag:standard / flag:read / flag:greedy (patron.001)
 #   eotg_paper_served  bare, one-shot: set by the tick when it fires
 #                   patron.008 The Paper (new beats §5.2)
+#   eotg_paper_sold    bare, one-shot: set by eotg_aug_patron_betray_effect
+#                   when the owner has no implants (reprisal spec §5.2); the
+#                   story parks after .006 and the tick fires patron.009
+#                   The Collector
 eotg_story_aug_patron = {
     on_setup = {
         set_variable = {
@@ -555,6 +559,21 @@ eotg_story_aug_patron = {
                 }
                 effect = {
                     end_story = yes
+                }
+            }
+            # Reprisal spec §5.3: the paper has been sold (a betrayal by an
+            # owner with no implants, eotg_aug_patron_betray_effect). The
+            # collector comes in person. Second, after the landless ending,
+            # which must still win; it shadows every later entry, so a parked
+            # story never re-fires .006 (grievance >= 3 or demand >= 4 still
+            # hold) or .007 (the envoy is dead). The tick is the cooldown
+            # authority (index §1 rule 5); patron.009 checks no flag. Every
+            # .009 option ends the story. Vanilla shape:
+            # story_cycle_pledge_loyalty_to_liege_overdue.txt:188-207.
+            triggered_effect = {
+                trigger = { has_variable = eotg_paper_sold }
+                effect = {
+                    story_owner = { trigger_event = { id = eotg_aug_patron.009  days = { 1 30 } } }
                 }
             }
             # Balance spec §5.8: the syndicate writes off a Neurofractured
@@ -670,6 +689,21 @@ eotg_story_aug_patron = {
                 }
                 effect = {
                     end_story = yes
+                }
+            }
+            # Reprisal spec §5.3: the paper has been sold (a betrayal by an
+            # owner with no implants, eotg_aug_patron_betray_effect). The
+            # collector comes in person. Second, after the landless ending,
+            # which must still win; it shadows every later entry, so a parked
+            # story never re-fires .006 (grievance >= 3 or demand >= 4 still
+            # hold) or .007 (the envoy is dead). The tick is the cooldown
+            # authority (index §1 rule 5); patron.009 checks no flag. Every
+            # .009 option ends the story. Vanilla shape:
+            # story_cycle_pledge_loyalty_to_liege_overdue.txt:188-207.
+            triggered_effect = {
+                trigger = { has_variable = eotg_paper_sold }
+                effect = {
+                    story_owner = { trigger_event = { id = eotg_aug_patron.009  days = { 1 30 } } }
                 }
             }
             # Balance spec §5.8: the syndicate writes off a Neurofractured
