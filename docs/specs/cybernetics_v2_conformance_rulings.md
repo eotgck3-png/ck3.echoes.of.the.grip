@@ -128,6 +128,8 @@ All are small. None touches patron.004, patron.006, the critic trigger or the be
 ## 3. For the human (new scope, not specced)
 
 These would add beats. They are listed so the choice is visible. Nothing is built.
+
+> **2026-10-04: both approved by the human and specced in [cybernetics_v2_new_beats.md](cybernetics_v2_new_beats.md).** M11 is amended there: two climaxes per ruler at most, no on_action restart.
 1. **A second Heir's Arc for a later heir** (M11), for example after heir.004 executes the first heir. Today the arc runs once per ruler.
 2. **A Patron arc beat for an owner who has had the implants removed** (M6). Today the debt simply continues: the clause keeps charging, and the story's demands go on reading the variable.
 

@@ -408,6 +408,8 @@ Owner options, by outcome:
 
 The story ends after any outcome, and heir.004 sets the owner's permanent `eotg_flag_aug_heir_arc_done`: the arc never restarts for this ruler, even for a later heir (*CB-26 M11*; a later-heir arc is new scope, rulings §3).
 
+> **Amended 2026-10-04 by [cybernetics_v2_new_beats.md](cybernetics_v2_new_beats.md) §5.1 (human-approved).** heir.004 still sets `eotg_flag_aug_heir_arc_done`, so no on_action ever creates a second arc story. But in round 1 it parks the story at a dormant `eotg_stage = 5` instead of ending it. The story's tick gives the next primary heir (14+, not the round-1 heir) a shorter round 2: heir.007 *The Next in Line* → heir.003 → heir.004, with successor descs. Round 2 ends the story for good. `eotg_aug_total_integration_effect` and fracture.026 b set stage 3 only while `eotg_stage < 4`. That file is the authority.
+
 **heir.005 What Must Be Done** (fires to the heir, on Kill success). `immediate`: `scope:eotg_parent_ruler = { death = { death_reason = death_murder  killer = root } }`. The player becomes the heir by normal succession.
 - **a** "It was mercy." —
 - **b [compassionate]** "It was murder." Stress major gain.

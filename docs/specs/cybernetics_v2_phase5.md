@@ -118,6 +118,7 @@ Culture and faith come from root **by scope** (map-agnostic). The envoy is passe
 ### 2.3 Story
 - **`on_setup`:** `envoy` (from passthrough), `demand = 0`, `grievance = 0`, `terms` (`flag:standard` / `flag:read` / `flag:greedy` from patron.001's option).
 - **`on_owner_death`:** `end_story = yes`. Inherited debt is deferred (§5).
+- **Amended 2026-10-04 by [cybernetics_v2_new_beats.md](cybernetics_v2_new_beats.md) §5.2 (human-approved):** a new tick entry, after the write-off and before the demand sequence, in both cadences. It fires **patron.008** *The Paper* once per story (story variable `eotg_paper_served`), when the owner has no implants, the envoy is present, demand < 4 and grievance < 3. That file is the authority.
 - **`effect_group`:** `years = { 2 3 }` (`{ 3 4 }` if terms = read), `first_valid`:
   1. `var:envoy` is dead or not the owner's courtier → **.007** *A New Envoy* (it creates the replacement and resets `envoy`).
   2. `grievance >= 3` → **.006** *The Final Demand* (betrayal framing).
