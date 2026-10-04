@@ -344,8 +344,26 @@ def _faith_file_name(name):
     return (stem.replace("religions", "faiths") if "religions" in stem else stem + "_faiths") + ext
 
 
-def port(src, out, repo_root=REPO):
+def source_repo_root(src):
+    """The checkout that holds ``src``: the nearest ancestor containing
+    ``OLD PROJECT VERSION/`` or ``.git``. Paths in the output are written relative
+    to it, so the bytes do not depend on where this tool lives (FIX 7). Falls back
+    to the parent of ``src`` when no marker is found."""
+    d = os.path.abspath(src)
+    while True:
+        if os.path.isdir(os.path.join(d, "OLD PROJECT VERSION")) or \
+                os.path.exists(os.path.join(d, ".git")):
+            return d
+        parent = os.path.dirname(d)
+        if parent == d:
+            return os.path.dirname(os.path.abspath(src))
+        d = parent
+
+
+def port(src, out, repo_root=None):
     """Run the conversion. Returns (report, [written paths])."""
+    if repo_root is None:
+        repo_root = source_repo_root(src)
     rep = Report()
     written = []
     target = os.path.join(out, "common", "religion")
@@ -476,9 +494,10 @@ def main(argv=None):
                     help="regenerate in a temp dir and exit 1 if --out differs")
     args = ap.parse_args(argv)
     out = os.path.abspath(args.out)
-    live = os.path.join(REPO, "common")
-    if out == live or out.startswith(live + os.sep):
-        ap.error("refusing to write into the live common/ folder")
+    for repo in {REPO, source_repo_root(args.src)}:
+        live = os.path.join(repo, "common")
+        if out == live or out.startswith(live + os.sep):
+            ap.error("refusing to write into the live common/ folder")
     if args.check:
         import tempfile
         with tempfile.TemporaryDirectory() as tmp:
@@ -492,8 +511,9 @@ def main(argv=None):
         print("port output %s" % ("is current" if not stale else "is STALE (%d file(s))" % len(stale)))
         return 1 if stale else 0
     rep, written = port(args.src, out)
+    print("source: %s" % os.path.abspath(args.src))
     for w in written:
-        print("wrote %s" % os.path.relpath(w, REPO).replace(os.sep, "/"))
+        print("wrote %s" % w)
     print("dropped: %s" % (", ".join(d[0] for d in rep.dropped) or "none"))
     print("%d transformation line(s), %d TODO(s)" % (len(rep.lines), len(rep.todos)))
     return 0
