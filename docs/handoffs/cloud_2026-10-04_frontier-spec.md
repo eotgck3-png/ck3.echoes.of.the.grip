@@ -1,0 +1,55 @@
+### HANDOFF (cloud session; spec only, no game files, nothing built)
+- **branch:** `claude/frontier-v1-cloud` (from `origin/v2-space-map` @ `389ad90`)
+- **status:** done, Stage 1 (spec). **Stage 2 waits for "Stage 2 approved".**
+- **summary:** `docs/specs/frontier_v1.md` turns `docs/design/frontier_systems.md` (not edited) into a buildable Phase 1 spec.
+  - **State (§2):** Frontier state lives in **county-title variables**, shown through **one county modifier per tier**. This beat a story cycle (it would die with its owner), a vanilla great project (DLC gating unknown) and capital-province variables. The state belongs to the place, so it survives founder death and owner changes. The political owner is just `holder`, read live.
+  - **Unsettled (§2.3):** a **normally held county flagged by data**. Its empty barony slots are what completion settles. One entry effect, `eotg_frontier_mark_unsettled_effect`, is used by the debug decision now and by the real map later.
+  - **Project types as data (§5):** seven rows in four `switch` tables (eligibility, base rate, completion floors, result) over one generic start → tick → complete → abandon engine.
+    - Results are plain CK3: a Port, Bastion or Sanctum holding in an empty slot, development, control, a settlers' leader character, and a 10-year modifier.
+    - With no empty slot, a type falls back to +1 development and +10 control.
+  - **Signature resource "Establishment" (§6):** hidden progress, 0–100, with hidden strain (0–4) as its pressure.
+    - A yearly tick on `yearly_playable_pulse` runs over the holder's held counties. Its cooldown authority is a 300-day title variable, so an owner change can't double-tick a county.
+    - Gain comes from type base + development + control + founder skill + sponsor payment + the resettle trace bonus. That paces to about 5–8 years unsponsored and 4–5 sponsored.
+    - The player only sees tier modifiers, never numbers.
+  - **Failure (§6.6):** strain at 4, from named causes (no founder, low control, occupation, war, sponsor lapse, events). The holder then picks: abandon, a new founder, a new type, or the sponsor's care.
+  - **Abandoned (§6.6)** is resettlable, with persistent traces: an attempts count, the former type, a 10-year ruins modifier, and a progress head start.
+  - **Founder, Sponsor and Political Owner (§4)** are stored separately.
+    - `on_death` lists route death handling directly: a founder's death adds strain, then the player picks a replacement in .006 (optional) or the AI picks automatically.
+    - A sponsor's death passes the sponsorship to their primary heir, or it lapses.
+    - Sponsor change is offer → accept in .003.
+  - **Hooks (§7):** the brief's 8 integration hooks are custom on_actions, defined empty. They fire with root = the county holder plus `scope:eotg_frontier_county`, `_founder` and `_sponsor`.
+  - **Decisions (§8):** 5 player/AI (Establish, Invest, Sponsor, Withdraw, Abandon) and 2 debug (mark unsettled, force tick), gated `debug_only = yes` (UNVERIFIED).
+  - **AI (§8.4):** a global cap of 8 frontiers, at most 1 per ruler.
+  - **Events (§9):** **6 required + 1 optional**, all coupled to Establishment:
+    - .001 start;
+    - .002 complication;
+    - .003 sponsor offer;
+    - .004 completion;
+    - .005 failure;
+    - .006 founder gone (optional);
+    - .010 sponsor pick.
+  - **Elsewhere in the spec:** a Phase 2+ list (§13), deferrals D1–D7 (§14), and a definition of done (§12).
+- **files:** `docs/specs/frontier_v1.md` (new), this handoff. No script, loc or other files touched.
+- **unverified-vanilla:** spec §16 holds 22 numbered questions for eotg-vanilla-scout. The ones that decide the design:
+  - **V1:** do variables work on landed-title scopes, and do they persist across holder changes? If not, the fallback is a story cycle (§2.2 B).
+  - **V8:** can script build a holding in an empty barony slot (`set_holding_type`?), and who holds the new barony? If not, every type uses the development/control fallback.
+  - **V12:** does `trigger_event = { on_action = x }` fire custom hooks with scopes intact? If not, the fallback is empty scripted effects.
+  - **V2 / V3:** can global and character variable lists hold title scopes?
+  - **V10:** is `debug_only = yes` valid in a decision's `is_shown`?
+  - **V13:** `every_held_title`, and does `yearly_playable_pulse` reach every county holder?
+- **source contradictions:**
+  - The v1_19 reference teaches the story-cycle shape `start_story` / `on_monthly` / `should_end`; the mod's verified v2 uses `create_story` / `effect_group`. v2 was followed (and the spec uses no story cycle).
+  - `OLD PROJECT VERSION/CONTRIBUTING.md` still shows title keys as `eotg_k_x`, against invariant 2. Not relevant, since the spec creates no titles.
+- **needs-lore:** spec §15 L1–L7:
+  - L1: settlers at 866 (may they be Exodus arrivals?);
+  - L2: whether older ruins (Second Era, Grip-era) may be mentioned;
+  - L3: the sponsorship register under LAW AT 866 ("charter" or "licence"?);
+  - L4: confirm no 866 faction is named (the brief's "New Cauldron" is only an example; none is used);
+  - L5: no Void in Research text;
+  - L6: infrastructure vocabulary;
+  - L7: "mission" across faiths.
+- **needs-human:** spec §17 Q1–Q12. The most important:
+  - **Q1:** the glossary maps County → "Region" and Barony → "System", but this task calls a county a star system. Which word do players see? Recommended: the Region is the Frontier, and its Systems get settled.
+  - **Q2:** approve the event count.
+  - **Q12:** who gets the new holding on completion.
+- **next:** the orchestrator runs eotg-vanilla-scout on §16 and eotg-lore-keeper on §15, collects the owner's answers to §17, then sends "Stage 2 approved" with the corrections.
