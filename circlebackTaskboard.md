@@ -88,7 +88,7 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **What:** let the game run 50 years in observer mode on the temporary map. Count augmented rulers by tier, how many reach Overclocked and Neurofractured, and how many die in a cascade. This settles round 2's top design issues (progression speed, AI uptake, everyone stuck at Augmented) before any pacing number is tuned.
 - **Blocked by:** B-DESCRIPTOR, B-TEMPMAP
 - **Owner:** human → eotg-architect
-- **Next step:** a logging sub-mod is built for this (2026-10-04), kept outside the repo in this session's scratchpad: `eotg_observer_submod/`. Follow its `README.md`:
+- **Next step:** a logging sub-mod is built for this, in `docs/tools/observer/` (2026-10-04). Its build script writes the installable sub-mod outside the repo with `--out`. Follow its `README.md`:
   1. Create the main-mod launcher.
   2. Run `tools/build_observer.py`.
   3. Copy it into the CK3 mod folder.
@@ -276,14 +276,6 @@ These are shared conditions. Clearing one unblocks every item that names it.
   5. Rebuild the gitignored generated art with `docs/tools/`. See `docs/pitfalls.md`: a stale generated artifact means a black map.
 - **Note:** this overlaps B-DESCRIPTOR. The repo still needs its own `descriptor.mod` with `supported_version="1.20.*"`.
 
-### CB-30: Marker model questions (from the map/marker session)
-- **Status:** waiting-human (2026-10-04)
-- **What:** for the custom per-holding `.obj` models (`docs/marker_model_brief.md`):
-  - (a) Are the 7 holding colours still wanted once the silhouettes differ?
-  - (b) Should any model REPLACE the shared plinth instead of sitting on it? If so, the beam and the emissive mask need authoring per model.
-  - Also: the `map-presentation-good` tag is stale at 69b1f5f. Move it?
-- **Owner:** human
-
 ## Done
 
 | ID | Item | Resolved | Date |
@@ -295,5 +287,6 @@ These are shared conditions. Clearing one unblocks every item that names it.
 | CB-06 | Helix at 866 AG | Ruling: a remnant that is active and growing, with 3 counties in different duchies. Lore-keeper ERRATA pasted into SETTING LORE. Open points are in CB-28 | 2026-10-04 |
 | CB-07 | Cybernetic voice errata | Approved by the human, pasted into SETTING LORE | 2026-10-04 |
 | CB-09 | Commit the cybernetics work | 2e6cef2 (round 2 + balance B1/B2), pushed | 2026-10-04 |
+| CB-30 | Marker model questions | Human: keep the 7 colours for now (placeholders); every model sits on the shared plinth; leave the `map-presentation-good` tag at 69b1f5f | 2026-10-04 |
 | CB-16 | Superseded notes on the 4 pre-v2 cybernetics QA docs | Done by cloud session (CB-24) | 2026-10-04 |
 | CB-24 | Cloud conformance audit | Merged from `claude/focused-dirac-ixo81h`. Verified locally: 12/12 MEDIUM confirmed and 5 vanilla claims settled (report §6). Follow-ups are CB-25 to CB-27. | 2026-10-04 |

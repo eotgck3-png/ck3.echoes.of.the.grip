@@ -1,0 +1,249 @@
+﻿# -- eotg_observer_effects.txt ------------------------------------------------
+# THROWAWAY observer sub-mod (balance spec §9.2). Logging only: debug_log
+# lines and the observer's own flags. Called from this sub-mod's on_actions
+# and from the hook lines build_observer.py injects into copies of the main
+# mod's files. Every call is wrapped in hidden_effect.
+#
+# Character state codes used in log keys:
+#   none (unaugmented), t1 Augmented, t2 Enhanced, t3 Overclocked,
+#   nf Neurofractured, ti Seamless (eotg_total_integration)
+# Title tier codes: county, duchy, kingdom (kingdom and above).
+# -----------------------------------------------------------------------------
+
+# One fixed key: eotg_obs_$KEY$ (loc carries year and character id).
+eotg_obs_log_effect = {
+    hidden_effect = {
+        debug_log = eotg_obs_$KEY$
+    }
+}
+
+# eotg_obs_<PREFIX>_<state>_<TT>
+eotg_obs_log_state_tt_effect = {
+    if = {
+        limit = { has_trait = eotg_total_integration }
+        debug_log = eotg_obs_$PREFIX$_ti_$TT$
+    }
+    else_if = {
+        limit = { has_trait = eotg_neurofractured }
+        debug_log = eotg_obs_$PREFIX$_nf_$TT$
+    }
+    else_if = {
+        limit = { eotg_is_aug_tier3 = yes }
+        debug_log = eotg_obs_$PREFIX$_t3_$TT$
+    }
+    else_if = {
+        limit = { eotg_is_aug_tier2 = yes }
+        debug_log = eotg_obs_$PREFIX$_t2_$TT$
+    }
+    else_if = {
+        limit = { eotg_is_aug_tier1 = yes }
+        debug_log = eotg_obs_$PREFIX$_t1_$TT$
+    }
+    else = {
+        debug_log = eotg_obs_$PREFIX$_none_$TT$
+    }
+}
+
+# eotg_obs_<PREFIX>_<state>_<title tier of this character>
+eotg_obs_log_state_by_tier_effect = {
+    if = {
+        limit = { highest_held_title_tier >= tier_kingdom }
+        eotg_obs_log_state_tt_effect = { PREFIX = $PREFIX$  TT = kingdom }
+    }
+    else_if = {
+        limit = { highest_held_title_tier = tier_duchy }
+        eotg_obs_log_state_tt_effect = { PREFIX = $PREFIX$  TT = duchy }
+    }
+    else = {
+        eotg_obs_log_state_tt_effect = { PREFIX = $PREFIX$  TT = county }
+    }
+}
+
+# §9.2 item 6: a yearly-list event was rolled for this ruler. Injected before
+# every trigger_event in the five yearly_playable_pulse lists.
+eotg_obs_log_event_effect = {
+    hidden_effect = {
+        eotg_obs_log_state_by_tier_effect = { PREFIX = ev }
+    }
+}
+
+# §9.2 items 2-3, 5: a newcomer (injected into eotg_aug_initiate_effect's
+# "was unaugmented" branch). Source: Seek (observer flag set by the Seek
+# decision), else the random list; non-rulers separately.
+eotg_obs_log_init_effect = {
+    hidden_effect = {
+        if = {
+            limit = { highest_held_title_tier >= tier_county }
+            if = {
+                limit = { has_character_flag = eotg_obs_sought }
+                debug_log = eotg_obs_init_seek
+                remove_character_flag = eotg_obs_sought
+            }
+            else = {
+                debug_log = eotg_obs_init_random
+            }
+        }
+        else = {
+            debug_log = eotg_obs_init_nonruler
+        }
+    }
+}
+
+# §9.2 items 2-4: a tier change (injected into eotg_aug_set_integration_effect
+# before the XP moves). XP up = progression (Pursue if the observer flag the
+# Pursue decision sets is present, else the random offer); XP down =
+# regression.
+eotg_obs_log_integration_effect = {
+    hidden_effect = {
+        if = {
+            limit = { highest_held_title_tier < tier_county }
+            if = {
+                limit = {
+                    eotg_is_aug_tier1 = yes
+                    has_trait_xp = { trait = eotg_cybernetics  value < $XP$ }
+                }
+                debug_log = eotg_obs_prog_12_nonruler
+            }
+            else_if = {
+                limit = {
+                    eotg_is_aug_tier2 = yes
+                    has_trait_xp = { trait = eotg_cybernetics  value < $XP$ }
+                }
+                debug_log = eotg_obs_prog_23_nonruler
+            }
+        }
+        else_if = {
+            limit = {
+                eotg_is_aug_tier1 = yes
+                has_trait_xp = { trait = eotg_cybernetics  value < $XP$ }
+            }
+            if = {
+                limit = { has_character_flag = eotg_obs_pursued }
+                debug_log = eotg_obs_prog_12_pursue
+            }
+            else = {
+                debug_log = eotg_obs_prog_12_offer
+            }
+            remove_character_flag = eotg_obs_pursued
+        }
+        else_if = {
+            limit = {
+                eotg_is_aug_tier2 = yes
+                has_trait_xp = { trait = eotg_cybernetics  value < $XP$ }
+            }
+            if = {
+                limit = { has_character_flag = eotg_obs_pursued }
+                debug_log = eotg_obs_prog_23_pursue
+            }
+            else = {
+                debug_log = eotg_obs_prog_23_offer
+            }
+            remove_character_flag = eotg_obs_pursued
+        }
+        else_if = {
+            limit = {
+                eotg_is_aug_tier3 = yes
+                has_trait_xp = { trait = eotg_cybernetics  value > $XP$ }
+            }
+            debug_log = eotg_obs_regress_32
+        }
+        else_if = {
+            limit = {
+                eotg_is_aug_tier2 = yes
+                has_trait_xp = { trait = eotg_cybernetics  value > $XP$ }
+            }
+            debug_log = eotg_obs_regress_21
+        }
+    }
+}
+
+# §9.2 items 2, 9: a terminal outcome, with the Sedation course count.
+eotg_obs_log_term_effect = {
+    hidden_effect = {
+        debug_log = eotg_obs_term_$KIND$
+        if = {
+            limit = { NOT = { has_variable = eotg_aug_sedation_courses } }
+            debug_log = eotg_obs_courses_0
+        }
+        else_if = {
+            limit = { var:eotg_aug_sedation_courses >= 3 }
+            debug_log = eotg_obs_courses_3p
+        }
+        else_if = {
+            limit = { var:eotg_aug_sedation_courses >= 2 }
+            debug_log = eotg_obs_courses_2
+        }
+        else = {
+            debug_log = eotg_obs_courses_1
+        }
+    }
+}
+
+# §9.2 items 10-11: a story arc ended (injected into each story's on_end, run
+# on the story owner). A dead owner ended it by dying (on_owner_death).
+eotg_obs_log_arc_end_effect = {
+    hidden_effect = {
+        if = {
+            limit = { is_alive = yes }
+            debug_log = eotg_obs_arc_$ARC$_end
+        }
+        else = {
+            debug_log = eotg_obs_arc_$ARC$_end_death
+        }
+    }
+}
+
+# §9.2 items 1, 5, 8, 9: the census (year 0, then every 10 years).
+eotg_obs_census_effect = {
+    debug_log = eotg_obs_census_begin
+    every_ruler = {
+        limit = { highest_held_title_tier >= tier_county }
+        # 1. tier x title tier
+        eotg_obs_log_state_by_tier_effect = { PREFIX = census }
+        # 8. capital development buckets (10 / 15 / 20 / 35 are the gates)
+        if = {
+            limit = { exists = capital_county }
+            if = {
+                limit = { capital_county = { development_level >= 35 } }
+                debug_log = eotg_obs_dev_35p
+            }
+            else_if = {
+                limit = { capital_county = { development_level >= 20 } }
+                debug_log = eotg_obs_dev_20_34
+            }
+            else_if = {
+                limit = { capital_county = { development_level >= 15 } }
+                debug_log = eotg_obs_dev_15_19
+            }
+            else_if = {
+                limit = { capital_county = { development_level >= 10 } }
+                debug_log = eotg_obs_dev_10_14
+            }
+            else = {
+                debug_log = eotg_obs_dev_lt10
+            }
+        }
+        # 9. Neurofractured rulers on Sedation
+        if = {
+            limit = {
+                has_trait = eotg_neurofractured
+                has_character_flag = eotg_flag_aug_sedated
+            }
+            debug_log = eotg_obs_nf_sedated
+        }
+    }
+    # 5. augmented knights by tier (non-rulers)
+    every_living_character = {
+        limit = {
+            OR = {
+                has_trait = eotg_cybernetics
+                has_trait = eotg_neurofractured
+                has_trait = eotg_total_integration
+            }
+            highest_held_title_tier < tier_county
+            is_knight = yes
+        }
+        eotg_obs_log_state_tt_effect = { PREFIX = knight  TT = all }
+    }
+    debug_log = eotg_obs_census_end
+}
