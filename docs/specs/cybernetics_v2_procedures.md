@@ -53,7 +53,7 @@ The rest of this spec relies on these. None of them changes the approved directi
 | State | Resource | Notes |
 |---|---|---|
 | Augmented / Enhanced / Overclocked / Neurofractured | **`eotg_fracture_risk`** (hidden, 0–100), unchanged, plus **tier** (track XP 0/50/100, moved only by `eotg_aug_set_integration_effect`) | Procedures move risk (§4.2 table) and change tier. A repair always adds risk, scaled by tier. Every risk move is in `hidden_effect`. Nothing quantifies it (index §1 rule 3). |
-| **Seamless** (`eotg_total_integration`) | **NEW `eotg_aug_residue`** (hidden character variable, integer 0–3) | **Why a new resource.** `eotg_add_fracture_risk` is a no-op at Seamless by design, and the voice is fixed at 5. Residue counts the *habits and reflexes the integration has not yet optimised away*. It is **not** a person: the voice-5 line ("There is no one left for it to speak to") stays true. **It only falls**, so it works as the state's clock. It is set to 3 by `eotg_aug_total_integration_effect`. **Read by:** the Flicker's eligibility; desc bands in every Seamless event; the size of the Ledger windfall; Self-Mending's desc. **Moved by:** one option in each G2 choice event, and the Flicker itself. **Never shown** (the same hidden rule as risk). **Lore-keeper to confirm the framing (§8).** |
+| **Seamless** (`eotg_total_integration`) | **NEW `eotg_aug_residue`** (hidden character variable, integer 0–3) | **Why a new resource.** `eotg_add_fracture_risk` is a no-op at Seamless by design, and the voice is fixed at 5. Residue counts the *habits and reflexes the integration has not yet optimised away*. It is **not** a person: the voice-5 line ("There is no one left for it to speak to") stays true. **It only falls**, so it works as the state's clock. It is set to 3 by `eotg_aug_total_integration_effect`. **Read by:** the Flicker's eligibility; desc bands in every Seamless event; the size of the Ledger windfall; A Part Replaced's desc. **Moved by:** one option in each G2 choice event, and the Flicker itself. **Never shown** (the same hidden rule as risk). **Approved by the lore-keeper (2026-10-04, ruling (a))**, with its register constraint (§7). |
 | **Former** (left the system) | **tier** (the way back in), plus the read-only marker **`eotg_aug_former`** | A former character has no risk, and nothing may recreate it (QA round 2 M3). The aftermath event couples by offering the way back in, which is a tier change: index §1 rule 4, "or changes tier". Its desc reads the marker. |
 
 **Coupling (invariant 5 / index §1 rule 4) for each new event:**
@@ -77,7 +77,7 @@ All keys carry the `eotg_` prefix. No landed titles. Loc keys use the dot form (
 | event | `eotg_aug_proc.001` *Who Takes It Out?* | procedures file | scripter | 1 |
 | event | `eotg_aug_proc.002` *After the Procedure* | procedures file | scripter | 1 |
 | event | `eotg_aug_proc.003` *Spare Parts* | procedures file | scripter | 1 |
-| event | `eotg_aug_proc.004` *Self-Mending* | procedures file | scripter | 1 / G2 |
+| event | `eotg_aug_proc.004` *A Part Replaced* (lore N1; working title was *Self-Mending*) | procedures file | scripter | 1 / G2 |
 | event | `eotg_aug_proc.020` *Phantom Static* | procedures file | scripter | G3 |
 | event | `eotg_aug_end.040` *The Ledger Balances* | `events/eotg_augmentation_endgame.txt` | scripter | G2 |
 | event | `eotg_aug_end.041` *A Resignation* | endgame file | scripter | G2 |
@@ -131,6 +131,7 @@ All keys carry the `eotg_` prefix. No landed titles. Loc keys use the dot form (
 | `eotg_aug_remove_all_effect` | calls `eotg_aug_mark_former_effect` last; `remove_variable = eotg_aug_residue` | G3, G2 |
 | `eotg_clean_all_aug_modifiers` | removes `eotg_mod_aug_fragments` (guarded, as the batch's tooltip pattern) | 4.2 |
 | `eotg_aug_total_integration_effect` | in its `hidden_effect`: `set_variable = { name = eotg_aug_residue  value = 3 }` | G2 |
+| `eotg_aug_heir.004` (desc only; lore N5) | `desc_premonition`'s `triggered_desc` trigger gains `NOT = { has_trait = eotg_total_integration }`. The `first_valid` fallback `desc_silent` becomes a `triggered_desc` with the same `NOT` trigger. A new appended `triggered_desc = { trigger = { has_trait = eotg_total_integration }  desc = eotg_aug_heir.004.desc_seamless }` follows the `first_valid`. Options and logic are unchanged; this is not a new beat. | G2 |
 | `eotg_decision_partial_removal`, `_overclock_regression`, `_remove_implants` | no `cost`. A gold floor in `is_valid` at the back-street price. The effect sets `eotg_aug_removal_kind` and fires proc.001. The old effect body moves into `eotg_aug_removal_perform_effect`. | 4.6 |
 | `eotg_decision_consult_physician` | `is_shown` / `ai_potential` also pass for an unaugmented character holding `eotg_mod_aug_fragments`; the effect removes Fragments | 4.8 |
 | `eotg_decision_aug_pursue_next_stage` | the `is_valid` gold floor becomes the back-street price (the cheapest path, as Seek does) | 4.6 |
@@ -340,11 +341,12 @@ All are `character_event`, in `events/eotg_augmentation_procedures.txt`, namespa
 
 **Coupling:** a/b/c/e/f move risk inside the roll (repair scaling).
 
-#### proc.004 *Self-Mending* (Seamless repair)
+#### proc.004 *A Part Replaced* (Seamless repair; lore N1)
 - **Fired by:** `eotg_on_trait_gained_aug_repair` for a Seamless patient. 7–30 days.
 - **Trigger:** `has_trait = eotg_total_integration`, `eotg_aug_has_repair_injury = yes`.
 - **Immediate:** `eotg_aug_repair_injury_effect`. No roll, no gold, no risk (risk is a no-op here by design).
-- **Desc:** base ("the machine repairs the body; nothing else changes"), plus `desc_residue` when `var:eotg_aug_residue >= 1` ("for a moment something in the face registers the pain, and then it is filed").
+- **Fiction (lore N1):** this is **not** self-repairing machinery, which is beyond 866 AG's tech level. The system logs the injury, orders the part against the existing fittings and books the technicians itself, and the cost was already budgeted. The mechanic is unchanged: no roll, no gold, no risk.
+- **Desc:** base, plus `desc_residue` when `var:eotg_aug_residue >= 1` (the old expression of pain was logged). Binding wording is in the lore file.
 - **One option:** a "Continue." (ai_chance base 100; a one-option notification, so the trait-modifier minimum does not apply, per S12).
 - **Coupling:** reads residue.
 
@@ -432,7 +434,7 @@ a, c and d pass `MAIMED_BASE = 30  PHYSICIAN = yes`.
 
 This is the gaps doc's back-street table: death +10, maimed +10.
 
-**The physician's −15 does not apply in the back street.** Thread T5's premise is "your physician stays at the table" (`desc_physician`), and that table is the sanctioned one. Where the gaps doc said the physician "keeps its −15", this spec reads it as "the clinic options keep it". The lore-keeper or the human can reverse that with one param.
+**The physician's −15 does not apply in the back street** (upheld by the lore-keeper, 2026-10-04). Thread T5's premise is "your physician stays at the table" (`desc_physician`), and that table is the sanctioned one. Where the gaps doc said the physician "keeps its −15", this spec reads it as "the clinic options keep it". Only the human can reverse it now, with one param.
 
 Survivors still go through `eotg_aug_excision_effect`, which now marks `flag:excised`.
 
@@ -544,7 +546,7 @@ effect = { if = { limit = { NOT = { has_character_flag = eotg_flag_aug_seamless_
   } } }
 ```
 
-**"The heir confronts what's in the chair"** is **heir.004**, reused through the arc. It is not a new event. M11 holds: the arc runs once per ruler, plus at most the one reprise from new_beats. The done flag gates it.
+**"The heir confronts what's in the chair"** is **heir.004**, reused through the arc. It is not a new event. heir.004 gets the Seamless-owner desc from lore N5 (§3.2). M11 holds: the arc runs once per ruler, plus at most the one reprise from new_beats. The done flag gates it.
 
 #### end.040 *The Ledger Balances*
 - **Trigger:** `has_trait = eotg_total_integration`.
@@ -575,7 +577,7 @@ effect = { if = { limit = { NOT = { has_character_flag = eotg_flag_aug_seamless_
 - **Trigger:** Seamless and `var:eotg_aug_residue >= 1`.
 - **Immediate:** `change_variable` residue −1 (hidden, clamped at 0).
 - **Desc:** `desc` (a reflex surfaces: a hand reaches for someone who left; it is logged and filed), plus `desc_last` appended when residue is now 0 ("It does not happen again").
-- **One option:** a "Continue." (the gaps doc's "one option, no choice"; S12).
+- **One option:** a "Continue." (the gaps doc's "one option, no choice"; S12). **Lore N2:** the reflex is a routine that fires at a scheduled hour and is logged as redundant and pruned. It never reaches for a person.
 - **Coupling:** moves and reads residue.
 
 **Seamless characters have no personality traits** (`eotg_aug_total_integration_effect` removes all 36). So their trait options and `ai_chance` modifiers use education traits (`00_traits.txt:208, 234, 368, 394, 549, 774, 816` and siblings). That is the only trait family a Seamless ruler is guaranteed to keep. Stress helpers are omitted for the same reason.
@@ -629,6 +631,8 @@ All under `D:/SteamLibrary/steamapps/common/Crusader Kings III/game/`.
 
 ## 7. Loc surface (eotg-localizer)
 
+**Binding renderings:** [cybernetics_v2_procedures_lore.md](cybernetics_v2_procedures_lore.md) (eotg-lore-keeper, 2026-10-04). It gives the exact text for the keys below, plus must-fixes N1–N5 and the residue register. Where it gives a rendering, the localizer uses it verbatim. The briefs in this section are fallback guidance only.
+
 Rules:
 - index §5, items 1–8;
 - US spelling (balance §8);
@@ -638,7 +642,7 @@ Rules:
 - back-alley register as init.010–.012;
 - **no named clinic, no named syndicate, no named authority**.
 
-**Licensing wording, kept neutral on purpose (coordinator, 2026-10-04).** The human has added lore docs under `docs/lore/`, and the lore-keeper is checking them. The index §5.3 rule ("licensing is always local and unnamed") may change.
+**Licensing wording, kept neutral on purpose.** The lore-keeper's `docs/lore/` check (2026-10-04) confirms that licensing is local and unnamed at 866. The neutral wording below stands, and survives either reading.
 - All new text says "the clinic", "a clinic that keeps records", "the back streets", "someone cheaper".
 - It **neither names nor characterizes** whoever sanctions a clinic: no "local", "your law's", "licensed by", "galactic" or "registered".
 - Then neither outcome of the lore check forces a rewrite. (The existing "A sanctioned clinic." in init.018.a is not touched here.)
@@ -652,7 +656,8 @@ Rules:
 | shared outcome lines `eotg_aug_proc.outcome_clean`, `_excellent`, `_infection`, `_complication`, `_fragments`, `_repair_failed`, `_discovered`, `_maimed`, `_one_eyed`, `_blind` (used by proc.002 and tier1.022) | 10 |
 | `eotg_aug_proc.install_tt` (on every rolled install option: "How it took will be known when the incision heals.") | 1 |
 | `eotg_aug_proc.003.t`, `.desc`, `.desc_wounded`, `.desc_maimed`, `.desc_one_legged`, `.desc_one_eyed`, `.desc_blind`, `.desc_disfigured`, `.desc_fractured`, `.desc_physician`, `.a`–`.f`, `.tt` | 17 |
-| `eotg_aug_proc.004.t`, `.desc`, `.desc_residue`, `.a` | 4 |
+| `eotg_aug_proc.004.t` ("A Part Replaced"), `.desc`, `.desc_residue`, `.a` | 4 |
+| `eotg_aug_heir.004.desc_seamless` (lore N5, exact text in the lore file) | 1 |
 | `eotg_aug_proc.020.t`, `.desc`, `.desc_removed`, `.desc_excised`, `.desc_rejected`, `.desc_fragments`, `.a`–`.e`, `.c.tt` | 12 |
 | `eotg_aug_init.011.desc_maimed`, `.desc_one_eyed`, `.desc_blind` | 3 |
 | `eotg_aug_init.006.desc_former` | 1 |
@@ -662,32 +667,40 @@ Rules:
 | `eotg_aug_end.041.t`, `.desc`, `.desc_residue_high`, `.desc_residue_low`, `.a`–`.c`, `.c.stays`, `.c.leaves` | 9 |
 | `eotg_aug_end.042.t`, `.desc`, `.desc_last`, `.a` | 4 |
 | `eotg_mod_aug_fragments`, `eotg_mod_aug_fragments_desc` | 2 |
-| revised tooltips: `eotg_decision_partial_removal_tooltip`, `eotg_decision_overclock_regression_tooltip` (now "Choose who performs it") and a new `eotg_decision_remove_implants_tooltip`; `eotg_decision_consult_physician_selection_tt` (mentions fragments) | 4 |
-| **Total** | **~102 new, plus 3 revised** |
+| **revised** (existing keys): `eotg_decision_partial_removal_tooltip`, `eotg_decision_overclock_regression_tooltip` (now "Choose who performs it"), `eotg_decision_remove_implants_tooltip` (exists, loc line 1747), `eotg_decision_consult_physician_selection_tt` (mentions fragments) | 4 revised |
+| **Total** | **~102 new** (the lore file's ~101, plus `heir.004.desc_seamless` from N5), **4 revised** |
 
 **Briefs:**
 - **proc.001:** desc_full is the last hardware out. desc_downgrade is "the overclock comes off; the rest stays". f [zealous] is faith-neutral ("as I was made"; index §5 deferral note).
 - **Severe outcome lines** (`outcome_maimed / _one_eyed / _blind`, init.011's three): factual and medical, with no gore beyond init.012's level. Blindness is the optic interface failing on the table.
 - **outcome_fragments:** "they missed some". Wire and splinters left in. Never "the implant is still there".
 - **proc.003.desc_fractured:** clinics refuse a patient whose hardware is unstable. Neurofractured register (index §5 items 1–2: internal, never external, no banned words).
-- **proc.004 and end.040–.042** are **Seamless register**. There is no voice. "There is no one left" stays true. Residue lines describe reflexes and habits that are logged and filed, never a person returning, never a "spark", "soul" or "humanity" (index §5.5: "self" or "personhood"). end.042's one option is "Continue." (end.010's wording; a separate key).
+- **proc.004 and end.040–.042** are **Seamless register**. There is no voice, and "There is no one left" stays true.
+  - **Residue register** (lore ruling (a)). **Allowed:** motor patterns, facial reflexes, standing instructions, schedules, and the court's perception of them. **Never:** preference, hesitation, longing, regret, felt recognition, memory as an experience, a "spark", soul, humanity or "the old self", or anything returning or growing.
+  - **Every residue line ends with the thing logged, filed or pruned.**
+  - N3: end.040 `desc_residue_high` is a standing instruction older than the integration, flagged and cut. It is not mercy.
+  - N4: end.041 `.c.stays` is written from the councillor's perception only.
+  - end.042's one option is "Continue." (end.010's wording; a separate key).
 - **end.041:** the councillor is named (`[eotg_resigner.GetName]`). Medieval leaks per index §5.6.
 - **proc.020:** the reflex reaching for an absent overlay. Must not use "whisper", "voice", "static that speaks", or anything external (the Void register is the opposite). The title *Phantom Static* is a working name for the lore-keeper.
-- **Titles to confirm:** *Who Takes It Out?*, *After the Procedure*, *Spare Parts*, *Self-Mending*, *Phantom Static*, *The Ledger Balances*, *A Resignation*, *A Flicker*.
+- **Titles (approved, lore ruling (b)):** *Who Takes It Out?*, *After the Procedure*, *Spare Parts*, *A Part Replaced* (N1), *Phantom Static*, *The Ledger Balances*, *A Resignation*, *A Flicker*.
 
 ---
 
 ## 8. Lore constraints
 
 - **866 AG** (`CLAUDE.md` §Canon). Cybernetics is still developing (SETTING LORE): reputable clinics exist and are not perfect (4%), and cheap work is dangerous.
-- **No Galactic League.** No authority above the polity. Provider wording stays neutral (§7) pending the `docs/lore/` review.
+- **No Galactic League.** No authority above the polity. Provider wording stays neutral (§7). The `docs/lore/` review confirms licensing is local and unnamed at 866.
+- **Tech level (lore N1):** nothing here repairs itself. Self-repairing machinery is post-866 (975, the Gnomish Mechanized Renaissance), so the Seamless repair is ordered parts and booked technicians.
 - **The syndicate stays unnamed.** Nothing here names it. patron.008 is untouched.
 - **Voice register** (index §5.1–2): the voice appears in none of these events. Seamless has no voice (`eotg_aug_voice = 5`). Former characters have no voice.
-- **For the lore-keeper:**
-  1. **Residue (§2):** is "habits not yet optimized away" compatible with "the person is gone" and the voice-5 line? If not, the fallback is to keep the variable mechanically, drop end.042, and write residue lines as the court's perception only.
-  2. The eight titles.
-  3. Whether a Seamless ruler confronted through heir.004 needs a Seamless-owner desc check. heir.004 already accepts a Seamless owner, per the Total Integration jump.
-  4. Excision back-street (§4.7): whether "your physician is not at that table" holds.
+- **Lore review: done** (eotg-lore-keeper, 2026-10-04, [cybernetics_v2_procedures_lore.md](cybernetics_v2_procedures_lore.md)). Approved with must-fixes N1–N5, all folded in:
+  - N1: proc.004 retitled *A Part Replaced*, with the ordered-part fiction (§3.1, §4.4, §7).
+  - N2–N4: residue wording (§7).
+  - N5: heir.004 Seamless desc (§3.2, §7).
+  - Residue is **approved** with its register constraint. The earlier fallback (drop end.042) is withdrawn.
+  - All titles are approved.
+  - The back-street Excision physician ruling (§4.7) is **upheld**.
 - **Nikios Khanate:** not touched.
 
 ---
@@ -727,7 +740,7 @@ Rules:
     - An Enhanced ruler, console `add_trait = one_legged` → proc.003 within 30 days. A second injury within 3 years → nothing. Seamless (console Total Integration), `add_trait = blind` → proc.004, and the trait is gone.
     - **Engine check (§4.9):** a wound pushed to rank 3 by `increase_wounds_no_death_effect` does / does not fire `on_trait_gained`. Starting characters with a listed trait do not get proc.003 on day 1.
     - Leave the system; 1–3 years later proc.020 fires once. Zealous vassals show "Reassured".
-    - Seamless for 10 years: Ledger / Resignation / Flicker appear. After three residue moves, no Flicker fires again. An adult heir with no arc gets heir.004.
+    - Seamless for 10 years: Ledger / Resignation / Flicker appear. heir.004 with a Seamless owner shows `desc_seamless` and neither `desc_silent` nor `desc_premonition`. After three residue moves, no Flicker fires again. An adult heir with no arc gets heir.004.
 
 ---
 
@@ -750,10 +763,10 @@ Rules:
 
 ### HANDOFF
 - status: done
-- next: eotg-lore-keeper
-- ask: Review docs/specs/cybernetics_v2_procedures.md §8: the residue framing for Seamless (§2), the eight event titles, the Seamless and Phantom Static registers (§7 briefs), and the back-street Excision physician ruling (§4.7). Confirm that the neutral clinic and licensing wording (§7) survives your docs/lore/ check. Then route to eotg-scripter (§3–§5, building on the uncommitted QA-passed batch), then eotg-localizer (§7), then eotg-qa (§9).
-- files: docs/specs/cybernetics_v2_procedures.md
-- new events (8): eotg_aug_proc.001 Who Takes It Out? (removal decisions); eotg_aug_proc.002 After the Procedure (eotg_aug_procedure_effect); eotg_aug_proc.003 Spare Parts (on_trait_gained → eotg_on_trait_gained_aug_repair); eotg_aug_proc.004 Self-Mending (same hook, Seamless); eotg_aug_proc.020 Phantom Static (eotg_on_yearly_aug_former_check); eotg_aug_end.040 The Ledger Balances, eotg_aug_end.041 A Resignation, eotg_aug_end.042 A Flicker (eotg_on_yearly_aug_seamless_check). Below the gaps doc's 12–15 estimate.
-- needs-loc (~102 new + 3 revised, §7): eotg_aug_proc.001.* (13), eotg_aug_proc.002.* (8), eotg_aug_proc.outcome_* (10), eotg_aug_proc.install_tt, eotg_aug_proc.003.* (17), eotg_aug_proc.004.* (4), eotg_aug_proc.020.* (12), eotg_aug_init.011.desc_maimed/_one_eyed/_blind, eotg_aug_init.006.desc_former, eotg_aug_tier1.002.f/.g, eotg_aug_tier1.022.desc_rejection, eotg_aug_tier2.003.f/.g, eotg_aug_end.001.e, eotg_aug_end.040.* (8), eotg_aug_end.041.* (9), eotg_aug_end.042.* (4), eotg_mod_aug_fragments(+_desc), eotg_decision_remove_implants_tooltip; revised eotg_decision_partial_removal_tooltip, eotg_decision_overclock_regression_tooltip, eotg_decision_consult_physician_selection_tt
-- needs-lore: residue framing; 8 titles; Seamless and Phantom Static registers; licensing neutrality against docs/lore/; the back-street Excision physician ruling
-- needs-human: the §9 item 11 in-game checks, including the engine check of on_trait_gained on a wound rank change; nothing else (event count is within the approval)
+- next: eotg-scripter
+- ask: Build docs/specs/cybernetics_v2_procedures.md §3–§5 on top of the uncommitted QA-passed batch and the G9 stress rows (trait_depth §5.2). This includes the lore N5 desc-only change on heir.004 (§3.2). Run the three validators, then hand §7 to eotg-localizer, who uses docs/specs/cybernetics_v2_procedures_lore.md renderings verbatim. Then eotg-qa runs §9.
+- files: docs/specs/cybernetics_v2_procedures.md; binding loc renderings in docs/specs/cybernetics_v2_procedures_lore.md
+- new events (8): eotg_aug_proc.001 Who Takes It Out? (the three removal decisions); eotg_aug_proc.002 After the Procedure (eotg_aug_procedure_effect); eotg_aug_proc.003 Spare Parts (on_trait_gained → eotg_on_trait_gained_aug_repair); eotg_aug_proc.004 A Part Replaced (same hook, Seamless); eotg_aug_proc.020 Phantom Static (eotg_on_yearly_aug_former_check); eotg_aug_end.040 The Ledger Balances, eotg_aug_end.041 A Resignation, eotg_aug_end.042 A Flicker (eotg_on_yearly_aug_seamless_check). Below the gaps doc's 12–15 estimate.
+- needs-loc (~102 new, 4 revised; §7): eotg_aug_proc.001.* (13), eotg_aug_proc.002.* (8), eotg_aug_proc.outcome_* (10), eotg_aug_proc.install_tt, eotg_aug_proc.003.* (17), eotg_aug_proc.004.* (4), eotg_aug_proc.020.* (12), eotg_aug_init.011.desc_maimed/_one_eyed/_blind, eotg_aug_init.006.desc_former, eotg_aug_tier1.002.f/.g, eotg_aug_tier1.022.desc_rejection, eotg_aug_tier2.003.f/.g, eotg_aug_end.001.e, eotg_aug_end.040.* (8), eotg_aug_end.041.* (9), eotg_aug_end.042.* (4), eotg_aug_heir.004.desc_seamless, eotg_mod_aug_fragments(+_desc); revised: eotg_decision_partial_removal_tooltip, eotg_decision_overclock_regression_tooltip, eotg_decision_remove_implants_tooltip, eotg_decision_consult_physician_selection_tt
+- needs-lore: none (review done; N1–N5 folded in)
+- needs-human: §9 item 11 in-game checks, including the engine check that on_trait_gained fires on a wound rank change (§4.9)
