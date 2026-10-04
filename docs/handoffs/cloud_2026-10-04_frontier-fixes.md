@@ -95,3 +95,43 @@ Line numbers are for the pushed files. `L` = `localization/english/eotg_frontier
 | S1, R3 apply; S2 not | done | See §1 | — |
 | Time-neutral text | done | Checked: no era, faction, date or "season" in Frontier loc | L |
 | Orchestrator rulings Q3, Q4, Q5, Q9 | done | See §2. `frontier_v1.md` §V and `frontier_v1_open_questions.md` §A2 match. | specs |
+
+## Follow-up pass (after the local re-QA), 2026-10-04
+
+Branch `claude/frontier-v1-cloud` (A–C). Tools (D) are on a **new branch `claude/tools-round6-cloud`**, stacked on `claude/tools-round5-cloud` because two of the files it touches are round 5's. Merge it after round 5.
+
+**Validation:**
+- **Frontier branch:**
+  - eotg_lint: 0 findings, 0 new.
+  - check_all: 12 pass, 0 fail, 7 skipped. `spec_conformance.md` was regenerated for the three new effects.
+  - Unit tests OK.
+  - All 8 Frontier files parse and carry their BOM.
+- **Tools branch:**
+  - 149 tests OK on LF and on CRLF (autocrlf clone).
+  - check_all: 12 pass, 0 fail, 7 skipped.
+  - eotg_lint: 0 new (vs baseline).
+
+| ID | Done | How | Where |
+|---|---|---|---|
+| A1 | done | Marker → citation (game_start.txt:987-991, title_on_actions.txt:103). The comparison is flipped to `current_year > var:eotg_frontier_tick_year`, and the `NOT has_variable` guard is kept in the OR | O:24-27, O:36 |
+| A2 | done | Marker → citation (03_dlc_fp2_script_values.txt:88-91, 00_county_control_values.txt:127, 09_mpo_wars.txt:1335) | V:111-113 |
+| A3 | done | Marker → citation (coronation_activity_l_english.yml:675, 817). Checked: the readout sets the four `eotg_frontier_debug_*` variables on the county inside `every_held_title`, saves that county as `eotg_frontier_county`, then sends the toast, so the loc reads the same scope after the variables are set | L:149, F:834-852 |
+| B | done | `years = 3` at all four `eotg_frontier_event_cd` sets. Spec pacing note: about 4–5 events per typical project. The spec variable table, §6.1 and §6.4 are updated. The test plan only clears the cooldown and assumed no length; its pacing line now states 3 years | F:529-574, spec:37, 233, 497, 518; test plan:20 |
+| C1 | done | .005 options a–d also require `var:eotg_frontier_strain >= eotg_frontier_strain_fail_value`. The fallback is `NOT = { AND = { is_frontier, strain >= fail } }` | E:704, 722, 744, 764; E:791-801 |
+| C2 | done | The heir is never made sponsor if they are the holder (`NOT = { this = scope:eotg_frontier_holder }`). This sits in the next-tick hand-off, because per C3 the hand-off now happens there. `eotg_frontier_check_sponsor_effect` drops a sponsor who `= holder`, with no strain. An heir who already holds the Region is dropped with no strain as well (C2's "inherits the Region" case) | F:240, F:254, F:477-501 |
+| C3 | done | `on_death`: `eotg_frontier_on_sponsor_death_effect` sets `eotg_frontier_pending_heir` = `primary_heir` and `eotg_frontier_pending_from` = the dead backer (used for the lapse toast and as the pending marker), then clears the sponsor (fires `sponsor_changed`). The next tick runs `eotg_frontier_resolve_pending_heir_effect`: if the heir is alive, `can_sponsor` (which includes "backs nothing") and not the holder, they become the sponsor (fires `sponsor_changed`, toast); else lapse (strain +1, toast). If a new backer was found in between, there is no lapse. The pending variables are removed either way, and also when the project ends | F:191-278, F:440, F:775; O:45-48; spec:51, 99, 231, 278-280, 382-385; test plan §4.4; open questions:43 |
+| C4 | done | "Too many hard years in a row." | L:120 |
+| C5 | done | The spec §3.2 rows for `check_sponsor` / `on_sponsor_death` / the new effects describe the on_death + next-tick flow | spec:278-280, 294 |
+| D1 | done | `px_event_report.py --root` (default: its own repo) supplies the variable whitelist. check_all passes it through `px_event_report_cmd(out, root)`. The CLI moved to argparse (same positional `<dir>` and `--all-loc`) and calls `utf8_console` (FIX 8) | tools: px_event_report.py:26-28, 36, 50, 127-136; check_all.py:164-166, 179; tests/test_px_event_report.py |
+| D2 | done (see note) | Cause: temp-dir cleanup on Windows. `shutil.rmtree` and `TemporaryDirectory` raise PermissionError [WinError 5/32] while Defender or the indexer holds a file that was just written, so a test that passed fails at random, on Windows only. New `tests/_testutil.py` provides `rmtree` (retries with backoff, clears read-only, leaks rather than fails) and `tempdir()`. Every test file uses them | tools: tests/_testutil.py; all tests/test_*.py; tests/test_testutil.py |
+
+**D2 note:**
+- **Not reproduced here:** the failure did not reproduce in this session: 20 runs with different `PYTHONHASHSEED` values and 12 runs in parallel all passed.
+- **Other causes ruled out:**
+  - Set and dict ordering (seeded runs).
+  - Shared fixed paths (parallel runs).
+  - Open file handles (none in the tools).
+  - Time-dependent output (none).
+- **What's left:** the Windows lock on temp-dir cleanup was the one cause left.
+- **Another way the same tests could fail:** the four `Real*Current` / `RealRepoBaseline` tests check the live working tree. They fail on purpose while `docs/qa/generated/` is stale. For example, the in-progress local batch shares those files, and a failure there would look like a flake.
+- **If it recurs:** send the failing test names and the traceback.
