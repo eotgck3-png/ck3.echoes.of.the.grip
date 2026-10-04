@@ -360,3 +360,26 @@ No deviation from vanilla shape.
 - needs-loc: 21 keys, §7 (eotg_aug_heir.007.*, eotg_aug_heir.003.desc_successor, eotg_aug_heir.004.desc_successor, eotg_aug_patron.008.*)
 - needs-lore: the two titles; patron.008.e's local-court premise
 - needs-human: §10, syndicate retaliation against an owner with no hardware (optional new scope); the §9 item 9 in-game checks after the build
+
+---
+
+## 11. Lore review (eotg-lore-keeper, 2026-10-04): binding loc wording
+
+**Verdict:** no canon contradiction and no design change. Both titles are approved. patron.008.e's premise is approved: there is no authority above the polity at 866 AG. Its text always says "your court" / "your law", never an abstract or higher authority, never the liege's law, and "court" stays faith-neutral.
+
+**Must-fix: use this exact text.**
+- **N1** `eotg_aug_heir.007.desc_dead`: "[eotg_prior_heir.GetFirstName] is dead, and [eotg_heir.GetFirstName] is first in line now. They know what was asked of the last heir, and what you answered. They have inherited the question along with the place."
+- **N2** `eotg_aug_heir.003.desc_successor`: "[eotg_heir.GetFirstName] has brought the incident logs and a date. This has been said to you once before, by [eotg_prior_heir.GetFirstName], and [eotg_heir.GetFirstName] knows how that went. They do not rehearse it. 'Step aside,' they say, 'or I will make you.'"
+- **N3** `eotg_aug_heir.004.desc_successor`: "[eotg_heir.GetFirstName] has decided. They know how this went the last time, and they have decided anyway. The question is settled, and only the method remains." This one must not name `eotg_prior_heir`, because the descs that follow open with "They…" and would read as the predecessor.
+- **N4** `eotg_aug_patron.008.desc`: "The hardware is out of you, and the syndicate knows it. The debt is not. The paper names you, not the implants, and the syndicate still holds the paper. The terms have been re-priced for a body it no longer services."
+- **N5** `eotg_aug_patron.008.e.success`: "Your court finds the contract has no standing under your law. The syndicate does not contest it. There is nowhere else to take it."
+
+**Suggested renderings, adopted:**
+- `heir.007.desc_executed`: "[eotg_heir.GetFirstName] comes to you knowing that you had [eotg_prior_heir.GetFirstName] put to death. They are first in line now because the one before them is not. They speak evenly, and keep their hands where you can see them." Never render the heir's "voice": that word is reserved for the implant.
+- `heir.007.desc_displaced`: "[eotg_prior_heir.GetFirstName] lives, but no longer stands first. [eotg_heir.GetFirstName] does, and knows how the change was made."
+- `heir.007.a`: "What happened to them will not happen to you."
+- `patron.008.b`: "Sign the lien on my revenues."
+- `patron.008.e.failure`: "Your court upholds the contract. The syndicate is sent a copy of the ruling."
+- `patron.008.desc_clause` starts with `\n\n`.
+
+**Noted for a later loc pass (out of scope):** the shipped `eotg_aug_heir.001.e` "They want the throne." uses a medieval word. If a region brief ever puts the Pill Boys (a First-Era "criminal syndicate in salvage economy") in play at 866, keep salvage imagery out of Patron text.
