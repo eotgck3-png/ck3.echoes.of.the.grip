@@ -1,0 +1,73 @@
+﻿# -- eotg_frontier_on_actions.txt ---------------------------------------------
+# On_actions for Frontier Systems v1 (docs/specs/frontier_v1.md §3.6, §6.1, §7).
+#
+# Vanilla hooks are extended ADDITIVELY only (CLAUDE.md invariant 4): an
+# `on_actions = { }` list in this file, never a top-level effect/trigger on a
+# vanilla hook. The yearly hook is yearly_playable_pulse (on_yearly_playable is
+# dead: catalog §4 lesson 13).
+# -----------------------------------------------------------------------------
+
+yearly_playable_pulse = {
+    on_actions = {
+        eotg_on_yearly_frontier_tick
+    }
+}
+
+# The yearly Frontier tick (spec §6.1). Root = a playable character; each of
+# its held Regions in the Frontier state is ticked once a year.
+# COOLDOWN AUTHORITY: eotg_frontier_ticked (300 days, on the county), set here
+# and nowhere else, so a Region that changes holder mid-year is not ticked
+# twice. No event trigger reads it.
+# UNVERIFIED-VANILLA (spec §16 V13): every_held_title with tier = tier_county;
+# yearly_playable_pulse reaches every county holder.
+eotg_on_yearly_frontier_tick = {
+    effect = {
+        every_held_title = {
+            limit = {
+                tier = tier_county
+                eotg_frontier_is_frontier = yes
+                NOT = { has_variable = eotg_frontier_ticked }
+            }
+            set_variable = { name = eotg_frontier_ticked  value = yes  days = 300 }
+            eotg_frontier_tick_effect = yes
+        }
+    }
+}
+
+# -- Integration hooks (spec §7; design §14) ---------------------------------
+# Empty on purpose. Later systems (Greater Drift, corporations, exploration...)
+# extend them additively from their OWN files:
+#   eotg_frontier_on_project_started = { on_actions = { my_hook } }
+# Frontier never names those systems (owner ruling: no dependency).
+# Fired by eotg_frontier_fire_hook_effect with:
+#   root                        the Region's current holder (political owner)
+#   scope:eotg_frontier_county  the Region (county title)
+#   scope:eotg_frontier_founder the founder, when there is one
+#   scope:eotg_frontier_sponsor the sponsor, when there is one
+#   scope:eotg_frontier_old_sponsor  (sponsor_changed only) the previous one
+# UNVERIFIED-VANILLA (spec §16 V12): trigger_event = { on_action = x } keeps
+# these scopes. Fallback: empty scripted effects.
+
+eotg_frontier_on_project_started = {
+}
+
+eotg_frontier_on_project_progressed = {
+}
+
+eotg_frontier_on_project_completed = {
+}
+
+eotg_frontier_on_project_failed = {
+}
+
+eotg_frontier_on_abandoned = {
+}
+
+eotg_frontier_on_sponsor_changed = {
+}
+
+eotg_frontier_on_development_changed = {
+}
+
+eotg_frontier_on_settled = {
+}

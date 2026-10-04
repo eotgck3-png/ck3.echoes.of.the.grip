@@ -1,0 +1,166 @@
+﻿# -- eotg_frontier_values.txt -------------------------------------------------
+# Script values for Frontier Systems v1 (docs/specs/frontier_v1.md §3.4, §5).
+# Vanilla folder (game/common/script_values/), no replace_path. Shapes as
+# common/script_values/eotg_augmentation_values.txt (a `value =` block,
+# conditional adds, a trailing clamp).
+#
+# The tuning levers: the type rows below are the project-type "data" (§5).
+# Adding a type = one more row in eotg_frontier_base_rate_value,
+# eotg_frontier_min_dev_value and eotg_frontier_min_control_value.
+#
+# Values with a COUNTY root read the county title's own variables; the gold
+# values are always read in a CHARACTER scope (spec §16 V22).
+# -----------------------------------------------------------------------------
+
+# -- Costs (character scope; vanilla realm-relative gold values) ---------------
+eotg_frontier_establish_cost_value = {
+    value = medium_gold_value
+}
+eotg_frontier_invest_cost_value = {
+    value = minor_gold_value
+}
+# Paid yearly by the sponsor (character scope: the sponsor)
+eotg_frontier_sponsor_payment_value = {
+    value = minor_gold_value
+}
+
+# -- Type rows (county scope) --------------------------------------------------
+# Base Establishment gained per year (spec §5.1)
+eotg_frontier_base_rate_value = {
+    value = 10
+    if = {
+        limit = { var:eotg_frontier_type ?= flag:settlement }
+        value = 12
+    }
+    else_if = {
+        limit = {
+            OR = {
+                var:eotg_frontier_type ?= flag:trade
+                var:eotg_frontier_type ?= flag:mining
+            }
+        }
+        value = 11
+    }
+    else_if = {
+        limit = { var:eotg_frontier_type ?= flag:research }
+        value = 9
+    }
+    # military, religious, administrative: 10
+}
+
+# Completion floor: development_level (spec §5.2)
+eotg_frontier_min_dev_value = {
+    value = 2
+    if = {
+        limit = {
+            OR = {
+                var:eotg_frontier_type ?= flag:trade
+                var:eotg_frontier_type ?= flag:research
+                var:eotg_frontier_type ?= flag:administrative
+            }
+        }
+        value = 3
+    }
+}
+
+# Completion floor: county_control (spec §5.2)
+eotg_frontier_min_control_value = {
+    value = 50
+    if = {
+        limit = { var:eotg_frontier_type ?= flag:settlement }
+        value = 40
+    }
+    else_if = {
+        limit = { var:eotg_frontier_type ?= flag:military }
+        value = 70
+    }
+    else_if = {
+        limit = { var:eotg_frontier_type ?= flag:administrative }
+        value = 80
+    }
+}
+
+# -- Yearly gain inputs (county scope) -----------------------------------------
+# UNVERIFIED-VANILLA: development_level and county_control readable as values
+# in a county-title scope (spec §16 V6).
+eotg_frontier_dev_bonus_value = {
+    value = development_level
+    divide = 5
+    floor = yes
+    max = 4
+    min = 0
+}
+
+eotg_frontier_control_bonus_value = {
+    value = 0
+    if = {
+        limit = { county_control >= 80 }
+        value = 2
+    }
+    else_if = {
+        limit = { county_control < 40 }
+        value = -3
+    }
+}
+
+# The founder's skill for the type, / 4, max 5; 0 without a valid founder.
+# The validity test is the same trigger the strain check uses.
+eotg_frontier_founder_bonus_value = {
+    value = 0
+    if = {
+        limit = { eotg_frontier_has_valid_founder = yes }
+        if = {
+            limit = { var:eotg_frontier_type ?= flag:military }
+            add = var:eotg_frontier_founder.martial
+        }
+        else_if = {
+            limit = {
+                OR = {
+                    var:eotg_frontier_type ?= flag:religious
+                    var:eotg_frontier_type ?= flag:research
+                }
+            }
+            add = var:eotg_frontier_founder.learning
+        }
+        else = {
+            add = var:eotg_frontier_founder.stewardship
+        }
+        divide = 4
+        floor = yes
+        max = 5
+    }
+}
+
+eotg_frontier_sponsor_bonus_value = {
+    value = 0
+    if = {
+        limit = { has_variable = eotg_frontier_sponsor_paid }
+        value = 6
+    }
+}
+
+# The resettle head start: 10 per earlier abandonment, max 30 (spec §6.2)
+eotg_frontier_trace_bonus_value = {
+    value = 0
+    if = {
+        limit = { has_variable = eotg_frontier_attempts }
+        add = var:eotg_frontier_attempts
+        multiply = 10
+        max = 30
+    }
+}
+
+# Establishment gained this year (spec §6.1 step 3)
+eotg_frontier_yearly_gain_value = {
+    value = eotg_frontier_base_rate_value
+    add = eotg_frontier_dev_bonus_value
+    add = eotg_frontier_control_bonus_value
+    add = eotg_frontier_founder_bonus_value
+    add = eotg_frontier_sponsor_bonus_value
+    min = 0
+}
+
+# -- AI throttle ----------------------------------------------------------------
+eotg_frontier_ai_cap_value = {
+    value = 8
+}

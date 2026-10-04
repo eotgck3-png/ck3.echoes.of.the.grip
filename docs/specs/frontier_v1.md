@@ -62,6 +62,23 @@ Shape examples come from the mod's verified v2 script: `common/*/eotg_augmentati
 
 ---
 
+## B. Build notes (Phase 1 as built, 2026-10-04): where the script differs from the sections below
+
+These are small simplifications made while building. Each keeps the architecture.
+
+1. **`eotg_frontier_mark_unsettled_effect` takes no `DEV_LOSS`.** A parameter that subtracts development has no safe text form when it is 0. The cartographer lowers development separately when the real map lands (D3).
+2. **`eotg_frontier_abandon_effect` takes `FAILED = yes|no`, not `CAUSE`.** The cause is already recorded in `eotg_frontier_last_cause`.
+3. **Type eligibility:** one shared trigger, `eotg_frontier_can_establish`, plus `eotg_frontier_admin_eligible` for Administrative. A `$TYPE$` switch would need identifier substitution (V14). The data rows (rate, floors, results) are if/else_if chains on `var:eotg_frontier_type` (the mod's verified shape), not `switch`.
+4. **.001** has one option per type plus "Not now". The founder is the decision's candidate (the best steward at court, or the taker). The "lead it yourself" and "another Region" re-fires were cut to keep .001 simple.
+5. **.005 option c** "Scale it back" switches the type to Settlement (the generic type) rather than re-opening the type pick.
+6. **The sponsor carries one back-reference variable,** `eotg_frontier_sponsoring` (the Region). That makes "is this character a sponsor?" correct in any scope; a global-list search would read `root` wrongly from another character's scope. It is written only by the set/clear sponsor effects. **The Frontier state itself stays on the Region.**
+7. **The AI-cap count** is a global variable, `eotg_frontier_active_count`, written only by start, settle and abandon. The global list `eotg_frontier_active` is used only for iteration (Sponsor, .010).
+8. **The decision picture** uses one vanilla illustration path (UNVERIFIED). This system adds no gfx.
+9. **Completion and failure events go to AI holders too,** who choose by `ai_chance`. That is fewer code paths than a separate AI resolution. .002 goes to players only; AI-to-AI sponsor offers resolve in script.
+10. **Loc:** 118 keys. They were checked against eotg_lint L003, L010 and L011, and against the round-4 rules L013 (house style) and L014 (unused keys): 0 findings.
+
+---
+
 ## 0. Engine facts
 
 Confidence key:
@@ -177,6 +194,7 @@ The engine needs every county to have a holder and a capital holding (E11). So U
 | `eotg_frontier_history` | `flag:settled`, permanent | Set on completion. Read by nothing in Phase 1; it's a hook for future systems (design §14). |
 | `eotg_frontier_last_cause` | `flag:no_founder` / `flag:low_control` / `flag:occupied` / `flag:war` / `flag:sponsor_lapsed` / `flag:events` | The latest strain cause. Read by .005's desc (§6.3). |
 | `eotg_frontier_invested` | yes, timed 1 year | Limits Invest to once a year per county (§8.2). |
+| `eotg_frontier_tick_strained` | yes, timed 1 day | Set by any strain this tick; a quiet tick (none set) eases strain by 1. |
 
 **Global variable list** `eotg_frontier_active`: every county currently in `flag:frontier`. It drives the AI throttle (§8.4), the Sponsor decision and debugging (E5).
 
@@ -197,44 +215,55 @@ All new. Namespace `eotg_frontier`. Files in §11.
 |---|---|---|
 | title variables | `eotg_frontier_state`, `_type`, `_progress`, `_strain`, `_founder`, `_sponsor`, `_sponsor_paid`, `_milestone`, `_ticked`, `_event_cd`, `_attempts`, `_former_type`, `_history`, `_last_cause`, `_invested` | §2.4 |
 | global variable list | `eotg_frontier_active` | §2.4 |
-| saved scopes (event chains) | `eotg_frontier_county`, `eotg_frontier_founder`, `eotg_frontier_sponsor`, `eotg_frontier_candidate` (founder candidate), `eotg_frontier_old_sponsor`, `eotg_frontier_offer_1/_2/_3` (Sponsor pick) | the hook scopes too (§7) |
+| saved scopes (event chains) | `eotg_frontier_county`, `eotg_frontier_founder`, `eotg_frontier_sponsor`, `eotg_frontier_candidate` (founder candidate), `eotg_frontier_old_sponsor`, `eotg_frontier_offer_1/_2/_3` (Sponsor pick); internal: `eotg_frontier_holder`, `_change`, `_heir_sponsor`, `_lapsed_sponsor`, `_leader`, `_sponsor_candidate` | the hook scopes too (§7) |
 | static modifiers (county) | `eotg_frontier_mod_unsettled`, `eotg_frontier_mod_outpost` (progress 0–32), `eotg_frontier_mod_foothold` (33–65), `eotg_frontier_mod_established` (66–99), `eotg_frontier_mod_new_settlement` (10 years after completion), `eotg_frontier_mod_abandoned_works` (10 years after abandonment), `eotg_frontier_mod_hard_season` (2 years, from .002) | each also needs `_desc` loc |
 
-### 3.2 Scripted effects (`common/scripted_effects/eotg_frontier_effects.txt`)
-| Key | Scope | Does |
-|---|---|---|
-| `eotg_frontier_mark_unsettled_effect` (param `DEV_LOSS`) | county | sets state `unsettled` and adds the modifier. **The only entry point** (debug decision now, the map later). |
-| `eotg_frontier_start_effect` (params `TYPE`, `FOUNDER`) | county | unsettled/abandoned → frontier: sets the variables, start progress (§6.2 resettle bonus), lists, tier modifier; fires `…_on_project_started`. |
-| `eotg_frontier_tick_effect` | county | the yearly tick (§6.1) |
-| `eotg_frontier_update_tier_modifier_effect` | county | swaps outpost / foothold / established by progress |
-| `eotg_frontier_milestone_effect` | county | +1 development at 33 and at 66, once each |
-| `eotg_frontier_add_progress_effect` (param `AMOUNT`) | county | clamped add; fires `…_progressed` and, on milestones, `…_development_changed` |
-| `eotg_frontier_add_strain_effect` (param `AMOUNT`) | county | clamped 0–4 |
-| `eotg_frontier_complete_effect` | county | dispatches on the type (§5.3), then the settled transition (§6.5) |
-| `eotg_frontier_complete_settlement_effect` … `_administrative_effect` (7) | county | one per type: the type's result table |
-| `eotg_frontier_build_holding_effect` (param `HOLDING`) | county | the first empty slot gets `HOLDING` (E12); a no-op if there is none |
-| `eotg_frontier_settle_effect` | county | clears every Frontier variable and modifier, keeps the history, removes from lists, fires `…_completed` and `…_settled` |
-| `eotg_frontier_abandon_effect` (param `CAUSE`) | county | → abandoned, with traces (§6.6); fires `…_failed` (if failed) and `…_abandoned` |
-| `eotg_frontier_set_sponsor_effect` (param `SPONSOR`) | county | sets or replaces the sponsor and the lists; fires `…_sponsor_changed` |
-| `eotg_frontier_clear_sponsor_effect` | county | removes the sponsor; fires `…_sponsor_changed` |
-| `eotg_frontier_set_founder_effect` (param `FOUNDER`) | county | replaces the founder and the lists |
-| `eotg_frontier_sponsor_pay_effect` | county | the yearly sponsor payment (§6.1 step 3) |
-| `eotg_frontier_check_people_effect` | county | the tick step: founder validity (No Founder) and sponsor validity (heir hand-off or Sponsor Lapse) |
-| `eotg_frontier_save_hook_scopes_effect` | county | saves `scope:eotg_frontier_county`, `_founder` and `_sponsor` before firing a hook |
+### 3.2 Scripted effects (`common/scripted_effects/eotg_frontier_effects.txt`), as built
+County scope unless noted.
 
-### 3.3 Scripted triggers (`common/scripted_triggers/eotg_frontier_triggers.txt`)
+| Key | Does |
+|---|---|
+| `eotg_frontier_save_hook_scopes_effect` | saves `scope:eotg_frontier_county`, `_founder` and `_sponsor` from the county's variables |
+| `eotg_frontier_fire_hook_effect` (`HOOK`) | saves the hook scopes, then `holder = { trigger_event = { on_action = $HOOK$ } }` |
+| `eotg_frontier_mark_unsettled_effect` | **the only entry point**: state `unsettled` plus the modifier (an Abandoned Region keeps its state) |
+| `eotg_frontier_start_effect` (`TYPE`, `FOUNDER`) | → frontier: variables, the resettle head start, list, counter, stage modifier; the started hook |
+| `eotg_frontier_count_effect` (`CHANGE`) | the AI-cap counter `eotg_frontier_active_count` (global) |
+| `eotg_frontier_unlist_effect` | out of the active list, counter −1 |
+| `eotg_frontier_set_founder_effect` (`FOUNDER`) | sets the founder |
+| `eotg_frontier_set_sponsor_effect` (`SPONSOR`) | sets or replaces the sponsor and its back-reference; the sponsor_changed hook |
+| `eotg_frontier_clear_sponsor_effect` | removes the sponsor; the sponsor_changed hook |
+| `eotg_frontier_drop_sponsor_effect` | removes the sponsor quietly (settle and abandon fire their own hooks) |
+| `eotg_frontier_add_progress_effect` (`AMOUNT`) | Establishment 0–100, milestones, stage modifier; the progressed hook |
+| `eotg_frontier_milestone_effect` | +1 development at 33 and 66, once each; the development_changed hook |
+| `eotg_frontier_update_tier_modifier_effect` | the one stage modifier |
+| `eotg_frontier_add_strain_effect` (`CAUSE`) | strain +1 (0–4); records the cause |
+| `eotg_frontier_ease_strain_effect` | strain −1 |
+| `eotg_frontier_tick_effect` | the yearly tick (§6.1) |
+| `eotg_frontier_check_sponsor_effect` | a dead sponsor → heir hand-off, or Sponsor Lapse |
+| `eotg_frontier_sponsor_pay_effect` | the yearly payment, or Sponsor Lapse |
+| `eotg_frontier_event_roll_effect` | the flavor roll; sets the event cooldown |
+| `eotg_frontier_find_sponsor_candidate_effect` | the liege, else an ally (AI, can sponsor) |
+| `eotg_frontier_complete_effect` | the type result rows (if/else_if on the type), then settle |
+| `eotg_frontier_build_holding_effect` (`HOLDING`) | a new System in an open slot, given to the holder; else +1 development, +10 control |
+| `eotg_frontier_create_leader_effect` | Settlement: the settlers' leader (template `eotg_frontier_settler_leader_template`) |
+| `eotg_frontier_settle_effect` | ends the Frontier: the completed and settled hooks, history, `New Settlement` |
+| `eotg_frontier_clear_project_effect` | removes the project variables |
+| `eotg_frontier_abandon_effect` (`FAILED`) | → abandoned, with traces; the failed (if `FAILED`) and abandoned hooks |
+| `eotg_frontier_restart_effect` | .005 b/c: half the Establishment, strain 2 |
+
+### 3.3 Scripted triggers (`common/scripted_triggers/eotg_frontier_triggers.txt`), as built
 | Key | Scope | True when |
 |---|---|---|
 | `eotg_frontier_is_unsettled` / `_is_frontier` / `_is_abandoned` | county | the state flag |
-| `eotg_frontier_can_establish` | county | unsettled or abandoned, and not occupied (UNVERIFIED test, §16) |
-| `eotg_frontier_type_eligible` (param `TYPE`) | county | per-type eligibility (§5.1), as one `switch` on `$TYPE$` |
-| `eotg_frontier_completion_met` | county | progress ≥ 100, and the type's development and control floors (§5.2) |
-| `eotg_frontier_holds_frontier` | character | holds any county with state `frontier` |
-| `eotg_frontier_founder_valid` | character (the founder) | alive, adult, not imprisoned, and the county holder or in their realm (§R); `$HOLDER$` param |
-| `eotg_frontier_is_sponsor` | character | sponsors at least one active frontier (read through the global list) |
-| `eotg_frontier_holds_establishable` | character | holds a county that `eotg_frontier_can_establish` |
-| `eotg_frontier_can_sponsor` | character | landed, count+, gold ≥ `eotg_frontier_sponsor_payment_value` × 2, sponsors none (through the global list) |
-| `eotg_frontier_ai_room` | none (global) | fewer than `eotg_frontier_ai_cap_value` active frontiers |
+| `eotg_frontier_can_establish` | county | unsettled or abandoned, and the capital is not occupied |
+| `eotg_frontier_admin_eligible` | county | can establish, and the holder is a duke or above or this is not their capital Region |
+| `eotg_frontier_has_valid_founder` | county | the founder is alive, adult, free, and the holder or in the holder's realm |
+| `eotg_frontier_has_valid_sponsor` | county | the sponsor exists and is alive |
+| `eotg_frontier_completion_met` | county | Establishment ≥ 100, and the type's development and control floors |
+| `eotg_frontier_holds_frontier` / `_holds_establishable` | character | holds such a Region |
+| `eotg_frontier_is_sponsor` | character | has the back-reference `eotg_frontier_sponsoring` |
+| `eotg_frontier_can_sponsor` | character | landed, count+, gold ≥ 2 payments, sponsors none |
+| `eotg_frontier_ai_room` | global | the active count < `eotg_frontier_ai_cap_value` |
 
 ### 3.4 Script values (`common/script_values/eotg_frontier_values.txt`)
 | Key | Value |
@@ -289,7 +318,7 @@ They are three separate things, stored separately.
 - They supply the skill input (§6.2): the type's skill (§5.1).
 
 ### 4.1 Founder validity (ruling Q2: no founder-death event)
-The yearly tick (`eotg_frontier_check_people_effect`) tests `eotg_frontier_founder_valid`.
+The yearly tick (`eotg_frontier_tick_effect`, step 1) tests `eotg_frontier_has_valid_founder` on the Region.
 - **An invalid founder** (dead, imprisoned, a child, or gone from the holder's realm) gives strain +1 with cause `no_founder`, every tick until replaced.
 - **A player holder** replaces the founder in the .002 variant *The Frontier Without a Founder*, which the event roll takes ahead of the ordinary complication while the founder is invalid.
 - **An AI holder** replaces the founder in the tick: their best candidate (the holder or a courtier, by the type's skill).
@@ -319,7 +348,7 @@ The yearly tick (`eotg_frontier_check_people_effect`) tests `eotg_frontier_found
 **How "data" is done:**
 - **One generic engine:** start, tick, complete, abandon.
 - **Types are rows** in four `switch` tables keyed on `var:eotg_frontier_type`:
-  - eligibility (`eotg_frontier_type_eligible`);
+  - eligibility (`eotg_frontier_can_establish`, plus `eotg_frontier_admin_eligible` for Administrative);
   - rate (`eotg_frontier_base_rate_value`);
   - floors (`eotg_frontier_min_dev_value` / `_min_control_value`);
   - result (`eotg_frontier_complete_effect`, which dispatches to one small effect per type).
@@ -398,7 +427,7 @@ every_held_title = {                         # E18 UNVERIFIED
 
 `eotg_frontier_tick_effect` runs on the county:
 1. **Strain causes** (design §12), each +1, applied through `eotg_frontier_add_strain_effect`:
-   - no valid founder (`eotg_frontier_founder_valid`, §4.1; ruling Q2);
+   - no valid founder (`eotg_frontier_has_valid_founder`, §4.1; ruling Q2);
    - county_control < 40;
    - the county's capital province is occupied (UNVERIFIED trigger, §16 V11);
    - the holder is at war **and** the strain from war has not fired this tick (one war point, however many wars).
@@ -504,7 +533,7 @@ All eight are custom on_actions, defined **empty** in `eotg_frontier_on_actions.
 
 ### 8.3 Sponsor, Withdraw, Abandon
 - **Sponsor (`eotg_decision_frontier_sponsor`):** shown when `eotg_frontier_can_sponsor = yes` and some active frontier is held by **someone else**. Fires `.010`, which lists up to 3 frontiers via `ordered_in_global_list` (E5), ranked by the holder's opinion of the taker and then by distance (the distance trigger is UNVERIFIED, §16 V17). Picking one sends `.003` to that county's holder.
-- **Withdraw (`eotg_decision_frontier_withdraw`):** shown to a character with a non-empty `eotg_frontier_sponsored` list. Clears every sponsorship they hold (one decision, no event), strain +1 on each, and a toast to each holder. **Q9:** withdraw from one at a time instead?
+- **Withdraw (`eotg_decision_frontier_withdraw`):** shown to a sponsor (`eotg_frontier_is_sponsor`). Clears the one sponsorship they hold (no event), strain +1 with cause Sponsor Lapse, and a toast to the holder.
 - **Abandon (`eotg_decision_frontier_abandon`):** shown to a holder of a frontier. Confirmation text plus `eotg_frontier_abandon_effect = { CAUSE = voluntary }` on the chosen county (the same "highest development first" pick). No event.
 
 ### 8.4 AI weights (plausible, not spammy)
@@ -543,7 +572,7 @@ Every event moves or reads Establishment (progress) or its pressure (strain), as
 
 | ID | Title (draft) | Fired by | Root | Options | Couples |
 |---|---|---|---|---|---|
-| `.001` | *An Opportunity Here* (start) | `eotg_decision_frontier_establish` | the taker; `scope:eotg_frontier_county`, `scope:eotg_frontier_candidate` | One option per **eligible type** (7, each `trigger = { eotg_frontier_type_eligible = { TYPE = x } }`), each starting the project with the candidate as founder. **"Not now"** refunds the cost. | **sets** progress (0, or the trace bonus); the start hook |
+| `.001` | *An Opportunity Here* (start) | `eotg_decision_frontier_establish` | the taker; `scope:eotg_frontier_county`, `scope:eotg_frontier_candidate` | One option per **type** (7; the Administrative option also needs `eotg_frontier_admin_eligible`), each starting the project with the candidate as founder. **"Not now"** refunds the cost. | **sets** progress (0, or the trace bonus); the start hook |
 | `.002` | *A Hard Season* (complication) / *The Frontier Without a Founder* (variant) | tick event roll (player holders) | the holder; `scope:eotg_frontier_county` | **Complication:** **(a)** "Ship in supplies": `minor_gold_value`, strain −1. **(b)** "Push through": progress +8, strain +1 (cause `hardship`). **(c)** [has a sponsor] "Call on the backer": the sponsor makes one extra payment, strain −1. **Without a Founder** (the founder is invalid): **(d)** "Appoint [eotg_frontier_candidate.GetName]": founder = the best candidate. **(e)** "Lead it yourself": founder = root. **(f)** "Let them manage alone": no founder; strain stays. The desc varies by strain band (0–1, 2, 3+). | moves strain or progress; sets the founder |
 | `.003` | *An Offer of Backing* (sponsor offer) | tick event roll (an AI candidate offers to a player holder), or `.010` (a player offers to any holder) | the holder; `scope:eotg_frontier_sponsor` = the offerer; `scope:eotg_frontier_county` | **(a)** Accept: set the sponsor; progress +5 (the first shipment). **(b)** Refuse. AI chance: by opinion of the offerer. | sets the sponsor; moves progress |
 | `.004` | *No Longer a Frontier* (completion) | tick resolve | the holder | The new System stays with the holder (§R). The options reward the founder (ruling Q12): **(a)** "A purse for [founder]": the holder pays `minor_gold_value`, which goes to the founder. **(b)** "Honor them publicly": the founder gains prestige, the holder a little. **(c)** "The work is its own reward": nothing. **(a)** and **(b)** are shown only when the founder is valid and is not the holder. Every option runs completion → settled. Desc variant per type. | completes Establishment (progress → Settled) |
@@ -554,26 +583,19 @@ Every event moves or reads Establishment (progress) or its pressure (strain), as
 
 **AI holders** get .001, .004, .005 and .003 (from player offers), and pick by `ai_chance`. They never get .002, and never get .003 from AI offers, which resolve in script.
 
-## 10. Loc surface (`localization/english/eotg_frontier_l_english.yml`)
-UTF-8 with BOM, bare `[x.GetName]`, gendered pronouns for single characters, US English, no em dashes. Glossary words (ruling Q1): **Region** (county), **System** (barony or holding), **Port**, **Bastion**, **Sanctum**. About 120 keys:
+## 10. Loc surface (`localization/english/eotg_frontier_l_english.yml`), as built: 118 keys
+UTF-8 with BOM, bare `[x.GetName]`, gendered pronouns for single characters, US English, no em dashes. Glossary words (ruling Q1): **Region** (county), **System** (barony or holding), **Port**, **Bastion**, **Sanctum**.
 - **Events:**
-  - `.001`–`.005`, `.010`: `.t`, `.desc` (plus desc variants: .002 bands ×3 and type ×7; .004 type ×7; .005 cause ×6); options `.a`–`.d`;
-  - option tooltips `_tt` for each project start, completion grant and failure branch.
-- **Decisions:** 7 × (`<key>`, `_desc`, `_tooltip`, `_confirm`). The debug ones get English only, with no flavor.
-- **Modifiers:** 7 × (`<key>`, `_desc`).
-- **Type names:** `eotg_frontier_type_settlement` … `_administrative`, plus `_desc` each.
-- **Strain causes:** `eotg_frontier_cause_*`, 6 short phrases.
-- **Toasts:** sponsor lapsed, sponsor withdrew, sponsorship passed to an heir, founder replaced, abandoned.
-- **Custom tooltips:** `eotg_frontier_state_frontier_tt` (the decision requirement wording, so no raw `has_variable` shows: eotg_lint L006), `eotg_frontier_tier_*_tt` (tier in words).
-
-**Register:**
-- **Vocabulary:** star systems, stations, settlers, survey, supply runs, berths, beacons.
-- **Never** "village", "manor", "peasants" (the glossary maps peasant → commoner).
-- **Never** a named 866 faction as sponsor or founder (the sponsor is `[eotg_frontier_sponsor.GetPrimaryTitle.GetName]` at runtime).
-- **Never** the Galactic League or any authority above the polity (LAW AT 866): a sponsorship is a private arrangement between two parties.
-- **Vocabulary (§R lore):** foundation, establishment, expedition, venture, outpost, grant. Never "charter" in the sense of a higher authority. Exodus settlers and descendants are allowed. Ruins and derelicts are allowed. No Void in Research text.
-
----
+  - `.001`–`.005` and `.010`: `.t`, `.desc`, option keys `.a`–`.h`;
+  - variants: `.001.desc_resettle`; `.002.t_no_founder`; `.002.desc_low/_mid/_high/_no_founder`; `.003.desc_replace`; `.004.desc_<type>` ×7; `.005.desc_<cause>` ×6;
+  - option tooltips: `.001.start_tt`, `.002.ease_tt/_push_tt/_founder_tt/_f_tt`, `.003.accept_tt/_refuse_tt`, `.004.complete_tt`, `.005.abandon_tt/_restart_tt/_sponsor_tt`, `.010.offer_tt`.
+- **Decisions:** 7 × `<key>`, `_desc`, `_confirm`, plus the custom tooltips `_gold_tt`, `_peace_tt`, `_effect_tt`, `_ready_tt` and `_valid_tt`. Raw variables never reach a requirement line (eotg_lint L006).
+- **Modifiers:** 7 × `<key>`, `_desc`.
+- **Toasts:** `eotg_frontier_toast_sponsor_inherited`, `_lapsed`, `_withdrew`, `_replaced`.
+- **Appended descs** (after the opener) start with `\n\n` (round-4 lint L013d).
+- **Vocabulary (§R lore):**
+  - **Use:** star systems, stations, settlers, survey, supply runs, berths; foundation, expedition, venture, outpost.
+  - **Never:** "charter" in the sense of a higher authority, a named faction, the Void, "village", "manor", "peasants", "barony", "holding slot".
 
 ## 11. File placement (new files only)
 | File | Contents |
@@ -582,11 +604,12 @@ UTF-8 with BOM, bare `[x.GetName]`, gendered pronouns for single characters, US 
 | `common/scripted_triggers/eotg_frontier_triggers.txt` | §3.3 |
 | `common/script_values/eotg_frontier_values.txt` | §3.4 |
 | `common/modifiers/eotg_frontier_modifiers.txt` | §3.1 modifiers |
+| `common/scripted_character_templates/eotg_frontier_templates.txt` | the settlers' leader (§5.3) |
 | `common/decisions/eotg_frontier_decisions.txt` | §3.5 |
 | `common/on_action/eotg_frontier_on_actions.txt` | §3.6 |
 | `events/eotg_frontier_events.txt` | §9 |
 | `localization/english/eotg_frontier_l_english.yml` | §10 |
-| `docs/qa/frontier_test_plan.md` | Stage 2: the in-game checklist |
+| `docs/specs/frontier_v1_test_plan.md` | the in-game checklist (in `docs/specs/`: this work may only add `frontier_v1_*` files there) |
 
 - **Not created:** no `replace_path`, no `descriptor.mod` edits, no gfx (modifiers use vanilla icons such as `county_modifier_development_positive`; their existence is UNVERIFIED, V18).
 - **Not touched:** no `eotg_augmentation_*` file.
@@ -684,10 +707,10 @@ UTF-8 with BOM, bare `[x.GetName]`, gendered pronouns for single characters, US 
 ---
 
 ### HANDOFF
-- status: done (Stage 1, the spec only; nothing built)
-- next: human (approve) + eotg-vanilla-scout (§16) + eotg-lore-keeper (§15)
-- ask: answer §16 V1–V22 against vanilla 1.20.0.3, review §15 L1–L7, get the owner's answers to §17 Q1–Q12, then send "Stage 2 approved" with the corrections
-- files: docs/specs/frontier_v1.md
-- needs-loc: none yet (§10 lists ~120 keys for Stage 2)
-- needs-lore: §15 L1–L7
-- needs-human: §17 Q1–Q12, especially Q1 (System vs Region), Q2 (event count) and Q12 (holding ownership)
+- status: partial. Phase 1 is built on the owner's rulings (§R) and the defaults in `frontier_v1_open_questions.md`, and is unverified in game.
+- next: eotg-vanilla-scout (open questions §B) → eotg-qa (Tiger, PX) → human (`frontier_v1_test_plan.md` §0 first)
+- ask: verify the engine list in `frontier_v1_open_questions.md` §B, starting with V1, V8 and V12; their binding fallbacks are in §R. Run Tiger and PX on the eotg_frontier_* files, then hand the owner the test plan.
+- files: §11
+- needs-loc: none (118 keys written; localizer review welcome)
+- needs-lore: none open (§R)
+- needs-human: the open questions file §A (Q3–Q16); the test plan
