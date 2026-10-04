@@ -30,10 +30,12 @@ RULES = {
     "L004": (ERROR, "dead or non-additive vanilla on_action hook"),
     "L005": (WARNING, "unguarded removal on a visible path"),
     "L006": (WARNING, "raw flag/variable check shown as a decision requirement"),
-    "L007": (WARNING, "event option with only silent effects and no custom_tooltip"),
+    "L007": (WARNING, "event option whose only effects are deferred (shows an empty tooltip)"),
     "L008": (ERROR, "skill effect without the _skill suffix"),
     "L009": (WARNING, "event defined but never fired"),
     "L010": (ERROR, "loc key referenced but not defined"),
+    "L011": (WARNING, "single named character referred to as they/them (house rule: gendered)"),
+    "L012": (ERROR, "cybernetics loc: never-name (ERROR) or register word to triage (WARNING)"),
 }
 
 SCRIPT_DIRS = ("common", "events")
@@ -72,7 +74,8 @@ REMOVALS = {"remove_character_modifier": "has_character_modifier",
 HIDING_BLOCKS = {"hidden_effect", "custom_tooltip", "custom_description"}
 
 # L006
-L006_BLOCKS = ("is_valid", "is_valid_showing_failures_only", "is_shown")
+# is_shown is NOT here: a failed is_shown hides the decision, so nothing renders
+L006_BLOCKS = ("is_valid", "is_valid_showing_failures_only")
 L006_KEYS = {"has_character_flag", "has_variable", "has_global_variable"}
 L006_WRAPPERS = {"custom_description", "custom_tooltip"}
 
@@ -108,6 +111,8 @@ TOOLTIP_KEYS = {"custom_tooltip", "custom_description", "custom_description_no_b
 HERE = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_ROOT = os.path.dirname(os.path.dirname(HERE))
 ALLOWLIST = os.path.join(HERE, "eotg_lint_loc_allowlist.txt")
+PRONOUN_ALLOWLIST = os.path.join(HERE, "eotg_lint_pronoun_allowlist.txt")
+REGISTER_FILE = os.path.join(HERE, "eotg_lint_register.json")
 
 
 class Finding:
@@ -428,44 +433,65 @@ def rule_l006(mod):
     return out
 
 
-class _Silence:
+# L007: an option whose consequence only arrives later (an event, a story, a scheme)
+DEFERRED_EFFECTS = {"trigger_event", "create_story", "start_scheme"}
+# bookkeeping that passes scopes along; neither a consequence nor a hidden resource
+NEUTRAL_EFFECTS = {"save_scope_as", "save_temporary_scope_as", "save_scope_value_as",
+                   "save_temporary_scope_value_as"}
+
+
+class _Deferral:
+    """Classify an effect node: 'deferred' | 'neutral' | 'other'.
+
+    Containers (if/else, hidden_effect, random_list entries, scope switches,
+    list builders) and mod scripted effects take the kind of their contents:
+    any 'other' -> other; else any 'deferred' -> deferred; else neutral.
+    Hidden resource moves (flags, variables, eotg_add_fracture_risk...) are
+    'other': the hidden-risk design keeps them silent on purpose.
+    """
+
     def __init__(self, mod):
         self.effects = mod.scripted_effects()
         self.memo = {}
 
+    @staticmethod
+    def combine(kinds):
+        kinds = list(kinds)
+        if "other" in kinds:
+            return "other"
+        return "deferred" if "deferred" in kinds else "neutral"
+
     def node(self, n, depth=0):
-        if n.key in SILENT_EFFECTS:
-            return True
+        if n.key in DEFERRED_EFFECTS:
+            return "deferred"
+        if n.key in NEUTRAL_EFFECTS:
+            return "neutral"
         if n.key in TOOLTIP_KEYS:
-            return False
-        if n.key and EVENT_ID_RE.match(n.key):
-            return False
-        if not n.is_block:
-            if n.key in self.effects and depth < 20:
-                return self.effect(n.key, depth)
-            return False
-        is_container = (n.key in CONTAINER_KEYS or n.key is None or n.key.isdigit()
-                        or n.key.startswith(CONTAINER_PREFIX))
+            return "other"
         if n.key in self.effects and depth < 20:
             return self.effect(n.key, depth)
+        if not n.is_block:
+            return "other"
+        is_container = (n.key in CONTAINER_KEYS or n.key == "hidden_effect" or n.key is None
+                        or n.key.isdigit() or n.key.startswith(CONTAINER_PREFIX))
         if is_container:
             return self.block(n.value, depth + 1)
-        return False
+        return "other"
 
     def block(self, nodes, depth=0):
         eff = [c for c in nodes if c.key not in NON_EFFECT_IN_CONTAINER]
-        return all(self.node(c, depth) for c in eff)
+        return self.combine(self.node(c, depth) for c in eff)
 
     def effect(self, name, depth):
         if name not in self.memo:
-            self.memo[name] = None   # cycle guard
+            self.memo[name] = "other"    # cycle guard
             self.memo[name] = self.block(self.effects[name].value, depth + 1)
-        return bool(self.memo[name])
+        return self.memo[name]
 
 
 def rule_l007(mod):
     out = []
-    sil = _Silence(mod)
+    cls = _Deferral(mod)
     for rel, eid, ev in mod.events():
         if any(c.key == "hidden" and c.value == "yes" for c in ev.value):
             continue
@@ -478,12 +504,12 @@ def rule_l007(mod):
                 continue
             if any(n.key in TOOLTIP_KEYS for n, _ in pdx_parse.walk(opt.value)):
                 continue
-            if all(sil.node(c) for c in effects):
+            if cls.block(effects) == "deferred":
                 nm = pdx_parse.first(opt.value, "name")
                 label = _str_value(nm) if nm else "?"
                 out.append(Finding("L007", rel, opt.line,
-                                   "option %s of %s has only silent effects (%s) and no "
-                                   "custom_tooltip; its tooltip renders empty"
+                                   "option %s of %s only defers its consequence (%s) and has no "
+                                   "custom_tooltip; it looks identical to a do-nothing option"
                                    % (label, eid, ", ".join(sorted({c.key for c in effects})))))
     return out
 
@@ -611,10 +637,140 @@ def rule_l010(mod, allowlist=None):
     return out
 
 
+# ------------------------------------------------------------------ loc text rules
+LOC_VALUE_RE = re.compile(r'^\s+([^\s:#"]+):\d*\s*"(.*)"\s*(#.*)?$')
+CHAR_NAME_FUNCS = ("GetName", "GetFirstName", "GetFirstNameNicknamed", "GetFullName",
+                   "GetTitledFirstName", "GetTitledFirstNameNoTooltip", "GetFirstNameNoTooltip",
+                   "GetNameNoTooltip", "GetShortUIName", "GetUIName", "GetFullNameNicknamed")
+CHAR_REF_RE = re.compile(r"\[([A-Za-z_][\w.:]*?)\.(%s)\b" % "|".join(CHAR_NAME_FUNCS))
+GENDER_FUNC_RE = re.compile(r"\[[^\]]*\.Get(SheHe|HerHim|HerHis|HerselfHimself|HersHis|"
+                            r"WomanMan|DaughterSon|WifeHusband|SisterBrother|MotherFather|"
+                            r"GirlBoy|LadyLord|QueenKing)")
+THEY_RE = re.compile(r"\b(they|them|their|themself|theirs)\b", re.I)
+
+
+def _visible_text(value):
+    """Loc value with [functions], $keys$, #formatting# and \\n removed."""
+    v = re.sub(r"\[[^\]]*\]", " ", value)
+    v = re.sub(r"\$[^$]*\$", " ", v)
+    v = re.sub(r"#[A-Za-z_]+\s|#!", " ", v)
+    return v.replace("\\n", " ")
+
+
+def iter_loc_values(mod, pattern="*.yml"):
+    """Yield (rel, line, key, value) for every loc entry."""
+    import fnmatch
+    for rel in sorted(mod.loc_files):
+        if not fnmatch.fnmatch(os.path.basename(rel), pattern):
+            continue
+        text, _ = pdx_parse.read_text(os.path.join(mod.root, rel))
+        for i, line in enumerate(text.splitlines(), 1):
+            m = LOC_VALUE_RE.match(line)
+            if m:
+                yield rel, i, m.group(1), m.group(2)
+
+
+def load_keylist(path):
+    return load_allowlist(path)
+
+
+def rule_l011(mod, allowlist=None):
+    allow = load_keylist(PRONOUN_ALLOWLIST) if allowlist is None else allowlist
+    out = []
+    for rel, line, key, value in iter_loc_values(mod, "eotg_*.yml"):
+        if key in allow:
+            continue
+        scopes = {m.group(1) for m in CHAR_REF_RE.finditer(value)}
+        if len(scopes) != 1:
+            continue
+        if GENDER_FUNC_RE.search(value):
+            continue
+        words = sorted({w.lower() for w in THEY_RE.findall(_visible_text(value))})
+        if words:
+            scope = scopes.pop()
+            out.append(Finding("L011", rel, line,
+                               "%s names one character ([%s]) but uses %s; use [%s.GetSheHe] / "
+                               "GetHerHim / GetHerHis (or allowlist the key if plural)"
+                               % (key, scope, "/".join(words), scope)))
+    return out
+
+
+def load_register(path=REGISTER_FILE):
+    with open(path, encoding="utf-8") as fh:
+        data = json.load(fh)
+    compiled = {"key_prefixes": tuple(data["key_prefixes"])}
+    for sev in ("error", "warning"):
+        compiled[sev] = [(t["term"], re.compile(t["regex"], 0 if t.get("case") else re.I),
+                          t.get("source", "")) for t in data[sev]]
+    return compiled
+
+
+def rule_l012(mod, register=None):
+    reg = load_register() if register is None else register
+    out = []
+    for rel, line, key, value in iter_loc_values(mod):
+        if not key.startswith(reg["key_prefixes"]):
+            continue
+        text = _visible_text(value)
+        for sev, severity in (("error", ERROR), ("warning", WARNING)):
+            for term, rx, src in reg[sev]:
+                if rx.search(text):
+                    kind = "never-name" if sev == "error" else "register word (triage)"
+                    out.append(Finding("L012", rel, line,
+                                       "%s: %s '%s'%s" % (key, kind, term,
+                                                         " (%s)" % src if src else ""),
+                                       severity=severity))
+    return out
+
+
+# ------------------------------------------------------------------ suppression
+ALLOW_RE = re.compile(r"#\s*eotg_lint:\s*allow\b(.*)$")
+ALLOW_ARGS_RE = re.compile(r"^\s*((?:L\d{3})(?:\s*,\s*L\d{3})*)\s*(.*)$")
+
+
+def scan_allows(mod):
+    """{rel: {line: set(rules)}} for valid allows, plus L000 findings for bad ones."""
+    allows, bad = {}, []
+    files = list(mod.docs) + list(mod.loc_files)
+    for rel in sorted(set(files)):
+        text, _ = pdx_parse.read_text(os.path.join(mod.root, rel))
+        for i, line in enumerate(text.splitlines(), 1):
+            m = ALLOW_RE.search(line)
+            if not m:
+                continue
+            a = ALLOW_ARGS_RE.match(m.group(1))
+            if not a:
+                bad.append(Finding("L000", rel, i, "eotg_lint allow without a rule id "
+                                   "(use '# eotg_lint: allow L007 <reason>')"))
+                continue
+            rules = {r.strip() for r in a.group(1).split(",")}
+            unknown = rules - set(RULES)
+            if unknown:
+                bad.append(Finding("L000", rel, i, "eotg_lint allow names unknown rule(s) %s"
+                                   % ", ".join(sorted(unknown))))
+                continue
+            if not a.group(2).strip():
+                bad.append(Finding("L000", rel, i, "eotg_lint allow %s without a reason"
+                                   % ",".join(sorted(rules))))
+                continue
+            allows.setdefault(rel, {})[i] = rules
+    return allows, bad
+
+
+def apply_allows(findings, allows):
+    kept = []
+    for f in findings:
+        lines = allows.get(f.file, {})
+        if f.rule in lines.get(f.line, ()) or f.rule in lines.get(f.line - 1, ()):
+            continue
+        kept.append(f)
+    return kept
+
+
 RULE_FUNCS = [
     ("L001", rule_l001), ("L002", rule_l002), ("L003", rule_l003), ("L004", rule_l004),
     ("L005", rule_l005), ("L006", rule_l006), ("L007", rule_l007), ("L008", rule_l008),
-    ("L009", rule_l009), ("L010", rule_l010),
+    ("L009", rule_l009), ("L010", rule_l010), ("L011", rule_l011), ("L012", rule_l012),
 ]
 
 
@@ -630,6 +786,10 @@ def lint(root, rules=None, allowlist=None):
             continue
         res = fn(mod, allowlist) if rid == "L010" else fn(mod)
         out.extend(res)
+    allows, bad = scan_allows(mod)
+    out = apply_allows(out, allows)
+    if not rules or "L000" in rules:
+        out.extend(bad)
     out.sort(key=lambda f: (f.file, f.line, f.rule, f.message))
     return out
 
@@ -719,9 +879,13 @@ def main(argv=None):
     by_rule = collections.Counter(f.rule for f in findings)
     new_by_rule = collections.Counter(f.rule for f in new)
     print("\n%-5s %-8s %6s %6s  %s" % ("rule", "severity", "total", "new", "description"))
+    sev_by_rule = collections.defaultdict(set)
+    for f in findings:
+        sev_by_rule[f.rule].add(f.severity)
     for rid in sorted(RULES):
         if by_rule[rid] or new_by_rule[rid]:
-            print("%-5s %-8s %6d %6d  %s" % (rid, RULES[rid][0], by_rule[rid],
+            sev = "/".join(sorted(sev_by_rule[rid])) or RULES[rid][0]
+            print("%-5s %-8s %6d %6d  %s" % (rid, sev, by_rule[rid],
                                              new_by_rule[rid], RULES[rid][1]))
     print("total: %d finding(s), %d new%s" % (len(findings), len(new),
                                              " (vs baseline)" if args.baseline else ""))
