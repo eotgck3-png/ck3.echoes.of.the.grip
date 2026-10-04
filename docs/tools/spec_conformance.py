@@ -420,6 +420,7 @@ def render(res):
 
 
 def main(argv=None):
+    P.utf8_console()
     ap = argparse.ArgumentParser(description="Cybernetics spec vs script conformance.")
     ap.add_argument("--root", default=DEFAULT_ROOT, help="mod checkout (default: this repo)")
     ap.add_argument("--specs", default=SPEC_GLOB, help="spec glob, relative to --root")

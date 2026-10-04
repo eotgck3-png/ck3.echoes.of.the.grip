@@ -487,6 +487,7 @@ def _snapshot(out):
 
 
 def main(argv=None):
+    P.utf8_console()
     ap = argparse.ArgumentParser(description="Port v1 religions to the CK3 1.20 schema (staging).")
     ap.add_argument("--src", default=DEFAULT_SRC, help="v1 common/religion folder")
     ap.add_argument("--out", default=DEFAULT_OUT, help="staging folder (never live common/)")

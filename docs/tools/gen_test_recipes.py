@@ -862,6 +862,7 @@ def generate(root):
 
 
 def main(argv=None):
+    P.utf8_console()
     ap = argparse.ArgumentParser(description="Console test recipe for every mod event.")
     ap.add_argument("--root", default=DEFAULT_ROOT, help="mod checkout (default: this repo)")
     ap.add_argument("--out", help="output file (default: <root>/%s)" % OUT_REL)
