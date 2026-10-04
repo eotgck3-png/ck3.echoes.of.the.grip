@@ -1544,7 +1544,10 @@ eotg_aug_tier1.012 = {
     # [cynical] "Tithe this."
     option = {
         name = eotg_aug_tier1.012.e
-        trigger = { has_trait = cynical }
+        trigger = {
+            exists = scope:eotg_pious    # answers the petitioner; none in desc_conscience
+            has_trait = cynical
+        }
         trait = cynical
         add_piety = -50
         add_prestige = 50

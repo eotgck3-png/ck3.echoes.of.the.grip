@@ -180,7 +180,14 @@ eotg_aug_retinue.001 = {
 eotg_aug_retinue.002 = {
     type = character_event
     title = eotg_aug_retinue.002.t
-    desc = eotg_aug_retinue.002.desc
+    desc = {
+        desc = eotg_aug_retinue.002.desc
+        # Name the second knight: options a, d and e need cand_b.
+        triggered_desc = {
+            trigger = { exists = scope:eotg_cand_b }
+            desc = eotg_aug_retinue.002.desc_cand_b
+        }
+    }
     theme = martial_chivalry_focus
 
     trigger = {

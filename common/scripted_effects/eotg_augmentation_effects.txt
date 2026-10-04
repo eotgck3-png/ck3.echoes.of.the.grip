@@ -859,6 +859,57 @@ eotg_aug_forget_relation_effect = {
     }
 }
 
+# The Heir's Arc dread seeds (new beats §3.1; refactor only: moved verbatim
+# from eotg_story_aug_heir_arc's on_setup, same order and clamp). Story scope:
+# var:eotg_heir must be set. Seeds only shift weights (index §4 T3). Absent at
+# the birth: tier2.010 (Phase 4b); intervention refused: tier3.020 (Phase 4c);
+# estranged parent: tier2.018 (Phase 4b).
+# Callers: eotg_story_aug_heir_arc (on_setup; the round-2 reprise, branch 0b).
+eotg_aug_heir_seed_dread_effect = {
+    if = {
+        limit = {
+            var:eotg_heir = { has_character_flag = eotg_flag_aug_absent_at_birth }
+        }
+        change_variable = { name = eotg_heir_dread  add = 1 }
+    }
+    if = {
+        limit = {
+            story_owner = { has_character_flag = eotg_flag_aug_intervention_refused }
+        }
+        change_variable = { name = eotg_heir_dread  add = 1 }
+    }
+    # Estranged parent: tier2.018 (Phase 4b) flags a spouse the marriage
+    # was lost to; if that spouse is the heir's parent, the heir saw it.
+    if = {
+        limit = {
+            var:eotg_heir = {
+                OR = {
+                    mother ?= { has_character_flag = eotg_flag_aug_estranged }
+                    father ?= { has_character_flag = eotg_flag_aug_estranged }
+                }
+            }
+        }
+        change_variable = { name = eotg_heir_dread  add = 1 }
+    }
+    if = {
+        limit = {
+            var:eotg_heir = {
+                opinion = { target = scope:story.story_owner  value < -20 }
+            }
+        }
+        change_variable = { name = eotg_heir_dread  add = 1 }
+    }
+    # Balance spec §5.8(b): a child the machine saved (init.014/.015,
+    # eotg_flag_aug_child_patient) fears it less. Clamped at 0.
+    if = {
+        limit = {
+            var:eotg_heir = { has_character_flag = eotg_flag_aug_child_patient }
+        }
+        change_variable = { name = eotg_heir_dread  add = -1 }
+        clamp_variable = { name = eotg_heir_dread  min = 0  max = 10 }
+    }
+}
+
 # The Warrant made real (audit §1.4). Run in the ruler's scope; the caller
 # saves scope:eotg_warrant_vassal. Shape copied from vanilla
 # prelude_events_0010_screw_over_guest_effect
@@ -1068,11 +1119,16 @@ eotg_aug_total_integration_effect = {
         add_opinion = { modifier = eotg_opinion_aug_unmade  target = root }
     }
     # Heir's Arc: stage 3, so the story's next tick fires the Choice
-    # (eotg_story_aug_heir_arc stage 5 accepts a Seamless owner).
+    # (its Choice entry accepts a Seamless owner). New beats §5.1 step 5:
+    # only below stage 4, so a dormant arc (5) or a Choice already fired (4)
+    # is not woken to fire heir.004 again against the same heir.
     if = {
         limit = { eotg_aug_has_heir_arc = yes }
         random_owned_story = {
-            limit = { story_type = eotg_story_aug_heir_arc }
+            limit = {
+                story_type = eotg_story_aug_heir_arc
+                var:eotg_stage < 4
+            }
             set_variable = { name = eotg_stage  value = 3 }
         }
     }

@@ -16,8 +16,15 @@
 #   §5.8a) eotg_on_yearly_aug_overclocked_check, once the Countdown runs.
 # Fires: eotg_aug_heir.001 (stage 0), eotg_fracture.005 (stage 1),
 #   eotg_aug_heir.003 (stage 2), eotg_aug_heir.004 (stage 3, outside the
-#   Flicker band). heir.004 ends the story. Stages 1-3 wait for a
-#   Neurofractured or Seamless owner, so at Overclocked only Concern fires.
+#   Flicker band). Stages 1-3 wait for a Neurofractured or Seamless owner, so
+#   at Overclocked only Concern fires.
+# Round 2 (docs/specs/cybernetics_v2_new_beats.md §5.1): heir.004 in round 1
+#   parks the story at a dormant stage 5 instead of ending it; the dormant
+#   entry below gives the next primary heir (14+, not the round-1 heir)
+#   eotg_aug_heir.007 The Next in Line, then heir.003 and heir.004 again.
+#   heir.004 in round 2 ends the story: never a third round. Vanilla shape
+#   for a story that re-targets a successor instead of ending:
+#   game/common/story_cycles/ep3_story_cycle_admin_eunuch.txt:145-182.
 #
 # Hidden (index §1 rule 3): visible left at its default (no), no
 # visualization block, no counters. The story's effect_group timing is the
@@ -26,10 +33,15 @@
 # Story variables (prefixed per invariant 1; the spec calls them heir / stage /
 # heir_dread):
 #   eotg_heir        the watching heir (character)
-#   eotg_stage       0-4
+#   eotg_stage       0-4; 5 = dormant after round 1's heir.004
 #   eotg_heir_dread  how far the heir has come to fear the ruler; weights
-#                    heir.004. Moved by heir.001, fracture.005, heir.003 and
-#                    fracture.026 (b).
+#                    heir.004. Moved by heir.001, fracture.005, heir.003,
+#                    fracture.026 (b) and heir.007.
+#   eotg_round       1 or 2 (new beats §5.1)
+#   eotg_prior_heir  the round-1 heir, copied from eotg_heir at the reprise
+#   eotg_prior_choice  flag:ally / usurp / kill_failed / kill_success /
+#                    executed: what round 1's heir.004 came to (heir.004,
+#                    its kill_c)
 # ─────────────────────────────────────────────────────────────────────────────
 
 eotg_story_aug_heir_arc = {
@@ -45,51 +57,11 @@ eotg_story_aug_heir_arc = {
         }
         set_variable = { name = eotg_stage  value = 0 }
         set_variable = { name = eotg_heir_dread  value = 0 }
-        # Seeds only shift weights (index §4 T3). Absent at the birth: tier2.010
-        # (Phase 4b); intervention refused: tier3.020 (Phase 4c); estranged
-        # parent: tier2.018 (Phase 4b).
-        if = {
-            limit = {
-                var:eotg_heir = { has_character_flag = eotg_flag_aug_absent_at_birth }
-            }
-            change_variable = { name = eotg_heir_dread  add = 1 }
-        }
-        if = {
-            limit = {
-                story_owner = { has_character_flag = eotg_flag_aug_intervention_refused }
-            }
-            change_variable = { name = eotg_heir_dread  add = 1 }
-        }
-        # Estranged parent: tier2.018 (Phase 4b) flags a spouse the marriage
-        # was lost to; if that spouse is the heir's parent, the heir saw it.
-        if = {
-            limit = {
-                var:eotg_heir = {
-                    OR = {
-                        mother ?= { has_character_flag = eotg_flag_aug_estranged }
-                        father ?= { has_character_flag = eotg_flag_aug_estranged }
-                    }
-                }
-            }
-            change_variable = { name = eotg_heir_dread  add = 1 }
-        }
-        if = {
-            limit = {
-                var:eotg_heir = {
-                    opinion = { target = scope:story.story_owner  value < -20 }
-                }
-            }
-            change_variable = { name = eotg_heir_dread  add = 1 }
-        }
-        # Balance spec §5.8(b): a child the machine saved (init.014/.015,
-        # eotg_flag_aug_child_patient) fears it less. Clamped at 0.
-        if = {
-            limit = {
-                var:eotg_heir = { has_character_flag = eotg_flag_aug_child_patient }
-            }
-            change_variable = { name = eotg_heir_dread  add = -1 }
-            clamp_variable = { name = eotg_heir_dread  min = 0  max = 10 }
-        }
+        set_variable = { name = eotg_round  value = 1 }
+        # Seeds only shift weights (index §4 T3). The five seeds live in
+        # eotg_aug_heir_seed_dread_effect (new beats §3.1: moved verbatim, same
+        # order and clamp) so the round-2 reprise below shares them.
+        eotg_aug_heir_seed_dread_effect = yes
     }
 
     on_end = {
@@ -143,10 +115,77 @@ eotg_story_aug_heir_arc = {
                 }
             }
 
+            # 0b. Dormant (stage 5): round 1's heir.004 has been answered
+            # (new beats §5.1 step 2). Matches every dormant tick, so a dormant
+            # story never falls through to branch 1. When the primary heir is
+            # someone else (the round-1 heir died, was executed, or no longer
+            # stands first) and is 14+, round 2 starts: the new heir is seeded
+            # like round 1, plus what they watched happen to the last one, and
+            # goes straight to the Warning (stage 2) after heir.007. An heir
+            # under 14 is waited for. Vanilla precedent: the admin eunuch story
+            # re-targets a successor in its tick
+            # (game/common/story_cycles/ep3_story_cycle_admin_eunuch.txt:145-182;
+            # events/dlc/ep3/ep3_story_cycle_admin_eunuch_events.txt:6021-6097).
+            triggered_effect = {
+                trigger = { var:eotg_stage = 5 }
+                effect = {
+                    if = {
+                        limit = {
+                            story_owner = {
+                                primary_heir ?= {
+                                    is_alive = yes
+                                    age >= 14
+                                    # QA S2: round 2 always has a predecessor
+                                    # to name (heir.007, heir.003 successor)
+                                    exists = scope:story.var:eotg_heir
+                                    NOT = { this = scope:story.var:eotg_heir }
+                                }
+                            }
+                        }
+                        set_variable = { name = eotg_prior_heir  value = var:eotg_heir }
+                        set_variable = {
+                            name = eotg_heir
+                            value = story_owner.primary_heir
+                        }
+                        set_variable = { name = eotg_round  value = 2 }
+                        set_variable = { name = eotg_heir_dread  value = 0 }
+                        eotg_aug_heir_seed_dread_effect = yes
+                        # What the new heir watched happen to the last one
+                        if = {
+                            limit = { var:eotg_prior_choice ?= flag:executed }
+                            change_variable = { name = eotg_heir_dread  add = 2 }
+                        }
+                        else_if = {
+                            limit = {
+                                OR = {
+                                    var:eotg_prior_choice ?= flag:usurp
+                                    var:eotg_prior_choice ?= flag:kill_failed
+                                }
+                            }
+                            change_variable = { name = eotg_heir_dread  add = 1 }
+                        }
+                        clamp_variable = { name = eotg_heir_dread  min = 0  max = 10 }
+                        set_variable = { name = eotg_stage  value = 2 }
+                        story_owner = {
+                            # That ally is gone (eotg_fracture.027 reads it)
+                            if = {
+                                limit = { has_character_flag = eotg_flag_aug_heir_ally }
+                                remove_character_flag = eotg_flag_aug_heir_ally
+                            }
+                            trigger_event = { id = eotg_aug_heir.007  days = { 1 30 } }
+                        }
+                    }
+                }
+            }
+
             # 1. The heir died or is no longer the primary heir: pass the arc
-            # to a new heir of 14+ one stage back, else end it.
+            # to a new heir of 14+ one stage back, else end it. Never while
+            # dormant (new beats §5.1 step 3; 0b already shadows it). Inside
+            # round 2 this still hands the arc to a third heir one stage back:
+            # a hand-off within the round, not a third round.
             triggered_effect = {
                 trigger = {
+                    var:eotg_stage < 5
                     OR = {
                         NOT = { exists = var:eotg_heir }
                         var:eotg_heir = { is_alive = no }
@@ -426,8 +465,9 @@ eotg_story_aug_countdown = {
 
 # ── eotg_story_aug_patron — The Patron's debt (I-05, thread T2, §2) ──────────
 # Created by: eotg_aug_patron_accept_effect (patron.001 a, c, d).
-# Fires: eotg_aug_patron.002-.007. Ended by: patron.006 (every option) or the
-#   owner's death (inherited debt is deferred, §5).
+# Fires: eotg_aug_patron.002-.008. Ended by: patron.006 (every option),
+#   patron.008 (a, b, e success), or the owner's death (inherited debt is
+#   deferred, §5).
 # The syndicate is never named (index §5.7): "the syndicate", "the syndicate
 #   envoy".
 # Story variables (spec: envoy / demand / grievance / terms):
@@ -435,6 +475,8 @@ eotg_story_aug_countdown = {
 #   eotg_demand     demands made, 0-4
 #   eotg_grievance  refusals; >= 3 brings the Final Demand early (betrayal tone)
 #   eotg_terms      flag:standard / flag:read / flag:greedy (patron.001)
+#   eotg_paper_served  bare, one-shot: set by the tick when it fires
+#                   patron.008 The Paper (new beats §5.2)
 eotg_story_aug_patron = {
     on_setup = {
         set_variable = {
@@ -450,6 +492,10 @@ eotg_story_aug_patron = {
         story_owner = {
             remove_variable = eotg_patron_envoy_passthrough
             remove_variable = eotg_patron_terms_passthrough
+            # New beats §5.2 "Once per life": permanent; read by the offer
+            # sites only (the initiation check's Patron entry, init.018 desc
+            # and e). Vanilla precedent: story_cycle_murders_at_court.txt:9.
+            add_character_flag = eotg_flag_aug_had_patron
         }
     }
 
@@ -485,6 +531,9 @@ eotg_story_aug_patron = {
     # Two cadences: read terms are slower (phase5 §2.3)
     # Balance spec §5.8: both ticks open (after the landless ending) with the
     # Neurofractured write-off.
+    # New beats §5.2: then the paper (patron.008), once per story, for an
+    # owner with no implants while the envoy is at court and the Final Demand
+    # is not yet due.
     # The tick (inlined in both cadences so the event graph can follow it;
     # keep the two copies identical). Order, phase5 §2.3 with 1 and 2
     # swapped (deviation): grievance >= 3 or demand >= 4 -> .006 first, so
@@ -524,6 +573,31 @@ eotg_story_aug_patron = {
                         add_character_flag = { flag = eotg_flag_aug_patron_writeoff  days = 60 }
                         trigger_event = { id = eotg_aug_patron.006  days = { 1 30 } }
                     }
+                }
+            }
+            # New beats §5.2: The Paper. The owner has no implants and the debt
+            # is still live: the syndicate re-prices it, once per story. The
+            # tick is the cooldown authority (index §1 rule 5): the one-shot
+            # story variable is set here and patron.008 checks no flag.
+            # Yields to .006 when the Final Demand is due, and to .007 when
+            # the envoy is dead or gone (the paper then comes the next tick).
+            # Vanilla shape: game/common/story_cycles/
+            # story_cycle_pledge_loyalty_to_liege_overdue.txt:188-207
+            # (NOT has_variable, then set_variable and trigger_event).
+            triggered_effect = {
+                trigger = {
+                    NOT = { has_variable = eotg_paper_served }
+                    var:eotg_demand < 4
+                    var:eotg_grievance < 3
+                    story_owner = { eotg_is_augmented_any = no }
+                    var:eotg_envoy ?= {
+                        is_alive = yes
+                        is_courtier_of = scope:story.story_owner
+                    }
+                }
+                effect = {
+                    set_variable = eotg_paper_served
+                    story_owner = { trigger_event = { id = eotg_aug_patron.008  days = { 1 30 } } }
                 }
             }
             triggered_effect = {
@@ -614,6 +688,31 @@ eotg_story_aug_patron = {
                         add_character_flag = { flag = eotg_flag_aug_patron_writeoff  days = 60 }
                         trigger_event = { id = eotg_aug_patron.006  days = { 1 30 } }
                     }
+                }
+            }
+            # New beats §5.2: The Paper. The owner has no implants and the debt
+            # is still live: the syndicate re-prices it, once per story. The
+            # tick is the cooldown authority (index §1 rule 5): the one-shot
+            # story variable is set here and patron.008 checks no flag.
+            # Yields to .006 when the Final Demand is due, and to .007 when
+            # the envoy is dead or gone (the paper then comes the next tick).
+            # Vanilla shape: game/common/story_cycles/
+            # story_cycle_pledge_loyalty_to_liege_overdue.txt:188-207
+            # (NOT has_variable, then set_variable and trigger_event).
+            triggered_effect = {
+                trigger = {
+                    NOT = { has_variable = eotg_paper_served }
+                    var:eotg_demand < 4
+                    var:eotg_grievance < 3
+                    story_owner = { eotg_is_augmented_any = no }
+                    var:eotg_envoy ?= {
+                        is_alive = yes
+                        is_courtier_of = scope:story.story_owner
+                    }
+                }
+                effect = {
+                    set_variable = eotg_paper_served
+                    story_owner = { trigger_event = { id = eotg_aug_patron.008  days = { 1 30 } } }
                 }
             }
             triggered_effect = {

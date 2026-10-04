@@ -9,9 +9,11 @@
 # eotg_aug_patron.005 — The Family Clause      (demand 3)
 # eotg_aug_patron.006 — The Final Demand       (demand 4+, or grievance 3+)
 # eotg_aug_patron.007 — A New Envoy            (the envoy is dead or gone)
+# eotg_aug_patron.008 — The Paper              (the owner has no implants;
+#                                               once per story)
 #
 # Fires from: .001 from eotg_on_yearly_aug_initiation_check (Patron entry) and
-#   eotg_aug_init.018 (e); .002-.007 from the story eotg_story_aug_patron
+#   eotg_aug_init.018 (e); .002-.008 from the story eotg_story_aug_patron
 #   through its effect_group tick. Cooldown authority: the story's
 #   effect_group (2-3 years, 3-4 on read terms). No event checks a flag.
 # Naming (index §5.3, §5.7): the patron is never named. Loc says "the
@@ -21,7 +23,8 @@
 #   controls; the betrayal path (eotg_aug_patron_betray_effect) can start the
 #   Countdown.
 # Every event from .002 saves scope:eotg_patron_story and scope:eotg_patron_envoy
-# in immediate. Demand events count up in `after` (every option).
+# in immediate. Demand events count up in `after` (every option); .007 and
+# .008 are not demands and do not.
 # ─────────────────────────────────────────────────────────────────────────────
 
 namespace = eotg_aug_patron
@@ -1061,6 +1064,192 @@ eotg_aug_patron.007 = {
             base = 20
             modifier = { add = 20  has_trait = stubborn }
             modifier = { add = 10  has_trait = arrogant }
+        }
+    }
+}
+
+
+# ── eotg_aug_patron.008 ───────────────────────────────────────────────────────
+# The Paper (docs/specs/cybernetics_v2_new_beats.md §5.2). The implants are
+# out; the debt is not (M6). The syndicate re-prices a debt whose collateral
+# is gone. Not one of the four demands: no `after` increment; options end the
+# story themselves where they should.
+# Caller: eotg_story_aug_patron, the paper entry (both cadences), once per
+# story (story variable eotg_paper_served, set in the tick). The trigger is a
+# world-state guard mirroring that entry; no flags.
+# Resource (index §1 rule 4, the "owner with no implants" coupling): c changes
+# tier (re-install); d and e (failure) move eotg_grievance; a, b and e
+# (success) end the debt. eotg_fracture_risk does not exist here and is only
+# recreated by c, after the install.
+# e: the holder's own court (index §5.3; lore review §11: no authority above
+# the polity at 866). Roll shape: patron.002.e (random_list with a desc per
+# branch).
+
+eotg_aug_patron.008 = {
+    type = character_event
+    title = eotg_aug_patron.008.t
+    desc = {
+        desc = eotg_aug_patron.008.desc
+        # M6 made visible: the exclusivity clause still bills for technicians
+        # with nothing left to service.
+        triggered_desc = {
+            trigger = { has_character_modifier = eotg_mod_aug_patron_clause }
+            desc = eotg_aug_patron.008.desc_clause
+        }
+    }
+    theme = stewardship_wealth_focus
+
+    trigger = {
+        eotg_aug_has_patron = yes
+        eotg_is_augmented_any = no
+    }
+
+    left_portrait = {
+        character = root
+        animation = thinking
+    }
+    right_portrait = {
+        # CB-27 M7 pattern (as patron.006): never a dead envoy, or one who
+        # has left court since the tick.
+        trigger = { eotg_aug_patron_envoy_present = yes }
+        character = scope:eotg_patron_envoy
+        animation = steward
+    }
+
+    immediate = {
+        hidden_effect = {
+            random_owned_story = {
+                limit = { story_type = eotg_story_aug_patron }
+                save_scope_as = eotg_patron_story
+                var:eotg_envoy ?= { save_scope_as = eotg_patron_envoy }
+            }
+        }
+    }
+
+    # "Pay off the principal." Settled; the story's on_end removes the clause
+    # and sends the envoy to the pool.
+    option = {
+        name = eotg_aug_patron.008.a
+        trigger = { eotg_aug_patron_can_pay = { BASE = major_gold_value  MULT = 1 } }
+        eotg_aug_patron_pay_effect = { BASE = major_gold_value  MULT = 1 }
+        hidden_effect = {
+            scope:eotg_patron_story ?= { end_story = yes }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = honest }
+            modifier = { add = 10  has_trait = diligent }
+            modifier = { add = -20  has_trait = greedy }
+        }
+    }
+
+    # "Sign the lien on my revenues." The ungated option: the final clause
+    # (permanent), and the debt is closed.
+    option = {
+        name = eotg_aug_patron.008.b
+        if = {
+            limit = { has_character_modifier = eotg_mod_aug_patron_clause }
+            remove_character_modifier = eotg_mod_aug_patron_clause
+        }
+        add_character_modifier = { modifier = eotg_mod_aug_patron_clause_final }
+        hidden_effect = {
+            scope:eotg_patron_story ?= { end_story = yes }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 10  has_trait = patient }
+            modifier = { add = -20  has_trait = ambitious }
+        }
+    }
+
+    # "Let them put it back." Tier change: back in the system at tier 1 with
+    # risk 15 (their firmware, and it remembers) and the open-ended clause
+    # (the story's on_end removes it). Not while the body is still recovering
+    # from Excision. The story continues from the current demand.
+    option = {
+        name = eotg_aug_patron.008.c
+        trigger = {
+            NOT = { has_character_modifier = eotg_mod_aug_excision_recovery }
+        }
+        eotg_aug_initiate_effect = yes
+        hidden_effect = {
+            eotg_add_fracture_risk = { AMOUNT = 15 }
+            # A 3-year trial clause (patron.003 c) becomes open-ended; the
+            # remove-then-add keeps one instance either way.
+            if = {
+                limit = { has_character_modifier = eotg_mod_aug_patron_clause }
+                remove_character_modifier = eotg_mod_aug_patron_clause
+            }
+        }
+        add_character_modifier = { modifier = eotg_mod_aug_patron_clause }
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = -20  has_trait = zealous }
+            modifier = { add = -20  has_trait = paranoid }
+        }
+    }
+
+    # "The paper is worth nothing now." Grievance to 3: the next tick brings
+    # the Final Demand (patron.006, betrayal tone).
+    option = {
+        name = eotg_aug_patron.008.d
+        if = {
+            limit = { scope:eotg_patron_story.var:eotg_grievance < 3 }
+            scope:eotg_patron_story = {
+                set_variable = { name = eotg_grievance  value = 3 }
+            }
+        }
+        # CB-27 follow-up: only an envoy alive and at court takes offence.
+        if = {
+            limit = { eotg_aug_patron_envoy_present = yes }
+            scope:eotg_patron_envoy = {
+                add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 5 }
+            }
+        }
+        add_prestige = 50
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = stubborn }
+            modifier = { add = 10  has_trait = wrathful }
+            modifier = { add = -20  has_trait = craven }
+        }
+    }
+
+    # [just] "Let my own court read the contract." 50% (+15 at stewardship
+    # 12+): voided under the holder's own law, the debt ends; 50%: upheld,
+    # grievance +1 and the sequence continues.
+    option = {
+        name = eotg_aug_patron.008.e
+        trigger = { has_trait = just }
+        trait = just
+        random_list = {
+            50 = {
+                modifier = {
+                    add = 15
+                    stewardship >= 12
+                }
+                desc = eotg_aug_patron.008.e.success
+                add_prestige = 100
+                hidden_effect = {
+                    scope:eotg_patron_story ?= { end_story = yes }
+                }
+            }
+            50 = {
+                desc = eotg_aug_patron.008.e.failure
+                add_prestige = -100
+                eotg_aug_patron_grievance_effect = { AMOUNT = 1 }
+            }
+        }
+        stress_impact = {
+            just = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = just }
+            modifier = { add = 10  has_trait = honest }
         }
     }
 }

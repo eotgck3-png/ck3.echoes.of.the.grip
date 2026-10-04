@@ -2491,7 +2491,11 @@ eotg_aug_init.018 = {
     desc = {
         desc = eotg_aug_init.018.desc
         triggered_desc = {
-            trigger = { eotg_aug_has_patron = no }
+            # New beats §5.2 "Once per life": same gate as e.
+            trigger = {
+                eotg_aug_has_patron = no
+                NOT = { has_character_flag = eotg_flag_aug_had_patron }
+            }
             desc = eotg_aug_init.018.desc_syndicate
         }
     }
@@ -2591,7 +2595,12 @@ eotg_aug_init.018 = {
     # eotg_aug_patron.001, a day later; it starts eotg_story_aug_patron.
     option = {
         name = eotg_aug_init.018.e
-        trigger = { eotg_aug_has_patron = no }
+        # New beats §5.2 "Once per life": one syndicate debt per life; the
+        # offer site owns the cooldown (lesson 5), patron.001 does not read it.
+        trigger = {
+            eotg_aug_has_patron = no
+            NOT = { has_character_flag = eotg_flag_aug_had_patron }
+        }
         # Tooltip sweep: otherwise empty, and read exactly like d.
         custom_tooltip = eotg_aug_init.018.e.tt
         trigger_event = { id = eotg_aug_patron.001  days = 1 }

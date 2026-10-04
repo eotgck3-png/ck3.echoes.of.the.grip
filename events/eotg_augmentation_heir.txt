@@ -8,16 +8,25 @@
 # eotg_aug_heir.004 -- The Heir's Choice       (story stage 3; ally / usurp / kill)
 # eotg_aug_heir.005 -- What Must Be Done       (to the heir, after the kill)
 # eotg_aug_heir.006 -- (hidden) the kill       (on the ruler, from heir.004)
+# eotg_aug_heir.007 -- The Next in Line        (round 2: the dormant story
+#                                                finds a later heir)
+#
+# Round 2 (docs/specs/cybernetics_v2_new_beats.md §5.1): round 1's heir.004
+#   parks the story at a dormant stage 5; for the next primary heir the story
+#   fires heir.007, then heir.003 and heir.004 with successor descs. Round 2's
+#   heir.004 ends the story. Never a third round.
 #
 # Fires from: the story cycle eotg_story_aug_heir_arc
 #   (common/story_cycles/eotg_augmentation_stories.txt), created by
 #   eotg_on_yearly_aug_neurofractured_check and (balance spec §5.8)
 #   eotg_on_yearly_aug_overclocked_check; heir.006 from heir.004's
-#   immediate (kill, success); heir.005 from heir.006, after succession.
+#   immediate (kill, success); heir.005 from heir.006, after succession;
+#   heir.007 from the story's dormant entry.
 # Cooldown: the story's effect_group timing (index §1 rule 5). No flags.
 # Each immediate saves the story as scope:eotg_heir_story and its eotg_heir
-# variable as scope:eotg_heir. Options move the story's eotg_heir_dread, which
-# weights heir.004.
+# variable as scope:eotg_heir (heir.003, .004 and .007 also its
+# eotg_prior_heir as scope:eotg_prior_heir, for round 2's loc). Options move
+# the story's eotg_heir_dread, which weights heir.004.
 # Resource: every option moves eotg_fracture_risk on the ruler, except
 # heir.005 (the heir's event), which couples through d (tier change).
 # -----------------------------------------------------------------------------
@@ -170,11 +179,21 @@ eotg_aug_heir.001 = {
 # -- eotg_aug_heir.003 --------------------------------------------------------
 # The Heir's Warning. "Step aside, or I will make you."
 # Caller: eotg_story_aug_heir_arc, stage 2.
+# New beats §5.1 step 6: in round 2 desc_successor (a second heir, who has
+# seen this said once before) replaces the base desc.
 
 eotg_aug_heir.003 = {
     type = character_event
     title = eotg_aug_heir.003.t
-    desc = eotg_aug_heir.003.desc
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_heir_story.var:eotg_round ?= 2 }
+                desc = eotg_aug_heir.003.desc_successor
+            }
+            desc = eotg_aug_heir.003.desc
+        }
+    }
     theme = family
 
     trigger = {
@@ -201,6 +220,7 @@ eotg_aug_heir.003 = {
                 limit = { story_type = eotg_story_aug_heir_arc }
                 save_scope_as = eotg_heir_story
                 var:eotg_heir = { save_scope_as = eotg_heir }
+                var:eotg_prior_heir ?= { save_scope_as = eotg_prior_heir }
             }
         }
     }
@@ -304,7 +324,9 @@ eotg_aug_heir.003 = {
 # -- eotg_aug_heir.004 --------------------------------------------------------
 # The Heir's Choice. The heir decides in immediate (ally / usurp / kill),
 # weighted by the story's eotg_heir_dread; the ruler's options follow the
-# outcome. The story ends here.
+# outcome. Round 1 parks the story at a dormant stage 5; round 2 ends it
+# (new beats §5.1 step 4). In round 2 desc_successor replaces the leading
+# desc (step 6).
 # Caller: eotg_story_aug_heir_arc, stage 3 (outside the Flicker band).
 #
 # Weights (spec §4): ally 40 - 15 x dread (min 5), +20 heir compassionate or
@@ -320,7 +342,13 @@ eotg_aug_heir.004 = {
     type = character_event
     title = eotg_aug_heir.004.t
     desc = {
-        desc = eotg_aug_heir.004.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_heir_story.var:eotg_round ?= 2 }
+                desc = eotg_aug_heir.004.desc_successor
+            }
+            desc = eotg_aug_heir.004.desc
+        }
         triggered_desc = {
             trigger = { has_character_flag = eotg_flag_aug_premonition }
             desc = eotg_aug_heir.004.desc_premonition
@@ -375,6 +403,7 @@ eotg_aug_heir.004 = {
                 limit = { story_type = eotg_story_aug_heir_arc }
                 save_scope_as = eotg_heir_story
                 var:eotg_heir = { save_scope_as = eotg_heir }
+                var:eotg_prior_heir ?= { save_scope_as = eotg_prior_heir }
             }
         }
         # The heir decides
@@ -550,12 +579,24 @@ eotg_aug_heir.004 = {
             trigger_event = { id = eotg_aug_heir.006  days = { 3 7 } }
         }
 
-        # The story ends after any outcome. The arc runs once per ruler: the
-        # permanent flag is read by the arc-start guard in
-        # eotg_on_yearly_aug_neurofractured_check (on_action authority, lesson 5).
+        # The arc starts once per ruler: the permanent flag is read by the
+        # arc-start guards in the on_actions (on_action authority, lesson 5).
+        # New beats §5.1 step 4: the outcome is remembered for round 2, and
+        # round 1 parks the story at the dormant stage 5 (the story's tick
+        # looks for the next heir). Round 2's end_story waits for `after`
+        # (QA): the window is built after immediate, and the leading desc and
+        # kill_c both still read the story.
         hidden_effect = {
             add_character_flag = eotg_flag_aug_heir_arc_done
-            scope:eotg_heir_story = { end_story = yes }
+            scope:eotg_heir_story = {
+                set_variable = { name = eotg_prior_choice  value = scope:eotg_heir_choice }
+                if = {
+                    limit = {
+                        NOT = { var:eotg_round ?= 2 }
+                    }
+                    set_variable = { name = eotg_stage  value = 5 }
+                }
+            }
         }
     }
 
@@ -731,6 +772,13 @@ eotg_aug_heir.004 = {
             has_trait = vengeful
         }
         trait = vengeful
+        # New beats §5.1 step 4: the option runs after the immediate, so this
+        # overwrites kill_failed. Round 2's heir.007 reads it (desc_executed).
+        hidden_effect = {
+            scope:eotg_heir_story ?= {
+                set_variable = { name = eotg_prior_choice  value = flag:executed }
+            }
+        }
         # QA round 2 M4: executing one's own heir is a deliberate killing of
         # family: vanilla add_kinslayer_trait_or_nothing_effect
         # (00_secret_effects.txt:433), before the death.
@@ -744,6 +792,21 @@ eotg_aug_heir.004 = {
             base = 30
             modifier = { add = 30  has_trait = vengeful }
             modifier = { add = 10  has_trait = wrathful }
+        }
+    }
+
+    # Round 2 ends the arc for good (new beats §5.1 step 4), after every
+    # option has run. Same shape as eotg_aug_patron.006's `after`
+    # (scope ?= { end_story = yes }). Vanilla ends a story from an event's
+    # after block: events/dlc/bp2/bp2_yearly_2.txt:3165-3170.
+    after = {
+        hidden_effect = {
+            scope:eotg_heir_story ?= {
+                if = {
+                    limit = { var:eotg_round ?= 2 }
+                    end_story = yes
+                }
+            }
         }
     }
 }
@@ -897,6 +960,172 @@ eotg_aug_heir.005 = {
             modifier = { add = 20  has_trait = ambitious }
             modifier = { add = 20  has_trait = callous }
             modifier = { add = -30  has_trait = zealous }
+        }
+    }
+}
+
+
+# -- eotg_aug_heir.007 --------------------------------------------------------
+# The Next in Line (new beats §5.1). Round 2 of the Heir's Arc: a later heir
+# arrives knowing what was asked of the last one, and what the ruler answered.
+# Next: heir.003 (stage 2) and heir.004, with successor descs.
+# Caller: eotg_story_aug_heir_arc, the dormant entry (branch 0b, stage 5 ->
+# 2). The trigger is a world-state guard mirroring that branch; no flags.
+# Dead-predecessor portrait: heir.005's animate_if_dead; vanilla
+# events/dlc/ep3/ep3_story_cycle_admin_eunuch_events.txt:6027-6039 (8010:
+# the dead predecessor beside the successor).
+# Resource: every option moves eotg_fracture_risk on root (a no-op for a
+# Seamless owner, by design in eotg_add_fracture_risk) and the story's
+# eotg_heir_dread. No stage change: the tick set stage 2.
+
+eotg_aug_heir.007 = {
+    type = character_event
+    title = eotg_aug_heir.007.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_heir_story.var:eotg_prior_choice ?= flag:executed }
+                desc = eotg_aug_heir.007.desc_executed
+            }
+            triggered_desc = {
+                trigger = {
+                    exists = scope:eotg_prior_heir
+                    scope:eotg_prior_heir = { is_alive = no }
+                }
+                desc = eotg_aug_heir.007.desc_dead
+            }
+            desc = eotg_aug_heir.007.desc_displaced
+        }
+    }
+    theme = family
+
+    trigger = {
+        any_owned_story = {
+            story_type = eotg_story_aug_heir_arc
+            exists = var:eotg_heir
+            var:eotg_heir = { is_alive = yes }
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = worry
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_heir }
+        character = scope:eotg_heir
+        animation = worry
+    }
+    lower_right_portrait = {
+        trigger = { exists = scope:eotg_prior_heir }
+        character = scope:eotg_prior_heir
+        animate_if_dead = yes
+        triggered_animation = {
+            trigger = { scope:eotg_prior_heir = { is_alive = no } }
+            animation = dead
+        }
+        animation = stress
+    }
+
+    immediate = {
+        hidden_effect = {
+            random_owned_story = {
+                limit = { story_type = eotg_story_aug_heir_arc }
+                save_scope_as = eotg_heir_story
+                var:eotg_heir = { save_scope_as = eotg_heir }
+                var:eotg_prior_heir ?= { save_scope_as = eotg_prior_heir }
+            }
+        }
+    }
+
+    # "What happened to them will not happen to you."
+    option = {
+        name = eotg_aug_heir.007.a
+        scope:eotg_heir = {
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+        }
+        scope:eotg_heir_story = { change_variable = { name = eotg_heir_dread  add = -1 } }
+        eotg_add_fracture_risk = { AMOUNT = -3 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 10  has_trait = gregarious }
+            modifier = { add = -10  has_trait = paranoid }
+        }
+    }
+
+    # "Then you know what I am."
+    option = {
+        name = eotg_aug_heir.007.b
+        scope:eotg_heir = {
+            add_opinion = { modifier = eotg_opinion_aug_fear  target = root  years = 10 }
+        }
+        scope:eotg_heir_story = { change_variable = { name = eotg_heir_dread  add = 1 } }
+        eotg_add_fracture_risk = { AMOUNT = 3 }
+        eotg_aug_stress_cruelty_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = arrogant }
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = -20  has_trait = compassionate }
+        }
+    }
+
+    # "Learn from it. Keep me, if it comes to that." The keeper flag weighs
+    # heir.004 toward ally and lets heir.003.c fall back on it.
+    option = {
+        name = eotg_aug_heir.007.c
+        scope:eotg_heir = {
+            add_character_flag = eotg_flag_aug_heir_keeper
+            add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
+        }
+        scope:eotg_heir_story = { change_variable = { name = eotg_heir_dread  add = -1 } }
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = humble }
+            modifier = { add = 20  has_trait = trusting }
+            modifier = { add = -20  has_trait = paranoid }
+        }
+    }
+
+    # [honest] "Tell them how it ended." Admitting an execution costs.
+    option = {
+        name = eotg_aug_heir.007.d
+        trigger = { has_trait = honest }
+        trait = honest
+        scope:eotg_heir = {
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+            add_character_modifier = { modifier = eotg_mod_aug_lesson_learning  years = 5 }
+        }
+        if = {
+            limit = { scope:eotg_heir_story.var:eotg_prior_choice ?= flag:executed }
+            add_prestige = -50
+        }
+        scope:eotg_heir_story = { change_variable = { name = eotg_heir_dread  add = -1 } }
+        eotg_add_fracture_risk = { AMOUNT = -3 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = honest }
+            modifier = { add = 10  has_trait = just }
+        }
+    }
+
+    # [paranoid] "They will try what the last one tried."
+    option = {
+        name = eotg_aug_heir.007.e
+        trigger = { has_trait = paranoid }
+        trait = paranoid
+        scope:eotg_heir = {
+            add_opinion = { modifier = eotg_opinion_aug_fear  target = root  years = 10 }
+        }
+        scope:eotg_heir_story = { change_variable = { name = eotg_heir_dread  add = 2 } }
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        eotg_aug_stress_cruelty_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = paranoid }
+            modifier = { add = 10  has_trait = vengeful }
         }
     }
 }

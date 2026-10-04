@@ -3791,7 +3791,10 @@ eotg_fracture.023 = {
     # [wrathful] "Then I will make one."
     option = {
         name = eotg_fracture.023.d
-        trigger = { has_trait = wrathful }
+        trigger = {
+            is_at_war = no    # peace branch only: no war to make at war
+            has_trait = wrathful
+        }
         trait = wrathful
         add_dread = 15
         stress_impact = {
@@ -3808,7 +3811,10 @@ eotg_fracture.023 = {
     # [calm] "Wait for the scouts."
     option = {
         name = eotg_fracture.023.e
-        trigger = { has_trait = calm }
+        trigger = {
+            is_at_war = no    # peace branch only: no scouts to await at war
+            has_trait = calm
+        }
         trait = calm
         show_as_tooltip = {
             eotg_add_fracture_risk = { AMOUNT = -6 }
@@ -4316,14 +4322,19 @@ eotg_fracture.026 = {
     }
 
     # "Beg the heir to act." With an Heir's Arc, it jumps to the Choice with
-    # the heir leaning ally (stage 3, heir_dread -2).
+    # the heir leaning ally (stage 3, heir_dread -2). New beats §5.1 step 5:
+    # only below stage 4, so a dormant arc (5) is not woken to fire heir.004
+    # again against the same heir.
     option = {
         name = eotg_fracture.026.b
         trigger = { exists = primary_heir }
         if = {
             limit = { eotg_aug_has_heir_arc = yes }
             random_owned_story = {
-                limit = { story_type = eotg_story_aug_heir_arc }
+                limit = {
+                    story_type = eotg_story_aug_heir_arc
+                    var:eotg_stage < 4
+                }
                 set_variable = { name = eotg_stage  value = 3 }
                 change_variable = { name = eotg_heir_dread  add = -2 }
             }
