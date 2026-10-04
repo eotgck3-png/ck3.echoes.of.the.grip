@@ -50,7 +50,7 @@ Until Phase 3a replaces the pool, the existing ≥30/≥60 weight modifiers in t
 ### 1.3 B3: regression decisions (`common/decisions/eotg_augmentation_decisions.txt`)
 | Decision | Change |
 |---|---|
-| `eotg_decision_partial_removal` | `is_valid`: drop `stress >= 100`. `cost = { gold = { value = medium_gold_value  if = { limit = { OR = { stress_level >= 2  has_character_flag = eotg_flag_aug_intervention_discount } } multiply = 0.75 } } }`. `is_valid_showing_failures_only` mirrors the gold check. |
+| `eotg_decision_partial_removal` | `is_valid`: drop `stress >= 100`. `cost = { gold = { value = medium_gold_value  if = { limit = { OR = { stress_level >= 2  has_character_flag = eotg_flag_aug_intervention_discount } } multiply = 0.75 } } }`. No `is_valid_showing_failures_only` gold check: `cost` alone is the vanilla convention (vanilla never tests gold in `is_valid`). *Amended 2026-10-04, CB-26 L1.* |
 | `eotg_decision_overclock_regression` | `is_valid`: drop `stress >= 200`. Cost as above with `major_gold_value`. **Effect: add** `change_variable = { name = eotg_fracture_risk  multiply = 0.5 }` before `eotg_aug_set_integration_effect = { XP = 50 }`. Remove `eotg_flag_aug_intervention_discount` if present. |
 | `eotg_decision_maintenance_protocol` | `cost = { gold = minor_gold_value }`. If `eotg_has_physician_access = yes`, multiply by 0.75. The tooltip text is already reworded (track spec Q1). |
 

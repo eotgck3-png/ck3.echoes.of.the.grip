@@ -10,9 +10,9 @@ Index: [cybernetics_v2.md](cybernetics_v2.md). Rules in index §1 apply. Needs P
 | Enhanced | "This is becoming part of me." | relationships, judgement, dependence |
 | Overclocked | "Something is wrong." | lost time, false memory, malfunction, the voice answering |
 
-**Signature resource.** Every event moves `eotg_fracture_risk` (on root or on a saved augmented character) or changes tier. Below Overclocked, moves are + only (index §1 rule 4). "Calm" choices pay in another resource.
+**Signature resource.** Every event moves `eotg_fracture_risk` (on root or on a saved augmented character) or changes tier. Below Overclocked, prefer + moves (index §1 rule 4): "calm" choices pay in another resource. The stated exception is tier1.018 a/d, where the copycat's risk −10 is a calm option cleaning up someone else's botched install (*CB-26 S8*).
 
-Conventions: as in Phase 3 §3. Universal options are **a–c**, trait options **d–f**. Helpers and lessons are from Phase 0. "phys" = `eotg_has_physician_access = yes`.
+Conventions: as in Phase 3 §3. Universal options come first (usually **a–c**), trait options after (usually **d–f**). Helpers and lessons are from Phase 0. "phys" = `eotg_has_physician_access = yes`.
 
 ---
 
@@ -28,7 +28,7 @@ The existing branches are unchanged (gold per Phase 0 §1.5). Raise "nothing" fr
 | 15 | `OR = { is_married = yes  any_relation = { type = lover } }` | tier1.009 A Lover's Touch |
 | 15 | `any_knight = { is_alive = yes }` | tier1.010 The Training Yard |
 | 20 | — | tier1.011 The Stare |
-| 15 | `OR = { has_trait = zealous  has_trait = cynical  any_courtier = { has_trait = zealous } }` | tier1.012 A Tithe for Purity |
+| 15 | `OR = { has_trait = zealous  any_courtier = { is_alive = yes  OR = { has_trait = zealous  has_trait = theologian } } }`. Someone must ask for the tithe; the bare `cynical` term is dropped (*CB-26 L24*). | tier1.012 A Tithe for Purity |
 | 8 | — | tier1.013 Rejection (stage 1) |
 | 12 | `OR = { any_knight = { eotg_is_augmented_any = no  prowess >= 10 }  any_relation = { type = rival } }` | tier1.016 The Challenge |
 | 10 | `OR = { any_vassal = { eotg_is_augmented_any = no } any_courtier = { eotg_is_augmented_any = no  is_adult = yes } }` | tier1.018 Copycat |
@@ -70,12 +70,12 @@ Expected: one Augmented event roughly every 3 years, from a 16-event pool.
 **tier1.011 The Stare (A-05).** A hall full of eyes.
 - **a** "Ignore them." Stress minor gain.
 - **b** "Stare back." +5 dread. Risk +2.
-- **c** "Explain what it does." +25 prestige.
+- **c** "Explain what it does." +25 prestige. Risk +2 (*CB-26 L16*).
 - **d [shy]** "Cover it with cloth from now on." −25 prestige. Stress: shy medium loss.
 - **e [gregarious]** "Make it the evening's entertainment." +75 prestige. Risk +3. Stress: gregarious minor loss.
 
 **tier1.012 A Tithe for Purity (A-06).** Saved `eotg_pious`: a zealous courtier, else a `theologian` courtier. If the ruler is zealous and no such courtier exists, the variant is "your own conscience".
-- **a** "Pay the tithe." `minor_gold_value`, +50 piety. `eotg_pious` gets reassured.
+- **a** "Pay the tithe." `minor_gold_value`, +50 piety. `eotg_pious` gets reassured. The purity pledge: `eotg_flag_suppress_progression` 1 year and helper reject. Without it, a strictly beat c (*CB-26 L17*).
 - **b** "Refuse." −25 piety. `eotg_pious` gets disgust.
 - **c** "Pay it, and keep upgrading." `minor_gold_value`, +25 piety. Risk +3.
 - **d [zealous]** "Fast and pray for a month." +100 piety. `eotg_flag_suppress_progression` 2 years.
@@ -83,7 +83,7 @@ Expected: one Augmented event roughly every 3 years, from a 16-event pool.
 
 **tier1.013 / .014 / .015 Rejection (A-07, M).** The body pushes back.
 - *.013 Fever.*
-  - **a** "Rest." → .014 in 30–60 days, flag `rested`.
+  - **a** "Rest." `eotg_mod_withdrawn_from_court` 3 months. → .014 in 30–60 days, flag `rested`. Without the cost, a strictly beat b (*CB-26 L18*).
   - **b** "Keep working." Risk +5. → .014.
   - **c** (phys) "My physician." → .014, flag `treated`.
   - **d [stubborn]** "I don't get sick." Risk +5. → .014.
@@ -102,7 +102,7 @@ Expected: one Augmented event roughly every 3 years, from a 16-event pool.
 
 **tier1.016 / .017 The Challenge (A-08, M).** Saved `eotg_challenger`: `ordered_knight` by prowess (unaugmented, prowess ≥ 10), else a rival.
 - *.016.*
-  - **a** "Accept." → .017.
+  - **a** "Accept." Risk +2: the implant spins up for the bout (*CB-26 L19*). → .017.
   - **b** "Refuse." −100 prestige. The challenger gets disgust.
   - **c** "Send my champion." The best knight duels. Win +50 prestige / lose −50.
   - **d [arrogant]** "Accept, with the implant switched off." → .017, flag `unaided` (root prowess counts −2 per tier in the duel weights; the win reward doubles).
@@ -226,7 +226,7 @@ If `scope:killer` exists, also set `eotg_aug_grief_killer`. `every_close_family_
 **tier2.011 Market Ledger (E-05).**
 - **a** "Implement it." `eotg_mod_aug_optimised_levies` 3 years. Risk +3.
 - **b** "Ignore it." —
-- **c** "Have the steward check the arithmetic." 50%: as a, without the vassal penalty. 50%: nothing.
+- **c** "Have the steward check the arithmetic." Gated on a living steward who is not root (the option names them; vanilla precedent `events/dlc/ep3/ep3_yearly_1.txt:174`). 50% + steward stewardship × 2: `eotg_mod_aug_optimised_levies_trimmed` 3 years (half the tax gain, no vassal penalty). Else nothing. *CB-26 M1.*
 - **d [greedy]** "Squeeze harder." As a, plus `add_gold = medium_gold_value`, `add_tyranny = 5`. Risk +5.
 - **e [generous]** "Spend the surplus on alms." `remove_short_term_gold = minor_gold_value`, +50 piety; vassals reassured.
 
@@ -253,7 +253,7 @@ If `scope:killer` exists, also set `eotg_aug_grief_killer`. `every_close_family_
   - **b** Bold (bold flag + firmware; risk +3).
   - **c** "Neither." —
 
-**tier2.015 / .016 Tampering (E-08, M).** Saved `eotg_tamperer`: a random courtier or vassal, or a rival if one exists.
+**tier2.015 / .016 Tampering (E-08, M).** Saved `eotg_tamperer`: a rival, else a courtier from the victim picker (0.05), else a vassal. **a, c and d fire .016; b ends the chain** (the purge leaves nothing to find). *CB-26 L23.*
 - *.015.*
   - **a** "Trace it." `duel = { skill = intrigue  target = scope:eotg_tamperer }` → .016 with the result.
   - **b** "Purge and reinstall." `medium_gold_value`. Risk +2.
@@ -319,7 +319,7 @@ If `scope:killer` exists, also set `eotg_aug_grief_killer`. `every_close_family_
 | 20 | `any_courtier = { is_adult = yes }` | tier3.009 Phantom Orders |
 | 15 | — | tier3.010 Heat Spike |
 | 15 | — | tier3.011 The Feast You Didn't Eat |
-| 30 | voice < 2, NOT `eotg_flag_aug_first_contact_done` (set here, permanent) | tier3.012 First Contact |
+| 30 (×1.5 at `eotg_aug_focus = flag:nerves`, Thread T7) | voice < 2, NOT `eotg_flag_aug_first_contact_done` (set here, permanent) | tier3.012 First Contact |
 | 15 | — | tier3.013 Sleepwalker |
 | 15 | `any_courtier = { is_adult = yes }` | tier3.014 The Missing Conversation |
 | 10 | — | tier3.016 The Bleed |
@@ -361,7 +361,7 @@ tier3.015 is fired by tier3.007 (a/d alliance, b/c rivalry) in 1–2 years if `s
 - **e [temperate]** "I would never have eaten that much." −25 prestige. Risk −3.
 
 **tier3.012 First Contact (O-05; T1 beat 2).** All options run `eotg_aug_voice_advance_effect = { STAGE = 2 }`. Desc variants: voice 0 = "a thought that arrives a half-second before you think it"; voice 1 = "the second self replies". Never "answers" (the Void faith's verb).
-- **a** "Answer it." Risk +8.
+- **a** "Reply to it." Risk +8. (*CB-26 S9*: the ban on "answers" holds.)
 - **b** "Ignore it." Stress medium gain. Risk −3.
 - **c** "Tell someone you trust." The spouse (or a friend) gets reassured. Risk −3.
 - **d [paranoid]** "It is lying to me." Risk +5.
@@ -378,7 +378,7 @@ tier3.015 is fired by tier3.007 (a/d alliance, b/c rivalry) in 1–2 years if `s
 
 **tier3.014 The Missing Conversation (O-07).** Saved `eotg_claimant`. `immediate` sets truth: 60% true / 40% exploiting.
 - **a** "Trust them." If exploiting: `minor_gold_value` lost. Risk +3.
-- **b** "Investigate." Intrigue `random_list`: you learn the truth (desc).
+- **b** "Investigate." Intrigue `random_list` inside `hidden_effect`; what you learned is reported by toast (`.toast_lie` / `.toast_true` / `.toast_unknown`), the vanilla hidden-outcome pattern (hunt.8540). A desc cannot report it: it shows before the click. Round 2 M7 also hides a's outcome behind a neutral tooltip. *CB-26 L22.*
 - **c** "Pretend to remember." Helper lie. Risk +5.
 - **d [trusting]** "Of course." Reassured. Risk +3.
 - **e [paranoid]** "Liar." Fear. Helper tyranny. Risk +5.
@@ -401,7 +401,7 @@ tier3.015 is fired by tier3.007 (a/d alliance, b/c rivalry) in 1–2 years if `s
 - *.022 Outcome.* `immediate` rolls:
   - **early cascade**: 20, +20 if `eotg_neurofracture_threshold_met`; runs `eotg_trigger_neurofracture`;
   - **scarring**: 45; `add_trait = scarred`, `eotg_mod_aug_overheated` 3 years;
-  - **insight**: 35; lesson learning + lesson intrigue, voice advance 2.
+  - **insight**: 35; lesson learning + lesson intrigue, voice advance **1**. Beat 2 belongs to First Contact's scene; advancing to 2 here would close its branch unseen. *CB-26 S10.*
 
   **a** "..."
 
@@ -427,7 +427,7 @@ tier3.015 is fired by tier3.007 (a/d alliance, b/c rivalry) in 1–2 years if `s
 **tier3.019 / .021 The Delegation, Revisited (O-12).** Saved `eotg_delegate`: `cp:councillor_chancellor`, else the spouse.
 - *.019.*
   - **a** "Delegate to them." The delegate gets admiration and `eotg_flag_aug_trusted_delegate`. Risk −5. → .021 in 180–360 days.
-  - **b** "Keep everything in my own hands." Risk +5.
+  - **b** "Keep everything in my own hands." +50 prestige (authority kept; without it, a strictly beat b; *CB-26 L20*). Risk and lesson per balance §5.6's stewardship roll.
   - **c [humble]** "Delegate everything." As a, + `eotg_mod_withdrawn_from_court` 1 year. Risk −8.
 - *.021 The Other Order.* The delegate swears you ordered something you didn't. `immediate`: 50% you did, and your memory is wrong.
   - **a** "Back them." −50 prestige. Risk +3.
@@ -448,7 +448,7 @@ Phase 3a's Containment Regency may use the trusted delegate as keeper when there
 - *.023.*
   - **a** "Follow it." `eotg_mod_aug_clarity_campaign` 1 year. Risk +10. → .024 in 180–270 days.
   - **b** "Reject it." Stress minor gain. Risk −3.
-  - **c** "Not yet. Gather more." Risk +3.
+  - **c** "Not yet. Gather more." Lesson martial (5 years). Risk +3. (*CB-26 L21*: without the lesson, c had no upside against b.)
   - **d [brave]** "And I lead the charge." As a, + lesson prowess. Risk +12.
   - **e [craven]** "Command from the capital." −50 prestige. Risk −3.
 - *.024 The Engagement.* `immediate` rolls:
@@ -470,6 +470,7 @@ The war itself is not modified: no war-score effect, map-agnostic.
 | `eotg_mod_aug_dulled_senses` | `icon = health_negative`, `stress_loss_mult = -0.1` |
 | `eotg_mod_aug_bold_firmware` | `icon = prowess_positive`, prowess +2 (no expiry; removed with the implants) |
 | `eotg_mod_aug_optimised_levies` | `icon = stewardship_positive`, `domain_tax_mult = 0.1`, `vassal_opinion = -5` |
+| `eotg_mod_aug_optimised_levies_trimmed` | `icon = stewardship_positive`, `domain_tax_mult = 0.05` (tier2.011.c success; *CB-26 M1*) |
 | `eotg_mod_aug_tampered` | `icon = intrigue_negative`, prowess −2, diplomacy −2 |
 | `eotg_mod_aug_overheated` | `icon = health_negative`, health −0.5, prowess +2 |
 | `eotg_mod_aug_clarity_campaign` | `icon = martial_positive`, `advantage = 15`, `enemy_hard_casualty_modifier = 0.15` |
@@ -482,7 +483,7 @@ Local saved variables used by chains (`eotg_aug_marriage_strain`, truth/outcome 
 - 4a: 16 events (incl. tier1.021/.022) plus the tier1.002 d/e options.
 - 4b: 15 events, plus E-12 variants (4).
 - 4c: 17 events.
-- 6 modifiers × 2.
+- 7 modifiers × 2 (incl. `_optimised_levies_trimmed`, CB-26 M1).
 - Outcome desc variants are listed per event above (Challenge 4, Copycat 3, Tampering 4, Space resolution 3, Plot 4, Bleed 3, Clarity 3).
 
 ## 9. Definition of done

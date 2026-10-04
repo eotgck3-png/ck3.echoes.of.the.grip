@@ -30,7 +30,7 @@ All three stories live in `common/story_cycles/eotg_augmentation_stories.txt` (c
 - **Also started by** patron.006 c/e (§2) under the same tier-3 condition.
 - **While running:** the OC `random_list` "nothing" weight doubles: `modifier = { factor = 2  eotg_aug_has_countdown = yes }` on the nothing branch.
 - **Ends:**
-  - `eotg_trigger_neurofracture` gains `random_owned_story = { type = eotg_story_aug_countdown  end_story = yes }`. The cascade itself (fracture.0001) is the ending.
+  - `eotg_trigger_neurofracture` gains `random_owned_story = { limit = { story_type = eotg_story_aug_countdown }  end_story = yes }`. The cascade itself (fracture.0001) is the ending.
   - `eotg_aug_remove_all_effect` gains the same line (Phase 0 left the slot).
   - The Downgrade decision: if the halved risk is < 50, fire countdown.006 *The Quiet*, which ends the story.
 - **`on_owner_death`:** `end_story = yes`.
@@ -82,7 +82,7 @@ Desc register escalates; **[voice]** variants as in Phase 3.
 - **d [sadistic]** "It felt like clarity." +20 dread. Risk +10.
 - **e [compassionate]** "Sit with them while they heal." The victim gets `eotg_opinion_aug_grateful_patient`; −25 prestige. Risk −5.
 
-**.005 No One Asks Any More.** You refused them, and the court stopped asking.
+**.005 No One Asks Anymore.** You refused them, and the court stopped asking.
 - **a** "Good." Risk +5.
 - **b** "Ask them to ask again." Remove the refused flag; fire tier3.020 in 30 days. Risk −3.
 - **c [humble]** "Go to them yourself." As b. Risk −6.
@@ -149,14 +149,14 @@ The envoy is saved as `scope:eotg_patron_envoy` from the story variable in each 
 - **d [diligent]** "Agree, but I audit their work." As a. Risk −8.
 - **e [paranoid]** "Their hands will never touch me." `grievance +1`. Risk +5.
 
-**.004 The Errand.** "There is a critic at your court." Saved `eotg_critic`: a zealous courtier, else a random courtier (`eotg_aug_victim_candidate`, not close family).
+**.004 The Errand.** "There is a critic at your court." Saved `eotg_critic`: a zealous courtier, else any courtier, both filtered by `eotg_aug_patron_critic_candidate` (adult, free, not root, not close family or spouse, not Neurofractured). The critic is a **chosen target**, not an episode victim, so index rule 7's picker does not apply (*CB-26 L4/S5*). The critic is named in loc.
 - **a** "It will be done." `scope:eotg_critic = { death = { death_reason = death_murder  killer = root } }`. Helper murder. Risk +5.
 - **b** "No." `grievance +1`.
 - **c** "Warn the critic instead." The critic gets reassured. `grievance +2`.
 - **d [sadistic]** "With pleasure." As a; stress: sadistic medium loss.
 - **e [just]** "Never, and they will hear of your asking." `grievance +2`, +50 prestige.
 
-**.005 The Family Clause.** "Your heir's implants will be ours." Saved `eotg_heir`: primary heir aged ≥ 12, unaugmented. Without one: "your next child" → only `grievance +1` options.
+**.005 The Family Clause.** "Your heir's implants will be ours." Saved `eotg_heir`: primary heir aged ≥ 12, unaugmented. Without one: "your next child" (`desc_no_heir`), and only the refusals **b** and **d** (grievance +2) remain; a, c and e need the heir (*CB-26 S15*).
 - **a** "Agreed." The heir runs `eotg_aug_initiate_effect`, risk 10, gets unease toward root. ("They weren't buying the implant. They were buying your dynasty.")
 - **b** "Never." `grievance +2`.
 - **c** "Take more of me instead." Root risk +15.
@@ -178,7 +178,7 @@ The envoy is saved as `scope:eotg_patron_envoy` from the story variable in each 
 ## 3. The Iron Retinue — `eotg_story_aug_retinue` (A-10; T4) and I-09 The Arms Race
 
 ### 3.1 Start
-- **init.020** (Phase 2 slot): when a retainer is augmented through it and `NOT = { any_owned_story = { type = eotg_story_aug_retinue } }` and the root already has another augmented knight, start the story at `phase = 2`.
+- **init.020** (Phase 2 slot): when a retainer is augmented through it (a–d), `eotg_aug_has_retinue = no`, NOT `eotg_flag_aug_retinue_done` (round 2 H2), and the court has **at least one** augmented knight, run `eotg_aug_start_retinue_effect`. That effect sets `phase = 1` with exactly one augmented knight, so .001 *First of the Iron* fires, and `phase = 2` with two or more. *CB-26 M5:* as first specced (always `phase = 2`, from the second knight), nothing reached `phase = 1` and .001 was unreachable.
 - **init.019 The Arms Race** b/d (below), starting at `phase = 2`.
 
 ### 3.2 Story
@@ -225,7 +225,7 @@ All set `phase = 3`.
 `phase = 5`.
 
 **.005 What the Programme Becomes.**
-- **a** "Continue." `eotg_flag_aug_retinue_permanent` (Phase 6 progression ×2 for flagged knights).
+- **a** "Continue." `eotg_flag_aug_retinue_permanent` on each retinue knight (they carry it). Phase 6 reads it on the knight **or** the liege (balance §5.7: +5 progression chance; *CB-26 S16*).
 - **b** "Stop recruiting." —
 - **c** "Reverse it." Every retinue knight: 15% `death_treatment`; else `eotg_aug_remove_all_effect` + `eotg_mod_aug_removal_withdrawal`. Remove `eotg_mod_aug_iron_retinue`.
 - **d** "Make it a privilege." Retinue knights get admiration; unaugmented knights get passed_over (`years = 10`).
@@ -238,7 +238,7 @@ All set `phase = 3`.
 - **b** "Start a programme." Create `eotg_story_aug_retinue` at `phase = 2`. Each augmented knight: risk +3 (the strain of being first).
 - **c** "Look after the ones I have." `minor_gold_value` per knight (cap 3): calibrated, risk −5.
 - **d [ambitious]** "All of it." a + b.
-- **e [content]** "Two is enough." `eotg_flag_suppress_progression` 3 years.
+- **e** "Two is enough." **Universal** (*CB-26 L12*): a and c cost gold and b commits to a programme, so this is the option nobody can be locked out of. `eotg_flag_suppress_progression` 3 years; content gets stress relief.
 
 ## 4. Data objects
 | Key | Type | Values |
@@ -247,10 +247,10 @@ All set `phase = 3`.
 | `eotg_mod_aug_patron_clause_final` | modifier | `icon = stewardship_negative`, `monthly_income_mult = -0.15` |
 | `eotg_mod_aug_patron_throttle` | modifier | `icon = health_negative`, `stress_gain_mult = 0.15`, prowess −2 |
 | `eotg_mod_aug_iron_retinue` | modifier | `icon = martial_positive`, `knight_effectiveness_mult = 0.1` |
-| `eotg_opinion_aug_passed_over` | opinion | −15, applied `years = 5` |
+| `eotg_opinion_aug_passed_over` | opinion | −15, applied `years = 5`; retinue.005.d applies `years = 10` (*CB-26 S17*) |
 | `eotg_aug_patron_envoy_template` | character template | §2.2 |
 
-All modifiers go into `eotg_clean_all_aug_modifiers` (patron and retinue modifiers are removed on the owner's full removal).
+On the owner's full removal (`eotg_clean_all_aug_modifiers`), `eotg_mod_aug_iron_retinue` and `eotg_mod_aug_patron_throttle` (a firmware restriction) are removed. **`eotg_mod_aug_patron_clause` and `_clause_final` stay:** the debt is contractual and survives the implants. The clause ends with the story's `on_end`; the final lien is permanent. *CB-26 M6.*
 
 **Index correction:** `eotg_mod_aug_retinue_resentment` (listed in index §3.4) is **dropped**. Resentment is the `passed_over` opinion.
 
@@ -264,7 +264,7 @@ All modifiers go into `eotg_clean_all_aug_modifiers` (patron and retinue modifie
 - countdown **[voice]** variants (3);
 - patron .006 tone variants (2);
 - .005 no-heir variant;
-- 5 modifiers and 1 opinion × 2.
+- 4 modifiers and 1 opinion × 2 (`_retinue_resentment` was dropped; *CB-26 S18*).
 
 ## 7. Definition of done
 0. **Validation, all three clean** on the phase's files, except the known-benign items listed in `CLAUDE.md` §Validation: Tiger 1.17.0 (scratch descriptor), `docs/tools/px_lsp_diagnostics.js` (PX language server, headless) and `docs/tools/px_vocab_check.py` (engine vocabulary + dead hooks). Tiger is the only one of the three that checks scope.
@@ -275,4 +275,4 @@ All modifiers go into `eotg_clean_all_aug_modifiers` (patron and retinue modifie
 5. **Human, in game:**
    - Console-set an Overclocked count to risk 55: Minor Anomalies within ~5 months.
    - Accept a patron: Repayment arrives in 2–3 years.
-   - Augment two knights through the decision: the retinue story starts.
+   - Augment one knight through the decision: the retinue story starts at phase 1, and *First of the Iron* follows (*CB-26 M5*).

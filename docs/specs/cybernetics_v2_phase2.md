@@ -58,7 +58,7 @@ eotg_on_death_aug_hardware = {
     }
 }
 ```
-Root = the dying character (`game/common/on_action/death.txt:1`). A custom on_action's `trigger`/`effect` blocks are fine. The rule only forbids putting them on the **vanilla** hook.
+Root = the dying character (`game/common/on_action/death.txt:7`; lines 1–5 are its comment header). A custom on_action's `trigger`/`effect` blocks are fine. The rule only forbids putting them on the **vanilla** hook.
 
 ### 1.3 Decisions → events
 `eotg_decision_seek_augmentation` → init.018. `eotg_decision_augment_retainer` → init.020. The other two decisions resolve in their own effect blocks.
@@ -67,15 +67,15 @@ Root = the dying character (`game/common/on_action/death.txt:1`). A custom on_ac
 
 ## 2. Events (`events/eotg_augmentation_initiation.txt`, namespace `eotg_aug_init`)
 
-"install" = `eotg_aug_initiate_effect = yes` + `set_variable = { name = eotg_fracture_risk  value = N }` (inside `hidden_effect`, as the existing events do). "phys" = `eotg_has_physician_access = yes`. Gold uses Phase 0 script values. Every option has an `ai_chance`, base 30, with trait modifiers matching its stress helper.
+"install" = `eotg_aug_initiate_effect = yes` + `set_variable = { name = eotg_fracture_risk  value = N }` (inside `hidden_effect`, as the existing events do). "phys" = `eotg_has_physician_access = yes`. Gold uses Phase 0 script values. Every option has an `ai_chance`, base 30 by default (10–40 by index §1 rule 6, *CB-26 L9*: declines and no-ops lower, the offer's main sale higher), with trait modifiers matching its stress helper.
 
 ### init.006 — The Prosthetic (I-01) · S
 - **Fires:** branch 2. **Trigger:** `eotg_has_physical_loss = yes`. **Desc:** `triggered_desc` per loss (blind / one_legged / maimed / one_eyed), worst first, matching `eotg_aug_restore_loss_effect`'s order.
-- **a** "Replace what I lost." Cost `medium_gold_value` (×0.75 if phys). Install, risk 0. `eotg_aug_restore_loss_effect`. Helper surgery.
+- **a** "Replace what I lost." Cost `medium_gold_value`, full price: the physician discount belongs to c, which would otherwise be "a plus calibration at the same price" (*CB-26 M4*). Install, risk 0. `eotg_aug_restore_loss_effect`. Helper surgery.
 - **b** "I will learn to live with it." Stress: content and humble minor loss, ambitious minor gain. +50 prestige.
-- **c** (`trigger` phys; no trait icon) "My physician holds the knife." As a, cost ×0.75. Also `eotg_mod_implant_calibrated` 3 years. If the physician is a courtier, they get `eotg_opinion_aug_grateful_patient`. *Inverted on purpose:* the patient is grateful to the doctor, so the opinion sits on the physician toward root.
+- **c** (`trigger` phys; no trait icon) "My physician holds the knife." As a, cost ×0.75. Also `eotg_mod_implant_calibrated` 3 years. If a court physician exists, they get `eotg_opinion_aug_admiration` toward root (10 years), as init.017.a. `eotg_opinion_aug_grateful_patient` is displayed as "Grateful Patient" and only ever sits on the person treated (*CB-26 M3*).
 - **d [zealous]** "As I was made, and as I was unmade." +100 piety, `eotg_flag_suppress_progression` 5 years. Stress: zealous medium loss.
-- **e [cynical]** "Make it better than the original." As a, + lesson prowess, risk set to 5.
+- **e [cynical]** "Make it better than the original." As a (full price), + lesson prowess, risk set to 5.
 - **Risk:** a/c/e set it. **Saved scopes:** `eotg_physician` (`court_position:court_physician_court_position`, if employed; precedent `events/activities/hunt_activity/hunt_events.txt:21052`).
 
 ### init.007 / init.008 — The Neural Bridge (I-02) · M, 2 stages
@@ -92,7 +92,7 @@ Root = the dying character (`game/common/on_action/death.txt:1`). A custom on_ac
 |---|---|---|
 | success | 50 (+15 phys) | `remove_trait = incapable` (or `infirm`, whichever is held). +50 prestige |
 | partial | 30 | trait stays; risk +10; desc "your hands answer, your words do not" |
-| complication | 20 (−10 phys) | `increase_wounds_effect = { REASON = wounds }`, risk +15 |
+| complication | 20 (−10 phys) | `increase_wounds_no_death_effect = { REASON = wounds }` (no death before the event opens; *CB-26 L7*), risk +15 |
 
 Options:
 - **a** "Then this is who I am now." Ends the chain.
@@ -134,7 +134,7 @@ Options:
 - **e** (rejection) "It will settle." Risk +10. 30%: trigger init.012 in 60 days anyway.
 - **f [lazy]** (infection) "Bandage it and forget it." As c, helper neglect.
 
-**init.012 (stage 3, rejection resolved).** `immediate` rolls: 60% the implant is lost (`eotg_aug_remove_all_effect`, `add_trait = wounded_1`); 40% saved (risk +10). One option: **a** "So be it." **b [brave]** (lost) "Find me another surgeon." Sets `eotg_flag_aug_backalley_retry` 2 years, which lets init.010 fire again regardless of cooldown. The flag is read **in the on_action branch**, not the event.
+**init.012 (stage 3, rejection resolved).** `immediate` rolls: 60% the implant is lost (`eotg_aug_remove_all_effect`, `increase_wounds_no_death_effect = { REASON = treatment }`, so an already-wounded ruler is not reset to rank 1; *CB-26 L8*); 40% saved (risk +10). One option: **a** "So be it." **b [brave]** (lost) "Find me another surgeon." Sets `eotg_flag_aug_backalley_retry` 2 years, which lets init.010 fire again regardless of cooldown. The flag is read **in the on_action**, not the event: while it is held, each pulse rolls a 50% retry (spending the flag and setting the normal 2-year cooldown) **instead of** the initiation list. The Sickly Child block is outside the list and still rolls. *CB-26 L11.*
 
 ### init.013 — A Parent's Hardware (I-06) · M
 - **Fires:** branch 5. **Saved:** `scope:eotg_dead_parent = var:eotg_parent_hardware`. **Desc:** variant if `eotg_flag_aug_hardware_fractured` ("they say it was the implant that broke them").
@@ -142,7 +142,7 @@ Options:
 - **b** "Sell them." `add_gold = medium_gold_value`.
 - **c** "Destroy them." +50 piety. Stress: zealous and compassionate minor loss.
 - **d [greedy]** "Sell them to the highest bidder, and let it be known." `add_gold = { value = medium_gold_value multiply = 1.5 }`, −50 prestige.
-- **e [eccentric]** "Keep them. Take them apart. Learn." Lesson learning, +5 risk **only if** the ruler is already augmented (otherwise the event couples via a).
+- **e [eccentric]** "Keep them. Take them apart. Learn." Lesson learning. (init.013 fires only for unaugmented rulers, so the event couples via a; the old "+5 risk if already augmented" clause was dead and is deleted, *CB-26 S14*.)
 - **All options:** `remove_variable = eotg_parent_hardware` and the fractured flag.
 
 ### init.014 / .015 — The Sickly Child (I-07) · M, 2 stages *(Q8: tone review)*
@@ -206,7 +206,7 @@ Coupling: moves the child's risk. The flagged child feeds Phase 6 and the Heir's
 | `eotg_decision_consult_physician` | `has_trait = eotg_cybernetics`, `eotg_has_physician_access = yes` | — | `minor_gold_value` (×0.5 if self-physician) | `cooldown = { years = 3 }` | `eotg_mod_implant_calibrated` 5 years; remove `eotg_mod_aug_infection`; if tier 3, risk −12 (maintenance gives −8); the court physician (if any) gets lesson learning | `ai_check_interval = 60`, base 10, +30 if tier 3 |
 | `eotg_decision_augment_retainer` | `has_trait = eotg_cybernetics` | `OR = { any_knight = {…unaugmented adult} any_courtier = {…} }`, `gold >= minor_gold_value` | none (the hub charges) | `cooldown = { years = 2 }` | `trigger_event = eotg_aug_init.020` | base 5, +15 ambitious, +10 callous |
 
-Picture: `gfx/interface/illustrations/decisions/decision_misc.dds`, as the existing three. The human delivered 3 decision illustrations on 2026-10-03, so the scripter checks `gfx/interface/` for mod illustrations first.
+Picture (*CB-26 L10*, placeholders accepted): Seek `decision_smith.dds`; Remove Implants reuses the mod's `eotg_decision_partial_removal.dds` (CB-05); Consult Physician `decision_physician.dds`; Augment a Retainer `decision_knight_kneeling.dds`. All under `gfx/interface/illustrations/decisions/`, all present in 1.20. Bespoke art is human art debt.
 
 ---
 

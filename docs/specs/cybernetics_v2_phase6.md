@@ -9,7 +9,7 @@ Today, augmented knights and courtiers are frozen at Augmented forever (audit §
 - break;
 - reach their **liege** as events: "your champion attacked a guard".
 
-It also makes tier3.007 *Two Machines*, init.005 *A Familiar Change*, fracture.024 *The Familiar Change* and init.019 *The Arms Race* reachable through courtiers, not just landed peers.
+It also makes tier3.007 *Two Machines*, init.005 *Back From the Capital*, fracture.024 *The Same Pattern* and init.019 *The Arms Race* reachable through courtiers, not just landed peers.
 
 **Signature resource.** Each non-ruler carries their own `eotg_fracture_risk`, which accrues at tier 3, cascades at 80, and drifts once fractured. Every liege-facing event moves the **champion's** risk or changes their tier.
 
@@ -40,19 +40,18 @@ Effect order:
 | Step | Applies to | Effect |
 |---|---|---|
 | 1. NR-01 offer | `is_knight = yes`, `eotg_is_augmented_any = no`, and the liege has `eotg_cybernetics`, or ≥1 augmented knight, or `eotg_flag_aug_want_more` | 3%: fire **nr.001** to the liege (cooldown below) |
-| 2. Progression | `eotg_is_aug_tier1/2` | 4% a year (8% if `eotg_flag_aug_iron_retinue` **and** the liege has `eotg_flag_aug_retinue_permanent`): `eotg_aug_set_integration_effect = { XP = 50 / 100 }`. Silent; nr.002 reports it. |
-| 3. Accrual | `eotg_is_aug_tier3` | `eotg_add_fracture_risk`: +6, +6 more at `stress_level >= 2`. If risk ≥ 80 → `eotg_aug_nr_cascade_effect` (§2), which fires **nr.006** to the liege and ignores cooldown. |
+| 2. Progression | `eotg_is_aug_tier1/2` | `chance = eotg_aug_nr_progress_chance` (balance §5.7: base 10, retinue +5, `eotg_flag_aug_retinue_permanent` on the knight **or** the liege +5, child patient +5, battle bonus 0–10): `eotg_aug_set_integration_effect = { XP = 50 / 100 }`. On a progression of a **knight**, when the liege is not on cooldown, set the liege cooldown and fire **nr.002** to the liege here; step 5 is then skipped for this character this year. nr.002 is not a step-5 list entry, so it only ever reports a progression that happened. *CB-26 M9, S16.* |
+| 3. Accrual | `eotg_is_aug_tier3` | `eotg_add_fracture_risk`: +10 (balance §5.7; was +6), +6 more at `stress_level >= 2`; battles add through `eotg_on_combat_aug_knights`. If risk ≥ 80 → `eotg_aug_nr_cascade_effect` (§2), which fires **nr.006** to the liege and ignores cooldown. |
 | 4. Drift | `has_trait = eotg_neurofractured` | +6 a year |
-| 5. Liege event | NOT `eotg_flag_aug_nr_cooldown` **on the liege** | one `random_list`, then the flag is set on the liege (`years = 1`) |
+| 5. Liege event | NOT `eotg_flag_aug_nr_cooldown` **on the liege**; not in a year this character cascaded (nr.006) or progressed with a report (nr.002) | one `random_list`, then the flag is set on the liege (`years = 1`) |
 
 The step-5 list, with the trigger on the champion:
 
 | Weight | Trigger | Event |
 |---|---|---|
-| 10 | `is_knight = yes`, tier 1–2 | nr.002 *Your Champion's New Edge* |
 | 15 | tier 2–3, risk ≥ 30 | nr.003 *Something Is Wrong With Them* |
 | 20 | tier 3 with risk ≥ 60, or Neurofractured | nr.004 *The Champion's Mistake* |
-| 10 | `is_knight = no`, tier 2+ | nr.005 *The Familiar Change* |
+| 10 | `is_knight = no`, tier 2+ | nr.005 *Not Quite Them* |
 | 100 | — | nothing |
 
 Weights ×1.5 for `eotg_flag_aug_iron_retinue` characters (`modifier = { factor = 1.5 … }`).
@@ -84,7 +83,7 @@ Root is the liege. `scope:eotg_champion` is the non-ruler. Every event's `trigge
 - **d [generous]** "At my expense, and properly." Install + `eotg_mod_implant_calibrated` 3 years. `medium_gold_value`.
 - **e [paranoid]** "Why do you want to be stronger than me?" The champion gets fear.
 
-**nr.002 Your Champion's New Edge (NR-02).** The desc names their new tier.
+**nr.002 Your Champion's New Edge (NR-02).** Fired from step 2 on a real progression (*CB-26 M9*). The desc names their new tier.
 - **a** "Reward them." `minor_gold_value`. Admiration. Risk +3.
 - **b** "Keep an eye on them." —
 - **c** "Front line, every battle." +50 prestige for root. Risk +8.
@@ -99,15 +98,15 @@ Root is the liege. `scope:eotg_champion` is the non-ruler. Every event's `trigge
 - **e [callous]** "Work them until it breaks." +25 prestige. Risk +10.
 
 **nr.004 The Champion's Mistake (NR-04).** `immediate`: `eotg_aug_pick_victim_effect = { NAME = eotg_victim  FAMILY_FACTOR = 0.05 }` in the liege's scope (root = liege, so the picker's `root` exclusions are right). Exclude the champion with a wrapper limit. The victim is wounded (`REASON = attacked`). No victim: "they attacked a door, a bulkhead, themselves", and the champion gets `wounded_1`.
-- **a** "Imprison them." `imprison = { target = scope:eotg_champion  type = dungeon }`. Helper tyranny. Risk −5.
+- **a** "Imprison them." `imprison_character_effect = { TARGET = scope:eotg_champion  IMPRISONER = root }` (round 2 M5; it applies vanilla tyranny). Helper tyranny. Risk −5.
 - **b** "Pay off the victim." `minor_gold_value`. Risk +5.
 - **c** "Restrain them, and have them treated." `medium_gold_value`. Risk −10.
-- **d [just]** "A trial." +50 prestige; then as a.
+- **d [just]** "A trial." +50 prestige; then as a, **except** that it has no tyranny stress helper: a trial is due process for a just ruler, so d gives just a minor stress loss instead. Vanilla tyranny from the imprisonment still applies. *CB-26 M10.*
 - **e [sadistic]** "Let them finish." `scope:eotg_victim = { death = { death_reason = death_murder  killer = scope:eotg_champion } }`. +20 dread. Helper murder (sadistic loses stress). Risk +5.
 
 Options a–d carry helper wound for the liege: their champion, their responsibility.
 
-**nr.005 The Familiar Change (NR-05).** `immediate`: `scope:eotg_champion = { eotg_aug_scramble_personality_effect = yes }` (Phase 3a effect). **If Phase 3a has not shipped,** use `add_trait = paranoid` when they are not `trusting` and not already paranoid. The desc names what changed.
+**nr.005 Not Quite Them (NR-05).** `immediate`: `scope:eotg_champion = { eotg_aug_scramble_personality_effect = yes }` (Phase 3a effect). **If Phase 3a has not shipped,** use `add_trait = paranoid` when they are not `trusting` and not already paranoid. The desc is generic; the vanilla trait-gain and trait-loss tooltips name what changed (*CB-26 S19*).
 - **a** "Talk to them." Risk −5.
 - **b** "Send them away." `move_to_pool`.
 - **c** "Watch." Risk +3.

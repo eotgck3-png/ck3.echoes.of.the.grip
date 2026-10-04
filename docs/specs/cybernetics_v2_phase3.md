@@ -28,7 +28,7 @@ Every event below moves it, or (endgames) changes tier.
 Order inside `effect`, all under `limit = { has_trait = eotg_neurofractured }`:
 
 1. **Drift** (Phase 0 §1.2). Always runs.
-2. **Heir's Arc start** (no cooldown; the story owns its pacing): `if` `NOT = { any_owned_story = { type = eotg_story_aug_heir_arc } }`, and `primary_heir ?= { is_alive = yes  age >= 14 }`, then `create_story = eotg_story_aug_heir_arc`.
+2. **Heir's Arc start** (no cooldown; the story owns its pacing): `if` `is_landed = yes`, `eotg_aug_has_heir_arc = no` (`any_owned_story = { story_type = eotg_story_aug_heir_arc }`), NOT `eotg_flag_aug_heir_arc_done`, and `primary_heir ?= { is_alive = yes  age >= 14 }`, then `create_story = eotg_story_aug_heir_arc`. **The arc runs once per ruler** (*CB-26 M11*): heir.004, and the story's landless exit, set the permanent `eotg_flag_aug_heir_arc_done`. Balance §5.8(a) adds a second start site at Overclocked with the same guard.
 3. **Terminal.** `if` `var:eotg_fracture_risk >= 95` and NOT `eotg_flag_aug_terminal_cooldown`: set that flag (`months = 11`) and fire **fracture.027** *The Cascade*. This replaces the year's roll.
 4. **`else_if`** NOT `eotg_flag_nf_event_cooldown` → three band lists (`if` storm / `else_if` fracture / `else` flicker). Each branch sets `eotg_flag_nf_event_cooldown` `months = 11` unless stated otherwise.
 
@@ -55,11 +55,11 @@ While `eotg_flag_aug_restrained` is set, the weight of every branch marked **V**
 | 30 **V** | — | fracture.016 *Blood on the Sleeve* |
 | 25 | — | fracture.017 *Terms of Access* |
 | 20 | NOT scramble cooldown (set, 5 years) | fracture.018 *Scrambled* |
-| 25 | `any_courtier = { eotg_aug_victim_candidate = yes }` | fracture.019 *The False Traitor* |
+| 25 | `any_courtier = { eotg_aug_victim_candidate = yes }` | fracture.019 *The Flagged Name* |
 | 15 | `any_courtier = { eotg_aug_victim_candidate = yes  NOT = { is_close_family_of = root } }` | fracture.021 *The Missing Courtier* |
-| 20 | `OR = { NOT = { has_variable = eotg_aug_voice }  var:eotg_aug_voice < 3 }` | fracture.022 *The Second Voice* |
+| 20 | `OR = { NOT = { has_variable = eotg_aug_voice }  var:eotg_aug_voice < 3 }` | fracture.022 *We* |
 | 15 | — | fracture.023 *The Wrong War* |
-| 20 | `any_courtier = { eotg_is_augmented_any = yes }` | fracture.024 *The Familiar Change* |
+| 20 | `any_courtier = { eotg_is_augmented_any = yes }` | fracture.024 *The Same Pattern* |
 | 5 | — | fracture.007 *Dead Reckoning* |
 | 60 | — | nothing |
 
@@ -112,7 +112,7 @@ That is 16 pairs × 2 = 32 entries, plus the 2 one-way lines in the last row. Fa
 - `lover` → `remove_relation_lover`;
 - `friend` → `remove_relation_friend`.
 
-Save the person as `scope:eotg_forgotten` and give them `eotg_opinion_aug_unease` (5 years). Callers name them in loc.
+Save the person as `scope:eotg_forgotten` and give them `eotg_opinion_aug_unease` (5 years). The effect names them itself, with a toast after the fact: `hidden_effect = { send_interface_toast = { title = eotg_aug_forget_relation_toast  left_icon = scope:eotg_forgotten } }` (vanilla hidden-outcome toast, hunt.8540, as tier3.014.b). Callers roll it on the click, so no option tooltip can name the person in advance. *CB-26 L14.*
 
 **`eotg_aug_raise_warrant_effect`.** Caller saves `scope:eotg_warrant_vassal`. Shape copied from vanilla `prelude_events_0010_screw_over_guest_effect` (`events/activities/coronation_activity/prelude_events.txt:236`).
 ```
@@ -141,7 +141,7 @@ Precedent: `events/bookmark_events.txt:2247–2249`. **Q7:** an in-game check is
 ## 3. Events — `events/eotg_augmentation_fracture.txt` (namespace `eotg_fracture`)
 
 Conventions:
-- The universal options are **a–c**; trait options are **d–e**.
+- Universal options come first, trait options after (usually a–c, then d–e). A universal option may follow a trait option where an event gained one later (fracture.026.d, fracture.007.f, end.020 d/e). *CB-26 S11.*
 - "picker(N, F)" = `eotg_aug_pick_victim_effect = { NAME = N  FAMILY_FACTOR = F }`.
 - Every option moves risk unless marked "—". The event couples through at least one option.
 - Desc `triggered_desc` variants on `var:eotg_aug_voice` are marked **[voice]**: 0–1 "a thought that arrives a half-second before you think it", 2 "it" (the model), 3 "we", 4 "we, on agreed terms". Every **[voice]** line follows the register rule and banned-word list in index §5.
@@ -242,7 +242,7 @@ All options carry helper wound (if wounded) or helper murder (if dead).
 - **d [stubborn]** "No." `random = { chance = 20  … }`. Stress: stubborn medium loss. —
 - **e [fickle]** "Does it matter?" Scramble. Stress: fickle medium loss. Risk −3.
 
-**fracture.019 / .020 The False Traitor** (unreliable perception).
+**fracture.019 / .020 The Flagged Name** (specced as *The False Traitor*; unreliable perception).
 
 *fracture.019.* `immediate`:
 - saves `eotg_accused`: `random_vassal` (alive), else picker(…, 0.05);
@@ -258,7 +258,7 @@ Options:
 
 `death_execution` is a vanilla reason (`game/common/deathreasons/00_event_deaths.txt`, checked).
 
-*fracture.020 (the truth).* The desc varies by truth × what was done.
+*fracture.020 (the truth).* The desc varies by truth × what was done: **6 variants**, `desc_true_spared` (true, and the ruler spared them via .019.e), `desc_true`, `desc_false_executed`, `_arrested`, `_watched`, `_spared`. Options a–d are merged by round 2 into a release option plus one ungated fallback whose name picks by case; on the true-and-spared path its name is `eotg_fracture.020.c_spared` and it gives **no** prestige (risk +5 stays). *CB-26 L15.*
 - If false: the accused's close family and the accused (if alive) get `eotg_opinion_aug_falsely_accused`; `add_tyranny = 10` if they were executed.
 - **a** (false, imprisoned) "Release them. I was wrong." `release_from_prison`. Risk −5.
 - **b** (false) "I was right anyway." Helper lie, `add_tyranny = 10`. Risk +10.
@@ -270,7 +270,7 @@ Options:
 - **c** "Ask the guards what I said." Reveals "you did order it". Helper murder. Risk +5.
 - **d [just]** "Open an inquiry, even if it ends at my door." −100 prestige. Risk −6.
 
-**fracture.022 The Second Voice** (T1, beat 3). **All options** run voice advance 3 first: the slip already happened.
+**fracture.022 We** (specced as *The Second Voice*; T1, beat 3). **All options** run voice advance 3 first: the slip already happened.
 - **a** "We — I. I meant I." Stress minor gain. Risk −5.
 - **b** "We." +10 dread. The spouse gets unease. Risk +10.
 - **c** "Put it in the logs." Lesson learning. Risk +3.
@@ -284,7 +284,7 @@ Options:
 - **d [wrathful]** "Then I will make one." +15 dread. Risk +10.
 - **e [calm]** "Wait for the scouts." Risk −6.
 
-**fracture.024 The Familiar Change** (T4: the ruler alone notices an augmented courtier changing). Saved `eotg_changed`: `random_courtier = { limit = { eotg_is_augmented_any = yes } }`.
+**fracture.024 The Same Pattern** (T4: the ruler alone notices an augmented courtier changing). Saved `eotg_changed`: `random_courtier = { limit = { eotg_is_augmented_any = yes } }`.
 - **a** "Watch them." Risk +3.
 - **b** "Confront them." 50%: they admit it (their risk −10, admiration). 50%: they deny it (unease). Root risk +3.
 - **c** "Have them restrained." `imprison = { type = house_arrest }`. Helper tyranny. Their risk −10. Root risk +5.
@@ -406,7 +406,7 @@ Owner options, by outcome:
 | Kill, failed | **b** | "Forgive them." | heir reassured | −5 |
 | Kill, failed | **c [vengeful]** | "Execute them." | `death_execution`; helper murder | +15 |
 
-The story ends after any outcome.
+The story ends after any outcome, and heir.004 sets the owner's permanent `eotg_flag_aug_heir_arc_done`: the arc never restarts for this ruler, even for a later heir (*CB-26 M11*; a later-heir arc is new scope, rulings §3).
 
 **heir.005 What Must Be Done** (fires to the heir, on Kill success). `immediate`: `scope:eotg_parent_ruler = { death = { death_reason = death_murder  killer = root } }`. The player becomes the heir by normal succession.
 - **a** "It was mercy." —
@@ -450,7 +450,7 @@ The story ends after any outcome.
 
 ## 6. Effects
 - **`eotg_aug_cascade_death_effect`:** `death = { death_reason = eotg_death_cascade }`.
-- **`eotg_aug_excision_effect`:** `eotg_aug_remove_all_effect`, `eotg_mod_aug_excision_recovery` 5 years, `add_trait = scarred`. End any Heir's Arc (`random_owned_story = { type = eotg_story_aug_heir_arc  end_story = yes }`).
+- **`eotg_aug_excision_effect`:** `eotg_aug_remove_all_effect`, `eotg_mod_aug_excision_recovery` 5 years, `add_trait = scarred`. End any Heir's Arc (`random_owned_story = { limit = { story_type = eotg_story_aug_heir_arc }  end_story = yes }`).
 - **`eotg_aug_total_integration_effect`:**
   - `remove_trait = eotg_neurofractured`, `add_trait = eotg_total_integration`;
   - `remove_trait` each of the 36 personality traits (no-ops when not held);
@@ -538,7 +538,7 @@ Coupling: moves the old ruler's risk, or changes their tier.
 | `eotg_decision_aug_embrace_cascade` | NF, `eotg_aug_pressure_storm = yes`, `OR = { var:eotg_aug_voice >= 3  has_character_flag = eotg_flag_aug_may_embrace }` | — | — | → end.009 | +30 ambitious, +20 callous, −50 compassionate |
 | `eotg_decision_aug_excision` | `OR = { eotg_is_aug_tier2 = yes  eotg_is_aug_tier3 = yes  has_trait = eotg_neurofractured }` | `gold >= major_gold_value` (or the promised flag) | `cooldown = { years = 5 }`; cost is charged in end.001 | → end.001 | `stress_level >= 3`; base 3 |
 
-All five use `decision_misc.dds` (or the human's illustrations).
+Pictures (*CB-26 L10*, vanilla placeholders accepted): Restraints `decision_prison.dds`, Sedation and Excision `decision_physician.dds`, Appoint a Warden `decision_realm.dds`, Embrace `decision_misc.dds`. Bespoke art is human art debt.
 
 ---
 

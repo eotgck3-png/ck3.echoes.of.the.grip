@@ -282,7 +282,7 @@ modifier = { factor = 2  is_ai = yes  highest_held_title_tier >= tier_kingdom }
 ```
 - These follow vanilla's tiering: counts are throttled hardest, kings least (`yearly_on_actions.txt:3022-3030`: AI kingdom+ 30%, duchy 70%, count 95% no-event).
 - They are gentler than vanilla's 95% for counts. Vanilla throttles flavor; this list creates world state, and the AI must still take part.
-- **The "A Familiar Change" entry (init.005, weight 20) gets `modifier = { factor = 0.5  is_ai = yes }`.** It is the contagion branch: every augmented vassal or courtier raises it.
+- **The "Back From the Capital" entry (init.005, weight 20; formerly *A Familiar Change*) gets `modifier = { factor = 0.5  is_ai = yes }`.** It is the contagion branch: every augmented vassal or courtier raises it.
 
 **(b) AI throttle on the tier-1 and tier-2 lists.** Nothing entry ×2 for AI counts only (`is_ai = yes`, `highest_held_title_tier < tier_duchy`). Their 0.35–0.4 events a year is fine for the player, but in a wider world it is pure AI noise.
 

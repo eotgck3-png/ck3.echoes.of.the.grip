@@ -65,9 +65,11 @@ The current values are in the audit references.
 6. **Options.**
    - Shape: 3 universal options plus 1–2 trait-gated ones where it fits. A trait-gated option uses `trigger = { has_trait = X }` **and** `trait = X` for the icon.
    - A trait option may be the better deal for a character who has that trait. That is vanilla practice: trait options reward the trait. **Amended 2026-10-03** after Phase 1 QA; the earlier rule, "must not dominate the universal ones", contradicted vanilla. What it must not do is make a *universal* option pointless for characters without the trait, and universal options must not dominate each other (audit §2.5).
-   - Every option has an `ai_chance` with ≥2 trait modifiers.
+   - Every option has an `ai_chance` with ≥2 trait modifiers. Base 30 is the default. A decline or no-op may go down to 10, and the option an offer exists to sell may go up to 40 (vanilla bases run 0–100). *Amended 2026-10-04, CB-26 L9.*
+   - The shape above applies to **choice** events. Chain-outcome stages and notifications (init.008, init.012, tier1.017, end.010, fracture.028) may have one or two options. *CB-26 S12.*
    - Every morally loaded option uses one of the stress helpers in Phase 0 §2.4.
-7. **Victims.** Every character hurt or killed by an episode is picked with `eotg_aug_pick_victim_effect` and named in loc. Never bare `random_courtier`. This covers audit §1.5.
+7. **Victims.** Every character hurt or killed by an **episode** (the implant's violence the ruler did not choose) is picked with `eotg_aug_pick_victim_effect` and named in loc. Never bare `random_courtier`. This covers audit §1.5.
+   - **Chosen targets are different** (*CB-26 L4/S5*). A person the story names and the ruler then decides to harm is picked by a dedicated scripted trigger and named in loc: the Errand's critic (patron.004, `eotg_aug_patron_critic_candidate`), an accused, a rival. That is not an episode, and the weighted picker does not apply.
 8. **Gold.** Scaled script values only (B5).
 9. **Map-agnostic.** No title, province, character, culture or faith keys. Faith reactions go through `zealous`, `cynical`, `theologian`, `lifestyle_mystic` and piety only. Created characters (the Patron's envoy) inherit `root.culture` / `root.faith` by scope, never by key.
 10. **Traits.** Every trait named in this spec was checked in `game/common/traits/00_traits.txt`. **`curious` and `pensive` are childhood traits** (`category = childhood`, `maximum_age = 15`) and are never used. Substitutes: `eccentric`, `erudite`, `education_learning_3/4`, `lifestyle_physician`, `shy`.
@@ -100,7 +102,8 @@ All four are extended additively (`on_actions = { eotg_… }`), never with a top
 | `eotg_has_physical_loss` | 0 | `maimed` OR `one_legged` OR `one_eyed` OR `blind` |
 | `eotg_has_physician_access` | 0 | self `lifestyle_physician`, OR `employs_court_position = court_physician_court_position` |
 | `eotg_aug_victim_candidate` | 0 | used by the victim picker (Phase 0 §2.2) |
-| `eotg_aug_has_countdown` | 5 | `any_owned_story = { type = eotg_story_aug_countdown }` |
+| `eotg_aug_has_heir_arc` | 3a | `any_owned_story = { story_type = eotg_story_aug_heir_arc }` |
+| `eotg_aug_has_countdown` / `_patron` / `_retinue` | 5 | `any_owned_story = { story_type = eotg_story_aug_countdown }` (and the patron and retinue stories). The filter field is `story_type`; to end one, `random_owned_story = { limit = { story_type = … }  end_story = yes }`. *CB-26 S2.* |
 
 ### 3.2 Scripted effects (`common/scripted_effects/eotg_augmentation_effects.txt`)
 | Key | Phase |
@@ -112,7 +115,7 @@ All four are extended additively (`on_actions = { eotg_… }`), never with a top
 | `eotg_aug_voice_advance_effect` (param `STAGE`) | 0 |
 | `eotg_aug_stress_{surgery,embrace,reject,wound,murder,cruelty,tyranny,lie,neglect}_effect` (9) | 0 |
 | `eotg_aug_scramble_personality_effect`, `eotg_aug_forget_relation_effect` | 3a |
-| `eotg_aug_raise_warrant_effect`, `eotg_aug_start_containment_regency_effect` (param `KEEPER`) | 3a |
+| `eotg_aug_raise_warrant_effect`, `eotg_aug_start_containment_regency_effect` (params `KEEPER`, `SWING`) | 3a |
 | `eotg_aug_total_integration_effect`, `eotg_aug_cascade_death_effect`, `eotg_aug_excision_effect` | 3b |
 | `eotg_aug_nr_cascade_effect` (non-ruler cascade; never `eotg_trigger_neurofracture`) | 6 |
 
@@ -120,7 +123,7 @@ All four are extended additively (`on_actions = { eotg_… }`), never with a top
 | Key | Type | Set by | Read by |
 |---|---|---|---|
 | `eotg_fracture_risk` | char var 0–100 (existing) | many | everything |
-| `eotg_aug_voice` | char var 0–4 | `eotg_aug_voice_advance_effect` | Phases 3–5 descs and options (Thread T1) |
+| `eotg_aug_voice` | char var 0–5 (5 = Seamless: "no voice now") | `eotg_aug_voice_advance_effect` | Phases 3–5 descs and options (Thread T1) |
 | `eotg_aug_focus` | char var (`flag:limbs` / `flag:senses` / `flag:nerves`) | tier1.021 (Phase 4a) | Phases 4b–5 |
 | `eotg_parent_hardware` | char var → the dead parent, 5 years | `eotg_on_death_aug_hardware` | init.013 |
 | `eotg_flag_aug_hidden_flaw` | char flag (permanent) | init.011, init.013 | OC accrual (+4/yr); Countdown starts at 40 not 50 |
@@ -139,12 +142,12 @@ All four are extended additively (`on_actions = { eotg_… }`), never with a top
 | static modifiers | `eotg_mod_aug_lesson_{prowess,learning,intrigue,martial}` | 0 |
 | | `eotg_mod_aug_removal_withdrawal`, `eotg_mod_aug_infection`, `eotg_mod_aug_clean_install`, `eotg_mod_aug_bridge_strain` | 2 |
 | | `eotg_mod_aug_restrained`, `eotg_mod_aug_sedated`, `eotg_mod_aug_excision_recovery` | 3b |
-| | `eotg_mod_aug_bold_firmware`, `eotg_mod_aug_clarity_campaign`, `eotg_mod_aug_dulled_senses`, `eotg_mod_aug_overheated`, `eotg_mod_aug_optimised_levies`, `eotg_mod_aug_tampered` | 4 |
+| | `eotg_mod_aug_bold_firmware`, `eotg_mod_aug_clarity_campaign`, `eotg_mod_aug_dulled_senses`, `eotg_mod_aug_overheated`, `eotg_mod_aug_optimised_levies`, `eotg_mod_aug_optimised_levies_trimmed` (CB-26 M1), `eotg_mod_aug_tampered` | 4 |
 | | `eotg_mod_aug_patron_clause`, `eotg_mod_aug_patron_clause_final`, `eotg_mod_aug_patron_throttle`, `eotg_mod_aug_iron_retinue` | 5 |
 | character template | `eotg_aug_patron_envoy_template` (`common/scripted_character_templates/eotg_augmentation_templates.txt`) | 5 |
 | opinion modifiers | `eotg_opinion_aug_grateful_patient` (+20, 10y) | 2 |
 | | `eotg_opinion_aug_falsely_accused` (−30, 10y), `eotg_opinion_aug_unmade` (−40, decaying) | 3 |
-| | `eotg_opinion_aug_passed_over` (−15, 5y) | 5 |
+| | `eotg_opinion_aug_passed_over` (−15, 5y by default; retinue.005.d applies 10y) | 5 |
 | trait | `eotg_total_integration` | 3b |
 | death reason | `eotg_death_cascade` (`common/deathreasons/eotg_augmentation_deaths.txt`) | 3b |
 | story cycles (`common/story_cycles/eotg_augmentation_stories.txt`) | `eotg_story_aug_heir_arc` | 3a |
@@ -173,13 +176,13 @@ New events go in the existing file for their namespace: `events/eotg_augmentatio
 
 | # | Thread | Beats (event id → phase) | Rule that keeps it robust to build order |
 |---|---|---|---|
-| **T1** | **The voice.** The implant's second perspective, introduced quietly and paid off in Neurofractured. Stored in `eotg_aug_voice` 0–4. | 1 "a second self": tier2.020 *The Second Self* (4b) → 2 "it replies": tier3.012 *First Contact* (4c) → 3 "we": fracture.022 *The Second Voice* (3a) → 4 "access granted": fracture.017 *Terms of Access*, a (3a). Payoff descs: fracture.026 *Last Lucid Moment*, fracture.027 *The Cascade*, fracture.007 *Dead Reckoning*, the Countdown stages, and `eotg_decision_aug_embrace_cascade` (needs voice ≥ 3 or Storm). | `eotg_aug_voice_advance_effect` only ever raises the value. Every beat has a `triggered_desc` for "this is the first time you notice it", so Phase 3 works before Phase 4 exists. |
+| **T1** | **The voice.** The implant's second perspective, introduced quietly and paid off in Neurofractured. Stored in `eotg_aug_voice` 0–4. | 1 "a second self": tier2.020 *The Second Self* (4b) → 2 "it replies": tier3.012 *First Contact* (4c) → 3 "we": fracture.022 *We* (3a; specced as *The Second Voice*) → 4 "access granted": fracture.017 *Terms of Access*, a (3a). Payoff descs: fracture.026 *The Last Lucid Moment*, fracture.027 *The Cascade*, the Countdown stages, and `eotg_decision_aug_embrace_cascade` (needs Neurofractured **and** Storm **and** voice ≥ 3 or `eotg_flag_aug_may_embrace`). *CB-26: fracture.007 dropped (M12); Embrace condition per phase 3 (S3).* | `eotg_aug_voice_advance_effect` only ever raises the value. Every beat has a `triggered_desc` for "this is the first time you notice it", so Phase 3 works before Phase 4 exists. |
 | **T2** | **The Patron's debt.** Somebody paid; they were buying you. | patron.001 offer (from init.018 or the initiation branch) → 4 demands over years → patron.006 final demand / betrayal. Remote Throttle pushes risk and can start the Countdown early. | Self-contained story cycle. It ends on owner death or settlement. |
 | **T3** | **The Heir's Arc.** The dynasty watches the ruler break. | Seeds: tier2.010 *Absent at the Birth* flags the child; tier2.018 *Space Between Us* resolution; tier3.020 *The Intervention* refused. Arc: heir.001 Concern → fracture.005 *What the Heir Saw* (existing, re-homed) → heir.003 *The Heir's Warning* → heir.004 *The Heir's Choice* (ally / usurp / kill). | Seeds only shift weights. With no seeds the arc runs on base weights. |
-| **T4** | **The Iron Retinue → the non-rulers.** Augmentation spreads to the people around you, and they break too. | init.002.c, tier1.004.a, `eotg_decision_augment_retainer` (2) → retinue story (5) → `eotg_aug_nr.*` (6). Also feeds tier3.007 *Two Machines*, init.005 *A Familiar Change*, fracture.024 *The Familiar Change*. | Phase 6 reads the augmented non-ruler state directly in `eotg_on_yearly_aug_nonruler_check` and only *weights* by the retinue flag. (`eotg_aug_is_nonruler` was removed as unused, 2026-10-04.) |
+| **T4** | **The Iron Retinue → the non-rulers.** Augmentation spreads to the people around you, and they break too. | init.002.c, tier1.004.a, `eotg_decision_augment_retainer` (2) → retinue story (5) → `eotg_aug_nr.*` (6). Also feeds tier3.007 *Two Machines*, init.005 *Back From the Capital*, fracture.024 *The Same Pattern*. | Phase 6 reads the augmented non-ruler state directly in `eotg_on_yearly_aug_nonruler_check` and only *weights* by the retinue flag. (`eotg_aug_is_nonruler` was removed as unused, 2026-10-04.) |
 | **T5** | **The physician.** Medicine as the counterweight. | `eotg_has_physician_access` cheapens or safens: init.006 (Prosthetic), init.007/.008 (Bridge), tier1.013–.015 (Rejection), maintenance, `eotg_decision_consult_physician`, Excision death odds. | Pure trigger; no state. |
 | **T6** | **Flaws you can't see.** Cheap hardware comes due. | init.011 hidden flaw, init.013 a parent's hardware → `eotg_flag_aug_hidden_flaw` → +4 OC accrual, Countdown at 40. | The flag is only read in two places. |
-| **T7** | **Focus.** What you chose to replace first. | tier1.021 sets `eotg_aug_focus` (limbs / senses / nerves). Read by: tier1.017 (limbs: duel bonus), tier2.012 & tier3.017–.018 (senses: truer warnings), tier2.020 & tier3.012 (nerves: the voice comes early), tier3.023 (limbs/senses: clarity odds). | Absent focus = neutral branch. |
+| **T7** | **Focus.** What you chose to replace first. | tier1.021 sets `eotg_aug_focus` (limbs / senses / nerves). Read by: tier1.017 (limbs: duel bonus), tier2.012 & tier3.017–.018 (senses: truer warnings), tier2.020 & tier3.012 (nerves: the voice comes early), tier3.024 (limbs/senses: decisive odds in The Engagement's roll; CB-26 S6). | Absent focus = neutral branch. |
 
 ---
 
@@ -250,7 +253,7 @@ New events go in the existing file for their namespace: `events/eotg_augmentatio
 3. QA audit 8: every new flavor event couples to `eotg_fracture_risk` or tier, per §1 rule 4.
 4. No event `trigger` checks a cooldown flag (lesson 5).
 5. `grep -rnE '\bcurious\b|\bpensive\b' events common` returns nothing.
-6. `grep -rn 'random_courtier' events/eotg_augmentation_*.txt` returns only non-violent uses (picking a witness or speaker), each followed by `save_scope_as`.
+6. `grep -rn 'random_courtier' events/eotg_augmentation_*.txt` returns only non-violent uses (picking a witness or speaker) or chosen targets filtered by a dedicated scripted trigger (rule 7), each followed by `save_scope_as`.
 7. No `basic_counter`, `visible = yes` or number on `eotg_fracture_risk` anywhere (hidden-risk rule).
 8. Loc: every key the phase lists exists once, BOM, no `[scope:`.
 9. **Human, in game:** the phase's own check list (each phase file, final section).
