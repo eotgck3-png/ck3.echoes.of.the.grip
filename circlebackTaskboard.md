@@ -308,6 +308,13 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Owner:** eotg-architect → eotg-scripter
 - **Next step:** when cultures exist, re-place the innovation per the §4.1 rule.
 
+### CB-37: Frontier Systems (cloud-built, Phase 1)
+- **Status:** in progress (2026-10-04)
+- **What:** the human's design brief `docs/design/frontier_systems.md` (Unsettled → Frontier → Settled; Founder/Sponsor; projects; abandonment; generic hooks; Greater Drifts optional and NOT built). It's assigned to the cloud agent: spec first (`docs/specs/frontier_v1.md`), then a Phase 1 build on its own branch, in new `eotg_frontier_*` files only.
+- **Owner:** cloud agent → orchestrator (vanilla checks, lore review, QA, merge) → human (approvals)
+- **Next step:** review the cloud spec when it lands. Answer its UNVERIFIED-VANILLA list with eotg-vanilla-scout, and its canon questions with eotg-lore-keeper.
+- **Note:** a mod-exclusive system built on the vanilla/temporary map before Gate 1 (CLAUDE.md). It must not reference specific titles, provinces, cultures or faiths. "Unsettled" is marked by data or a variable, never by hard-coded title keys.
+
 ## Tooling and environment
 
 ### CB-18: Game is 1.20.0.3; the tools target older versions
