@@ -1,6 +1,9 @@
 """Run every repo check that can run here, skip the rest, print one summary table.
 
-    python docs/tools/check_all.py [--only NAME ...] [--verbose] [--list]
+    python docs/tools/check_all.py [--root CHECKOUT] [--only NAME ...] [--verbose] [--list]
+
+--root lints and QAs another checkout of the mod with THIS copy's tools (default:
+the repo this script lives in). The unit tests always test this copy's tools.
 
 Runs, from the repo root:
   - eotg_lint against docs/tools/eotg_lint_baseline.json
@@ -18,6 +21,7 @@ Local paths default to the owner's machine (see CLAUDE.md) and can be overridden
   EOTG_PX_DIR     PX extension folder (default newest ~/.vscode/extensions/jdeffner.px-toolkit-*)
   EOTG_VSCODE_EXE VS Code executable  (default C:/Users/river/AppData/Local/Programs/Microsoft VS Code/Code.exe)
   EOTG_TIGER_EXE  ck3-tiger           (default C:/Users/river/tools/ck3-tiger-windows-v1.17.0/ck3-tiger.exe)
+  EOTG_LOG_DIR    where the Tiger log goes (default: the system temp dir; never inside a repo)
 Exit status 1 when any check FAILs; skips never fail. Standard library only.
 """
 import argparse
@@ -80,7 +84,7 @@ def requirement(name, env=None):
 # ------------------------------------------------------------ checks
 class Check:
     def __init__(self, name, cmd=None, needs=(), skip_reason=None, run=None, env_extra=None,
-                 informational=False):
+                 informational=False, cwd=None):
         self.name = name
         self.cmd = cmd              # list[str], run with cwd=ROOT
         self.needs = tuple(needs)
@@ -88,6 +92,7 @@ class Check:
         self.run_fn = run           # callable(env) -> (rc, output), instead of cmd
         self.env_extra = env_extra or {}
         self.informational = informational   # ran, but the exit code is not a verdict
+        self.cwd = cwd                       # default: the run_check root
 
 
 class Result:
@@ -117,7 +122,7 @@ def run_check(check, env=None, root=ROOT):
         if check.run_fn:
             rc, out = check.run_fn(env)
         else:
-            p = subprocess.run(check.cmd, cwd=root, env=env, stdout=subprocess.PIPE,
+            p = subprocess.run(check.cmd, cwd=check.cwd or root, env=env, stdout=subprocess.PIPE,
                                stderr=subprocess.STDOUT, timeout=1800)
             rc, out = p.returncode, p.stdout.decode("utf-8", errors="replace")
     except (OSError, subprocess.SubprocessError) as e:
@@ -129,45 +134,77 @@ def run_check(check, env=None, root=ROOT):
                   ("exit %d; " % rc if rc else "") + _last_line(out), secs, out)
 
 
-def _px_event_report(env):
+def _inside(path, parent):
+    path, parent = os.path.realpath(path), os.path.realpath(parent)
+    return path == parent or path.startswith(parent.rstrip(os.sep) + os.sep)
+
+
+def tiger_log_path(env, root=ROOT):
+    """$EOTG_LOG_DIR or the system temp dir; never inside the target or this repo."""
+    d = env.get("EOTG_LOG_DIR") or tempfile.gettempdir()
+    note = ""
+    if _inside(d, root) or _inside(d, ROOT):
+        note = " (EOTG_LOG_DIR %s is inside a repo; using the temp dir)" % d
+        d = tempfile.gettempdir()
+    return os.path.join(d, "eotg_tiger_check_all.log"), note
+
+
+def _px_lsp_script(root):
+    # px_lsp_diagnostics.js lints the repo it lives in (MOD = __dirname/../..)
+    p = os.path.join(root, "docs", "tools", "px_lsp_diagnostics.js")
+    return p if os.path.exists(p) else os.path.join(HERE, "px_lsp_diagnostics.js")
+
+
+def _px_event_report(env, root=ROOT):
     exe = _env(env, "EOTG_VSCODE_EXE")
     with tempfile.TemporaryDirectory() as out:
         e = dict(env, ELECTRON_RUN_AS_NODE="1")
-        p = subprocess.run([exe, os.path.join("docs", "tools", "px_lsp_diagnostics.js"), "events",
+        p = subprocess.run([exe, _px_lsp_script(root), "events",
                             "--request=eventGraph", "--request=locCoverage", "--out=" + out],
-                           cwd=ROOT, env=e, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                           cwd=root, env=e, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                            timeout=1800)
         if not os.path.exists(os.path.join(out, "px_eventGraph.json")):
             return 1, p.stdout.decode("utf-8", errors="replace") + "\nno px_eventGraph.json written"
-        q = subprocess.run([PY, os.path.join("docs", "tools", "px_event_report.py"), out],
-                           cwd=ROOT, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        q = subprocess.run([PY, os.path.join(HERE, "px_event_report.py"), out],
+                           cwd=root, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         return q.returncode, q.stdout.decode("utf-8", errors="replace")
 
 
-def _tiger(env):
+def _tiger(env, root=ROOT):
     exe = _env(env, "EOTG_TIGER_EXE")
-    log = os.path.join(tempfile.gettempdir(), "eotg_tiger_check_all.log")
+    log, note = tiger_log_path(env, root)
     p = subprocess.run([exe, "--game", _env(env, "EOTG_CK3_GAME"), "echoes_of_the_grip.mod"],
-                       cwd=ROOT, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                       cwd=root, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                        timeout=3600)
     out = p.stdout.decode("utf-8", errors="replace")
     with open(log, "w", encoding="utf-8") as fh:
         fh.write(out)
-    return p.returncode, "%s\nlog: %s (triage against CLAUDE.md known-benign list)" % (out, log)
+    print("ck3-tiger log: %s%s" % (log, note))
+    return p.returncode, "%s\nlog: %s%s (triage against CLAUDE.md known-benign list)" % (
+        out, log, note)
 
 
 def default_checks(root=ROOT):
-    t = os.path.join("docs", "tools")
+    root = os.path.abspath(root)
+    q = os.path.join(HERE, "qa")
+    baseline = os.path.join(root, "docs", "tools", "eotg_lint_baseline.json")
+    if not os.path.exists(baseline):
+        baseline = os.path.join(HERE, "eotg_lint_baseline.json")
+    lint = [PY, os.path.join(HERE, "eotg_lint.py"), "--root", root, "--quiet",
+            "--baseline", baseline]
+    v1_src = os.path.join(root, "OLD PROJECT VERSION", "common", "religion")
+    port_out = os.path.join(root, "docs", "port", "religion_1_20")
     checks = [
-        Check("eotg_lint (vs baseline)",
-              [PY, os.path.join(t, "eotg_lint.py"), "--quiet",
-               "--baseline", os.path.join(t, "eotg_lint_baseline.json")]),
+        Check("eotg_lint (vs baseline)", lint, cwd=root),
         Check("unit tests (docs/tools/tests)",
-              [PY, "-m", "unittest", "discover", "-s", os.path.join(t, "tests")]),
+              [PY, "-m", "unittest", "discover", "-s", os.path.join(HERE, "tests")], cwd=ROOT),
         Check("port_religions_1_20 --check",
-              [PY, os.path.join(t, "port_religions_1_20.py"), "--check"]),
+              [PY, os.path.join(HERE, "port_religions_1_20.py"), "--src", v1_src,
+               "--out", port_out, "--check"], cwd=root,
+              skip_reason=None if os.path.isdir(v1_src) and os.path.isdir(port_out)
+              else "no v1 religion sources or staged port in %s" % root),
     ]
-    for f in sorted(glob.glob(os.path.join(root, t, "qa", "*.py"))):
+    for f in sorted(glob.glob(os.path.join(q, "*.py"))):
         base = os.path.basename(f)
         if base in QA_MODULES:
             continue
@@ -175,23 +212,25 @@ def default_checks(root=ROOT):
         if base in QA_NEEDS_ARGS:
             checks.append(Check(name, skip_reason="interactive tool, " + QA_NEEDS_ARGS[base]))
         else:
-            checks.append(Check(name, [PY, os.path.join(t, "qa", base), "."]))
+            checks.append(Check(name, [PY, f, root], cwd=root))
     checks += [
-        Check("px_vocab_check", [PY, os.path.join(t, "px_vocab_check.py"), "common", "events"],
-              needs=("px", "game")),
+        Check("px_vocab_check", [PY, os.path.join(HERE, "px_vocab_check.py"), "common", "events"],
+              needs=("px", "game"), cwd=root, env_extra={"EOTG_MOD_ROOT": root}),
         Check("px_lsp_diagnostics", None, needs=("vscode", "px", "game"),
               run=lambda env: _run_simple(
-                  [_env(env, "EOTG_VSCODE_EXE"), os.path.join(t, "px_lsp_diagnostics.js"),
-                   "common", "events", "localization"], dict(env, ELECTRON_RUN_AS_NODE="1"))),
+                  [_env(env, "EOTG_VSCODE_EXE"), _px_lsp_script(root),
+                   "common", "events", "localization"], dict(env, ELECTRON_RUN_AS_NODE="1"),
+                  root)),
         Check("px_event_report (via px_lsp)", None, needs=("vscode", "px", "game"),
-              run=_px_event_report),
-        Check("ck3-tiger", None, needs=("tiger", "game"), run=_tiger, informational=True),
+              run=lambda env: _px_event_report(env, root)),
+        Check("ck3-tiger", None, needs=("tiger", "game"), run=lambda env: _tiger(env, root),
+              informational=True),
     ]
     return checks
 
 
-def _run_simple(cmd, env):
-    p = subprocess.run(cmd, cwd=ROOT, env=env, stdout=subprocess.PIPE,
+def _run_simple(cmd, env, cwd=ROOT):
+    p = subprocess.run(cmd, cwd=cwd, env=env, stdout=subprocess.PIPE,
                        stderr=subprocess.STDOUT, timeout=1800)
     return p.returncode, p.stdout.decode("utf-8", errors="replace")
 
@@ -211,12 +250,18 @@ def format_table(results):
 
 def main(argv=None, checks=None, env=None):
     ap = argparse.ArgumentParser(description="Run all repo checks; skip what needs a local install.")
+    ap.add_argument("--root", default=ROOT,
+                    help="mod checkout to lint and QA (default: this repo)")
     ap.add_argument("--only", action="append", default=[],
                     help="run only checks whose name contains this text (repeatable)")
     ap.add_argument("--list", action="store_true", help="list checks and requirements, run nothing")
     ap.add_argument("--verbose", action="store_true", help="print each check's full output")
     args = ap.parse_args(argv)
-    checks = default_checks() if checks is None else checks
+    root = os.path.abspath(args.root)
+    if checks is None and not os.path.isdir(os.path.join(root, "events")) \
+            and not os.path.isdir(os.path.join(root, "common")):
+        ap.error("--root %s does not look like a mod checkout (no common/ or events/)" % root)
+    checks = default_checks(root) if checks is None else checks
     if args.only:
         checks = [c for c in checks if any(o in c.name for o in args.only)]
     if args.list:
@@ -225,7 +270,7 @@ def main(argv=None, checks=None, env=None):
         return 0
     results = []
     for c in checks:
-        r = run_check(c, env)
+        r = run_check(c, env, root)
         results.append(r)
         if args.verbose and r.output:
             print("=== %s ===\n%s" % (r.name, r.output.rstrip()))

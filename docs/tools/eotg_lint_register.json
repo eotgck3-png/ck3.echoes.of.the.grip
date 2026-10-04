@@ -1,0 +1,307 @@
+{
+ "_comment": [
+  "Cybernetics never-name and register rules for eotg_lint L012 (data, not code).",
+  "Sources: docs/specs/cybernetics_v2.md \u00a75 items 2-3 (2026-10-04) and docs/specs/cybernetics_v2_*_lore.md.",
+  "error = never-name (fails); warning = register word listed for human triage. 'warrant' also hits fracture.006 'The Warrant' (Phase 3a, a vassal faction), and 'program' hits the Iron Retinue's 'Program': expected triage hits.",
+  "regex is a Python regex on the loc value with [functions], $keys$ and #formatting removed; case=true means case-sensitive."
+ ],
+ "key_prefixes": [
+  "eotg_aug_",
+  "eotg_fracture",
+  "eotg_mod_aug",
+  "eotg_decision_aug",
+  "eotg_opinion_aug"
+ ],
+ "error": [
+  {
+   "term": "Blackstar",
+   "regex": "\\bBlackstar\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 3"
+  },
+  {
+   "term": "Shadow Market(s)",
+   "regex": "\\bShadow Markets?\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 3"
+  },
+  {
+   "term": "Black Contract(s)",
+   "regex": "\\bBlack Contracts?\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 3"
+  },
+  {
+   "term": "Blackline",
+   "regex": "\\bBlackline\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 3"
+  },
+  {
+   "term": "P&D",
+   "regex": "\\bP\\s*&\\s*D\\b",
+   "case": true,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 3"
+  },
+  {
+   "term": "Calix",
+   "regex": "\\bCalix\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 3"
+  },
+  {
+   "term": "Pill Mob",
+   "regex": "\\bPill Mob\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 3"
+  },
+  {
+   "term": "Pillwake",
+   "regex": "\\bPillwake\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 3"
+  },
+  {
+   "term": "Red Pills",
+   "regex": "\\bRed Pills\\b",
+   "case": true,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 3"
+  },
+  {
+   "term": "Concrete Cartel",
+   "regex": "\\bConcrete Cartel\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 3"
+  },
+  {
+   "term": "Acathea",
+   "regex": "\\bAcathea\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 3"
+  },
+  {
+   "term": "Codex",
+   "regex": "\\bCodex\\b",
+   "case": true,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 3"
+  },
+  {
+   "term": "Archivist(s) (proper noun)",
+   "regex": "\\bArchivists?\\b",
+   "case": true,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 3"
+  },
+  {
+   "term": "Conclave",
+   "regex": "\\bConclave\\b",
+   "case": true,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 3"
+  },
+  {
+   "term": "Carrigore",
+   "regex": "\\bCarrigore\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 2"
+  },
+  {
+   "term": "Trauma Team",
+   "regex": "\\bTrauma Team\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 3"
+  },
+  {
+   "term": "Galactic League",
+   "regex": "\\bGalactic League\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 3"
+  },
+  {
+   "term": "galactic",
+   "regex": "\\bgalactic\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 3"
+  },
+  {
+   "term": "interstellar regulation",
+   "regex": "\\binterstellar regulations?\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 3"
+  }
+ ],
+ "warning": [
+  {
+   "term": "whisper",
+   "regex": "\\bwhisper\\w*",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 2"
+  },
+  {
+   "term": "edge of hearing",
+   "regex": "\\bedge of hearing\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 2"
+  },
+  {
+   "term": "speaks from",
+   "regex": "\\bspeaks? from\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 2"
+  },
+  {
+   "term": "possess/possession",
+   "regex": "\\bpossess\\w*",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 2"
+  },
+  {
+   "term": "demon",
+   "regex": "\\bdemon(s|ic|ically)?\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 2"
+  },
+  {
+   "term": "pact",
+   "regex": "\\bpacts?\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 2"
+  },
+  {
+   "term": "abyss",
+   "regex": "\\babyss\\w*",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 2"
+  },
+  {
+   "term": "the Eye",
+   "regex": "\\bthe Eye\\b",
+   "case": true,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 2"
+  },
+  {
+   "term": "Orrin",
+   "regex": "\\bOrrin\\b",
+   "case": true,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 2"
+  },
+  {
+   "term": "Kyros",
+   "regex": "\\bKyros\\b",
+   "case": true,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 2"
+  },
+  {
+   "term": "Void",
+   "regex": "\\bVoid\\b",
+   "case": true,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 2"
+  },
+  {
+   "term": "rift",
+   "regex": "\\brifts?\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 2"
+  },
+  {
+   "term": "breach",
+   "regex": "\\bbreach\\w*",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 2"
+  },
+  {
+   "term": "answers (verb)",
+   "regex": "\\banswer(s|ed|ing)\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 2; item 8: use replies/responds"
+  },
+  {
+   "term": "remote",
+   "regex": "\\bremote\\w*",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 3 (no remote-kill)"
+  },
+  {
+   "term": "hack",
+   "regex": "\\bhack\\w*",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_interactions_lore.md (I6 grep)"
+  },
+  {
+   "term": "virus",
+   "regex": "\\bvirus\\w*",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_interactions_lore.md (I6 grep)"
+  },
+  {
+   "term": "upload",
+   "regex": "\\bupload\\w*",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_interactions_lore.md (I6 grep)"
+  },
+  {
+   "term": "network",
+   "regex": "\\bnetwork\\w*",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_interactions_lore.md (I6 grep)"
+  },
+  {
+   "term": "harvest",
+   "regex": "\\bharvest\\w*",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_interactions_lore.md (I6 grep)"
+  },
+  {
+   "term": "telemetry",
+   "regex": "\\btelemetry\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_realm_lore.md (DoD grep)"
+  },
+  {
+   "term": "warrant",
+   "regex": "\\bwarrants?\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_realm_lore.md (DoD grep)"
+  },
+  {
+   "term": "magistrate",
+   "regex": "\\bmagistrat\\w*",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_realm_lore.md (DoD grep)"
+  },
+  {
+   "term": "inspector",
+   "regex": "\\binspector\\w*",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_realm_lore.md (DoD grep)"
+  },
+  {
+   "term": "registry",
+   "regex": "\\bregistr(y|ies)\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_realm_lore.md (DoD grep)"
+  },
+  {
+   "term": "encourage",
+   "regex": "\\bencourag\\w*",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_realm_lore.md (DoD grep)"
+  },
+  {
+   "term": "sponsor",
+   "regex": "\\bsponsor\\w*",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_realm_lore.md (DoD grep)"
+  },
+  {
+   "term": "patronage",
+   "regex": "\\bpatronage\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_realm_lore.md (DoD grep)"
+  },
+  {
+   "term": "programme/program",
+   "regex": "\\bprogram(me)?s?\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2.md \u00a75 item 3; realm lore R-section"
+  }
+ ]
+}

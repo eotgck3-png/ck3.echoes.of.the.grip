@@ -102,5 +102,38 @@ class RunLogic(unittest.TestCase):
         self.assertIsNotNone(by["qa/progression_sim.py"].skip_reason)
 
 
+class RootAndLogs(unittest.TestCase):
+    def test_default_checks_use_root(self):
+        with tempfile.TemporaryDirectory() as d:
+            os.makedirs(os.path.join(d, "events"))
+            by = {c.name: c for c in C.default_checks(d)}
+            lint = by["eotg_lint (vs baseline)"]
+            self.assertIn(os.path.abspath(d), lint.cmd)
+            self.assertEqual(lint.cwd, os.path.abspath(d))
+            self.assertEqual(by["qa/event_graph.py"].cmd[-1], os.path.abspath(d))
+            self.assertEqual(by["px_vocab_check"].env_extra["EOTG_MOD_ROOT"], os.path.abspath(d))
+            # no v1 sources in that checkout -> the port check is skipped, not failed
+            self.assertIsNotNone(by["port_religions_1_20 --check"].skip_reason)
+
+    def test_root_must_look_like_a_mod(self):
+        with tempfile.TemporaryDirectory() as d, redirect_stdout(io.StringIO()):
+            from contextlib import redirect_stderr
+            with self.assertRaises(SystemExit), redirect_stderr(io.StringIO()):
+                C.main(["--root", d])
+
+    def test_tiger_log_dir(self):
+        with tempfile.TemporaryDirectory() as d:
+            path, note = C.tiger_log_path({"EOTG_LOG_DIR": d}, root=C.ROOT)
+            self.assertEqual(os.path.dirname(path), d)
+            self.assertEqual(note, "")
+        path, note = C.tiger_log_path({}, root=C.ROOT)
+        self.assertEqual(os.path.dirname(path), tempfile.gettempdir())
+        # never inside the repo
+        inside = os.path.join(C.ROOT, "docs")
+        path, note = C.tiger_log_path({"EOTG_LOG_DIR": inside}, root=C.ROOT)
+        self.assertFalse(C._inside(path, C.ROOT))
+        self.assertIn("inside a repo", note)
+
+
 if __name__ == "__main__":
     unittest.main()
