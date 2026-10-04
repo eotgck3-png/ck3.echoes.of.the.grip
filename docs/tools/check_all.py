@@ -9,6 +9,10 @@ Runs, from the repo root:
   - eotg_lint against docs/tools/eotg_lint_baseline.json
   - the docs/tools unit tests
   - port_religions_1_20 --check (staged 1.20 religion output is current)
+  - gen_test_recipes --check  (docs/qa/generated/console_recipes.md is current)
+  - spec_conformance --check  (docs/qa/generated/spec_conformance.md is current)
+    These two FAIL only on a stale file; the content (events that can't be
+    fired cold, spec gaps) is reported in the detail line, never as a failure.
   - docs/tools/qa/*.py analysis scripts (those that need no arguments)
   - px_vocab_check.py                     needs the PX Toolkit + the game install
   - px_lsp_diagnostics.js                 needs VS Code (+ PX Toolkit + game)
@@ -204,6 +208,13 @@ def default_checks(root=ROOT):
               skip_reason=None if os.path.isdir(v1_src) and os.path.isdir(port_out)
               else "no v1 religion sources or staged port in %s" % root),
     ]
+    for tool, rel in (("gen_test_recipes", "docs/qa/generated/console_recipes.md"),
+                      ("spec_conformance", "docs/qa/generated/spec_conformance.md")):
+        present = os.path.exists(os.path.join(root, *rel.split("/")))
+        checks.append(Check("%s --check" % tool,
+                            [PY, os.path.join(HERE, tool + ".py"), "--root", root, "--check"],
+                            cwd=root, skip_reason=None if present
+                            else "no %s in %s (generate it first)" % (rel, root)))
     for f in sorted(glob.glob(os.path.join(q, "*.py"))):
         base = os.path.basename(f)
         if base in QA_MODULES:

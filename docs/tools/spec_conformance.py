@@ -441,7 +441,11 @@ def main(argv=None):
             with open(out, "rb") as fh:
                 cur = fh.read().decode("utf-8").replace("\r\n", "\n")
         ok = cur == text
-        print("spec conformance report %s (%s)" % ("is current" if ok else "is STALE", out))
+        built = [x for x in res["specs"] if x["built"]]
+        gaps = sum(1 for x in built for r in x["ids"] if not r["exempt"] and r["status"] == "missing")
+        print("spec conformance report %s (%s): %d spec(s), %d built, %d missing id(s) in built "
+              "specs" % ("is current" if ok else "is STALE", out, len(res["specs"]), len(built),
+                         gaps))
         return 0 if ok else 1
     os.makedirs(os.path.dirname(out), exist_ok=True)
     with open(out, "w", encoding="utf-8", newline="\n") as fh:

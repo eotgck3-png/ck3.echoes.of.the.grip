@@ -138,6 +138,8 @@ An event that only fires itself counts as unfired.
 
 **Limit:** references from GUI or code-side hooks are not seen.
 
+**Shared graph:** the references are collected by `eotg_lint.fire_sites(mod)`, which returns `{event_id: [FireSite]}`. Each FireSite records the definition that holds the reference (event, on_action, decision, story, effect…) and the block path down to it. `gen_test_recipes.py` reads the same graph, so "fired by" there and L009 here always agree.
+
 ### L010 — loc key referenced but not defined (ERROR)
 **Keys checked:**
 - event `title`, `desc` and option `name`, including keys inside `first_valid`, `triggered_desc` and `random_valid`;

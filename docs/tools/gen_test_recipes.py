@@ -889,7 +889,10 @@ def main(argv=None):
             with open(out, "rb") as fh:
                 cur = fh.read().decode("utf-8").replace("\r\n", "\n")
         ok = cur == text
-        print("console recipes %s (%s)" % ("are current" if ok else "are STALE", out))
+        c = collections.Counter(r["fire_cold"] for r in recipes)
+        print("console recipes %s (%s): %d events, %d fire cold, %d after setup, %d need a route"
+              % ("are current" if ok else "are STALE", out, len(recipes), c["yes"], c["setup"],
+                 c["no"]))
         return 0 if ok else 1
     os.makedirs(os.path.dirname(out), exist_ok=True)
     with open(out, "w", encoding="utf-8", newline="\n") as fh:

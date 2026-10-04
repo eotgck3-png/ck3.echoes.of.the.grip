@@ -21,3 +21,19 @@ Read-only analysis scripts used in the cybernetics QA rounds (`docs/qa/cyberneti
 - Parsing is delegated to `docs/tools/pdx_parse.py` (2026-10-04), which also handles `@` values, inline math, tagged colour blocks, BOM and CRLF; `aug_parse.load` keeps its tuple shape, and every script's output was verified unchanged.
 - `event_graph.py` reads `trigger_event` calls only, not on_action `events = {}` lists. This system uses `trigger_event` throughout.
 - `loc_mechanical.py` lists `set_variable` / `save_scope_value_as` `name =` arguments as "missing". These are false positives.
+
+## Generated QA reports (`docs/tools/`, output in `docs/qa/generated/`)
+
+Both regenerate from the tree, are deterministic, and have `--check`, which exits 1 only when the committed file is stale (line endings are ignored, so CRLF checkouts pass). `check_all.py` runs both `--check`s. Re-run a tool after changing events or specs, and commit its output alongside.
+
+| Tool | Writes | Run | What |
+|---|---|---|---|
+| `gen_test_recipes.py` | `docs/qa/generated/console_recipes.md` | `python docs/tools/gen_test_recipes.py` · one event: `--event eotg_aug_tier1.005` · `--json out.json` | A console recipe for every event in `events/eotg_*.txt`, grouped like `cybernetics_test_plan.md` §4. Each recipe has: <br>• **fire cold** (yes / after setup / no, with exactly what is missing: a saved scope and who saves it, a story and who creates it, a flag or variable and who sets it); <br>• **setup** console lines from the event's trigger (traits, tier through `add_trait_xp`, flags, variables, gold, stress, skills), plus plain notes for the rest; <br>• *for realistic content* lines from the trigger of its usual firing path; <br>• the **fire** line, with a target when the script fires it on another character; <br>• **fired by**; <br>• a **live route** (the shortest chain from a decision, else a pulse). |
+| `spec_conformance.py` | `docs/qa/generated/spec_conformance.md` | `python docs/tools/spec_conformance.py` · `--json out.json` · `--specs GLOB` | Checks 1–2 of `docs/qa/cybernetics_spec_conformance_cloud.md`, automated. <br>• **Per spec:** every backticked `eotg_` id and event id, classified, is reported as present, referenced only, or missing. Built and unbuilt specs are kept apart. Exempt lines are listed. <br>• **Plus:** script definitions that no spec names. |
+
+**Known limits.**
+- **`gen_test_recipes.py`:**
+  - Its requirements come from script, not from play. A trigger shape it doesn't know becomes a plain note quoting the script.
+  - The event-graph edges are `eotg_lint.fire_sites`: any reference to an event id outside its own definition counts as firing it, which is the same rule L009 uses.
+  - Whether the console `event` command evaluates an event's `trigger` is UNVERIFIED. The recipe assumes it does, hence "after setup".
+- **`spec_conformance.py`:** a spec line that quotes a wrong or old key on purpose (a correction table, "Every `scope:x` becomes `scope:y`", "minus `key`") shows as missing. Read the line before acting. Suffix shorthand (`` `eotg_a_low` / `_high` ``) is resolved against the script. When no key matches, it is listed under "Suffix shorthand that matches no key" and not counted.
