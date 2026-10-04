@@ -269,6 +269,27 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Owner:** eotg-localizer
 - **Next step:** reflavor them through `localization/english/replace/` (e.g. Technician, Fitter, Sneak) when the glossary is decided.
 
+### CB-34: In-game checks for G9 (7d79ff2) and the new beats (db0c550)
+- **Status:** waiting-human (2026-10-04)
+- **What, G9 trait depth:**
+  1. Each of the 8 trait options shows with its trait icon. Use console `add_trait`, then fire the host event.
+  2. tier2.004.e: Reassured or Unease depending on whether the spouse is chaste, and .017 follows 180–365 days later.
+  3. tier3.010.f: Dulled Senses for 2 years.
+  4. tier3.021.d: Falsely Accused, +10 dread, and one arbitrary stress line.
+  5. nr.004.f: the champion is Reassured, and a victim gets Disgust only if one exists.
+  6. The helper rows appear: impatient, gluttonous and temperate on reject options; fickle on neglect options.
+  7. Three gated options showing at once don't overflow the window.
+- **What, new beats:**
+  1. Round 2: after a round-1 kill, heir.007 shows desc_executed with the dead predecessor's portrait, and option a is gendered.
+  2. Round-2 heir.003 and heir.004 show desc_successor. The story ends after round 2's heir.004, and there is no third heir.007.
+  3. patron.008 fires once after full removal; options a and b behave as specced.
+  4. Once per life: no second patron.001 for 10+ years after settling, and init.018 shows no syndicate line or option e.
+  5. The throttle tooltip shows after a betrayal.
+  6. Opinion names in the breakdown, including the ruler's own opinion of another Overclocked character after tier3.007.a ("Admiration").
+  7. Gendered pronouns read right with a female and a male champion and heir.
+- **Owner:** human → orchestrator
+- **Next step:** check alongside CB-31 during normal play.
+
 ## Tooling and environment
 
 ### CB-18: Game is 1.20.0.3; the tools target older versions
