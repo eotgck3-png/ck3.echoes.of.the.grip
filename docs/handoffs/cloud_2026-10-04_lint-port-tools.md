@@ -1,0 +1,56 @@
+### HANDOFF (cloud session; validated in the sandbox, not on Windows or against game files)
+- **branch:** `claude/lint-port-tools-cloud` (from `origin/v2-space-map` @ `27d2e46`)
+- **status:** done (Tasks 1, 2 and 3)
+- **summary:**
+  - **`pdx_parse.py`:** a reusable, line-aware Paradox-script parser. `qa/aug_parse.py` now delegates to it.
+  - **`eotg_lint.py`:** linter rules L000–L010, plus a committed baseline, an allowlist and docs.
+  - **`port_religions_1_20.py`:** converts v1 religions to the 1.20 schema, into `docs/port/religion_1_20/` with a `PORT_REPORT.md`.
+  - **`check_all.py`:** a single command for every check, which skips anything needing a local install.
+  - Standard library only; no mod files were edited.
+- **files:**
+  - **new:**
+    - `docs/tools/pdx_parse.py`, `eotg_lint.py`, `eotg_lint.md`, `eotg_lint_baseline.json`, `eotg_lint_loc_allowlist.txt`
+    - `port_religions_1_20.py`, `check_all.py`, `.gitignore`
+    - `docs/tools/tests/test_{pdx_parse,eotg_lint,port_religions,check_all}.py`
+    - `docs/port/religion_1_20/**`
+  - **changed:**
+    - `docs/tools/qa/aug_parse.py` (delegates to `pdx_parse`; dead `_parse` removed)
+    - `docs/tools/qa/README.md` (known-limits line)
+- **validation run here (Linux, Python 3.11):**
+  - **Unit tests:** `python -m unittest discover -s docs/tools/tests` → **68 tests OK**. Every lint rule has a hit and a non-hit fixture. The religion port is tested on a fixture with 2 faiths and a family. The `check_all` skip logic is tested.
+  - **QA scripts unchanged:** the output of `trait_coverage`, `event_graph`, `option_outcomes`, `risk_moves`, `loc_mechanical`, `loc_scope_refs`, `show_option` and `option_ai_weights` is **byte-identical** before and after `aug_parse` was switched to `pdx_parse`. `to_tuples` also equals the old tokenizer on all 30 mod script files.
+  - **Parser robustness:** 177 files (v1 tree, v2 `common/`, `map_data/*.txt`) parse with 0 errors. The only failures are five prose `.txt` notes in v1 `docs/`, which are not script. A full lint takes about 0.4 s.
+  - **`eotg_lint` on the current tree:** 28 findings, all WARNING: L006 ×4 (`is_shown` flag checks) and L007 ×24 (silent-only options). They are committed as the baseline. Every other rule is at 0. `--baseline` gives exit 0.
+  - **Regression proof:**
+    - On the tree **before `eca9b9c`** (the tooltip fix), the linter reports **L005 ×113** unguarded removals (the "~16 You lose …" bug) and **L006** on `eotg_flag_maintenance_cooldown` in `is_valid` (the "You do not have the … flag" bug).
+    - On `OLD PROJECT VERSION/` it reports 1,426 findings: L002 1,009 (`eotg_*_` titles), L003 169 (including the 166 `replace/` duplicates), **L004 ×3** (the dead `on_yearly_playable` hooks, CB-10) and L010 88.
+  - **Port:**
+    - Output: 11 religions, 12 faiths and 4 families. The staged files parse with 0 errors.
+    - All 51 source comments are kept, except the 2 above the dropped Nikios block.
+    - The leaf-value diff against the source is exactly the intended one: −`tenet_monasticism`, +`doctrine_monasticism_encouraged`, and +1 `religion =` per faith.
+    - `--check` reports "current", and a second run is byte-identical.
+  - **`check_all.py`:** 10 PASS, 0 FAIL, 7 SKIP. The skips are `px_vocab_check`, `px_lsp_diagnostics`, `px_event_report` and `ck3-tiger` ("skipped: needs local install") and the three QA tools that need arguments.
+- **unverified-vanilla:**
+  - **eotg_lint:** listed per rule in `docs/tools/eotg_lint.md`, mainly:
+    - that `immediate`, on_action and story effects never show in tooltips;
+    - that `custom_tooltip` hides inner effect lines;
+    - that failed `random_list` entries are left out of the tooltip;
+    - whether `is_shown` failures render;
+    - which implied loc keys the engine requires;
+    - the `replace/` duplicate resolution order.
+  - **Port:** the 7 assumptions listed in `docs/port/religion_1_20/PORT_REPORT.md`, mainly:
+    - that religion-level `doctrine =` lines are still valid;
+    - that families keep `graphical_faith` / `piety_icon_group`;
+    - the `tenet_background_icon` key name (`core_tenet_banner_*` vs `tenet_banner_*`);
+    - faiths having no `icon`.
+- **needs-local-validation (Windows, game 1.20.0.3):**
+  1. `python docs/tools/check_all.py`. `px_vocab_check`, `px_lsp_diagnostics`, `px_event_report` and Tiger should now run instead of skipping. If the paths differ, set `EOTG_CK3_GAME`, `EOTG_PX_DIR`, `EOTG_VSCODE_EXE` or `EOTG_TIGER_EXE`.
+  2. Check the 24 L007 options in game: is each tooltip really empty? Spot-check the 4 L006 `is_shown` ones.
+  3. Compare the staged `docs/port/religion_1_20/common/religion/**` with vanilla 1.20 `religion_types/`, `faith_types/` and `religion_family_types/`, then load it in game before moving anything into `common/`.
+- **needs-loc:** none
+- **needs-lore:** none
+- **needs-human:** none. Wiring `check_all.py` / `eotg_lint.py --baseline` into CLAUDE.md §Validation is the local session's step, as agreed.
+- **taskboard (proposed):**
+  - CB-10 and CB-11 can cite L004, which now catches the dead hook automatically.
+  - Add a CB item: "triage eotg_lint baseline: 24 L007 silent options, 4 L006 `is_shown` checks".
+  - B-FAITHS: the 1.20 religion staging is ready for in-game validation.
