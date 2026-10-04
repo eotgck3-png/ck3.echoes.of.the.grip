@@ -81,6 +81,20 @@ VAR_READ_RE = re.compile(r"(?<![\w:.])var:([A-Za-z_]\w*)")
 LOC_SCOPE_RE = re.compile(r"\[([A-Za-z_]\w*)\.")
 CMP = {">=": lambda n: n, ">": lambda n: n + 1, "==": lambda n: n, "=": lambda n: n}
 
+# FIX 9b: title (county) scopes. Keys that only make sense on a landed title,
+# switches into a title, and iterators over titles.
+TITLE_KEYS = {"development_level", "county_control", "has_county_modifier",
+              "add_county_modifier", "remove_county_modifier", "change_development_level",
+              "change_development_progress", "change_county_control", "title_province",
+              "holder", "tier", "is_title_created", "de_jure_liege", "any_county_province",
+              "every_county_province", "random_county_province", "ordered_county_province",
+              "set_county_culture", "set_county_faith"}
+TITLE_LINKS = {"capital_county", "primary_title", "county", "duchy", "kingdom", "empire"}
+TITLE_ITER_RE = re.compile(r"^(any|every|random|ordered)_(held_title|realm_county|"
+                           r"sub_realm_county|county_in_region|realm_de_jure_county|"
+                           r"in_de_jure_hierarchy|de_jure_county)$")
+TITLE_TO_CHAR = {"holder", "current_holder"}
+
 
 def _num(v):
     try:
@@ -98,15 +112,16 @@ def _fmt(v):
 class Req:
     """One requirement. kind: line (console), note, scope, story, flag, varstate,
     varscope; human is the plain-English phrase; console the console line."""
-    __slots__ = ("kind", "name", "human", "console", "order", "default")
+    __slots__ = ("kind", "name", "human", "console", "order", "default", "scope")
 
-    def __init__(self, kind, name, human, console=None, order=50, default=False):
+    def __init__(self, kind, name, human, console=None, order=50, default=False, scope=None):
         self.kind, self.name, self.human, self.console, self.order = \
             kind, name, human, console, order
         self.default = default      # a fresh character already meets it
+        self.scope = scope          # None = the event's root; else a title scope label
 
     def key(self):
-        return (self.kind, self.name, self.human, self.console)
+        return (self.kind, self.name, self.human, self.console, self.scope)
 
 
 class Model:
@@ -134,6 +149,8 @@ class Model:
         self.effect_callers = collections.defaultdict(set)    # effect -> {label}
         self.hook_parents = collections.defaultdict(set)      # custom on_action -> {hook}
         self._index()
+        self._classify_titles()
+        self._index_debug_decisions()
 
     # --- labels
     def label(self, kind, owner, parents=()):
@@ -188,18 +205,133 @@ class Model:
                             (self.label(kind, top.key, parents), kind, top.key))
                     if n.key in self.effects and top.key != n.key:
                         self.effect_callers[n.key].add(self.label(kind, top.key, parents))
+                        for sc in call_saves(self, n):
+                            self.saved_scope[sc].add(self.label(kind, top.key, parents))
                     if kind == "on_action" and n.key == "on_actions" and n.is_block:
                         for c in n.value:
                             if c.is_bare:
                                 self.hook_parents[c.key].add(top.key)
 
+    # --- FIX 9b: which definitions and saved scopes are titles
+    def _title_body(self, nodes):
+        """True when these nodes, at their own scope, use a title-only key or a
+        mod trigger/effect already known to run on a title."""
+        for c in nodes:
+            k = c.key
+            if not k or k == "#":
+                continue
+            if k in TITLE_KEYS or k in self.title_defs:
+                return True
+            if k in ("limit", "trigger", "AND", "OR", "NOT", "NOR", "if", "else_if", "else",
+                     "custom_description", "custom_tooltip", "hidden_effect") and c.is_block:
+                if self._title_body(c.value):
+                    return True
+        return False
+
+    def _classify_titles(self):
+        self.title_defs = set()          # scripted triggers/effects that run on a title
+        defs = dict(self.triggers)
+        defs.update(self.effects)
+        changed = True
+        while changed:
+            changed = False
+            for name, node in defs.items():
+                if name not in self.title_defs and node.is_block and self._title_body(node.value):
+                    self.title_defs.add(name)
+                    changed = True
+        # saved scopes that hold titles: saved inside a title context, or used
+        # as scope:x = { <title content> }
+        self.title_scopes = set()
+        for rel, doc in sorted(self.mod.docs.items()):
+            for top in doc.nodes:
+                if not top.is_block or not top.key:
+                    continue
+                start = top.key in self.title_defs and top.key in self.effects
+                self._collect_title_scopes(top.value, start)
+        for _ in range(3):      # scope:x = { scope:y-content } chains
+            for rel, doc in sorted(self.mod.docs.items()):
+                for n, _p in P.walk(doc.nodes):
+                    if n.is_block and n.key and n.key.startswith("scope:") and \
+                            "." not in n.key and self._title_body(n.value):
+                        self.title_scopes.add(n.key[6:])
+
+    def _collect_title_scopes(self, nodes, in_title):
+        for c in nodes:
+            k = c.key
+            if not k or k == "#":
+                continue
+            if k in SCOPE_SAVERS and isinstance(c.value, str) and in_title:
+                self.title_scopes.add(c.value)
+            if c.is_block:
+                inner = in_title
+                if self.is_title_switch(k):
+                    inner = True
+                elif k in TITLE_TO_CHAR or is_scope_switch(k):
+                    inner = False
+                self._collect_title_scopes(c.value, inner)
+
+    def is_title_switch(self, k, node=None):
+        if not k:
+            return False
+        if k in TITLE_LINKS or k.startswith("title:") or TITLE_ITER_RE.match(k):
+            return True
+        if k.startswith("scope:") and "." not in k:
+            return k[6:] in getattr(self, "title_scopes", ()) or \
+                (node is not None and node.is_block and self._title_body(node.value))
+        if k.startswith(("every_in_global_list", "any_in_global_list", "random_in_global_list",
+                         "ordered_in_global_list")) and node is not None and node.is_block:
+            return self._title_body(node.value)
+        return False
+
+    def title_label(self, k):
+        """How a title scope is named in recipes."""
+        return self._title_label(k)
+
+    def _title_label(self, k):
+        """How a title scope is named in recipes."""
+        if k.startswith("scope:") or k.startswith("title:") or k in TITLE_LINKS:
+            return k
+        if TITLE_ITER_RE.match(k):
+            return "one of your counties (%s)" % k
+        return k
+
+    def _index_debug_decisions(self):
+        """{variable: decision key} for debug-only decisions whose effect sets it
+        (directly or through scripted effects): the recipe can point at them."""
+        self.debug_vars = {}
+        for rel, doc in self.mod.common_dir("decisions"):
+            for d in doc.nodes:
+                if not d.is_block:
+                    continue
+                shown = P.first(d.value, "is_shown")
+                if shown is None or not any(n.key == "debug_only" for n, _ in P.walk(shown.value)):
+                    continue
+                eff = P.first(d.value, "effect")
+                for var in self._vars_set(eff.value if eff is not None else [], set()):
+                    self.debug_vars.setdefault(var, d.key)
+
+    def _vars_set(self, nodes, seen):
+        out = set()
+        for n, _ in P.walk(nodes):
+            if n.key in L.VAR_SETTERS and n.is_block:
+                nm = P.first(n.value, "name")
+                if nm is not None and isinstance(nm.value, str):
+                    out.add(nm.value)
+            elif n.key in self.effects and n.key not in seen:
+                seen.add(n.key)
+                out |= self._vars_set(self.effects[n.key].value, seen)
+        return out
+
     # --- trigger translation
-    def reqs(self, nodes, neg=False, depth=0, own=True):
+    def reqs(self, nodes, neg=False, depth=0, own=True, scope=None):
         out = []
         for n in nodes:
             if n.key in (None, "#") or n.key.startswith("@"):
                 continue
-            out += self.req(n, neg, depth, own)
+            for r in self.req(n, neg, depth, own):
+                if scope is not None and r.scope is None:
+                    r.scope = scope
+                out.append(r)
         return out
 
     def req(self, n, neg, depth, own):
@@ -221,10 +353,53 @@ class Model:
                 return self.reqs(kids, True, depth, own)
             first = self.req(kids[0], False, depth, own) if kids else []
             rest = self.describe(kids[1:])
-            if first and all(r.kind == "line" for r in first):
+            if first and all(r.console for r in first):
                 return first + ([Req("note", None, "(or instead: %s)" % rest, order=90)]
                                 if rest else [])
             return [Req("note", None, "one of: %s" % self.describe(kids))]
+        # FIX 9b: inside a title, `holder = { }` is about the title's holder,
+        # who is the event's root; marked "@root" so the outer title label
+        # does not claim it
+        if k in TITLE_TO_CHAR and sv in ("root", "scope:root"):
+            return [Req("note", None, "not held by you" if neg else "held by you")]
+        if n.is_block and k in TITLE_TO_CHAR:
+            out = self.reqs(n.value, neg, depth, own)
+            for r in out:
+                if r.scope is None:
+                    r.scope = "@root"
+            return out
+        # FIX 9b: a switch into a title: its conditions belong to that title
+        if n.is_block and self.is_title_switch(k, n) and not neg:
+            label = self.title_label(k)
+            inner = [c for c in n.value if c.key not in ("limit", "#", "variable", "order_by")]
+            lim = P.first(n.value, "limit")
+            if lim is not None and lim.is_block:
+                inner = list(lim.value) + inner
+            pre = []
+            if k.startswith("scope:"):
+                pre.append(Req("scope", k[6:], "scope:%s" % k[6:]))
+            return pre + self.reqs(inner, False, depth, own, scope=label)
+        if k == "development_level" and _num(sv) is not None and op in CMP and not neg:
+            x = CMP[op](_num(sv))
+            return [Req("line", "development", "development %s+" % x,
+                        "effect change_development_level = %s" % x, order=45)]
+        if k == "county_control" and _num(sv) is not None and op in CMP and not neg:
+            x = CMP[op](_num(sv))
+            return [Req("line", "control", "control %s+" % x,
+                        "effect change_county_control = %s" % x, order=46)]
+        if k == "has_county_modifier" and sv and not neg:
+            return [Req("line", sv, "modifier %s" % sv, "effect add_county_modifier = %s" % sv,
+                        order=47)]
+        if k in ("development_level", "county_control") and sv and not neg:
+            return [Req("note", k, "%s %s %s" % (k.replace("_", " "), op, sv))]
+        if k and k.startswith("var:") and "." not in k and sv and sv.startswith("flag:") \
+                and op in ("=", "==", "?="):
+            name = k[4:]
+            if neg:
+                return [Req("note", name, "%s is not %s" % (name, sv), default=True)]
+            return [Req("varflag", name, "%s = %s" % (name, sv),
+                        "effect set_variable = { name = %s value = %s }" % (name, sv),
+                        order=39)]
         if k == "has_trait" and sv:
             if sv == AUG_TRAIT:
                 if neg:
@@ -407,13 +582,35 @@ def is_scope_switch(key):
         key in CHAR_LINKS or key in ROOT_LINKS or key.startswith("cp:")
 
 
+def _effect_entry_label(model, name):
+    """The label of a title-scoped effect's own scope: its first top-level
+    save_scope_as, else a description."""
+    node = model.effects.get(name)
+    if node is not None and node.is_block:
+        for c in node.value:
+            if c.key in SCOPE_SAVERS and isinstance(c.value, str):
+                return "scope:%s" % c.value
+    return "the county %s runs on" % name
+
+
 def site_context(model, site):
-    """(target, [Req]) for one fire site: who the event fires on, and the root-scope
-    conditions on the path from the definition down to the reference."""
-    target = "story" if site.kind == "story" else "root"
+    """(target, [Req]) for one fire site: who the event fires on, and the
+    conditions on the path from the definition down to the reference.
+
+    FIX 9b: conditions met inside a title scope (a title-scoped scripted
+    effect, capital_county / title:x / scope:x holding a title, a held-title
+    iterator) keep that scope as their label; `holder = { }` out of a title
+    hands the event to that title's holder, which is the event's root.
+    """
+    scope = "root"          # "root" | a title label | "story" | another character
+    if site.kind == "story":
+        scope = "story"
+    elif site.kind == "effect" and site.owner in model.title_defs:
+        scope = _effect_entry_label(model, site.owner)
+    title_scope = scope not in ("root", "story")
     reqs = []
     top = site.parents[0] if site.parents else None
-    if top is not None and top.is_block and target == "root":
+    if top is not None and top.is_block and scope == "root":
         heads = {"on_action": ("trigger",), "event": ("trigger",),
                  "decision": ("is_shown", "is_valid")}.get(site.kind, ())
         for h in heads:
@@ -421,69 +618,179 @@ def site_context(model, site):
                 if b.is_block:
                     reqs += model.reqs(b.value, own=False)
     for p in site.parents[1:]:
-        if is_scope_switch(p.key):
-            target = "root" if p.key in ROOT_LINKS else p.key
+        k = p.key
+        if model.is_title_switch(k, p):
+            scope, title_scope = model.title_label(k), True
+            lim = P.first(p.value, "limit") if p.is_block else None
+            if lim is not None and lim.is_block:
+                reqs += model.reqs(lim.value, own=False, scope=scope)
             continue
-        if target != "root":
+        if title_scope and k in TITLE_TO_CHAR:
+            scope, title_scope = "root", False      # the title's holder gets the event
+            continue
+        if is_scope_switch(k):
+            scope, title_scope = ("root" if k in ROOT_LINKS else k), False
+            continue
+        if scope not in ("root",) and not title_scope:
             continue
         cond = None
-        if p.key in ("if", "else_if") or (p.key or "").startswith(("every_", "random_")):
+        if k in ("if", "else_if") or (k or "").startswith(("every_", "random_")):
             cond = P.first(p.value, "limit") if p.is_block else None
-        elif p.key and (p.key.isdigit() or p.key == "triggered_effect"):
+        elif k and (k.isdigit() or k == "triggered_effect"):
             cond = P.first(p.value, "trigger") if p.is_block else None
         if cond is not None and cond.is_block:
-            reqs += model.reqs(cond.value, own=False)
+            reqs += model.reqs(cond.value, own=False, scope=scope if title_scope else None)
+    target = "root" if title_scope else scope
     if target != "root":
-        # conditions so far were about another character (the pulse's root,
-        # an iterator): they say nothing about the event's own root
-        reqs = []
+        # conditions on the root were about another character (the pulse's
+        # root, an iterator); title facts stay true whoever gets the event
+        reqs = [r for r in reqs if r.scope is not None]
     return target, reqs
+
+
+def _scope_reads(node):
+    """Scopes a node reads. A `?=` comparison is a guarded read (true or false
+    when the scope is missing, never an error), so it requires nothing."""
+    if node.op == "?=":
+        return set()
+    names = set()
+    for text in (node.key or "", node.value if isinstance(node.value, str) else ""):
+        names.update(m.group(1) for m in SCOPE_READ_RE.finditer(text))
+    return names
+
+
+def _saves_of(node):
+    if node.key in SCOPE_SAVERS and isinstance(node.value, str):
+        return {node.value}
+    if node.key in SCOPE_VALUE_SAVERS and node.is_block:
+        nm = P.first(node.value, "name")
+        if nm is not None and isinstance(nm.value, str):
+            return {nm.value}
+    return set()
+
+
+PARAM_RE = re.compile(r"^\$([A-Za-z_]\w*)\$$")
+
+
+def effect_param_saves(model, name):
+    """Parameters a scripted effect saves a scope under (save_scope_as = $NAME$)."""
+    node = model.effects.get(name)
+    out = set()
+    if node is None:
+        return out
+    for n, _ in P.walk(node.value):
+        v = None
+        if n.key in SCOPE_SAVERS and isinstance(n.value, str):
+            v = n.value
+        elif n.key in SCOPE_VALUE_SAVERS and n.is_block:
+            nm = P.first(n.value, "name")
+            v = nm.value if nm is not None and isinstance(nm.value, str) else None
+        m = PARAM_RE.match(v or "")
+        if m:
+            out.add(m.group(1))
+    return out
+
+
+def call_saves(model, node):
+    """Scopes a call like `eotg_x_effect = { NAME = eotg_y }` saves through its
+    parameters."""
+    if node.key not in model.effects or not node.is_block:
+        return set()
+    params = {c.key: c.value for c in node.value if isinstance(c.value, str)}
+    return {params[p] for p in effect_param_saves(model, node.key) if p in params}
+
+
+def effect_profile(model, name, _stack=None):
+    """(reads, saves) of a scripted effect, in order (FIX 9a): `reads` are the
+    scopes it reads before saving them itself, i.e. what its caller must
+    provide; `saves` everything it (and the effects it calls) saves."""
+    _stack = set() if _stack is None else _stack
+    if name in _stack or name not in model.effects:
+        return set(), set()
+    memo = model.__dict__.setdefault("_profiles", {})
+    if name in memo:
+        return memo[name]
+    _stack.add(name)
+    reads, saved = _ordered(model, model.effects[name].value, set(), _stack)
+    _stack.discard(name)
+    memo[name] = (reads, saved)
+    return reads, saved
+
+
+def _ordered(model, nodes, provided, _stack=None, in_duel=False):
+    """Walk nodes in script order. Returns (unprovided reads, scopes saved here).
+    `provided` is what exists on entry; it is not modified."""
+    have = set(provided)
+    reads, saved = set(), set()
+    for n in nodes:
+        if n.key == "#":
+            continue
+        duel = in_duel or n.key == "duel" or (n.key or "").endswith("_duel")
+        for r in _scope_reads(n):
+            if r not in have and not (duel and r == "duel_value"):
+                reads.add(r)
+        sv = _saves_of(n)
+        if n.key in model.effects:
+            er, es = effect_profile(model, n.key, _stack)
+            reads |= er - have
+            sv |= {x for x in es if not PARAM_RE.match(x)} | call_saves(model, n)
+        if n.is_block:
+            cr, cs = _ordered(model, n.value, have, _stack, duel)
+            reads |= cr
+            sv |= cs
+        have |= sv
+        saved |= sv
+    return reads, saved
 
 
 def effect_saves(model, name, _seen=None):
     """Scopes a scripted effect saves, through the effects it calls."""
-    _seen = set() if _seen is None else _seen
-    if name in _seen or name not in model.effects:
-        return set()
-    _seen.add(name)
-    out = set()
-    for n, _ in P.walk(model.effects[name].value):
-        if n.key in SCOPE_SAVERS and isinstance(n.value, str):
-            out.add(n.value)
-        elif n.key in SCOPE_VALUE_SAVERS and n.is_block:
-            nm = P.first(n.value, "name")
-            if nm is not None and isinstance(nm.value, str):
-                out.add(nm.value)
-        elif n.key in model.effects:
-            out |= effect_saves(model, n.key, _seen)
-    return out
+    return effect_profile(model, name)[1]
 
 
 def event_reads(model, ev):
-    """(scope names read, var names read, provided scopes) for an event.
-    Provided: saved in its immediate or an option, directly or by a scripted
-    effect called there."""
-    reads, vars_read = set(), set()
-    provided = set()
-    for n, parents in P.walk(ev.value):
-        in_duel = any(p.key == "duel" or (p.key or "").endswith("_duel") for p in parents)
+    """(unprovided scope reads, var names read, scopes provided by immediate).
+
+    FIX 9a, in the order the engine runs an event:
+      trigger                 nothing in the event provides anything yet;
+      immediate               its own earlier saves (and scripted effects');
+      desc, title, portraits,
+      option triggers, names  what immediate saved;
+      each option's effects   immediate's saves + that option's earlier saves;
+      after                   immediate + every option's saves.
+    """
+    vars_read = set()
+    for n, _ in P.walk(ev.value):
         for text in (n.key or "", n.value if isinstance(n.value, str) else ""):
-            for m in SCOPE_READ_RE.finditer(text):
-                if not (in_duel and m.group(1) == "duel_value"):    # the duel effect sets it
-                    reads.add(m.group(1))
-            for m in VAR_READ_RE.finditer(text):
-                vars_read.add(m.group(1))
-        in_immediate = any(p.key == "immediate" for p in parents)
-        in_option = any(p.key == "option" for p in parents)
-        if n.key in SCOPE_SAVERS and isinstance(n.value, str) and (in_immediate or in_option):
-            provided.add(n.value)
-        if n.key in model.effects and (in_immediate or in_option):
-            provided |= effect_saves(model, n.key)
-        if n.key in SCOPE_VALUE_SAVERS and n.is_block and (in_immediate or in_option):
-            nm = P.first(n.value, "name")
-            if nm is not None and isinstance(nm.value, str):
-                provided.add(nm.value)
-    return reads, vars_read, provided
+            vars_read.update(m.group(1) for m in VAR_READ_RE.finditer(text))
+    unprovided = set()
+    guarded = set()
+    for n, _ in P.walk(ev.value):
+        if n.op == "?=":
+            for text in (n.key or "", n.value if isinstance(n.value, str) else ""):
+                guarded.update(m.group(1) for m in SCOPE_READ_RE.finditer(text))
+    model.__dict__["_last_guarded"] = guarded
+    trig = [c for c in ev.value if c.key == "trigger"]
+    unprovided |= _ordered(model, trig, set())[0]
+    imm = [c for c in ev.value if c.key == "immediate"]
+    r, provided = _ordered(model, imm, set())
+    unprovided |= r
+    option_saves = set()
+    for c in ev.value:
+        if c.key in ("trigger", "immediate", "option", "after", "#"):
+            continue
+        unprovided |= _ordered(model, [c], provided)[0]
+    for opt in P.find(ev.value, "option"):
+        pre = [c for c in opt.value if c.key in ("trigger", "name", "show_as_unavailable")]
+        unprovided |= _ordered(model, pre, provided)[0]
+        body = [c for c in opt.value if c.key not in ("trigger", "name", "show_as_unavailable",
+                                                      "ai_chance")]
+        r, sv = _ordered(model, body, provided)
+        unprovided |= r
+        option_saves |= sv
+    aft = [c for c in ev.value if c.key == "after"]
+    unprovided |= _ordered(model, aft, provided | option_saves)[0]
+    return unprovided, vars_read, provided
 
 
 def loc_keys_of(ev):
@@ -532,7 +839,9 @@ def site_label(model, site):
     if site.kind == "on_action":
         return "on_action " + hook_chain(model, site.owner)
     if site.kind == "effect":
-        callers = model.effect_callers.get(site.owner, set())
+        callers = {"on_action " + hook_chain(model, c[len("on_action "):])
+                   if c.startswith("on_action ") else c
+                   for c in model.effect_callers.get(site.owner, set())}
         return lab + (" ← " + _short(callers) if callers else "")
     return lab
 
@@ -544,7 +853,10 @@ KIND_PREF = {"decision": 0, "on_action": 1, "story": 2, "event": 3, "effect": 4}
 def _upstream(model, kind, owner):
     """[(kind, owner, label)] that lead into a definition."""
     if kind == "event":
-        return [(s.kind, s.owner, site_label(model, s)) for s in model.sites.get(owner, [])]
+        # plain labels: the chain itself names an effect's callers
+        return [(s.kind, s.owner, "on_action " + hook_chain(model, s.owner)
+                 if s.kind == "on_action" else model.label(s.kind, s.owner, s.parents))
+                for s in model.sites.get(owner, [])]
     if kind == "story":
         return [(k, o, "on_action " + hook_chain(model, o) if k == "on_action" else lab)
                 for lab, k, o in model.story_creators.get(owner, [])]
@@ -598,6 +910,33 @@ def live_route(model, eid, max_depth=7):
 
 
 # ------------------------------------------------------------------ recipes
+def _root(reqs):
+    """`holder = { }` conditions inside a title are the event root's ("@root")."""
+    for r in reqs:
+        if r.scope == "@root":
+            r.scope = None
+    return reqs
+
+
+TITLE_PLACEHOLDER = "<county>"
+
+
+def _title_placeholder(scope):
+    if scope.startswith("title:") or scope in TITLE_LINKS:
+        return scope
+    return TITLE_PLACEHOLDER
+
+
+def scoped_console(scope, console):
+    """A console line for a title-scoped requirement: `effect <title> = { … }`."""
+    inner = console[len("effect "):] if console.startswith("effect ") else console
+    return "effect %s = { %s }" % (_title_placeholder(scope), inner)
+
+
+def _plain(text):
+    return re.sub(r"\[[^\]]*\]", "…", text)
+
+
 def _dedupe(reqs):
     out, seen = [], set()
     numeric = {r.name for r in reqs if r.kind in ("varnum", "varcap", "varscope")}
@@ -610,24 +949,41 @@ def _dedupe(reqs):
     return out
 
 
+def _upstream_owners(model, eid, depth=5):
+    """'kind owner' strings for every definition upstream of an event."""
+    seen, frontier = set(), [("event", eid)]
+    for _ in range(depth):
+        nxt = []
+        for kind, owner in frontier:
+            for k, o, _lab in _upstream(model, kind, owner):
+                if (k, o) not in seen:
+                    seen.add((k, o))
+                    nxt.append((k, o))
+        frontier = nxt
+    return ["%s %s" % ko for ko in sorted(seen)]
+
+
 def _savers(model, name, firer_labels):
     labels = model.saved_scope.get(name, set())
-    near = {lab for lab in labels if any(lab.startswith(f) for f in firer_labels)}
+    near = {lab for lab in labels if any(lab == f or lab.startswith(f + " ")
+                                         for f in firer_labels)}
     return _short(near or labels) if (near or labels) else "nothing in script"
 
 
 def recipe(model, eid):
     rel, ev = model.events[eid]
     sites = sorted(model.sites.get(eid, []), key=lambda s: (s.rel, s.line))
+    model.__dict__.pop("_last_guarded", None)
     hidden = any(c.key == "hidden" and c.value == "yes" for c in ev.value)
     trig = P.first(ev.value, "trigger")
-    own = model.reqs(trig.value) if trig is not None and trig.is_block else []
+    own = _root(model.reqs(trig.value) if trig is not None and trig.is_block else [])
 
     # context: requirements common to every firing path (root scope only)
     targets = collections.OrderedDict()
     ctx_sets = []
     for s in sites:
         tgt, rq = site_context(model, s)
+        rq = _root(rq)
         targets.setdefault(tgt, []).append(site_label(model, s))
         ctx_sets.append({r.key(): r for r in rq})
     ctx = []
@@ -635,11 +991,11 @@ def recipe(model, eid):
         common = set(ctx_sets[0]).intersection(*ctx_sets[1:])
         ctx = [ctx_sets[0][k] for k in sorted(common, key=str)]
 
-    firer_owner_labels = ["%s %s" % (s.kind, s.owner) for s in sites]
+    firer_owner_labels = _upstream_owners(model, eid)
     reads, vars_read, provided = event_reads(model, ev)
     for k in loc_keys_of(ev):
         for m in LOC_SCOPE_RE.finditer(model.loc.get(k, "")):
-            if m.group(1) in model.saved_scope:
+            if m.group(1) in model.saved_scope and m.group(1) not in provided:
                 reads.add(m.group(1))
 
     missing = []
@@ -665,7 +1021,7 @@ def recipe(model, eid):
             missing.append("needs variable %s, set by %s"
                            % (r.name, _short(model.set_var.get(r.name, ())) or "nothing in script"))
             prereq.append("variable %s (%s)" % (r.name, _short(model.set_var.get(r.name, ()), 2)))
-    for name in sorted(reads - provided):
+    for name in sorted(reads):
         if name in ENGINE_SCOPES:
             if name == "story" and story_names:
                 continue
@@ -680,6 +1036,14 @@ def recipe(model, eid):
             missing.append("reads story variable var:%s, set by %s"
                            % (v, _short(model.set_var.get(v, ()))))
 
+    # guarded reads (`scope:x ?= …`) of a scope the event does not save: fired
+    # cold it runs, but its text or branch falls back (FIX 9a)
+    for name in sorted(model.__dict__.get("_last_guarded", set()) - provided - reads):
+        if name in model.saved_scope:
+            own.append(Req("note", name, "reads scope:%s if present (saved by %s); fired cold, "
+                           "its text falls back" % (name, _savers(model, name,
+                                                                  firer_owner_labels)),
+                           order=95, default=True))
     setup_own = [r for r in own if r.console or r.kind == "note"]
     setup_ctx = [r for r in ctx if (r.console or r.kind == "note")
                  and r.key() not in {o.key() for o in own}]
@@ -692,17 +1056,37 @@ def recipe(model, eid):
 
     def lines(reqs):
         out = []
+        hinted = set()
         for r in _dedupe(reqs):
-            if r.console:
+            if r.console and r.scope:
+                out.append(("console", scoped_console(r.scope, r.console)))
+            elif r.console:
                 out.append(("console", r.console))
             elif r.kind == "note":
-                out.append(("note", r.human))
+                out.append(("note", ("on %s: " % r.scope if r.scope else "") + r.human))
             elif r.kind == "varcap":
-                out.append(("note", "keep %s" % r.human))
+                out.append(("note", ("on %s: " % r.scope if r.scope else "") +
+                            "keep %s" % r.human))
+            dec = model.debug_vars.get(r.name) if r.scope else None
+            if dec and dec not in hinted:
+                hinted.add(dec)
+                out.append(("note", "or take the debug decision '%s' (%s), which sets %s"
+                            % (_plain(model.loc.get(dec, dec)), dec, r.name)))
+        scopes = sorted({r.scope for r in reqs if r.scope and r.console and
+                         _title_placeholder(r.scope) == TITLE_PLACEHOLDER})
+        for sc in scopes:
+            out.insert(0, ("note", "%s: the county the event is about (%s); your capital "
+                                   "Region is capital_county, any other is title:<c_key>"
+                           % (TITLE_PLACEHOLDER, sc)))
         return out
 
     setup = lines(setup_own)
     setup_rec = [x for x in lines(setup_ctx) if x not in setup]
+    # a "<county>:" header only where a <county> line is left, and only once
+    if not any(k == "console" and TITLE_PLACEHOLDER in t for k, t in setup_rec):
+        setup_rec = [x for x in setup_rec if not x[1].startswith(TITLE_PLACEHOLDER + ":")]
+    elif any(t.startswith(TITLE_PLACEHOLDER + ":") for _, t in setup):
+        setup_rec = [x for x in setup_rec if not x[1].startswith(TITLE_PLACEHOLDER + ":")]
     # one initiate line, before anything that needs it
     for lst in (setup, setup_rec):
         if ("console", INITIATE) in lst:
