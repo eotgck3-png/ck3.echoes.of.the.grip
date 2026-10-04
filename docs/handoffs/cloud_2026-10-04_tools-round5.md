@@ -1,0 +1,46 @@
+### HANDOFF (cloud session; validated in the sandbox, not on Windows or against game files)
+- **branch:** `claude/tools-round5-cloud` (from `origin/v2-space-map` @ `87d0d93`)
+- **status:** done (FIX 8, FIX 9, FIX 10)
+- **summary:**
+  - **FIX 8, Windows console:** `pdx_parse.utf8_console()` reconfigures stdout/stderr to UTF-8 (errors=replace) when they can't encode the tools' output. Where `reconfigure` is unavailable, it wraps them to print ASCII (`->`, `-`, `S`).
+    - Called first in `main()` of `gen_test_recipes`, `spec_conformance`, `eotg_lint`, `check_all` and `port_religions_1_20`.
+    - `tests/test_console.py` runs each CLI with `PYTHONIOENCODING=cp1252` on a fixture whose output holds non-ASCII (an arrow in the root path and in a loc filename). All six CLI tests fail on the old tools.
+  - **FIX 9, gen_test_recipes:**
+    - **(a) Order-aware scope reads**, in the order the engine runs an event:
+      - the trigger gets nothing from the event;
+      - immediate provides for desc, title, portraits, option triggers and names;
+      - an option's saves count only for what comes after them in that option;
+      - `after` sees everything.
+    - **Scripted effects** have an ordered read/save profile, and saves through a parameter (`eotg_aug_pick_victim_effect = { NAME = eotg_victim }`) are understood.
+    - **Guarded reads** (`scope:x ?= …`) no longer block a cold fire; they add a "reads scope:x if present (saved by …)" note.
+    - **(b) Title scopes:** scripted triggers and effects are classified as title-scoped from their contents. Conditions under `capital_county`, `title:x`, held-title iterators, or a `scope:x` that holds a title are attributed to that scope. They print as `effect <county> = { … }`, with a header explaining `<county>` and a pointer to any **debug decision** that sets the same variable.
+      - `holder = { }` inside a title is the event's root.
+      - A title-scoped effect hands the event to its holder, so the fire line is plain `event <id>`.
+    - **Also:**
+      - "saved by" now prefers savers on the event's upstream chain;
+      - live routes use plain labels;
+      - effect callers show their hook chain.
+    - **Frontier-shaped fixtures:** 7 tests, all failing on the round-4 tool.
+    - **Run read-only against `claude/frontier-v1-cloud`,** the rows are usable. E.g. .004: "needs scope:eotg_frontier_county, saved by effect eotg_frontier_tick_effect"; `effect <county> = { set_variable = { name = eotg_frontier_progress value = 100 } }`; "or take the debug decision '(Debug) Mark Capital Region Unsettled'".
+    - **Regenerated `console_recipes.md`** for the current tree (no Frontier yet): 163 events, **47 fire cold, 73 after setup, 43 need a route**. It was 39 / 63 / 61.
+      - About 19 cybernetics events now count as fire-cold, because they pick their own victim in `immediate` (e.g. countdown.004, fracture.009). The test plan's "via parent (needs eotg_victim)" verdict for them was wrong.
+      - tier1.021 now correctly needs `eotg_proc_provider`, passed down from tier1.002's options; the old tool missed it.
+  - **FIX 10, spec_conformance:** reads every `docs/specs/*.md` that has an identifier table (a table row naming a backticked `eotg_` id), plus its `_lore.md` companion, and reports **per family**:
+    - a summary by family and by spec;
+    - built and unbuilt gaps per family.
+
+    A spec that names no event counts as built once anything it names exists, so a plan with nothing built yet is listed apart.
+    - **Current tree:** 25 specs in 4 families: `cybernetics` (the track spec, 13 gaps), `cybernetics_v2` (3), `glossary` and `void` (unbuilt).
+    - **Run against the Frontier branch:** `frontier_v1` is a family of 2 specs, both built, with 5 missing ids in `frontier_v1.md`, all of them fallback or hypothetical names.
+    - The committed report was already stale on `87d0d93`: two self-repair specs had landed after it was generated. It is now regenerated.
+- **files:**
+  - `docs/tools/pdx_parse.py`, `gen_test_recipes.py`, `spec_conformance.py`, `eotg_lint.py`, `check_all.py`, `port_religions_1_20.py`, `qa/README.md`;
+  - `tests/test_console.py` (new), `tests/test_gen_test_recipes.py`, `tests/test_spec_conformance.py`;
+  - `docs/qa/generated/console_recipes.md`, `docs/qa/generated/spec_conformance.md`;
+  - this handoff.
+- **validation:**
+  - **Unit tests:** **140 OK** on LF, and on a fresh `core.autocrlf=true` clone where every file is CRLF.
+  - **`check_all.py`:** 12 pass, 0 fail, 7 skipped (local-only tools), in the repo, in the CRLF clone, and as `--root <CRLF clone>` from the LF checkout.
+  - **Lint:** `eotg_lint` 14 findings, 0 new.
+- **follow-up:** after Frontier merges, run `python docs/tools/gen_test_recipes.py` and `spec_conformance.py`, then commit both reports. `check_all` flags them stale until then.
+- **needs-human:** none.
