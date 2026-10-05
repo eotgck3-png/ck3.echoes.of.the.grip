@@ -470,3 +470,15 @@ eotg_frontier_reward_dev_value = {
     if = { limit = { has_county_modifier = eotg_frontier_trait_ancient_infrastructure } add = 1 }
     max = 3
 }
+
+# == Expansion B2 (frontier_v2.md §B2) ========================================
+# What a resettling expedition salvages from the last attempt's
+# infrastructure: 5 per piece left behind (at most 2 pieces)
+eotg_frontier_salvage_bonus_value = {
+    value = 0
+    if = {
+        limit = { has_variable = eotg_frontier_salvage }
+        add = var:eotg_frontier_salvage
+        multiply = 5
+    }
+}

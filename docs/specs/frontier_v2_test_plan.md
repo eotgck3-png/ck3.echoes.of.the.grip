@@ -80,3 +80,7 @@ Nothing listens to them yet. Send any `error.log` line mentioning `eotg_frontier
 - **No player text** says "barony", "holding slot", "county", "charter", "season", names a faction, an era, or the Void.
 - **Canadian spelling** (colour, honour, defence, travelled).
 - **error.log:** send every line containing `eotg_frontier`, especially from the Phase 2 lines marked `UNVERIFIED-VANILLA` (spec §15): `piety_level`, `county_opinion_add`, the script-value comparisons in `eotg_frontier_triggers.txt`, and `change_development_level` with a script value.
+
+## 9. Expansion (spec §B; each part can be dropped on its own)
+- **B1:** with a Hostile, Remote or Dangerous trait and no counter, *A Hard Year* adds a line about it. *No Longer a Frontier* adds a line for two pieces of infrastructure, studied ruins or anomalies, or a hard Region.
+- **B2 salvage:** build infrastructure in a Frontier, then **Abandon a Frontier**. Establish there again: *An Opportunity Here* mentions what is still standing, and the Readout shows 5 more progress per piece left behind (on top of the 10 per earlier attempt).

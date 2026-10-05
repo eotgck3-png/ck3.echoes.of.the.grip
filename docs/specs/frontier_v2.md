@@ -418,6 +418,17 @@ Built after A passed lint, check_all and spec_conformance. Each subsection is on
 - **.004 *No Longer a Frontier*** gets one line for what the project leaves behind: two pieces of infrastructure; ruins or anomalies studied; or a Region that was hard to settle.
 - New loc: `eotg_frontier.002.desc_hostile`, `.002.desc_remote`, `.002.desc_dangerous`, `.004.desc_built_much`, `.004.desc_studied`, `.004.desc_hard_won`. No mechanics change.
 
+### B2. Salvage: resettling an abandoned Region's infrastructure (design §3.4 "abandoned infrastructure")
+- **On abandonment**, a Region that had infrastructure records how many pieces it lost in `eotg_frontier_salvage` (title variable, kept until the next start; the latest abandonment wins).
+- **On the next start**, the project begins `eotg_frontier_salvage_bonus_value` ahead (5 per piece, at most 10), on top of Phase 1's trace bonus and any survey data. The variable is consumed.
+- **.001** gets a line when salvage is waiting: `eotg_frontier.001.desc_salvage`.
+- Pacing: at most +10 once per resettlement; it makes a failed, well-built project less of a total loss without making abandonment profitable (the infrastructure itself cost two medium gold payments).
+
+| Type | Key | Notes |
+|---|---|---|
+| variable | `eotg_frontier_salvage` | pieces of infrastructure an abandoned attempt left |
+| script value | `eotg_frontier_salvage_bonus_value` | 5 × that, as a start bonus |
+
 ---
 
 ### HANDOFF

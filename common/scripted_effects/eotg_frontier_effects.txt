@@ -118,6 +118,13 @@ eotg_frontier_start_effect = {
         # Q4: the development this project can still reach (its floor is
         # never above it)
         set_variable = { name = eotg_frontier_dev_reachable  value = eotg_frontier_dev_reachable_value }
+        # Expansion B2 (frontier_v2.md §B2): salvage from an abandoned attempt's
+        # infrastructure
+        if = {
+            limit = { has_variable = eotg_frontier_salvage }
+            change_variable = { name = eotg_frontier_progress  add = eotg_frontier_salvage_bonus_value }
+            remove_variable = eotg_frontier_salvage
+        }
         # Phase 2 (frontier_v2.md §8): survey data on file is a head start
         if = {
             limit = { has_variable = eotg_frontier_survey_data }
@@ -822,7 +829,12 @@ eotg_frontier_abandon_effect = {
             change_development_level = -1
         }
         # Phase 2 (frontier_v2.md §4.2): what was built is lost; what was
-        # learned (the traits) stays
+        # learned (the traits) stays. Expansion B2 (§B2): the next expedition
+        # can salvage some of it (one record per abandonment, the latest wins)
+        if = {
+            limit = { eotg_frontier_infra_count_value >= 1 }
+            set_variable = { name = eotg_frontier_salvage  value = eotg_frontier_infra_count_value }
+        }
         eotg_frontier_clear_infra_effect = yes
         eotg_frontier_drop_sponsor_effect = yes
         eotg_frontier_unlist_effect = yes
