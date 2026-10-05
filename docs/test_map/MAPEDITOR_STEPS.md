@@ -56,8 +56,9 @@ The tiling maths does work for this map. Stride is `tile_size - 1` = 64, and 819
 > ⚠️ **The main mod folder is a directory junction to this repo.** Anything the editor writes into
 > `mod/eotg_stellar_rivers` lands directly in your working tree. Check `git status` after the
 > session and revert anything you did not intend — in particular `gfx/map/terrain/colormap.dds` and
-> the nine `eotg_structure_*.dds` files, which are tracked and **irreproducible** (see
-> `docs/pitfalls.md` §13).
+> the nine `eotg_structure_*.dds` files, which are tracked and **easy to replace wrong** — they
+> can be rebuilt, but only from one specific source image and `--level`, so an accidental
+> regeneration changes the map's look without looking like damage (see `docs/pitfalls.md` §13).
 
 ## 1. Launch with the map editor
 

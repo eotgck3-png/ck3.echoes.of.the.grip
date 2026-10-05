@@ -32,7 +32,7 @@ else. Rather than drop a stale materials.settings into the sub-mod, this stages 
 into a temp directory, builds there, and moves the three results to --out. Nothing is left behind.
 
 Usage:
-    python docs/test_map/build_terrain.py [--out <dir>] [--level 131] [--size 4096x2048]
+    python docs/test_map/build_terrain.py [--out <dir>] [--level 132] [--size 4096x2048]
 
 --out defaults to docs/test_map/gfx/map/terrain. install.py should pass the INSTALLED sub-mod's
 gfx/map/terrain instead, so the textures land where the game will read them.
@@ -52,9 +52,13 @@ REPO = os.path.dirname(os.path.dirname(HERE))              # repo root
 TOOLS = os.path.join(REPO, "docs", "tools")
 REL = os.path.join("gfx", "map", "terrain")
 
-# The main mod's colormap and structure bakes are tracked AND irreproducible - the source art that
-# made them is gone (docs/pitfalls.md §13). This script must never touch them, so it checksums them
-# before and after and fails loudly rather than letting a redirect bug destroy them quietly.
+# The main mod's colormap and structure bakes are tracked, and they ARE reproducible - but only
+# from one specific source image and one specific --level, neither of which is obvious. They are
+# therefore easy to replace WRONG: a well-meaning rerun with the defaults silently swaps them for
+# something subtly different, and a .dds diff tells you nothing readable. See docs/pitfalls.md
+# section 13 and gfx/map/terrain/README.md for the exact commands. This script must never touch
+# them, so it checksums them before and after and fails loudly rather than letting a redirect bug
+# replace them quietly.
 GUARDED = ["colormap.dds"] + [
     "eotg_structure_%s_%s.dds" % (n, k) for n in "abc" for k in ("diffuse", "normal", "properties")
 ]
@@ -76,7 +80,7 @@ def refuse_if_inside_main_gfx(out: str) -> None:
     real = os.path.realpath(out)
     if real == forbidden or real.startswith(forbidden + os.sep):
         sys.exit("REFUSING: --out is inside the main mod's gfx/ (%s).\nThat directory holds "
-                 "tracked, irreproducible art; see docs/pitfalls.md section 13." % real)
+                 "tracked art that is easy to replace wrong; see docs/pitfalls.md section 13." % real)
 
 
 def run(script: str, *args: str) -> None:
@@ -92,10 +96,12 @@ def main() -> None:
     ap.add_argument("--out", default=os.path.join(HERE, *REL.split(os.sep)),
                     help="where the three textures are written (default: docs/test_map/gfx/map/terrain)")
     ap.add_argument("--size", default="4096x2048", help="colormap size, half the map is plenty")
-    # 131 matches the main mod's tracked colormap (mean 131.47 against this tool's 131.33), so the
-    # test map reads at the same tone. The tool's own default of 106 is markedly darker, and the
-    # main mod's exact bake cannot be reproduced - only approached this closely.
-    ap.add_argument("--level", default="131", help="colormap sRGB level; 131 matches the main mod")
+    # 132 is the main mod's own colormap level - at this size it reproduces the tracked file
+    # BYTE-IDENTICALLY, so the test map reads at exactly the main mod's tone rather than merely
+    # close to it. This said 131 until 2026-10-04, which was wrong: 131 gives mean 131.33 against
+    # the main mod's 131.47 and a visibly wider dark tail. The tool's own default of 106 is
+    # markedly darker again.
+    ap.add_argument("--level", default="132", help="colormap sRGB level; 132 matches the main mod")
     a = ap.parse_args()
 
     out = os.path.abspath(a.out)

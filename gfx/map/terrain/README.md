@@ -1,13 +1,32 @@
-# Terrain — paused 2026-09-25
+# Terrain
 
-The terrain material work is **on hold and not shipped**. This folder deliberately contains only
-`flat_maps/flatmap.dds` (the zoomed-out star chart), which is part of the working presentation pass,
-not the terrain material experiment.
+> **Status corrected 2026-10-04.** This file opened by saying the terrain work was "paused, on hold
+> and not shipped" and that the folder held only `flat_maps/flatmap.dds`. That has been untrue
+> since the terrain pass resumed in late September: `materials.settings`, `detail_index.tga`,
+> `detail_intensity.tga`, `colormap.dds`, the nine `eotg_structure_*.dds` bakes, the masks and the
+> `pdxterrain.shader` override are all present and shipping. The history below is kept because the
+> round-1 diagnosis is still the reason the textures look the way they do.
 
-With no `materials.settings`, `detail_index.tga`, `colormap.dds` or `pdxterrain.shader` override
-present, CK3 falls back to **vanilla terrain** — Earth-like grass, rock and sand. That is expected.
-Everything else in the space-map pass (void ocean, stellar-wind rivers, borders, arrows, star
-chart, surround, ambience, weather removal) is unaffected and still active.
+## Rebuilding the shipped art — READ THIS FIRST
+
+The two generators below rewrite their outputs **unconditionally**, and the arguments that produced
+the shipped files are **not the defaults**. Running either with defaults silently replaces the
+map's look with something different. These are the exact commands, verified byte-identical against
+the tracked files on 2026-10-04 (9/9 structure bakes, and the colormap):
+
+```
+python docs/tools/build_terrain_hybrid.py <root> --source "C:/Users/river/Downloads/spectralbaron_seamless_repeating_futuristic_smoked_carbon-glass_138c75b4-2b72-472a-b618-4aa25d6ec2a8.png"
+python docs/tools/build_colormap.py       <root> --level 132
+```
+
+The `--source` image lives in `Downloads`, outside the repo, alongside the six other candidates
+evaluated on 10-01/10-02. **It is the single point of failure for the structure bakes** — if it is
+ever deleted they become genuinely irreproducible, which is why the bakes and the colormap are
+tracked via `.gitignore` exceptions. See `docs/pitfalls.md` section 13.
+
+`docs/test_map/build_terrain.py` is the safe pattern for pointing a generator anywhere near this
+folder: it refuses an `--out` inside the main mod's `gfx/` and checksums these ten files before and
+after.
 
 ## Why it was paused
 Round 1 of generated textures failed a structural constraint: terrain is minified ~5-9 source
@@ -23,8 +42,8 @@ contrast 1.20 and peak/mean 13.1 against vanilla terrain's 0.06 and 0.3. See
 - **The removed files themselves** — moved, not deleted, to
   `Documents/Paradox Interactive/Crusader Kings III/mod/_eotg_terrain_backup_20260925/` (445 MB).
 
-## To resume
-Drop round-2 images into a folder and run:
+## To re-import terrain textures from scratch
+Drop new images into a folder and run:
 
     python docs/tools/import_terrain_textures.py <mod root> <folder> --check      # verify first
     python docs/tools/import_terrain_textures.py <mod root> <folder> --coherent

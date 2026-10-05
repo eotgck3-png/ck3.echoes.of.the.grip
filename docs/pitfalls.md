@@ -279,11 +279,24 @@ a vanilla `.txt`.
 
 **Symptom.** After an unrelated terrain tweak, the terrain structure looks different and nobody changed it on purpose.
 
-**Cause.** The `eotg_structure_{a,b,c}_{diffuse,normal}.dds` bakes in game since 2026-10-01 came from `docs/tools/build_terrain_hybrid.py --source <image>` run against an image that isn't in the repo and can't be found. No invocation of the committed tool reproduces them: procedural, `eotg_hologram_source.png` and `--cloud` all give 0/6 matches. The tool is deterministic and unchanged since 09-27. `build_terrain_hybrid.py` rewrites these files unconditionally.
+**Cause.** `build_terrain_hybrid.py` and `build_colormap.py` rewrite these files unconditionally, and the arguments that produced the shipped ones are not the defaults. Run either with its defaults and the map's look changes — not subtly enough to miss in game, but a `.dds` diff tells you nothing readable, and the files are gitignored by default so git will not report it either.
 
-**Same trap, second case:** `gfx/map/terrain/colormap.dds` (09-25) predates the only committed `build_colormap.py` (643b6e7, 09-26). No `--level` or `--drift` reproduces it: the default output is visibly darker (mean 106 vs 131). Only the holding decals (`build_holding_decals.py`) were verified to reproduce byte for byte.
+**They ARE reproducible, and half the recipe was already written down** — `gfx/map/terrain/README.md` has carried `build_colormap.py --level 132` all along, in the folder those files live in, and `.gitignore` even points at that README. It was not read. The `--source` image for the structure bakes genuinely was unrecorded; it is now. Verified byte-identical 2026-10-04 — 9/9 structure bakes and the colormap:
 
-**Rule.** These files (9 structure bakes + colormap) are tracked inputs now (`.gitignore` exception, 2026-10-04). Don't run `build_terrain_hybrid.py` or `build_colormap.py` over them unless you mean to replace the look. If you do, commit the new bakes together with the exact command and its source image.
+```
+python docs/tools/build_terrain_hybrid.py <root> --source "<the smoked carbon-glass PNG in Downloads>"
+python docs/tools/build_colormap.py <root> --level 132
+```
+
+The exact source filename is in `gfx/map/terrain/README.md`. Note `--level 132`, not the tool's default of 106.
+
+**This was first recorded here as "irreproducible", which was wrong**, and the three ways it went wrong are the useful part:
+
+1. **The search did not include the obvious place.** It covered the repo, the mod folder and the backup, but not `Downloads`, so "I cannot find it" was written down as "it is gone".
+2. **The folder's own README was never read.** `--level 132` was sitting in `gfx/map/terrain/README.md` the whole time. Before declaring an artifact unreproducible, read the README next to it.
+3. **A slope was inferred from a single data point.** The colormap was ruled out by measuring **one** level (131 → mean 131.33), assuming `mean = level + 0.33`, and extrapolating that 132 would land on 132.33 and miss the target of 131.47. It does not — 132 reproduces the file exactly. One point gives you no slope; test the neighbouring value instead of extrapolating to it.
+
+**Rule.** Keep treating these as tracked inputs (`.gitignore` exception, 2026-10-04). The reason is not that they are irreplaceable but that they are **easy to replace wrong**, which still argues for the guard. Don't run either generator over them unless you mean to replace the look; if you do, commit the new output together with the exact command and source image. `docs/test_map/build_terrain.py` has a checksum guard that refuses to write into the main mod's `gfx/` and verifies these ten files before and after — copy that pattern before pointing any generator at the repo.
 
 **Confirm.** `git status gfx/map/terrain/` shows them modified after any tool run. `git checkout` restores them.
 

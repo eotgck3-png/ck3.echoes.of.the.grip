@@ -1,11 +1,12 @@
 
 # Generated terrain art / bakes (see gfx/map/terrain/README.md)
 gfx/map/terrain/*.dds
-# Exception (2026-10-04): the structure bakes are irreproducible. The 10-01 bake came from a
-# --source image that is no longer anywhere, so they are tracked inputs, not outputs.
-# Do not rerun build_terrain_hybrid.py over them; see docs/pitfalls.md.
+# Exception (2026-10-04): the structure bakes are tracked because they are easy to replace
+# WRONG, not because they cannot be remade. They come from one specific --source image and are
+# reproducible byte-for-byte; a rerun with different args silently swaps the map's look for
+# something subtly different. Exact command: gfx/map/terrain/README.md, docs/pitfalls.md 13.
 !gfx/map/terrain/eotg_structure_*.dds
-# colormap.dds (09-25) predates the only committed build_colormap.py and no args reproduce it.
+# colormap.dds likewise: reproducible, but only at --level 132, which is not the tool default.
 !gfx/map/terrain/colormap.dds
 gfx/map/terrain/*.tga
 gfx/map/terrain/masks/
