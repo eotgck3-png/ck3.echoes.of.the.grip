@@ -22,8 +22,12 @@ Usage::
     for node, parents in walk(doc.nodes):
         print(node.line, node.key, node.op, node.value)
 """
+import os
 import re
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import textio  # noqa: E402
 
 __all__ = [
     "Node", "Document", "ParseError", "OPERATORS", "TAGS",
@@ -170,19 +174,14 @@ def utf8_console():
 
 
 def read_text(path):
-    """Read a script file as text. Returns (text, had_bom). Tolerates bad bytes."""
-    with open(path, "rb") as fh:
-        raw = fh.read()
-    bom = raw.startswith(b"\xef\xbb\xbf")
-    if bom:
-        raw = raw[3:]
-    return raw.decode("utf-8", errors="replace"), bom
+    """Read a script file as text. Returns (text, had_bom). Tolerates bad bytes.
+    Every leading BOM is stripped (textio; a stacked BOM is eotg_lint L016's job)."""
+    return textio.read_text(path)
 
 
 def tokenize(text, keep_comments=False):
     """Split text into Tokens. Newlines and whitespace are dropped."""
-    if text.startswith("﻿"):
-        text = text[1:]
+    text = textio.strip_boms(text)
     tokens = []
     line = 1
     for m in _TOKEN_RE.finditer(text):

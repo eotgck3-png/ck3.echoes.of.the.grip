@@ -18,6 +18,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import pdx_parse  # noqa: E402
+import textio  # noqa: E402
 
 ERROR = "ERROR"
 WARNING = "WARNING"
@@ -36,13 +37,18 @@ RULES = {
     "L010": (ERROR, "loc key referenced but not defined"),
     "L011": (WARNING, "single named character referred to as they/them (house rule: gendered)"),
     "L012": (ERROR, "cybernetics loc: never-name (ERROR) or register word to triage (WARNING)"),
-    "L013": (WARNING, "loc house style: dash, British spelling, stray space, appended desc without \\n\\n"),
+    "L013": (WARNING, "loc house style: dash, non-Canadian spelling, stray space, appended desc without \\n\\n"),
     "L014": (WARNING, "eotg_ loc key defined but never referenced"),
+    "L016": (ERROR, "BOM (U+FEFF) anywhere but byte 0: a stacked or mid-file BOM"),
 }
 
 SCRIPT_DIRS = ("common", "events")
 TEXT_SCAN_DIRS = ("common", "events", "history", "localization", "map_data", "gfx")
 TEXT_SCAN_EXT = (".txt", ".yml", ".gui", ".csv", ".mod", ".asset")
+
+# L016: every mod text file has at most one BOM, at byte 0 (docs/pitfalls.md §14)
+BOM_SCAN_DIRS = ("common", "events", "localization", "history", "docs/test_map")
+BOM_SCAN_EXT = (".txt", ".yml", ".mod", ".csv", ".settings", ".gui")
 
 # common/<dir> whose top-level keys are mod-defined identifiers (L001)
 DEFINITION_DIRS = {
@@ -286,7 +292,7 @@ def rule_l003(mod):
             out.append(Finding("L003", rel, 1, "missing UTF-8 BOM"))
         m = re.search(r"_l_(\w+)\.yml$", rel)
         lang = m.group(1) if m else "english"
-        text = raw.decode("utf-8-sig", errors="replace")
+        text, _ = textio.decode(raw)
         lines = text.splitlines()
         header = None
         for i, line in enumerate(lines, 1):
@@ -314,6 +320,42 @@ def rule_l003(mod):
                 else:
                     seen[lang][k] = (rel, i)
     mod.loc = seen
+    return out
+
+
+def bom_scan_files(root):
+    """L016's files: BOM_SCAN_DIRS recursively, plus descriptor-type files at the root."""
+    for top in BOM_SCAN_DIRS:
+        yield from _iter_files(root, top, BOM_SCAN_EXT)
+    for f in sorted(os.listdir(root)):
+        p = os.path.join(root, f)
+        if os.path.isfile(p) and f.lower().endswith(BOM_SCAN_EXT):
+            yield p
+
+
+def rule_l016(mod):
+    """A second BOM right after the first (EF BB BF EF BB BF): CK3 strips one and reads
+    the next as part of the first key, which in common/script_values/ broke every named
+    value in the game. A BOM mid-file is a pasted-in file. Reported by byte offset."""
+    out = []
+    for f in bom_scan_files(mod.root):
+        with open(f, "rb") as fh:
+            raw = fh.read()
+        offsets = textio.stray_bom_offsets(raw)
+        if not offsets:
+            continue
+        rel = _rel(mod.root, f)
+        lead = 0
+        while raw.startswith(textio.BOM * (lead + 1)):
+            lead += 1
+        if lead > 1:
+            out.append(Finding("L016", rel, 1, "file starts with %d stacked BOMs (bytes 0-%d); "
+                               "keep exactly one" % (lead, 3 * lead - 1)))
+        for off in offsets:
+            if off < 3 * lead:
+                continue
+            out.append(Finding("L016", rel, raw.count(b"\n", 0, off) + 1,
+                               "BOM at byte %d (only byte 0 may hold one)" % off))
     return out
 
 
@@ -610,11 +652,10 @@ def _looks_like_key(v):
 def load_allowlist(path=ALLOWLIST):
     keys = set()
     if os.path.exists(path):
-        with open(path, encoding="utf-8-sig") as fh:
-            for line in fh:
-                s = line.split("#", 1)[0].strip()
-                if s:
-                    keys.add(s)
+        for line in textio.read_lines(path):
+            s = line.split("#", 1)[0].strip()
+            if s:
+                keys.add(s)
     return keys
 
 
@@ -736,8 +777,7 @@ def rule_l011(mod, allowlist=None):
 
 
 def load_register(path=REGISTER_FILE):
-    with open(path, encoding="utf-8") as fh:
-        data = json.load(fh)
+    data = json.loads(textio.read_text(path)[0])
     compiled = {"key_prefixes": tuple(data["key_prefixes"])}
     for sev in ("error", "warning"):
         compiled[sev] = [(t["term"], re.compile(t["regex"], 0 if t.get("case") else re.I),
@@ -765,16 +805,20 @@ def rule_l012(mod, register=None):
 
 # ------------------------------------------------------------------ L013 / L014
 def load_style(path=STYLE_FILE):
-    with open(path, encoding="utf-8") as fh:
-        data = json.load(fh)
-    br = data["british"]
+    data = json.loads(textio.read_text(path)[0])
+    sp = data["spelling"]
+
+    def words(kind, entries):
+        return [(re.compile(r"\b(%s)\b" % w["regex"], re.I), kind, w["canadian"]) for w in entries]
     return {
         "dashes": tuple(data["dashes"]["chars"]),
-        "words": [(re.compile(r"\b(%s)\b" % w["regex"], re.I), w["us"]) for w in br["words"]],
-        "ise": re.compile(r"\b(%s)\b" % br["ise_regex"], re.I),
-        "ise_us": br.get("ise_us", "-ize"),
-        "ise_exceptions": {w.lower() for w in br["ise_exceptions"]},
-        "exceptions": list(br.get("exceptions", [])),
+        # (regex, what the form is, the Canadian form); house standard: Canadian English
+        "words": words("American spelling", sp["american_forms"])
+        + words("British spelling", sp.get("british_forms_not_canadian", [])),
+        "ise": re.compile(r"\b(%s)\b" % sp["ise_regex"], re.I),
+        "ise_canadian": sp.get("ise_canadian", "-ize"),
+        "ise_exceptions": {w.lower() for w in sp["ise_exceptions"]},
+        "exceptions": list(sp.get("exceptions", [])),
         "append_prefix": data["append"]["prefix"],
     }
 
@@ -855,14 +899,14 @@ def rule_l013(mod, style=None):
         for ex in st["exceptions"]:
             text = text.replace(ex, " ")
         hits = []
-        for rx, us in st["words"]:
-            hits += [(m.group(1), us) for m in rx.finditer(text)]
+        for rx, kind, canadian in st["words"]:
+            hits += [(m.group(1), kind, canadian) for m in rx.finditer(text)]
         for m in st["ise"].finditer(text):
             if _ise_base(m.group(1)) not in st["ise_exceptions"]:
-                hits.append((m.group(1), st["ise_us"]))
-        for word, us in sorted(set(hits), key=lambda h: h[0].lower()):
-            out.append(Finding("L013", rel, line, "L013b %s: British spelling '%s' (US: %s)"
-                               % (key, word, us)))
+                hits.append((m.group(1), "-ise spelling", st["ise_canadian"]))
+        for word, kind, canadian in sorted(set(hits), key=lambda h: h[0].lower()):
+            out.append(Finding("L013", rel, line, "L013b %s: %s '%s' (Canadian: %s)"
+                               % (key, kind, word, canadian)))
         probs = []
         if "  " in value:
             probs.append("double space")
@@ -887,8 +931,7 @@ def rule_l013(mod, style=None):
 
 
 def load_conventions(path=CONVENTIONS_FILE):
-    with open(path, encoding="utf-8") as fh:
-        data = json.load(fh)
+    data = json.loads(textio.read_text(path)[0])
     return data
 
 
@@ -980,9 +1023,16 @@ def scan_allows(mod):
     return allows, bad
 
 
+# Rules an inline allow cannot silence: a stray BOM is a load-time crash, never a choice.
+UNSUPPRESSABLE = {"L016"}
+
+
 def apply_allows(findings, allows):
     kept = []
     for f in findings:
+        if f.rule in UNSUPPRESSABLE:
+            kept.append(f)
+            continue
         lines = allows.get(f.file, {})
         if f.rule in lines.get(f.line, ()) or f.rule in lines.get(f.line - 1, ()):
             continue
@@ -994,7 +1044,7 @@ RULE_FUNCS = [
     ("L001", rule_l001), ("L002", rule_l002), ("L003", rule_l003), ("L004", rule_l004),
     ("L005", rule_l005), ("L006", rule_l006), ("L007", rule_l007), ("L008", rule_l008),
     ("L009", rule_l009), ("L010", rule_l010), ("L011", rule_l011), ("L012", rule_l012),
-    ("L013", rule_l013), ("L014", rule_l014),
+    ("L013", rule_l013), ("L014", rule_l014), ("L016", rule_l016),
 ]
 
 
@@ -1041,8 +1091,7 @@ def filter_paths(findings, root, paths):
 
 
 def load_baseline(path):
-    with open(path, encoding="utf-8") as fh:
-        data = json.load(fh)
+    data = json.loads(textio.read_text(path)[0])
     items = data.get("findings", data) if isinstance(data, dict) else data
     return collections.Counter((i["rule"], i["file"], i["message"]) for i in items)
 
@@ -1066,9 +1115,7 @@ def write_json(path, findings, stats=None):
             "findings": [f.as_dict() for f in findings]}
     if stats:
         data["skipped"] = stats.get("skipped", {})
-    with open(path, "w", encoding="utf-8", newline="\n") as fh:
-        json.dump(data, fh, indent=1, sort_keys=True)
-        fh.write("\n")
+    textio.write_text(path, json.dumps(data, indent=1, sort_keys=True) + "\n", bom=False)
 
 
 def main(argv=None):

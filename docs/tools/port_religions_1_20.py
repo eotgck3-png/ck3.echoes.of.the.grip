@@ -36,6 +36,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import pdx_parse as P  # noqa: E402
+import textio  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(os.path.dirname(HERE))
@@ -335,8 +336,7 @@ def _write(path, src_rel, nodes, footer=None):
     text = HEADER.format(src=src_rel) + "\n" + body + "\n"
     if footer:
         text += "\n".join(footer) + "\n"
-    with open(path, "w", encoding="utf-8-sig", newline="\n") as fh:
-        fh.write(text)
+    textio.write_text(path, text, bom=True)
 
 
 def _faith_file_name(name):
@@ -423,9 +423,9 @@ def port(src, out, repo_root=None):
         written.append(fdst)
 
     report_path = os.path.join(out, "PORT_REPORT.md")
-    with open(report_path, "w", encoding="utf-8", newline="\n") as fh:
-        fh.write(render_report(rep, [os.path.relpath(w, out).replace(os.sep, "/")
-                                     for w in written], rel_src(src)))
+    report = render_report(rep, [os.path.relpath(w, out).replace(os.sep, "/") for w in written],
+                           rel_src(src))
+    textio.write_text(report_path, report, bom=False)
     written.append(report_path)
     return rep, written
 

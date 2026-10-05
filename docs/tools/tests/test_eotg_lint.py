@@ -412,29 +412,60 @@ class L013(LintCase):
         self.assertClean({self.LOC: self.loc(("eotg_x.1.desc", "A pause, then nothing - fine."))},
                          "L013")
 
-    def test_b_british(self):
+    def test_b_american(self):
+        # house standard: Canadian English (owner, 2026-10-04)
         res = self.assertHit({self.LOC: self.loc(
-            ("eotg_x.1.desc", "The Colour of honour; they realised it afterwards."))}, "L013",
-            count=4)
+            ("eotg_x.1.desc", "The Color of honor; gray armor at the center of the theater."))},
+            "L013", count=6)
         msgs = " | ".join(f.message for f in res)
-        for w in ("'Colour'", "'honour'", "'realised'", "'afterwards'"):
+        for w in ("'Color'", "'honor'", "'gray'", "'armor'", "'center'", "'theater'"):
             self.assertIn(w, msgs)
-        self.assertIn("(US: color)", msgs)
-        self.assertHit({self.LOC: self.loc(("eotg_x.1.desc", "its organisation"))}, "L013",
-                       "'organisation'")
+        self.assertIn("American spelling 'Color' (Canadian: colour)", msgs)
+        for v, needle in (("its defense and the catalog", "'defense'"),
+                          ("they traveled; he modeled it", "'traveled'"),
+                          ("they traveled; he modeled it", "'modeled'"),
+                          ("an offense, by their favor", "'offense'"),
+                          ("show the license", "'the license'")):
+            self.assertHit({self.LOC: self.loc(("eotg_x.1.desc", v))}, "L013", needle)
+
+    def test_b_ise_and_british_only(self):
+        res = self.assertHit({self.LOC: self.loc(
+            ("eotg_x.1.desc", "They realised it; its organisation; a programme to analyse."))},
+            "L013", count=4)
+        msgs = " | ".join(f.message for f in res)
+        self.assertIn("-ise spelling 'realised' (Canadian: -ize / -ization)", msgs)
+        self.assertIn("-ise spelling 'organisation'", msgs)
+        self.assertIn("British spelling 'programme' (Canadian: program)", msgs)
+        self.assertIn("British spelling 'analyse'", msgs)
 
     def test_b_clean_and_exceptions(self):
+        # Canadian forms, words both standards share, and markup are all clean
         self.assertClean({self.LOC: self.loc(
-            ("eotg_x.1.desc", "The color of honor. They rise; the wise promise, otherwise noise. "
+            ("eotg_x.1.desc", "The colour of honour, grey armour at the centre of the theatre. "
+                              "Its defence, the catalogue, an offence; they travelled and modelled. "
+                              "They realized it; the organization ran a program to analyze the plow. "
+                              "An honorary title, a vigorous and humorous governor, an error; "
+                              "licensed to trade, they license the yards; a meter on the wall. "
+                              "They rise; the wise promise, otherwise noise. "
                               "Raised, rising, surprised, precise, exercise, the Tide-Crowned. "
-                              "[ROOT.Char.GetColour] $honour_key$ #colour text#!"))}, "L013")
+                              "[ROOT.Char.GetColor] $honor_key$ #color text#!"))}, "L013")
         # exceptions are data: an extra exception silences a word
-        root = make_mod({self.LOC: self.loc(("eotg_x.1.desc", "the Grey Margrave"))})
+        root = make_mod({self.LOC: self.loc(("eotg_x.1.desc", "the Gray Margrave"))})
         self.addCleanup(rmtree, root)
         st = L.load_style()
         self.assertTrue(L.rule_l013(L.Mod(root), st))
-        st["exceptions"].append("Grey Margrave")
+        st["exceptions"].append("Gray Margrave")
         self.assertEqual(L.rule_l013(L.Mod(root), st), [])
+
+    def test_b_style_data_names(self):
+        # the JSON says what it holds: American forms and Canadian replacements
+        import json
+        with open(L.STYLE_FILE, encoding="utf-8") as fh:
+            data = json.load(fh)
+        self.assertNotIn("british", data)
+        sp = data["spelling"]
+        self.assertTrue(all("canadian" in w for w in sp["american_forms"]))
+        self.assertIn("Canadian", sp["standard"])
 
     def test_c_whitespace(self):
         for v, needle in (("Two  spaces.", "double space"), (" Leading.", "leading whitespace"),
@@ -582,10 +613,62 @@ class CLI(unittest.TestCase):
                          ["common/scripted_effects/x.txt"])
         self.assertEqual(rc, 1)
 
+    def test_baseline_rewritten_twice_has_no_bom(self):
+        bl = os.path.join(self.root, "bl.json")
+        with open(bl, "wb") as fh:                      # a Windows editor saved it with a BOM
+            fh.write(b"\xef\xbb\xbf{\"findings\": []}\n")
+        self.assertEqual(L.load_baseline(bl), {})       # and it still loads
+        for _ in range(2):
+            self.run_main("--rule", "L008", "--write-baseline", bl)
+        with open(bl, "rb") as fh:
+            self.assertFalse(fh.read().startswith(b"\xef\xbb\xbf"))
+        rc, out = self.run_main("--rule", "L008", "--baseline", bl)
+        self.assertEqual(rc, 0, out)
+
     def test_unknown_rule(self):
         with self.assertRaises(SystemExit):
             with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
                 L.main(["--root", self.root, "--rule", "L999"])
+
+
+class L016(LintCase):
+    """At most one BOM, at byte 0 (docs/pitfalls.md §14)."""
+
+    def test_stacked_bom(self):
+        res = self.assertHit({"common/script_values/eotg_v.txt": "\ufeff\ufeff\ufeffeotg_v = 1\n"},
+                             "L016", "starts with 3 stacked BOMs", count=1)
+        self.assertEqual(res[0].severity, L.ERROR)
+        self.assertEqual(res[0].line, 1)
+
+    def test_double_bom_in_loc(self):
+        self.assertHit({"localization/english/eotg_l_english.yml":
+                        "\ufeff\ufeffl_english:\n eotg_k:0 \"x\"\n"},
+                       "L016", "starts with 2 stacked BOMs (bytes 0-5)", count=1)
+
+    def test_mid_file_bom(self):
+        res = self.assertHit({"events/eotg_e.txt": "\ufeffnamespace = eotg_e\n\ufeffeotg_e.1 = { }\n"},
+                             "L016", "BOM at byte 22", count=1)
+        self.assertEqual(res[0].line, 2)
+
+    def test_every_scanned_place(self):
+        files = {"history/characters/eotg_c.txt": "a\ufeff",
+                 "docs/test_map/map_data/definition.csv": "0;0;0;0;x;x;\ufeff\n",
+                 "eotg_root.mod": "\ufeff\ufeffname = \"x\"\n",
+                 "common/defines/eotg_d.settings": "\ufeff\ufeffx",
+                 "common/gui/eotg_w.gui": "\ufeff\ufeffx",
+                 "docs/notes.txt": "\ufeff\ufeffnot scanned\n"}
+        res = self.assertHit(files, "L016", count=5)
+        self.assertNotIn("docs/notes.txt", [f.file for f in res])
+
+    def test_clean_files(self):
+        self.assertClean({"common/script_values/eotg_v.txt": "\ufeffeotg_v = 1\n",
+                          "events/eotg_e.txt": "namespace = eotg_e\n",
+                          "localization/english/eotg_l_english.yml": LOC_OK}, "L016")
+
+    def test_allow_cannot_silence_it(self):
+        self.assertHit({"localization/english/eotg_l_english.yml":
+                        "\ufeff\ufeffl_english:\n # eotg_lint: allow L016 testing\n"},
+                       "L016", count=1)
 
 
 class RealRepoBaseline(unittest.TestCase):

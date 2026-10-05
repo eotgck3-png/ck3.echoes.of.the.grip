@@ -1,5 +1,5 @@
 {
- "_comment": "Data for eotg_lint rule L013 (loc house style, owner's loc review 2026-10-04). Edit freely; no code change needed. Regexes are Python 're' syntax, matched as whole words, case-insensitively, against the visible text of a value ([functions], $KEYS$ and #formatting removed). See docs/tools/eotg_lint.md, L013. | HOUSE STANDARD IS CANADIAN ENGLISH (owner, 2026-10-04): -our/-re/-ce nouns and grey/catalogue are correct; -ize, program, analyze, plow are the Canadian forms. Interim list; cloud round 7 rebuilds this as an American-form + -ise checker with fixtures.",
+ "_comment": "Data for eotg_lint rule L013 (loc house style). Edit freely; no code change needed. Regexes are Python 're' syntax, matched as whole words, case-insensitively, against the visible text of a value ([functions], $KEYS$ and #formatting removed). See docs/tools/eotg_lint.md, L013.",
  "dashes": {
   "chars": [
    "—",
@@ -7,23 +7,224 @@
   ],
   "why": "The owner removed every em and en dash from mod prose; use a comma, colon, full stop or parentheses."
  },
- "british": {
-  "words": [
+ "spelling": {
+  "standard": "Canadian English (owner, 2026-10-04): -our, -re, -ce nouns, grey, catalogue, doubled -ll- (travelled); but -ize, program, analyze, plow.",
+  "american_forms": [
+   {
+    "regex": "(dis)?color(s|ed|ful|ing|less|ation)?",
+    "canadian": "colour"
+   },
+   {
+    "regex": "(dis)?honor(s|ed|ing|able|ably)?",
+    "canadian": "honour (honorary and honorific are Canadian too)"
+   },
+   {
+    "regex": "armor(s|ed|y|er|ers)?",
+    "canadian": "armour"
+   },
+   {
+    "regex": "(dis)?favor(s|ed|ing|able|ably|ite|ites|itism)?",
+    "canadian": "favour"
+   },
+   {
+    "regex": "(mis)?behavior(s|al)?",
+    "canadian": "behaviour"
+   },
+   {
+    "regex": "rumor(s|ed)?",
+    "canadian": "rumour"
+   },
+   {
+    "regex": "labor(s|ed|ing|er|ers)?",
+    "canadian": "labour"
+   },
+   {
+    "regex": "valor",
+    "canadian": "valour"
+   },
+   {
+    "regex": "vigor",
+    "canadian": "vigour (vigorous is Canadian too)"
+   },
+   {
+    "regex": "neighbor(s|ing|hood|hoods|ly)?",
+    "canadian": "neighbour"
+   },
+   {
+    "regex": "harbor(s|ed|ing)?",
+    "canadian": "harbour"
+   },
+   {
+    "regex": "endeavor(s|ed|ing)?",
+    "canadian": "endeavour"
+   },
+   {
+    "regex": "flavor(s|ed|ing|ful)?",
+    "canadian": "flavour"
+   },
+   {
+    "regex": "savior(s)?",
+    "canadian": "saviour"
+   },
+   {
+    "regex": "splendor",
+    "canadian": "splendour"
+   },
+   {
+    "regex": "humor(s|ed|ing)?",
+    "canadian": "humour (humorous is Canadian too)"
+   },
+   {
+    "regex": "odor(s)?",
+    "canadian": "odour"
+   },
+   {
+    "regex": "rigor",
+    "canadian": "rigour (rigorous is Canadian too)"
+   },
+   {
+    "regex": "clamor(s|ed|ing)?",
+    "canadian": "clamour"
+   },
+   {
+    "regex": "ardor",
+    "canadian": "ardour"
+   },
+   {
+    "regex": "candor",
+    "canadian": "candour"
+   },
+   {
+    "regex": "fervor",
+    "canadian": "fervour"
+   },
+   {
+    "regex": "rancor",
+    "canadian": "rancour"
+   },
+   {
+    "regex": "vapor(s)?",
+    "canadian": "vapour"
+   },
+   {
+    "regex": "parlor(s)?",
+    "canadian": "parlour"
+   },
+   {
+    "regex": "(epi)?center(s|ed|ing|piece|pieces)?",
+    "canadian": "centre"
+   },
+   {
+    "regex": "theater(s)?",
+    "canadian": "theatre"
+   },
+   {
+    "regex": "fiber(s)?",
+    "canadian": "fibre"
+   },
+   {
+    "regex": "liter(s)?",
+    "canadian": "litre"
+   },
+   {
+    "regex": "somber",
+    "canadian": "sombre"
+   },
+   {
+    "regex": "specter(s)?",
+    "canadian": "spectre"
+   },
+   {
+    "regex": "scepter(s)?",
+    "canadian": "sceptre"
+   },
+   {
+    "regex": "saber(s)?",
+    "canadian": "sabre"
+   },
+   {
+    "regex": "meager",
+    "canadian": "meagre"
+   },
+   {
+    "regex": "luster",
+    "canadian": "lustre"
+   },
+   {
+    "regex": "caliber",
+    "canadian": "calibre"
+   },
+   {
+    "regex": "sepulcher(s)?",
+    "canadian": "sepulchre"
+   },
+   {
+    "regex": "maneuver(s|ed|ing)?",
+    "canadian": "manoeuvre"
+   },
+   {
+    "regex": "catalog(s|ed|ing)?",
+    "canadian": "catalogue"
+   },
+   {
+    "regex": "dialog(s)?",
+    "canadian": "dialogue"
+   },
+   {
+    "regex": "gray(s|ed|ing|er|est|ish|ness)?",
+    "canadian": "grey"
+   },
+   {
+    "regex": "defense(s|less)?",
+    "canadian": "defence"
+   },
+   {
+    "regex": "offense(s)?",
+    "canadian": "offence"
+   },
+   {
+    "regex": "pretense(s)?",
+    "canadian": "pretence"
+   },
+   {
+    "regex": "(a|an|the|his|her|its|their|your|our|my|no|any|this|that|royal) licenses?",
+    "canadian": "licence (the noun; the verb license is Canadian)"
+   },
+   {
+    "regex": "(mold|smolder)(s|ed|ing|y)?",
+    "canadian": "mould, smoulder"
+   },
+   {
+    "regex": "pajamas",
+    "canadian": "pyjamas"
+   },
+   {
+    "regex": "jewelry",
+    "canadian": "jewellery"
+   },
+   {
+    "regex": "(travel|cancel|model|label|level|fuel|signal|quarrel|marvel|duel|rival|total|channel|counsel|tunnel|shovel|revel|unravel)(ed|ing|er|ers)",
+    "canadian": "double the l: travelled, modelled, levelled"
+   }
+  ],
+  "_american_note": "US spellings Canadian English does not use. Words spelled the same in both (error, governor, honorary, vigorous, meter for the instrument, the verb license) are deliberately absent.",
+  "british_forms_not_canadian": [
    {
     "regex": "programmes?",
-    "us": "program"
+    "canadian": "program"
    },
    {
     "regex": "plough(s|ed|ing|man|men)?",
-    "us": "plow"
+    "canadian": "plow"
    },
    {
-    "regex": "(analy|paraly)s(e|ed|es|ing)",
-    "us": "-yze (analyze, paralyze)"
+    "regex": "(analy|paraly|cataly)s(e|ed|es|ing)",
+    "canadian": "-yze (analyze, paralyze)"
    }
   ],
+  "_british_note": "British-only spellings Canadian English does not use. Do NOT list forms Canada shares with Britain (colour, centre, defence, grey).",
   "ise_regex": "[a-z]+is(e|ed|es|ing|ation|ations)",
-  "ise_us": "-ize / -ization",
+  "ise_canadian": "-ize / -ization",
   "ise_exceptions": [
    "advertise",
    "advise",
@@ -94,7 +295,7 @@
    "Tide-Crowned"
   ],
   "_exceptions_note": "Literal strings (proper nouns, fixed names) blanked out before matching.",
-  "why": "House standard is Canadian English (Oxford -ize with British -our, -re, -ll-)."
+  "why": "House standard is Canadian English: one spelling throughout the mod, checked against the owner's list."
  },
  "whitespace": {
   "why": "Doubled or edge spaces render as visible gaps or misalign concatenated descs."

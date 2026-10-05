@@ -433,6 +433,20 @@ class CLI(unittest.TestCase):
         self.assertEqual(rc, 1)
         self.assertIn("STALE", out)
 
+    def test_rewrite_twice_no_bom(self):
+        # docs/pitfalls.md §14: a report someone re-saved with a BOM, then regenerated twice
+        import textio
+        os.makedirs(os.path.dirname(self.out), exist_ok=True)
+        with open(self.out, "wb") as fh:
+            fh.write(textio.BOM * 2 + b"old\n")
+        j = os.path.join(self.root, "r.json")
+        for _ in range(2):
+            self.assertEqual(self.run_main("--json", j)[0], 0)
+        for f in (self.out, j):
+            with open(f, "rb") as fh:
+                self.assertEqual(textio.count_boms(fh.read()), 0, f)
+        self.assertEqual(self.run_main("--check")[0], 0)
+
     def test_event_and_json(self):
         rc, out = self.run_main("--event", "eotg_t.2")
         self.assertEqual(rc, 0)

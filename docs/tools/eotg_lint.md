@@ -27,7 +27,7 @@ python docs/tools/eotg_lint.py --write-baseline docs/tools/eotg_lint_baseline.js
 | `docs/tools/eotg_lint_loc_allowlist.txt` | Vanilla loc keys the mod borrows on purpose (L010). |
 | `docs/tools/eotg_lint_pronoun_allowlist.txt` | Loc keys where they/them is plural (L011), each with a reason. |
 | `docs/tools/eotg_lint_register.json` | The cybernetics never-name and register terms (L012), as data. |
-| `docs/tools/eotg_lint_style.json` | The loc house-style data (L013): dash characters, British spellings and their US forms, the `-ise` exceptions, literal exceptions, the appended-desc prefix. |
+| `docs/tools/eotg_lint_style.json` | The loc house-style data (L013): dash characters, the spellings Canadian English does not use (`american_forms`, `british_forms_not_canadian`) and their Canadian forms, the `-ise` exceptions, literal exceptions, the appended-desc prefix. |
 | `docs/tools/eotg_lint_loc_conventions.json` | Engine naming conventions per `common/` folder (L014): which loc keys a defined object makes "referenced". |
 | `docs/tools/tests/test_eotg_lint.py`, `test_pdx_parse.py` | Fixture tests: one hit and one non-hit for every rule. Run `python -m unittest discover -s docs/tools/tests`. |
 
@@ -202,12 +202,14 @@ From the owner's loc review (2026-10-04). Applies to values in `localization/**/
 
 **L013a: em or en dash.** Any `—` or `–` in a value. *Why:* the owner removed them all from mod prose. Use a comma, colon, full stop or parentheses. *False positives:* none expected; a hyphen `-` is not flagged.
 
-**L013b: British spelling.** *Why:* the house standard is US English [SUPERSEDED 2026-10-04: the house standard is now CANADIAN English; L013b is being rebuilt to flag American forms and -ise (tools round 7). The interim data in eotg_lint_style.json is already Canadian-correct.].
+**L013b: not Canadian spelling.** *Why:* the house standard is **Canadian English** (owner, 2026-10-04; the loc was converted in `4168bb8`): -our, -re and -ce nouns, grey, catalogue, doubled -ll- (travelled), but -ize, program, analyze and plow. Message: `L013b <key>: American spelling 'color' (Canadian: colour)`, `British spelling 'programme' (Canadian: program)` or `-ise spelling 'realised' (Canadian: -ize / -ization)`.
 - **How it matches:** whole words, case-insensitive, on the **visible text** (`[functions]`, `$KEYS$` and `#formatting` removed first).
-- **The list:** catalogue, afterwards, colour, armour, honour, favour, behaviour, rumour, labour, valour, vigour, neighbour, harbour, splendour, defence, offence, centre, metre, programme, travelled/-ing/-er, cancelled/-ing, labelled/-ing, grey, plough, analyse/paralyse, each with its inflections.
+- **`american_forms`:** color, honor, armor, favor, behavior, rumor, labor, valor, vigor, neighbor, harbor, endeavor, flavor, savior, humor and the other -or nouns; center, theater, fiber, liter, somber, specter, saber, meager, luster, caliber, maneuver; catalog, dialog; gray; defense, offense, pretense; license **as a noun** (after a/the/his/their/…; the verb license is Canadian); mold, smolder; pajamas; jewelry; and single-l travel/cancel/model/label/level/fuel/… + -ed/-ing/-er. Each with its inflections.
+- **Deliberately absent:** words spelled the same in Canadian and US English: error, governor, emperor, honorary, honorific, vigorous, humorous, rigorous, meter (the instrument).
+- **`british_forms_not_canadian`:** programme, plough, analyse / paralyse / catalyse. Forms Canada shares with Britain (colour, centre, defence) never go here.
 - **`-ise` forms:** any word ending in -ise/-ised/-ises/-ising/-isation(s) is flagged, unless its base form (turned back into `-ise`) is in `ise_exceptions`. That list covers rise, wise, noise, promise, precise, otherwise, raise, surprise, exercise and about 60 more.
 - **`exceptions`:** literal strings such as `Tide-Crowned` are blanked out before matching. This is for proper nouns.
-- **False positives:** a new `-ise` word that isn't a British spelling (e.g. "franchise" if it were missing) gets flagged. Add it to `ise_exceptions`. A proper noun that happens to be a British spelling (a "Grey" house) goes in `exceptions`.
+- **False positives:** a new `-ise` word that isn't a spelling choice (e.g. "franchise" if it were missing) gets flagged; add it to `ise_exceptions`. A proper noun that happens to be an American form (a "Gray" house) goes in `exceptions`.
 
 **L013c: stray whitespace.** A double space, or leading or trailing whitespace, inside the quoted value. *Why:* it renders as a visible gap, and an edge space misaligns concatenated descs. *False positives:* a deliberate double space (none known).
 
@@ -236,6 +238,17 @@ A loc key containing `eotg_` that is defined in `localization/` and reached by n
 
 Add the convention to the JSON, or an inline `# eotg_lint: allow L014 <reason>` on the loc line.
 
+### L016 — BOM anywhere but byte 0 (ERROR)
+Every mod text file has at most one UTF-8 BOM (`EF BB BF`), and only at byte 0. Scanned: `common/`, `events/`, `localization/`, `history/`, `docs/test_map/` (recursively) and the files at the repo root, with extensions `.txt .yml .mod .csv .settings .gui`. Reported:
+- **stacked BOMs** at the start: "file starts with N stacked BOMs (bytes 0-…)";
+- **a BOM anywhere else**, with its byte offset and line.
+
+*Why:* CK3 strips one BOM and reads the next as part of the first key ("Invalid scripted_value key '\ufeff'"). In `common/script_values/` that corrupted the named-value table: about 26,000 parse errors, most in vanilla files, then a crash on load (`docs/pitfalls.md` §14, 2026-10-04). Tiger, PX and the other rules all missed it. The usual cause is a tool re-saving a BOM file with `utf-8-sig` without stripping the old BOM; the tools now read and write through `docs/tools/textio.py`, which can't do that.
+
+**No baseline and no inline allow.** An allow comment never silences L016, and `check_all` also runs it alone with no baseline, so a stray BOM always fails.
+
+**Fix:** keep exactly one BOM at byte 0, e.g. `python -c "import sys; sys.path.insert(0, 'docs/tools'); import textio as t; p = sys.argv[1]; t.write_text(p, t.read_text(p)[0], bom=True, newline=None)" <file>`. A mid-file BOM is usually a pasted-in file: delete the character.
+
 **UNVERIFIED-VANILLA:** each folder entry has `"verified"`.
 - **Verified:** decisions, traits, modifiers and opinion modifiers (what L010 already used, plus the leveled-trait keys in the mod's own loc).
 - **Not verified against vanilla 1.20:** deathreasons (`_killer` / `_unknown`), character_interactions (`_extra_icon`), scheme_types (`_action`, `_name`, `_success_desc`…), laws (`_effects`), law_groups, court positions (`court_position_<x>`), story_cycles and buildings. These only widen what counts as referenced, so a wrong pattern can hide a dead key but never invent one.
@@ -261,7 +274,7 @@ Every other rule is at 0:
 - **L007:** the 24 earlier hits were hidden-resource moves; it is now narrowed to deferred-only options (FIX 2).
 - **L006:** the 4 earlier hits were all in `is_shown` (FIX 3).
 - **L011:** 3 hits, all plural "they", so allowlisted.
-- **L013:** 0. No dashes, British spellings or stray spaces in `eotg_*.yml`. All 34 checkable appended descs start with `\n\n`; 108 were skipped as ambiguous.
+- **L013:** 0. No dashes, non-Canadian spellings or stray spaces in `eotg_*.yml`. All 34 checkable appended descs start with `\n\n`; 108 were skipped as ambiguous.
 - **L014:** 0. Every one of the 1,576 keys containing `eotg_` is referenced by script, a convention or `$KEY$`.
 
 **Cross-checks:**

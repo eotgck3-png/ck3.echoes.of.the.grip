@@ -198,6 +198,25 @@ class Families(unittest.TestCase):
 
 
 class CLI(unittest.TestCase):
+    def test_rewrite_twice_no_bom(self):
+        # docs/pitfalls.md §14: a report re-saved with a BOM, then regenerated twice
+        import textio
+        root = make_mod()
+        self.addCleanup(rmtree, root)
+        out = os.path.join(root, *S.OUT_REL.split("/"))
+        os.makedirs(os.path.dirname(out), exist_ok=True)
+        with open(out, "wb") as fh:
+            fh.write(textio.BOM * 2 + b"old\n")
+        j = os.path.join(root, "c.json")
+        for _ in range(2):
+            with redirect_stdout(io.StringIO()):
+                S.main(["--root", root, "--json", j])
+        for f in (out, j):
+            with open(f, "rb") as fh:
+                self.assertEqual(textio.count_boms(fh.read()), 0, f)
+        with redirect_stdout(io.StringIO()):
+            self.assertEqual(S.main(["--root", root, "--check"]), 0)
+
     def test_write_check_crlf_json(self):
         root = make_mod()
         self.addCleanup(rmtree, root)
