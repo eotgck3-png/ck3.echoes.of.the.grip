@@ -15,6 +15,21 @@
 
 ---
 
+## V. Local verification and owner decisions (2026-10-05): these override everything below
+
+**Verification:** Tiger, PX and eotg_lint clean on every Frontier file; lore CLEAR; vanilla 1.20.0.3 confirmed §15 items 1, 2, 3, 5 and 6 (markers dropped in script). Item 4 is an in-game test (`frontier_v2_test_plan.md` §0.1). Fixes applied:
+1. **.032 (LAW AT 866):** the settlers ask only for lighter dues; the "say in how the work is shared out" line is gone, so granting their terms never grants a say.
+2. **.032 (c) "Talk them round":** two triggered `name` blocks. The liege variant reads "Talk [eotg_frontier_overlord.GetHerHim] round." (key `eotg_frontier.032.c_liege`; gendered pronoun ruling).
+3. **.037 trigger** also requires `holder = root` on the Region, so a study report never reaches someone who no longer holds it.
+4. **Dangerous (design):** the Danger strain cause applies while control is below the **project's own completion control floor** (`eotg_frontier_min_control_value`, which already includes the trait adjustments), not a fixed 60. A Dangerous project that meets its floor is no longer on a clock. The rows in §3.3 and §5.2 are updated.
+5. **One `development_changed` per completion:** inside `eotg_frontier_complete_effect` (marked by the temporary `scope:eotg_frontier_settling`), `eotg_frontier_raise_dev_effect` only records that development moved (`scope:eotg_frontier_dev_moved`). The completion fires the hook once, after the type row and the settle rewards. Outside a completion it fires as before.
+6. **Start order:** the first expedition's trait reveal (and `eotg_frontier_on_discovery`) now runs after the founder is set, so the discovery hook carries `scope:eotg_frontier_founder`.
+7. **Loc:** `.021.c_tt` "in a remote Region"; "yet" dropped from the Anomalous lines; "a single shift" in `.035.desc_derelict`; "Abandoned" capitalized in the Survey tooltip.
+
+**Owner decisions (§16), all keep the build as it is:** Q2-1 traits are removed on settling; Q2-2 infrastructure costs medium gold; Q2-3 about 30% of reveals are bad news; Q2-4 Military and Religious keep their prestige and piety start costs; Q2-5 Terms Demanded keeps its liege variant; Q2-6 all three completion courtiers stay.
+
+---
+
 ## 0. Rules this phase builds under
 
 Everything in Phase 1 §R and §V, plus:
@@ -125,7 +140,7 @@ Saved scopes: `eotg_frontier_discovered` (a flag value: the trait just revealed,
 | scripted trigger | `eotg_frontier_can_survey` | county: Unsettled, Frontier or Abandoned; trait room; not surveyed in the last 5 years |
 | scripted trigger | `eotg_frontier_holds_surveyable` | character: holds such a Region |
 | scripted trigger | `eotg_frontier_holds_buildable` | character: holds a Frontier with infrastructure room |
-| scripted trigger | `eotg_frontier_danger_strains` | county: Dangerous, control below 60, no Garrison Post, not a Military project |
+| scripted trigger | `eotg_frontier_danger_strains` | county: Dangerous, control below the project's own control floor (§V 4), no Garrison Post, not a Military project |
 | scripted trigger | `eotg_frontier_quiet_eases` | county: a quiet year may ease strain (not Hostile, or an Orbital Station) |
 | scripted trigger | `eotg_frontier_war_strains` | county: war adds strain (not a Military project) |
 
@@ -235,7 +250,7 @@ Lightweight Region traits, as county modifiers with one small line each. A Regio
 | Anomalous | −1; +4 Research | — | — | learning legacy | .035 +10 |
 | Hostile Environment | −2 (0 with an Orbital Station) | — | a quiet year doesn't ease strain (unless an Orbital Station) | — | .002 +10 |
 | Remote | −2 (0 with a Navigation Beacon) | control floor −10 | — | — | .034 +10 (−5 with a Beacon) |
-| Dangerous | 0 | — | **strain cause Danger** each year while control < 60 (not with a Garrison Post or a Military project) | — | .034 +10 |
+| Dangerous | 0 | — | **strain cause Danger** each year while control is below the project's control floor (§V 4; not with a Garrison Post or a Military project) | — | .034 +10 |
 
 Strain is still never a roll (§R): Danger is a named, counterable condition read by the tick, and .005 names it.
 
@@ -392,7 +407,7 @@ Two new empty integration on_actions, fired like Phase 1's:
 - **D2-3:** AI flavor events (AI holders still get none).
 - **D2-4:** an opinion between a backer and the founder (only holder ↔ backer and holder ↔ founder exist).
 
-## 15. Verification list for the local session (eotg-vanilla-scout, vanilla 1.20.0.3)
+## 15. Verification list for the local session (eotg-vanilla-scout, vanilla 1.20.0.3). **Items 1, 2, 3, 5 and 6 confirmed 2026-10-05 (§V); item 4 is `frontier_v2_test_plan.md` §0.1.**
 1. **(F6)** `piety_level >= n` as a character trigger (marked `# UNVERIFIED-VANILLA` in `eotg_frontier_type_input_value`).
 2. **(F7)** `county_opinion_add` inside a static county modifier (`eotg_frontier_mod_legacy_faith`, `eotg_frontier_mod_concessions`; marked).
 3. **(F8)** `add_county_modifier = $TRAIT$` and `has_county_modifier = $TRAIT$` with a whole-token parameter. Phase 1's `HOOK = $HOOK$` and `flag:$TYPE$` are the precedent (H), so this is low risk; listed for completeness.
@@ -400,7 +415,7 @@ Two new empty integration on_actions, fired like Phase 1's:
 5. **(F10)** A script value on the **left** of a trigger comparison (`eotg_frontier_trait_count_value < eotg_frontier_trait_max_value`, `eotg_frontier_reward_dev_value > 0`, `eotg_frontier_infra_count_value < eotg_frontier_infra_slots_value`). Phase 1 only used script values on the right (marked in `eotg_frontier_triggers.txt`). Fallback if it fails: `calc_true_if`, or move the count into a variable.
 6. **(F11)** `change_development_level = eotg_frontier_reward_dev_value` (a script value as the amount; marked).
 
-## 16. Questions for the owner
+## 16. Questions for the owner (**all answered 2026-10-05: keep as built; see §V**)
 - **Q2-1. Traits after settling:** removed (as built, "the Frontier is temporary"), with their value paid out as results. Or should they stay on the Region as permanent descriptors?
 - **Q2-2. Infrastructure cost:** `medium_gold_value` each, at most two. Too cheap, too dear?
 - **Q2-3. Negative traits:** a reveal is about 30% bad news. Keep that, or weight reveals toward good news?

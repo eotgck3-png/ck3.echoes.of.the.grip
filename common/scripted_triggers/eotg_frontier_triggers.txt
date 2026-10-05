@@ -149,9 +149,9 @@ eotg_frontier_ai_would_sponsor = {
 }
 
 # == Phase 2 (docs/specs/frontier_v2.md §3.3) ================================
-# UNVERIFIED-VANILLA: a script value on the LEFT of a comparison
-# (eotg_frontier_trait_count_value < eotg_frontier_trait_max_value). Phase 1
-# only put script values on the right (spec frontier_v2.md §15 item 5).
+# A script value on the LEFT of a comparison (eotg_frontier_trait_count_value
+# < eotg_frontier_trait_max_value): confirmed against vanilla 1.20.0.3 (spec
+# frontier_v2.md §15 item 5).
 
 # -- Traits and infrastructure (county scope) ----------------------------------
 # Room for one more known trait (spec §5.1: at most two)
@@ -180,11 +180,13 @@ eotg_frontier_can_survey = {
 }
 
 # -- Strain conditions (county scope; read by the yearly tick) ----------------
-# Dangerous: raiders and worse take their chance while the hold is weak.
-# Countered by a Garrison Post, or by a Military project (spec §5.2).
+# Dangerous: raiders and worse take their chance while the hold is weak,
+# meaning below the project's own completion control floor (verification 4: a
+# project that meets its floor is not on a clock). Countered by a Garrison
+# Post, or by a Military project (spec §5.2).
 eotg_frontier_danger_strains = {
     has_county_modifier = eotg_frontier_trait_dangerous
-    county_control < 60
+    county_control < eotg_frontier_min_control_value
     NOT = { has_county_modifier = eotg_frontier_infra_garrison_post }
     NOT = { var:eotg_frontier_type ?= flag:military }
 }

@@ -17,6 +17,22 @@
 
 ---
 
+## 0. Engine checks (TEST-IN-GAME; spec §15 item 4)
+### 0.1 A county modifier survives a holder change
+1. Mark a Region Unsettled and give it a trait: `effect title:c_emberscar = { add_county_modifier = eotg_frontier_trait_remote }`. Establish a Frontier there and build one piece of infrastructure.
+2. **Save, quit to menu, reload.** The trait and the infrastructure modifier are still on the Region.
+3. Grant the Region to a vassal (Grant Title). Hover the Region: both modifiers are still there.
+4. Re-grant it to yourself (or play on), run **(Debug) Run the Frontier Year**: the Readout's progress still counts them (a Remote Region without a Beacon gains about 1 a year less).
+5. **Report:** did the modifiers survive steps 2 and 3?
+
+### 0.2 `clamp_variable` holds progress and strain in range
+1. `effect title:c_emberscar = { set_variable = { name = eotg_frontier_progress value = 98 } }`, then fire .035 and choose **Strip it for parts** (+4): the Readout shows 100, not 102.
+2. `effect title:c_emberscar = { set_variable = { name = eotg_frontier_strain value = 8 } }`, then fire .036 and choose **Work it now** (strain +1): the Readout shows strain 8, not 9.
+3. Set progress to 1 and fire .034, choosing **Make do** (−3): progress shows 0, not −2.
+4. **Report:** any value outside 0–100 (progress) or 0–8 (strain).
+
+---
+
 ## 1. Traits (spec §5)
 1. **Survey reveals a trait.** Mark a Region Unsettled, take **Survey a Region**. *Survey Report* names what was found, and the Region shows the trait modifier (e.g. `Remote`).
    - **File the report:** the Region now has survey data. Establish there: the Readout shows progress 5 at the start (10 more per earlier abandonment).
@@ -28,7 +44,7 @@
 5. **Effects** (Readout, then **(Debug) Run the Frontier Year**):
    - **Speed:** a Rich Resources Mining project gains about 1.5 a year more than without; Hostile or Remote, about 1 a year less.
    - **Requirements:** Strategic Location raises the control floor by 10, Remote lowers it by 10, Ancient Infrastructure lowers the development floor by 1 (the Readout shows the floors).
-   - **Dangerous:** with control below 60 (`effect title:c_emberscar = { change_county_control = -100 }`), each year adds strain; .005 then names the cause ("The Region was never safe..."). A Garrison Post, or a Military project, stops it.
+   - **Dangerous:** with control below the project's own control floor (the Readout shows it; `effect title:c_emberscar = { change_county_control = -100 }`), each year adds strain; at or above the floor, it doesn't; .005 then names the cause ("The Region was never safe..."). A Garrison Post, or a Military project, stops it.
    - **Hostile Environment:** a year with no strain cause no longer eases strain. An Orbital Station restores that.
 6. **Abandon keeps the traits:** abandon the Frontier; the trait modifiers stay on the Region.
 
@@ -60,7 +76,7 @@ Fire each with the console line above, on a Frontier that meets its conditions:
 |---|---|---|
 | .030 *A Rival Backer* | a backer, and a liege or ally who could back it | **Take the new terms:** the rival backs it, the old backer's opinion of you drops ("Dropped as a Frontier's Backer") and gets a toast. **Keep faith:** opinion up, strain −1 |
 | .031 *The Backer Wants a Say* | a backer who is not you | no option gives the backer a say; each says so in its tooltip. **The Region is mine:** opinion down, strain +1 |
-| .032 *Terms Demanded* | a Frontier from Foothold | **as a count under a liege:** the liege's variant (pay the share, or refuse and be resented); **as an independent ruler:** the settlers' variant (grant: `Settlers' Terms` for 10 years) |
+| .032 *Terms Demanded* | a Frontier from Foothold | **as a count under a liege:** the liege's variant (pay the share, or refuse and be resented; with diplomacy, *Talk him round* or *Talk her round*); **as an independent ruler:** the settlers' variant (grant: `Settlers' Terms` for 10 years) |
 | .033 *A Quarrel in the Camps* | a founder who is not you | **Back the founder:** progress +3, strain +1. **Side with the settlers:** strain −1, progress −2, the founder resents it |
 | .034 *A Supply Run Lost* | — | the desc adds a line for Remote or Dangerous |
 | .035 *What the Crews Found* | trait room | **without known ruins:** ruins; study them → `Ancient Ruins`. **With known ruins:** a derelict; restore it → `Ancient Infrastructure`. **Strip it:** progress +4, no trait |

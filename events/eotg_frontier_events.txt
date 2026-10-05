@@ -1684,9 +1684,16 @@ eotg_frontier.032 = {
         }
     }
 
-    # "Talk them round."
+    # "Talk them round." The liege variant names the liege (gendered pronoun)
     option = {
-        name = eotg_frontier.032.c
+        name = {
+            trigger = { exists = scope:eotg_frontier_overlord }
+            text = eotg_frontier.032.c_liege
+        }
+        name = {
+            trigger = { NOT = { exists = scope:eotg_frontier_overlord } }
+            text = eotg_frontier.032.c
+        }
         trigger = {
             diplomacy >= decent_skill_rating
             scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
@@ -2092,7 +2099,10 @@ eotg_frontier.037 = {
 
     trigger = {
         exists = scope:eotg_frontier_county
-        scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        scope:eotg_frontier_county = {
+            eotg_frontier_is_frontier = yes
+            holder = root
+        }
     }
 
     left_portrait = {

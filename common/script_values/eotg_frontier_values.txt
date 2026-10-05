@@ -426,8 +426,8 @@ eotg_frontier_type_input_value = {
         }
     }
     else_if = {
-        # UNVERIFIED-VANILLA: piety_level >= n as a character trigger (spec §15
-        # item 1)
+        # piety_level >= n as a character trigger: confirmed against vanilla
+        # 1.20.0.3 (spec §15 item 1)
         limit = { var:eotg_frontier_type ?= flag:religious }
         if = {
             limit = { holder = { piety_level >= 3 } }

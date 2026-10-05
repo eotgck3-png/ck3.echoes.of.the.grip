@@ -131,14 +131,15 @@ eotg_frontier_start_effect = {
             change_variable = { name = eotg_frontier_progress  add = eotg_frontier_survey_bonus_value }
             remove_variable = eotg_frontier_survey_data
         }
+        eotg_frontier_set_founder_effect = { FOUNDER = $FOUNDER$ }
         # Phase 2 (§5.3): a Region nobody has learned anything about reveals a
-        # trait to its first expedition
+        # trait to its first expedition. After the founder is set, so the
+        # discovery hook carries scope:eotg_frontier_founder (verification 6)
         if = {
             limit = { eotg_frontier_trait_count_value < 1 }
             eotg_frontier_reveal_trait_effect = yes
             eotg_frontier_discovery_toast_effect = yes
         }
-        eotg_frontier_set_founder_effect = { FOUNDER = $FOUNDER$ }
         add_to_global_variable_list = { name = eotg_frontier_active  target = this }
         eotg_frontier_update_tier_modifier_effect = yes
         eotg_frontier_fire_hook_effect = { HOOK = eotg_frontier_on_project_started }
@@ -636,6 +637,8 @@ eotg_frontier_complete_effect = {
         limit = { eotg_frontier_is_frontier = yes }
         eotg_frontier_save_hook_scopes_effect = yes
         holder = { save_temporary_scope_as = eotg_frontier_holder }
+        # development_changed fires once below, not once per row (verification 5)
+        save_temporary_scope_value_as = { name = eotg_frontier_settling  value = yes }
         if = {
             limit = { var:eotg_frontier_type ?= flag:settlement }
             eotg_frontier_build_holding_effect = { HOLDING = city_holding }
@@ -679,14 +682,27 @@ eotg_frontier_complete_effect = {
         }
         # Phase 2 (frontier_v2.md §7): traits and infrastructure become results
         eotg_frontier_settle_rewards_effect = yes
+        if = {
+            limit = { exists = scope:eotg_frontier_dev_moved }
+            eotg_frontier_fire_hook_effect = { HOOK = eotg_frontier_on_development_changed }
+        }
         eotg_frontier_settle_effect = yes
     }
 }
 
-# Development from a result, with its hook (Q8)
+# Development from a result, with its hook (Q8). Inside a completion
+# (scope:eotg_frontier_settling set by eotg_frontier_complete_effect) the hook
+# is deferred: the completion fires it once, however many rows raised
+# development (frontier_v2 verification 5).
 eotg_frontier_raise_dev_effect = {
     change_development_level = $AMOUNT$
-    eotg_frontier_fire_hook_effect = { HOOK = eotg_frontier_on_development_changed }
+    if = {
+        limit = { exists = scope:eotg_frontier_settling }
+        save_temporary_scope_value_as = { name = eotg_frontier_dev_moved  value = yes }
+    }
+    else = {
+        eotg_frontier_fire_hook_effect = { HOOK = eotg_frontier_on_development_changed }
+    }
 }
 
 # A new System in an open slot of the Region; else development and control
@@ -1111,13 +1127,12 @@ eotg_frontier_clear_infra_effect = {
 # into normal CK3 results (development, control, 25-year legacies), then
 # removes them. A legacy is added once, however many sources grant it.
 # Reads var:eotg_frontier_type, so it runs before the project is cleared.
-# UNVERIFIED-VANILLA: change_development_level = <script value> (Phase 1 only
-# passes numbers; spec frontier_v2.md §15 item 6)
+# change_development_level = <script value>: confirmed against vanilla
+# 1.20.0.3 (spec frontier_v2.md §15 item 6)
 eotg_frontier_settle_rewards_effect = {
     if = {
         limit = { eotg_frontier_reward_dev_value > 0 }
-        change_development_level = eotg_frontier_reward_dev_value
-        eotg_frontier_fire_hook_effect = { HOOK = eotg_frontier_on_development_changed }
+        eotg_frontier_raise_dev_effect = { AMOUNT = eotg_frontier_reward_dev_value }
     }
     if = {
         limit = { has_county_modifier = eotg_frontier_infra_orbital_station }

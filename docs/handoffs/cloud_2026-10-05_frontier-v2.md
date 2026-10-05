@@ -151,3 +151,23 @@ Engine use that has a precedent in the mod's verified script, so it is not flagg
   - .031 against LAW AT 866;
   - the "Frontier Legacy" names.
 - **owner:** the Q2 questions, then the test plan.
+
+## Verification fixes (after the local pass, 2026-10-05)
+Applied on the same branch; still NOT merged. Spec §V lists each item. The changes:
+1. **.032 settlers' desc:** the line asks only for lighter dues, so no option grants a say.
+2. **.032 (c):** triggered `name` blocks; the liege variant uses `eotg_frontier.032.c_liege` "Talk [eotg_frontier_overlord.GetHerHim] round."
+3. **.037 trigger:** adds `holder = root` on the Region.
+4. **Danger:** strain applies below the project's own control floor (`eotg_frontier_min_control_value`), not a fixed 60.
+5. **`development_changed`:** fires once per completion, deferred through the temporary scopes `eotg_frontier_settling` and `eotg_frontier_dev_moved`.
+6. **Start effect:** the trait reveal and discovery hook run after the founder is set.
+7. **Loc polish:** "in a remote Region", the two "yet"s, "a single shift", "Abandoned".
+8. **Markers:** dropped on the vanilla-confirmed items 1, 2, 3, 5 and 6.
+9. **Test plan §0:** 0.1 (a county modifier survives a holder change) and 0.2 (`clamp_variable` holds progress at 0–100 and strain at 0–8).
+
+Owner decisions Q2-1 to Q2-6 (keep everything as built) are recorded in spec §V and §16.
+
+Validation:
+- eotg_lint 0 findings;
+- check_all 13 pass / 0 fail / 7 skipped;
+- spec_conformance frontier_v2 109 ids, 0 missing;
+- every Frontier file parses with exactly one BOM.
