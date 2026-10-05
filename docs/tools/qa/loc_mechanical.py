@@ -16,6 +16,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from aug_parse import (LOC_FILE, common_files, event_files, read, root_arg,
                        strip_comments_fast)
+import textio  # noqa: E402  (aug_parse put docs/tools on sys.path)
 
 FIELD_RE = re.compile(
     r"\b(title|desc|name|custom_tooltip|text|tooltip|confirm_text|selection_tooltip|"
@@ -34,7 +35,7 @@ def main():
     with open(loc, "rb") as fh:
         raw = fh.read()
     print("BOM", raw[:3] == b"\xef\xbb\xbf")
-    lines = raw.decode("utf-8-sig").split("\n")
+    lines = textio.decode(raw)[0].split("\n")
     print("header", repr(lines[0]))
 
     keys = collections.OrderedDict()
@@ -62,11 +63,10 @@ def main():
 
     tree = collections.defaultdict(list)
     for f in glob.glob(os.path.join(root, "localization", "**", "*.yml"), recursive=True):
-        with open(f, encoding="utf-8-sig") as fh:
-            for i, line in enumerate(fh, 1):
-                m = re.match(r'^\s+([A-Za-z0-9_.\-]+):\d* "', line)
-                if m:
-                    tree[m.group(1)].append((os.path.basename(f), i))
+        for i, line in enumerate(textio.read_lines(f), 1):
+            m = re.match(r'^\s+([A-Za-z0-9_.\-]+):\d* "', line)
+            if m:
+                tree[m.group(1)].append((os.path.basename(f), i))
     print("duplicates across localization/", [(k, v) for k, v in tree.items() if len(v) > 1])
 
     files = event_files(root) + common_files(root)

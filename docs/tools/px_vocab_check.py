@@ -23,6 +23,9 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import textio  # noqa: E402
+
 GAME = Path("D:/SteamLibrary/steamapps/common/Crusader Kings III/game")
 PX = Path.home() / ".vscode/extensions"
 MOD = Path(os.environ.get("EOTG_MOD_ROOT") or Path(__file__).resolve().parents[2])
@@ -54,7 +57,7 @@ def strip_comments(text):
 
 
 def read(path):
-    return path.read_text(encoding="utf-8-sig", errors="replace")
+    return textio.read_text(path)[0]
 
 
 def px_vocab():
@@ -97,7 +100,7 @@ def trait_groups(root):
 
 def vanilla_index():
     if CACHE.exists():
-        return {k: set(v) for k, v in json.loads(CACHE.read_text()).items()}
+        return {k: set(v) for k, v in json.loads(textio.read_text(CACHE)[0]).items()}
     keys = set()
     for sub in ("common", "events", "history"):
         for f in (GAME / sub).rglob("*.txt"):
@@ -115,7 +118,7 @@ def vanilla_index():
     }
     for f in (GAME / "events").rglob("*.txt"):
         index["events"] |= set(re.findall(r"^([\w]+\.\d+)\s*=", read(f), re.M))
-    CACHE.write_text(json.dumps({k: sorted(v) for k, v in index.items()}))
+    textio.write_text(str(CACHE), json.dumps({k: sorted(v) for k, v in index.items()}), bom=False)
     return index
 
 

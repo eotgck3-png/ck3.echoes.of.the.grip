@@ -582,10 +582,62 @@ class CLI(unittest.TestCase):
                          ["common/scripted_effects/x.txt"])
         self.assertEqual(rc, 1)
 
+    def test_baseline_rewritten_twice_has_no_bom(self):
+        bl = os.path.join(self.root, "bl.json")
+        with open(bl, "wb") as fh:                      # a Windows editor saved it with a BOM
+            fh.write(b"\xef\xbb\xbf{\"findings\": []}\n")
+        self.assertEqual(L.load_baseline(bl), {})       # and it still loads
+        for _ in range(2):
+            self.run_main("--rule", "L008", "--write-baseline", bl)
+        with open(bl, "rb") as fh:
+            self.assertFalse(fh.read().startswith(b"\xef\xbb\xbf"))
+        rc, out = self.run_main("--rule", "L008", "--baseline", bl)
+        self.assertEqual(rc, 0, out)
+
     def test_unknown_rule(self):
         with self.assertRaises(SystemExit):
             with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
                 L.main(["--root", self.root, "--rule", "L999"])
+
+
+class L016(LintCase):
+    """At most one BOM, at byte 0 (docs/pitfalls.md §14)."""
+
+    def test_stacked_bom(self):
+        res = self.assertHit({"common/script_values/eotg_v.txt": "\ufeff\ufeff\ufeffeotg_v = 1\n"},
+                             "L016", "starts with 3 stacked BOMs", count=1)
+        self.assertEqual(res[0].severity, L.ERROR)
+        self.assertEqual(res[0].line, 1)
+
+    def test_double_bom_in_loc(self):
+        self.assertHit({"localization/english/eotg_l_english.yml":
+                        "\ufeff\ufeffl_english:\n eotg_k:0 \"x\"\n"},
+                       "L016", "starts with 2 stacked BOMs (bytes 0-5)", count=1)
+
+    def test_mid_file_bom(self):
+        res = self.assertHit({"events/eotg_e.txt": "\ufeffnamespace = eotg_e\n\ufeffeotg_e.1 = { }\n"},
+                             "L016", "BOM at byte 22", count=1)
+        self.assertEqual(res[0].line, 2)
+
+    def test_every_scanned_place(self):
+        files = {"history/characters/eotg_c.txt": "a\ufeff",
+                 "docs/test_map/map_data/definition.csv": "0;0;0;0;x;x;\ufeff\n",
+                 "eotg_root.mod": "\ufeff\ufeffname = \"x\"\n",
+                 "common/defines/eotg_d.settings": "\ufeff\ufeffx",
+                 "common/gui/eotg_w.gui": "\ufeff\ufeffx",
+                 "docs/notes.txt": "\ufeff\ufeffnot scanned\n"}
+        res = self.assertHit(files, "L016", count=5)
+        self.assertNotIn("docs/notes.txt", [f.file for f in res])
+
+    def test_clean_files(self):
+        self.assertClean({"common/script_values/eotg_v.txt": "\ufeffeotg_v = 1\n",
+                          "events/eotg_e.txt": "namespace = eotg_e\n",
+                          "localization/english/eotg_l_english.yml": LOC_OK}, "L016")
+
+    def test_allow_cannot_silence_it(self):
+        self.assertHit({"localization/english/eotg_l_english.yml":
+                        "\ufeff\ufeffl_english:\n # eotg_lint: allow L016 testing\n"},
+                       "L016", count=1)
 
 
 class RealRepoBaseline(unittest.TestCase):

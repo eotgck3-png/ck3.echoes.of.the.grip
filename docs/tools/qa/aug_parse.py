@@ -18,6 +18,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import pdx_parse  # noqa: E402  (docs/tools/pdx_parse.py)
+import textio  # noqa: E402
 
 PERS = (
     "lustful chaste gluttonous temperate greedy generous lazy diligent wrathful "
@@ -46,8 +47,7 @@ def common_files(root):
 
 
 def read(path):
-    with open(path, encoding="utf-8-sig") as fh:
-        return fh.read()
+    return textio.read_text(path)[0]
 
 
 def strip_comments(text):
@@ -107,9 +107,8 @@ def load_loc_keys(root):
     """OrderedDict key -> (line_no, text) from the cybernetics loc file."""
     keys = collections.OrderedDict()
     kre = re.compile(r'^ ([A-Za-z0-9_.\-]+):(\d+)? "(.*)"\s*(#.*)?$')
-    with open(os.path.join(root, LOC_FILE), encoding="utf-8-sig") as fh:
-        for i, line in enumerate(fh, 1):
-            m = kre.match(line.rstrip("\r\n"))
-            if m:
-                keys[m.group(1)] = (i, m.group(3))
+    for i, line in enumerate(textio.read_lines(os.path.join(root, LOC_FILE)), 1):
+        m = kre.match(line.rstrip("\r\n"))
+        if m:
+            keys[m.group(1)] = (i, m.group(3))
     return keys

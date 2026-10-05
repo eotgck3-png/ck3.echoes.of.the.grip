@@ -29,6 +29,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import eotg_lint as L  # noqa: E402
 import pdx_parse as P  # noqa: E402
+import textio  # noqa: E402
 
 DEFAULT_ROOT = os.path.dirname(os.path.dirname(HERE))
 OUT_REL = "docs/qa/generated/spec_conformance.md"
@@ -49,8 +50,7 @@ def spec_family(path):
 
 
 def has_identifier_table(path):
-    with open(path, encoding="utf-8-sig") as fh:
-        return any(ID_ROW_RE.match(line) for line in fh)
+    return any(ID_ROW_RE.match(line) for line in textio.read_lines(path))
 
 
 def select_specs(paths):
@@ -183,8 +183,7 @@ def resolve_shorthand(base, span, known):
 def parse_spec(path, known=frozenset()):
     """([SpecId] in file order, one per occurrence; has a New section; [unresolved
     shorthand (line, text)])."""
-    with open(path, encoding="utf-8-sig") as fh:
-        lines = fh.read().splitlines()
+    lines = textio.read_text(path)[0].splitlines()
     ids, unresolved = [], []
     heading, in_new, new_level = "", False, 0
     has_new = False
@@ -249,8 +248,7 @@ def spec_text_tokens(paths, known=frozenset()):
     """Every eotg_ token and short event form mentioned anywhere in the specs."""
     toks = set()
     for p in paths:
-        with open(p, encoding="utf-8-sig") as fh:
-            text = fh.read()
+        text = textio.read_text(p)[0]
         for span in SPAN_RE.findall(text):
             toks.update(expand_span(span, known))
         toks.update(_normalise(t.rstrip("."), known) for t in TOKEN_RE.findall(text))
@@ -485,14 +483,11 @@ def main(argv=None):
     res = analyse(root, args.specs)
     text = render(res)
     if args.json:
-        with open(args.json, "w", encoding="utf-8", newline="\n") as fh:
-            json.dump(res, fh, indent=1)
-            fh.write("\n")
+        textio.write_text(args.json, json.dumps(res, indent=1) + "\n", bom=False)
     if args.check:
         cur = ""
         if os.path.exists(out):
-            with open(out, "rb") as fh:
-                cur = fh.read().decode("utf-8").replace("\r\n", "\n")
+            cur = textio.read_text(out)[0].replace("\r\n", "\n")
         ok = cur == text
         built = [x for x in res["specs"] if x["built"]]
         gaps = sum(1 for x in built for r in x["ids"] if not r["exempt"] and r["status"] == "missing")
@@ -500,9 +495,7 @@ def main(argv=None):
               "specs (%s)" % ("is current" if ok else "is STALE", len(res["specs"]), len(built),
                               gaps, out))
         return 0 if ok else 1
-    os.makedirs(os.path.dirname(out), exist_ok=True)
-    with open(out, "w", encoding="utf-8", newline="\n") as fh:
-        fh.write(text)
+    textio.write_text(out, text, bom=False, makedirs=True)
     built = [s for s in res["specs"] if s["built"]]
     gaps = sum(1 for s in built for r in s["ids"] if not r["exempt"] and r["status"] == "missing")
     print("wrote %s: %d spec(s), %d built, %d missing id(s) in built specs"

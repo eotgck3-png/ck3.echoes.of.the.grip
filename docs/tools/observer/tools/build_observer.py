@@ -26,6 +26,9 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))   # docs/tools
+import textio  # noqa: E402  (one BOM at most: docs/pitfalls.md §14)
+
 HERE = Path(__file__).resolve().parents[1]          # the sub-mod sources (docs/tools/observer)
 MOD = HERE.parents[2]                                # the main mod: repo root, three levels up
 OUT = None                                           # build output, set by --out
@@ -52,7 +55,7 @@ YEARLY_LISTS = (
 
 
 def read(p):
-    return p.read_text(encoding="utf-8-sig")
+    return textio.read_text(p)[0]
 
 
 def sha(text):
@@ -315,7 +318,7 @@ def loc_keys(dec_keys):
     # Self-repair spec §4.3
     char += ["census_self_repair", "census_full_stack", "cascade_self_repair", "cascade_full_stack", "refit"]
     char += dec_keys
-    lines = ["\ufeffl_english:"]
+    lines = ["l_english:"]          # write() adds the BOM
     for k in glob:
         lines.append(f' eotg_obs_{k}:0 "EOTG_OBS {k} y=[GetCurrentDate.GetYear]"')
     for k in char:
@@ -324,9 +327,8 @@ def loc_keys(dec_keys):
 
 
 def write(rel, text):
-    p = OUT / rel
-    p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(text if text.startswith("\ufeff") else "\ufeff" + text, encoding="utf-8", newline="\n")
+    """Every sub-mod script and loc file: exactly one BOM, however many the source had."""
+    textio.write_text(str(OUT / rel), text, bom=True, makedirs=True)
 
 
 def main(argv):
@@ -366,8 +368,9 @@ def main(argv):
         write(rel, read(HERE / rel))
     # The descriptor goes inside the sub-mod; the launcher .mod goes beside it,
     # which is where CK3 looks when OUT is <CK3 mod folder>/eotg_observer_submod.
-    (OUT / "descriptor.mod").write_text(read(HERE / "descriptor.mod"), encoding="utf-8")
-    (OUT.parent / "eotg_observer_submod.mod").write_text(read(HERE / "eotg_observer_submod.mod"), encoding="utf-8")
+    textio.write_text(str(OUT / "descriptor.mod"), read(HERE / "descriptor.mod"), bom=False)
+    textio.write_text(str(OUT.parent / "eotg_observer_submod.mod"),
+                      read(HERE / "eotg_observer_submod.mod"), bom=False)
     print("decisions hooked:", len(dec_keys))
     print("built:", OUT)
     print("launcher:", OUT.parent / "eotg_observer_submod.mod")

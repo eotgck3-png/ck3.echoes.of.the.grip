@@ -236,6 +236,17 @@ A loc key containing `eotg_` that is defined in `localization/` and reached by n
 
 Add the convention to the JSON, or an inline `# eotg_lint: allow L014 <reason>` on the loc line.
 
+### L016 — BOM anywhere but byte 0 (ERROR)
+Every mod text file has at most one UTF-8 BOM (`EF BB BF`), and only at byte 0. Scanned: `common/`, `events/`, `localization/`, `history/`, `docs/test_map/` (recursively) and the files at the repo root, with extensions `.txt .yml .mod .csv .settings .gui`. Reported:
+- **stacked BOMs** at the start: "file starts with N stacked BOMs (bytes 0-…)";
+- **a BOM anywhere else**, with its byte offset and line.
+
+*Why:* CK3 strips one BOM and reads the next as part of the first key ("Invalid scripted_value key '\ufeff'"). In `common/script_values/` that corrupted the named-value table: about 26,000 parse errors, most in vanilla files, then a crash on load (`docs/pitfalls.md` §14, 2026-10-04). Tiger, PX and the other rules all missed it. The usual cause is a tool re-saving a BOM file with `utf-8-sig` without stripping the old BOM; the tools now read and write through `docs/tools/textio.py`, which can't do that.
+
+**No baseline and no inline allow.** An allow comment never silences L016, and `check_all` also runs it alone with no baseline, so a stray BOM always fails.
+
+**Fix:** keep exactly one BOM at byte 0, e.g. `python -c "import sys; sys.path.insert(0, 'docs/tools'); import textio as t; p = sys.argv[1]; t.write_text(p, t.read_text(p)[0], bom=True, newline=None)" <file>`. A mid-file BOM is usually a pasted-in file: delete the character.
+
 **UNVERIFIED-VANILLA:** each folder entry has `"verified"`.
 - **Verified:** decisions, traits, modifiers and opinion modifiers (what L010 already used, plus the leveled-trait keys in the mod's own loc).
 - **Not verified against vanilla 1.20:** deathreasons (`_killer` / `_unknown`), character_interactions (`_extra_icon`), scheme_types (`_action`, `_name`, `_success_desc`…), laws (`_effects`), law_groups, court positions (`court_position_<x>`), story_cycles and buildings. These only widen what counts as referenced, so a wrong pattern can hide a dead key but never invent one.

@@ -32,6 +32,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import eotg_lint as L  # noqa: E402
 import pdx_parse as P  # noqa: E402
+import textio  # noqa: E402
 
 DEFAULT_ROOT = os.path.dirname(os.path.dirname(HERE))
 OUT_REL = "docs/qa/generated/console_recipes.md"
@@ -1265,23 +1266,18 @@ def main(argv=None):
         print(render_one(hit[0]))
         return 0
     if args.json:
-        with open(args.json, "w", encoding="utf-8", newline="\n") as fh:
-            json.dump(recipes, fh, indent=1)
-            fh.write("\n")
+        textio.write_text(args.json, json.dumps(recipes, indent=1) + "\n", bom=False)
     if args.check:
         cur = ""
         if os.path.exists(out):
-            with open(out, "rb") as fh:
-                cur = fh.read().decode("utf-8").replace("\r\n", "\n")
+            cur = textio.read_text(out)[0].replace("\r\n", "\n")
         ok = cur == text
         c = collections.Counter(r["fire_cold"] for r in recipes)
         print("console recipes %s: %d events, %d fire cold, %d after setup, %d need a route (%s)"
               % ("are current" if ok else "are STALE", len(recipes), c["yes"], c["setup"],
                  c["no"], out))
         return 0 if ok else 1
-    os.makedirs(os.path.dirname(out), exist_ok=True)
-    with open(out, "w", encoding="utf-8", newline="\n") as fh:
-        fh.write(text)
+    textio.write_text(out, text, bom=False, makedirs=True)
     c = collections.Counter(r["fire_cold"] for r in recipes)
     print("wrote %s: %d events, %d fire cold, %d after setup, %d need a route"
           % (out, len(recipes), c["yes"], c["setup"], c["no"]))

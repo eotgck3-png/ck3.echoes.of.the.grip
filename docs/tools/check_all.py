@@ -7,6 +7,8 @@ the repo this script lives in). The unit tests always test this copy's tools.
 
 Runs, from the repo root:
   - eotg_lint against docs/tools/eotg_lint_baseline.json
+  - eotg_lint L016 alone, with no baseline: a stacked or mid-file BOM always FAILs
+    (docs/pitfalls.md §14: it crashed the game and no other checker saw it)
   - the docs/tools unit tests
   - port_religions_1_20 --check (staged 1.20 religion output is current)
   - gen_test_recipes --check  (docs/qa/generated/console_recipes.md is current)
@@ -39,6 +41,7 @@ import time
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import pdx_parse as _pdx  # noqa: E402  (utf8_console, FIX 8)
+import textio  # noqa: E402
 ROOT = os.path.dirname(os.path.dirname(HERE))
 PY = sys.executable or "python"
 
@@ -188,8 +191,7 @@ def _tiger(env, root=ROOT):
                        cwd=root, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                        timeout=3600)
     out = p.stdout.decode("utf-8", errors="replace")
-    with open(log, "w", encoding="utf-8") as fh:
-        fh.write(out)
+    textio.write_text(log, out.replace(textio.BOM_CHAR, ""), bom=False, newline=None)
     print("ck3-tiger log: %s%s" % (log, note))
     return p.returncode, "%s\nlog: %s%s (triage against CLAUDE.md known-benign list)" % (
         out, log, note)
@@ -207,6 +209,10 @@ def default_checks(root=ROOT):
     port_out = os.path.join(root, "docs", "port", "religion_1_20")
     checks = [
         Check("eotg_lint (vs baseline)", lint, cwd=root),
+        # never baselined: one stray BOM is a load-time crash, not a known issue
+        Check("eotg_lint L016 (BOMs, no baseline)",
+              [PY, os.path.join(HERE, "eotg_lint.py"), "--root", root, "--rule", "L016", "--quiet"],
+              cwd=root),
         Check("unit tests (docs/tools/tests)",
               [PY, "-m", "unittest", "discover", "-s", os.path.join(HERE, "tests")], cwd=ROOT),
         Check("port_religions_1_20 --check",

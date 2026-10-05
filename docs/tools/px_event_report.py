@@ -24,6 +24,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import pdx_parse  # noqa: E402  (utf8_console)
+import textio  # noqa: E402
 
 DEFAULT_ROOT = Path(__file__).resolve().parents[2]
 
@@ -50,7 +51,7 @@ def main(out_dir, all_loc, root=None):
     mod_root = Path(root).resolve() if root else DEFAULT_ROOT
     def strip(text):
         return "\n".join(l.split("#", 1)[0] for l in text.splitlines())
-    script = {f: strip(f.read_text(encoding="utf-8-sig", errors="replace"))
+    script = {f: strip(textio.read_text(f)[0])
               for sub in ("common", "events") for f in (mod_root / sub).rglob("*.txt")}
     defined = {}
     for f, text in script.items():
