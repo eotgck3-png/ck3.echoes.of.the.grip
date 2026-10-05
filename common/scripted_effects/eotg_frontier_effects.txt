@@ -1,0 +1,852 @@
+﻿﻿﻿# -- eotg_frontier_effects.txt ------------------------------------------------
+# Scripted effects for Frontier Systems v1 (docs/specs/frontier_v1.md §3.2).
+#
+# THE ARCHITECTURAL RULE (spec §R): the REGION (county title) owns the
+# Frontier state; the current county HOLDER owns the Region politically; the
+# FOUNDER starts the project; the SPONSOR supports it. Four distinct things.
+# Nothing here writes Frontier state onto a character, except the sponsor's
+# one back-reference (eotg_frontier_sponsoring), so Withdraw and the death
+# hand-off can find its Region.
+#
+# Scopes: every effect named eotg_frontier_* runs in COUNTY scope unless its
+# header says otherwise. Hooks fire with root = the county holder and
+# scope:eotg_frontier_county / _founder / _sponsor (spec §7).
+# Saved-scope hygiene (verification Q2): the hook and chain scopes are saved
+# with save_scope_as and CLEARED when a value is absent; scopes used only
+# inside one effect run are save_temporary_scope_as and cleared before reuse.
+# Gold values (minor_gold_value...) are only ever read inside a character
+# scope (verification E3: 01_dynamic_values.txt:53 reads character triggers).
+#
+# Engine facts confirmed against vanilla 1.20.0.3 (verification §3):
+#   title variables (V1: province_on_actions.txt:904), global title lists
+#   (V2: game_start.txt:200), county modifiers incl. `years =` (V4),
+#   change_development_level incl. negatives (V5: mpo_decisions.txt:6887),
+#   set_holding_type on an empty province (V8: 00_decisions_effects.txt:1347),
+#   trigger_event = { on_action = x } (V12), clamp_variable, timed variables.
+# TEST-IN-GAME (frontier_v1_test_plan.md §0): a county variable survives save,
+# reload and a holder change (V1); the barony a new holding creates and its
+# holder (V8); saved scopes reaching the custom on_actions (V12).
+# -----------------------------------------------------------------------------
+
+# == Event helpers =============================================================
+# .001 option tooltip, in the right person (lore I1). CHARACTER scope (the
+# event's root); reads scope:eotg_frontier_candidate.
+eotg_frontier_start_tooltip_effect = {
+    if = {
+        limit = { scope:eotg_frontier_candidate ?= root }
+        custom_tooltip = eotg_frontier.001.start_self_tt
+    }
+    else = {
+        custom_tooltip = eotg_frontier.001.start_tt
+    }
+}
+
+# == Hooks (spec §7) ===========================================================
+# Saves the hook scopes from the county's own variables; clears a scope whose
+# variable is absent so no earlier Region's founder or sponsor leaks in (Q2).
+eotg_frontier_save_hook_scopes_effect = {
+    save_scope_as = eotg_frontier_county
+    if = {
+        limit = { exists = var:eotg_frontier_founder }
+        var:eotg_frontier_founder = { save_scope_as = eotg_frontier_founder }
+    }
+    else = {
+        clear_saved_scope = eotg_frontier_founder
+    }
+    if = {
+        limit = { exists = var:eotg_frontier_sponsor }
+        var:eotg_frontier_sponsor = { save_scope_as = eotg_frontier_sponsor }
+    }
+    else = {
+        clear_saved_scope = eotg_frontier_sponsor
+    }
+}
+
+# Fires one integration hook with freshly saved scopes. $HOOK$ is the custom
+# on_action key.
+# TEST-IN-GAME (V12): saved scopes reach the custom on_action. Documented
+# fallback (verification E5, owner ruling): replace the trigger_event below
+# with empty scripted effects per hook (eotg_frontier_hook_<name>_effect)
+# that other systems override; never hard-code another system here.
+eotg_frontier_fire_hook_effect = {
+    eotg_frontier_save_hook_scopes_effect = yes
+    eotg_frontier_trigger_hook_effect = { HOOK = $HOOK$ }
+}
+
+# The one place a hook is fired. Uses the scopes as they are: settle and
+# abandon call it after clearing the Region's variables, keeping the scopes
+# saved before the clear (spec §7: settled / abandoned still name the founder
+# and sponsor of the project that ended).
+eotg_frontier_trigger_hook_effect = {
+    holder = {
+        trigger_event = { on_action = $HOOK$ }
+    }
+}
+
+# == Entry: Unsettled (spec §2.3) ==============================================
+# THE single way a Region becomes Unsettled: the debug decision now, the map
+# after Gate 1 (deferral D3). Map-agnostic: it takes whatever county it is
+# called on. A Region with any Frontier state keeps it.
+eotg_frontier_mark_unsettled_effect = {
+    if = {
+        limit = {
+            NOT = { has_variable = eotg_frontier_state }
+        }
+        set_variable = { name = eotg_frontier_state  value = flag:unsettled }
+        add_county_modifier = eotg_frontier_mod_unsettled
+    }
+}
+
+# == Start (spec §6.1, §6.6 resettle) ==========================================
+# $TYPE$: settlement | trade | mining | military | religious | research |
+# administrative. $FOUNDER$: a character scope.
+# Guarded (verification Q-B1): does nothing unless the Region can still be
+# established, so a second open .001 cannot start it twice.
+eotg_frontier_start_effect = {
+    if = {
+        limit = { eotg_frontier_can_establish = yes }
+        if = {
+            limit = { has_county_modifier = eotg_frontier_mod_unsettled }
+            remove_county_modifier = eotg_frontier_mod_unsettled
+        }
+        set_variable = { name = eotg_frontier_state  value = flag:frontier }
+        set_variable = { name = eotg_frontier_type  value = flag:$TYPE$ }
+        # The resettle head start (0 on a first attempt)
+        set_variable = { name = eotg_frontier_progress  value = eotg_frontier_trace_bonus_value }
+        set_variable = { name = eotg_frontier_strain  value = 0 }
+        set_variable = { name = eotg_frontier_milestone  value = 0 }
+        # Q4: the development this project can still reach (its floor is
+        # never above it)
+        set_variable = { name = eotg_frontier_dev_reachable  value = eotg_frontier_dev_reachable_value }
+        eotg_frontier_set_founder_effect = { FOUNDER = $FOUNDER$ }
+        add_to_global_variable_list = { name = eotg_frontier_active  target = this }
+        eotg_frontier_update_tier_modifier_effect = yes
+        eotg_frontier_fire_hook_effect = { HOOK = eotg_frontier_on_project_started }
+    }
+}
+
+# Removes the Region from the active list (the only record of active
+# Frontiers; verification Q-B1: no second counter)
+eotg_frontier_unlist_effect = {
+    remove_list_global_variable = { name = eotg_frontier_active  target = this }
+}
+
+# == People (spec §4) ==========================================================
+eotg_frontier_set_founder_effect = {
+    set_variable = { name = eotg_frontier_founder  value = $FOUNDER$ }
+}
+
+# Sets or replaces the sponsor. The old sponsor (if any) is saved as
+# scope:eotg_frontier_old_sponsor and loses its back-reference; a stale
+# old_sponsor from earlier in the pulse is cleared first (Q2).
+eotg_frontier_set_sponsor_effect = {
+    save_scope_as = eotg_frontier_county
+    clear_saved_scope = eotg_frontier_old_sponsor
+    if = {
+        limit = { exists = var:eotg_frontier_sponsor }
+        var:eotg_frontier_sponsor = {
+            save_scope_as = eotg_frontier_old_sponsor
+            if = {
+                limit = { has_variable = eotg_frontier_sponsoring }
+                remove_variable = eotg_frontier_sponsoring
+            }
+        }
+    }
+    set_variable = { name = eotg_frontier_sponsor  value = $SPONSOR$ }
+    $SPONSOR$ = {
+        set_variable = { name = eotg_frontier_sponsoring  value = scope:eotg_frontier_county }
+    }
+    eotg_frontier_fire_hook_effect = { HOOK = eotg_frontier_on_sponsor_changed }
+}
+
+eotg_frontier_clear_sponsor_effect = {
+    if = {
+        limit = { exists = var:eotg_frontier_sponsor }
+        clear_saved_scope = eotg_frontier_old_sponsor
+        eotg_frontier_drop_sponsor_effect = yes
+        eotg_frontier_fire_hook_effect = { HOOK = eotg_frontier_on_sponsor_changed }
+    }
+}
+
+# Removes the sponsor without firing sponsor_changed: used when the project
+# itself ends (settle, abandon), which fire their own hooks.
+eotg_frontier_drop_sponsor_effect = {
+    if = {
+        limit = { exists = var:eotg_frontier_sponsor }
+        var:eotg_frontier_sponsor = {
+            save_scope_as = eotg_frontier_old_sponsor
+            if = {
+                limit = { has_variable = eotg_frontier_sponsoring }
+                remove_variable = eotg_frontier_sponsoring
+            }
+        }
+        remove_variable = eotg_frontier_sponsor
+    }
+    if = {
+        limit = { has_variable = eotg_frontier_sponsor_paid }
+        remove_variable = eotg_frontier_sponsor_paid
+    }
+}
+
+# The sponsor dies (verification E2; orchestrator ruling on the hand-off).
+# Vanilla reads primary_heir of a dying character only inside on_death
+# (death.txt:31-51), but there the heir usually has not inherited yet, so
+# eotg_frontier_can_sponsor would fail. So on_death only records the heir on
+# the Region and clears the sponsor; the Region's next yearly tick decides
+# (eotg_frontier_resolve_pending_heir_effect). CHARACTER scope: root = the
+# dying sponsor.
+eotg_frontier_on_sponsor_death_effect = {
+    if = {
+        limit = { has_variable = eotg_frontier_sponsoring }
+        var:eotg_frontier_sponsoring = {
+            if = {
+                limit = {
+                    var:eotg_frontier_sponsor ?= root
+                    eotg_frontier_is_frontier = yes
+                }
+                # The dead backer, for the lapse toast; also marks the hand-off
+                # as pending
+                set_variable = { name = eotg_frontier_pending_from  value = root }
+                if = {
+                    limit = { exists = root.primary_heir }
+                    set_variable = { name = eotg_frontier_pending_heir  value = root.primary_heir }
+                }
+                eotg_frontier_clear_sponsor_effect = yes
+            }
+        }
+    }
+}
+
+# The heir hand-off, at the Region's first yearly tick after the sponsor's
+# death. The heir carries the backing if alive, able to sponsor (which
+# includes backing nothing else), and not the Region's holder (spec §R: the
+# sponsor and the holder are never collapsed). An heir who now holds the
+# Region simply does not back it: no strain (as in check_sponsor). Otherwise
+# the backing lapses. A backer found in the meantime (.003, AI-to-AI) wins:
+# no lapse. The pending variables go either way. COUNTY scope, inside the
+# tick (scope:eotg_frontier_holder is saved).
+eotg_frontier_resolve_pending_heir_effect = {
+    if = {
+        limit = {
+            has_variable = eotg_frontier_pending_from
+            NOT = { exists = var:eotg_frontier_sponsor }
+        }
+        if = {
+            limit = {
+                exists = var:eotg_frontier_pending_heir
+                var:eotg_frontier_pending_heir = {
+                    is_alive = yes
+                    eotg_frontier_can_sponsor = yes
+                    NOT = { this = scope:eotg_frontier_holder }
+                }
+            }
+            var:eotg_frontier_pending_heir = { save_temporary_scope_as = eotg_frontier_heir_sponsor }
+            eotg_frontier_set_sponsor_effect = { SPONSOR = scope:eotg_frontier_heir_sponsor }
+            holder = {
+                send_interface_toast = {
+                    title = eotg_frontier_toast_sponsor_inherited
+                    left_icon = scope:eotg_frontier_heir_sponsor
+                }
+            }
+        }
+        else_if = {
+            limit = {
+                NOT = { var:eotg_frontier_pending_heir ?= scope:eotg_frontier_holder }
+            }
+            var:eotg_frontier_pending_from = { save_temporary_scope_as = eotg_frontier_lapsed_sponsor }
+            eotg_frontier_add_strain_effect = { CAUSE = sponsor_lapsed }
+            holder = {
+                send_interface_toast = {
+                    title = eotg_frontier_toast_sponsor_lapsed
+                    left_icon = scope:eotg_frontier_lapsed_sponsor
+                }
+            }
+        }
+    }
+    eotg_frontier_clear_pending_heir_effect = yes
+}
+
+eotg_frontier_clear_pending_heir_effect = {
+    if = {
+        limit = { has_variable = eotg_frontier_pending_from }
+        remove_variable = eotg_frontier_pending_from
+    }
+    if = {
+        limit = { has_variable = eotg_frontier_pending_heir }
+        remove_variable = eotg_frontier_pending_heir
+    }
+}
+
+# == The two hidden values (spec §6) ===========================================
+# Establishment, the signature resource. Clamped 0-100; pays the development
+# milestones; refreshes the stage modifier. The progressed hook fires only on
+# a real gain (verification Q8).
+eotg_frontier_add_progress_effect = {
+    save_temporary_scope_value_as = {
+        name = eotg_frontier_old_progress
+        value = var:eotg_frontier_progress
+    }
+    change_variable = { name = eotg_frontier_progress  add = $AMOUNT$ }
+    clamp_variable = { name = eotg_frontier_progress  min = 0  max = 100 }
+    eotg_frontier_milestone_effect = yes
+    eotg_frontier_update_tier_modifier_effect = yes
+    if = {
+        limit = { var:eotg_frontier_progress > scope:eotg_frontier_old_progress }
+        eotg_frontier_fire_hook_effect = { HOOK = eotg_frontier_on_project_progressed }
+    }
+}
+
+# Establishment 33 and 66: the project reaches a new stage. Development is
+# granted once per Region, ever (verification Q5: no farming by abandoning and
+# resettling): eotg_frontier_dev_granted is permanent history.
+eotg_frontier_milestone_effect = {
+    if = {
+        limit = {
+            var:eotg_frontier_progress >= 33
+            var:eotg_frontier_milestone < 1
+        }
+        set_variable = { name = eotg_frontier_milestone  value = 1 }
+        eotg_frontier_grant_milestone_dev_effect = { LEVEL = 1 }
+    }
+    if = {
+        limit = {
+            var:eotg_frontier_progress >= 66
+            var:eotg_frontier_milestone < 2
+        }
+        set_variable = { name = eotg_frontier_milestone  value = 2 }
+        eotg_frontier_grant_milestone_dev_effect = { LEVEL = 2 }
+    }
+}
+
+eotg_frontier_grant_milestone_dev_effect = {
+    if = {
+        limit = {
+            OR = {
+                NOT = { has_variable = eotg_frontier_dev_granted }
+                var:eotg_frontier_dev_granted < $LEVEL$
+            }
+        }
+        set_variable = { name = eotg_frontier_dev_granted  value = $LEVEL$ }
+        change_development_level = 1
+        eotg_frontier_fire_hook_effect = { HOOK = eotg_frontier_on_development_changed }
+    }
+}
+
+# The one stage modifier the player sees (spec §6.2). At full Establishment
+# with a floor unmet, it says what completion is waiting on (Q4b).
+eotg_frontier_update_tier_modifier_effect = {
+    if = {
+        limit = { has_county_modifier = eotg_frontier_mod_outpost }
+        remove_county_modifier = eotg_frontier_mod_outpost
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_mod_foothold }
+        remove_county_modifier = eotg_frontier_mod_foothold
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_mod_established }
+        remove_county_modifier = eotg_frontier_mod_established
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_mod_waiting_development }
+        remove_county_modifier = eotg_frontier_mod_waiting_development
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_mod_waiting_control }
+        remove_county_modifier = eotg_frontier_mod_waiting_control
+    }
+    if = {
+        limit = { eotg_frontier_is_frontier = yes }
+        if = {
+            limit = {
+                var:eotg_frontier_progress >= 100
+                development_level < eotg_frontier_min_dev_value
+            }
+            add_county_modifier = eotg_frontier_mod_waiting_development
+        }
+        else_if = {
+            limit = {
+                var:eotg_frontier_progress >= 100
+                county_control < eotg_frontier_min_control_value
+            }
+            add_county_modifier = eotg_frontier_mod_waiting_control
+        }
+        else_if = {
+            limit = { var:eotg_frontier_progress >= 66 }
+            add_county_modifier = eotg_frontier_mod_established
+        }
+        else_if = {
+            limit = { var:eotg_frontier_progress >= 33 }
+            add_county_modifier = eotg_frontier_mod_foothold
+        }
+        else = {
+            add_county_modifier = eotg_frontier_mod_outpost
+        }
+    }
+}
+
+# Strain, the pressure toward failure, never a random roll. 0-8 (rescaled
+# from 0-4 when the owner doubled the pacing, so failure stays proportionate
+# to a project twice as long). Every point has a named cause (spec §6.3):
+# no_founder, low_control, occupied, war, sponsor_lapsed, and hardship (an
+# event choice).
+eotg_frontier_add_strain_effect = {
+    change_variable = { name = eotg_frontier_strain  add = 1 }
+    clamp_variable = { name = eotg_frontier_strain  min = 0  max = 8 }
+    set_variable = { name = eotg_frontier_last_cause  value = flag:$CAUSE$ }
+    set_variable = { name = eotg_frontier_tick_strained  value = yes  days = 1 }
+}
+
+eotg_frontier_ease_strain_effect = {
+    change_variable = { name = eotg_frontier_strain  add = -1 }
+    clamp_variable = { name = eotg_frontier_strain  min = 0  max = 8 }
+}
+
+# == The yearly tick (spec §6.1) ===============================================
+# Called only by eotg_on_yearly_frontier_tick, which owns the cooldown (the
+# calendar-year marker eotg_frontier_tick_year), and by the debug tick.
+eotg_frontier_tick_effect = {
+    save_scope_as = eotg_frontier_county
+    clear_saved_scope = eotg_frontier_old_sponsor
+    holder = { save_temporary_scope_as = eotg_frontier_holder }
+
+    # 1. The named strain causes
+    if = {
+        limit = { eotg_frontier_has_valid_founder = no }
+        eotg_frontier_add_strain_effect = { CAUSE = no_founder }
+        # An AI holder takes the project on itself (spec §4.1); a player
+        # chooses in eotg_frontier.002's Without a Founder variant.
+        if = {
+            limit = { holder = { is_ai = yes } }
+            eotg_frontier_set_founder_effect = { FOUNDER = scope:eotg_frontier_holder }
+        }
+    }
+    if = {
+        limit = { county_control < 40 }
+        eotg_frontier_add_strain_effect = { CAUSE = low_control }
+    }
+    if = {
+        limit = { title_province = { is_occupied = yes } }
+        eotg_frontier_add_strain_effect = { CAUSE = occupied }
+    }
+    if = {
+        limit = { holder = { is_at_war = yes } }
+        eotg_frontier_add_strain_effect = { CAUSE = war }
+    }
+
+    # 2. The sponsor: the heir hand-off recorded in on_death resolves now; a
+    # dead sponsor still set is a lapse; one who now holds the Region is
+    # dropped; a living one pays
+    eotg_frontier_resolve_pending_heir_effect = yes
+    eotg_frontier_check_sponsor_effect = yes
+    eotg_frontier_sponsor_pay_effect = yes
+
+    # A quiet year eases strain
+    if = {
+        limit = { NOT = { has_variable = eotg_frontier_tick_strained } }
+        eotg_frontier_ease_strain_effect = yes
+    }
+    else = {
+        remove_variable = eotg_frontier_tick_strained
+    }
+
+    # 3. Establishment gained this year
+    eotg_frontier_add_progress_effect = { AMOUNT = eotg_frontier_yearly_gain_value }
+
+    # 4. Resolve: completion, then failure, then the event roll
+    if = {
+        limit = { eotg_frontier_completion_met = yes }
+        holder = { trigger_event = eotg_frontier.004 }
+    }
+    else_if = {
+        limit = { var:eotg_frontier_strain >= eotg_frontier_strain_fail_value }
+        holder = { trigger_event = eotg_frontier.005 }
+    }
+    else_if = {
+        # Cooldown authority for flavor events: set here and nowhere else;
+        # no event trigger reads it (CLAUDE.md invariant 4, lesson 5).
+        limit = { NOT = { has_variable = eotg_frontier_event_cd } }
+        eotg_frontier_event_roll_effect = yes
+    }
+}
+
+# A sponsor who has died while still set (on_death clears them, so this is
+# the fallback): the backing has lapsed (spec §4.2). A sponsor who has become
+# the Region's holder (inherited or was given it) is dropped with no strain:
+# the sponsor and the holder are never collapsed (spec §R).
+eotg_frontier_check_sponsor_effect = {
+    if = {
+        limit = {
+            exists = var:eotg_frontier_sponsor
+            var:eotg_frontier_sponsor = { is_alive = no }
+        }
+        var:eotg_frontier_sponsor = { save_temporary_scope_as = eotg_frontier_lapsed_sponsor }
+        eotg_frontier_clear_sponsor_effect = yes
+        eotg_frontier_add_strain_effect = { CAUSE = sponsor_lapsed }
+        holder = {
+            send_interface_toast = {
+                title = eotg_frontier_toast_sponsor_lapsed
+                left_icon = scope:eotg_frontier_lapsed_sponsor
+            }
+        }
+    }
+    else_if = {
+        limit = {
+            exists = var:eotg_frontier_sponsor
+            var:eotg_frontier_sponsor = { this = scope:eotg_frontier_holder }
+        }
+        eotg_frontier_clear_sponsor_effect = yes
+    }
+}
+
+# The yearly payment (spec §4.3; Q5: the money goes into the project)
+eotg_frontier_sponsor_pay_effect = {
+    if = {
+        limit = { eotg_frontier_has_valid_sponsor = yes }
+        if = {
+            limit = {
+                var:eotg_frontier_sponsor = { gold >= eotg_frontier_sponsor_payment_value }
+            }
+            var:eotg_frontier_sponsor = {
+                remove_short_term_gold = eotg_frontier_sponsor_payment_value
+            }
+            set_variable = { name = eotg_frontier_sponsor_paid  value = yes  days = 360 }
+        }
+        else = {
+            var:eotg_frontier_sponsor = { save_temporary_scope_as = eotg_frontier_lapsed_sponsor }
+            eotg_frontier_clear_sponsor_effect = yes
+            eotg_frontier_add_strain_effect = { CAUSE = sponsor_lapsed }
+            holder = {
+                send_interface_toast = {
+                    title = eotg_frontier_toast_sponsor_lapsed
+                    left_icon = scope:eotg_frontier_lapsed_sponsor
+                }
+            }
+        }
+    }
+}
+
+# The flavor roll. Sets the 3-year cooldown (owner decision) when an event
+# (or an AI-to-AI offer) actually happens. Player holders get .002 / .003; AI holders get
+# only the scripted AI-to-AI sponsor offer (spec §6.1, §8.4).
+eotg_frontier_event_roll_effect = {
+    eotg_frontier_find_sponsor_candidate_effect = yes
+    if = {
+        limit = { holder = { is_ai = no } }
+        if = {
+            # A founderless Frontier gets its variant of .002 first
+            limit = { eotg_frontier_has_valid_founder = no }
+            set_variable = { name = eotg_frontier_event_cd  value = yes  years = 3 }
+            holder = { trigger_event = eotg_frontier.002 }
+        }
+        else = {
+            random_list = {
+                30 = {
+                    set_variable = { name = eotg_frontier_event_cd  value = yes  years = 3 }
+                    holder = { trigger_event = eotg_frontier.002 }
+                }
+                20 = {
+                    trigger = {
+                        NOT = { exists = var:eotg_frontier_sponsor }
+                        exists = scope:eotg_frontier_sponsor_candidate
+                    }
+                    set_variable = { name = eotg_frontier_event_cd  value = yes  years = 3 }
+                    scope:eotg_frontier_sponsor_candidate = { save_scope_as = eotg_frontier_sponsor }
+                    holder = { trigger_event = eotg_frontier.003 }
+                }
+                50 = { }
+            }
+        }
+    }
+    else_if = {
+        limit = {
+            NOT = { exists = var:eotg_frontier_sponsor }
+            exists = scope:eotg_frontier_sponsor_candidate
+        }
+        random = {
+            chance = 20
+            if = {
+                limit = {
+                    holder = {
+                        opinion = { target = scope:eotg_frontier_sponsor_candidate  value >= 0 }
+                    }
+                }
+                set_variable = { name = eotg_frontier_event_cd  value = yes  years = 3 }
+                eotg_frontier_set_sponsor_effect = { SPONSOR = scope:eotg_frontier_sponsor_candidate }
+                eotg_frontier_add_progress_effect = { AMOUNT = 3 }
+            }
+        }
+    }
+}
+
+# An AI ruler who would back this Frontier: the holder's liege first, else an
+# ally (spec §8.4). They must pass the Sponsor decision's own AI gate: can
+# sponsor, and gold for four payments (verification notes). Saves
+# scope:eotg_frontier_sponsor_candidate, or clears it.
+eotg_frontier_find_sponsor_candidate_effect = {
+    clear_saved_scope = eotg_frontier_sponsor_candidate
+    holder = {
+        if = {
+            limit = {
+                exists = liege
+                NOT = { liege = this }
+                liege = { eotg_frontier_ai_would_sponsor = yes }
+            }
+            liege = { save_temporary_scope_as = eotg_frontier_sponsor_candidate }
+        }
+        else = {
+            random_ally = {
+                limit = { eotg_frontier_ai_would_sponsor = yes }
+                save_temporary_scope_as = eotg_frontier_sponsor_candidate
+            }
+        }
+    }
+}
+
+# == Completion → Settled (spec §5.3, §6.5) ===================================
+# The new System always goes to the current holder (ruling Q12). Guarded
+# (Q-B1): does nothing unless the Region is still a Frontier. The
+# development_changed hook fires only where development actually changed (Q8).
+eotg_frontier_complete_effect = {
+    if = {
+        limit = { eotg_frontier_is_frontier = yes }
+        eotg_frontier_save_hook_scopes_effect = yes
+        holder = { save_temporary_scope_as = eotg_frontier_holder }
+        if = {
+            limit = { var:eotg_frontier_type ?= flag:settlement }
+            eotg_frontier_build_holding_effect = { HOLDING = city_holding }
+            eotg_frontier_raise_dev_effect = { AMOUNT = 1 }
+            eotg_frontier_create_leader_effect = yes
+        }
+        else_if = {
+            limit = { var:eotg_frontier_type ?= flag:trade }
+            eotg_frontier_build_holding_effect = { HOLDING = city_holding }
+            eotg_frontier_raise_dev_effect = { AMOUNT = 1 }
+        }
+        else_if = {
+            limit = { var:eotg_frontier_type ?= flag:mining }
+            eotg_frontier_raise_dev_effect = { AMOUNT = 2 }
+        }
+        else_if = {
+            limit = { var:eotg_frontier_type ?= flag:military }
+            eotg_frontier_build_holding_effect = { HOLDING = castle_holding }
+            change_county_control = 15
+        }
+        else_if = {
+            limit = { var:eotg_frontier_type ?= flag:religious }
+            eotg_frontier_build_holding_effect = { HOLDING = church_holding }
+            eotg_frontier_raise_dev_effect = { AMOUNT = 1 }
+        }
+        else_if = {
+            limit = { var:eotg_frontier_type ?= flag:research }
+            eotg_frontier_raise_dev_effect = { AMOUNT = 2 }
+            if = {
+                limit = { eotg_frontier_has_valid_founder = yes }
+                var:eotg_frontier_founder = { add_learning_skill = 1 }
+            }
+        }
+        else_if = {
+            limit = { var:eotg_frontier_type ?= flag:administrative }
+            change_county_control = 100
+            eotg_frontier_raise_dev_effect = { AMOUNT = 1 }
+        }
+        eotg_frontier_settle_effect = yes
+    }
+}
+
+# Development from a result, with its hook (Q8)
+eotg_frontier_raise_dev_effect = {
+    change_development_level = $AMOUNT$
+    eotg_frontier_fire_hook_effect = { HOOK = eotg_frontier_on_development_changed }
+}
+
+# A new System in an open slot of the Region; else development and control
+# (owner ruling: never block the feature on holding creation).
+# Vanilla picks empty slots with has_holding = no AND
+# barony_cannot_construct_holding = no in both the check and the pick
+# (verification E1; 01_dlc_fp1_scripted_effects.txt:519-530), so the check
+# and the pick always agree and the fallback runs when no slot qualifies.
+# The grant runs at CHARACTER scope, as vanilla does
+# (hold_court_events_general.txt:6873-6890).
+# TEST-IN-GAME (V8): whether set_holding_type creates the barony holder, and
+# who it is; the grant below only acts when the holder is not already ours.
+eotg_frontier_build_holding_effect = {
+    clear_saved_scope = eotg_frontier_new_barony
+    if = {
+        limit = {
+            any_county_province = {
+                has_holding = no
+                barony_cannot_construct_holding = no
+            }
+        }
+        random_county_province = {
+            limit = {
+                has_holding = no
+                barony_cannot_construct_holding = no
+            }
+            set_holding_type = $HOLDING$
+            barony = { save_temporary_scope_as = eotg_frontier_new_barony }
+        }
+        if = {
+            limit = {
+                exists = scope:eotg_frontier_new_barony
+                NOT = { scope:eotg_frontier_new_barony = { holder ?= scope:eotg_frontier_holder } }
+            }
+            scope:eotg_frontier_holder = {
+                create_title_and_vassal_change = {
+                    type = created
+                    save_scope_as = eotg_frontier_change
+                    add_claim_on_loss = no
+                }
+                scope:eotg_frontier_new_barony = {
+                    change_title_holder = {
+                        holder = scope:eotg_frontier_holder
+                        change = scope:eotg_frontier_change
+                    }
+                }
+                resolve_title_and_vassal_change = scope:eotg_frontier_change
+            }
+        }
+    }
+    else = {
+        eotg_frontier_raise_dev_effect = { AMOUNT = 1 }
+        change_county_control = 10
+    }
+}
+
+# Settlement: the settlers' first leader, a courtier of the holder, with the
+# holder's culture and faith BY SCOPE (map-agnostic; as the patron envoy,
+# eotg_aug_patron_accept_effect).
+eotg_frontier_create_leader_effect = {
+    scope:eotg_frontier_holder = {
+        create_character = {
+            template = eotg_frontier_settler_leader_template
+            location = scope:eotg_frontier_county.title_province
+            culture = scope:eotg_frontier_holder.culture
+            faith = scope:eotg_frontier_holder.faith
+            save_scope_as = eotg_frontier_leader
+        }
+        add_courtier = scope:eotg_frontier_leader
+    }
+}
+
+# Clears the Frontier: normal CK3 takes over (design §3.3). Keeps only the
+# history (attempts, former type, development granted, settled). The
+# completed hook fires with the project intact; settled fires after the
+# clear, with the scopes saved before it (spec §7, Q8).
+eotg_frontier_settle_effect = {
+    eotg_frontier_fire_hook_effect = { HOOK = eotg_frontier_on_project_completed }
+    eotg_frontier_drop_sponsor_effect = yes
+    eotg_frontier_unlist_effect = yes
+    eotg_frontier_clear_project_effect = yes
+    remove_variable = eotg_frontier_state
+    set_variable = { name = eotg_frontier_history  value = flag:settled }
+    eotg_frontier_update_tier_modifier_effect = yes
+    add_county_modifier = { modifier = eotg_frontier_mod_new_settlement  years = 10 }
+    eotg_frontier_trigger_hook_effect = { HOOK = eotg_frontier_on_settled }
+}
+
+# The project's own variables (not state, not history)
+eotg_frontier_clear_project_effect = {
+    remove_variable = eotg_frontier_type
+    remove_variable = eotg_frontier_progress
+    remove_variable = eotg_frontier_strain
+    remove_variable = eotg_frontier_milestone
+    if = {
+        limit = { has_variable = eotg_frontier_founder }
+        remove_variable = eotg_frontier_founder
+    }
+    if = {
+        limit = { has_variable = eotg_frontier_dev_reachable }
+        remove_variable = eotg_frontier_dev_reachable
+    }
+    if = {
+        limit = { has_variable = eotg_frontier_last_cause }
+        remove_variable = eotg_frontier_last_cause
+    }
+    if = {
+        limit = { has_variable = eotg_frontier_event_cd }
+        remove_variable = eotg_frontier_event_cd
+    }
+    if = {
+        limit = { has_variable = eotg_frontier_invested }
+        remove_variable = eotg_frontier_invested
+    }
+    eotg_frontier_clear_pending_heir_effect = yes
+}
+
+# == Failure / abandonment (spec §6.6) =========================================
+# $FAILED$ = yes (strain reached the failure threshold) | no (chosen).
+# Guarded (Q-B1): does nothing unless the Region is still a Frontier.
+eotg_frontier_abandon_effect = {
+    if = {
+        limit = { eotg_frontier_is_frontier = yes }
+        eotg_frontier_save_hook_scopes_effect = yes
+        if = {
+            limit = { always = $FAILED$ }
+            eotg_frontier_trigger_hook_effect = { HOOK = eotg_frontier_on_project_failed }
+        }
+        # Traces (design §3.4): the count, the type, the ruins
+        if = {
+            limit = { NOT = { has_variable = eotg_frontier_attempts } }
+            set_variable = { name = eotg_frontier_attempts  value = 0 }
+        }
+        change_variable = { name = eotg_frontier_attempts  add = 1 }
+        set_variable = { name = eotg_frontier_former_type  value = var:eotg_frontier_type }
+        # Lose infrastructure built during the attempt (Q5: kept)
+        if = {
+            limit = { var:eotg_frontier_milestone >= 1 }
+            change_development_level = -1
+        }
+        eotg_frontier_drop_sponsor_effect = yes
+        eotg_frontier_unlist_effect = yes
+        eotg_frontier_clear_project_effect = yes
+        set_variable = { name = eotg_frontier_state  value = flag:abandoned }
+        eotg_frontier_update_tier_modifier_effect = yes
+        add_county_modifier = { modifier = eotg_frontier_mod_abandoned_works  years = 10 }
+        eotg_frontier_trigger_hook_effect = { HOOK = eotg_frontier_on_abandoned }
+    }
+}
+
+# .005 "continue under a new founder" / "scale back": half the Establishment
+# stays; strain eases to half the failure threshold (spec §6.6)
+eotg_frontier_restart_effect = {
+    if = {
+        limit = { eotg_frontier_is_frontier = yes }
+        set_variable = {
+            name = eotg_frontier_progress
+            value = {
+                value = var:eotg_frontier_progress
+                multiply = 0.5
+                floor = yes
+            }
+        }
+        set_variable = { name = eotg_frontier_strain  value = 4 }
+        eotg_frontier_update_tier_modifier_effect = yes
+    }
+}
+
+# == Debug readout (approved test tooling; verification §2 "Readout") =========
+# For each Frontier the taker holds, a toast with the hidden numbers: progress,
+# strain, and the completion floors against the current values. The numbers
+# are copied into short-lived county variables so the loc reads plain Var().
+# CHARACTER scope (the debug decision's taker).
+eotg_frontier_debug_readout_effect = {
+    every_held_title = {
+        limit = {
+            tier = tier_county
+            eotg_frontier_is_frontier = yes
+        }
+        save_scope_as = eotg_frontier_county
+        set_variable = { name = eotg_frontier_debug_floor_dev  value = eotg_frontier_min_dev_value  days = 30 }
+        set_variable = { name = eotg_frontier_debug_floor_control  value = eotg_frontier_min_control_value  days = 30 }
+        set_variable = { name = eotg_frontier_debug_dev  value = eotg_frontier_current_dev_value  days = 30 }
+        set_variable = { name = eotg_frontier_debug_control  value = eotg_frontier_current_control_value  days = 30 }
+        root = {
+            send_interface_toast = {
+                title = eotg_frontier_debug_readout_toast
+                left_icon = root
+            }
+        }
+    }
+}

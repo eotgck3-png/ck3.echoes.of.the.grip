@@ -1,0 +1,71 @@
+﻿# -- eotg_frontier_modifiers.txt ----------------------------------------------
+# Static county modifiers for Frontier Systems v1 (docs/specs/frontier_v1.md
+# §3.1, §6.2). One modifier per Frontier stage is all the player sees; the
+# Establishment and strain numbers stay hidden (spec §R).
+#
+# County modifiers and the icon keys county_modifier_development_positive /
+# _negative and county_modifier_control_positive / _negative: confirmed
+# (verification V4, V18). Tiger reports no unknown modifier key here.
+# -----------------------------------------------------------------------------
+
+# A Region with no recognized settlement yet: Systems remain open
+eotg_frontier_mod_unsettled = {
+    icon = county_modifier_development_negative
+    tax_mult = -0.5
+    levy_size = -0.5
+    monthly_county_control_growth_factor = -0.25
+}
+
+# Frontier, early stage (Establishment 0-32)
+eotg_frontier_mod_outpost = {
+    icon = county_modifier_development_negative
+    tax_mult = -0.5
+    levy_size = -0.5
+    monthly_county_control_growth_factor = -0.1
+}
+
+# Frontier, middle stage (33-65)
+eotg_frontier_mod_foothold = {
+    icon = county_modifier_development_positive
+    tax_mult = -0.25
+    levy_size = -0.25
+}
+
+# Frontier, late stage (66-99)
+eotg_frontier_mod_established = {
+    icon = county_modifier_development_positive
+    tax_mult = -0.1
+    development_growth_factor = 0.1
+}
+
+# Full Establishment, but a completion floor is unmet: says what completion is
+# waiting on (verification Q4b). No effect beyond the outpost-level lines.
+eotg_frontier_mod_waiting_development = {
+    icon = county_modifier_development_negative
+    tax_mult = -0.1
+}
+eotg_frontier_mod_waiting_control = {
+    icon = county_modifier_control_negative
+    tax_mult = -0.1
+}
+
+# Ten years after a project completes (spec §5.3; one shared modifier, Q6)
+eotg_frontier_mod_new_settlement = {
+    icon = county_modifier_development_positive
+    development_growth_factor = 0.2
+    tax_mult = 0.05
+    monthly_county_control_growth_add = 0.1
+}
+
+# Ten years after a project is abandoned: what the attempt left behind
+eotg_frontier_mod_abandoned_works = {
+    icon = county_modifier_development_negative
+    tax_mult = -0.05
+}
+
+# Two years after .002 option b ("push through") in a lean year (lore S1:
+# "a year" is time- and planet-neutral; "season" was not)
+eotg_frontier_mod_hard_year = {
+    icon = county_modifier_control_negative
+    monthly_county_control_growth_factor = -0.1
+}

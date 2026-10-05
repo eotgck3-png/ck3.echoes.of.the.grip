@@ -1,0 +1,464 @@
+﻿# -- eotg_frontier_decisions.txt ----------------------------------------------
+# Decisions for Frontier Systems v1 (docs/specs/frontier_v1.md §3.5, §8).
+#
+# Shapes copied from common/decisions/eotg_augmentation_decisions.txt
+# (verified against 1.20): ai_check_interval_by_tier with every tier key
+# (0 = never), ai_potential + ai_will_do, custom_description around anything
+# that would otherwise render as a raw variable (eotg_lint L006).
+# Decisions cannot take a Region as a target (spec §8.1), so each picks one:
+# Establish takes the most developed eligible Region; Invest and Abandon the
+# taker's most advanced / most strained Frontier.
+#
+# Confirmed against vanilla 1.20 (verification §3): the held-title iterators
+# with tier = tier_county (V13), the picture decision_realm.dds, and
+# debug_only = yes in is_shown (V10; test_decision.txt:9): the debug
+# decisions show only when the game runs with -debug_mode (E4).
+# -----------------------------------------------------------------------------
+
+# Establish a Frontier (spec §8.1). The event .001 picks the project type and
+# charges the cost (as Seek Augmentation: no `cost`, the event pays).
+eotg_decision_frontier_establish = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 60
+        duchy = 48
+        kingdom = 48
+        empire = 48
+        hegemony = 48
+    }
+
+    is_shown = {
+        eotg_frontier_holds_establishable = yes
+    }
+
+    is_valid = {
+        custom_description = {
+            text = eotg_decision_frontier_establish_gold_tt
+            gold >= eotg_frontier_establish_cost_value
+        }
+        # Open question Q7: not while at war
+        custom_description = {
+            text = eotg_decision_frontier_establish_peace_tt
+            is_at_war = no
+        }
+    }
+
+    effect = {
+        ordered_held_title = {
+            limit = {
+                tier = tier_county
+                eotg_frontier_can_establish = yes
+            }
+            order_by = development_level
+            save_scope_as = eotg_frontier_county
+        }
+        # The founder candidate: the best steward at court, or the taker
+        ordered_courtier = {
+            limit = {
+                is_adult = yes
+                is_imprisoned = no
+            }
+            order_by = stewardship
+            save_scope_as = eotg_frontier_candidate
+        }
+        if = {
+            limit = {
+                OR = {
+                    NOT = { exists = scope:eotg_frontier_candidate }
+                    scope:eotg_frontier_candidate = { stewardship <= root.stewardship }
+                }
+            }
+            save_scope_as = eotg_frontier_candidate
+        }
+        custom_tooltip = eotg_decision_frontier_establish_effect_tt
+        trigger_event = eotg_frontier.001
+    }
+
+    ai_potential = {
+        eotg_frontier_holds_establishable = yes
+        eotg_frontier_holds_frontier = no
+        eotg_frontier_ai_room = yes
+        is_at_war = no
+    }
+    ai_will_do = {
+        base = 10
+        modifier = { add = 10  stewardship >= 12 }
+        modifier = { add = 10  has_trait = ambitious }
+        modifier = { add = 5  has_trait = diligent }
+        modifier = { add = -10  has_trait = lazy }
+        modifier = { add = -10  has_trait = content }
+        modifier = {
+            factor = 0
+            gold < {
+                value = eotg_frontier_establish_cost_value
+                multiply = 2
+            }
+        }
+    }
+}
+
+# Invest in a Frontier (spec §8.2; open question Q3): gold into Establishment,
+# once a year per Region.
+eotg_decision_frontier_invest = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 24
+        duchy = 24
+        kingdom = 24
+        empire = 24
+        hegemony = 24
+    }
+
+    is_shown = {
+        eotg_frontier_holds_frontier = yes
+    }
+
+    is_valid = {
+        custom_description = {
+            text = eotg_decision_frontier_invest_ready_tt
+            any_held_title = {
+                tier = tier_county
+                eotg_frontier_is_frontier = yes
+                NOT = { has_variable = eotg_frontier_invested }
+            }
+        }
+    }
+
+    cost = {
+        gold = {
+            value = eotg_frontier_invest_cost_value
+        }
+    }
+
+    effect = {
+        ordered_held_title = {
+            limit = {
+                tier = tier_county
+                eotg_frontier_is_frontier = yes
+                NOT = { has_variable = eotg_frontier_invested }
+            }
+            order_by = var:eotg_frontier_progress
+            save_scope_as = eotg_frontier_county
+        }
+        custom_tooltip = eotg_decision_frontier_invest_effect_tt
+        # Q4b: say what a finished Frontier is waiting on
+        if = {
+            limit = {
+                scope:eotg_frontier_county = {
+                    OR = {
+                        has_county_modifier = eotg_frontier_mod_waiting_development
+                        has_county_modifier = eotg_frontier_mod_waiting_control
+                    }
+                }
+            }
+            custom_tooltip = eotg_decision_frontier_invest_waiting_tt
+        }
+        hidden_effect = {
+            scope:eotg_frontier_county = {
+                set_variable = { name = eotg_frontier_invested  value = yes  years = 1 }
+                # Halved with the doubled pacing (verification §4)
+                eotg_frontier_add_progress_effect = { AMOUNT = 5 }
+            }
+        }
+    }
+
+    ai_potential = {
+        eotg_frontier_holds_frontier = yes
+        gold >= {
+            value = eotg_frontier_invest_cost_value
+            multiply = 3
+        }
+    }
+    ai_will_do = {
+        base = 20
+        modifier = {
+            add = 20
+            any_held_title = {
+                tier = tier_county
+                eotg_frontier_is_frontier = yes
+                var:eotg_frontier_strain >= 4
+            }
+        }
+        modifier = { add = -10  has_trait = greedy }
+    }
+}
+
+# Sponsor a Frontier held by someone else (spec §8.3): pick one in .010, the
+# holder answers in .003. A sponsor backs one Frontier at a time.
+eotg_decision_frontier_sponsor = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 60
+        kingdom = 36
+        empire = 36
+        hegemony = 36
+    }
+
+    # any_in_global_list over title scopes: confirmed (verification V2)
+    is_shown = {
+        eotg_frontier_can_sponsor = yes
+        any_in_global_list = {
+            variable = eotg_frontier_active
+            NOT = { holder = root }
+            NOT = { exists = var:eotg_frontier_sponsor }
+        }
+    }
+
+    effect = {
+        custom_tooltip = eotg_decision_frontier_sponsor_effect_tt
+        trigger_event = eotg_frontier.010
+    }
+
+    ai_potential = {
+        eotg_frontier_can_sponsor = yes
+        gold >= {
+            value = eotg_frontier_sponsor_payment_value
+            multiply = 4
+        }
+    }
+    ai_will_do = {
+        base = 5
+        modifier = { add = 10  has_trait = generous }
+        modifier = { add = 5  has_trait = ambitious }
+        modifier = { factor = 0  has_trait = greedy }
+    }
+}
+
+# Withdraw sponsorship (spec §8.3; open Q9): ends this character's backing.
+eotg_decision_frontier_withdraw = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 24
+        duchy = 24
+        kingdom = 24
+        empire = 24
+        hegemony = 24
+    }
+
+    is_shown = {
+        eotg_frontier_is_sponsor = yes
+    }
+
+    effect = {
+        custom_tooltip = eotg_decision_frontier_withdraw_effect_tt
+        hidden_effect = {
+            var:eotg_frontier_sponsoring = {
+                save_scope_as = eotg_frontier_county
+                if = {
+                    limit = { var:eotg_frontier_sponsor ?= root }
+                    eotg_frontier_clear_sponsor_effect = yes
+                    eotg_frontier_add_strain_effect = { CAUSE = sponsor_lapsed }
+                    holder = {
+                        send_interface_toast = {
+                            title = eotg_frontier_toast_sponsor_withdrew
+                            left_icon = root
+                        }
+                    }
+                }
+            }
+            # A stale back-reference never blocks a new sponsorship
+            if = {
+                limit = { has_variable = eotg_frontier_sponsoring }
+                remove_variable = eotg_frontier_sponsoring
+            }
+        }
+    }
+
+    ai_potential = {
+        eotg_frontier_is_sponsor = yes
+    }
+    ai_will_do = {
+        base = 0
+        modifier = {
+            add = 50
+            gold < {
+                value = eotg_frontier_sponsor_payment_value
+                multiply = 2
+            }
+        }
+        modifier = { add = 20  is_at_war = yes }
+    }
+}
+
+# Abandon a Frontier (spec §8.3): the most strained one the taker holds.
+# Abandoned, never erased: the Region keeps its traces and can be resettled.
+eotg_decision_frontier_abandon = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 36
+        duchy = 36
+        kingdom = 36
+        empire = 36
+        hegemony = 36
+    }
+
+    is_shown = {
+        eotg_frontier_holds_frontier = yes
+    }
+
+    effect = {
+        ordered_held_title = {
+            limit = {
+                tier = tier_county
+                eotg_frontier_is_frontier = yes
+            }
+            order_by = var:eotg_frontier_strain
+            save_scope_as = eotg_frontier_county
+        }
+        custom_tooltip = eotg_decision_frontier_abandon_effect_tt
+        hidden_effect = {
+            scope:eotg_frontier_county = {
+                eotg_frontier_abandon_effect = { FAILED = no }
+            }
+        }
+    }
+
+    ai_potential = {
+        any_held_title = {
+            tier = tier_county
+            eotg_frontier_is_frontier = yes
+            var:eotg_frontier_strain >= 6
+        }
+    }
+    ai_will_do = {
+        base = 0
+        modifier = {
+            add = 30
+            gold < minor_gold_value
+        }
+    }
+}
+
+# -- Debug only (spec §8.5) ----------------------------------------------------
+# Marks the taker's capital Region Unsettled so the whole loop can be tested
+# on the vanilla map. Any other Region: the console line in
+# docs/specs/frontier_v1_test_plan.md.
+eotg_decision_frontier_debug_mark_unsettled = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 0
+        kingdom = 0
+        empire = 0
+        hegemony = 0
+    }
+
+    # debug_only = yes: confirmed (verification V10; test_decision.txt:9).
+    # Shown only when the game runs with -debug_mode.
+    is_shown = {
+        debug_only = yes
+    }
+
+    is_valid = {
+        custom_description = {
+            text = eotg_decision_frontier_debug_mark_unsettled_valid_tt
+            exists = capital_county
+            capital_county = {
+                NOT = { has_variable = eotg_frontier_state }
+            }
+        }
+    }
+
+    effect = {
+        capital_county = {
+            eotg_frontier_mark_unsettled_effect = yes
+        }
+    }
+
+    ai_potential = {
+        always = no
+    }
+    ai_will_do = {
+        base = 0
+    }
+}
+
+# Runs the yearly tick on every Frontier the taker holds, now, ignoring the
+# tick cooldown.
+eotg_decision_frontier_debug_tick = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 0
+        kingdom = 0
+        empire = 0
+        hegemony = 0
+    }
+
+    is_shown = {
+        debug_only = yes
+        eotg_frontier_holds_frontier = yes
+    }
+
+    effect = {
+        every_held_title = {
+            limit = {
+                tier = tier_county
+                eotg_frontier_is_frontier = yes
+            }
+            eotg_frontier_tick_effect = yes
+        }
+    }
+
+    ai_potential = {
+        always = no
+    }
+    ai_will_do = {
+        base = 0
+    }
+}
+
+# The hidden numbers, for testing (verification §2 "Readout", APPROVED as
+# test tooling): a toast per Frontier the taker holds with progress, strain
+# and the completion floors against the current values.
+eotg_decision_frontier_debug_readout = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 0
+        kingdom = 0
+        empire = 0
+        hegemony = 0
+    }
+
+    is_shown = {
+        debug_only = yes
+        eotg_frontier_holds_frontier = yes
+    }
+
+    effect = {
+        eotg_frontier_debug_readout_effect = yes
+    }
+
+    ai_potential = {
+        always = no
+    }
+    ai_will_do = {
+        base = 0
+    }
+}

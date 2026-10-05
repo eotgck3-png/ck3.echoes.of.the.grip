@@ -1,0 +1,29 @@
+﻿# -- eotg_frontier_templates.txt ----------------------------------------------
+# Character templates for Frontier Systems v1. Shape as
+# common/scripted_character_templates/eotg_augmentation_templates.txt (vanilla
+# 01_ep1_character_templates.txt). Culture and faith are NOT set here: the
+# caller passes the holder's by scope (map-agnostic).
+# -----------------------------------------------------------------------------
+
+# The settlers' first leader (spec §5.3, Settlement). Caller:
+# eotg_frontier_create_leader_effect.
+eotg_frontier_settler_leader_template = {
+    age = { 25 45 }
+
+    random_traits_list = {
+        count = 1
+        diligent = {}
+        brave = {}
+        gregarious = {}
+        stubborn = {}
+    }
+    random_traits_list = {
+        count = 1
+        education_stewardship_2 = {}
+        education_stewardship_3 = {}
+        education_martial_2 = {}
+    }
+    random_traits = yes
+
+    stewardship = { 8 13 }
+}

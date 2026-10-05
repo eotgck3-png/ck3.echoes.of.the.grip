@@ -1,0 +1,953 @@
+﻿# -- eotg_frontier_events.txt -------------------------------------------------
+# Frontier Systems v1 events (docs/specs/frontier_v1.md §9): 6 core events
+# (owner ruling Q2). Every event reads or moves Establishment
+# (var:eotg_frontier_progress) or its pressure (var:eotg_frontier_strain):
+# CLAUDE.md invariant 5.
+#
+# Every event is fired by something (invariant 4):
+#   .001  eotg_decision_frontier_establish
+#   .002  eotg_frontier_event_roll_effect (yearly tick; player holders)
+#   .003  eotg_frontier_event_roll_effect, or eotg_frontier.010
+#   .004  eotg_frontier_tick_effect (completion)
+#   .005  eotg_frontier_tick_effect (strain 4)
+#   .010  eotg_decision_frontier_sponsor
+# Event triggers are world-state guards only; the flavor cooldown
+# (eotg_frontier_event_cd) lives in the tick and is never read here.
+# Root is always a character (the Region's holder, or the decision taker);
+# the Region arrives as scope:eotg_frontier_county.
+#
+# theme = realm: confirmed (verification §3). Every option that changes a
+# Region re-checks its state (verification Q-B1), and each event that can be
+# left open while the state moves on has a "the moment has passed" option, so
+# it never opens with nothing to click. Gains are halved with the doubled
+# pacing and strain bands follow the 0-8 scale (verification §4).
+# -----------------------------------------------------------------------------
+
+namespace = eotg_frontier
+
+# -- eotg_frontier.001 --------------------------------------------------------
+# An Opportunity Here: the start. Pick the project type; the cost is paid here
+# (the decision has no `cost`). The founder candidate was picked by the
+# decision (the best steward at court, or the taker).
+eotg_frontier.001 = {
+    type = character_event
+    title = eotg_frontier.001.t
+    desc = {
+        desc = eotg_frontier.001.desc
+        # Lore I1: never tell the player about themselves in the third person
+        first_valid = {
+            triggered_desc = {
+                trigger = {
+                    exists = scope:eotg_frontier_candidate
+                    NOT = { scope:eotg_frontier_candidate = root }
+                }
+                desc = eotg_frontier.001.desc_other
+            }
+            desc = eotg_frontier.001.desc_self
+        }
+        triggered_desc = {
+            trigger = {
+                scope:eotg_frontier_county = { eotg_frontier_is_abandoned = yes }
+            }
+            desc = eotg_frontier.001.desc_resettle
+        }
+    }
+    theme = realm
+
+    trigger = {
+        exists = scope:eotg_frontier_county
+        scope:eotg_frontier_county = { eotg_frontier_can_establish = yes }
+    }
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+    right_portrait = {
+        trigger = {
+            exists = scope:eotg_frontier_candidate
+            NOT = { scope:eotg_frontier_candidate = root }
+        }
+        character = scope:eotg_frontier_candidate
+        animation = personality_bold
+    }
+
+    # "Settlers first."
+    option = {
+        name = eotg_frontier.001.a
+        trigger = {
+            gold >= eotg_frontier_establish_cost_value
+            scope:eotg_frontier_county = { eotg_frontier_can_establish = yes }
+        }
+        remove_short_term_gold = eotg_frontier_establish_cost_value
+        scope:eotg_frontier_county = {
+            eotg_frontier_start_effect = { TYPE = settlement  FOUNDER = scope:eotg_frontier_candidate }
+        }
+        eotg_frontier_start_tooltip_effect = yes
+        ai_chance = {
+            base = 30
+        }
+    }
+
+    # "A trading post."
+    option = {
+        name = eotg_frontier.001.b
+        trigger = {
+            gold >= eotg_frontier_establish_cost_value
+            scope:eotg_frontier_county = { eotg_frontier_can_establish = yes }
+        }
+        remove_short_term_gold = eotg_frontier_establish_cost_value
+        scope:eotg_frontier_county = {
+            eotg_frontier_start_effect = { TYPE = trade  FOUNDER = scope:eotg_frontier_candidate }
+        }
+        eotg_frontier_start_tooltip_effect = yes
+        ai_chance = {
+            base = 15
+            modifier = { add = 10  has_trait = greedy }
+        }
+    }
+
+    # "Mine it."
+    option = {
+        name = eotg_frontier.001.c
+        trigger = {
+            gold >= eotg_frontier_establish_cost_value
+            scope:eotg_frontier_county = { eotg_frontier_can_establish = yes }
+        }
+        remove_short_term_gold = eotg_frontier_establish_cost_value
+        scope:eotg_frontier_county = {
+            eotg_frontier_start_effect = { TYPE = mining  FOUNDER = scope:eotg_frontier_candidate }
+        }
+        eotg_frontier_start_tooltip_effect = yes
+        ai_chance = {
+            base = 15
+        }
+    }
+
+    # "Hold it."
+    option = {
+        name = eotg_frontier.001.d
+        trigger = {
+            gold >= eotg_frontier_establish_cost_value
+            scope:eotg_frontier_county = { eotg_frontier_can_establish = yes }
+        }
+        remove_short_term_gold = eotg_frontier_establish_cost_value
+        scope:eotg_frontier_county = {
+            eotg_frontier_start_effect = { TYPE = military  FOUNDER = scope:eotg_frontier_candidate }
+        }
+        eotg_frontier_start_tooltip_effect = yes
+        ai_chance = {
+            base = 10
+            modifier = { add = 15  martial >= 12 }
+            modifier = { add = 10  is_at_war = yes }
+        }
+    }
+
+    # "A place of faith."
+    option = {
+        name = eotg_frontier.001.e
+        trigger = {
+            gold >= eotg_frontier_establish_cost_value
+            scope:eotg_frontier_county = { eotg_frontier_can_establish = yes }
+        }
+        remove_short_term_gold = eotg_frontier_establish_cost_value
+        scope:eotg_frontier_county = {
+            eotg_frontier_start_effect = { TYPE = religious  FOUNDER = scope:eotg_frontier_candidate }
+        }
+        eotg_frontier_start_tooltip_effect = yes
+        ai_chance = {
+            base = 5
+            modifier = { add = 20  has_trait = zealous }
+        }
+    }
+
+    # "Study what is out there."
+    option = {
+        name = eotg_frontier.001.f
+        trigger = {
+            gold >= eotg_frontier_establish_cost_value
+            scope:eotg_frontier_county = { eotg_frontier_can_establish = yes }
+        }
+        remove_short_term_gold = eotg_frontier_establish_cost_value
+        scope:eotg_frontier_county = {
+            eotg_frontier_start_effect = { TYPE = research  FOUNDER = scope:eotg_frontier_candidate }
+        }
+        eotg_frontier_start_tooltip_effect = yes
+        ai_chance = {
+            base = 5
+            modifier = { add = 15  learning >= 12 }
+        }
+    }
+
+    # "Bring it into the realm's order."
+    option = {
+        name = eotg_frontier.001.g
+        trigger = {
+            gold >= eotg_frontier_establish_cost_value
+            scope:eotg_frontier_county = { eotg_frontier_admin_eligible = yes }
+        }
+        remove_short_term_gold = eotg_frontier_establish_cost_value
+        scope:eotg_frontier_county = {
+            eotg_frontier_start_effect = { TYPE = administrative  FOUNDER = scope:eotg_frontier_candidate }
+        }
+        eotg_frontier_start_tooltip_effect = yes
+        ai_chance = {
+            base = 5
+            modifier = { add = 10  stewardship >= 14 }
+        }
+    }
+
+    # "Not now."
+    option = {
+        name = eotg_frontier.001.h
+        ai_chance = {
+            base = 0
+        }
+    }
+}
+
+# -- eotg_frontier.002 --------------------------------------------------------
+# A Hard Season (complication) / The Frontier Without a Founder (variant,
+# owner ruling Q2: no founder-death event; an invalid founder is the strain
+# cause No Founder, and this is where the player replaces them).
+# The desc reads strain by band; no number is ever shown.
+eotg_frontier.002 = {
+    type = character_event
+    title = {
+        first_valid = {
+            triggered_desc = {
+                trigger = {
+                    scope:eotg_frontier_county = { eotg_frontier_has_valid_founder = no }
+                }
+                desc = eotg_frontier.002.t_no_founder
+            }
+            desc = eotg_frontier.002.t
+        }
+    }
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = {
+                    scope:eotg_frontier_county = { eotg_frontier_has_valid_founder = no }
+                }
+                desc = eotg_frontier.002.desc_no_founder
+            }
+            triggered_desc = {
+                trigger = {
+                    scope:eotg_frontier_county = { var:eotg_frontier_strain >= 6 }
+                }
+                desc = eotg_frontier.002.desc_high
+            }
+            triggered_desc = {
+                trigger = {
+                    scope:eotg_frontier_county = { var:eotg_frontier_strain >= 4 }
+                }
+                desc = eotg_frontier.002.desc_mid
+            }
+            desc = eotg_frontier.002.desc_low
+        }
+    }
+    theme = realm
+
+    trigger = {
+        exists = scope:eotg_frontier_county
+        scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+    }
+
+    left_portrait = {
+        character = root
+        animation = worry
+    }
+    right_portrait = {
+        trigger = {
+            exists = scope:eotg_frontier_candidate
+            NOT = { scope:eotg_frontier_candidate = root }
+        }
+        character = scope:eotg_frontier_candidate
+        animation = personality_bold
+    }
+
+    immediate = {
+        hidden_effect = {
+            # A replacement founder for the variant: the best steward at
+            # court who is not the old founder
+            if = {
+                limit = {
+                    scope:eotg_frontier_county = { eotg_frontier_has_valid_founder = no }
+                }
+                ordered_courtier = {
+                    limit = {
+                        is_adult = yes
+                        is_imprisoned = no
+                        NOT = { scope:eotg_frontier_county = { var:eotg_frontier_founder ?= prev } }
+                    }
+                    order_by = stewardship
+                    save_scope_as = eotg_frontier_candidate
+                }
+            }
+        }
+    }
+
+    # "Ship in supplies."
+    option = {
+        name = eotg_frontier.002.a
+        trigger = {
+            scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
+                eotg_frontier_has_valid_founder = yes
+            }
+            gold >= minor_gold_value
+        }
+        remove_short_term_gold = minor_gold_value
+        scope:eotg_frontier_county = { eotg_frontier_ease_strain_effect = yes }
+        custom_tooltip = eotg_frontier.002.ease_tt
+        ai_chance = {
+            base = 40
+            modifier = { add = -20  has_trait = greedy }
+        }
+    }
+
+    # "Push through."
+    option = {
+        name = eotg_frontier.002.b
+        trigger = {
+            scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
+                eotg_frontier_has_valid_founder = yes
+            }
+        }
+        scope:eotg_frontier_county = {
+            add_county_modifier = { modifier = eotg_frontier_mod_hard_year  years = 2 }
+            eotg_frontier_add_progress_effect = { AMOUNT = 4 }
+            eotg_frontier_add_strain_effect = { CAUSE = hardship }
+        }
+        custom_tooltip = eotg_frontier.002.push_tt
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = stubborn }
+        }
+    }
+
+    # (a sponsor who can pay) "Call on the backer."
+    option = {
+        name = eotg_frontier.002.c
+        trigger = {
+            scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
+                eotg_frontier_has_valid_founder = yes
+                eotg_frontier_has_valid_sponsor = yes
+                var:eotg_frontier_sponsor = { gold >= eotg_frontier_sponsor_payment_value }
+            }
+        }
+        scope:eotg_frontier_county = {
+            var:eotg_frontier_sponsor = {
+                remove_short_term_gold = eotg_frontier_sponsor_payment_value
+            }
+            eotg_frontier_ease_strain_effect = yes
+        }
+        custom_tooltip = eotg_frontier.002.ease_tt
+        ai_chance = {
+            base = 40
+        }
+    }
+
+    # (no founder; a candidate at court) "Appoint them."
+    option = {
+        name = eotg_frontier.002.d
+        trigger = {
+            scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
+                eotg_frontier_has_valid_founder = no
+            }
+            exists = scope:eotg_frontier_candidate
+        }
+        scope:eotg_frontier_county = {
+            eotg_frontier_set_founder_effect = { FOUNDER = scope:eotg_frontier_candidate }
+        }
+        custom_tooltip = eotg_frontier.002.founder_tt
+        ai_chance = {
+            base = 50
+        }
+    }
+
+    # (no founder) "Lead it yourself."
+    option = {
+        name = eotg_frontier.002.e
+        trigger = {
+            scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
+                eotg_frontier_has_valid_founder = no
+            }
+        }
+        scope:eotg_frontier_county = {
+            eotg_frontier_set_founder_effect = { FOUNDER = root }
+        }
+        custom_tooltip = eotg_frontier.002.founder_tt
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = diligent }
+        }
+    }
+
+    # (no founder) "They will manage." Strain keeps building.
+    option = {
+        name = eotg_frontier.002.f
+        trigger = {
+            scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
+                eotg_frontier_has_valid_founder = no
+            }
+        }
+        custom_tooltip = eotg_frontier.002.f_tt
+        ai_chance = {
+            base = 5
+            modifier = { add = 20  has_trait = lazy }
+        }
+    }
+    # The Region is no longer in this state (it moved on while the event was
+    # open): a way out with no effect (verification Q-B1)
+    option = {
+        name = eotg_frontier.option_passed
+        trigger = {
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = no }
+        }
+        ai_chance = {
+            base = 100
+        }
+    }
+}
+
+# -- eotg_frontier.003 --------------------------------------------------------
+# An Offer of Backing. scope:eotg_frontier_sponsor offers; the holder (root)
+# decides. Sponsorship gives the backer no claim and no ownership (spec §R).
+eotg_frontier.003 = {
+    type = character_event
+    title = eotg_frontier.003.t
+    desc = {
+        desc = eotg_frontier.003.desc
+        triggered_desc = {
+            trigger = {
+                scope:eotg_frontier_county = { exists = var:eotg_frontier_sponsor }
+            }
+            desc = eotg_frontier.003.desc_replace
+        }
+    }
+    theme = realm
+
+    trigger = {
+        exists = scope:eotg_frontier_county
+        exists = scope:eotg_frontier_sponsor
+        scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        scope:eotg_frontier_sponsor = { is_alive = yes }
+        NOT = { scope:eotg_frontier_sponsor = root }
+    }
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+    right_portrait = {
+        character = scope:eotg_frontier_sponsor
+        animation = personality_honorable
+    }
+
+    # "Accept the backing."
+    option = {
+        name = eotg_frontier.003.a
+        trigger = {
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+            scope:eotg_frontier_sponsor = { eotg_frontier_can_sponsor = yes }
+        }
+        scope:eotg_frontier_county = {
+            eotg_frontier_set_sponsor_effect = { SPONSOR = scope:eotg_frontier_sponsor }
+            eotg_frontier_add_progress_effect = { AMOUNT = 3 }
+        }
+        custom_tooltip = eotg_frontier.003.accept_tt
+        hidden_effect = {
+            if = {
+                limit = { exists = scope:eotg_frontier_old_sponsor }
+                scope:eotg_frontier_old_sponsor = {
+                    send_interface_toast = {
+                        title = eotg_frontier_toast_sponsor_replaced
+                        left_icon = root
+                    }
+                }
+            }
+        }
+        ai_chance = {
+            base = 50
+            modifier = {
+                add = 30
+                opinion = { target = scope:eotg_frontier_sponsor  value >= 20 }
+            }
+            modifier = {
+                factor = 0
+                opinion = { target = scope:eotg_frontier_sponsor  value < -20 }
+            }
+        }
+    }
+
+    # "We will manage without them."
+    option = {
+        name = eotg_frontier.003.b
+        custom_tooltip = eotg_frontier.003.refuse_tt
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = arrogant }
+        }
+    }
+}
+
+# -- eotg_frontier.004 --------------------------------------------------------
+# No Longer a Frontier: completion. The new System always goes to the current
+# holder (ruling Q12); the options only decide how the founder is rewarded.
+eotg_frontier.004 = {
+    type = character_event
+    title = eotg_frontier.004.t
+    desc = {
+        desc = eotg_frontier.004.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_county = { var:eotg_frontier_type ?= flag:settlement } }
+                desc = eotg_frontier.004.desc_settlement
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_county = { var:eotg_frontier_type ?= flag:trade } }
+                desc = eotg_frontier.004.desc_trade
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_county = { var:eotg_frontier_type ?= flag:mining } }
+                desc = eotg_frontier.004.desc_mining
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_county = { var:eotg_frontier_type ?= flag:military } }
+                desc = eotg_frontier.004.desc_military
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_county = { var:eotg_frontier_type ?= flag:religious } }
+                desc = eotg_frontier.004.desc_religious
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_county = { var:eotg_frontier_type ?= flag:research } }
+                desc = eotg_frontier.004.desc_research
+            }
+            desc = eotg_frontier.004.desc_administrative
+        }
+    }
+    theme = realm
+
+    trigger = {
+        exists = scope:eotg_frontier_county
+        scope:eotg_frontier_county = { eotg_frontier_completion_met = yes }
+    }
+
+    left_portrait = {
+        character = root
+        animation = happiness
+    }
+    right_portrait = {
+        trigger = {
+            exists = scope:eotg_frontier_founder
+            NOT = { scope:eotg_frontier_founder = root }
+            scope:eotg_frontier_founder = { is_alive = yes }
+        }
+        character = scope:eotg_frontier_founder
+        animation = personality_bold
+    }
+
+    immediate = {
+        hidden_effect = {
+            scope:eotg_frontier_county = {
+                if = {
+                    limit = { exists = var:eotg_frontier_founder }
+                    var:eotg_frontier_founder = { save_scope_as = eotg_frontier_founder }
+                }
+            }
+        }
+    }
+
+    # (a founder who is not you) "A purse for them."
+    option = {
+        name = eotg_frontier.004.a
+        trigger = {
+            scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
+                eotg_frontier_has_valid_founder = yes
+            }
+            NOT = { scope:eotg_frontier_founder = root }
+            gold >= minor_gold_value
+        }
+        remove_short_term_gold = minor_gold_value
+        scope:eotg_frontier_founder = { add_gold = minor_gold_value }
+        scope:eotg_frontier_county = { eotg_frontier_complete_effect = yes }
+        custom_tooltip = eotg_frontier.004.complete_tt
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = generous }
+            modifier = { factor = 0  has_trait = greedy }
+        }
+    }
+
+    # (a founder who is not you) "Honor them publicly."
+    option = {
+        name = eotg_frontier.004.b
+        trigger = {
+            scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
+                eotg_frontier_has_valid_founder = yes
+            }
+            NOT = { scope:eotg_frontier_founder = root }
+        }
+        scope:eotg_frontier_founder = { add_prestige = 100 }
+        add_prestige = 25
+        scope:eotg_frontier_county = { eotg_frontier_complete_effect = yes }
+        custom_tooltip = eotg_frontier.004.complete_tt
+        ai_chance = {
+            base = 30
+        }
+    }
+
+    # "The work is its own reward."
+    option = {
+        name = eotg_frontier.004.c
+        trigger = {
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        scope:eotg_frontier_county = { eotg_frontier_complete_effect = yes }
+        custom_tooltip = eotg_frontier.004.complete_tt
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = greedy }
+        }
+    }
+    # The Region is no longer in this state (it moved on while the event was
+    # open): a way out with no effect (verification Q-B1)
+    option = {
+        name = eotg_frontier.option_passed
+        trigger = {
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = no }
+        }
+        ai_chance = {
+            base = 100
+        }
+    }
+}
+
+# -- eotg_frontier.005 --------------------------------------------------------
+# The Frontier Falters: strain reached 4. Failure is never a random roll: the
+# desc names the latest cause (spec §6.3, §6.6). AI order (spec §6.6): the
+# sponsor's care, else a new founder, else abandon.
+eotg_frontier.005 = {
+    type = character_event
+    title = eotg_frontier.005.t
+    desc = {
+        desc = eotg_frontier.005.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_county = { var:eotg_frontier_last_cause ?= flag:no_founder } }
+                desc = eotg_frontier.005.desc_no_founder
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_county = { var:eotg_frontier_last_cause ?= flag:low_control } }
+                desc = eotg_frontier.005.desc_low_control
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_county = { var:eotg_frontier_last_cause ?= flag:occupied } }
+                desc = eotg_frontier.005.desc_occupied
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_county = { var:eotg_frontier_last_cause ?= flag:war } }
+                desc = eotg_frontier.005.desc_war
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_county = { var:eotg_frontier_last_cause ?= flag:sponsor_lapsed } }
+                desc = eotg_frontier.005.desc_sponsor_lapsed
+            }
+            desc = eotg_frontier.005.desc_hardship
+        }
+    }
+    theme = realm
+
+    trigger = {
+        exists = scope:eotg_frontier_county
+        scope:eotg_frontier_county = {
+            eotg_frontier_is_frontier = yes
+            var:eotg_frontier_strain >= eotg_frontier_strain_fail_value
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+
+    immediate = {
+        hidden_effect = {
+            ordered_courtier = {
+                limit = {
+                    is_adult = yes
+                    is_imprisoned = no
+                    NOT = { scope:eotg_frontier_county = { var:eotg_frontier_founder ?= prev } }
+                }
+                order_by = stewardship
+                save_scope_as = eotg_frontier_candidate
+            }
+        }
+    }
+
+    # "Let it go."
+    option = {
+        name = eotg_frontier.005.a
+        trigger = {
+            scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
+                var:eotg_frontier_strain >= eotg_frontier_strain_fail_value
+            }
+        }
+        scope:eotg_frontier_county = {
+            eotg_frontier_abandon_effect = { FAILED = yes }
+        }
+        custom_tooltip = eotg_frontier.005.abandon_tt
+        ai_chance = {
+            base = 10
+        }
+    }
+
+    # "New hands." A new founder; half the work stands.
+    option = {
+        name = eotg_frontier.005.b
+        trigger = {
+            scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
+                var:eotg_frontier_strain >= eotg_frontier_strain_fail_value
+            }
+            exists = scope:eotg_frontier_candidate
+            gold >= minor_gold_value
+        }
+        remove_short_term_gold = minor_gold_value
+        scope:eotg_frontier_county = {
+            eotg_frontier_set_founder_effect = { FOUNDER = scope:eotg_frontier_candidate }
+            eotg_frontier_restart_effect = yes
+        }
+        custom_tooltip = eotg_frontier.005.restart_tt
+        ai_chance = {
+            base = 50
+        }
+    }
+
+    # (not a Settlement project) "Scale it back to a plain settlement."
+    option = {
+        name = eotg_frontier.005.c
+        trigger = {
+            scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
+                var:eotg_frontier_strain >= eotg_frontier_strain_fail_value
+                NOT = { var:eotg_frontier_type ?= flag:settlement }
+            }
+        }
+        scope:eotg_frontier_county = {
+            set_variable = { name = eotg_frontier_type  value = flag:settlement }
+            eotg_frontier_restart_effect = yes
+        }
+        custom_tooltip = eotg_frontier.005.restart_tt
+        ai_chance = {
+            base = 20
+        }
+    }
+
+    # (a sponsor who can pay double) "Lean on the backer."
+    option = {
+        name = eotg_frontier.005.d
+        trigger = {
+            scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
+                var:eotg_frontier_strain >= eotg_frontier_strain_fail_value
+                eotg_frontier_has_valid_sponsor = yes
+                var:eotg_frontier_sponsor = {
+                    gold >= {
+                        value = eotg_frontier_sponsor_payment_value
+                        multiply = 2
+                    }
+                }
+            }
+        }
+        scope:eotg_frontier_county = {
+            var:eotg_frontier_sponsor = {
+                remove_short_term_gold = {
+                    value = eotg_frontier_sponsor_payment_value
+                    multiply = 2
+                }
+            }
+            set_variable = { name = eotg_frontier_strain  value = 2 }
+        }
+        custom_tooltip = eotg_frontier.005.sponsor_tt
+        ai_chance = {
+            base = 100
+        }
+    }
+    # The Region is no longer in this state (it moved on while the event was
+    # open): a way out with no effect (verification Q-B1)
+    option = {
+        name = eotg_frontier.option_passed
+        trigger = {
+            # Resolved already (another .005 ran, or a restart lowered the strain)
+            scope:eotg_frontier_county = {
+                NOT = {
+                    AND = {
+                        eotg_frontier_is_frontier = yes
+                        var:eotg_frontier_strain >= eotg_frontier_strain_fail_value
+                    }
+                }
+            }
+        }
+        ai_chance = {
+            base = 100
+        }
+    }
+}
+
+# -- eotg_frontier.010 --------------------------------------------------------
+# Whom to Back: the Sponsor decision's pick. Up to three unsponsored
+# Frontiers held by others, most advanced first (reads Establishment). The
+# chosen holder answers in .003.
+# ordered_in_global_list over title scopes: confirmed (verification V2).
+eotg_frontier.010 = {
+    type = character_event
+    title = eotg_frontier.010.t
+    # Each offer's stage, in words (verification Q7)
+    desc = {
+        desc = eotg_frontier.010.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_offer_1 ?= { var:eotg_frontier_progress >= 66 } }
+                desc = eotg_frontier.010.desc_offer_1_late
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_offer_1 ?= { var:eotg_frontier_progress >= 33 } }
+                desc = eotg_frontier.010.desc_offer_1_mid
+            }
+            triggered_desc = {
+                trigger = { exists = scope:eotg_frontier_offer_1 }
+                desc = eotg_frontier.010.desc_offer_1_early
+            }
+        }
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_offer_2 ?= { var:eotg_frontier_progress >= 66 } }
+                desc = eotg_frontier.010.desc_offer_2_late
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_offer_2 ?= { var:eotg_frontier_progress >= 33 } }
+                desc = eotg_frontier.010.desc_offer_2_mid
+            }
+            triggered_desc = {
+                trigger = { exists = scope:eotg_frontier_offer_2 }
+                desc = eotg_frontier.010.desc_offer_2_early
+            }
+        }
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_offer_3 ?= { var:eotg_frontier_progress >= 66 } }
+                desc = eotg_frontier.010.desc_offer_3_late
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_offer_3 ?= { var:eotg_frontier_progress >= 33 } }
+                desc = eotg_frontier.010.desc_offer_3_mid
+            }
+            triggered_desc = {
+                trigger = { exists = scope:eotg_frontier_offer_3 }
+                desc = eotg_frontier.010.desc_offer_3_early
+            }
+        }
+    }
+    theme = realm
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+
+    immediate = {
+        hidden_effect = {
+            ordered_in_global_list = {
+                variable = eotg_frontier_active
+                limit = {
+                    NOT = { holder = root }
+                    NOT = { exists = var:eotg_frontier_sponsor }
+                }
+                order_by = var:eotg_frontier_progress
+                save_scope_as = eotg_frontier_offer_1
+            }
+            ordered_in_global_list = {
+                variable = eotg_frontier_active
+                limit = {
+                    NOT = { holder = root }
+                    NOT = { exists = var:eotg_frontier_sponsor }
+                    NOT = { this = scope:eotg_frontier_offer_1 }
+                }
+                order_by = var:eotg_frontier_progress
+                save_scope_as = eotg_frontier_offer_2
+            }
+            ordered_in_global_list = {
+                variable = eotg_frontier_active
+                limit = {
+                    NOT = { holder = root }
+                    NOT = { exists = var:eotg_frontier_sponsor }
+                    NOT = { this = scope:eotg_frontier_offer_1 }
+                    NOT = { this = scope:eotg_frontier_offer_2 }
+                }
+                order_by = var:eotg_frontier_progress
+                save_scope_as = eotg_frontier_offer_3
+            }
+        }
+    }
+
+    option = {
+        name = eotg_frontier.010.a
+        trigger = { exists = scope:eotg_frontier_offer_1 }
+        save_scope_as = eotg_frontier_sponsor
+        scope:eotg_frontier_offer_1 = {
+            save_scope_as = eotg_frontier_county
+            holder = { trigger_event = eotg_frontier.003 }
+        }
+        custom_tooltip = eotg_frontier.010.offer_tt
+        ai_chance = {
+            base = 30
+        }
+    }
+
+    option = {
+        name = eotg_frontier.010.b
+        trigger = { exists = scope:eotg_frontier_offer_2 }
+        save_scope_as = eotg_frontier_sponsor
+        scope:eotg_frontier_offer_2 = {
+            save_scope_as = eotg_frontier_county
+            holder = { trigger_event = eotg_frontier.003 }
+        }
+        custom_tooltip = eotg_frontier.010.offer_tt
+        ai_chance = {
+            base = 20
+        }
+    }
+
+    option = {
+        name = eotg_frontier.010.c
+        trigger = { exists = scope:eotg_frontier_offer_3 }
+        save_scope_as = eotg_frontier_sponsor
+        scope:eotg_frontier_offer_3 = {
+            save_scope_as = eotg_frontier_county
+            holder = { trigger_event = eotg_frontier.003 }
+        }
+        custom_tooltip = eotg_frontier.010.offer_tt
+        ai_chance = {
+            base = 10
+        }
+    }
+
+    option = {
+        name = eotg_frontier.010.d
+        ai_chance = {
+            base = 5
+        }
+    }
+}
