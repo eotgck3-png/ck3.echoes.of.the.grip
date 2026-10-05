@@ -14,7 +14,7 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | Family | Specs | Built | Ids | Present | Referenced only | Missing in built specs |
 |---|---|---|---|---|---|---|
 | `cybernetics` | 1 | 1 | 66 | 53 | 0 | 13 |
-| `cybernetics_v2` | 22 | 20 | 1264 | 1207 | 29 | 6 |
+| `cybernetics_v2` | 22 | 22 | 1268 | 1231 | 30 | 7 |
 | `glossary` | 1 | 0 | 1 | 0 | 0 | 0 |
 | `void` | 1 | 0 | 86 | 0 | 0 | 0 |
 
@@ -42,8 +42,8 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | `cybernetics_v2_realm_lore.md` | yes | 2 | 2 | 0 | 0 | 0 |
 | `cybernetics_v2_reprisal.md` | yes | 37 | 36 | 1 | 0 | 0 |
 | `cybernetics_v2_reprisal_lore.md` | yes | 3 | 3 | 0 | 0 | 0 |
-| `cybernetics_v2_self_repair.md` | **no** | 53 | 34 | 1 | 18 | 0 |
-| `cybernetics_v2_self_repair_lore.md` | **no** | 5 | 1 | 0 | 4 | 0 |
+| `cybernetics_v2_self_repair.md` | yes | 57 | 54 | 2 | 1 | 0 |
+| `cybernetics_v2_self_repair_lore.md` | yes | 5 | 5 | 0 | 0 | 0 |
 | `cybernetics_v2_trait_depth.md` | yes | 42 | 41 | 1 | 0 | 0 |
 | `glossary_proposal_cloud.md` | **no** | 1 | 0 | 0 | 1 | 0 |
 | `void_lift_plan_cloud.md` | **no** | 86 | 0 | 0 | 86 | 0 |
@@ -205,6 +205,20 @@ None.
 - Referenced only, never defined or set (0): none
 - Exempt (0): none
 
+#### `docs/specs/cybernetics_v2_self_repair.md`
+
+- Specced and present: 54
+- Specced, missing from script (1): `eotg_mod_aug_calibrated` (modifier, l.28)
+- Referenced only, never defined or set (2): `eotg_cybernetic_innovation` (flag, l.72), `eotg_implant_calibrated` (modifier, l.77)
+- Exempt (0): none
+
+#### `docs/specs/cybernetics_v2_self_repair_lore.md`
+
+- Specced and present: 5
+- Specced, missing from script (0): none
+- Referenced only, never defined or set (0): none
+- Exempt (0): none
+
 #### `docs/specs/cybernetics_v2_trait_depth.md`
 
 - Specced and present: 41
@@ -214,22 +228,7 @@ None.
 
 ### Unbuilt specs (expected gaps)
 
-#### `docs/specs/cybernetics_v2_self_repair.md`
-
-- New events, none in script yet: `eotg_aug_proc.005`
-- Specced and present: 34
-- Specced, missing from script (18): `eotg_aug_proc.005` (event, l.15), `eotg_mod_aug_calibrated` (modifier, l.28), `eotg_mod_aug_self_repair` (modifier, l.52), `eotg_innovation_self_repairing_machinery` (unknown, l.71), `eotg_cybernetic_innovation` (flag, l.72), `eotg_decision_aug_self_repair` (decision, l.74), `eotg_aug_self_repair_fit_effect` (effect, l.78), `eotg_aug_can_self_repair` (trigger, l.79), `eotg_aug_self_repair_price_value` (script value, l.80), `eotg_aug_oc_wear_relief_value` (script value, l.81), `eotg_proc_refit` (scope, l.82), `eotg_decision_aug_self_repair_selection_tt` (loc, l.289), `eotg_decision_aug_self_repair_no_provider_tt` (loc, l.292), `eotg_decision_aug_self_repair_tooltip` (loc, l.294), `eotg_aug_proc.005.tt` (loc, l.313), `eotg_innovation_self_repairing_machinery_custom` (unknown, l.433), `eotg_aug_proc.005.t` (loc, l.436), `eotg_aug_proc.002.desc_refit` (loc, l.437)
-- Referenced only, never defined or set (1): `eotg_implant_calibrated` (modifier, l.77)
-- Exempt (0): none
-- Suffix shorthand that matches no key (7, not counted): l.432: `eotg_innovation_self_repairing_machinery` + `_desc`; l.434: `eotg_decision_aug_self_repair` + `_desc`; l.434: `eotg_decision_aug_self_repair` + `_tooltip`; l.434: `eotg_decision_aug_self_repair` + `_confirm`; l.434: `eotg_decision_aug_self_repair` + `_selection_tt`; l.434: `eotg_decision_aug_self_repair` + `_no_provider_tt`; l.435: `eotg_mod_aug_self_repair` + `_desc`
-
-#### `docs/specs/cybernetics_v2_self_repair_lore.md`
-
-- New events, none in script yet: none
-- Specced and present: 1
-- Specced, missing from script (4): `eotg_innovation_self_repairing_machinery` (unknown, l.33), `eotg_mod_aug_self_repair` (modifier, l.33), `eotg_decision_aug_self_repair` (decision, l.53), `eotg_aug_proc.002.desc_refit` (loc, l.76)
-- Referenced only, never defined or set (0): none
-- Exempt (0): none
+None.
 
 
 ## Family `glossary`

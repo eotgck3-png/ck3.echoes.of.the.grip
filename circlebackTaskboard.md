@@ -370,6 +370,28 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Owner:** human → orchestrator
 - **Next step:** check alongside CB-38 and CB-39.
 
+### CB-41: In-game checks for the Self-repair batch
+- **Status:** waiting-human (2026-10-04)
+- **What:** `docs/specs/cybernetics_v2_self_repair.md` §9 item 9 is the full list:
+  - the culture window shows Self-Repairing Machinery (civic group, early medieval column);
+  - a tribal culture can pick it as an ahead-of-time fascination (note the rate shown in the UI);
+  - after granting it by console, the decision appears for tiers 1–3 only and disappears once fitted;
+  - the clinic, physician and "My implant technician." routes all work;
+  - the clinic is greyed out under a Ban;
+  - calibration lasts 5 years after Maintenance and 7 years after Consult;
+  - Overclocked accrual is 11 / 8 / 5 depending on how much is stacked;
+  - the modifier is removed on a full exit and at Total Integration.
+
+  Also check:
+  1. **Engine (a):** how fast the ahead-of-time research actually goes. The defines say it is allowed: ÷5 per era behind, and halved for each ahead-of-time innovation already held.
+  2. **Engine (d):** tribal rulers on the test map can still use it. The early medieval era is invalid for tribal governments, but that only limits engine-applied innovation effects, and this innovation has none.
+  3. **Observer:** read report section [16]. Rebuild the sub-mod first.
+- **Art debt:** the innovation icon, the modifier icon and the decision picture are stopgaps.
+- **Note:** a refit roll uses up the sabotage flag, as every roll does, so it lifts a tampering's ×1.5 penalty. The Tampered modifier stays.
+- **Related:** CB-36 (move the innovation's era at Gate 1; S5: nothing in history or bookmarks may grant it).
+- **Owner:** human → orchestrator
+- **Next step:** check alongside CB-38 to CB-40.
+
 ## Tooling and environment
 
 ### CB-18: Game is 1.20.0.3; the tools target older versions

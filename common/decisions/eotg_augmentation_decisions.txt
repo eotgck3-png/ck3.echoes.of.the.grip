@@ -218,7 +218,15 @@ eotg_decision_maintenance_protocol = {
 
     effect = {
         add_character_flag = { flag = eotg_flag_maintenance_cooldown  years = 3 }
-        add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 3 }
+        # Self-repair spec §4.3: calibration holds 5 years with self-repairing
+        # hardware (the cooldown stays 3)
+        if = {
+            limit = { has_character_modifier = eotg_mod_aug_self_repair }
+            add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 5 }
+        }
+        else = {
+            add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 3 }
+        }
         # Recalibration replaces black-market hardware (audit §1.7c)
         if = {
             limit = { has_character_modifier = eotg_mod_illegal_implants }
@@ -261,6 +269,12 @@ eotg_decision_maintenance_protocol = {
         modifier = { add = 10  has_trait = diligent }
         modifier = { add = -10  has_trait = lazy }
         modifier = { add = -10  has_trait = callous }
+        # Self-repair spec §4.3: below Overclocked the refit lessens the need
+        modifier = {
+            add = -10
+            has_character_modifier = eotg_mod_aug_self_repair
+            eotg_is_aug_tier3 = no
+        }
     }
 }
 
@@ -449,7 +463,14 @@ eotg_decision_consult_physician = {
         # Procedures spec §4.8: a former character is not "calibrated"
         if = {
             limit = { has_trait = eotg_cybernetics }
-            add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 5 }
+            # Self-repair spec §4.3: 7 years with self-repairing hardware
+            if = {
+                limit = { has_character_modifier = eotg_mod_aug_self_repair }
+                add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 7 }
+            }
+            else = {
+                add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 5 }
+            }
         }
         if = {
             limit = { has_character_modifier = eotg_mod_aug_infection }
@@ -994,5 +1015,92 @@ eotg_decision_aug_pursue_next_stage = {
             eotg_is_aug_tier2 = yes
             eotg_aug_pressure_flicker = no
         }
+    }
+}
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Self-repairing machinery (docs/specs/cybernetics_v2_self_repair.md §4.4)
+# ═════════════════════════════════════════════════════════════════════════════
+
+# Commission Self-Repairing Hardware: a refit on the existing machinery, for
+# an augmented character (tiers 1-3) whose culture has the innovation. No
+# cost: proc.005 charges per provider (the Seek shape; vanilla
+# 00_lifestyle_decisions.txt:342). The gold floor is the cheapest open
+# provider. No back streets and no self-surgery (the hardware comes from the
+# scholars' workshops), so the severe tail cannot happen on this procedure.
+# The physician route keeps the procedures QA rule: a surgeon other than the
+# patient (eotg_aug_has_surgeon_for), not the spec's eotg_aug_has_surgeon_access
+# (reported).
+eotg_decision_aug_self_repair = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/eotg_decision_maintenance_protocol.dds"
+    }
+    selection_tooltip = eotg_decision_aug_self_repair_selection_tt
+    confirm_text = eotg_decision_aug_self_repair_confirm
+    # Counts are offered, they never seek (Seek's intervals; balance §5.2/5.3)
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 36
+        kingdom = 24
+        empire = 24
+        hegemony = 24
+    }
+
+    is_shown = {
+        eotg_aug_can_self_repair = yes
+    }
+
+    is_valid = {
+        custom_description = {
+            text = eotg_decision_aug_self_repair_no_provider_tt
+            OR = {
+                eotg_aug_clinic_open = yes
+                eotg_aug_has_surgeon_for = { PATIENT = root }
+            }
+        }
+        OR = {
+            AND = {
+                eotg_aug_clinic_open = yes
+                eotg_aug_can_afford_procedure = { BASE = eotg_aug_self_repair_price_value  MULT = 1 }
+            }
+            AND = {
+                eotg_aug_has_surgeon_for = { PATIENT = root }
+                eotg_aug_can_afford_procedure = { BASE = eotg_aug_self_repair_price_value  MULT = eotg_aug_price_mult_physician }
+            }
+        }
+    }
+
+    # Decision-owned (index §1 rule 5); covers "Not yet"
+    cooldown = { years = 1 }
+
+    effect = {
+        custom_tooltip = eotg_decision_aug_self_repair_tooltip
+        trigger_event = eotg_aug_proc.005
+    }
+
+    ai_potential = {
+        eotg_aug_can_self_repair = yes
+        short_term_gold >= {
+            value = eotg_aug_self_repair_price_value
+            multiply = eotg_aug_price_mult_physician
+        }
+    }
+    ai_will_do = {
+        base = 5
+        modifier = { add = 25  eotg_is_aug_tier3 = yes }
+        modifier = { add = 20  eotg_aug_has_countdown = yes }
+        modifier = { add = 10  has_trait = diligent }
+        modifier = {
+            add = 10
+            OR = {
+                has_trait = education_learning_3
+                has_trait = education_learning_4
+                has_trait = education_learning_5
+            }
+        }
+        modifier = { add = -15  has_trait = greedy }
+        modifier = { add = -10  has_trait = lazy }
     }
 }

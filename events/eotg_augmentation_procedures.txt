@@ -6,6 +6,7 @@
 # eotg_aug_proc.002 — After the Procedure  (outcome report)
 # eotg_aug_proc.003 — Spare Parts          (repair offer)
 # eotg_aug_proc.004 — A Part Replaced      (Seamless repair; lore N1)
+# eotg_aug_proc.005 — Within Tolerance     (self-repairing hardware refit)
 # eotg_aug_proc.020 — Phantom Static       (after leaving the system, G3)
 #
 # Fires from:
@@ -14,6 +15,7 @@
 #   eotg_aug_procedure_effect (common/scripted_effects/
 #     eotg_augmentation_effects.txt) -> .002;
 #   eotg_on_trait_gained_aug_repair (on_trait_gained) -> .003 / .004;
+#   eotg_decision_aug_self_repair -> .005;
 #   eotg_on_yearly_aug_former_check (yearly_playable_pulse) -> .020.
 # Cooldowns live in those on_actions and decisions only
 # (eotg_flag_aug_repair_cooldown, eotg_flag_aug_phantom_done); no event
@@ -280,6 +282,11 @@ eotg_aug_proc.002 = {
     title = eotg_aug_proc.002.t
     desc = {
         first_valid = {
+            # Self-repair spec §4.4: the refit (proc.005), first
+            triggered_desc = {
+                trigger = { exists = scope:eotg_proc_refit }
+                desc = eotg_aug_proc.002.desc_refit
+            }
             # Interactions spec §3.2: a salvaged prisoner, and a fault repair
             # (tamper.004 a/b/c, int.001.b), before the kind openers
             triggered_desc = {
@@ -866,6 +873,126 @@ eotg_aug_proc.020 = {
             base = 30
             modifier = { add = 30  has_trait = zealous }
             modifier = { add = 10  has_trait = humble }
+        }
+    }
+}
+
+
+# ── eotg_aug_proc.005 ─────────────────────────────────────────────────────────
+# Within Tolerance (docs/specs/cybernetics_v2_self_repair.md §4.4). The refit
+# with self-repairing hardware, once the patient's culture has the innovation.
+# Paid options: pay (eotg_aug_self_repair_price_value x the provider), fit
+# (eotg_aug_self_repair_fit_effect: the modifier, then risk +2 / +4 / +6 by
+# tier, hidden), mark the chain (scope:eotg_proc_refit, read by proc.002's
+# opener), then the shared roll as an `upgrade` (deep work on fitted
+# hardware; no fifth procedure literal), hidden. Clinic and physician only:
+# the severe tail weighs 0 in both columns.
+# b keeps the procedures QA rule (eotg_aug_has_surgeon_for: a surgeon other
+# than the patient, covering the Implant Technician), not the spec's
+# eotg_aug_has_surgeon_access (reported). a closes under a Ban (realm §3.2).
+# Caller: eotg_decision_aug_self_repair. Its cooldown (1 year) is the only
+# cooldown; the trigger here is a world-state guard.
+# Resource: a and b move risk (the fit) and lead to the roll; c declines.
+
+eotg_aug_proc.005 = {
+    type = character_event
+    title = eotg_aug_proc.005.t
+    desc = {
+        desc = eotg_aug_proc.005.desc
+        triggered_desc = {
+            trigger = { eotg_is_aug_tier3 = yes }
+            desc = eotg_aug_proc.005.desc_overclocked
+        }
+        triggered_desc = {
+            trigger = { eotg_aug_has_surgeon_for = { PATIENT = root } }
+            desc = eotg_aug_proc.005.desc_surgeon
+        }
+    }
+    theme = medicine
+
+    trigger = { eotg_aug_can_self_repair = yes }
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+    right_portrait = {
+        trigger = {
+            exists = scope:eotg_proc_surgeon
+            NOT = { scope:eotg_proc_surgeon = root }
+        }
+        character = scope:eotg_proc_surgeon
+        animation = personality_rational
+    }
+
+    immediate = {
+        hidden_effect = {
+            eotg_aug_save_surgeon_effect = yes
+        }
+    }
+
+    # "The clinic."
+    option = {
+        name = eotg_aug_proc.005.a
+        show_as_unavailable = { eotg_aug_clinic_open = no }
+        trigger = {
+            # Realm spec §3.2: sanctioned clinics close under a Ban
+            custom_description = {
+                text = eotg_aug_clinic_closed_tt
+                eotg_aug_clinic_open = yes
+            }
+            eotg_aug_can_afford_procedure = { BASE = eotg_aug_self_repair_price_value  MULT = 1 }
+        }
+        eotg_aug_pay_procedure_effect = { BASE = eotg_aug_self_repair_price_value  MULT = 1 }
+        eotg_aug_self_repair_fit_effect = yes
+        save_scope_value_as = { name = eotg_proc_refit  value = yes }
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = upgrade  SURGEON = root }
+        }
+        custom_tooltip = eotg_aug_proc.005.tt
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 10  has_trait = craven }
+            modifier = { add = -20  has_trait = greedy }
+        }
+    }
+
+    # (a surgeon other than root: a court physician or a technician) "My own
+    # physician." / "My implant technician."
+    option = {
+        name = eotg_aug_proc.005.b
+        name = {
+            trigger = { eotg_aug_surgeon_is_technician = yes }
+            text = eotg_aug_opt_technician
+        }
+        trigger = {
+            eotg_aug_has_surgeon_for = { PATIENT = root }
+            eotg_aug_can_afford_procedure = { BASE = eotg_aug_self_repair_price_value  MULT = eotg_aug_price_mult_physician }
+        }
+        eotg_aug_pay_procedure_effect = { BASE = eotg_aug_self_repair_price_value  MULT = eotg_aug_price_mult_physician }
+        eotg_aug_self_repair_fit_effect = yes
+        save_scope_value_as = { name = eotg_proc_refit  value = yes }
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = physician  PROCEDURE = upgrade  SURGEON = scope:eotg_proc_surgeon }
+        }
+        custom_tooltip = eotg_aug_proc.005.tt
+        eotg_aug_stress_surgery_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = trusting }
+            modifier = { add = 10  has_trait = diligent }
+        }
+    }
+
+    # "Not yet." Ungated; the decision's 1-year cooldown covers it.
+    option = {
+        name = eotg_aug_proc.005.c
+        ai_chance = {
+            base = 15
+            modifier = { add = 20  has_trait = greedy }
+            modifier = { add = 10  has_trait = content }
         }
     }
 }

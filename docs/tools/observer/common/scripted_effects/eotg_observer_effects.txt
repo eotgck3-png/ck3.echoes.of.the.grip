@@ -225,6 +225,9 @@ eotg_obs_census_effect = {
                 debug_log = eotg_obs_dev_lt10
             }
         }
+        # Self-repair spec §4.3 counters 1 and 3: rulers fitted; Overclocked
+        # rulers with all three wear-relief rows
+        eotg_obs_log_self_repair_effect = { PREFIX = census }
         # Realm spec §4.9 counters 1 and 4: the governing law; technicians
         eotg_obs_log_law_effect = { PREFIX = census_law }
         if = {
@@ -252,6 +255,11 @@ eotg_obs_census_effect = {
             is_knight = yes
         }
         eotg_obs_log_state_tt_effect = { PREFIX = knight  TT = all }
+    }
+    # Self-repair spec §4.3 counter 1: cultures holding the innovation
+    every_culture_global = {
+        limit = { has_innovation = eotg_innovation_self_repairing_machinery }
+        debug_log = eotg_obs_census_innovation
     }
     debug_log = eotg_obs_census_end
 }
@@ -288,5 +296,24 @@ eotg_obs_log_law_effect = {
     }
     else = {
         debug_log = eotg_obs_$PREFIX$_none
+    }
+}
+
+# Self-repair spec §4.3: eotg_obs_<PREFIX>_self_repair for a fitted character,
+# and eotg_obs_<PREFIX>_full_stack for an Overclocked one with all three
+# wear-relief rows (the safe vendor, an own technician, the refit).
+eotg_obs_log_self_repair_effect = {
+    if = {
+        limit = { has_character_modifier = eotg_mod_aug_self_repair }
+        debug_log = eotg_obs_$PREFIX$_self_repair
+        if = {
+            limit = {
+                eotg_is_aug_tier3 = yes
+                has_character_flag = eotg_flag_aug_vendor_safe
+                eotg_aug_own_technician_valid = yes
+                has_character_modifier = eotg_mod_aug_self_repair
+            }
+            debug_log = eotg_obs_$PREFIX$_full_stack
+        }
     }
 }

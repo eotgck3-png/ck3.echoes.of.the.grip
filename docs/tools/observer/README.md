@@ -1,6 +1,6 @@
 # EotG Observer: logging sub-mod for the 50-year run
 
-This is the tool for **CB-20** on `circlebackTaskboard.md`: the observer run in `docs/specs/cybernetics_v2_balance.md` §9.2. It logs the 12 measurements listed there, plus the five interaction counters of `docs/specs/cybernetics_v2_interactions.md` §9 item 10 the four realm counters of `docs/specs/cybernetics_v2_realm.md` §4.9 and the three reprisal counters of `docs/specs/cybernetics_v2_reprisal.md` §9 item 7, so the cybernetics pacing can be judged against the targets you set (HQ2). It changes no gameplay.
+This is the tool for **CB-20** on `circlebackTaskboard.md`: the observer run in `docs/specs/cybernetics_v2_balance.md` §9.2. It logs the 12 measurements listed there, plus the five interaction counters of `docs/specs/cybernetics_v2_interactions.md` §9 item 10 the four realm counters of `docs/specs/cybernetics_v2_realm.md` §4.9 the three reprisal counters of `docs/specs/cybernetics_v2_reprisal.md` §9 item 7 and the three self-repair counters of `docs/specs/cybernetics_v2_self_repair.md` §4.3, so the cybernetics pacing can be judged against the targets you set (HQ2). It changes no gameplay.
 
 **These sources are versioned here, but the main mod never loads them.** CK3 only reads its known folders at the mod root, and this folder is under `docs/`. A build step creates the installable sub-mod **outside** the repo.
 
@@ -16,7 +16,7 @@ This is the tool for **CB-20** on `circlebackTaskboard.md`: the observer run in 
 | `localization/english/eotg_observer_l_english.yml` | Reference copy of the log text. The build regenerates it. |
 | `descriptor.mod`, `eotg_observer_submod.mod` | The sub-mod's descriptor and its launcher file. The launcher depends on **"Echoes of the Grip"**. |
 | `tools/build_observer.py` | Builds the installable sub-mod. |
-| `tools/parse_observer_log.py` | Turns the logs into the §9.2 report, plus sections [13] (interactions), [14] (realm) and [15] (reprisal). |
+| `tools/parse_observer_log.py` | Turns the logs into the §9.2 report, plus sections [13] (interactions), [14] (realm), [15] (reprisal) and [16] (self-repair). |
 
 **What the build adds.** Logging needs hooks inside seven main-mod files: the augmentation effects, on_actions, decisions and stories, plus the character interactions (`common/character_interactions/eotg_augmentation_interactions.txt`: Examine and Tamper start, on the click) and the tamper outcome events (`events/eotg_augmentation_tamper.txt`: tamper.001's success, failure and discovery). Offer, Demand and Salvage are hooked in their scripted effects; the realm counters add a hook in `eotg_aug_contraband_effect`, one on the cascade (with a technician), one in Demand's crime-refusal branch, and law and technician lines in the census and the initiation log (the observer's own effects). The reprisal counters hook the patron events (`events/eotg_augmentation_patron.txt`: .006 f and every .009 option) and `eotg_aug_patron_collect_effect`, which also sets an observer-only flag on the collector so the observer's `on_death` can count a collector's success. So the build writes **overlay copies** of those seven files into the output folder, with one-line hooks, each tagged `# eotg_obs`.
 - CK3 loads the sub-mod after the main mod, so the overlays replace the originals.
@@ -96,6 +96,7 @@ The report has one section per §9.2 measurement. **The headline check is item 1
 | 13 | Interactions per decade (interactions spec §9 item 10): Offer installs (landed / unlanded), Demand removals, Examinations, Tamper starts / successes / failures / discoveries at execution, Salvages (and deaths on the table) | judged against HQ2 with [1]; any non-zero count answers engine check (c) |
 | 14 | Realm (realm spec §4.9): count+ rulers by governing Augmentation law and technicians employed at each census; initiations per 10 governed rulers by law; contraband crimes and refused-lawful-order refusals per decade; Overclocked → cascade median with and without a technician | judged against HQ2 with [1]; the law levers should roughly cancel |
 | 15 | Reprisal per decade (reprisal spec §9 item 7): .006 f taken (augmented / no implants); .009 fired, by option; collector schemes started (and the fallback) and succeeded | expected well under 1 collector per 100 AI ruler-decades |
+| 16 | Self-repair (self-repair spec §4.3): cultures with the innovation and fitted rulers at each census; refits and cascades of fitted rulers per decade; Overclocked rulers holding all three wear-relief rows, and their cascades; Overclocked → cascade median for fitted and unfitted rulers | HQ2 untouched at year 30 (no AI culture is in era before 900); the full stack should still cascade |
 
 **How some figures are approximated:**
 - **Per-ruler-year rates (4, 6):** each decade is divided by the mean of the two censuses around it.

@@ -138,6 +138,11 @@ def build_effects():
         ("eotg_trigger_neurofracture", "eotg_obs_log_effect = { KEY = cascade_ruler }"),
         # Realm spec §4.9 counter 4: cascades of rulers with a technician
         ("eotg_trigger_neurofracture", "if = { limit = { eotg_aug_own_technician_valid = yes } eotg_obs_log_effect = { KEY = cascade_tech } }"),
+        # Self-repair spec §4.3 counters 2 and 3: cascades of fitted rulers,
+        # and of those with the full stack (before the cascade removes the trait)
+        ("eotg_trigger_neurofracture", "eotg_obs_log_self_repair_effect = { PREFIX = cascade }"),
+        # Self-repair spec §4.3 counter 1: refits
+        ("eotg_aug_self_repair_fit_effect", "eotg_obs_log_effect = { KEY = refit }"),
         ("eotg_aug_nr_cascade_effect", "eotg_obs_log_effect = { KEY = cascade_nonruler }"),
         ("eotg_aug_cascade_death_effect", "eotg_obs_log_term_effect = { KIND = death }"),
         ("eotg_aug_total_integration_effect", "eotg_obs_log_term_effect = { KIND = seamless }"),
@@ -282,7 +287,7 @@ TTS = ("county", "duchy", "kingdom")
 
 
 def loc_keys(dec_keys):
-    glob = ["start", "year", "census_begin", "census_end"]
+    glob = ["start", "year", "census_begin", "census_end", "census_innovation"]
     char = []
     for p in ("census", "ev"):
         char += [f"{p}_{s}_{t}" for s in STATES for t in TTS]
@@ -307,6 +312,8 @@ def loc_keys(dec_keys):
     # Reprisal spec §9 item 7
     char += ["patron_f_aug", "patron_f_none", "patron_009"] + [f"patron_009_{x}" for x in "abcde"]
     char += ["collector_scheme", "collector_fallback", "collector_kill"]
+    # Self-repair spec §4.3
+    char += ["census_self_repair", "census_full_stack", "cascade_self_repair", "cascade_full_stack", "refit"]
     char += dec_keys
     lines = ["\ufeffl_english:"]
     for k in glob:

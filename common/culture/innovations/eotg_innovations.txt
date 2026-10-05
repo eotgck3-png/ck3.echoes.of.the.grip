@@ -1,0 +1,57 @@
+﻿# ── eotg_innovations.txt ─────────────────────────────────────────────────────
+# The mod's culture innovations (docs/specs/cybernetics_v2_self_repair.md §4.1).
+#
+# eotg_innovation_self_repairing_machinery — Self-Repairing Machinery
+#
+# Shape: vanilla innovation_armilary_sphere
+# (common/culture/innovations/00_early_medieval_innovations.txt:409-433): a
+# learning, civic, early-medieval innovation with no regional gate, plus
+# unlock_decision (tooltip only, _culture_innovations.info:105) and custom.
+# Gating (option B, decided by the human 2026-10-04): one era above the era
+# the cultures hold at 866. A culture can fascinate it ahead of time at
+# vanilla's ahead-of-time cost (00_defines.txt:1230-1233); the AI does not
+# fascinate it before it is in the era (vanilla 00_early_medieval_innovations
+# .txt:58-68).
+# GATE 1 (taskboard CB-36): if the mod's 866 cultures start in the early
+# medieval era, move this to culture_era_high_medieval and move the AI x0
+# test with it; if v2 replaces the eras, re-point both keys.
+# Map-agnostic: no potential, can_progress, region or asset, so every culture
+# can research it. No modifiers: nothing changes until someone pays for a
+# refit (eotg_decision_aug_self_repair, which tests has_innovation itself).
+# Lore S5: nothing grants it but research (no history or bookmark grant).
+# Only the mod's own flag: vanilla's global_regular / *_era_regular feed the
+# "all innovations" achievement (standard_achievements.txt:923).
+# ─────────────────────────────────────────────────────────────────────────────
+
+eotg_innovation_self_repairing_machinery = {
+    skill = learning
+    group = culture_group_civic
+    culture_era = culture_era_early_medieval
+    # Stopgap: vanilla's @misc_inventions icon (art debt, not blocking)
+    icon = "gfx/interface/icons/culture_innovations/innovation_misc_inventions.dds"
+
+    # unlock_decision left out on purpose: in _culture_innovations.info but unused by vanilla; the custom line tells the player
+    custom = eotg_innovation_self_repairing_machinery_custom
+
+    flag = eotg_cybernetic_innovation
+
+    # Root: the culture; scope:character: its head (_culture_innovations.info:45-50)
+    ai_weight_for_fascination = {
+        value = 50
+        if = {
+            limit = {
+                NOT = {
+                    has_cultural_era_or_later = culture_era_early_medieval
+                }
+            }
+            multiply = 0
+        }
+        # An augmented head of culture favors it
+        if = {
+            limit = {
+                scope:character ?= { eotg_is_augmented_any = yes }
+            }
+            multiply = 2
+        }
+    }
+}

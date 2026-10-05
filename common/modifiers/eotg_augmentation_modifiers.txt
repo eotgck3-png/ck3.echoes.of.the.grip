@@ -9,6 +9,17 @@ eotg_mod_implant_calibrated = {
     health = 0.3
 }
 
+# Self-repairing hardware (docs/specs/cybernetics_v2_self_repair.md §2, §4.3):
+# the permanent, visible marker of the refit (eotg_aug_self_repair_fit_effect,
+# proc.005). Read by eotg_aug_oc_wear_relief_value, the non-ruler Overclocked
+# row, Maintenance, Consult the Physician and eotg_aug_can_self_repair;
+# removed by eotg_clean_all_aug_modifiers. Carries no number about risk.
+# Reuses the Calibrated Systems icon (art debt, not blocking).
+eotg_mod_aug_self_repair = {
+    icon = eotg_implant_calibrated
+    health = 0.1
+}
+
 # Black market complications
 eotg_mod_illegal_implants = {
     icon = intrigue_negative

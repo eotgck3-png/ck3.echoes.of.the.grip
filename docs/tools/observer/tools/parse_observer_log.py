@@ -1,8 +1,9 @@
 """Turn an observer run's log into the 12 measurements of balance spec §9.2,
 plus [13], the interaction counters of docs/specs/cybernetics_v2_interactions.md
 §9 item 10, [14], the realm counters of docs/specs/cybernetics_v2_realm.md
-§4.9, and [15], the reprisal counters of docs/specs/cybernetics_v2_reprisal.md
-§9 item 7.
+§4.9, [15], the reprisal counters of docs/specs/cybernetics_v2_reprisal.md
+§9 item 7, and [16], the self-repair counters of
+docs/specs/cybernetics_v2_self_repair.md §4.3.
 
 Reads every line that contains "EOTG_OBS <key>" (the resolved loc text) or a
 raw "eotg_obs_<key>" (if the loc did not resolve). Each line may carry
@@ -288,6 +289,27 @@ def report(path, events, marks, start_year):
               f" 009 fired {c['patron_009']} (a {c['patron_009_a']} b {c['patron_009_b']} c {c['patron_009_c']}"
               f" d {c['patron_009_d']} e {c['patron_009_e']}); collector schemes {c['collector_scheme']}"
               f" (fallback {c['collector_fallback']}), succeeded {c['collector_kill']}")
+    # ---- 16: self-repair (self-repair spec 4.3) ----
+    print("\n[16] SELF-REPAIR (self-repair spec 4.3): (1) cultures with the innovation, rulers fitted")
+    for c in censuses:
+        cc = c["c"]
+        print(f"  year {c['year']}: cultures {cc['census_innovation']}  fitted rulers {cc['census_self_repair']}"
+              f"  | Overclocked with all three wear rows {cc['census_full_stack']}")
+    for d in sorted(by_dec):
+        c = by_dec[d]
+        print(f"  decade {d}: refits {c['refit']}; cascades of fitted rulers {c['cascade_self_repair']}"
+              f" (full stack {c['cascade_full_stack']})")
+    fit_ids = {cid for _, k, cid in events if k == "cascade_self_repair" and cid}
+    def oc_span_fit(fitted):
+        out = []
+        for (cid, k), y in first.items():
+            if k in oc and ((cid in fit_ids) == fitted) and (cid, "cascade_ruler") in first:
+                c_y = first[(cid, "cascade_ruler")]
+                if c_y >= y:
+                    out.append(c_y - y)
+        return out
+    print("    (2) Overclocked -> cascade, fitted at the cascade:", med_iqr(oc_span_fit(True)))
+    print("        unfitted:", med_iqr(oc_span_fit(False)))
 
 
 def main(argv):

@@ -67,7 +67,9 @@
 #
 # Overclocked risk accrual (cybernetics_v2 B2): base 12/year, + 8 per vanilla
 # stress_level (1-3), paranoid +12, at war +10, hidden flaw +4, vendor
-# safe -3 / bold +3. Threshold: 80, always (eotg_neurofracture_threshold_met).
+# bold +3, and the wear relief eotg_aug_oc_wear_relief_value (vendor safe -3,
+# Implant Technician -2/-3, self-repairing hardware -1; no cap; self-repair
+# spec §4.3). Threshold: 80, always (eotg_neurofracture_threshold_met).
 # Neurofractured drift (B1; balance spec §5.5): eotg_aug_nf_drift_value, +8/year,
 # + 4 per stress_level, sedated -6/-3/0 by course, restrained -4, floor 2.
 # Runs every pulse, outside the episode cooldown.
@@ -901,32 +903,16 @@ eotg_on_yearly_aug_overclocked_check = {
                 eotg_add_fracture_risk = { AMOUNT = 4 }
             }
 
-            # Firmware vendor choice (flags set in Phase 4b)
-            if = {
-                limit = { has_character_flag = eotg_flag_aug_vendor_safe }
-                eotg_add_fracture_risk = { AMOUNT = -3 }
-            }
+            # Firmware vendor choice (flags set in Phase 4b): the bold vendor
             if = {
                 limit = { has_character_flag = eotg_flag_aug_vendor_bold }
                 eotg_add_fracture_risk = { AMOUNT = 3 }
             }
 
-            # Realm spec §3.3 (G10): an Implant Technician keeps the hardware
-            # cooler (-2, excellent aptitude -3), like the safe vendor
-            if = {
-                limit = { eotg_aug_own_technician_valid = yes }
-                if = {
-                    limit = {
-                        court_position:eotg_aug_implant_technician_court_position = {
-                            aptitude = { court_position = eotg_aug_implant_technician_court_position  value >= 4 }
-                        }
-                    }
-                    eotg_add_fracture_risk = { AMOUNT = -3 }
-                }
-                else = {
-                    eotg_add_fracture_risk = { AMOUNT = -2 }
-                }
-            }
+            # Self-repair spec §4.3: the three wear-relief rows in one value
+            # (the safe vendor -3; the realm spec's Implant Technician -2 /
+            # -3, moved unchanged; self-repairing hardware -1). No cap.
+            eotg_add_fracture_risk = { AMOUNT = eotg_aug_oc_wear_relief_value }
 
             # The Countdown (Phase 5 §1.1): after accrual, before the threshold
             # check. Risk >= 50, or >= 40 with the hidden flaw (thread T6).
@@ -1589,6 +1575,11 @@ eotg_on_yearly_aug_nonruler_check = {
                 if = {
                     limit = { stress_level >= 2 }
                     eotg_add_fracture_risk = { AMOUNT = 6 }
+                }
+                # Self-repair spec §4.3: self-repairing hardware wears slower
+                if = {
+                    limit = { has_character_modifier = eotg_mod_aug_self_repair }
+                    eotg_add_fracture_risk = { AMOUNT = -1 }
                 }
                 if = {
                     limit = { var:eotg_fracture_risk >= 80 }

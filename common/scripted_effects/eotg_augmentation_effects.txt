@@ -254,6 +254,9 @@ eotg_clean_all_aug_modifiers = {
     if = { limit = { has_character_modifier = eotg_mod_aug_iron_retinue }  remove_character_modifier = eotg_mod_aug_iron_retinue }
     # Procedures spec §4.2: a careless removal's fragments (eotg_aug_proc.002)
     if = { limit = { has_character_modifier = eotg_mod_aug_fragments }  remove_character_modifier = eotg_mod_aug_fragments }
+    # Self-repair spec §4.5: the refit comes out with the rest (full exit) and
+    # goes at Total Integration (no risk left to slow)
+    if = { limit = { has_character_modifier = eotg_mod_aug_self_repair }  remove_character_modifier = eotg_mod_aug_self_repair }
 }
 
 # Increment fracture risk variable — expects $AMOUNT$ parameter.
@@ -3075,5 +3078,32 @@ eotg_aug_realm001_forgive_effect = {
             }
         }
         remove_opinion = { target = scope:eotg_contraband_subject  modifier = eotg_opinion_aug_contraband }
+    }
+}
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Self-repair — docs/specs/cybernetics_v2_self_repair.md §4.4
+# ═════════════════════════════════════════════════════════════════════════════
+
+# The refit's fit (patient scope; no params): the visible marker, then the
+# deep work's risk by tier in hidden_effect (the procedures repair scale
+# without the Neurofractured step: a Neurofractured character cannot be
+# refitted). Applied on the click, as tier2.003's XP; the shared roll's
+# outcome is applied at the reveal.
+# Callers: eotg_aug_proc.005 (a, b).
+eotg_aug_self_repair_fit_effect = {
+    add_character_modifier = eotg_mod_aug_self_repair
+    hidden_effect = {
+        if = {
+            limit = { eotg_is_aug_tier3 = yes }
+            eotg_add_fracture_risk = { AMOUNT = 6 }
+        }
+        else_if = {
+            limit = { eotg_is_aug_tier2 = yes }
+            eotg_add_fracture_risk = { AMOUNT = 4 }
+        }
+        else = {
+            eotg_add_fracture_risk = { AMOUNT = 2 }
+        }
     }
 }

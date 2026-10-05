@@ -637,3 +637,18 @@ eotg_aug_tournament_entrant = {
     eotg_is_augmented_any = yes
     NOT = { has_trait = eotg_total_integration }
 }
+
+# -- Self-repair (docs/specs/cybernetics_v2_self_repair.md §4.2) -------------
+# Self-repairing hardware can be fitted: augmented at tiers 1-3 (not
+# Neurofractured, not Seamless), the character's own culture has the
+# innovation (a culture's scholars; no liege read, lore U1; vanilla
+# culture = { has_innovation } from character scope,
+# common/buildings/00_city_buildings.txt:459-461), and not already fitted.
+# The only has_innovation test in the mod (spec §9 item 2).
+# Users: eotg_decision_aug_self_repair (is_shown, ai_potential),
+# eotg_aug_proc.005 (trigger).
+eotg_aug_can_self_repair = {
+    has_trait = eotg_cybernetics
+    culture ?= { has_innovation = eotg_innovation_self_repairing_machinery }
+    NOT = { has_character_modifier = eotg_mod_aug_self_repair }
+}
