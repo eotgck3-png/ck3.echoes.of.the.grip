@@ -1803,6 +1803,74 @@ eotg_aug_tier2.021 = {
             modifier = { add = 10  has_trait = paranoid }
         }
     }
+
+    # [paranoid, Enhanced+] "Lower the threshold. Let it flag more." Tier
+    # options spec row 12: trust the machine over people. The flagged keep
+    # the opinion, and stay held if held.
+    option = {
+        name = eotg_aug_tier2.021.c
+        trigger = {
+            OR = {
+                eotg_is_aug_tier2 = yes
+                eotg_is_aug_tier3 = yes
+            }
+            has_trait = paranoid
+        }
+        trait = paranoid
+        trait = eotg_cybernetics
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_intrigue  years = 5 }
+        hidden_effect = { eotg_add_fracture_risk = { AMOUNT = 6 } }
+        stress_impact = {
+            paranoid = minor_stress_impact_loss
+        }
+        eotg_aug_stress_embrace_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = paranoid }
+            modifier = { add = 10  has_trait = callous }
+        }
+    }
+
+    # [just, Enhanced+] "Correct the model, and say so before the court."
+    # Tier options spec row 13: as a for the flagged, plus a recalibration;
+    # the correction is made in public (prestige).
+    option = {
+        name = eotg_aug_tier2.021.d
+        trigger = {
+            OR = {
+                eotg_is_aug_tier2 = yes
+                eotg_is_aug_tier3 = yes
+            }
+            has_trait = just
+        }
+        trait = just
+        trait = eotg_cybernetics
+        scope:eotg_flagged = {
+            if = {
+                limit = { is_imprisoned_by = root }
+                release_from_prison = yes
+            }
+            if = {
+                limit = { has_opinion_modifier = { target = root  modifier = eotg_opinion_aug_falsely_accused } }
+                remove_opinion = { target = root  modifier = eotg_opinion_aug_falsely_accused }
+            }
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+        }
+        add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 1 }
+        add_prestige = {
+            value = minor_prestige_value
+            multiply = -1
+        }
+        hidden_effect = { eotg_add_fracture_risk = { AMOUNT = 3 } }
+        stress_impact = {
+            just = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = just }
+            modifier = { add = 10  has_trait = honest }
+        }
+    }
 }
 
 
@@ -1980,6 +2048,34 @@ eotg_aug_tier2.014 = {
             base = 20
             modifier = { add = 20  has_trait = content }
             modifier = { add = 10  has_trait = stubborn }
+        }
+    }
+
+    # [greedy, Enhanced+] "Run their margins through the overlay." Tier
+    # options spec row 10: the careful vendor, and the overlay finds the
+    # margin (a larger rebate than a).
+    option = {
+        name = eotg_aug_tier2.014.d
+        trigger = {
+            OR = {
+                eotg_is_aug_tier2 = yes
+                eotg_is_aug_tier3 = yes
+            }
+            has_trait = greedy
+        }
+        trait = greedy
+        trait = eotg_cybernetics
+        remove_character_flag = eotg_flag_aug_vendor_bold
+        add_character_flag = eotg_flag_aug_vendor_safe
+        add_gold = medium_gold_value
+        hidden_effect = { eotg_add_fracture_risk = { AMOUNT = 3 } }
+        stress_impact = {
+            greedy = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = greedy }
+            modifier = { add = 10  has_trait = diligent }
         }
     }
 }
@@ -2278,6 +2374,37 @@ eotg_aug_tier2.016 = {
         ai_chance = {
             base = 30
             modifier = { add = 20  has_trait = just }
+            modifier = { add = 10  has_trait = paranoid }
+        }
+    }
+
+    # [diligent, Enhanced+] (not the culprit outcome) "Rebuild the parameters
+    # from my own logs." Tier options spec row 11: personal device logs only.
+    # Clears a malfunction's Tampered; otherwise the lesson is the pay.
+    option = {
+        name = eotg_aug_tier2.016.d
+        trigger = {
+            OR = {
+                eotg_is_aug_tier2 = yes
+                eotg_is_aug_tier3 = yes
+            }
+            has_trait = diligent
+            NOT = { scope:eotg_tamper_outcome ?= flag:culprit }
+        }
+        trait = diligent
+        trait = eotg_cybernetics
+        if = {
+            limit = { has_character_modifier = eotg_mod_aug_tampered }
+            remove_character_modifier = eotg_mod_aug_tampered
+        }
+        add_character_modifier = { modifier = eotg_mod_aug_lesson_learning  years = 5 }
+        hidden_effect = { eotg_add_fracture_risk = { AMOUNT = 4 } }
+        stress_impact = {
+            diligent = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = diligent }
             modifier = { add = 10  has_trait = paranoid }
         }
     }

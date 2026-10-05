@@ -14,7 +14,7 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | Family | Specs | Built | Ids | Present | Referenced only | Missing in built specs |
 |---|---|---|---|---|---|---|
 | `cybernetics` | 1 | 1 | 53 | 53 | 0 | 0 |
-| `cybernetics_v2` | 22 | 22 | 1283 | 1253 | 30 | 0 |
+| `cybernetics_v2` | 24 | 24 | 1385 | 1352 | 31 | 2 |
 | `frontier_v1` | 2 | 2 | 159 | 158 | 1 | 0 |
 | `glossary` | 1 | 0 | 1 | 0 | 0 | 0 |
 | `void` | 1 | 0 | 86 | 0 | 0 | 0 |
@@ -45,6 +45,8 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | `cybernetics_v2_reprisal_lore.md` | yes | 3 | 3 | 0 | 0 | 0 |
 | `cybernetics_v2_self_repair.md` | yes | 58 | 55 | 2 | 0 | 1 |
 | `cybernetics_v2_self_repair_lore.md` | yes | 5 | 5 | 0 | 0 | 0 |
+| `cybernetics_v2_tier_options.md` | yes | 94 | 91 | 1 | 2 | 0 |
+| `cybernetics_v2_tier_options_lore.md` | yes | 8 | 8 | 0 | 0 | 0 |
 | `cybernetics_v2_trait_depth.md` | yes | 42 | 41 | 1 | 0 | 0 |
 | `frontier_v1.md` | yes | 146 | 137 | 1 | 0 | 8 |
 | `frontier_v1_open_questions.md` | yes | 21 | 21 | 0 | 0 | 0 |
@@ -223,6 +225,20 @@ None.
 - Referenced only, never defined or set (0): none
 - Exempt (0): none
 
+#### `docs/specs/cybernetics_v2_tier_options.md`
+
+- Specced and present: 91
+- Specced, missing from script (2): `eotg_aug_act.00` (event, l.24), `eotg_is_aug_tier` (unknown, l.25)
+- Referenced only, never defined or set (1): `eotg_champion.GetHerHim` (loc, l.342)
+- Exempt (0): none
+
+#### `docs/specs/cybernetics_v2_tier_options_lore.md`
+
+- Specced and present: 8
+- Specced, missing from script (0): none
+- Referenced only, never defined or set (0): none
+- Exempt (0): none
+
 #### `docs/specs/cybernetics_v2_trait_depth.md`
 
 - Specced and present: 41
@@ -297,12 +313,12 @@ None.
 
 Mod definitions (`common/` top-level keys, events, namespaces, flags and variables that are set, saved scopes) that no spec read here names. An event also counts as mentioned by its short form (`tier1.005`).
 
-- **effect** (30): `eotg_aug_abdicate_effect`, `eotg_aug_act003_examine_effect`, `eotg_aug_act004_reactions_effect`, `eotg_aug_act_withdraw_effect`, `eotg_aug_bridge_success_effect`, `eotg_aug_end_countdown_effect`, `eotg_aug_excision_pay_effect`, `eotg_aug_f006_concessions_effect`, `eotg_aug_f006_crush_effect`, `eotg_aug_f006_tribunal_effect`, `eotg_aug_f009_misled_toast_effect`, `eotg_aug_f015_send_effect`, `eotg_aug_f016_burn_effect`, `eotg_aug_f016_confess_effect`, `eotg_aug_f019_arrest_effect`, `eotg_aug_f019_spare_effect`, `eotg_aug_f019_watch_effect`, `eotg_aug_f023_muster_effect`, `eotg_aug_f023_stand_down_effect`, `eotg_aug_f024_restrain_effect`, `eotg_aug_f024_sit_with_effect`, `eotg_aug_f025_hold_keeper_effect`, `eotg_aug_f025_let_them_effect`, `eotg_aug_f025_take_it_effect`, `eotg_aug_parent_hardware_clear_effect`, `eotg_aug_patron_demand_effect`, `eotg_aug_realm001_forgive_effect`, `eotg_aug_retinue_install_effect`, `eotg_aug_retinue_reverse_effect`, `eotg_aug_unmask_congenital_effect`
-- **event** (9): `eotg_aug_countdown.002`, `eotg_aug_countdown.003`, `eotg_aug_patron.007`, `eotg_aug_retinue.002`, `eotg_aug_retinue.004`, `eotg_aug_tier1.014`, `eotg_aug_tier1.019`, `eotg_aug_tier3.018`, `eotg_frontier.002`
+- **effect** (27): `eotg_aug_abdicate_effect`, `eotg_aug_bridge_success_effect`, `eotg_aug_end_countdown_effect`, `eotg_aug_excision_pay_effect`, `eotg_aug_f006_concessions_effect`, `eotg_aug_f006_crush_effect`, `eotg_aug_f006_tribunal_effect`, `eotg_aug_f009_misled_toast_effect`, `eotg_aug_f015_send_effect`, `eotg_aug_f016_burn_effect`, `eotg_aug_f016_confess_effect`, `eotg_aug_f019_arrest_effect`, `eotg_aug_f019_spare_effect`, `eotg_aug_f019_watch_effect`, `eotg_aug_f023_muster_effect`, `eotg_aug_f023_stand_down_effect`, `eotg_aug_f024_restrain_effect`, `eotg_aug_f024_sit_with_effect`, `eotg_aug_f025_hold_keeper_effect`, `eotg_aug_f025_let_them_effect`, `eotg_aug_f025_take_it_effect`, `eotg_aug_parent_hardware_clear_effect`, `eotg_aug_patron_demand_effect`, `eotg_aug_realm001_forgive_effect`, `eotg_aug_retinue_install_effect`, `eotg_aug_retinue_reverse_effect`, `eotg_aug_unmask_congenital_effect`
+- **event** (5): `eotg_aug_countdown.002`, `eotg_aug_countdown.003`, `eotg_aug_retinue.002`, `eotg_aug_retinue.004`, `eotg_frontier.002`
 - **flag** (12): `eotg_flag_aug_bleed_purged`, `eotg_flag_aug_bleed_ridden`, `eotg_flag_aug_bout_unaided`, `eotg_flag_aug_bridge_full_current`, `eotg_flag_aug_cascaded_this_pulse`, `eotg_flag_aug_declined_bridge`, `eotg_flag_aug_declined_prosthetic`, `eotg_flag_aug_rejection_brave`, `eotg_flag_aug_rejection_rested`, `eotg_flag_aug_rejection_treated`, `eotg_flag_aug_upgrade_reassured`, `eotg_flag_tier1_vassal_suspicion_fired`
 - **modifier** (19): `eotg_frontier_mod_waiting_control`, `eotg_mod_aug_diplomacy_bonus`, `eotg_mod_aug_intrigue_bonus`, `eotg_mod_aug_learning_bonus`, `eotg_mod_aug_martial_bonus`, `eotg_mod_aug_steward_bonus`, `eotg_mod_enh_diplomacy_bonus`, `eotg_mod_enh_learning_bonus`, `eotg_mod_enh_martial_bonus`, `eotg_mod_enh_steward_bonus`, `eotg_mod_nf_diplomacy_distortion`, `eotg_mod_nf_intrigue_distortion`, `eotg_mod_nf_learning_distortion`, `eotg_mod_nf_martial_distortion`, `eotg_mod_nf_steward_distortion`, `eotg_mod_oc_diplomacy_bonus`, `eotg_mod_oc_intrigue_bonus`, `eotg_mod_oc_learning_bonus`, `eotg_mod_oc_steward_bonus`
 - **namespace** (3): `eotg_aug_tier1`, `eotg_aug_tier2`, `eotg_aug_tier3`
-- **scope** (63): `eotg_accused_kin`, `eotg_aug_peer`, `eotg_aug_victim_owner`, `eotg_aug_withdrawn`, `eotg_bleed_outcome`, `eotg_blood_outcome`, `eotg_bout_outcome`, `eotg_bridge_outcome`, `eotg_campaign_outcome`, `eotg_claim_truth`, `eotg_concerned_vassal`, `eotg_confessor`, `eotg_confidant`, `eotg_copycat_outcome`, `eotg_delegation_leader`, `eotg_demand_provider`, `eotg_executed`, `eotg_former_self`, `eotg_frontier_change`, `eotg_frontier_heir_sponsor`, `eotg_frontier_lapsed_sponsor`, `eotg_frontier_leader`, `eotg_frontier_new_barony`, `eotg_frontier_offer_2`, `eotg_frontier_offer_3`, `eotg_frontier_old_progress`, `eotg_frontier_sponsor_candidate`, `eotg_grief_killer`, `eotg_hire_first`, `eotg_hire_second`, `eotg_iron_knight`, `eotg_kept_retinue_bonus`, `eotg_letter_kind`, `eotg_machines_bond`, `eotg_misled_outcome`, `eotg_missing_outcome`, `eotg_nr_cascaded`, `eotg_nr_reported`, `eotg_offer_provider`, `eotg_other_parent`, `eotg_petitioning_knight`, `eotg_phantom_order`, `eotg_plot_action`, `eotg_plot_learned`, `eotg_plot_truth`, `eotg_rejection_outcome`, `eotg_report_truth`, `eotg_resentful`, `eotg_retainer_installed`, `eotg_retinue_story`, `eotg_salvage_provider`, `eotg_scrambled_into`, `eotg_seamless_heir_arc`, `eotg_surgeon`, `eotg_tamper_outcome`, `eotg_tamper_trace`, `eotg_victim_portrait`, `eotg_volunteer_b`, `eotg_warden_chancellor`, `eotg_warden_heir`, `eotg_warden_spouse`, `eotg_warrant_result`, `eotg_watching_heir`
+- **scope** (61): `eotg_accused_kin`, `eotg_aug_peer`, `eotg_aug_victim_owner`, `eotg_aug_withdrawn`, `eotg_bleed_outcome`, `eotg_blood_outcome`, `eotg_bout_outcome`, `eotg_bridge_outcome`, `eotg_campaign_outcome`, `eotg_claim_truth`, `eotg_concerned_vassal`, `eotg_confessor`, `eotg_confidant`, `eotg_copycat_outcome`, `eotg_demand_provider`, `eotg_executed`, `eotg_former_self`, `eotg_frontier_change`, `eotg_frontier_heir_sponsor`, `eotg_frontier_lapsed_sponsor`, `eotg_frontier_leader`, `eotg_frontier_new_barony`, `eotg_frontier_offer_2`, `eotg_frontier_offer_3`, `eotg_frontier_old_progress`, `eotg_frontier_sponsor_candidate`, `eotg_grief_killer`, `eotg_hire_first`, `eotg_hire_second`, `eotg_iron_knight`, `eotg_kept_retinue_bonus`, `eotg_letter_kind`, `eotg_machines_bond`, `eotg_misled_outcome`, `eotg_missing_outcome`, `eotg_nr_cascaded`, `eotg_nr_reported`, `eotg_offer_provider`, `eotg_other_parent`, `eotg_petitioning_knight`, `eotg_phantom_order`, `eotg_plot_action`, `eotg_plot_learned`, `eotg_plot_truth`, `eotg_rejection_outcome`, `eotg_report_truth`, `eotg_resentful`, `eotg_retainer_installed`, `eotg_retinue_story`, `eotg_salvage_provider`, `eotg_scrambled_into`, `eotg_seamless_heir_arc`, `eotg_surgeon`, `eotg_tamper_trace`, `eotg_victim_portrait`, `eotg_volunteer_b`, `eotg_warden_chancellor`, `eotg_warden_heir`, `eotg_warden_spouse`, `eotg_warrant_result`, `eotg_watching_heir`
 - **script value** (2): `eotg_frontier_current_control_value`, `eotg_frontier_current_dev_value`
 - **trigger** (6): `eotg_aug_containment_possible`, `eotg_aug_keeper_candidate`, `eotg_aug_patron_heir_candidate`, `eotg_aug_sick_child_candidate`, `eotg_can_progress_to_overclocked`, `eotg_frontier_is_abandoned`
 - **variable** (10): `eotg_aug_escrow`, `eotg_aug_plot_vassals`, `eotg_frontier_debug_control`, `eotg_frontier_debug_floor_control`, `eotg_frontier_debug_floor_dev`, `eotg_hall_gone`, `eotg_patron_envoy_passthrough`, `eotg_patron_terms_passthrough`, `eotg_phase1_grace`, `eotg_retinue_phase_passthrough`

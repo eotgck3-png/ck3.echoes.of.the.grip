@@ -753,6 +753,74 @@ eotg_aug_tier3.006 = {
             modifier = { add = 10  has_trait = humble }
         }
     }
+
+    # [honest, Overclocked] "Hand them my diagnostic logs." Tier options spec
+    # row 14: the delegation reads the logs. The verdict reads the hidden band
+    # inside hidden_effect and is told by toast after the click (the
+    # eotg_aug_act003_examine_effect / end.041.c pattern), so the tooltip
+    # never shows the condition.
+    option = {
+        name = eotg_aug_tier3.006.e
+        trigger = {
+            eotg_is_aug_tier3 = yes
+            has_trait = honest
+        }
+        trait = honest
+        trait = eotg_cybernetics
+        custom_tooltip = eotg_aug_tier3.006.e.tt
+        hidden_effect = {
+            if = {
+                limit = { eotg_aug_pressure_flicker = yes }
+                every_vassal = {
+                    limit = {
+                        is_alive = yes
+                        opinion = { target = root  value < -20 }
+                    }
+                    if = {
+                        limit = { has_opinion_modifier = { target = root  modifier = eotg_opinion_aug_fear } }
+                        remove_opinion = { target = root  modifier = eotg_opinion_aug_fear }
+                    }
+                    if = {
+                        limit = { has_opinion_modifier = { target = root  modifier = eotg_opinion_aug_unease } }
+                        remove_opinion = { target = root  modifier = eotg_opinion_aug_unease }
+                    }
+                    add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+                }
+                send_interface_toast = {
+                    type = event_toast_effect_good
+                    title = eotg_aug_tier3.006.e.clean
+                    left_icon = scope:eotg_delegation_leader
+                }
+            }
+            else = {
+                every_vassal = {
+                    limit = {
+                        is_alive = yes
+                        opinion = { target = root  value < -20 }
+                    }
+                    add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+                }
+                add_prestige = {
+                    value = minor_prestige_value
+                    multiply = -1
+                }
+                send_interface_toast = {
+                    type = event_toast_effect_bad
+                    title = eotg_aug_tier3.006.e.strained
+                    left_icon = scope:eotg_delegation_leader
+                }
+            }
+            eotg_add_fracture_risk = { AMOUNT = 3 }
+        }
+        stress_impact = {
+            honest = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = honest }
+            modifier = { add = 10  has_trait = just }
+        }
+    }
 }
 
 
@@ -2747,6 +2815,31 @@ eotg_aug_tier3.019 = {
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = humble }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # [lazy, Overclocked] "Work through its table. Don't read it." Tier
+    # options spec row 15: the ruler's hands do the work in the model's order
+    # (no networked treasury; tech ceiling). Fires no tier3.021, sets no
+    # delegate flag (as b).
+    option = {
+        name = eotg_aug_tier3.019.d
+        trigger = {
+            eotg_is_aug_tier3 = yes
+            has_trait = lazy
+        }
+        trait = lazy
+        trait = eotg_cybernetics
+        add_character_modifier = { modifier = eotg_mod_aug_optimised_levies  years = 3 }
+        hidden_effect = { eotg_add_fracture_risk = { AMOUNT = 8 } }
+        stress_impact = {
+            lazy = minor_stress_impact_loss
+        }
+        eotg_aug_stress_embrace_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = lazy }
             modifier = { add = 10  has_trait = content }
         }
     }

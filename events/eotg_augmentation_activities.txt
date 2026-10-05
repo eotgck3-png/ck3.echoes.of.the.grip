@@ -26,6 +26,14 @@
 # moves are hidden; no text quantifies them.
 # Register (lore R5-R7): the field, the bout, the arena, the marshal; the
 # quarry and the trail; the holy site, faith-neutral; physical evidence only.
+# Hardware-state options (docs/specs/cybernetics_v2_tier_options.md): the
+# Seamless rows act.001.f and act.003.g. Residue pacing (lore ruling,
+# 2026-10-05): eotg_aug_residue only runs 0-3 and these hosts recur, so a
+# Seamless row that moves another character's risk (act.001.f, the
+# entrants) does not also lower the ruler's residue, and a residue-only row
+# (act.003.g) is hidden once none is left; otherwise a few clicks would
+# drain it and Flicker (end.042) and the end.040/.041 desc_residue_high
+# lines could never be reached.
 # ─────────────────────────────────────────────────────────────────────────────
 
 namespace = eotg_aug_act
@@ -224,6 +232,45 @@ eotg_aug_act.001 = {
             modifier = { add = 10  has_trait = stubborn }
         }
     }
+
+    # [Seamless] "Units above tolerance are barred. The rest may ride."
+    # Tier options spec row 1: a ruling by rating, not by faith (no zealous
+    # unease loop). Overclocked and Neurofractured entrants withdraw; the rest
+    # compete and run hot. Its signature move is the entrants' risk; it does
+    # not also lower the ruler's residue (residue pacing ruling, 2026-10-05:
+    # the host recurs and residue only runs 0-3).
+    option = {
+        name = eotg_aug_act.001.f
+        trigger = { has_trait = eotg_total_integration }
+        trait = eotg_total_integration
+        involved_activity = {
+            every_attending_character = {
+                limit = {
+                    eotg_aug_tournament_entrant = yes
+                    OR = {
+                        eotg_is_aug_tier3 = yes
+                        has_trait = eotg_neurofractured
+                    }
+                }
+                eotg_aug_act_withdraw_effect = { HOST = root }
+            }
+            every_attending_character = {
+                limit = {
+                    eotg_aug_tournament_entrant = yes
+                    OR = {
+                        eotg_is_aug_tier1 = yes
+                        eotg_is_aug_tier2 = yes
+                    }
+                }
+                hidden_effect = { eotg_add_fracture_risk = { AMOUNT = 3 } }
+            }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = just }
+            modifier = { add = 10  has_trait = diligent }
+        }
+    }
 }
 
 
@@ -376,6 +423,51 @@ eotg_aug_act.002 = {
             base = 30
             modifier = { add = 30  has_trait = honest }
             modifier = { add = 10  has_trait = just }
+        }
+    }
+
+    # [wrathful, Overclocked] "Let the reflexes answer." Tier options spec
+    # row 2: the reflex layer runs unthrottled (Overheated); no "seen" roll.
+    option = {
+        name = eotg_aug_act.002.f
+        trigger = {
+            eotg_is_aug_tier3 = yes
+            has_trait = wrathful
+        }
+        trait = wrathful
+        trait = eotg_cybernetics
+        activity_tournament_change_contestant_score_effect = { SCORE = increase_major }
+        add_character_modifier = { modifier = eotg_mod_aug_overheated  years = 1 }
+        hidden_effect = { eotg_add_fracture_risk = { AMOUNT = 8 } }
+        stress_impact = {
+            wrathful = minor_stress_impact_loss
+        }
+        eotg_aug_stress_embrace_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = wrathful }
+            modifier = { add = 10  has_trait = brave }
+        }
+    }
+
+    # [Neurofractured, voice 2+] "Run the schedule it has already drafted."
+    # Tier options spec row 3: the model times every exchange inside the
+    # rules' tolerance, so there is no "seen" roll.
+    option = {
+        name = eotg_aug_act.002.g
+        trigger = {
+            has_trait = eotg_neurofractured
+            has_variable = eotg_aug_voice
+            var:eotg_aug_voice >= 2
+        }
+        trait = eotg_neurofractured
+        activity_tournament_change_contestant_score_effect = { SCORE = increase_major }
+        hidden_effect = { eotg_add_fracture_risk = { AMOUNT = 10 } }
+        eotg_aug_stress_embrace_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 10  has_trait = arrogant }
         }
     }
 }
@@ -573,6 +665,61 @@ eotg_aug_act.003 = {
             modifier = { add = 10  has_trait = diligent }
         }
     }
+
+    # [diligent, Enhanced+] "Run the heat readings through the overlay."
+    # Tier options spec row 4: the same verdict as c/e, told by toast; no
+    # surgeon needed. Not for a just host, who has e (never shown together).
+    option = {
+        name = eotg_aug_act.003.f
+        trigger = {
+            OR = {
+                eotg_is_aug_tier2 = yes
+                eotg_is_aug_tier3 = yes
+            }
+            has_trait = diligent
+            NOT = { has_trait = just }
+        }
+        trait = diligent
+        trait = eotg_cybernetics
+        eotg_aug_act003_examine_effect = yes
+        hidden_effect = { eotg_add_fracture_risk = { AMOUNT = 2 } }
+        stress_impact = {
+            diligent = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = diligent }
+            modifier = { add = 10  has_trait = paranoid }
+        }
+    }
+
+    # [Seamless] "Casing temperatures noted. A ruling follows." Tier options
+    # spec row 5: as f, by tolerance; residue, not risk. Not for a just host.
+    # Its only move is residue, so it is hidden once none is left (residue
+    # pacing ruling, 2026-10-05; a world-state guard, not a cooldown).
+    option = {
+        name = eotg_aug_act.003.g
+        trigger = {
+            has_trait = eotg_total_integration
+            NOT = { has_trait = just }
+            has_variable = eotg_aug_residue
+            var:eotg_aug_residue >= 1
+        }
+        trait = eotg_total_integration
+        eotg_aug_act003_examine_effect = yes
+        hidden_effect = {
+            if = {
+                limit = { has_variable = eotg_aug_residue }
+                change_variable = { name = eotg_aug_residue  add = -1 }
+                clamp_variable = { name = eotg_aug_residue  min = 0  max = 3 }
+            }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = just }
+            modifier = { add = 10  has_trait = diligent }
+        }
+    }
 }
 
 
@@ -679,6 +826,51 @@ eotg_aug_act.004 = {
             base = 30
             modifier = { add = 30  has_trait = shy }
             modifier = { add = 10  has_trait = craven }
+        }
+    }
+
+    # [Neurofractured, voice 2+] "Let it finish my sentences." Tier options
+    # spec row 6: the model replies a half-second early, in your own voice
+    # (internal). The hall reacts as to a.
+    option = {
+        name = eotg_aug_act.004.f
+        trigger = {
+            has_trait = eotg_neurofractured
+            has_variable = eotg_aug_voice
+            var:eotg_aug_voice >= 2
+        }
+        trait = eotg_neurofractured
+        add_prestige = minor_prestige_value
+        eotg_aug_act004_reactions_effect = yes
+        hidden_effect = { eotg_add_fracture_risk = { AMOUNT = 6 } }
+        eotg_aug_stress_embrace_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = gregarious }
+            modifier = { add = 10  has_trait = arrogant }
+        }
+    }
+
+    # [trusting, Augmented] "It is only a first fitting. Let them hold it."
+    # Tier options spec row 7: handed round close up, not shown to the hall
+    # (no reactions effect).
+    option = {
+        name = eotg_aug_act.004.g
+        trigger = {
+            eotg_is_aug_tier1 = yes
+            has_trait = trusting
+        }
+        trait = trusting
+        trait = eotg_cybernetics
+        add_prestige = minor_prestige_value
+        hidden_effect = { eotg_add_fracture_risk = { AMOUNT = 2 } }
+        stress_impact = {
+            trusting = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = trusting }
+            modifier = { add = 10  has_trait = gregarious }
         }
     }
 }

@@ -22,6 +22,11 @@
 # Victims come from the picker run in the liege's scope (root = liege, so its
 #   root exclusions are right), with the champion excluded through the
 #   second-victim picker's EXCLUDE.
+# Hardware-state options (docs/specs/cybernetics_v2_tier_options.md): nr.003
+#   f (Enhanced+) and g (Seamless). Residue pacing (lore ruling, 2026-10-05):
+#   eotg_aug_residue only runs 0-3 and nr.003 recurs, so the Seamless row g,
+#   which moves the champion's risk, does not also lower the ruler's residue
+#   (Flicker, end.042, and the desc_residue_high lines stay reachable).
 # ─────────────────────────────────────────────────────────────────────────────
 
 namespace = eotg_aug_nr
@@ -386,6 +391,59 @@ eotg_aug_nr.003 = {
             base = 30
             modifier = { add = 30  has_trait = callous }
             modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+
+    # [Enhanced+] "I know these symptoms. Take my maintenance slot." Tier
+    # options spec row 8: the champion eased as a, with no gold; the ruler
+    # gives up their own maintenance slot.
+    option = {
+        name = eotg_aug_nr.003.f
+        trigger = {
+            OR = {
+                eotg_is_aug_tier2 = yes
+                eotg_is_aug_tier3 = yes
+            }
+        }
+        trait = eotg_cybernetics
+        scope:eotg_champion = {
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+            hidden_effect = { eotg_add_fracture_risk = { AMOUNT = -10 } }
+        }
+        hidden_effect = { eotg_add_fracture_risk = { AMOUNT = 3 } }
+        stress_impact = {
+            compassionate = minor_stress_impact_loss
+            callous = minor_stress_impact_gain
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 10  has_trait = generous }
+        }
+    }
+
+    # [Seamless] "Fault logged. Maintenance is scheduled." Tier options spec
+    # row 9: the champion serviced as equipment; the unease is the court's
+    # (the champion's), not the ruler's. Its signature move is the champion's
+    # risk; it does not also lower the ruler's residue (residue pacing ruling,
+    # 2026-10-05).
+    option = {
+        name = eotg_aug_nr.003.g
+        trigger = {
+            has_trait = eotg_total_integration
+            gold >= minor_gold_value
+        }
+        trait = eotg_total_integration
+        remove_short_term_gold = minor_gold_value
+        scope:eotg_champion = {
+            add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 1 }
+            add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+            hidden_effect = { eotg_add_fracture_risk = { AMOUNT = -12 } }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 10  has_trait = callous }
         }
     }
 }

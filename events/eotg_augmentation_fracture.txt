@@ -4783,4 +4783,28 @@ eotg_fracture.029 = {
             modifier = { add = 10  has_trait = patient }
         }
     }
+
+    # [Neurofractured, voice 3+] "Let it schedule the recovery." Tier options
+    # spec row 16 (kept by the orchestrator, 2026-10-05: purely local, no
+    # state or story variable): the model takes the shaking off you; the
+    # mirror of b.
+    option = {
+        name = eotg_fracture.029.c
+        trigger = {
+            has_trait = eotg_neurofractured
+            has_variable = eotg_aug_voice
+            var:eotg_aug_voice >= 3
+        }
+        trait = eotg_neurofractured
+        stress_impact = {
+            base = medium_stress_impact_loss
+        }
+        hidden_effect = { eotg_add_fracture_risk = { AMOUNT = 8 } }
+        eotg_aug_stress_embrace_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 10  has_trait = craven }
+        }
+    }
 }

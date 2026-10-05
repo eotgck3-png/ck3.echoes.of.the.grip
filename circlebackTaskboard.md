@@ -392,6 +392,25 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Owner:** human → orchestrator
 - **Next step:** check alongside CB-38 to CB-40.
 
+### CB-42: Named cybernetics sellers, in a name file the owner can edit
+- **Status:** queued (2026-10-05)
+- **What:** the owner wants cybernetics events to name the seller: a company or a gang instead of "a clinic", "a vendor" or "the syndicate". The owner wants one file they can add names to, starting with 12 made-up companies and 12 gangs. The name is rolled once and kept for the rest of a story: the Patron chain uses one syndicate throughout, and tier2.014 brings back the vendors from .013. This is approved flavour on existing events. It adds no new events or options and changes no mechanics.
+- **Owner:** Cybernetics Modding session (architect spec `docs/specs/cybernetics_v2_seller_names.md` → lore → scripter → localizer → QA) → orchestrator commits
+- **Next step:** starts once the tier-options batch is done. On return, show the owner the file to edit and the starting names.
+
+### CB-43: In-game checks for the tier-options batch (16 options)
+- **Status:** waiting-human (2026-10-05)
+- **What:** `docs/specs/cybernetics_v2_tier_options.md` §9 item 11:
+  - each new option appears only in its own state, with both trait icons;
+  - tier3.006.e shows the *clean* toast at low risk (e.g. 10) and the *strained* toast at high risk (e.g. 50), and its tooltip never shows the condition;
+  - tier2.016.d is absent in the culprit outcome, and removes Tampered in the malfunction outcome;
+  - a just Enhanced host sees act.003 e, not f;
+  - act.002, act.004 and nr.003 fit five options without scrolling.
+- **Art debt:** the Seamless trait icon (`eotg_total_integration.dds`), now also shown on act.001.f, act.003.g and nr.003.g.
+- **Suggestions for the human (new events, not built):** spec §10.1, H1–H4.
+- **Owner:** human → orchestrator
+- **Next step:** check alongside CB-38 to CB-41.
+
 ## Tooling and environment
 
 ### CB-18: Game is 1.20.0.3; the tools target older versions
