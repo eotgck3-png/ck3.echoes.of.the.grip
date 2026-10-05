@@ -1,0 +1,117 @@
+﻿# TEST MAP: not mod content. Part of the EotG Test Map sub-mod (docs/test_map/README.md).
+# One 866 bookmark, three leads. Shape copied from vanilla common/bookmarks/bookmarks/00_bookmarks.txt (bm_867_persia).
+# Bookmark characters use `religion = <rite>` as vanilla 1.20 bookmarks still do (bm_867_persia: religion = shafii).
+
+eotg_tm_bm_866 = {
+	start_date = 866.1.1
+	is_playable = yes
+	recommended = yes
+	group = eotg_tm_bm_group_866
+
+	weight = {
+		value = 100
+	}
+
+	# Aurelian (900001)
+	character = {
+		name = "bookmark_eotg_tm_aurelian"
+		dynasty = eotg_tm_dyn_vaskar
+		dynasty_splendor_level = 1
+		type = male
+		birth = 826.4.12
+		title = e_kronos
+		government = feudal_government
+		culture = greek
+		religion = byzantine_rite
+		difficulty = "BOOKMARK_CHARACTER_DIFFICULTY_EASY"
+		history_id = 900001
+		position = { 760 520 }
+
+		animation = personality_bold
+
+		character = {
+			name = "bookmark_eotg_tm_aurelian_alt_lysias"
+			relation = "BOOKMARK_RELATION_SON"
+			dynasty = eotg_tm_dyn_vaskar
+			type = male
+			birth = 848.9.1
+			culture = greek
+			religion = byzantine_rite
+			history_id = 900003
+			animation = personality_bold
+		}
+
+		character = {
+			name = "bookmark_eotg_tm_aurelian_alt_theodora"
+			relation = "BOOKMARK_RELATION_WIFE"
+			dynasty = eotg_tm_dyn_meridas
+			type = female
+			birth = 829.7.3
+			culture = greek
+			religion = byzantine_rite
+			history_id = 900002
+			animation = personality_compassionate
+		}
+	}
+
+	# Ragnvald (900040)
+	character = {
+		name = "bookmark_eotg_tm_ragnvald"
+		dynasty = eotg_tm_dyn_skeldung
+		dynasty_splendor_level = 1
+		type = male
+		birth = 829.5.5
+		title = k_skeldscar
+		government = feudal_government
+		culture = norse
+		religion = norse_pagan
+		difficulty = "BOOKMARK_CHARACTER_DIFFICULTY_MEDIUM"
+		history_id = 900040
+		position = { 1180 420 }
+
+		animation = personality_bold
+
+		character = {
+			name = "bookmark_eotg_tm_ragnvald_alt_eirik"
+			relation = "BOOKMARK_RELATION_SON"
+			dynasty = eotg_tm_dyn_skeldung
+			type = male
+			birth = 851.8.14
+			culture = norse
+			religion = norse_pagan
+			history_id = 900042
+			animation = personality_rational
+		}
+	}
+
+	# Sveinn (900060)
+	character = {
+		name = "bookmark_eotg_tm_sveinn"
+		dynasty = eotg_tm_dyn_wyvar
+		dynasty_splendor_level = 1
+		type = male
+		birth = 834.4.14
+		title = d_wyveris
+		government = feudal_government
+		culture = norse
+		religion = byzantine_rite
+		difficulty = "BOOKMARK_CHARACTER_DIFFICULTY_HARD"
+		history_id = 900060
+		position = { 1320 720 }
+
+		animation = personality_bold
+
+		character = {
+			name = "bookmark_eotg_tm_sveinn_alt_ragnvald"
+			relation = "BOOKMARK_RELATION_RIVAL"
+			dynasty = eotg_tm_dyn_skeldung
+			type = male
+			birth = 829.5.5
+			culture = norse
+			religion = norse_pagan
+			history_id = 900040
+			animation = war_attacker
+		}
+	}
+
+}

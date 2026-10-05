@@ -1,0 +1,1163 @@
+﻿# TEST MAP: not mod content. Part of the EotG Test Map sub-mod (docs/test_map/README.md).
+# Rulers, families and courtiers for the test map. Shape copied from vanilla history/characters/breton.txt;
+# 1.20 history writes `rite = <rite>` (see _characters.info); every character below sets culture + rite.
+
+900001 = {
+	name = "Aurelian"
+	# Emperor of Kronos. Bookmark lead 1. Capital dev 15.
+	dynasty = eotg_tm_dyn_vaskar
+	diplomacy = 11
+	martial = 9
+	stewardship = 15
+	intrigue = 7
+	learning = 8
+	prowess = 8
+	culture = greek
+	rite = byzantine_rite
+	trait = ambitious
+	trait = diligent
+	trait = wrathful
+	trait = education_stewardship_3
+	826.4.12 = {
+		birth = yes
+	}
+	847.3.1 = {
+		add_spouse = 900002
+	}
+}
+
+900002 = {
+	name = "Theodora"
+	# Empress, spouse of 900001.
+	female = yes
+	dynasty = eotg_tm_dyn_meridas
+	diplomacy = 13
+	martial = 4
+	stewardship = 9
+	intrigue = 8
+	learning = 10
+	prowess = 3
+	culture = greek
+	rite = byzantine_rite
+	trait = calm
+	trait = compassionate
+	trait = honest
+	trait = education_diplomacy_2
+	829.7.3 = {
+		birth = yes
+	}
+}
+
+900003 = {
+	name = "Lysias"
+	# Primary heir, age 17 at start (Heir's Arc).
+	dynasty = eotg_tm_dyn_vaskar
+	diplomacy = 6
+	martial = 10
+	stewardship = 5
+	intrigue = 9
+	learning = 5
+	prowess = 11
+	culture = greek
+	rite = byzantine_rite
+	trait = brave
+	trait = vengeful
+	trait = impatient
+	trait = education_martial_2
+	father = 900001
+	mother = 900002
+	848.9.1 = {
+		birth = yes
+	}
+}
+
+900004 = {
+	name = "Irene"
+	# Daughter, 13.
+	female = yes
+	dynasty = eotg_tm_dyn_vaskar
+	diplomacy = 5
+	martial = 2
+	stewardship = 4
+	intrigue = 6
+	learning = 7
+	prowess = 2
+	culture = greek
+	rite = byzantine_rite
+	trait = curious
+	father = 900001
+	mother = 900002
+	852.11.5 = {
+		birth = yes
+	}
+}
+
+900005 = {
+	name = "Romanos"
+	# Son, 7.
+	dynasty = eotg_tm_dyn_vaskar
+	diplomacy = 2
+	martial = 3
+	stewardship = 2
+	intrigue = 2
+	learning = 3
+	prowess = 3
+	culture = greek
+	rite = byzantine_rite
+	trait = rowdy
+	father = 900001
+	mother = 900002
+	858.6.30 = {
+		birth = yes
+	}
+}
+
+900006 = {
+	name = "Demetrios"
+	# Emperor's brother; knight-grade prowess.
+	dynasty = eotg_tm_dyn_vaskar
+	diplomacy = 6
+	martial = 14
+	stewardship = 5
+	intrigue = 6
+	learning = 4
+	prowess = 16
+	culture = greek
+	rite = byzantine_rite
+	trait = brave
+	trait = arrogant
+	trait = wrathful
+	trait = education_martial_3
+	830.1.9 = {
+		birth = yes
+	}
+	866.1.1 = {
+		employer = 900001
+	}
+}
+
+900007 = {
+	name = "Melitta"
+	# Court scholar with lifestyle_physician; appoint as court physician in game.
+	female = yes
+	diplomacy = 6
+	martial = 3
+	stewardship = 7
+	intrigue = 5
+	learning = 16
+	prowess = 4
+	culture = greek
+	rite = byzantine_rite
+	trait = lifestyle_physician
+	trait = diligent
+	trait = patient
+	trait = cynical
+	trait = education_learning_3
+	818.5.5 = {
+		birth = yes
+	}
+	866.1.1 = {
+		employer = 900001
+	}
+}
+
+900008 = {
+	name = "Nikephoros"
+	# Failed pretender, held prisoner by the Emperor (prisoner tests).
+	dynasty = eotg_tm_dyn_arkas
+	diplomacy = 8
+	martial = 7
+	stewardship = 6
+	intrigue = 14
+	learning = 6
+	prowess = 9
+	culture = greek
+	rite = byzantine_rite
+	trait = ambitious
+	trait = deceitful
+	trait = callous
+	trait = education_intrigue_3
+	835.2.2 = {
+		birth = yes
+	}
+	866.1.1 = {
+		employer = 900001
+		effect = {
+			rightfully_imprison_character_effect = {
+				TARGET = character:900008
+				IMPRISONER = character:900001
+			}
+		}
+	}
+}
+
+900009 = {
+	name = "Stephanos"
+	# Knight.
+	diplomacy = 5
+	martial = 11
+	stewardship = 4
+	intrigue = 5
+	learning = 3
+	prowess = 14
+	culture = greek
+	rite = byzantine_rite
+	trait = brave
+	trait = gregarious
+	trait = honest
+	trait = education_martial_2
+	838.10.14 = {
+		birth = yes
+	}
+	866.1.1 = {
+		employer = 900001
+	}
+}
+
+900010 = {
+	name = "Basil"
+	# Count of Caelestis. 50+, low prowess (old-age offer). Dev 10.
+	dynasty = eotg_tm_dyn_kourou
+	diplomacy = 9
+	martial = 4
+	stewardship = 8
+	intrigue = 6
+	learning = 12
+	prowess = 3
+	culture = greek
+	rite = byzantine_rite
+	trait = craven
+	trait = content
+	trait = lazy
+	trait = education_learning_2
+	812.3.3 = {
+		birth = yes
+	}
+	842.6.1 = {
+		add_spouse = 900011
+	}
+}
+
+900011 = {
+	name = "Zoe"
+	female = yes
+	diplomacy = 8
+	martial = 3
+	stewardship = 7
+	intrigue = 6
+	learning = 6
+	prowess = 2
+	culture = greek
+	rite = byzantine_rite
+	trait = generous
+	trait = trusting
+	trait = shy
+	trait = education_diplomacy_1
+	820.8.8 = {
+		birth = yes
+	}
+}
+
+900012 = {
+	name = "Ioannes"
+	# Adult heir of Caelestis.
+	dynasty = eotg_tm_dyn_kourou
+	diplomacy = 7
+	martial = 8
+	stewardship = 9
+	intrigue = 5
+	learning = 6
+	prowess = 9
+	culture = greek
+	rite = byzantine_rite
+	trait = diligent
+	trait = just
+	trait = calm
+	trait = education_stewardship_2
+	father = 900010
+	mother = 900011
+	845.2.17 = {
+		birth = yes
+	}
+}
+
+900013 = {
+	name = "Anthousa"
+	# Countess of Helix Crossing. Dev 8 (below the 10 gate).
+	female = yes
+	dynasty = eotg_tm_dyn_helixa
+	diplomacy = 9
+	martial = 5
+	stewardship = 7
+	intrigue = 15
+	learning = 7
+	prowess = 4
+	culture = greek
+	rite = byzantine_rite
+	trait = deceitful
+	trait = greedy
+	trait = ambitious
+	trait = education_intrigue_3
+	836.12.1 = {
+		birth = yes
+	}
+}
+
+900014 = {
+	name = "Leon"
+	# Count of Spectral Breach. Dev 5.
+	dynasty = eotg_tm_dyn_spectros
+	diplomacy = 5
+	martial = 6
+	stewardship = 10
+	intrigue = 7
+	learning = 8
+	prowess = 6
+	culture = greek
+	rite = byzantine_rite
+	trait = paranoid
+	trait = shy
+	trait = just
+	trait = education_stewardship_1
+	841.5.22 = {
+		birth = yes
+	}
+}
+
+900015 = {
+	name = "Phokas"
+	# Count of The Surge. Dev 10.
+	dynasty = eotg_tm_dyn_thalassos
+	diplomacy = 6
+	martial = 9
+	stewardship = 7
+	intrigue = 5
+	learning = 11
+	prowess = 8
+	culture = greek
+	rite = byzantine_rite
+	trait = zealous
+	trait = stubborn
+	trait = chaste
+	trait = education_learning_2
+	828.9.9 = {
+		birth = yes
+	}
+	850.4.4 = {
+		add_spouse = 900016
+	}
+}
+
+900016 = {
+	name = "Eudokia"
+	female = yes
+	diplomacy = 7
+	martial = 2
+	stewardship = 6
+	intrigue = 8
+	learning = 9
+	prowess = 2
+	culture = greek
+	rite = byzantine_rite
+	trait = patient
+	trait = forgiving
+	trait = humble
+	trait = education_learning_1
+	834.1.30 = {
+		birth = yes
+	}
+}
+
+900017 = {
+	name = "Sophia"
+	# Heir of The Surge, age 13.
+	female = yes
+	dynasty = eotg_tm_dyn_thalassos
+	diplomacy = 6
+	martial = 3
+	stewardship = 4
+	intrigue = 5
+	learning = 6
+	prowess = 2
+	culture = greek
+	rite = byzantine_rite
+	trait = charming
+	father = 900015
+	mother = 900016
+	852.3.12 = {
+		birth = yes
+	}
+}
+
+900018 = {
+	name = "Andronikos"
+	# Duke of Graveshelf, vassal of the Emperor. Dev 12.
+	dynasty = eotg_tm_dyn_gravas
+	diplomacy = 8
+	martial = 12
+	stewardship = 9
+	intrigue = 13
+	learning = 6
+	prowess = 10
+	culture = greek
+	rite = byzantine_rite
+	trait = callous
+	trait = ambitious
+	trait = vengeful
+	trait = education_intrigue_2
+	822.6.6 = {
+		birth = yes
+	}
+	845.9.1 = {
+		add_spouse = 900019
+	}
+}
+
+900019 = {
+	name = "Maria"
+	female = yes
+	diplomacy = 10
+	martial = 3
+	stewardship = 8
+	intrigue = 6
+	learning = 7
+	prowess = 3
+	culture = greek
+	rite = byzantine_rite
+	trait = compassionate
+	trait = calm
+	trait = temperate
+	trait = education_diplomacy_2
+	830.2.14 = {
+		birth = yes
+	}
+}
+
+900020 = {
+	name = "Alexios"
+	# Heir of Graveshelf, 16.
+	dynasty = eotg_tm_dyn_gravas
+	diplomacy = 7
+	martial = 6
+	stewardship = 6
+	intrigue = 5
+	learning = 11
+	prowess = 7
+	culture = greek
+	rite = byzantine_rite
+	trait = humble
+	trait = honest
+	trait = temperate
+	trait = education_learning_1
+	father = 900018
+	mother = 900019
+	849.7.7 = {
+		birth = yes
+	}
+}
+
+900021 = {
+	name = "Gregorios"
+	# Count of Galenus. Dev 10.
+	dynasty = eotg_tm_dyn_mavros
+	diplomacy = 14
+	martial = 6
+	stewardship = 8
+	intrigue = 5
+	learning = 7
+	prowess = 6
+	culture = greek
+	rite = byzantine_rite
+	trait = generous
+	trait = trusting
+	trait = gregarious
+	trait = education_diplomacy_2
+	833.4.4 = {
+		birth = yes
+	}
+}
+
+900022 = {
+	name = "Isaakios"
+	# Count of Muth. Dev 4.
+	dynasty = eotg_tm_dyn_muthas
+	diplomacy = 6
+	martial = 7
+	stewardship = 12
+	intrigue = 8
+	learning = 4
+	prowess = 8
+	culture = greek
+	rite = byzantine_rite
+	trait = greedy
+	trait = arbitrary
+	trait = lustful
+	trait = education_stewardship_2
+	845.11.11 = {
+		birth = yes
+	}
+}
+
+900023 = {
+	name = "Helena"
+	# Countess of Sanctum Channel. Dev 9.
+	female = yes
+	dynasty = eotg_tm_dyn_sanktis
+	diplomacy = 8
+	martial = 3
+	stewardship = 7
+	intrigue = 6
+	learning = 18
+	prowess = 3
+	culture = greek
+	rite = byzantine_rite
+	trait = zealous
+	trait = patient
+	trait = forgiving
+	trait = education_learning_4
+	819.10.2 = {
+		birth = yes
+	}
+}
+
+900024 = {
+	name = "Teodor"
+	# Duke of Sanctum Wilds, vassal of the Emperor. Capital dev 7 (below the gate).
+	dynasty = eotg_tm_dyn_wildaros
+	diplomacy = 5
+	martial = 16
+	stewardship = 6
+	intrigue = 6
+	learning = 5
+	prowess = 15
+	culture = greek
+	rite = byzantine_rite
+	trait = brave
+	trait = impatient
+	trait = wrathful
+	trait = education_martial_4
+	839.3.18 = {
+		birth = yes
+	}
+}
+
+900025 = {
+	name = "Konstantin"
+	# Duke of Silica Span, 50, low prowess, cynical+learned. Dev 11.
+	dynasty = eotg_tm_dyn_silikos
+	diplomacy = 8
+	martial = 5
+	stewardship = 10
+	intrigue = 7
+	learning = 15
+	prowess = 2
+	culture = greek
+	rite = byzantine_rite
+	trait = craven
+	trait = cynical
+	trait = diligent
+	trait = education_learning_3
+	815.1.21 = {
+		birth = yes
+	}
+	844.5.5 = {
+		add_spouse = 900026
+	}
+}
+
+900026 = {
+	name = "Anna"
+	female = yes
+	diplomacy = 9
+	martial = 2
+	stewardship = 7
+	intrigue = 9
+	learning = 8
+	prowess = 2
+	culture = greek
+	rite = byzantine_rite
+	trait = honest
+	trait = content
+	trait = gregarious
+	trait = education_diplomacy_2
+	825.6.19 = {
+		birth = yes
+	}
+}
+
+900027 = {
+	name = "Michael"
+	# Heir of Silica Span, 19.
+	dynasty = eotg_tm_dyn_silikos
+	diplomacy = 7
+	martial = 6
+	stewardship = 6
+	intrigue = 12
+	learning = 6
+	prowess = 7
+	culture = greek
+	rite = byzantine_rite
+	trait = ambitious
+	trait = deceitful
+	trait = arrogant
+	trait = education_intrigue_1
+	father = 900025
+	mother = 900026
+	846.8.30 = {
+		birth = yes
+	}
+}
+
+900028 = {
+	name = "Mikhail"
+	# Count of Skeld Cast. Dev 10.
+	dynasty = eotg_tm_dyn_kastos
+	diplomacy = 7
+	martial = 11
+	stewardship = 7
+	intrigue = 5
+	learning = 5
+	prowess = 11
+	culture = greek
+	rite = byzantine_rite
+	trait = honest
+	trait = just
+	trait = stubborn
+	trait = education_martial_1
+	837.2.2 = {
+		birth = yes
+	}
+}
+
+900029 = {
+	name = "Nikolaos"
+	# Count of The Remnant. Dev 6.
+	dynasty = eotg_tm_dyn_remnas
+	diplomacy = 6
+	martial = 7
+	stewardship = 6
+	intrigue = 16
+	learning = 7
+	prowess = 6
+	culture = greek
+	rite = byzantine_rite
+	trait = paranoid
+	trait = wrathful
+	trait = vengeful
+	trait = education_intrigue_4
+	824.12.24 = {
+		birth = yes
+	}
+}
+
+900030 = {
+	name = "Xenia"
+	# Countess of Winterstead. Dev 10.
+	female = yes
+	dynasty = eotg_tm_dyn_wintara
+	diplomacy = 15
+	martial = 4
+	stewardship = 8
+	intrigue = 6
+	learning = 7
+	prowess = 4
+	culture = greek
+	rite = byzantine_rite
+	trait = compassionate
+	trait = calm
+	trait = generous
+	trait = education_diplomacy_3
+	843.9.15 = {
+		birth = yes
+	}
+}
+
+900040 = {
+	name = "Ragnvald"
+	# King of Skeldscar. Bookmark lead 2. Dev 12. Defending the Wyveris war.
+	dynasty = eotg_tm_dyn_skeldung
+	diplomacy = 9
+	martial = 15
+	stewardship = 8
+	intrigue = 6
+	learning = 5
+	prowess = 14
+	culture = norse
+	rite = norse_pagan
+	trait = brave
+	trait = ambitious
+	trait = gregarious
+	trait = education_martial_3
+	829.5.5 = {
+		birth = yes
+	}
+	850.6.21 = {
+		add_spouse = 900041
+	}
+}
+
+900041 = {
+	name = "Asta"
+	female = yes
+	diplomacy = 8
+	martial = 4
+	stewardship = 12
+	intrigue = 6
+	learning = 7
+	prowess = 4
+	culture = norse
+	rite = norse_pagan
+	trait = calm
+	trait = diligent
+	trait = honest
+	trait = education_stewardship_2
+	834.3.3 = {
+		birth = yes
+	}
+}
+
+900042 = {
+	name = "Eirik"
+	# Primary heir, age 14 at start (Heir's Arc minimum).
+	dynasty = eotg_tm_dyn_skeldung
+	diplomacy = 4
+	martial = 6
+	stewardship = 3
+	intrigue = 4
+	learning = 3
+	prowess = 7
+	culture = norse
+	rite = norse_pagan
+	trait = rowdy
+	father = 900040
+	mother = 900041
+	851.8.14 = {
+		birth = yes
+	}
+}
+
+900043 = {
+	name = "Halfdan"
+	# Son, 10.
+	dynasty = eotg_tm_dyn_skeldung
+	diplomacy = 3
+	martial = 3
+	stewardship = 3
+	intrigue = 3
+	learning = 4
+	prowess = 3
+	culture = norse
+	rite = norse_pagan
+	trait = pensive
+	father = 900040
+	mother = 900041
+	855.2.9 = {
+		birth = yes
+	}
+}
+
+900044 = {
+	name = "Thorvald"
+	# King's brother; knight.
+	dynasty = eotg_tm_dyn_skeldung
+	diplomacy = 5
+	martial = 12
+	stewardship = 4
+	intrigue = 6
+	learning = 3
+	prowess = 15
+	culture = norse
+	rite = norse_pagan
+	trait = wrathful
+	trait = brave
+	trait = callous
+	trait = education_martial_2
+	832.11.30 = {
+		birth = yes
+	}
+	866.1.1 = {
+		employer = 900040
+	}
+}
+
+900045 = {
+	name = "Sigrid"
+	# Courtier, warrior.
+	female = yes
+	diplomacy = 6
+	martial = 10
+	stewardship = 5
+	intrigue = 6
+	learning = 4
+	prowess = 12
+	culture = norse
+	rite = norse_pagan
+	trait = brave
+	trait = vengeful
+	trait = honest
+	trait = education_martial_2
+	840.7.17 = {
+		birth = yes
+	}
+	866.1.1 = {
+		employer = 900040
+	}
+}
+
+900046 = {
+	name = "Gunnar"
+	# Court scholar with lifestyle_physician.
+	diplomacy = 5
+	martial = 4
+	stewardship = 6
+	intrigue = 5
+	learning = 14
+	prowess = 4
+	culture = norse
+	rite = norse_pagan
+	trait = lifestyle_physician
+	trait = patient
+	trait = cynical
+	trait = education_learning_2
+	820.4.1 = {
+		birth = yes
+	}
+	866.1.1 = {
+		employer = 900040
+	}
+}
+
+900047 = {
+	name = "Ulf"
+	# Count of Klian (war target). Dev 10.
+	dynasty = eotg_tm_dyn_klianing
+	diplomacy = 7
+	martial = 6
+	stewardship = 12
+	intrigue = 5
+	learning = 6
+	prowess = 6
+	culture = norse
+	rite = norse_pagan
+	trait = content
+	trait = temperate
+	trait = trusting
+	trait = education_stewardship_2
+	830.10.10 = {
+		birth = yes
+	}
+}
+
+900048 = {
+	name = "Ragnhild"
+	# Countess of The Void. Dev 7.
+	female = yes
+	dynasty = eotg_tm_dyn_myrkr
+	diplomacy = 7
+	martial = 6
+	stewardship = 6
+	intrigue = 15
+	learning = 6
+	prowess = 5
+	culture = norse
+	rite = norse_pagan
+	trait = deceitful
+	trait = ambitious
+	trait = sadistic
+	trait = education_intrigue_3
+	838.1.13 = {
+		birth = yes
+	}
+}
+
+900049 = {
+	name = "Bjorn"
+	# Duke of Karak Crossing, vassal of the King. Dev 10.
+	dynasty = eotg_tm_dyn_karaking
+	diplomacy = 6
+	martial = 13
+	stewardship = 8
+	intrigue = 6
+	learning = 4
+	prowess = 9
+	culture = norse
+	rite = norse_pagan
+	trait = stubborn
+	trait = greedy
+	trait = wrathful
+	trait = education_martial_2
+	817.9.27 = {
+		birth = yes
+	}
+	845.2.2 = {
+		add_spouse = 900050
+	}
+}
+
+900050 = {
+	name = "Ingrid"
+	female = yes
+	diplomacy = 9
+	martial = 3
+	stewardship = 8
+	intrigue = 7
+	learning = 6
+	prowess = 3
+	culture = norse
+	rite = norse_pagan
+	trait = patient
+	trait = just
+	trait = shy
+	trait = education_diplomacy_1
+	826.12.12 = {
+		birth = yes
+	}
+}
+
+900051 = {
+	name = "Freyja"
+	# Heir of Karak Crossing, 17.
+	female = yes
+	dynasty = eotg_tm_dyn_karaking
+	diplomacy = 6
+	martial = 14
+	stewardship = 6
+	intrigue = 5
+	learning = 5
+	prowess = 13
+	culture = norse
+	rite = norse_pagan
+	trait = ambitious
+	trait = brave
+	trait = just
+	trait = education_martial_3
+	father = 900049
+	mother = 900050
+	848.4.20 = {
+		birth = yes
+	}
+}
+
+900052 = {
+	name = "Orm"
+	# Count of Shadow Hollow. Dev 5.
+	dynasty = eotg_tm_dyn_skuggi
+	diplomacy = 4
+	martial = 6
+	stewardship = 7
+	intrigue = 8
+	learning = 12
+	prowess = 6
+	culture = norse
+	rite = norse_pagan
+	trait = shy
+	trait = paranoid
+	trait = diligent
+	trait = education_learning_2
+	841.6.6 = {
+		birth = yes
+	}
+}
+
+900053 = {
+	name = "Vagn"
+	# Count of Skeld Haven. 55, low prowess. Dev 10.
+	dynasty = eotg_tm_dyn_havnar
+	diplomacy = 7
+	martial = 5
+	stewardship = 9
+	intrigue = 6
+	learning = 5
+	prowess = 2
+	culture = norse
+	rite = norse_pagan
+	trait = lazy
+	trait = gluttonous
+	trait = content
+	trait = education_stewardship_1
+	810.2.28 = {
+		birth = yes
+	}
+}
+
+900054 = {
+	name = "Leif"
+	# Count of Warpmire. Dev 3.
+	dynasty = eotg_tm_dyn_mirling
+	diplomacy = 5
+	martial = 9
+	stewardship = 5
+	intrigue = 5
+	learning = 4
+	prowess = 12
+	culture = norse
+	rite = norse_pagan
+	trait = impatient
+	trait = brave
+	trait = lustful
+	trait = education_martial_1
+	846.10.3 = {
+		birth = yes
+	}
+}
+
+900060 = {
+	name = "Sveinn"
+	# Independent Duke of Wyveris. Bookmark lead 3. Dev 12. Attacking Skeldscar for Klian.
+	dynasty = eotg_tm_dyn_wyvar
+	diplomacy = 9
+	martial = 8
+	stewardship = 8
+	intrigue = 15
+	learning = 7
+	prowess = 8
+	culture = norse
+	rite = byzantine_rite
+	trait = ambitious
+	trait = deceitful
+	trait = patient
+	trait = education_intrigue_3
+	mother = 900063
+	834.4.14 = {
+		birth = yes
+	}
+	856.5.1 = {
+		add_spouse = 900061
+	}
+	865.6.1 = {
+		effect = {
+			add_pressed_claim = title:c_klian
+		}
+	}
+}
+
+900061 = {
+	name = "Kristin"
+	female = yes
+	diplomacy = 8
+	martial = 3
+	stewardship = 6
+	intrigue = 5
+	learning = 11
+	prowess = 3
+	culture = norse
+	rite = byzantine_rite
+	trait = compassionate
+	trait = honest
+	trait = shy
+	trait = education_learning_2
+	840.1.5 = {
+		birth = yes
+	}
+}
+
+900062 = {
+	name = "Arni"
+	# Heir, 8.
+	dynasty = eotg_tm_dyn_wyvar
+	diplomacy = 3
+	martial = 2
+	stewardship = 3
+	intrigue = 3
+	learning = 4
+	prowess = 2
+	culture = norse
+	rite = byzantine_rite
+	trait = curious
+	father = 900060
+	mother = 900061
+	857.3.3 = {
+		birth = yes
+	}
+}
+
+900063 = {
+	name = "Gudrun"
+	# Dowager, mother of 900060.
+	female = yes
+	diplomacy = 6
+	martial = 3
+	stewardship = 7
+	intrigue = 6
+	learning = 9
+	prowess = 2
+	culture = norse
+	rite = byzantine_rite
+	trait = zealous
+	trait = stubborn
+	trait = arbitrary
+	trait = education_learning_2
+	808.8.8 = {
+		birth = yes
+	}
+	866.1.1 = {
+		employer = 900060
+	}
+}
+
+900065 = {
+	name = "Hakon"
+	# Knight.
+	diplomacy = 4
+	martial = 10
+	stewardship = 4
+	intrigue = 5
+	learning = 3
+	prowess = 13
+	culture = norse
+	rite = byzantine_rite
+	trait = brave
+	trait = callous
+	trait = greedy
+	trait = education_martial_2
+	836.12.9 = {
+		birth = yes
+	}
+	866.1.1 = {
+		employer = 900060
+	}
+}
+
+900066 = {
+	name = "Ivar"
+	# Count of Rustshard. Dev 10.
+	dynasty = eotg_tm_dyn_rusting
+	diplomacy = 8
+	martial = 6
+	stewardship = 15
+	intrigue = 5
+	learning = 7
+	prowess = 5
+	culture = norse
+	rite = byzantine_rite
+	trait = just
+	trait = temperate
+	trait = calm
+	trait = education_stewardship_3
+	827.7.7 = {
+		birth = yes
+	}
+}
+
+900067 = {
+	name = "Gyda"
+	# Countess of Twilight Moor. Dev 4.
+	female = yes
+	dynasty = eotg_tm_dyn_moring
+	diplomacy = 11
+	martial = 5
+	stewardship = 6
+	intrigue = 7
+	learning = 5
+	prowess = 4
+	culture = norse
+	rite = byzantine_rite
+	trait = arrogant
+	trait = vengeful
+	trait = gregarious
+	trait = education_diplomacy_1
+	844.5.25 = {
+		birth = yes
+	}
+}
+
