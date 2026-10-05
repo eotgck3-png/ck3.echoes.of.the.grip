@@ -1,105 +1,17 @@
 {
- "_comment": "Data for eotg_lint rule L013 (loc house style, owner's loc review 2026-10-04). Edit freely; no code change needed. Regexes are Python 're' syntax, matched as whole words, case-insensitively, against the visible text of a value ([functions], $KEYS$ and #formatting removed). See docs/tools/eotg_lint.md, L013.",
+ "_comment": "Data for eotg_lint rule L013 (loc house style, owner's loc review 2026-10-04). Edit freely; no code change needed. Regexes are Python 're' syntax, matched as whole words, case-insensitively, against the visible text of a value ([functions], $KEYS$ and #formatting removed). See docs/tools/eotg_lint.md, L013. | HOUSE STANDARD IS CANADIAN ENGLISH (owner, 2026-10-04): -our/-re/-ce nouns and grey/catalogue are correct; -ize, program, analyze, plow are the Canadian forms. Interim list; cloud round 7 rebuilds this as an American-form + -ise checker with fixtures.",
  "dashes": {
   "chars": [
-   "\u2014",
-   "\u2013"
+   "—",
+   "–"
   ],
   "why": "The owner removed every em and en dash from mod prose; use a comma, colon, full stop or parentheses."
  },
  "british": {
   "words": [
    {
-    "regex": "catalogues?",
-    "us": "catalog"
-   },
-   {
-    "regex": "afterwards",
-    "us": "afterward"
-   },
-   {
-    "regex": "(dis)?colour(s|ed|ful|ing|less)?",
-    "us": "color"
-   },
-   {
-    "regex": "armour(s|ed|y|er|ers)?",
-    "us": "armor"
-   },
-   {
-    "regex": "(dis)?honour(s|ed|ing|able|ably)?",
-    "us": "honor"
-   },
-   {
-    "regex": "(dis)?favour(s|ed|ing|able|ably|ite|ites|itism)?",
-    "us": "favor"
-   },
-   {
-    "regex": "(mis)?behaviour(s|al)?",
-    "us": "behavior"
-   },
-   {
-    "regex": "rumour(s|ed)?",
-    "us": "rumor"
-   },
-   {
-    "regex": "labour(s|ed|ing|er|ers)?",
-    "us": "labor"
-   },
-   {
-    "regex": "valour",
-    "us": "valor"
-   },
-   {
-    "regex": "vigour",
-    "us": "vigor"
-   },
-   {
-    "regex": "neighbour(s|ing|hood|hoods|ly)?",
-    "us": "neighbor"
-   },
-   {
-    "regex": "harbour(s|ed|ing)?",
-    "us": "harbor"
-   },
-   {
-    "regex": "splendour",
-    "us": "splendor"
-   },
-   {
-    "regex": "defences?",
-    "us": "defense"
-   },
-   {
-    "regex": "offences?",
-    "us": "offense"
-   },
-   {
-    "regex": "centre(s|d)?",
-    "us": "center"
-   },
-   {
-    "regex": "metres?",
-    "us": "meter"
-   },
-   {
     "regex": "programmes?",
     "us": "program"
-   },
-   {
-    "regex": "travell(ed|ing|er|ers)",
-    "us": "traveled / traveling / traveler"
-   },
-   {
-    "regex": "cancell(ed|ing)",
-    "us": "canceled / canceling"
-   },
-   {
-    "regex": "labell(ed|ing)",
-    "us": "labeled / labeling"
-   },
-   {
-    "regex": "grey(s|ed|ing|ish|ness)?",
-    "us": "gray"
    },
    {
     "regex": "plough(s|ed|ing|man|men)?",
@@ -182,7 +94,7 @@
    "Tide-Crowned"
   ],
   "_exceptions_note": "Literal strings (proper nouns, fixed names) blanked out before matching.",
-  "why": "House standard is US English."
+  "why": "House standard is Canadian English (Oxford -ize with British -our, -re, -ll-)."
  },
  "whitespace": {
   "why": "Doubled or edge spaces render as visible gaps or misalign concatenated descs."
