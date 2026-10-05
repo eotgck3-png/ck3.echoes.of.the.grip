@@ -182,7 +182,7 @@ These come from the QA passes and are in build order. Tick them off as you go.
     - Repayment comes in 2–3 years (3–4 if you read every clause);
     - three refusals bring the Final Demand early.
 26. Remove Implants during a Patron debt. The debt continues, the clause stays, and only the non-hardware options show.
-27. Augment two knights through Augment a Courtier. The Retinue starts, and More Ask follows within 1–2 years.
+27. Augment two knights through Augment a Courtier. The Retinue starts, and More Step Forward follows within 1–2 years.
 
 **Non-rulers (Phase 6)**
 28. A count with an augmented knight sees that knight progress within 10–20 years, or right away with `add_trait_xp` on the knight.
@@ -395,9 +395,9 @@ These come from the QA passes and are in build order. Tick them off as you go.
 | Event | Title | Fired by | Console |
 |---|---|---|---|
 | `eotg_aug_retinue.001` | First of the Iron | story: retinue | `event eotg_aug_retinue.001` |
-| `eotg_aug_retinue.002` | More Ask | story: retinue | `event eotg_aug_retinue.002` |
+| `eotg_aug_retinue.002` | More Step Forward | story: retinue | `event eotg_aug_retinue.002` |
 | `eotg_aug_retinue.003` | The Iron Ranks | story: retinue | `event eotg_aug_retinue.003` |
-| `eotg_aug_retinue.004` | The Unaugmented Resent | story: retinue | `event eotg_aug_retinue.004` |
+| `eotg_aug_retinue.004` | Resentment in the Ranks | story: retinue | `event eotg_aug_retinue.004` |
 | `eotg_aug_retinue.005` | What the Program Becomes | story: retinue | `event eotg_aug_retinue.005` |
 
 ### Non-ruler lifecycle
@@ -406,7 +406,7 @@ These come from the QA passes and are in build order. Tick them off as you go.
 |---|---|---|---|
 | `eotg_aug_nr.001` | The Champion Volunteers | yearly nonruler | via parent (needs `eotg_champion`) |
 | `eotg_aug_nr.002` | Your Champion's New Edge | yearly nonruler | via parent (needs `eotg_champion`) |
-| `eotg_aug_nr.003` | Something Is Wrong With Them | yearly nonruler | via parent (needs `eotg_champion`) |
+| `eotg_aug_nr.003` | Something Is Wrong | yearly nonruler | via parent (needs `eotg_champion`) |
 | `eotg_aug_nr.004` | The Champion's Mistake | yearly nonruler | via parent (needs `eotg_champion`, `eotg_victim`) |
 | `eotg_aug_nr.005` | The Familiar Change | yearly nonruler | via parent (needs `eotg_champion`) |
 | `eotg_aug_nr.006` | The Broken Champion | effect: aug_nr_cascade_effect | via parent (needs `eotg_champion`) |

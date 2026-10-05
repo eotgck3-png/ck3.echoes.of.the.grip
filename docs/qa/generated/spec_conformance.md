@@ -14,7 +14,7 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | Family | Specs | Built | Ids | Present | Referenced only | Missing in built specs |
 |---|---|---|---|---|---|---|
 | `cybernetics` | 1 | 1 | 53 | 53 | 0 | 0 |
-| `cybernetics_v2` | 22 | 22 | 1282 | 1251 | 31 | 0 |
+| `cybernetics_v2` | 22 | 22 | 1283 | 1253 | 30 | 0 |
 | `frontier_v1` | 2 | 2 | 166 | 160 | 1 | 5 |
 | `glossary` | 1 | 0 | 1 | 0 | 0 | 0 |
 | `void` | 1 | 0 | 86 | 0 | 0 | 0 |
@@ -25,7 +25,7 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 |---|---|---|---|---|---|---|
 | `cybernetics_track.md` | yes | 66 | 53 | 0 | 0 | 13 |
 | `cybernetics_v2.md` | yes | 108 | 107 | 1 | 0 | 0 |
-| `cybernetics_v2_balance.md` | yes | 139 | 136 | 2 | 0 | 1 |
+| `cybernetics_v2_balance.md` | yes | 139 | 137 | 1 | 0 | 1 |
 | `cybernetics_v2_conformance_rulings.md` | yes | 39 | 38 | 1 | 0 | 0 |
 | `cybernetics_v2_interactions.md` | yes | 161 | 154 | 4 | 0 | 3 |
 | `cybernetics_v2_interactions_lore.md` | yes | 1 | 1 | 0 | 0 | 0 |
@@ -40,7 +40,7 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | `cybernetics_v2_procedures.md` | yes | 146 | 144 | 1 | 0 | 1 |
 | `cybernetics_v2_procedures_lore.md` | yes | 7 | 7 | 0 | 0 | 0 |
 | `cybernetics_v2_realm.md` | yes | 125 | 120 | 4 | 0 | 1 |
-| `cybernetics_v2_realm_lore.md` | yes | 2 | 2 | 0 | 0 | 0 |
+| `cybernetics_v2_realm_lore.md` | yes | 3 | 3 | 0 | 0 | 0 |
 | `cybernetics_v2_reprisal.md` | yes | 37 | 36 | 1 | 0 | 0 |
 | `cybernetics_v2_reprisal_lore.md` | yes | 3 | 3 | 0 | 0 | 0 |
 | `cybernetics_v2_self_repair.md` | yes | 58 | 55 | 2 | 0 | 1 |
@@ -81,9 +81,9 @@ None.
 
 #### `docs/specs/cybernetics_v2_balance.md`
 
-- Specced and present: 136
+- Specced and present: 137
 - Specced, missing from script (0): none
-- Referenced only, never defined or set (2): `eotg_aug_sedation_courses` (variable, l.91), `eotg_aug_nr_battle_bonus` (variable, l.95)
+- Referenced only, never defined or set (1): `eotg_aug_sedation_courses` (variable, l.91)
 - Exempt (1): `eotg_fracture.011.desc_misled` (loc, l.792)
 
 #### `docs/specs/cybernetics_v2_conformance_rulings.md`
@@ -190,7 +190,7 @@ None.
 
 #### `docs/specs/cybernetics_v2_realm_lore.md`
 
-- Specced and present: 2
+- Specced and present: 3
 - Specced, missing from script (0): none
 - Referenced only, never defined or set (0): none
 - Exempt (0): none
