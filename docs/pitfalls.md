@@ -231,3 +231,14 @@ a vanilla `.txt`.
 **Rule.** These files (9 structure bakes + colormap) are tracked inputs now (`.gitignore` exception, 2026-10-04). Don't run `build_terrain_hybrid.py` or `build_colormap.py` over them unless you mean to replace the look. If you do, commit the new bakes together with the exact command and its source image.
 
 **Confirm.** `git status gfx/map/terrain/` shows them modified after any tool run. `git checkout` restores them.
+
+## 14. A doubled BOM crashes the game, and no checker catches it
+
+**Symptom.** The game crashes during load (EXCEPTION_ACCESS_VIOLATION). error.log has tens of thousands of `pdx_persistent_reader` errors, mostly in VANILLA files ("Named value not found: =", "Unexpected token"), and events load short (e.g. 11 of 21 in one file).
+
+**Cause.** A mod script file that starts with two or three UTF-8 BOMs (`EF BB BF EF BB BF …`). The engine strips one BOM and reads the next as part of the first key: "Invalid scripted_value key '\ufeff'". In `common/script_values/` that corrupts the named-value table, so every later file that uses a named value (`medium_gold_value` in `gold >= { … }`, and so on) fails to parse, including vanilla files. Found 2026-10-04 in three Frontier files after a tool re-saved BOM files with `utf-8-sig` (fixed in the commit after ef514e8).
+
+**Confirm.** error.log: `grep "Invalid scripted_value key" error.log`, or any `jomini_named_values` error naming a mod file. Or count the BOMs in every tracked text file; there should be exactly one, at byte 0:
+`python -c "import subprocess;[print(f) for f in subprocess.run(['git','ls-files'],capture_output=True,text=True).stdout.split() if f.endswith(('.txt','.yml')) and open(f,'rb').read().count(b'\xef\xbb\xbf')>1]"`
+
+**Rule.** When rewriting a file that already starts with a BOM, read it with `utf-8-sig` (which strips the BOM) before writing it with `utf-8-sig`. Tiger, PX and eotg_lint all missed this; eotg_lint is getting a rule for it.
