@@ -83,4 +83,5 @@ Nothing listens to them yet. Send any `error.log` line mentioning `eotg_frontier
 
 ## 9. Expansion (spec §B; each part can be dropped on its own)
 - **B1:** with a Hostile, Remote or Dangerous trait and no counter, *A Hard Year* adds a line about it. *No Longer a Frontier* adds a line for two pieces of infrastructure, studied ruins or anomalies, or a hard Region.
+- **B3:** fire .035 on a Region without known ruins and choose **Study them properly**. One to two years later (or speed up time), *What the Ruins Held* arrives if the Region is still a Frontier. Both options raise progress; sharing also gives prestige.
 - **B2 salvage:** build infrastructure in a Frontier, then **Abandon a Frontier**. Establish there again: *An Opportunity Here* mentions what is still standing, and the Readout shows 5 more progress per piece left behind (on top of the 10 per earlier attempt).

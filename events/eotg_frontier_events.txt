@@ -1967,6 +1967,11 @@ eotg_frontier.035 = {
             }
         }
         custom_tooltip = eotg_frontier.035.a_tt
+        # Expansion B3 (frontier_v2.md §B3): the study reports back later
+        trigger_event = {
+            id = eotg_frontier.037
+            days = { 365 730 }
+        }
         ai_chance = {
             base = 30
             modifier = { add = 20  learning >= 12 }
@@ -2070,6 +2075,58 @@ eotg_frontier.036 = {
         ai_chance = {
             base = 30
             modifier = { add = 20  has_trait = impatient }
+        }
+    }
+}
+
+# -- eotg_frontier.037 (Expansion B3, frontier_v2.md §B3) ---------------------
+# What the Ruins Held: the study chosen in .035 (a) reports back, one to two
+# years later. Fired only by that option, so it adds a prompt only after the
+# player chose to study. If the Region has left the Frontier state by then,
+# the trigger fails and nothing shows.
+eotg_frontier.037 = {
+    type = character_event
+    title = eotg_frontier.037.t
+    desc = eotg_frontier.037.desc
+    theme = realm
+
+    trigger = {
+        exists = scope:eotg_frontier_county
+        scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+    }
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+
+    # "Share what was learned."
+    option = {
+        name = eotg_frontier.037.a
+        trigger = {
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        add_prestige = minor_prestige_value
+        scope:eotg_frontier_county = { eotg_frontier_add_progress_effect = { AMOUNT = 2 } }
+        custom_tooltip = eotg_frontier.037.a_tt
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = gregarious }
+        }
+    }
+
+    # "Keep it for the Frontier's own crews." Ungated.
+    option = {
+        name = eotg_frontier.037.b
+        scope:eotg_frontier_county = {
+            if = {
+                limit = { eotg_frontier_is_frontier = yes }
+                eotg_frontier_add_progress_effect = { AMOUNT = 5 }
+                custom_tooltip = eotg_frontier.037.b_tt
+            }
+        }
+        ai_chance = {
+            base = 30
         }
     }
 }

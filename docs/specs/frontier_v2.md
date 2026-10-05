@@ -429,6 +429,15 @@ Built after A passed lint, check_all and spec_conformance. Each subsection is on
 | variable | `eotg_frontier_salvage` | pieces of infrastructure an abandoned attempt left |
 | script value | `eotg_frontier_salvage_bonus_value` | 5 × that, as a start bonus |
 
+### B3. A discovery follow-up: *What the Ruins Held*
+- **.035 (a) "Study them properly"** now also fires **.037** one to two years later (`trigger_event` with `days = { 365 730 }`, from the option, so `scope:eotg_frontier_county` travels with it).
+- **.037** (if the Region is still a Frontier; otherwise its trigger fails and nothing shows): **(a)** share the findings: a little prestige, progress +2; **(b, ungated)** keep them for the crews: progress +5.
+- **Budget:** fired only by a choice the player made, at most once per study, so ordinary projects see no extra prompt.
+
+| Type | Key | Notes |
+|---|---|---|
+| event | `eotg_frontier.037` | *What the Ruins Held* |
+
 ---
 
 ### HANDOFF
