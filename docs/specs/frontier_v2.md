@@ -378,7 +378,7 @@ Two new empty integration on_actions, fired like Phase 1's:
 ---
 
 ## 12. Loc surface (as built)
-`localization/english/eotg_frontier_l_english.yml` (the one Frontier loc file), Canadian English. Phase 2 adds about 190 keys (exact count in the handoff): 24 modifiers × 2, 3 opinions, 2 decisions × 4 plus their tooltips, 9 events, the .020 trait lines, the .001/.005 variants, and 1 toast.
+`localization/english/eotg_frontier_l_english.yml` (the one Frontier loc file), Canadian English. Phase 2 (A) adds **153 keys** (149 → 302): 24 modifiers × 2, 3 opinions, 2 decisions (12 keys), 9 events, the .020 trait lines, the .001/.005 variants, and 1 toast. The expansion adds 13 more (B1 6, B2 1, B3 6), 315 in all.
 
 ## 13. Definition of done (Phase 2)
 1. eotg_lint: 0 findings in Frontier files (incl. L013b, L016). check_all passes. spec_conformance: frontier_v2 shows 0 missing ids.
