@@ -74,6 +74,48 @@ so any mismatch reported *inside it* is a bug in the checker, not in the file �
 built-in control. Known drifted-but-harmless right now: `pdxwater.shader`,
 `surroundmap.shader`, `clouds.fxh` (verified: nothing outside it calls `GetCloud`).
 
+### It is not only shaders. It is every vanilla file we copy and edit.
+
+The entries above are all `.shader`/`.fxh`, and that framing hid the real surface. Measured
+2026-10-04: **108 tracked files shadow a vanilla path, across 16 directories.** None is
+byte-identical to vanilla. Only `gfx/FX` had ever been checked — **12 of them, about 21% of what
+can actually go stale.**
+
+Split them before checking, or a sweep drowns in false positives:
+
+- **Can go stale — vanilla TEXT we copied and then edited (57 files).** `map_object_data` 31
+  (the largest group, and until now entirely unchecked), `gfx/FX` 12, `gfx/particles` 4,
+  `gfx/map/rivers` 2, and one each of `fonts.font`, `environment.txt`, `posteffect_volumes.txt`,
+  `table_styles.txt`, `materials.settings`, `water.settings`, `seasons.txt`,
+  `terrain_ambience_layer_default.txt`.
+- **Cannot go stale — art wholly replaced by our own generators (51 files).** `gfx/map/borders`
+  35, `gfx/map/movement_arrows` 14, `colormap.dds`, `flatmap.dds`. These differ from vanilla *by
+  design*; a game update cannot invalidate them, and they do not belong in a staleness check.
+
+**Generated copies are the easy ones to forget**, because nobody edited them by hand and they
+look like build output rather than like overrides. They are overrides. Anything a tool in
+`docs/tools/` copies out of vanilla and rewrites — `build_marker_assets.py` for
+`common/buildings/`, `strip_map_objects.py` for `gfx/map/map_object_data/` — is a vanilla
+snapshot frozen at the version it was generated against, and the fix is simply to **re-run the
+generator after a CK3 update**. Two real cases:
+
+- `common/buildings/eotg_*` (2026-10-04): four of seven were pre-1.20 copies silently overriding
+  1.20 gameplay. `eotg_00_tribal_buildings.txt` had lost `flag = tribe`, which produced 9
+  `has_construction_with_flag 'tribe'` errors from *vanilla's* `bp2_yearly_events_6`; castle and
+  temple were missing 1.20 `province_rite_modifier` blocks; the citadel had hard-coded fervor
+  numbers where 1.20 uses `*_fervor_gain`. Re-running `build_marker_assets.py` fixed all four and
+  preserved every marker hook.
+- `gfx/particles` (1.20): vanilla renamed the compound node `"Radians to Degrees"` to
+  `radians_to_degrees`, so four 1.19 bird copies could not resolve it and the engine dropped the
+  node links. Cosmetic *only because those emitters are disabled anyway* — the same break in
+  `map_object_data` would not have been.
+
+**The detection is cheap and does not need the game running.** For each tracked file, test whether
+the same relative path exists under the game folder; if it does, it is an override. Skip
+`.dds`/`.png`/`.tga` as replaced art. Diff everything else against the current vanilla copy after
+every patch. That rule alone would have caught `gfx/particles`, `map_object_data`, `seasons.txt`
+and `fonts.font` the first time.
+
 ---
 
 ## 3. Black map = the terrain shader failed to compile
@@ -255,3 +297,34 @@ a vanilla `.txt`.
 `python -c "import subprocess;[print(f) for f in subprocess.run(['git','ls-files'],capture_output=True,text=True).stdout.split() if f.endswith(('.txt','.yml')) and open(f,'rb').read().count(b'\xef\xbb\xbf')>1]"`
 
 **Rule.** When rewriting a file that already starts with a BOM, read it with `utf-8-sig` (which strips the BOM) before writing it with `utf-8-sig`. Tiger, PX and eotg_lint all missed this; eotg_lint is getting a rule for it.
+
+---
+
+## 15. `count=0` is not enough: the engine still validates the asset
+
+**Symptom.** 99 × `Map object type has no valid asset` in `error.log` on load. Nothing looks wrong
+on the map, because the objects are meant to be invisible anyway.
+
+**Cause.** `docs/tools/strip_map_objects.py` switches off vanilla's 3D map clutter (trees, deer,
+bridges, the Great Wall, map-table props) by rewriting each `object={ … }` with `count=0` and an
+empty `transform`. The first version rebuilt each block from a hand-picked set of fields — `name`,
+`render_pass`, `layer` — and so **dropped the `entity=` / `pdxmesh=` line**. The engine validates
+the asset reference whether or not any instances are placed, so every stripped object logged an
+error. 99 objects across 30 files, which is exactly the number of error lines.
+
+**The vanilla answer was sitting right there.** Vanilla ships `coast_foam.txt` with `count=0`, and
+it still carries `entity="env_coast_foam_l"`. Copy the whole declaration and change only `count`
+and `transform`; do not reconstruct it from the fields you happened to think of. The script now
+carries every attribute through generically rather than by listing them, because the attribute set
+varies — `animals`/`env_effects` use `entity=`, `bridges`/`cliffs`/`special` use `pdxmesh=` — and
+a future version may add more. It also preserved `clamp_to_water_level` and `generated_content`,
+which the field list had been silently discarding too.
+
+**Watch the performance trap in that fix.** `transform` holds one line per placed instance —
+550,631 of them across these files — so a parser that accumulates its value with `buf += line`
+is quadratic and turns a one-second run into minutes. Record the key, skip the body: it is
+discarded on output anyway.
+
+**Confirm.** `grep -c "no valid asset" error.log`, or offline:
+`python -c "import re,glob,io;print(sum(1 for f in glob.glob('gfx/map/map_object_data/**/*.txt',recursive=True) for b in re.finditer(r'object=\{(.*?)\}',io.open(f,encoding='utf-8-sig').read(),re.S) if not re.search(r'(entity|pdxmesh)=',b.group(1))))"`
+— it should print `0`.
