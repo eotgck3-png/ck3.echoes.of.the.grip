@@ -16,7 +16,7 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | `cybernetics` | 1 | 1 | 53 | 53 | 0 | 0 |
 | `cybernetics_v2` | 22 | 22 | 1283 | 1253 | 30 | 0 |
 | `frontier_v1` | 2 | 2 | 159 | 158 | 1 | 0 |
-| `frontier_v2` | 1 | 1 | 99 | 99 | 0 | 0 |
+| `frontier_v2` | 1 | 1 | 100 | 100 | 0 | 0 |
 | `glossary` | 1 | 0 | 1 | 0 | 0 | 0 |
 | `void` | 1 | 0 | 86 | 0 | 0 | 0 |
 
@@ -49,7 +49,7 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | `cybernetics_v2_trait_depth.md` | yes | 42 | 41 | 1 | 0 | 0 |
 | `frontier_v1.md` | yes | 146 | 137 | 1 | 0 | 8 |
 | `frontier_v1_open_questions.md` | yes | 21 | 21 | 0 | 0 | 0 |
-| `frontier_v2.md` | yes | 99 | 99 | 0 | 0 | 0 |
+| `frontier_v2.md` | yes | 100 | 100 | 0 | 0 | 0 |
 | `glossary_proposal_cloud.md` | **no** | 1 | 0 | 0 | 1 | 0 |
 | `void_lift_plan_cloud.md` | **no** | 86 | 0 | 0 | 86 | 0 |
 
@@ -267,7 +267,7 @@ None.
 
 #### `docs/specs/frontier_v2.md`
 
-- Specced and present: 99
+- Specced and present: 100
 - Specced, missing from script (0): none
 - Referenced only, never defined or set (0): none
 - Exempt (0): none

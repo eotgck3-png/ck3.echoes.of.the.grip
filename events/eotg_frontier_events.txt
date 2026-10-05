@@ -295,6 +295,39 @@ eotg_frontier.002 = {
             }
             desc = eotg_frontier.002.desc_low
         }
+        # Expansion B1 (frontier_v2.md §B1): the place itself is part of the trouble
+        first_valid = {
+            triggered_desc = {
+                trigger = {
+                    scope:eotg_frontier_county = {
+                        eotg_frontier_has_valid_founder = yes
+                        has_county_modifier = eotg_frontier_trait_hostile
+                        NOT = { has_county_modifier = eotg_frontier_infra_orbital_station }
+                    }
+                }
+                desc = eotg_frontier.002.desc_hostile
+            }
+            triggered_desc = {
+                trigger = {
+                    scope:eotg_frontier_county = {
+                        eotg_frontier_has_valid_founder = yes
+                        has_county_modifier = eotg_frontier_trait_remote
+                        NOT = { has_county_modifier = eotg_frontier_infra_navigation_beacon }
+                    }
+                }
+                desc = eotg_frontier.002.desc_remote
+            }
+            triggered_desc = {
+                trigger = {
+                    scope:eotg_frontier_county = {
+                        eotg_frontier_has_valid_founder = yes
+                        has_county_modifier = eotg_frontier_trait_dangerous
+                        NOT = { has_county_modifier = eotg_frontier_infra_garrison_post }
+                    }
+                }
+                desc = eotg_frontier.002.desc_dangerous
+            }
+        }
     }
     theme = realm
 
@@ -581,6 +614,38 @@ eotg_frontier.004 = {
                 desc = eotg_frontier.004.desc_research
             }
             desc = eotg_frontier.004.desc_administrative
+        }
+        # Expansion B1 (frontier_v2.md §B1): what the Frontier leaves behind
+        first_valid = {
+            triggered_desc = {
+                trigger = {
+                    scope:eotg_frontier_county = { eotg_frontier_infra_count_value >= 2 }
+                }
+                desc = eotg_frontier.004.desc_built_much
+            }
+            triggered_desc = {
+                trigger = {
+                    scope:eotg_frontier_county = {
+                        OR = {
+                            has_county_modifier = eotg_frontier_trait_ancient_ruins
+                            has_county_modifier = eotg_frontier_trait_anomalous
+                        }
+                    }
+                }
+                desc = eotg_frontier.004.desc_studied
+            }
+            triggered_desc = {
+                trigger = {
+                    scope:eotg_frontier_county = {
+                        OR = {
+                            has_county_modifier = eotg_frontier_trait_hostile
+                            has_county_modifier = eotg_frontier_trait_remote
+                            has_county_modifier = eotg_frontier_trait_dangerous
+                        }
+                    }
+                }
+                desc = eotg_frontier.004.desc_hard_won
+            }
         }
     }
     theme = realm

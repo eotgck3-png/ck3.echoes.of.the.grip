@@ -411,7 +411,12 @@ Two new empty integration on_actions, fired like Phase 1's:
 ---
 
 ## B. Expansion (optional; separate commits, accept or drop independently)
-*(Filled in after A was built and validated; see the subsections below.)*
+Built after A passed lint, check_all and spec_conformance. Each subsection is one commit on the branch; dropping one is a revert of that commit. **None adds a prompt to an ordinary project** except B3, which only follows a choice the player made.
+
+### B1. Phase 1 events react to traits (loc and descs only)
+- **.002 *A Hard Year*** (the complication, not the founderless variant) gets one more line for the worst uncountered trait: Hostile Environment without an Orbital Station, Remote without a Navigation Beacon, or Dangerous without a Garrison Post.
+- **.004 *No Longer a Frontier*** gets one line for what the project leaves behind: two pieces of infrastructure; ruins or anomalies studied; or a Region that was hard to settle.
+- New loc: `eotg_frontier.002.desc_hostile`, `.002.desc_remote`, `.002.desc_dangerous`, `.004.desc_built_much`, `.004.desc_studied`, `.004.desc_hard_won`. No mechanics change.
 
 ---
 
