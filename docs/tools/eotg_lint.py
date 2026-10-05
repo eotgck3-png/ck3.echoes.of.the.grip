@@ -37,7 +37,7 @@ RULES = {
     "L010": (ERROR, "loc key referenced but not defined"),
     "L011": (WARNING, "single named character referred to as they/them (house rule: gendered)"),
     "L012": (ERROR, "cybernetics loc: never-name (ERROR) or register word to triage (WARNING)"),
-    "L013": (WARNING, "loc house style: dash, British spelling, stray space, appended desc without \\n\\n"),
+    "L013": (WARNING, "loc house style: dash, non-Canadian spelling, stray space, appended desc without \\n\\n"),
     "L014": (WARNING, "eotg_ loc key defined but never referenced"),
     "L016": (ERROR, "BOM (U+FEFF) anywhere but byte 0: a stacked or mid-file BOM"),
 }
@@ -806,14 +806,19 @@ def rule_l012(mod, register=None):
 # ------------------------------------------------------------------ L013 / L014
 def load_style(path=STYLE_FILE):
     data = json.loads(textio.read_text(path)[0])
-    br = data["british"]
+    sp = data["spelling"]
+
+    def words(kind, entries):
+        return [(re.compile(r"\b(%s)\b" % w["regex"], re.I), kind, w["canadian"]) for w in entries]
     return {
         "dashes": tuple(data["dashes"]["chars"]),
-        "words": [(re.compile(r"\b(%s)\b" % w["regex"], re.I), w["us"]) for w in br["words"]],
-        "ise": re.compile(r"\b(%s)\b" % br["ise_regex"], re.I),
-        "ise_us": br.get("ise_us", "-ize"),
-        "ise_exceptions": {w.lower() for w in br["ise_exceptions"]},
-        "exceptions": list(br.get("exceptions", [])),
+        # (regex, what the form is, the Canadian form); house standard: Canadian English
+        "words": words("American spelling", sp["american_forms"])
+        + words("British spelling", sp.get("british_forms_not_canadian", [])),
+        "ise": re.compile(r"\b(%s)\b" % sp["ise_regex"], re.I),
+        "ise_canadian": sp.get("ise_canadian", "-ize"),
+        "ise_exceptions": {w.lower() for w in sp["ise_exceptions"]},
+        "exceptions": list(sp.get("exceptions", [])),
         "append_prefix": data["append"]["prefix"],
     }
 
@@ -894,14 +899,14 @@ def rule_l013(mod, style=None):
         for ex in st["exceptions"]:
             text = text.replace(ex, " ")
         hits = []
-        for rx, us in st["words"]:
-            hits += [(m.group(1), us) for m in rx.finditer(text)]
+        for rx, kind, canadian in st["words"]:
+            hits += [(m.group(1), kind, canadian) for m in rx.finditer(text)]
         for m in st["ise"].finditer(text):
             if _ise_base(m.group(1)) not in st["ise_exceptions"]:
-                hits.append((m.group(1), st["ise_us"]))
-        for word, us in sorted(set(hits), key=lambda h: h[0].lower()):
-            out.append(Finding("L013", rel, line, "L013b %s: British spelling '%s' (US: %s)"
-                               % (key, word, us)))
+                hits.append((m.group(1), "-ise spelling", st["ise_canadian"]))
+        for word, kind, canadian in sorted(set(hits), key=lambda h: h[0].lower()):
+            out.append(Finding("L013", rel, line, "L013b %s: %s '%s' (Canadian: %s)"
+                               % (key, kind, word, canadian)))
         probs = []
         if "  " in value:
             probs.append("double space")

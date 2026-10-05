@@ -1,8 +1,8 @@
 ### HANDOFF (cloud session; tools round 7: BOM safety)
-- **branch:** `claude/tools-round7-cloud`, from `origin/v2-space-map` @ `7e05e18`. It also carries the frontier_v1 5-id spec cleanup (cherry-picked from `claude/frontier-spec-conformance-cloud`, which was not merged).
+- **branch:** `claude/tools-round7-cloud`, rebased onto `origin/v2-space-map` @ `4168bb8` (Canadian loc). It also carries the frontier_v1 5-id spec cleanup (cherry-picked from `claude/frontier-spec-conformance-cloud`, which was not merged).
 - **cause, owned:** the stacked BOMs came from this cloud session's Frontier follow-up edits. A throwaway edit helper read `.txt` files as plain `utf-8` (which keeps the BOM as U+FEFF) and wrote them back with `utf-8-sig` (which adds another). Each pass added one: values was edited once (×2), and effects and on_actions twice (×3). The BOM check after those edits only looked at the first 3 bytes. The repo's tools had no such writer; the helper was an ad-hoc script.
 - **validation (sandbox):**
-  - Unit tests: **179 OK** on an LF checkout and on a CRLF (`core.autocrlf=true`) clone.
+  - Unit tests: **181 OK** (after item 3) on an LF checkout and on a CRLF (`core.autocrlf=true`) clone.
   - check_all: **13 pass, 0 fail, 7 skipped** (the new L016 row included).
   - eotg_lint: 0 findings, 0 new.
   - The port, recipes and spec-conformance outputs are byte-identical to the committed ones (`--check`).
@@ -21,3 +21,14 @@
 
 - **not covered:** px_vocab_check needs PX and the game, so its cache write is converted but untested here. The qa/ readers were changed to read through `textio`; `qa/loc_mechanical` output was compared before and after and is identical apart from a set's print order, which already varied with the hash seed.
 - **follow-up suggestion:** a pre-commit hook could run `eotg_lint.py --rule L016 --quiet`; it takes about 0.5 s on the tree.
+
+## Item 3: L013b for Canadian English (added after the rebase onto 4168bb8)
+
+| What | Done | How | Where |
+|---|---|---|---|
+| Data | done | `eotg_lint_style.json`: the `british` / `us` keys are gone. A `spelling` section has `standard`, `american_forms` (each `{regex, canadian}`), `british_forms_not_canadian` (programme, plough, analyse/paralyse/catalyse: the interim list's three), `ise_regex` / `ise_canadian` / `ise_exceptions` (the list kept as is), `exceptions` (`Tide-Crowned`). Notes in the file say what must NOT be listed | `docs/tools/eotg_lint_style.json` |
+| American forms | done | color, honor, armor, favor, behavior, rumor, labor, valor, vigor, neighbor, harbor, endeavor, flavor, savior, splendor, humor, odor, rigor, clamor, ardor, candor, fervor, rancor, vapor, parlor; center, theater, fiber, liter, somber, specter, scepter, saber, meager, luster, caliber, sepulcher, maneuver; catalog, dialog; gray; defense, offense, pretense; license **as a noun** (after a/an/the/his/her/its/their/your/our/my/no/any/this/that/royal); mold, smolder; pajamas; jewelry; single-l travel/cancel/model/label/level/fuel/signal/quarrel/marvel/duel/rival/total/channel/counsel/tunnel/shovel/revel/unravel + -ed/-ing/-er(s). **Not flagged** (the same in both): error, governor, honorary, honorific, vigorous, humorous, rigorous, meter, the verb license, afterwards | same |
+| Code | done | `load_style` / `rule_l013`: message `L013b <key>: American spelling 'color' (Canadian: colour)` / `British spelling 'programme' (Canadian: program)` / `-ise spelling 'realised' (Canadian: -ize / -ization)`. The rule description and `eotg_lint.md` §L013b updated | `eotg_lint.py` `load_style`, `rule_l013`; `eotg_lint.md` |
+| Fixtures | done | `test_b_british` became `test_b_american` (6 hits in one line, plus defense/catalog, traveled, modeled, offense, "the license"); new `test_b_ise_and_british_only`; `test_b_clean_and_exceptions` rewritten in Canadian English, including shared words, the verb license and markup; the exception test uses "the Gray Margrave"; new `test_b_style_data_names` | `tests/test_eotg_lint.py` |
+| Real repo | done | **1 hit**: `localization/english/eotg_augmentation_l_english.yml:54` `eotg_mod_enh_diplomacy_bonus_desc` "predictive response **modeling**" → "modelling". Not fixed here (loc is out of scope for a tools round); added to `eotg_lint_baseline.json` so check_all stays green. **Remove the entry when the loc is fixed.** | baseline |
+| Generated | done | `console_recipes.md` was already stale on the base (`4168bb8` renamed event titles: "More Step Forward", "Resentment in the Ranks", ...); regenerated | `docs/qa/generated/console_recipes.md` |
