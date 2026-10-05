@@ -72,12 +72,18 @@ def main(out_dir, all_loc, root=None):
                 story_roots |= fired
             else:
                 unstarted.append(story)
-    name_re = (r"(?:set_variable|change_variable|remove_variable|has_variable|set_local_variable|"
-               r"save_scope_as|save_temporary_scope_as|save_scope_value_as|save_temporary_scope_value_as|"
-               r"add_character_flag|has_character_flag|remove_character_flag|add_to_variable_list)"
+    # every variable, variable-list, flag and saved-scope form, plain, global_ and local_
+    # (eotg_frontier_active is a global variable list: add_to_global_variable_list, and
+    # read as `variable = eotg_frontier_active` inside any_in_global_list)
+    name_re = (r"\b(?:(?:set|change|remove|has|clamp)_(?:global_|local_)?variable"
+               r"|(?:add_to|is_target_in|clear|has)_(?:global_|local_)?variable_list"
+               r"|remove_list_(?:global_|local_)?variable"
+               r"|save_(?:temporary_)?scope(?:_value)?_as"
+               r"|(?:add|set|has|remove)_\w*flag"
+               r"|variable)"
                r"\s*=\s*(?:\{[^}]*?(?:name|flag)\s*=\s*)?(\w+)")
     script_names = {n for text in script.values() for n in re.findall(name_re, text)}
-    script_names |= {n for text in script.values() for n in re.findall(r"\b(?:var|scope|local_var|flag):(\w+)", text)}
+    script_names |= {n for text in script.values() for n in re.findall(r"\b(?:var|scope|local_var|global_var|flag):(\w+)", text)}
 
     for story in unstarted:
         print(f"!! story cycle {story} is never started (no create_story); its events count as unreached")

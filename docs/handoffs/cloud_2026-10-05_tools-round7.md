@@ -32,3 +32,11 @@
 | Fixtures | done | `test_b_british` became `test_b_american` (6 hits in one line, plus defense/catalog, traveled, modeled, offense, "the license"); new `test_b_ise_and_british_only`; `test_b_clean_and_exceptions` rewritten in Canadian English, including shared words, the verb license and markup; the exception test uses "the Gray Margrave"; new `test_b_style_data_names` | `tests/test_eotg_lint.py` |
 | Real repo | done | **1 hit**: `localization/english/eotg_augmentation_l_english.yml:54` `eotg_mod_enh_diplomacy_bonus_desc` "predictive response **modeling**" → "modelling". Not fixed here (loc is out of scope for a tools round); added to `eotg_lint_baseline.json` so check_all stays green. **Remove the entry when the loc is fixed.** | baseline |
 | Generated | done | `console_recipes.md` was already stale on the base (`4168bb8` renamed event titles: "More Step Forward", "Resentment in the Ranks", ...); regenerated | `docs/qa/generated/console_recipes.md` |
+
+## Item 5(c), from the Frontier error.log notes
+
+| What | Done | How | Where |
+|---|---|---|---|
+| `eotg_frontier_active` reported as missing loc | done (exempt) | It is the global variable list of active Frontiers. px_event_report's whitelist of script-only names now reads every variable, variable-list, flag and saved-scope form, plain, `global_` and `local_` (`add_to_global_variable_list`, `remove_list_global_variable`, `is_target_in_global_variable_list`, `set_global_flag`, …), plus `variable = x` (list iterators) and `global_var:x`. A real missing key is still reported | `docs/tools/px_event_report.py` (`name_re`); `tests/test_px_event_report.py` `test_global_variable_list_is_not_loc` |
+
+Items 5(a) and 5(b) are Frontier script changes, on `claude/frontier-errorlog-cloud` (handoff `docs/handoffs/cloud_2026-10-05_frontier-errorlog.md`).

@@ -59,6 +59,24 @@ class RootWhitelist(unittest.TestCase):
         self.assertEqual(rc, 1, out)
         self.assertIn("missing english loc '%s'" % VAR, out)
 
+    def test_global_variable_list_is_not_loc(self):
+        # error.log, first Frontier launch: eotg_frontier_active reported as missing loc
+        name = "eotg_some_global_list"
+        with open(os.path.join(self.root, "events", "eotg_x.txt"), "a", encoding="utf-8") as fh:
+            fh.write("eotg_x.2 = { immediate = { add_to_global_variable_list = "
+                     "{ name = %s target = this } } }\n"
+                     "eotg_x.3 = { trigger = { any_in_global_list = { variable = eotg_read_only_list "
+                     "count >= 1 } } }\n" % name)
+        cov = [{"language": "english", "defined": 1,
+                "missing": [{"key": k, "file": "events/eotg_x.txt", "line": 3}
+                            for k in (name, "eotg_read_only_list", "eotg_real_missing_key")]}]
+        with open(os.path.join(self.out, "px_locCoverage.json"), "w", encoding="utf-8") as fh:
+            json.dump(cov, fh)
+        rc, out = self.run_report("--root", self.root)
+        self.assertNotIn("'%s'" % name, out)
+        self.assertNotIn("'eotg_read_only_list'", out)
+        self.assertIn("missing english loc 'eotg_real_missing_key'", out)   # real gaps still show
+
     def test_check_all_passes_root(self):
         cmd = C.px_event_report_cmd(self.out, self.root)
         self.assertEqual(cmd[-2:], ["--root", os.path.abspath(self.root)])
