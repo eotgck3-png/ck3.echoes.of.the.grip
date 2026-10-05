@@ -307,21 +307,21 @@ eotg_frontier.002 = {
         }
     }
 
-    # "Push through."
+    # "Push through." The ungated fallback (error.log qa_noopt: an event must
+    # never open with no selectable option), so it is offered in the Without
+    # a Founder variant too. Its effects are guarded instead: a Region that
+    # left the Frontier state while the event was open gets nothing.
     option = {
         name = eotg_frontier.002.b
-        trigger = {
-            scope:eotg_frontier_county = {
-                eotg_frontier_is_frontier = yes
-                eotg_frontier_has_valid_founder = yes
+        scope:eotg_frontier_county = {
+            if = {
+                limit = { eotg_frontier_is_frontier = yes }
+                add_county_modifier = { modifier = eotg_frontier_mod_hard_year  years = 2 }
+                eotg_frontier_add_progress_effect = { AMOUNT = 4 }
+                eotg_frontier_add_strain_effect = { CAUSE = hardship }
+                custom_tooltip = eotg_frontier.002.push_tt
             }
         }
-        scope:eotg_frontier_county = {
-            add_county_modifier = { modifier = eotg_frontier_mod_hard_year  years = 2 }
-            eotg_frontier_add_progress_effect = { AMOUNT = 4 }
-            eotg_frontier_add_strain_effect = { CAUSE = hardship }
-        }
-        custom_tooltip = eotg_frontier.002.push_tt
         ai_chance = {
             base = 30
             modifier = { add = 20  has_trait = stubborn }
@@ -607,14 +607,17 @@ eotg_frontier.004 = {
         }
     }
 
-    # "The work is its own reward."
+    # "The work is its own reward." The ungated fallback (error.log qa_noopt):
+    # eotg_frontier_complete_effect is itself guarded by the Frontier state.
     option = {
         name = eotg_frontier.004.c
-        trigger = {
-            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        scope:eotg_frontier_county = {
+            if = {
+                limit = { eotg_frontier_is_frontier = yes }
+                eotg_frontier_complete_effect = yes
+                custom_tooltip = eotg_frontier.004.complete_tt
+            }
         }
-        scope:eotg_frontier_county = { eotg_frontier_complete_effect = yes }
-        custom_tooltip = eotg_frontier.004.complete_tt
         ai_chance = {
             base = 20
             modifier = { add = 20  has_trait = greedy }

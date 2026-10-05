@@ -232,8 +232,8 @@ The engine needs every county to have a holder and a capital holding (E11). So U
 | `eotg_frontier_tick_year` | the calendar year of the last tick | **Cooldown authority for the yearly tick** (§V, Q9): exactly one tick per in-game year, whoever holds the Region (§6.1). |
 | `eotg_frontier_event_cd` | yes, timed 3 years (owner) | **Cooldown authority for flavor events**, set only in the tick's event roll (§6.4). |
 | `eotg_frontier_attempts` | integer, permanent | Times a project here has ended in abandonment (a persistent trace, design §3.4). |
-| `eotg_frontier_former_type` | type flag, permanent once set | What the last failed project was. |
-| `eotg_frontier_history` | `flag:settled`, permanent | Set on completion. Read by nothing in Phase 1; it's a hook for future systems (design §14). |
+| ~~`eotg_frontier_former_type`~~ | superseded (dropped 2026-10-05) | Was: what the last failed project was. Nothing read it, so error.log reported it as set but never used. |
+| ~~`eotg_frontier_history`~~ | superseded (dropped 2026-10-05) | Was: `flag:settled` on completion, read by nothing (error.log: set but never used). A future system listens to `…_on_settled` instead (design §14). |
 | `eotg_frontier_last_cause` | `flag:no_founder` / `flag:low_control` / `flag:occupied` / `flag:war` / `flag:sponsor_lapsed` / `flag:events` | The latest strain cause. Read by .005's desc (§6.3). |
 | `eotg_frontier_invested` | yes, timed 1 year | Limits Invest to once a year per county (§8.2). |
 | `eotg_frontier_dev_reachable` | development | Q4: the development this project can still reach (§V). |
@@ -258,7 +258,7 @@ All new. Namespace `eotg_frontier`. Files in §11.
 ### 3.1 Data and state
 | Type | Key | Notes |
 |---|---|---|
-| title variables | `eotg_frontier_state`, `_type`, `_progress`, `_strain`, `_founder`, `_sponsor`, `_sponsor_paid`, `_milestone`, `_ticked`, `_event_cd`, `_attempts`, `_former_type`, `_history`, `_last_cause`, `_invested` | §2.4 |
+| title variables | `eotg_frontier_state`, `_type`, `_progress`, `_strain`, `_founder`, `_sponsor`, `_sponsor_paid`, `_milestone`, `_ticked`, `_event_cd`, `_attempts`, `_last_cause`, `_invested` | §2.4 |
 | global variable list | `eotg_frontier_active` | §2.4 |
 | saved scopes (event chains) | `eotg_frontier_county`, `eotg_frontier_founder`, `eotg_frontier_sponsor`, `eotg_frontier_candidate` (founder candidate), `eotg_frontier_old_sponsor`, `eotg_frontier_offer_1/_2/_3` (Sponsor pick); internal: `eotg_frontier_holder`, `_change`, `_heir_sponsor`, `_lapsed_sponsor`, `_leader`, `_sponsor_candidate` | the hook scopes too (§7) |
 | static modifiers (county) | `eotg_frontier_mod_unsettled`, `eotg_frontier_mod_outpost` (progress 0–32), `eotg_frontier_mod_foothold` (33–65), `eotg_frontier_mod_established` (66–99), `eotg_frontier_mod_new_settlement` (10 years after completion), `eotg_frontier_mod_abandoned_works` (10 years after abandonment), `eotg_frontier_mod_hard_year` (2 years, from .002) | each also needs `_desc` loc |
@@ -522,11 +522,11 @@ Strain is an integer from 0 to 4, hidden. Its causes are the tick list (§6.1) p
 `eotg_frontier_complete_effect` runs the type's result (§5.3), then `eotg_frontier_settle_effect`:
 - **Removes** the tier modifier and every `eotg_frontier_*` state variable (state, type, progress, strain, founder, sponsor, paid, milestone, event_cd, last_cause, invested).
 - **Removes** the county from `eotg_frontier_active` and from the founder's and sponsor's lists.
-- **Sets** `eotg_frontier_history = flag:settled` and adds `eotg_frontier_mod_new_settlement` (10 years).
-- **Keeps** `eotg_frontier_attempts` and `eotg_frontier_former_type` as history.
+- **Adds** `eotg_frontier_mod_new_settlement` (10 years). No settled flag is kept (superseded 2026-10-05: nothing read it).
+- **Keeps** `eotg_frontier_attempts` and `eotg_frontier_dev_granted` as history.
 - **Fires** `…_on_project_completed`, then `…_on_settled`.
 
-After that the county is a normal county. No Frontier code reads it again. The `eotg_frontier_history` flag exists only for future systems.
+After that the county is a normal county. No Frontier code reads it again. Future systems listen to `…_on_settled`.
 
 ### 6.6 Failure and abandonment (design §3.4, §12)
 **`eotg_frontier.005` *The Frontier Falters*** offers (contextual, design §12 "a failed project may"):
@@ -538,7 +538,7 @@ After that the county is a normal county. No Frontier code reads it again. The `
 **AI resolution, no event:** (d) if possible; else (b) if gold ≥ 2 × minor; else (a).
 
 **Abandonment** (`eotg_frontier_abandon_effect`, from .005, the Abandon decision or the debug flow):
-- `state = flag:abandoned`, `attempts +1`, `former_type = type`.
+- `state = flag:abandoned`, `attempts +1`.
 - Clear the founder, sponsor, progress, strain and lists.
 - −1 development if milestone ≥ 1 ("lose infrastructure").
 - Add `eotg_frontier_mod_abandoned_works` (10 years: the ruins of the attempt, a small tax line, a description). The `abandoned` state then stays, so the county shows as resettlable.
@@ -632,7 +632,7 @@ Every event moves or reads Establishment (progress) or its pressure (strain), as
 | ID | Title (draft) | Fired by | Root | Options | Couples |
 |---|---|---|---|---|---|
 | `.001` | *An Opportunity Here* (start) | `eotg_decision_frontier_establish` | the taker; `scope:eotg_frontier_county`, `scope:eotg_frontier_candidate` | One option per **type** (7; the Administrative option also needs `eotg_frontier_admin_eligible`), each starting the project with the candidate as founder. **"Not now"** refunds the cost. | **sets** progress (0, or the trace bonus); the start hook |
-| `.002` | *A Hard Year* (complication) / *The Frontier Without a Founder* (variant) | tick event roll (player holders) | the holder; `scope:eotg_frontier_county` | **Complication:** **(a)** "Ship in supplies": `minor_gold_value`, strain −1. **(b)** "Push through": progress +8, strain +1 (cause `hardship`). **(c)** [has a sponsor] "Call on the backer": the sponsor makes one extra payment, strain −1. **Without a Founder** (the founder is invalid): **(d)** "Appoint [eotg_frontier_candidate.GetName]": founder = the best candidate. **(e)** "Lead it yourself": founder = root. **(f)** "Let them manage alone": no founder; strain stays. The desc varies by strain band (0–1, 2, 3+). | moves strain or progress; sets the founder |
+| `.002` | *A Hard Year* (complication) / *The Frontier Without a Founder* (variant) | tick event roll (player holders) | the holder; `scope:eotg_frontier_county` | **Complication:** **(a)** "Ship in supplies": `minor_gold_value`, strain −1. **(b)** "Push through": progress +8, strain +1 (cause `hardship`). **(c)** [has a sponsor] "Call on the backer": the sponsor makes one extra payment, strain −1. **Without a Founder** (the founder is invalid): **(d)** "Appoint [eotg_frontier_candidate.GetName]": founder = the best candidate. **(e)** "Lead it yourself": founder = root. **(f)** "Let them manage alone": no founder; strain stays. **(b) is ungated** (2026-10-05, error.log qa_noopt), so the variant offers it too; its effects run only while the Region is a Frontier. In .004, **(c)** "The work is its own reward" is likewise ungated. The desc varies by strain band (0–1, 2, 3+). | moves strain or progress; sets the founder |
 | `.003` | *An Offer of Backing* (sponsor offer) | tick event roll (an AI candidate offers to a player holder), or `.010` (a player offers to any holder) | the holder; `scope:eotg_frontier_sponsor` = the offerer; `scope:eotg_frontier_county` | **(a)** Accept: set the sponsor; progress +5 (the first shipment). **(b)** Refuse. AI chance: by opinion of the offerer. | sets the sponsor; moves progress |
 | `.004` | *No Longer a Frontier* (completion) | tick resolve | the holder | The new System stays with the holder (§R). The options reward the founder (ruling Q12): **(a)** "A purse for [founder]": the holder pays `minor_gold_value`, which goes to the founder. **(b)** "Honor them publicly": the founder gains prestige, the holder a little. **(c)** "The work is its own reward": nothing. **(a)** and **(b)** are shown only when the founder is valid and is not the holder. Every option runs completion → settled. Desc variant per type. | completes Establishment (progress → Settled) |
 | `.005` | *The Frontier Falters* (failure) | tick resolve (strain 8) | the holder | §6.6 a–d. The desc names `eotg_frontier_last_cause`. | resets or ends progress; strain |

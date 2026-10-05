@@ -731,7 +731,9 @@ eotg_frontier_create_leader_effect = {
 }
 
 # Clears the Frontier: normal CK3 takes over (design §3.3). Keeps only the
-# history (attempts, former type, development granted, settled). The
+# history (attempts, development granted). Nothing marks a Region as settled:
+# no Frontier code would read it (error.log, first launch); a future system
+# can listen to the settled hook. The
 # completed hook fires with the project intact; settled fires after the
 # clear, with the scopes saved before it (spec §7, Q8).
 eotg_frontier_settle_effect = {
@@ -740,7 +742,6 @@ eotg_frontier_settle_effect = {
     eotg_frontier_unlist_effect = yes
     eotg_frontier_clear_project_effect = yes
     remove_variable = eotg_frontier_state
-    set_variable = { name = eotg_frontier_history  value = flag:settled }
     eotg_frontier_update_tier_modifier_effect = yes
     add_county_modifier = { modifier = eotg_frontier_mod_new_settlement  years = 10 }
     eotg_frontier_trigger_hook_effect = { HOOK = eotg_frontier_on_settled }
@@ -786,13 +787,13 @@ eotg_frontier_abandon_effect = {
             limit = { always = $FAILED$ }
             eotg_frontier_trigger_hook_effect = { HOOK = eotg_frontier_on_project_failed }
         }
-        # Traces (design §3.4): the count, the type, the ruins
+        # Traces (design §3.4): the count and the ruins. The failed type is not
+        # kept: nothing reads it (error.log, first launch)
         if = {
             limit = { NOT = { has_variable = eotg_frontier_attempts } }
             set_variable = { name = eotg_frontier_attempts  value = 0 }
         }
         change_variable = { name = eotg_frontier_attempts  add = 1 }
-        set_variable = { name = eotg_frontier_former_type  value = var:eotg_frontier_type }
         # Lose infrastructure built during the attempt (Q5: kept)
         if = {
             limit = { var:eotg_frontier_milestone >= 1 }
@@ -829,7 +830,9 @@ eotg_frontier_restart_effect = {
 # == Debug readout (approved test tooling; verification §2 "Readout") =========
 # For each Frontier the taker holds, a toast with the hidden numbers: progress,
 # strain, and the completion floors against the current values. The numbers
-# are copied into short-lived county variables so the loc reads plain Var().
+# are copied into short-lived county variables so the loc reads plain Var(),
+# and script reads them back to pick the toast: floors met, or still waiting
+# (a real read, so error.log has no "set but never used" for them).
 # CHARACTER scope (the debug decision's taker).
 eotg_frontier_debug_readout_effect = {
     every_held_title = {
@@ -842,10 +845,24 @@ eotg_frontier_debug_readout_effect = {
         set_variable = { name = eotg_frontier_debug_floor_control  value = eotg_frontier_min_control_value  days = 30 }
         set_variable = { name = eotg_frontier_debug_dev  value = eotg_frontier_current_dev_value  days = 30 }
         set_variable = { name = eotg_frontier_debug_control  value = eotg_frontier_current_control_value  days = 30 }
-        root = {
-            send_interface_toast = {
-                title = eotg_frontier_debug_readout_toast
-                left_icon = root
+        if = {
+            limit = {
+                var:eotg_frontier_debug_dev >= var:eotg_frontier_debug_floor_dev
+                var:eotg_frontier_debug_control >= var:eotg_frontier_debug_floor_control
+            }
+            root = {
+                send_interface_toast = {
+                    title = eotg_frontier_debug_readout_toast
+                    left_icon = root
+                }
+            }
+        }
+        else = {
+            root = {
+                send_interface_toast = {
+                    title = eotg_frontier_debug_readout_toast_waiting
+                    left_icon = root
+                }
             }
         }
     }
