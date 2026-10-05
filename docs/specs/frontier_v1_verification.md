@@ -17,7 +17,7 @@ Apply every MUST and SHOULD item on the same branch, re-run the tools, and push.
 - Nothing contradicts canon at 866.
 - No named factions, no Void, no tech-ceiling breach.
 - No medieval words.
-- US spelling, no dashes, BOM present.
+- ~~US spelling~~ Canadian English (supersedes US spelling: owner ruling 2026-10-04, loc commit 4168bb8), no dashes, BOM present.
 - Glossary used correctly (Region, System, Port, Bastion, Sanctum).
 
 ### MUST
@@ -47,7 +47,7 @@ Apply every MUST and SHOULD item on the same branch, re-run the tools, and push.
 - **I5. `.004.desc_mining`** becomes "\n\nThe mines are running steadily, and the ore is paying its way." (once Settled, there is no next stage)
 - **I6. `.010.desc`** becomes "Other rulers are trying to settle open Regions, and some could use a backer. Whichever you choose, its holder will decide whether to take your money."
 - **R1. `.004.a`** becomes "Pay [eotg_frontier_founder.GetFirstName] well, for all of it." ("a purse" is court language)
-- **R2. `eotg_frontier_mod_unsettled_desc`** becomes "No permanent settlement has taken hold here yet. Systems remain open for settlement, along with whatever earlier travelers left behind." (passive "recognized" implies a registry)
+- **R2. `eotg_frontier_mod_unsettled_desc`** becomes "No permanent settlement has taken hold here yet. Systems remain open for settlement, along with whatever earlier travellers left behind." ("travellers": Canadian English, owner ruling 2026-10-04, 4168bb8) (passive "recognized" implies a registry)
 
 ### OPTIONAL (owner's taste, §4)
 - **R3. `.003.desc`:** "The offer comes with no claim attached. If the Frontier succeeds, [eotg_frontier_sponsor.GetSheHe] will share the credit. If it fails, the loss."

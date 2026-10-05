@@ -9,7 +9,7 @@
 - congenital re-activation (§5.9);
 - heir.006 kinslayer (§5.0);
 - the 5-year Embrace cooldown (§5.0);
-- US spelling (§8).
+- ~~US spelling~~ (§8); superseded: Canadian English (supersedes US spelling: owner ruling 2026-10-04, loc commit 4168bb8).
 
 The exact player-facing wording is in the lore-keeper's report, which goes to the localizer directly. It covers the toasts, the Pursue decision, the sought descs, the Embrace roll, the Heir/Patron/Retinue variants and the license clause. This spec states the rules. Where it quotes a line, the quote is binding.
 
@@ -811,7 +811,7 @@ From index §5 (lore review 2026-10-03, binding) and `OLD PROJECT VERSION/docs/S
     - a misled fracture.011 is indistinguishable from a genuine no-witness event;
     - a reveal fires only when the player was actually misled.
 11. **Congenital (lore M6):** never "cure", "fix", "correct", "defect", "deformity" or "normal".
-12. **US spelling throughout** (license, honor, color) in all new and changed text.
+12. ~~**US spelling throughout** (license, honor, color) in all new and changed text.~~ **Superseded:** Canadian English (supersedes US spelling: owner ruling 2026-10-04, loc commit 4168bb8); e.g. licence (noun), honour, colour.
 8. Congenital masking (init.006.f) is hardware compensation, not a cure. The genes pass on: `make_trait_inactive`.
 
 Lore review complete (2026-10-04): must-fixes M1–M8 are applied above. The exact wording is in the lore-keeper's report, which goes to the localizer.
@@ -908,6 +908,6 @@ Make one change set per run, and rerun before touching event content.
 - next: eotg-scripter
 - ask: After batch A (round 2 §7.1) lands, build Part B1 of `docs/specs/cybernetics_v2_balance.md` (§5.1, 5.2, 5.3, 5.5, 5.10 and the script-values file). Hand B1 to QA, then build the throwaway observer sub-mod (§9.2) for the human's 50-year run. Build Part B2 (§5.4, 5.6, 5.7, 5.8, 5.9); lore review is complete (M1–M8 applied), so B2 is not blocked.
 - files: docs/specs/cybernetics_v2_balance.md
-- needs-loc: §7 (~96 keys) using the lore-keeper report's exact wording; lore M1–M8 and US spelling bind
+- needs-loc: §7 (~96 keys) using the lore-keeper report's exact wording; lore M1–M8 and Canadian English (supersedes US spelling: owner ruling 2026-10-04, loc commit 4168bb8) bind
 - needs-lore: none (M1–M8 applied 2026-10-04; the localizer works from the lore-keeper report)
 - needs-human: run the 50-year observer run (§9.2) after B1; in-game checks §9.1; the orchestrator adds `common/script_values/` to the CLAUDE.md placement table (HQ1 and HQ2 resolved 2026-10-04)

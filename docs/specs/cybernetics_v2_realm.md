@@ -567,7 +567,7 @@ HQ2 (balance §0): at game year 30, **25–40%** of AI count-tier-and-above rule
 
 Rules:
 - index §5 items 1–8 and today's never-name extension;
-- US spelling ("Favor", "license" as noun and verb);
+- ~~US spelling ("Favor", "license" as noun and verb)~~ Canadian English (supersedes US spelling: owner ruling 2026-10-04, loc commit 4168bb8); shipped as "Favoured";
 - bare `[x.GetName]`;
 - appended desc lines start with `\n\n`;
 - **no tooltip, toast, law `_effects`, court-position text or desc quantifies risk or odds**;

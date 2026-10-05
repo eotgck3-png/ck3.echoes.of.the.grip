@@ -49,9 +49,9 @@ The step-5 list, with the trigger on the champion:
 
 | Weight | Trigger | Event |
 |---|---|---|
-| 15 | tier 2–3, risk ≥ 30 | nr.003 *Something Is Wrong With Them* |
+| 15 | tier 2–3, risk ≥ 30 | nr.003 *Something Is Wrong* |
 | 20 | tier 3 with risk ≥ 60, or Neurofractured | nr.004 *The Champion's Mistake* |
-| 10 | `is_knight = no`, tier 2+ | nr.005 *Not Quite Them* |
+| 10 | `is_knight = no`, tier 2+ | nr.005 *A Changed Champion* |
 | 100 | — | nothing |
 
 Weights ×1.5 for `eotg_flag_aug_iron_retinue` characters (`modifier = { factor = 1.5 … }`).
@@ -90,7 +90,7 @@ Root is the liege. `scope:eotg_champion` is the non-ruler. Every event's `trigge
 - **d [ambitious]** "I want more of them." The liege gets `eotg_flag_aug_want_more` 5 years, which raises nr.001's base chance to 6% and the Arms Race weight ×1.5.
 - **e [craven]** "Keep them beside me." Admiration. Risk −3.
 
-**nr.003 Something Is Wrong With Them (NR-03).**
+**nr.003 Something Is Wrong (NR-03).** (Was "Something Is Wrong With Them"; retitled 2026-10-04, owner-approved, 4168bb8.)
 - **a** "Pay for their maintenance." `minor_gold_value`. Risk −10.
 - **b** "Relieve them of duty." Disgust. Risk −5.
 - **c** "Ignore it." Risk +5.
@@ -106,7 +106,7 @@ Root is the liege. `scope:eotg_champion` is the non-ruler. Every event's `trigge
 
 Options a–d carry helper wound for the liege: their champion, their responsibility.
 
-**nr.005 Not Quite Them (NR-05).** `immediate`: `scope:eotg_champion = { eotg_aug_scramble_personality_effect = yes }` (Phase 3a effect). **If Phase 3a has not shipped,** use `add_trait = paranoid` when they are not `trusting` and not already paranoid. The desc is generic; the vanilla trait-gain and trait-loss tooltips name what changed (*CB-26 S19*).
+**nr.005 A Changed Champion (NR-05).** (Was "Not Quite Them"; retitled 2026-10-04, owner-approved, 4168bb8.) `immediate`: `scope:eotg_champion = { eotg_aug_scramble_personality_effect = yes }` (Phase 3a effect). **If Phase 3a has not shipped,** use `add_trait = paranoid` when they are not `trusting` and not already paranoid. The desc is generic; the vanilla trait-gain and trait-loss tooltips name what changed (*CB-26 S19*).
 - **a** "Talk to them." Risk −5.
 - **b** "Send them away." `move_to_pool`.
 - **c** "Watch." Risk +3.

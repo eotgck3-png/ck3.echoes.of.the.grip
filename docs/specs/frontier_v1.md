@@ -643,7 +643,7 @@ Every event moves or reads Establishment (progress) or its pressure (strain), as
 **AI holders** get .001, .004, .005 and .003 (from player offers), and pick by `ai_chance`. They never get .002, and never get .003 from AI offers, which resolve in script.
 
 ## 10. Loc surface (`localization/english/eotg_frontier_l_english.yml`), as built: 118 keys
-UTF-8 with BOM, bare `[x.GetName]`, gendered pronouns for single characters, US English, no em dashes. Glossary words (ruling Q1): **Region** (county), **System** (barony or holding), **Port**, **Bastion**, **Sanctum**.
+UTF-8 with BOM, bare `[x.GetName]`, gendered pronouns for single characters, ~~US English~~ Canadian English (supersedes US spelling: owner ruling 2026-10-04, loc commit 4168bb8), no em dashes. Glossary words (ruling Q1): **Region** (county), **System** (barony or holding), **Port**, **Bastion**, **Sanctum**.
 - **Events:**
   - `.001`–`.005` and `.010`: `.t`, `.desc`, option keys `.a`–`.h`;
   - variants: `.001.desc_resettle`; `.002.t_no_founder`; `.002.desc_low/_mid/_high/_no_founder`; `.003.desc_replace`; `.004.desc_<type>` ×7; `.005.desc_<cause>` ×6;

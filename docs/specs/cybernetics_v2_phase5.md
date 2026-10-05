@@ -241,7 +241,7 @@ Every knight augmented through the story gets `eotg_flag_aug_iron_retinue` and `
 - **d [ambitious]** "Them, and the next." Two knights (second via `ordered_knight`). `phase = 3`.
 - **e [compassionate]** "Only if they truly want it." As a; the volunteer gets reassured.
 
-**.002 More Ask.** Saved `eotg_cand_a`, `eotg_cand_b`.
+**.002 More Step Forward.** (Was "More Ask"; retitled 2026-10-04, owner-approved, 4168bb8.) Saved `eotg_cand_a`, `eotg_cand_b`.
 - **a** "Both." 2× `minor_gold_value`.
 - **b** "The stronger one." One install; the other gets `eotg_opinion_aug_passed_over`.
 - **c** "Neither." Both get passed over.
@@ -259,7 +259,7 @@ All set `phase = 3`.
 
 `phase = 4`.
 
-**.004 The Unaugmented Resent.** Every unaugmented knight gets `eotg_opinion_aug_passed_over`.
+**.004 Resentment in the Ranks.** (Was "The Unaugmented Resent"; retitled 2026-10-04, owner-approved, 4168bb8.) Every unaugmented knight gets `eotg_opinion_aug_passed_over`.
 - **a** "Augment them too." `minor_gold_value` each (cap 3); install.
 - **b** "Honour the unaugmented." `medium_gold_value`; replace passed_over with reassured.
 - **c** "Let them resent." Retinue knights risk +3 each (isolation).

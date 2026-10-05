@@ -355,7 +355,7 @@ With option 4: the "= no" sites always pass; 0030.a and 0022.b are never offered
 
 ## 4. Loc drafts
 
-All lines are in `localization/english/eotg_void_l_english.yml` unless marked `eotg_l_english.yml`. I re-read every line and key. Current text is verbatim, trimmed with … where long. Proposals use American spelling, keep the Void **external** (at the edge of hearing, from an unnamed source), name Orrin only as a belief, and drop the hard-coded year count. The v1 strings have no `[…]` functions to preserve.
+All lines are in `localization/english/eotg_void_l_english.yml` unless marked `eotg_l_english.yml`. I re-read every line and key. Current text is verbatim, trimmed with … where long. Proposals use American spelling (superseded: Canadian English (supersedes US spelling: owner ruling 2026-10-04, loc commit 4168bb8)), keep the Void **external** (at the edge of hearing, from an unnamed source), name Orrin only as a belief, and drop the hard-coded year count. The v1 strings have no `[…]` functions to preserve.
 
 | Line | Key | Current (verbatim) | Proposed |
 |---|---|---|---|

@@ -401,7 +401,7 @@ All under `D:/SteamLibrary/steamapps/common/Crusader Kings III/game/`.
 
 **General rules:**
 - index §5 items 1–8, plus the never-name list (index §5.3 and its extensions in the procedures, realm and reprisal lore files);
-- US spelling; bare `[x.GetName]`; appended lines start with `\n\n`;
+- ~~US spelling~~ Canadian English (supersedes US spelling: owner ruling 2026-10-04, loc commit 4168bb8); bare `[x.GetName]`; appended lines start with `\n\n`;
 - **no number, and no "risk", "odds" or "chance"** in any tooltip or desc (the hidden rule). The engine's own modifier tooltip shows `health`; nothing else is quantified.
 
 **The hardware's register.** With the hardware as subject, never:

@@ -282,7 +282,7 @@ All paths under `D:/SteamLibrary/steamapps/common/Crusader Kings III/game/`.
 
 ## 7. Loc surface (eotg-localizer)
 
-13 new keys plus 1 revised shipped key, dot form (index §0), UTF-8 BOM, bare `[x.GetName]`, US spelling, appended descs start with `\n\n`. No `replace/` override. **No number and no "risk", "odds" or "chance"** in any of them.
+13 new keys plus 1 revised shipped key, dot form (index §0), UTF-8 BOM, bare `[x.GetName]`, ~~US spelling~~ Canadian English (supersedes US spelling: owner ruling 2026-10-04, loc commit 4168bb8), appended descs start with `\n\n`. No `replace/` override. **No number and no "risk", "odds" or "chance"** in any of them.
 
 **The renderings in [cybernetics_v2_reprisal_lore.md](cybernetics_v2_reprisal_lore.md) §Renderings are binding** (P2–P7). The localizer may polish them within the rules below, but does not rewrite them. They are not copied here, so there is one source.
 

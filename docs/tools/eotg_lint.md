@@ -202,7 +202,7 @@ From the owner's loc review (2026-10-04). Applies to values in `localization/**/
 
 **L013a: em or en dash.** Any `—` or `–` in a value. *Why:* the owner removed them all from mod prose. Use a comma, colon, full stop or parentheses. *False positives:* none expected; a hyphen `-` is not flagged.
 
-**L013b: British spelling.** *Why:* the house standard is US English.
+**L013b: British spelling.** *Why:* the house standard is US English [SUPERSEDED 2026-10-04: the house standard is now CANADIAN English; L013b is being rebuilt to flag American forms and -ise (tools round 7). The interim data in eotg_lint_style.json is already Canadian-correct.].
 - **How it matches:** whole words, case-insensitive, on the **visible text** (`[functions]`, `$KEYS$` and `#formatting` removed first).
 - **The list:** catalogue, afterwards, colour, armour, honour, favour, behaviour, rumour, labour, valour, vigour, neighbour, harbour, splendour, defence, offence, centre, metre, programme, travelled/-ing/-er, cancelled/-ing, labelled/-ing, grey, plough, analyse/paralyse, each with its inflections.
 - **`-ise` forms:** any word ending in -ise/-ised/-ises/-ising/-isation(s) is flagged, unless its base form (turned back into `-ise`) is in `ise_exceptions`. That list covers rise, wise, noise, promise, precise, otherwise, raise, surprise, exercise and about 60 more.

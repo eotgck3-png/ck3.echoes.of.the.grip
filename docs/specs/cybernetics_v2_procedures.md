@@ -635,7 +635,7 @@ All under `D:/SteamLibrary/steamapps/common/Crusader Kings III/game/`.
 
 Rules:
 - index §5, items 1–8;
-- US spelling (balance §8);
+- ~~US spelling (balance §8)~~ Canadian English (supersedes US spelling: owner ruling 2026-10-04, loc commit 4168bb8);
 - bare `[x.GetName]`;
 - appended desc lines start with `\n\n`;
 - **no tooltip quantifies risk or odds** (the hidden rule; duel-style percentages appear nowhere here);

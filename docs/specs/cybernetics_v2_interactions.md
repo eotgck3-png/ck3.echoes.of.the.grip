@@ -774,7 +774,7 @@ HQ2 (balance §0): at game year 30, **25–40%** of AI count-tier-and-above rule
 
 Rules:
 - index §5 items 1–8 and today's never-name extension;
-- US spelling;
+- ~~US spelling~~ Canadian English (supersedes US spelling: owner ruling 2026-10-04, loc commit 4168bb8);
 - bare `[x.GetName]`;
 - appended desc lines start with `\n\n`;
 - **no tooltip, toast or desc quantifies risk or odds**. The scheme's vanilla success-chance UI is not ours.

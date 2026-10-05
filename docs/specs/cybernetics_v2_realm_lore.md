@@ -57,7 +57,7 @@
   - Ban: "Augmentation Prohibited"
   - License: "Augmentation Licensed"
   - Tolerate: "Augmentation Tolerated"
-  - Favor: "Augmentation Favored"
+  - Favor: "Augmentation Favoured"
 - **Court position:** "Implant Technician".
 - **Interaction:** "Borrow Their Technician" (replaces "Lend Your Surgeon").
 - **Events:**
@@ -87,17 +87,17 @@ The localizer may polish these. No numbers, and no "risk", "odds" or "chance". A
 - **tolerate** "Augmentation Tolerated"
   - _effects "Your law says nothing on augmentation."
   - _desc "What anyone has fitted is their own affair."
-- **favor** "Augmentation Favored"
+- **favor** "Augmentation Favoured"
   - _effects "You hold the augmented in open regard at your court.\nOffers of implant work come more readily.\nFewer look closely at back-street work."
   - _desc "Your court makes no secret of whose company it prefers."
-- cooldown_tt "The Augmentation law was changed too recently."
+- cooldown_tt "The Augmentation law has not been changed recently" (synced 2026-10-04 to the shipped `eotg_aug_policy_cooldown_tt`; it is a `custom_description` that renders as a met/unmet condition, so the shipped form stands)
 - set_by_liege_tt "Set by the ruler at the head of your realm, for all of it."
 - clinic_closed_tt "No sanctioned clinic operates where augmentation is prohibited."
 
 **AI and Demand amendments**
 - REFUSAL_IS_CRIME "Refusing would break their realm's law"
 - BANNED "Prohibited in their realm"
-- FAVORED "Favored in their realm"
+- FAVORED "Favoured in the realm" (shipped wording; Canadian spelling, 4168bb8)
 - demand_removal_crime_desc "\n\nUnder the law of your realm, refusing this order is a crime."
 - demand_crime_toast "[recipient.GetName] Refuses a Lawful Order". Body: "Refusing was a crime under your realm's law. You have reason to imprison [recipient.GetHerHim]."
 

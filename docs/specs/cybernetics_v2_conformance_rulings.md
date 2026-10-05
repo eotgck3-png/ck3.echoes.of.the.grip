@@ -95,7 +95,7 @@ These are the titles changed in `5a97355`, plus three earlier drifts found by th
 | init.005 | A Familiar Change | **Back From the Capital** |
 | tier2.005 | The Confessor's Warning | **The Advisor's Warning** |
 | fracture.024 | The Familiar Change | **The Same Pattern** |
-| nr.005 (5a97355) | The Familiar Change | **Not Quite Them** |
+| nr.005 (5a97355; retitled 2026-10-04, owner-approved, 4168bb8) | The Familiar Change, then Not Quite Them | **A Changed Champion** |
 | countdown.005 (5a97355) | No One Asks Any More | **No One Asks Anymore** |
 | fracture.019 (earlier) | The False Traitor | **The Flagged Name** |
 | fracture.022 (earlier) | The Second Voice | **We** |
@@ -111,7 +111,7 @@ All are small. None touches patron.004, patron.006, the critic trigger or the be
 | # | Owner | Finding | Instruction |
 |---|---|---|---|
 | **W1** | scripter | M1 | (1) `common/modifiers/eotg_augmentation_modifiers.txt`, next to `eotg_mod_aug_optimised_levies`: add `eotg_mod_aug_optimised_levies_trimmed = { icon = stewardship_positive  domain_tax_mult = 0.05 }`, with no `vassal_opinion`. (2) In `eotg_aug_tier2.011` option c, change the success branch's `add_character_modifier` to the trimmed key (still `years = 3`). Keep the steward gate and the weight. (3) Add `remove_character_modifier = eotg_mod_aug_optimised_levies_trimmed` to `eotg_clean_all_aug_modifiers`, under the Phase 4 block. |
-| **W1-loc** | localizer | M1 | Add `eotg_mod_aug_optimised_levies_trimmed` (name, e.g. "Trimmed Levy Plan") and `eotg_mod_aug_optimised_levies_trimmed_desc`. The desc says the steward cut the parts the vassals would have felt; it does not quantify. `eotg_aug_tier2.011.c.success` is unchanged. US spelling. |
+| **W1-loc** | localizer | M1 | Add `eotg_mod_aug_optimised_levies_trimmed` (name, e.g. "Trimmed Levy Plan") and `eotg_mod_aug_optimised_levies_trimmed_desc`. The desc says the steward cut the parts the vassals would have felt; it does not quantify. `eotg_aug_tier2.011.c.success` is unchanged. ~~US spelling.~~ Canadian English (supersedes US spelling: owner ruling 2026-10-04, loc commit 4168bb8). |
 | **W2** | scripter | M4 | `eotg_aug_init.006` option e: replace both the `gold >=` trigger value and the `remove_short_term_gold` value with plain `medium_gold_value` (drop the physician `if`/`multiply = 0.75`). Fix the comment: "As a, plus a lesson; full price, as a." |
 | **W3** | scripter | M6 | `eotg_clean_all_aug_modifiers`: add `remove_character_modifier = eotg_mod_aug_patron_throttle`. Reword the Phase 5 comment: the clause modifiers stay (the debt survives), and the throttle goes with the firmware. Do not touch `eotg_aug_patron_betray_effect` (CB-27 M7 is in it). **Done.** The betray-effect half followed after M7, as the follow-up below; see §4. |
 | **W4** | scripter | L14 | `eotg_aug_forget_relation_effect`: inside the closing `if = { limit = { exists = scope:eotg_forgotten } … }`, after the opinion, add `hidden_effect = { send_interface_toast = { title = eotg_aug_forget_relation_toast  left_icon = scope:eotg_forgotten } }`. Same shape as tier3.014.b (vanilla hunt.8540). |

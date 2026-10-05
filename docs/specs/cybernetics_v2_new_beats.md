@@ -288,7 +288,7 @@ No deviation from vanilla shape.
 
 ## 7. Loc surface (eotg-localizer)
 
-21 keys, dot form (index §0), UTF-8 BOM, bare `[x.GetName]` / `[x.GetFirstName]`, one definition each. US spelling. No `replace/` override.
+21 keys, dot form (index §0), UTF-8 BOM, bare `[x.GetName]` / `[x.GetFirstName]`, one definition each. ~~US spelling.~~ Canadian English (supersedes US spelling: owner ruling 2026-10-04, loc commit 4168bb8). No `replace/` override.
 
 **heir (11)**
 
