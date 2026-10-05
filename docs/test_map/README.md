@@ -90,6 +90,10 @@ That script logs errors and does nothing; it does not stop the game.
 - `history/provinces/00_provinces.txt`: `culture`, `faith` and `rite` added on the 28 county capitals (a county with
   no culture or faith breaks), and the empty slots of the four "full" counties above filled with cities and temples.
 
+- **Adjacency reverted (2026-10-05).** CK3Gen exported the crossing as `79;42;sea;-1;...`. A `sea` crossing needs a
+  sea-zone id in `Through` (every vanilla row has one; `-1` appears only in the end-of-file row), and the comment
+  contained a non-ASCII arrow. Tiger reports `expected province id`, and the import was followed by two crashes in
+  a row. The file is back to just the header and the end row. Report this to CK3Gen before importing again.
 - **First-load crash fix (2026-10-05).** The first launch crashed while loading history. Two vanilla files named
   titles that the test map removes, and both are now overridden by files of the same name:
   - `history/titles/ce3/00_ecclesiastical_titles.txt` is an empty file. **`replace_path` does not reach
@@ -98,7 +102,7 @@ That script logs errors and does nothing; it does not stop the game.
     Copy it from vanilla again after a CK3 update.
 
 - **Re-import 2026-10-05** (CK3Gen `Output/Test`): the same 103 provinces, `provinces.png`, titles and title loc. Taken
-  from it: `heightmap.png`, `rivers.png`, `adjacencies.csv` (new crossing 79 Caelestis to 42 The Verge) and
+  from it: `heightmap.png`, `rivers.png`, `adjacencies.csv` (a new crossing, 79 Caelestis to 42 The Verge; since REVERTED, see below) and
   `geographical_region.txt` (adds empty `material_*` and other filler regions). Not taken: its `00_provinces.txt`
   (the raw export, without our culture, faith and holding edits above) and `gfx/map/stellar_winds_flow.png`
   (no game file reads it; it is the input for animating the Stellar Winds in the map shader, if that ever lands).
