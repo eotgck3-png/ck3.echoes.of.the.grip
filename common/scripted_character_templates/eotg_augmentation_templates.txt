@@ -5,10 +5,17 @@
 # root.culture / root.faith by scope (index §1 rule 9, map-agnostic).
 # ─────────────────────────────────────────────────────────────────────────────
 
-# The syndicate envoy (cybernetics_v2_phase5.md §2.2). Callers:
-# eotg_aug_patron_accept_effect (patron.001 a, c, d) and eotg_aug_patron.007.
+# The syndicate envoy (cybernetics_v2_phase5.md §2.2), and the collector who
+# buys the paper (reprisal spec §5.4; lore P6: always gendered). Callers:
+# eotg_aug_patron_accept_effect (patron.001 a, c, d), eotg_aug_patron.007 and
+# eotg_aug_patron.009.
 eotg_aug_patron_envoy_template = {
     age = { 35 55 }
+    # Gender (runtime fix: create_character needs gender data). An even
+    # split, as vanilla's non-noble agent templates
+    # (common/scripted_character_templates/00_court_position_templates.txt:4,
+    # scribe_travel_option_character; :111, stooge_camp_officer_template).
+    gender_female_chance = 50
 
     random_traits_list = {
         count = 1

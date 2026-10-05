@@ -1708,6 +1708,15 @@ eotg_on_combat_aug_knights = {
                         eotg_is_aug_tier2 = yes
                     }
                 }
+                # Runtime fix: set before the first change (the engine reported
+                # it "used but never set"). Vanilla shape:
+                # common/scripted_effects/00_hunt_effects.txt:950-955
+                # (hunt_activity_success_change_effect: NOT exists, set 0,
+                # then change_variable).
+                if = {
+                    limit = { NOT = { has_variable = eotg_aug_nr_battle_bonus } }
+                    set_variable = { name = eotg_aug_nr_battle_bonus  value = 0 }
+                }
                 change_variable = { name = eotg_aug_nr_battle_bonus  add = 2 }
                 clamp_variable = { name = eotg_aug_nr_battle_bonus  min = 0  max = 10 }
             }

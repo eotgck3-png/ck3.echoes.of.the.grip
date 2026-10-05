@@ -9,6 +9,11 @@
 # eotg_frontier_create_leader_effect.
 eotg_frontier_settler_leader_template = {
     age = { 25 45 }
+    # Gender (runtime fix: create_character needs gender data). An even
+    # split, as vanilla's non-noble agent templates
+    # (common/scripted_character_templates/00_court_position_templates.txt:4,
+    # scribe_travel_option_character; :111, stooge_camp_officer_template).
+    gender_female_chance = 50
 
     random_traits_list = {
         count = 1
