@@ -15,7 +15,7 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 |---|---|---|---|---|---|---|
 | `cybernetics` | 1 | 1 | 53 | 53 | 0 | 0 |
 | `cybernetics_v2` | 22 | 22 | 1282 | 1251 | 31 | 0 |
-| `frontier_v1` | 2 | 2 | 166 | 160 | 1 | 5 |
+| `frontier_v1` | 2 | 2 | 161 | 160 | 1 | 0 |
 | `glossary` | 1 | 0 | 1 | 0 | 0 | 0 |
 | `void` | 1 | 0 | 86 | 0 | 0 | 0 |
 
@@ -46,7 +46,7 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | `cybernetics_v2_self_repair.md` | yes | 58 | 55 | 2 | 0 | 1 |
 | `cybernetics_v2_self_repair_lore.md` | yes | 5 | 5 | 0 | 0 | 0 |
 | `cybernetics_v2_trait_depth.md` | yes | 42 | 41 | 1 | 0 | 0 |
-| `frontier_v1.md` | yes | 147 | 139 | 1 | 5 | 2 |
+| `frontier_v1.md` | yes | 146 | 139 | 1 | 0 | 6 |
 | `frontier_v1_open_questions.md` | yes | 21 | 21 | 0 | 0 | 0 |
 | `glossary_proposal_cloud.md` | **no** | 1 | 0 | 0 | 1 | 0 |
 | `void_lift_plan_cloud.md` | **no** | 86 | 0 | 0 | 86 | 0 |
@@ -242,9 +242,9 @@ None.
 #### `docs/specs/frontier_v1.md`
 
 - Specced and present: 139
-- Specced, missing from script (5): `eotg_k_cauldron` (unknown, l.162), `eotg_frontier_hook_started_effect` (effect, l.570), `eotg_frontier_debug` (unknown, l.615), `eotg_aug` (unknown, l.690), `eotg_frontier_on_founder_changed` (unknown, l.760)
+- Specced, missing from script (0): none
 - Referenced only, never defined or set (1): `eotg_lint` (unknown, l.679)
-- Exempt (2): `eotg_frontier_active_count` (unknown, l.39), `eotg_frontier_ticked` (unknown, l.50)
+- Exempt (6): `eotg_frontier_active_count` (unknown, l.39), `eotg_frontier_ticked` (unknown, l.50), `eotg_k_cauldron` (unknown, l.162), `eotg_frontier_hook_started_effect` (effect, l.570), `eotg_frontier_debug` (unknown, l.615), `eotg_frontier_on_founder_changed` (unknown, l.760)
 - Suffix shorthand that matches no key (1, not counted): l.261: `eotg_frontier_state` + `_ticked`
 
 #### `docs/specs/frontier_v1_open_questions.md`

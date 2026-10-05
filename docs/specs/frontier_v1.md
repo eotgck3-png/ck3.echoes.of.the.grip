@@ -159,7 +159,7 @@ Every M and L fact is in §16.
 
 **Contradictions noted between sources** (precedence followed):
 - **Story cycles:** the v1_19 reference (§12) teaches `start_story` / `on_monthly` / `should_end`. The mod's verified v2 story cycles use `create_story` and `effect_group`. v2 wins; this spec uses no story cycle anyway.
-- **Title keys:** `OLD PROJECT VERSION/CONTRIBUTING.md` still shows title keys as `eotg_k_cauldron`, the v1 form that cost the map. CLAUDE.md invariant 2 (tier-first) wins. This spec creates no titles.
+- **Title keys:** `OLD PROJECT VERSION/CONTRIBUTING.md` still shows title keys as `eotg_k_cauldron`, the v1 form that cost the map (rejected). CLAUDE.md invariant 2 (tier-first) wins. This spec creates no titles.
 
 ---
 
@@ -567,7 +567,7 @@ All eight are custom on_actions, defined **empty** in `eotg_frontier_on_actions.
 | `eotg_frontier_on_development_changed` | the milestone effect, and the result effects that change development | — |
 | `eotg_frontier_on_settled` | the settle effect, after the variables are cleared | — |
 
-**Fallback if E17 fails:** call scripted effects with an empty body (`eotg_frontier_hook_started_effect = yes`), which future systems override. That is a weaker pattern: it needs a file override, not additive extension.
+**Fallback if E17 fails** (not built unless it does): call scripted effects with an empty body (`eotg_frontier_hook_started_effect = yes`), which future systems override. That is a weaker pattern: it needs a file override, not additive extension.
 
 ---
 
@@ -612,7 +612,7 @@ All eight are custom on_actions, defined **empty** in `eotg_frontier_on_actions.
 | Option | How | Notes |
 |---|---|---|
 | **A** (recommended) | `is_shown = { debug_only = yes }` | E16, M |
-| B | a game rule `eotg_frontier_debug` (off by default) | needs a game-rule file; has_game_rule is already used by the mod |
+| B | a game rule `eotg_frontier_debug` (off by default) | rejected (A chosen); needs a game-rule file; has_game_rule is already used by the mod |
 | C | shown only to `is_ai = no` while a character flag set from the console is held | always works; less clean |
 
 **Mark unsettled:** effect `capital_county = { eotg_frontier_mark_unsettled_effect = { DEV_LOSS = 0 } }`.
@@ -687,7 +687,7 @@ UTF-8 with BOM, bare `[x.GetName]`, gendered pronouns for single characters, US 
 5. **Founder and sponsor validity:** killing or imprisoning the founder → strain +1 (No Founder) each tick, and the .002 *Without a Founder* variant offers a replacement. Killing a sponsor → at the next tick it passes to their heir, or lapses with +1 strain (Sponsor Lapse).
 6. **Owner change** (grant the county away): the frontier continues under the new holder; the founder and sponsor are unchanged, and the founder stays valid when the new holder is their vassal (Q3); there is no double tick that year.
 7. **AI behaviour (10-year observer run):** active frontiers stay ≤ 8; no AI ruler has more than one; at least one AI frontier starts and resolves.
-8. **Standalone:** nothing reads any `eotg_aug*` or other EotG system (grep). No title, province, culture or faith keys in script (grep for `title:`, `province:`, `culture:`, `faith:`: 0 hits).
+8. **Standalone:** nothing reads any eotg_aug* identifier or other EotG system (grep). No title, province, culture or faith keys in script (grep for `title:`, `province:`, `culture:`, `faith:`: 0 hits).
 9. **No numbers:** no tooltip shows a progress or strain number.
 
 ---
@@ -757,7 +757,7 @@ UTF-8 with BOM, bare `[x.GetName]`, gendered pronouns for single characters, US 
 - **Q5. Sponsor money:** spent on the project (proposed), or paid to the holder?
 - **Q6. One shared "New Settlement" modifier** with type text, or one per type (+7 modifiers)?
 - **Q7. War:** may Establish be taken while at war? (Proposed: no. War adds strain anyway.)
-- **Q8. A founder-change hook:** should the brief's eight hooks gain `eotg_frontier_on_founder_changed`?
+- **Q8. A founder-change hook:** should the brief's eight hooks gain `eotg_frontier_on_founder_changed`? (Owner: no, not built; §A Q8.)
 - **Q9. Withdraw:** from every sponsorship at once (proposed), or one at a time (needs a pick event)?
 - **Q10. Opinion modifiers** between sponsor and holder: Phase 1 or Phase 2 (proposed: Phase 2)?
 - **Q11. The AI cap of 8** active frontiers on the map, at most one per ruler. On the vanilla map, nothing is Unsettled until the debug decision marks it, so AI frontiers only appear in counties marked that way. Is that acceptable for Phase 1 testing?
