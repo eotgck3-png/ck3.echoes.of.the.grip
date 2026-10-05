@@ -220,6 +220,7 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **What:**
   - `eotg_flag_aug_containment_regency` is set and cleared but never read.
   - `eotg_flag_aug_trusted_delegate` (Phase 4) isn't wired into Containment Regency as an optional bonus.
+  - `eotg_flag_aug_trusted_delegate` shows as "set but never used" in error.log. Keep it: it's a reserved optional read (phase4 spec ~l.429). The warning is expected until it's wired in.
   - Pre-v2 events use unprefixed saved-scope names (`aug_peer`, `aug_spouse`, `concerned_vassal`, `confessor`, `other_machine`, `petitioning_knight`, `watching_heir`). These are event-local, not global, so it's cosmetic.
 - **Trigger to revisit:** the next time those events are edited.
 - **Owner:** eotg-scripter
