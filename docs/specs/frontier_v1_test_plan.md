@@ -15,7 +15,7 @@
 - `New Settlement`: completed;
 - `Abandoned Works`: given up.
 
-**The hidden numbers:** take **(Debug) Frontier Readout**. It shows a toast per Frontier you hold, with progress (/100), strain (/8), and development and control against their completion floors.
+**The hidden numbers:** take **(Debug) Frontier Readout**. It shows a toast per Frontier you hold, with progress (/100), strain (/8), and development and control against their completion floors. The toast ends "Floors met." or "Waiting on a floor."
 
 **Pacing (owner decision):** about 10–16 years to Settled unsponsored, 8–10 sponsored. Strain fails a project at 8. Flavor events come at most once every **3 years** per Region (about 4–5 per project at most); to see one sooner, clear the cooldown as in §4 step 1.
 
@@ -105,7 +105,8 @@ For each type: mark a fresh Region Unsettled, Establish, and pick that option in
 
 ## 4. Founder and sponsor
 1. **Founder gone** (ruling Q2: no death event): with the founder dead or imprisoned, clear the event cooldown with `effect capital_county = { remove_variable = eotg_frontier_event_cd }`, then run the debug year.
-   - *The Frontier Without a Founder* offers: appoint a courtier, lead it yourself, or let them manage.
+   - *The Frontier Without a Founder* offers: appoint a courtier, lead it yourself, or let them manage. "Push through" is offered too: it is each event's ungated fallback (error.log, first launch), so the event can never open with nothing to pick.
+   - **Fallbacks:** in every Frontier event at least one option has no trigger. With an event left open after the Region stopped being a Frontier, "Push through" (.002) or "The work is its own reward" (.004) does nothing; "The moment has passed" shows as well.
    - Strain keeps building until someone is appointed.
 2. **A backer offers (AI → you).** The offer comes from your **liege** or an **ally** who is AI, holds a county or more, has gold for four payments, and backs no other Frontier.
    - **Setup:** be a vassal, then `effect liege = { add_gold = 3000 }`. Or have an ally and give them gold the same way through `character:<id>`.
