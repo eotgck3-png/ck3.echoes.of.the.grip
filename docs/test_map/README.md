@@ -105,7 +105,10 @@ That script logs errors and does nothing; it does not stop the game.
   name a `founder =` title, which becomes the rite's first holder. `byzantine_rite`'s founder is `d_et_constantinople`, and
   every other Christian rite except `slavic_rite` also names a vanilla title. A missing founder title crashes history
   loading **with nothing in error.log** (found by elimination: variant C with province history crashed, D without it got
-  through). For the same reason `history/faiths` is replaced with an empty file: vanilla faith history creates founder rites.
+  through). **And vanilla faith history begins at 867.1.1**, the earliest vanilla bookmark. At our 866 start Christianity has no
+  main rite and no rites, so any `rite =` in history crashes. `history/faiths` is therefore replaced by
+  `eotg_test_map_faiths.txt`, which sets `christian_faith` (main rite `slavic_rite`) and `norse_pagan` from 1.1.1. Faiths
+  nobody uses stay "non-created", which `_faith_history.info` allows. **The real 866 map needs the same thing for every faith it uses.**
   Any rite used here must have no `founder`, or a founder title that exists on this map.
 - **`-mapeditor` launches cannot start a game.** Picking a bookmark with `-mapeditor` among the launch options crashes
   after "Setup powerful vassals", with or without mods. Remove it from the launch options for play tests.

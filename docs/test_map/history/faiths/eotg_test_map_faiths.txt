@@ -1,4 +1,23 @@
-﻿# TEST MAP: not mod content. Intentionally empty, so that replace_path="history/faiths" (descriptor.mod)
-# drops vanilla faith history. That history creates rites whose `founder =` titles do not exist on this map
-# (roman_rite -> k_papal_state, byzantine_rite -> d_et_constantinople, ...). A rite with a missing founder
-# title crashed history loading with nothing in error.log (2026-10-05 bisect, variants C/D).
+﻿# TEST MAP: not mod content. Faith history for the two faiths the test map uses, dated before its 866 start.
+# Why (2026-10-05): vanilla 1.20 faith history begins at 867.1.1 (the earliest vanilla bookmark), so at 866 Christianity
+# has no main rite and no rites, and history that sets `rite =` crashes history loading with nothing in error.log.
+# replace_path="history/faiths" drops vanilla's file: its rites name founder titles (roman_rite -> k_papal_state,
+# byzantine_rite -> d_et_constantinople) that do not exist on this map. Shape: vanilla history/faiths/00_christianity.txt
+# and _faith_history.info. Rites used here have no `founder`.
+
+christian_faith = {
+	1.1.1 = {
+		created = yes
+		main_rite = slavic_rite
+		rites = {
+			slavic_rite = {}
+		}
+	}
+}
+
+norse_pagan = {
+	1.1.1 = {
+		created = yes
+		main_rite = norse_pagan
+	}
+}
