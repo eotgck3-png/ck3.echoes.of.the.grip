@@ -26,3 +26,9 @@ docs/tools/terrain_preview.png
 # Generated marker binaries: rebuilt by docs/tools/obj_to_pdxmesh.py and build_marker_assets.py
 # from eotg_marker_source.obj, which IS tracked.
 gfx/models/buildings/eotg_markers/*.dds
+
+# Test-map sub-mod terrain textures: reproducible (build_terrain_index.py / build_colormap.py --level 131
+# against docs/test_map), and too large for GitHub (detail_index.tga is 134 MB > the 100 MB limit).
+# docs/test_map/install.py builds them at install time.
+docs/test_map/gfx/map/terrain/*.tga
+docs/test_map/gfx/map/terrain/*.dds
