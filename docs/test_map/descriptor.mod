@@ -17,6 +17,7 @@ replace_path="common/province_terrain"					# vanilla 01_province_properties.txt 
 replace_path="common/bookmarks/bookmarks"				# vanilla bookmarks name vanilla history_ids and titles
 replace_path="common/bookmarks/groups"					# vanilla groups would sit empty; ours holds the 866 bookmark
 replace_path="common/bookmarks/challenge_characters"	# vanilla challenge characters name vanilla characters and titles (c_kerak, ...)
+replace_path="history/faiths"							# vanilla faith history creates rites whose founder titles do not exist here (crash)
 replace_path="history/characters"						# vanilla characters
 replace_path="history/titles"							# vanilla holders of vanilla titles
 replace_path="history/provinces"						# vanilla province ids

@@ -34,9 +34,9 @@ Cultures and faiths are vanilla: the mod has none yet (B-CULTURES, B-FAITHS).
 
 | Realm | Ruler | Culture / rite | Counties |
 |---|---|---|---|
-| Empire of Kronos (`e_kronos` + `k_kronos`) | Emperor Aurelian Vaskar (900001), **lead 1, easy** | greek / byzantine_rite (faith christian_faith) | 16: domain c_kronos, c_aphion_seam; 4 direct counts; dukes of Graveshelf (3 vassal counts), Sanctum Wilds, Silica Span (3 vassal counts) |
+| Empire of Kronos (`e_kronos` + `k_kronos`) | Emperor Aurelian Vaskar (900001), **lead 1, easy** | greek / slavic_rite (faith christian_faith) | 16: domain c_kronos, c_aphion_seam; 4 direct counts; dukes of Graveshelf (3 vassal counts), Sanctum Wilds, Silica Span (3 vassal counts) |
 | Kingdom of Skeldscar (`k_skeldscar`) | King Ragnvald Skeldung (900040), **lead 2, medium** | norse / norse_pagan | 8: domain c_skeldscar, c_helios_shoal; 2 direct counts; duke of Karak Crossing (3 vassal counts) |
-| Duchy of Wyveris (`d_wyveris`, independent) | Duke Sveinn Wyvar (900060), **lead 3, hard** | norse / byzantine_rite | 4: domain c_wyveris, c_emberscar; 2 vassal counts |
+| Duchy of Wyveris (`d_wyveris`, independent) | Duke Sveinn Wyvar (900060), **lead 3, hard** | norse / slavic_rite | 4: domain c_wyveris, c_emberscar; 2 vassal counts |
 
 24 landed rulers (1 emperor, 1 king, 4 dukes, 18 counts, all `feudal_government`) and 52 characters in all.
 The Skeldscar-Wyveris war over c_klian (`claim_cb`) is running at the start (Sveinn attacking, Ragnvald defending).
@@ -77,7 +77,7 @@ Replaced (each folder ships a file here; CLAUDE.md invariant 3): `common/landed_
 `common/bookmarks/{bookmarks,groups,challenge_characters}`, `history/{characters,titles,provinces,province_mapping,wars,struggles,situations}`,
 `map_data/geographical_regions`. The reasons are commented in `descriptor.mod`.
 
-Kept on purpose: vanilla cultures, faiths, `history/cultures` and `history/faiths` (the world uses them),
+Kept on purpose: vanilla cultures, faiths and `history/cultures` (the world uses them),
 `common/dynasties`, `common/coat_of_arms`, `common/bookmark_portraits` (keyed by name, unused), `history/artifacts` (empty in vanilla),
 `gfx/map/map_object_data` (CK3Gen's seven locator files override vanilla's by name; the rest are cosmetic),
 and vanilla script (decisions, events, situations, struggles, holy sites) that names vanilla titles or regions.
@@ -100,6 +100,15 @@ That script logs errors and does nothing; it does not stop the game.
     subfolders**, so vanilla 1.20's new `ce3/` survived `replace_path="history/titles"`.
   - `history/faiths/00_christianity.txt` is a copy of vanilla with `religious_head = k_orthodox` commented out.
     Copy it from vanilla again after a CK3 update.
+
+- **Rites and faith history (2026-10-05).** Kronos and Wyveris use `slavic_rite`, not `byzantine_rite`. In 1.20 a rite can
+  name a `founder =` title, which becomes the rite's first holder. `byzantine_rite`'s founder is `d_et_constantinople`, and
+  every other Christian rite except `slavic_rite` also names a vanilla title. A missing founder title crashes history
+  loading **with nothing in error.log** (found by elimination: variant C with province history crashed, D without it got
+  through). For the same reason `history/faiths` is replaced with an empty file: vanilla faith history creates founder rites.
+  Any rite used here must have no `founder`, or a founder title that exists on this map.
+- **`-mapeditor` launches cannot start a game.** Picking a bookmark with `-mapeditor` among the launch options crashes
+  after "Setup powerful vassals", with or without mods. Remove it from the launch options for play tests.
 
 - **Re-import 2026-10-05** (CK3Gen `Output/Test`): the same 103 provinces, `provinces.png`, titles and title loc. Taken
   from it: `heightmap.png`, `rivers.png`, `adjacencies.csv` (a new crossing, 79 Caelestis to 42 The Verge; since REVERTED, see below) and

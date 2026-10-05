@@ -1,0 +1,4 @@
+﻿# TEST MAP: not mod content. Intentionally empty, so that replace_path="history/faiths" (descriptor.mod)
+# drops vanilla faith history. That history creates rites whose `founder =` titles do not exist on this map
+# (roman_rite -> k_papal_state, byzantine_rite -> d_et_constantinople, ...). A rite with a missing founder
+# title crashed history loading with nothing in error.log (2026-10-05 bisect, variants C/D).
