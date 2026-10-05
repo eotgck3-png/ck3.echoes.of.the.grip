@@ -1,0 +1,23 @@
+﻿# -- eotg_frontier_opinions.txt -----------------------------------------------
+# Opinion modifiers for Frontier Systems v2 (docs/specs/frontier_v2.md §3.1).
+# Shape as common/opinion_modifiers/eotg_augmentation_opinions.txt; the
+# duration is passed by the caller (add_opinion = { ... years = n }).
+# Shared by every Frontier event, so the names stay generic (invariant 7).
+# -----------------------------------------------------------------------------
+
+# Callers: .030 b (the backer), .031 b/c (the backer), .032 a (the liege),
+# .033 a (the founder). 10 years.
+eotg_frontier_opinion_pleased = {
+    opinion = 10
+}
+
+# Callers: .031 a (the backer), .032 b (the liege), .033 b (the founder).
+# 10 years.
+eotg_frontier_opinion_slighted = {
+    opinion = -10
+}
+
+# Caller: .030 a, on the backer who was let go for a rival. 10 years.
+eotg_frontier_opinion_dropped = {
+    opinion = -20
+}

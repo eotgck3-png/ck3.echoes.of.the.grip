@@ -147,3 +147,73 @@ eotg_frontier_ai_would_sponsor = {
         multiply = 4
     }
 }
+
+# == Phase 2 (docs/specs/frontier_v2.md §3.3) ================================
+# UNVERIFIED-VANILLA: a script value on the LEFT of a comparison
+# (eotg_frontier_trait_count_value < eotg_frontier_trait_max_value). Phase 1
+# only put script values on the right (spec frontier_v2.md §15 item 5).
+
+# -- Traits and infrastructure (county scope) ----------------------------------
+# Room for one more known trait (spec §5.1: at most two)
+eotg_frontier_trait_room = {
+    eotg_frontier_trait_count_value < eotg_frontier_trait_max_value
+}
+
+# A Frontier that can build: a free slot, and nothing built here this year
+# (spec §4.1)
+eotg_frontier_infra_room = {
+    eotg_frontier_is_frontier = yes
+    eotg_frontier_infra_count_value < eotg_frontier_infra_slots_value
+    NOT = { has_variable = eotg_frontier_built }
+}
+
+# A Region a survey can learn more about (spec §8): Unsettled, a Frontier or
+# Abandoned, with trait room, not surveyed in the last five years
+eotg_frontier_can_survey = {
+    OR = {
+        eotg_frontier_is_unsettled = yes
+        eotg_frontier_is_frontier = yes
+        eotg_frontier_is_abandoned = yes
+    }
+    eotg_frontier_trait_room = yes
+    NOT = { has_variable = eotg_frontier_surveyed }
+}
+
+# -- Strain conditions (county scope; read by the yearly tick) ----------------
+# Dangerous: raiders and worse take their chance while the hold is weak.
+# Countered by a Garrison Post, or by a Military project (spec §5.2).
+eotg_frontier_danger_strains = {
+    has_county_modifier = eotg_frontier_trait_dangerous
+    county_control < 60
+    NOT = { has_county_modifier = eotg_frontier_infra_garrison_post }
+    NOT = { var:eotg_frontier_type ?= flag:military }
+}
+
+# A quiet year may ease strain, unless the place itself is hostile and nothing
+# shelters the settlers from it (spec §5.2)
+eotg_frontier_quiet_eases = {
+    OR = {
+        NOT = { has_county_modifier = eotg_frontier_trait_hostile }
+        has_county_modifier = eotg_frontier_infra_orbital_station
+    }
+}
+
+# War adds strain, except to a Military project, built for it (spec §6.1)
+eotg_frontier_war_strains = {
+    NOT = { var:eotg_frontier_type ?= flag:military }
+}
+
+# -- Character scope -----------------------------------------------------------
+eotg_frontier_holds_surveyable = {
+    any_held_title = {
+        tier = tier_county
+        eotg_frontier_can_survey = yes
+    }
+}
+
+eotg_frontier_holds_buildable = {
+    any_held_title = {
+        tier = tier_county
+        eotg_frontier_infra_room = yes
+    }
+}

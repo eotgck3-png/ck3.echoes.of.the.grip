@@ -69,3 +69,126 @@ eotg_frontier_mod_hard_year = {
     icon = county_modifier_control_negative
     monthly_county_control_growth_factor = -0.1
 }
+
+# == Phase 2 (docs/specs/frontier_v2.md) =====================================
+# Every line below uses only modifier keys the Phase 1 modifiers already use
+# (verified by Tiger), except county_opinion_add, which the mod's buildings
+# use (common/buildings/eotg_00_city_buildings.txt:60).
+
+# -- Frontier traits (spec §5): the Region's known nature. Present = known.
+# Kept through abandonment (resource knowledge); converted into results and
+# removed when the Region settles (eotg_frontier_settle_rewards_effect). Their
+# real weight is in the script values; the line here is the display.
+eotg_frontier_trait_rich_resources = {
+    icon = county_modifier_development_positive
+    tax_mult = 0.05
+}
+eotg_frontier_trait_trade_route = {
+    icon = county_modifier_development_positive
+    tax_mult = 0.05
+}
+eotg_frontier_trait_strategic = {
+    icon = county_modifier_control_positive
+    levy_size = 0.05
+}
+eotg_frontier_trait_habitable = {
+    icon = county_modifier_development_positive
+    development_growth_factor = 0.05
+}
+eotg_frontier_trait_ancient_ruins = {
+    icon = county_modifier_development_positive
+    development_growth_factor = 0.05
+}
+eotg_frontier_trait_ancient_infrastructure = {
+    icon = county_modifier_development_positive
+    tax_mult = 0.05
+}
+eotg_frontier_trait_anomalous = {
+    icon = county_modifier_control_negative
+    monthly_county_control_growth_factor = -0.05
+}
+eotg_frontier_trait_hostile = {
+    icon = county_modifier_development_negative
+    monthly_county_control_growth_factor = -0.1
+    development_growth_factor = -0.05
+}
+eotg_frontier_trait_remote = {
+    icon = county_modifier_control_negative
+    monthly_county_control_growth_factor = -0.1
+}
+eotg_frontier_trait_dangerous = {
+    icon = county_modifier_control_negative
+    levy_size = -0.05
+    monthly_county_control_growth_factor = -0.05
+}
+
+# -- Frontier infrastructure (spec §4): what the project has built. Removed
+# and converted into results on settling; lost on abandonment.
+eotg_frontier_infra_habitat = {
+    icon = county_modifier_development_positive
+    development_growth_factor = 0.05
+}
+eotg_frontier_infra_orbital_station = {
+    icon = county_modifier_control_positive
+    monthly_county_control_growth_factor = 0.05
+}
+eotg_frontier_infra_navigation_beacon = {
+    icon = county_modifier_control_positive
+    monthly_county_control_growth_factor = 0.05
+}
+eotg_frontier_infra_trade_station = {
+    icon = county_modifier_development_positive
+    tax_mult = 0.05
+}
+eotg_frontier_infra_mining_complex = {
+    icon = county_modifier_development_positive
+    tax_mult = 0.05
+}
+eotg_frontier_infra_research_facility = {
+    icon = county_modifier_development_positive
+    development_growth_factor = 0.05
+}
+eotg_frontier_infra_mission = {
+    icon = county_modifier_control_positive
+    monthly_county_control_growth_factor = 0.05
+}
+eotg_frontier_infra_garrison_post = {
+    icon = county_modifier_control_positive
+    levy_size = 0.05
+}
+
+# -- Settlement legacies (spec §7): 25 years after settling, from the type,
+# the traits and the infrastructure.
+eotg_frontier_mod_legacy_trade = {
+    icon = county_modifier_development_positive
+    tax_mult = 0.1
+}
+eotg_frontier_mod_legacy_industry = {
+    icon = county_modifier_development_positive
+    tax_mult = 0.1
+    development_growth_factor = 0.05
+}
+eotg_frontier_mod_legacy_defence = {
+    icon = county_modifier_control_positive
+    levy_size = 0.15
+    monthly_county_control_growth_add = 0.1
+}
+eotg_frontier_mod_legacy_learning = {
+    icon = county_modifier_development_positive
+    development_growth_factor = 0.15
+}
+# UNVERIFIED-VANILLA: county_opinion_add in a static county modifier (the
+# mod's buildings use it in their county modifier; spec §15 item 2)
+eotg_frontier_mod_legacy_faith = {
+    icon = county_modifier_control_positive
+    county_opinion_add = 5
+    monthly_county_control_growth_factor = 0.1
+}
+
+# .032: terms granted to the settlers, 10 years. Lighter dues, a steadier camp.
+# UNVERIFIED-VANILLA: county_opinion_add (as above)
+eotg_frontier_mod_concessions = {
+    icon = county_modifier_control_positive
+    tax_mult = -0.15
+    county_opinion_add = 5
+}
