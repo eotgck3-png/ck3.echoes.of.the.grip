@@ -90,6 +90,12 @@ That script logs errors and does nothing; it does not stop the game.
 - `history/provinces/00_provinces.txt`: `culture`, `faith` and `rite` added on the 28 county capitals (a county with
   no culture or faith breaks), and the empty slots of the four "full" counties above filled with cities and temples.
 
+- **Re-import 2026-10-05** (CK3Gen `Output/Test`): the same 103 provinces, `provinces.png`, titles and title loc. Taken
+  from it: `heightmap.png`, `rivers.png`, `adjacencies.csv` (new crossing 79 Caelestis to 42 The Verge) and
+  `geographical_region.txt` (adds empty `material_*` and other filler regions). Not taken: its `00_provinces.txt`
+  (the raw export, without our culture, faith and holding edits above) and `gfx/map/stellar_winds_flow.png`
+  (no game file reads it; it is the input for animating the Stellar Winds in the map shader, if that ever lands).
+
 ## Known gaps
 
 - **Heightmap:** missing until MAPEDITOR_STEPS.md is done. Until then the game falls back to vanilla's heightmap files,
