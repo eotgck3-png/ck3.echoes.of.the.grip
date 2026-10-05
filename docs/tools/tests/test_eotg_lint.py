@@ -5,13 +5,14 @@ Run: python -m unittest discover docs/tools/tests
 import io
 import json
 import os
-import shutil
 import sys
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _testutil import rmtree, tempdir  # noqa: E402,F401
 import eotg_lint as L  # noqa: E402
 
 BOM = "﻿"
@@ -31,7 +32,7 @@ def make_mod(files):
 class LintCase(unittest.TestCase):
     def run_rule(self, files, rule, allowlist=frozenset()):
         root = make_mod(files)
-        self.addCleanup(shutil.rmtree, root)
+        self.addCleanup(rmtree, root)
         return L.lint(root, {rule}, allowlist=set(allowlist))
 
     def assertHit(self, files, rule, needle=None, count=None, **kw):
@@ -352,7 +353,7 @@ class L011(LintCase):
 
     def test_allowlist(self):
         root = make_mod(self.loc("[x.GetName] watches them go."))
-        self.addCleanup(shutil.rmtree, root)
+        self.addCleanup(rmtree, root)
         mod = L.Mod(root)
         self.assertEqual(len(L.rule_l011(mod, allowlist=set())), 1)
         self.assertEqual(L.rule_l011(mod, allowlist={"eotg_k"}), [])
@@ -362,7 +363,7 @@ class L012(LintCase):
     def run12(self, key, value):
         root = make_mod({"localization/english/eotg_a_l_english.yml":
                          LOC_OK + ' %s:0 "%s"\n' % (key, value)})
-        self.addCleanup(shutil.rmtree, root)
+        self.addCleanup(rmtree, root)
         return L.rule_l012(L.Mod(root))
 
     def test_never_names_are_errors(self):
@@ -429,7 +430,7 @@ class L013(LintCase):
                               "[ROOT.Char.GetColour] $honour_key$ #colour text#!"))}, "L013")
         # exceptions are data: an extra exception silences a word
         root = make_mod({self.LOC: self.loc(("eotg_x.1.desc", "the Grey Margrave"))})
-        self.addCleanup(shutil.rmtree, root)
+        self.addCleanup(rmtree, root)
         st = L.load_style()
         self.assertTrue(L.rule_l013(L.Mod(root), st))
         st["exceptions"].append("Grey Margrave")
@@ -471,7 +472,7 @@ eotg_x.1 = {
             ("eotg_x.1.desc_app", "\\n\\nNew paragraph."), ("eotg_x.1.desc_late", "Late."))}
         self.assertClean(files, "L013")
         root = make_mod(files)
-        self.addCleanup(shutil.rmtree, root)
+        self.addCleanup(rmtree, root)
         stats = {}
         L.lint(root, {"L013"}, stats=stats)
         self.assertEqual(len(stats["skipped"]["L013d"]), 1)
@@ -521,7 +522,7 @@ class L014(LintCase):
         self.assertClean(files, "L014")
         # conventions are data: drop decisions and their keys become dead
         root = make_mod(files)
-        self.addCleanup(shutil.rmtree, root)
+        self.addCleanup(rmtree, root)
         conv = L.load_conventions()
         del conv["folders"]["decisions"]
         dead = sorted(f.message.split("'")[1] for f in L.rule_l014(L.Mod(root), conv))
@@ -536,7 +537,7 @@ class CLI(unittest.TestCase):
                                  "eotg_t.2 = { option = { trigger_event = eotg_t.1 } }",
             "common/scripted_effects/x.txt": "eotg_e = { add_martial = 1 }",
         })
-        self.addCleanup(shutil.rmtree, self.root)
+        self.addCleanup(rmtree, self.root)
 
     def run_main(self, *args):
         buf = io.StringIO()

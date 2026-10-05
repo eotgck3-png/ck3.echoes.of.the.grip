@@ -5,6 +5,8 @@ import tempfile
 import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _testutil import rmtree, tempdir  # noqa: E402,F401
 import pdx_parse as P  # noqa: E402
 
 
@@ -67,7 +69,7 @@ class ParseBasics(unittest.TestCase):
         self.assertEqual(P.first(doc.nodes[1].value, "c").line, 3)
 
     def test_file_with_bom(self):
-        with tempfile.TemporaryDirectory() as d:
+        with tempdir() as d:
             p = os.path.join(d, "f.txt")
             with open(p, "wb") as fh:
                 fh.write(b"\xef\xbb\xbfa = 1\r\n")
@@ -115,7 +117,7 @@ class TupleCompat(unittest.TestCase):
         sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(
             os.path.abspath(__file__))), "qa"))
         import aug_parse
-        with tempfile.TemporaryDirectory() as d:
+        with tempdir() as d:
             p = os.path.join(d, "f.txt")
             with open(p, "w", encoding="utf-8") as fh:
                 fh.write("x = { y ?= z }  # c\n")

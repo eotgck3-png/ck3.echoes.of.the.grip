@@ -9,15 +9,23 @@ writes (PX's Event Graph panel data and its localization coverage), and reports:
 Usage:
   ELECTRON_RUN_AS_NODE=1 ".../Code.exe" docs/tools/px_lsp_diagnostics.js events \
       --request=eventGraph --request=locCoverage --out=<dir>
-  python docs/tools/px_event_report.py <dir> [--all-loc]
+  python docs/tools/px_event_report.py <dir> [--all-loc] [--root CHECKOUT]
+--root is the mod checkout the JSON was made from (default: the repo holding this
+script); its script supplies the variable / scope / flag names PX wrongly asks loc for.
 Exit status 1 when an event is unreachable or an eotg_ loc key is missing.
 """
 
+import argparse
 import collections
 import re
 import json
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import pdx_parse  # noqa: E402  (utf8_console)
+
+DEFAULT_ROOT = Path(__file__).resolve().parents[2]
 
 
 # PX asks for loc it does not need: building mesh asset names, and variable names it assumes
@@ -25,7 +33,7 @@ from pathlib import Path
 KNOWN_BENIGN = re.compile(r"(_mesh$|^eotg_fracture_risk$)")
 
 
-def main(out_dir, all_loc):
+def main(out_dir, all_loc, root=None):
     d = Path(out_dir)
     graph = json.loads((d / "px_eventGraph.json").read_text(encoding="utf-8"))
     nodes = {n["id"]: n for n in graph["nodes"]}
@@ -39,7 +47,7 @@ def main(out_dir, all_loc):
     # blocks), and omits events reached only that way. So: take the event list from the
     # event files, and treat every story cycle that some mod script starts with
     # `create_story` as a root whose events are reached.
-    mod_root = Path(__file__).resolve().parents[2]
+    mod_root = Path(root).resolve() if root else DEFAULT_ROOT
     def strip(text):
         return "\n".join(l.split("#", 1)[0] for l in text.splitlines())
     script = {f: strip(f.read_text(encoding="utf-8-sig", errors="replace"))
@@ -116,7 +124,15 @@ def main(out_dir, all_loc):
     return 1 if problems else 0
 
 
+def cli(argv=None):
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("out_dir", help="where px_lsp_diagnostics.js wrote its JSON")
+    ap.add_argument("--all-loc", action="store_true", help="report every missing key, not only eotg_")
+    ap.add_argument("--root", default=None, help="the mod checkout the JSON describes")
+    a = ap.parse_args(argv)
+    pdx_parse.utf8_console()
+    return main(a.out_dir, a.all_loc, a.root)
+
+
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        sys.exit(__doc__)
-    sys.exit(main(sys.argv[1], "--all-loc" in sys.argv))
+    sys.exit(cli())

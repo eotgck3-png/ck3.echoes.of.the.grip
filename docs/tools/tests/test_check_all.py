@@ -10,6 +10,8 @@ import unittest
 from contextlib import redirect_stdout
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _testutil import rmtree, tempdir  # noqa: E402,F401
 import check_all as C  # noqa: E402
 
 PY = sys.executable
@@ -17,9 +19,8 @@ PY = sys.executable
 
 class Requirements(unittest.TestCase):
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(self.tmp.cleanup)
-        self.dir = self.tmp.name
+        self.dir = tempfile.mkdtemp(prefix="eotg_req_")
+        self.addCleanup(rmtree, self.dir)
         self.exe = os.path.join(self.dir, "Code.exe")
         open(self.exe, "w").close()
         self.missing = os.path.join(self.dir, "nope")
@@ -105,7 +106,7 @@ class RunLogic(unittest.TestCase):
 
 class RootAndLogs(unittest.TestCase):
     def test_default_checks_use_root(self):
-        with tempfile.TemporaryDirectory() as d:
+        with tempdir() as d:
             os.makedirs(os.path.join(d, "events"))
             by = {c.name: c for c in C.default_checks(d)}
             lint = by["eotg_lint (vs baseline)"]
@@ -123,7 +124,7 @@ class RootAndLogs(unittest.TestCase):
     def test_generators_run_against_root(self):
         import gen_test_recipes as G
         import spec_conformance as S
-        with tempfile.TemporaryDirectory() as d:
+        with tempdir() as d:
             ev = os.path.join(d, "events")
             os.makedirs(ev)
             with open(os.path.join(ev, "eotg_x.txt"), "w") as fh:
@@ -142,13 +143,13 @@ class RootAndLogs(unittest.TestCase):
             self.assertEqual(rc, 0, out)
 
     def test_root_must_look_like_a_mod(self):
-        with tempfile.TemporaryDirectory() as d, redirect_stdout(io.StringIO()):
+        with tempdir() as d, redirect_stdout(io.StringIO()):
             from contextlib import redirect_stderr
             with self.assertRaises(SystemExit), redirect_stderr(io.StringIO()):
                 C.main(["--root", d])
 
     def test_tiger_log_dir(self):
-        with tempfile.TemporaryDirectory() as d:
+        with tempdir() as d:
             path, note = C.tiger_log_path({"EOTG_LOG_DIR": d}, root=C.ROOT)
             self.assertEqual(os.path.dirname(path), d)
             self.assertEqual(note, "")
