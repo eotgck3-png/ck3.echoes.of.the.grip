@@ -21,7 +21,6 @@ replace_path="history/faiths"							# vanilla faith history creates rites whose 
 replace_path="history/characters"						# vanilla characters
 replace_path="history/titles"							# vanilla holders of vanilla titles
 replace_path="history/provinces"						# vanilla province ids
-replace_path="history/province_mapping"				# vanilla province id -> province id mappings
 replace_path="history/wars"								# vanilla wars between vanilla characters over vanilla titles
 replace_path="history/struggles"						# Iberian, Persian, TGP struggles on vanilla regions
 replace_path="history/situations"						# Great Steppe and Christian Church situations on vanilla regions

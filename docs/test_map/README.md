@@ -74,7 +74,7 @@ Low-development ones (c_reogladra 3, c_warpmire 3, c_muth 4, c_twilight_moor 4) 
 ## What `replace_path` removes, and what it keeps
 
 Replaced (each folder ships a file here; CLAUDE.md invariant 3): `common/landed_titles`, `common/province_terrain`,
-`common/bookmarks/{bookmarks,groups,challenge_characters}`, `history/{characters,titles,provinces,province_mapping,wars,struggles,situations}`,
+`common/bookmarks/{bookmarks,groups,challenge_characters}`, `history/{characters,titles,provinces,faiths,wars,struggles,situations}`,
 `map_data/geographical_regions`. The reasons are commented in `descriptor.mod`.
 
 Kept on purpose: vanilla cultures, faiths and `history/cultures` (the world uses them),
@@ -101,6 +101,11 @@ That script logs errors and does nothing; it does not stop the game.
   - `history/faiths/00_christianity.txt` is a copy of vanilla with `religious_head = k_orthodox` commented out.
     Copy it from vanilla again after a CK3 update.
 
+- **The crash that blocked every first load: an empty `province_mapping` (2026-10-05).** `replace_path="history/province_mapping"`
+  plus a comment-only file crashes the province-history loader as soon as any province history exists, with nothing in
+  error.log. Found by elimination: variant D, with no province history, got through, and variant F, the full map with
+  vanilla's mapping kept, loaded. Vanilla's mappings name province ids this map does not have, and that is harmless (the
+  Atlantis TC template does the same). **Never replace `history/province_mapping` with an empty folder.**
 - **Rites and faith history (2026-10-05).** Kronos and Wyveris use `slavic_rite`, not `byzantine_rite`. In 1.20 a rite can
   name a `founder =` title, which becomes the rite's first holder. `byzantine_rite`'s founder is `d_et_constantinople`, and
   every other Christian rite except `slavic_rite` also names a vanilla title. A missing founder title crashes history
