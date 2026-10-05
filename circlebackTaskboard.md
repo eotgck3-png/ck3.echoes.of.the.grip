@@ -47,7 +47,7 @@ These are shared conditions. Clearing one unblocks every item that names it.
 | ID | Blocker | Clears when | Holding |
 |---|---|---|---|
 | ~~**B-DESCRIPTOR**~~ | **Cleared 2026-10-04** (39b8bda): `descriptor.mod` + `echoes_of_the_grip.mod` at the repo root, "Echoes of the Grip", 1.20.*, no `replace_path`. | — | — |
-| **B-TEMPMAP** | The temporary map isn't in yet. Systems are map-agnostic, but in-game tests need rulers, courts and conditions to exist. | The human brings it in. Check `docs/qa/cybernetics_test_plan.md` §1c against it, especially **capital county development 10+**. | CB-01, CB-02, CB-03 |
+| **B-TEMPMAP** | **In progress 2026-10-04:** the test map is built as the sub-mod EotG Test Map (`docs/test_map/`, 06b1eb2). It still needs the human's `-mapeditor` heightmap pass (`docs/test_map/MAPEDITOR_STEPS.md`), then a first load. | Clears when the human reaches the 866 test bookmark with the map rendering. | CB-01, CB-02, CB-03, CB-20, CB-21 |
 | **B-FAITHS** | No faiths or religions exist in v2 yet (Gate 1 / intake work). | Religions are lifted or built from the briefs. | CB-12 |
 | **B-CULTURES** | No cultures exist in v2 yet. | Cultures are lifted or built from the briefs. | CB-17 |
 | **B-ART** | Art is human-supplied. | You drop files in (e.g. `C:\Users\river\Downloads\assets`); the orchestrator converts them to vanilla formats. | CB-04, CB-05 |
@@ -308,12 +308,11 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Owner:** eotg-architect → eotg-scripter
 - **Next step:** when cultures exist, re-place the innovation per the §4.1 rule.
 
-### CB-37: Frontier Systems (cloud-built, Phase 1)
-- **Status:** in progress (2026-10-04)
-- **What:** the human's design brief `docs/design/frontier_systems.md` (Unsettled → Frontier → Settled; Founder/Sponsor; projects; abandonment; generic hooks; Greater Drifts optional and NOT built). It's assigned to the cloud agent: spec first (`docs/specs/frontier_v1.md`), then a Phase 1 build on its own branch, in new `eotg_frontier_*` files only.
-- **Owner:** cloud agent → orchestrator (vanilla checks, lore review, QA, merge) → human (approvals)
-- **Next step:** review the cloud spec when it lands. Answer its UNVERIFIED-VANILLA list with eotg-vanilla-scout, and its canon questions with eotg-lore-keeper.
-- **Note:** a mod-exclusive system built on the vanilla/temporary map before Gate 1 (CLAUDE.md). It must not reference specific titles, provinces, cultures or faiths. "Unsettled" is marked by data or a variable, never by hard-coded title keys.
+### CB-37: Frontier Systems Phase 1: in-game test
+- **Status:** waiting-human (2026-10-04)
+- **What:** merged in ef514e8 after three local verification passes (`docs/specs/frontier_v1_verification.md`). The in-game plan is `docs/specs/frontier_v1_test_plan.md`. **Run section 0 first** (V1 county-variable persistence, V8 holding in an empty slot, V12 saved scopes reaching the hooks). It works on the vanilla map via the debug decisions, or on the test map (24 counties with empty slots; see docs/test_map/README.md).
+- **Owner:** human -> orchestrator (route failures to the cloud agent)
+- **Next step:** after section 0 passes, run the rest of the plan. Phase 2 content is the owner's call.
 
 ### CB-38: In-game checks for the Interactions batch (G4/G5/G8)
 - **Status:** waiting-human (2026-10-04)
