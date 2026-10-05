@@ -90,6 +90,13 @@ That script logs errors and does nothing; it does not stop the game.
 - `history/provinces/00_provinces.txt`: `culture`, `faith` and `rite` added on the 28 county capitals (a county with
   no culture or faith breaks), and the empty slots of the four "full" counties above filled with cities and temples.
 
+- **First-load crash fix (2026-10-05).** The first launch crashed while loading history. Two vanilla files named
+  titles that the test map removes, and both are now overridden by files of the same name:
+  - `history/titles/ce3/00_ecclesiastical_titles.txt` is an empty file. **`replace_path` does not reach
+    subfolders**, so vanilla 1.20's new `ce3/` survived `replace_path="history/titles"`.
+  - `history/faiths/00_christianity.txt` is a copy of vanilla with `religious_head = k_orthodox` commented out.
+    Copy it from vanilla again after a CK3 update.
+
 - **Re-import 2026-10-05** (CK3Gen `Output/Test`): the same 103 provinces, `provinces.png`, titles and title loc. Taken
   from it: `heightmap.png`, `rivers.png`, `adjacencies.csv` (new crossing 79 Caelestis to 42 The Verge) and
   `geographical_region.txt` (adds empty `material_*` and other filler regions). Not taken: its `00_provinces.txt`
