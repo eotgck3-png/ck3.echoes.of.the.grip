@@ -12,7 +12,7 @@
 **Lore review: done** (eotg-lore-keeper, 2026-10-04): approved with must-fixes R1–R8, all folded in below. **Binding names and loc renderings:** [cybernetics_v2_realm_lore.md](cybernetics_v2_realm_lore.md).
 **Also binding:** [cybernetics_v2_balance.md](cybernetics_v2_balance.md) (HQ1 pacing, HQ2 world targets, §9.2 observer run), [cybernetics_v2_trait_depth.md](cybernetics_v2_trait_depth.md) §5.2 (G9 stress rows: no option here writes its own `stress_impact` line for impatient, gluttonous, temperate or fickle).
 
-**Build state.** Neither the procedures spec nor the interactions spec is built yet: there is no `events/eotg_augmentation_procedures.txt` and no `common/character_interactions/` in the tree. Their pieces that this spec amends (§3.2) are therefore **built together** with them, in the order procedures → interactions → this spec.
+**Build state (2026-10-04): built and QA-passed**, after procedures and interactions, as planned. This spec now describes the committed script. The build's departures from the first draft (each ruled by the coordinator and QA-passed) are amended in place below, and §11 lists them with their reasons.
 
 **Size.**
 - **7 new events** (all visible): 6 activity events, 1 realm event. **Below the ~10 flag; no further yes needed.**
@@ -114,6 +114,8 @@ All keys carry `eotg_`. No landed titles. Loc keys use the dot form for events (
 | scripted trigger | `eotg_aug_has_surgeon_access` = `eotg_has_physician_access` OR `employs_court_position = eotg_aug_implant_technician_court_position` OR `eotg_aug_borrowed_technician_valid` | triggers | scripter |
 | scripted trigger | `eotg_aug_borrowed_technician_valid`: `var:eotg_aug_borrowed_technician ?= { is_alive = yes  is_imprisoned = no  has_court_position = eotg_aug_implant_technician_court_position  NOT = { has_trait = blind } }` | triggers | scripter |
 | scripted trigger | `eotg_aug_surgeon_is_technician` (true when `eotg_aug_save_surgeon_effect` would pick a technician: own or borrowed; used for option name variants) | triggers | scripter |
+| scripted trigger (as built) | `eotg_aug_has_surgeon_for` (param `PATIENT`; run in the scope of whoever provides the surgeon): `eotg_aug_has_surgeon_access = yes`, **and** the surgeon `eotg_aug_save_surgeon_effect` would pick is not `$PATIENT$`. Same order as the effect: own technician (`eotg_aug_own_technician_valid`) → borrowed technician (`eotg_aug_borrowed_technician_valid`) → court physician → self. It replaces the interactions build's `eotg_aug_has_court_physician` (the procedures QA rule "a surgeon other than the patient"), which is gone from script. | triggers | scripter |
+| scripted trigger (as built) | `eotg_aug_own_technician_valid` (the court's own technician can operate: the position is filled and its holder is not blind) | triggers | scripter |
 | scripted trigger | `eotg_aug_tournament_entrant` (character scope; §4.7) | triggers | scripter |
 | character interaction | `eotg_aug_borrow_technician_interaction` ("Borrow Their Technician"; the deferred "Lend Your Surgeon", §4.6) | `common/character_interactions/eotg_augmentation_interactions.txt` (the interactions spec's file) | scripter |
 | character variable (timed, 1 year) | `eotg_aug_borrowed_technician` → the lent technician | the interaction's `on_accept` | scripter |
@@ -136,7 +138,7 @@ All keys carry `eotg_`. No landed titles. Loc keys use the dot form for events (
 | activity variables (once per activity; **set only in the on_actions**) | `eotg_aug_act_entrants_ruled` (act.001), `eotg_aug_act_accusation_done` (act.003) | on_actions | scripter |
 | saved scopes (event-local) | `eotg_aug_entrant`, `eotg_aug_accused`, `eotg_aug_accuser`, `eotg_contraband_subject`, `eotg_lent_technician` | the events and effects above | scripter |
 | icons (art) | `gfx/interface/icons/laws/eotg_aug_policy_{ban,license,tolerate,favor}.dds` (the path vanilla derives from the law key: `gfx/interface/icons/laws/crown_authority_1.dds`, read by `[Law.GetIcon]`, `window_my_realm.gui:483`); `gfx/interface/icons/court_position_types/eotg_aug_implant_technician_court_position.dds` (vanilla `…/court_position_types/court_physician_court_position.dds`) | — | **human** (art debt; a stopgap copy of a vanilla icon under the new name is acceptable and is the human's call) |
-| interaction icon | placeholder vanilla `learning` (as Examine) | — | human (art debt) |
+| interaction icon | placeholder vanilla `plague` (as built, as Examine: the drafted `learning` has no file under `gfx/interface/icons/character_interactions/`) | — | human (art debt) |
 
 **Shared opinion modifiers** are system-scoped (`eotg_opinion_aug_*`) per index §1 rule 1. None carries a government prefix.
 
@@ -152,9 +154,10 @@ All keys carry `eotg_`. No landed titles. Loc keys use the dot form for events (
 | procedures `eotg_aug_save_surgeon_effect` | New order: (1) own technician (`employs_court_position = eotg_aug_implant_technician_court_position`; the holder is not blind) → `court_position:eotg_aug_implant_technician_court_position`; (2) a valid borrowed technician → `var:eotg_aug_borrowed_technician`; (3) own court physician (unchanged); (4) the patient (unchanged fallback). | One place decides who operates. |
 | procedures script value `eotg_aug_price_mult_physician` | Becomes conditional in the payer's scope: `0.6` when the payer employs a technician, otherwise `0.75`. A borrowed technician pays the lending fee instead (§4.6) and stays at `0.75`. | "Cheaper maintenance" for procedures on the physician route. |
 | procedures: every **clinic-provider option at a provider-choice point** (init.018.a; tier1.002 a, d, e; tier2.003 a, c, d; proc.001 a, f; proc.003 a, f) | `trigger` gains `eotg_aug_clinic_open = yes`; `show_as_unavailable = { eotg_aug_clinic_open = no }` with the tooltip `eotg_aug_clinic_closed_tt` (vanilla shape `tournament_events.txt:4496`). | Under a Ban the sanctioned clinics are closed; the choice is your own people or the back streets. |
-| procedures: every **physician-provider option** (init.018.c; tier1.002.f; tier2.003.f; proc.001.b; proc.003.b) | Its `eotg_has_physician_access` test becomes `eotg_aug_has_surgeon_access`. It gains a second name: `name = { trigger = { eotg_aug_surgeon_is_technician = yes }  text = eotg_aug_opt_technician }`, the plain name otherwise. | The technician (own or borrowed) is offered wherever the physician is. |
-| interactions: Offer / Demand / Salvage **physician send option**; Examine `is_available`; tamper.004.b; int.001 | `eotg_has_physician_access` → `eotg_aug_has_surgeon_access` (actor scope where it was actor scope). | As above. |
-| interactions: Offer / Demand **clinic send option**; tamper.004.a | `is_valid` / `trigger` gains `scope:recipient = { eotg_aug_clinic_open = yes }` (tamper.004.a: root). | The patient's realm decides (LAW AT 866: "settled under the law of the realm where it is pressed"). |
+| procedures: every **physician-provider option** (init.018.c; tier1.002.f; tier2.003.f; proc.001.b; proc.003.b) | **As built:** its physician test becomes `eotg_aug_has_surgeon_for = { PATIENT = root }` (§3.1), not the first draft's `eotg_aug_has_surgeon_access`. It gains a second name: `name = { trigger = { eotg_aug_surgeon_is_technician = yes }  text = eotg_aug_opt_technician }`, the plain name otherwise. **init.018.c** also gains a gold guard at the physician-route price: `gold >= { value = medium_gold_value  multiply = eotg_aug_price_mult_physician }`, matching its `remove_short_term_gold` (so the option's guard follows the conditional price, 0.75 or 0.6 with a technician). | The technician (own or borrowed) is offered wherever the physician is. `_for` keeps the procedures QA rule: the surgeon `eotg_aug_save_surgeon_effect` picks must not be the patient (a physician ruler operating on themself at the physician's price without the self penalty). Plain surgeon access would reopen that once a technician can be the surgeon. |
+| interactions: Offer / Demand / Salvage **physician send option**; tamper.004.b; int.002.b | **As built:** → `eotg_aug_has_surgeon_for = { PATIENT = … }` in the surgeon provider's scope (send options: `scope:actor = { eotg_aug_has_surgeon_for = { PATIENT = scope:recipient } }`; the events: `PATIENT = root`). int.001.b tests the saved surgeon against the examined directly. | As above, and the interactions guard: the recipient is never the actor's own physician or technician. |
+| interactions: Examine `is_available` | `eotg_has_physician_access` → `eotg_aug_has_surgeon_access` (actor-only; no patient is known there). | The technician can examine. |
+| interactions: Offer / Demand **clinic send option**; tamper.004.a | `is_valid` / `trigger` gains `scope:recipient = { eotg_aug_clinic_open = yes }` (tamper.004.a: root). **As built:** the clinic send option's `starts_enabled` is the same test, `starts_enabled = { scope:recipient = { eotg_aug_clinic_open = yes } }`, so the clinic is not preselected where the recipient's realm bans it. | The patient's realm decides (LAW AT 866: "settled under the law of the realm where it is pressed"). A preselected option that fails `is_valid` would open the window already invalid. |
 | interactions: **Demand Removal** | (1) `desc` gains `triggered_desc = { trigger = { scope:recipient = { eotg_aug_refusal_is_crime = { ACTOR = scope:actor } } }  desc = eotg_aug_demand_removal_crime_desc }` (`00_religious_interactions.txt:160-180` shape). (2) `ai_accept` gains `modifier = { add = 50  desc = EOTG_AUG_AI_REFUSAL_IS_CRIME  scope:recipient = { eotg_aug_refusal_is_crime = { ACTOR = scope:actor } } }` (`00_religion_scripted_modifiers.txt:262-275`). (3) `on_decline` becomes an if/else: **if** the refusal is a crime, `scope:recipient = { reverse_add_opinion = { target = scope:actor  modifier = eotg_opinion_aug_defied_law  years = 10 } }` and the actor toast `eotg_aug_demand_crime_toast`; **else** the existing `eotg_opinion_aug_demanded_removal` line (`00_religious_interactions.txt:640-672`). (4) `ai_will_do` gains +30 when `scope:actor = { eotg_aug_under_policy = { LAW = ban } }`. | The interactions spec's deferred "refusal as a crime" (its §4.2 and §10). |
 | interactions: **Offer Augmentation** | `ai_accept`: recipient under Ban −25 (`EOTG_AUG_AI_BANNED`), under Favor +15 (`EOTG_AUG_AI_FAVORED`). `ai_will_do`: `factor = 0.25` when the actor is under Ban. | The realm's law shapes willingness. |
 | procedures DoD item 5 and interactions DoD item 4 | Read "none of maimed / one_eyed / blind / death / discovered … except **discovered under a Ban**". The severe tail stays back-street only. | Consistency with the first row. |
@@ -277,13 +280,14 @@ Specified in §3.2 (Demand Removal row), following vanilla's conversion demand e
 | Opt | Text intent | Trigger | Effect | ai_chance |
 |---|---|---|---|---|
 | a | "Arrest them." | — | `imprison_character_effect = { TARGET = scope:eotg_contraband_subject  IMPRISONER = root }` (the opinion is the lawful reason) | 30; +20 just; +20 zealous; −20 compassionate |
-| b | "Have it taken out." | subject `is_courtier_of = root`, NOT landed, `eotg_is_augmented_any = yes`, NOT Seamless; afford the removal at the provider below | `eotg_aug_demand_removal_effect = { PROVIDER = physician }` with a surgeon (`eotg_aug_has_surgeon_access`), else `{ PROVIDER = backstreet }`, run with `scope:actor` = root and `scope:recipient` = the subject (save both before the call); the subject gains `eotg_opinion_aug_forced_procedure`; root runs `eotg_aug_stress_tyranny_effect`. **Changes the subject's tier.** | 30; +20 zealous; +10 arbitrary; −20 compassionate |
+| b | "Have it taken out." | subject `is_courtier_of = root`, NOT landed, `has_trait = eotg_cybernetics` (tiers 1–3: **neither Neurofractured nor Seamless**, as built, matching Demand Implant Removal's `is_shown`), NOT `has_variable = eotg_aug_removal_kind` (the booking guard); afford the removal at the provider below | `eotg_aug_demand_removal_effect = { PROVIDER = physician }` when root has a surgeon other than the subject (`eotg_aug_has_surgeon_for = { PATIENT = scope:eotg_contraband_subject }`), else `{ PROVIDER = backstreet }`, run with `scope:actor` = root and `scope:recipient` = the subject (save both before the call), and `scope:hook = yes` saved so the effect takes its forced branch: the subject gains `eotg_opinion_aug_forced_procedure`; root runs `eotg_aug_stress_tyranny_effect`. **Changes the subject's tier.** | 30; +20 zealous; +10 arbitrary; −20 compassionate |
 | c | "A fine will do." | subject `gold >= minor_gold_value` | the subject `pay_short_term_gold = { target = root  gold = minor_gold_value }`; root `remove_opinion = { target = scope:eotg_contraband_subject  modifier = eotg_opinion_aug_contraband }` | 30; +20 greedy; +10 just |
 | d | "Look the other way." | — | root `remove_opinion` as c; `eotg_aug_stress_lie_effect = yes` (root breaks its own law) | 20; +20 cynical; +10 lazy; −20 zealous |
 | e [just] | "The realm's law holds, for everyone." | `has_trait = just` | as a, plus `add_prestige = minor_prestige_value` | 30; +30 just; +10 diligent |
 | f [greedy] | "A fine. A large one." | `has_trait = greedy`; subject `gold >= medium_gold_value` | as c at `medium_gold_value`, plus the subject `add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }` | 30; +30 greedy; +10 arbitrary |
 
 - Option b uses the interactions spec's removal effect and therefore its roll. Because a liege ordering the surgery on a household member is the "forced" case, the forced-procedure opinion applies.
+- **Option b excludes Neurofractured subjects as well as Seamless** (as built; coordinator ruling, QA-passed). It is a removal, so it follows Demand Implant Removal (interactions §4.2): a Neurofractured character's exit is Excision (`eotg_decision_aug_excision`), deliberately dangerous, and a forced removal must not bypass it. Seamless hardware cannot be taken out at 866 (lore ruling). Arrest, fines and looking away (a, c–f) still apply to a Neurofractured or Seamless subject.
 - The tier line in the desc reads the subject's tier, and b changes it (coupling).
 - An imprisoned subject can then be Salvaged (interactions §4.5). That is an existing lever, not new content.
 
@@ -320,7 +324,7 @@ Specified in §3.2 (Demand Removal row), following vanilla's conversion demand e
 | **Cheaper procedures** | `eotg_aug_price_mult_physician` = 0.6 with a technician (§3.2) | 0.75 → 0.6 |
 | **Cheaper maintenance** | `eotg_decision_maintenance_protocol` (§3.3) | cost ×0.5; Overclocked risk drop −12 instead of −8 |
 | **Hardware runs cooler** | `eotg_on_yearly_aug_overclocked_check` (§3.3) | −2 a year (aptitude ≥ 4: −3), like the safe-vendor −3 |
-| **Offered wherever a physician is** | `eotg_aug_has_surgeon_access` in the provider options and send options (§3.2), with the name variant "My implant technician." | — |
+| **Offered wherever a physician is** | `eotg_aug_has_surgeon_for = { PATIENT }` in the provider options and send options (§3.2, as built), with the name variant "My implant technician." | — |
 
 **Why the `SURGEON` parameter and not a new `PROVIDER`.** A fourth provider column would duplicate the physician column and complicate the procedures DoD ("the severe tail only in the back streets"). As a surgeon under `PROVIDER = physician`, the technician inherits that column's zero severe tail and improves it through the one factor the roll already has. The odds stay in one place (procedures goal 4).
 
@@ -334,7 +338,7 @@ The **actor borrows**; the recipient lends. One interaction serves both directio
 
 | Field | Value |
 |---|---|
-| `category` / `icon` | `interaction_category_friendly` / `learning` (placeholder) |
+| `category` / `icon` | `interaction_category_friendly` / `plague` (placeholder; as built) |
 | `desc` / `notification_text` | `eotg_aug_borrow_technician_interaction_desc` / `_notification` |
 | `is_shown` | `scope:recipient != scope:actor`; `scope:recipient = { employs_court_position = eotg_aug_implant_technician_court_position }`; `scope:actor = { eotg_is_augmented_any = yes  NOT = { employs_court_position = eotg_aug_implant_technician_court_position } }`; relation `OR = { scope:actor = { is_allied_to = scope:recipient }  scope:actor = { is_vassal_of = scope:recipient }  scope:recipient = { is_vassal_of = scope:actor }  scope:actor = { is_close_family_of = scope:recipient }  scope:actor = { is_spouse_of = scope:recipient }  scope:actor = { has_relation_friend = scope:recipient } }` |
 | `is_valid_showing_failures_only` | the actor has no valid borrowed technician; `scope:actor.short_term_gold >= minor_gold_value`; the lender's technician is not imprisoned and not blind; NOT `scope:actor = { is_at_war_with = scope:recipient }`; the **actor** is not under a Ban (`scope:actor = { eotg_aug_clinic_open = yes }`: the work would happen in the actor's realm) |
@@ -360,7 +364,7 @@ The **actor borrows**; the recipient lends. One interaction serves both directio
 | paranoid | −20 | `EOTG_AUG_AI_PARANOID` (interactions) |
 | the lender is tier 3 or Neurofractured | −30 | `EOTG_AUG_AI_NEEDS_TECHNICIAN` |
 
-**AI sending:** `ai_targets` allies, family (`max = 5`), liege, vassals (`max = 10`); `ai_frequency_by_tier` 0 / 0 / 48 / 36 / 36 / 36; `ai_will_do` base 0, +40 actor tier 3 or Neurofractured, +20 actor holds infection, Fragments or `eotg_mod_aug_tampered`, +20 actor has `eotg_aug_repair_injury`, `factor = 0.5` if the actor already has physician access, `factor = 0` if the actor cannot afford it.
+**AI sending:** `ai_targets` **`war_allies`** (as built: the `.info` list of `ai_recipients` has no plain `allies`; `war_allies` is the closest list, so AI borrowing from an ally happens between co-belligerents; `_character_interactions.info:798`), family (`max = 5`), liege, vassals (`max = 10`); `ai_frequency_by_tier` 0 / 0 / 48 / 36 / 36 / 36; `ai_will_do` base 0, +40 actor tier 3 or Neurofractured, +20 actor holds infection, Fragments or `eotg_mod_aug_tampered`, +20 actor has `eotg_aug_repair_injury`, `factor = 0.5` if the actor already has physician access, `factor = 0` if the actor cannot afford it.
 
 ### 4.7 G6: activity hooks
 
@@ -652,7 +656,7 @@ No vanilla string needs a `replace/` override. Vanilla keys reused: `tournament_
 3. **Additive only:** no top-level `trigger` or `effect` is added to any vanilla on_action; each vanilla hook block in the mod contains only `on_actions = { }`.
 4. **Coupling (QA audit 8):** every §4.8 event and realm.001 has an option that moves risk or tier, or reads the band or tier in a desc or branch trigger, per the §2 table.
 5. **Hidden rule:** no new loc string contains a number, or the words "risk", "odds" or "chance", about the signature resource. Every risk move is in `hidden_effect`.
-6. **Realm-locality:** `eotg_aug_under_policy` is the only reader of the law group (`grep -n "has_realm_law = eotg_aug_policy"` finds it only in that trigger and in the laws' own `ai_will_do`). Non-default laws have `can_keep = { is_independent_ruler = yes }`.
+6. **Realm-locality:** `eotg_aug_under_policy` is the only reader of the law group (`grep -n "has_realm_law = eotg_aug_policy_"` finds it only in that trigger and in the laws' own `ai_will_do`). Non-default laws have `can_keep = { is_independent_ruler = yes }`.
 7. **Clinic closure:** with a Ban in force, every clinic option listed in §3.2 shows unavailable with the tooltip; the physician (or technician) and back-street options remain.
 8. **Map-agnostic:** `grep -nE "title:|culture:|faith:|religion:|character:[0-9]" common/law_groups common/laws common/court_positions events/eotg_augmentation_activities.txt events/eotg_augmentation_realm.txt` returns nothing.
 9. **Identifiers:** every new global key starts `eotg_`; `grep -rnE 'eotg_[ekdcb]_'` stays empty.
@@ -690,6 +694,21 @@ No vanilla string needs a `replace/` override. Vanilla keys reused: `tournament_
 | **Ransom for augmented prisoners** | Unchanged from the interactions deferral (vanilla ransom script values would need an override). |
 | **Bespoke art:** 4 law icons, 1 court-position icon, the interaction icon | Art debt for the human (§3.1). |
 | **Men-at-arms (G11), the Clinic building (Q10)** | Unchanged deferrals. |
+
+---
+
+## 11. As built: departures from the first draft (2026-10-04)
+
+Each was ruled by the coordinator in the Cybernetics session and passed QA. The sections above are amended to match; this table is the record.
+
+| # | Where | First draft | As built | Reason |
+|---|---|---|---|---|
+| 1 | §4.4 realm.001.b | Excludes Seamless only | Excludes **Neurofractured and Seamless** (`has_trait = eotg_cybernetics`), plus the booking guard | Matches Demand Implant Removal: Excision is the Neurofractured exit. |
+| 2 | §3.1, §3.2, §4.5 | Physician-route options and send options test `eotg_aug_has_surgeon_access` | They test **`eotg_aug_has_surgeon_for = { PATIENT }`**: surgeon access, and the surgeon picked (own technician → borrowed technician → physician → self) is not the patient. It replaces `eotg_aug_has_court_physician` (interactions build), now gone. Examine's `is_available` and act.003.c keep plain surgeon access (no patient). | The procedures QA rule (no self-surgery at the physician's price) and the interactions guard (the recipient is not the actor's own surgeon) must survive the technician joining the order. |
+| 3 | §3.2 init.018.c | Trigger swap and name variant only | Also a gold guard: `gold >= { value = medium_gold_value  multiply = eotg_aug_price_mult_physician }` | The option's guard must match what it charges, and the price is now conditional. |
+| 4 | §4.6 Borrow AI | `ai_targets` allies | `war_allies` | No `allies` list exists in `ai_recipients` (`_character_interactions.info`). |
+| 5 | §3.2 clinic send option | `is_valid` gate only | `starts_enabled` gated on `eotg_aug_clinic_open` too | Not preselected where the recipient's realm bans clinics. |
+| 6 | §3.1 icons | Borrow icon `learning` | `plague` | No `learning` interaction icon file. Placeholder; art debt unchanged. |
 
 ---
 

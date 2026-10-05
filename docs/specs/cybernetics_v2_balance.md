@@ -789,7 +789,7 @@ File: `localization/english/eotg_augmentation_l_english.yml`. Rules: BOM, dot-fo
 
 **Approximately 96 keys:**
 - the earlier ~95;
-- minus `eotg_fracture.011.desc_misled` (`desc_none` is reused);
+- minus `eotg_fracture.011.desc_misled` (not built: `desc_none` is reused);
 - plus `eotg_fracture.023.f_war`;
 - plus the optional `eotg_aug_init.006.b_congenital`.
 

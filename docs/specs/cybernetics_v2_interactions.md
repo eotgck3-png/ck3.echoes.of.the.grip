@@ -5,6 +5,7 @@
 **Index:** [cybernetics_v2.md](cybernetics_v2.md). Index §1 rules 1–12 and the §5 lore register (with today's never-name extension) apply to everything here.
 **Builds on:** [cybernetics_v2_procedures.md](cybernetics_v2_procedures.md) (committed, in lore review). This spec **uses** its roll (`eotg_aug_procedure_roll_effect` / `eotg_aug_procedure_effect`, params `PATIENT`, `PROVIDER`, `PROCEDURE`, `SURGEON`), its pricing helpers, `eotg_aug_save_surgeon_effect`, `eotg_aug_removal_perform_effect`, `eotg_aug_repair_injury_effect`, proc.002 and proc.020, and the reserved `eotg_aug_former = flag:salvaged`. It does **not** re-spec the roll. §3.2 lists five small additive amendments to the procedures spec's not-yet-built pieces.
 **Lore review:** approved 2026-10-04 with must-fixes I1–I7, all folded in below. The verdict and its loc renderings are in [cybernetics_v2_interactions_lore.md](cybernetics_v2_interactions_lore.md), which is **binding** for script and loc (§7, §8).
+**Build state (2026-10-04): built and QA-passed.** This spec now describes the committed script. Where the build departed from the first draft (each ruled by the coordinator and QA-passed), the text below is amended in place, and §11 lists every departure with its reason.
 **Also binding:** [cybernetics_v2_balance.md](cybernetics_v2_balance.md) (HQ1 pacing, HQ2 world targets, §9.2 observer run), [cybernetics_v2_trait_depth.md](cybernetics_v2_trait_depth.md) §5.2 (G9 stress rows), [cybernetics_v2_new_beats.md](cybernetics_v2_new_beats.md) (patron.008 fires after any exit), [`docs/lore/REVIEW_866.md`](../lore/REVIEW_866.md).
 
 **Size.**
@@ -117,14 +118,16 @@ All keys carry `eotg_`. No landed titles.
 | opinion modifier | `eotg_opinion_aug_salvaged_me` (−50, decaying, 50 years, `imprisonment_reason = yes`; displayed "Cut Out My Implants") | opinions | scripter |
 | opinion modifier | `eotg_opinion_aug_salvaged_family_member` (−20, decaying, 20 years) | opinions | scripter |
 | opinion modifier | `eotg_opinion_aug_tampered` (−40, decaying, 30 years, `imprisonment_reason = yes`) | opinions | scripter |
-| character flag (timed, 5 years) | `eotg_flag_aug_sabotaged` | `eotg_aug_sabotage_apply_effect`; read by `eotg_aug_proc_bad_factor`; consumed by the roll; removed by a fault repair | scripter |
+| character flag (timed, 5 years) | `eotg_flag_aug_sabotaged` | `eotg_aug_sabotage_apply_effect`; read by `eotg_aug_proc_bad_factor`; consumed by the roll, **except** by a fault repair that does not repair (rejection, maimed, one_eyed, blind; §3.2, §4.4.3); removed by a fault repair that does | scripter |
 | character flag (one-shot) | `eotg_flag_aug_proc_salvage` | set by `eotg_aug_salvage_effect` before the roll; consumed by the roll | scripter |
 | character variable (timed, 10 years) | `eotg_aug_sabotaged_by` → the scheme owner | `eotg_aug_sabotage_apply_effect`; read by int.001.d | scripter |
 | variable value (reserved, now used) | `eotg_aug_former = flag:salvaged` | `eotg_aug_salvage_effect` | scripter |
 | variable value (new) | `eotg_aug_repair_injury = flag:fault` | int.001.b, tamper.004 a/b/c | scripter |
 | saved scope values | `eotg_proc_fault`, `eotg_proc_salvage`, `eotg_salvage_tier`, `eotg_tamper_signed`, `scheme_successful` / `scheme_discovered` (vanilla names, local); saved scopes `eotg_examined`, `eotg_saboteur`, `owner`, `target`, `scheme` (vanilla names, local) | the effects and events above | scripter |
-| interaction send-option flags | `eotg_aug_provider_clinic`, `eotg_aug_provider_physician`, `eotg_aug_provider_backstreet` (Offer, Demand, Salvage) | interactions | scripter |
-| icons (placeholders, vanilla files) | interactions: `icon_personal` (Offer), `demand_obedience` (Demand), `learning` (Examine), `icon_scheme_steal_back_artifact` (start Tamper), `blind` (Salvage); scheme `icon_scheme_hostile` | vanilla `gfx/interface/icons/character_interactions/`, `…/scheme_types/` | human (bespoke art later; recorded as art debt) |
+| interaction send-option flags | `eotg_aug_provider_clinic`, `eotg_aug_provider_physician`, `eotg_aug_provider_backstreet` (Offer, Demand, Salvage; read as `scope:<flag> ?= yes`, so the conformance tool lists them "referenced only": expected for send-option flags) | interactions | scripter |
+| scripted effect (as built) | `eotg_aug_fault_repair_book_effect` (patient scope: `eotg_aug_repair_injury = flag:fault` for 365 days, hidden, and `scope:eotg_proc_fault`) | effects; callers tamper.004 a/b/c, int.001.b | scripter |
+| scripted effect (as built) | `eotg_aug_examine_treat_effect` (int.001 a and e: the "Treat what you can" removals, hidden risk −5 at tier 3 / NF, gratitude) | effects | scripter |
+| icons (placeholders, vanilla files) | interactions: `icon_personal` (Offer), `demand_obedience` (Demand), **`plague` (Examine; as built: the drafted `learning` has no file under `gfx/interface/icons/character_interactions/`, and `plague` is the nearest medical icon there)**, `icon_scheme_steal_back_artifact` (start Tamper), `blind` (Salvage); scheme `icon_scheme_hostile` | vanilla `gfx/interface/icons/character_interactions/`, `…/scheme_types/` | human (bespoke art later; recorded as art debt) |
 
 **One deliberate exception to "prefix everything":** the Tamper interaction's agent-package flags keep vanilla's names `agent_focus_balance / _success / _speed / _secrecy`. They are scope values local to one interaction (they cannot collide), and keeping them lets the four option labels use vanilla's existing loc. Everything global is prefixed.
 
@@ -135,7 +138,7 @@ All keys carry `eotg_`. No landed titles.
 | Piece | Amendment | Why |
 |---|---|---|
 | `eotg_aug_proc_bad_factor` | one more row: patient has `eotg_flag_aug_sabotaged` → ×1.5 | G5's hold on the roll (the reserved extension point, procedures §10) |
-| `eotg_aug_procedure_roll_effect` | patient has `eotg_flag_aug_proc_salvage`: **rejection** ×5, **maimed / one_eyed / blind** ×2, **death** ×3. Step 5 (clear one-shots) also removes `eotg_flag_aug_proc_salvage` and `eotg_flag_aug_sabotaged`. | Salvage is unwilling, restrained surgery done for the parts, not the patient. "Fragments likely" (gaps G8). Severe weights stay 0 at physician and clinic before factors, so procedures DoD 5 still holds. |
+| `eotg_aug_procedure_roll_effect` | patient has `eotg_flag_aug_proc_salvage`: **rejection** ×5, **maimed / one_eyed / blind** ×2, **death** ×3. Step 5 (clear one-shots) also removes `eotg_flag_aug_proc_salvage`, and removes `eotg_flag_aug_sabotaged` **unless** this roll is a fault repair (`scope:eotg_proc_kind = flag:repair` with `var:eotg_aug_repair_injury ?= flag:fault`) whose outcome is rejection, maimed, one_eyed or blind. **As built (coordinator ruling, QA-passed):** those are the repair outcomes whose branch in `eotg_aug_procedure_apply_effect` skips `eotg_aug_repair_injury_effect`, so the fault is still there; the flag stays with it (×1.5 still applies, `eotg_aug_has_fault` stays true, matching `eotg_mod_aug_tampered`). Death weighs 0 on a repair. The §4.4.3 rule wins over the first draft's "always removes". | Salvage is unwilling, restrained surgery done for the parts, not the patient. "Fragments likely" (gaps G8). Severe weights stay 0 at physician and clinic before factors, so procedures DoD 5 still holds. A sabotage flag cleared by a failed repair would let the fault vanish with the hardware still faulty. |
 | `eotg_aug_repair_injury_effect` | new branch `flag:fault` → remove `eotg_flag_aug_hidden_flaw`, `eotg_flag_aug_sabotaged`, `eotg_mod_aug_tampered` (each guarded) | A repair roll can now fix a fault, not only an injury |
 | proc.002 desc | two openers placed **before** the kind openers in its `first_valid`: `desc_salvaged` (`exists = scope:eotg_proc_salvage`) and `desc_repair_fault` (`exists = scope:eotg_proc_fault`) | The report reads right for a salvaged prisoner and for a fault repair. `desc_repair` and `outcome_repair_failed` must be written injury-neutral (§7). |
 | proc.020 desc | `desc_salvaged` added to the marker `first_valid` (`var:eotg_aug_former ?= flag:salvaged`) | Uses the reserved value |
@@ -164,16 +167,26 @@ The physician is the safe choice and needs one. The rough way is free and danger
 - **Payment.** The actor pays in `on_accept` with `eotg_aug_pay_procedure_effect` inside `scope:actor`. Affordability is checked in `is_valid_showing_failures_only` with `eotg_aug_can_afford_procedure`, per provider flag.
   - **Not** the vanilla `cost = { gold = … }` block. `cost` is charged on send (`_character_interactions.info:484-487`), so a player recipient's refusal would still cost the actor.
   - The procedures spec's helpers keep one price scale.
-- **The surgeon.** For `physician`, run `scope:actor = { eotg_aug_save_surgeon_effect = yes }`. In the actor's scope it saves the actor's court physician, or the actor if they are themselves a `lifestyle_physician` (the effect's fallback is "this"). The send option's `is_valid` is `scope:actor = { eotg_has_physician_access = yes }`.
-- **Provider send options** (Offer, Demand, Salvage), exclusive (`send_options_exclusive = yes`, `00_scheme_interactions.txt:368`):
+- **The surgeon.** For `physician`, run `scope:actor = { eotg_aug_save_surgeon_effect = yes }`. In the actor's scope it saves the actor's surgeon (after the realm spec: own Implant Technician → borrowed technician → court physician), or the actor if they are themselves a `lifestyle_physician` (the effect's fallback is "this").
+  - **As built:** the physician send option's `is_valid` is `custom_description = { text = eotg_aug_send_physician_valid_tt  scope:actor = { eotg_aug_has_surgeon_for = { PATIENT = scope:recipient } } }`: one requirement line (Tiger: an `OR` is too complex to tooltip in a failures-only trigger).
+  - **The recipient is never the actor's own physician** (or technician). `eotg_aug_has_surgeon_for = { PATIENT }` is surgeon access **and** the surgeon `eotg_aug_save_surgeon_effect` would pick is not `$PATIENT$`. Without it, a recipient who is the actor's court physician would operate on themself at the physician's price without the self penalty: the exploit the procedures QA closed.
+  - The interactions build first used a trigger `eotg_aug_has_court_physician` for that rule. The realm build **superseded** it with `eotg_aug_has_surgeon_for` (realm spec §3.2), which keeps the rule and also covers the technician. `eotg_aug_has_court_physician` no longer exists in script.
+- **Provider send options** (Offer, Demand, Salvage). **As built, Offer and Demand are non-exclusive** (`send_options_exclusive = no`); Salvage stays exclusive (`send_options_exclusive = yes`, `00_scheme_interactions.txt:368`).
+  - Why: `send_options_exclusive` is interaction-wide (`_character_interactions.info:372`). Offer and Demand also carry the hook send option, so an exclusive set would make choosing the hook deselect the provider. Vanilla `ask_for_conversion_courtier_interaction` pairs its hook and influence options the same non-exclusive way.
+  - In exchange, `is_valid_showing_failures_only` requires **exactly one** provider: `custom_description = { text = eotg_aug_send_one_provider_tt` with two `calc_true_if` blocks over the three `scope:eotg_aug_provider_* ?= yes` flags, one `amount >= 1`, one `amount <= 1` `}` (an explicit comparator pair; vanilla never writes a bare `amount =`). `ai_will_do` zeroes every other combination.
+  - Salvage has no hook, so it stays exclusive.
 
 ```
-send_option = { flag = eotg_aug_provider_clinic      localization = eotg_aug_send_clinic      current_description = eotg_aug_send_clinic_tt      starts_enabled = { always = yes } }
+send_option = { flag = eotg_aug_provider_clinic      localization = eotg_aug_send_clinic      current_description = eotg_aug_send_clinic_tt
+                starts_enabled = { scope:recipient = { eotg_aug_clinic_open = yes } }                       # realm §3.2
+                is_valid = { custom_description = { text = eotg_aug_clinic_closed_tt  scope:recipient = { eotg_aug_clinic_open = yes } } } }
 send_option = { flag = eotg_aug_provider_physician   localization = eotg_aug_send_physician   current_description = eotg_aug_send_physician_tt
-                is_valid = { scope:actor = { eotg_has_physician_access = yes } } }
+                is_valid = { custom_description = { text = eotg_aug_send_physician_valid_tt
+                                                    scope:actor = { eotg_aug_has_surgeon_for = { PATIENT = scope:recipient } } } } }
 send_option = { flag = eotg_aug_provider_backstreet  localization = eotg_aug_send_backstreet  current_description = eotg_aug_send_backstreet_tt }
+send_options_exclusive = no                                                                                 # Offer, Demand
 ```
-  Salvage has no clinic (§4.5) and labels its back-street option `eotg_aug_send_rough`.
+  Salvage has no clinic (§4.5), labels its back-street option `eotg_aug_send_rough` (`starts_enabled = { always = yes }`), and gives its physician option the description `eotg_aug_send_salvage_physician_tt`.
 - **Hooks** (Offer, Demand). These copy `ask_for_conversion_courtier_interaction`:
   - the send option: `flag = hook`, `localization = SCHEME_HOOK`, `is_valid = { scope:actor = { has_usable_hook = scope:recipient } }` (:362-378);
   - the extra icon (:375-378);
@@ -195,7 +208,7 @@ send_option = { flag = eotg_aug_provider_backstreet  localization = eotg_aug_sen
 | `notification_text` | `eotg_aug_offer_augmentation_interaction_notification` | `00_religious_interactions.txt:516` |
 | `is_available` | `is_adult = yes`, `is_imprisoned = no`; AI only: `OR = { eotg_is_augmented_any = yes  has_trait = ambitious  has_trait = cynical }`, NOT `zealous` | `.info:570-573`; `00_artifact_interactions.txt:2828-2847` |
 | `is_shown` | `scope:recipient != scope:actor`; `scope:recipient = { eotg_aug_in_charge_of = { ACTOR = scope:actor } }`; `scope:recipient = { eotg_is_augmented_any = no  is_imprisoned = no }` | |
-| `is_valid_showing_failures_only` | `scope:recipient = { eotg_aug_offer_candidate = yes }`; afford by flag: clinic `minor_gold_value` ×1, physician ×`eotg_aug_price_mult_physician`, back streets `tiny_gold_value` | |
+| `is_valid_showing_failures_only` | `scope:recipient = { eotg_aug_offer_candidate = yes }`; exactly one provider (`eotg_aug_send_one_provider_tt`, §4.0); afford by flag: clinic `minor_gold_value` ×1, physician ×`eotg_aug_price_mult_physician`, back streets `tiny_gold_value` | |
 | `cooldown_against_recipient` | `{ years = 5 }` | `00_religious_interactions.txt:213` (15 for conversion) |
 | `ai_min_reply_days` / `ai_max_reply_days` | 1 / 5 | :247-248 |
 | `auto_accept` | strong-hook `custom_description` only | :236-245 |
@@ -262,7 +275,7 @@ The reveal goes to the recipient (init.011 or silent), per the procedures routin
 | `category` / `icon` | `interaction_category_vassal` / `demand_obedience` | |
 | `popup_on_receive` / `pause_on_receive` | yes / yes | `00_religious_interactions.txt:511-512` |
 | `is_shown` | `scope:recipient = { has_trait = eotg_cybernetics  eotg_aug_in_charge_of = { ACTOR = scope:actor }  is_imprisoned = no }`. Tiers 1–3 only. **Neurofractured is excluded:** its exit is Excision (`eotg_decision_aug_excision`), deliberately dangerous. **Seamless is excluded** (lore ruling, upheld): at 866 tech no surgeon can find where Seamless hardware ends and the body begins, so there is nothing a removal could take out. | |
-| `is_valid_showing_failures_only` | afford by flag: base `medium_gold_value` (the full-removal clinic price, procedures `eotg_aug_removal_base_value`); multipliers 1 / `eotg_aug_price_mult_physician` / `eotg_aug_price_mult_backstreet_removal` | |
+| `is_valid_showing_failures_only` | **booking guard (as built):** `scope:recipient = { custom_description = { text = eotg_decision_aug_removal_booked_tt  NOT = { has_variable = eotg_aug_removal_kind } } }`, so a removal the recipient booked themself (`eotg_aug_removal_kind`, 30 days) is not overwritten (the procedures QA booking guard); exactly one provider (`eotg_aug_send_one_provider_tt`, §4.0); afford by flag: base `medium_gold_value` (the full-removal clinic price, procedures `eotg_aug_removal_base_value`); multipliers 1 / `eotg_aug_price_mult_physician` / `eotg_aug_price_mult_backstreet_removal` | procedures QA (booking guard) |
 | `cooldown_against_recipient` | `{ years = 10 }` | demand_conversion: 15 (:544) |
 | `auto_accept` | strong hook | |
 | `on_accept` | `eotg_aug_demand_removal_effect = { PROVIDER = … }`; hook use; opinion; actor toast `eotg_aug_demand_accepted_toast` | |
@@ -318,8 +331,8 @@ The same desc key is used whichever direction the number points. The sign tells 
 
 | Field | Value |
 |---|---|
-| `category` / `icon` | `interaction_category_friendly` / `learning` |
-| `is_available` | `eotg_has_physician_access = yes` (actor-only state belongs in `is_available`, `.info:570-573`) |
+| `category` / `icon` | `interaction_category_friendly` / `plague` (as built; placeholder, §3.1) |
+| `is_available` | `eotg_aug_has_surgeon_access = yes` (realm spec §3.2; first draft `eotg_has_physician_access`). Actor-only state belongs in `is_available`, `.info:570-573` |
 | `is_shown` | `scope:recipient != scope:actor`; recipient `eotg_aug_tamper_target = yes` (augmented, not Seamless; lore ruling: at 866 tech no one can tell where Seamless hardware ends and the body begins, so there is no hardware to examine apart from the body); recipient `OR = { eotg_aug_in_charge_of = { ACTOR = scope:actor }  is_imprisoned_by = scope:actor }` |
 | `cooldown_against_recipient` | `{ years = 2 }` |
 | `auto_accept` | `OR = { scope:recipient = { is_courtier_of = scope:actor }  scope:recipient = { is_imprisoned_by = scope:actor } }`. Your own household and your prisoners do not get a say. |
@@ -540,16 +553,22 @@ No episode is fired. Episodes belong to the band pools' cooldown authority (less
 
 **Options** (Spare Parts shape, procedures proc.003). Every paid option:
 1. pays at base `medium_gold_value`;
-2. sets `set_variable = { name = eotg_aug_repair_injury  value = flag:fault  days = 365 }` and `save_scope_value_as = { name = eotg_proc_fault  value = yes }`;
+2. books the fault as the repair: `eotg_aug_fault_repair_book_effect = yes` (as built; it sets `set_variable = { name = eotg_aug_repair_injury  value = flag:fault  days = 365 }` in `hidden_effect` and `save_scope_value_as = { name = eotg_proc_fault  value = yes }`);
 3. runs `hidden_effect = { eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = …  PROCEDURE = repair  SURGEON = … } }`;
 4. ends with `custom_tooltip = eotg_aug_tamper.004.tt`.
 
-A fault repair adds the repair risk (+2 to +8 by tier, back streets +3), and the sabotaged flag it is clearing makes **this** roll ×1.5 bad. Fixing sabotaged hardware is harder than fixing it clean. A clean, excellent, infection, flaw or discovered outcome runs `eotg_aug_repair_injury_effect` (`flag:fault`) and clears the fault. Rejection ("failed") leaves it and adds risk +5.
+A fault repair adds the repair risk (+2 to +8 by tier, back streets +3), and the sabotaged flag it is clearing makes **this** roll ×1.5 bad. Fixing sabotaged hardware is harder than fixing it clean. A clean, excellent, infection, flaw or discovered outcome runs `eotg_aug_repair_injury_effect` (`flag:fault`) and clears the fault, `eotg_flag_aug_sabotaged` included.
+
+**A repair that does not repair keeps the fault, flag included** (coordinator ruling, QA-passed; this rule wins over §3.2's first-draft "step 5 removes the sabotaged flag"). The outcomes are **rejection** ("failed"; also adds risk +5), **maimed**, **one_eyed** and **blind** (the back-street severe tail). Their branches in `eotg_aug_procedure_apply_effect` skip `eotg_aug_repair_injury_effect`, so:
+- `eotg_mod_aug_tampered` stays (its 2 years run on);
+- `eotg_flag_aug_sabotaged` stays (its 5 years run on). The roll's step 5 leaves it in place on exactly these outcomes of a `flag:fault` repair;
+- `eotg_aug_has_fault` stays true, and the next roll is still ×1.5 bad.
+Death weighs 0 on any repair, so it needs no rule.
 
 | Opt | Text intent | Trigger | Provider / price | Extra | ai_chance |
 |---|---|---|---|---|---|
-| a | "The clinic." | NOT `eotg_neurofractured`; afford ×1 | clinic | — | 40; +20 diligent; +10 craven; −20 greedy |
-| b | "My own physician." | `eotg_has_physician_access`; afford × `eotg_aug_price_mult_physician` | physician, `SURGEON = scope:eotg_proc_surgeon` | — | 40; +20 trusting; +10 diligent |
+| a | "The clinic." | NOT `eotg_neurofractured`; `eotg_aug_clinic_open = yes` (realm §3.2: root's realm decides; shown unavailable with `eotg_aug_clinic_closed_tt` under a Ban); afford ×1 | clinic | — | 40; +20 diligent; +10 craven; −20 greedy |
+| b | "My own physician." / name variant `eotg_aug_opt_technician` when `eotg_aug_surgeon_is_technician = yes` | `eotg_aug_has_surgeon_for = { PATIENT = root }` (as built: a surgeon other than root; the procedures QA rule, realm §3.2); afford × `eotg_aug_price_mult_physician` | physician, `SURGEON = scope:eotg_proc_surgeon` | — | 40; +20 trusting; +10 diligent |
 | c | "Someone cheaper." | afford × `eotg_aug_price_mult_backstreet_repair` | backstreet | — | 25; +20 greedy; +10 deceitful; −20 craven |
 | d | "Live with it." | — | — | `eotg_aug_stress_neglect_effect = yes`. The fault stays (2-year modifier, 5-year flag). | 20; +20 lazy; +10 stubborn |
 | e [paranoid] | "Find the hands." (physical evidence only, lore I5; §7) | `has_trait = paranoid`; NOT known (no `scheme_discovered`, no `eotg_tamper_signed`); `scope:owner ?= { is_alive = yes }` | — | intrigue `duel` vs `scope:owner` (tier2.015.a shape, `compare_modifier` ×2.5); success: `add_opinion = { modifier = eotg_opinion_aug_tampered  target = scope:owner }`, toast `.e.success`; failure: toast `.e.failure` | 30; +30 paranoid; +10 vengeful |
@@ -579,7 +598,7 @@ Shape: `blind_interaction` (`00_prison_interactions.txt:8150-8344`).
 | `is_shown` | `scope:actor = { is_adult = yes }`; `scope:recipient = { is_imprisoned_by = scope:actor  eotg_aug_tamper_target = yes }`. **Seamless is excluded** (option A; **decided by the human 2026-10-04**, §8 ruling 2). `eotg_aug_tamper_target` already excludes Seamless, so no extra clause is needed. The trigger comment carries the lore reason (§8 ruling 1). |
 | `is_valid_showing_failures_only` | recipient NOT `is_being_tortured`, NOT `is_currently_being_purged` (vanilla `custom_description` keys `currently_being_tortured`, `is_currently_being_purged_tt`; :8175-8194) |
 | `is_highlighted` | actor sadistic, or rival of the recipient (:8196-8213, minus the cultural lines) |
-| send options | physician (needs access, `localization = eotg_aug_send_physician`) / rough (`flag = eotg_aug_provider_backstreet`, `localization = eotg_aug_send_rough`, `starts_enabled`) |
+| send options | exclusive. Physician (`localization = eotg_aug_send_physician`, `current_description = eotg_aug_send_salvage_physician_tt`; `is_valid` = `scope:actor = { eotg_aug_has_surgeon_for = { PATIENT = scope:recipient } }` with `eotg_aug_send_physician_valid_tt`, §4.0) / rough (`flag = eotg_aug_provider_backstreet`, `localization = eotg_aug_send_rough`, `starts_enabled = { always = yes }`) |
 | `on_accept` | see below |
 | `auto_accept` | yes |
 
@@ -654,7 +673,7 @@ All `character_event`, in `events/eotg_augmentation_interactions.txt`, namespace
 | Opt | Text intent | Trigger | Effect | ai_chance |
 |---|---|---|---|---|
 | a | "Treat what you can." | examined holds infection, fragments or `eotg_mod_aug_tampered`, OR is tier 3 / NF; `gold >= minor_gold_value` | pay `minor_gold_value`; on the examined: remove infection, fragments and tampered (guarded); hidden risk −5 if tier 3 or NF; `eotg_opinion_aug_grateful_patient` 10 years | 40; +20 diligent; +20 compassionate |
-| b | "Fix the fault." | examined `eotg_aug_has_fault = yes`; afford `medium_gold_value` × `eotg_aug_price_mult_physician` | pay; on the examined `eotg_aug_repair_injury = flag:fault` (365 days); `save_scope_value_as eotg_proc_fault`; `hidden_effect = { eotg_aug_procedure_effect = { PATIENT = scope:eotg_examined  PROVIDER = physician  PROCEDURE = repair  SURGEON = scope:eotg_proc_surgeon } }`; `custom_tooltip = eotg_aug_int.001.b.tt` | 30; +20 diligent; +10 paranoid; −20 greedy |
+| b | "Fix the fault." | examined `eotg_aug_has_fault = yes`; `exists = scope:eotg_proc_surgeon` and NOT `scope:eotg_proc_surgeon = scope:eotg_examined` (as built: the surgeon is not the patient, §4.0); afford `medium_gold_value` × `eotg_aug_price_mult_physician` | pay; on the examined `eotg_aug_fault_repair_book_effect = yes` (`eotg_aug_repair_injury = flag:fault`, 365 days; `eotg_proc_fault`); `hidden_effect = { eotg_aug_procedure_effect = { PATIENT = scope:eotg_examined  PROVIDER = physician  PROCEDURE = repair  SURGEON = scope:eotg_proc_surgeon } }`; `custom_tooltip = eotg_aug_int.001.b.tt` | 30; +20 diligent; +10 paranoid; −20 greedy |
 | c | "Note it." | — | `eotg_aug_stress_neglect_effect = yes` | 20; +20 lazy; +10 content |
 | d | "Trace the tampering." (physical evidence only, lore I5; §7) | `scope:eotg_examined.var:eotg_aug_sabotaged_by ?= { is_alive = yes }` (save as `eotg_saboteur` in the immediate) | intrigue `duel` vs `scope:eotg_saboteur` (×2.5); success: the examined **and** root `add_opinion = { modifier = eotg_opinion_aug_tampered  target = scope:eotg_saboteur }`, toast `.d.success`; failure: toast `.d.failure` | 30; +20 paranoid; +10 vengeful |
 | e [lifestyle_physician] | "Let me do it myself." | `has_trait = lifestyle_physician`, NOT blind; the same state trigger as a | as a, but free, plus `eotg_mod_aug_lesson_learning` 5 years | 30; +30 lifestyle_physician; +10 diligent |
@@ -673,7 +692,7 @@ All `character_event`, in `events/eotg_augmentation_interactions.txt`, namespace
 | Opt | Text intent | Trigger | Effect | ai_chance |
 |---|---|---|---|---|
 | a | "Sell it." | — | `add_gold = eotg_aug_salvage_sale_value` | 30; +20 greedy; +10 cynical |
-| b | "Fit it to me." | `eotg_can_receive_augmented = yes`; `gold >= tiny_gold_value` | pay `tiny_gold_value`; `eotg_aug_initiate_effect = yes`; hidden risk set to 5; 50% `eotg_flag_aug_hidden_flaw` (used hardware; thread T6). With physician access: `eotg_aug_save_surgeon_effect`, then `eotg_aug_procedure_effect` (physician, install), `custom_tooltip = eotg_aug_proc.install_tt`. Without: `eotg_aug_procedure_roll_effect` (backstreet, install), then init.011 in 180–540 days unless death. Then `eotg_aug_stress_surgery_effect = yes`. **Tier 1 only**, whatever the hardware came from (HQ1: no skipping tiers). | 30; +20 ambitious; +10 cynical; `factor = 0` zealous |
+| b | "Fit it to me." | `eotg_can_receive_augmented = yes`; `gold >= tiny_gold_value` | pay `tiny_gold_value`; `eotg_aug_initiate_effect = yes`; hidden risk set to 5; 50% `eotg_flag_aug_hidden_flaw` (used hardware; thread T6). With a surgeon other than root (`eotg_aug_has_surgeon_for = { PATIENT = root }`, as built; §4.0): `eotg_aug_save_surgeon_effect`, then `eotg_aug_procedure_effect` (physician, install), `custom_tooltip = eotg_aug_proc.install_tt`. Without: `eotg_aug_procedure_roll_effect` (backstreet, install), then init.011 in 180–540 days unless death. Then `eotg_aug_stress_surgery_effect = yes`. **Tier 1 only**, whatever the hardware came from (HQ1: no skipping tiers). | 30; +20 ambitious; +10 cynical; `factor = 0` zealous |
 | c | "Keep it for spare parts." | `has_trait = eotg_cybernetics` | `eotg_mod_aug_clean_install` 5 years; hidden risk +3; 25% `eotg_flag_aug_hidden_flaw` | 30; +20 diligent; +10 greedy |
 | d | "Destroy it." | — | `add_piety = minor_piety_gain`; `eotg_aug_stress_reject_effect = yes` | 20; +30 zealous; +10 humble |
 | e [cynical] | "Take it apart. Learn." | `has_trait = cynical` | `eotg_mod_aug_lesson_learning` 5 years; if augmented, hidden risk +2 | 30; +30 cynical; +10 education_learning_3 |
@@ -787,7 +806,8 @@ No vanilla string needs a `replace/` override. Vanilla keys reused as-is: `START
 | **Toasts and effect tooltips:** `eotg_aug_offer_accepted_toast`, `eotg_aug_offer_declined_toast`, `eotg_aug_demand_accepted_toast`, `eotg_aug_demand_declined_toast`, `eotg_aug_examine_declined_toast`, `eotg_aug_demand_removal_effect_tt`, `eotg_aug_salvage_effect_tt`, `eotg_aug_tamper_foiled_toast` | 8 |
 | **`ai_accept` descs:** `EOTG_AUG_AI_LIEGE`, `_AMBITIOUS`, `_CYNICAL`, `_BRAVE`, `_GREEDY`, `_LOSS`, `_CRAVEN`, `_CONTENT`, `_PARANOID`, `_HUMBLE`, `_ZEALOUS`, `_FORMER`, `_CLINIC`, `_PHYSICIAN`, `_BACKSTREET`, `_TIER_AUGMENTED`, `_TIER_ENHANCED`, `_TIER_OVERCLOCKED`, `_STUBBORN`, `_ARROGANT`, `_STRESS`, `_COUNTDOWN`, `_ILLEGAL`, `_TRUSTING`, `_DECEITFUL` | 25 |
 | **Scheme:** `eotg_aug_tamper`, `eotg_aug_tamper_action`, `eotg_aug_tamper_desc`, `eotg_aug_tamper_desc_general`, `EOTG_AUG_TAMPER_SUCCESS_DESC`, `EOTG_AUG_TAMPER_DISCOVERY_DESC`, `eotg_aug_tamper_invalidated_title`, `eotg_aug_tamper_invalidated_dead`, `eotg_aug_tamper_invalidated_removed`, `EOTG_AUG_TAMPER_TARGET_PHYSICIAN`, `_TARGET_ILLEGAL`, `_TARGET_HARDENED`, `_TARGET_FRACTURED`, `_OWNER_KNOWS` | 14 |
-| **Engine-generated scheme modifier names**, only if PX `missing-required-loc` asks for them (vanilla has them for its schemes): `eotg_aug_tamper_scheme_phase_duration_add`, `eotg_aug_tamper_enemy_scheme_phase_duration_add` (vanilla form at `steal_back_artifact_scheme_phase_duration_add`) | (2) |
+| **Engine-generated scheme modifier names**, only if PX `missing-required-loc` asks for them (vanilla has them for its schemes): `eotg_aug_tamper_scheme_phase_duration_add`, `eotg_aug_tamper_enemy_scheme_phase_duration_add` (vanilla form at `steal_back_artifact_scheme_phase_duration_add`). **Not built** (as of 2026-10-04): PX has not asked for them, so they are deliberately absent. Add them only if PX or the game shows a raw key. | (0) |
+| **As built, added:** `eotg_aug_send_one_provider_tt` (exactly one provider), `eotg_aug_send_physician_valid_tt` (the physician send option's requirement line), `eotg_aug_send_salvage_physician_tt` (Salvage's physician description); reused from the procedures and realm loc: `eotg_decision_aug_removal_booked_tt` (Demand's booking guard), `eotg_aug_clinic_closed_tt`, `eotg_aug_opt_technician` | 3 new |
 | **Opinions:** `eotg_opinion_aug_forced_procedure`, `_demanded_removal`, `_salvaged_me`, `_salvaged_family_member`, `_tampered` | 5 |
 | `eotg_aug_int.001.t`, `.desc`, `.desc_fractured`, `.desc_oc_bad`, `.desc_oc_ok`, `.desc_stable`, `.desc_flaw`, `.desc_tampered`, `.desc_infection`, `.desc_illegal`, `.a`–`.e`, `.b.tt`, `.d.success`, `.d.failure` | 18 |
 | `eotg_aug_int.002.t`, `.desc`, `.desc_augmented`, `.desc_enhanced`, `.desc_overclocked`, `.desc_fractured`, `.desc_died`, `.desc_maimed`, `.desc_fragments`, `.a`–`.e` | 14 |
@@ -795,7 +815,7 @@ No vanilla string needs a `replace/` override. Vanilla keys reused as-is: `START
 | `eotg_aug_tamper.003.t`, `.desc`, `.desc_tier3`, `.desc_discovered`, `.a`, `.b` | 6 |
 | `eotg_aug_tamper.004.t`, `.desc`, `.desc_aug`, `.desc_enh`, `.desc_oc`, `.desc_nf`, `.desc_known`, `.desc_unknown`, `.a`–`.e`, `.tt`, `.e.success`, `.e.failure` | 16 |
 | **Procedures amendments:** `eotg_aug_proc.002.desc_salvaged`, `eotg_aug_proc.002.desc_repair_fault`, `eotg_aug_proc.020.desc_salvaged` | 3 |
-| **Total** | **~144 (+2 conditional)** |
+| **Total** | **~147** (the 2 conditional keys not built) |
 
 **Briefs:**
 - **Offer:** a gift, in the transactional tone of the existing system. The physician and clinic tooltips say who does the work, never who licenses it (the procedures spec's neutral-licensing rule). The back-street tooltip: cheap, unvetted.
@@ -878,6 +898,22 @@ No vanilla string needs a `replace/` override. Vanilla keys reused as-is: `START
 | **Episodes as a sabotage result** | Lesson 5: episodes belong to the band pools' cooldown authority (the same call as the procedures spec's operating table). |
 | **Dedicated icons** for the five interactions and the scheme | Vanilla placeholders now (§3.1). Art debt for the human, alongside the Seamless trait icon. |
 | **A scheme odds-prediction term for the mod's modifiers** | The vanilla prediction is an approximation. Our ±10/15 lines are left out of it rather than adding a misc script value. Add one if players find the prediction misleading. |
+
+---
+
+## 11. As built: departures from the first draft (2026-10-04)
+
+Each was ruled by the coordinator in the Cybernetics session and passed QA. The sections above are amended to match; this table is the record.
+
+| # | Where | First draft | As built | Reason |
+|---|---|---|---|---|
+| 1 | §3.2 roll step 5; §4.4.3 | A fault repair always clears `eotg_flag_aug_sabotaged` | A fault repair whose outcome is rejection, maimed, one_eyed or blind **keeps** the flag | §4.4.3 is the specific rule: a repair that does not repair leaves the fault, and the flag is the fault's hold on the next roll. It stays consistent with `eotg_mod_aug_tampered` and `eotg_aug_has_fault`. |
+| 2 | §4.0; Offer, Demand, Salvage physician send options; tamper.004.b; int.002.b; int.001.b | `eotg_has_physician_access` | First `eotg_aug_has_court_physician`, then **`eotg_aug_has_surgeon_for = { PATIENT }`** (realm build; the former is superseded and gone from script). int.001.b tests the saved surgeon directly (not the examined) | The surgeon must not be the patient (procedures QA: no self-surgery at the physician's price without the self penalty), and the technician counts as a surgeon (realm §3.2). |
+| 3 | §4.2 Demand | No booking check | `is_valid_showing_failures_only` checks `eotg_aug_removal_kind` (`eotg_decision_aug_removal_booked_tt`) | Procedures QA booking guard: a demand must not overwrite a removal the recipient booked. |
+| 4 | §4.0 | Exclusive provider options plus a hook option | Offer and Demand: `send_options_exclusive = no` and an exactly-one-provider check (`eotg_aug_send_one_provider_tt`); Salvage stays exclusive | `send_options_exclusive` is interaction-wide, so it would make the hook deselect the provider. Vanilla pairs hook and influence options the same way. |
+| 5 | §3.1 icons; §4.3 | Examine icon `learning` | `plague` | `learning` has no file in `gfx/interface/icons/character_interactions/`. Placeholder; art debt unchanged. |
+| 6 | §3.1 | No helper effects named | `eotg_aug_fault_repair_book_effect`, `eotg_aug_examine_treat_effect` | Shared option bodies (tamper.004 a/b/c and int.001.b; int.001 a/e). |
+| 7 | §7 | 2 conditional scheme modifier loc keys | Not built | PX never asked for them. |
 
 ---
 

@@ -13,8 +13,8 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 
 | Family | Specs | Built | Ids | Present | Referenced only | Missing in built specs |
 |---|---|---|---|---|---|---|
-| `cybernetics` | 1 | 1 | 66 | 53 | 0 | 13 |
-| `cybernetics_v2` | 22 | 22 | 1268 | 1231 | 30 | 7 |
+| `cybernetics` | 1 | 1 | 53 | 53 | 0 | 0 |
+| `cybernetics_v2` | 22 | 22 | 1282 | 1251 | 31 | 0 |
 | `glossary` | 1 | 0 | 1 | 0 | 0 | 0 |
 | `void` | 1 | 0 | 86 | 0 | 0 | 0 |
 
@@ -22,11 +22,11 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 
 | Spec | Built | Ids | Present | Referenced only | Missing | Exempt |
 |---|---|---|---|---|---|---|
-| `cybernetics_track.md` | yes | 66 | 53 | 0 | 13 | 0 |
+| `cybernetics_track.md` | yes | 66 | 53 | 0 | 0 | 13 |
 | `cybernetics_v2.md` | yes | 108 | 107 | 1 | 0 | 0 |
-| `cybernetics_v2_balance.md` | yes | 139 | 136 | 2 | 1 | 0 |
+| `cybernetics_v2_balance.md` | yes | 139 | 136 | 2 | 0 | 1 |
 | `cybernetics_v2_conformance_rulings.md` | yes | 39 | 38 | 1 | 0 | 0 |
-| `cybernetics_v2_interactions.md` | yes | 146 | 140 | 4 | 2 | 0 |
+| `cybernetics_v2_interactions.md` | yes | 161 | 154 | 4 | 0 | 3 |
 | `cybernetics_v2_interactions_lore.md` | yes | 1 | 1 | 0 | 0 | 0 |
 | `cybernetics_v2_new_beats.md` | yes | 69 | 65 | 4 | 0 | 0 |
 | `cybernetics_v2_phase0.md` | yes | 49 | 49 | 0 | 0 | 0 |
@@ -36,13 +36,13 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | `cybernetics_v2_phase4.md` | yes | 65 | 65 | 0 | 0 | 0 |
 | `cybernetics_v2_phase5.md` | yes | 52 | 49 | 3 | 0 | 0 |
 | `cybernetics_v2_phase6.md` | yes | 27 | 26 | 1 | 0 | 0 |
-| `cybernetics_v2_procedures.md` | yes | 147 | 144 | 1 | 2 | 0 |
+| `cybernetics_v2_procedures.md` | yes | 146 | 144 | 1 | 0 | 1 |
 | `cybernetics_v2_procedures_lore.md` | yes | 7 | 7 | 0 | 0 | 0 |
-| `cybernetics_v2_realm.md` | yes | 120 | 115 | 3 | 1 | 1 |
+| `cybernetics_v2_realm.md` | yes | 125 | 120 | 4 | 0 | 1 |
 | `cybernetics_v2_realm_lore.md` | yes | 2 | 2 | 0 | 0 | 0 |
 | `cybernetics_v2_reprisal.md` | yes | 37 | 36 | 1 | 0 | 0 |
 | `cybernetics_v2_reprisal_lore.md` | yes | 3 | 3 | 0 | 0 | 0 |
-| `cybernetics_v2_self_repair.md` | yes | 57 | 54 | 2 | 1 | 0 |
+| `cybernetics_v2_self_repair.md` | yes | 58 | 55 | 2 | 0 | 1 |
 | `cybernetics_v2_self_repair_lore.md` | yes | 5 | 5 | 0 | 0 | 0 |
 | `cybernetics_v2_trait_depth.md` | yes | 42 | 41 | 1 | 0 | 0 |
 | `glossary_proposal_cloud.md` | **no** | 1 | 0 | 0 | 1 | 0 |
@@ -55,9 +55,9 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 #### `docs/specs/cybernetics_track.md`
 
 - Specced and present: 53
-- Specced, missing from script (13): `eotg_augmented` (trait, l.25), `eotg_enhanced` (trait, l.25), `eotg_overclocked` (trait, l.25), `eotg_apply_edu_synergy_augmented` (effect, l.116), `eotg_apply_edu_synergy_enhanced` (effect, l.117), `eotg_apply_edu_synergy_overclocked` (effect, l.118), `trait_eotg_augmented` (unknown, l.393), `trait_eotg_augmented_desc` (loc, l.393), `trait_eotg_enhanced` (unknown, l.393), `trait_eotg_enhanced_desc` (loc, l.393), `trait_eotg_overclocked` (unknown, l.393), `trait_eotg_overclocked_desc` (loc, l.393), `trait_eotg_cybernetics_2_desc` (loc, l.410)
+- Specced, missing from script (0): none
 - Referenced only, never defined or set (0): none
-- Exempt (0): none
+- Exempt (13): `eotg_augmented` (trait, l.25), `eotg_enhanced` (trait, l.25), `eotg_overclocked` (trait, l.25), `eotg_apply_edu_synergy_augmented` (effect, l.116), `eotg_apply_edu_synergy_enhanced` (effect, l.117), `eotg_apply_edu_synergy_overclocked` (effect, l.118), `trait_eotg_augmented` (unknown, l.393), `trait_eotg_augmented_desc` (loc, l.393), `trait_eotg_enhanced` (unknown, l.393), `trait_eotg_enhanced_desc` (loc, l.393), `trait_eotg_overclocked` (unknown, l.393), `trait_eotg_overclocked_desc` (loc, l.393), `trait_eotg_cybernetics_2_desc` (loc, l.410)
 - Suffix shorthand that matches no key (1, not counted): l.410: `trait_eotg_cybernetics_2_desc` + `_3_desc`
 
 ### Unbuilt specs (expected gaps)
@@ -79,9 +79,9 @@ None.
 #### `docs/specs/cybernetics_v2_balance.md`
 
 - Specced and present: 136
-- Specced, missing from script (1): `eotg_fracture.011.desc_misled` (loc, l.792)
+- Specced, missing from script (0): none
 - Referenced only, never defined or set (2): `eotg_aug_sedation_courses` (variable, l.91), `eotg_aug_nr_battle_bonus` (variable, l.95)
-- Exempt (0): none
+- Exempt (1): `eotg_fracture.011.desc_misled` (loc, l.792)
 
 #### `docs/specs/cybernetics_v2_conformance_rulings.md`
 
@@ -93,11 +93,11 @@ None.
 
 #### `docs/specs/cybernetics_v2_interactions.md`
 
-- Specced and present: 140
-- Specced, missing from script (2): `eotg_aug_tamper_scheme_phase_duration_add` (unknown, l.790), `eotg_aug_tamper_enemy_scheme_phase_duration_add` (unknown, l.790)
-- Referenced only, never defined or set (4): `eotg_aug_provider_clinic` (flag, l.126), `eotg_aug_provider_physician` (flag, l.126), `eotg_aug_provider_backstreet` (flag, l.126), `eotg_opinion_aug_salvaged` (opinion, l.590)
-- Exempt (0): none
-- Suffix shorthand that matches no key (7, not counted): l.670: `eotg_salvage_tier` + `_enhanced`; l.670: `eotg_salvage_tier` + `_overclocked`; l.670: `eotg_salvage_tier` + `_fractured`; l.789: `eotg_aug_tamper_invalidated_removed` + `_TARGET_ILLEGAL`; l.789: `eotg_aug_tamper_invalidated_removed` + `_TARGET_HARDENED`; l.789: `eotg_aug_tamper_invalidated_removed` + `_TARGET_FRACTURED`; l.789: `eotg_aug_tamper_invalidated_removed` + `_OWNER_KNOWS`
+- Specced and present: 154
+- Specced, missing from script (0): none
+- Referenced only, never defined or set (4): `eotg_aug_provider_clinic` (flag, l.127), `eotg_aug_provider_physician` (flag, l.127), `eotg_aug_provider_backstreet` (flag, l.127), `eotg_opinion_aug_salvaged` (opinion, l.609)
+- Exempt (3): `eotg_aug_has_court_physician` (unknown, l.173), `eotg_aug_tamper_scheme_phase_duration_add` (unknown, l.809), `eotg_aug_tamper_enemy_scheme_phase_duration_add` (unknown, l.809)
+- Suffix shorthand that matches no key (7, not counted): l.689: `eotg_salvage_tier` + `_enhanced`; l.689: `eotg_salvage_tier` + `_overclocked`; l.689: `eotg_salvage_tier` + `_fractured`; l.808: `eotg_aug_tamper_invalidated_removed` + `_TARGET_ILLEGAL`; l.808: `eotg_aug_tamper_invalidated_removed` + `_TARGET_HARDENED`; l.808: `eotg_aug_tamper_invalidated_removed` + `_TARGET_FRACTURED`; l.808: `eotg_aug_tamper_invalidated_removed` + `_OWNER_KNOWS`
 
 #### `docs/specs/cybernetics_v2_interactions_lore.md`
 
@@ -166,9 +166,9 @@ None.
 #### `docs/specs/cybernetics_v2_procedures.md`
 
 - Specced and present: 144
-- Specced, missing from script (2): `eotg_mod_aug_illegal_implants` (modifier, l.24), `eotg_alley_outcome` (unknown, l.359)
+- Specced, missing from script (0): none
 - Referenced only, never defined or set (1): `eotg_resigner.GetName` (loc, l.684)
-- Exempt (0): none
+- Exempt (1): `eotg_mod_aug_illegal_implants` (modifier, l.24)
 
 #### `docs/specs/cybernetics_v2_procedures_lore.md`
 
@@ -179,10 +179,11 @@ None.
 
 #### `docs/specs/cybernetics_v2_realm.md`
 
-- Specced and present: 115
-- Specced, missing from script (1): `eotg_aug_policy` (unknown, l.655)
-- Referenced only, never defined or set (3): `eotg_contraband_subject.GetName` (loc, l.272), `eotg_aug_accuser.GetName` (loc, l.423), `eotg_aug_accused.GetName` (loc, l.423)
-- Exempt (1): `eotg_opinion_aug_demanded_removal` (opinion, l.158)
+- Specced and present: 120
+- Specced, missing from script (0): none
+- Referenced only, never defined or set (4): `eotg_aug_has_court_physician` (trigger, l.117), `eotg_contraband_subject.GetName` (loc, l.275), `eotg_aug_accuser.GetName` (loc, l.427), `eotg_aug_accused.GetName` (loc, l.427)
+- Exempt (1): `eotg_opinion_aug_demanded_removal` (opinion, l.161)
+- Suffix shorthand that matches no key (1, not counted): l.157: `eotg_aug_price_mult_physician` + `_for`
 
 #### `docs/specs/cybernetics_v2_realm_lore.md`
 
@@ -207,10 +208,10 @@ None.
 
 #### `docs/specs/cybernetics_v2_self_repair.md`
 
-- Specced and present: 54
-- Specced, missing from script (1): `eotg_mod_aug_calibrated` (modifier, l.28)
-- Referenced only, never defined or set (2): `eotg_cybernetic_innovation` (flag, l.72), `eotg_implant_calibrated` (modifier, l.77)
-- Exempt (0): none
+- Specced and present: 55
+- Specced, missing from script (0): none
+- Referenced only, never defined or set (2): `eotg_cybernetic_innovation` (flag, l.73), `eotg_implant_calibrated` (modifier, l.78)
+- Exempt (1): `eotg_mod_aug_calibrated` (modifier, l.29)
 
 #### `docs/specs/cybernetics_v2_self_repair_lore.md`
 
@@ -269,11 +270,11 @@ None.
 
 Mod definitions (`common/` top-level keys, events, namespaces, flags and variables that are set, saved scopes) that no spec read here names. An event also counts as mentioned by its short form (`tier1.005`).
 
-- **effect** (32): `eotg_aug_abdicate_effect`, `eotg_aug_act003_examine_effect`, `eotg_aug_act004_reactions_effect`, `eotg_aug_act_withdraw_effect`, `eotg_aug_bridge_success_effect`, `eotg_aug_end_countdown_effect`, `eotg_aug_examine_treat_effect`, `eotg_aug_excision_pay_effect`, `eotg_aug_f006_concessions_effect`, `eotg_aug_f006_crush_effect`, `eotg_aug_f006_tribunal_effect`, `eotg_aug_f009_misled_toast_effect`, `eotg_aug_f015_send_effect`, `eotg_aug_f016_burn_effect`, `eotg_aug_f016_confess_effect`, `eotg_aug_f019_arrest_effect`, `eotg_aug_f019_spare_effect`, `eotg_aug_f019_watch_effect`, `eotg_aug_f023_muster_effect`, `eotg_aug_f023_stand_down_effect`, `eotg_aug_f024_restrain_effect`, `eotg_aug_f024_sit_with_effect`, `eotg_aug_f025_hold_keeper_effect`, `eotg_aug_f025_let_them_effect`, `eotg_aug_f025_take_it_effect`, `eotg_aug_fault_repair_book_effect`, `eotg_aug_parent_hardware_clear_effect`, `eotg_aug_patron_demand_effect`, `eotg_aug_realm001_forgive_effect`, `eotg_aug_retinue_install_effect`, `eotg_aug_retinue_reverse_effect`, `eotg_aug_unmask_congenital_effect`
+- **effect** (30): `eotg_aug_abdicate_effect`, `eotg_aug_act003_examine_effect`, `eotg_aug_act004_reactions_effect`, `eotg_aug_act_withdraw_effect`, `eotg_aug_bridge_success_effect`, `eotg_aug_end_countdown_effect`, `eotg_aug_excision_pay_effect`, `eotg_aug_f006_concessions_effect`, `eotg_aug_f006_crush_effect`, `eotg_aug_f006_tribunal_effect`, `eotg_aug_f009_misled_toast_effect`, `eotg_aug_f015_send_effect`, `eotg_aug_f016_burn_effect`, `eotg_aug_f016_confess_effect`, `eotg_aug_f019_arrest_effect`, `eotg_aug_f019_spare_effect`, `eotg_aug_f019_watch_effect`, `eotg_aug_f023_muster_effect`, `eotg_aug_f023_stand_down_effect`, `eotg_aug_f024_restrain_effect`, `eotg_aug_f024_sit_with_effect`, `eotg_aug_f025_hold_keeper_effect`, `eotg_aug_f025_let_them_effect`, `eotg_aug_f025_take_it_effect`, `eotg_aug_parent_hardware_clear_effect`, `eotg_aug_patron_demand_effect`, `eotg_aug_realm001_forgive_effect`, `eotg_aug_retinue_install_effect`, `eotg_aug_retinue_reverse_effect`, `eotg_aug_unmask_congenital_effect`
 - **event** (8): `eotg_aug_countdown.002`, `eotg_aug_countdown.003`, `eotg_aug_patron.007`, `eotg_aug_retinue.002`, `eotg_aug_retinue.004`, `eotg_aug_tier1.014`, `eotg_aug_tier1.019`, `eotg_aug_tier3.018`
 - **flag** (12): `eotg_flag_aug_bleed_purged`, `eotg_flag_aug_bleed_ridden`, `eotg_flag_aug_bout_unaided`, `eotg_flag_aug_bridge_full_current`, `eotg_flag_aug_cascaded_this_pulse`, `eotg_flag_aug_declined_bridge`, `eotg_flag_aug_declined_prosthetic`, `eotg_flag_aug_rejection_brave`, `eotg_flag_aug_rejection_rested`, `eotg_flag_aug_rejection_treated`, `eotg_flag_aug_upgrade_reassured`, `eotg_flag_tier1_vassal_suspicion_fired`
 - **modifier** (18): `eotg_mod_aug_diplomacy_bonus`, `eotg_mod_aug_intrigue_bonus`, `eotg_mod_aug_learning_bonus`, `eotg_mod_aug_martial_bonus`, `eotg_mod_aug_steward_bonus`, `eotg_mod_enh_diplomacy_bonus`, `eotg_mod_enh_learning_bonus`, `eotg_mod_enh_martial_bonus`, `eotg_mod_enh_steward_bonus`, `eotg_mod_nf_diplomacy_distortion`, `eotg_mod_nf_intrigue_distortion`, `eotg_mod_nf_learning_distortion`, `eotg_mod_nf_martial_distortion`, `eotg_mod_nf_steward_distortion`, `eotg_mod_oc_diplomacy_bonus`, `eotg_mod_oc_intrigue_bonus`, `eotg_mod_oc_learning_bonus`, `eotg_mod_oc_steward_bonus`
 - **namespace** (3): `eotg_aug_tier1`, `eotg_aug_tier2`, `eotg_aug_tier3`
 - **scope** (54): `eotg_accused_kin`, `eotg_aug_peer`, `eotg_aug_victim_owner`, `eotg_aug_withdrawn`, `eotg_bleed_outcome`, `eotg_blood_outcome`, `eotg_bout_outcome`, `eotg_bridge_outcome`, `eotg_campaign_outcome`, `eotg_claim_truth`, `eotg_concerned_vassal`, `eotg_confessor`, `eotg_confidant`, `eotg_copycat_outcome`, `eotg_delegation_leader`, `eotg_demand_provider`, `eotg_executed`, `eotg_former_self`, `eotg_grief_killer`, `eotg_hire_first`, `eotg_hire_second`, `eotg_iron_knight`, `eotg_kept_retinue_bonus`, `eotg_letter_kind`, `eotg_machines_bond`, `eotg_misled_outcome`, `eotg_missing_outcome`, `eotg_nr_cascaded`, `eotg_nr_reported`, `eotg_offer_provider`, `eotg_other_parent`, `eotg_petitioning_knight`, `eotg_phantom_order`, `eotg_plot_action`, `eotg_plot_learned`, `eotg_plot_truth`, `eotg_rejection_outcome`, `eotg_report_truth`, `eotg_resentful`, `eotg_retainer_installed`, `eotg_retinue_story`, `eotg_salvage_provider`, `eotg_scrambled_into`, `eotg_seamless_heir_arc`, `eotg_surgeon`, `eotg_tamper_outcome`, `eotg_tamper_trace`, `eotg_victim_portrait`, `eotg_volunteer_b`, `eotg_warden_chancellor`, `eotg_warden_heir`, `eotg_warden_spouse`, `eotg_warrant_result`, `eotg_watching_heir`
-- **trigger** (7): `eotg_aug_containment_possible`, `eotg_aug_has_surgeon_for`, `eotg_aug_keeper_candidate`, `eotg_aug_own_technician_valid`, `eotg_aug_patron_heir_candidate`, `eotg_aug_sick_child_candidate`, `eotg_can_progress_to_overclocked`
+- **trigger** (5): `eotg_aug_containment_possible`, `eotg_aug_keeper_candidate`, `eotg_aug_patron_heir_candidate`, `eotg_aug_sick_child_candidate`, `eotg_can_progress_to_overclocked`
 - **variable** (7): `eotg_aug_escrow`, `eotg_aug_plot_vassals`, `eotg_hall_gone`, `eotg_patron_envoy_passthrough`, `eotg_patron_terms_passthrough`, `eotg_phase1_grace`, `eotg_retinue_phase_passthrough`

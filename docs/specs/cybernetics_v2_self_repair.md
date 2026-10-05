@@ -9,6 +9,7 @@
 - [cybernetics_v2_procedures_lore.md](cybernetics_v2_procedures_lore.md): the 866 tech ceiling (lore N1).
 **Also binding:** [cybernetics_v2_balance.md](cybernetics_v2_balance.md) (HQ1 / HQ2, §9.2 observer run); the SETTING LORE ERRATA entry **CYBERNETICS AT 866** (2026-10-04).
 
+**Build state (2026-10-04): built and QA-passed** (commit `9a8a17f`). This spec now describes the committed script; the departures from the first draft are amended in place and listed in §11.
 **Build position.** Last in the cybernetics queue: **procedures → interactions → realm → reprisal → this spec.** It reads triggers, values and option shapes that only exist once procedures and realm are built (§4.7). It shares files with reprisal (effects, loc), so it lands after it.
 
 **Size.**
@@ -25,7 +26,7 @@
 
 | Brief says | Script says | Consequence here |
 |---|---|---|
-| The Calibrated Systems modifier is `eotg_mod_aug_calibrated` | The key is **`eotg_mod_implant_calibrated`** (`common/modifiers/eotg_augmentation_modifiers.txt`; loc "Calibrated Systems"). It carries `stress_gain_mult = -0.15`, `health = 0.3`. | This spec uses the real key. |
+| The Calibrated Systems modifier is `eotg_mod_aug_calibrated` (the brief's name; never a key, not built) | The key is **`eotg_mod_implant_calibrated`** (`common/modifiers/eotg_augmentation_modifiers.txt`; loc "Calibrated Systems"). It carries `stress_gain_mult = -0.15`, `health = 0.3`. | This spec uses the real key. |
 | Calibration slows risk | **It does not.** Nothing reads `eotg_mod_implant_calibrated` in any accrual. The only risk effect of calibration is the **one-off −8 at Overclocked** in `eotg_decision_maintenance_protocol`'s effect (−12 in Consult the Physician; the realm spec makes Maintenance −12 with a technician). | "Calibrations last longer" alone would buy stress and health, not stability. The package in §4.3 pairs it with an accrual change so the hardware does what its name says. |
 | The Maintenance cooldown | `eotg_flag_maintenance_cooldown`, 3 years, **set in the decision effect** and read in its `is_valid` / `ai_potential`. Decision-owned (index §1 rule 5). | Not shortened and not removed (§4.3, "Rejected"). |
 
@@ -68,8 +69,8 @@ All keys carry the `eotg_` prefix. No landed titles. Loc keys use the dot form f
 
 | Type | Key | Where | Owner |
 |---|---|---|---|
-| culture innovation | `eotg_innovation_self_repairing_machinery` | `common/culture/innovations/eotg_innovations.txt` (**new folder for the mod**; additive, no `replace_path`) | scripter |
-| innovation flag | `eotg_cybernetic_innovation` (`flag =`; **not** `global_regular` / `early_medieval_era_regular`, §4.1) | same file | scripter |
+| culture innovation | `eotg_innovation_self_repairing_machinery` (as built: **no `unlock_decision`**, §4.1) | `common/culture/innovations/eotg_innovations.txt` (**new folder for the mod**; additive, no `replace_path`) | scripter |
+| innovation flag | `eotg_cybernetic_innovation` (`flag =`; **not** `global_regular` / `early_medieval_era_regular`, §4.1; set by the innovation's `flag =` line, so the conformance tool lists it "referenced only": expected) | same file | scripter |
 | innovation icon | stopgap `gfx/interface/icons/culture_innovations/innovation_misc_inventions.dds` (vanilla, the `@misc_inventions` icon used by `innovation_armilary_sphere`, `00_early_medieval_innovations.txt:30, :413`) | same file | scripter (stopgap); **human** if bespoke art is wanted (not blocking) |
 | decision | `eotg_decision_aug_self_repair` | `common/decisions/eotg_augmentation_decisions.txt` | scripter |
 | decision picture | placeholder: `gfx/interface/illustrations/decisions/eotg_decision_maintenance_protocol.dds` (the Seek decision already reuses it) | same | scripter; human if bespoke |
@@ -93,7 +94,7 @@ All keys carry the `eotg_` prefix. No landed titles. Loc keys use the dot form f
 | proc.002 *After the Procedure* | One new opener, `desc_refit`, **first** in its opener `first_valid`, when `exists = scope:eotg_proc_refit`. | 4.4 |
 | realm spec §3.2, technician accrual row | **Location only:** its two values (−2 / −3) move unchanged into `eotg_aug_oc_wear_relief_value`. No change to its numbers; the realm spec's −6 best case stands (human, 2026-10-04). | 4.3 |
 
-**Reused, not new:** `eotg_aug_procedure_effect`, `eotg_aug_save_surgeon_effect`, `eotg_aug_pay_procedure_effect`, `eotg_aug_can_afford_procedure`, `eotg_aug_price_mult_physician`, `eotg_aug_stress_surgery_effect`, `eotg_add_fracture_risk`, `eotg_aug_clinic_open`, `eotg_aug_has_surgeon_access`, `eotg_aug_surgeon_is_technician`, the loc key `eotg_aug_opt_technician`, `eotg_aug_clinic_closed_tt`, `eotg_is_aug_tier1/2/3`, `eotg_aug_has_countdown`.
+**Reused, not new:** `eotg_aug_procedure_effect`, `eotg_aug_save_surgeon_effect`, `eotg_aug_pay_procedure_effect`, `eotg_aug_can_afford_procedure`, `eotg_aug_price_mult_physician`, `eotg_aug_stress_surgery_effect`, `eotg_add_fracture_risk`, `eotg_aug_clinic_open`, `eotg_aug_has_surgeon_for` (as built, in place of `eotg_aug_has_surgeon_access`), `eotg_aug_surgeon_is_technician`, the loc key `eotg_aug_opt_technician`, `eotg_aug_clinic_closed_tt`, `eotg_is_aug_tier1/2/3`, `eotg_aug_has_countdown`.
 
 ---
 
@@ -105,7 +106,7 @@ All keys carry the `eotg_` prefix. No landed titles. Loc keys use the dot form f
 
 | Fact | Evidence |
 |---|---|
-| An innovation names one era (`culture_era`), one group (`culture_group_military` / `culture_group_civic`), a head-of-culture skill for fascination (`skill`, default learning), an `icon`, optional `potential` (hidden if false) and `can_progress` (shown but stalled if false), optional `flag`s, and `unlock_*` / `custom` tooltip lines. **`unlock_decision` is tooltip-only**: the decision must gate itself. | `common/culture/innovations/_culture_innovations.info:14-30, 75-79, 100-114` |
+| An innovation names one era (`culture_era`), one group (`culture_group_military` / `culture_group_civic`), a head-of-culture skill for fascination (`skill`, default learning), an `icon`, optional `potential` (hidden if false) and `can_progress` (shown but stalled if false), optional `flag`s, and `unlock_*` / `custom` tooltip lines. **`unlock_decision` is tooltip-only**: the decision must gate itself. **No vanilla innovation uses `unlock_decision`** (it appears only in the `.info`), so the build leaves it out (§11). | `common/culture/innovations/_culture_innovations.info:14-30, 75-79, 100-114` |
 | **There is no per-innovation cost or progress field.** The only levers are era placement, `can_progress`, `region`, and the AI weights. | same file (full field list) |
 | Era years: tribal 0, early medieval **900**, high medieval **1050**, late medieval 1200. The year is when the era *starts receiving base spread*; a culture then needs at least 8 of its current era's innovations plus era progress to join it. | `common/culture/eras/00_culture_eras.txt:2-7, 39-40, 83-84`; `_culture_eras.info:2`; `common/defines/00_defines.txt:1194-1196` (`MINIMUM_INNOVATIONS_TO_NEXT_ERA = 8`, `ERA_PROGRESS_GAIN_BASE_MONTHLY = 0.1`) |
 | At the vanilla 867 start, almost every culture is in the **tribal** era. Most join early medieval at the **950** history entry. | e.g. `history/cultures/greek.txt:3-24` (867 innovations, `join_era = culture_era_early_medieval` at `950.1.1`); 22 of the files with an early-medieval `join_era` place it at 950, 1 at 866 |
@@ -141,7 +142,7 @@ All keys carry the `eotg_` prefix. No landed titles. Loc keys use the dot form f
 
 **Rule that survives Gate 1** (for the taskboard): *the innovation sits exactly one era above the era the mod's cultures hold at 866.* If the mod's culture history puts its 866 cultures in `culture_era_early_medieval` (a spacefaring setting might), move it to `culture_era_high_medieval`, and its AI × 0 test with it. If v2 replaces the eras, re-point both keys. Nothing else changes.
 
-**Definition** (shape: `innovation_armilary_sphere`, `00_early_medieval_innovations.txt:409-433`, plus `unlock_decision` from `.info:105-106`):
+**Definition** (shape: `innovation_armilary_sphere`, `00_early_medieval_innovations.txt:409-433`). **As built, without `unlock_decision`:** the `.info` lists it (`:105-106`) but no vanilla innovation uses it, so it is an unproven field; it would only add a tooltip line, and the `custom` line already tells the player what the innovation unlocks.
 
 ```
 eotg_innovation_self_repairing_machinery = {
@@ -150,7 +151,7 @@ eotg_innovation_self_repairing_machinery = {
     culture_era = culture_era_early_medieval  # option B; see the Gate 1 rule above
     icon = "gfx/interface/icons/culture_innovations/innovation_misc_inventions.dds"   # stopgap
 
-    unlock_decision = eotg_decision_aug_self_repair            # tooltip only (.info:105)
+    # no unlock_decision: in the .info, unused by vanilla; the custom line tells the player
     custom = eotg_innovation_self_repairing_machinery_custom
 
     flag = eotg_cybernetic_innovation        # NOT global_regular / *_era_regular (below)
@@ -289,7 +290,7 @@ The cost of the full stack:
 | `selection_tooltip` | `eotg_decision_aug_self_repair_selection_tt` |
 | `ai_check_interval_by_tier` | barony 0, county 0, duchy 36, kingdom 24, empire 24, hegemony 24 (Seek's: counts are offered, they never seek; balance §5.2/§5.3) |
 | `is_shown` | `eotg_aug_can_self_repair = yes` |
-| `is_valid` | `custom_description = { text = eotg_decision_aug_self_repair_no_provider_tt  OR = { eotg_aug_clinic_open = yes  eotg_aug_has_surgeon_access = yes } }`. Gold floor at the cheapest provider: `OR = { eotg_aug_can_afford_procedure = { BASE = eotg_aug_self_repair_price_value  MULT = 1 }  AND = { eotg_aug_has_surgeon_access = yes  eotg_aug_can_afford_procedure = { BASE = eotg_aug_self_repair_price_value  MULT = eotg_aug_price_mult_physician } } }` |
+| `is_valid` | `custom_description = { text = eotg_decision_aug_self_repair_no_provider_tt  OR = { eotg_aug_clinic_open = yes  eotg_aug_has_surgeon_for = { PATIENT = root } } }`. Gold floor at the cheapest **open** provider (as built): `OR = { AND = { eotg_aug_clinic_open = yes  eotg_aug_can_afford_procedure = { BASE = eotg_aug_self_repair_price_value  MULT = 1 } }  AND = { eotg_aug_has_surgeon_for = { PATIENT = root }  eotg_aug_can_afford_procedure = { BASE = eotg_aug_self_repair_price_value  MULT = eotg_aug_price_mult_physician } } }`. The clinic price counts **only while the clinic is open**: in the first draft's form, a ruler under a Ban with a surgeon, rich enough for the clinic price but not the surgeon's, passed the floor and reached proc.005 with no option they could take but "Not yet". |
 | `cooldown` | `{ years = 1 }` (decision-owned, index §1 rule 5; covers "Not yet") |
 | `effect` | `custom_tooltip = eotg_decision_aug_self_repair_tooltip`; `trigger_event = eotg_aug_proc.005` |
 | `ai_potential` | `eotg_aug_can_self_repair = yes`; `short_term_gold >= { value = eotg_aug_self_repair_price_value  multiply = eotg_aug_price_mult_physician }` |
@@ -304,7 +305,7 @@ The cost of the full stack:
 - **Fired by:** `eotg_decision_aug_self_repair` only.
 - **Trigger** (world-state guard; no cooldown read): `eotg_aug_can_self_repair = yes`.
 - **Immediate:** `eotg_aug_save_surgeon_effect = yes`.
-- **Desc:** base, plus `desc_overclocked` (`eotg_is_aug_tier3 = yes`: the deepest hardware wears fastest, and this is what it is for), plus `desc_surgeon` (`eotg_aug_has_surgeon_access = yes`).
+- **Desc:** base, plus `desc_overclocked` (`eotg_is_aug_tier3 = yes`: the deepest hardware wears fastest, and this is what it is for), plus `desc_surgeon` (`eotg_aug_has_surgeon_for = { PATIENT = root }`, as built).
 - **Paid options run, in order:**
   1. `eotg_aug_pay_procedure_effect = { BASE = eotg_aug_self_repair_price_value  MULT = … }`;
   2. `eotg_aug_self_repair_fit_effect = yes` (adds the modifier: shown by the engine; then risk +2 / +4 / +6 by tier in `hidden_effect`);
@@ -318,7 +319,7 @@ The cost of the full stack:
 | Opt | Text intent | Trigger | Provider / price | ai_chance |
 |---|---|---|---|---|
 | a | "The clinic." | `eotg_aug_clinic_open = yes`; afford ×1. `show_as_unavailable = { eotg_aug_clinic_open = no }` with `eotg_aug_clinic_closed_tt` (realm §3.2, vanilla `tournament_events.txt:4496`) | clinic ×1, `SURGEON = root` | 40; +20 diligent; +10 craven; −20 greedy |
-| b | "My own physician." / name variant `eotg_aug_opt_technician` when `eotg_aug_surgeon_is_technician = yes` (realm §3.2) | `eotg_aug_has_surgeon_access = yes`; afford × `eotg_aug_price_mult_physician` | physician × that mult, `SURGEON = scope:eotg_proc_surgeon` | 40; +20 trusting; +10 diligent |
+| b | "My own physician." / name variant `eotg_aug_opt_technician` when `eotg_aug_surgeon_is_technician = yes` (realm §3.2) | `eotg_aug_has_surgeon_for = { PATIENT = root }` (as built: a surgeon other than the patient; the procedures QA rule, realm §3.2); afford × `eotg_aug_price_mult_physician` | physician × that mult, `SURGEON = scope:eotg_proc_surgeon` | 40; +20 trusting; +10 diligent |
 | c | "Not yet." | — | — | 15; +20 greedy; +10 content |
 
 No trait-gated option. This is a purchase point like proc.001, and index §1 rule 6 allows 0–2. A trait option would add loc for no new decision.
@@ -431,7 +432,7 @@ Also: the banned list of index §5.2.
 |---|---|---|
 | `eotg_innovation_self_repairing_machinery`, `_desc` | 2 | "Self-Repairing Machinery". Desc: mechanisms that measure their own wear and correct it; they cannot make a part. No possessive (S3). |
 | `eotg_innovation_self_repairing_machinery_custom` | 1 | "Augmented characters of this culture can have self-repairing hardware fitted." |
-| `eotg_decision_aug_self_repair`, `_desc`, `_tooltip`, `_confirm`, `_selection_tt`, `_no_provider_tt` | 6 | "Commission Self-Repairing Hardware". Desc: our scholars' hardware keeps itself in tolerance; calibrating less often; the price is ruinous. |
+| `eotg_decision_aug_self_repair`, `_desc`, `_tooltip`, `_confirm`, `_selection_tt`, `_no_provider_tt` | 6 | "Commission Self-Repairing Hardware". Desc: our scholars' hardware keeps itself in tolerance; calibrating less often; the price is ruinous. **`_no_provider_tt` is phrased as the requirement** (a `custom_description` line reads as what must be true, and shows red when it is not): as built, "A clinic will do this work for you here, or someone at your court can". |
 | `eotg_mod_aug_self_repair`, `_desc` | 2 | "Self-Repairing Hardware". Desc: it measures its own wear and holds its calibration longer; you are another matter. |
 | `eotg_aug_proc.005.t`, `.desc`, `.desc_overclocked`, `.desc_surgeon`, `.a`, `.b`, `.c`, `.tt` | 8 | .t "Within Tolerance". .a "The clinic." .b "My own physician." (the technician variant reuses `eotg_aug_opt_technician`). .c "Not yet." |
 | `eotg_aug_proc.002.desc_refit` | 1 | Its record, read at the panel, already shows the first fault it found and corrected (S2). |
@@ -472,7 +473,7 @@ No vanilla string needs a `replace/` override. The Maintenance and Consult toolt
    - Tiger 1.17 targets 1.18.3. Check any finding on the innovation file against `_culture_innovations.info` and `00_early_medieval_innovations.txt` before treating it as real.
 1. **Reachability (PX event graph):** proc.005 from `eotg_decision_aug_self_repair`. proc.002 (with `desc_refit`) from `eotg_aug_procedure_effect`.
 2. **Gating:**
-   - `grep -rn "eotg_innovation_self_repairing_machinery" common` finds only the innovation, `eotg_aug_can_self_repair`, and the decision's `unlock_decision` line;
+   - `grep -rn "eotg_innovation_self_repairing_machinery" common` finds only the innovation and `eotg_aug_can_self_repair` (there is no `unlock_decision` line, §11);
    - `eotg_aug_can_self_repair` is the only `has_innovation` test;
    - **S5:** `grep -rn "eotg_innovation_self_repairing_machinery\|eotg_mod_aug_self_repair" history common/bookmarks` returns nothing;
    - no culture, title, faith or province key anywhere in the change.
@@ -491,11 +492,11 @@ No vanilla string needs a `replace/` override. The Maintenance and Consult toolt
    - **S4 grep:** `grep -rniE "gnom|technocra|technarch|renaissance|golden age|council of innovation|technomag|975|replicat|nanite|swarm|before anyone|ahead of its time|the first to"` over the new keys is empty;
    - a reviewer reads the 20 keys against the S1, S2, S6 and S7 word lists in §7. Those lists have hardware-as-subject conditions, so they are not grep-clean.
 9. **Human, in game (temporary map, vanilla cultures):**
-   - The culture window lists the innovation in the civic group, early medieval column, for any culture. Its tooltip shows the decision unlock and the custom line.
+   - The culture window lists the innovation in the civic group, early medieval column, for any culture. Its tooltip shows the custom line (no decision-unlock line: `unlock_decision` is not used, §11).
    - **Engine check:** from a tribal-era culture at the start, the player can choose it as the **fascination** (ahead of time), and it shows progress. Note the rate the UI shows, and the rate for an in-era innovation (T). If the ahead-of-time choice is not offered, report it: option B then behaves like C.
    - Console (player scope) `effect = { culture = { add_innovation = eotg_innovation_self_repairing_machinery } }`. Then the decision appears for an augmented character, and not for an unaugmented, Neurofractured or Seamless one. It disappears once fitted.
    - Clinic route: gold drops by the full price and the modifier appears. Reload until a bad outcome: proc.002 opens with `desc_refit`. Physician route: cheaper price. With a technician (after realm) the option reads "My implant technician."
-   - Under a Ban (realm): the clinic option is greyed with its reason. With no physician or technician, the decision is invalid with `_no_provider_tt`.
+   - Under a Ban (realm): the clinic option is greyed with its reason. With no physician or technician (or only one who is the patient), the decision is invalid with `_no_provider_tt`. With a surgeon and gold for the clinic price but not the surgeon's, the decision is invalid (the gold floor), not open into an event with only "Not yet".
    - Maintenance, with the modifier: Calibrated Systems for 5 years. Consult: 7.
    - Overclocked, calm, fitted (`var:eotg_fracture_risk` before and after the yearly pulse):
      - no vendor flag, no technician: rises 11 a year (12 unfitted; self-repair row −1);
@@ -520,6 +521,19 @@ No vanilla string needs a `replace/` override. The Maintenance and Consult toolt
 - **An announcement event when the culture discovers it.** Vanilla has no hook for it (§4.1) and already notifies discoveries. A yearly culture-pulse poll would be a vignette.
 - **Bespoke art** for the innovation icon, the modifier icon and the decision picture. Stopgaps are named (§3.1). Human debt; not blocking.
 - **The other future techs** (remote kill, programmes, uploads): canon says not at 866. Not built.
+
+---
+
+## 11. As built: departures from the first draft (2026-10-04)
+
+Each was ruled by the coordinator in the Cybernetics session and passed QA. The sections above are amended to match; this table is the record.
+
+| # | Where | First draft | As built | Reason |
+|---|---|---|---|---|
+| 1 | §4.1 definition; §9 items 2, 9 | `unlock_decision = eotg_decision_aug_self_repair` | Left out | No vanilla innovation uses the field (it is only in the `.info`). It is tooltip-only, and the `custom` line already says what the innovation unlocks. |
+| 2 | §4.4 decision `is_valid`, proc.005 `desc_surgeon` and option b | `eotg_aug_has_surgeon_access` | `eotg_aug_has_surgeon_for = { PATIENT = root }` | The procedures QA rule: the surgeon must not be the patient (realm §3.2, §11 there). A lone physician ruler takes the clinic, not themself at the physician's price. |
+| 3 | §4.4 decision `is_valid` gold floor | `OR` of the clinic price and the surgeon price | The clinic price counts only `AND` the clinic is open | Under a Ban the old `OR` could pass on the clinic price, then open proc.005 with the clinic greyed out and the surgeon unaffordable: an event with no valid paid choice, only "Not yet", and a year's decision cooldown spent. |
+| 4 | §7 `_no_provider_tt` | A failure message | Phrased as the requirement | It is a `custom_description` line, shown as a condition. |
 
 ---
 

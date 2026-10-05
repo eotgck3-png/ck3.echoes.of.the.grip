@@ -22,7 +22,7 @@
 
 ## 1. Purpose & gate
 
-Replace `eotg_augmented` → `eotg_enhanced` → `eotg_overclocked` with one trait, **`eotg_cybernetics`**. Today the three traits are swapped in and out with `remove_trait`/`add_trait`. The new trait has a single level track whose XP bands are the three tiers. Its displayed name and description switch by XP, as vanilla `lifestyle_blademaster` does. `eotg_neurofractured` stays a separate trait.
+Replace `eotg_augmented` → `eotg_enhanced` → `eotg_overclocked` (all three superseded and removed from script) with one trait, **`eotg_cybernetics`**. Today the three traits are swapped in and out with `remove_trait`/`add_trait`. The new trait has a single level track whose XP bands are the three tiers. Its displayed name and description switch by XP, as vanilla `lifestyle_blademaster` does. `eotg_neurofractured` stays a separate trait.
 
 The rework also fixes three QA findings:
 - timed modifiers that collide with the permanent synergy keys;
@@ -110,12 +110,12 @@ All keys are `eotg_`-prefixed. No landed titles are involved.
 
 | Type | Key | Replaced by |
 |---|---|---|
-| trait | `eotg_augmented` | `eotg_cybernetics` at XP 0 |
-| trait | `eotg_enhanced` | `eotg_cybernetics` at XP 50 |
-| trait | `eotg_overclocked` | `eotg_cybernetics` at XP 100 |
-| scripted effect | `eotg_apply_edu_synergy_augmented` | `eotg_aug_refresh_synergy_effect`, called by `eotg_aug_initiate_effect` and `eotg_aug_set_integration_effect` |
-| scripted effect | `eotg_apply_edu_synergy_enhanced` | same |
-| scripted effect | `eotg_apply_edu_synergy_overclocked` | same |
+| trait | `eotg_augmented` | superseded by `eotg_cybernetics` at XP 0 |
+| trait | `eotg_enhanced` | superseded by `eotg_cybernetics` at XP 50 |
+| trait | `eotg_overclocked` | superseded by `eotg_cybernetics` at XP 100 |
+| scripted effect | `eotg_apply_edu_synergy_augmented` | superseded by `eotg_aug_refresh_synergy_effect`, called by `eotg_aug_initiate_effect` and `eotg_aug_set_integration_effect` |
+| scripted effect | `eotg_apply_edu_synergy_enhanced` | superseded (same) |
+| scripted effect | `eotg_apply_edu_synergy_overclocked` | superseded (same) |
 
 No `trait_conversion.lookup` entry. No saves exist, and adding an entry would mean overriding vanilla's lookup file.
 
@@ -240,32 +240,32 @@ Line numbers are as of the 2026-10-02 lift. The table is exhaustive for:
 | Line | Today | Replacement |
 |---|---|---|
 | 2–5 | header describing the 3-trait chain | header: XP takes exactly 0/50/100; deltas stack; only `eotg_aug_set_integration_effect` changes XP |
-| 8–23 | `eotg_augmented = {…}` | delete; replaced by `eotg_cybernetics` (§4.1) |
-| 25–43 | `eotg_enhanced = {…}` | delete |
-| 45–63 | `eotg_overclocked = {…}` | delete |
-| 78 | `opposites = { eotg_augmented eotg_enhanced eotg_overclocked }` | `opposites = { eotg_cybernetics }`, plus `icon` and `shown_in_ruler_designer = no` (§4.2) |
+| 8–23 (superseded) | `eotg_augmented = {…}` | delete; replaced by `eotg_cybernetics` (§4.1) |
+| 25–43 (superseded) | `eotg_enhanced = {…}` | delete |
+| 45–63 (superseded) | `eotg_overclocked = {…}` | delete |
+| 78 (superseded) | `opposites = { eotg_augmented eotg_enhanced eotg_overclocked }` | `opposites = { eotg_cybernetics }`, plus `icon` and `shown_in_ruler_designer = no` (§4.2) |
 
 ### 5.2 `common/scripted_triggers/eotg_augmentation_triggers.txt`
 
 | Line | Today | Replacement |
 |---|---|---|
-| 7–12 | `OR = { has_trait = eotg_augmented … eotg_neurofractured }` | `OR = { has_trait = eotg_cybernetics  has_trait = eotg_neurofractured }` |
-| 31 | `has_trait = eotg_augmented` | `eotg_is_aug_tier1 = yes` (no XP condition) |
-| 41 | `has_trait = eotg_enhanced` | `eotg_is_aug_tier2 = yes` (no XP condition) |
-| 51 | `has_trait = eotg_overclocked` | `eotg_is_aug_tier3 = yes` |
+| 7–12 (superseded) | `OR = { has_trait = eotg_augmented … eotg_neurofractured }` | `OR = { has_trait = eotg_cybernetics  has_trait = eotg_neurofractured }` |
+| 31 (superseded) | `has_trait = eotg_augmented` | `eotg_is_aug_tier1 = yes` (no XP condition) |
+| 41 (superseded) | `has_trait = eotg_enhanced` | `eotg_is_aug_tier2 = yes` (no XP condition) |
+| 51 (superseded) | `has_trait = eotg_overclocked` | `eotg_is_aug_tier3 = yes` |
 | new | n/a | `eotg_is_aug_tier1/2/3` (§3.1) |
 
 ### 5.3 `common/scripted_effects/eotg_augmentation_effects.txt`
 
 | Line | Today | Replacement |
 |---|---|---|
-| 5–36 | `eotg_apply_edu_synergy_augmented` | delete |
-| 38–74 | `eotg_apply_edu_synergy_enhanced` | delete |
-| 76–112 | `eotg_apply_edu_synergy_overclocked` | delete |
+| 5–36 (superseded) | `eotg_apply_edu_synergy_augmented` | delete |
+| 38–74 (superseded) | `eotg_apply_edu_synergy_enhanced` | delete |
+| 76–112 (superseded) | `eotg_apply_edu_synergy_overclocked` | delete |
 | new | n/a | `eotg_aug_clear_synergy_effect`, `eotg_aug_refresh_synergy_effect`, `eotg_aug_initiate_effect`, `eotg_aug_set_integration_effect` (§4.3) |
 | 116–120 | 5× `remove_character_modifier = eotg_mod_oc_*_bonus` | `eotg_aug_clear_synergy_effect = yes` |
 | 148–173 | `eotg_clean_all_aug_modifiers` | add removes for `eotg_mod_aug_affect_dampened` and `eotg_mod_aug_running_hot` |
-| 187 | `remove_trait = eotg_overclocked` | `remove_trait = eotg_cybernetics` |
+| 187 (superseded) | `remove_trait = eotg_overclocked` | `remove_trait = eotg_cybernetics` |
 | 188 | `add_trait = eotg_neurofractured` | unchanged |
 
 ### 5.4 `common/modifiers/eotg_augmentation_modifiers.txt`
@@ -284,32 +284,32 @@ Line numbers are as of the 2026-10-02 lift. The table is exhaustive for:
 | Line | Today | Replacement |
 |---|---|---|
 | 4–5 | header | "Enhanced → Augmented (XP to 0)", "Overclocked → Enhanced (XP to 50)" |
-| 16 | `has_trait = eotg_enhanced` | `eotg_is_aug_tier2 = yes` |
-| 31–32 | `remove_trait = eotg_enhanced` / `add_trait = eotg_augmented` | `eotg_aug_set_integration_effect = { XP = 0 }` |
-| 33–38 | `eotg_apply_edu_synergy_augmented = yes` + 5× remove `eotg_mod_enh_*` | delete |
-| 62 | `has_trait = eotg_overclocked` | `eotg_is_aug_tier3 = yes` |
-| 77–78 | `remove_trait = eotg_overclocked` / `add_trait = eotg_enhanced` | `eotg_aug_set_integration_effect = { XP = 50 }` |
-| 79–84 | `eotg_apply_edu_synergy_enhanced = yes` + 5× remove `eotg_mod_oc_*` | delete |
+| 16 (superseded) | `has_trait = eotg_enhanced` | `eotg_is_aug_tier2 = yes` |
+| 31–32 (superseded) | `remove_trait = eotg_enhanced` / `add_trait = eotg_augmented` | `eotg_aug_set_integration_effect = { XP = 0 }` |
+| 33–38 (superseded) | `eotg_apply_edu_synergy_augmented = yes` + 5× remove `eotg_mod_enh_*` | delete |
+| 62 (superseded) | `has_trait = eotg_overclocked` | `eotg_is_aug_tier3 = yes` |
+| 77–78 (superseded) | `remove_trait = eotg_overclocked` / `add_trait = eotg_enhanced` | `eotg_aug_set_integration_effect = { XP = 50 }` |
+| 79–84 (superseded) | `eotg_apply_edu_synergy_enhanced = yes` + 5× remove `eotg_mod_oc_*` | delete |
 | 85 | `eotg_mod_oc_regression_recovery` | unchanged |
-| 110–114 | `OR = { has_trait = eotg_augmented / eotg_enhanced / eotg_overclocked }` | `has_trait = eotg_cybernetics` |
-| 132 | `limit = { has_trait = eotg_overclocked }` | `limit = { eotg_is_aug_tier3 = yes }` |
-| 141 | `has_trait = eotg_overclocked` | `eotg_is_aug_tier3 = yes` |
-| 147 | `modifier = { add = 30  has_trait = eotg_overclocked }` | `modifier = { add = 30  eotg_is_aug_tier3 = yes }` |
+| 110–114 (superseded) | `OR = { has_trait = eotg_augmented / eotg_enhanced / eotg_overclocked }` | `has_trait = eotg_cybernetics` |
+| 132 (superseded) | `limit = { has_trait = eotg_overclocked }` | `limit = { eotg_is_aug_tier3 = yes }` |
+| 141 (superseded) | `has_trait = eotg_overclocked` | `eotg_is_aug_tier3 = yes` |
+| 147 (superseded) | `modifier = { add = 30  has_trait = eotg_overclocked }` | `modifier = { add = 30  eotg_is_aug_tier3 = yes }` |
 
 ### 5.6 `common/on_action/eotg_augmentation_on_actions.txt`
 
 | Line | Today | Replacement |
 |---|---|---|
 | 1–32 | header | add one line: the tier is the XP on `eotg_cybernetics` (0/50/100), read through `eotg_is_aug_tier1/2/3`. Everything else unchanged. |
-| 104 | `any_vassal = { has_trait = eotg_augmented }` | `any_vassal = { has_trait = eotg_cybernetics }` (Q5) |
-| 105 | `any_courtier = { is_alive = yes  has_trait = eotg_augmented }` | `… has_trait = eotg_cybernetics }` |
-| 124 | `has_trait = eotg_augmented` | `eotg_is_aug_tier1 = yes` |
-| 136 | `has_trait = eotg_augmented` | `eotg_is_aug_tier1 = yes` |
+| 104 (superseded) | `any_vassal = { has_trait = eotg_augmented }` | `any_vassal = { has_trait = eotg_cybernetics }` (Q5) |
+| 105 (superseded) | `any_courtier = { is_alive = yes  has_trait = eotg_augmented }` | `… has_trait = eotg_cybernetics }` |
+| 124 (superseded) | `has_trait = eotg_augmented` | `eotg_is_aug_tier1 = yes` |
+| 136 (superseded) | `has_trait = eotg_augmented` | `eotg_is_aug_tier1 = yes` |
 | 156 | `trigger = { any_knight = { is_alive = yes } }` | `trigger = { any_knight = { is_alive = yes  eotg_is_augmented_any = no } }` |
-| 183 | `has_trait = eotg_enhanced` | `eotg_is_aug_tier2 = yes` |
-| 235 | `limit = { has_trait = eotg_overclocked }` | `limit = { eotg_is_aug_tier3 = yes }` |
-| 307 | `any_vassal = { is_alive = yes  has_trait = eotg_overclocked }` | `… eotg_is_aug_tier3 = yes }` |
-| 308 | `any_courtier = { is_alive = yes  has_trait = eotg_overclocked }` | `… eotg_is_aug_tier3 = yes }` |
+| 183 (superseded) | `has_trait = eotg_enhanced` | `eotg_is_aug_tier2 = yes` |
+| 235 (superseded) | `limit = { has_trait = eotg_overclocked }` | `limit = { eotg_is_aug_tier3 = yes }` |
+| 307 (superseded) | `any_vassal = { is_alive = yes  has_trait = eotg_overclocked }` | `… eotg_is_aug_tier3 = yes }` |
+| 308 (superseded) | `any_courtier = { is_alive = yes  has_trait = eotg_overclocked }` | `… eotg_is_aug_tier3 = yes }` |
 | 330 | `has_trait = eotg_neurofractured` | unchanged |
 
 ### 5.7 `events/eotg_augmentation_initiation.txt`
@@ -317,35 +317,35 @@ Line numbers are as of the 2026-10-02 lift. The table is exhaustive for:
 | Line | Today | Replacement |
 |---|---|---|
 | 14 | header "adds a tier trait" | "adds `eotg_cybernetics` at XP 0" |
-| 38 + 40 | `add_trait = eotg_augmented` … `eotg_apply_edu_synergy_augmented = yes` | `eotg_aug_initiate_effect = yes` (keep line 39, heal wounds, and the risk set) |
+| 38 + 40 (superseded) | `add_trait = eotg_augmented` … `eotg_apply_edu_synergy_augmented = yes` | `eotg_aug_initiate_effect = yes` (keep line 39, heal wounds, and the risk set) |
 | 113 + 114 | same pair | `eotg_aug_initiate_effect = yes` |
 | 149 | `trigger = { any_knight = { is_alive = yes } }` | `… is_alive = yes  eotg_is_augmented_any = no …` |
 | 151 | `limit = { is_alive = yes }` | `limit = { is_alive = yes  eotg_is_augmented_any = no }` |
-| 152 | `add_trait = eotg_augmented` (knight) | `eotg_aug_initiate_effect = yes` (knight synergy fix) |
+| 152 (superseded) | `add_trait = eotg_augmented` (knight) | `eotg_aug_initiate_effect = yes` (knight synergy fix) |
 | 181 + 182 | same pair | `eotg_aug_initiate_effect = yes` |
 | 234 + 237 | same pair | `eotg_aug_initiate_effect = yes` (keep line 235, illegal implants, and line 236, heal wounds) |
-| 293 | `any_vassal = { has_trait = eotg_augmented }` | `… has_trait = eotg_cybernetics …` |
-| 294 | `any_courtier = { is_alive = yes  has_trait = eotg_augmented }` | `… has_trait = eotg_cybernetics …` |
-| 301 | `limit = { any_vassal = { has_trait = eotg_augmented } }` | `… eotg_cybernetics …` |
-| 303 | `limit = { has_trait = eotg_augmented }` | `limit = { has_trait = eotg_cybernetics }` |
-| 309 | `limit = { is_alive = yes  has_trait = eotg_augmented }` | `… has_trait = eotg_cybernetics }` |
+| 293 (superseded) | `any_vassal = { has_trait = eotg_augmented }` | `… has_trait = eotg_cybernetics …` |
+| 294 (superseded) | `any_courtier = { is_alive = yes  has_trait = eotg_augmented }` | `… has_trait = eotg_cybernetics …` |
+| 301 (superseded) | `limit = { any_vassal = { has_trait = eotg_augmented } }` | `… eotg_cybernetics …` |
+| 303 (superseded) | `limit = { has_trait = eotg_augmented }` | `limit = { has_trait = eotg_cybernetics }` |
+| 309 (superseded) | `limit = { is_alive = yes  has_trait = eotg_augmented }` | `… has_trait = eotg_cybernetics }` |
 | 319 + 320 | same pair | `eotg_aug_initiate_effect = yes` |
 
 ### 5.8 `events/eotg_augmentation_tier1.txt`
 
 | Line | Today | Replacement |
 |---|---|---|
-| 96–98 (002.a) | `remove_trait = eotg_augmented` / `add_trait = eotg_enhanced` / `eotg_apply_edu_synergy_enhanced = yes` | `eotg_aug_set_integration_effect = { XP = 50 }` |
+| 96–98 (002.a) (superseded) | `remove_trait = eotg_augmented` / `add_trait = eotg_enhanced` / `eotg_apply_edu_synergy_enhanced = yes` | `eotg_aug_set_integration_effect = { XP = 50 }` |
 | 241–243 | `trigger = { any_knight = { is_alive = yes } }` | `… is_alive = yes  eotg_is_augmented_any = no …` (matches on_action line 156) |
 | 248 | `limit = { is_alive = yes }` | `limit = { is_alive = yes  eotg_is_augmented_any = no }` |
-| 258 | `add_trait = eotg_augmented` (knight) | `eotg_aug_initiate_effect = yes` (knight synergy fix) |
+| 258 (superseded) | `add_trait = eotg_augmented` (knight) | `eotg_aug_initiate_effect = yes` (knight synergy fix) |
 
 ### 5.9 `events/eotg_augmentation_tier2.txt`
 
 | Line | Today | Replacement |
 |---|---|---|
 | 38 (001.a) | `modifier = eotg_mod_enh_intrigue_bonus  years = 3` | `modifier = eotg_mod_aug_affect_dampened  years = 3` (QA a) |
-| 139–141 (003.a) | `remove_trait = eotg_enhanced` / `add_trait = eotg_overclocked` / `eotg_apply_edu_synergy_overclocked = yes` | `eotg_aug_set_integration_effect = { XP = 100 }` |
+| 139–141 (003.a) (superseded) | `remove_trait = eotg_enhanced` / `add_trait = eotg_overclocked` / `eotg_apply_edu_synergy_overclocked = yes` | `eotg_aug_set_integration_effect = { XP = 100 }` |
 | 181–183 (003.c) | same three lines | `eotg_aug_set_integration_effect = { XP = 100 }` (keep the risk +5 on line 180) |
 | 369 (006.a) | `modifier = eotg_mod_enh_intrigue_bonus  years = 2` | `modifier = eotg_mod_aug_affect_dampened  years = 2` (QA a) |
 
@@ -355,11 +355,11 @@ Line numbers are as of the 2026-10-02 lift. The table is exhaustive for:
 |---|---|---|
 | 176 (003.b) | `modifier = eotg_mod_oc_martial_bonus  years = 2` | `modifier = eotg_mod_aug_running_hot  years = 2` (QA a) |
 | 285 (005.a) | `modifier = eotg_mod_oc_martial_bonus  years = 1` | `modifier = eotg_mod_aug_running_hot  years = 1` (QA a) |
-| 411 | `any_vassal = { is_alive = yes  has_trait = eotg_overclocked }` | `… eotg_is_aug_tier3 = yes …` |
-| 412 | `any_courtier = { is_alive = yes  has_trait = eotg_overclocked }` | `… eotg_is_aug_tier3 = yes …` |
-| 428 | `limit = { any_vassal = { is_alive = yes  has_trait = eotg_overclocked } }` | `… eotg_is_aug_tier3 = yes …` |
-| 430 | `limit = { is_alive = yes  has_trait = eotg_overclocked }` | `limit = { is_alive = yes  eotg_is_aug_tier3 = yes }` |
-| 436 | `limit = { is_alive = yes  has_trait = eotg_overclocked }` | `limit = { is_alive = yes  eotg_is_aug_tier3 = yes }` |
+| 411 (superseded) | `any_vassal = { is_alive = yes  has_trait = eotg_overclocked }` | `… eotg_is_aug_tier3 = yes …` |
+| 412 (superseded) | `any_courtier = { is_alive = yes  has_trait = eotg_overclocked }` | `… eotg_is_aug_tier3 = yes …` |
+| 428 (superseded) | `limit = { any_vassal = { is_alive = yes  has_trait = eotg_overclocked } }` | `… eotg_is_aug_tier3 = yes …` |
+| 430 (superseded) | `limit = { is_alive = yes  has_trait = eotg_overclocked }` | `limit = { is_alive = yes  eotg_is_aug_tier3 = yes }` |
+| 436 (superseded) | `limit = { is_alive = yes  has_trait = eotg_overclocked }` | `limit = { is_alive = yes  eotg_is_aug_tier3 = yes }` |
 
 ---
 
@@ -390,7 +390,7 @@ Field names were checked against `ck3-modding/reference/common/traits/_traits.in
 
 UTF-8 with BOM, one definition per key, no `replace/` overrides.
 
-**Removed (6):** `trait_eotg_augmented`, `trait_eotg_augmented_desc`, `trait_eotg_enhanced`, `trait_eotg_enhanced_desc`, `trait_eotg_overclocked`, `trait_eotg_overclocked_desc`.
+**Removed (6; superseded, deliberately absent):** `trait_eotg_augmented`, `trait_eotg_augmented_desc`, `trait_eotg_enhanced`, `trait_eotg_enhanced_desc`, `trait_eotg_overclocked`, `trait_eotg_overclocked_desc`.
 
 **Added (track trait, 10):**
 
@@ -400,14 +400,14 @@ UTF-8 with BOM, one definition per key, no `replace/` overrides.
 | `trait_eotg_cybernetics_1` | "Augmented" |
 | `trait_eotg_cybernetics_2` | "Enhanced" |
 | `trait_eotg_cybernetics_3` | "Overclocked" |
-| `trait_eotg_cybernetics_1_desc` | Reuse the old `trait_eotg_augmented_desc` text |
+| `trait_eotg_cybernetics_1_desc` | Reuse the text of the old `trait_eotg_augmented_desc` (that key is superseded) |
 | `trait_eotg_cybernetics_1_character_desc` | Reuse the old Augmented desc. If you add the character's name, use the vanilla trait-tooltip form `[ROOT.GetCharacter.GetFirstNameNoTooltip]` (`traits_l_english.yml:141`), never `[scope:x]`. |
 | `trait_eotg_cybernetics_2_character_desc` | Reuse the old Enhanced desc |
 | `trait_eotg_cybernetics_3_character_desc` | Reuse the old Overclocked desc |
 | `trait_track_eotg_cybernetics` | "Integration" |
 | `trait_track_eotg_cybernetics_desc` | One line on how deeply the implants are wired in |
 
-Do not add `trait_eotg_cybernetics_2_desc` / `_3_desc`. They can never be shown, and vanilla comments out its own equivalents.
+Do not add `trait_eotg_cybernetics_2_desc` / `_3_desc` (not built, on purpose). They can never be shown, and vanilla comments out its own equivalents.
 
 **Added (modifiers, 4):**
 - `eotg_mod_aug_affect_dampened` "Affect Dampened", plus `eotg_mod_aug_affect_dampened_desc`
