@@ -52,13 +52,26 @@ function signature or struct member breaks them. In 1.19.0.6 → 1.20.0.3 this h
   and 7 in `tree.shader`.** An `.fxh` is *included by vanilla shaders*, so a stale one breaks
   files that have nothing to do with the mod.
 - `pdxterrain.shader` called the old 5/6-argument `GetBorderColorAndBlendGame` ⇒ black map.
+- `pdxterrain.shader` called the old 6-argument `ApplyProvinceEffectsTerrain` (1.20 added
+  `TerrainNormal` and `MapCoords`) ⇒ `PdxTerrain` / `PdxTerrainSkirt` failed to compile,
+  magenta terrain under `-mapeditor`. **The normal game looked fine for a full day**: the
+  call sits only in `MainCode PixelShader`, the low-spec entry point never references
+  province effects, so `PdxTerrainLowSpec` still compiled and the game silently used it.
+  A map that renders does NOT mean the high-spec terrain effect compiled — check
+  `error.log` for `pdx_terrain.cpp` after every shader change, not just when it looks wrong.
+  This one was self-inflicted: porting an `.fxh` without auditing the calls INTO it.
 
 **Confirm.** `grep "pdx_terrain.cpp" error.log` — it names the failing effect directly. Do **not**
 start from `Compile error`; the decal errors appear first and are a *symptom of a different file*.
 
 **Prevent.** After every CK3 update, diff each override against the game's copy. A `.shader` is
 self-contained and can only break itself; an **`.fxh` breaks everything that includes it**, so
-check those first. Known drifted-but-harmless right now: `pdxwater.shader`,
+check those first. Comparing which SYMBOLS exist is not enough — that is how the
+`ApplyProvinceEffectsTerrain` break survived the first sweep. Compare the **arity of every
+call site** against vanilla's declarations as well. Beware a naive comma split when counting
+args: `float2( a, b )` reads as two, and `province_effects.fxh` is a verbatim vanilla copy,
+so any mismatch reported *inside it* is a bug in the checker, not in the file — a useful
+built-in control. Known drifted-but-harmless right now: `pdxwater.shader`,
 `surroundmap.shader`, `clouds.fxh` (verified: nothing outside it calls `GetCloud`).
 
 ---

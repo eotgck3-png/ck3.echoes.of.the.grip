@@ -1799,7 +1799,9 @@ PixelShader =
 						float WaterNormalLerp = 0.0f;
 						EffectIntensities ConditionData;
 						BilinearSampleProvinceEffectsMask( ColorMapCoords, ConditionData );
-						ApplyProvinceEffectsTerrain( ConditionData, DetailDiffuse, DetailNormal, DetailMaterial, Input.WorldSpacePos, WaterNormalLerp );
+						ApplyProvinceEffectsTerrain( ConditionData, DetailDiffuse, DetailNormal,
+							DetailMaterial, Normal, Input.WorldSpacePos, ColorMapCoords,
+							WaterNormalLerp );   // MOD(eotg) 1.20 added TerrainNormal + MapCoords
 
 						// Use the property that only water has lower roughness to adjust the terrain normals to face upward.
 						float WaterNormalAdjustment = smoothstep( 0.6f, 1.0f, 1 - DetailMaterial.a);
