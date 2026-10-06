@@ -15,6 +15,7 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 |---|---|---|---|---|---|---|
 | `cybernetics` | 1 | 1 | 53 | 53 | 0 | 0 |
 | `cybernetics_v2` | 25 | 25 | 1477 | 1428 | 47 | 2 |
+| `frontier` | 1 | 1 | 71 | 9 | 0 | 62 |
 | `frontier_v1` | 2 | 2 | 159 | 158 | 1 | 0 |
 | `frontier_v2` | 1 | 1 | 109 | 109 | 0 | 0 |
 | `glossary` | 1 | 0 | 1 | 0 | 0 | 0 |
@@ -50,6 +51,7 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | `cybernetics_v2_tier_options.md` | yes | 94 | 91 | 1 | 2 | 0 |
 | `cybernetics_v2_tier_options_lore.md` | yes | 8 | 8 | 0 | 0 | 0 |
 | `cybernetics_v2_trait_depth.md` | yes | 42 | 41 | 1 | 0 | 0 |
+| `frontier_unclaimed_regions.md` | yes | 71 | 9 | 0 | 62 | 0 |
 | `frontier_v1.md` | yes | 146 | 137 | 1 | 0 | 8 |
 | `frontier_v1_open_questions.md` | yes | 21 | 21 | 0 | 0 | 0 |
 | `frontier_v2.md` | yes | 109 | 109 | 0 | 0 | 0 |
@@ -255,6 +257,23 @@ None.
 - Specced, missing from script (0): none
 - Referenced only, never defined or set (1): `eotg_victim` (scope, l.59)
 - Exempt (0): none
+
+### Unbuilt specs (expected gaps)
+
+None.
+
+
+## Family `frontier`
+
+### Built specs: gaps
+
+#### `docs/specs/frontier_unclaimed_regions.md`
+
+- Specced and present: 9
+- Specced, missing from script (62): `eotg_unclaimed_county` (variable, l.24), `eotg_unclaimed_release_effect` (effect, l.25), `eotg_unclaimed_on_claimed_effect` (effect, l.26), `eotg_unclaimed_claimed` (variable, l.31), `eotg_unclaimed_government` (effect, l.44), `eotg_government_is_unclaimed` (flag, l.45), `eotg_is_unclaimed_holder` (trigger, l.45), `eotg_unclaimed_folk` (trait, l.46), `eotg_unclaimed_holder_template` (template, l.47), `eotg_unclaimed_seed` (story, l.48), `eotg_unclaimed_mod_unclaimed` (modifier, l.49), `eotg_unclaimed_counties` (variable, l.52), `eotg_unclaimed_ai_gap` (variable, l.53), `eotg_unclaimed_ai_gap_days_value` (script value, l.53), `eotg_unclaimed_target` (scope, l.54), `eotg_unclaimed_new_holder` (scope, l.54), `eotg_unclaimed_old_holder` (scope, l.54), `eotg_unclaimed_claimant` (scope, l.54), `eotg_unclaimed_change` (scope, l.54), `eotg_is_unclaimed_folk` (trigger, l.59), `eotg_unclaimed_is_unclaimed` (trigger, l.61), `eotg_unclaimed_in_reach` (trigger, l.62), `eotg_unclaimed_can_claim` (trigger, l.63), `eotg_unclaimed_ai_may_claim` (trigger, l.64), `eotg_unclaimed_on_released` (effect, l.69), `eotg_unclaimed_create_holder_effect` (effect, l.70), `eotg_unclaimed_on_claimed` (effect, l.71), `eotg_unclaimed_claim_effect` (effect, l.72), `eotg_unclaimed_vanish_effect` (effect, l.73), `eotg_unclaimed_on_holder_death_effect` (effect, l.74), `eotg_unclaimed_game_start_effect` (effect, l.75), `eotg_unclaimed_sweep_effect` (effect, l.76), `eotg_unclaimed_set_neutral_colour_effect` (effect, l.77), `eotg_unclaimed_set_claimed_colour_effect` (effect, l.78), `eotg_unclaimed_debug_readout_effect` (effect, l.79), `eotg_unclaimed_claim_gold_value` (script value, l.84), `eotg_unclaimed_claim_prestige_value` (script value, l.85), `eotg_unclaimed_reach_value` (script value, l.86), `eotg_unclaimed_ai_hold_cap_value` (script value, l.88), `eotg_unclaimed_claim_interaction` (interaction, l.93), `eotg_decision_unclaimed_debug_release` (decision, l.94), `eotg_decision_unclaimed_debug_readout` (decision, l.95), `eotg_unclaimed_on_game_start` (on_action, l.96), `eotg_unclaimed_on_title_gain` (on_action, l.97), `eotg_unclaimed_on_death` (on_action, l.98), `eotg_unclaimed_on_yearly_sweep` (on_action, l.99), `eotg_unclaimed_on_frontier_abandoned` (on_action, l.100), `eotg_unclaimed_on_frontier_settled` (on_action, l.101), `eotg_unclaimed_abandon_returns_tt` (loc, l.111), `eotg_unclaimed_toast_unplayable` (unknown, l.201), `eotg_unclaimed_toast_released` (unknown, l.261), `eotg_unclaimed_claim_effect_tt` (loc, l.336), `eotg_frontier_mark_unknown_effect` (effect, l.392), `eotg_unclaimed_government_realm` (unknown, l.433), `trait_eotg_unclaimed_folk` (unknown, l.457), `trait_eotg_unclaimed_folk_desc` (loc, l.457), `eotg_unclaimed_mod_unclaimed_desc` (loc, l.458), `eotg_unclaimed_claim_reach_tt` (loc, l.461), `eotg_unclaimed_toast_claimed` (unknown, l.463), `eotg_unclaimed_debug_playable_tt` (loc, l.464), `eotg_unclaimed_debug_counts_tt` (loc, l.464), `eotg_unclaimed_defender_tt` (loc, l.468)
+- Referenced only, never defined or set (0): none
+- Exempt (0): none
+- Suffix shorthand that matches no key (16, not counted): l.54: `eotg_unclaimed_change` + `_target`; l.54: `eotg_unclaimed_change` + `_claimant`; l.54: `eotg_unclaimed_change` + `_old_holder`; l.69: `eotg_unclaimed_release_effect` + `_create_holder_effect`; l.71: `eotg_unclaimed_mod_unclaimed` + `_vanish_effect`; l.336: `eotg_unclaimed_claim_effect_tt` + `_returns_tt`; l.456: `eotg_unclaimed_government` + `_adjective`; l.456: `eotg_unclaimed_government` + `_realm`; l.456: `eotg_unclaimed_government` + `_desc`; l.456: `eotg_unclaimed_government` + `_with_icon`; l.460: `eotg_unclaimed_claim_interaction` + `_desc`; l.461: `eotg_unclaimed_claim_reach_tt` + `_gold_tt`; l.461: `eotg_unclaimed_claim_reach_tt` + `_prestige_tt`; l.461: `eotg_unclaimed_claim_reach_tt` + `_effect_tt`; l.461: `eotg_unclaimed_claim_reach_tt` + `_returns_tt`; l.464: `eotg_unclaimed_debug_playable_tt` + `_unplayable_tt`
 
 ### Unbuilt specs (expected gaps)
 
