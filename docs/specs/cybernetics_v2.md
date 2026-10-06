@@ -54,7 +54,7 @@ The current values are in the audit references.
 
 1. **Identifiers.** `eotg_` prefix on every key. Story cycles are `eotg_story_aug_*`. No landed titles. Shared opinion modifiers are system-scoped (`eotg_opinion_aug_*`) because only this system uses them.
 2. **Tier state.** Integration XP changes only at 0/50/100 through `eotg_aug_set_integration_effect`. Leaving the system entirely (Rejection failure, Remove Implants, Excision) uses the new `eotg_aug_remove_all_effect` (Phase 0), which removes the trait rather than setting XP. Total Integration and Neurofractured are separate traits.
-3. **Hidden risk.** No number, bar, counter or story-cycle `basic_counter` ever shows `eotg_fracture_risk`. Story cycles are `visible = no` (the vanilla default). Prose may react to the band; tooltips may not quantify it.
+3. **Hidden risk.** No number, bar, counter or story-cycle `basic_counter` ever shows `eotg_fracture_risk`. Story cycles are `visible = no` (the vanilla default). Prose may react to the band; tooltips may not quantify it. **Exception (owner ruling, 2026-10-06):** `eotg_story_aug_kingpin` is `visible = yes` and shows the kingpin's *leverage* as a 1–3 band (`cybernetics_v2_kingpin.md` §5.4.2). It never shows fracture risk.
 4. **Signature coupling (invariant 5).** Every flavor event has at least one option that calls `eotg_add_fracture_risk` (on root or a saved augmented character), **or** changes tier, **or** reads the band in a `trigger`/`triggered_desc`. **Below Overclocked, prefer + moves and reads.** − moves at risk 0 are clamped away (audit §2.2.3), so a "calm" option at tiers 1–2 should pay off in another resource, not a cosmetic −3.
 5. **Cooldown authority.**
    - Small events: branches in the tier `random_list` inside the existing custom on_actions. The cooldown flag is set in the branch.
@@ -254,7 +254,7 @@ New events go in the existing file for their namespace: `events/eotg_augmentatio
 4. No event `trigger` checks a cooldown flag (lesson 5).
 5. `grep -rnE '\bcurious\b|\bpensive\b' events common` returns nothing.
 6. `grep -rn 'random_courtier' events/eotg_augmentation_*.txt` returns only non-violent uses (picking a witness or speaker) or chosen targets filtered by a dedicated scripted trigger (rule 7), each followed by `save_scope_as`.
-7. No `basic_counter`, `visible = yes` or number on `eotg_fracture_risk` anywhere (hidden-risk rule).
+7. No `basic_counter`, `visible = yes` or number on `eotg_fracture_risk` anywhere (hidden-risk rule). The kingpin story's leverage band counter is the one permitted `visible = yes` / `basic_counter` (owner ruling 2026-10-06).
 8. Loc: every key the phase lists exists once, BOM, no `[scope:`.
 9. **Human, in game:** the phase's own check list (each phase file, final section).
 

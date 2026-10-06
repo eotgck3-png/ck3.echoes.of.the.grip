@@ -6,6 +6,7 @@
 **Index:** [cybernetics_v2.md](cybernetics_v2.md). Index §1 rules 1–12 and the §5 lore register apply to every line of this spec unless this file says otherwise.
 **Builds on:** the Patron story ([phase5](cybernetics_v2_phase5.md) §2, [reprisal](cybernetics_v2_reprisal.md)), the named sellers ([seller_names](cybernetics_v2_seller_names.md)), Neurofractured mode ([phase3](cybernetics_v2_phase3.md)), the balance amendments ([balance](cybernetics_v2_balance.md)), the writing review (`docs/qa/event_writing_review_2026-10-05.md`) and the rewrite feedback (`docs/proposals/gemini_rewrite_feedback_2026-10-06.md` §2–§4).
 **Lore review (2026-10-06): changes required, applied in this revision** (the lore-keeper's ruling, relayed by the orchestrator; binding wording in §7.4).
+**Owner answers (2026-10-06):** §11 Q2–Q6 ruled and folded in: the story passes to the heir (§5.4.1), entry is 2% a year (§5.3), empire-tier claims stay open, L12 stays vanilla independence, and leverage is **visible as three bands** (§2, §5.4.2).
 **Sequence:** architect (this file) → lore-keeper (canon review, §8 questions) → scripter (batch A, then batch B, see the handoff) → localizer → QA → orchestrator commits.
 
 ---
@@ -24,7 +25,7 @@ Each run rolls an organization profile and a kingpin mind, so two runs don't pla
 
 **Gate:** 3 (Systems). Cybernetics is a mod-exclusive system, built and tested against the temporary map (CLAUDE.md, 2026-10-02; `docs/agent_workflow.md` §5 rule 2). **Not blocked.** The design is map-agnostic: it names no title, province, character, culture or faith key. Every title comes from a scope (`liege.primary_title`, a held county, a neighbour's primary title). The kingpin inherits `root.culture` and `root.faith` by scope (index §1 rule 9).
 
-**Size:** 41 events (24 nodes, 17 leaves), 1 story cycle, 2 character templates, 1 custom on_action, 10 character/county modifiers, 6 opinion modifiers, 1 script value file, about 14 scripted effects and 8 scripted triggers, 1 debug decision, and about 420 loc keys. It is built in **two batches** (handoff): A is entry, collaboration, the law path and the non-war leaves; B is the claim path, the wars and the crisis stage.
+**Size:** 42 events (25 nodes including the heir notification, 17 leaves), 1 story cycle, 2 character templates, 1 custom on_action, 10 character/county modifiers, 6 opinion modifiers, 1 script value file, about 14 scripted effects and 8 scripted triggers, 1 debug decision, and about 420 loc keys. It is built in **two batches** (handoff): A is entry, collaboration, the law path and the non-war leaves; B is the claim path, the wars and the crisis stage.
 
 ---
 
@@ -35,11 +36,11 @@ Each run rolls an organization profile and a kingpin mind, so two runs don't pla
 - **Start:** rolled by mind (§5.2.3): 15–45.
 - **Drift:** each yearly tick adds `eotg_aug_kp_drift_value` (§5.6): base +6, purge mind +4, crew kind +2, during a war stage +6, and −4 for each calm option taken since the last tick (counted in `eotg_kp_calmed`, reset on tick), with a floor of 2. From 30, a calm run reaches Storm (60) in about 4 years and the terminal (95) in about 8 to 10.
 - **Terminal at ≥ 95:** the tick resolves the story at once, to The Break (massacre, L9) or The Fracture Finishes It (cascade death, L16), §5.5 T1.
-- **Hidden:** no number, bar or counter, ever (index §1 rule 3). Prose reads the band.
+- **Hidden:** the kingpin's fracture risk has no number, bar or counter, ever (index §1 rule 3). Prose reads its band. (Leverage, below, is the one visible value, as bands.)
 
 **Coupling rule (invariant 5, binding on every event in this spec):** every event either moves the kingpin's pressure in at least one option (`scope:eotg_kp = { eotg_add_fracture_risk = { AMOUNT = N } }`) **or** reads the band in a `triggered_desc`. Leaves read it in their desc, and the ending text differs by band. The per-event column in §5.8 says which.
 
-**Secondary state (story variable, not the signature): `eotg_kp_leverage`, 0–100**, the organization's hold on you. Taking money, running errands and staying quiet raise it. Refusals, unmasking an informant and evidence lower it. It selects between collaboration's endings (§5.5 T4) and decides whether the crisis closes on you (T2). It is also hidden, for the same reason as risk: prose tells it.
+**Secondary state (story variable, not the signature): `eotg_kp_leverage`, 0–100**, the organization's hold on you. Taking money, running errands and staying quiet raise it. Refusals, unmasking an informant and evidence lower it. It selects between collaboration's endings (§5.5 T4) and decides whether the crisis closes on you (T2). **Visible as three bands, never as a number** (owner ruling Q6, 2026-10-06; §5.4.2): 1 "A favour owed" (0–40), 2 "Deep in their pocket" (41–79), 3 "They own the room" (80–100). The band thresholds are the tree's own thresholds (T4 ≤ 40, T2 ≥ 80), so the band the player sees tells them which endings are near. The kingpin's fracture risk stays hidden.
 
 The root's own risk moves only where the root's own implant is in the scene (the Neurofractured-root option in .002 and .072, §5.8). Nothing here creates risk on an unaugmented root (`eotg_add_fracture_risk` already guards that).
 
@@ -52,9 +53,13 @@ All keys carry `eotg_`. There are no landed titles. Loc key form: the index's do
 | Identifier | Type | Exact name | Owner |
 |---|---|---|---|
 | Namespace | event namespace | `eotg_aug_kingpin` | scripter |
-| Events (nodes) | character_event | `eotg_aug_kingpin.001`–`.015`, `.030`–`.034`, `.036`, `.038`, `.039`, `.050` | scripter |
+| Events (nodes) | character_event | `eotg_aug_kingpin.001`–`.015`, `.030`–`.034`, `.036`, `.038`, `.039`, `.040` (the heir's notification), `.050` | scripter |
 | Events (leaves) | character_event | `eotg_aug_kingpin.060`–`.076` | scripter |
-| Story cycle | story_cycle | `eotg_story_aug_kingpin` | scripter |
+| Story cycle | story_cycle | `eotg_story_aug_kingpin` (`visible = yes`, §5.4.2) | scripter |
+| Leverage band | story variable (int 1–3) | `eotg_kp_leverage_band` (written only by `eotg_aug_kp_leverage_effect`; read by the story's `basic_counter` and the custom loc) | scripter |
+| Leverage band name | customizable_localization (`type = all`, run on the story) | `eotg_aug_kp_cl_leverage_band` (texts `eotg_aug_kp_band_1` / `_2` / `_3`; fallback `_1`) | scripter |
+| Inherited marker | story variable (bare, one-shot) | `eotg_kp_inherited` (set in `on_owner_death`, read by .040's desc and removed in its `after`) | scripter |
+| Leaf guard | story variable (bare) | `eotg_kp_resolving` (set in the `immediate` of every leaf and of .036; `on_owner_death` ends the story instead of passing it on) | scripter |
 | Custom on_action | on_action | `eotg_on_yearly_aug_kingpin_check` | scripter |
 | Kingpin template | scripted_character_template | `eotg_aug_kingpin_template` (age 32–58; `gender_female_chance = 50`; **no** personality traits; `random_traits_list` count 1 from `education_intrigue_3`, `education_martial_3`, `education_stewardship_2`; `random_traits = no`; martial 10–16, intrigue 10–16, stewardship 6–12, prowess 10–16) | scripter |
 | Lieutenant template | scripted_character_template | `eotg_aug_kp_lieutenant_template` (age 25–45; 50% female; one of `ambitious`, `deceitful`, `craven`, `honest`; intrigue 8–12) | scripter |
@@ -70,7 +75,7 @@ All keys carry `eotg_`. There are no landed titles. Loc key form: the index's do
 | Debug overrides | character variables on root | `eotg_kp_force_kind`, `_method`, `_reach`, `_mind` | scripter |
 | Story variables | story variables | §5.4 table (`eotg_kp`, `eotg_kp_stage`, `eotg_kp_path`, `eotg_kp_leverage`, `eotg_kp_refusals`, `eotg_kp_years`, `eotg_kp_war_years`, `eotg_kp_calmed`, `eotg_kp_target`, `eotg_kp_opponent`, `eotg_kp_rival`, `eotg_kp_informant`, `eotg_kp_informant_unmasked`, `eotg_kp_playing`, `eotg_kp_forewarned`, `eotg_kp_evidence`, `eotg_kp_spiral_done`) | scripter |
 | Saved scopes | event scopes | `eotg_kp`, `eotg_kp_story`, `eotg_kp_target`, `eotg_kp_opponent`, `eotg_kp_rival`, `eotg_kp_informant`, `eotg_kp_lieutenant`, `eotg_kp_errand_target`, `eotg_kp_purge_target`, `eotg_kp_county`, `eotg_kp_reporter`, `eotg_kp_victim`, `eotg_kp_victim_2`, `eotg_kp_war`, `eotg_patron_story` (reused) | scripter |
-| Scripted effects | scripted_effect | `eotg_aug_kp_start_effect`, `eotg_aug_kp_roll_profile_effect`, `eotg_aug_kp_roll_name_effect`, `eotg_aug_kp_add_mind_traits_effect`, `eotg_aug_kp_leverage_effect` (param `AMOUNT`, clamps 0–100), `eotg_aug_kp_refuse_effect` (refusals +1, kp +`$RISK$`), `eotg_aug_kp_calm_effect` (kp −`$RISK$`, calmed +1), `eotg_aug_kp_set_stage_effect` (param `STAGE`), `eotg_aug_kp_raise_claimant_effect` (params `CLAIMANT`), `eotg_aug_kp_war_support_effect`, `eotg_aug_kp_seize_county_effect`, `eotg_aug_kp_grant_county_effect`, `eotg_aug_kp_end_effect`, `eotg_aug_kp_save_scopes_effect` (every event's `immediate` opener) | scripter |
+| Scripted effects | scripted_effect | `eotg_aug_kp_start_effect`, `eotg_aug_kp_roll_profile_effect`, `eotg_aug_kp_roll_name_effect`, `eotg_aug_kp_add_mind_traits_effect`, `eotg_aug_kp_leverage_effect` (param `AMOUNT`, clamps 0–100, then writes `eotg_kp_leverage_band`), `eotg_aug_kp_inherit_effect` (§5.4.1), `eotg_aug_kp_refuse_effect` (refusals +1, kp +`$RISK$`), `eotg_aug_kp_calm_effect` (kp −`$RISK$`, calmed +1), `eotg_aug_kp_set_stage_effect` (param `STAGE`), `eotg_aug_kp_raise_claimant_effect` (params `CLAIMANT`), `eotg_aug_kp_war_support_effect`, `eotg_aug_kp_seize_county_effect`, `eotg_aug_kp_grant_county_effect`, `eotg_aug_kp_end_effect`, `eotg_aug_kp_save_scopes_effect` (every event's `immediate` opener) | scripter |
 | Scripted triggers | scripted_trigger | `eotg_aug_kp_can_start`, `eotg_aug_kp_root_is_vassal`, `eotg_aug_kp_root_is_independent`, `eotg_aug_kp_liege_claim_possible`, `eotg_aug_kp_neighbour_target`, `eotg_aug_kp_vassal_seat_target`, `eotg_aug_kp_seizable_county` (county: held by root, not the capital, tier county), `eotg_aug_kp_errand_target`, `eotg_aug_kp_purge_target`, `eotg_aug_kp_informant_candidate`, `eotg_aug_kp_is` (params `AXIS`, `VALUE`: `scope:eotg_kp.var:eotg_kp_$AXIS$ ?= flag:$VALUE$`) | scripter |
 | Script values | script_value | `eotg_aug_kp_drift_value`, `eotg_aug_kp_arrest_value`, `eotg_aug_kp_levies_value` | scripter |
 | Character modifiers | static modifier | `eotg_mod_aug_kp_arrangement` (`domain_tax_mult = 0.08`, `county_opinion_add = -5`), `eotg_mod_aug_kp_hired_guns` (`levy_size = 0.15`; vanilla shape `common/modifiers/00_activity_hold_court_modifiers.txt:29`, `levy_size = 0.2`), `eotg_mod_aug_kp_network` (`domain_tax_mult = 0.15`, `vassal_opinion = -5`, `enemy_hostile_scheme_success_chance_add = -10`), `eotg_mod_aug_kp_exposed` (`vassal_opinion = -10`, `general_opinion = -5`), `eotg_mod_aug_kp_kept` (`stress_gain_mult = 0.25`, `dread_gain_mult = 0.5`, `tyranny_gain_mult = 0.25`, `vassal_opinion = -15`), `eotg_mod_aug_kp_tribute` (`domain_tax_mult = -0.1`), `eotg_mod_aug_kp_informants` (`enemy_hostile_scheme_success_chance_add = -10`), `eotg_mod_aug_kp_seized_clinic` (`domain_tax_mult = 0.05`) | scripter (keys verified in PX `modifiers.log`, 2026-10-06) |
@@ -78,6 +83,7 @@ All keys carry `eotg_`. There are no landed titles. Loc key form: the index's do
 | Opinion modifiers | opinion_modifier | `eotg_opinion_aug_kp_order` (+10, 10 y), `eotg_opinion_aug_kp_kingmaker` (+50, 20 y, decaying), `eotg_opinion_aug_kp_conspired` (−30, 10 y), `eotg_opinion_aug_kp_harboured` (−20, 10 y), `eotg_opinion_aug_kp_raised_criminal` (−10, 10 y), `eotg_opinion_aug_kp_warned` (+20, 10 y) | scripter. System-scoped (index §1 rule 1), not shared with any government. |
 | Army name | loc key | `eotg_aug_kp_army_name` | localizer |
 | Toasts | loc keys | `eotg_aug_kingpin_toast_gone`, `eotg_aug_kingpin_toast_dead` | localizer |
+| Story panel loc | loc keys | `eotg_story_aug_kingpin` (name), `eotg_story_aug_kingpin_info` (custom string), `eotg_story_aug_kingpin_kp_label`, `eotg_story_aug_kingpin_band_label`, `_band_min_label`, `_band_max_label`, `eotg_aug_kp_band_1` / `_2` / `_3` | localizer |
 | Debug decision | decision | `eotg_decision_aug_debug_kingpin` (`debug_only = yes`; runs the start effect with the force variables; precedent `common/decisions/eotg_unclaimed_decisions.txt:9`) | scripter |
 | Name lists, CoAs, holy sites, icons | — | **None new.** Names come from the existing seller lists (`cybernetics_seller_names.txt`, owner), and characters from the culture's name list. The landed kingpin (L4, L10, L12) uses the existing title's CoA. The event themes are vanilla (`intrigue`, `stewardship_wealth_focus`, `war`, `dread`, `realm`); no art debt. | — |
 
@@ -87,7 +93,7 @@ No new trait, death reason, decision art, law, government or MAA.
 
 | Path | What | Written by |
 |---|---|---|
-| `events/eotg_augmentation_kingpin.txt` | 41 events, with the namespace header in the Patron file's form (callers, cooldown authority, resource, naming) | scripter |
+| `events/eotg_augmentation_kingpin.txt` | 42 events, with the namespace header in the Patron file's form (callers, cooldown authority, resource, naming) | scripter |
 | `common/story_cycles/eotg_aug_kingpin_story.txt` | `eotg_story_aug_kingpin` | scripter |
 | `common/on_action/eotg_aug_kingpin_on_actions.txt` | the `yearly_playable_pulse` extension and the custom on_action | scripter |
 | `common/on_action/eotg_augmentation_on_actions.txt` | **E1**, one trigger line | scripter |
@@ -95,10 +101,11 @@ No new trait, death reason, decision art, law, government or MAA.
 | `common/scripted_effects/eotg_aug_kingpin_effects.txt` | effects (§3) | scripter |
 | `common/scripted_triggers/eotg_aug_kingpin_triggers.txt` | triggers (§3) | scripter |
 | `common/script_values/eotg_aug_kingpin_values.txt` | values (§5.6) | scripter |
+| `common/customizable_localization/eotg_aug_kingpin_custom_loc.txt` | the band-name custom loc (hand-written; **not** one of the generated seller-name files) | scripter |
 | `common/modifiers/eotg_aug_kingpin_modifiers.txt` | 15 modifiers | scripter |
 | `common/opinion_modifiers/eotg_aug_kingpin_opinions.txt` | 6 opinions | scripter |
 | `common/decisions/eotg_aug_kingpin_decisions.txt` | the debug decision | scripter |
-| `localization/english/eotg_aug_kingpin_l_english.yml` | **all** keys of §7.2, UTF-8 with BOM | localizer |
+| `localization/english/eotg_aug_kingpin_l_english.yml` | **all** keys of §7.2, including the story-panel keys, UTF-8 with BOM | localizer |
 
 Every folder already exists in the mod. No `replace_path`. **The seller generator, its list and its generated files do not change.**
 
@@ -253,7 +260,7 @@ eotg_on_yearly_aug_kingpin_check = {
     }
     effect = {
         random_list = {
-            4 = {                             # fire
+            2 = {                             # fire (owner ruling Q3, 2026-10-06: 2%, was 4%)
                 modifier = { factor = 2     eotg_aug_has_patron = yes }
                 modifier = { factor = 1.5   eotg_is_augmented_any = yes }
                 modifier = { factor = 1.5   eotg_aug_under_policy = { LAW = ban } }
@@ -263,14 +270,14 @@ eotg_on_yearly_aug_kingpin_check = {
                 add_character_flag = { flag = eotg_flag_aug_kingpin_cooldown  years = 10 }
                 trigger_event = { id = eotg_aug_kingpin.001  days = { 1 30 } }
             }
-            96 = { }                          # nothing
+            98 = { }                          # nothing
         }
     }
 }
 ```
 
 - **Cooldown authority is here only** (invariant 4, lesson 5). `.001`'s `trigger` mirrors world state (`eotg_aug_kp_can_start = yes`) and reads no flag. The 10-year cooldown matters only if a story ends before `on_setup` sets the once-per-life flag (a cold cancel). It is also the AI pacing floor.
-- **Expected frequency:** a player with no multipliers sees it about once in 25 years. An augmented player under a Ban with a Patron sees it in about 4–6 years. AI ×0.25.
+- **Expected frequency (owner ruling Q3, 2026-10-06):** base 2% a year, so a player with no multipliers sees it about once in 50 years. With all the multipliers (Patron, augmented, Ban, illegal implants, augmented court: ×12.7, about 24% a year) about once in 4–5 years, but the once-per-life flag and the 10-year cooldown cap it. Typical play lands at about once or twice per campaign. AI ×0.25.
 - **Story creation:** `.001` `immediate` runs `eotg_aug_kp_start_effect`. It creates the kingpin, rolls the profile (§5.2), and runs `create_story = eotg_story_aug_kingpin` with the kingpin passed through `root.var:eotg_kp_passthrough` (Patron envoy pattern, `eotg_augmentation_stories.txt` patron `on_setup`). `on_setup` copies it into `var:eotg_kp`, removes the passthrough, and sets `eotg_flag_aug_had_kingpin`.
 
 **Edit E1 (existing file, one line):** add `NOT = { has_character_flag = eotg_flag_aug_kingpin }` to the `trigger` of `eotg_on_yearly_aug_nonruler_check` (`common/on_action/eotg_augmentation_on_actions.txt:1505`). This is needed only while the kingpin is root's courtier in the claim stages. No other existing file changes, apart from the template append (§3).
@@ -297,10 +304,83 @@ New file `common/story_cycles/eotg_aug_kingpin_story.txt`. Shape: the Patron sto
 | `eotg_kp_forewarned` | bare | .006 forecast c. Read: L8 costs halved. |
 | `eotg_kp_evidence` | int | .004.b and .009.a; each point is +10 on arrest and audit rolls (max +30) |
 | `eotg_kp_spiral_done` | bare | one-shot guard for .066 |
+| `eotg_kp_leverage_band` | int 1–3 | the visible band (§5.4.2); written only by `eotg_aug_kp_leverage_effect` |
+| `eotg_kp_inherited` | bare | set in `on_owner_death`; .040 reads it |
+| `eotg_kp_resolving` | bare | set by every leaf and .036; blocks inheritance |
 
 **`on_end`:** remove `eotg_flag_aug_kingpin` from a living kingpin. If the kingpin is alive, unlanded, not imprisoned, and not root's or the liege's courtier by a leaf's choice, `move_to_pool = yes` (Patron `on_end` precedent). Remove `eotg_mod_aug_kp_arrangement` and `eotg_mod_aug_kp_kept` from the owner if held. The crisis **county** modifier keeps its timer.
 
-**`on_owner_death`:** `end_story = yes`. Inheritance is deferred (§10, owner question Q2).
+**`on_owner_death` (owner ruling Q2, 2026-10-06): the story passes to the heir.** Vanilla shape, `common/story_cycles/ce1_story_cycle_black_death.txt:18-30`:
+
+```
+on_owner_death = {
+    if = {
+        limit = {
+            exists = story_owner.player_heir
+            exists = var:eotg_kp
+            var:eotg_kp = { is_alive = yes }
+            NOT = { exists = var:eotg_kp_resolving }
+            NOT = { story_owner.player_heir = var:eotg_kp }
+        }
+        eotg_aug_kp_inherit_effect = yes        # carry-over table below, run before the hand-off
+        make_story_owner = story_owner.player_heir
+        story_owner = { trigger_event = { id = eotg_aug_kingpin.040  days = { 3 10 } } }
+    }
+    else = { end_story = yes }
+}
+```
+
+The scripter confirms whether `story_owner` already points to the heir after `make_story_owner` (vanilla stops there, so it never needed to know). If it does not, the heir is saved as `scope:eotg_kp_heir` before the hand-off and the event is fired on that (V-K8).
+
+#### 5.4.1 What carries over to the heir
+
+| Thing | Carries? | Rule |
+|---|---|---|
+| The kingpin, the profile, the organization's name | yes | They are on the kingpin. |
+| `eotg_kp_leverage` | yes, **−10** (floor 0) | The debt is the house's, but a new face buys a little room. The band is recomputed through `eotg_aug_kp_leverage_effect`. |
+| `eotg_kp_evidence`, `eotg_kp_years`, `eotg_kp_informant` | yes | Records, history and a planted courtier don't die with the ruler. |
+| `eotg_kp_refusals`, `eotg_kp_calmed`, `eotg_kp_playing`, `eotg_kp_forewarned` | **reset** | Personal: they belonged to the dead ruler. |
+| stage `open`, `collab` | yes | |
+| stage `custody` | yes | Vanilla passes prisoners to the heir. If the kingpin was freed by the succession, M2-style check: stage becomes `open`. |
+| stage `kept` | yes | The crisis outlives the ruler. The heir gets `eotg_mod_aug_kp_kept`, and the kingpin `add_hook = { type = strong_blackmail_hook  target = <heir> }` (the files outlive the ruler; hooks don't transfer by themselves). |
+| stage `pending` | **reset to `collab`** | The faction was the dead ruler's. Unset `eotg_kp_path` and `eotg_kp_target`; vanilla handles the faction itself. |
+| stage `war`, path `own` | **reset to `collab`** | The claimant died, so vanilla `claimant_faction_war` invalidates (`should_invalidate`: the special character must be alive). Unset the path. M3 never resolves it, so no false loss. |
+| stage `war`, other paths | yes | The kingpin is the claimant and still alive. The war follows **vanilla war inheritance**; the story keeps `eotg_kp_opponent`, and M3 resolves whenever the heir is no longer at war with the opponent (won, lost, or not inherited at all, which M3 treats as lost: .065). V-K8 confirms what vanilla does with a faction war whose leader dies. |
+| `eotg_mod_aug_kp_arrangement`, `_hired_guns`, `_informants` (character modifiers on the dead) | re-applied to the heir with the remaining years only if the stage is `collab` or `kept` | Modifiers die with the character. |
+| County modifiers | stay | They are on the counties, which pass to the heir anyway. |
+| `eotg_flag_aug_had_kingpin` | set on the heir | An inherited story is the heir's one per life. |
+
+**.040 The Inheritance** (notification on the heir; signature: desc reads the band). Desc: a base line, then one fragment by stage (`.desc_open` / `_collab` / `_custody` / `_kept` / `_war`) and one band line. Example beat: "[kp.GetFirstName] sends no condolences. [kp.GetSheHe|U] sends the ledger." One option, **a** "Then [kp.GetFirstName] deals with me now." plus, only in `collab` or `kept`, **b** "Send word: the arrangement stands." (leverage +5, kp −3, calmed +1) and **c** "Send word: it ended with the funeral." (refusals +1, kp +5). Shape: vanilla inheritance notifications are one-option (`events/story_cycles/` "inherited" letters); the two extra options follow index §1 rule 6 (outcome stages may have one or two options) only where the stage gives the heir something to decide.
+
+#### 5.4.2 Visible story (owner ruling Q6, 2026-10-06)
+
+Index §1 rule 3 makes story cycles invisible **to hide fracture risk**. This story is the one exception, by owner ruling, because what it shows is leverage, not risk. The amendment is recorded in the index (`cybernetics_v2.md` §1 rule 3). Shape: `common/story_cycles/_story_cycles.info` (`visible`, `icon`, `background`, `visualization`), with the precedents `bp2_story_cycle_foreign_raised_reformer.txt:3-33` (`custom_string_key` plus a 0–3 `basic_counter`) and `book_translation_story_cycle.txt:2-19`.
+
+```
+eotg_story_aug_kingpin = {
+    visible = yes
+    icon = { reference = "gfx/interface/icons/story_cycles/story_icon_palace_politics.dds" }   # vanilla; no art debt
+    background = { reference = "gfx/interface/illustrations/event_scenes/alley.dds" }         # vanilla; see the note below
+    visualization = {
+        custom_string_key = "eotg_story_aug_kingpin_info"
+        character = { variable_name = "eotg_kp"  label = "eotg_story_aug_kingpin_kp_label" }
+        basic_counter = {
+            variable_name = "eotg_kp_leverage_band"
+            min = 1  max = 3
+            label = "eotg_story_aug_kingpin_band_label"
+            min_label = "eotg_story_aug_kingpin_band_min_label"   # "A favour owed"
+            max_label = "eotg_story_aug_kingpin_band_max_label"   # "They own the room"
+        }
+    }
+    ...
+}
+```
+
+- **Bands, not numbers.** The counter reads `eotg_kp_leverage_band` (1–3), never `eotg_kp_leverage`. `eotg_aug_kp_leverage_effect` changes and clamps leverage, then writes the band: 1 if ≤ 40, 2 if 41–79, 3 if ≥ 80. Nothing else writes the band.
+- **The band's name** comes from the custom loc `eotg_aug_kp_cl_leverage_band` (`type = all`, triggers `var:eotg_kp_leverage_band = 1/2/3`; vanilla `Story.Custom` precedent: `00_pet_custom_loc.txt:1917` `CatStoryNameAll`, used as `[Story.Custom('CatStoryNameAll')]` in `story_cycles_l_english.yml:16`).
+- **`eotg_story_aug_kingpin_info`** (the custom string, `Story` scope) names the organization, the band, and what moves it, in plain words with no numbers: "[Story.Custom('eotg_aug_kp_cl_leverage_band')]. Taking their money, doing their errands and keeping their secrets deepen it. Refusing them, turning their people and gathering evidence loosen it." The organization's name is on the kingpin, so the string uses `[Story.MakeScope.Var('eotg_kp').Char.GetFirstName]` (vanilla form, `story_cycles_l_english.yml:70`) and a fixed noun, not the seller custom loc (that runs on a character).
+- **Not shown:** the kingpin's fracture risk, the stage, the path, any count.
+- **Background note:** if the mod reskins vanilla event scenes for space, the scripter swaps `alley.dds` for the mod's equivalent; otherwise the vanilla file stands. No new art.
 
 ### 5.5 The tick (cooldown authority for every chain stage)
 
@@ -529,9 +609,11 @@ A key beat's desc is `desc = { <fragment A first_valid>  <fragment B first_valid
 
 - **Per event:** `.t`, every option `.a`–`.f` (and `.b2` etc. where a kind/role variant replaces an option: write them `.e_crew`, `.e_syndicate`, `.e_front`, `.e_hired`, `.f_hired` (.001), `.c_hired` (.012), `.b_indep`, `.c_indep`), and duel `.success` / `.failure` tooltips (index balance §5.6 form).
 - **Descs:** as §7.1, plus `.desc_war` (.068), `.desc_patron` (.074), `.desc_indep` (.063, .065, .067), `.desc_purge_half` (.063), `.desc_held` (.069 from M3), `.desc_lost` (.066 from M3), `.desc_contract` (.073 from .012 c‴), `.desc_discovered` (.038), `.desc_none` fallbacks wherever a scope may be absent (the reporter in .001, the victims in .012 and .068, a county in .012 and .014).
-- **Tooltips:** `eotg_aug_kingpin.<id>.<opt>.tt` where an option's effect is hidden (leverage moves are always hidden, with the tooltip saying what it means in plain words: ".003.a.tt: '[kp.GetFirstName] will remember this arrangement.'"), plus the toasts.
+- **Tooltips:** `eotg_aug_kingpin.<id>.<opt>.tt` where an option's effect is hidden (leverage changes are numberless: each option that moves leverage shows one of two shared tooltips, `eotg_aug_kp_leverage_up_tt` "[kp.GetFirstName]'s hold on you deepens." or `eotg_aug_kp_leverage_down_tt` "[kp.GetFirstName]'s hold on you loosens.", and the story panel shows the band), plus the toasts.
+- **Story panel:** `eotg_story_aug_kingpin`, `_info`, `_kp_label`, `_band_label`, `_band_min_label`, `_band_max_label`, `eotg_aug_kp_band_1` "A favour owed", `_2` "Deep in their pocket", `_3` "They own the room" (owner wording; checked against §7.4: it is about the room, not "owns you"), `eotg_aug_kp_leverage_up_tt`, `_down_tt`.
+- **.040:** `.t`, `.desc`, `.desc_open` / `_collab` / `_custody` / `_kept` / `_war`, band lines, `.a`–`.c`.
 - **Modifiers:** `<key>` and `<key>_desc` for all 15. **Opinions:** 6 keys. **Decision:** `eotg_decision_aug_debug_kingpin`, `_desc`, `_tooltip`, `_confirm`. **Army:** `eotg_aug_kp_army_name`.
-- **Estimate:** about 420 keys. The scripter hands the localizer the exact list from the built file (the dangling-key check in `px_lsp_diagnostics.js`).
+- **Estimate:** about 440 keys. The scripter hands the localizer the exact list from the built file (the dangling-key check in `px_lsp_diagnostics.js`).
 - **Vanilla strings:** none need a `replace/` override. Faction, war and CB text is vanilla's and reads correctly with mod titles. Vanilla `claimant_faction_war` names are medieval-neutral; CB-33 (scheme agent names) is unrelated.
 
 ### 7.3 Text plan (beats only; the localizer writes)
@@ -624,10 +706,11 @@ A key beat's desc is `desc = { <fragment A first_valid>  <fragment B first_valid
 ## 9. Definition of done
 
 0. **Tiger, `px_lsp_diagnostics.js` and `px_vocab_check.py` are clean** on the new and touched files, except the known-benign list (CLAUDE.md §Validation). Tiger is the scope check: `faction_start_war` in faction scope; `set_special_character` in faction scope; `add_hook` in character scope with the target; `create_title_and_vassal_change` + `becomes_independent`.
-1. **Reachability:** `px_event_report.py` shows all 41 events reachable. `.001` from the on_action; every node and leaf from a node, the story tick or maintenance. No event is fired by nothing.
+1. **Reachability:** `px_event_report.py` shows all 42 events reachable (.040 from the story's `on_owner_death`). `.001` from the on_action; every node and leaf from a node, the story tick or maintenance. No event is fired by nothing.
 2. **Cooldown authority:** `grep -n "eotg_flag_aug_kingpin_cooldown" events/` returns nothing. No event `trigger` reads a flag. `.001`'s trigger is `eotg_aug_kp_can_start = yes` only.
-3. **Signature coupling (QA audit 8):** every one of the 41 events moves the kingpin's `eotg_fracture_risk` in ≥ 1 option, or reads `eotg_aug_pressure_*` on `scope:eotg_kp` in a `triggered_desc`. ≥ 30 events **move** it.
-4. **Hidden state:** no `basic_counter`, no `visible = yes`, and no number on `eotg_fracture_risk` or `eotg_kp_leverage` in loc (grep the loc file for digits next to those words).
+3. **Signature coupling (QA audit 8):** every one of the 42 events moves the kingpin's `eotg_fracture_risk` in ≥ 1 option, or reads `eotg_aug_pressure_*` on `scope:eotg_kp` in a `triggered_desc`. ≥ 30 events **move** it.
+4. **Visibility (owner ruling Q6):** `eotg_story_aug_kingpin` is the only `visible = yes` story in the mod, and its only `basic_counter` reads `eotg_kp_leverage_band` (min 1, max 3). Nothing shows `eotg_fracture_risk` or raw `eotg_kp_leverage` (grep: no `basic_counter` on either; no digits next to those words in loc). `eotg_kp_leverage_band` is written only inside `eotg_aug_kp_leverage_effect`. In game: the story panel shows the kingpin, the band name, and the explanation, and the band changes after .004 a (deepen) and .007 a (loosen).
+4a. **Inheritance (owner ruling Q2):** kill the owner mid-story (`kill` on yourself with a heir; or the console death effect) in `collab`, `kept` and `war` (path `back_kp`): the heir owns the story, .040 fires with the right stage fragment, leverage is down one step's worth (or the same band), refusals are 0, and in `kept` the heir has `eotg_mod_aug_kp_kept` and is hooked by the kingpin. In `war` path `own` and in `pending`, the heir's stage is `collab`. With the kingpin dead, or with a leaf event pending, the story ends instead.
 5. **Map-agnostic:** `grep -nE "title:[ekdcb]_|c_[a-z]|culture:|faith:|character:" ` over the new files returns nothing outside comments.
 6. **Profile variety:** a 100-start observer run (`docs/tools/observer`, or `eotg_decision_aug_debug_kingpin` ×100 in one session) shows all 4 kinds, all 4 minds and all 4 methods. Each exclusive leaf (L12, L15, L17) is reachable only with its kind (QA reads the option triggers).
 7. **Leaves:** each of the 17 leaves is reached at least once by the console recipes (§9.1) and ends the story (`any_owned_story` false afterwards). It applies the §5.8 mechanics, verified on the character sheet: the modifier, the hook, the title holder, or the death and its reason.
@@ -671,6 +754,7 @@ Or take the debug decision. **Shorthand** used below: `S{…}` = `effect = { ran
 | L17 .076 | kind front → .001 e → .015 a (with `add_stewardship_skill = 20`) → .013 e. Then check that the Pursue decision names the seized company |
 
 **V-checks (in game, human):**
+- **V-K8:** after `make_story_owner` inside `on_owner_death`, does `story_owner` point to the heir? And what does vanilla do with a claimant faction war whose leader (the dead owner) is not the claimant?
 - **V-K1:** does an AI ever invite the pool kingpin? (Observer run.)
 - **V-K2:** does `can_create_faction` pass for a vassal with `claiming_title` set and a pressed claim?
 - **V-K3:** `claim_cb` with `claimant = <courtier>` and `target_title =`.
@@ -679,7 +763,7 @@ Or take the debug decision. **Shorthand** used below: `S{…}` = `effect = { ran
 - **V-K6:** removing an enemy knight from script.
 - **V-K7:** finding the war scope after `faction_start_war` / `start_war`, and `end_war = white_peace`.
 
-Each failed check has a fallback in the cited row. The scripter records which one was used.
+Each failed check has a fallback in the cited row (V-K8: fire .040 on a scope saved before the hand-off; treat a war the heir did not inherit as lost, as M3 already does). The scripter records which one was used.
 
 ---
 
@@ -687,7 +771,6 @@ Each failed check has a fallback in the cited row. The scripter records which on
 
 | Item | Why |
 |---|---|
-| Story inheritance by the heir (the crisis outliving the ruler) | It complicates `on_owner_death`, every saved scope and the claim war's claimant. Owner question Q2. |
 | **The Unclaimed Regions release for L12** (`eotg_unclaimed_release_effect` when the seizing kingpin dies without heirs) | It is map-agnostic, but it makes Unclaimed a by-product of crime, and the Unclaimed placeholders are "the Unsworn", not a gang. A gang is a ruler, not nobody. The seizure uses vanilla independency instead. Owner question Q5. |
 | The landless-adventurer kingpin (a 1.20 camp with followers) | DLC-dependent (Roads to Power) and a government the mod does not own. The pool character covers the role. |
 | A playable kingpin (become the boss) | A new government or a landless-ruler path; out of scope. |
@@ -702,19 +785,19 @@ Each failed check has a fallback in the cited row. The scripter records which on
 ## 11. Owner questions
 
 - **Q1. Pill Mob (KQ1). Settled by ruling:** syndicate kind is Patron-only (index §5 item 3, `cybernetics_v2.md:211`). L15's "without a Patron" branch is dead while that holds.
-- **Q2. Inheritance.** Should the story end on the ruler's death (as built), or pass to the heir when the stage is `kept` or `war`?
-- **Q3. Frequency.** Once per life, entry 4% a year at base (about once in 25 years). Is that rare enough to feel like an event, and common enough to be seen?
-- **Q4. Empire-tier claims.** A count can try for the liege's empire through the faction (the AI is discouraged, the player is not). Keep it open, or cap the target at one tier above root?
-- **Q5. L12 and Unclaimed.** Vanilla independency (built) or the Unclaimed release when the gang's Region falls empty?
-- **Q6. Leverage visibility.** Hidden like fracture risk (recommended), or shown as a tooltip line on the arrangement modifier?
+- **Q2. Inheritance. Ruled 2026-10-06: the story passes to the heir** if the kingpin is alive and no leaf is resolving (vanilla `on_owner_death` shape, `ce1_story_cycle_black_death.txt:18-30`). Reason: the crisis is the house's, not one ruler's, and a debt that dies with the debtor would make the kept stage escapable by dying. Built in §5.4.1 (carry-over) and .040.
+- **Q3. Frequency. Ruled 2026-10-06: 2% a year at base** (was 4%), multipliers, 10-year cooldown and once per life unchanged. Reason: about once or twice per campaign keeps it an event, not a fixture (§5.3).
+- **Q4. Empire-tier claims. Ruled 2026-10-06: allowed, as specced.** Reason: vanilla's claimant faction targets the direct liege at any tier (`create_claimant_faction_against_interaction`, `00_vassal_interactions.txt:1367`); the AI stays discouraged by its `ai_chance` (§5.7).
+- **Q5. L12. Ruled 2026-10-06: vanilla independence, as specced,** the boss holding the whole Region as one ruler; not the Unclaimed release. Reason: a crew is a ruler, not "the Unsworn" (§10).
+- **Q6. Leverage visibility. Ruled 2026-10-06: visible as three bands,** not hidden; the exact number stays hidden. Reason: leverage is the player's lever, not a hidden risk, and the bands map to the tree's own thresholds. Built in §2 and §5.4.2 (visible story, `basic_counter` on a 1–3 band variable, band-name custom loc, explanatory string).
 
 ---
 
 ### HANDOFF
 - status: done
 - next: eotg-scripter
-- ask: Build batch A of docs/specs/cybernetics_v2_kingpin.md (.001–.015, .060–.062, .068–.071, .073–.076, the story without the war stages, the on_action, E1, the templates, the debug decision), then batch B (.030–.039, .050, .063–.067, .072, the war stages, M3/M4). Apply the lore review as written (§5.2.1 syndicate Patron-only and the front exclusion, §5.2.3–§5.2.4 minds, §7.3–§7.4).
+- ask: Build batch A of docs/specs/cybernetics_v2_kingpin.md (.001–.015, .060–.062, .068–.071, .073–.076, the story without the war stages, the on_action, E1, the templates, the debug decision), then batch B (.030–.039, .050, .063–.067, .072, the war stages, M3/M4). Apply the lore review as written (§5.2.1 syndicate Patron-only and the front exclusion, §5.2.3–§5.2.4 minds, §7.3–§7.4) and the owner rulings (§11: 2% entry, heir inheritance §5.4.1 and .040 in batch A, the visible banded story §5.4.2).
 - files: docs/specs/cybernetics_v2_kingpin.md, docs/specs/cybernetics_v2_seller_names.md (seizure amendment, §5.1 and §5.3)
-- needs-loc: about 420 keys in localization/english/eotg_aug_kingpin_l_english.yml (§7.1–§7.4), after the scripter's build gives the exact list
+- needs-loc: about 440 keys in localization/english/eotg_aug_kingpin_l_english.yml (§7.1–§7.4), after the scripter's build gives the exact list
 - needs-lore: none blocking (KQ1–KQ3 ruled 2026-10-06); sign-off of the drafted loc against §7.4
-- needs-human: Q2–Q6 (§11; Q1 settled by ruling); V-K1–V-K7 in-game checks after batch A/B
+- needs-human: none open in §11 (all ruled 2026-10-06); V-K1–V-K8 in-game checks after batch A/B
