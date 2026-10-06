@@ -9,6 +9,8 @@ Each check comes from a numbered list on the taskboard (CB-31, CB-34, and later 
 
 The full event list, and which events can be fired directly from the console, is in [cybernetics_test_plan.md](cybernetics_test_plan.md) §4.
 
+**To test everything pending in one go** (engine checks, cybernetics, Frontier), follow [IN_GAME_SESSION_PLAN.md](IN_GAME_SESSION_PLAN.md). It orders and deduplicates the checks from every test plan and taskboard item, in three sittings.
+
 ---
 
 ## 1. Before you start
