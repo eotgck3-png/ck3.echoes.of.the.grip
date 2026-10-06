@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from _testutil import rmtree, tempdir  # noqa: E402,F401
 import eotg_lint as L  # noqa: E402
 
-BOM = "﻿"
+BOM = "\ufeff"  # an escape, not the raw character: textio refuses U+FEFF past byte 0
 LOC_OK = BOM + "l_english:\n"
 
 

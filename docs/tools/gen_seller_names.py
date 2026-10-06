@@ -301,6 +301,16 @@ def render_all(lists):
     return {OUT_CUSTOM: render_custom(lists), OUT_ROLLS: render_rolls(lists), OUT_LOC: render_loc(lists)}
 
 
+def same_content(have, want):
+    """True if the bytes on disk match the rendered bytes, ignoring line endings.
+
+    A checkout with core.autocrlf=true has CRLF files on disk while the renderer writes
+    LF, so a byte comparison would call every generated file stale."""
+    if have is None:
+        return False
+    return have.replace(b"\r\n", b"\n") == want.replace(b"\r\n", b"\n")
+
+
 def run(root, check=False, register=REGISTER, out=sys.stdout):
     path = os.path.join(root, LIST_FILE)
     if not os.path.exists(path):
@@ -327,7 +337,7 @@ def run(root, check=False, register=REGISTER, out=sys.stdout):
             if os.path.exists(p):
                 with open(p, "rb") as fh:
                     have = fh.read()
-            if have != want:
+            if not same_content(have, want):
                 stale.append(rel)
         print(counts_line(lists), file=out)
         if stale:
@@ -344,7 +354,7 @@ def run(root, check=False, register=REGISTER, out=sys.stdout):
         if os.path.exists(p):
             with open(p, "rb") as fh:
                 have = fh.read()
-        if have == textio.encode(body, bom=True):
+        if same_content(have, textio.encode(body, bom=True)):
             print("  unchanged " + rel, file=out)      # leave files others may be editing alone
             continue
         textio.write_text(p, body, bom=True, makedirs=True)

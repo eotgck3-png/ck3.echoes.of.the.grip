@@ -607,10 +607,18 @@ eotg_fracture.004 = {
         }
     }
 
-    # [callous] "Replace them by morning."
+    # [callous] "Fill the empty places by the next watch." Only when someone
+    # was killed or wounded: the same gate as option c's (exists on the
+    # victim scopes saved in immediate), widened to either victim.
     option = {
         name = eotg_fracture.004.e
-        trigger = { has_trait = callous }
+        trigger = {
+            has_trait = callous
+            OR = {
+                exists = scope:eotg_victim_dead
+                exists = scope:eotg_victim
+            }
+        }
         trait = callous
         add_dread = 20
         eotg_add_fracture_risk = { AMOUNT = 5 }
