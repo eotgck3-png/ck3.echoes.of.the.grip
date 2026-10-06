@@ -17,6 +17,7 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | `cybernetics_v2` | 25 | 25 | 1476 | 1428 | 46 | 2 |
 | `frontier_v1` | 2 | 2 | 159 | 158 | 1 | 0 |
 | `frontier_v2` | 1 | 1 | 109 | 109 | 0 | 0 |
+| `frontier_v3` | 1 | 0 | 52 | 18 | 0 | 0 |
 | `glossary` | 1 | 0 | 1 | 0 | 0 | 0 |
 | `void` | 1 | 0 | 86 | 0 | 0 | 0 |
 
@@ -53,6 +54,7 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | `frontier_v1.md` | yes | 146 | 137 | 1 | 0 | 8 |
 | `frontier_v1_open_questions.md` | yes | 21 | 21 | 0 | 0 | 0 |
 | `frontier_v2.md` | yes | 109 | 109 | 0 | 0 | 0 |
+| `frontier_v3.md` | **no** | 52 | 18 | 0 | 34 | 0 |
 | `glossary_proposal_cloud.md` | **no** | 1 | 0 | 0 | 1 | 0 |
 | `void_lift_plan_cloud.md` | **no** | 86 | 0 | 0 | 86 | 0 |
 
@@ -299,6 +301,23 @@ None.
 ### Unbuilt specs (expected gaps)
 
 None.
+
+
+## Family `frontier_v3`
+
+### Built specs: gaps
+
+None.
+
+### Unbuilt specs (expected gaps)
+
+#### `docs/specs/frontier_v3.md`
+
+- New events, none in script yet: `eotg_frontier.040`, `eotg_frontier.041`, `eotg_frontier.042`
+- Specced and present: 18
+- Specced, missing from script (34): `eotg_frontier_explored` (unknown, l.41), `eotg_frontier_expedition_sent` (unknown, l.42), `eotg_frontier_trade_network_bonus` (unknown, l.43), `eotg_frontier_set_trade_network_effect` (effect, l.43), `eotg_frontier_mod_merc_escort` (modifier, l.44), `eotg_frontier_exploration` (unknown, l.46), `eotg_frontier_company` (effect, l.46), `eotg_frontier_faith_backer` (effect, l.46), `eotg_frontier_faith_backer_kind` (unknown, l.46), `eotg_frontier_mod_unknown` (modifier, l.55), `eotg_frontier_mod_partial` (modifier, l.56), `eotg_frontier_mark_unknown_effect` (effect, l.62), `eotg_frontier_explore_step_effect` (effect, l.63), `eotg_frontier_on_explored` (effect, l.63), `eotg_frontier_find_company_effect` (effect, l.64), `eotg_frontier_find_faith_backer_effect` (effect, l.65), `eotg_frontier_faith_settle_effect` (effect, l.66), `eotg_frontier_offer_backing_effect` (effect, l.67), `eotg_frontier_is_unknown` (trigger, l.73), `eotg_frontier_is_partial` (trigger, l.74), `eotg_frontier_can_explore` (trigger, l.75), `eotg_frontier_holds_explorable` (trigger, l.76), `eotg_frontier_can_back` (trigger, l.77), `eotg_frontier_is_company_captain` (trigger, l.78), `eotg_frontier_is_holy_order_leader` (trigger, l.79), `eotg_frontier_explore_cost_value` (script value, l.84), `eotg_frontier_escort_cost_value` (script value, l.85), `eotg_frontier_trade_network_value` (script value, l.86), `eotg_decision_frontier_explore` (decision, l.91), `eotg_decision_frontier_debug_mark_unknown` (decision, l.92), `eotg_frontier.040` (event, l.94), `eotg_frontier.041` (event, l.95), `eotg_frontier.042` (event, l.96), `eotg_frontier_fervor_mission_settled` (unknown, l.165)
+- Referenced only, never defined or set (0): none
+- Exempt (0): none
 
 
 ## Family `glossary`
