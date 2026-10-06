@@ -206,7 +206,7 @@ Defined empty in `eotg_frontier_on_actions.txt`, extended additively, fired thro
 ---
 
 ## 10. Loc surface
-`localization/english/eotg_frontier_l_english.yml`, Canadian English. New: 3 modifiers × 2, 2 decisions (5 + 4 keys), 3 events with their variants and tooltips, 1 fervour desc. Exact count in the handoff.
+`localization/english/eotg_frontier_l_english.yml`, Canadian English. New: **42 keys** (316 → 358): exploration 22 (2 modifiers, 2 decisions, .042), mercenaries 10 (1 modifier, .040), religious organizations 10 (.041, 1 fervour desc). The hooks add none.
 
 ## 11. AI
 | Decision | Interval | ai_potential | ai_will_do |
