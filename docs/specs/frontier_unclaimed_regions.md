@@ -1,12 +1,51 @@
 # Spec: Unclaimed Regions (Frontier, "Option B")
 
-**Author:** eotg-architect, 2026-10-06. **Status: design, not built.** Owner decision 2026-10-06, "Option B": Unsettled space has **no ruler**. The engine still needs a holder for every county, so each unclaimed county is held by a **passive placeholder**, which stands for the scattered people living there and is not a ruler. A ruler must **claim** the county before Establishing a Frontier there. An abandoned Frontier goes back to unclaimed. Unclaimed space is hard on armies passing through. Impassable or void provinces that are not counties stay scenery.
+**Author:** eotg-architect, 2026-10-06. **Status: design approved by the owner 2026-10-06 (see §D); not built.** Owner decision 2026-10-06, "Option B": Unsettled space has **no ruler**. The engine still needs a holder for every county, so each unclaimed county is held by a **passive placeholder**, which stands for the scattered people living there and is not a ruler. A ruler must **claim** the county before Establishing a Frontier there. An abandoned Frontier goes back to unclaimed. Unclaimed space is hard on armies passing through. Impassable or void provinces that are not counties stay scenery.
 
 **Supersedes:** [`frontier_v1.md`](frontier_v1.md) §2.3 option (a), *for unclaimed counties only*. Phase 1's owned-county Unsettled path (`eotg_frontier_mark_unsettled_effect` on a county someone already holds) stays as it is, as a separate case (§6.3).
 
 **Inputs:** the research in [`research/unclaimed_regions_vanilla_2026-10-06.md`](research/unclaimed_regions_vanilla_2026-10-06.md) (cited as *R§n*); [`docs/design/frontier_systems.md`](../design/frontier_systems.md) §3, §12, §13; [`frontier_v1.md`](frontier_v1.md) §R, §V, §2.5, §4; [`frontier_v2.md`](frontier_v2.md) §V; Phase 3a on `origin/claude/frontier-v3-cloud:docs/specs/frontier_v3.md` (unmerged). Vanilla is 1.20.0.3, `G` = the game root. I re-checked every vanilla citation below against the installed files during this session. Where I went beyond the research, the line says **(new)**.
 
 **Size (proposed):** 1 government, 1 trait, 1 character template, 1 county modifier, 1 character interaction, 2 debug decisions, about 10 scripted effects, 6 triggers, 5 script values, 4 additive vanilla hooks, 2 Frontier-hook listeners, 2 new empty hooks, **1 key-level vanilla trigger override**, and about 30 loc keys. **No events, no gfx.** Two batches (§13).
+
+---
+
+## D. Owner decisions (2026-10-06). These bind and override §19's open questions and §15's placeholders.
+
+The owner accepted every orchestrator recommendation ("follow your recommendations").
+
+- **UQ1, playability.** Accept the risk with this spec's mitigations. Batch 1 probes whether placeholders are
+  playable. If they are, add the trigger override that keeps placeholders out of vanilla yearly events, plus the
+  lobby warning. Do NOT override vanilla `herder_government`.
+- **UQ2, war immunity.** Use our own flag `eotg_government_is_unclaimed` plus the key-level override of
+  `herders_and_tributary_constraints` (§4.4). Do NOT reuse `government_is_herder`: vanilla
+  `mpo_retrieve_land_from_herder_interaction` would let the AI take unclaimed land without our pacing.
+- **UQ3, authoring.** One history seed (`eotg_unclaimed_seed`), split at game start into one placeholder per county.
+- **UQ5, release.** A capital county stays with its holder on abandonment. Both failed and voluntary abandonment
+  release a claimed county back to unclaimed.
+- **UQ7, attrition.** `supply_limit_mult_for_others = -0.5` on the government, plus `supply_limit_mult = -0.25` on
+  Phase 1's Unsettled modifier for owned counties. Tune after playtesting.
+- **UQ4, UQ6, UQ8, UQ10, UQ11.** The spec's own defaults.
+- **UQ9, names (lore).** Placeholders keep random names from their culture (real people, not "nobodies"). A fixed
+  pattern, if one is ever needed, is "the Unsworn of [county]".
+- **Names (lore-keeper, UL2 and UL3):**
+  - the status and modifier is **"Unclaimed Region"**;
+  - the people and trait `eotg_unclaimed_folk` are **"the Unsworn"**;
+  - the interaction is **"Raise Your Colours"**, not "Stake a Claim". CK3's [claim|E] concept means a claim
+    pressed in war, and this interaction leaves none. The keys can stay `eotg_unclaimed_*`.
+  - Interaction description: "Pay for the crews, the guns and the flag, and this Region is yours for as long as
+    you can hold it. Nobody else has to agree, and nobody is obliged to respect it."
+- **UL1, culture and faith.** Placeholders copy the county's culture and faith by scope (no neutral culture).
+  The cartographer picks real drifter peoples from the briefs (e.g. Uvreki, Tangentine). Which counties start
+  unclaimed is a vault question; never guess it.
+- **Text rules (ERRATA LAW AT 866):**
+  - never say a claim is filed, registered, recognized, licensed or chartered, or that others must respect it;
+  - write "Region" (a county), not "system", for the claimed unit;
+  - keep "Council" and "Frontier Guard" out of this system's text;
+  - don't present unclaimed space as where the Titan Exodus lands;
+  - the Myr is a war zone at 866, not empty land.
+- **No ERRATA entry is added for now;** the premise is recorded here instead. The lore-keeper's draft
+  ("UNCLAIMED SPACE AT 866") is available if the owner wants it in canon later.
 
 ---
 
