@@ -3,6 +3,7 @@
 **Author:** eotg-architect, 2026-10-06
 **Authorized by:** the owner, relayed by the coordinator on 2026-10-06. The request was for a branching tree in which a landed character learns that their heir has become Neurofractured. It must have at least 10 final outcomes, and three are required: the heir kills the character, the heir massacres the court, and the heir murders the next two in line. An addition the same day asked for variation: a profile rolled and stored at entry that changes which events fire, which options appear and the outcome odds, plus desc variants per profile.
 **Lore review:** eotg-lore-keeper, 2026-10-06: CHANGES REQUIRED, wording and framing only; the structure passed canon. All items applied in this revision (§3.4; §5.3 .011, .012, .016, .019, .025, .027; §7.1; §10).
+**Owner rulings:** §11 Q1–Q5 ruled 2026-10-06. Q5 changed the design: **only a player ruler gets the tree; AI-only occurrences resolve in one hidden event (§5.5).**
 **Builds on:** [cybernetics_v2.md](cybernetics_v2.md) (index; its §1 rules and §5 register bind this file), [phase 3](cybernetics_v2_phase3.md) (Neurofractured, the Heir's Arc, Excision, abdication), [phase 6](cybernetics_v2_phase6.md) (non-ruler cascade), [new beats](cybernetics_v2_new_beats.md) §5.1 (Heir's Arc round 2), [balance](cybernetics_v2_balance.md) §5.2 and §5.10 (AI pacing).
 **Writing rules:** `docs/qa/event_writing_review_2026-10-05.md` and `docs/proposals/gemini_rewrite_feedback_2026-10-06.md` §2–§4.
 
@@ -12,7 +13,7 @@ The design is in §5 (the tree) and §5A (variation). The other sections follow 
 
 ## 1. Purpose & gate
 
-The existing Neurofractured content is about a ruler who is breaking while the heir watches (the Heir's Arc, T3). This tree is the mirror image: **the ruler is sound and the heir is breaking**, and the ruler must decide what the dynasty does about it. Choices branch over 3–5 events into **17 final outcomes**, from a clean excision to the heir killing the ruler. When the tree starts, a **profile** is rolled and stored: how the heir's Neurofracture shows, and what the heir is to the ruler. The profile decides which middle events can fire, which options show, and the odds of every hidden roll, so two playthroughs don't read alike.
+The existing Neurofractured content is about a ruler who is breaking while the heir watches (the Heir's Arc, T3). This tree is the mirror image: **the ruler is sound and the heir is breaking**, and the ruler must decide what the dynasty does about it. Choices branch over 3–5 events into **17 final outcomes**, from a clean excision to the heir killing the ruler. **The tree is for player rulers** (owner Q5). When the ruler is AI, one hidden event picks an outcome by weighted roll and applies the same outcome effects, so the world sees the same results without the event cost (§5.5). When the tree starts, a **profile** is rolled and stored: how the heir's Neurofracture shows, and what the heir is to the ruler. The profile decides which middle events can fire, which options show, and the odds of every hidden roll, so two playthroughs don't read alike.
 
 **Gate 3 (Systems), built against the temporary map** under `docs/agent_workflow.md` §5 rule 2. **Not blocked.** It is map-agnostic: it uses no title, province, culture, faith or character keys. The line of succession is read only through the ruler's `primary_title` and vanilla iterators.
 
@@ -37,7 +38,7 @@ The ruler's own risk moves only in .020 (the ruler must already be Overclocked).
 
 Namespace **`eotg_aug_inherit`**. Event ids `eotg_aug_inherit.001`–`.027`. Loc keys use the **dot form** (`eotg_aug_inherit.001.t / .desc_rage / .a`), per index §0 "Loc key form": the whole cybernetics tree is dot-form, so this file does not switch to `_NNNN_t`.
 
-### 3.1 New: events (27)
+### 3.1 New: events (28)
 
 | Id | Working title | Fired to | Kind |
 |---|---|---|---|
@@ -68,6 +69,7 @@ Namespace **`eotg_aug_inherit`**. Event ids `eotg_aug_inherit.001`–`.027`. Loc
 | .025 | The Seat | the heir, now ruler | aftermath of L15 |
 | .026 | The Warden's Hand | the heir, now ruler | aftermath of L9 / L10 |
 | .027 | The Line Shortens | ruler | **leaf L11** |
+| .028 | (hidden) Resolution | **AI** ruler | `hidden = yes`; the whole tree as one weighted roll (§5.5) |
 
 ### 3.2 New: script
 
@@ -75,6 +77,7 @@ Namespace **`eotg_aug_inherit`**. Event ids `eotg_aug_inherit.001`–`.027`. Loc
 |---|---|---|---|
 | `eotg_on_yearly_aug_inherit_check` | custom on_action | `common/on_action/eotg_augmentation_on_actions.txt` | entry; cooldown authority (§5.1) |
 | `eotg_aug_inherit_can_start` | scripted trigger (ruler scope) | `common/scripted_triggers/eotg_augmentation_triggers.txt` | entry gate, shared by both firing sites |
+| `eotg_aug_inherit_tree_runs` | scripted trigger (ruler scope) | same | `is_ai = no`. Picks the tree or .028 (§5.5.1). One trigger, so widening it later is a one-line change. |
 | `eotg_aug_inherit_heir_candidate` | scripted trigger (heir scope; param `RULER`) | same | the heir half of the gate |
 | `eotg_aug_inherit_chain_valid` | scripted trigger (ruler scope) | same | world-state guard for every node: `var:eotg_inh_heir` exists and is alive. Nodes before a leaf also need the heir to be Neurofractured and still at root's court. **Reads no cooldown flag.** |
 | `eotg_aug_inherit_start_effect` (param `SOURCE` = `report` / `cascade`) | scripted effect | `common/scripted_effects/eotg_augmentation_effects.txt` | sets the cooldown and active marker, rolls the profile and bond, picks the witness, fires .001 |
@@ -85,10 +88,12 @@ Namespace **`eotg_aug_inherit`**. Event ids `eotg_aug_inherit.001`–`.027`. Loc
 | `eotg_aug_inherit_pick_line_effect` | scripted effect | same | saves `eotg_inh_next_1` and `eotg_inh_next_2`, the first two people in the line who are not the heir (§5.4.1) |
 | `eotg_aug_inherit_strike_effect` (param `NAME`) | scripted effect | same | massacre picker: picks one victim excluding anyone already struck (§5.4.2) |
 | `eotg_aug_inherit_excision_effect` (param `TABLE` = `physician` / `back` / `self`) | scripted effect | same | the heir's surgery. Ruler-side odds, the heir as patient (§5.4.3). |
-| `eotg_aug_inherit_ward_effect` (param `TYPE` = `house_arrest` / `dungeon`) | scripted effect | same | imprisons the heir, then rolls a breakout that schedules .023 or .017 (§5A.4) |
-| `eotg_aug_inherit_abdicate_effect` (param `WARDEN` = `yes` / `no`) | scripted effect | same | abdication to the heir (§5.4.4) |
+| `eotg_aug_inherit_ward_effect` (param `TYPE` = `house_arrest` / `dungeon`) | scripted effect | same | **tree only.** `eotg_aug_inherit_confine_effect = { TYPE }`, then a breakout roll that schedules .023 or .017 (§5A.4) |
+| `eotg_aug_inherit_abdicate_effect` (params `WARDEN` = `yes` / `no`, `NOTIFY` = `yes` / `no`) | scripted effect | same | abdication to the heir (§5.4.4). NOTIFY fires .026; the tree passes `yes`, .028 passes `no`. |
+| **leaf effects** (15, listed in §5.5.3) `eotg_aug_inherit_leaf_*_effect` and `eotg_aug_inherit_confine_effect` | scripted effects | same | each outcome's mechanics, written once. Called by the tree's leaf events **and** by .028, so the map outcomes match (owner Q5). |
 | `eotg_aug_inherit_roll_effect` (param `CHANCE`, `NAME`) | scripted effect | same | every hidden roll in the tree goes through this. Honours the debug override `var:eotg_inh_force` (§9). |
 | `eotg_aug_inherit_debug_effect` (params `PROFILE`, `BOND`, `THREAT`) | scripted effect, **debug only** | same | test recipes (§9). Never called by script. |
+| `eotg_aug_inherit_ai_weight` | script value (ruler scope) — **optional** | `common/script_values/eotg_augmentation_values.txt` | only if the scripter prefers values to inline `modifier` blocks for the §5.5.2 weights |
 
 ### 3.3 New: variables and flags (all on the **ruler** unless stated)
 
@@ -104,6 +109,8 @@ Namespace **`eotg_aug_inherit`**. Event ids `eotg_aug_inherit.001`–`.027`. Loc
 | `eotg_inh_reaction` | var, `flag:accept` / `flag:leave` / `flag:violent` | .013 immediate | .013 desc and options |
 | `eotg_inh_old_ruler` | char var **on the heir** | abdicate effect | .026 |
 | `eotg_inh_force` | var, `flag:pass` / `flag:fail` | **console only** | the roll effect (§9) |
+| `eotg_inh_force_leaf` | var, a §5.5.2 branch key (`flag:massacre` …) | **console only** | .028's `random_list` (×1000 on that branch) |
+| `eotg_inh_outcome` | var, the leaf (`flag:l1` … `flag:l17`), **kept after close** | every leaf effect | QA: the observer run reads the leaf distribution from it (§9 item 13); overwritten if the ruler ever gets a second occurrence |
 | `eotg_flag_aug_inh_cooldown` | flag, 3 years | **on_action / start effect only** | on_action only (lesson 5) |
 | `eotg_flag_aug_inh_active` | flag, 6 years (safety timeout) | start effect; cleared by close | the Heir's Arc start guards (§5.2) |
 | `eotg_flag_aug_inh_coerced` | flag (chain) | .002.b | .003 refusal roll, .010 odds |
@@ -216,11 +223,13 @@ Without this, the ruler would get nr.006 (restrain, cut it out, execute: a three
 2. `primary_heir = { add_character_flag = eotg_flag_aug_inh_seen  save_scope_as = eotg_inh_heir }`, then `set_variable eotg_inh_heir`.
 3. `set_variable eotg_inh_source = flag:$SOURCE$`.
 4. Roll the profile (§5A.1) and set the bond (§5A.2).
-5. Witness, first valid:
+5. **Tree path only** (`eotg_aug_inherit_tree_runs = yes`). Witness, first valid:
    - `court_position:court_physician_court_position` when `employs_court_position = court_physician_court_position` (the mod's existing shape, endgame.txt:98);
    - else `primary_spouse` if it is not the heir;
    - else `random_courtier = { limit = { is_adult = yes  NOT = { this = scope:eotg_inh_heir } } }`. That is a non-violent pick of a speaker, which index §6 item 6 allows. Save it as the variable.
-6. `trigger_event = { id = eotg_aug_inherit.001  days = { 3 10 } }`.
+6. Fire:
+   - `eotg_aug_inherit_tree_runs = yes` → `trigger_event = { id = eotg_aug_inherit.001  days = { 3 10 } }`;
+   - else → `trigger_event = { id = eotg_aug_inherit.028  days = { 30 180 } }`. The delay is the months the tree would have taken.
 
 ### 5.2 Collisions and exclusivity
 
@@ -343,7 +352,7 @@ Delays are in days. "→ Lx" is a leaf. Universal options are lower-case letters
 Notation:
 - "H±n" means the heir's `eotg_add_fracture_risk = { AMOUNT = ±n }`.
 - The stress helpers are the index §3.2 `eotg_aug_stress_*_effect` set.
-- AI lines are `base; modifiers`. Every option has at least two trait modifiers (index §1 rule 6).
+- AI lines are `base; modifiers`. Every option has at least two trait modifiers (index §1 rule 6). Since owner Q5 the tree runs only for player rulers, so these weights matter only if the player hands the ruler to the AI mid-chain. They are kept for that case, for index §1 rule 6, and as the source of the AI defaults in §5.5.3.
 
 **.001 The Report.** Desc: one of four profile variants, plus a bond line, plus a source line (cascade or report). Theme `family`. Left portrait the ruler; right portrait the witness if one exists, else the heir.
 
@@ -576,7 +585,7 @@ Options: clean/maimed **a** "[heir] is still [heir]." (ruler stress minor loss; 
 | b "Lock [heir] away." | — | ward `dungeon` | 30; +15 just, +15 craven |
 | c "I forgive you. Don't make me regret it." | forgiving | **L4**: the heir gets `reassured`; H−10; ruler gets `eotg_mod_aug_inh_terms`; fire .022 (365) | 30; +30 forgiving, +10 compassionate |
 
-**.025 The Seat** (to the heir, who now holds the titles). Root is the heir, whose risk is own-scope. Desc variants, each the heir's own belief and never "as I saw it would" (lore review): **ledger** "it went the way I had written it down"; **certain** "it went the way I'd already decided"; **rage/cold** a shared variant.
+**.025 The Seat** (to the heir, who now holds the titles. When the dead ruler was the player and the heir is the player's heir, the player continues as the heir by vanilla succession, so this is also the player's first event as the heir; same story role as .026, owner Q3). Root is the heir, whose risk is own-scope. Desc variants, each the heir's own belief and never "as I saw it would" (lore review): **ledger** "it went the way I had written it down"; **certain** "it went the way I'd already decided"; **rage/cold** a shared variant.
 
 | Opt | Effect | AI |
 |---|---|---|
@@ -584,7 +593,7 @@ Options: clean/maimed **a** "[heir] is still [heir]." (ruler stress minor loss; 
 | b "That wasn't a forecast. That was me." | own risk −10; stress major gain | 20; +20 compassionate, +10 honest |
 | c "Take the seat." | own risk +0; +50 dread | 30; +20 ambitious, +10 wrathful |
 
-**.026 The Warden's Hand** (to the heir, now ruler; `var:eotg_inh_old_ruler` on the heir). Desc variants: a warden was installed (`has_active_diarchy = yes`), or none was (the quiet path, or the regency could not start).
+**.026 The Warden's Hand** (to the heir, now ruler, and now the **player**, owner Q3; fires 3 days after the hand-off; `var:eotg_inh_old_ruler` on the heir). It is the tree's closing event: it names the old ruler, and the hand-off is told from the heir's side. Desc variants: a warden was installed (`has_active_diarchy = yes`), or none was (the quiet path, or the regency could not start).
 
 | Opt | Variant | Effect | AI |
 |---|---|---|---|
@@ -671,7 +680,7 @@ Death +5 if `coerced` (the heir fought it). Death +10 if the heir is in the Stor
 2. `is_ai = no` and the heir is AI → `set_player_character = scope:eotg_inh_heir`. Precedent: `tgp_dynastic_cycle_decisions.txt:2155–2170`. **The player follows the crown to the Neurofractured heir** (§11 Q3).
 3. `depose = yes`. Precedent: `stress_threshold_events.txt:16775`.
 4. WARDEN = yes: the heir runs `eotg_aug_start_containment_regency_effect = { KEEPER = scope:eotg_inh_old_ruler_s  SWING = 60 }`. That is the existing effect, with the **Q7 / CB-02 caveat** that a capable adult's regency may end early. If the effect cannot start (an ineligible government, or an existing diarchy), .026 shows its "none" variant. **The desc must hold on both paths.**
-5. The heir: `trigger_event = { id = eotg_aug_inherit.026  days = 30 }`.
+5. NOTIFY = yes: the heir gets `trigger_event = { id = eotg_aug_inherit.026  days = 3 }`. **Owner Q3:** the player now *is* the heir, and .026 is the tree's closing event from the heir's side. It must name the old ruler and make the hand-off read as story rather than as a character switch. Three days, not thirty, so the first thing the player sees as the heir is this event. The tree path always passes NOTIFY = yes. The ruler is always a player there, and the heir is always AI (gate), so `set_player_character` always runs.
 
 #### 5.4.5 Routing into .009 after it has been seen
 
@@ -697,6 +706,86 @@ The route effect is a one-liner in each option: if `pattern_seen`, fire the thre
 | the sibling's coup | `death_murder`, killer the second | vanilla |
 
 ---
+
+### 5.5 The AI path: one hidden event (owner Q5, 2026-10-06)
+
+#### 5.5.1 Who gets the tree
+
+`eotg_aug_inherit_tree_runs` is `is_ai = no` on the ruler, and nothing more.
+
+The owner left the wider gate to the architect: also run the tree when the heir or the ruler is the player's close family or direct liege. **Decided: no.** The tree's events go to the *ruler*, so an AI ruler's tree is invisible to the player whoever the player is related to. The full tree would cost 4–7 events and show the player nothing that .028 doesn't. Telling a related player what happened is a notification, deferred in §10 (now cross-referenced to this rule).
+
+The heir is never a player (§5.1 gate), so `tree_runs = no` means no player is root of any event in the chain.
+
+**Throttle:** unchanged (×0.4 county, ×0.55 duke, ×0.7 king+ for AI). Precedent, cited by the owner: vanilla `random_yearly_playable_pulse` `chance_of_no_event` 30 / 70 for AI kings and dukes, "No need to waste performance here" (`common/on_action/yearly_on_actions.txt:3022-3037`). Ours is a single hidden event, so the lighter throttle is kept.
+
+#### 5.5.2 .028 Resolution (hidden)
+
+```
+eotg_aug_inherit.028 = {
+    type = character_event
+    hidden = yes                               # vanilla court_yearly.1001 (events/yearly_events/court_yearly_events.txt:331)
+    trigger = { eotg_aug_inherit_chain_valid = yes }
+    on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
+    immediate = {
+        eotg_aug_inherit_scopes_effect = yes
+        random_list = { <the 15 branches below; each runs its leaf effect, then the AI default> }
+        eotg_aug_inherit_close_effect = yes
+    }
+}
+```
+
+**Weights.** Each branch has a base, additive `modifier`s and `factor = 0` gates. They are read from the stored profile and bond, the heir's band and the ruler's traits, so they track what the tree's choices and rolls produce. Each branch also has `modifier = { factor = 1000  var:eotg_inh_force_leaf ?= flag:<key> }` for testing. These are **first-pass numbers for the observer run** (§9 item 13), not a balance claim.
+
+| Branch key | Leaf | Base | + | Gate (×0) / × |
+|---|---|---|---|---|
+| `excise` | L1 / L2 / L3 (the surgery roll decides) | 15 | ruler has physician access +15; diligent +10; brave +10; `coerced` n/a | gold < `medium_gold_value` |
+| `terms` | L4 | 15 | cold +10; favourite +20; dutiful +10; ruler compassionate +10, forgiving +10 | ×0.25 certain; ×0.25 rival; ×0.5 estranged; ×0.5 rage |
+| `confine` | L5 | 15 | ruler paranoid +10, craven +10, just +5; rage +5; cold +10 | — |
+| `exile` | L6 | 10 | ruler craven +5, content +5; estranged +10 | — |
+| `disinherit` | L7 | 10 | cold +20; dutiful +10; ruler just +10 | ×0.5 rival |
+| `transit` | L8 | 3 | ruler deceitful +10; ruler intrigue ≥ 14 +5 | gold < `medium_gold_value` |
+| `abdicate_warden` | L9 | 3 | ruler content +5, humble +5; ruler age ≥ 60 +10 | the .005.b validity test fails; ruler ambitious |
+| `abdicate_quiet` | L10 | 1 | ruler trusting +3; ruler age ≥ 60 +5 | as above; ruler paranoid |
+| `coup` | L11 | 0 | +15 if `scope:eotg_inh_second` passes the .005.d test; claimant +5; ruler callous +5 | no qualifying second |
+| `heir_end` | L12 | 5 | cold +20; heir `stress_level >= 2` +5; favourite +5, dutiful +5 | ×0.25 certain |
+| `next_two` | L13 | 5 | ledger +20; claimant +10 | nobody eligible in the line (§5.5.4) |
+| `massacre` | L14 | 5 | rage +20; heir Storm band +10, Fracture +5; estranged +5 | — |
+| `attempt` | L15, or L17 on failure | 5 | certain +20; rival +15; estranged +5 | ×0.5 favourite |
+| `ruler_cascade` | L16 | 2 | ruler ambitious +5, eccentric +5 | ruler not `eotg_is_aug_tier3`; ruler content |
+| `kill_heir` | L17 | 3 | ruler callous +10, sadistic +10 | ruler compassionate |
+
+The heir's band enters through `massacre` and through the surgery's death odds, so .028 **reads** the resource. Every branch's leaf effect moves the heir's risk or changes a tier. That is the invariant 5 coupling (§9 item 3).
+
+#### 5.5.3 Leaf effects (shared with the tree)
+
+Each leaf's mechanics live in one scripted effect. The tree's leaf options call the same effect, so the same outcome has the same consequences on both paths. **The tree options keep only what is option-specific:** extra opinion, stress helpers, gold choices and follow-up `trigger_event`s. Every leaf effect sets `var:eotg_inh_outcome` on root.
+
+| Effect | Leaf | Called by (tree) | Called by .028, then the **AI default** for the follow-up options |
+|---|---|---|---|
+| `eotg_aug_inherit_leaf_excise_effect = { TABLE }` (pay, then `eotg_aug_inherit_excision_effect`, store the result) | L1–L3 | .010 a / b | `excise`: TABLE `physician` if `employs_court_position = court_physician_court_position` and gold ≥ `major_gold_value`, else `back`. Follow-up (.021): none. |
+| `eotg_aug_inherit_leaf_terms_effect` (heir sedated + reassured, ruler `eotg_mod_aug_inh_terms`, H−15) | L4 | .006 a, .020 b, .024 c (the tree adds the .022 follow-up) | `terms`. No .022 a year later on the AI path. |
+| `eotg_aug_inherit_confine_effect = { TYPE }` (imprison, sedated on house arrest) | L5 | inside the ward effect; .016 a, .017 a / c | `confine`: TYPE `house_arrest` (the .008 a default, base 40 over b's 25). No breakout roll: the breakout's outcome is weighted into `massacre` instead. |
+| `eotg_aug_inherit_leaf_exile_effect = { STYLE }` (`plain` / `credit` / `disinherit`) | L6 | .011 a / b / c, .003 b_ref, .013 leave a | `exile`: STYLE `plain` (.011 a; credit only if gold ≥ `medium_gold_value` and the ruler is generous) |
+| `eotg_aug_inherit_leaf_disinherit_effect = { COST }` (vanilla `disinherit_effect`, H−5; COST = yes adds −150 prestige) | L7 | .007 a (`no`), .013 immediate (`yes`) | `disinherit`: COST `no` when the profile is cold or the bond dutiful (a renunciation), else `yes` |
+| `eotg_aug_inherit_leaf_transit_effect` (the .012 a body, exposure roll included; the toast is guarded on `is_ai = no`) | L8 | .012 a | `transit` |
+| `eotg_aug_inherit_abdicate_effect = { WARDEN  NOTIFY }` | L9 / L10 | .014 a / b (`NOTIFY = yes`) | `abdicate_warden` / `abdicate_quiet` with `NOTIFY = no` |
+| `eotg_aug_inherit_leaf_coup_effect = { LEAVE }` (the .027 immediate) | L11 | .015 a (`yes`) / b (`no`) | `coup`: LEAVE 50/50 (`random`). Follow-up AI default: .027 a (let it stand). |
+| `eotg_aug_inherit_leaf_heir_end_effect` (the .019 immediate: suicide when cold, else cascade; ruler stress) | L12 | .019 immediate | `heir_end`. Follow-up: none (the .019 options are only stress and opinion). |
+| `eotg_aug_inherit_leaf_next_two_effect` (pick the line, then the deaths; §5.4.1) | L13 | .016 immediate | `next_two`. Follow-up AI default: .016 a, custody (confine `dungeon`, no breakout). |
+| `eotg_aug_inherit_leaf_massacre_effect` (pickers, deaths, wounded, emptied-court modifier; §5.4.2) | L14 | .017 immediate | `massacre`. Follow-up AI default: .017 a, take the heir alive (confine `dungeon`). |
+| `eotg_aug_inherit_leaf_attempt_effect = { MOD  NOTIFY }` (the .018 roll; on success the ruler dies; NOTIFY fires .025; on failure the ruler is wounded and NOTIFY fires .024) | L15 | .018 a / b / c (`NOTIFY = yes`, MOD per option) | `attempt`: MOD −15 (the .018 a default, "Guards!", base 40). On failure the AI default is .024 a (execute), so the leaf is **L17** through `kill_heir` REASON `execution`. NOTIFY `no`. |
+| `eotg_aug_inherit_leaf_ruler_cascade_effect` (`eotg_trigger_neurofracture` on root, heir H−20, mutual admiration, arc-done flag) | L16 | .020 a | `ruler_cascade`. The cascade's own fracture.0001 still fires to the AI ruler, as any AI cascade does. |
+| `eotg_aug_inherit_leaf_kill_heir_effect = { REASON }` (`murder` / `execution` / `guards`; kinslayer on root first) | L17 | .009 e, .013 c (`murder`); .016 b, .024 a (`execution`); .017 b (`guards`) | `kill_heir`: REASON `execution` |
+
+**The AI-default rule** for any follow-up choice not listed: the option with the highest base `ai_chance`; on a tie, the less lethal option.
+
+#### 5.5.4 AI-path rules
+
+- **No player is killed off-screen.** On the AI path, the L13 line pick (§5.4.1) adds `is_ai = yes` to both `random_title_heir` limits. A player in the line is skipped and the next person is taken. With nobody eligible, the `next_two` branch is gated out (×0). Massacre victims are courtiers, who are never players. The L15 victim is the AI ruler.
+- **No visible event, toast or tooltip** reaches anyone on the AI path. Vanilla's own death and imprisonment notifications to related players still fire, and they are the only window.
+- **Map outcomes match the tree.** Titles (disinherit, abdication, regency), deaths (with the same reasons and killers), traits, modifiers, opinions, the secret on an unsanctioned coup, and kinslayer all come from the shared leaf effects.
+- **Exclusivity and cleanup** are identical to the tree: §5.2 guards, `on_trigger_fail`, and the close effect at the end of `immediate`.
 
 ## 5A. Variation
 
@@ -795,6 +884,8 @@ Bond lines say "your child" only under `is_child_of = root`, and "your heir" oth
 | massacre picker, family factor | mod fracture.004 + `eotg_aug_pick_victim_effect` | L14 |
 | AI tier throttle | `common/on_action/yearly_on_actions.txt:3022-3030` | §5.1 |
 | `move_to_pool` | mod end.011 | L6, L8 |
+| hidden resolution event | `events/yearly_events/court_yearly_events.txt:331` (`court_yearly.1001`, `hidden = yes`, trigger + immediate) | .028 |
+| AI performance throttle | `common/on_action/yearly_on_actions.txt:3022-3037` (`chance_of_no_event` 30 / 70 for AI, "No need to waste performance here") | §5.5.1 |
 
 **Deviations:**
 - The excision helper is a separate effect, not a call to the existing one, because the patient is not the payer (§5.4.3).
@@ -863,6 +954,7 @@ The option texts quoted in §5.3 are working text. Where this list differs, **th
 | .025.a | "The seat was always going to be mine." |
 | .026 none a | "Mine. Now it's mine." |
 | .018 bond descs (5) | at most **one** spoken line from the heir per variant |
+| .016.child (owner Q1) | the child's death is off-screen and in plain words: one sentence, the name and the fact. No method, no age emphasis, no scene. |
 | .011 | "Passage Out": a paid berth on an outbound ship; b is "passage and credit". No destination, Unclaimed region or polity. Keep "[heir] is still in the line". |
 | .012 | lost in transit ("the shuttle never docked"); exposure is a witness (a dockhand or a fitter) who saw the heir alive. "Residence logs" is allowed. Never a registry, records office or certificate. |
 | .016 | `desc_ledger` is the only desc that mentions a list; `desc_neutral` is "[heir] had worked out who stood between [heir_herhis] and the seat." |
@@ -911,15 +1003,20 @@ Sources: SETTING LORE ERRATA "CYBERNETIC VOICE" (2026-10-03) and "CYBERNETICS AT
 ## 9. Definition of done
 
 0. **Tiger, `px_lsp_diagnostics.js` and `px_vocab_check.py` all clean** on the touched files, except the known-benign list in `CLAUDE.md` §Validation. Tiger is the only one that checks scope.
-1. **Reachability:** all 27 events are reachable (PX event graph + `px_event_report.py`): .001 from `eotg_on_yearly_aug_inherit_check` (`yearly_playable_pulse`, count+) and from `eotg_aug_nr_cascade_effect`; everything else from a chain stage. No event is fired by nothing.
+1. **Reachability:** all 28 events are reachable (PX event graph + `px_event_report.py`). .001 (player) and .028 (AI) are fired from `eotg_aug_inherit_start_effect`, which is called by `eotg_on_yearly_aug_inherit_check` (`yearly_playable_pulse`, count+) and by `eotg_aug_nr_cascade_effect`. Everything else is fired from a chain stage. No event is fired by nothing.
 2. **Lesson 5:** no event `trigger` reads `eotg_flag_aug_inh_cooldown`. `grep -n "eotg_flag_aug_inh_cooldown" events/` is empty.
-3. **Invariant 5:** each of the 27 events moves the heir's `eotg_fracture_risk` in at least one option, reads the heir's band, or changes a tier (the heir's death or excision, or the ruler's cascade). The risk moves 1+ times in at least **20 events**. QA audit 8.
-4. **Leaves:** all **17** leaf outcomes in §5.3 are reachable with the recipes below, including **L13, L14 and L15**.
+3. **Invariant 5:** each of the 28 events moves the heir's `eotg_fracture_risk` in at least one option, reads the heir's band, or changes a tier (the heir's death or excision, or the ruler's cascade). The risk moves 1+ times in at least **20 events**. QA audit 8.
+4. **Leaves:** all **17** leaf outcomes in §5.3 are reachable on the tree path, and all **15** branches of .028 on the AI path, with the recipes below. This includes **L13, L14 and L15** on both.
 5. **Exclusivity:** with a live Heir's Arc at stages 0–4, the tree does not start. While the tree runs, neither Heir's Arc start site creates a story.
 6. **Cleanup:** after every leaf and every `on_trigger_fail`, the ruler has no `eotg_inh_*` variable and no chain flag. Only the cooldown, `buried_empty` and the heir's `seen` remain.
 7. **Hidden risk:** no tooltip shows a number, "risk", "pressure" or odds.
 8. **Loc:** every key in §7 exists once, BOM present, no `[scope:`, Canadian spelling, no banned word (QA greps the §8 list).
 9. **Victims:** L13 names its victims. L14 names its first dead and its wounded survivor. `random_courtier` appears only in the witness pick and inside the new strike picker.
+10. **The AI path is silent.** .028 has `hidden = yes`. For an AI ruler, `eotg_aug_inherit_start_effect` fires .028 and never .001. No event in the chain has an AI ruler as root other than .028, apart from the existing fracture.0001 after L16.
+11. **Leaf parity.** Each of the 15 leaf effects (§5.5.3) is called from .028 **and** from at least one tree event. .028 contains no outcome mechanics inline: grep its `immediate` for `death =`, `disinherit_effect`, `imprison`, `depose`; all must be empty.
+12. **No off-screen player death:** the AI-path line pick excludes players (§5.5.4).
+13. **Observer run** (balance §9.2): after 50 years, read `eotg_inh_outcome` on every ruler that has it. All 15 branches occur at least once. The three required leaves (L13, L14, L15) together are 15–40% of AI outcomes. Count the .028 firings per decade against the throttle. Retune §5.5.2 if any branch is absent or above 30%.
+14. **Owner Q3:** after L9 / L10 on the tree path, the player is the heir and .026 is the first event they see, within 3 days.
 
 ### 9.1 Console recipes (debug mode; `docs/qa/HOW_TO_TEST_IN_GAME.md`)
 
@@ -958,6 +1055,28 @@ Sources: SETTING LORE ERRATA "CYBERNETIC VOICE" (2026-10-03) and "CYBERNETICS AT
 
 **V-13:** the line ordering in §5.4.1 picks places 2 and 3, not random title heirs. Check with 4+ people in the line.
 
+**AI path (.028).** Pick an AI count whose primary heir is an adult, unlanded AI courtier; hover the count for their id `X`.
+1. `effect character:X = { primary_heir = { add_trait = eotg_neurofractured } }`.
+2. `effect character:X = { eotg_aug_inherit_start_effect = { SOURCE = report } }`. It must schedule .028 and **not** .001 (DoD 10). Check that `character:X` now has `eotg_inh_heir`.
+3. Force a branch: `effect character:X = { set_variable = { name = eotg_inh_force_leaf  value = flag:massacre } }`, using any §5.5.2 key. A gated branch (×0) stays 0 under the force, which also tests the gates. Optionally force the profile and bond with `effect character:X = { eotg_aug_inherit_debug_effect = { … } }`.
+4. Resolve now: `event eotg_aug_inherit.028 X`. The scheduled copy later fails its trigger and closes harmlessly.
+5. Check:
+   - `eotg_inh_outcome` on X;
+   - the heir's and the victims' state in the character window (dead with the §5.4.6 reason, imprisoned, disinherited, gone from court);
+   - for `abdicate_*`, the heir now holds X's titles and **you were not switched** (X was AI);
+   - no chain variable or flag remains on X except the cooldown and `eotg_inh_outcome`.
+
+| Branch | Extra setup |
+|---|---|
+| `excise` | gold ≥ `medium_gold_value` on X (`effect character:X = { add_gold = 500 }`); a physician for the `physician` table |
+| `terms`, `confine`, `exile`, `disinherit`, `heir_end`, `massacre`, `kill_heir` | none (set `eotg_fracture_risk` 70 on the heir to see the Storm weights) |
+| `transit` | gold as above |
+| `abdicate_warden` / `_quiet` | X not ambitious (`effect character:X = { remove_trait = ambitious }`) |
+| `coup` | X's second in line is an adult ambitious AI |
+| `next_two` | 3+ people in X's line. Repeat with **you** in the line (play a landed sibling): you must be skipped (DoD 12). |
+| `attempt` | force `eotg_inh_force = flag:pass` (L15: X dies) and `flag:fail` (L17: the heir is executed) |
+| `ruler_cascade` | X Overclocked (`effect character:X = { eotg_aug_initiate_effect = yes  add_trait_xp = { trait = eotg_cybernetics value = 100 } }`) |
+
 ---
 
 ## 10. Deferred
@@ -969,27 +1088,31 @@ Sources: SETTING LORE ERRATA "CYBERNETIC VOICE" (2026-10-03) and "CYBERNETICS AT
 | **The faked-death return beat** (the heir "lost in transit" reappears years later) | `eotg_flag_aug_inh_buried_empty` and the heir's `eotg_aug_inh_presumed_dead` are set now, so it can be built without a migration. New event; it's the owner's call. |
 | **Faith-gated reactions to the heir's suicide** (prestige or piety by doctrine) | Canon gives no culture or faith a stance on suicide, so .019 is value-neutral now (lore review). Gate it on doctrines once v2 faiths exist from the region briefs. |
 | **A vanilla secret for the faked death** | It needs a new `common/secret_types/` entry and folder. Not worth it for one leaf now. |
-| **Notifications to other players or rulers** (e.g. a liege told of a vassal's massacre) | Vanilla-shaped, but it is new events. |
-| **Reactions from the heir's spouse or children** | They would widen the cast past the 27 events. A later pass can add them as desc lines. |
+| **Notifications to other players or rulers** (e.g. a liege told of a vassal's massacre, or a player told what .028 decided about their relative) | Vanilla-shaped, but it is new events. With Q5's ruling this is the only way a player could see an AI occurrence beyond vanilla's death notices (§5.5.1). |
+| **Reactions from the heir's spouse or children** | They would widen the cast past the 28 events. A later pass can add them as desc lines. |
 | **A visible story-panel entry** | The hidden-risk rule; the system's stories are all invisible. |
 
 ---
 
-## 11. Owner questions
+## 11. Owner questions: ruled 2026-10-06
 
-1. **Child victims in L13.** The next two in line can be children. Vanilla murder schemes kill children, and the spec allows it with a restrained one-line desc variant (`.016.child`). **Recommend: allow.** Alternative: skip under-16s and take the next adult. That changes "the next two" into "the next two adults".
-2. **The heir's suicide (L12).** It is restricted to the Flatline profile, given no method or detail, and fires only for adult heirs. Other profiles die of the cascade instead. **Recommend: keep as specced.** Alternative: cascade death for every profile.
-3. **Abdication hands the player to the Neurofractured heir** (vanilla behaviour). The player then lives under the warden they installed (.026). **Recommend: keep.** Alternative: the player stays on the old ruler, which is landless after `depose` and so effectively ends the game.
-4. **The cascade hook replaces nr.006 for the primary heir** (§5.1 site B). **Recommend: yes**, otherwise the same cascade produces two events. This edits one existing effect.
-5. **AI rulers run the full tree** with `ai_chance`, throttled at entry (count 0.4, duke 0.55, king+ 0.7). That is about 4–7 events per occurrence. Neurofractured heirs are rare, so the cost is small. **Recommend: keep.** Alternative: AI rulers resolve the whole tree in one hidden `random_list` in the start effect (no events, same leaves).
+All five were answered by the owner on 2026-10-06, following the recommendations from community and vanilla research.
+
+| # | Question | **Ruling** | Reason | Design change |
+|---|---|---|---|---|
+| Q1 | Child victims in L13 | **Allow.** Off-screen, plain wording. | Vanilla murder has no target age gate, and `murder_outcome` has child and infant variants. The game's T / PEGI 12 rating covers text references. | §7.1 row `.016.child` (one plain sentence, no scene). |
+| Q2 | The heir's suicide (L12) | **Keep as framed.** | Vanilla `death_suicide` exists, trait-gated and oblique. Ours is limited to a Flatline adult heir and is never the player. | None. The lore review's value-neutral .019 and the L12 desc rule (§7.1) stand. |
+| Q3 | Abdication passes play to the heir | **Keep.** | Players dislike a game over far more than a character switch. The heir needs a closing event, so the switch reads as story. | §5.4.4: .026 fires in 3 days, not 30, and names the old ruler from the heir's side. .025 plays the same role after L15. DoD 14. |
+| Q4 | The cascade hook replaces nr.006 for the primary heir | **Yes.** | One cascade, one event. | None (§5.1 site B as specced). |
+| Q5 | AI rulers run the full tree | **Changed: no.** The full tree runs only when the player is involved. AI-only occurrences resolve in one hidden event at entry, by a weighted `random_list` with the same profile and bond weights and the same leaf effects. Keep the tier throttle. Leaves that need a player choice with no AI analogue take the AI default from the matrix. | Performance. Precedent: vanilla `random_yearly_playable_pulse` `chance_of_no_event` 30 / 70 / 95 for AI ("No need to waste performance here"). | New §5.5 (.028, the 15 shared leaf effects, AI defaults, no off-screen player death). "Involved" is decided as **the ruler is a player** only (§5.5.1, with the reason). §3, §6, §9 updated. |
 
 ---
 
 ### HANDOFF
-- status: done (lore review 2026-10-06 applied; owner answers to §11 pending)
-- next: human
-- ask: Answer §11 Q1–Q5; the orchestrator then dispatches eotg-scripter (§3–§5A, §9), then eotg-localizer (§7 and the binding §7.1 wording fixes).
+- status: done (lore review and owner rulings of 2026-10-06 applied; nothing open)
+- next: eotg-scripter
+- ask: Build the spec: §3 identifiers (28 events, the 15 shared leaf effects, `eotg_aug_inherit_tree_runs`), §5.1 entry (the on_action, plus the `eotg_aug_nr_cascade_effect` hook), §5.2 guards in the two Heir's Arc start sites and the non-ruler step 5, the §5.3 tree for player rulers, the §5.5 hidden .028 for AI rulers, and the §5A profile, bond and roll tables. Then run §9 items 0–3 and 10–11 statically. Hand loc keys to eotg-localizer (§7, with §7.1 binding).
 - files: docs/specs/cybernetics_v2_fracturing_inheritance.md
-- needs-loc: about 226 keys in a new file `localization/english/eotg_aug_inherit_l_english.yml` (§7); §7.1 is binding
-- needs-lore: none (the review's items are applied; optional re-read of §7.1 once the loc is drafted)
-- needs-human: owner questions §11 Q1–Q5. In game: V-13 line ordering, Q7/CB-02 regency persistence for L9, the 17 leaf recipes in §9.1.
+- needs-loc: about 226 keys in the new `localization/english/eotg_aug_inherit_l_english.yml` (§7, §7.1). .028 is hidden and needs no loc.
+- needs-lore: none
+- needs-human: in game: the §9.1 recipes (17 tree leaves, 15 AI branches), V-13 line ordering, V-14/V-15 exclusivity, Q7/CB-02 regency persistence for L9, DoD 14 (.026 after the switch), and the observer run's leaf distribution (DoD 13)
