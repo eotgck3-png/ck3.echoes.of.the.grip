@@ -116,3 +116,17 @@ eotg_frontier_on_discovery = {
 
 eotg_frontier_on_infrastructure_built = {
 }
+
+# -- Phase 3a integration hook (docs/specs/frontier_v3.md §8) ---------------
+# A Region's exploration state advanced (eotg_frontier_explore_step_effect):
+#   scope:eotg_frontier_exploration  flag:partial or flag:known
+# The hook a future Exploration system listens to (design §13).
+
+eotg_frontier_on_explored = {
+}
+
+# Phase 3a: how a Corporations or Trade system plugs in (frontier_v3.md §7).
+# No hook of its own: a corporation offers backing with
+# eotg_frontier_offer_backing_effect and listens to eotg_frontier_on_sponsor_changed;
+# a trade network sets eotg_frontier_set_trade_network_effect and listens to
+# eotg_frontier_on_project_progressed / _completed.

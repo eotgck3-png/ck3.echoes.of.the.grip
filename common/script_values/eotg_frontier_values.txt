@@ -208,6 +208,8 @@ eotg_frontier_yearly_gain_value = {
     add = eotg_frontier_trait_rate_value
     add = eotg_frontier_infra_rate_value
     add = eotg_frontier_type_input_value
+    # Phase 3a hook (frontier_v3.md §7): a future trade network; 0 by default
+    add = eotg_frontier_trade_network_value
     multiply = eotg_frontier_pace_value
     min = 0
 }
@@ -480,5 +482,32 @@ eotg_frontier_salvage_bonus_value = {
         limit = { has_variable = eotg_frontier_salvage }
         add = var:eotg_frontier_salvage
         multiply = 5
+    }
+}
+
+# == Phase 3a (docs/specs/frontier_v3.md §3.4) ================================
+# One expedition (character scope)
+eotg_frontier_explore_cost_value = {
+    value = minor_gold_value
+}
+
+# A mercenary escort for five years (.040; character scope)
+eotg_frontier_escort_cost_value = {
+    value = medium_gold_value
+}
+
+# -- Hook: trade networks (frontier_v3.md §7) ---------------------------------
+# What a future trade system adds to a TRADE Frontier's yearly input (pre-pace,
+# like every input). 0 unless that system has called
+# eotg_frontier_set_trade_network_effect on the county, and 0 for every other
+# type. Frontier itself never sets it.
+eotg_frontier_trade_network_value = {
+    value = 0
+    if = {
+        limit = {
+            var:eotg_frontier_type ?= flag:trade
+            has_variable = eotg_frontier_trade_network_bonus
+        }
+        add = var:eotg_frontier_trade_network_bonus
     }
 }

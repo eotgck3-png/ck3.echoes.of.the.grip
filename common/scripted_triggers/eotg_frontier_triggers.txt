@@ -33,6 +33,8 @@ eotg_frontier_can_establish = {
         eotg_frontier_is_abandoned = yes
     }
     title_province = { is_occupied = no }
+    # Phase 3a (frontier_v3.md §4): not until explored past Unknown
+    eotg_frontier_is_unknown = no
 }
 
 # Type eligibility (spec §5.1). Six types need only eotg_frontier_can_establish;
@@ -177,6 +179,8 @@ eotg_frontier_can_survey = {
     }
     eotg_frontier_trait_room = yes
     NOT = { has_variable = eotg_frontier_surveyed }
+    # Phase 3a (frontier_v3.md §4): not until explored past Unknown
+    eotg_frontier_is_unknown = no
 }
 
 # -- Strain conditions (county scope; read by the yearly tick) ----------------
@@ -189,6 +193,8 @@ eotg_frontier_danger_strains = {
     county_control < eotg_frontier_min_control_value
     NOT = { has_county_modifier = eotg_frontier_infra_garrison_post }
     NOT = { var:eotg_frontier_type ?= flag:military }
+    # Phase 3a (frontier_v3.md §5): a hired escort counters it too
+    NOT = { has_county_modifier = eotg_frontier_mod_merc_escort }
 }
 
 # A quiet year may ease strain, unless the place itself is hostile and nothing
@@ -218,4 +224,70 @@ eotg_frontier_holds_buildable = {
         tier = tier_county
         eotg_frontier_infra_room = yes
     }
+}
+
+# == Phase 3a (docs/specs/frontier_v3.md §3.3) ================================
+# -- Exploration (spec §4). eotg_frontier_explored absent = Known: old saves and
+# maps have no variable and keep Phase 2's behaviour.
+eotg_frontier_is_unknown = {
+    var:eotg_frontier_explored ?= flag:unknown
+}
+
+eotg_frontier_is_partial = {
+    var:eotg_frontier_explored ?= flag:partial
+}
+
+# An expedition can go: Unknown or Partial, none this year
+eotg_frontier_can_explore = {
+    OR = {
+        eotg_frontier_is_unknown = yes
+        eotg_frontier_is_partial = yes
+    }
+    # the same gate as eotg_frontier_can_survey (owner fix B1): never a
+    # settled county
+    OR = {
+        eotg_frontier_is_unsettled = yes
+        eotg_frontier_is_frontier = yes
+        eotg_frontier_is_abandoned = yes
+    }
+    NOT = { has_variable = eotg_frontier_expedition_sent }
+}
+
+# THE expedition targeting rule (spec §4.1): may $ACTOR$ send an expedition to
+# this Region? County scope. Today: an explorable Region $ACTOR$ holds. The
+# Unclaimed Regions build widens this one trigger to Regions within $ACTOR$'s
+# reach (frontier_unclaimed_regions.md §8.2); every caller goes through it.
+eotg_frontier_can_target_expedition = {
+    eotg_frontier_can_explore = yes
+    holder = $ACTOR$
+}
+
+# Character scope, called with the decision taker as root (is_shown,
+# ai_potential): there is a Region this character may send an expedition to
+eotg_frontier_holds_explorable = {
+    any_held_title = {
+        tier = tier_county
+        eotg_frontier_can_target_expedition = { ACTOR = root }
+    }
+}
+
+# -- Backers who may hold no county (frontier_v3.md §5, §6) --------------------
+# A mercenary captain or a faith leader who could back a Frontier: alive,
+# backing nothing yet, with gold for two payments. Narrower than
+# eotg_frontier_can_sponsor (which also needs a landed count or above, for
+# .003); .040 and .041 call eotg_frontier_set_sponsor_effect with it, so
+# payments, lapse, withdrawal and the hooks work unchanged. Character scope.
+eotg_frontier_can_back = {
+    is_alive = yes
+    eotg_frontier_is_sponsor = no
+    gold >= {
+        value = eotg_frontier_sponsor_payment_value
+        multiply = 2
+    }
+}
+
+# Leads a mercenary company. Character scope. government_is_mercenary:
+# confirmed against vanilla 1.20 (spec frontier_v3.md §15 item 1).
+eotg_frontier_is_company_captain = {
+    government_has_flag = government_is_mercenary
 }

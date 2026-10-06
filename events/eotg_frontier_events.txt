@@ -2140,3 +2140,299 @@ eotg_frontier.037 = {
         }
     }
 }
+
+# =============================================================================
+# Phase 3a events (docs/specs/frontier_v3.md §9). Fired by:
+#   .040, .041  eotg_frontier_flavor_pick_effect (the same single yearly roll)
+#   .042        eotg_decision_frontier_explore
+# =============================================================================
+
+# -- eotg_frontier.042 --------------------------------------------------------
+# The Expedition Returns (spec §4): one step of exploration, run in immediate.
+# At Known, the charts are filed as a survey (Phase 2's
+# eotg_frontier_file_survey_effect): +2 progress on a running Frontier, a head
+# start for the next project otherwise. That is how the event couples to progress.
+eotg_frontier.042 = {
+    type = character_event
+    title = eotg_frontier.042.t
+    desc = {
+        desc = eotg_frontier.042.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_exploration ?= flag:known }
+                desc = eotg_frontier.042.desc_known
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_exploration ?= flag:partial }
+                desc = eotg_frontier.042.desc_partial
+            }
+            desc = eotg_frontier.042.desc_nothing
+        }
+    }
+    theme = realm
+
+    trigger = {
+        exists = scope:eotg_frontier_county
+    }
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+
+    immediate = {
+        hidden_effect = {
+            clear_saved_scope = eotg_frontier_exploration
+            scope:eotg_frontier_county = { eotg_frontier_explore_step_effect = yes }
+        }
+    }
+
+    # "Send them straight back out." From Partial, with gold: on to Known now.
+    option = {
+        name = eotg_frontier.042.b
+        trigger = {
+            gold >= eotg_frontier_explore_cost_value
+            scope:eotg_frontier_county = { eotg_frontier_is_partial = yes }
+        }
+        remove_short_term_gold = eotg_frontier_explore_cost_value
+        custom_tooltip = eotg_frontier.042.b_tt
+        scope:eotg_frontier_county = {
+            eotg_frontier_explore_step_effect = yes
+            # At Known, the charts are filed as a survey: +2 progress on a
+            # Frontier, survey data otherwise (Phase 2, never data on a Frontier)
+            if = {
+                limit = { scope:eotg_frontier_exploration ?= flag:known }
+                eotg_frontier_file_survey_effect = yes
+            }
+        }
+        ai_chance = {
+            base = 20
+            modifier = { add = 10  learning >= 12 }
+        }
+    }
+
+    # "File the charts." Always available; at Known the charts are a head start.
+    option = {
+        name = eotg_frontier.042.a
+        scope:eotg_frontier_county = {
+            if = {
+                limit = { scope:eotg_frontier_exploration ?= flag:known }
+                eotg_frontier_file_survey_effect = yes
+            }
+            else_if = {
+                limit = { scope:eotg_frontier_exploration ?= flag:partial }
+                custom_tooltip = eotg_frontier.042.a_partial_tt
+            }
+        }
+        ai_chance = {
+            base = 50
+        }
+    }
+}
+
+# -- eotg_frontier.040 --------------------------------------------------------
+# Guns for Hire (spec §5): a mercenary company offers to guard the convoys of a
+# Dangerous Region, or, for a Military project with no backer, to back the venture. The captain
+# gains no claim and no say (LAW AT 866). Comes through the yearly roll's pool
+# for a Military project with no backer, or a Dangerous Region of any other
+# project with no escort.
+eotg_frontier.040 = {
+    type = character_event
+    title = eotg_frontier.040.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { exists = scope:eotg_frontier_company }
+                desc = eotg_frontier.040.desc
+            }
+            desc = eotg_frontier.040.desc_none
+        }
+    }
+    theme = realm
+
+    trigger = {
+        exists = scope:eotg_frontier_county
+        scope:eotg_frontier_county = {
+            eotg_frontier_is_frontier = yes
+            OR = {
+                var:eotg_frontier_type ?= flag:military
+                has_county_modifier = eotg_frontier_trait_dangerous
+            }
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_frontier_company }
+        character = scope:eotg_frontier_company
+        animation = personality_bold
+    }
+
+    immediate = {
+        hidden_effect = {
+            if = {
+                limit = { NOT = { exists = scope:eotg_frontier_company } }
+                scope:eotg_frontier_county = { eotg_frontier_find_company_effect = yes }
+            }
+        }
+    }
+
+    # (a Dangerous Region, a project that is not Military) "Hire them to guard
+    # the convoys." The fee goes to the captain: the amount is fixed once, in
+    # the payer's scope, so both sides see the same number (a scope value as a
+    # gold amount: confirmed, spec frontier_v3.md §15 item 8).
+    option = {
+        name = eotg_frontier.040.a
+        trigger = {
+            exists = scope:eotg_frontier_company
+            gold >= eotg_frontier_escort_cost_value
+            scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
+                has_county_modifier = eotg_frontier_trait_dangerous
+                NOT = { var:eotg_frontier_type ?= flag:military }
+                NOT = { has_county_modifier = eotg_frontier_mod_merc_escort }
+            }
+        }
+        save_temporary_scope_value_as = { name = eotg_frontier_fee  value = eotg_frontier_escort_cost_value }
+        pay_short_term_gold = { target = scope:eotg_frontier_company  gold = scope:eotg_frontier_fee }
+        scope:eotg_frontier_county = {
+            add_county_modifier = { modifier = eotg_frontier_mod_merc_escort  years = 5 }
+            eotg_frontier_ease_strain_effect = yes
+        }
+        custom_tooltip = eotg_frontier.040.a_tt
+        ai_chance = {
+            base = 40
+        }
+    }
+
+    # (a Military project with no backer) "Let the company back the venture."
+    option = {
+        name = eotg_frontier.040.b
+        trigger = {
+            exists = scope:eotg_frontier_company
+            scope:eotg_frontier_company = { eotg_frontier_can_back = yes }
+            scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
+                var:eotg_frontier_type ?= flag:military
+                NOT = { exists = var:eotg_frontier_sponsor }
+            }
+        }
+        scope:eotg_frontier_county = {
+            eotg_frontier_set_sponsor_effect = { SPONSOR = scope:eotg_frontier_company }
+            eotg_frontier_add_progress_effect = { AMOUNT = 3 }
+        }
+        custom_tooltip = eotg_frontier.040.b_tt
+        ai_chance = {
+            base = 30
+        }
+    }
+
+    # "We will hold it ourselves." Always available; changes nothing.
+    option = {
+        name = eotg_frontier.040.c
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = arrogant }
+        }
+    }
+}
+
+# -- eotg_frontier.041 --------------------------------------------------------
+# A Faithful Offer (spec §6): the head of the holder's faith, or a holy order
+# of it, offers to back a Religious Frontier, or to bless it. Faith-neutral:
+# no faith is named. The backer gains no claim, no say and no authority over
+# the Region (LAW AT 866). Comes through the yearly roll's pool.
+eotg_frontier.041 = {
+    type = character_event
+    title = eotg_frontier.041.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_faith_backer_kind ?= flag:head }
+                desc = eotg_frontier.041.desc_head
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_faith_backer_kind ?= flag:order }
+                desc = eotg_frontier.041.desc_order
+            }
+            desc = eotg_frontier.041.desc_none
+        }
+    }
+    theme = realm
+
+    trigger = {
+        exists = scope:eotg_frontier_county
+        scope:eotg_frontier_county = {
+            eotg_frontier_is_frontier = yes
+            var:eotg_frontier_type ?= flag:religious
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_frontier_faith_backer }
+        character = scope:eotg_frontier_faith_backer
+        animation = personality_honorable
+    }
+
+    immediate = {
+        hidden_effect = {
+            if = {
+                limit = { NOT = { exists = scope:eotg_frontier_faith_backer } }
+                scope:eotg_frontier_county = { eotg_frontier_find_faith_backer_effect = yes }
+            }
+        }
+    }
+
+    # (no backer yet) "Accept the backing."
+    option = {
+        name = eotg_frontier.041.a
+        trigger = {
+            exists = scope:eotg_frontier_faith_backer
+            scope:eotg_frontier_faith_backer = { eotg_frontier_can_back = yes }
+            scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
+                NOT = { exists = var:eotg_frontier_sponsor }
+            }
+        }
+        scope:eotg_frontier_county = {
+            eotg_frontier_set_faith_backer_effect = yes
+            eotg_frontier_add_progress_effect = { AMOUNT = 3 }
+        }
+        custom_tooltip = eotg_frontier.041.a_tt
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = zealous }
+        }
+    }
+
+    # "Ask only for a blessing."
+    option = {
+        name = eotg_frontier.041.b
+        trigger = {
+            exists = scope:eotg_frontier_faith_backer
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        add_piety = minor_piety_value
+        scope:eotg_frontier_county = { eotg_frontier_add_progress_effect = { AMOUNT = 2 } }
+        custom_tooltip = eotg_frontier.041.b_tt
+        ai_chance = {
+            base = 30
+        }
+    }
+
+    # "The mission stands on its own." Always available; changes nothing.
+    option = {
+        name = eotg_frontier.041.c
+        ai_chance = {
+            base = 10
+            modifier = { add = 20  has_trait = cynical }
+        }
+    }
+}

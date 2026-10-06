@@ -594,3 +594,102 @@ eotg_decision_frontier_build = {
         modifier = { add = -10  has_trait = greedy }
     }
 }
+
+# == Phase 3a (docs/specs/frontier_v3.md) =====================================
+
+# Send an Expedition (spec §4): one step of exploration in an Unknown (first)
+# or Partial Region the taker holds. A new decision rather than a Survey
+# extension: Survey needs trait room and runs once in five years; exploration
+# needs neither, and this is the seam a future Exploration system extends.
+# One expedition a year per Region (the decision's own gate).
+eotg_decision_frontier_explore = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 60
+        duchy = 48
+        kingdom = 48
+        empire = 48
+        hegemony = 48
+    }
+
+    is_shown = {
+        eotg_frontier_holds_explorable = yes
+    }
+
+    cost = {
+        gold = {
+            value = eotg_frontier_explore_cost_value
+        }
+    }
+
+    effect = {
+        # All expedition targeting is in one trigger and one effect (spec §4.1)
+        eotg_frontier_pick_expedition_target_effect = { ACTOR = root }
+        custom_tooltip = eotg_decision_frontier_explore_effect_tt
+        hidden_effect = {
+            scope:eotg_frontier_county = {
+                set_variable = { name = eotg_frontier_expedition_sent  value = yes  years = 1 }
+            }
+        }
+        trigger_event = eotg_frontier.042
+    }
+
+    ai_potential = {
+        eotg_frontier_holds_explorable = yes
+        gold >= {
+            value = eotg_frontier_explore_cost_value
+            multiply = 3
+        }
+    }
+    ai_will_do = {
+        base = 10
+        modifier = { add = 10  learning >= 12 }
+    }
+}
+
+# Debug only: marks the taker's capital Region Unknown (and Unsettled), so
+# exploration can be tested on the vanilla map. Any other Region: the console
+# line in docs/specs/frontier_v3_test_plan.md.
+eotg_decision_frontier_debug_mark_unknown = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 0
+        kingdom = 0
+        empire = 0
+        hegemony = 0
+    }
+
+    is_shown = {
+        debug_only = yes
+    }
+
+    is_valid = {
+        custom_description = {
+            text = eotg_decision_frontier_debug_mark_unsettled_valid_tt
+            exists = capital_county
+            capital_county = {
+                NOT = { has_variable = eotg_frontier_state }
+            }
+        }
+    }
+
+    effect = {
+        capital_county = {
+            eotg_frontier_mark_unknown_effect = yes
+        }
+    }
+
+    ai_potential = {
+        always = no
+    }
+    ai_will_do = {
+        base = 0
+    }
+}
