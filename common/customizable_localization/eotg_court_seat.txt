@@ -1,0 +1,57 @@
+﻿# HAND-WRITTEN (not generated; unlike eotg_aug_seller_names.txt, edit this file directly).
+# eotg_court_seat: the word for a character's seat, by the holding type of their
+# capital province, so event prose stops assuming "station" (owner request 2026-10-06).
+#
+# Usage in loc (lowercase, for mid-sentence):
+#   event root character:   [ROOT.Char.Custom('eotg_court_seat')]
+#   any other character:    [x.Custom('eotg_court_seat')]      (x = a saved scope, bare name, no scope:)
+#   sentence start:         [ROOT.Char.Custom('eotg_court_seat')|U]
+#
+# Words follow the reflavour glossary (OLD PROJECT VERSION/docs/localization_crusade.md:15-27,
+# v1 replace/eotg_holdings_concepts_l_english.yml:36-39): Castle = Bastion, City = Port,
+# Temple = Sanctum, Tribe = Clanhold. The glossary has no word for the three 1.20
+# holdings nomad_holding, herder_holding and temple_citadel_holding; their entries are
+# stopgaps until the glossary rules on them (CB-08).
+#
+# Shape and trigger: vanilla 00_feast_custom_loc.txt:157 (capital_province ?= { }) and
+# 00_visit_settlement_custom_loc.txt:36 (has_holding_type per holding). Holding list:
+# vanilla common/holdings/00_holdings.txt (castle, tribal, city, church, nomad, herder,
+# temple_citadel). A landless character has no capital_province, so ?= fails and the
+# fallback ("court") is used.
+
+eotg_court_seat = {
+    type = character
+
+    text = {
+        trigger = { capital_province ?= { has_holding_type = castle_holding } }
+        localization_key = eotg_court_seat_castle
+    }
+    text = {
+        trigger = { capital_province ?= { has_holding_type = city_holding } }
+        localization_key = eotg_court_seat_city
+    }
+    text = {
+        trigger = { capital_province ?= { has_holding_type = church_holding } }
+        localization_key = eotg_court_seat_church
+    }
+    text = {
+        trigger = { capital_province ?= { has_holding_type = tribal_holding } }
+        localization_key = eotg_court_seat_tribal
+    }
+    text = {
+        trigger = { capital_province ?= { has_holding_type = nomad_holding } }
+        localization_key = eotg_court_seat_nomad # STOPGAP word, glossary has none (CB-08)
+    }
+    text = {
+        trigger = { capital_province ?= { has_holding_type = herder_holding } }
+        localization_key = eotg_court_seat_herder # STOPGAP word, glossary has none (CB-08)
+    }
+    text = {
+        trigger = { capital_province ?= { has_holding_type = temple_citadel_holding } }
+        localization_key = eotg_court_seat_temple_citadel # STOPGAP word, glossary has none (CB-08)
+    }
+    text = {
+        fallback = yes
+        localization_key = eotg_court_seat_fallback
+    }
+}

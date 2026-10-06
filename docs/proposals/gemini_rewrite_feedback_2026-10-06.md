@@ -118,7 +118,7 @@ Canon rules (from `OLD PROJECT VERSION/docs/SETTING LORE` ERRATA and `docs/specs
 | eotg_aug_retinue.001 First of the Iron | `.a` doesn't give a leadership role: "You will be the first of the iron." `.d` installs only the next volunteer: "…and the next one after." |
 | eotg_aug_heir.007 The Next in Line | `.c` must keep the "keep me in check" meaning: "Learn from it, and restrain me if I fall." desc_displaced: the prior heir is alive, so no "fatal mistake". No executioner's spade or royal summons. |
 | eotg_aug_tier2.018 Resolution | `.c` is the fallback for both the estranged and the reconciled variants, so it must be neutral ("Then this is where we stand."). `.b` is a petition, not a decree. No winter, sheepskin or royal seal. |
-| eotg_aug_end.030 Into Restraints | Use the heir via `[ROOT.Char.GetHeir.GetFirstName]` and `[ROOT.Char.GetHeir.GetSheHe]` (not `[primary_heir.…]`). No "humanity", no "palace guards". Keep the shipped line "a formality that no one believes is a formality". The heir present and speaking is good. |
+| eotg_aug_end.030 Into Restraints | Use the heir via `[ROOT.Char.GetPrimaryTitle.GetHeir.GetFirstName]` and `(no pronoun: name the heir)` (not `[primary_heir.…]`). No "humanity", no "palace guards". Keep the shipped line "a formality that no one believes is a formality". The heir present and speaking is good. |
 | eotg_aug_init.020 Choosing the Volunteer | **Now scripted** (§6): write the base desc plus the three candidate lines; each shows only if that candidate exists. |
 | eotg_aug_tier1.003 An Uncomfortable Question | No "holy blood / ungodly" framing. `.e` is the deceitful (lie) option: "There is nothing to tell; I am unchanged." |
 | eotg_aug_tier1.004 The Knight's Request | Cut "the retinue program" and "illicit". `.d`: "My own coffers will pay for your implant" (no "royal treasury", no "new limb"). |
@@ -165,3 +165,6 @@ exact scope names in the events on branch `v2-space-map`.
 
 Don't edit `.yml` or `.txt` files. The project's localizer applies approved text, which keeps the file
 encoding correct.
+
+
+**Correction (2026-10-06):** characters have no `GetHeir` loc function; titles do. Use `[ROOT.Char.GetPrimaryTitle.GetHeir.GetFirstName]` (Tiger flagged the old form).
