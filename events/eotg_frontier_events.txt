@@ -2140,3 +2140,92 @@ eotg_frontier.037 = {
         }
     }
 }
+
+# =============================================================================
+# Phase 3a events (docs/specs/frontier_v3.md §9). Fired by:
+#   .040, .041  eotg_frontier_flavor_pick_effect (the same single yearly roll)
+#   .042        eotg_decision_frontier_explore
+# =============================================================================
+
+# -- eotg_frontier.042 --------------------------------------------------------
+# The Expedition Returns (spec §4): one step of exploration, run in immediate.
+# At Known, the charts are a head start for the next project (Phase 2's survey
+# data); that is how the event couples to progress.
+eotg_frontier.042 = {
+    type = character_event
+    title = eotg_frontier.042.t
+    desc = {
+        desc = eotg_frontier.042.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_exploration ?= flag:known }
+                desc = eotg_frontier.042.desc_known
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_exploration ?= flag:partial }
+                desc = eotg_frontier.042.desc_partial
+            }
+            desc = eotg_frontier.042.desc_nothing
+        }
+    }
+    theme = realm
+
+    trigger = {
+        exists = scope:eotg_frontier_county
+    }
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+
+    immediate = {
+        hidden_effect = {
+            clear_saved_scope = eotg_frontier_exploration
+            scope:eotg_frontier_county = { eotg_frontier_explore_step_effect = yes }
+        }
+    }
+
+    # "Send them straight back out." From Partial, with gold: on to Known now.
+    option = {
+        name = eotg_frontier.042.b
+        trigger = {
+            gold >= eotg_frontier_explore_cost_value
+            scope:eotg_frontier_county = { eotg_frontier_is_partial = yes }
+        }
+        remove_short_term_gold = eotg_frontier_explore_cost_value
+        scope:eotg_frontier_county = {
+            eotg_frontier_explore_step_effect = yes
+            set_variable = { name = eotg_frontier_survey_data  value = yes }
+        }
+        custom_tooltip = eotg_frontier.042.b_tt
+        ai_chance = {
+            base = 20
+            modifier = { add = 10  learning >= 12 }
+        }
+    }
+
+    # "File the charts." Always available; at Known the charts are a head start.
+    option = {
+        name = eotg_frontier.042.a
+        scope:eotg_frontier_county = {
+            if = {
+                limit = {
+                    NOT = { has_variable = eotg_frontier_explored }
+                    OR = {
+                        eotg_frontier_is_unsettled = yes
+                        eotg_frontier_is_abandoned = yes
+                    }
+                }
+                set_variable = { name = eotg_frontier_survey_data  value = yes }
+                custom_tooltip = eotg_frontier.020.data_tt
+            }
+            else = {
+                custom_tooltip = eotg_frontier.042.a_partial_tt
+            }
+        }
+        ai_chance = {
+            base = 50
+        }
+    }
+}

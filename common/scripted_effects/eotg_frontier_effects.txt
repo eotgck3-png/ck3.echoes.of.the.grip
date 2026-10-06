@@ -1304,3 +1304,57 @@ eotg_frontier_find_rival_backer_effect = {
         }
     }
 }
+
+# == Phase 3a (docs/specs/frontier_v3.md) =====================================
+
+# -- Exploration (spec §4) -----------------------------------------------------
+# THE entry point for Unknown, parallel to eotg_frontier_mark_unsettled_effect
+# (the cartographer after Gate 1; test sub-mods now). An Unknown Region is also
+# Unsettled. Acts only on a Region with no Frontier state, or an Unsettled one:
+# a Frontier, an Abandoned Region or one that is already explored stays as it
+# is. Map-agnostic: it takes whatever county it is called on.
+eotg_frontier_mark_unknown_effect = {
+    if = {
+        limit = {
+            OR = {
+                NOT = { has_variable = eotg_frontier_state }
+                eotg_frontier_is_unsettled = yes
+            }
+            NOT = { has_variable = eotg_frontier_explored }
+        }
+        eotg_frontier_mark_unsettled_effect = yes
+        set_variable = { name = eotg_frontier_explored  value = flag:unknown }
+        add_county_modifier = eotg_frontier_mod_unknown
+    }
+}
+
+# One expedition's worth: Unknown -> Partial -> Known, a trait each step
+# (Phase 2's eotg_frontier_reveal_trait_effect, which respects trait room).
+# Saves scope:eotg_frontier_exploration (flag:partial / flag:known) and fires
+# eotg_frontier_on_explored. A future Exploration system may call it too.
+eotg_frontier_explore_step_effect = {
+    save_scope_as = eotg_frontier_county
+    if = {
+        limit = { eotg_frontier_is_unknown = yes }
+        set_variable = { name = eotg_frontier_explored  value = flag:partial }
+        if = {
+            limit = { has_county_modifier = eotg_frontier_mod_unknown }
+            remove_county_modifier = eotg_frontier_mod_unknown
+        }
+        add_county_modifier = eotg_frontier_mod_partial
+        save_scope_value_as = { name = eotg_frontier_exploration  value = flag:partial }
+        eotg_frontier_reveal_trait_effect = yes
+        eotg_frontier_fire_hook_effect = { HOOK = eotg_frontier_on_explored }
+    }
+    else_if = {
+        limit = { eotg_frontier_is_partial = yes }
+        remove_variable = eotg_frontier_explored
+        if = {
+            limit = { has_county_modifier = eotg_frontier_mod_partial }
+            remove_county_modifier = eotg_frontier_mod_partial
+        }
+        save_scope_value_as = { name = eotg_frontier_exploration  value = flag:known }
+        eotg_frontier_reveal_trait_effect = yes
+        eotg_frontier_fire_hook_effect = { HOOK = eotg_frontier_on_explored }
+    }
+}
