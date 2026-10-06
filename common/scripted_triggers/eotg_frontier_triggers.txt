@@ -243,13 +243,31 @@ eotg_frontier_can_explore = {
         eotg_frontier_is_unknown = yes
         eotg_frontier_is_partial = yes
     }
+    # the same gate as eotg_frontier_can_survey (owner fix B1): never a
+    # settled county
+    OR = {
+        eotg_frontier_is_unsettled = yes
+        eotg_frontier_is_frontier = yes
+        eotg_frontier_is_abandoned = yes
+    }
     NOT = { has_variable = eotg_frontier_expedition_sent }
 }
 
+# THE expedition targeting rule (spec §4.1): may $ACTOR$ send an expedition to
+# this Region? County scope. Today: an explorable Region $ACTOR$ holds. The
+# Unclaimed Regions build widens this one trigger to Regions within $ACTOR$'s
+# reach (frontier_unclaimed_regions.md §8.2); every caller goes through it.
+eotg_frontier_can_target_expedition = {
+    eotg_frontier_can_explore = yes
+    holder = $ACTOR$
+}
+
+# Character scope, called with the decision taker as root (is_shown,
+# ai_potential): there is a Region this character may send an expedition to
 eotg_frontier_holds_explorable = {
     any_held_title = {
         tier = tier_county
-        eotg_frontier_can_explore = yes
+        eotg_frontier_can_target_expedition = { ACTOR = root }
     }
 }
 
@@ -268,17 +286,8 @@ eotg_frontier_can_back = {
     }
 }
 
-# Leads a mercenary company. Character scope.
-# UNVERIFIED-VANILLA: the mercenary company government's flag is
-# government_is_mercenary (skill reference/common/governments/_governments.info:116;
-# spec frontier_v3.md §15 item 1)
+# Leads a mercenary company. Character scope. government_is_mercenary:
+# confirmed against vanilla 1.20 (spec frontier_v3.md §15 item 1).
 eotg_frontier_is_company_captain = {
     government_has_flag = government_is_mercenary
-}
-
-# Leads a holy order. Character scope.
-# UNVERIFIED-VANILLA: the holy order government's flag is government_is_holy_order
-# (by analogy with government_is_mercenary; spec frontier_v3.md §15 item 2)
-eotg_frontier_is_holy_order_leader = {
-    government_has_flag = government_is_holy_order
 }

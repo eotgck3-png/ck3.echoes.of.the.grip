@@ -2149,8 +2149,9 @@ eotg_frontier.037 = {
 
 # -- eotg_frontier.042 --------------------------------------------------------
 # The Expedition Returns (spec §4): one step of exploration, run in immediate.
-# At Known, the charts are a head start for the next project (Phase 2's survey
-# data); that is how the event couples to progress.
+# At Known, the charts are filed as a survey (Phase 2's
+# eotg_frontier_file_survey_effect): +2 progress on a running Frontier, a head
+# start for the next project otherwise. That is how the event couples to progress.
 eotg_frontier.042 = {
     type = character_event
     title = eotg_frontier.042.t
@@ -2194,11 +2195,16 @@ eotg_frontier.042 = {
             scope:eotg_frontier_county = { eotg_frontier_is_partial = yes }
         }
         remove_short_term_gold = eotg_frontier_explore_cost_value
+        custom_tooltip = eotg_frontier.042.b_tt
         scope:eotg_frontier_county = {
             eotg_frontier_explore_step_effect = yes
-            set_variable = { name = eotg_frontier_survey_data  value = yes }
+            # At Known, the charts are filed as a survey: +2 progress on a
+            # Frontier, survey data otherwise (Phase 2, never data on a Frontier)
+            if = {
+                limit = { scope:eotg_frontier_exploration ?= flag:known }
+                eotg_frontier_file_survey_effect = yes
+            }
         }
-        custom_tooltip = eotg_frontier.042.b_tt
         ai_chance = {
             base = 20
             modifier = { add = 10  learning >= 12 }
@@ -2210,17 +2216,11 @@ eotg_frontier.042 = {
         name = eotg_frontier.042.a
         scope:eotg_frontier_county = {
             if = {
-                limit = {
-                    NOT = { has_variable = eotg_frontier_explored }
-                    OR = {
-                        eotg_frontier_is_unsettled = yes
-                        eotg_frontier_is_abandoned = yes
-                    }
-                }
-                set_variable = { name = eotg_frontier_survey_data  value = yes }
-                custom_tooltip = eotg_frontier.020.data_tt
+                limit = { scope:eotg_frontier_exploration ?= flag:known }
+                eotg_frontier_file_survey_effect = yes
             }
-            else = {
+            else_if = {
+                limit = { scope:eotg_frontier_exploration ?= flag:partial }
                 custom_tooltip = eotg_frontier.042.a_partial_tt
             }
         }
@@ -2231,10 +2231,11 @@ eotg_frontier.042 = {
 }
 
 # -- eotg_frontier.040 --------------------------------------------------------
-# Blades for Hire (spec §5): a mercenary company offers to guard the convoys,
-# or, for a Military project with no backer, to back the venture. The captain
+# Guns for Hire (spec §5): a mercenary company offers to guard the convoys of a
+# Dangerous Region, or, for a Military project with no backer, to back the venture. The captain
 # gains no claim and no say (LAW AT 866). Comes through the yearly roll's pool
-# for a Military project or a Dangerous Region.
+# for a Military project with no backer, or a Dangerous Region of any other
+# project with no escort.
 eotg_frontier.040 = {
     type = character_event
     title = eotg_frontier.040.t
@@ -2279,10 +2280,10 @@ eotg_frontier.040 = {
         }
     }
 
-    # "Hire them to guard the convoys." The fee goes to the captain: the amount
-    # is fixed once, in the payer's scope, so both sides see the same number.
-    # UNVERIFIED-VANILLA: a saved scope value (scope:eotg_frontier_fee) as the
-    # amount of remove_short_term_gold / add_gold (spec frontier_v3.md §15 item 8)
+    # (a Dangerous Region, a project that is not Military) "Hire them to guard
+    # the convoys." The fee goes to the captain: the amount is fixed once, in
+    # the payer's scope, so both sides see the same number (a scope value as a
+    # gold amount: confirmed, spec frontier_v3.md §15 item 8).
     option = {
         name = eotg_frontier.040.a
         trigger = {
@@ -2290,12 +2291,13 @@ eotg_frontier.040 = {
             gold >= eotg_frontier_escort_cost_value
             scope:eotg_frontier_county = {
                 eotg_frontier_is_frontier = yes
+                has_county_modifier = eotg_frontier_trait_dangerous
+                NOT = { var:eotg_frontier_type ?= flag:military }
                 NOT = { has_county_modifier = eotg_frontier_mod_merc_escort }
             }
         }
         save_temporary_scope_value_as = { name = eotg_frontier_fee  value = eotg_frontier_escort_cost_value }
-        remove_short_term_gold = scope:eotg_frontier_fee
-        scope:eotg_frontier_company = { add_gold = scope:eotg_frontier_fee }
+        pay_short_term_gold = { target = scope:eotg_frontier_company  gold = scope:eotg_frontier_fee }
         scope:eotg_frontier_county = {
             add_county_modifier = { modifier = eotg_frontier_mod_merc_escort  years = 5 }
             eotg_frontier_ease_strain_effect = yes
@@ -2400,7 +2402,7 @@ eotg_frontier.041 = {
             }
         }
         scope:eotg_frontier_county = {
-            eotg_frontier_set_sponsor_effect = { SPONSOR = scope:eotg_frontier_faith_backer }
+            eotg_frontier_set_faith_backer_effect = yes
             eotg_frontier_add_progress_effect = { AMOUNT = 3 }
         }
         custom_tooltip = eotg_frontier.041.a_tt

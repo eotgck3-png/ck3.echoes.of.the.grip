@@ -176,6 +176,16 @@ eotg_frontier_set_sponsor_effect = {
     set_variable = { name = eotg_frontier_sponsor  value = $SPONSOR$ }
     $SPONSOR$ = {
         set_variable = { name = eotg_frontier_sponsoring  value = scope:eotg_frontier_county }
+        # Phase 3a (frontier_v3.md §6, Q3-5): every sponsorship starts without a
+        # faith tie; eotg_frontier_set_faith_backer_effect adds one after this
+        if = {
+            limit = { has_variable = eotg_frontier_backs_for_faith }
+            remove_variable = eotg_frontier_backs_for_faith
+        }
+        if = {
+            limit = { has_variable = eotg_frontier_backs_for_order }
+            remove_variable = eotg_frontier_backs_for_order
+        }
     }
     eotg_frontier_fire_hook_effect = { HOOK = eotg_frontier_on_sponsor_changed }
 }
@@ -228,7 +238,18 @@ eotg_frontier_on_sponsor_death_effect = {
                 # The dead backer, for the lapse toast; also marks the hand-off
                 # as pending
                 set_variable = { name = eotg_frontier_pending_from  value = root }
+                # Phase 3a (frontier_v3.md §6, Q3-5): a head of faith's or order
+                # leader's backing passes to the faith's next head or the order's
+                # next leader, never to their personal heir
                 if = {
+                    limit = { root = { has_variable = eotg_frontier_backs_for_faith } }
+                    set_variable = { name = eotg_frontier_pending_faith  value = root.var:eotg_frontier_backs_for_faith }
+                }
+                else_if = {
+                    limit = { root = { has_variable = eotg_frontier_backs_for_order } }
+                    set_variable = { name = eotg_frontier_pending_order  value = root.var:eotg_frontier_backs_for_order }
+                }
+                else_if = {
                     limit = { exists = root.primary_heir }
                     set_variable = { name = eotg_frontier_pending_heir  value = root.primary_heir }
                 }
@@ -248,6 +269,18 @@ eotg_frontier_on_sponsor_death_effect = {
 # tick (scope:eotg_frontier_holder is saved).
 eotg_frontier_resolve_pending_heir_effect = {
     if = {
+        # Phase 3a (frontier_v3.md §6, Q3-5): a faith backer's successor
+        limit = {
+            has_variable = eotg_frontier_pending_from
+            NOT = { exists = var:eotg_frontier_sponsor }
+            OR = {
+                has_variable = eotg_frontier_pending_faith
+                has_variable = eotg_frontier_pending_order
+            }
+        }
+        eotg_frontier_resolve_faith_successor_effect = yes
+    }
+    else_if = {
         limit = {
             has_variable = eotg_frontier_pending_from
             NOT = { exists = var:eotg_frontier_sponsor }
@@ -295,6 +328,15 @@ eotg_frontier_clear_pending_heir_effect = {
     if = {
         limit = { has_variable = eotg_frontier_pending_heir }
         remove_variable = eotg_frontier_pending_heir
+    }
+    # Phase 3a (frontier_v3.md §6, Q3-5)
+    if = {
+        limit = { has_variable = eotg_frontier_pending_faith }
+        remove_variable = eotg_frontier_pending_faith
+    }
+    if = {
+        limit = { has_variable = eotg_frontier_pending_order }
+        remove_variable = eotg_frontier_pending_order
     }
 }
 
@@ -602,6 +644,43 @@ eotg_frontier_event_roll_effect = {
             }
         }
     }
+    # Phase 3a (frontier_v3.md §11, owner Q3-4): an AI holder with no backer
+    # accepts a mercenary company (Military) or a faith backer (Religious), in
+    # script with no event, like the AI-to-AI offer above; same 20% and the
+    # same cooldown, so it never doubles up with it in one year
+    if = {
+        limit = {
+            holder = { is_ai = yes }
+            NOT = { exists = var:eotg_frontier_sponsor }
+            NOT = { has_variable = eotg_frontier_event_cd }
+            OR = {
+                var:eotg_frontier_type ?= flag:military
+                var:eotg_frontier_type ?= flag:religious
+            }
+        }
+        random = {
+            chance = 20
+            if = {
+                limit = { var:eotg_frontier_type ?= flag:military }
+                eotg_frontier_find_company_effect = yes
+                if = {
+                    limit = { exists = scope:eotg_frontier_company }
+                    set_variable = { name = eotg_frontier_event_cd  value = yes  years = 3 }
+                    eotg_frontier_set_sponsor_effect = { SPONSOR = scope:eotg_frontier_company }
+                    eotg_frontier_add_progress_effect = { AMOUNT = 3 }
+                }
+            }
+            else = {
+                eotg_frontier_find_faith_backer_effect = yes
+                if = {
+                    limit = { exists = scope:eotg_frontier_faith_backer }
+                    set_variable = { name = eotg_frontier_event_cd  value = yes  years = 3 }
+                    eotg_frontier_set_faith_backer_effect = yes
+                    eotg_frontier_add_progress_effect = { AMOUNT = 3 }
+                }
+            }
+        }
+    }
 }
 
 # An AI ruler who would back this Frontier: the holder's liege first, else an
@@ -789,6 +868,8 @@ eotg_frontier_settle_effect = {
     eotg_frontier_unlist_effect = yes
     eotg_frontier_clear_project_effect = yes
     remove_variable = eotg_frontier_state
+    # Phase 3a (frontier_v3.md §4): a settled Region is no longer explored
+    eotg_frontier_clear_exploration_effect = yes
     eotg_frontier_update_tier_modifier_effect = yes
     add_county_modifier = { modifier = eotg_frontier_mod_new_settlement  years = 10 }
     eotg_frontier_trigger_hook_effect = { HOOK = eotg_frontier_on_settled }
@@ -1303,14 +1384,23 @@ eotg_frontier_flavor_pick_effect = {
             modifier = { add = 10  var:eotg_frontier_type ?= flag:mining }
             holder = { trigger_event = eotg_frontier.036 }
         }
-        # Phase 3a (frontier_v3.md §5): a mercenary company offers its blades
+        # Phase 3a (frontier_v3.md §5): a mercenary company offers its guns,
+        # only where .040 (a) or (b) can apply: a Military project with no
+        # backer, or a Dangerous Region of any other project with no escort
         10 = {
             trigger = {
-                OR = {
-                    var:eotg_frontier_type ?= flag:military
-                    has_county_modifier = eotg_frontier_trait_dangerous
-                }
                 exists = scope:eotg_frontier_company
+                OR = {
+                    AND = {
+                        var:eotg_frontier_type ?= flag:military
+                        NOT = { exists = var:eotg_frontier_sponsor }
+                    }
+                    AND = {
+                        has_county_modifier = eotg_frontier_trait_dangerous
+                        NOT = { var:eotg_frontier_type ?= flag:military }
+                        NOT = { has_county_modifier = eotg_frontier_mod_merc_escort }
+                    }
+                }
             }
             holder = { trigger_event = eotg_frontier.040 }
         }
@@ -1407,14 +1497,17 @@ eotg_frontier_explore_step_effect = {
 # A mercenary captain who could back or guard the Frontier, anywhere on the map
 # (word of a paying contract travels). Saves scope:eotg_frontier_company, or
 # clears it.
-# UNVERIFIED-VANILLA: random_independent_ruler reaches mercenary captains
-# (spec frontier_v3.md §15 item 3)
+# Never a company at war with the holder. random_independent_ruler with
+# government_is_mercenary: vanilla precedent (events/lifestyles/warfare_lifestyle/
+# martial_authority_events.txt:73-85; confirmed, spec frontier_v3.md §15 item 3).
 eotg_frontier_find_company_effect = {
     clear_saved_scope = eotg_frontier_company
+    holder = { save_temporary_scope_as = eotg_frontier_holder }
     random_independent_ruler = {
         limit = {
             eotg_frontier_is_company_captain = yes
             eotg_frontier_can_back = yes
+            NOT = { is_at_war_with = scope:eotg_frontier_holder }
         }
         save_scope_as = eotg_frontier_company
     }
@@ -1426,12 +1519,16 @@ eotg_frontier_find_company_effect = {
 # Frontier. Faith is read only generically: never a faith, religion or
 # doctrine key. Saves scope:eotg_frontier_faith_backer and
 # scope:eotg_frontier_faith_backer_kind (flag:head / flag:order), or clears them.
-# UNVERIFIED-VANILLA: faith.religious_head from a character, with exists
-# (spec frontier_v3.md §15 item 4); random_independent_ruler reaching holy
-# order leaders (item 3); faith = scope:x.faith (item 5)
+# Also saves the faith (scope:eotg_frontier_backer_faith, for a head) or the
+# holy order (scope:eotg_frontier_faith_order) for the succession rule (Q3-5).
+# faith.religious_head: confirmed (spec frontier_v3.md §15 item 4). Holy orders
+# are found through the faith (owner fix B4; precedent
+# events/dlc/fp1/fp1_jomsvikings_events.txt:815-817).
 eotg_frontier_find_faith_backer_effect = {
     clear_saved_scope = eotg_frontier_faith_backer
     clear_saved_scope = eotg_frontier_faith_backer_kind
+    clear_saved_scope = eotg_frontier_backer_faith
+    clear_saved_scope = eotg_frontier_faith_order
     holder = {
         save_temporary_scope_as = eotg_frontier_believer
         if = {
@@ -1441,20 +1538,103 @@ eotg_frontier_find_faith_backer_effect = {
                 faith.religious_head = { eotg_frontier_can_back = yes }
             }
             faith.religious_head = { save_scope_as = eotg_frontier_faith_backer }
+            faith = { save_scope_as = eotg_frontier_backer_faith }
             save_scope_value_as = { name = eotg_frontier_faith_backer_kind  value = flag:head }
         }
         else = {
-            random_independent_ruler = {
-                limit = {
-                    eotg_frontier_is_holy_order_leader = yes
-                    faith = scope:eotg_frontier_believer.faith
-                    eotg_frontier_can_back = yes
+            scope:eotg_frontier_believer.faith = {
+                random_faith_holy_order = {
+                    limit = { leader = { eotg_frontier_can_back = yes } }
+                    save_scope_as = eotg_frontier_faith_order
+                    leader = { save_scope_as = eotg_frontier_faith_backer }
                 }
-                save_scope_as = eotg_frontier_faith_backer
             }
             if = {
                 limit = { exists = scope:eotg_frontier_faith_backer }
                 save_scope_value_as = { name = eotg_frontier_faith_backer_kind  value = flag:order }
+            }
+        }
+    }
+}
+
+# Makes the faith backer found above the Sponsor, with the faith tie the
+# succession rule needs (Q3-5): the faith on a head, the holy order on an order
+# leader. Callers: .041 (a), the AI path in eotg_frontier_event_roll_effect.
+# UNVERIFIED-VANILLA: a character variable holding a faith scope and one holding
+# a holy order scope (spec frontier_v3.md §15 item 9)
+eotg_frontier_set_faith_backer_effect = {
+    eotg_frontier_set_sponsor_effect = { SPONSOR = scope:eotg_frontier_faith_backer }
+    scope:eotg_frontier_faith_backer = {
+        if = {
+            limit = {
+                scope:eotg_frontier_faith_backer_kind ?= flag:head
+                exists = scope:eotg_frontier_backer_faith
+            }
+            set_variable = { name = eotg_frontier_backs_for_faith  value = scope:eotg_frontier_backer_faith }
+        }
+        else_if = {
+            limit = { exists = scope:eotg_frontier_faith_order }
+            set_variable = { name = eotg_frontier_backs_for_order  value = scope:eotg_frontier_faith_order }
+        }
+    }
+}
+
+# A dead faith backer's successor (owner Q3-5), at the Region's first tick
+# after the death: the faith's head NOW, or the order's leader NOW. They carry
+# the backing (and the tie) if they can back and don't hold the Region;
+# otherwise the backing lapses (Sponsor Lapse). Called by
+# eotg_frontier_resolve_pending_heir_effect, which clears the pending
+# variables afterwards. COUNTY scope, inside the tick.
+eotg_frontier_resolve_faith_successor_effect = {
+    clear_saved_scope = eotg_frontier_successor
+    clear_saved_scope = eotg_frontier_kept_faith
+    clear_saved_scope = eotg_frontier_kept_order
+    if = {
+        limit = { has_variable = eotg_frontier_pending_faith }
+        var:eotg_frontier_pending_faith = {
+            save_temporary_scope_as = eotg_frontier_kept_faith
+            religious_head ?= { save_temporary_scope_as = eotg_frontier_successor }
+        }
+    }
+    else = {
+        var:eotg_frontier_pending_order = {
+            save_temporary_scope_as = eotg_frontier_kept_order
+            leader ?= { save_temporary_scope_as = eotg_frontier_successor }
+        }
+    }
+    if = {
+        limit = {
+            exists = scope:eotg_frontier_successor
+            scope:eotg_frontier_successor = {
+                eotg_frontier_can_back = yes
+                NOT = { this = scope:eotg_frontier_holder }
+            }
+        }
+        eotg_frontier_set_sponsor_effect = { SPONSOR = scope:eotg_frontier_successor }
+        scope:eotg_frontier_successor = {
+            if = {
+                limit = { exists = scope:eotg_frontier_kept_faith }
+                set_variable = { name = eotg_frontier_backs_for_faith  value = scope:eotg_frontier_kept_faith }
+            }
+            else_if = {
+                limit = { exists = scope:eotg_frontier_kept_order }
+                set_variable = { name = eotg_frontier_backs_for_order  value = scope:eotg_frontier_kept_order }
+            }
+        }
+        holder = {
+            send_interface_toast = {
+                title = eotg_frontier_toast_faith_backer_succeeded
+                left_icon = scope:eotg_frontier_successor
+            }
+        }
+    }
+    else = {
+        var:eotg_frontier_pending_from = { save_temporary_scope_as = eotg_frontier_lapsed_sponsor }
+        eotg_frontier_add_strain_effect = { CAUSE = sponsor_lapsed }
+        holder = {
+            send_interface_toast = {
+                title = eotg_frontier_toast_sponsor_lapsed
+                left_icon = scope:eotg_frontier_lapsed_sponsor
             }
         }
     }
@@ -1484,9 +1664,15 @@ eotg_frontier_faith_settle_effect = {
 # calls eotg_frontier_set_sponsor_effect itself after its own consent flow.
 # Either way: no claim, no say (LAW AT 866), and eotg_frontier_on_sponsor_changed
 # fires. Nothing in Frontier calls this.
+# PACING: the caller owns it. This sends .003 every time it is called, outside
+# the Frontier roll and its 3-year cooldown; a caller must throttle itself.
+# Never offers the holder their own Region.
 eotg_frontier_offer_backing_effect = {
     if = {
-        limit = { eotg_frontier_is_frontier = yes }
+        limit = {
+            eotg_frontier_is_frontier = yes
+            NOT = { holder = $SPONSOR$ }
+        }
         save_scope_as = eotg_frontier_county
         $SPONSOR$ = { save_scope_as = eotg_frontier_sponsor }
         holder = { trigger_event = eotg_frontier.003 }
@@ -1499,4 +1685,60 @@ eotg_frontier_offer_backing_effect = {
 # Nothing in Frontier calls this.
 eotg_frontier_set_trade_network_effect = {
     set_variable = { name = eotg_frontier_trade_network_bonus  value = $AMOUNT$ }
+}
+
+# -- Exploration, round 2 (frontier_v3.md §4) ---------------------------------
+# Settling ends exploration: a settled Region is a normal county (owner fix B1)
+eotg_frontier_clear_exploration_effect = {
+    if = {
+        limit = { has_variable = eotg_frontier_explored }
+        remove_variable = eotg_frontier_explored
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_mod_unknown }
+        remove_county_modifier = eotg_frontier_mod_unknown
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_mod_partial }
+        remove_county_modifier = eotg_frontier_mod_partial
+    }
+}
+
+# THE expedition target pick (spec §4.1). Saves scope:eotg_frontier_county:
+# an Unknown Region first, else a Partial one, the most developed of each,
+# among the Regions eotg_frontier_can_target_expedition allows $ACTOR$.
+# Today that is $ACTOR$'s own Regions. The Unclaimed Regions build widens the
+# trigger and this pick to Regions within $ACTOR$'s reach (one-place change).
+eotg_frontier_pick_expedition_target_effect = {
+    clear_saved_scope = eotg_frontier_county
+    $ACTOR$ = {
+        if = {
+            limit = {
+                any_held_title = {
+                    tier = tier_county
+                    eotg_frontier_can_target_expedition = { ACTOR = $ACTOR$ }
+                    eotg_frontier_is_unknown = yes
+                }
+            }
+            ordered_held_title = {
+                limit = {
+                    tier = tier_county
+                    eotg_frontier_can_target_expedition = { ACTOR = $ACTOR$ }
+                    eotg_frontier_is_unknown = yes
+                }
+                order_by = development_level
+                save_scope_as = eotg_frontier_county
+            }
+        }
+        else = {
+            ordered_held_title = {
+                limit = {
+                    tier = tier_county
+                    eotg_frontier_can_target_expedition = { ACTOR = $ACTOR$ }
+                }
+                order_by = development_level
+                save_scope_as = eotg_frontier_county
+            }
+        }
+    }
 }
