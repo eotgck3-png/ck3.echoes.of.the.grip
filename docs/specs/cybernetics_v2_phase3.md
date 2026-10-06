@@ -538,7 +538,20 @@ Coupling: moves the old ruler's risk, or changes their tier.
 | `eotg_decision_aug_sedation` | NF, NOT `eotg_flag_aug_sedated` | — | `medium_gold_value` | `eotg_flag_aug_sedated` + `eotg_mod_aug_sedated`, `years = 5`. Drift −6. | `stress_level >= 2`; base 15 |
 | `eotg_decision_aug_appoint_warden` | NF, `has_active_diarchy = no`, `basic_eligible_for_diarchy_trigger = yes` | a candidate exists | `cooldown = { years = 5 }` | → end.020 | base 5, +20 if the heir is an adult |
 | `eotg_decision_aug_embrace_cascade` | NF, `eotg_aug_pressure_storm = yes`, `OR = { var:eotg_aug_voice >= 3  has_character_flag = eotg_flag_aug_may_embrace }` | — | — | → end.009 | +30 ambitious, +20 callous, −50 compassionate |
-| `eotg_decision_aug_excision` | `OR = { eotg_is_aug_tier2 = yes  eotg_is_aug_tier3 = yes  has_trait = eotg_neurofractured }` | `gold >= major_gold_value` (or the promised flag) | `cooldown = { years = 5 }`; cost is charged in end.001 | → end.001 | `stress_level >= 3`; base 3 |
+| `eotg_decision_aug_excision` | `OR = { eotg_is_aug_tier3 = yes  has_trait = eotg_neurofractured }` (**tier 2 removed**, owner ruling 2026-10-05, below) | `gold >= major_gold_value` (or the promised flag) | `cooldown = { years = 5 }`; cost is charged in end.001 | → end.001 | `stress_level >= 3`; base 3 (superseded by balance §5.2) |
+
+**Owner ruling, 2026-10-05: one removal step per stage** (source: the owner, after the first in-game playtest; relayed in `docs/handoffs/orchestrator_2026-10-05_cyber-fix-batch.md` part B). Each stage shows the player exactly one way down, plus Excision only where nothing gentler is left:
+
+| Stage | Removal decisions shown |
+|---|---|
+| Augmented (tier 1) | Remove the Implants (`eotg_decision_remove_implants`), safe full removal |
+| Enhanced (tier 2) | Partial Implant Removal (`eotg_decision_partial_removal`) **only** |
+| Overclocked (tier 3) | Initiate Downgrade Protocol (`eotg_decision_overclock_regression`), plus Cut It Out (`eotg_decision_aug_excision`) as the last resort |
+| Neurofractured | Cut It Out (`eotg_decision_aug_excision`) |
+
+Excision is no longer shown at Enhanced. An Enhanced character who wants everything out steps down to Augmented first, then takes Remove the Implants. The event routes into end.001 (fracture.026.d, fracture.027, fracture.007.f, end.031.c) are Neurofractured-only already and are unchanged.
+
+Loc (localizer, same ruling): reword `eotg_decision_aug_excision`'s desc and tooltip so the danger and finality are unmistakable. It can kill; everything comes out; it costs major gold. It must read clearly unlike Remove the Implants, the safe tier-1 exit. No numbers, no "odds" or "chance" (index §0, no per-option risk tooltips).
 
 Pictures (*CB-26 L10*, vanilla placeholders accepted): Restraints `decision_prison.dds`, Sedation and Excision `decision_physician.dds`, Appoint a Warden `decision_realm.dds`, Embrace `decision_misc.dds`. Bespoke art is human art debt.
 

@@ -2682,9 +2682,8 @@ eotg_aug_tier3.018 = {
 # ── eotg_aug_tier3.019 ────────────────────────────────────────────────────────
 # The Delegation, Revisited (O-12). Hand the realm's daily work to someone
 # you trust. Saved eotg_delegate: cp:councillor_chancellor, else the primary
-# spouse. a and c fire .021 in 180-360 days; the delegate gets
-# eotg_flag_aug_trusted_delegate (10 years; an optional keeper read for
-# Phase 3a's Containment Regency, not wired in this phase).
+# spouse. a and c fire .021 in 180-360 days. (eotg_flag_aug_trusted_delegate
+# was dropped, architect decision 2026-10-05, phase4 spec: read nowhere.)
 # Deviation (rule 6): b "Keep everything in my own hands" pays +50 prestige
 # (authority kept); as specced a strictly beat it.
 # Caller: eotg_on_yearly_aug_overclocked_check (Phase 4c branch).
@@ -2738,7 +2737,6 @@ eotg_aug_tier3.019 = {
         trigger = { exists = scope:eotg_delegate }
         scope:eotg_delegate = {
             add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
-            add_character_flag = { flag = eotg_flag_aug_trusted_delegate  years = 10 }
         }
         eotg_add_fracture_risk = { AMOUNT = -5 }
         trigger_event = { id = eotg_aug_tier3.021  days = { 180 360 } }
@@ -2804,7 +2802,6 @@ eotg_aug_tier3.019 = {
         trait = humble
         scope:eotg_delegate = {
             add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
-            add_character_flag = { flag = eotg_flag_aug_trusted_delegate  years = 10 }
         }
         add_character_modifier = { modifier = eotg_mod_withdrawn_from_court  years = 1 }
         eotg_add_fracture_risk = { AMOUNT = -8 }

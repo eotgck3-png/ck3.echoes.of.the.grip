@@ -37,16 +37,73 @@ namespace = eotg_aug_tier2
 # ── eotg_aug_tier2.001 ────────────────────────────────────────────────────────
 # Emotional Delay
 # The enhanced character notices their emotional responses have slowed.
+# Speaker (scope:eotg_delay_speaker, saved in immediate): the primary spouse;
+# else an adult child, parent or sibling at court; else an adult courtier.
+# If no one is found the desc falls back to the unnamed text.
 
 eotg_aug_tier2.001 = {
     type = character_event
     title = eotg_aug_tier2.001.t
-    desc = eotg_aug_tier2.001.desc
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { exists = scope:eotg_delay_speaker }
+                desc = eotg_aug_tier2.001.desc_speaker
+            }
+            desc = eotg_aug_tier2.001.desc
+        }
+    }
     theme = mental_health
 
     left_portrait = {
         character = root
         animation = personality_rational
+    }
+
+    immediate = {
+        hidden_effect = {
+            if = {
+                limit = {
+                    exists = primary_spouse
+                    primary_spouse = { is_alive = yes }
+                }
+                primary_spouse = { save_scope_as = eotg_delay_speaker }
+            }
+            else_if = {
+                limit = {
+                    any_courtier = {
+                        is_alive = yes
+                        is_adult = yes
+                        OR = {
+                            is_child_of = root
+                            is_parent_of = root
+                            is_sibling_of = root
+                        }
+                    }
+                }
+                random_courtier = {
+                    limit = {
+                        is_alive = yes
+                        is_adult = yes
+                        OR = {
+                            is_child_of = root
+                            is_parent_of = root
+                            is_sibling_of = root
+                        }
+                    }
+                    save_scope_as = eotg_delay_speaker
+                }
+            }
+            else = {
+                random_courtier = {
+                    limit = {
+                        is_adult = yes
+                        is_imprisoned = no
+                    }
+                    save_scope_as = eotg_delay_speaker
+                }
+            }
+        }
     }
 
     # "Emotion clouds judgment" — lean into the detachment
@@ -374,7 +431,12 @@ eotg_aug_tier2.003 = {
                 eotg_aug_clinic_open = yes
             }
             gold >= medium_gold_value
-            any_prisoner = { is_alive = yes }
+            # any_prisoner has no trigger loc; shown greyed under a Ban, so
+            # it carries a NOT_ key too (QA loc_bug_hunt_2026-10-05).
+            custom_description = {
+                text = eotg_aug_tier2_has_prisoner_tt
+                any_prisoner = { is_alive = yes }
+            }
         }
         remove_short_term_gold = medium_gold_value
         random_prisoner = {

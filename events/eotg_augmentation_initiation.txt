@@ -2831,11 +2831,29 @@ eotg_aug_init.018 = {
 # Resource: a/b/c/d install on the chosen retainer (tier change, risk 0).
 # Candidate picks are non-violent (a knight or courtier to honour), each
 # followed by save_scope_as; never the victim picker.
+# Desc: the base text, then one line per candidate actually found (each
+# scope is saved conditionally in immediate, so each line checks exists).
+# Multi-part desc shape: vanilla events/activities/coronation_activity/
+# coronation_events.txt:87 (desc + bare triggered_desc inside desc = { }).
 
 eotg_aug_init.020 = {
     type = character_event
     title = eotg_aug_init.020.t
-    desc = eotg_aug_init.020.desc
+    desc = {
+        desc = eotg_aug_init.020.desc
+        triggered_desc = {
+            trigger = { exists = scope:eotg_cand_best }
+            desc = eotg_aug_init.020.desc_line_best
+        }
+        triggered_desc = {
+            trigger = { exists = scope:eotg_cand_any }
+            desc = eotg_aug_init.020.desc_line_any
+        }
+        triggered_desc = {
+            trigger = { exists = scope:eotg_cand_courtier }
+            desc = eotg_aug_init.020.desc_line_courtier
+        }
+    }
     theme = martial_chivalry_focus
 
     left_portrait = {

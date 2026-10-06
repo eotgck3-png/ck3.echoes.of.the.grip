@@ -535,10 +535,15 @@ eotg_decision_augment_retainer = {
     }
 
     # No cost: the hub charges per candidate.
+    # any_knight has no trigger loc, so the candidate test is one
+    # custom_description (vanilla pam_decisions.txt:6371-6380).
     is_valid = {
-        OR = {
-            any_knight = { eotg_aug_retainer_candidate = yes }
-            any_courtier = { eotg_aug_retainer_candidate = yes }
+        custom_description = {
+            text = eotg_decision_augment_retainer_candidate_tt
+            OR = {
+                any_knight = { eotg_aug_retainer_candidate = yes }
+                any_courtier = { eotg_aug_retainer_candidate = yes }
+            }
         }
         gold >= minor_gold_value
     }
@@ -836,9 +841,11 @@ eotg_decision_aug_excision = {
         hegemony = 24
     }
 
+    # Owner ruling 2026-10-05 (one removal step per stage): Overclocked and
+    # Neurofractured only. Enhanced uses Partial Implant Removal; Augmented,
+    # Remove the Implants.
     is_shown = {
         OR = {
-            eotg_is_aug_tier2 = yes
             eotg_is_aug_tier3 = yes
             has_trait = eotg_neurofractured
         }
@@ -1060,15 +1067,20 @@ eotg_decision_aug_self_repair = {
                 eotg_aug_has_surgeon_for = { PATIENT = root }
             }
         }
-        OR = {
-            AND = {
-                eotg_aug_clinic_open = yes
-                eotg_aug_can_afford_procedure = { BASE = eotg_aug_self_repair_price_value  MULT = 1 }
-            }
-            AND = {
-                eotg_aug_has_surgeon_for = { PATIENT = root }
-                eotg_aug_can_afford_procedure = { BASE = eotg_aug_self_repair_price_value  MULT = eotg_aug_price_mult_physician }
-            }
+        # The price of the provider that applies. Only that branch is shown:
+        # a trigger_if limit is never tooltipped, so the surgeon checks
+        # (is_alive, this != $PATIENT$) stay out of the requirement list (QA
+        # loc_bug_hunt_2026-10-05). Own surgeon first: its price
+        # (eotg_aug_price_mult_physician, 0.75 or 0.6) never exceeds the
+        # clinic's (x1), so this passes exactly when the old OR of the two
+        # prices did. No provider: the custom_description above fails.
+        trigger_if = {
+            limit = { eotg_aug_has_surgeon_for = { PATIENT = root } }
+            eotg_aug_can_afford_procedure = { BASE = eotg_aug_self_repair_price_value  MULT = eotg_aug_price_mult_physician }
+        }
+        trigger_else_if = {
+            limit = { eotg_aug_clinic_open = yes }
+            eotg_aug_can_afford_procedure = { BASE = eotg_aug_self_repair_price_value  MULT = 1 }
         }
     }
 

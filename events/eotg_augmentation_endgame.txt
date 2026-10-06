@@ -437,6 +437,11 @@ eotg_aug_end.011 = {
     title = eotg_aug_end.011.t
     desc = {
         first_valid = {
+            # The most notable leaver, saved in immediate before move_to_pool.
+            triggered_desc = {
+                trigger = { exists = scope:eotg_departed_courtier }
+                desc = eotg_aug_end.011.desc_named
+            }
             triggered_desc = {
                 trigger = { var:eotg_hall_gone > 0 }
                 desc = eotg_aug_end.011.desc
@@ -470,6 +475,25 @@ eotg_aug_end.011 = {
                     add = 1
                 }
             }
+        }
+        # The most notable leaver, named in the desc: a court-position holder
+        # first, then the highest prestige. Saved before move_to_pool; the
+        # character still exists in the pool, so the name resolves.
+        ordered_courtier = {
+            limit = {
+                is_imprisoned = no
+                NOT = { is_close_family_of = root }
+                NOT = { is_spouse_of = root }
+                opinion = { target = root  value < 0 }
+            }
+            order_by = {
+                value = prestige
+                if = {
+                    limit = { has_any_court_position = yes }
+                    add = 1000000
+                }
+            }
+            save_scope_as = eotg_departed_courtier
         }
         every_courtier = {
             limit = {

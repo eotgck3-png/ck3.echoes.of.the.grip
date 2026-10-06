@@ -601,6 +601,19 @@ class L014(LintCase):
         self.assertEqual(dead, ["eotg_decision_d_confirm", "eotg_decision_d_desc",
                                 "eotg_decision_d_tooltip"])
 
+    def test_not_key_exempt_when_base_used(self):
+        # NOT_<key> is read by the engine when custom_description <key> fails;
+        # it counts as used whenever its base key is referenced in script
+        self.assertClean(self.files(
+            "eotg_cd_x", "NOT_eotg_cd_x",
+            **{"events/e.txt": "namespace = eotg_x\neotg_x.1 = { trigger = { "
+                               "custom_description = { text = eotg_cd_x always = yes } } }"}),
+            "L014")
+
+    def test_not_key_hit_when_base_unused(self):
+        self.assertHit(self.files("NOT_eotg_cd_y"), "L014",
+                       "'NOT_eotg_cd_y' is defined but nothing references it", count=1)
+
 
 class CLI(unittest.TestCase):
     def setUp(self):

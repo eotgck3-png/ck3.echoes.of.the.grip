@@ -1009,6 +1009,11 @@ def rule_l014(mod, conventions=None):
     for key, (rel, line) in sorted(defined.items()):
         if key in used or (implied and implied.match(key)):
             continue
+        # NOT_<key>: the engine reads it on its own when the custom_description
+        # <key> fails in failure-style UI (send options, failures-only blocks,
+        # law can_pass, show_as_unavailable). Used whenever its base key is.
+        if key.startswith("NOT_") and key[4:] in used:
+            continue
         out.append(Finding("L014", rel, line,
                            "loc key '%s' is defined but nothing references it (script, "
                            "naming convention or $KEY$)" % key))
