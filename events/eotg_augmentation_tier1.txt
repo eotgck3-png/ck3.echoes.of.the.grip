@@ -2536,6 +2536,10 @@ eotg_aug_tier1.018 = {
 # Rolled on the copycat: recovered 50 (grateful) / worse 35 (risk +20; they
 # now feed Phase 6) / dead 15 (death_treatment, vanilla
 # common/deathreasons/00_event_deaths.txt).
+# Option b (owner-approved 2026-10-06): pay to be seen standing by them. The
+# recipient, scope:eotg_copycat_recipient (saved in immediate after the
+# roll), is the copycat if alive, else their closest living kin at root's
+# court (close family first, eldest; then extended family).
 
 eotg_aug_tier1.019 = {
     type = character_event
@@ -2621,6 +2625,41 @@ eotg_aug_tier1.019 = {
                 death = { death_reason = death_treatment }
             }
         }
+        hidden_effect = {
+            scope:eotg_copycat = {
+                # Branch on the roll, not on is_alive: death in the block above
+                # may not have resolved yet when this runs.
+                if = {
+                    limit = { NOT = { scope:eotg_copycat_outcome = flag:dead } }
+                    save_scope_as = eotg_copycat_recipient
+                }
+                else_if = {
+                    limit = {
+                        any_close_family_member = {
+                            is_alive = yes
+                            is_courtier_of = root
+                        }
+                    }
+                    ordered_close_family_member = {
+                        limit = {
+                            is_alive = yes
+                            is_courtier_of = root
+                        }
+                        order_by = age
+                        save_scope_as = eotg_copycat_recipient
+                    }
+                }
+                else = {
+                    random_close_or_extended_family_member = {
+                        limit = {
+                            is_alive = yes
+                            is_courtier_of = root
+                        }
+                        save_scope_as = eotg_copycat_recipient
+                    }
+                }
+            }
+        }
     }
 
     # "I see."
@@ -2630,6 +2669,27 @@ eotg_aug_tier1.019 = {
             base = 100
             modifier = { add = 10  has_trait = compassionate }
             modifier = { add = 10  has_trait = callous }
+        }
+    }
+
+    # "Make it known you stood by them." Offered in every outcome; greyed
+    # out without the gold, hidden when no one is left at court to receive it.
+    option = {
+        name = eotg_aug_tier1.019.b
+        show_as_unavailable = { exists = scope:eotg_copycat_recipient }
+        trigger = {
+            exists = scope:eotg_copycat_recipient
+            gold >= minor_gold_value
+        }
+        remove_short_term_gold = minor_gold_value
+        scope:eotg_copycat_recipient = {
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 10  has_trait = generous }
+            modifier = { add = -20  has_trait = greedy }
         }
     }
 }
