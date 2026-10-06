@@ -46,6 +46,9 @@ Known benign (Tiger predates the 1.19 religion folder rename): ~48 faith/religio
 
 **Note (2026-10-03, updated 2026-10-04):** the installed game is now 1.20.0.3 "Crozier", and Tiger 1.17 targets 1.18.3. These are version noise inside vanilla files, so don't "fix" them:
 - **About 48 errors in `20_health_effects.txt`** (`change_spiritual_fulfillment` ×36, `has_personal_tenet_flag` ×12), reached through `increase_wounds_effect`. The count grows with the number of call sites.
+- **The vanilla trigger override** `common/scripted_triggers/eotg_vanilla_overrides_triggers.txt` (2026-10-06): 17 `strict-scopes` warnings, "herders_and_tributary_constraints expects scope:attacker to be set", one per CB group. The engine sets that scope; see pitfalls §16.
+- **`rite` as an unknown field** in `create_character` and in character templates. Tiger 1.17 predates 1.20 rites; vanilla's `herder_character` uses the same field.
+- **PX vocab `use_great_projects`** in `eotg_unclaimed_government.txt`. It's documented in vanilla `_governments.info:630`; PX's vocabulary is behind.
 - **Errors from the kinslayer path** (`add_kinslayer_trait_or_nothing_effect` → `00_secret_effects` / `00_religious_triggers`): `knows_doctrine` / `add_known_doctrine` (about 14), `rite` / `rite_has_parameter` (about 28), and strict-scopes warnings that `check_rite` / `check_rite_liege` are unset. Vanilla sets those scopes itself with `save_temporary_scope_as` (`00_religious_triggers.txt:389,397`).
 
 A new descriptor must say `supported_version="1.20.*"`. `echoes_of_the_grip.mod` at the repo root is the Tiger descriptor. The game loads the repo directly: `Documents/Paradox Interactive/Crusader Kings III/mod/eotg_stellar_rivers` is a directory junction to it (2026-10-04), so the working tree, including uncommitted edits, is what the game runs.

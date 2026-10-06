@@ -7,6 +7,32 @@ Entries are ordered by how often they have bitten. Each one gives the **symptom*
 actually see, the **cause**, and how to **confirm** it before changing anything — the confirm
 step is the one that keeps getting skipped.
 
+## The rule that would have saved the most time
+
+**A change that produces no visible result is evidence, not a dead end.** It almost always means
+you are editing something that is not being drawn, and the next move is to find out *what is*,
+not to look for a second mechanism inside the thing you already changed.
+
+This went wrong twice in one session, in both directions:
+
+- Borders bloomed at maximum zoom. Sharpening the terrain shader's border alpha changed nothing
+  — because the bands were border *meshes* from `pdxborder.shader`, a different system entirely
+  (§1). The null result was the answer on the first try; it was read as "not strong enough" and
+  the search moved on to new mechanisms instead of new systems.
+- Navigable rivers kept looking like sea. Measurement said the detector should fire hard, so the
+  effect should have been unmissable. The gap between "this must be visible" and "it is not" was
+  the finding: the detector's floor was 0.5 rather than 0, leaving 0.04 of usable range.
+
+The same shape appears in §13: inferring a slope from a single point. Both skip the step that
+would say whether the thing being reasoned about is the thing in play.
+
+**So:** when a change lands and nothing moves, stop and prove the code is executing before
+touching a constant. A temporary diagnostic that paints the suspect system an unmistakable colour
+costs one launch and ends the argument — `EOTG_DIAG_LANE` in `pdxwater.shader` is the worked
+example, and it found the real bug on its first run. Say so plainly when you hand over a
+diagnostic build, though: it repaints the map, and it is unkind to let someone launch expecting a
+fix and get a test instrument.
+
 ---
 
 ## 1. A border looks wrong → find out WHICH SCREEN first
@@ -341,3 +367,38 @@ discarded on output anyway.
 **Confirm.** `grep -c "no valid asset" error.log`, or offline:
 `python -c "import re,glob,io;print(sum(1 for f in glob.glob('gfx/map/map_object_data/**/*.txt',recursive=True) for b in re.finditer(r'object=\{(.*?)\}',io.open(f,encoding='utf-8-sig').read(),re.S) if not re.search(r'(entity|pdxmesh)=',b.group(1))))"`
 — it should print `0`.
+
+---
+
+## 16. Overriding a vanilla scripted trigger: copy the WHOLE block, place each line by hand
+
+**Symptom.** None at first: an override that is subtly wrong still loads. It silently changes every caller.
+`herders_and_tributary_constraints` is called by 17 casus belli groups, so one wrong line changes war for
+everyone.
+
+**What happened (Unclaimed Regions, 2026-10-06).** War immunity for unclaimed placeholders needs our flag added
+to vanilla's `herders_and_tributary_constraints` (00_war_and_peace_triggers.txt). It went wrong three ways
+before it shipped:
+1. **The line range was wrong.** The spec said 1144-1160; the trigger runs **1144-1195**. Copying the stated range
+   would have cut it off mid-block.
+2. **Wrong nesting.** The instructions put our flag "beside" `government_has_flag = government_is_herder`. That line
+   sits inside a `custom_tooltip`, and two triggers in one `custom_tooltip` are ANDed: "NOT (herder AND
+   unclaimed)" gives no immunity at all. Our flag must be a separate child of the `NOR`.
+3. **Unset scope.** The attacker line read `scope:attacker` at the top level. Vanilla only reads it inside
+   `trigger_if = { limit = { exists = scope:defender } }`; at the top level it would have broken all 17 groups.
+   The attacker line is root-scoped instead (root is the attacker in `allowed_for_character`).
+
+**Rules.**
+- Copy the block **programmatically**: assert the first and last lines and the next key's line, then
+  check the braces balance.
+- Diff the result against vanilla. The ONLY differences may be the lines you meant to add.
+- Override **by key in a differently named file** (`eotg_vanilla_overrides_triggers.txt`), never by vanilla's
+  path, which would replace the whole file.
+- Re-copy after every CK3 update (§2).
+- Tiger reports `strict-scopes ... expects scope:attacker` once per caller on the copied block. That's benign:
+  the engine sets the scope, and Tiger simply doesn't report on vanilla's own copy.
+
+**Confirm.** In game, `logs/database_conflicts.log` should show `Overriding entry
+'herders_and_tributary_constraints'` naming the mod file. An ordinary claim CB must still be offered against a
+non-placeholder (V-U2), which proves the attacker line didn't block everything.
+
