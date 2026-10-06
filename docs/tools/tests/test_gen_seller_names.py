@@ -186,6 +186,31 @@ class Outputs(unittest.TestCase):
             self.assertEqual(code, 0, out)
             self.assertIn("companies: 3", out)
 
+    def test_check_ignores_crlf_line_endings(self):
+        """A checkout with core.autocrlf=true turns the generated files to CRLF; --check
+        must still call them current, and a real content change still stale."""
+        with tempdir() as root:
+            make(root, GOOD)
+            self.assertEqual(run(root)[0], 0)
+            for rel in G.render_all(G.parse(GOOD, G.LIST_FILE)[0]):
+                p = os.path.join(root, *rel.split("/"))
+                data = _read(root, rel).replace(b"\r\n", b"\n").replace(b"\n", b"\r\n")
+                self.assertIn(b"\r\n", data)
+                with open(p, "wb") as fh:
+                    fh.write(data)
+            code, out = run(root, check=True)
+            self.assertEqual(code, 0, out)
+            self.assertIn("seller names are current", out)
+            make(root, with_name("companies", "Lenwick Fittings"))
+            code, out = run(root, check=True)
+            self.assertEqual(code, 1)
+            self.assertIn("STALE", out)
+
+    def test_same_content(self):
+        self.assertTrue(G.same_content(b"a\r\nb\r\n", b"a\nb\n"))
+        self.assertFalse(G.same_content(b"a\nc\n", b"a\nb\n"))
+        self.assertFalse(G.same_content(None, b"a\n"))
+
     def test_single_syndicate_rival_has_no_valid_entry(self):
         """With one syndicate, the _except roll's only entry excludes itself, so the
         rival stays unset and the custom loc falls back to 'a rival syndicate'."""

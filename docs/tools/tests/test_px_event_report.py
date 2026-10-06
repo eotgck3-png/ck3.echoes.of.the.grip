@@ -77,6 +77,31 @@ class RootWhitelist(unittest.TestCase):
         self.assertNotIn("'eotg_read_only_list'", out)
         self.assertIn("missing english loc 'eotg_real_missing_key'", out)   # real gaps still show
 
+    def test_docs_and_v1_tree_are_outside_the_mod(self):
+        # error.log / PX run 2026-10-06: two eotg_ keys missing from docs/tools/observer and
+        # docs/test_map, sub-mods that never ship with the mod
+        cov = [{"language": "english", "defined": 1,
+                "missing": [{"key": "eotg_obs_from_observer", "file": "docs/tools/observer/common/x.txt", "line": 1},
+                            {"key": "eotg_tm_from_test_map", "file": os.path.join(self.root, "docs", "test_map", "x.txt"), "line": 1},
+                            {"key": "eotg_from_v1", "file": "OLD PROJECT VERSION/events/x.txt", "line": 1},
+                            {"key": "eotg_real_missing_key", "file": "events/eotg_x.txt", "line": 3},
+                            {"key": "eotg_not_docs", "file": "docsish/x.txt", "line": 1}]}]
+        with open(os.path.join(self.out, "px_locCoverage.json"), "w", encoding="utf-8") as fh:
+            json.dump(cov, fh)
+        rc, out = self.run_report("--root", self.root)
+        for k in ("eotg_obs_from_observer", "eotg_tm_from_test_map", "eotg_from_v1"):
+            self.assertNotIn("'%s'" % k, out)
+        self.assertIn("missing english loc 'eotg_real_missing_key'", out)
+        self.assertIn("missing english loc 'eotg_not_docs'", out)
+        self.assertEqual(rc, 1)
+
+    def test_outside_mod(self):
+        root = R.Path(self.root).resolve()
+        self.assertTrue(R.outside_mod("docs/test_map/x.txt", root))
+        self.assertTrue(R.outside_mod("docs\\tools\\observer\\x.txt", root))
+        self.assertFalse(R.outside_mod("events/eotg_x.txt", root))
+        self.assertFalse(R.outside_mod(os.path.join(self.root, "common", "x.txt"), root))
+
     def test_check_all_passes_root(self):
         cmd = C.px_event_report_cmd(self.out, self.root)
         self.assertEqual(cmd[-2:], ["--root", os.path.abspath(self.root)])

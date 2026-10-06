@@ -33,6 +33,24 @@ DEFAULT_ROOT = Path(__file__).resolve().parents[2]
 # are displayed. eotg_fracture_risk is hidden by design (spec cybernetics_track.md Q1).
 KNOWN_BENIGN = re.compile(r"(_mesh$|^eotg_fracture_risk$)")
 
+# Folders PX's coverage scan walks that the shipped mod does not contain: the frozen v1
+# tree, and docs/ (test sub-mods such as docs/test_map and docs/test_submods, and tool
+# sub-mods such as docs/tools/observer). Those load as separate mods with their own loc,
+# or build keys at runtime (the observer's debug_log = eotg_obs_$KEY$), so their gaps are
+# not the mod's. Matched on the first path component relative to the checkout.
+OUTSIDE_MOD = ("OLD PROJECT VERSION", "docs")
+
+
+def outside_mod(file, mod_root):
+    """True if a coverage entry's file is not part of the shipped mod (OUTSIDE_MOD)."""
+    p = Path(str(file).replace("\\", "/"))
+    if p.is_absolute():
+        try:
+            p = p.resolve().relative_to(mod_root)
+        except ValueError:
+            return "OLD PROJECT VERSION" in str(file)
+    return bool(p.parts) and p.parts[0] in OUTSIDE_MOD
+
 
 def main(out_dir, all_loc, root=None):
     d = Path(out_dir)
@@ -114,12 +132,13 @@ def main(out_dir, all_loc, root=None):
     cov_file = d / "px_locCoverage.json"
     if cov_file.exists():
         for lang in json.loads(cov_file.read_text(encoding="utf-8")):
-            # PX's coverage scan walks every subfolder, including the frozen v1 tree; its
-            # definition index does not, so only the coverage needs filtering.
+            # PX's coverage scan walks every subfolder, including the frozen v1 tree and
+            # docs/ (OUTSIDE_MOD); its definition index does not, so only the coverage
+            # needs filtering.
             # PX also asks for loc on names the mod only uses as variables, saved scopes or
             # flags (eotg_aug_escrow, eotg_scrambled_into, ...). Those are never displayed.
             live = [m for m in lang["missing"]
-                    if "OLD PROJECT VERSION" not in m["file"] and not KNOWN_BENIGN.search(m["key"])
+                    if not outside_mod(m["file"], mod_root) and not KNOWN_BENIGN.search(m["key"])
                     and m["key"] not in script_names]
             lang["missing"] = live
             missing = [m for m in live if all_loc or m["key"].startswith(("eotg_", "trait_eotg_"))]
