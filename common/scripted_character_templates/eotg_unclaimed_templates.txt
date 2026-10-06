@@ -1,0 +1,25 @@
+﻿# -- eotg_unclaimed_templates.txt ---------------------------------------------
+# Unclaimed Regions (docs/specs/frontier_unclaimed_regions.md §5.2). Shape of
+# vanilla herder_character (09_mpo_character_templates.txt:2) and of
+# eotg_frontier_templates.txt. Also the government's
+# generated_character_template, for the engine's own successors (§5.3
+# fallback).
+#
+# No culture, faith or name keys: the name is the culture's ordinary random
+# name (owner UQ9). eotg_unclaimed_create_holder_effect passes the county's
+# culture, faith and rite explicitly, by scope (map-agnostic).
+# UNVERIFIED-VANILLA: culture/faith = this.culture/this.faith in a template
+#   (the spec's reading of herder_character); for the engine's own successors
+#   `this` is assumed to be the character the template is applied to.
+# -----------------------------------------------------------------------------
+
+eotg_unclaimed_holder_template = {
+    age = { 30 55 }
+    gender_female_chance = 50
+    dynasty = none
+    random_traits = no
+    trait = eotg_unclaimed_folk
+    culture = this.culture
+    faith = this.faith
+    rite = this.rite   # vanilla herder_character, 09_mpo_character_templates.txt:6
+}

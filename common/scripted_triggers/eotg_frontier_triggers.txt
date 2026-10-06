@@ -35,6 +35,10 @@ eotg_frontier_can_establish = {
     title_province = { is_occupied = no }
     # Phase 3a (frontier_v3.md §4): not until explored past Unknown
     eotg_frontier_is_unknown = no
+    # Unclaimed Regions (frontier_unclaimed_regions.md §3.6): never while
+    # unclaimed. Defence in depth: the decision only offers counties the taker
+    # holds, so a claim always comes first.
+    eotg_unclaimed_is_unclaimed = no
 }
 
 # Type eligibility (spec §5.1). Six types need only eotg_frontier_can_establish;
@@ -254,20 +258,36 @@ eotg_frontier_can_explore = {
 }
 
 # THE expedition targeting rule (spec §4.1): may $ACTOR$ send an expedition to
-# this Region? County scope. Today: an explorable Region $ACTOR$ holds. The
-# Unclaimed Regions build widens this one trigger to Regions within $ACTOR$'s
-# reach (frontier_unclaimed_regions.md §8.2); every caller goes through it.
+# this Region? County scope. An explorable Region $ACTOR$ holds, or (Unclaimed
+# Regions build) an explorable Unclaimed Region within $ACTOR$'s reach, by the
+# claim interaction's own reach test (frontier_unclaimed_regions.md §8.2).
+# Exploring gives no claim and no say over it (LAW AT 866); claiming stays the
+# interaction's job. Every caller goes through this one trigger.
 eotg_frontier_can_target_expedition = {
     eotg_frontier_can_explore = yes
-    holder = $ACTOR$
+    OR = {
+        holder = $ACTOR$
+        AND = {
+            eotg_unclaimed_is_unclaimed = yes
+            eotg_unclaimed_in_reach = { ACTOR = $ACTOR$ }
+        }
+    }
 }
 
 # Character scope, called with the decision taker as root (is_shown,
 # ai_potential): there is a Region this character may send an expedition to
 eotg_frontier_holds_explorable = {
-    any_held_title = {
-        tier = tier_county
-        eotg_frontier_can_target_expedition = { ACTOR = root }
+    OR = {
+        any_held_title = {
+            tier = tier_county
+            eotg_frontier_can_target_expedition = { ACTOR = root }
+        }
+        # Unclaimed Regions within reach (frontier_v3.md §4.1); the list is
+        # the system's own record (eotg_unclaimed_counties)
+        any_in_global_list = {
+            variable = eotg_unclaimed_counties
+            eotg_frontier_can_target_expedition = { ACTOR = root }
+        }
     }
 }
 

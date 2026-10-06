@@ -1,6 +1,17 @@
 {
  "_comment": "Data for eotg_lint rule L014 (defined but unused loc keys). For each object defined at the top level of common/<folder>/*.txt, the engine reads these loc keys by naming convention; {key} is the object's key, {n} any number (trait levels). A loc key that matches one of these is 'referenced'. 'verified' says whether the convention was checked against vanilla 1.20 files; unverified ones are listed in eotg_lint.md as UNVERIFIED-VANILLA. Add folders/patterns here, not to the code.",
  "folders": {
+  "governments": {
+   "patterns": [
+    "{key}",
+    "{key}_adjective",
+    "{key}_realm",
+    "{key}_desc",
+    "{key}_with_icon"
+   ],
+   "verified": false,
+   "source": "frontier_unclaimed_regions.md §14 (vanilla herder_government loc, government_l_english.yml); not checked against 1.20 here"
+  },
   "decisions": {
    "patterns": [
     "{key}",

@@ -34,11 +34,11 @@ Cultures and faiths are vanilla: the mod has none yet (B-CULTURES, B-FAITHS).
 
 | Realm | Ruler | Culture / rite | Counties |
 |---|---|---|---|
-| Empire of Kronos (`e_kronos` + `k_kronos`) | Emperor Aurelian Vaskar (900001), **lead 1, easy** | greek / slavic_rite (faith christian_faith) | 16: domain c_kronos, c_aphion_seam; 4 direct counts; dukes of Graveshelf (3 vassal counts), Sanctum Wilds, Silica Span (3 vassal counts) |
-| Kingdom of Skeldscar (`k_skeldscar`) | King Ragnvald Skeldung (900040), **lead 2, medium** | norse / norse_pagan | 8: domain c_skeldscar, c_helios_shoal; 2 direct counts; duke of Karak Crossing (3 vassal counts) |
+| Empire of Kronos (`e_kronos` + `k_kronos`) | Emperor Aurelian Vaskar (900001), **lead 1, easy** | greek / slavic_rite (faith christian_faith) | 15: domain c_kronos; 4 direct counts; dukes of Graveshelf (3 vassal counts), Sanctum Wilds, Silica Span (3 vassal counts) |
+| Kingdom of Skeldscar (`k_skeldscar`) | King Ragnvald Skeldung (900040), **lead 2, medium** | norse / norse_pagan | 7: domain c_skeldscar; 2 direct counts; duke of Karak Crossing (3 vassal counts) |
 | Duchy of Wyveris (`d_wyveris`, independent) | Duke Sveinn Wyvar (900060), **lead 3, hard** | norse / slavic_rite | 4: domain c_wyveris, c_emberscar; 2 vassal counts |
 
-24 landed rulers (1 emperor, 1 king, 4 dukes, 18 counts, all `feudal_government`) and 52 characters in all.
+24 landed rulers (1 emperor, 1 king, 4 dukes, 18 counts, all `feudal_government`), plus the Unclaimed seed placeholder holding c_aphion_seam and c_helios_shoal (`eotg_unclaimed_government`; split into one placeholder per county at game start, see docs/specs/frontier_unclaimed_regions.md) and 52 characters in all.
 The Skeldscar-Wyveris war over c_klian (`claim_cb`) is running at the start (Sveinn attacking, Ragnvald defending).
 
 ### Cybernetics (`docs/qa/cybernetics_test_plan.md` §1c)
@@ -60,6 +60,19 @@ The Skeldscar-Wyveris war over c_klian (`claim_cb`) is running at the start (Sve
 - **War:** leads 2 and 3 start at war.
 - **50+ with low prowess:** Basil (c_caelestis, 53), Konstantin (Duke of Silica Span, 50, also cynical and learned), Vagn (c_skeld_haven, 55).
 - **Diarchy / regency:** all rulers are feudal.
+
+### Unclaimed Regions (TEST ONLY; `docs/specs/frontier_unclaimed_regions.md` §11.2)
+
+- **Two neighbouring counties start unclaimed:** c_aphion_seam (was the Emperor's second domain county) and
+  c_helios_shoal (was the King's). Both are held at 866.1.1 by the history seed `eotg_unclaimed_seed`, under
+  `eotg_unclaimed_government`, with the neutral colour `{ 88 92 100 }` in `common/landed_titles`.
+- At game start the seed is split: each county gets its own Unsworn placeholder (the county's culture and faith),
+  and the seed is vanished. This exercises the real Gate 1 path, which the vanilla sub-mod doesn't.
+- **Why these two:** they touch each other, and between them they border both the Empire (c_kronos, c_caelestis,
+  c_muth, c_the_remnant, c_the_surge) and the Kingdom (c_skeldscar, c_klian, c_karak_crossing), so rulers of both
+  realms can claim (adjacency computed from `map_data/provinces.png`). Neither is anyone's only or capital county,
+  and neither is used by the Frontier test plans. **Cybernetics note:** c_aphion_seam was listed among the
+  development-10 counties above; no ruler's initiation gate read it (the Emperor's capital is c_kronos).
 
 ### Frontier (Regions = counties)
 

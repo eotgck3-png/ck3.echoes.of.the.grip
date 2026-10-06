@@ -1,0 +1,50 @@
+﻿l_english:
+ # Unclaimed Regions (docs/specs/frontier_unclaimed_regions.md §14). County = Region.
+ # Never: charter, registry, recognized, licensed, wasteland, peasants, human, a named faction.
+
+ # -- Government (icon: the vanilla herder icon until art lands, spec §18) --
+ eotg_unclaimed_government:0 "Unclaimed"
+ eotg_unclaimed_government_adjective:0 "Unclaimed"
+ eotg_unclaimed_government_realm:0 "Unclaimed Region"
+ eotg_unclaimed_government_desc:0 "No ruler holds this Region. The people scattered across its Systems keep no court, swear no oath and raise no armies. Whoever is willing to pay for the crews, the guns and the flag can make it theirs."
+ eotg_unclaimed_government_with_icon:0 "@government_type_herder! Unclaimed"
+ eotg_government_is_unclaimed:0 "Is not a ruler: the scattered people of an Unclaimed Region"
+
+ # -- Trait --
+ trait_eotg_unclaimed_folk:0 "Unsworn"
+ trait_eotg_unclaimed_folk_desc:0 "One of the Unsworn, the scattered people of a Region that no ruler has claimed. No court, no oath, and nothing handed down."
+
+ # -- County modifier --
+ eotg_unclaimed_mod_unclaimed:0 "Unclaimed Region"
+ eotg_unclaimed_mod_unclaimed_desc:0 "No ruler holds this Region. The Unsworn who live here answer to no one, and an army passing through finds little to live on."
+
+ # -- Toasts --
+ eotg_unclaimed_toast_claimed:0 "Your colours now fly over a new Region. It is yours for as long as you can hold it."
+
+ # -- Debug decisions (testing only) --
+ eotg_decision_unclaimed_debug_release:0 "(Debug) Release a Region to the Unsworn"
+ eotg_decision_unclaimed_debug_release_desc:0 "Testing only. Gives up your least developed Region that is not your capital. It becomes an Unclaimed Region."
+ eotg_decision_unclaimed_debug_release_tooltip:0 "Testing only: release one of your Regions as an Unclaimed Region."
+ eotg_decision_unclaimed_debug_release_confirm:0 "Release it"
+ eotg_decision_unclaimed_debug_release_valid_tt:0 "You hold a Region that is not your capital and is not already unclaimed"
+ eotg_decision_unclaimed_debug_readout:0 "(Debug) Unclaimed Regions Readout"
+ eotg_decision_unclaimed_debug_readout_desc:0 "Testing only. Checks whether the Unsworn can be played, and counts the Unclaimed Regions."
+ eotg_decision_unclaimed_debug_readout_tooltip:0 "Testing only: show the Unclaimed Regions probe."
+ eotg_decision_unclaimed_debug_readout_confirm:0 "Show it"
+ eotg_unclaimed_debug_none_tt:0 "No Unsworn holder was found anywhere."
+ eotg_unclaimed_debug_playable_tt:0 "PROBE: an Unsworn holder IS playable. Report this (spec V-U1: mitigations M2 and M3 are needed)."
+ eotg_unclaimed_debug_unplayable_tt:0 "PROBE: an Unsworn holder is NOT playable (spec V-U1)."
+ eotg_unclaimed_debug_counts_tt:0 "Unclaimed Regions: [eotg_unclaimed_debug_reader.MakeScope.Var('eotg_unclaimed_debug_counties').GetValue|0]. Unsworn alive: [eotg_unclaimed_debug_reader.MakeScope.Var('eotg_unclaimed_debug_folk').GetValue|0]. Fixed by the last yearly sweep: [eotg_unclaimed_debug_reader.MakeScope.Var('eotg_unclaimed_debug_fixed').GetValue|0] (0 expected)."
+
+ # -- Raise Your Colours (Batch 2) --
+ eotg_unclaimed_claim_interaction:0 "Raise Your Colours"
+ eotg_unclaimed_claim_interaction_desc:0 "Pay for the crews, the guns and the flag, and this Region is yours for as long as you can hold it. Nobody else has to agree, and nobody is obliged to respect it."
+ eotg_unclaimed_claim_reach_tt:0 "The Region borders your lands, or lies within reach of your capital"
+ eotg_unclaimed_claim_gold_tt:0 "You can pay for the crews, the guns and the flag"
+ eotg_unclaimed_claim_prestige_tt:0 "Your name carries enough weight to make it stick"
+ eotg_unclaimed_claim_effect_tt:0 "The Region becomes yours. The Unsworn living there go on as before. You may now Establish a Frontier here."
+ eotg_unclaimed_claim_returns_tt:0 "If a Frontier here is ever abandoned, the Region is given up and becomes unclaimed again, unless it is your capital Region."
+
+ # -- Release on abandonment (Batch 2) --
+ eotg_unclaimed_toast_released:0 "With the Frontier abandoned, a Region you had claimed is unclaimed again."
+ eotg_unclaimed_abandon_returns_tt:0 "This Region came out of unclaimed space. Abandoning the Frontier gives it up: it becomes unclaimed again."

@@ -1,0 +1,103 @@
+﻿# -- eotg_unclaimed_triggers.txt ----------------------------------------------
+# Unclaimed Regions (docs/specs/frontier_unclaimed_regions.md §3.2).
+# Signature resource: the county title variable eotg_unclaimed_county
+# (present = Unclaimed; spec §2).
+# -----------------------------------------------------------------------------
+
+# Character: an Unsworn placeholder, landed or not (the trait). Mod code that
+# must also skip a placeholder that has lost its land uses this one (§5.5).
+eotg_is_unclaimed_folk = {
+    has_trait = eotg_unclaimed_folk
+}
+
+# Character: holds land under the placeholder government. THE shared
+# exclusion trigger for every mod pulse and event entry (spec §5.5).
+# government_has_flag as a character trigger: the mod's own verified use
+# (common/buildings/eotg_99_background_graphics_buildings.txt:27).
+eotg_is_unclaimed_holder = {
+    government_has_flag = eotg_government_is_unclaimed
+}
+
+# County: Unclaimed
+eotg_unclaimed_is_unclaimed = {
+    has_variable = eotg_unclaimed_county
+}
+
+# == Claiming (spec §8; Batch 2) ===============================================
+
+# County, $ACTOR$: the actor can reach this county to claim it (spec §8.2),
+# either of:
+#  (a) adjacency: a neighbouring county is the actor's or in the actor's
+#      sub-realm (the MPO retrieve-land interaction's own test,
+#      09_mpo_interactions.txt:7426, read from the target's side so no scope
+#      has to be saved in a trigger);
+#  (b) distance from the actor's capital (squared, eotg_unclaimed_reach_value),
+#      which reaches across void or sea lanes on a space map. Syntax precedent
+#      00_fp3_interactions.txt:918 (spec §8.2).
+# UNVERIFIED-VANILLA: any_neighboring_county from a county title scope;
+#   target_is_liege_or_above; `this.title_province` as the argument of
+#   squared_distance() inside the script-value string.
+eotg_unclaimed_in_reach = {
+    OR = {
+        any_neighboring_county = {
+            holder ?= {
+                OR = {
+                    this = $ACTOR$
+                    target_is_liege_or_above = $ACTOR$
+                }
+            }
+        }
+        # Block form (vanilla 00_activity_triggers.txt:577): a $ARG$ inside a
+        # quoted script-value string is not substituted (Tiger: unknown token)
+        AND = {
+            exists = $ACTOR$.capital_province
+            title_province = {
+                squared_distance = {
+                    target = $ACTOR$.capital_province
+                    value <= eotg_unclaimed_reach_value
+                }
+            }
+        }
+    }
+}
+
+# Character (the actor): may raise their colours over a Region at all
+# (spec §8.2). Vassals may: the Region joins their domain, and so their
+# liege's realm.
+eotg_unclaimed_can_claim = {
+    is_landed = yes
+    highest_held_title_tier >= tier_county
+    is_adult = yes
+    is_imprisoned = no
+    eotg_is_unclaimed_holder = no
+    eotg_is_unclaimed_folk = no
+}
+
+# Character (an AI actor): the AI throttle (spec §8.4). Not a cooldown: the
+# interaction's own `cooldown` is the per-actor one; eotg_unclaimed_ai_gap is
+# the worldwide one, set only in the interaction's on_accept.
+# UNVERIFIED-VANILLA: domain_size / domain_limit compared as values.
+eotg_unclaimed_ai_may_claim = {
+    is_at_war = no
+    gold >= eotg_unclaimed_ai_gold_floor_value
+    domain_size < domain_limit
+    NOT = {
+        any_held_title = {
+            tier = tier_county
+            has_variable = eotg_unclaimed_claimed
+            count >= eotg_unclaimed_ai_hold_cap_value
+        }
+    }
+    NOT = { has_global_variable = eotg_unclaimed_ai_gap }
+}
+
+# County: abandoning its Frontier would give it back to unclaimed space
+# (spec §6.1, owner UQ5): it came out of unclaimed space and is not its
+# holder's capital Region. Read by the release listener and by the Phase 1
+# abandon tooltips (spec §3.6).
+eotg_unclaimed_would_release = {
+    has_variable = eotg_unclaimed_claimed
+    eotg_unclaimed_is_unclaimed = no
+    exists = holder
+    NOT = { this = holder.capital_county }
+}

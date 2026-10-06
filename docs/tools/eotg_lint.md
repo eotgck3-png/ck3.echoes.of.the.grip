@@ -234,7 +234,7 @@ From the owner's loc review (2026-10-04). Applies to values in `localization/**/
 A loc key containing `eotg_` that is defined in `localization/` and reached by none of these:
 - **a literal in script:** any key or string value in `common/` or `events/` (quoted or not), or any identifier-like word in a `gfx/**/*.gui` file. This includes every `localization_key = X` in `common/customizable_localization/`, so generated seller names (CB-42) count as referenced;
 - **another loc value:** `$KEY$` or `Localize('KEY')` (the regexes are in the JSON);
-- **an engine naming convention:** for every object defined at the top level of `common/<folder>/`, the patterns in `docs/tools/eotg_lint_loc_conventions.json` (`{key}` = the object, `{n}` = any number). They start from what L010 already implies: decision `<d>`/`_desc`/`_tooltip`/`_confirm`; trait `trait_<t>`/`_desc`/`_character_desc`, leveled `trait_<t>_<n>…` and `trait_track_<t>`; modifier `<m>`/`_desc`; opinion `<o>`. Also deathreasons, character_interactions, scheme_types, laws, law_groups, court_positions/types, story_cycles and buildings.
+- **an engine naming convention:** for every object defined at the top level of `common/<folder>/`, the patterns in `docs/tools/eotg_lint_loc_conventions.json` (`{key}` = the object, `{n}` = any number). They start from what L010 already implies: decision `<d>`/`_desc`/`_tooltip`/`_confirm`; trait `trait_<t>`/`_desc`/`_character_desc`, leveled `trait_<t>_<n>…` and `trait_track_<t>`; modifier `<m>`/`_desc`; opinion `<o>`. Also governments, deathreasons, character_interactions, scheme_types, laws, law_groups, court_positions/types, story_cycles and buildings.
 
 *Why:* dead loc rots. It gets reviewed, translated and register-checked for nothing, and it often marks an option or branch that was cut in script but not in loc.
 
@@ -257,7 +257,7 @@ Every mod text file has at most one UTF-8 BOM (`EF BB BF`), and only at byte 0. 
 
 **UNVERIFIED-VANILLA:** each folder entry has `"verified"`.
 - **Verified:** decisions, traits, modifiers and opinion modifiers (what L010 already used, plus the leveled-trait keys in the mod's own loc).
-- **Not verified against vanilla 1.20:** deathreasons (`_killer` / `_unknown`), character_interactions (`_extra_icon`), scheme_types (`_action`, `_name`, `_success_desc`…), laws (`_effects`), law_groups, court positions (`court_position_<x>`), story_cycles and buildings. These only widen what counts as referenced, so a wrong pattern can hide a dead key but never invent one.
+- **Not verified against vanilla 1.20:** governments (`_adjective`, `_realm`, `_desc`, `_with_icon`), deathreasons (`_killer` / `_unknown`), character_interactions (`_extra_icon`), scheme_types (`_action`, `_name`, `_success_desc`…), laws (`_effects`), law_groups, court positions (`court_position_<x>`), story_cycles and buildings. These only widen what counts as referenced, so a wrong pattern can hide a dead key but never invent one.
 
 ## Inline suppression
 To silence one finding, put this on the finding's line or on the line directly before it:

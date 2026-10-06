@@ -26,6 +26,11 @@ yearly_playable_pulse = {
 # current_year on the left
 # (00_empire_faith_gate_triggers.txt:234, yearly_on_actions.txt:546).
 eotg_on_yearly_frontier_tick = {
+    # Unclaimed Regions (frontier_unclaimed_regions.md §5.5, §9.2): never an
+    # Unsworn placeholder (they hold no Frontier: Establish needs a claim)
+    trigger = {
+        eotg_is_unclaimed_folk = no
+    }
     effect = {
         every_held_title = {
             limit = {
@@ -55,6 +60,8 @@ on_death = {
 eotg_frontier_on_sponsor_death = {
     trigger = {
         has_variable = eotg_frontier_sponsoring
+        # Unclaimed Regions (§5.5, §9.2): never an Unsworn placeholder
+        eotg_is_unclaimed_folk = no
     }
     effect = {
         eotg_frontier_on_sponsor_death_effect = yes

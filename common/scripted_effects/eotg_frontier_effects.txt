@@ -650,7 +650,12 @@ eotg_frontier_event_roll_effect = {
     # same cooldown, so it never doubles up with it in one year
     if = {
         limit = {
-            holder = { is_ai = yes }
+            holder = {
+                is_ai = yes
+                # Unclaimed Regions (frontier_v3.md §17): placeholders are AI
+                # but never take backers
+                eotg_is_unclaimed_holder = no
+            }
             NOT = { exists = var:eotg_frontier_sponsor }
             NOT = { has_variable = eotg_frontier_event_cd }
             OR = {
@@ -1672,6 +1677,8 @@ eotg_frontier_offer_backing_effect = {
         limit = {
             eotg_frontier_is_frontier = yes
             NOT = { holder = $SPONSOR$ }
+            # Unclaimed Regions (frontier_v3.md §17): never to a placeholder
+            holder = { eotg_is_unclaimed_holder = no }
         }
         save_scope_as = eotg_frontier_county
         $SPONSOR$ = { save_scope_as = eotg_frontier_sponsor }
@@ -1705,10 +1712,9 @@ eotg_frontier_clear_exploration_effect = {
 }
 
 # THE expedition target pick (spec §4.1). Saves scope:eotg_frontier_county:
-# an Unknown Region first, else a Partial one, the most developed of each,
-# among the Regions eotg_frontier_can_target_expedition allows $ACTOR$.
-# Today that is $ACTOR$'s own Regions. The Unclaimed Regions build widens the
-# trigger and this pick to Regions within $ACTOR$'s reach (one-place change).
+# among the Regions eotg_frontier_can_target_expedition allows $ACTOR$, the
+# actor's own first (Unknown, else Partial), then Unclaimed Regions within
+# reach (Unknown, else Partial); the most developed of each.
 eotg_frontier_pick_expedition_target_effect = {
     clear_saved_scope = eotg_frontier_county
     $ACTOR$ = {
@@ -1730,10 +1736,47 @@ eotg_frontier_pick_expedition_target_effect = {
                 save_scope_as = eotg_frontier_county
             }
         }
-        else = {
+        else_if = {
+            limit = {
+                any_held_title = {
+                    tier = tier_county
+                    eotg_frontier_can_target_expedition = { ACTOR = $ACTOR$ }
+                }
+            }
             ordered_held_title = {
                 limit = {
                     tier = tier_county
+                    eotg_frontier_can_target_expedition = { ACTOR = $ACTOR$ }
+                }
+                order_by = development_level
+                save_scope_as = eotg_frontier_county
+            }
+        }
+        # Unclaimed Regions within reach, after the actor's own, Unknown first
+        # (frontier_v3.md §4.1). UNVERIFIED-VANILLA: ordered_in_global_list
+        # with limit and order_by (the mod verified any_in_global_list only)
+        else_if = {
+            limit = {
+                any_in_global_list = {
+                    variable = eotg_unclaimed_counties
+                    eotg_frontier_can_target_expedition = { ACTOR = $ACTOR$ }
+                    eotg_frontier_is_unknown = yes
+                }
+            }
+            ordered_in_global_list = {
+                variable = eotg_unclaimed_counties
+                limit = {
+                    eotg_frontier_can_target_expedition = { ACTOR = $ACTOR$ }
+                    eotg_frontier_is_unknown = yes
+                }
+                order_by = development_level
+                save_scope_as = eotg_frontier_county
+            }
+        }
+        else = {
+            ordered_in_global_list = {
+                variable = eotg_unclaimed_counties
+                limit = {
                     eotg_frontier_can_target_expedition = { ACTOR = $ACTOR$ }
                 }
                 order_by = development_level

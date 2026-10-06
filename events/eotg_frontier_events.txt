@@ -833,6 +833,12 @@ eotg_frontier.005 = {
                 var:eotg_frontier_strain >= eotg_frontier_strain_fail_value
             }
         }
+        # Unclaimed Regions (frontier_unclaimed_regions.md §3.6), shown before
+        # the abandonment releases the Region
+        if = {
+            limit = { scope:eotg_frontier_county = { eotg_unclaimed_would_release = yes } }
+            custom_tooltip = eotg_unclaimed_abandon_returns_tt
+        }
         scope:eotg_frontier_county = {
             eotg_frontier_abandon_effect = { FAILED = yes }
         }
@@ -2241,6 +2247,15 @@ eotg_frontier.040 = {
     title = eotg_frontier.040.t
     desc = {
         first_valid = {
+            # A Military project is offered money only (the escort is never
+            # offered there: a Military project ignores Danger)
+            triggered_desc = {
+                trigger = {
+                    exists = scope:eotg_frontier_company
+                    scope:eotg_frontier_county ?= { var:eotg_frontier_type ?= flag:military }
+                }
+                desc = eotg_frontier.040.desc_military
+            }
             triggered_desc = {
                 trigger = { exists = scope:eotg_frontier_company }
                 desc = eotg_frontier.040.desc
