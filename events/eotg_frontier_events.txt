@@ -2337,3 +2337,100 @@ eotg_frontier.040 = {
         }
     }
 }
+
+# -- eotg_frontier.041 --------------------------------------------------------
+# A Faithful Offer (spec §6): the head of the holder's faith, or a holy order
+# of it, offers to back a Religious Frontier, or to bless it. Faith-neutral:
+# no faith is named. The backer gains no claim, no say and no authority over
+# the Region (LAW AT 866). Comes through the yearly roll's pool.
+eotg_frontier.041 = {
+    type = character_event
+    title = eotg_frontier.041.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_faith_backer_kind ?= flag:head }
+                desc = eotg_frontier.041.desc_head
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_faith_backer_kind ?= flag:order }
+                desc = eotg_frontier.041.desc_order
+            }
+            desc = eotg_frontier.041.desc_none
+        }
+    }
+    theme = realm
+
+    trigger = {
+        exists = scope:eotg_frontier_county
+        scope:eotg_frontier_county = {
+            eotg_frontier_is_frontier = yes
+            var:eotg_frontier_type ?= flag:religious
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_frontier_faith_backer }
+        character = scope:eotg_frontier_faith_backer
+        animation = personality_honorable
+    }
+
+    immediate = {
+        hidden_effect = {
+            if = {
+                limit = { NOT = { exists = scope:eotg_frontier_faith_backer } }
+                scope:eotg_frontier_county = { eotg_frontier_find_faith_backer_effect = yes }
+            }
+        }
+    }
+
+    # (no backer yet) "Accept the backing."
+    option = {
+        name = eotg_frontier.041.a
+        trigger = {
+            exists = scope:eotg_frontier_faith_backer
+            scope:eotg_frontier_faith_backer = { eotg_frontier_can_back = yes }
+            scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
+                NOT = { exists = var:eotg_frontier_sponsor }
+            }
+        }
+        scope:eotg_frontier_county = {
+            eotg_frontier_set_sponsor_effect = { SPONSOR = scope:eotg_frontier_faith_backer }
+            eotg_frontier_add_progress_effect = { AMOUNT = 3 }
+        }
+        custom_tooltip = eotg_frontier.041.a_tt
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = zealous }
+        }
+    }
+
+    # "Ask only for a blessing."
+    option = {
+        name = eotg_frontier.041.b
+        trigger = {
+            exists = scope:eotg_frontier_faith_backer
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        add_piety = minor_piety_value
+        scope:eotg_frontier_county = { eotg_frontier_add_progress_effect = { AMOUNT = 2 } }
+        custom_tooltip = eotg_frontier.041.b_tt
+        ai_chance = {
+            base = 30
+        }
+    }
+
+    # "The mission stands on its own." Always available; changes nothing.
+    option = {
+        name = eotg_frontier.041.c
+        ai_chance = {
+            base = 10
+            modifier = { add = 20  has_trait = cynical }
+        }
+    }
+}

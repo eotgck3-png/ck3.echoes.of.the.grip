@@ -665,6 +665,8 @@ eotg_frontier_complete_effect = {
             eotg_frontier_build_holding_effect = { HOLDING = church_holding }
             eotg_frontier_raise_dev_effect = { AMOUNT = 1 }
             eotg_frontier_create_figure_effect = { TEMPLATE = eotg_frontier_elder_template }
+            # Phase 3a (frontier_v3.md §6): the mission ties into the faith
+            eotg_frontier_faith_settle_effect = yes
         }
         else_if = {
             limit = { var:eotg_frontier_type ?= flag:research }
@@ -1230,6 +1232,12 @@ eotg_frontier_flavor_pick_effect = {
         }
         eotg_frontier_find_company_effect = yes
     }
+    # Phase 3a (frontier_v3.md §6): a faith backer, only where .041 can come
+    clear_saved_scope = eotg_frontier_faith_backer
+    if = {
+        limit = { var:eotg_frontier_type ?= flag:religious }
+        eotg_frontier_find_faith_backer_effect = yes
+    }
     random_list = {
         20 = {
             modifier = { add = 10  has_county_modifier = eotg_frontier_trait_hostile }
@@ -1305,6 +1313,14 @@ eotg_frontier_flavor_pick_effect = {
                 exists = scope:eotg_frontier_company
             }
             holder = { trigger_event = eotg_frontier.040 }
+        }
+        # Phase 3a (frontier_v3.md §6): the faith offers its support
+        10 = {
+            trigger = {
+                var:eotg_frontier_type ?= flag:religious
+                exists = scope:eotg_frontier_faith_backer
+            }
+            holder = { trigger_event = eotg_frontier.041 }
         }
     }
 }
@@ -1401,5 +1417,61 @@ eotg_frontier_find_company_effect = {
             eotg_frontier_can_back = yes
         }
         save_scope_as = eotg_frontier_company
+    }
+}
+
+# -- Religious organizations (spec §6), faith-neutral --------------------------
+# The holder's head of faith (if there is one, and it isn't the holder), else
+# the leader of a holy order of the holder's faith, who could back the
+# Frontier. Faith is read only generically: never a faith, religion or
+# doctrine key. Saves scope:eotg_frontier_faith_backer and
+# scope:eotg_frontier_faith_backer_kind (flag:head / flag:order), or clears them.
+# UNVERIFIED-VANILLA: faith.religious_head from a character, with exists
+# (spec frontier_v3.md §15 item 4); random_independent_ruler reaching holy
+# order leaders (item 3); faith = scope:x.faith (item 5)
+eotg_frontier_find_faith_backer_effect = {
+    clear_saved_scope = eotg_frontier_faith_backer
+    clear_saved_scope = eotg_frontier_faith_backer_kind
+    holder = {
+        save_temporary_scope_as = eotg_frontier_believer
+        if = {
+            limit = {
+                exists = faith.religious_head
+                NOT = { faith.religious_head = this }
+                faith.religious_head = { eotg_frontier_can_back = yes }
+            }
+            faith.religious_head = { save_scope_as = eotg_frontier_faith_backer }
+            save_scope_value_as = { name = eotg_frontier_faith_backer_kind  value = flag:head }
+        }
+        else = {
+            random_independent_ruler = {
+                limit = {
+                    eotg_frontier_is_holy_order_leader = yes
+                    faith = scope:eotg_frontier_believer.faith
+                    eotg_frontier_can_back = yes
+                }
+                save_scope_as = eotg_frontier_faith_backer
+            }
+            if = {
+                limit = { exists = scope:eotg_frontier_faith_backer }
+                save_scope_value_as = { name = eotg_frontier_faith_backer_kind  value = flag:order }
+            }
+        }
+    }
+}
+
+# A Religious completion ties into the faith in normal CK3 terms: piety for the
+# holder, a little fervour for the holder's faith (the shape of the mod's
+# temple buildings, common/buildings/eotg_00_temple_buildings.txt:178-190).
+# Reads scope:eotg_frontier_holder (saved by eotg_frontier_complete_effect).
+eotg_frontier_faith_settle_effect = {
+    scope:eotg_frontier_holder = {
+        add_piety = minor_piety_value
+        faith = {
+            change_fervor = {
+                value = trivial_fervor_gain
+                desc = eotg_frontier_fervor_mission_settled
+            }
+        }
     }
 }
