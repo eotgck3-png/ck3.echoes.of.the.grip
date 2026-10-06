@@ -2229,3 +2229,111 @@ eotg_frontier.042 = {
         }
     }
 }
+
+# -- eotg_frontier.040 --------------------------------------------------------
+# Blades for Hire (spec §5): a mercenary company offers to guard the convoys,
+# or, for a Military project with no backer, to back the venture. The captain
+# gains no claim and no say (LAW AT 866). Comes through the yearly roll's pool
+# for a Military project or a Dangerous Region.
+eotg_frontier.040 = {
+    type = character_event
+    title = eotg_frontier.040.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { exists = scope:eotg_frontier_company }
+                desc = eotg_frontier.040.desc
+            }
+            desc = eotg_frontier.040.desc_none
+        }
+    }
+    theme = realm
+
+    trigger = {
+        exists = scope:eotg_frontier_county
+        scope:eotg_frontier_county = {
+            eotg_frontier_is_frontier = yes
+            OR = {
+                var:eotg_frontier_type ?= flag:military
+                has_county_modifier = eotg_frontier_trait_dangerous
+            }
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_frontier_company }
+        character = scope:eotg_frontier_company
+        animation = personality_bold
+    }
+
+    immediate = {
+        hidden_effect = {
+            if = {
+                limit = { NOT = { exists = scope:eotg_frontier_company } }
+                scope:eotg_frontier_county = { eotg_frontier_find_company_effect = yes }
+            }
+        }
+    }
+
+    # "Hire them to guard the convoys." The fee goes to the captain: the amount
+    # is fixed once, in the payer's scope, so both sides see the same number.
+    # UNVERIFIED-VANILLA: a saved scope value (scope:eotg_frontier_fee) as the
+    # amount of remove_short_term_gold / add_gold (spec frontier_v3.md §15 item 8)
+    option = {
+        name = eotg_frontier.040.a
+        trigger = {
+            exists = scope:eotg_frontier_company
+            gold >= eotg_frontier_escort_cost_value
+            scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
+                NOT = { has_county_modifier = eotg_frontier_mod_merc_escort }
+            }
+        }
+        save_temporary_scope_value_as = { name = eotg_frontier_fee  value = eotg_frontier_escort_cost_value }
+        remove_short_term_gold = scope:eotg_frontier_fee
+        scope:eotg_frontier_company = { add_gold = scope:eotg_frontier_fee }
+        scope:eotg_frontier_county = {
+            add_county_modifier = { modifier = eotg_frontier_mod_merc_escort  years = 5 }
+            eotg_frontier_ease_strain_effect = yes
+        }
+        custom_tooltip = eotg_frontier.040.a_tt
+        ai_chance = {
+            base = 40
+        }
+    }
+
+    # (a Military project with no backer) "Let the company back the venture."
+    option = {
+        name = eotg_frontier.040.b
+        trigger = {
+            exists = scope:eotg_frontier_company
+            scope:eotg_frontier_company = { eotg_frontier_can_back = yes }
+            scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
+                var:eotg_frontier_type ?= flag:military
+                NOT = { exists = var:eotg_frontier_sponsor }
+            }
+        }
+        scope:eotg_frontier_county = {
+            eotg_frontier_set_sponsor_effect = { SPONSOR = scope:eotg_frontier_company }
+            eotg_frontier_add_progress_effect = { AMOUNT = 3 }
+        }
+        custom_tooltip = eotg_frontier.040.b_tt
+        ai_chance = {
+            base = 30
+        }
+    }
+
+    # "We will hold it ourselves." Always available; changes nothing.
+    option = {
+        name = eotg_frontier.040.c
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = arrogant }
+        }
+    }
+}

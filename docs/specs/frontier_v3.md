@@ -240,6 +240,7 @@ AI holders still get no flavour events, so .040 and .041 are player-only. **Not 
 5. **(G8)** `faith = scope:x.faith` comparing two characters' faiths.
 6. A mercenary captain or holy order leader as `var:eotg_frontier_sponsor`: does `remove_short_term_gold` take their gold each year (`eotg_frontier_sponsor_pay_effect`)? Do they lose it when the company is disbanded? (In game.)
 7. TEST-IN-GAME: `eotg_frontier_explored` on a county title survives save/reload and a holder change (as V1 did).
+8. A saved scope value as a gold amount: `remove_short_term_gold = scope:eotg_frontier_fee` / `add_gold = scope:eotg_frontier_fee` in .040 (a). Fallback: `remove_short_term_gold = eotg_frontier_escort_cost_value` and no payment to the captain.
 
 ## 16. Questions for the owner
 - **Q3-1.** An Unknown Region is also Unsettled (as built). Or should Unknown be independent, e.g. an Unknown Region that is already settled?

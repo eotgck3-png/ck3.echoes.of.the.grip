@@ -193,6 +193,8 @@ eotg_frontier_danger_strains = {
     county_control < eotg_frontier_min_control_value
     NOT = { has_county_modifier = eotg_frontier_infra_garrison_post }
     NOT = { var:eotg_frontier_type ?= flag:military }
+    # Phase 3a (frontier_v3.md §5): a hired escort counters it too
+    NOT = { has_county_modifier = eotg_frontier_mod_merc_escort }
 }
 
 # A quiet year may ease strain, unless the place itself is hostile and nothing
@@ -249,4 +251,27 @@ eotg_frontier_holds_explorable = {
         tier = tier_county
         eotg_frontier_can_explore = yes
     }
+}
+
+# -- Backers who may hold no county (frontier_v3.md §5, §6) --------------------
+# A mercenary captain or a faith leader who could back a Frontier: alive,
+# backing nothing yet, with gold for two payments. Narrower than
+# eotg_frontier_can_sponsor (which also needs a landed count or above, for
+# .003); .040 and .041 call eotg_frontier_set_sponsor_effect with it, so
+# payments, lapse, withdrawal and the hooks work unchanged. Character scope.
+eotg_frontier_can_back = {
+    is_alive = yes
+    eotg_frontier_is_sponsor = no
+    gold >= {
+        value = eotg_frontier_sponsor_payment_value
+        multiply = 2
+    }
+}
+
+# Leads a mercenary company. Character scope.
+# UNVERIFIED-VANILLA: the mercenary company government's flag is
+# government_is_mercenary (skill reference/common/governments/_governments.info:116;
+# spec frontier_v3.md §15 item 1)
+eotg_frontier_is_company_captain = {
+    government_has_flag = government_is_mercenary
 }

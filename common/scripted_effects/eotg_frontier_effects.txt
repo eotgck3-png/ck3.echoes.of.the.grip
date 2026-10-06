@@ -1120,6 +1120,11 @@ eotg_frontier_clear_infra_effect = {
         limit = { has_county_modifier = eotg_frontier_infra_garrison_post }
         remove_county_modifier = eotg_frontier_infra_garrison_post
     }
+    # Phase 3a (frontier_v3.md §5): a hired escort ends with the project
+    if = {
+        limit = { has_county_modifier = eotg_frontier_mod_merc_escort }
+        remove_county_modifier = eotg_frontier_mod_merc_escort
+    }
 }
 
 # -- Better settlement outcomes (spec §7) --------------------------------------
@@ -1213,6 +1218,18 @@ eotg_frontier_create_figure_effect = {
 # infrastructure. .002 is always eligible, so something always fires.
 eotg_frontier_flavor_pick_effect = {
     eotg_frontier_find_rival_backer_effect = yes
+    # Phase 3a (frontier_v3.md §5): a captain is looked for only where .040 can
+    # come (a Military project or a Dangerous Region)
+    clear_saved_scope = eotg_frontier_company
+    if = {
+        limit = {
+            OR = {
+                var:eotg_frontier_type ?= flag:military
+                has_county_modifier = eotg_frontier_trait_dangerous
+            }
+        }
+        eotg_frontier_find_company_effect = yes
+    }
     random_list = {
         20 = {
             modifier = { add = 10  has_county_modifier = eotg_frontier_trait_hostile }
@@ -1277,6 +1294,17 @@ eotg_frontier_flavor_pick_effect = {
             }
             modifier = { add = 10  var:eotg_frontier_type ?= flag:mining }
             holder = { trigger_event = eotg_frontier.036 }
+        }
+        # Phase 3a (frontier_v3.md §5): a mercenary company offers its blades
+        10 = {
+            trigger = {
+                OR = {
+                    var:eotg_frontier_type ?= flag:military
+                    has_county_modifier = eotg_frontier_trait_dangerous
+                }
+                exists = scope:eotg_frontier_company
+            }
+            holder = { trigger_event = eotg_frontier.040 }
         }
     }
 }
@@ -1356,5 +1384,22 @@ eotg_frontier_explore_step_effect = {
         save_scope_value_as = { name = eotg_frontier_exploration  value = flag:known }
         eotg_frontier_reveal_trait_effect = yes
         eotg_frontier_fire_hook_effect = { HOOK = eotg_frontier_on_explored }
+    }
+}
+
+# -- Mercenary organizations (spec §5) -----------------------------------------
+# A mercenary captain who could back or guard the Frontier, anywhere on the map
+# (word of a paying contract travels). Saves scope:eotg_frontier_company, or
+# clears it.
+# UNVERIFIED-VANILLA: random_independent_ruler reaches mercenary captains
+# (spec frontier_v3.md §15 item 3)
+eotg_frontier_find_company_effect = {
+    clear_saved_scope = eotg_frontier_company
+    random_independent_ruler = {
+        limit = {
+            eotg_frontier_is_company_captain = yes
+            eotg_frontier_can_back = yes
+        }
+        save_scope_as = eotg_frontier_company
     }
 }
