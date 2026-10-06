@@ -1,0 +1,95 @@
+﻿# -- eotg_aug_kingpin_values.txt ----------------------------------------------
+# Script values for the Neurofractured Kingpin (docs/specs/
+# cybernetics_v2_kingpin.md §5.6). Batch A.
+#
+# BATCH-B SEAM (kingpin): eotg_aug_kp_levies_value (war support, spawn_army)
+# is written with the war stages in batch B. V-K4 is settled already:
+# max_military_strength is a vanilla value (order_by = max_military_strength,
+# e.g. common/decisions/dlc_decisions/ep3_decisions.txt).
+# -----------------------------------------------------------------------------
+
+# Yearly drift of the kingpin's eotg_fracture_risk (spec §2, §5.6). Run in
+# the STORY's scope (the tick saves it as a scope value before moving the
+# kingpin, so the value is not re-evaluated in the kingpin's scope).
+# Base 6; purge +4; cold -2; crew +2; war stage +6; -4 per calm option since
+# the last tick (eotg_kp_calmed); floor 2.
+eotg_aug_kp_drift_value = {
+    value = 6
+    if = {
+        limit = { var:eotg_kp ?= { var:eotg_kp_mind ?= flag:purge } }
+        add = 4
+    }
+    if = {
+        limit = { var:eotg_kp ?= { var:eotg_kp_mind ?= flag:cold } }
+        add = -2
+    }
+    if = {
+        limit = { var:eotg_kp ?= { var:eotg_kp_kind ?= flag:crew } }
+        add = 2
+    }
+    if = {
+        limit = { var:eotg_kp_stage ?= flag:war }
+        add = 6
+    }
+    if = {
+        limit = { exists = var:eotg_kp_calmed }
+        subtract = {
+            value = var:eotg_kp_calmed
+            multiply = 4
+        }
+    }
+    min = 2
+}
+
+# The bonus on the arrest and crackdown rolls (.010 a/b, .011 a), added to
+# the success weight of the duel (spec §5.6). Run in the ruler's scope with
+# scope:eotg_kp_story and scope:eotg_kp saved. +10 per evidence point (max
+# +30); +15 if the ruler played along at the audience (eotg_kp_playing);
+# +20 for the audience arrest (.002 b, scope value eotg_kp_audience_arrest);
+# -10 reach wide; -10 infiltration until the informant is unmasked. The
+# hired crew's -10 applies to martial rolls only and is added at those
+# options, not here.
+eotg_aug_kp_arrest_value = {
+    value = 0
+    if = {
+        limit = { scope:eotg_kp_story ?= { exists = var:eotg_kp_evidence } }
+        add = {
+            value = scope:eotg_kp_story.var:eotg_kp_evidence
+            multiply = 10
+            max = 30
+        }
+    }
+    if = {
+        limit = { scope:eotg_kp_story ?= { has_variable = eotg_kp_playing } }
+        add = 15
+    }
+    if = {
+        limit = { exists = scope:eotg_kp_audience_arrest }
+        add = 20
+    }
+    if = {
+        limit = { eotg_aug_kp_is = { AXIS = reach  VALUE = wide } }
+        add = -10
+    }
+    if = {
+        limit = {
+            eotg_aug_kp_is = { AXIS = method  VALUE = infiltration }
+            scope:eotg_kp_story ?= { NOT = { has_variable = eotg_kp_informant_unmasked } }
+        }
+        add = -10
+    }
+}
+
+# The evidence half of the arrest value, for the audit roll (.015 a: +10 per
+# evidence point, max +30). Same scopes as eotg_aug_kp_arrest_value.
+eotg_aug_kp_evidence_value = {
+    value = 0
+    if = {
+        limit = { scope:eotg_kp_story ?= { exists = var:eotg_kp_evidence } }
+        add = {
+            value = scope:eotg_kp_story.var:eotg_kp_evidence
+            multiply = 10
+            max = 30
+        }
+    }
+}

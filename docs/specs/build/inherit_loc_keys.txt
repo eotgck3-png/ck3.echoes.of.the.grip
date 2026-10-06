@@ -1,0 +1,318 @@
+# A Fracturing Inheritance: loc keys the built script references (eotg-scripter, 2026-10-06).
+# Target file: localization/english/eotg_aug_inherit_l_english.yml (UTF-8 with BOM, Canadian English).
+# Spec: docs/specs/cybernetics_v2_fracturing_inheritance.md §7; §7.1 (lore wording) is BINDING and wins over
+#   the working option text in §5.3. §8 lore constraints apply to every string.
+# [APPENDED] = an appended desc fragment: its value must start with a blank line (lint L013d).
+# Scopes available to loc (bare, never scope:): eotg_inh_heir (every event; dead in .019, maybe dead in .021),
+#   eotg_inh_ruler (= ROOT in ruler events), eotg_inh_witness (may be unset: give a no-witness fallback),
+#   eotg_inh_second (.005 desc_second/.d, .015, .027), eotg_inh_councillor (.005, may be unset),
+#   eotg_inh_surgeon (.003, .010; unset when no court physician: use [ROOT.Char.Custom('eotg_aug_cl_clinic_of_record')]),
+#   eotg_inh_watcher (.004; spymaster else witness; may be unset), eotg_inh_killed_a / eotg_inh_killed_b /
+#   eotg_inh_spared / eotg_inh_child_victim (.016), eotg_inh_dead_1 and eotg_inh_wounded (.017; count via
+#   ROOT.Var('eotg_inh_dead_count')), eotg_inh_old_ruler_s (.025, the dead ruler), eotg_inh_old_ruler (.026).
+#   In .025 and .026 ROOT is the heir, now ruler.
+# Variant suffixes: .001/.002/.004 desc_<profile> (rage/ledger/cold/certain = Running Hot/The Ledger/Flatline/
+#   Certainty, internal names only, never shown); bond_<bond>; .006 refuse_<profile>; .018 desc_<bond>.
+# Option suffixes: plain letters; refusal variants .ra/.rb (.006, .007); .013 accept .a, leave .la/.lb,
+#   violent .va/.vb/.vc; .021 dead .da/.db; .022 slipping .sa/.sb; .026 none .na/.nb; .003 refused .a_ref/.b_ref;
+#   .002 profile options .p_rage/.p_ledger/.p_cold/.p_certain.
+# Hidden-risk rule: no number, 'risk', 'pressure' or odds in any tooltip or toast.
+# Total keys: 237
+# .028 is hidden and needs no loc.
+
+## events: eotg_aug_inherit.001
+eotg_aug_inherit.001.t
+eotg_aug_inherit.001.desc_rage
+eotg_aug_inherit.001.desc_ledger
+eotg_aug_inherit.001.desc_cold
+eotg_aug_inherit.001.desc_certain
+eotg_aug_inherit.001.bond_rival    [APPENDED]
+eotg_aug_inherit.001.bond_estranged    [APPENDED]
+eotg_aug_inherit.001.bond_claimant    [APPENDED]
+eotg_aug_inherit.001.bond_favourite    [APPENDED]
+eotg_aug_inherit.001.bond_dutiful    [APPENDED]
+eotg_aug_inherit.001.src_cascade    [APPENDED]
+eotg_aug_inherit.001.src_report    [APPENDED]
+eotg_aug_inherit.001.a
+eotg_aug_inherit.001.a.tt    # tooltip: the heir will be brought to you (L007 fix; no mechanics)
+eotg_aug_inherit.001.b
+eotg_aug_inherit.001.c
+eotg_aug_inherit.001.d
+eotg_aug_inherit.001.e
+
+## events: eotg_aug_inherit.002
+eotg_aug_inherit.002.t
+eotg_aug_inherit.002.desc_rage
+eotg_aug_inherit.002.desc_ledger
+eotg_aug_inherit.002.desc_cold
+eotg_aug_inherit.002.desc_certain
+eotg_aug_inherit.002.bond_rival    [APPENDED]
+eotg_aug_inherit.002.bond_estranged    [APPENDED]
+eotg_aug_inherit.002.bond_claimant    [APPENDED]
+eotg_aug_inherit.002.bond_favourite    [APPENDED]
+eotg_aug_inherit.002.bond_dutiful    [APPENDED]
+eotg_aug_inherit.002.a
+eotg_aug_inherit.002.b
+eotg_aug_inherit.002.c
+eotg_aug_inherit.002.p_rage
+eotg_aug_inherit.002.p_ledger
+eotg_aug_inherit.002.p_cold
+eotg_aug_inherit.002.p_certain
+eotg_aug_inherit.002.d
+
+## events: eotg_aug_inherit.003
+eotg_aug_inherit.003.t
+eotg_aug_inherit.003.desc_refused
+eotg_aug_inherit.003.desc_storm
+eotg_aug_inherit.003.desc_fracture
+eotg_aug_inherit.003.desc_flicker
+eotg_aug_inherit.003.a
+eotg_aug_inherit.003.b
+eotg_aug_inherit.003.c
+eotg_aug_inherit.003.d
+eotg_aug_inherit.003.a_ref
+eotg_aug_inherit.003.b_ref
+
+## events: eotg_aug_inherit.004
+eotg_aug_inherit.004.t
+eotg_aug_inherit.004.desc_rage
+eotg_aug_inherit.004.desc_ledger
+eotg_aug_inherit.004.desc_cold
+eotg_aug_inherit.004.desc_certain
+eotg_aug_inherit.004.a
+eotg_aug_inherit.004.b
+eotg_aug_inherit.004.b.tt    # tooltip: a berth will be found (L007 fix)
+eotg_aug_inherit.004.c
+eotg_aug_inherit.004.c.tt    # tooltip: the council will sit (L007 fix)
+eotg_aug_inherit.004.d
+
+## events: eotg_aug_inherit.005
+eotg_aug_inherit.005.t
+eotg_aug_inherit.005.desc
+eotg_aug_inherit.005.desc_second    [APPENDED]
+eotg_aug_inherit.005.a
+eotg_aug_inherit.005.b
+eotg_aug_inherit.005.c
+eotg_aug_inherit.005.d
+
+## events: eotg_aug_inherit.006
+eotg_aug_inherit.006.t
+eotg_aug_inherit.006.desc_accept
+eotg_aug_inherit.006.refuse_rage
+eotg_aug_inherit.006.refuse_ledger
+eotg_aug_inherit.006.refuse_cold
+eotg_aug_inherit.006.refuse_certain
+eotg_aug_inherit.006.a
+eotg_aug_inherit.006.b
+eotg_aug_inherit.006.c
+eotg_aug_inherit.006.ra
+eotg_aug_inherit.006.rb
+
+## events: eotg_aug_inherit.007
+eotg_aug_inherit.007.t
+eotg_aug_inherit.007.desc
+eotg_aug_inherit.007.accept    [APPENDED]
+eotg_aug_inherit.007.refuse    [APPENDED]
+eotg_aug_inherit.007.a
+eotg_aug_inherit.007.b
+eotg_aug_inherit.007.ra
+eotg_aug_inherit.007.rb
+
+## events: eotg_aug_inherit.008
+eotg_aug_inherit.008.t
+eotg_aug_inherit.008.desc
+eotg_aug_inherit.008.a
+eotg_aug_inherit.008.b
+
+## events: eotg_aug_inherit.009
+eotg_aug_inherit.009.t
+eotg_aug_inherit.009.desc_kill_ruler
+eotg_aug_inherit.009.desc_massacre
+eotg_aug_inherit.009.desc_next_two
+eotg_aug_inherit.009.desc_self
+eotg_aug_inherit.009.a
+eotg_aug_inherit.009.a.tt    # tooltip: an arrest is attempted (may fail; no odds)
+eotg_aug_inherit.009.a_fail_tt    # TOAST title: the arrest failed
+eotg_aug_inherit.009.b
+eotg_aug_inherit.009.b.tt    # tooltip: the guard is doubled; whatever comes, comes later
+eotg_aug_inherit.009.c
+eotg_aug_inherit.009.c.tt    # tooltip: the talk may or may not reach the heir (no odds)
+eotg_aug_inherit.009.d
+eotg_aug_inherit.009.d.tt    # tooltip: the ruler stands ready for whatever comes
+eotg_aug_inherit.009.e
+
+## events: eotg_aug_inherit.010
+eotg_aug_inherit.010.t
+eotg_aug_inherit.010.desc_physician
+eotg_aug_inherit.010.desc_back
+eotg_aug_inherit.010.desc_self
+eotg_aug_inherit.010.coerced    [APPENDED]
+eotg_aug_inherit.010.a
+eotg_aug_inherit.010.b
+eotg_aug_inherit.010.c
+eotg_aug_inherit.010.tt    # tooltip on the excision options: the outcome is decided on the table (words, no odds; as eotg_aug_end.001.tt)
+
+## events: eotg_aug_inherit.011
+eotg_aug_inherit.011.t
+eotg_aug_inherit.011.desc
+eotg_aug_inherit.011.a
+eotg_aug_inherit.011.b
+eotg_aug_inherit.011.c
+
+## events: eotg_aug_inherit.012
+eotg_aug_inherit.012.t
+eotg_aug_inherit.012.desc
+eotg_aug_inherit.012.a
+eotg_aug_inherit.012.b
+eotg_aug_inherit.012.exposed_tt    # TOAST title: someone (a dockhand or a fitter, unnamed, no pronoun) saw the heir alive. Never a record or registry
+
+## events: eotg_aug_inherit.013
+eotg_aug_inherit.013.t
+eotg_aug_inherit.013.desc_accept
+eotg_aug_inherit.013.desc_leave
+eotg_aug_inherit.013.desc_violent
+eotg_aug_inherit.013.a
+eotg_aug_inherit.013.la
+eotg_aug_inherit.013.lb
+eotg_aug_inherit.013.va
+eotg_aug_inherit.013.va.tt    # tooltip: the new line is guarded; the heir has not finished
+eotg_aug_inherit.013.vb
+eotg_aug_inherit.013.vc
+
+## events: eotg_aug_inherit.014
+eotg_aug_inherit.014.t
+eotg_aug_inherit.014.desc
+eotg_aug_inherit.014.a
+eotg_aug_inherit.014.b
+eotg_aug_inherit.014.c
+
+## events: eotg_aug_inherit.015
+eotg_aug_inherit.015.t
+eotg_aug_inherit.015.desc
+eotg_aug_inherit.015.a
+eotg_aug_inherit.015.b
+eotg_aug_inherit.015.b.tt    # tooltip: the second may act anyway (no odds)
+eotg_aug_inherit.015.c
+
+## events: eotg_aug_inherit.016
+eotg_aug_inherit.016.t
+eotg_aug_inherit.016.desc_ledger
+eotg_aug_inherit.016.desc_neutral
+eotg_aug_inherit.016.count_two    [APPENDED]
+eotg_aug_inherit.016.spared    [APPENDED]
+eotg_aug_inherit.016.desc_one    [APPENDED]
+eotg_aug_inherit.016.child    [APPENDED]
+eotg_aug_inherit.016.a
+eotg_aug_inherit.016.b
+eotg_aug_inherit.016.c
+
+## events: eotg_aug_inherit.017
+eotg_aug_inherit.017.t
+eotg_aug_inherit.017.desc
+eotg_aug_inherit.017.from_ward    [APPENDED]
+eotg_aug_inherit.017.ready    [APPENDED]
+eotg_aug_inherit.017.killed    [APPENDED]
+eotg_aug_inherit.017.none    [APPENDED]
+eotg_aug_inherit.017.wounded    [APPENDED]
+eotg_aug_inherit.017.a
+eotg_aug_inherit.017.b
+eotg_aug_inherit.017.c
+
+## events: eotg_aug_inherit.018
+eotg_aug_inherit.018.t
+eotg_aug_inherit.018.desc_rival
+eotg_aug_inherit.018.desc_estranged
+eotg_aug_inherit.018.desc_claimant
+eotg_aug_inherit.018.desc_favourite
+eotg_aug_inherit.018.desc_dutiful
+eotg_aug_inherit.018.a
+eotg_aug_inherit.018.tt    # tooltip on all three .018 options: what happens next is not yours to decide (no odds)
+eotg_aug_inherit.018.b
+eotg_aug_inherit.018.c
+eotg_aug_inherit.018.fail_tt    # TOAST title: the attempt failed; the ruler is hurt and alive
+
+## events: eotg_aug_inherit.019
+eotg_aug_inherit.019.t
+eotg_aug_inherit.019.desc_cold
+eotg_aug_inherit.019.desc_cascade
+eotg_aug_inherit.019.a
+eotg_aug_inherit.019.b
+eotg_aug_inherit.019.c
+
+## events: eotg_aug_inherit.020
+eotg_aug_inherit.020.t
+eotg_aug_inherit.020.desc
+eotg_aug_inherit.020.a
+eotg_aug_inherit.020.b
+
+## events: eotg_aug_inherit.021
+eotg_aug_inherit.021.t
+eotg_aug_inherit.021.desc_dead
+eotg_aug_inherit.021.desc_maimed
+eotg_aug_inherit.021.desc_clean
+eotg_aug_inherit.021.a
+eotg_aug_inherit.021.b
+eotg_aug_inherit.021.da
+eotg_aug_inherit.021.db
+
+## events: eotg_aug_inherit.022
+eotg_aug_inherit.022.t
+eotg_aug_inherit.022.desc_holding
+eotg_aug_inherit.022.desc_slipping
+eotg_aug_inherit.022.a
+eotg_aug_inherit.022.b
+eotg_aug_inherit.022.sa
+eotg_aug_inherit.022.sb
+
+## events: eotg_aug_inherit.023
+eotg_aug_inherit.023.t
+eotg_aug_inherit.023.desc_quarters
+eotg_aug_inherit.023.desc_cells
+eotg_aug_inherit.023.a
+eotg_aug_inherit.023.b
+
+## events: eotg_aug_inherit.024
+eotg_aug_inherit.024.t
+eotg_aug_inherit.024.desc
+eotg_aug_inherit.024.a
+eotg_aug_inherit.024.b
+eotg_aug_inherit.024.c
+
+## events: eotg_aug_inherit.025
+eotg_aug_inherit.025.t
+eotg_aug_inherit.025.desc_ledger
+eotg_aug_inherit.025.desc_certain
+eotg_aug_inherit.025.desc_shared
+eotg_aug_inherit.025.a
+eotg_aug_inherit.025.b
+eotg_aug_inherit.025.c
+
+## events: eotg_aug_inherit.026
+eotg_aug_inherit.026.t
+eotg_aug_inherit.026.desc_warden
+eotg_aug_inherit.026.desc_none
+eotg_aug_inherit.026.a
+eotg_aug_inherit.026.b
+eotg_aug_inherit.026.na
+eotg_aug_inherit.026.nb
+
+## events: eotg_aug_inherit.027
+eotg_aug_inherit.027.t
+eotg_aug_inherit.027.desc_leave
+eotg_aug_inherit.027.desc_no_leave
+eotg_aug_inherit.027.a
+eotg_aug_inherit.027.b
+eotg_aug_inherit.027.c
+
+## shared tooltips and toasts
+eotg_aug_inherit.ward_breakout_tt    # TOAST title when .017 comes from the ward. Spec §5A.4: "The ward's door was found open."
+eotg_aug_inherit.route_threat_tt    # tooltip on any route into .009 after it has run. Spec §5.3: "Whatever [heir] is building will not wait." Scope: eotg_inh_heir
+eotg_aug_inherit.ward_tt    # tooltip on every ward option: the ward may not hold (no odds). Scope: eotg_inh_heir
+
+## modifiers (common/modifiers/eotg_augmentation_modifiers.txt)
+eotg_mod_aug_inh_terms
+eotg_mod_aug_inh_terms_desc    # §7.1: "The realm's vassals do not trust a succession that rests on your heir's terms holding." (a modifier desc cannot resolve an event scope)
+eotg_mod_aug_inh_emptied_court
+eotg_mod_aug_inh_emptied_court_desc
+
+## opinions, decisions: none new (reused eotg_opinion_aug_*).

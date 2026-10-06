@@ -1,0 +1,35 @@
+﻿# HAND-WRITTEN (not generated; unlike eotg_aug_seller_names.txt, edit this file directly).
+# The Neurofractured Kingpin (docs/specs/cybernetics_v2_kingpin.md §5.4.2):
+# the name of the leverage band the visible story shows. Run on the STORY
+# (type = all), reading the story variable eotg_kp_leverage_band (1-3), which
+# only eotg_aug_kp_leverage_effect writes. Never a number.
+#
+# Usage in loc (the story panel's custom string has the STORY scope):
+#   [Story.Custom('eotg_aug_kp_cl_leverage_band')]
+#
+# Shape: vanilla common/customizable_localization/00_pet_custom_loc.txt:1917
+# (CatStoryNameAll, type = all, triggers on story variables; used as
+# [Story.Custom('CatStoryNameAll')]). Fallback is band 1, "A favour owed".
+
+eotg_aug_kp_cl_leverage_band = {
+    type = all
+
+    text = {
+        trigger = {
+            exists = var:eotg_kp_leverage_band
+            var:eotg_kp_leverage_band >= 3
+        }
+        localization_key = eotg_aug_kp_band_3
+    }
+    text = {
+        trigger = {
+            exists = var:eotg_kp_leverage_band
+            var:eotg_kp_leverage_band = 2
+        }
+        localization_key = eotg_aug_kp_band_2
+    }
+    text = {
+        fallback = yes
+        localization_key = eotg_aug_kp_band_1
+    }
+}

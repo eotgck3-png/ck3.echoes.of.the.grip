@@ -59,6 +59,10 @@
 #     (act.001)
 #   eotg_aug_act_accusation_done  — activity variable, once per tournament
 #     (act.003)
+#   eotg_flag_aug_inh_cooldown    — A Fracturing Inheritance, 3 years, set
+#     only in eotg_aug_inherit_start_effect (called from
+#     eotg_on_yearly_aug_inherit_check and eotg_aug_nr_cascade_effect); read
+#     only in eotg_aug_inherit_can_start, never by an eotg_aug_inherit event
 #
 # Each tier rolls one weighted random_list per pulse (weights = v1 chances),
 # with a "nothing" branch. v1 used independent ifs whose cooldown was set in
@@ -88,6 +92,8 @@ yearly_playable_pulse = {
         # Procedures spec §4.10-4.11 (G3, G2)
         eotg_on_yearly_aug_former_check
         eotg_on_yearly_aug_seamless_check
+        # A Fracturing Inheritance (cybernetics_v2_fracturing_inheritance.md §5.1)
+        eotg_on_yearly_aug_inherit_check
     }
 }
 
@@ -972,6 +978,7 @@ eotg_on_yearly_aug_overclocked_check = {
                     eotg_aug_has_countdown = yes
                     eotg_aug_has_heir_arc = no
                     NOT = { has_character_flag = eotg_flag_aug_heir_arc_done }
+                    NOT = { has_variable = eotg_inh_heir }    # A Fracturing Inheritance §5.2: not mid-tree
                     primary_heir ?= {
                         is_alive = yes
                         age >= 14
@@ -1221,6 +1228,7 @@ eotg_on_yearly_aug_neurofractured_check = {
                     is_landed = yes    # QA round 2: a ruler-only arc (see the story)
                     eotg_aug_has_heir_arc = no
                     NOT = { has_character_flag = eotg_flag_aug_heir_arc_done }
+                    NOT = { has_variable = eotg_inh_heir }    # A Fracturing Inheritance §5.2: not mid-tree
                     primary_heir ?= {
                         is_alive = yes
                         age >= 14
@@ -1515,6 +1523,8 @@ eotg_on_yearly_aug_nonruler_check = {
         is_adult = yes
         exists = employer
         employer = { highest_held_title_tier >= tier_county }
+        # Kingpin spec §5.3 E1: the story's tick is a kingpin's only drift
+        NOT = { has_character_flag = eotg_flag_aug_kingpin }
     }
     effect = {
         employer = { save_scope_as = eotg_nr_liege }
@@ -1632,6 +1642,9 @@ eotg_on_yearly_aug_nonruler_check = {
                     NOT = { exists = scope:eotg_nr_reported }
                     scope:eotg_nr_liege = {
                         NOT = { has_character_flag = eotg_flag_aug_nr_cooldown }
+                        # A Fracturing Inheritance §5.2: no champion event
+                        # about the heir while the liege's tree runs
+                        NOT = { var:eotg_inh_heir ?= root }
                     }
                 }
                 random_list = {
@@ -1914,6 +1927,7 @@ eotg_on_yearly_aug_seamless_check = {
                         is_landed = yes
                         eotg_aug_has_heir_arc = no
                         NOT = { has_character_flag = eotg_flag_aug_heir_arc_done }
+                        NOT = { has_variable = eotg_inh_heir }    # A Fracturing Inheritance §5.2: not mid-tree
                         primary_heir ?= {
                             is_alive = yes
                             is_adult = yes
@@ -1939,6 +1953,31 @@ eotg_on_yearly_aug_seamless_check = {
                     modifier = { factor = 1.25  is_ai = yes  highest_held_title_tier >= tier_kingdom }
                 }
             }
+        }
+    }
+}
+
+
+# A Fracturing Inheritance, site A (docs/specs/cybernetics_v2_fracturing_inheritance.md
+# §5.1): the ruler learns the primary heir is Neurofractured. Site B is the
+# non-ruler cascade (eotg_aug_nr_cascade_effect). COOLDOWN AUTHORITY:
+# eotg_flag_aug_inh_cooldown (3 years) is set in eotg_aug_inherit_start_effect,
+# which only the two sites call, and read only in eotg_aug_inherit_can_start;
+# no event trigger reads it (lesson 5). A player ruler is told the first year
+# it is true; AI throttle as balance spec §5.10(a), from vanilla
+# common/on_action/yearly_on_actions.txt:3022-3030. An AI ruler resolves in
+# the hidden eotg_aug_inherit.028 (owner Q5).
+eotg_on_yearly_aug_inherit_check = {
+    trigger = {
+        eotg_aug_inherit_can_start = yes
+    }
+    effect = {
+        random = {
+            chance = 100
+            modifier = { factor = 0.4  is_ai = yes  highest_held_title_tier = tier_county }
+            modifier = { factor = 0.55  is_ai = yes  highest_held_title_tier = tier_duchy }
+            modifier = { factor = 0.7  is_ai = yes  highest_held_title_tier >= tier_kingdom }
+            eotg_aug_inherit_start_effect = { SOURCE = report }
         }
     }
 }

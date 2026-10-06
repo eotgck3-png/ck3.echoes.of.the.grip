@@ -1,0 +1,3163 @@
+﻿# -- eotg_augmentation_inherit.txt --------------------------------------------
+# A Fracturing Inheritance (docs/specs/cybernetics_v2_fracturing_inheritance.md).
+# The ruler is sound; the primary heir is Neurofractured. The ruler decides
+# what the dynasty does about it, over 3-5 events and 17 outcomes.
+#
+# eotg_aug_inherit.001 -- The Report                    (entry)
+# eotg_aug_inherit.002 -- The Conversation
+# eotg_aug_inherit.003 -- The Physicians
+# eotg_aug_inherit.004 -- The Watch
+# eotg_aug_inherit.005 -- The Council
+# eotg_aug_inherit.006 -- The Terms
+# eotg_aug_inherit.007 -- The Answer
+# eotg_aug_inherit.008 -- The Ward
+# eotg_aug_inherit.009 -- The Pattern                   (danger hub, once)
+# eotg_aug_inherit.010 -- The Table
+# eotg_aug_inherit.011 -- Passage Out                   (L6)
+# eotg_aug_inherit.012 -- The Shuttle That Never Docked (L8)
+# eotg_aug_inherit.013 -- Struck from the Line          (L7, or a reaction)
+# eotg_aug_inherit.014 -- The Hand-Off                  (L9, L10)
+# eotg_aug_inherit.015 -- The Offer
+# eotg_aug_inherit.016 -- The List                      (L13)
+# eotg_aug_inherit.017 -- The Long Watch                (L14)
+# eotg_aug_inherit.018 -- The Last Audience             (L15, or .024)
+# eotg_aug_inherit.019 -- The Quiet Room                (L12)
+# eotg_aug_inherit.020 -- Two Machines                  (L16)
+# eotg_aug_inherit.021 -- After the Table               (L1, L2, L3)
+# eotg_aug_inherit.022 -- Kept Terms                    (L4)
+# eotg_aug_inherit.023 -- The Locked Wing               (L5)
+# eotg_aug_inherit.024 -- Still Breathing               (after a failed attempt)
+# eotg_aug_inherit.025 -- The Seat                      (to the heir, after L15)
+# eotg_aug_inherit.026 -- The Warden's Hand             (to the heir, after L9 / L10)
+# eotg_aug_inherit.027 -- The Line Shortens             (L11)
+# eotg_aug_inherit.028 -- (hidden) Resolution           (AI rulers, owner Q5)
+#
+# Fires from: eotg_aug_inherit_start_effect -> .001 (player ruler) or .028
+#   (AI ruler); the start effect is called by eotg_on_yearly_aug_inherit_check
+#   (yearly_playable_pulse) and eotg_aug_nr_cascade_effect (the non-ruler
+#   cascade, for a primary heir). Every other event is a chain stage fired by
+#   trigger_event from an earlier stage or a leaf / route effect in
+#   common/scripted_effects/eotg_augmentation_effects.txt (each header names it).
+# Cooldown: eotg_flag_aug_inh_cooldown lives in the start effect and the gate
+#   eotg_aug_inherit_can_start only. No event trigger here reads it (lesson 5);
+#   triggers are the world-state guard eotg_aug_inherit_chain_valid.
+# Cleanup: every ruler-root event has on_trigger_fail = the close effect, and
+#   every leaf calls it.
+# Resource: the heir's eotg_fracture_risk (hidden). Every non-terminal event
+#   moves it in at least one option; the heir's band picks descs (.003, .022)
+#   and weights the rolls; leaves change a tier (death, excision, the ruler's
+#   cascade). No number, "risk" or odds in any tooltip (index §1 rule 3).
+# Loc: dot-form keys, localization/english/eotg_aug_inherit_l_english.yml.
+#   Profile names (Running Hot, The Ledger, Flatline, Certainty) are
+#   internal only (spec §7.1).
+# AI: the tree runs only for player rulers (eotg_aug_inherit_tree_runs); the
+#   ai_chance blocks matter only if the ruler passes to the AI mid-chain.
+# -----------------------------------------------------------------------------
+
+namespace = eotg_aug_inherit
+
+
+# -- eotg_aug_inherit.001 -----------------------------------------------------
+# The Report. Profile line, bond line, source line (cascade or report).
+# Caller: eotg_aug_inherit_start_effect (player ruler).
+
+eotg_aug_inherit.001 = {
+    type = character_event
+    title = eotg_aug_inherit.001.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { var:eotg_inh_profile ?= flag:rage }
+                desc = eotg_aug_inherit.001.desc_rage
+            }
+            triggered_desc = {
+                trigger = { var:eotg_inh_profile ?= flag:ledger }
+                desc = eotg_aug_inherit.001.desc_ledger
+            }
+            triggered_desc = {
+                trigger = { var:eotg_inh_profile ?= flag:cold }
+                desc = eotg_aug_inherit.001.desc_cold
+            }
+            desc = eotg_aug_inherit.001.desc_certain
+        }
+        first_valid = {
+            triggered_desc = {
+                trigger = { var:eotg_inh_bond ?= flag:rival }
+                desc = eotg_aug_inherit.001.bond_rival
+            }
+            triggered_desc = {
+                trigger = { var:eotg_inh_bond ?= flag:estranged }
+                desc = eotg_aug_inherit.001.bond_estranged
+            }
+            triggered_desc = {
+                trigger = { var:eotg_inh_bond ?= flag:claimant }
+                desc = eotg_aug_inherit.001.bond_claimant
+            }
+            triggered_desc = {
+                trigger = { var:eotg_inh_bond ?= flag:favourite }
+                desc = eotg_aug_inherit.001.bond_favourite
+            }
+            desc = eotg_aug_inherit.001.bond_dutiful
+        }
+        first_valid = {
+            triggered_desc = {
+                trigger = { var:eotg_inh_source ?= flag:cascade }
+                desc = eotg_aug_inherit.001.src_cascade
+            }
+            desc = eotg_aug_inherit.001.src_report
+        }
+    }
+    theme = family
+
+    trigger = { eotg_aug_inherit_chain_valid = { FULL = yes } }
+    on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
+
+    left_portrait = {
+        character = root
+        animation = worry
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_inh_witness }
+        character = scope:eotg_inh_witness
+        animation = stress
+    }
+    lower_right_portrait = {
+        trigger = { exists = scope:eotg_inh_heir }
+        character = scope:eotg_inh_heir
+    }
+
+    immediate = {
+        eotg_aug_inherit_scopes_effect = yes
+    }
+
+    # "Bring [heir] to me. I'll hear it from [heir_himher]."
+    option = {
+        name = eotg_aug_inherit.001.a
+        custom_tooltip = eotg_aug_inherit.001.a.tt
+        trigger_event = { id = eotg_aug_inherit.002  days = { 14 30 } }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = gregarious }
+            modifier = { add = 10  has_trait = honest }
+            modifier = { add = -10  has_trait = shy }
+        }
+    }
+
+    # "Send for the physicians before anyone else." Caught early: H-3.
+    option = {
+        name = eotg_aug_inherit.001.b
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = -3 } }
+        trigger_event = { id = eotg_aug_inherit.003  days = { 30 60 } }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 15  has_trait = lifestyle_physician }
+        }
+    }
+
+    # "Say nothing. Watch [heir]." Nobody intervenes: H+5.
+    option = {
+        name = eotg_aug_inherit.001.c
+        eotg_aug_stress_lie_effect = yes
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 5 } }
+        trigger_event = { id = eotg_aug_inherit.004  days = { 60 120 } }
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = paranoid }
+            modifier = { add = 15  has_trait = deceitful }
+        }
+    }
+
+    # [compassionate] "I'll go to [heir] myself, before the next watch." H-5.
+    option = {
+        name = eotg_aug_inherit.001.d
+        trigger = { has_trait = compassionate }
+        trait = compassionate
+        add_character_flag = { flag = eotg_flag_aug_inh_gentle  years = 6 }
+        scope:eotg_inh_heir = {
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+            eotg_add_fracture_risk = { AMOUNT = -5 }
+        }
+        trigger_event = { id = eotg_aug_inherit.002  days = { 3 7 } }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = compassionate }
+            modifier = { add = 10  has_trait = forgiving }
+        }
+    }
+
+    # [callous / paranoid] "The succession comes first." H+5. Two traits gate
+    # it, so no trait icon (one icon would misname half the rulers).
+    option = {
+        name = eotg_aug_inherit.001.e
+        trigger = {
+            OR = {
+                has_trait = callous
+                has_trait = paranoid
+            }
+        }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 5 } }
+        trigger_event = { id = eotg_aug_inherit.005  days = { 14 30 } }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = 20  has_trait = paranoid }
+        }
+    }
+}
+
+
+# -- eotg_aug_inherit.002 -----------------------------------------------------
+# The Conversation. The heir is in the room. Exactly one profile option shows.
+# Caller: .001 (a, d).
+
+eotg_aug_inherit.002 = {
+    type = character_event
+    title = eotg_aug_inherit.002.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { var:eotg_inh_profile ?= flag:rage }
+                desc = eotg_aug_inherit.002.desc_rage
+            }
+            triggered_desc = {
+                trigger = { var:eotg_inh_profile ?= flag:ledger }
+                desc = eotg_aug_inherit.002.desc_ledger
+            }
+            triggered_desc = {
+                trigger = { var:eotg_inh_profile ?= flag:cold }
+                desc = eotg_aug_inherit.002.desc_cold
+            }
+            desc = eotg_aug_inherit.002.desc_certain
+        }
+        first_valid = {
+            triggered_desc = {
+                trigger = { var:eotg_inh_bond ?= flag:rival }
+                desc = eotg_aug_inherit.002.bond_rival
+            }
+            triggered_desc = {
+                trigger = { var:eotg_inh_bond ?= flag:estranged }
+                desc = eotg_aug_inherit.002.bond_estranged
+            }
+            triggered_desc = {
+                trigger = { var:eotg_inh_bond ?= flag:claimant }
+                desc = eotg_aug_inherit.002.bond_claimant
+            }
+            triggered_desc = {
+                trigger = { var:eotg_inh_bond ?= flag:favourite }
+                desc = eotg_aug_inherit.002.bond_favourite
+            }
+            desc = eotg_aug_inherit.002.bond_dutiful
+        }
+    }
+    theme = family
+
+    trigger = { eotg_aug_inherit_chain_valid = { FULL = yes } }
+    on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
+
+    left_portrait = {
+        character = root
+        animation = worry
+    }
+    right_portrait = {
+        character = scope:eotg_inh_heir
+        animation = stress
+    }
+
+    immediate = {
+        eotg_aug_inherit_scopes_effect = yes
+    }
+
+    # "Stay. We face it together." H-5.
+    option = {
+        name = eotg_aug_inherit.002.a
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = -5 } }
+        trigger_event = { id = eotg_aug_inherit.006  days = { 7 14 } }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 10  has_trait = trusting }
+        }
+    }
+
+    # "You will see the physicians. That is not a request." H+5.
+    option = {
+        name = eotg_aug_inherit.002.b
+        add_character_flag = { flag = eotg_flag_aug_inh_coerced  years = 6 }
+        scope:eotg_inh_heir = {
+            add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+            eotg_add_fracture_risk = { AMOUNT = 5 }
+        }
+        trigger_event = { id = eotg_aug_inherit.003  days = { 14 30 } }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = stubborn }
+            modifier = { add = 10  has_trait = diligent }
+        }
+    }
+
+    # "Give up the succession. Quietly." H+3.
+    option = {
+        name = eotg_aug_inherit.002.c
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 3 } }
+        trigger_event = { id = eotg_aug_inherit.007  days = { 7 14 } }
+        ai_chance = {
+            base = 25
+            modifier = { add = 15  has_trait = just }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # [Running Hot] "Sit with [heir] until it passes." 25% the ruler is hurt
+    # unless prowess >= 12 (vanilla increase_wounds_effect). H-8.
+    option = {
+        name = eotg_aug_inherit.002.p_rage
+        trigger = { var:eotg_inh_profile ?= flag:rage }
+        if = {
+            limit = { prowess < 12 }
+            random = {
+                chance = 25
+                increase_wounds_effect = { REASON = attacked }
+            }
+        }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = -8 } }
+        trigger_event = { id = eotg_aug_inherit.006  days = { 7 14 } }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = brave }
+            modifier = { add = 10  has_trait = patient }
+        }
+    }
+
+    # [The Ledger] "Show me the list." The names on it are guarded. H+5.
+    option = {
+        name = eotg_aug_inherit.002.p_ledger
+        trigger = { var:eotg_inh_profile ?= flag:ledger }
+        add_character_flag = { flag = eotg_flag_aug_inh_guarded  years = 6 }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 5 } }
+        trigger_event = { id = eotg_aug_inherit.005  days = { 7 14 } }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = paranoid }
+            modifier = { add = 10  has_trait = diligent }
+        }
+    }
+
+    # [Flatline] "Do you want to stop?" The .007 renunciation +30
+    # (scope value eotg_inh_asked, read by eotg_aug_inherit_renounce_chance). H-3.
+    option = {
+        name = eotg_aug_inherit.002.p_cold
+        trigger = { var:eotg_inh_profile ?= flag:cold }
+        save_scope_value_as = { name = eotg_inh_asked  value = yes }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = -3 } }
+        trigger_event = { id = eotg_aug_inherit.007  days = { 7 14 } }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = compassionate }
+            modifier = { add = 10  has_trait = honest }
+        }
+    }
+
+    # [Certainty] "You don't rule yet." Presets the threat. H+10.
+    option = {
+        name = eotg_aug_inherit.002.p_certain
+        trigger = { var:eotg_inh_profile ?= flag:certain }
+        hidden_effect = {
+            set_variable = { name = eotg_inh_threat  value = flag:kill_ruler }
+        }
+        add_prestige = 50
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 10 } }
+        eotg_aug_inherit_route_pattern_effect = { DAYS_MIN = 14  DAYS_MAX = 30 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = arrogant }
+            modifier = { add = 15  has_trait = wrathful }
+        }
+    }
+
+    # [wrathful] "Get out of my sight." H+10.
+    option = {
+        name = eotg_aug_inherit.002.d
+        trigger = { has_trait = wrathful }
+        trait = wrathful
+        scope:eotg_inh_heir = {
+            add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 5 }
+            eotg_add_fracture_risk = { AMOUNT = 10 }
+        }
+        eotg_aug_inherit_route_pattern_effect = { DAYS_MIN = 14  DAYS_MAX = 30 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = wrathful }
+            modifier = { add = 10  has_trait = arbitrary }
+        }
+    }
+}
+
+
+# -- eotg_aug_inherit.003 -----------------------------------------------------
+# The Physicians. Speaker: the court physician (scope:eotg_inh_surgeon), else
+# the clinic of record through its existing custom loc. Immediate: the
+# refusal roll, skipped when sent from .006.b (scope value eotg_inh_no_refusal).
+# Desc reads the heir's band; "refused" if the heir did not come.
+# Callers: .001 (b), .002 (b), .006 (b).
+
+eotg_aug_inherit.003 = {
+    type = character_event
+    title = eotg_aug_inherit.003.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { exists = scope:eotg_inh_refused }
+                desc = eotg_aug_inherit.003.desc_refused
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_inh_heir = { eotg_aug_pressure_storm = yes } }
+                desc = eotg_aug_inherit.003.desc_storm
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_inh_heir = { eotg_aug_pressure_fracture = yes } }
+                desc = eotg_aug_inherit.003.desc_fracture
+            }
+            desc = eotg_aug_inherit.003.desc_flicker
+        }
+    }
+    theme = medicine
+
+    trigger = { eotg_aug_inherit_chain_valid = { FULL = yes } }
+    on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
+
+    left_portrait = {
+        character = root
+        animation = worry
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_inh_surgeon }
+        character = scope:eotg_inh_surgeon
+        animation = personality_rational
+    }
+    lower_right_portrait = {
+        trigger = { exists = scope:eotg_inh_heir }
+        character = scope:eotg_inh_heir
+    }
+
+    immediate = {
+        eotg_aug_inherit_scopes_effect = yes
+        add_character_flag = { flag = eotg_flag_aug_inh_physicians_seen  years = 6 }
+        hidden_effect = {
+            if = {
+                limit = { employs_court_position = court_physician_court_position }
+                court_position:court_physician_court_position = { save_scope_as = eotg_inh_surgeon }
+            }
+            if = {
+                limit = { NOT = { exists = scope:eotg_inh_no_refusal } }
+                eotg_aug_inherit_roll_effect = { CHANCE = eotg_aug_inherit_refuse_chance  NAME = eotg_inh_refused }
+            }
+        }
+    }
+
+    # "Cut it out of [heir]." The physician's table.
+    option = {
+        name = eotg_aug_inherit.003.a
+        trigger = {
+            NOT = { exists = scope:eotg_inh_refused }
+            gold >= major_gold_value
+        }
+        hidden_effect = {
+            set_variable = { name = eotg_inh_table  value = flag:physician }
+        }
+        trigger_event = { id = eotg_aug_inherit.010  days = { 14 30 } }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = brave }
+            modifier = { add = 15  has_trait = diligent }
+        }
+    }
+
+    # "Hold it down. Sedation, and a locked ward." H-5. Always shown when the
+    # heir came, so the event cannot dead-end.
+    option = {
+        name = eotg_aug_inherit.003.b
+        trigger = { NOT = { exists = scope:eotg_inh_refused } }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = -5 } }
+        trigger_event = { id = eotg_aug_inherit.008  days = { 7 14 } }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = craven }
+            modifier = { add = 15  has_trait = content }
+        }
+    }
+
+    # "Find someone cheaper." The back-street table.
+    option = {
+        name = eotg_aug_inherit.003.c
+        trigger = {
+            NOT = { exists = scope:eotg_inh_refused }
+            gold >= medium_gold_value
+        }
+        hidden_effect = {
+            set_variable = { name = eotg_inh_table  value = flag:back }
+        }
+        trigger_event = { id = eotg_aug_inherit.010  days = { 14 30 } }
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = greedy }
+            modifier = { add = 10  has_trait = arbitrary }
+        }
+    }
+
+    # [physician / learning 14] "I'll stand at the table myself." H-3. Two
+    # gates, so no trait icon.
+    option = {
+        name = eotg_aug_inherit.003.d
+        trigger = {
+            NOT = { exists = scope:eotg_inh_refused }
+            gold >= medium_gold_value
+            OR = {
+                has_trait = lifestyle_physician
+                learning >= 14
+            }
+        }
+        hidden_effect = {
+            set_variable = { name = eotg_inh_table  value = flag:self }
+        }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = -3 } }
+        trigger_event = { id = eotg_aug_inherit.010  days = { 14 30 } }
+        ai_chance = {
+            base = 30
+            modifier = { add = 25  has_trait = lifestyle_physician }
+            modifier = { add = 10  has_trait = brave }
+        }
+    }
+
+    # (refused) "Find [heir]. Bring [heir_himher] back." H+8.
+    option = {
+        name = eotg_aug_inherit.003.a_ref
+        trigger = { exists = scope:eotg_inh_refused }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 8 } }
+        eotg_aug_inherit_route_pattern_effect = { DAYS_MIN = 7  DAYS_MAX = 14 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 15  has_trait = stubborn }
+            modifier = { add = 10  has_trait = wrathful }
+        }
+    }
+
+    # (refused) "Let [heir] go." L6, no passage paid (H+5 in the leaf).
+    option = {
+        name = eotg_aug_inherit.003.b_ref
+        trigger = { exists = scope:eotg_inh_refused }
+        eotg_aug_inherit_leaf_exile_effect = { STYLE = plain }
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = content }
+            modifier = { add = 10  has_trait = craven }
+        }
+    }
+}
+
+
+# -- eotg_aug_inherit.004 -----------------------------------------------------
+# The Watch. Months pass (H+6). The watcher is the spymaster, else the
+# witness; the desc is the profile, seen from outside. Caller: .001 (c).
+
+eotg_aug_inherit.004 = {
+    type = character_event
+    title = eotg_aug_inherit.004.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { var:eotg_inh_profile ?= flag:rage }
+                desc = eotg_aug_inherit.004.desc_rage
+            }
+            triggered_desc = {
+                trigger = { var:eotg_inh_profile ?= flag:ledger }
+                desc = eotg_aug_inherit.004.desc_ledger
+            }
+            triggered_desc = {
+                trigger = { var:eotg_inh_profile ?= flag:cold }
+                desc = eotg_aug_inherit.004.desc_cold
+            }
+            desc = eotg_aug_inherit.004.desc_certain
+        }
+    }
+    theme = secret
+
+    trigger = { eotg_aug_inherit_chain_valid = { FULL = yes } }
+    on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
+
+    left_portrait = {
+        character = root
+        animation = paranoia
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_inh_watcher }
+        character = scope:eotg_inh_watcher
+        animation = scheme
+    }
+    lower_right_portrait = {
+        trigger = { exists = scope:eotg_inh_heir }
+        character = scope:eotg_inh_heir
+    }
+
+    immediate = {
+        eotg_aug_inherit_scopes_effect = yes
+        hidden_effect = {
+            if = {
+                limit = {
+                    exists = cp:councillor_spymaster
+                    NOT = { cp:councillor_spymaster = scope:eotg_inh_heir }
+                }
+                cp:councillor_spymaster = { save_scope_as = eotg_inh_watcher }
+            }
+            else_if = {
+                limit = { exists = scope:eotg_inh_witness }
+                scope:eotg_inh_witness = { save_scope_as = eotg_inh_watcher }
+            }
+        }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 6 } }
+    }
+
+    # "Keep watching." H+3.
+    option = {
+        name = eotg_aug_inherit.004.a
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 3 } }
+        eotg_aug_inherit_route_pattern_effect = { DAYS_MIN = 30  DAYS_MAX = 90 }
+        ai_chance = {
+            base = 25
+            modifier = { add = 20  has_trait = paranoid }
+            modifier = { add = 10  has_trait = patient }
+        }
+    }
+
+    # "Put [heir] on the next ship out."
+    option = {
+        name = eotg_aug_inherit.004.b
+        custom_tooltip = eotg_aug_inherit.004.b.tt
+        trigger_event = { id = eotg_aug_inherit.011  days = { 7 14 } }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = craven }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # "Take this to the council."
+    option = {
+        name = eotg_aug_inherit.004.c
+        custom_tooltip = eotg_aug_inherit.004.c.tt
+        trigger_event = { id = eotg_aug_inherit.005  days = { 7 14 } }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = just }
+            modifier = { add = 10  has_trait = diligent }
+        }
+    }
+
+    # [intrigue 14 / deceitful] "Let [heir] be lost in transit." H-3.
+    option = {
+        name = eotg_aug_inherit.004.d
+        trigger = {
+            OR = {
+                intrigue >= 14
+                has_trait = deceitful
+            }
+        }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = -3 } }
+        trigger_event = { id = eotg_aug_inherit.012  days = { 14 30 } }
+        ai_chance = {
+            base = 30
+            modifier = { add = 25  has_trait = deceitful }
+            modifier = { add = 10  has_trait = schemer }
+        }
+    }
+}
+
+
+# -- eotg_aug_inherit.005 -----------------------------------------------------
+# The Council. The councillor (chancellor, else spouse) and the second in line.
+# Callers: .001 (e), .002 (p_ledger), .004 (c), .006 (ra).
+
+eotg_aug_inherit.005 = {
+    type = character_event
+    title = eotg_aug_inherit.005.t
+    desc = {
+        desc = eotg_aug_inherit.005.desc
+        triggered_desc = {
+            trigger = { exists = scope:eotg_inh_second }
+            desc = eotg_aug_inherit.005.desc_second
+        }
+    }
+    theme = realm
+
+    trigger = { eotg_aug_inherit_chain_valid = { FULL = yes } }
+    on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
+
+    left_portrait = {
+        character = root
+        animation = thinking
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_inh_councillor }
+        character = scope:eotg_inh_councillor
+        animation = chancellor
+    }
+    lower_right_portrait = {
+        trigger = { exists = scope:eotg_inh_second }
+        character = scope:eotg_inh_second
+    }
+
+    immediate = {
+        eotg_aug_inherit_scopes_effect = yes
+    }
+
+    # "Strike [heir] from the line." H+5.
+    option = {
+        name = eotg_aug_inherit.005.a
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 5 } }
+        trigger_event = { id = eotg_aug_inherit.013  days = { 7 14 } }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = just }
+            modifier = { add = 15  has_trait = callous }
+        }
+    }
+
+    # "I'll step down while I can still set the terms." H-5.
+    option = {
+        name = eotg_aug_inherit.005.b
+        trigger = { eotg_aug_inherit_can_abdicate = yes }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = -5 } }
+        trigger_event = { id = eotg_aug_inherit.014  days = { 7 14 } }
+        ai_chance = {
+            base = 15
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 15  has_trait = humble }
+            modifier = { add = -20  has_trait = ambitious }
+        }
+    }
+
+    # "Nothing changes. [heir] stays first." H+5.
+    option = {
+        name = eotg_aug_inherit.005.c
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 5 } }
+        eotg_aug_inherit_route_pattern_effect = { DAYS_MIN = 30  DAYS_MAX = 90 }
+        ai_chance = {
+            base = 25
+            modifier = { add = 15  has_trait = stubborn }
+            modifier = { add = 10  has_trait = trusting }
+        }
+    }
+
+    # "Hear what [second] proposes." H+3.
+    option = {
+        name = eotg_aug_inherit.005.d
+        trigger = { eotg_aug_inherit_second_qualifies = yes }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 3 } }
+        trigger_event = { id = eotg_aug_inherit.015  days = { 14 30 } }
+        ai_chance = {
+            base = 25
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 15  has_trait = callous }
+        }
+    }
+}
+
+
+# -- eotg_aug_inherit.006 -----------------------------------------------------
+# The Terms. Runs once (eotg_flag_aug_inh_talked). Immediate: the acceptance
+# roll, or a forced pass (scope value eotg_inh_accept_forced, from .007.b /
+# .009.c). The accept desc is true after a roll or a forced pass.
+# Callers: .002 (a, p_rage), .007 (b), .009 (c).
+
+eotg_aug_inherit.006 = {
+    type = character_event
+    title = eotg_aug_inherit.006.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { exists = scope:eotg_inh_accepted }
+                desc = eotg_aug_inherit.006.desc_accept
+            }
+            triggered_desc = {
+                trigger = { var:eotg_inh_profile ?= flag:rage }
+                desc = eotg_aug_inherit.006.refuse_rage
+            }
+            triggered_desc = {
+                trigger = { var:eotg_inh_profile ?= flag:ledger }
+                desc = eotg_aug_inherit.006.refuse_ledger
+            }
+            triggered_desc = {
+                trigger = { var:eotg_inh_profile ?= flag:cold }
+                desc = eotg_aug_inherit.006.refuse_cold
+            }
+            desc = eotg_aug_inherit.006.refuse_certain
+        }
+    }
+    theme = family
+
+    trigger = { eotg_aug_inherit_chain_valid = { FULL = yes } }
+    on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
+
+    left_portrait = {
+        character = root
+        animation = worry
+    }
+    right_portrait = {
+        character = scope:eotg_inh_heir
+        animation = stress
+    }
+
+    immediate = {
+        eotg_aug_inherit_scopes_effect = yes
+        add_character_flag = { flag = eotg_flag_aug_inh_talked  years = 6 }
+        hidden_effect = {
+            if = {
+                limit = { exists = scope:eotg_inh_accept_forced }
+                save_scope_value_as = { name = eotg_inh_accepted  value = yes }
+            }
+            else = {
+                eotg_aug_inherit_roll_effect = { CHANCE = eotg_aug_inherit_accept_chance  NAME = eotg_inh_accepted }
+            }
+        }
+    }
+
+    # (accept) "Then we hold each other to it." L4 (H-15 in the leaf).
+    option = {
+        name = eotg_aug_inherit.006.a
+        trigger = { exists = scope:eotg_inh_accepted }
+        eotg_aug_inherit_leaf_terms_effect = yes
+        trigger_event = { id = eotg_aug_inherit.022  days = 365 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 10  has_trait = forgiving }
+        }
+    }
+
+    # (accept) "And the physicians are part of the terms." H-5; .003 rolls no
+    # refusal. Hidden once .003 has run (loop guard).
+    option = {
+        name = eotg_aug_inherit.006.b
+        trigger = {
+            exists = scope:eotg_inh_accepted
+            NOT = { has_character_flag = eotg_flag_aug_inh_physicians_seen }
+        }
+        save_scope_value_as = { name = eotg_inh_no_refusal  value = yes }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = -5 } }
+        trigger_event = { id = eotg_aug_inherit.003  days = { 14 30 } }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 10  has_trait = craven }
+        }
+    }
+
+    # (accept) [Overclocked] "Then I'll meet you where you are." H-5.
+    option = {
+        name = eotg_aug_inherit.006.c
+        trigger = {
+            exists = scope:eotg_inh_accepted
+            eotg_is_aug_tier3 = yes
+        }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = -5 } }
+        trigger_event = { id = eotg_aug_inherit.020  days = { 7 14 } }
+        ai_chance = {
+            base = 10
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 15  has_trait = eccentric }
+            modifier = { factor = 0  has_trait = content }
+        }
+    }
+
+    # (refuse) "Then the council decides." H+5.
+    option = {
+        name = eotg_aug_inherit.006.ra
+        trigger = { NOT = { exists = scope:eotg_inh_accepted } }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 5 } }
+        trigger_event = { id = eotg_aug_inherit.005  days = { 7 14 } }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = stubborn }
+            modifier = { add = 10  has_trait = just }
+        }
+    }
+
+    # (refuse) "I'll give you time." H+5.
+    option = {
+        name = eotg_aug_inherit.006.rb
+        trigger = { NOT = { exists = scope:eotg_inh_accepted } }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 5 } }
+        eotg_aug_inherit_route_pattern_effect = { DAYS_MIN = 60  DAYS_MAX = 120 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = patient }
+            modifier = { add = 10  has_trait = trusting }
+        }
+    }
+}
+
+
+# -- eotg_aug_inherit.007 -----------------------------------------------------
+# The Answer. Immediate: the renunciation roll. Callers: .002 (c, p_cold).
+
+eotg_aug_inherit.007 = {
+    type = character_event
+    title = eotg_aug_inherit.007.t
+    desc = {
+        desc = eotg_aug_inherit.007.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { exists = scope:eotg_inh_renounced }
+                desc = eotg_aug_inherit.007.accept
+            }
+            desc = eotg_aug_inherit.007.refuse
+        }
+    }
+    theme = family
+
+    trigger = { eotg_aug_inherit_chain_valid = { FULL = yes } }
+    on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
+
+    left_portrait = {
+        character = root
+        animation = worry
+    }
+    right_portrait = {
+        character = scope:eotg_inh_heir
+        animation = thinking
+    }
+
+    immediate = {
+        eotg_aug_inherit_scopes_effect = yes
+        hidden_effect = {
+            eotg_aug_inherit_roll_effect = { CHANCE = eotg_aug_inherit_renounce_chance  NAME = eotg_inh_renounced }
+        }
+    }
+
+    # (accept) "Thank you." L7, no prestige cost (a renunciation).
+    option = {
+        name = eotg_aug_inherit.007.a
+        trigger = { exists = scope:eotg_inh_renounced }
+        eotg_aug_inherit_leaf_disinherit_effect = { COST = no }
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 15  has_trait = compassionate }
+            modifier = { add = 10  has_trait = honest }
+        }
+    }
+
+    # (accept) "No. Stay my heir. I only had to know." H-8; .006 with the
+    # acceptance forced, or straight to the terms if .006 has already run.
+    option = {
+        name = eotg_aug_inherit.007.b
+        trigger = { exists = scope:eotg_inh_renounced }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = -8 } }
+        if = {
+            limit = { has_character_flag = eotg_flag_aug_inh_talked }
+            eotg_aug_inherit_leaf_terms_effect = yes
+            trigger_event = { id = eotg_aug_inherit.022  days = 365 }
+        }
+        else = {
+            save_scope_value_as = { name = eotg_inh_accept_forced  value = yes }
+            trigger_event = { id = eotg_aug_inherit.006  days = { 7 14 } }
+        }
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 10  has_trait = trusting }
+        }
+    }
+
+    # (refuse) "Then I'll do it for you." .013, violent +15
+    # (scope value eotg_inh_violent_plus). H+5.
+    option = {
+        name = eotg_aug_inherit.007.ra
+        trigger = { NOT = { exists = scope:eotg_inh_renounced } }
+        save_scope_value_as = { name = eotg_inh_violent_plus  value = yes }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 5 } }
+        trigger_event = { id = eotg_aug_inherit.013  days = { 7 14 } }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = stubborn }
+            modifier = { add = 10  has_trait = callous }
+        }
+    }
+
+    # (refuse) "Forget I asked." The Ledger marks the heir (next_two +25). H+5.
+    option = {
+        name = eotg_aug_inherit.007.rb
+        trigger = { NOT = { exists = scope:eotg_inh_renounced } }
+        scope:eotg_inh_heir = {
+            if = {
+                limit = { scope:eotg_inh_ruler = { var:eotg_inh_profile ?= flag:ledger } }
+                add_character_flag = { flag = eotg_flag_aug_inh_marked  years = 6 }
+            }
+            eotg_add_fracture_risk = { AMOUNT = 5 }
+        }
+        eotg_aug_inherit_route_pattern_effect = { DAYS_MIN = 60  DAYS_MAX = 120 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = craven }
+            modifier = { add = 10  has_trait = forgiving }
+        }
+    }
+}
+
+
+# -- eotg_aug_inherit.008 -----------------------------------------------------
+# The Ward. Both options confine the heir and roll the hidden breakout
+# (eotg_aug_inherit_ward_effect): .023 if it holds, .017 if not.
+# Caller: .003 (b).
+
+eotg_aug_inherit.008 = {
+    type = character_event
+    title = eotg_aug_inherit.008.t
+    desc = eotg_aug_inherit.008.desc
+    theme = dungeon
+
+    trigger = { eotg_aug_inherit_chain_valid = { FULL = yes } }
+    on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
+
+    left_portrait = {
+        character = root
+        animation = worry
+    }
+    right_portrait = {
+        character = scope:eotg_inh_heir
+        animation = stress
+    }
+
+    immediate = {
+        eotg_aug_inherit_scopes_effect = yes
+    }
+
+    # "Keep [heir] comfortable." Confined to quarters, sedated. H-10.
+    option = {
+        name = eotg_aug_inherit.008.a
+        trigger = { gold >= minor_gold_value }
+        remove_short_term_gold = minor_gold_value
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = -10 } }
+        eotg_aug_inherit_ward_effect = { TYPE = house_arrest  OUTCOME = yes }
+        eotg_aug_stress_tyranny_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 10  has_trait = generous }
+        }
+    }
+
+    # "Chains, and a guard who doesn't talk." The cells (breakout x0.5). H+5.
+    option = {
+        name = eotg_aug_inherit.008.b
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 5 } }
+        eotg_aug_inherit_ward_effect = { TYPE = dungeon  OUTCOME = yes }
+        eotg_aug_stress_cruelty_effect = yes
+        ai_chance = {
+            base = 25
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = 15  has_trait = paranoid }
+        }
+    }
+}
+
+
+# -- eotg_aug_inherit.009 -----------------------------------------------------
+# The Pattern, the danger hub. Runs once (eotg_flag_aug_inh_pattern_seen;
+# every route into it goes through eotg_aug_inherit_route_pattern_effect).
+# Immediate: H+8 and the threat roll; the desc is the warning sign the
+# ruler sees, never a forecast of a plot (spec §8).
+# Callers: eotg_aug_inherit_route_pattern_effect, from .002 (p_certain, d),
+# .003 (a_ref), .004 (a), .005 (c), .006 (rb), .007 (rb), .010 (c), .012 (b),
+# .014 (c), .015 (b fail, c).
+
+eotg_aug_inherit.009 = {
+    type = character_event
+    title = eotg_aug_inherit.009.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { var:eotg_inh_threat ?= flag:kill_ruler }
+                desc = eotg_aug_inherit.009.desc_kill_ruler
+            }
+            triggered_desc = {
+                trigger = { var:eotg_inh_threat ?= flag:massacre }
+                desc = eotg_aug_inherit.009.desc_massacre
+            }
+            triggered_desc = {
+                trigger = { var:eotg_inh_threat ?= flag:next_two }
+                desc = eotg_aug_inherit.009.desc_next_two
+            }
+            desc = eotg_aug_inherit.009.desc_self
+        }
+    }
+    theme = dread
+
+    trigger = { eotg_aug_inherit_chain_valid = { FULL = yes } }
+    on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
+
+    left_portrait = {
+        character = root
+        animation = paranoia
+    }
+    right_portrait = {
+        character = scope:eotg_inh_heir
+        animation = anger
+    }
+
+    immediate = {
+        eotg_aug_inherit_scopes_effect = yes
+        add_character_flag = { flag = eotg_flag_aug_inh_pattern_seen  years = 6 }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 8 } }
+        hidden_effect = {
+            eotg_aug_inherit_roll_threat_effect = yes
+        }
+    }
+
+    # "Arrest [heir] before the next watch." The arrest roll is hidden:
+    # success, the cells (and the ward's own roll); failure, the threat in
+    # 1-3 days with a toast. H+5.
+    option = {
+        name = eotg_aug_inherit.009.a
+        trigger = { scope:eotg_inh_heir = { is_imprisoned = no } }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 5 } }
+        custom_tooltip = eotg_aug_inherit.009.a.tt
+        hidden_effect = {
+            eotg_aug_inherit_roll_effect = { CHANCE = eotg_aug_inherit_arrest_chance  NAME = eotg_inh_arrested }
+            if = {
+                limit = { exists = scope:eotg_inh_arrested }
+                eotg_aug_inherit_ward_effect = { TYPE = dungeon  OUTCOME = yes }
+            }
+            else = {
+                send_interface_toast = {
+                    title = eotg_aug_inherit.009.a_fail_tt
+                    left_icon = scope:eotg_inh_heir
+                }
+                eotg_aug_inherit_fire_threat_effect = { DAYS_MIN = 1  DAYS_MAX = 3 }
+            }
+        }
+        eotg_aug_stress_tyranny_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = paranoid }
+            modifier = { add = 15  has_trait = just }
+        }
+    }
+
+    # "Double the guard and wait." Guarded. A self threat: 50% the guard
+    # finds the heir in time (confined to quarters). H+3.
+    option = {
+        name = eotg_aug_inherit.009.b
+        add_character_flag = { flag = eotg_flag_aug_inh_guarded  years = 6 }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 3 } }
+        custom_tooltip = eotg_aug_inherit.009.b.tt
+        hidden_effect = {
+            if = {
+                limit = { var:eotg_inh_threat ?= flag:self }
+                eotg_aug_inherit_roll_effect = { CHANCE = 50  NAME = eotg_inh_found }
+            }
+            if = {
+                limit = { exists = scope:eotg_inh_found }
+                eotg_aug_inherit_ward_effect = { TYPE = house_arrest  OUTCOME = yes }
+            }
+            else = {
+                eotg_aug_inherit_fire_threat_effect = { DAYS_MIN = 30  DAYS_MAX = 90 }
+            }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = craven }
+            modifier = { add = 10  has_trait = patient }
+        }
+    }
+
+    # "Go to [heir]. Talk [heir_himher] down." Hidden talk roll: success,
+    # .006 with the acceptance forced; failure, the threat in 7-14. H-5.
+    option = {
+        name = eotg_aug_inherit.009.c
+        trigger = { NOT = { has_character_flag = eotg_flag_aug_inh_talked } }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = -5 } }
+        custom_tooltip = eotg_aug_inherit.009.c.tt
+        hidden_effect = {
+            eotg_aug_inherit_roll_effect = { CHANCE = eotg_aug_inherit_talk_chance  NAME = eotg_inh_talked_down }
+            if = {
+                limit = { exists = scope:eotg_inh_talked_down }
+                save_scope_value_as = { name = eotg_inh_accept_forced  value = yes }
+                trigger_event = { id = eotg_aug_inherit.006  days = { 7 14 } }
+            }
+            else = {
+                eotg_aug_inherit_fire_threat_effect = { DAYS_MIN = 7  DAYS_MAX = 14 }
+            }
+        }
+        ai_chance = {
+            base = 25
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 15  has_trait = gregarious }
+        }
+    }
+
+    # [brave] "Let it come to me, then." Ready: one victim fewer, the attempt
+    # on the ruler less likely to succeed. Reads the band through the
+    # massacre count; no move here.
+    option = {
+        name = eotg_aug_inherit.009.d
+        trigger = { has_trait = brave }
+        trait = brave
+        add_character_flag = { flag = eotg_flag_aug_inh_ruler_ready  years = 6 }
+        custom_tooltip = eotg_aug_inherit.009.d.tt
+        hidden_effect = {
+            eotg_aug_inherit_fire_threat_effect = { DAYS_MIN = 14  DAYS_MAX = 30 }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = brave }
+            modifier = { add = 10  has_trait = wrathful }
+        }
+    }
+
+    # [callous / sadistic] "End it before [heir] does." L17, in secret.
+    option = {
+        name = eotg_aug_inherit.009.e
+        trigger = {
+            OR = {
+                has_trait = callous
+                has_trait = sadistic
+            }
+        }
+        eotg_aug_inherit_leaf_kill_heir_effect = { REASON = murder }
+        eotg_aug_stress_murder_effect = yes
+        add_dread = 20
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 20
+            modifier = { add = 25  has_trait = callous }
+            modifier = { add = 20  has_trait = sadistic }
+            modifier = { factor = 0  has_trait = compassionate }
+        }
+    }
+}
+
+
+# -- eotg_aug_inherit.010 -----------------------------------------------------
+# The Table. The odds in words by table (end.001's shape), plus a line if the
+# heir was coerced. The surgery resolves hidden in the leaf; .021 reveals it.
+# Caller: .003 (a, c, d).
+
+eotg_aug_inherit.010 = {
+    type = character_event
+    title = eotg_aug_inherit.010.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { var:eotg_inh_table ?= flag:physician }
+                desc = eotg_aug_inherit.010.desc_physician
+            }
+            triggered_desc = {
+                trigger = { var:eotg_inh_table ?= flag:back }
+                desc = eotg_aug_inherit.010.desc_back
+            }
+            desc = eotg_aug_inherit.010.desc_self
+        }
+        triggered_desc = {
+            trigger = { has_character_flag = eotg_flag_aug_inh_coerced }
+            desc = eotg_aug_inherit.010.coerced
+        }
+    }
+    theme = medicine
+
+    trigger = { eotg_aug_inherit_chain_valid = { FULL = yes } }
+    on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
+
+    left_portrait = {
+        character = root
+        animation = worry
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_inh_surgeon }
+        character = scope:eotg_inh_surgeon
+        animation = personality_rational
+    }
+    lower_right_portrait = {
+        trigger = { exists = scope:eotg_inh_heir }
+        character = scope:eotg_inh_heir
+    }
+
+    immediate = {
+        eotg_aug_inherit_scopes_effect = yes
+        hidden_effect = {
+            if = {
+                limit = {
+                    NOT = { var:eotg_inh_table ?= flag:self }
+                    employs_court_position = court_physician_court_position
+                }
+                court_position:court_physician_court_position = { save_scope_as = eotg_inh_surgeon }
+            }
+        }
+    }
+
+    # "Begin."
+    option = {
+        name = eotg_aug_inherit.010.a
+        trigger = {
+            OR = {
+                AND = {
+                    var:eotg_inh_table ?= flag:physician
+                    gold >= major_gold_value
+                }
+                AND = {
+                    NOT = { var:eotg_inh_table ?= flag:physician }
+                    gold >= medium_gold_value
+                }
+            }
+        }
+        if = {
+            limit = { var:eotg_inh_table ?= flag:physician }
+            eotg_aug_inherit_leaf_excise_effect = { TABLE = physician }
+        }
+        else_if = {
+            limit = { var:eotg_inh_table ?= flag:back }
+            eotg_aug_inherit_leaf_excise_effect = { TABLE = back }
+        }
+        else = {
+            eotg_aug_inherit_leaf_excise_effect = { TABLE = self }
+        }
+        trigger_event = { id = eotg_aug_inherit.021  days = 3 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 15  has_trait = brave }
+            modifier = { add = 15  has_trait = diligent }
+        }
+    }
+
+    # [compassionate] "Begin. I'll stay with [heir] while they work."
+    option = {
+        name = eotg_aug_inherit.010.b
+        trigger = {
+            has_trait = compassionate
+            OR = {
+                AND = {
+                    var:eotg_inh_table ?= flag:physician
+                    gold >= major_gold_value
+                }
+                AND = {
+                    NOT = { var:eotg_inh_table ?= flag:physician }
+                    gold >= medium_gold_value
+                }
+            }
+        }
+        trait = compassionate
+        scope:eotg_inh_heir = {
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+        }
+        if = {
+            limit = { var:eotg_inh_table ?= flag:physician }
+            eotg_aug_inherit_leaf_excise_effect = { TABLE = physician }
+        }
+        else_if = {
+            limit = { var:eotg_inh_table ?= flag:back }
+            eotg_aug_inherit_leaf_excise_effect = { TABLE = back }
+        }
+        else = {
+            eotg_aug_inherit_leaf_excise_effect = { TABLE = self }
+        }
+        stress_impact = { base = minor_stress_impact_loss }
+        trigger_event = { id = eotg_aug_inherit.021  days = 3 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = compassionate }
+            modifier = { add = 10  has_trait = gregarious }
+        }
+    }
+
+    # "Not today." H+5.
+    option = {
+        name = eotg_aug_inherit.010.c
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 5 } }
+        eotg_aug_inherit_route_pattern_effect = { DAYS_MIN = 30  DAYS_MAX = 60 }
+        ai_chance = {
+            base = 15
+            modifier = { add = 20  has_trait = craven }
+            modifier = { add = 10  has_trait = lazy }
+        }
+    }
+}
+
+
+# -- eotg_aug_inherit.011 -----------------------------------------------------
+# Passage Out: L6. A paid berth on an outbound ship; no destination, no
+# Unclaimed region, no polity named. The heir stays in the line (c aside).
+# Caller: .004 (b).
+
+eotg_aug_inherit.011 = {
+    type = character_event
+    title = eotg_aug_inherit.011.t
+    desc = eotg_aug_inherit.011.desc
+    theme = secret
+
+    trigger = { eotg_aug_inherit_chain_valid = { FULL = yes } }
+    on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
+
+    left_portrait = {
+        character = root
+        animation = sadness
+    }
+    right_portrait = {
+        character = scope:eotg_inh_heir
+        animation = stress
+    }
+
+    immediate = {
+        eotg_aug_inherit_scopes_effect = yes
+    }
+
+    # "Take the berth. Don't come back." (H+5 in the leaf)
+    option = {
+        name = eotg_aug_inherit.011.a
+        scope:eotg_inh_heir = {
+            add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 5 }
+        }
+        eotg_aug_inherit_leaf_exile_effect = { STYLE = plain }
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = callous }
+            modifier = { add = 10  has_trait = wrathful }
+        }
+    }
+
+    # "Go, with passage and credit, and my word." (H-5 in the leaf)
+    option = {
+        name = eotg_aug_inherit.011.b
+        trigger = { gold >= medium_gold_value }
+        eotg_aug_inherit_leaf_exile_effect = { STYLE = credit }
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = generous }
+            modifier = { add = 10  has_trait = compassionate }
+        }
+    }
+
+    # [vengeful / arbitrary] "Take the berth. You are no longer my heir."
+    # (H+8 in the leaf)
+    option = {
+        name = eotg_aug_inherit.011.c
+        trigger = {
+            OR = {
+                has_trait = vengeful
+                has_trait = arbitrary
+            }
+        }
+        eotg_aug_inherit_leaf_exile_effect = { STYLE = disinherit }
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 25  has_trait = vengeful }
+            modifier = { add = 15  has_trait = arbitrary }
+        }
+    }
+}
+
+
+# -- eotg_aug_inherit.012 -----------------------------------------------------
+# The Shuttle That Never Docked: L8. Lost in transit between systems; the
+# court mourns someone who is on a ship elsewhere. Exposure, if it comes, is
+# a witness who saw the heir alive (hidden roll in the leaf, toast on reveal).
+# Caller: .004 (d).
+
+eotg_aug_inherit.012 = {
+    type = character_event
+    title = eotg_aug_inherit.012.t
+    desc = eotg_aug_inherit.012.desc
+    theme = secret
+
+    trigger = { eotg_aug_inherit_chain_valid = { FULL = yes } }
+    on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
+
+    left_portrait = {
+        character = root
+        animation = scheme
+    }
+    right_portrait = {
+        character = scope:eotg_inh_heir
+        animation = worry
+    }
+
+    immediate = {
+        eotg_aug_inherit_scopes_effect = yes
+    }
+
+    # "Do it." L8 (H-5 in the leaf).
+    option = {
+        name = eotg_aug_inherit.012.a
+        trigger = { gold >= medium_gold_value }
+        eotg_aug_inherit_leaf_transit_effect = yes
+        eotg_aug_stress_lie_effect = yes
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = deceitful }
+            modifier = { add = 10  has_trait = schemer }
+        }
+    }
+
+    # "No. I can't do this." H+3.
+    option = {
+        name = eotg_aug_inherit.012.b
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 3 } }
+        eotg_aug_inherit_route_pattern_effect = { DAYS_MIN = 30  DAYS_MAX = 60 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = honest }
+            modifier = { add = 10  has_trait = just }
+        }
+    }
+}
+
+
+# -- eotg_aug_inherit.013 -----------------------------------------------------
+# Struck from the Line. Immediate: the disinheritance (L7's leaf, with the
+# prestige cost), then the reaction roll into var:eotg_inh_reaction. A
+# violent reaction presets the threat (spec §5A.3). Flatline never rolls
+# violent. Callers: .005 (a), .007 (ra; violent +15 through scope value
+# eotg_inh_violent_plus).
+
+eotg_aug_inherit.013 = {
+    type = character_event
+    title = eotg_aug_inherit.013.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { var:eotg_inh_reaction ?= flag:accept }
+                desc = eotg_aug_inherit.013.desc_accept
+            }
+            triggered_desc = {
+                trigger = { var:eotg_inh_reaction ?= flag:leave }
+                desc = eotg_aug_inherit.013.desc_leave
+            }
+            desc = eotg_aug_inherit.013.desc_violent
+        }
+    }
+    theme = realm
+
+    trigger = { eotg_aug_inherit_chain_valid = { FULL = yes } }
+    on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+    right_portrait = {
+        character = scope:eotg_inh_heir
+        animation = anger
+    }
+
+    immediate = {
+        eotg_aug_inherit_scopes_effect = yes
+        eotg_aug_inherit_leaf_disinherit_effect = { COST = yes }
+        hidden_effect = {
+            random_list = {
+                40 = {
+                    modifier = { add = 30  var:eotg_inh_profile ?= flag:cold }
+                    modifier = { add = -20  var:eotg_inh_profile ?= flag:certain }
+                    modifier = { add = 15  var:eotg_inh_bond ?= flag:dutiful }
+                    modifier = { add = 10  var:eotg_inh_bond ?= flag:favourite }
+                    modifier = { add = -20  var:eotg_inh_bond ?= flag:rival }
+                    set_variable = { name = eotg_inh_reaction  value = flag:accept }
+                }
+                25 = {
+                    modifier = { add = 10  var:eotg_inh_profile ?= flag:rage }
+                    modifier = { add = 20  var:eotg_inh_bond ?= flag:estranged }
+                    set_variable = { name = eotg_inh_reaction  value = flag:leave }
+                }
+                15 = {
+                    modifier = { add = 25  var:eotg_inh_profile ?= flag:ledger }
+                    modifier = { add = 25  var:eotg_inh_profile ?= flag:certain }
+                    modifier = { add = 20  var:eotg_inh_profile ?= flag:rage }
+                    modifier = { add = 20  var:eotg_inh_bond ?= flag:rival }
+                    modifier = { add = 15  exists = scope:eotg_inh_violent_plus }
+                    modifier = { factor = 0  var:eotg_inh_profile ?= flag:cold }
+                    set_variable = { name = eotg_inh_reaction  value = flag:violent }
+                }
+            }
+            if = {
+                limit = { var:eotg_inh_reaction ?= flag:violent }
+                if = {
+                    limit = {
+                        OR = {
+                            var:eotg_inh_profile ?= flag:ledger
+                            var:eotg_inh_bond ?= flag:claimant
+                        }
+                    }
+                    set_variable = { name = eotg_inh_threat  value = flag:next_two }
+                }
+                else_if = {
+                    limit = {
+                        OR = {
+                            var:eotg_inh_profile ?= flag:certain
+                            var:eotg_inh_bond ?= flag:rival
+                        }
+                    }
+                    set_variable = { name = eotg_inh_threat  value = flag:kill_ruler }
+                }
+                else_if = {
+                    limit = { var:eotg_inh_profile ?= flag:rage }
+                    set_variable = { name = eotg_inh_threat  value = flag:massacre }
+                }
+            }
+        }
+    }
+
+    # (accept) "It's done." L7 (the leaf ran in immediate; H-5 there).
+    option = {
+        name = eotg_aug_inherit.013.a
+        trigger = { var:eotg_inh_reaction ?= flag:accept }
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 10  has_trait = content }
+            modifier = { add = 10  has_trait = just }
+        }
+    }
+
+    # (leave) "Let [heir] go." L6 on the heir's own feet (H+5 in the leaf).
+    option = {
+        name = eotg_aug_inherit.013.la
+        trigger = { var:eotg_inh_reaction ?= flag:leave }
+        eotg_aug_inherit_leaf_exile_effect = { STYLE = plain }
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = content }
+            modifier = { add = 10  has_trait = craven }
+        }
+    }
+
+    # (leave) "Bring [heir] back under guard." The cells. H+8.
+    option = {
+        name = eotg_aug_inherit.013.lb
+        trigger = { var:eotg_inh_reaction ?= flag:leave }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 8 } }
+        eotg_aug_inherit_ward_effect = { TYPE = dungeon  OUTCOME = yes }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = wrathful }
+            modifier = { add = 10  has_trait = stubborn }
+        }
+    }
+
+    # (violent) "Guard the new line." The preset threat in 30-60. H+5.
+    option = {
+        name = eotg_aug_inherit.013.va
+        trigger = { var:eotg_inh_reaction ?= flag:violent }
+        add_character_flag = { flag = eotg_flag_aug_inh_guarded  years = 6 }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 5 } }
+        custom_tooltip = eotg_aug_inherit.013.va.tt
+        hidden_effect = {
+            eotg_aug_inherit_fire_threat_effect = { DAYS_MIN = 30  DAYS_MAX = 60 }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = paranoid }
+            modifier = { add = 10  has_trait = diligent }
+        }
+    }
+
+    # (violent) "Lock [heir] up before [heir_heshe] moves." The cells. H+5.
+    option = {
+        name = eotg_aug_inherit.013.vb
+        trigger = { var:eotg_inh_reaction ?= flag:violent }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 5 } }
+        eotg_aug_inherit_ward_effect = { TYPE = dungeon  OUTCOME = yes }
+        eotg_aug_stress_tyranny_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = just }
+            modifier = { add = 15  has_trait = paranoid }
+        }
+    }
+
+    # (violent) [callous] "End it." L17, in secret.
+    option = {
+        name = eotg_aug_inherit.013.vc
+        trigger = {
+            var:eotg_inh_reaction ?= flag:violent
+            has_trait = callous
+        }
+        trait = callous
+        eotg_aug_inherit_leaf_kill_heir_effect = { REASON = murder }
+        eotg_aug_stress_murder_effect = yes
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 20
+            modifier = { add = 25  has_trait = callous }
+            modifier = { add = 15  has_trait = vengeful }
+        }
+    }
+}
+
+
+# -- eotg_aug_inherit.014 -----------------------------------------------------
+# The Hand-Off: L9 / L10. The player follows the crown to the heir (owner
+# Q3); .026 reaches the heir in 3 days. Caller: .005 (b).
+
+eotg_aug_inherit.014 = {
+    type = character_event
+    title = eotg_aug_inherit.014.t
+    desc = eotg_aug_inherit.014.desc
+    theme = realm
+
+    trigger = { eotg_aug_inherit_chain_valid = { FULL = yes } }
+    on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
+
+    left_portrait = {
+        character = root
+        animation = thinking
+    }
+    right_portrait = {
+        character = scope:eotg_inh_heir
+        animation = worry
+    }
+
+    immediate = {
+        eotg_aug_inherit_scopes_effect = yes
+    }
+
+    # "Yes, with a warden at [heir_herhis] side." L9 (H-10 in the leaf).
+    option = {
+        name = eotg_aug_inherit.014.a
+        trigger = { eotg_aug_inherit_can_abdicate = yes }
+        eotg_aug_inherit_abdicate_effect = { WARDEN = yes  NOTIFY = yes }
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = humble }
+            modifier = { add = 15  has_trait = content }
+        }
+    }
+
+    # "Quietly. No warden. It's [heir_herhis] now." L10 (H+10 in the leaf).
+    option = {
+        name = eotg_aug_inherit.014.b
+        trigger = { eotg_aug_inherit_can_abdicate = yes }
+        stress_impact = { base = major_stress_impact_loss }
+        eotg_aug_inherit_abdicate_effect = { WARDEN = no  NOTIFY = yes }
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 15
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 10  has_trait = trusting }
+            modifier = { add = -20  has_trait = paranoid }
+        }
+    }
+
+    # "Not yet." H+5.
+    option = {
+        name = eotg_aug_inherit.014.c
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 5 } }
+        eotg_aug_inherit_route_pattern_effect = { DAYS_MIN = 30  DAYS_MAX = 90 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 10  has_trait = stubborn }
+        }
+    }
+}
+
+
+# -- eotg_aug_inherit.015 -----------------------------------------------------
+# The Offer. The second in line proposes to remove the heir.
+# Caller: .005 (d).
+
+eotg_aug_inherit.015 = {
+    type = character_event
+    title = eotg_aug_inherit.015.t
+    desc = eotg_aug_inherit.015.desc
+    theme = secret
+
+    trigger = {
+        eotg_aug_inherit_chain_valid = { FULL = yes }
+        exists = scope:eotg_inh_second
+        scope:eotg_inh_second = { is_alive = yes }
+    }
+    on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
+
+    left_portrait = {
+        character = root
+        animation = thinking
+    }
+    right_portrait = {
+        character = scope:eotg_inh_second
+        animation = scheme
+    }
+
+    immediate = {
+        eotg_aug_inherit_scopes_effect = yes
+    }
+
+    # "Do what you must. I don't want to know." With your leave. H+5.
+    option = {
+        name = eotg_aug_inherit.015.a
+        eotg_aug_stress_murder_effect = yes
+        save_scope_value_as = { name = eotg_inh_leave  value = yes }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 5 } }
+        trigger_event = { id = eotg_aug_inherit.027  days = { 30 90 } }
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = 10  has_trait = ambitious }
+            modifier = { factor = 0  has_trait = compassionate }
+        }
+    }
+
+    # "No. And if [heir] dies, I'll know whose hand it was." Hidden roll: the
+    # second acts anyway (without your leave), else .009. H+3.
+    option = {
+        name = eotg_aug_inherit.015.b
+        scope:eotg_inh_second = {
+            add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+        }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 3 } }
+        custom_tooltip = eotg_aug_inherit.015.b.tt
+        hidden_effect = {
+            eotg_aug_inherit_roll_effect = { CHANCE = eotg_aug_inherit_second_acts_chance  NAME = eotg_inh_second_acts }
+            if = {
+                limit = { exists = scope:eotg_inh_second_acts }
+                trigger_event = { id = eotg_aug_inherit.027  days = { 60 120 } }
+            }
+            else = {
+                eotg_aug_inherit_route_pattern_effect = { DAYS_MIN = 30  DAYS_MAX = 90 }
+            }
+        }
+        ai_chance = {
+            base = 40
+            modifier = { add = 15  has_trait = just }
+            modifier = { add = 15  has_trait = honest }
+        }
+    }
+
+    # [just] "Say it to [heir]'s face." The heir marked; threat next_two. H+10.
+    option = {
+        name = eotg_aug_inherit.015.c
+        trigger = { has_trait = just }
+        trait = just
+        scope:eotg_inh_heir = {
+            add_character_flag = { flag = eotg_flag_aug_inh_marked  years = 6 }
+            eotg_add_fracture_risk = { AMOUNT = 10 }
+        }
+        hidden_effect = {
+            set_variable = { name = eotg_inh_threat  value = flag:next_two }
+        }
+        eotg_aug_inherit_route_pattern_effect = { DAYS_MIN = 14  DAYS_MAX = 30 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = just }
+            modifier = { add = 10  has_trait = honest }
+        }
+    }
+}
+
+
+# -- eotg_aug_inherit.016 -----------------------------------------------------
+# The List: L13 (required). The heir arranged the deaths of the next two in
+# line (leaf effect in immediate, so the desc names who died). Only
+# desc_ledger mentions a list. If nobody is left in the line by the time this
+# fires, the only name between the heir and the seat is the ruler's: the
+# on_trigger_fail sends .018 instead (spec §5.4.1).
+# Caller: eotg_aug_inherit_fire_threat_effect (threat next_two).
+
+eotg_aug_inherit.016 = {
+    type = character_event
+    title = eotg_aug_inherit.016.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { var:eotg_inh_profile ?= flag:ledger }
+                desc = eotg_aug_inherit.016.desc_ledger
+            }
+            desc = eotg_aug_inherit.016.desc_neutral
+        }
+        first_valid = {
+            triggered_desc = {
+                trigger = { exists = scope:eotg_inh_killed_b }
+                desc = eotg_aug_inherit.016.count_two
+            }
+            triggered_desc = {
+                trigger = { exists = scope:eotg_inh_spared }
+                desc = eotg_aug_inherit.016.spared
+            }
+            desc = eotg_aug_inherit.016.desc_one
+        }
+        triggered_desc = {
+            trigger = { exists = scope:eotg_inh_child_victim }
+            desc = eotg_aug_inherit.016.child
+        }
+    }
+    theme = death
+
+    trigger = {
+        eotg_aug_inherit_chain_valid = { FULL = no }
+        eotg_aug_inherit_line_eligible = yes
+    }
+    on_trigger_fail = {
+        if = {
+            limit = { eotg_aug_inherit_chain_valid = { FULL = no } }
+            eotg_aug_inherit_scopes_effect = yes
+            set_variable = { name = eotg_inh_threat  value = flag:kill_ruler }
+            trigger_event = { id = eotg_aug_inherit.018  days = { 1 3 } }
+        }
+        else = {
+            eotg_aug_inherit_close_effect = yes
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = shock
+    }
+    right_portrait = {
+        character = scope:eotg_inh_heir
+        animation = schadenfreude
+    }
+    lower_right_portrait = {
+        trigger = { exists = scope:eotg_inh_killed_a }
+        character = scope:eotg_inh_killed_a
+    }
+
+    immediate = {
+        eotg_aug_inherit_scopes_effect = yes
+        eotg_aug_inherit_leaf_next_two_effect = yes
+    }
+
+    # "Take [heir] into custody." The cells; the ward's roll still applies,
+    # and .023 / .017 close the chain. H-5.
+    option = {
+        name = eotg_aug_inherit.016.a
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = -5 } }
+        eotg_aug_inherit_ward_effect = { TYPE = dungeon  OUTCOME = no }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = just }
+            modifier = { add = 10  has_trait = diligent }
+        }
+    }
+
+    # "Execute [heir]." L17 within L13.
+    option = {
+        name = eotg_aug_inherit.016.b
+        eotg_aug_inherit_leaf_kill_heir_effect = { REASON = execution }
+        eotg_aug_stress_murder_effect = yes
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = vengeful }
+            modifier = { add = 15  has_trait = wrathful }
+        }
+    }
+
+    # "[heir] is all the line I have left." The heir stays; the vassals
+    # recoil. H+10.
+    option = {
+        name = eotg_aug_inherit.016.c
+        every_vassal = {
+            limit = { opinion = { target = root  value < 20 } }
+            add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 5 }
+        }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 10 } }
+        eotg_aug_stress_neglect_effect = yes
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 15
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 10  has_trait = craven }
+        }
+    }
+}
+
+
+# -- eotg_aug_inherit.017 -----------------------------------------------------
+# The Long Watch: L14 (required). The massacre resolves in immediate
+# (fracture.004's shape); from the ward, the heir is released first and the
+# breakout toast fires. Desc works for an empty court (desc "none").
+# Callers: eotg_aug_inherit_fire_threat_effect (threat massacre),
+# eotg_aug_inherit_ward_effect (breakout).
+
+eotg_aug_inherit.017 = {
+    type = character_event
+    title = eotg_aug_inherit.017.t
+    desc = {
+        desc = eotg_aug_inherit.017.desc
+        triggered_desc = {
+            trigger = { exists = scope:eotg_inh_from_ward }
+            desc = eotg_aug_inherit.017.from_ward
+        }
+        triggered_desc = {
+            trigger = { has_character_flag = eotg_flag_aug_inh_ruler_ready }
+            desc = eotg_aug_inherit.017.ready
+        }
+        first_valid = {
+            triggered_desc = {
+                trigger = { exists = scope:eotg_inh_dead_1 }
+                desc = eotg_aug_inherit.017.killed
+            }
+            desc = eotg_aug_inherit.017.none
+        }
+        triggered_desc = {
+            trigger = { exists = scope:eotg_inh_wounded }
+            desc = eotg_aug_inherit.017.wounded
+        }
+    }
+    theme = dread
+
+    trigger = { eotg_aug_inherit_chain_valid = { FULL = no } }
+    on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
+
+    left_portrait = {
+        character = root
+        animation = fear
+    }
+    right_portrait = {
+        character = scope:eotg_inh_heir
+        animation = rage
+    }
+    lower_right_portrait = {
+        trigger = { exists = scope:eotg_inh_dead_1 }
+        character = scope:eotg_inh_dead_1
+    }
+
+    immediate = {
+        eotg_aug_inherit_scopes_effect = yes
+        if = {
+            limit = { scope:eotg_inh_heir = { is_imprisoned = yes } }
+            send_interface_toast = {
+                title = eotg_aug_inherit.ward_breakout_tt
+                left_icon = scope:eotg_inh_heir
+            }
+        }
+        eotg_aug_inherit_leaf_massacre_effect = yes
+    }
+
+    # "Take [heir] alive." The cells. H-5.
+    option = {
+        name = eotg_aug_inherit.017.a
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = -5 } }
+        eotg_aug_inherit_confine_effect = { TYPE = dungeon  OUTCOME = no }
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = just }
+            modifier = { add = 10  has_trait = brave }
+        }
+    }
+
+    # "Cut [heir] down." L17 by the guards.
+    option = {
+        name = eotg_aug_inherit.017.b
+        eotg_aug_inherit_leaf_kill_heir_effect = { REASON = guards }
+        eotg_aug_stress_murder_effect = yes
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = wrathful }
+            modifier = { add = 15  has_trait = vengeful }
+        }
+    }
+
+    # [compassionate] "Hold [heir] until the shaking stops." Confined to
+    # quarters; 25% the ruler is hurt. H-10.
+    option = {
+        name = eotg_aug_inherit.017.c
+        trigger = { has_trait = compassionate }
+        trait = compassionate
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = -10 } }
+        eotg_aug_inherit_confine_effect = { TYPE = house_arrest  OUTCOME = no }
+        random = {
+            chance = 25
+            increase_wounds_effect = { REASON = attacked }
+        }
+        stress_impact = { base = medium_stress_impact_gain }
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = compassionate }
+            modifier = { add = 10  has_trait = brave }
+        }
+    }
+}
+
+
+# -- eotg_aug_inherit.018 -----------------------------------------------------
+# The Last Audience: L15 (required), or .024. The heir comes to the ruler;
+# the desc is the bond, at most one spoken line from the heir. Each option
+# sets the attempt roll's modifier and resolves it (hidden; the leaf queues
+# .025 to the heir before the death, or .024 on a failure).
+# Callers: eotg_aug_inherit_fire_threat_effect (threat kill_ruler), .016
+# (on_trigger_fail, nobody left in the line).
+
+eotg_aug_inherit.018 = {
+    type = character_event
+    title = eotg_aug_inherit.018.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { var:eotg_inh_bond ?= flag:rival }
+                desc = eotg_aug_inherit.018.desc_rival
+            }
+            triggered_desc = {
+                trigger = { var:eotg_inh_bond ?= flag:estranged }
+                desc = eotg_aug_inherit.018.desc_estranged
+            }
+            triggered_desc = {
+                trigger = { var:eotg_inh_bond ?= flag:claimant }
+                desc = eotg_aug_inherit.018.desc_claimant
+            }
+            triggered_desc = {
+                trigger = { var:eotg_inh_bond ?= flag:favourite }
+                desc = eotg_aug_inherit.018.desc_favourite
+            }
+            desc = eotg_aug_inherit.018.desc_dutiful
+        }
+    }
+    theme = dread
+
+    trigger = {
+        eotg_aug_inherit_chain_valid = { FULL = no }
+        var:eotg_inh_heir ?= { is_imprisoned = no }
+    }
+    on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
+
+    left_portrait = {
+        character = root
+        animation = fear
+    }
+    right_portrait = {
+        character = scope:eotg_inh_heir
+        animation = rage
+    }
+
+    immediate = {
+        eotg_aug_inherit_scopes_effect = yes
+    }
+
+    # "Guards!" -15.
+    option = {
+        name = eotg_aug_inherit.018.a
+        custom_tooltip = eotg_aug_inherit.018.tt
+        hidden_effect = {
+            eotg_aug_inherit_leaf_attempt_effect = { MOD = -15  NOTIFY = yes }
+        }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = craven }
+            modifier = { add = 10  has_trait = paranoid }
+        }
+    }
+
+    # "Say [heir]'s name. Make [heir_himher] hear it." Favourite or dutiful
+    # -25, otherwise +5 (eotg_aug_inherit_attempt_mod_name).
+    option = {
+        name = eotg_aug_inherit.018.b
+        custom_tooltip = eotg_aug_inherit.018.tt
+        hidden_effect = {
+            eotg_aug_inherit_leaf_attempt_effect = { MOD = eotg_aug_inherit_attempt_mod_name  NOTIFY = yes }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 10  has_trait = honest }
+        }
+    }
+
+    # [brave] "Face [heir] yourself." The stronger hand -20, otherwise +5
+    # (eotg_aug_inherit_attempt_mod_face).
+    option = {
+        name = eotg_aug_inherit.018.c
+        trigger = { has_trait = brave }
+        trait = brave
+        custom_tooltip = eotg_aug_inherit.018.tt
+        hidden_effect = {
+            eotg_aug_inherit_leaf_attempt_effect = { MOD = eotg_aug_inherit_attempt_mod_face  NOTIFY = yes }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = brave }
+            modifier = { add = 10  has_trait = wrathful }
+        }
+    }
+}
+
+
+# -- eotg_aug_inherit.019 -----------------------------------------------------
+# The Quiet Room: L12. A death found, not a death in progress (spec §7.1).
+# The death runs in immediate: Flatline by vanilla death_suicide, every
+# other profile by the cascade. Value-neutral: stress and close-family
+# opinion only. Caller: eotg_aug_inherit_fire_threat_effect (threat self).
+
+eotg_aug_inherit.019 = {
+    type = character_event
+    title = eotg_aug_inherit.019.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { var:eotg_inh_profile ?= flag:cold }
+                desc = eotg_aug_inherit.019.desc_cold
+            }
+            desc = eotg_aug_inherit.019.desc_cascade
+        }
+    }
+    theme = death
+
+    trigger = { eotg_aug_inherit_chain_valid = { FULL = no } }
+    on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
+
+    left_portrait = {
+        character = root
+        animation = grief
+    }
+    right_portrait = {
+        character = scope:eotg_inh_heir
+        animation = dead
+        animate_if_dead = yes
+    }
+
+    immediate = {
+        eotg_aug_inherit_scopes_effect = yes
+        eotg_aug_inherit_leaf_heir_end_effect = yes
+    }
+
+    # "Lay [heir] to rest as my heir, not as a patient."
+    option = {
+        name = eotg_aug_inherit.019.a
+        stress_impact = { base = minor_stress_impact_loss }
+        every_close_family_member = {
+            limit = {
+                is_alive = yes
+                NOT = { this = scope:eotg_inh_heir }
+            }
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+        }
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 10  has_trait = just }
+        }
+    }
+
+    # "Tell the court it was a cascade." A lie on the Flatline path, the
+    # truth on every other.
+    option = {
+        name = eotg_aug_inherit.019.b
+        if = {
+            limit = { var:eotg_inh_profile ?= flag:cold }
+            eotg_aug_stress_lie_effect = yes
+            every_close_family_member = {
+                limit = {
+                    is_alive = yes
+                    NOT = { this = scope:eotg_inh_heir }
+                }
+                add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+            }
+        }
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = deceitful }
+            modifier = { add = 10  has_trait = craven }
+        }
+    }
+
+    # [callous] "It settled itself."
+    option = {
+        name = eotg_aug_inherit.019.c
+        trigger = { has_trait = callous }
+        trait = callous
+        every_close_family_member = {
+            limit = {
+                is_alive = yes
+                NOT = { this = scope:eotg_inh_heir }
+            }
+            add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 5 }
+        }
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 20
+            modifier = { add = 30  has_trait = callous }
+            modifier = { add = 10  has_trait = sadistic }
+        }
+    }
+}
+
+
+# -- eotg_aug_inherit.020 -----------------------------------------------------
+# Two Machines: L16, or the terms. Coupling: the ruler's tier changes.
+# Caller: .006 (c).
+
+eotg_aug_inherit.020 = {
+    type = character_event
+    title = eotg_aug_inherit.020.t
+    desc = eotg_aug_inherit.020.desc
+    theme = dread
+
+    trigger = { eotg_aug_inherit_chain_valid = { FULL = yes } }
+    on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
+
+    left_portrait = {
+        character = root
+        animation = personality_bold
+    }
+    right_portrait = {
+        character = scope:eotg_inh_heir
+        animation = shock
+    }
+
+    immediate = {
+        eotg_aug_inherit_scopes_effect = yes
+    }
+
+    # "Take the limits off." L16 (heir H-20 in the leaf).
+    option = {
+        name = eotg_aug_inherit.020.a
+        trigger = { eotg_is_aug_tier3 = yes }
+        eotg_aug_inherit_leaf_ruler_cascade_effect = yes
+        eotg_aug_stress_embrace_effect = yes
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 15  has_trait = eccentric }
+        }
+    }
+
+    # "No. One of us is enough." L4 (H-15 in the leaf).
+    option = {
+        name = eotg_aug_inherit.020.b
+        eotg_aug_inherit_leaf_terms_effect = yes
+        trigger_event = { id = eotg_aug_inherit.022  days = 365 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 15  has_trait = craven }
+        }
+    }
+}
+
+
+# -- eotg_aug_inherit.021 -----------------------------------------------------
+# After the Table: L1 / L2 / L3. The surgery resolved at .010 (hidden); the
+# desc reads eotg_inh_table_result. The heir may be dead, so the trigger only
+# asks that the chain still exists. Caller: .010 (a, b).
+
+eotg_aug_inherit.021 = {
+    type = character_event
+    title = eotg_aug_inherit.021.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { var:eotg_inh_table_result ?= flag:dead }
+                desc = eotg_aug_inherit.021.desc_dead
+            }
+            triggered_desc = {
+                trigger = { var:eotg_inh_table_result ?= flag:maimed }
+                desc = eotg_aug_inherit.021.desc_maimed
+            }
+            desc = eotg_aug_inherit.021.desc_clean
+        }
+    }
+    theme = medicine
+
+    trigger = { has_variable = eotg_inh_heir }
+    on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
+
+    left_portrait = {
+        character = root
+        animation = worry
+    }
+    right_portrait = {
+        character = scope:eotg_inh_heir
+        animation = sick
+        animate_if_dead = yes
+    }
+
+    immediate = {
+        eotg_aug_inherit_scopes_effect = yes
+    }
+
+    # (alive) "[heir] is still [heir]."
+    option = {
+        name = eotg_aug_inherit.021.a
+        trigger = { NOT = { var:eotg_inh_table_result ?= flag:dead } }
+        stress_impact = { base = minor_stress_impact_loss }
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 10  has_trait = compassionate }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # (alive) "Whatever's left of [heir_himher] is enough."
+    option = {
+        name = eotg_aug_inherit.021.b
+        trigger = { NOT = { var:eotg_inh_table_result ?= flag:dead } }
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 10  has_trait = callous }
+            modifier = { add = 10  has_trait = cynical }
+        }
+    }
+
+    # (dead) "Lay [heir] to rest."
+    option = {
+        name = eotg_aug_inherit.021.da
+        trigger = { var:eotg_inh_table_result ?= flag:dead }
+        stress_impact = { base = medium_stress_impact_gain }
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 10  has_trait = compassionate }
+            modifier = { add = 10  has_trait = just }
+        }
+    }
+
+    # (dead) "The table had its odds. I chose them."
+    option = {
+        name = eotg_aug_inherit.021.db
+        trigger = { var:eotg_inh_table_result ?= flag:dead }
+        stress_impact = { base = minor_stress_impact_gain }
+        add_prestige = 50
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = callous }
+            modifier = { add = 10  has_trait = stubborn }
+        }
+    }
+}
+
+
+# -- eotg_aug_inherit.022 -----------------------------------------------------
+# Kept Terms: L4, a year on. The desc reads the heir's band now: holding
+# (Flicker) or slipping (Fracture / Storm).
+# Callers: .006 (a), .007 (b, after .006), .009 (c, after .006 via .006),
+# .020 (b), .024 (c).
+
+eotg_aug_inherit.022 = {
+    type = character_event
+    title = eotg_aug_inherit.022.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_inh_heir = { eotg_aug_pressure_flicker = yes } }
+                desc = eotg_aug_inherit.022.desc_holding
+            }
+            desc = eotg_aug_inherit.022.desc_slipping
+        }
+    }
+    theme = family
+
+    trigger = { eotg_aug_inherit_chain_valid = { FULL = no } }
+    on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
+
+    left_portrait = {
+        character = root
+        animation = thinking
+    }
+    right_portrait = {
+        character = scope:eotg_inh_heir
+        animation = worry
+    }
+
+    immediate = {
+        eotg_aug_inherit_scopes_effect = yes
+    }
+
+    # (holding) "Another year, then." H-5.
+    option = {
+        name = eotg_aug_inherit.022.a
+        trigger = { scope:eotg_inh_heir = { eotg_aug_pressure_flicker = yes } }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = -5 } }
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 10  has_trait = patient }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # (holding) [diligent] "Tighten the terms." H-10.
+    option = {
+        name = eotg_aug_inherit.022.b
+        trigger = {
+            scope:eotg_inh_heir = { eotg_aug_pressure_flicker = yes }
+            has_trait = diligent
+        }
+        trait = diligent
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = -10 } }
+        stress_impact = { base = minor_stress_impact_gain }
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 25  has_trait = diligent }
+            modifier = { add = 10  has_trait = paranoid }
+        }
+    }
+
+    # (slipping) "Then we start again. Now." H-10.
+    option = {
+        name = eotg_aug_inherit.022.sa
+        trigger = { scope:eotg_inh_heir = { eotg_aug_pressure_flicker = no } }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = -10 } }
+        stress_impact = { base = medium_stress_impact_gain }
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 15  has_trait = compassionate }
+            modifier = { add = 10  has_trait = stubborn }
+        }
+    }
+
+    # (slipping) "I can't carry both of us." The terms lapse. H+10.
+    option = {
+        name = eotg_aug_inherit.022.sb
+        trigger = { scope:eotg_inh_heir = { eotg_aug_pressure_flicker = no } }
+        if = {
+            limit = { has_character_modifier = eotg_mod_aug_inh_terms }
+            remove_character_modifier = eotg_mod_aug_inh_terms
+        }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 10 } }
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = craven }
+            modifier = { add = 10  has_trait = callous }
+        }
+    }
+}
+
+
+# -- eotg_aug_inherit.023 -----------------------------------------------------
+# The Locked Wing: L5. Fired only if the ward held. Desc: confined to
+# quarters, or the cells (scope value eotg_inh_confine_type, carried from
+# eotg_aug_inherit_confine_effect). Caller: eotg_aug_inherit_ward_effect.
+
+eotg_aug_inherit.023 = {
+    type = character_event
+    title = eotg_aug_inherit.023.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_inh_confine_type ?= flag:house_arrest }
+                desc = eotg_aug_inherit.023.desc_quarters
+            }
+            desc = eotg_aug_inherit.023.desc_cells
+        }
+    }
+    theme = dungeon
+
+    trigger = { eotg_aug_inherit_chain_valid = { FULL = no } }
+    on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
+
+    left_portrait = {
+        character = root
+        animation = sadness
+    }
+    right_portrait = {
+        character = scope:eotg_inh_heir
+        animation = stress
+    }
+
+    immediate = {
+        eotg_aug_inherit_scopes_effect = yes
+    }
+
+    # "Keep it so." H-5.
+    option = {
+        name = eotg_aug_inherit.023.a
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = -5 } }
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 10  has_trait = patient }
+            modifier = { add = 10  has_trait = just }
+        }
+    }
+
+    # [compassionate] "Visit [heir]." H-5.
+    option = {
+        name = eotg_aug_inherit.023.b
+        trigger = { has_trait = compassionate }
+        trait = compassionate
+        scope:eotg_inh_heir = {
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+            eotg_add_fracture_risk = { AMOUNT = -5 }
+        }
+        stress_impact = { base = minor_stress_impact_loss }
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = compassionate }
+            modifier = { add = 10  has_trait = gregarious }
+        }
+    }
+}
+
+
+# -- eotg_aug_inherit.024 -----------------------------------------------------
+# Still Breathing. The attempt failed: the ruler is wounded and the guards
+# hold the heir. Caller: eotg_aug_inherit_leaf_attempt_effect (failure,
+# NOTIFY = yes), from .018.
+
+eotg_aug_inherit.024 = {
+    type = character_event
+    title = eotg_aug_inherit.024.t
+    desc = eotg_aug_inherit.024.desc
+    theme = dread
+
+    trigger = { eotg_aug_inherit_chain_valid = { FULL = no } }
+    on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
+
+    left_portrait = {
+        character = root
+        animation = pain
+    }
+    right_portrait = {
+        character = scope:eotg_inh_heir
+        animation = shame
+    }
+
+    immediate = {
+        eotg_aug_inherit_scopes_effect = yes
+    }
+
+    # "Execute [heir]." L17.
+    option = {
+        name = eotg_aug_inherit.024.a
+        eotg_aug_inherit_leaf_kill_heir_effect = { REASON = execution }
+        eotg_aug_stress_murder_effect = yes
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = vengeful }
+            modifier = { add = 15  has_trait = wrathful }
+        }
+    }
+
+    # "Lock [heir] away." The cells, and the ward's roll.
+    option = {
+        name = eotg_aug_inherit.024.b
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 5 } }
+        eotg_aug_inherit_ward_effect = { TYPE = dungeon  OUTCOME = yes }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = just }
+            modifier = { add = 15  has_trait = craven }
+        }
+    }
+
+    # [forgiving] "I forgive you. Don't make me regret it." L4 (H-15 in the
+    # leaf, H-10 here).
+    option = {
+        name = eotg_aug_inherit.024.c
+        trigger = { has_trait = forgiving }
+        trait = forgiving
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = -10 } }
+        eotg_aug_inherit_leaf_terms_effect = yes
+        trigger_event = { id = eotg_aug_inherit.022  days = 365 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = forgiving }
+            modifier = { add = 10  has_trait = compassionate }
+        }
+    }
+}
+
+
+# -- eotg_aug_inherit.025 -----------------------------------------------------
+# The Seat. ROOT IS THE HEIR, who killed the ruler (L15). When the dead ruler
+# was the player, the player continues as this heir by vanilla succession,
+# so this is the player's first event as the heir (owner Q3). The desc is the
+# heir's own belief, never "as I saw it would" (lore review). The profile
+# arrives as scope value eotg_inh_profile_s; the old ruler as
+# scope:eotg_inh_old_ruler_s. Coupling: the heir's own risk.
+# Caller: eotg_aug_inherit_leaf_attempt_effect (success, NOTIFY = yes).
+# Vanilla precedent for an event to the killer-heir after the death:
+# common/on_action/death.txt:191-195 (as heir.005 / heir.006).
+
+eotg_aug_inherit.025 = {
+    type = character_event
+    title = eotg_aug_inherit.025.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_inh_profile_s ?= flag:ledger }
+                desc = eotg_aug_inherit.025.desc_ledger
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_inh_profile_s ?= flag:certain }
+                desc = eotg_aug_inherit.025.desc_certain
+            }
+            desc = eotg_aug_inherit.025.desc_shared
+        }
+    }
+    theme = death
+
+    # is_landed: an heir struck from the line at .013 who then kills the
+    # ruler does not take the seat, so there is no Seat to tell.
+    trigger = {
+        is_alive = yes
+        is_landed = yes
+        exists = scope:eotg_inh_old_ruler_s
+        scope:eotg_inh_old_ruler_s = { is_alive = no }
+    }
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+    right_portrait = {
+        character = scope:eotg_inh_old_ruler_s
+        animation = dead
+        animate_if_dead = yes
+    }
+
+    # "The seat was always going to be mine." Own risk +5.
+    option = {
+        name = eotg_aug_inherit.025.a
+        eotg_add_fracture_risk = { AMOUNT = 5 }
+        add_prestige = 100
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = 10  has_trait = arrogant }
+        }
+    }
+
+    # "That wasn't a forecast. That was me." Own risk -10.
+    option = {
+        name = eotg_aug_inherit.025.b
+        eotg_add_fracture_risk = { AMOUNT = -10 }
+        stress_impact = { base = major_stress_impact_gain }
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = compassionate }
+            modifier = { add = 10  has_trait = honest }
+        }
+    }
+
+    # "Take the seat." Reads nothing new; the dread is the coupling's cost.
+    option = {
+        name = eotg_aug_inherit.025.c
+        add_dread = 50
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 10  has_trait = wrathful }
+        }
+    }
+}
+
+
+# -- eotg_aug_inherit.026 -----------------------------------------------------
+# The Warden's Hand. ROOT IS THE HEIR, now ruler and (tree path) the player
+# (owner Q3): the tree's closing event, told from the heir's side, naming the
+# old ruler (var:eotg_inh_old_ruler, removed here). Warden desc only with an
+# active diarchy; "none" covers the quiet path and a regency that could not
+# start. Caller: eotg_aug_inherit_abdicate_effect (NOTIFY = yes), from .014.
+
+eotg_aug_inherit.026 = {
+    type = character_event
+    title = eotg_aug_inherit.026.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { has_active_diarchy = yes }
+                desc = eotg_aug_inherit.026.desc_warden
+            }
+            desc = eotg_aug_inherit.026.desc_none
+        }
+    }
+    theme = realm
+
+    trigger = {
+        is_alive = yes
+        has_variable = eotg_inh_old_ruler
+    }
+
+    left_portrait = {
+        character = root
+        animation = thinking
+    }
+    right_portrait = {
+        trigger = { exists = scope:eotg_inh_old_ruler }
+        character = scope:eotg_inh_old_ruler
+        animation = worry
+    }
+
+    immediate = {
+        var:eotg_inh_old_ruler = { save_scope_as = eotg_inh_old_ruler }
+    }
+
+    # (warden) "Let [old_ruler] hold the controls a while." Own risk -10.
+    option = {
+        name = eotg_aug_inherit.026.a
+        trigger = { has_active_diarchy = yes }
+        eotg_add_fracture_risk = { AMOUNT = -10 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 15  has_trait = humble }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # (warden) "I don't need a keeper." Own risk +10.
+    option = {
+        name = eotg_aug_inherit.026.b
+        trigger = { has_active_diarchy = yes }
+        end_diarchy = yes
+        eotg_add_fracture_risk = { AMOUNT = 10 }
+        scope:eotg_inh_old_ruler = {
+            add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+        }
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = arrogant }
+            modifier = { add = 15  has_trait = ambitious }
+        }
+    }
+
+    # (none) "Mine. Now it's mine." Own risk +10.
+    option = {
+        name = eotg_aug_inherit.026.na
+        trigger = { has_active_diarchy = no }
+        eotg_add_fracture_risk = { AMOUNT = 10 }
+        add_prestige = 100
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = ambitious }
+            modifier = { add = 10  has_trait = arrogant }
+        }
+    }
+
+    # (none) "Ask [old_ruler] to stay close." Own risk -5.
+    option = {
+        name = eotg_aug_inherit.026.nb
+        trigger = { has_active_diarchy = no }
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = humble }
+            modifier = { add = 10  has_trait = trusting }
+        }
+    }
+
+    after = {
+        remove_variable = eotg_inh_old_ruler
+    }
+}
+
+
+# -- eotg_aug_inherit.027 -----------------------------------------------------
+# The Line Shortens: L11. The second in line kills the heir (leaf in
+# immediate): "with your leave" (scope value eotg_inh_leave, .015.a) or
+# "without your leave" (.015.b's roll; a vanilla secret_murder). The second
+# becomes the primary heir by vanilla succession. Callers: .015 (a, b).
+
+eotg_aug_inherit.027 = {
+    type = character_event
+    title = eotg_aug_inherit.027.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { exists = scope:eotg_inh_leave }
+                desc = eotg_aug_inherit.027.desc_leave
+            }
+            desc = eotg_aug_inherit.027.desc_no_leave
+        }
+    }
+    theme = death
+
+    trigger = {
+        eotg_aug_inherit_chain_valid = { FULL = no }
+        exists = scope:eotg_inh_second
+        scope:eotg_inh_second = { is_alive = yes }
+    }
+    on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
+
+    left_portrait = {
+        character = root
+        animation = shock
+    }
+    right_portrait = {
+        character = scope:eotg_inh_second
+        animation = scheme
+    }
+    lower_right_portrait = {
+        trigger = { exists = scope:eotg_inh_heir }
+        character = scope:eotg_inh_heir
+    }
+
+    immediate = {
+        eotg_aug_inherit_scopes_effect = yes
+        if = {
+            limit = { exists = scope:eotg_inh_leave }
+            eotg_aug_inherit_leaf_coup_effect = { LEAVE = yes }
+        }
+        else = {
+            eotg_aug_inherit_leaf_coup_effect = { LEAVE = no }
+        }
+    }
+
+    # "Let it stand." Without your leave, it still costs.
+    option = {
+        name = eotg_aug_inherit.027.a
+        if = {
+            limit = { NOT = { exists = scope:eotg_inh_leave } }
+            add_prestige = -50
+        }
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 40
+            modifier = { add = 15  has_trait = callous }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # "Arrest [second]." Vanilla imprison_character_effect
+    # (00_prison_effects.txt:1644).
+    option = {
+        name = eotg_aug_inherit.027.b
+        trigger = { scope:eotg_inh_second = { is_imprisoned = no } }
+        imprison_character_effect = {
+            TARGET = scope:eotg_inh_second
+            IMPRISONER = root
+        }
+        eotg_aug_stress_tyranny_effect = yes
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = just }
+            modifier = { add = 10  has_trait = paranoid }
+        }
+    }
+
+    # [just] "Execute [second]." Kinslayer on the ruler first (M4 policy).
+    option = {
+        name = eotg_aug_inherit.027.c
+        trigger = { has_trait = just }
+        trait = just
+        add_kinslayer_trait_or_nothing_effect = { VICTIM = scope:eotg_inh_second }
+        scope:eotg_inh_second = {
+            death = {
+                death_reason = death_execution
+                killer = root
+            }
+        }
+        eotg_aug_stress_murder_effect = yes
+        eotg_aug_inherit_close_effect = yes
+        ai_chance = {
+            base = 20
+            modifier = { add = 25  has_trait = just }
+            modifier = { add = 10  has_trait = vengeful }
+        }
+    }
+}
+
+
+# -- eotg_aug_inherit.028 -----------------------------------------------------
+# (Hidden) Resolution. Owner Q5: an AI ruler does not run the tree; the whole
+# tree is one weighted roll here, and each branch calls the same leaf effect
+# the tree's leaf events call, so the map changes the same way (spec §5.5).
+# Follow-up choices take the AI default (§5.5.3: the option with the highest
+# base ai_chance, the less lethal on a tie). Branch weights: spec §5.5.2,
+# first-pass numbers for the observer run. var:eotg_inh_force_leaf (console)
+# multiplies one branch by 1000; a gated branch stays 0.
+# No outcome mechanics inline: every outcome is a leaf effect call.
+# Shape: vanilla court_yearly.1001 (events/yearly_events/
+# court_yearly_events.txt:331; hidden, trigger + immediate).
+# Caller: eotg_aug_inherit_start_effect (AI ruler).
+
+eotg_aug_inherit.028 = {
+    type = character_event
+    hidden = yes
+
+    trigger = { eotg_aug_inherit_chain_valid = { FULL = yes } }
+    on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
+
+    immediate = {
+        eotg_aug_inherit_scopes_effect = yes
+        random_list = {
+            15 = {    # excise: L1 / L2 / L3
+                modifier = { add = 15  eotg_has_physician_access = yes }
+                modifier = { add = 10  has_trait = diligent }
+                modifier = { add = 10  has_trait = brave }
+                modifier = { factor = 0  gold < medium_gold_value }
+                modifier = { factor = 1000  var:eotg_inh_force_leaf ?= flag:excise }
+                if = {
+                    limit = {
+                        employs_court_position = court_physician_court_position
+                        gold >= major_gold_value
+                    }
+                    eotg_aug_inherit_leaf_excise_effect = { TABLE = physician }
+                }
+                else = {
+                    eotg_aug_inherit_leaf_excise_effect = { TABLE = back }
+                }
+            }
+            15 = {    # terms: L4 (no .022 on the AI path)
+                modifier = { add = 10  var:eotg_inh_profile ?= flag:cold }
+                modifier = { add = 20  var:eotg_inh_bond ?= flag:favourite }
+                modifier = { add = 10  var:eotg_inh_bond ?= flag:dutiful }
+                modifier = { add = 10  has_trait = compassionate }
+                modifier = { add = 10  has_trait = forgiving }
+                modifier = { factor = 0.25  var:eotg_inh_profile ?= flag:certain }
+                modifier = { factor = 0.25  var:eotg_inh_bond ?= flag:rival }
+                modifier = { factor = 0.5  var:eotg_inh_bond ?= flag:estranged }
+                modifier = { factor = 0.5  var:eotg_inh_profile ?= flag:rage }
+                modifier = { factor = 1000  var:eotg_inh_force_leaf ?= flag:terms }
+                eotg_aug_inherit_leaf_terms_effect = yes
+            }
+            15 = {    # confine: L5, confined to quarters (the .008 a default);
+                      # no breakout roll: the breakout is weighted into massacre
+                modifier = { add = 10  has_trait = paranoid }
+                modifier = { add = 10  has_trait = craven }
+                modifier = { add = 5  has_trait = just }
+                modifier = { add = 5  var:eotg_inh_profile ?= flag:rage }
+                modifier = { add = 10  var:eotg_inh_profile ?= flag:cold }
+                modifier = { factor = 1000  var:eotg_inh_force_leaf ?= flag:confine }
+                eotg_aug_inherit_confine_effect = { TYPE = house_arrest  OUTCOME = yes }
+            }
+            10 = {    # exile: L6, plain (credit if generous and able to pay)
+                modifier = { add = 5  has_trait = craven }
+                modifier = { add = 5  has_trait = content }
+                modifier = { add = 10  var:eotg_inh_bond ?= flag:estranged }
+                modifier = { factor = 1000  var:eotg_inh_force_leaf ?= flag:exile }
+                if = {
+                    limit = {
+                        has_trait = generous
+                        gold >= medium_gold_value
+                    }
+                    eotg_aug_inherit_leaf_exile_effect = { STYLE = credit }
+                }
+                else = {
+                    eotg_aug_inherit_leaf_exile_effect = { STYLE = plain }
+                }
+            }
+            10 = {    # disinherit: L7, free when it is a renunciation
+                modifier = { add = 20  var:eotg_inh_profile ?= flag:cold }
+                modifier = { add = 10  var:eotg_inh_bond ?= flag:dutiful }
+                modifier = { add = 10  has_trait = just }
+                modifier = { factor = 0.5  var:eotg_inh_bond ?= flag:rival }
+                modifier = { factor = 1000  var:eotg_inh_force_leaf ?= flag:disinherit }
+                if = {
+                    limit = {
+                        OR = {
+                            var:eotg_inh_profile ?= flag:cold
+                            var:eotg_inh_bond ?= flag:dutiful
+                        }
+                    }
+                    eotg_aug_inherit_leaf_disinherit_effect = { COST = no }
+                }
+                else = {
+                    eotg_aug_inherit_leaf_disinherit_effect = { COST = yes }
+                }
+            }
+            3 = {    # transit: L8
+                modifier = { add = 10  has_trait = deceitful }
+                modifier = { add = 5  intrigue >= 14 }
+                modifier = { factor = 0  gold < medium_gold_value }
+                modifier = { factor = 1000  var:eotg_inh_force_leaf ?= flag:transit }
+                eotg_aug_inherit_leaf_transit_effect = yes
+            }
+            3 = {    # abdicate_warden: L9
+                modifier = { add = 5  has_trait = content }
+                modifier = { add = 5  has_trait = humble }
+                modifier = { add = 10  age >= 60 }
+                modifier = { factor = 0  eotg_aug_inherit_can_abdicate = no }
+                modifier = { factor = 0  has_trait = ambitious }
+                modifier = { factor = 1000  var:eotg_inh_force_leaf ?= flag:abdicate_warden }
+                eotg_aug_inherit_abdicate_effect = { WARDEN = yes  NOTIFY = no }
+            }
+            1 = {    # abdicate_quiet: L10
+                modifier = { add = 3  has_trait = trusting }
+                modifier = { add = 5  age >= 60 }
+                modifier = { factor = 0  eotg_aug_inherit_can_abdicate = no }
+                modifier = { factor = 0  has_trait = ambitious }
+                modifier = { factor = 0  has_trait = paranoid }
+                modifier = { factor = 1000  var:eotg_inh_force_leaf ?= flag:abdicate_quiet }
+                eotg_aug_inherit_abdicate_effect = { WARDEN = no  NOTIFY = no }
+            }
+            0 = {    # coup: L11, with or without leave at even odds; then .027 a
+                modifier = { add = 15  eotg_aug_inherit_second_qualifies = yes }
+                modifier = { add = 5  var:eotg_inh_bond ?= flag:claimant }
+                modifier = { add = 5  has_trait = callous }
+                modifier = { factor = 0  eotg_aug_inherit_second_qualifies = no }
+                modifier = { factor = 1000  var:eotg_inh_force_leaf ?= flag:coup }
+                random_list = {
+                    50 = { eotg_aug_inherit_leaf_coup_effect = { LEAVE = yes } }
+                    50 = { eotg_aug_inherit_leaf_coup_effect = { LEAVE = no } }
+                }
+            }
+            5 = {    # heir_end: L12
+                modifier = { add = 20  var:eotg_inh_profile ?= flag:cold }
+                modifier = { add = 5  scope:eotg_inh_heir = { stress_level >= 2 } }
+                modifier = { add = 5  var:eotg_inh_bond ?= flag:favourite }
+                modifier = { add = 5  var:eotg_inh_bond ?= flag:dutiful }
+                modifier = { factor = 0.25  var:eotg_inh_profile ?= flag:certain }
+                modifier = { factor = 1000  var:eotg_inh_force_leaf ?= flag:heir_end }
+                eotg_aug_inherit_leaf_heir_end_effect = yes
+            }
+            5 = {    # next_two: L13; then .016 a (custody, no breakout)
+                modifier = { add = 20  var:eotg_inh_profile ?= flag:ledger }
+                modifier = { add = 10  var:eotg_inh_bond ?= flag:claimant }
+                modifier = { factor = 0  eotg_aug_inherit_line_eligible = no }
+                modifier = { factor = 1000  var:eotg_inh_force_leaf ?= flag:next_two }
+                eotg_aug_inherit_leaf_next_two_effect = yes
+                eotg_aug_inherit_confine_effect = { TYPE = dungeon  OUTCOME = no }
+            }
+            5 = {    # massacre: L14; then .017 a (taken alive)
+                modifier = { add = 20  var:eotg_inh_profile ?= flag:rage }
+                modifier = { add = 10  scope:eotg_inh_heir = { eotg_aug_pressure_storm = yes } }
+                modifier = { add = 5  scope:eotg_inh_heir = { eotg_aug_pressure_fracture = yes } }
+                modifier = { add = 5  var:eotg_inh_bond ?= flag:estranged }
+                modifier = { factor = 1000  var:eotg_inh_force_leaf ?= flag:massacre }
+                eotg_aug_inherit_leaf_massacre_effect = yes
+                eotg_aug_inherit_confine_effect = { TYPE = dungeon  OUTCOME = no }
+            }
+            5 = {    # attempt: L15; on failure .024 a (L17 by execution)
+                modifier = { add = 20  var:eotg_inh_profile ?= flag:certain }
+                modifier = { add = 15  var:eotg_inh_bond ?= flag:rival }
+                modifier = { add = 5  var:eotg_inh_bond ?= flag:estranged }
+                modifier = { factor = 0.5  var:eotg_inh_bond ?= flag:favourite }
+                modifier = { factor = 1000  var:eotg_inh_force_leaf ?= flag:attempt }
+                eotg_aug_inherit_leaf_attempt_effect = { MOD = -15  NOTIFY = no }
+                if = {
+                    limit = { NOT = { exists = scope:eotg_inh_attempt_ok } }
+                    eotg_aug_inherit_leaf_kill_heir_effect = { REASON = execution }
+                }
+            }
+            2 = {    # ruler_cascade: L16
+                modifier = { add = 5  has_trait = ambitious }
+                modifier = { add = 5  has_trait = eccentric }
+                modifier = { factor = 0  eotg_is_aug_tier3 = no }
+                modifier = { factor = 0  has_trait = content }
+                modifier = { factor = 1000  var:eotg_inh_force_leaf ?= flag:ruler_cascade }
+                eotg_aug_inherit_leaf_ruler_cascade_effect = yes
+            }
+            3 = {    # kill_heir: L17
+                modifier = { add = 10  has_trait = callous }
+                modifier = { add = 10  has_trait = sadistic }
+                modifier = { factor = 0  has_trait = compassionate }
+                modifier = { factor = 1000  var:eotg_inh_force_leaf ?= flag:kill_heir }
+                eotg_aug_inherit_leaf_kill_heir_effect = { REASON = execution }
+            }
+        }
+        # The attempt branch may already have closed and killed the ruler.
+        if = {
+            limit = { is_alive = yes }
+            eotg_aug_inherit_close_effect = yes
+        }
+    }
+}

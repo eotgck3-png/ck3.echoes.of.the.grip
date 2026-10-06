@@ -1,0 +1,604 @@
+﻿# -- eotg_aug_kingpin_effects.txt ---------------------------------------------
+# Scripted effects for the Neurofractured Kingpin (docs/specs/
+# cybernetics_v2_kingpin.md §3, §5). Batch A.
+#
+# Scopes: event effects run in the ruler's scope (root) after
+# eotg_aug_kp_save_scopes_effect has saved scope:eotg_kp_story and
+# scope:eotg_kp. The story's own blocks (on_setup, tick, on_owner_death)
+# save scope:eotg_kp_story themselves before calling anything here.
+#
+# Hidden-risk rule (index §1 rule 3): every move of the kingpin's
+# eotg_fracture_risk is inside hidden_effect. Leverage is shown only as one
+# of two shared tooltips (eotg_aug_kp_leverage_up_tt / _down_tt) and as the
+# story panel's band; the number never reaches a tooltip.
+#
+# BATCH-B SEAM (kingpin): eotg_aug_kp_raise_claimant_effect and
+# eotg_aug_kp_war_support_effect (spec §3, §5.8 war support) are written
+# with batch B, with their callers .030-.032 and .038.
+# -----------------------------------------------------------------------------
+
+# -- Start (spec §5.1.2, §5.2, §5.3) ------------------------------------------
+
+# Create the kingpin, roll the profile and the organization's name, make
+# them Neurofractured, and start the story. Root = the ruler.
+# create_character shape: vanilla events/story_cycles/
+# ep3_story_cycle_el_cid.txt:1406-1409 (template, dynasty = none, location,
+# culture and faith by scope; no employer, so a pool character at the
+# ruler's capital). Never eotg_trigger_neurofracture: it fires a ruler event
+# and opens the ruler cooldown (same reasoning as eotg_aug_nr_cascade_effect).
+# Story hand-off through a passthrough variable (the Patron's pattern,
+# eotg_aug_patron_accept_effect).
+# Caller: eotg_aug_kingpin.001 (immediate).
+eotg_aug_kp_start_effect = {
+    create_character = {
+        template = eotg_aug_kingpin_template
+        dynasty = none
+        location = root.capital_province
+        culture = root.culture
+        faith = root.faith
+        save_scope_as = eotg_kp
+    }
+    scope:eotg_kp = {
+        add_character_flag = eotg_flag_aug_kingpin
+        eotg_aug_kp_roll_profile_effect = yes
+        eotg_aug_kp_roll_name_effect = yes
+        add_trait = eotg_neurofractured
+        eotg_aug_kp_add_mind_traits_effect = yes
+        eotg_apply_neurofracture_distortion = yes
+    }
+    set_variable = { name = eotg_kp_passthrough  value = scope:eotg_kp }
+    create_story = eotg_story_aug_kingpin
+}
+
+# Roll the organization profile onto the kingpin (spec §5.2.1-§5.2.3): kind,
+# method, reach, mind, as character variables holding flags (the seller-name
+# mechanism). Run in the kingpin's scope; root = the ruler. A debug override
+# on root (eotg_kp_force_kind / _method / _reach / _mind) wins and is removed.
+# Caller: eotg_aug_kp_start_effect.
+eotg_aug_kp_roll_profile_effect = {
+    # Kind. Syndicate exists only with a Patron (index §5 item 3,
+    # cybernetics_v2.md:211; KQ1): the Patron forces it, and without one its
+    # weight is 0, so it has no entry below. Ban: crew x1.5; License: front x1.5.
+    if = {
+        limit = { root = { has_variable = eotg_kp_force_kind } }
+        set_variable = { name = eotg_kp_kind  value = root.var:eotg_kp_force_kind }
+        root = { remove_variable = eotg_kp_force_kind }
+    }
+    else_if = {
+        limit = { root = { eotg_aug_has_patron = yes } }
+        set_variable = { name = eotg_kp_kind  value = flag:syndicate }
+    }
+    else = {
+        random_list = {
+            30 = {
+                modifier = {
+                    factor = 1.5
+                    root = { eotg_aug_under_policy = { LAW = ban } }
+                }
+                set_variable = { name = eotg_kp_kind  value = flag:crew }
+            }
+            25 = {
+                modifier = {
+                    factor = 1.5
+                    root = { eotg_aug_under_policy = { LAW = license } }
+                }
+                set_variable = { name = eotg_kp_kind  value = flag:front }
+            }
+            20 = {
+                set_variable = { name = eotg_kp_kind  value = flag:hired }
+            }
+        }
+    }
+
+    # Method, weighted by kind (§5.2.2 table: violence / bribery / blackmail /
+    # infiltration = crew 60/15/15/10, syndicate 10/50/20/20,
+    # front 0/15/50/35, hired 70/20/0/10).
+    if = {
+        limit = { root = { has_variable = eotg_kp_force_method } }
+        set_variable = { name = eotg_kp_method  value = root.var:eotg_kp_force_method }
+        root = { remove_variable = eotg_kp_force_method }
+    }
+    else = {
+        random_list = {
+            10 = {
+                modifier = { add = 50  var:eotg_kp_kind = flag:crew }
+                modifier = { add = -10  var:eotg_kp_kind = flag:front }
+                modifier = { add = 60  var:eotg_kp_kind = flag:hired }
+                set_variable = { name = eotg_kp_method  value = flag:violence }
+            }
+            15 = {
+                modifier = { add = 35  var:eotg_kp_kind = flag:syndicate }
+                modifier = { add = 5  var:eotg_kp_kind = flag:hired }
+                set_variable = { name = eotg_kp_method  value = flag:bribery }
+            }
+            15 = {
+                modifier = { add = 5  var:eotg_kp_kind = flag:syndicate }
+                modifier = { add = 35  var:eotg_kp_kind = flag:front }
+                modifier = { add = -15  var:eotg_kp_kind = flag:hired }
+                set_variable = { name = eotg_kp_method  value = flag:blackmail }
+            }
+            10 = {
+                modifier = { add = 10  var:eotg_kp_kind = flag:syndicate }
+                modifier = { add = 25  var:eotg_kp_kind = flag:front }
+                set_variable = { name = eotg_kp_method  value = flag:infiltration }
+            }
+        }
+    }
+
+    # Reach: local 60 / wide 40; syndicates wide 60 / local 40.
+    if = {
+        limit = { root = { has_variable = eotg_kp_force_reach } }
+        set_variable = { name = eotg_kp_reach  value = root.var:eotg_kp_force_reach }
+        root = { remove_variable = eotg_kp_force_reach }
+    }
+    else = {
+        random_list = {
+            60 = {
+                modifier = { add = -20  var:eotg_kp_kind = flag:syndicate }
+                set_variable = { name = eotg_kp_reach  value = flag:local }
+            }
+            40 = {
+                modifier = { add = 20  var:eotg_kp_kind = flag:syndicate }
+                set_variable = { name = eotg_kp_reach  value = flag:wide }
+            }
+        }
+    }
+
+    # Mind, weighted by kind (§5.2.3: purge / grandeur / forecast / cold =
+    # crew 45/20/25/10, syndicate 20/35/20/25, front 15/20/25/40,
+    # hired 15/15/25/45).
+    if = {
+        limit = { root = { has_variable = eotg_kp_force_mind } }
+        set_variable = { name = eotg_kp_mind  value = root.var:eotg_kp_force_mind }
+        root = { remove_variable = eotg_kp_force_mind }
+    }
+    else = {
+        random_list = {
+            15 = {
+                modifier = { add = 30  var:eotg_kp_kind = flag:crew }
+                modifier = { add = 5  var:eotg_kp_kind = flag:syndicate }
+                set_variable = { name = eotg_kp_mind  value = flag:purge }
+            }
+            15 = {
+                modifier = { add = 5  var:eotg_kp_kind = flag:crew }
+                modifier = { add = 20  var:eotg_kp_kind = flag:syndicate }
+                modifier = { add = 5  var:eotg_kp_kind = flag:front }
+                set_variable = { name = eotg_kp_mind  value = flag:grandeur }
+            }
+            20 = {
+                modifier = { add = 5  var:eotg_kp_kind = flag:crew }
+                modifier = { add = 5  var:eotg_kp_kind = flag:front }
+                modifier = { add = 5  var:eotg_kp_kind = flag:hired }
+                set_variable = { name = eotg_kp_mind  value = flag:forecast }
+            }
+            10 = {
+                modifier = { add = 15  var:eotg_kp_kind = flag:syndicate }
+                modifier = { add = 30  var:eotg_kp_kind = flag:front }
+                modifier = { add = 35  var:eotg_kp_kind = flag:hired }
+                set_variable = { name = eotg_kp_mind  value = flag:cold }
+            }
+        }
+    }
+}
+
+# Name the organization from the existing seller lists (spec §5.2.1; seller
+# spec §5.1; the generated roll effects are unchanged). Kingpin's scope;
+# root = the ruler. Crew and hired: [gangs]. Front: [companies], never the
+# ruler's own clinic of record (lore review item 6). Syndicate: the Patron's
+# own syndicate (var-to-var copy, vanilla 00_animal_effects.txt:395-398), or
+# a roll if the Patron story has none (an old save, or a debug-forced kind).
+# Caller: eotg_aug_kp_start_effect.
+eotg_aug_kp_roll_name_effect = {
+    if = {
+        limit = {
+            OR = {
+                var:eotg_kp_kind = flag:crew
+                var:eotg_kp_kind = flag:hired
+            }
+        }
+        eotg_aug_roll_gang_effect = { VAR = eotg_aug_seller_gang }
+    }
+    else_if = {
+        limit = { var:eotg_kp_kind = flag:front }
+        if = {
+            limit = { root = { has_variable = eotg_aug_clinic_of_record } }
+            set_variable = { name = eotg_kp_exclude_company  value = root.var:eotg_aug_clinic_of_record }
+            eotg_aug_roll_company_except_effect = { VAR = eotg_aug_seller_company  EXCLUDE = eotg_kp_exclude_company }
+            remove_variable = eotg_kp_exclude_company
+        }
+        else = {
+            eotg_aug_roll_company_effect = { VAR = eotg_aug_seller_company }
+        }
+    }
+    else = {
+        root = {
+            random_owned_story = {
+                limit = {
+                    story_type = eotg_story_aug_patron
+                    exists = var:eotg_syndicate
+                }
+                save_scope_as = eotg_kp_patron_source
+            }
+        }
+        if = {
+            limit = { exists = scope:eotg_kp_patron_source }
+            set_variable = {
+                name = eotg_patron_syndicate_passthrough
+                value = scope:eotg_kp_patron_source.var:eotg_syndicate
+            }
+        }
+        else = {
+            eotg_aug_roll_syndicate_effect = { VAR = eotg_patron_syndicate_passthrough }
+        }
+    }
+}
+
+# The mind's two traits, its starting pressure, and a third trait from the
+# spec's list filtered against the mind's two (spec §5.2.3). Three in total,
+# the vanilla cap. The third list is a random_list with a trigger on each
+# entry (vanilla random_traits_list cannot filter; precedent: the generated
+# seller roll effects). Kingpin's scope. Caller: eotg_aug_kp_start_effect.
+eotg_aug_kp_add_mind_traits_effect = {
+    if = {
+        limit = { var:eotg_kp_mind = flag:purge }
+        add_trait = paranoid
+        add_trait = wrathful
+        set_variable = { name = eotg_fracture_risk  value = { integer_range = { min = 35  max = 45 } } }
+    }
+    else_if = {
+        limit = { var:eotg_kp_mind = flag:grandeur }
+        add_trait = arrogant
+        add_trait = ambitious
+        set_variable = { name = eotg_fracture_risk  value = { integer_range = { min = 25  max = 35 } } }
+    }
+    else_if = {
+        limit = { var:eotg_kp_mind = flag:forecast }
+        add_trait = eccentric
+        add_trait = calm
+        set_variable = { name = eotg_fracture_risk  value = { integer_range = { min = 20  max = 35 } } }
+    }
+    else = {
+        add_trait = callous
+        add_trait = diligent
+        set_variable = { name = eotg_fracture_risk  value = { integer_range = { min = 15  max = 30 } } }
+    }
+    random_list = {
+        1 = {
+            trigger = { NOT = { has_trait = generous } }
+            add_trait = greedy
+        }
+        1 = {
+            trigger = { NOT = { has_trait = honest } }
+            add_trait = deceitful
+        }
+        1 = {
+            trigger = {
+                NOT = { has_trait = forgiving }
+                NOT = { has_trait = calm }    # the forecast mind is calm
+            }
+            add_trait = vengeful
+        }
+        1 = {
+            trigger = { NOT = { has_trait = fickle } }
+            add_trait = stubborn
+        }
+        1 = {
+            trigger = {
+                NOT = { has_trait = patient }
+                NOT = { has_trait = calm }    # the forecast mind is calm
+            }
+            add_trait = impatient
+        }
+        1 = {
+            trigger = { NOT = { has_trait = zealous } }
+            add_trait = cynical
+        }
+    }
+}
+
+# -- Scopes (spec §3 "every event's immediate opener") ------------------------
+
+# Save the story and its characters for the event. Root = the ruler.
+# Saves: eotg_kp_story, eotg_kp, eotg_kp_informant (if planted), and, with a
+# Patron, eotg_patron_story and eotg_patron_envoy (the Patron's own scope
+# names, so eotg_aug_patron_envoy_present and eotg_aug_patron_demand_effect
+# work unchanged).
+# Callers: every eotg_aug_kingpin event's immediate.
+eotg_aug_kp_save_scopes_effect = {
+    random_owned_story = {
+        limit = { story_type = eotg_story_aug_kingpin }
+        save_scope_as = eotg_kp_story
+        if = {
+            limit = { exists = var:eotg_kp }
+            var:eotg_kp = { save_scope_as = eotg_kp }
+        }
+        if = {
+            limit = { exists = var:eotg_kp_informant }
+            var:eotg_kp_informant = { save_scope_as = eotg_kp_informant }
+        }
+    }
+    random_owned_story = {
+        limit = { story_type = eotg_story_aug_patron }
+        save_scope_as = eotg_patron_story
+        if = {
+            limit = { exists = var:eotg_envoy }
+            var:eotg_envoy = { save_scope_as = eotg_patron_envoy }
+        }
+    }
+}
+
+# -- Story state (spec §2, §5.4) ----------------------------------------------
+
+# Move leverage by $AMOUNT$, clamp 0-100, then write the visible band: 1 if
+# <= 40, 2 if 41-79, 3 if >= 80 (spec §5.4.2). The ONLY writer of
+# eotg_kp_leverage_band. Needs scope:eotg_kp_story. No tooltip: callers use
+# eotg_aug_kp_leverage_up_effect / _down_effect, which show the shared
+# tooltip and call this hidden.
+# Callers: the two wrappers below, the story's on_setup and
+# eotg_aug_kp_inherit_effect.
+eotg_aug_kp_leverage_effect = {
+    scope:eotg_kp_story = {
+        if = {
+            limit = { NOT = { exists = var:eotg_kp_leverage } }
+            set_variable = { name = eotg_kp_leverage  value = 0 }
+        }
+        change_variable = { name = eotg_kp_leverage  add = $AMOUNT$ }
+        clamp_variable = { name = eotg_kp_leverage  min = 0  max = 100 }
+        if = {
+            limit = { var:eotg_kp_leverage <= 40 }
+            set_variable = { name = eotg_kp_leverage_band  value = 1 }
+        }
+        else_if = {
+            limit = { var:eotg_kp_leverage < 80 }
+            set_variable = { name = eotg_kp_leverage_band  value = 2 }
+        }
+        else = {
+            set_variable = { name = eotg_kp_leverage_band  value = 3 }
+        }
+    }
+}
+
+# Leverage up / down by $AMOUNT$ (a positive number), with the shared
+# numberless tooltip (spec §7.2).
+eotg_aug_kp_leverage_up_effect = {
+    custom_tooltip = eotg_aug_kp_leverage_up_tt
+    hidden_effect = {
+        eotg_aug_kp_leverage_effect = { AMOUNT = $AMOUNT$ }
+    }
+}
+
+eotg_aug_kp_leverage_down_effect = {
+    custom_tooltip = eotg_aug_kp_leverage_down_tt
+    hidden_effect = {
+        eotg_aug_kp_leverage_effect = { AMOUNT = -$AMOUNT$ }
+    }
+}
+
+# A refusal: refusals +1, the kingpin's pressure +$RISK$ (spec §3). Hidden.
+eotg_aug_kp_refuse_effect = {
+    hidden_effect = {
+        scope:eotg_kp_story = {
+            change_variable = { name = eotg_kp_refusals  add = 1 }
+        }
+        scope:eotg_kp = { eotg_add_fracture_risk = { AMOUNT = $RISK$ } }
+    }
+}
+
+# A calming option: the kingpin's pressure -$RISK$, calmed +1 (drift relief,
+# spec §2). Hidden.
+eotg_aug_kp_calm_effect = {
+    hidden_effect = {
+        scope:eotg_kp = { eotg_add_fracture_risk = { AMOUNT = -$RISK$ } }
+        scope:eotg_kp_story = {
+            change_variable = { name = eotg_kp_calmed  add = 1 }
+        }
+    }
+}
+
+# Set the story stage to flag:$STAGE$ (open / collab / custody / pending /
+# war / kept). Hidden: the stage is never shown (spec §5.4.2).
+eotg_aug_kp_set_stage_effect = {
+    hidden_effect = {
+        scope:eotg_kp_story = {
+            set_variable = { name = eotg_kp_stage  value = flag:$STAGE$ }
+        }
+    }
+}
+
+# Their guns on retainer for 5 years (.001 f_hired, .003 e_hired). The story
+# keeps a timed mirror (eotg_kp_hired_guns_on, 5 years) so an heir can be
+# given the modifier for the rest of its span (§5.4.1): a character
+# modifier's remaining time cannot be read in script (PX triggers.log has
+# only the boolean has_character_modifier_duration_remaining).
+eotg_aug_kp_hired_guns_effect = {
+    add_character_modifier = { modifier = eotg_mod_aug_kp_hired_guns  years = 5 }
+    hidden_effect = {
+        scope:eotg_kp_story = {
+            set_variable = { name = eotg_kp_hired_guns_on  value = yes  days = 1825 }    # 5 years; set_variable takes days only (PX effects.log)
+        }
+    }
+}
+
+# Open a leaf: the story is resolving (spec §3 leaf guard), so
+# on_owner_death ends it instead of passing it on, and the maintenance does
+# not end it under the leaf. Callers: every leaf's immediate (.060-.076).
+eotg_aug_kp_leaf_open_effect = {
+    scope:eotg_kp_story = { set_variable = eotg_kp_resolving }
+}
+
+# End the story (every leaf's `after`). Root = the ruler. on_end does the
+# clean-up (the kingpin's flag, the owner's open-ended modifiers).
+eotg_aug_kp_end_effect = {
+    random_owned_story = {
+        limit = { story_type = eotg_story_aug_kingpin }
+        end_story = yes
+    }
+}
+
+# -- Inheritance (owner ruling Q2; spec §5.4.1) -------------------------------
+
+# Carry the story over to the heir, before make_story_owner. Run in the
+# story's scope with scope:eotg_kp_story (= this) and scope:eotg_kp_heir
+# saved by on_owner_death.
+# - leverage -10 (floor 0), band recomputed;
+# - evidence, years and the informant carry; refusals, calmed, playing and
+#   forewarned reset;
+# - pending, and war on the own path, reset to collab (the faction or the
+#   claim was the dead ruler's); custody carries (vanilla passes prisoners
+#   to the heir; the maintenance turns it to open if the kingpin went free);
+# - in collab or kept, the open-ended arrangement and the remaining span of
+#   the hired guns are re-applied to the heir; in kept, the kept modifier
+#   and a strong blackmail hook from the kingpin (hooks don't transfer);
+# - the heir's once-per-life flag.
+eotg_aug_kp_inherit_effect = {
+    set_variable = eotg_kp_inherited
+    eotg_aug_kp_leverage_effect = { AMOUNT = -10 }
+    set_variable = { name = eotg_kp_refusals  value = 0 }
+    set_variable = { name = eotg_kp_calmed  value = 0 }
+    if = {
+        limit = { has_variable = eotg_kp_playing }
+        remove_variable = eotg_kp_playing
+    }
+    if = {
+        limit = { has_variable = eotg_kp_forewarned }
+        remove_variable = eotg_kp_forewarned
+    }
+    # Stage reset (batch B stages; harmless before they exist)
+    if = {
+        limit = {
+            OR = {
+                var:eotg_kp_stage = flag:pending
+                AND = {
+                    var:eotg_kp_stage = flag:war
+                    var:eotg_kp_path ?= flag:own
+                }
+            }
+        }
+        set_variable = { name = eotg_kp_stage  value = flag:collab }
+        if = {
+            limit = { has_variable = eotg_kp_path }
+            remove_variable = eotg_kp_path
+        }
+        if = {
+            limit = { has_variable = eotg_kp_target }
+            remove_variable = eotg_kp_target
+        }
+    }
+    if = {
+        limit = {
+            var:eotg_kp_stage = flag:custody
+            var:eotg_kp = { is_imprisoned = no }
+        }
+        set_variable = { name = eotg_kp_stage  value = flag:open }
+    }
+    # Modifiers die with the character: re-apply to the heir
+    if = {
+        limit = {
+            OR = {
+                var:eotg_kp_stage = flag:collab
+                var:eotg_kp_stage = flag:kept
+            }
+        }
+        if = {
+            limit = { has_variable = eotg_kp_arrangement_on }
+            scope:eotg_kp_heir = {
+                add_character_modifier = { modifier = eotg_mod_aug_kp_arrangement }
+            }
+        }
+        if = {
+            limit = { has_variable = eotg_kp_hired_guns_on }
+            # Open-ended on the heir; the maintenance removes it when the
+            # story's 5-year mirror expires
+            scope:eotg_kp_heir = {
+                add_character_modifier = { modifier = eotg_mod_aug_kp_hired_guns }
+            }
+            set_variable = eotg_kp_guns_inherited
+        }
+        if = {
+            limit = { var:eotg_kp_stage = flag:kept }
+            scope:eotg_kp_heir = {
+                add_character_modifier = { modifier = eotg_mod_aug_kp_kept }
+            }
+            var:eotg_kp = {
+                add_hook = { type = strong_blackmail_hook  target = scope:eotg_kp_heir }
+            }
+        }
+    }
+    scope:eotg_kp_heir = { add_character_flag = eotg_flag_aug_had_kingpin }
+}
+
+# -- Leaves (spec §5.8 leaf table) --------------------------------------------
+
+# L10 A Seat Under You: grant scope:eotg_kp_county to the kingpin as the
+# ruler's vassal. Vanilla shape: events/activities/hold_court_activity/
+# hold_court_events_general.txt:6880-6891 (create_title_and_vassal_change,
+# type granted, change_title_holder) and the resolve call
+# (events/dlc/fp3/fp3_story_cycle_zanj_rebellion_events.txt:477). The
+# kingpin's gratitude is vanilla received_title_county (the opinion vanilla's
+# own grant script adds, 00_grant_titles_interaction.txt:573), in place of
+# the spec's "granted_title", which vanilla does not define.
+# Caller: eotg_aug_kingpin.069 (a).
+eotg_aug_kp_grant_county_effect = {
+    scope:eotg_kp = {
+        if = {
+            limit = { is_imprisoned = yes }
+            release_from_prison = yes
+        }
+    }
+    create_title_and_vassal_change = {
+        type = granted
+        save_scope_as = eotg_kp_change
+        add_claim_on_loss = no
+    }
+    scope:eotg_kp_county = {
+        change_title_holder = {
+            holder = scope:eotg_kp
+            change = scope:eotg_kp_change
+        }
+    }
+    resolve_title_and_vassal_change = scope:eotg_kp_change
+    scope:eotg_kp = {
+        add_opinion = { modifier = received_title_county  target = root }
+    }
+}
+
+# L12 The Region Falls: the crew holds scope:eotg_kp_county as an independent
+# ruler. Vanilla Zanj independency pattern (events/dlc/fp3/
+# fp3_story_cycle_zanj_rebellion_events.txt:414-477): independency change,
+# becomes_independent, change_title_holder, resolve. No truce, unlike the
+# Zanj (deviation 2): the ruler keeps a pressed claim, so vanilla claim_cb
+# can take it back. Caller: eotg_aug_kingpin.071 (a).
+eotg_aug_kp_seize_county_effect = {
+    scope:eotg_kp = {
+        if = {
+            limit = { is_imprisoned = yes }
+            release_from_prison = yes
+        }
+    }
+    create_title_and_vassal_change = {
+        type = independency
+        save_scope_as = eotg_kp_change
+        add_claim_on_loss = no
+    }
+    show_as_tooltip = {
+        scope:eotg_kp_county = {
+            change_title_holder = {
+                holder = scope:eotg_kp
+                change = scope:eotg_kp_change
+            }
+        }
+    }
+    scope:eotg_kp = {
+        becomes_independent = { change = scope:eotg_kp_change }
+    }
+    hidden_effect = {
+        scope:eotg_kp_county = {
+            change_title_holder = {
+                holder = scope:eotg_kp
+                change = scope:eotg_kp_change
+            }
+        }
+    }
+    resolve_title_and_vassal_change = scope:eotg_kp_change
+    add_pressed_claim = scope:eotg_kp_county
+}
