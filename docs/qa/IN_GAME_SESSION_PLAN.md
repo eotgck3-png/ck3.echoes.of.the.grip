@@ -52,12 +52,12 @@ Overlapping checks are merged, and each says where it came from, so a failure ca
 - **Before you start, ask the orchestrator "is the tree clean?"** The game runs the repo working tree through the junction (HTT §1). Restart the game after any commit; script and loc load at startup.
 
 ### 0.3 Recommended start (playset A)
-**1066 bookmark → Orsocorre I, Judge of Cagliari** (Sardinia).
+**1066 bookmark → Giovanni Obertenghi, Count of Ajaccio and Vecchio** (southern Corsica). *(Changed 2026-10-06: the sub-mod now releases Sardinia as unclaimed, so Giovanni of Cagliari would start landless. Giovanni holds two owned Unsettled Regions, and Vecchio faces Sardinia across the strait, which suits the Unclaimed checks. His capital is probably below development 10, so cybernetics offers stay on the test map, as sitting 2 already plans.)*
 
 What the sub-mod does on a new game (it only runs on a **new** game, never on a loaded save):
 - marks 8 counties Unsettled:
   - Corsica: `c_ajaccio`, `c_bastia`, `c_vecchio`;
-  - Sardinia: `c_cagliari` (your capital), `c_arborea`, `c_gallura`, `c_logudoro`, `c_tortoli`;
+  - Sardinia: `c_cagliari`, `c_arborea`, `c_gallura`, `c_logudoro`, `c_tortoli`. These are now **released as Unclaimed** (held by Unsworn placeholders), with `c_vecchio` and `c_tortoli` starting Unknown;
 - marks **`c_vecchio` and `c_tortoli` Unknown** as well.
 
 **Do this first, then save as `S0_start`:**
@@ -78,7 +78,7 @@ What the sub-mod does on a new game (it only runs on a **new** game, never on a 
 
 ---
 
-## Sitting 1: engine checks (playset A, Orsocorre, about 1½ hours)
+## Sitting 1: engine checks (playset A, Giovanni, about 1½ hours)
 
 These decide whether the architecture holds. **If any E-check fails, stop and send §S before going on**: later checks may depend on it. Start from `S0_start`.
 
@@ -125,7 +125,7 @@ These decide whether the architecture holds. **If any E-check fails, stop and se
 ### E5 Finding captains and faith leaders
 *src: F3 §0.2 (spec §15 items 1–5, confirmed statically in round 2; this is the in-game half)*
 - [ ] **E-7** Make a Frontier Military: `effect title:<c_key> = { set_variable = { name = eotg_frontier_type value = flag:military } }`. Fire `.040` as above. *Guns for Hire* shows a captain's portrait and name. If the right portrait is empty, send the `error.log` lines with `government_is_mercenary`.
-- [ ] **E-8** Set the type to `flag:religious` and fire `.041`. Report whether it names **your head of faith** or **a holy order's leader**. Orsocorre is Catholic, so the head of faith is the easy case.
+- [ ] **E-8** Set the type to `flag:religious` and fire `.041`. Report whether it names **your head of faith** or **a holy order's leader**. Giovanni is Catholic, so the head of faith is the easy case.
 - [ ] **E-9** The holy-order path: you need a ruler whose faith has **no head** but has a holy order. Use the character-switch command to such a ruler (or create an order with vanilla's decision first), then fire `.041` on a Religious Frontier of theirs.
   - The portrait is the order's leader, and the desc is the *holy order* variant.
   - Send `error.log` lines with `random_faith_holy_order`, `religious_head` or `eotg_frontier_backs_for`.
@@ -452,7 +452,7 @@ These decide whether the architecture holds. **If any E-check fails, stop and se
 **Save as `S2_done`.**
 
 ---
-## Sitting 3: Frontier, Phase 1 → 2 → 3a (playset A, Orsocorre; about 3 hours)
+## Sitting 3: Frontier, Phase 1 → 2 → 3a (playset A, Giovanni; about 3 hours)
 
 Start from **`S0_start`**, not from S1: E-checks left Regions in odd states.
 
@@ -514,7 +514,7 @@ Already covered in sitting 1, so don't repeat them here: F1 §0 (E-1, E-4, E-5),
 - [ ] **F1-7** **A backer offers** (AI → you). *src: F1 §4.2*
   - Be a vassal with a rich liege (`effect liege = { add_gold = 3000 }`), or have an ally with gold.
   - Clear the cooldown and run the debug year a few times → *An Offer of Backing*: the backer shares the credit if it succeeds and the loss if it fails. Accepting gives a little progress, and they pay yearly.
-  - Orsocorre is independent, so use an ally, or the corporation-style hook in F3-10.
+  - If you are independent, use an ally, or the corporation-style hook in F3-10.
 - [ ] **F1-8** **You back someone** (you → AI). *src: F1 §4.3*
   1. `effect title:c_arborea = { eotg_frontier_start_effect = { TYPE = trade FOUNDER = title:c_arborea.holder } }`. It is already Unsettled.
   2. **Back a Frontier** → *Whom to Back* shows its stage in words → the AI answers.
@@ -579,7 +579,7 @@ Already covered in sitting 1, so don't repeat them here: F1 §0 (E-1, E-4, E-5),
   |---|---|---|
   | .030 *A Rival Backer* | a backer, and a liege or ally who could back | **Take the new terms:** the old backer's opinion drops ("Dropped as a Frontier's Backer"), with a toast. **Keep faith:** opinion up, strain −1 |
   | .031 *The Backer Wants a Say* | a backer who is not you | no option gives a say, and each tooltip says so. **The Region is mine:** opinion down, strain +1 |
-  | .032 *Terms Demanded* | Foothold+ | as a vassal count: the liege variant (*Talk him round* / *Talk her round*). As independent (Orsocorre): the settlers' variant → `Settlers' Terms` for 10 years |
+  | .032 *Terms Demanded* | Foothold+ | as a vassal count: the liege variant (*Talk him round* / *Talk her round*). As an independent ruler: the settlers' variant → `Settlers' Terms` for 10 years |
   | .033 *A Quarrel in the Camps* | a founder who is not you | **Back the founder:** progress +3, strain +1. **Side with the settlers:** strain −1, progress −2, and the founder resents it |
   | .034 *A Supply Run Lost* | — | the desc adds a line for Remote or Dangerous |
   | .035 *What the Crews Found* | trait room | no known ruins → ruins → `Ancient Ruins`. Known ruins → a derelict → `Ancient Infrastructure`. **Strip it:** +4, no trait |
@@ -644,14 +644,52 @@ Already covered in sitting 1, so don't repeat them here: F1 §0 (E-1, E-4, E-5),
 
 ---
 
-## §U Unclaimed Regions (added after merge)
-**Placeholder.** Unclaimed Regions (`docs/specs/frontier_unclaimed_regions.md`) is built on its own branch, which is not on `v2-space-map` yet.
+## §U Unclaimed Regions (merged 2026-10-06, e356020)
+Spec: `docs/specs/frontier_unclaimed_regions.md` (§D owner decisions). Source of this list: `docs/handoffs/cloud_2026-10-06_frontier-unclaimed.md`.
+**Do V-U1 in sitting 1**, as an engine check: it decides whether mitigations M2 and M3 must be built. The rest can follow sitting 3, as Giovanni on Corsica.
+Setup: `-debug_mode`. **Test map:** c_aphion_seam and c_helios_shoal start unclaimed. **Vanilla map:** load the sub-mod, and Sardinia's 5 counties are released at start. Corsica stays owned-Unsettled. Anywhere: **(Debug) Release a Region to the Unsworn**, or `effect title:<c_key> = { eotg_unclaimed_release_effect = yes }`.
+1. **V-U1 Playability:** take **(Debug) Unclaimed Regions Readout**. The first toast says "IS playable" or "is NOT playable". Also try picking an Unsworn holder in the lobby's free pick. **This decides M2 and M3**, which are not built.
+2. **V-U2 War immunity:** the override is **live** (merged 2026-10-06; pitfalls §16). Check:
+   - `logs/database_conflicts.log` lists `Overriding entry 'herders_and_tributary_constraints'` from `eotg_vanilla_overrides_triggers.txt`;
+   - an ordinary claim CB is still offered against a normal ruler (proves the attacker line did not block everything);
+   - `add_claim` on an unclaimed county gives no CB;
+   - in a 20-year observer run, no placeholder declares war.
+3. **V-U3 Attrition:** park a 3,000+ army in an unclaimed county, then claim it and compare the supply limit. Expect −0.5 (the government) plus −0.25 (the Unsettled modifier, now built). If the government part doesn't show, uncomment the fallback line in `eotg_unclaimed_mod_unclaimed`.
+4. **V-U4 History seed (test map):**
+   - the seed `eotg_unclaimed_seed` gets `eotg_unclaimed_government` from title history (it carries the trait, which `can_get_government` needs);
+   - at start each county has its own Unsworn holder, with the county's culture and faith;
+   - the seed is gone;
+   - the readout counts 2 Regions and 2 Unsworn.
+5. **V-U5 Capital barony:** the script now moves it explicitly when the old holder held it. Check that the placeholder (or the claimant) holds the capital barony, and that nothing errors if the engine had already moved it.
+6. **V-U6 Colour:**
+   - released counties turn slate `{ 88 92 100 }`; on the test map the history colour is already slate;
+   - a claimed one takes the claimant's primary title colour;
+   - both survive save and reload.
+7. **V-U7 Vanish:** after a claim the old placeholder is gone, with no death notification to players. The readout's "Unsworn alive" drops by one.
+8. **V-U8 Death:** kill a placeholder (`effect character:<id> = { death = { death_reason = death_natural_causes } }`). The county passes to a new Unsworn holder at once (`on_death`), or by the next 1 January (the sweep). The readout's "fixed by the last yearly sweep" is 0 if `on_death` worked.
+9. **V-U9 Catch-all:** `effect title:<unclaimed c_key> = { change_title_holder = { holder = character:<your id> } }` from the console. The county loses `Unclaimed Region`, recolours, and you get the "colours now fly" toast.
+10. **V-U10 Government gate:** placeholders get the government, and no ordinary count ever ends up with it (observer run).
+11. **V-U11 Trait blockers:** marriage interactions refuse an Unsworn holder, and holding the county is unaffected.
+12. **V-U12 Realm name:** does "Unclaimed Region" (`eotg_unclaimed_government_realm`) show on the map or in the realm name?
+13. **V-U13 Persistence:** `eotg_unclaimed_county`, `eotg_unclaimed_claimed`, the list (readout count) and the colours survive save and reload.
+14. **V-U14 AI targets:**
+    - in a 20-year observer run, AI rulers next to placeholders claim with *Raise Your Colours*;
+    - at most about 2 a year worldwide (the 180-day gap);
+    - no AI holds more than 2 claimed, unsettled Regions.
+15. **V-U15 Abandon:**
+    - claim a Sardinian Region from Corsica, mark nothing (it's already Unsettled), Establish, then abandon. The decision and .005 (a) show "Abandoning the Frontier gives it up"; the Region goes back to grey, Unclaimed and Abandoned, keeping its traces, and a toast says so;
+    - a Corsican (owned, never claimed) abandonment stays with its holder;
+    - a claimed **capital** Region stays, Abandoned.
 
-When it merges, its in-game list goes here: V-U1 to V-U15, from that branch's handoff `docs/handoffs/cloud_2026-10-06_frontier-unclaimed.md`. Two changes will apply then:
-- the Corsica/Sardinia sub-mod will **release Sardinia as unclaimed**, so sitting 3 moves Frontier play to Corsica;
-- **V-U1** (whether the Unsworn holders are playable) belongs in sitting 1, as an engine check.
-
-**Don't test Unclaimed from this plan until this section is filled in.**
+**New checks for this build:**
+- **Raise Your Colours:**
+  - it shows only on Unsworn holders whose Region is unclaimed;
+  - it greys out with the reasons in words (reach, gold, standing);
+  - it charges minor gold and minor prestige on accept, with a 5-year cooldown per actor;
+  - *Establish a Frontier* becomes available for that Region.
+- **Expedition to unclaimed space:** mark a Sardinian Region Unknown (c_tortoli already is). From Corsica, **Send an Expedition** offers it if it is in reach: own Regions first, then unclaimed. Filing the charts at Known gives the Region survey data for whoever claims it.
+- **Placeholders stay out of mod content:** no cybernetics or Frontier events or offers ever reach an Unsworn character (`error.log` lines with `eotg_is_unclaimed`).
+- **.040 on a Military Frontier:** the desc offers only money behind the venture, with no convoy guards.
 
 ---
 

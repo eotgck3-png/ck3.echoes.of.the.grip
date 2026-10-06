@@ -421,6 +421,13 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Owner:** human → orchestrator
 - **Next step:** check alongside CB-38 to CB-41.
 
+### CB-44: In-game test session (one plan for everything pending)
+- **Status:** waiting-human (2026-10-06)
+- **What:** `docs/qa/IN_GAME_SESSION_PLAN.md` gathers every pending in-game check (140 boxes, 3 sittings, plus §U Unclaimed Regions V-U1..V-U15). It supersedes the scattered lists for CB-31, CB-34, CB-35, CB-37..CB-43, the loc-bug confirmations and the cybernetics fix-batch checks; those items stay open until their checks pass in the plan.
+- **Start:** 1066, Giovanni Obertenghi (Corsica) with "Echoes of the Grip" + "EotG Test: Frontier on Corsica and Sardinia"; cybernetics sitting on the test map as Emperor Aurelian. Do V-U1 (placeholder playability) in sitting 1.
+- **Owner:** human → orchestrator (route failures)
+- **Next step:** run sitting 1; send back the §S items.
+
 ## Tooling and environment
 
 ### CB-18: Game is 1.20.0.3; the tools target older versions
@@ -436,7 +443,7 @@ These are shared conditions. Clearing one unblocks every item that names it.
   3. The orchestrator then updates the version references in `CLAUDE.md`.
 
 ### CB-19: Space-map defines file has no BOM
-- **Status:** waiting-human (2026-10-03)
+- **Status:** **done 2026-10-06** (BOM added by the cloud test-session batch, merged 1b38939). Was: waiting-human (2026-10-03)
 - **What:** PX's language server flags `common/defines/eotg_space_map_defines.txt` as not UTF-8 with BOM. Vanilla defines files have a BOM. It's your space-map work, so it was left untouched.
 - **Owner:** human (or say "fix it")
 - **Next step:** re-save it as UTF-8 with BOM. The orchestrator can do this on request; the content doesn't change.
