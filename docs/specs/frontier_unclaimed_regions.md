@@ -1,6 +1,6 @@
 # Spec: Unclaimed Regions (Frontier, "Option B")
 
-**Author:** eotg-architect, 2026-10-06. **Status: design approved by the owner 2026-10-06 (see §D); not built.** Owner decision 2026-10-06, "Option B": Unsettled space has **no ruler**. The engine still needs a holder for every county, so each unclaimed county is held by a **passive placeholder**, which stands for the scattered people living there and is not a ruler. A ruler must **claim** the county before Establishing a Frontier there. An abandoned Frontier goes back to unclaimed. Unclaimed space is hard on armies passing through. Impassable or void provinces that are not counties stay scenery.
+**Author:** eotg-architect, 2026-10-06. **Status: design approved by the owner 2026-10-06 (see §D). Batches 1 and 2 built on branch `claude/frontier-unclaimed-cloud` (cloud, static, unvalidated); NOT merged. Build notes and deviations: §20.** Owner decision 2026-10-06, "Option B": Unsettled space has **no ruler**. The engine still needs a holder for every county, so each unclaimed county is held by a **passive placeholder**, which stands for the scattered people living there and is not a ruler. A ruler must **claim** the county before Establishing a Frontier there. An abandoned Frontier goes back to unclaimed. Unclaimed space is hard on armies passing through. Impassable or void provinces that are not counties stay scenery.
 
 **Supersedes:** [`frontier_v1.md`](frontier_v1.md) §2.3 option (a), *for unclaimed counties only*. Phase 1's owned-county Unsettled path (`eotg_frontier_mark_unsettled_effect` on a county someone already holds) stays as it is, as a separate case (§6.3).
 
@@ -237,7 +237,7 @@ The engine assigns governments when a character is landed. Vanilla guards holy o
 **Plan:** build A as specified, and probe it in Batch 1 (V-U1, through the debug readout). If the holder is playable, apply these mitigations:
 - **M1. Mod pulses:** every mod on_action entry that runs on playable characters, everyone, or the dead adds `eotg_is_unclaimed_holder = no` (or `eotg_is_unclaimed_folk = no`). Batch 2 audits these (§9.2). **This is needed whatever V-U1 shows**, because `random_yearly_everyone_pulse` and `on_death` reach unplayable characters too.
 - **M2. Vanilla yearly events:** a second key-level override, of `basic_is_valid_for_yearly_events_trigger` (`G/common/scripted_triggers/00_available_for_events_triggers.txt:802-816`), adding `NOT = { government_has_flag = eotg_government_is_unclaimed }`. Same file and same pitfalls entry. **Only if V-U1 says playable.**
-- **M3. Lobby pick:** an additive `on_game_start_after_lobby` check that toasts any player who picked a placeholder: "No one rules here; choose a ruler" (`eotg_unclaimed_toast_unplayable`). Bookmarks never list placeholders. **The toast does not stop the player from playing that character. This is a known limitation, owner question UQ1.**
+- **M3. Lobby pick:** an additive `on_game_start_after_lobby` check that toasts any player who picked a placeholder: "No one rules here; choose a ruler" (`eotg_unclaimed_toast_unplayable`; not built until V-U1 says playable, §20). Bookmarks never list placeholders. **The toast does not stop the player from playing that character. This is a known limitation, owner question UQ1.**
 - **The alternative if M1–M3 are not acceptable:** override vanilla `herder_government` itself, by key, to strip fertility, herd and `mechanic_type` while keeping the engine's unplayable key. That breaks the MPO no-DLC conversion (placeholders become tribal without MPO), anything MPO expects of herders, and the default herder government. **Not recommended**, listed only so the owner sees the whole choice (UQ1).
 
 ### 4.6 Vanilla precedent for creating a placeholder
@@ -499,12 +499,12 @@ It stays with its claimant, Unsettled, with no time limit. A lapse after N years
   - `eotg_unclaimed_claim_interaction`, `_desc`;
   - tooltips `eotg_unclaimed_claim_reach_tt`, `_gold_tt`, `_prestige_tt`, `_effect_tt`, `_returns_tt`;
   - **any requirement line shows words, never raw variables.**
-- **Toasts:** `eotg_unclaimed_toast_claimed`, `eotg_unclaimed_toast_released`, and conditionally `eotg_unclaimed_toast_unplayable`.
+- **Toasts:** `eotg_unclaimed_toast_claimed`, `eotg_unclaimed_toast_released`, and conditionally `eotg_unclaimed_toast_unplayable` (not built until V-U1 says playable, §20).
 - **Debug decisions:** 2 × (`<key>`, `_desc`, `_confirm`), plus `eotg_unclaimed_debug_playable_tt` / `_unplayable_tt` and `eotg_unclaimed_debug_counts_tt`.
 - **Phase 1:** `eotg_unclaimed_abandon_returns_tt`.
 - **No `replace/` overrides needed.**
   - The placeholder still shows the vanilla rank "Count". Renaming the rank per government is deferred (UD7).
-  - The overridden trigger's tooltip key `is_a_herder_defender_tt` stays vanilla text ("herders can't fight"). The localizer can add our own `custom_tooltip` key inside the override (`eotg_unclaimed_defender_tt`), since we own that copy.
+  - The overridden trigger's tooltip key `is_a_herder_defender_tt` stays vanilla text ("herders can't fight"). The localizer can add our own `custom_tooltip` key inside the override (`eotg_unclaimed_defender_tt`), since we own that copy. Not built: the override ships inert until the local session pastes vanilla's body (§20).
 - **Glossary:** county = **Region**. Use "unclaimed" and "claim". **Never** "charter", "registry", "wasteland" (it's lived in), "peasants", "human" (multi-species), or any named faction.
 
 ---
@@ -565,6 +565,32 @@ It stays with its claimant, Unsettled, with no time limit. A lapse after N years
 - **UQ9: placeholder names.** Random names from the county's culture (recommended), or one fixed name for every placeholder?
 - **UQ10: AI pacing.** About 2 AI claims a year worldwide, and at most 2 claimed-but-unsettled counties per AI ruler?
 - **UQ11:** should a claim that is never established lapse back after N years?
+
+---
+
+## 20. Build notes (cloud session, 2026-10-06; static, unvalidated)
+Batch 1 and Batch 2 are built on `claude/frontier-unclaimed-cloud` (from Frontier Phase 3a round 2, `dc02666`). Handoff: `docs/handoffs/cloud_2026-10-06_frontier-unclaimed.md`.
+
+**Deviations from this spec, and why:**
+1. **The `herders_and_tributary_constraints` override ships INERT** (`common/scripted_triggers/eotg_vanilla_overrides_triggers.txt`, commented out). The cloud session has no game files, and a key-level override must be a verbatim copy; a reconstruction would silently change 17 CB groups. The file carries the frame, the two `# EOTG` lines and the paste steps. **Until the local session pastes vanilla's body, there is no war immunity (V-U2 fails by design).** `eotg_unclaimed_defender_tt` waits with it (not built).
+2. **M2 and M3 are not built** (`basic_is_valid_for_yearly_events_trigger` override, `eotg_unclaimed_toast_unplayable`): §4.5 makes both conditional on V-U1. The probe (`eotg_decision_unclaimed_debug_readout`) answers it. **M1 is built** (the pulse guards, §9.2).
+3. **Expedition targeting is widened now** (owner instruction for this build; this spec's UD2 had left it for a later phase). `eotg_frontier_can_target_expedition` and `eotg_frontier_pick_expedition_target_effect` (`frontier_v3.md` §4.1) also allow an explorable Unclaimed Region within the actor's reach (`eotg_unclaimed_in_reach`), after the actor's own Regions. Survey stays holder-only.
+4. **The capital barony is moved explicitly** with the county, when the old county holder held it (creation and claim). If V-U5 shows the engine already does this, the extra move is a no-op.
+5. **A history placeholder holding exactly one county is adopted**, not replaced (§5.1 "(S) also accepts (H)'s output"). A seed being split carries the character flag `eotg_unclaimed_splitting`, so it is never adopted; every county it held gets its own placeholder.
+6. **The seed must carry the trait `eotg_unclaimed_folk`** in its history (added to §10 step 2's needs): `can_get_government` reads it, and without it history's `government =` may fall back.
+7. **New identifiers beyond §3:**
+   - the trigger `eotg_unclaimed_would_release` (county; shared by the release listener and the Phase 1 abandon tooltips);
+   - the effect `eotg_unclaimed_on_abandoned_effect` (the listener's body);
+   - the script value `eotg_unclaimed_ai_gold_floor_value` (3 × the claim gold);
+   - the loc keys `eotg_unclaimed_claim_returns_tt` (§14's `_returns_tt`), `eotg_unclaimed_debug_none_tt` and `eotg_decision_unclaimed_debug_release_valid_tt`;
+   - the character flag `eotg_unclaimed_splitting`;
+   - the global variable `eotg_unclaimed_sweep_fixed` (what the last sweep fixed; the readout shows it);
+   - the saved scopes `eotg_unclaimed_previous`, `_former`, `_stray`, `_stray_holder`, `_probe` and `_debug_reader`.
+8. **Names:** the trait shows as "Unsworn" (one person; the people are "the Unsworn"). The interaction is "Raise Your Colours" (§D), and its key stays `eotg_unclaimed_claim_interaction`.
+9. **Interaction category:** `interaction_category_diplomacy` (UNVERIFIED-VANILLA). The icon is the mod's existing placeholder `icon_personal`.
+10. **Placeholders and Phase 3a hooks:** an expedition to an Unclaimed Region fires `eotg_frontier_on_explored` with root = the placeholder, because Frontier hooks fire on the county holder. Listeners must not assume a real ruler there.
+11. **Test map:** c_aphion_seam and c_helios_shoal start unclaimed. They are adjacent, between them they border both big realms, and neither is anyone's only county. c_aphion_seam was listed among the development-10 counties for cybernetics §1c, but no ruler's gate read it.
+12. **eotg_lint:** a `governments` loc naming convention (`{key}`, `_adjective`, `_realm`, `_desc`, `_with_icon`), marked unverified, so L014 sees the government's loc.
 
 ---
 

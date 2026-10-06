@@ -414,3 +414,74 @@ eotg_unclaimed_debug_readout_effect = {
         left_icon = root
     }
 }
+
+# == Raise Your Colours (spec §8.3; Batch 2) ===================================
+# CHARACTER scope (the actor). $TARGET$: the Unclaimed county. The
+# interaction's on_accept. Pays gold and prestige, then moves the county (and
+# its capital barony, V-U5) to the actor: type granted, no claim left behind
+# (the MPO creation pattern, R§5; under LAW AT 866 a claim is asserted under
+# the claimant's own law, not won from anyone). The bookkeeping runs from
+# on_title_gain (eotg_unclaimed_on_title_gain), not from here (§8.5); the old
+# placeholder's vanish is repeated here once the move is resolved, in case the
+# catch-all ran before the capital barony moved.
+eotg_unclaimed_claim_effect = {
+    save_scope_as = eotg_unclaimed_claimant
+    remove_short_term_gold = eotg_unclaimed_claim_gold_value
+    add_prestige = {
+        value = 0
+        subtract = eotg_unclaimed_claim_prestige_value
+    }
+    $TARGET$ = {
+        save_scope_as = eotg_unclaimed_target
+        clear_saved_scope = eotg_unclaimed_old_holder
+        holder ?= { save_scope_as = eotg_unclaimed_old_holder }
+    }
+    create_title_and_vassal_change = {
+        type = granted
+        save_scope_as = eotg_unclaimed_change
+        add_claim_on_loss = no
+    }
+    scope:eotg_unclaimed_target = {
+        change_title_holder = {
+            holder = scope:eotg_unclaimed_claimant
+            change = scope:eotg_unclaimed_change
+        }
+        title_province = {
+            barony = {
+                if = {
+                    limit = {
+                        exists = scope:eotg_unclaimed_old_holder
+                        holder ?= scope:eotg_unclaimed_old_holder
+                    }
+                    change_title_holder = {
+                        holder = scope:eotg_unclaimed_claimant
+                        change = scope:eotg_unclaimed_change
+                    }
+                }
+            }
+        }
+    }
+    resolve_title_and_vassal_change = scope:eotg_unclaimed_change
+    scope:eotg_unclaimed_old_holder ?= { eotg_unclaimed_vanish_effect = yes }
+}
+
+# == Frontier hook listeners (spec §6; Batch 2) ================================
+# Called from eotg_unclaimed_on_frontier_abandoned (root = the Region's holder,
+# COUNTY scope here). A Region that came out of unclaimed space goes back to it
+# when its Frontier is abandoned, failed or voluntary alike (owner UQ5), unless
+# it is the holder's capital Region (which stays, Abandoned, as in Phase 1).
+# It keeps its Abandoned state and traces, so it is resettlable after the next
+# claim (design §3.4).
+eotg_unclaimed_on_abandoned_effect = {
+    if = {
+        limit = { eotg_unclaimed_would_release = yes }
+        holder = { save_scope_as = eotg_unclaimed_former }
+        eotg_unclaimed_release_effect = yes
+        scope:eotg_unclaimed_former = {
+            send_interface_toast = {
+                title = eotg_unclaimed_toast_released
+                left_icon = scope:eotg_unclaimed_former
+            }
+        }
+    }
+}

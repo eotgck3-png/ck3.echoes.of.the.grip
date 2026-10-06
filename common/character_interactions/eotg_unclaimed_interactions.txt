@@ -1,0 +1,133 @@
+﻿# -- eotg_unclaimed_interactions.txt ------------------------------------------
+# Unclaimed Regions (docs/specs/frontier_unclaimed_regions.md §8).
+#
+# eotg_unclaimed_claim_interaction: "Raise Your Colours". The recipient is an
+# Unsworn placeholder; the target is its one county
+# (scope:recipient.capital_county). Precedent: vanilla
+# mpo_retrieve_land_from_herder_interaction (09_mpo_interactions.txt:7426),
+# vanilla's own "take land from someone who holds it without ruling it":
+# neighbour reach, a prestige cost, auto_accept, AI neighboring_rulers.
+# Deviations (spec §8.1): our cost, our cooldown, our AI throttle.
+#
+# Rules (the mod's interaction rules, eotg_augmentation_interactions.txt
+# header): the actor pays in on_accept, never with `cost`; affordability is
+# checked in is_valid_showing_failures_only.
+# Cooldown: `cooldown` (per actor, _character_interactions.info:199), not
+# cooldown_against_recipient: each claim vanishes its recipient, so a
+# recipient cooldown would never bind (spec §8.3).
+# LAW AT 866: the text never says a claim is filed, registered, recognized or
+# licensed, or that others must respect it.
+# -----------------------------------------------------------------------------
+
+eotg_unclaimed_claim_interaction = {
+    # UNVERIFIED-VANILLA: interaction_category_diplomacy is a vanilla category
+    #   (the mod has only used friendly, hostile, vassal and prison)
+    category = interaction_category_diplomacy
+    # Art wanted (spec §18); the mod's existing placeholder icon until then
+    icon = icon_personal
+    interface_priority = 60
+    desc = eotg_unclaimed_claim_interaction_desc
+
+    # Actor-only state (_character_interactions.info:556); the AI throttle
+    # (spec §8.4)
+    is_available = {
+        trigger_if = {
+            limit = { is_ai = yes }
+            eotg_unclaimed_ai_may_claim = yes
+        }
+    }
+
+    is_shown = {
+        NOT = { scope:recipient = scope:actor }
+        scope:actor = {
+            eotg_is_unclaimed_holder = no
+            eotg_is_unclaimed_folk = no
+        }
+        scope:recipient = {
+            eotg_is_unclaimed_holder = yes
+            capital_county ?= { eotg_unclaimed_is_unclaimed = yes }
+        }
+    }
+
+    is_valid_showing_failures_only = {
+        scope:actor = { eotg_unclaimed_can_claim = yes }
+        custom_description = {
+            text = eotg_unclaimed_claim_reach_tt
+            scope:recipient.capital_county = {
+                eotg_unclaimed_in_reach = { ACTOR = scope:actor }
+            }
+        }
+        custom_description = {
+            text = eotg_unclaimed_claim_gold_tt
+            scope:actor = { gold >= eotg_unclaimed_claim_gold_value }
+        }
+        custom_description = {
+            text = eotg_unclaimed_claim_prestige_tt
+            scope:actor = { prestige >= eotg_unclaimed_claim_prestige_value }
+        }
+    }
+
+    cooldown = { years = 5 }
+
+    # Nobody answers for the Unsworn: the placeholder cannot refuse
+    auto_accept = yes
+
+    on_accept = {
+        scope:actor = {
+            custom_tooltip = eotg_unclaimed_claim_effect_tt
+            custom_tooltip = eotg_unclaimed_claim_returns_tt
+            eotg_unclaimed_claim_effect = { TARGET = scope:recipient.capital_county }
+            # The worldwide AI throttle (spec §8.4), set here and nowhere else
+            if = {
+                limit = { is_ai = yes }
+                set_global_variable = {
+                    name = eotg_unclaimed_ai_gap
+                    value = yes
+                    days = eotg_unclaimed_ai_gap_days_value
+                }
+            }
+        }
+    }
+
+    # AI (spec §8.4). The distance reach (b) is for players: the AI only looks
+    # at neighbouring rulers.
+    # UNVERIFIED-VANILLA (V-U14): placeholders count as neighboring_rulers.
+    ai_target_quick_trigger = {
+        adult = yes
+    }
+    ai_targets = {
+        ai_recipients = neighboring_rulers
+        max = 5
+    }
+    ai_frequency_by_tier = {
+        barony = 0
+        county = 36
+        duchy = 24
+        kingdom = 24
+        empire = 24
+        hegemony = 24
+    }
+    ai_will_do = {
+        base = 10
+        modifier = {
+            add = 10
+            scope:actor = { has_trait = ambitious }
+        }
+        modifier = {
+            add = 10
+            scope:actor = { stewardship >= 12 }
+        }
+        modifier = {
+            add = -10
+            scope:actor = { has_trait = content }
+        }
+        modifier = {
+            add = -10
+            scope:actor = { has_trait = lazy }
+        }
+        modifier = {
+            factor = 0
+            scope:actor = { is_at_war = yes }
+        }
+    }
+}

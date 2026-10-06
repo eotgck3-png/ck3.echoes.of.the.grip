@@ -322,6 +322,12 @@ eotg_decision_frontier_abandon = {
             save_scope_as = eotg_frontier_county
         }
         custom_tooltip = eotg_decision_frontier_abandon_effect_tt
+        # Unclaimed Regions (frontier_unclaimed_regions.md §3.6): abandoning a
+        # claimed Region gives it up
+        if = {
+            limit = { scope:eotg_frontier_county = { eotg_unclaimed_would_release = yes } }
+            custom_tooltip = eotg_unclaimed_abandon_returns_tt
+        }
         hidden_effect = {
             scope:eotg_frontier_county = {
                 eotg_frontier_abandon_effect = { FAILED = no }
@@ -616,6 +622,8 @@ eotg_decision_frontier_explore = {
     }
 
     is_shown = {
+        # Unclaimed Regions (frontier_v3.md §17): never a placeholder
+        eotg_is_unclaimed_holder = no
         eotg_frontier_holds_explorable = yes
     }
 

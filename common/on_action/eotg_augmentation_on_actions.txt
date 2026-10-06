@@ -171,6 +171,11 @@ on_game_start_after_lobby = {
 #   - the Sickly Child offer, which has its own 5-year cooldown and does not
 #     require the ruler to be unaugmented (the child must be).
 eotg_on_yearly_aug_initiation_check = {
+    # Unclaimed Regions (frontier_unclaimed_regions.md §5.5, §9.2): never an
+    # Unsworn placeholder
+    trigger = {
+        eotg_is_unclaimed_folk = no
+    }
     effect = {
         # Back-Alley retry: a brave ruler who lost the implant looks again.
         # Spends the retry flag; still sets the normal cooldown.
@@ -448,6 +453,8 @@ eotg_on_game_start_aug_init = {
 # eotg_aug_init.013); a Neurofractured parent also flags the children.
 eotg_on_death_aug_hardware = {
     trigger = {
+        # Unclaimed Regions (§5.5, §9.2): never an Unsworn placeholder
+        eotg_is_unclaimed_folk = no
         OR = {
             has_trait = eotg_cybernetics
             has_trait = eotg_neurofractured
@@ -482,6 +489,8 @@ eotg_on_death_aug_hardware = {
 # one) before the effect walks the family again with the XP-based tier test.
 eotg_on_death_aug_grief = {
     trigger = {
+        # Unclaimed Regions (§5.5, §9.2): never an Unsworn placeholder
+        eotg_is_unclaimed_folk = no
         any_close_family_member = { has_trait = eotg_cybernetics }
     }
     effect = {
@@ -538,6 +547,11 @@ eotg_on_birth_aug_parent_check = {
 
 # Tier 1 — random events for Augmented characters
 eotg_on_yearly_aug_tier1_check = {
+    # Unclaimed Regions (frontier_unclaimed_regions.md §5.5, §9.2): never an
+    # Unsworn placeholder
+    trigger = {
+        eotg_is_unclaimed_folk = no
+    }
     effect = {
         # Vassal's Suspicion — one-time, outside the tier cooldown (as v1)
         if = {
@@ -716,6 +730,11 @@ eotg_on_yearly_aug_tier1_check = {
 
 # Tier 2 — random events for Enhanced characters
 eotg_on_yearly_aug_tier2_check = {
+    # Unclaimed Regions (frontier_unclaimed_regions.md §5.5, §9.2): never an
+    # Unsworn placeholder
+    trigger = {
+        eotg_is_unclaimed_folk = no
+    }
     effect = {
         if = {
             limit = {
@@ -862,6 +881,11 @@ eotg_on_yearly_aug_tier2_check = {
 
 # Tier 3 — Overclocked risk accumulation and random events
 eotg_on_yearly_aug_overclocked_check = {
+    # Unclaimed Regions (frontier_unclaimed_regions.md §5.5, §9.2): never an
+    # Unsworn placeholder
+    trigger = {
+        eotg_is_unclaimed_folk = no
+    }
     effect = {
         if = {
             limit = { eotg_is_aug_tier3 = yes }
@@ -1161,6 +1185,11 @@ eotg_on_yearly_aug_overclocked_check = {
 # eotg_flag_aug_restrained is set (decision, Phase 3b).
 # eotg_fracture.005 is no longer in any list: the Heir's Arc fires it.
 eotg_on_yearly_aug_neurofractured_check = {
+    # Unclaimed Regions (frontier_unclaimed_regions.md §5.5, §9.2): never an
+    # Unsworn placeholder
+    trigger = {
+        eotg_is_unclaimed_folk = no
+    }
     effect = {
         if = {
             limit = { has_trait = eotg_neurofractured }
@@ -1474,6 +1503,8 @@ eotg_on_yearly_aug_neurofractured_check = {
 # year (+6 at stress level 2+); battle accrual in eotg_on_combat_aug_knights.
 eotg_on_yearly_aug_nonruler_check = {
     trigger = {
+        # Unclaimed Regions (§5.5, §9.2): never an Unsworn placeholder
+        eotg_is_unclaimed_folk = no
         OR = {
             has_trait = eotg_cybernetics
             has_trait = eotg_neurofractured
@@ -1809,6 +1840,8 @@ eotg_on_trait_gained_aug_repair = {
 # 1-year eotg_flag_aug_former_settling). proc.020's trigger reads neither.
 eotg_on_yearly_aug_former_check = {
     trigger = {
+        # Unclaimed Regions (§5.5, §9.2): never an Unsworn placeholder
+        eotg_is_unclaimed_folk = no
         has_variable = eotg_aug_former
         eotg_is_augmented_any = no
         NOT = { has_character_flag = eotg_flag_aug_former_settling }
@@ -1838,6 +1871,8 @@ eotg_on_yearly_aug_former_check = {
 # §5.10(a): count x2.5, duke x1.75, king+ x1.25).
 eotg_on_yearly_aug_seamless_check = {
     trigger = {
+        # Unclaimed Regions (§5.5, §9.2): never an Unsworn placeholder
+        eotg_is_unclaimed_folk = no
         has_trait = eotg_total_integration
     }
     effect = {

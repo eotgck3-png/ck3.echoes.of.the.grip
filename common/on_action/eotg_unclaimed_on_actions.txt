@@ -110,3 +110,45 @@ eotg_unclaimed_on_claimed = {
 
 eotg_unclaimed_on_released = {
 }
+
+# -- Frontier hooks (spec §6; Batch 2) -----------------------------------------
+# Frontier's own integration hooks, extended additively from this file (the
+# pattern eotg_frontier_on_actions.txt documents). Fired by
+# eotg_frontier_abandon_effect / eotg_frontier_settle_effect with root = the
+# Region's holder and scope:eotg_frontier_county set (frontier_v1.md §7).
+# TEST-IN-GAME (Frontier V12): the saved scopes reach these on_actions.
+
+eotg_frontier_on_abandoned = {
+    on_actions = {
+        eotg_unclaimed_on_frontier_abandoned
+    }
+}
+
+eotg_frontier_on_settled = {
+    on_actions = {
+        eotg_unclaimed_on_frontier_settled
+    }
+}
+
+# An abandoned Frontier that came out of unclaimed space goes back to it
+# (not the holder's capital Region; failed and voluntary alike, owner UQ5).
+eotg_unclaimed_on_frontier_abandoned = {
+    trigger = {
+        exists = scope:eotg_frontier_county
+        scope:eotg_frontier_county = { has_variable = eotg_unclaimed_claimed }
+    }
+    effect = {
+        scope:eotg_frontier_county = { eotg_unclaimed_on_abandoned_effect = yes }
+    }
+}
+
+# A settled Region is ordinary land and never goes back (spec §6.2).
+eotg_unclaimed_on_frontier_settled = {
+    trigger = {
+        exists = scope:eotg_frontier_county
+        scope:eotg_frontier_county = { has_variable = eotg_unclaimed_claimed }
+    }
+    effect = {
+        scope:eotg_frontier_county = { remove_variable = eotg_unclaimed_claimed }
+    }
+}

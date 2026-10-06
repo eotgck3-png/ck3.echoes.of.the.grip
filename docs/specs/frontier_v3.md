@@ -166,8 +166,8 @@ Options:
 
 **Today:** `eotg_frontier_can_explore = yes` and `holder = $ACTOR$`, and the pick iterates `$ACTOR$`'s held county titles. This is the Phase 3a behaviour unchanged.
 
-**How the Unclaimed Regions build widens it** (`frontier_unclaimed_regions.md` §8.2; deferred there as UD2, so a later Frontier phase, not that spec's Batch 2):
-1. (Deferred; the Unclaimed identifiers are not built.) The trigger becomes `eotg_frontier_can_explore = yes` AND (`holder = $ACTOR$` OR (`eotg_unclaimed_is_unclaimed = yes` AND `eotg_unclaimed_in_reach = { ACTOR = $ACTOR$ }`)): the actor's own Regions, plus unclaimed Regions **within reach**, adjacency to the actor's sub-realm or distance from the actor's capital, exactly as that spec's §8.2 defines reach.
+**How the Unclaimed Regions build widens it** (`frontier_unclaimed_regions.md` §8.2; that spec deferred it as UD2, and the owner asked for it in its Batch 2. **Built** on `claude/frontier-unclaimed-cloud`, unmerged; steps 1–3 as written, `eotg_frontier_holds_explorable` also reads the Unclaimed list, and the decision is never shown to a placeholder):
+1. The trigger becomes `eotg_frontier_can_explore = yes` AND (`holder = $ACTOR$` OR (`eotg_unclaimed_is_unclaimed = yes` AND `eotg_unclaimed_in_reach = { ACTOR = $ACTOR$ }`)): the actor's own Regions, plus unclaimed Regions **within reach**, adjacency to the actor's sub-realm or distance from the actor's capital, exactly as that spec's §8.2 defines reach.
 2. The pick adds a second pass over unclaimed counties in reach (the reach test's own iterator), after the actor's own Regions, with the same Unknown-first order.
 3. .042 is fired to the actor, not the county holder; its options already act on `scope:eotg_frontier_county` and pay from root. Nothing else in §4 changes.
 4. Exploring an unclaimed Region gives no claim and no say over it (LAW AT 866); claiming stays the Unclaimed interaction's job.
@@ -300,7 +300,17 @@ AI holders still get no flavour events, so .040 and .041 are player-only. **AI h
 - **For the cartographer:** never mark long-settled cores Unknown. Unknown is for fringe and border Regions.
 
 ## 17. Unclaimed Regions impact (round 2; `frontier_unclaimed_regions.md`, approved, not built)
-Every place in Phase 3a that assumes the county's holder is a real, playable ruler. When counties can be held by an Unclaimed placeholder, each needs a look. **Nothing here is changed yet** (no government, placeholder or claiming logic in Phase 3a).
+Every place in Phase 3a that assumes the county's holder is a real, playable ruler. When counties can be held by an Unclaimed placeholder, each needs a look. Phase 3a itself adds no government, placeholder or claiming logic.
+
+**Adapted by the Unclaimed Regions build** (`claude/frontier-unclaimed-cloud`, unmerged):
+- expedition targeting: widened (§4.1);
+- `eotg_decision_frontier_explore`: `is_shown` excludes placeholders (`eotg_is_unclaimed_holder = no`);
+- `eotg_frontier_event_roll_effect`, AI block: the holder must not be a placeholder;
+- `eotg_frontier_offer_backing_effect`: never for a placeholder-held county;
+- `eotg_frontier_can_establish`: never while Unclaimed;
+- the yearly Frontier tick and the sponsor-death on_action: skip Unsworn characters.
+
+The other rows need no change, for the reasons the table gives.
 
 | Where | Assumes | What Unclaimed needs |
 |---|---|---|
