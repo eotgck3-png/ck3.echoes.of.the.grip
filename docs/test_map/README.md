@@ -61,6 +61,19 @@ The Skeldscar-Wyveris war over c_klian (`claim_cb`) is running at the start (Sve
 - **50+ with low prowess:** Basil (c_caelestis, 53), Konstantin (Duke of Silica Span, 50, also cynical and learned), Vagn (c_skeld_haven, 55).
 - **Diarchy / regency:** all rulers are feudal.
 
+### Unclaimed Regions (TEST ONLY; `docs/specs/frontier_unclaimed_regions.md` §11.2)
+
+- **Two neighbouring counties start unclaimed:** c_aphion_seam (was the Emperor's second domain county) and
+  c_helios_shoal (was the King's). Both are held at 866.1.1 by the history seed `eotg_unclaimed_seed`, under
+  `eotg_unclaimed_government`, with the neutral colour `{ 88 92 100 }` in `common/landed_titles`.
+- At game start the seed is split: each county gets its own Unsworn placeholder (the county's culture and faith),
+  and the seed is vanished. This exercises the real Gate 1 path, which the vanilla sub-mod doesn't.
+- **Why these two:** they touch each other, and between them they border both the Empire (c_kronos, c_caelestis,
+  c_muth, c_the_remnant, c_the_surge) and the Kingdom (c_skeldscar, c_klian, c_karak_crossing), so rulers of both
+  realms can claim (adjacency computed from `map_data/provinces.png`). Neither is anyone's only or capital county,
+  and neither is used by the Frontier test plans. **Cybernetics note:** c_aphion_seam was listed among the
+  development-10 counties above; no ruler's initiation gate read it (the Emperor's capital is c_kronos).
+
 ### Frontier (Regions = counties)
 
 **Counties with no empty holding slot:** c_kronos, c_graveshelf, c_skeldscar, c_wyveris (every barony built).

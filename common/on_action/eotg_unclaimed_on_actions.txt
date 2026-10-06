@@ -1,0 +1,112 @@
+﻿# -- eotg_unclaimed_on_actions.txt --------------------------------------------
+# Unclaimed Regions (docs/specs/frontier_unclaimed_regions.md §9).
+#
+# Vanilla hooks are extended ADDITIVELY only (CLAUDE.md invariant 4):
+# `on_actions = { }` lists here, never a top-level effect/trigger on a vanilla
+# hook. on_title_gain and on_death fire for every character in the game, so
+# each handler's trigger is the cheap check first (spec §5.5).
+# No cooldowns are duplicated in any trigger: the interaction's `cooldown`, the
+# AI gap global and the sweep's yearly cadence each own their own pacing (§9.1).
+# -----------------------------------------------------------------------------
+
+# Runs before the lobby (game_start.txt:2509), so the split is done before
+# anyone picks a character (spec §5.1).
+on_game_start = {
+    on_actions = {
+        eotg_unclaimed_on_game_start
+    }
+}
+
+eotg_unclaimed_on_game_start = {
+    effect = {
+        eotg_unclaimed_game_start_effect = yes
+    }
+}
+
+# The catch-all (spec §8.5): root = the new holder, scope:title,
+# scope:previous_holder (title_on_actions.txt:229-233). Whatever moved the
+# county (the interaction, a vanilla event, the console, a future system),
+# the bookkeeping runs here, once.
+# UNVERIFIED-VANILLA (V-U9): on_title_gain fires for scripted transfers
+#   (change_title_holder) as well as for the engine's own.
+on_title_gain = {
+    on_actions = {
+        eotg_unclaimed_on_title_gain
+    }
+}
+
+eotg_unclaimed_on_title_gain = {
+    trigger = {
+        scope:title = { has_variable = eotg_unclaimed_county }
+    }
+    effect = {
+        if = {
+            # The §5.3 fallback: the engine gave the county to a generated
+            # successor (folk through the government's template); adopt it.
+            # Script never turns a REAL character into a placeholder.
+            limit = {
+                eotg_is_unclaimed_folk = yes
+                eotg_is_unclaimed_holder = no
+            }
+            change_government = eotg_unclaimed_government
+        }
+        else_if = {
+            limit = { eotg_is_unclaimed_folk = no }
+            scope:title = {
+                eotg_unclaimed_on_claimed_effect = {
+                    CLAIMANT = root
+                    OLD = scope:previous_holder
+                }
+            }
+        }
+    }
+}
+
+# Root is just about to die (death.txt:1). A dying placeholder's counties get
+# new placeholders while it still holds them (spec §5.3).
+on_death = {
+    on_actions = {
+        eotg_unclaimed_on_death
+    }
+}
+
+eotg_unclaimed_on_death = {
+    trigger = {
+        eotg_is_unclaimed_holder = yes
+    }
+    effect = {
+        eotg_unclaimed_on_holder_death_effect = yes
+    }
+}
+
+# Every 1 January, no root (yearly_on_actions.txt:1-3): the safety net.
+# UNVERIFIED-VANILLA: yearly_global_pulse is the hook's name in 1.20.0.3
+#   (spec §5.3 cites it; pitfalls §12: a hook name from .info prose can be dead)
+yearly_global_pulse = {
+    on_actions = {
+        eotg_unclaimed_on_yearly_sweep
+    }
+}
+
+eotg_unclaimed_on_yearly_sweep = {
+    effect = {
+        eotg_unclaimed_sweep_effect = yes
+    }
+}
+
+# -- Integration hooks (spec §9.3) -------------------------------------------
+# Empty on purpose. Later systems (corporations claiming for a backer,
+# exploration revealing claimable space) extend them additively from their
+# own files. Fired with trigger_event = { on_action = ... }, as Frontier's.
+#   eotg_unclaimed_on_claimed:  root = the claimant;
+#     scope:eotg_unclaimed_target (the county), scope:eotg_unclaimed_old_holder
+#     (the placeholder, when known)
+#   eotg_unclaimed_on_released: root = the new placeholder;
+#     scope:eotg_unclaimed_target, plus scope:eotg_unclaimed_old_holder when the
+#     county had a real holder
+
+eotg_unclaimed_on_claimed = {
+}
+
+eotg_unclaimed_on_released = {
+}

@@ -1,0 +1,24 @@
+﻿# -- eotg_unclaimed_triggers.txt ----------------------------------------------
+# Unclaimed Regions (docs/specs/frontier_unclaimed_regions.md §3.2).
+# Signature resource: the county title variable eotg_unclaimed_county
+# (present = Unclaimed; spec §2).
+# -----------------------------------------------------------------------------
+
+# Character: an Unsworn placeholder, landed or not (the trait). Mod code that
+# must also skip a placeholder that has lost its land uses this one (§5.5).
+eotg_is_unclaimed_folk = {
+    has_trait = eotg_unclaimed_folk
+}
+
+# Character: holds land under the placeholder government. THE shared
+# exclusion trigger for every mod pulse and event entry (spec §5.5).
+# government_has_flag as a character trigger: the mod's own verified use
+# (common/buildings/eotg_99_background_graphics_buildings.txt:27).
+eotg_is_unclaimed_holder = {
+    government_has_flag = eotg_government_is_unclaimed
+}
+
+# County: Unclaimed
+eotg_unclaimed_is_unclaimed = {
+    has_variable = eotg_unclaimed_county
+}

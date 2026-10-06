@@ -1,0 +1,36 @@
+﻿# -- eotg_unclaimed_values.txt ------------------------------------------------
+# Unclaimed Regions (docs/specs/frontier_unclaimed_regions.md §3.4). Shapes as
+# eotg_frontier_values.txt. Gold and prestige are read in the ACTOR's scope.
+# -----------------------------------------------------------------------------
+
+# Raise Your Colours: what the claim costs (spec §8.3)
+eotg_unclaimed_claim_gold_value = {
+    value = minor_gold_value
+}
+# As vanilla mpo_retrieve_land_from_herder_interaction (spec §3.4)
+eotg_unclaimed_claim_prestige_value = {
+    value = minor_prestige_value
+}
+
+# Non-adjacent reach (spec §8.2 b): a squared distance from the actor's
+# capital; a map knob. UNVERIFIED-VANILLA: squared_distance_medium is a
+# vanilla script value (62500, spec §3.4)
+eotg_unclaimed_reach_value = {
+    value = squared_distance_medium
+}
+
+# The worldwide AI claim throttle (spec §8.4): at most about two AI claims a year
+eotg_unclaimed_ai_gap_days_value = {
+    value = 180
+}
+
+# An AI holds at most this many claimed, unsettled counties (spec §8.4)
+eotg_unclaimed_ai_hold_cap_value = {
+    value = 2
+}
+
+# The AI's gold floor before claiming: three claims' worth (spec §8.4)
+eotg_unclaimed_ai_gold_floor_value = {
+    value = eotg_unclaimed_claim_gold_value
+    multiply = 3
+}

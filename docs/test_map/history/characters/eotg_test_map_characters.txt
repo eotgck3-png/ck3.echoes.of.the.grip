@@ -1161,3 +1161,18 @@
 	}
 }
 
+
+# TEST ONLY: Unclaimed Regions (frontier_unclaimed_regions.md §5.1, §11.2). The one
+# history seed: it holds every county that starts unclaimed (c_aphion_seam,
+# c_helios_shoal) and is vanished at game start, once the split has given each
+# county its own placeholder with the county's culture and faith. It MUST carry
+# the trait eotg_unclaimed_folk: the government's can_get_government reads it.
+eotg_unclaimed_seed = {
+	name = "Unsworn"
+	culture = greek
+	rite = slavic_rite
+	trait = eotg_unclaimed_folk
+	826.1.1 = {
+		birth = yes
+	}
+}

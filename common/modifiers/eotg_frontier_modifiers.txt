@@ -14,6 +14,12 @@ eotg_frontier_mod_unsettled = {
     tax_mult = -0.5
     levy_size = -0.5
     monthly_county_control_growth_factor = -0.25
+    # Unclaimed Regions (frontier_unclaimed_regions.md §7.3, owner UQ7): owned
+    # Unsettled space also slows armies; a defender in their own realm gets the
+    # own-realm supply bonus (00_defines.txt:657-658), so it falls harder on
+    # attackers. supply_limit_mult as a county modifier: vanilla precedent
+    # 00_county_corruption_modifiers.txt:16 (research R§6).
+    supply_limit_mult = -0.25
 }
 
 # Frontier, early stage (Establishment 0-32)

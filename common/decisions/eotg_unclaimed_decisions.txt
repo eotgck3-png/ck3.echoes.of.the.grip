@@ -1,0 +1,90 @@
+﻿# -- eotg_unclaimed_decisions.txt ---------------------------------------------
+# Unclaimed Regions (docs/specs/frontier_unclaimed_regions.md §3.5, §12):
+# debug decisions only (debug_only = yes). Shape as
+# eotg_decision_frontier_debug_mark_unknown (eotg_frontier_decisions.txt).
+# -----------------------------------------------------------------------------
+
+# Releases the taker's least-developed held county that is not their capital
+# (spec §11.3). Every release goes through eotg_unclaimed_release_effect.
+eotg_decision_unclaimed_debug_release = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 0
+        kingdom = 0
+        empire = 0
+        hegemony = 0
+    }
+
+    is_shown = {
+        debug_only = yes
+    }
+
+    is_valid = {
+        custom_description = {
+            text = eotg_decision_unclaimed_debug_release_valid_tt
+            any_held_title = {
+                tier = tier_county
+                NOT = { this = root.capital_county }
+                eotg_unclaimed_is_unclaimed = no
+            }
+        }
+    }
+
+    effect = {
+        ordered_held_title = {
+            limit = {
+                tier = tier_county
+                NOT = { this = root.capital_county }
+                eotg_unclaimed_is_unclaimed = no
+            }
+            # The least developed first
+            order_by = {
+                value = development_level
+                multiply = -1
+            }
+            eotg_unclaimed_release_effect = yes
+        }
+    }
+
+    ai_potential = {
+        always = no
+    }
+    ai_will_do = {
+        base = 0
+    }
+}
+
+# The probe (spec §12 V-U1, V-U3): is a placeholder playable, and how many
+# counties and Unsworn are there.
+eotg_decision_unclaimed_debug_readout = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 0
+        kingdom = 0
+        empire = 0
+        hegemony = 0
+    }
+
+    is_shown = {
+        debug_only = yes
+    }
+
+    effect = {
+        eotg_unclaimed_debug_readout_effect = yes
+    }
+
+    ai_potential = {
+        always = no
+    }
+    ai_will_do = {
+        base = 0
+    }
+}

@@ -1,6 +1,6 @@
 ﻿# TEST ONLY: not mod content. EotG Test: Frontier on Corsica and Sardinia (docs/test_submods/frontier_vanilla/README.md).
-# Marks the vanilla counties of Corsica and Sardinia Unsettled at game start, so Frontier can be tested on the
-# vanilla map. Vanilla title keys are allowed here because this sub-mod is never shipped (mod script never names them).
+# Marks the vanilla counties of Corsica Unsettled and releases Sardinia's as Unclaimed Regions at game start, so
+# Frontier and Unclaimed Regions can be tested on the vanilla map. Vanilla title keys are allowed here because this sub-mod is never shipped (mod script never names them).
 # Additive on vanilla's on_game_start (invariant 4).
 
 on_game_start = {
@@ -12,11 +12,14 @@ eotg_test_frontier_vanilla_mark = {
         title:c_ajaccio = { eotg_frontier_mark_unsettled_effect = yes }
         title:c_bastia = { eotg_frontier_mark_unsettled_effect = yes }
         title:c_vecchio = { eotg_frontier_mark_unsettled_effect = yes }
-        title:c_cagliari = { eotg_frontier_mark_unsettled_effect = yes }
-        title:c_arborea = { eotg_frontier_mark_unsettled_effect = yes }
-        title:c_gallura = { eotg_frontier_mark_unsettled_effect = yes }
-        title:c_logudoro = { eotg_frontier_mark_unsettled_effect = yes }
-        title:c_tortoli = { eotg_frontier_mark_unsettled_effect = yes }
+        # Unclaimed Regions (frontier_unclaimed_regions.md §11.1): Sardinia is
+        # RELEASED as unclaimed (placeholders, neutral grey, Unsettled); Corsica
+        # above stays owned-Unsettled, so both cases are tested (§6.3)
+        title:c_cagliari = { eotg_unclaimed_release_effect = yes }
+        title:c_arborea = { eotg_unclaimed_release_effect = yes }
+        title:c_gallura = { eotg_unclaimed_release_effect = yes }
+        title:c_logudoro = { eotg_unclaimed_release_effect = yes }
+        title:c_tortoli = { eotg_unclaimed_release_effect = yes }
         # Frontier Phase 3a (frontier_v3_test_plan.md): one Region on each island
         # starts Unknown, to test exploration
         title:c_vecchio = { eotg_frontier_mark_unknown_effect = yes }

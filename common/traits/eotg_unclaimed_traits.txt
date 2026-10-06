@@ -1,0 +1,26 @@
+﻿# -- eotg_unclaimed_traits.txt ------------------------------------------------
+# Unclaimed Regions (docs/specs/frontier_unclaimed_regions.md §5.4).
+#
+# eotg_unclaimed_folk, "the Unsworn": marks a placeholder holder, landed or not.
+# The blockers keep a placeholder out of real dynasties: no marriage, no
+# children, no inheritance of titles or claims (fields per
+# reference/common/traits/_traits.info; shape of vanilla's blocker lines,
+# 00_traits.txt:6896-6899). ai.arrange_marriage = no on the government only
+# stops the placeholder itself from proposing (research R§2).
+# -----------------------------------------------------------------------------
+
+eotg_unclaimed_folk = {
+    category = fame
+    # Art wanted (spec §18): a trait icon of our own.
+    # UNVERIFIED-VANILLA: gfx/interface/icons/traits/celibate.dds exists
+    #   (a vanilla trait icon, used until the art lands)
+    icon = celibate.dds
+
+    flag = can_not_marry
+    can_have_children = no
+    inheritance_blocker = all
+    claim_inheritance_blocker = all
+
+    shown_in_ruler_designer = no
+    shown_in_encyclopedia = no
+}

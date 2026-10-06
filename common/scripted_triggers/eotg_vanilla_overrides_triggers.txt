@@ -1,0 +1,51 @@
+﻿# -- eotg_vanilla_overrides_triggers.txt --------------------------------------
+# !!! DELIBERATE NON-ADDITIVE VANILLA OVERRIDE (key-level) !!!
+# Unclaimed Regions (docs/specs/frontier_unclaimed_regions.md §4.3, §4.4; owner
+# UQ2). This file REDEFINES vanilla scripted triggers by key. A redefined key
+# replaces vanilla's whole definition: vanilla changes to it are silently lost.
+# After every CK3 update, diff each block below against vanilla (pitfalls §2's
+# override sweep).
+#
+# Overridden keys (copied from the vanilla version named):
+#   herders_and_tributary_constraints
+#     from game/common/scripted_triggers/00_war_and_peace_triggers.txt:1144-1160
+#     (CK3 1.20.0.3), plus two lines marked `# EOTG`:
+#       - the defender side: our flag joins government_is_herder (no CB war
+#         against an Unclaimed Region's placeholder);
+#       - the attacker side: a placeholder never declares war.
+#   basic_is_valid_for_yearly_events_trigger: NOT overridden. Only if V-U1
+#     finds placeholders playable (spec §4.5 M2).
+#
+# Confirm it loads: logs/database_conflicts.log must show
+#   Overriding entry 'herders_and_tributary_constraints'
+# naming this file. If it is absent, the key-level override did not take.
+#
+# =============================================================================
+# STATUS: INERT. The block below is COMMENTED OUT on purpose.
+# This file was written in a cloud session WITHOUT the game files. A key-level
+# override must be a VERBATIM copy of vanilla's trigger, and a reconstruction
+# from memory would silently change every CB group that calls it (17 groups,
+# 00_casus_belli_groups.txt). So until the local session pastes vanilla's
+# body, there is NO war immunity for Unclaimed Regions (V-U2 fails by design).
+#
+# UNVERIFIED-VANILLA / LOCAL TODO (blocking V-U2):
+#   1. Copy herders_and_tributary_constraints VERBATIM from
+#      game/common/scripted_triggers/00_war_and_peace_triggers.txt (1.20.0.3).
+#   2. Uncomment the frame below and paste vanilla's body where it says so.
+#   3. In the defender check that reads government_has_flag =
+#      government_is_herder, add the EOTG defender line beside it, in the same
+#      logical position (the defender must NOT have our flag either).
+#   4. Add the EOTG attacker line at the top level of the trigger.
+#   5. Check database_conflicts.log (above), then V-U2.
+# The attacker scope's name (scope:attacker) is assumed from the CB group
+# context; use whatever vanilla's body uses.
+# =============================================================================
+
+#herders_and_tributary_constraints = {
+#    # ---- vanilla body, verbatim, 1.20.0.3 (paste here) ----
+#    #   ... inside the defender block that tests
+#    #       government_has_flag = government_is_herder, add beside it:
+#    #   government_has_flag = eotg_government_is_unclaimed   # EOTG (defender)
+#    # ---- end of vanilla body ----
+#    scope:attacker = { NOT = { government_has_flag = eotg_government_is_unclaimed } }   # EOTG (attacker)
+#}
