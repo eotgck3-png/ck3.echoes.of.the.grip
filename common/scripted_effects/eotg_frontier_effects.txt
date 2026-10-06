@@ -118,7 +118,28 @@ eotg_frontier_start_effect = {
         # Q4: the development this project can still reach (its floor is
         # never above it)
         set_variable = { name = eotg_frontier_dev_reachable  value = eotg_frontier_dev_reachable_value }
+        # Expansion B2 (frontier_v2.md §B2): salvage from an abandoned attempt's
+        # infrastructure
+        if = {
+            limit = { has_variable = eotg_frontier_salvage }
+            change_variable = { name = eotg_frontier_progress  add = eotg_frontier_salvage_bonus_value }
+            remove_variable = eotg_frontier_salvage
+        }
+        # Phase 2 (frontier_v2.md §8): survey data on file is a head start
+        if = {
+            limit = { has_variable = eotg_frontier_survey_data }
+            change_variable = { name = eotg_frontier_progress  add = eotg_frontier_survey_bonus_value }
+            remove_variable = eotg_frontier_survey_data
+        }
         eotg_frontier_set_founder_effect = { FOUNDER = $FOUNDER$ }
+        # Phase 2 (§5.3): a Region nobody has learned anything about reveals a
+        # trait to its first expedition. After the founder is set, so the
+        # discovery hook carries scope:eotg_frontier_founder (verification 6)
+        if = {
+            limit = { eotg_frontier_trait_count_value < 1 }
+            eotg_frontier_reveal_trait_effect = yes
+            eotg_frontier_discovery_toast_effect = yes
+        }
         add_to_global_variable_list = { name = eotg_frontier_active  target = this }
         eotg_frontier_update_tier_modifier_effect = yes
         eotg_frontier_fire_hook_effect = { HOOK = eotg_frontier_on_project_started }
@@ -422,7 +443,8 @@ eotg_frontier_tick_effect = {
         }
     }
     if = {
-        limit = { county_control < 40 }
+        # Phase 2 (frontier_v2.md §6.1): Administrative's line is stricter
+        limit = { county_control < eotg_frontier_low_control_value }
         eotg_frontier_add_strain_effect = { CAUSE = low_control }
     }
     if = {
@@ -430,8 +452,17 @@ eotg_frontier_tick_effect = {
         eotg_frontier_add_strain_effect = { CAUSE = occupied }
     }
     if = {
-        limit = { holder = { is_at_war = yes } }
+        # Phase 2 (§6.1): a Military project is built for war
+        limit = {
+            holder = { is_at_war = yes }
+            eotg_frontier_war_strains = yes
+        }
         eotg_frontier_add_strain_effect = { CAUSE = war }
+    }
+    # Phase 2 (§5.2): a Dangerous Region, weakly held and unguarded
+    if = {
+        limit = { eotg_frontier_danger_strains = yes }
+        eotg_frontier_add_strain_effect = { CAUSE = danger }
     }
 
     # 2. The sponsor: the heir hand-off recorded in on_death resolves now; a
@@ -441,13 +472,15 @@ eotg_frontier_tick_effect = {
     eotg_frontier_check_sponsor_effect = yes
     eotg_frontier_sponsor_pay_effect = yes
 
-    # A quiet year eases strain
+    # A quiet year eases strain, unless the place is hostile and nothing
+    # shelters the settlers (Phase 2, frontier_v2.md §5.2)
     if = {
-        limit = { NOT = { has_variable = eotg_frontier_tick_strained } }
-        eotg_frontier_ease_strain_effect = yes
-    }
-    else = {
+        limit = { has_variable = eotg_frontier_tick_strained }
         remove_variable = eotg_frontier_tick_strained
+    }
+    else_if = {
+        limit = { eotg_frontier_quiet_eases = yes }
+        eotg_frontier_ease_strain_effect = yes
     }
 
     # 3. Establishment gained this year
@@ -527,8 +560,9 @@ eotg_frontier_sponsor_pay_effect = {
 }
 
 # The flavor roll. Sets the 3-year cooldown (owner decision) when an event
-# (or an AI-to-AI offer) actually happens. Player holders get .002 / .003; AI holders get
-# only the scripted AI-to-AI sponsor offer (spec §6.1, §8.4).
+# (or an AI-to-AI offer) actually happens. Player holders get the founderless
+# .002, else an event from the Phase 2 pool (eotg_frontier_flavor_pick_effect);
+# AI holders get only the scripted AI-to-AI sponsor offer (spec §6.1, §8.4).
 eotg_frontier_event_roll_effect = {
     eotg_frontier_find_sponsor_candidate_effect = yes
     if = {
@@ -540,21 +574,12 @@ eotg_frontier_event_roll_effect = {
             holder = { trigger_event = eotg_frontier.002 }
         }
         else = {
-            random_list = {
-                30 = {
-                    set_variable = { name = eotg_frontier_event_cd  value = yes  years = 3 }
-                    holder = { trigger_event = eotg_frontier.002 }
-                }
-                20 = {
-                    trigger = {
-                        NOT = { exists = var:eotg_frontier_sponsor }
-                        exists = scope:eotg_frontier_sponsor_candidate
-                    }
-                    set_variable = { name = eotg_frontier_event_cd  value = yes  years = 3 }
-                    scope:eotg_frontier_sponsor_candidate = { save_scope_as = eotg_frontier_sponsor }
-                    holder = { trigger_event = eotg_frontier.003 }
-                }
-                50 = { }
+            # Phase 2 (frontier_v2.md §9.1): the same frequency as Phase 1 (an
+            # event in half the eligible years), from a wider pool
+            random = {
+                chance = 50
+                set_variable = { name = eotg_frontier_event_cd  value = yes  years = 3 }
+                eotg_frontier_flavor_pick_effect = yes
             }
         }
     }
@@ -612,6 +637,8 @@ eotg_frontier_complete_effect = {
         limit = { eotg_frontier_is_frontier = yes }
         eotg_frontier_save_hook_scopes_effect = yes
         holder = { save_temporary_scope_as = eotg_frontier_holder }
+        # development_changed fires once below, not once per row (verification 5)
+        save_temporary_scope_value_as = { name = eotg_frontier_settling  value = yes }
         if = {
             limit = { var:eotg_frontier_type ?= flag:settlement }
             eotg_frontier_build_holding_effect = { HOLDING = city_holding }
@@ -631,11 +658,13 @@ eotg_frontier_complete_effect = {
             limit = { var:eotg_frontier_type ?= flag:military }
             eotg_frontier_build_holding_effect = { HOLDING = castle_holding }
             change_county_control = 15
+            eotg_frontier_create_figure_effect = { TEMPLATE = eotg_frontier_commander_template }
         }
         else_if = {
             limit = { var:eotg_frontier_type ?= flag:religious }
             eotg_frontier_build_holding_effect = { HOLDING = church_holding }
             eotg_frontier_raise_dev_effect = { AMOUNT = 1 }
+            eotg_frontier_create_figure_effect = { TEMPLATE = eotg_frontier_elder_template }
         }
         else_if = {
             limit = { var:eotg_frontier_type ?= flag:research }
@@ -649,15 +678,31 @@ eotg_frontier_complete_effect = {
             limit = { var:eotg_frontier_type ?= flag:administrative }
             change_county_control = 100
             eotg_frontier_raise_dev_effect = { AMOUNT = 1 }
+            eotg_frontier_create_figure_effect = { TEMPLATE = eotg_frontier_official_template }
+        }
+        # Phase 2 (frontier_v2.md §7): traits and infrastructure become results
+        eotg_frontier_settle_rewards_effect = yes
+        if = {
+            limit = { exists = scope:eotg_frontier_dev_moved }
+            eotg_frontier_fire_hook_effect = { HOOK = eotg_frontier_on_development_changed }
         }
         eotg_frontier_settle_effect = yes
     }
 }
 
-# Development from a result, with its hook (Q8)
+# Development from a result, with its hook (Q8). Inside a completion
+# (scope:eotg_frontier_settling set by eotg_frontier_complete_effect) the hook
+# is deferred: the completion fires it once, however many rows raised
+# development (frontier_v2 verification 5).
 eotg_frontier_raise_dev_effect = {
     change_development_level = $AMOUNT$
-    eotg_frontier_fire_hook_effect = { HOOK = eotg_frontier_on_development_changed }
+    if = {
+        limit = { exists = scope:eotg_frontier_settling }
+        save_temporary_scope_value_as = { name = eotg_frontier_dev_moved  value = yes }
+    }
+    else = {
+        eotg_frontier_fire_hook_effect = { HOOK = eotg_frontier_on_development_changed }
+    }
 }
 
 # A new System in an open slot of the Region; else development and control
@@ -799,6 +844,14 @@ eotg_frontier_abandon_effect = {
             limit = { var:eotg_frontier_milestone >= 1 }
             change_development_level = -1
         }
+        # Phase 2 (frontier_v2.md §4.2): what was built is lost; what was
+        # learned (the traits) stays. Expansion B2 (§B2): the next expedition
+        # can salvage some of it (one record per abandonment, the latest wins)
+        if = {
+            limit = { eotg_frontier_infra_count_value >= 1 }
+            set_variable = { name = eotg_frontier_salvage  value = eotg_frontier_infra_count_value }
+        }
+        eotg_frontier_clear_infra_effect = yes
         eotg_frontier_drop_sponsor_effect = yes
         eotg_frontier_unlist_effect = yes
         eotg_frontier_clear_project_effect = yes
@@ -863,6 +916,390 @@ eotg_frontier_debug_readout_effect = {
                     title = eotg_frontier_debug_readout_toast_waiting
                     left_icon = root
                 }
+            }
+        }
+    }
+}
+
+# == Phase 2 (docs/specs/frontier_v2.md) =====================================
+# Traits and infrastructure are county modifiers (spec §2, §4, §5): present =
+# known / built. Parameters are whole tokens ($TRAIT$, $INFRA$, flag:$FLAG$),
+# the same substitution Phase 1 uses for $HOOK$ and flag:$TYPE$.
+
+# -- Traits (spec §5) -----------------------------------------------------------
+# Rolls one trait the Region lacks, all equally weighted (spec §5.3).
+# Habitable and Hostile Environment exclude each other. THE public discovery
+# entry point: a future Exploration system calls this on any county
+# (spec §8), and listens to eotg_frontier_on_discovery.
+eotg_frontier_reveal_trait_effect = {
+    if = {
+        limit = { eotg_frontier_trait_room = yes }
+        random_list = {
+            10 = {
+                trigger = { NOT = { has_county_modifier = eotg_frontier_trait_rich_resources } }
+                eotg_frontier_add_trait_effect = { TRAIT = eotg_frontier_trait_rich_resources  FLAG = rich_resources }
+            }
+            10 = {
+                trigger = { NOT = { has_county_modifier = eotg_frontier_trait_trade_route } }
+                eotg_frontier_add_trait_effect = { TRAIT = eotg_frontier_trait_trade_route  FLAG = trade_route }
+            }
+            10 = {
+                trigger = { NOT = { has_county_modifier = eotg_frontier_trait_strategic } }
+                eotg_frontier_add_trait_effect = { TRAIT = eotg_frontier_trait_strategic  FLAG = strategic }
+            }
+            10 = {
+                trigger = {
+                    NOT = { has_county_modifier = eotg_frontier_trait_habitable }
+                    NOT = { has_county_modifier = eotg_frontier_trait_hostile }
+                }
+                eotg_frontier_add_trait_effect = { TRAIT = eotg_frontier_trait_habitable  FLAG = habitable }
+            }
+            10 = {
+                trigger = { NOT = { has_county_modifier = eotg_frontier_trait_ancient_ruins } }
+                eotg_frontier_add_trait_effect = { TRAIT = eotg_frontier_trait_ancient_ruins  FLAG = ancient_ruins }
+            }
+            10 = {
+                trigger = { NOT = { has_county_modifier = eotg_frontier_trait_ancient_infrastructure } }
+                eotg_frontier_add_trait_effect = { TRAIT = eotg_frontier_trait_ancient_infrastructure  FLAG = ancient_infrastructure }
+            }
+            10 = {
+                trigger = { NOT = { has_county_modifier = eotg_frontier_trait_anomalous } }
+                eotg_frontier_add_trait_effect = { TRAIT = eotg_frontier_trait_anomalous  FLAG = anomalous }
+            }
+            10 = {
+                trigger = {
+                    NOT = { has_county_modifier = eotg_frontier_trait_hostile }
+                    NOT = { has_county_modifier = eotg_frontier_trait_habitable }
+                }
+                eotg_frontier_add_trait_effect = { TRAIT = eotg_frontier_trait_hostile  FLAG = hostile }
+            }
+            10 = {
+                trigger = { NOT = { has_county_modifier = eotg_frontier_trait_remote } }
+                eotg_frontier_add_trait_effect = { TRAIT = eotg_frontier_trait_remote  FLAG = remote }
+            }
+            10 = {
+                trigger = { NOT = { has_county_modifier = eotg_frontier_trait_dangerous } }
+                eotg_frontier_add_trait_effect = { TRAIT = eotg_frontier_trait_dangerous  FLAG = dangerous }
+            }
+        }
+    }
+}
+
+# Adds one named trait if there is room; saves what was found as
+# scope:eotg_frontier_discovered (a flag value) and fires the discovery hook.
+# $TRAIT$: the modifier key; $FLAG$: its short name.
+eotg_frontier_add_trait_effect = {
+    if = {
+        limit = {
+            NOT = { has_county_modifier = $TRAIT$ }
+            eotg_frontier_trait_room = yes
+        }
+        add_county_modifier = $TRAIT$
+        save_scope_value_as = { name = eotg_frontier_discovered  value = flag:$FLAG$ }
+        eotg_frontier_fire_hook_effect = { HOOK = eotg_frontier_on_discovery }
+    }
+}
+
+# The holder's "new findings" toast, for a reveal no event shows (the first
+# expedition at Establish)
+eotg_frontier_discovery_toast_effect = {
+    save_scope_as = eotg_frontier_county
+    holder = {
+        save_temporary_scope_as = eotg_frontier_toast_target
+        send_interface_toast = {
+            title = eotg_frontier_toast_discovery
+            left_icon = scope:eotg_frontier_toast_target
+        }
+    }
+}
+
+eotg_frontier_clear_traits_effect = {
+    if = {
+        limit = { has_county_modifier = eotg_frontier_trait_rich_resources }
+        remove_county_modifier = eotg_frontier_trait_rich_resources
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_trait_trade_route }
+        remove_county_modifier = eotg_frontier_trait_trade_route
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_trait_strategic }
+        remove_county_modifier = eotg_frontier_trait_strategic
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_trait_habitable }
+        remove_county_modifier = eotg_frontier_trait_habitable
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_trait_ancient_ruins }
+        remove_county_modifier = eotg_frontier_trait_ancient_ruins
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_trait_ancient_infrastructure }
+        remove_county_modifier = eotg_frontier_trait_ancient_infrastructure
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_trait_anomalous }
+        remove_county_modifier = eotg_frontier_trait_anomalous
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_trait_hostile }
+        remove_county_modifier = eotg_frontier_trait_hostile
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_trait_remote }
+        remove_county_modifier = eotg_frontier_trait_remote
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_trait_dangerous }
+        remove_county_modifier = eotg_frontier_trait_dangerous
+    }
+}
+
+# -- Discoveries (spec §8) ------------------------------------------------------
+# What a filed survey report gives: progress on a Frontier, or survey data on
+# file for the next project (its head start, consumed by the start effect).
+eotg_frontier_file_survey_effect = {
+    if = {
+        limit = { eotg_frontier_is_frontier = yes }
+        eotg_frontier_add_progress_effect = { AMOUNT = 2 }
+        custom_tooltip = eotg_frontier.020.progress_tt
+    }
+    else = {
+        set_variable = { name = eotg_frontier_survey_data  value = yes }
+        custom_tooltip = eotg_frontier.020.data_tt
+    }
+}
+
+# -- Infrastructure (spec §4) ---------------------------------------------------
+# Builds one piece if the Region has room for it; one build a year. Saves what
+# was built as scope:eotg_frontier_infrastructure (a flag value) for the hook.
+eotg_frontier_add_infra_effect = {
+    if = {
+        limit = {
+            eotg_frontier_infra_room = yes
+            NOT = { has_county_modifier = $INFRA$ }
+        }
+        add_county_modifier = $INFRA$
+        set_variable = { name = eotg_frontier_built  value = yes  years = 1 }
+        save_scope_value_as = { name = eotg_frontier_infrastructure  value = flag:$FLAG$ }
+        eotg_frontier_fire_hook_effect = { HOOK = eotg_frontier_on_infrastructure_built }
+    }
+}
+
+eotg_frontier_clear_infra_effect = {
+    if = {
+        limit = { has_county_modifier = eotg_frontier_infra_habitat }
+        remove_county_modifier = eotg_frontier_infra_habitat
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_infra_orbital_station }
+        remove_county_modifier = eotg_frontier_infra_orbital_station
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_infra_navigation_beacon }
+        remove_county_modifier = eotg_frontier_infra_navigation_beacon
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_infra_trade_station }
+        remove_county_modifier = eotg_frontier_infra_trade_station
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_infra_mining_complex }
+        remove_county_modifier = eotg_frontier_infra_mining_complex
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_infra_research_facility }
+        remove_county_modifier = eotg_frontier_infra_research_facility
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_infra_mission }
+        remove_county_modifier = eotg_frontier_infra_mission
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_infra_garrison_post }
+        remove_county_modifier = eotg_frontier_infra_garrison_post
+    }
+}
+
+# -- Better settlement outcomes (spec §7) --------------------------------------
+# After the type row, before the settle: turns the traits and infrastructure
+# into normal CK3 results (development, control, 25-year legacies), then
+# removes them. A legacy is added once, however many sources grant it.
+# Reads var:eotg_frontier_type, so it runs before the project is cleared.
+# change_development_level = <script value>: confirmed against vanilla
+# 1.20.0.3 (spec frontier_v2.md §15 item 6)
+eotg_frontier_settle_rewards_effect = {
+    if = {
+        limit = { eotg_frontier_reward_dev_value > 0 }
+        eotg_frontier_raise_dev_effect = { AMOUNT = eotg_frontier_reward_dev_value }
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_infra_orbital_station }
+        change_county_control = 10
+    }
+    if = {
+        limit = {
+            OR = {
+                var:eotg_frontier_type ?= flag:trade
+                has_county_modifier = eotg_frontier_trait_trade_route
+                has_county_modifier = eotg_frontier_infra_trade_station
+            }
+        }
+        add_county_modifier = { modifier = eotg_frontier_mod_legacy_trade  years = 25 }
+    }
+    if = {
+        limit = {
+            OR = {
+                var:eotg_frontier_type ?= flag:mining
+                has_county_modifier = eotg_frontier_trait_rich_resources
+                has_county_modifier = eotg_frontier_infra_mining_complex
+            }
+        }
+        add_county_modifier = { modifier = eotg_frontier_mod_legacy_industry  years = 25 }
+    }
+    if = {
+        limit = {
+            OR = {
+                has_county_modifier = eotg_frontier_trait_strategic
+                has_county_modifier = eotg_frontier_infra_garrison_post
+            }
+        }
+        add_county_modifier = { modifier = eotg_frontier_mod_legacy_defence  years = 25 }
+    }
+    if = {
+        limit = {
+            OR = {
+                var:eotg_frontier_type ?= flag:research
+                has_county_modifier = eotg_frontier_trait_ancient_ruins
+                has_county_modifier = eotg_frontier_trait_anomalous
+                has_county_modifier = eotg_frontier_infra_research_facility
+            }
+        }
+        add_county_modifier = { modifier = eotg_frontier_mod_legacy_learning  years = 25 }
+    }
+    if = {
+        limit = {
+            OR = {
+                var:eotg_frontier_type ?= flag:religious
+                has_county_modifier = eotg_frontier_infra_mission
+            }
+        }
+        add_county_modifier = { modifier = eotg_frontier_mod_legacy_faith  years = 25 }
+    }
+    eotg_frontier_clear_traits_effect = yes
+    eotg_frontier_clear_infra_effect = yes
+}
+
+# A local figure for a type's result (spec §7): a courtier of the holder, the
+# holder's culture and faith BY SCOPE (map-agnostic), as the settlers' leader.
+# Reads scope:eotg_frontier_holder and scope:eotg_frontier_county.
+eotg_frontier_create_figure_effect = {
+    scope:eotg_frontier_holder = {
+        create_character = {
+            template = $TEMPLATE$
+            location = scope:eotg_frontier_county.title_province
+            culture = scope:eotg_frontier_holder.culture
+            faith = scope:eotg_frontier_holder.faith
+            save_scope_as = eotg_frontier_figure
+        }
+        add_courtier = scope:eotg_frontier_figure
+    }
+}
+
+# -- The flavor pool (spec §9.1) ----------------------------------------------
+# Called by eotg_frontier_event_roll_effect for player holders, once the 50%
+# "an event comes this year" roll has passed. Weights read the traits and the
+# infrastructure. .002 is always eligible, so something always fires.
+eotg_frontier_flavor_pick_effect = {
+    eotg_frontier_find_rival_backer_effect = yes
+    random_list = {
+        20 = {
+            modifier = { add = 10  has_county_modifier = eotg_frontier_trait_hostile }
+            holder = { trigger_event = eotg_frontier.002 }
+        }
+        20 = {
+            trigger = {
+                NOT = { exists = var:eotg_frontier_sponsor }
+                exists = scope:eotg_frontier_sponsor_candidate
+            }
+            scope:eotg_frontier_sponsor_candidate = { save_scope_as = eotg_frontier_sponsor }
+            holder = { trigger_event = eotg_frontier.003 }
+        }
+        10 = {
+            trigger = {
+                eotg_frontier_has_valid_sponsor = yes
+                exists = scope:eotg_frontier_rival
+            }
+            modifier = { add = 10  has_county_modifier = eotg_frontier_trait_trade_route }
+            holder = { trigger_event = eotg_frontier.030 }
+        }
+        10 = {
+            trigger = {
+                eotg_frontier_has_valid_sponsor = yes
+                NOT = { var:eotg_frontier_sponsor = holder }
+            }
+            holder = { trigger_event = eotg_frontier.031 }
+        }
+        10 = {
+            trigger = { var:eotg_frontier_progress >= 33 }
+            modifier = { add = 10  has_county_modifier = eotg_frontier_trait_strategic }
+            holder = { trigger_event = eotg_frontier.032 }
+        }
+        10 = {
+            trigger = {
+                eotg_frontier_has_valid_founder = yes
+                NOT = { holder = var:eotg_frontier_founder }
+            }
+            modifier = { add = 5  has_county_modifier = eotg_frontier_trait_habitable }
+            holder = { trigger_event = eotg_frontier.033 }
+        }
+        5 = {
+            modifier = { add = 10  has_county_modifier = eotg_frontier_trait_remote }
+            modifier = { add = 10  has_county_modifier = eotg_frontier_trait_dangerous }
+            modifier = {
+                add = -5
+                has_county_modifier = eotg_frontier_trait_remote
+                has_county_modifier = eotg_frontier_infra_navigation_beacon
+            }
+            holder = { trigger_event = eotg_frontier.034 }
+        }
+        10 = {
+            trigger = { eotg_frontier_trait_room = yes }
+            modifier = { add = 10  var:eotg_frontier_type ?= flag:research }
+            modifier = { add = 10  has_county_modifier = eotg_frontier_trait_anomalous }
+            holder = { trigger_event = eotg_frontier.035 }
+        }
+        10 = {
+            trigger = {
+                eotg_frontier_trait_room = yes
+                NOT = { has_county_modifier = eotg_frontier_trait_rich_resources }
+            }
+            modifier = { add = 10  var:eotg_frontier_type ?= flag:mining }
+            holder = { trigger_event = eotg_frontier.036 }
+        }
+    }
+}
+
+# A would-be backer other than the current one (.030): the holder's liege,
+# else an ally, who passes the AI backing gate (eotg_frontier_ai_would_sponsor
+# includes "backs nothing yet", so the current backer never qualifies).
+# Saves scope:eotg_frontier_rival, or clears it.
+eotg_frontier_find_rival_backer_effect = {
+    clear_saved_scope = eotg_frontier_rival
+    holder = {
+        if = {
+            limit = {
+                exists = liege
+                NOT = { liege = this }
+                liege = { eotg_frontier_ai_would_sponsor = yes }
+            }
+            liege = { save_scope_as = eotg_frontier_rival }
+        }
+        else = {
+            random_ally = {
+                limit = { eotg_frontier_ai_would_sponsor = yes }
+                save_scope_as = eotg_frontier_rival
             }
         }
     }

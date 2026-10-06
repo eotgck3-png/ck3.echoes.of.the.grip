@@ -32,3 +32,67 @@ eotg_frontier_settler_leader_template = {
 
     stewardship = { 8 13 }
 }
+
+# == Phase 2 (docs/specs/frontier_v2.md §7): local figures on completion ======
+# Same shape as the settlers' leader. Culture and faith come from the caller
+# (eotg_frontier_create_figure_effect), by scope.
+
+# Military: the commander who held the approaches
+eotg_frontier_commander_template = {
+    age = { 28 50 }
+    gender_female_chance = 50
+    random_traits_list = {
+        count = 1
+        brave = {}
+        stubborn = {}
+        diligent = {}
+        just = {}
+    }
+    random_traits_list = {
+        count = 1
+        education_martial_2 = {}
+        education_martial_3 = {}
+    }
+    random_traits = yes
+    martial = { 9 14 }
+}
+
+# Religious: the elder who kept the mission
+eotg_frontier_elder_template = {
+    age = { 35 60 }
+    gender_female_chance = 50
+    random_traits_list = {
+        count = 1
+        patient = {}
+        compassionate = {}
+        zealous = {}
+        calm = {}
+    }
+    random_traits_list = {
+        count = 1
+        education_learning_2 = {}
+        education_learning_3 = {}
+    }
+    random_traits = yes
+    learning = { 9 14 }
+}
+
+# Administrative: the official who put the Region in order
+eotg_frontier_official_template = {
+    age = { 25 50 }
+    gender_female_chance = 50
+    random_traits_list = {
+        count = 1
+        diligent = {}
+        just = {}
+        temperate = {}
+        patient = {}
+    }
+    random_traits_list = {
+        count = 1
+        education_stewardship_2 = {}
+        education_stewardship_3 = {}
+    }
+    random_traits = yes
+    stewardship = { 9 14 }
+}

@@ -64,6 +64,11 @@ eotg_frontier_min_dev_value = {
         }
         value = 3
     }
+    # Phase 2 (frontier_v2.md §5.2): Ancient Infrastructure lowers the floor
+    if = {
+        limit = { has_county_modifier = eotg_frontier_trait_ancient_infrastructure }
+        add = -1
+    }
     if = {
         limit = { has_variable = eotg_frontier_dev_reachable }
         max = var:eotg_frontier_dev_reachable
@@ -104,6 +109,16 @@ eotg_frontier_min_control_value = {
     else_if = {
         limit = { var:eotg_frontier_type ?= flag:administrative }
         value = 80
+    }
+    # Phase 2 (frontier_v2.md §5.2): contested ground needs a firmer hold; a
+    # remote Region is held more loosely
+    if = {
+        limit = { has_county_modifier = eotg_frontier_trait_strategic }
+        add = 10
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_trait_remote }
+        add = -10
     }
 }
 
@@ -188,6 +203,11 @@ eotg_frontier_yearly_gain_value = {
     add = eotg_frontier_control_bonus_value
     add = eotg_frontier_founder_bonus_value
     add = eotg_frontier_sponsor_bonus_value
+    # Phase 2 (frontier_v2.md §4.2, §5.2, §6.2): traits, infrastructure and the
+    # type's own input, before the pace multiplier like everything else
+    add = eotg_frontier_trait_rate_value
+    add = eotg_frontier_infra_rate_value
+    add = eotg_frontier_type_input_value
     multiply = eotg_frontier_pace_value
     min = 0
 }
@@ -207,4 +227,258 @@ eotg_frontier_strain_fail_value = {
 # -- AI throttle ----------------------------------------------------------------
 eotg_frontier_ai_cap_value = {
     value = 8
+}
+
+# == Phase 2 (docs/specs/frontier_v2.md) =====================================
+# The rows below are the Phase 2 "data": one row per trait, infrastructure or
+# type. Adding one = one more row here, one modifier, its loc. All yearly
+# inputs are PRE-PACE: eotg_frontier_yearly_gain_value halves the sum.
+
+# -- Counts (county scope) -----------------------------------------------------
+eotg_frontier_trait_count_value = {
+    value = 0
+    if = { limit = { has_county_modifier = eotg_frontier_trait_rich_resources } add = 1 }
+    if = { limit = { has_county_modifier = eotg_frontier_trait_trade_route } add = 1 }
+    if = { limit = { has_county_modifier = eotg_frontier_trait_strategic } add = 1 }
+    if = { limit = { has_county_modifier = eotg_frontier_trait_habitable } add = 1 }
+    if = { limit = { has_county_modifier = eotg_frontier_trait_ancient_ruins } add = 1 }
+    if = { limit = { has_county_modifier = eotg_frontier_trait_ancient_infrastructure } add = 1 }
+    if = { limit = { has_county_modifier = eotg_frontier_trait_anomalous } add = 1 }
+    if = { limit = { has_county_modifier = eotg_frontier_trait_hostile } add = 1 }
+    if = { limit = { has_county_modifier = eotg_frontier_trait_remote } add = 1 }
+    if = { limit = { has_county_modifier = eotg_frontier_trait_dangerous } add = 1 }
+}
+
+# A Region holds at most this many known traits (spec §5.1)
+eotg_frontier_trait_max_value = {
+    value = 2
+}
+
+eotg_frontier_infra_count_value = {
+    value = 0
+    if = { limit = { has_county_modifier = eotg_frontier_infra_habitat } add = 1 }
+    if = { limit = { has_county_modifier = eotg_frontier_infra_orbital_station } add = 1 }
+    if = { limit = { has_county_modifier = eotg_frontier_infra_navigation_beacon } add = 1 }
+    if = { limit = { has_county_modifier = eotg_frontier_infra_trade_station } add = 1 }
+    if = { limit = { has_county_modifier = eotg_frontier_infra_mining_complex } add = 1 }
+    if = { limit = { has_county_modifier = eotg_frontier_infra_research_facility } add = 1 }
+    if = { limit = { has_county_modifier = eotg_frontier_infra_mission } add = 1 }
+    if = { limit = { has_county_modifier = eotg_frontier_infra_garrison_post } add = 1 }
+}
+
+# One piece of infrastructure from the start, two from Foothold (spec §4.1).
+# Read only on a Frontier (eotg_frontier_infra_room), where progress exists.
+eotg_frontier_infra_slots_value = {
+    value = 1
+    if = {
+        limit = { var:eotg_frontier_progress >= 33 }
+        value = 2
+    }
+}
+
+# -- Costs (character scope) ----------------------------------------------------
+eotg_frontier_infra_cost_value = {
+    value = medium_gold_value
+}
+eotg_frontier_survey_cost_value = {
+    value = minor_gold_value
+}
+
+# The head start a project gets from survey data on file (spec §8)
+eotg_frontier_survey_bonus_value = {
+    value = 5
+}
+
+# -- Yearly inputs (county scope, pre-pace) -------------------------------------
+# Traits (spec §5.2). Each row: a flat input, plus more for the type it suits.
+# Hostile Environment and Remote are countered by an Orbital Station and a
+# Navigation Beacon.
+eotg_frontier_trait_rate_value = {
+    value = 0
+    if = {
+        limit = { has_county_modifier = eotg_frontier_trait_rich_resources }
+        add = 1
+        if = { limit = { var:eotg_frontier_type ?= flag:mining } add = 2 }
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_trait_trade_route }
+        add = 1
+        if = { limit = { var:eotg_frontier_type ?= flag:trade } add = 2 }
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_trait_strategic }
+        add = 1
+        if = { limit = { var:eotg_frontier_type ?= flag:military } add = 2 }
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_trait_habitable }
+        add = 1
+        if = { limit = { var:eotg_frontier_type ?= flag:settlement } add = 2 }
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_trait_ancient_ruins }
+        if = { limit = { var:eotg_frontier_type ?= flag:research } add = 3 }
+        else_if = { limit = { var:eotg_frontier_type ?= flag:religious } add = 2 }
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_trait_ancient_infrastructure }
+        add = 2
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_trait_anomalous }
+        add = -1
+        if = { limit = { var:eotg_frontier_type ?= flag:research } add = 5 }
+    }
+    if = {
+        limit = {
+            has_county_modifier = eotg_frontier_trait_hostile
+            NOT = { has_county_modifier = eotg_frontier_infra_orbital_station }
+        }
+        add = -2
+    }
+    if = {
+        limit = {
+            has_county_modifier = eotg_frontier_trait_remote
+            NOT = { has_county_modifier = eotg_frontier_infra_navigation_beacon }
+        }
+        add = -2
+    }
+}
+
+# Infrastructure (spec §4.2): +1 each, +2 more where it fits the type.
+eotg_frontier_infra_rate_value = {
+    value = 0
+    if = {
+        limit = { has_county_modifier = eotg_frontier_infra_habitat }
+        add = 1
+        if = { limit = { var:eotg_frontier_type ?= flag:settlement } add = 2 }
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_infra_orbital_station }
+        add = 1
+        if = { limit = { var:eotg_frontier_type ?= flag:administrative } add = 2 }
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_infra_navigation_beacon }
+        add = 1
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_infra_trade_station }
+        add = 1
+        if = { limit = { var:eotg_frontier_type ?= flag:trade } add = 2 }
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_infra_mining_complex }
+        add = 1
+        if = { limit = { var:eotg_frontier_type ?= flag:mining } add = 2 }
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_infra_research_facility }
+        add = 1
+        if = { limit = { var:eotg_frontier_type ?= flag:research } add = 2 }
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_infra_mission }
+        add = 1
+        if = { limit = { var:eotg_frontier_type ?= flag:religious } add = 2 }
+    }
+    if = {
+        limit = { has_county_modifier = eotg_frontier_infra_garrison_post }
+        add = 1
+        if = { limit = { var:eotg_frontier_type ?= flag:military } add = 2 }
+    }
+}
+
+# The type's own input, in normal CK3 terms (spec §6.2). Research has none:
+# its inputs are the founder's learning and the research traits.
+eotg_frontier_type_input_value = {
+    value = 0
+    if = {
+        limit = {
+            var:eotg_frontier_type ?= flag:settlement
+            county_control >= 60
+        }
+        add = 2
+    }
+    else_if = {
+        limit = {
+            var:eotg_frontier_type ?= flag:trade
+            has_variable = eotg_frontier_sponsor_paid
+        }
+        add = 3
+    }
+    else_if = {
+        limit = { var:eotg_frontier_type ?= flag:mining }
+        add = {
+            value = development_level
+            divide = 5
+            floor = yes
+            max = 3
+        }
+    }
+    else_if = {
+        limit = { var:eotg_frontier_type ?= flag:military }
+        add = {
+            value = holder.martial
+            divide = 6
+            floor = yes
+            max = 3
+        }
+    }
+    else_if = {
+        # piety_level >= n as a character trigger: confirmed against vanilla
+        # 1.20.0.3 (spec §15 item 1)
+        limit = { var:eotg_frontier_type ?= flag:religious }
+        if = {
+            limit = { holder = { piety_level >= 3 } }
+            add = 2
+        }
+        else_if = {
+            limit = { holder = { piety_level >= 1 } }
+            add = 1
+        }
+    }
+    else_if = {
+        limit = { var:eotg_frontier_type ?= flag:administrative }
+        add = {
+            value = holder.stewardship
+            divide = 6
+            floor = yes
+            max = 3
+        }
+    }
+}
+
+# Below this control a year adds the strain cause Low Control. Administrative
+# projects answer for order, so theirs is stricter (spec §6.1).
+eotg_frontier_low_control_value = {
+    value = 40
+    if = {
+        limit = { var:eotg_frontier_type ?= flag:administrative }
+        value = 50
+    }
+}
+
+# Development a settling Region gets from its traits and infrastructure
+# (spec §4.2, §5.2): +1 per source, at most +3 (eotg_frontier_settle_rewards_effect)
+eotg_frontier_reward_dev_value = {
+    value = 0
+    if = { limit = { has_county_modifier = eotg_frontier_infra_habitat } add = 1 }
+    if = { limit = { has_county_modifier = eotg_frontier_infra_navigation_beacon } add = 1 }
+    if = { limit = { has_county_modifier = eotg_frontier_trait_habitable } add = 1 }
+    if = { limit = { has_county_modifier = eotg_frontier_trait_rich_resources } add = 1 }
+    if = { limit = { has_county_modifier = eotg_frontier_trait_ancient_infrastructure } add = 1 }
+    max = 3
+}
+
+# == Expansion B2 (frontier_v2.md §B2) ========================================
+# What a resettling expedition salvages from the last attempt's
+# infrastructure: 5 per piece left behind (at most 2 pieces)
+eotg_frontier_salvage_bonus_value = {
+    value = 0
+    if = {
+        limit = { has_variable = eotg_frontier_salvage }
+        add = var:eotg_frontier_salvage
+        multiply = 5
+    }
 }

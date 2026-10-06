@@ -100,3 +100,19 @@ eotg_frontier_on_development_changed = {
 
 eotg_frontier_on_settled = {
 }
+
+# -- Phase 2 integration hooks (docs/specs/frontier_v2.md §10) ---------------
+# Empty, extended additively by later systems, fired like the hooks above.
+# eotg_frontier_on_discovery is the hook for a future Exploration system
+# (design §13): it fires whenever a trait is revealed, from Establish, Survey,
+# an event, or that system's own call to eotg_frontier_reveal_trait_effect.
+#   scope:eotg_frontier_discovered      the trait revealed (flag:rich_resources,
+#                                       flag:trade_route, ... flag:dangerous)
+#   scope:eotg_frontier_infrastructure  (infrastructure_built) what was built
+#                                       (flag:habitat ... flag:garrison_post)
+
+eotg_frontier_on_discovery = {
+}
+
+eotg_frontier_on_infrastructure_built = {
+}

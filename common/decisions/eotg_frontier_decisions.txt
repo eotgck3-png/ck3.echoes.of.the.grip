@@ -462,3 +462,135 @@ eotg_decision_frontier_debug_readout = {
         base = 0
     }
 }
+
+# == Phase 2 (docs/specs/frontier_v2.md) =====================================
+
+# Survey a Region (spec §8): learn what an Unsettled, Abandoned or Frontier
+# Region is like before or during a project. Picks the most developed Region
+# that can be surveyed; .020 reveals a trait. The 5-year mark is the
+# decision's own gate (not an event cooldown).
+eotg_decision_frontier_survey = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 60
+        duchy = 48
+        kingdom = 48
+        empire = 48
+        hegemony = 48
+    }
+
+    is_shown = {
+        eotg_frontier_holds_surveyable = yes
+    }
+
+    cost = {
+        gold = {
+            value = eotg_frontier_survey_cost_value
+        }
+    }
+
+    effect = {
+        ordered_held_title = {
+            limit = {
+                tier = tier_county
+                eotg_frontier_can_survey = yes
+            }
+            order_by = development_level
+            save_scope_as = eotg_frontier_county
+        }
+        custom_tooltip = eotg_decision_frontier_survey_effect_tt
+        hidden_effect = {
+            scope:eotg_frontier_county = {
+                set_variable = { name = eotg_frontier_surveyed  value = yes  years = 5 }
+            }
+        }
+        trigger_event = eotg_frontier.020
+    }
+
+    ai_potential = {
+        eotg_frontier_holds_surveyable = yes
+        gold >= {
+            value = eotg_frontier_survey_cost_value
+            multiply = 3
+        }
+    }
+    ai_will_do = {
+        base = 5
+        modifier = {
+            add = 10
+            any_held_title = {
+                tier = tier_county
+                eotg_frontier_is_unsettled = yes
+                eotg_frontier_can_survey = yes
+            }
+        }
+        modifier = { add = 5  learning >= 12 }
+    }
+}
+
+# Build Frontier Infrastructure (spec §4): one piece a year, in the most
+# advanced Frontier with room. .021 picks it and charges the cost.
+eotg_decision_frontier_build = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 24
+        duchy = 24
+        kingdom = 24
+        empire = 24
+        hegemony = 24
+    }
+
+    is_shown = {
+        eotg_frontier_holds_frontier = yes
+    }
+
+    is_valid = {
+        custom_description = {
+            text = eotg_decision_frontier_build_room_tt
+            eotg_frontier_holds_buildable = yes
+        }
+        custom_description = {
+            text = eotg_decision_frontier_build_gold_tt
+            gold >= eotg_frontier_infra_cost_value
+        }
+    }
+
+    effect = {
+        ordered_held_title = {
+            limit = {
+                tier = tier_county
+                eotg_frontier_infra_room = yes
+            }
+            order_by = var:eotg_frontier_progress
+            save_scope_as = eotg_frontier_county
+        }
+        custom_tooltip = eotg_decision_frontier_build_effect_tt
+        trigger_event = eotg_frontier.021
+    }
+
+    ai_potential = {
+        eotg_frontier_holds_buildable = yes
+        gold >= {
+            value = eotg_frontier_infra_cost_value
+            multiply = 2
+        }
+    }
+    ai_will_do = {
+        base = 15
+        modifier = {
+            add = 10
+            any_held_title = {
+                tier = tier_county
+                eotg_frontier_is_frontier = yes
+                var:eotg_frontier_strain >= 4
+            }
+        }
+        modifier = { add = -10  has_trait = greedy }
+    }
+}
