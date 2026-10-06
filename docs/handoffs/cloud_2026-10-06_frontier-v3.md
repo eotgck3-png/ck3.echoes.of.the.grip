@@ -77,3 +77,47 @@ Options are in spec §9. **Prompts per typical project stay at about 5**: same s
 - **taskboard:**
   - **CB-37 (Frontier in-game test):** add `frontier_v3_test_plan.md` after the v1/v2 plans.
   - **Proposed new item:** "Frontier Phase 3a: local verification (spec §15) and owner questions Q3-1..5".
+
+---
+
+## Round 2 (2026-10-06)
+
+### HANDOFF (cloud session, unvalidated)
+- **branch:** `claude/frontier-v3-cloud`, with `origin/v2-space-map` @ `86eb121` merged in (`41ea2a7`). **Do NOT merge.**
+- **status:** done (static; no Tiger, PX or game here).
+- **summary:**
+  - **Fixes:**
+    - settling clears the exploration state, and Send an Expedition takes Survey's gate (S2);
+    - .042 files the charts at Known through `eotg_frontier_file_survey_effect` in both options, so an active Frontier never gets survey data;
+    - .040's escort is only for a Dangerous non-Military project and is paid with `pay_short_term_gold`. Its pool entry rolls only where (a) or (b) can apply, so the event never offers only "nothing";
+    - holy order leaders are found through `random_faith_holy_order`, and `eotg_frontier_is_holy_order_leader` is retired;
+    - companies at war with the holder are excluded;
+    - `eotg_frontier_offer_backing_effect` documents that callers own their pacing, and refuses the holder as sponsor;
+    - loc per the lore-keeper: *Guns for Hire*, the .040 desc and tooltip, and `eotg_frontier_mod_unknown_desc`.
+  - **Owner decisions (spec §16):**
+    - Q3-4: the AI accepts company and faith backers in `eotg_frontier_event_roll_effect`, with no event;
+    - Q3-5: a faith backer's backing passes to the faith's next head or the order's next leader (spec §6.1), never their personal heir;
+    - the cartographer note: no Unknown cores.
+  - **Unclaimed prep:**
+    - all expedition targeting goes through `eotg_frontier_can_target_expedition` and `eotg_frontier_pick_expedition_target_effect`, unchanged in behaviour (spec §4.1 says how Unclaimed widens them);
+    - spec §17 lists every Phase 3a assumption of a real, playable holder;
+    - no government, placeholder or claiming logic.
+- **commits:**
+  - `41ea2a7` the merge of `v2-space-map` (86eb121);
+  - `6ed0eab` script and loc;
+  - `1a8251d` spec, test plan and generated reports;
+  - this handoff (the commit after `1a8251d`).
+- **validation:**
+  - eotg_lint: 0 findings;
+  - check_all: 14 pass, 0 fail, 7 skipped (local tools);
+  - spec_conformance: frontier_v3 has 0 missing, 76 present and 4 exempt (the Unclaimed ids, not built, and the retired trigger);
+  - the loc file has one BOM.
+- **unverified-vanilla:** `common/scripted_effects/eotg_frontier_effects.txt:1563`: a character variable holding a faith or a holy order, copied to a county variable and read back as a scope (spec §15 item 9). Items 6 and 7 stay in game.
+- **needs-local-validation:** Tiger + PX on the Frontier files. In game, test plan §1.5–1.6 (filing on a Frontier; settling clears exploration), §0.2.3 (the holy-order search), §2.5 (a company disbands), §2.6 (AI backers) and §3.2 (a faith backer dies).
+- **needs-loc:** none. One new key, `eotg_frontier_toast_faith_backer_succeeded`.
+- **needs-lore:**
+  - the new toast ("…passes to the one who now leads the faithful in their place");
+  - the .040 tooltip ("while it does, the Region's dangers no longer slow the work").
+  - The .040 desc is the lore-keeper's text verbatim. Its "guards for the convoys and, if the venture is a military one, money behind it as well" now reads on a Military project, where the escort isn't offered. Confirm that's acceptable, or give a variant for that case.
+- **needs-human:** none new.
+- **taskboard:** CB-37 also covers `frontier_v3_test_plan.md`'s round 2 steps; Q3-1..5 are answered.
