@@ -1475,3 +1475,28 @@ eotg_frontier_faith_settle_effect = {
         }
     }
 }
+
+# -- Hooks for systems that don't exist yet (spec §7) --------------------------
+# CORPORATIONS (and any other backer): offer backing to a Frontier. Call on its
+# county with SPONSOR = the offering character. The holder answers in Phase 1's
+# .003, exactly as for any backer; .003 accepts only an eotg_frontier_can_sponsor
+# backer (a landed count or above). A system whose representative is unlanded
+# calls eotg_frontier_set_sponsor_effect itself after its own consent flow.
+# Either way: no claim, no say (LAW AT 866), and eotg_frontier_on_sponsor_changed
+# fires. Nothing in Frontier calls this.
+eotg_frontier_offer_backing_effect = {
+    if = {
+        limit = { eotg_frontier_is_frontier = yes }
+        save_scope_as = eotg_frontier_county
+        $SPONSOR$ = { save_scope_as = eotg_frontier_sponsor }
+        holder = { trigger_event = eotg_frontier.003 }
+    }
+}
+
+# TRADE NETWORKS: set what a trade network adds to this Region's yearly input
+# while it is a Trade Frontier (pre-pace; AMOUNT = 2 is +1 progress a year;
+# AMOUNT = 0 switches it off). Read by eotg_frontier_trade_network_value.
+# Nothing in Frontier calls this.
+eotg_frontier_set_trade_network_effect = {
+    set_variable = { name = eotg_frontier_trade_network_bonus  value = $AMOUNT$ }
+}

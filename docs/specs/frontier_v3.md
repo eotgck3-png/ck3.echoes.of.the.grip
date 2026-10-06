@@ -43,7 +43,7 @@
 | `eotg_frontier_trade_network_bonus` | variable, a number | **Hook:** a future trade system writes it through `eotg_frontier_set_trade_network_effect`; a Trade Frontier adds it to its yearly input (§7). Never set by Frontier itself. |
 | `eotg_frontier_mod_merc_escort` | county modifier, 5 years | A mercenary escort guards the Region: Dangerous adds no strain (§5). |
 
-Saved scopes: `eotg_frontier_exploration` (flag value: what an expedition reached, `flag:partial` or `flag:known`; for the hook and .042's desc), `eotg_frontier_company` (a mercenary captain, .040), `eotg_frontier_faith_backer` (a head of faith or holy order leader, .041), `eotg_frontier_faith_backer_kind` (`flag:head` / `flag:order`).
+Saved scopes: `eotg_frontier_exploration` (flag value: what an expedition reached, `flag:partial` or `flag:known`; for the hook and .042's desc), `eotg_frontier_company` (a mercenary captain, .040), `eotg_frontier_faith_backer` (a head of faith or holy order leader, .041), `eotg_frontier_faith_backer_kind` (`flag:head` / `flag:order`); internal: `eotg_frontier_fee` (.040's escort fee, fixed once), `eotg_frontier_believer` (the holder, while finding a faith backer).
 
 ---
 

@@ -124,3 +124,9 @@ eotg_frontier_on_infrastructure_built = {
 
 eotg_frontier_on_explored = {
 }
+
+# Phase 3a: how a Corporations or Trade system plugs in (frontier_v3.md §7).
+# No hook of its own: a corporation offers backing with
+# eotg_frontier_offer_backing_effect and listens to eotg_frontier_on_sponsor_changed;
+# a trade network sets eotg_frontier_set_trade_network_effect and listens to
+# eotg_frontier_on_project_progressed / _completed.
