@@ -272,7 +272,7 @@ Call it inside the existing `hidden_effect`, next to the procedure call, in **ev
 - init.018 a;
 - tier1.002 a.
 
-The scripter enumerates the exact list by grepping `PROVIDER = clinic` inside those events. It does **not** go into `eotg_aug_procedure_effect`, which stays as built. The clinic of record is never removed: excision or full removal leaves it, and a later clinic install overwrites it.
+The scripter enumerates the exact list by grepping `PROVIDER = clinic` inside those events. It does **not** go into `eotg_aug_procedure_effect`, which stays as built. The clinic of record is never removed: excision or full removal leaves it, and a later clinic install overwrites it. **Amended 2026-10-06 (kingpin spec, lore review item 6):** a **seizure** is the one other permitted overwrite. When a ruler seizes a front clinic (`eotg_aug_kingpin.076`, [cybernetics_v2_kingpin.md](cybernetics_v2_kingpin.md) L17), the seized company becomes the clinic of record. Nothing else removes or overwrites it; the kingpin story's other endings leave it alone.
 
 **Stays generic, and why**
 
@@ -319,7 +319,7 @@ tier2.013 is once per character (`eotg_flag_aug_vendor_done`, set in `eotg_on_ye
 | `eotg_aug_seller_gang` (root) | `immediate` of init.004/.010/.018 | the same event, init.011 | the next init gang host (impossible once augmented) |
 | `eotg_aug_seller_gang` (copycat) | tier1.018 `immediate` | tier1.018 | nothing |
 | `eotg_aug_vendor_careful` / `_bold` | tier2.013 `immediate`, once | .013, .014, the modifier desc | nothing (.013 is once per life) |
-| `eotg_aug_clinic_of_record` | clinic options of named-company hosts | tier1.002, tier1.019, the Pursue decision desc | the next clinic install |
+| `eotg_aug_clinic_of_record` | clinic options of named-company hosts; a seizure (kingpin L17, 2026-10-06) | tier1.002, tier1.019, the Pursue decision desc | the next clinic install, or a seizure |
 
 ### 5.4 The Patron syndicate: named from canon (owner ruling, 2026-10-05)
 
