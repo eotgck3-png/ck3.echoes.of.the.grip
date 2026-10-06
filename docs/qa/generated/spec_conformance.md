@@ -14,7 +14,7 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | Family | Specs | Built | Ids | Present | Referenced only | Missing in built specs |
 |---|---|---|---|---|---|---|
 | `cybernetics` | 1 | 1 | 53 | 53 | 0 | 0 |
-| `cybernetics_v2` | 25 | 25 | 1476 | 1428 | 46 | 2 |
+| `cybernetics_v2` | 25 | 25 | 1477 | 1428 | 47 | 2 |
 | `frontier_v1` | 2 | 2 | 159 | 158 | 1 | 0 |
 | `frontier_v2` | 1 | 1 | 109 | 109 | 0 | 0 |
 | `glossary` | 1 | 0 | 1 | 0 | 0 | 0 |
@@ -34,8 +34,8 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | `cybernetics_v2_phase0.md` | yes | 49 | 49 | 0 | 0 | 0 |
 | `cybernetics_v2_phase1.md` | yes | 20 | 17 | 3 | 0 | 0 |
 | `cybernetics_v2_phase2.md` | yes | 52 | 52 | 0 | 0 | 0 |
-| `cybernetics_v2_phase3.md` | yes | 82 | 79 | 3 | 0 | 0 |
-| `cybernetics_v2_phase4.md` | yes | 65 | 65 | 0 | 0 | 0 |
+| `cybernetics_v2_phase3.md` | yes | 84 | 80 | 3 | 0 | 1 |
+| `cybernetics_v2_phase4.md` | yes | 65 | 64 | 1 | 0 | 0 |
 | `cybernetics_v2_phase5.md` | yes | 53 | 49 | 3 | 0 | 1 |
 | `cybernetics_v2_phase6.md` | yes | 27 | 26 | 1 | 0 | 0 |
 | `cybernetics_v2_procedures.md` | yes | 146 | 144 | 1 | 0 | 1 |
@@ -89,7 +89,7 @@ None.
 - Specced and present: 138
 - Specced, missing from script (0): none
 - Referenced only, never defined or set (1): `eotg_aug_sedation_courses` (variable, l.91)
-- Exempt (1): `eotg_fracture.011.desc_misled` (loc, l.792)
+- Exempt (1): `eotg_fracture.011.desc_misled` (loc, l.794)
 
 #### `docs/specs/cybernetics_v2_conformance_rulings.md`
 
@@ -145,16 +145,16 @@ None.
 
 #### `docs/specs/cybernetics_v2_phase3.md`
 
-- Specced and present: 79
+- Specced and present: 80
 - Specced, missing from script (0): none
 - Referenced only, never defined or set (3): `eotg_victim` (unknown, l.163), `eotg_witness` (unknown, l.178), `eotg_missing` (unknown, l.267)
-- Exempt (0): none
+- Exempt (1): `eotg_is_aug_tier3` (decision, l.541)
 
 #### `docs/specs/cybernetics_v2_phase4.md`
 
-- Specced and present: 65
+- Specced and present: 64
 - Specced, missing from script (0): none
-- Referenced only, never defined or set (0): none
+- Referenced only, never defined or set (1): `eotg_flag_aug_trusted_delegate` (flag, l.429)
 - Exempt (0): none
 
 #### `docs/specs/cybernetics_v2_phase5.md`

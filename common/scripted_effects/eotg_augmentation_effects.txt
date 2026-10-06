@@ -3024,10 +3024,13 @@ eotg_aug_act003_examine_effect = {
             scope:eotg_aug_accuser ?= {
                 add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
             }
+            # Short title; the paragraph is the body (as eotg_aug_act.001's
+            # barred toast above).
             send_interface_toast = {
                 type = event_toast_effect_neutral
-                title = eotg_aug_act.003.c.hot
+                title = eotg_aug_act.003.c.hot_toast
                 left_icon = scope:eotg_aug_accused
+                custom_tooltip = eotg_aug_act.003.c.hot
             }
         }
         else = {
@@ -3039,8 +3042,9 @@ eotg_aug_act003_examine_effect = {
             }
             send_interface_toast = {
                 type = event_toast_effect_neutral
-                title = eotg_aug_act.003.c.clean
+                title = eotg_aug_act.003.c.clean_toast
                 left_icon = scope:eotg_aug_accused
+                custom_tooltip = eotg_aug_act.003.c.clean
             }
         }
     }

@@ -426,7 +426,7 @@ tier3.015 is fired by tier3.007 (a/d alliance, b/c rivalry) in 1–2 years if `s
 
 **tier3.019 / .021 The Delegation, Revisited (O-12).** Saved `eotg_delegate`: `cp:councillor_chancellor`, else the spouse.
 - *.019.*
-  - **a** "Delegate to them." The delegate gets admiration and `eotg_flag_aug_trusted_delegate`. Risk −5. → .021 in 180–360 days.
+  - **a** "Delegate to them." The delegate gets admiration. Risk −5. ~~and `eotg_flag_aug_trusted_delegate`~~ (flag dropped, architect decision 2026-10-05, below). → .021 in 180–360 days.
   - **b** "Keep everything in my own hands." +50 prestige (authority kept; without it, a strictly beat b; *CB-26 L20*). Risk and lesson per balance §5.6's stewardship roll.
   - **c [humble]** "Delegate everything." As a, + `eotg_mod_withdrawn_from_court` 1 year. Risk −8.
 - *.021 The Other Order.* The delegate swears you ordered something you didn't. `immediate`: 50% you did, and your memory is wrong.
@@ -434,7 +434,7 @@ tier3.015 is fired by tier3.007 (a/d alliance, b/c rivalry) in 1–2 years if `s
   - **b** "Overrule them." The delegate gets disgust. Risk +5.
   - **c** "Check the logs." The truth is revealed: if you did, risk +5.
 
-Phase 3a's Containment Regency may use the trusted delegate as keeper when there is no spouse or adult heir. This is an optional cross-phase read.
+~~Phase 3a's Containment Regency may use the trusted delegate as keeper when there is no spouse or adult heir. This is an optional cross-phase read.~~ **Dropped (architect decision, 2026-10-05; QA `docs/qa/loc_bug_hunt_2026-10-05.md` found the flag set at tier3.019.a/.c and read nowhere).** `eotg_flag_aug_trusted_delegate` is removed: the scripter deletes both sets in tier3.019 (a and c, which inherits a). Why: the read was optional and never built; .021 works from the saved `eotg_delegate` scope, not the flag; the delegate is the chancellor or the spouse, and the spouse is already fracture.025's first keeper, so the read would add only the chancellor; and a new keeper branch is new event content, which is the owner's call, not a fix. If the owner later wants the chancellor as a fallback keeper, re-add the flag with fracture.025's keeper picker as its reader.
 
 **tier3.020 The Intervention (O-11).** Saved `eotg_intervener`: the spouse, else the adult heir.
 - **a** "I'll schedule the downgrade." `eotg_flag_aug_intervention_discount` 2 years (B3). Reassured. Risk −5.

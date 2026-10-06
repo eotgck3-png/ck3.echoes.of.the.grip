@@ -37,13 +37,13 @@ Optional (they render positively today, so they aren't broken): NOT_ keys for 12
 | site | UI | failing trigger | fix |
 |---|---|---|---|
 | triggers:610,616,622,626 (eotg_aug_has_surgeon_for), via decisions:1067-1069 (confirmed) | Self-Repair is_valid | `NOT = { this = $PATIENT$ }` | `this != $PATIENT$` |
-| triggers:565 (eotg_aug_borrowed_technician_valid) (confirmed) | Self-Repair is_valid | is_alive (global-only loc) | restructure decisions:1064-1071 as trigger_if (clinic open) / trigger_else; or hidden_trigger |
+| triggers:565 (eotg_aug_borrowed_technician_valid) (confirmed) | Self-Repair is_valid | is_alive (global-only loc) | restructure decisions:1064-1071 as trigger_if (clinic open) / trigger_else; or the hidden-check pattern |
 | decisions:540 (confirmed) | Augment a Retainer is_valid | any_knight has no loc | custom_description with a new key |
-| triggers:60 (eotg_can_receive_augmented) | Seek Augmentation is_valid | is_alive, first person | hidden_trigger |
-| triggers:221 (eotg_aug_keeper_candidate) | Appoint Warden is_valid | is_alive, third person | hidden_trigger |
+| triggers:60 (eotg_can_receive_augmented) | Seek Augmentation is_valid | is_alive, first person | the hidden-check pattern |
+| triggers:221 (eotg_aug_keeper_candidate) | Appoint Warden is_valid | is_alive, third person | the hidden-check pattern |
 | interactions:1564 | Borrow Technician | short_term_gold has no loc (probable) | gold >= minor_gold_value |
 | tier2.txt:377 | tier2.003.c greyed | any_prisoner has no loc | custom_description + its NOT_ key |
-| procedures.txt:125,238 (low) | proc.001.a/f | has_variable has no NOT_ loc | hidden_trigger |
+| procedures.txt:125,238 (low) | proc.001.a/f | has_variable has no NOT_ loc | the hidden-check pattern |
 
 **Latent (66 lines):** the same patterns sit in option triggers without `show_as_unavailable`, so they never render.
 They are listed in the agent report and only matter if `show_as_unavailable` is added later. Examples: has_trait_xp
@@ -61,3 +61,6 @@ None. All 2,155 explicit references resolve; auto-generated keys exist; BOMs are
 - False positives (not bugs): exists and debug_only; is_available_quick; currently_being_tortured; tamper allow
   lines under is_ai; is_shown/potential blocks; vanilla is_available_adult and can_start_scheme, which fail the same
   way in vanilla.
+
+
+**Correction (2026-10-05):** "the hidden-check pattern" means `trigger_if = { limit = { <condition fails> } always = no }` (vanilla 00_bastard_triggers.txt:5-8; CK3 has no hidden_trigger). An earlier version of this file said `hidden_trigger`, which does not exist in CK3.

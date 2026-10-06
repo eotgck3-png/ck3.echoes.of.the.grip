@@ -122,7 +122,12 @@ eotg_aug_proc.001 = {
                 text = eotg_aug_clinic_closed_tt
                 eotg_aug_clinic_open = yes
             }
-            has_variable = eotg_aug_removal_kind
+            # has_variable has no NOT_ loc and this option shows greyed: a
+            # trigger_if limit is never tooltipped (QA loc_bug_hunt_2026-10-05).
+            trigger_if = {
+                limit = { NOT = { has_variable = eotg_aug_removal_kind } }
+                always = no
+            }
             eotg_aug_can_afford_procedure = { BASE = eotg_aug_removal_base_value  MULT = 1 }
         }
         eotg_aug_pay_procedure_effect = { BASE = eotg_aug_removal_base_value  MULT = 1 }
@@ -235,7 +240,12 @@ eotg_aug_proc.001 = {
                 text = eotg_aug_clinic_closed_tt
                 eotg_aug_clinic_open = yes
             }
-            has_variable = eotg_aug_removal_kind
+            # has_variable has no NOT_ loc and this option shows greyed: a
+            # trigger_if limit is never tooltipped (QA loc_bug_hunt_2026-10-05).
+            trigger_if = {
+                limit = { NOT = { has_variable = eotg_aug_removal_kind } }
+                always = no
+            }
             has_trait = zealous
             var:eotg_aug_removal_kind ?= flag:full
             eotg_aug_can_afford_procedure = { BASE = eotg_aug_removal_base_value  MULT = 1 }

@@ -98,7 +98,7 @@ Integration only ever sits at 0, 50 or 100. It changes only at these steps or th
 | Accept Restraints / Begin a Sedation Regimen | Neurofractured | minor / medium gold |
 | Appoint a Warden | Neurofractured, no diarchy, eligible for vanilla diarchy | 5 years |
 | Hand Over the Controls | Neurofractured, Storm pressure, voice stage 3+ or permission | — |
-| Cut It Out (Excision) | Enhanced, Overclocked or Neurofractured, and can afford it | 5 years |
+| Cut It Out (Excision) | Overclocked or Neurofractured, and can afford it (not Enhanced: owner ruling 2026-10-05, one removal step per stage) | 5 years |
 
 **Story cycles.** The player never sees these directly; they pace events in the background.
 - **The Countdown** (Overclocked).

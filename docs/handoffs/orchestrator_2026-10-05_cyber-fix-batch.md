@@ -14,12 +14,12 @@ Source: the owner's first in-game playtest, docs/qa/loc_bug_hunt_2026-10-05.md, 
 2. **Class 2: fix the 8 visible sites.**
    - Self-Repair: `NOT = { this = $PATIENT$ }` becomes `this != $PATIENT$` (triggers:610,616,622,626).
    - Self-Repair: is_alive (triggers:565). Restructure decisions:1064-1071 as trigger_if (clinic open) /
-     trigger_else, or use hidden_trigger.
+     trigger_else, or use the hidden-check pattern.
    - Augment a Retainer: any_knight (decisions:540) becomes custom_description with a new key.
-   - is_alive at triggers:60 and 221 goes inside hidden_trigger.
+   - is_alive at triggers:60 and 221 goes inside the hidden-check pattern.
    - interactions:1564: short_term_gold becomes gold >= minor_gold_value.
    - tier2:377: any_prisoner becomes custom_description + its NOT_ key.
-   - procedures:125,238: has_variable goes inside hidden_trigger.
+   - procedures:125,238: has_variable goes inside the hidden-check pattern.
 3. **Others.**
    - effects:3029: the toast title uses a paragraph key (eotg_aug_act.003.c.hot); give it a short title key.
    - eotg_flag_aug_trusted_delegate (set at tier3:2741,2807) is read nowhere. Wire up a reader or drop it;
@@ -47,3 +47,6 @@ eotg_flag_aug_settling timer. Make it explicit, keeping the theme:
 
 ## Not in this batch
 The event-writing rewrite (docs/qa/event_writing_review_2026-10-05.md) waits on the owner's go-ahead.
+
+
+**Correction (2026-10-05):** "the hidden-check pattern" means `trigger_if = { limit = { <condition fails> } always = no }` (vanilla 00_bastard_triggers.txt:5-8; CK3 has no hidden_trigger). An earlier version of this file said `hidden_trigger`, which does not exist in CK3.

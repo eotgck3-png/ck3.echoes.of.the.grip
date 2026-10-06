@@ -374,7 +374,12 @@ eotg_aug_tier2.003 = {
                 eotg_aug_clinic_open = yes
             }
             gold >= medium_gold_value
-            any_prisoner = { is_alive = yes }
+            # any_prisoner has no trigger loc; shown greyed under a Ban, so
+            # it carries a NOT_ key too (QA loc_bug_hunt_2026-10-05).
+            custom_description = {
+                text = eotg_aug_tier2_has_prisoner_tt
+                any_prisoner = { is_alive = yes }
+            }
         }
         remove_short_term_gold = medium_gold_value
         random_prisoner = {

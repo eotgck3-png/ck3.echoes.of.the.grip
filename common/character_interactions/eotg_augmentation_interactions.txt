@@ -1561,7 +1561,9 @@ eotg_aug_borrow_technician_interaction = {
                 text = eotg_aug_borrow_none_held_tt
                 eotg_aug_borrowed_technician_valid = no
             }
-            short_term_gold >= minor_gold_value
+            # gold, not short_term_gold: the latter has no trigger loc (QA
+            # loc_bug_hunt_2026-10-05).
+            gold >= minor_gold_value
             NOT = { is_at_war_with = scope:recipient }
             # The work would happen in the actor's realm
             custom_description = {

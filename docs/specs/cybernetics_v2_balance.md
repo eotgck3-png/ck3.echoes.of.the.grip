@@ -261,6 +261,8 @@ Option A answers the design complaint directly ("no decision lets the player pur
 
 Today almost every AI Overclocked ruler cascades. Afterwards roughly half regress and half break. After 5 years settling, the regressed ones can climb again (relapse).
 
+**Owner ruling, 2026-10-05: one removal step per stage** (source: the owner; `docs/handoffs/orchestrator_2026-10-05_cyber-fix-batch.md` part B; full table in phase3 §8). Augmented: Remove the Implants. Enhanced: Partial Implant Removal **only**. Overclocked: Downgrade Protocol, plus Excision (Cut It Out) as the last resort. Neurofractured: Excision. `eotg_decision_aug_excision`'s `is_shown` drops tier 2 and becomes `OR = { eotg_is_aug_tier3 = yes  has_trait = eotg_neurofractured }`. The `ai_potential` above already excludes tier 2 and needs no change. Partial Removal is now the only removal at Enhanced, for the AI as for the player. At Overclocked the AI weighs Downgrade (above) against Excision (Countdown running only), and the 35–65% regression share (§9.2 item 4) still applies.
+
 Excision, Warden, Restraints and Sedation should each show ≥ 1 AI use per 10 Neurofractured AI rulers in the observer run (§9.2 item 4).
 
 **Risks:**

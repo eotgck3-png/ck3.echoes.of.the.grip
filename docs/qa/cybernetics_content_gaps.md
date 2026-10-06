@@ -160,7 +160,7 @@ Hook `random_yearly_everyone_pulse` (verified in vanilla), filtered to `eotg_is_
 | **Sedation Regimen** | Neurofractured | Yearly gold, pressure −, skills −. |
 | **Name a Keeper** | Neurofractured | Appoint a guardian or regent (diarchy). |
 | **Embrace the Cascade** | Neurofractured, 60+ | Path to Total Integration. |
-| **Excision** | Enhanced and up | High-risk full removal (§3.5d). |
+| **Excision** | Overclocked and Neurofractured (was "Enhanced and up"; owner ruling 2026-10-05, one removal step per stage) | High-risk full removal (§3.5d). |
 
 The existing three need rework too; see the logic audit. Regression is gated on stress, and maintenance can't remove illegal implants.
 
