@@ -162,6 +162,21 @@ eotg_aug_tier1.002 = {
         animation = personality_bold
     }
 
+    # CB-42 (docs/specs/cybernetics_v2_seller_names.md §5.1): the seller, rolled
+    # once into a character variable before the desc and options render (no
+    # random_valid: the name never changes while the window is open)
+    immediate = {
+        hidden_effect = {
+            # The clinic that fitted you comes back (clinic of record), else a roll
+            if = {
+                limit = { has_variable = eotg_aug_clinic_of_record }
+                set_variable = { name = eotg_aug_seller_company  value = var:eotg_aug_clinic_of_record }
+            }
+            else = {
+                eotg_aug_roll_company_effect = { VAR = eotg_aug_seller_company }
+            }
+        }
+    }
     # "Proceed" — pay; the surgeons ask what to change first (.021)
     # Balance spec §5.6: how well you vet the surgeons is a stewardship check
     # against medium_skill_rating (10); success sets eotg_flag_aug_chain_edge
@@ -181,6 +196,7 @@ eotg_aug_tier1.002 = {
         }
         eotg_aug_pay_upgrade_effect = { MULT = 1 }
         save_scope_value_as = { name = eotg_proc_provider  value = flag:clinic }
+        hidden_effect = { eotg_aug_record_clinic_effect = yes }    # CB-42: clinic of record
         # Balance spec §5.6 (B2 QA): clear any other chain's edge/strain first
         eotg_aug_clear_chain_flags_effect = yes
         duel = {
@@ -276,6 +292,7 @@ eotg_aug_tier1.002 = {
         trait = ambitious
         eotg_aug_pay_upgrade_effect = { MULT = 1 }
         save_scope_value_as = { name = eotg_proc_provider  value = flag:clinic }
+        hidden_effect = { eotg_aug_record_clinic_effect = yes }    # CB-42: clinic of record
         eotg_add_fracture_risk = { AMOUNT = 3 }
         trigger_event = { id = eotg_aug_tier1.021  days = 1 }
         eotg_aug_stress_surgery_effect = yes
@@ -303,6 +320,7 @@ eotg_aug_tier1.002 = {
         trait = craven
         eotg_aug_pay_upgrade_effect = { MULT = 1 }
         save_scope_value_as = { name = eotg_proc_provider  value = flag:clinic }
+        hidden_effect = { eotg_aug_record_clinic_effect = yes }    # CB-42: clinic of record
         add_character_flag = { flag = eotg_flag_aug_upgrade_reassured  days = 120 }
         trigger_event = { id = eotg_aug_tier1.021  days = 1 }
         stress_impact = {
@@ -2365,6 +2383,8 @@ eotg_aug_tier1.018 = {
                 eotg_add_fracture_risk = { AMOUNT = 20 }
                 add_character_modifier = { modifier = eotg_mod_aug_infection  years = 1 }
                 add_character_flag = { flag = eotg_flag_aug_breach_victim  days = 30 }
+                # CB-42 (seller names §5.1): the copycat's own back-street crew
+                eotg_aug_roll_gang_effect = { VAR = eotg_aug_seller_gang }
             }
         }
     }
@@ -2563,6 +2583,15 @@ eotg_aug_tier1.019 = {
 
     immediate = {
         hidden_effect = {
+            # CB-42 (seller names §5.1): your clinic treats the copycat
+            # The clinic that fitted you comes back (clinic of record), else a roll
+            if = {
+                limit = { has_variable = eotg_aug_clinic_of_record }
+                set_variable = { name = eotg_aug_seller_company  value = var:eotg_aug_clinic_of_record }
+            }
+            else = {
+                eotg_aug_roll_company_effect = { VAR = eotg_aug_seller_company }
+            }
             random_list = {
                 50 = {
                     save_scope_value_as = { name = eotg_copycat_outcome  value = flag:recovered }

@@ -43,7 +43,7 @@ The rest of this spec relies on these. None of them changes the approved directi
 
 **Gate 3 (Systems), built against the temporary map** (`docs/agent_workflow.md` §5 rule 2; the mod-exclusive-system exception in `CLAUDE.md`). **Not blocked.**
 - Map-agnostic: no title, province, character, culture or faith keys.
-- The syndicate stays unnamed.
+- The syndicate: Named once per story from the owner's `[syndicates]` list of canon syndicates; 'the syndicate' / 'the syndicate envoy' on later mentions. (Owner ruling 2026-10-05, CB-42; `cybernetics_v2_seller_names.md` §5.4.)
 - Faith reactions go only through `zealous` / `cynical` and piety.
 
 ---
@@ -692,7 +692,7 @@ Rules:
 - **866 AG** (`CLAUDE.md` §Canon). Cybernetics is still developing (SETTING LORE): reputable clinics exist and are not perfect (4%), and cheap work is dangerous.
 - **No Galactic League.** No authority above the polity. Provider wording stays neutral (§7). The `docs/lore/` review confirms licensing is local and unnamed at 866.
 - **Tech level (lore N1):** nothing here repairs itself. Self-repairing machinery is post-866 (975, the Gnomish Mechanized Renaissance), so the Seamless repair is ordered parts and booked technicians.
-- **The syndicate stays unnamed.** Nothing here names it. patron.008 is untouched.
+- **The syndicate's name:** Named once per story from the owner's `[syndicates]` list of canon syndicates; 'the syndicate' / 'the syndicate envoy' on later mentions. Nothing in this spec names it. patron.008 is untouched here; CB-42 adds the name at first mention. (Owner ruling 2026-10-05, CB-42; `cybernetics_v2_seller_names.md` §5.4.)
 - **Voice register** (index §5.1–2): the voice appears in none of these events. Seamless has no voice (`eotg_aug_voice = 5`). Former characters have no voice.
 - **Lore review: done** (eotg-lore-keeper, 2026-10-04, [cybernetics_v2_procedures_lore.md](cybernetics_v2_procedures_lore.md)). Approved with must-fixes N1–N5, all folded in:
   - N1: proc.004 retitled *A Part Replaced*, with the ordered-part fiction (§3.1, §4.4, §7).

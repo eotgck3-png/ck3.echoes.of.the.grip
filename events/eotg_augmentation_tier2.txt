@@ -1894,6 +1894,18 @@ eotg_aug_tier2.013 = {
         animation = thinking
     }
 
+    # CB-42 (docs/specs/cybernetics_v2_seller_names.md §5.1): the seller, rolled
+    # once into a character variable before the desc and options render (no
+    # random_valid: the name never changes while the window is open)
+    immediate = {
+        hidden_effect = {
+            # Both vendors, once (tier2.013 is once per life; .014 only reads them)
+            if = {
+                limit = { NOT = { has_variable = eotg_aug_vendor_careful } }
+                eotg_aug_roll_vendors_effect = yes
+            }
+        }
+    }
     # "The careful vendor."
     option = {
         name = eotg_aug_tier2.013.a
@@ -1911,7 +1923,7 @@ eotg_aug_tier2.013 = {
         name = eotg_aug_tier2.013.b
         remove_character_flag = eotg_flag_aug_vendor_safe
         add_character_flag = eotg_flag_aug_vendor_bold
-        add_character_modifier = { modifier = eotg_mod_aug_bold_firmware }
+        add_character_modifier = { modifier = eotg_mod_aug_bold_firmware  desc = eotg_mod_aug_bold_firmware_vendor_desc }    # CB-42: names the bold vendor (vanilla hunt_events.txt:4409-4413)
         eotg_add_fracture_risk = { AMOUNT = 5 }
         eotg_aug_stress_embrace_effect = yes
         ai_chance = {
@@ -2031,7 +2043,7 @@ eotg_aug_tier2.014 = {
         name = eotg_aug_tier2.014.b
         remove_character_flag = eotg_flag_aug_vendor_safe
         add_character_flag = eotg_flag_aug_vendor_bold
-        add_character_modifier = { modifier = eotg_mod_aug_bold_firmware }
+        add_character_modifier = { modifier = eotg_mod_aug_bold_firmware  desc = eotg_mod_aug_bold_firmware_vendor_desc }    # CB-42: names the bold vendor (vanilla hunt_events.txt:4409-4413)
         eotg_add_fracture_risk = { AMOUNT = 3 }
         eotg_aug_stress_embrace_effect = yes
         ai_chance = {

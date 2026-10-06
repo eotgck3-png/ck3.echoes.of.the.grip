@@ -14,7 +14,7 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | Family | Specs | Built | Ids | Present | Referenced only | Missing in built specs |
 |---|---|---|---|---|---|---|
 | `cybernetics` | 1 | 1 | 53 | 53 | 0 | 0 |
-| `cybernetics_v2` | 24 | 24 | 1385 | 1352 | 31 | 2 |
+| `cybernetics_v2` | 25 | 25 | 1476 | 1428 | 46 | 2 |
 | `frontier_v1` | 2 | 2 | 159 | 158 | 1 | 0 |
 | `frontier_v2` | 1 | 1 | 109 | 109 | 0 | 0 |
 | `glossary` | 1 | 0 | 1 | 0 | 0 | 0 |
@@ -25,18 +25,18 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | Spec | Built | Ids | Present | Referenced only | Missing | Exempt |
 |---|---|---|---|---|---|---|
 | `cybernetics_track.md` | yes | 66 | 53 | 0 | 0 | 13 |
-| `cybernetics_v2.md` | yes | 108 | 107 | 1 | 0 | 0 |
-| `cybernetics_v2_balance.md` | yes | 139 | 137 | 1 | 0 | 1 |
+| `cybernetics_v2.md` | yes | 109 | 108 | 1 | 0 | 0 |
+| `cybernetics_v2_balance.md` | yes | 140 | 138 | 1 | 0 | 1 |
 | `cybernetics_v2_conformance_rulings.md` | yes | 39 | 38 | 1 | 0 | 0 |
 | `cybernetics_v2_interactions.md` | yes | 161 | 154 | 4 | 0 | 3 |
 | `cybernetics_v2_interactions_lore.md` | yes | 1 | 1 | 0 | 0 | 0 |
-| `cybernetics_v2_new_beats.md` | yes | 69 | 65 | 4 | 0 | 0 |
+| `cybernetics_v2_new_beats.md` | yes | 70 | 66 | 4 | 0 | 0 |
 | `cybernetics_v2_phase0.md` | yes | 49 | 49 | 0 | 0 | 0 |
 | `cybernetics_v2_phase1.md` | yes | 20 | 17 | 3 | 0 | 0 |
 | `cybernetics_v2_phase2.md` | yes | 52 | 52 | 0 | 0 | 0 |
 | `cybernetics_v2_phase3.md` | yes | 82 | 79 | 3 | 0 | 0 |
 | `cybernetics_v2_phase4.md` | yes | 65 | 65 | 0 | 0 | 0 |
-| `cybernetics_v2_phase5.md` | yes | 52 | 49 | 3 | 0 | 0 |
+| `cybernetics_v2_phase5.md` | yes | 53 | 49 | 3 | 0 | 1 |
 | `cybernetics_v2_phase6.md` | yes | 27 | 26 | 1 | 0 | 0 |
 | `cybernetics_v2_procedures.md` | yes | 146 | 144 | 1 | 0 | 1 |
 | `cybernetics_v2_procedures_lore.md` | yes | 7 | 7 | 0 | 0 | 0 |
@@ -46,6 +46,7 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | `cybernetics_v2_reprisal_lore.md` | yes | 3 | 3 | 0 | 0 | 0 |
 | `cybernetics_v2_self_repair.md` | yes | 58 | 55 | 2 | 0 | 1 |
 | `cybernetics_v2_self_repair_lore.md` | yes | 5 | 5 | 0 | 0 | 0 |
+| `cybernetics_v2_seller_names.md` | yes | 88 | 73 | 15 | 0 | 0 |
 | `cybernetics_v2_tier_options.md` | yes | 94 | 91 | 1 | 2 | 0 |
 | `cybernetics_v2_tier_options_lore.md` | yes | 8 | 8 | 0 | 0 | 0 |
 | `cybernetics_v2_trait_depth.md` | yes | 42 | 41 | 1 | 0 | 0 |
@@ -78,14 +79,14 @@ None.
 
 #### `docs/specs/cybernetics_v2.md`
 
-- Specced and present: 107
+- Specced and present: 108
 - Specced, missing from script (0): none
 - Referenced only, never defined or set (1): `eotg_aug_is_nonruler` (unknown, l.182)
 - Exempt (0): none
 
 #### `docs/specs/cybernetics_v2_balance.md`
 
-- Specced and present: 137
+- Specced and present: 138
 - Specced, missing from script (0): none
 - Referenced only, never defined or set (1): `eotg_aug_sedation_courses` (variable, l.91)
 - Exempt (1): `eotg_fracture.011.desc_misled` (loc, l.792)
@@ -115,7 +116,7 @@ None.
 
 #### `docs/specs/cybernetics_v2_new_beats.md`
 
-- Specced and present: 65
+- Specced and present: 66
 - Specced, missing from script (0): none
 - Referenced only, never defined or set (4): `eotg_heir_story.var` (loc, l.158), `eotg_patron_story.var` (loc, l.262), `eotg_heir.GetFirstName` (loc, l.298), `eotg_prior_heir.GetFirstName` (loc, l.298)
 - Exempt (0): none
@@ -161,7 +162,7 @@ None.
 - Specced and present: 49
 - Specced, missing from script (0): none
 - Referenced only, never defined or set (3): `eotg_suspect` (unknown, l.68), `eotg_victim` (unknown, l.78), `eotg_mod_aug_retinue_resentment` (modifier, l.303)
-- Exempt (0): none
+- Exempt (1): `eotg_mod_aug_patron_clause_final_desc` (loc, l.101)
 
 #### `docs/specs/cybernetics_v2_phase6.md`
 
@@ -225,6 +226,13 @@ None.
 - Specced and present: 5
 - Specced, missing from script (0): none
 - Referenced only, never defined or set (0): none
+- Exempt (0): none
+
+#### `docs/specs/cybernetics_v2_seller_names.md`
+
+- Specced and present: 73
+- Specced, missing from script (0): none
+- Referenced only, never defined or set (15): `eotg_aug_cl_company` (loc, l.40), `eotg_aug_cl_gang` (loc, l.41), `eotg_aug_cl_vendor_careful` (loc, l.42), `eotg_aug_cl_vendor_bold` (loc, l.43), `eotg_aug_cl_clinic_of_record` (loc, l.44), `eotg_aug_cl_syndicate` (loc, l.45), `eotg_aug_cl_syndicate_offer` (loc, l.45), `eotg_aug_cl_rival_syndicate` (loc, l.45), `eotg_aug_seller_gang` (flag, l.53), `eotg_aug_vendor_careful` (flag, l.54), `eotg_aug_vendor_bold` (flag, l.55), `eotg_patron_syndicate_passthrough` (flag, l.57), `eotg_aug_rival_syndicate` (flag, l.59), `eotg_lint` (unknown, l.223), `eotg_copycat.Custom` (loc, l.259)
 - Exempt (0): none
 
 #### `docs/specs/cybernetics_v2_tier_options.md`
@@ -339,4 +347,4 @@ Mod definitions (`common/` top-level keys, events, namespaces, flags and variabl
 - **scope** (61): `eotg_accused_kin`, `eotg_aug_peer`, `eotg_aug_victim_owner`, `eotg_aug_withdrawn`, `eotg_bleed_outcome`, `eotg_blood_outcome`, `eotg_bout_outcome`, `eotg_bridge_outcome`, `eotg_campaign_outcome`, `eotg_claim_truth`, `eotg_concerned_vassal`, `eotg_confessor`, `eotg_confidant`, `eotg_copycat_outcome`, `eotg_demand_provider`, `eotg_executed`, `eotg_former_self`, `eotg_frontier_change`, `eotg_frontier_heir_sponsor`, `eotg_frontier_lapsed_sponsor`, `eotg_frontier_leader`, `eotg_frontier_new_barony`, `eotg_frontier_offer_2`, `eotg_frontier_offer_3`, `eotg_frontier_old_progress`, `eotg_frontier_sponsor_candidate`, `eotg_grief_killer`, `eotg_hire_first`, `eotg_hire_second`, `eotg_iron_knight`, `eotg_kept_retinue_bonus`, `eotg_letter_kind`, `eotg_machines_bond`, `eotg_misled_outcome`, `eotg_missing_outcome`, `eotg_nr_cascaded`, `eotg_nr_reported`, `eotg_offer_provider`, `eotg_other_parent`, `eotg_petitioning_knight`, `eotg_phantom_order`, `eotg_plot_action`, `eotg_plot_learned`, `eotg_plot_truth`, `eotg_rejection_outcome`, `eotg_report_truth`, `eotg_resentful`, `eotg_retainer_installed`, `eotg_retinue_story`, `eotg_salvage_provider`, `eotg_scrambled_into`, `eotg_seamless_heir_arc`, `eotg_surgeon`, `eotg_tamper_trace`, `eotg_victim_portrait`, `eotg_volunteer_b`, `eotg_warden_chancellor`, `eotg_warden_heir`, `eotg_warden_spouse`, `eotg_warrant_result`, `eotg_watching_heir`
 - **script value** (2): `eotg_frontier_current_control_value`, `eotg_frontier_current_dev_value`
 - **trigger** (6): `eotg_aug_containment_possible`, `eotg_aug_keeper_candidate`, `eotg_aug_patron_heir_candidate`, `eotg_aug_sick_child_candidate`, `eotg_can_progress_to_overclocked`, `eotg_frontier_is_abandoned`
-- **variable** (10): `eotg_aug_escrow`, `eotg_aug_plot_vassals`, `eotg_frontier_debug_control`, `eotg_frontier_debug_floor_control`, `eotg_frontier_debug_floor_dev`, `eotg_hall_gone`, `eotg_patron_envoy_passthrough`, `eotg_patron_terms_passthrough`, `eotg_phase1_grace`, `eotg_retinue_phase_passthrough`
+- **variable** (9): `eotg_aug_escrow`, `eotg_aug_plot_vassals`, `eotg_frontier_debug_control`, `eotg_frontier_debug_floor_control`, `eotg_frontier_debug_floor_dev`, `eotg_hall_gone`, `eotg_patron_terms_passthrough`, `eotg_phase1_grace`, `eotg_retinue_phase_passthrough`

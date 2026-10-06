@@ -99,7 +99,7 @@
  # ── Initiation Events ─────────────────────────────────────────────────────────
  eotg_aug_init.001.t:0 "The Cost of Survival"
  # eotg_lint: allow L012 "encouraging" is the medic's ordinary adjective, not sponsorship
- eotg_aug_init.001.desc:0 "The field medic's assessment is not encouraging. The wound will not kill you, but it will cost you. A clinic representative is already here, and they have a more permanent solution."
+ eotg_aug_init.001.desc:0 "The field medic's assessment is not encouraging. The wound will not kill you, but it will cost you. A representative from [ROOT.Char.Custom('eotg_aug_cl_company')] is already here, and they have a more permanent solution."
  eotg_aug_init.001.a:0 "Do it."
  eotg_aug_init.001.b:0 "Accept conventional care and hope it eases."
  eotg_aug_init.001.c:0 "I will not be rebuilt by strangers. I refuse."
@@ -107,7 +107,7 @@
  eotg_aug_init.001.e:0 "Flesh was only ever a first draft."
 
  eotg_aug_init.002.t:0 "A Vendor's Pitch"
- eotg_aug_init.002.desc:0 "A vendor's representative arrives at court with a carefully worded proposal. Enhancements. Performance. A competitive edge. They call it an investment."
+ eotg_aug_init.002.desc:0 "A representative from [ROOT.Char.Custom('eotg_aug_cl_company')] arrives at court with a carefully worded proposal. Enhancements. Performance. A competitive edge. They call it an investment."
  eotg_aug_init.002.a:0 "Pay for the work."
  eotg_aug_init.002.b:0 "Decline."
  eotg_aug_init.002.c:0 "Offer it to one of my knights instead."
@@ -121,7 +121,7 @@
  eotg_aug_init.003.e:0 "Let age have me."
 
  eotg_aug_init.004.t:0 "Desperation Protocol"
- eotg_aug_init.004.desc:0 "The sanctioned clinics are two systems behind the front. What is here is less reputable: a field technician with unlicensed hardware and no medical certification. The offer is direct: your wound for their work."
+ eotg_aug_init.004.desc:0 "The sanctioned clinics are two systems behind the front. What is here is less reputable: a field technician who works for [ROOT.Char.Custom('eotg_aug_cl_gang')], with unlicensed hardware and no medical certification. The offer is direct: your wound for their work."
  eotg_aug_init.004.a:0 "Do it. Whatever it takes."
  eotg_aug_init.004.b:0 "I'd rather bleed."
  eotg_aug_init.004.d:0 "I will finish this war as I am."
@@ -145,8 +145,8 @@
  eotg_aug_tier1.001.e:0 "It'll pass."
 
  eotg_aug_tier1.002.t:0 "The Upgrade"
- eotg_aug_tier1.002.desc:0 "The clinic's newest model has arrived in the capital. The technician is direct: what you have now is the beginning. What comes next is the point."
- eotg_aug_tier1.002.desc_sought:0 "You sent for the clinic, and the technician came. What you have now is the beginning, they say, and you asked to hear the rest. The price is on the table before the specifications are."
+ eotg_aug_tier1.002.desc:0 "The newest model from [ROOT.Char.Custom('eotg_aug_cl_company')] has arrived in the capital. The technician is direct: what you have now is the beginning. What comes next is the point."
+ eotg_aug_tier1.002.desc_sought:0 "You sent for [ROOT.Char.Custom('eotg_aug_cl_company')], and the technician came. What you have now is the beginning, they say, and you asked to hear the rest. The price is on the table before the specifications are."
  eotg_aug_tier1.002.a:0 "Pay for the upgrade, then decide what changes."
  eotg_aug_tier1.002.b:0 "Not yet."
  eotg_aug_tier1.002.c:0 "I will wait. Ask me again in a few years."
@@ -356,7 +356,7 @@
 
  # -- Phase 2: entry hooks, decisions, modifiers ---------------------------------
  eotg_aug_init.006.t:0 "The Prosthetic"
- eotg_aug_init.006.desc:0 "The old injury is still the first thing anyone notices about you. The clinics here do not patch. They replace. A technician has laid the specifications on the table."
+ eotg_aug_init.006.desc:0 "The old injury is still the first thing anyone notices about you. The clinics here do not patch. They replace. A technician from [ROOT.Char.Custom('eotg_aug_cl_company')] has laid the specifications on the table."
  eotg_aug_init.006.desc_blind:0 "\n\nYour sight first. They have optical units that would let you read a face across the hall."
  eotg_aug_init.006.desc_one_legged:0 "\n\nThe leg first. The actuator drawing is already in your hand."
  eotg_aug_init.006.desc_maimed:0 "\n\nThe hand, the arm, whatever the war took. A frame and a sensor lattice could give it back."
@@ -390,7 +390,7 @@
  eotg_aug_init.009.d:0 "Every advantage, every time."
  eotg_aug_init.009.e:0 "Write the treatise first."
  eotg_aug_init.010.t:0 "Back-Alley Surgery"
- eotg_aug_init.010.desc:0 "There is a clinic with no name and no certificate on the wall. They work cheap, they work fast, and they ask nothing. The hardware is of uncertain origin. The price is a fraction of what the sanctioned clinics charge."
+ eotg_aug_init.010.desc:0 "[ROOT.Char.Custom('eotg_aug_cl_gang')|U] run a clinic with no name and no certificate on the wall. They work cheap, they work fast, and they ask nothing. The hardware is of uncertain origin. The price is a fraction of what the sanctioned clinics charge."
  eotg_aug_init.010.a:0 "Cheap is cheap."
  eotg_aug_init.010.b:0 "Not from those hands."
  eotg_aug_init.010.c:0 "And no one hears of it."
@@ -399,7 +399,7 @@
  eotg_aug_init.011.desc_clean:0 "Weeks on, the incision has closed. The implant sits where it was put. Nothing hurts that should not."
  eotg_aug_init.011.desc_infection:0 "The incision is hot and swollen, and the skin around the implant has gone an ugly colour. A fever is building."
  eotg_aug_init.011.desc_rejection:0 "The body is fighting it. The flesh around the hardware has turned hard and dark, and the implant has begun to shift."
- eotg_aug_init.011.desc_discovered:0 "Word has got out. Someone saw the incision, or the clinic, or paid to know. The hardware is no secret now."
+ eotg_aug_init.011.desc_discovered:0 "Word has got out. Someone saw the incision, or saw you go to [ROOT.Char.Custom('eotg_aug_cl_gang')], or paid to know. The hardware is no secret now."
  eotg_aug_init.011.desc_excellent:0 "The install took better than anyone had a right to expect. The incision is a fine line, and the implant already feels like part of you."
  eotg_aug_init.011.a:0 "Good."
  eotg_aug_init.011.a_grim:0 "Keep going."
@@ -453,9 +453,9 @@
  eotg_aug_init.017.d:0 "I trust your hands."
  eotg_aug_init.017.e:0 "And who paid you to suggest it?"
  eotg_aug_init.018.t:0 "The Offer You Sought"
- eotg_aug_init.018.desc:0 "You sent word, and replies came back, as many as you asked for. A sanctioned clinic, with records and a waiting list. A back street, with neither. And a closed door, if you change your mind."
- eotg_aug_init.018.a:0 "A sanctioned clinic."
- eotg_aug_init.018.b:0 "The back streets."
+ eotg_aug_init.018.desc:0 "You sent word, and replies came back, as many as you asked for. [ROOT.Char.Custom('eotg_aug_cl_company')|U], with records and a waiting list. [ROOT.Char.Custom('eotg_aug_cl_gang')|U], with neither. And a closed door, if you change your mind."
+ eotg_aug_init.018.a:0 "[ROOT.Char.Custom('eotg_aug_cl_company')|U], a sanctioned clinic."
+ eotg_aug_init.018.b:0 "[ROOT.Char.Custom('eotg_aug_cl_gang')|U], in the back streets."
  eotg_aug_init.018.c:0 "My own physician."
  eotg_aug_init.018.d:0 "Not yet."
  eotg_aug_init.020.t:0 "Choosing the Volunteer"
@@ -884,7 +884,7 @@
  eotg_decision_aug_embrace_cascade_tooltip:0 "You hand over the controls. If the handover holds, you become Seamless and lose your friends, your personality and any further choice. It may not hold."
  eotg_decision_aug_embrace_cascade_confirm:0 "Hand over the controls."
  eotg_decision_aug_pursue_next_stage:0 "Pursue the Next Stage"
- eotg_decision_aug_pursue_next_stage_desc:0 "The work you have settles, and then it asks for more. The surgeons keep a next procedure ready for those who can pay for it, and a sanctioned clinic will book you whenever you send word."
+ eotg_decision_aug_pursue_next_stage_desc:0 "The work you have settles, and then it asks for more. The surgeons keep a next procedure ready for those who can pay for it, and [ROOT.Char.Custom('eotg_aug_cl_clinic_of_record')] will book you whenever you send word."
  eotg_decision_aug_pursue_next_stage_tooltip:0 "The surgeons will make you an offer. You may still refuse it."
  eotg_decision_aug_pursue_next_stage_confirm:0 "Send for the surgeons."
  eotg_decision_aug_pursue_next_stage_settling_tt:0 "The last work has settled"
@@ -1023,7 +1023,7 @@
 
  # eotg_aug_tier1.018 Copycat
  eotg_aug_tier1.018.t:0 "Copycat"
- eotg_aug_tier1.018.desc:0 "[eotg_copycat.GetFirstName] saw what the implant did for you and went to a back-room operator for the same. The work was cheap and fast. The incision is infected, the readings are wrong, and now [eotg_copycat.GetSheHe] is at your door asking for help."
+ eotg_aug_tier1.018.desc:0 "[eotg_copycat.GetFirstName] saw what the implant did for you and went to [eotg_copycat.Custom('eotg_aug_cl_gang')] for the same. The work was cheap and fast. The incision is infected, the readings are wrong, and now [eotg_copycat.GetSheHe] is at your door asking for help."
  eotg_aug_tier1.018.a:0 "Pay for [eotg_copycat.GetHerHis] treatment."
  eotg_aug_tier1.018.b:0 "Refuse."
  eotg_aug_tier1.018.c:0 "Help [eotg_copycat.GetHerHim], for a price."
@@ -1033,8 +1033,8 @@
  # eotg_aug_tier1.019 Copycat: Their Fate
  eotg_aug_tier1.019.t:0 "Copycat: Their Fate"
  eotg_aug_tier1.019.desc_recovered:0 "[eotg_copycat.GetFirstName] is on [eotg_copycat.GetHerHis] feet. The infection cleared, the implant settled, and [eotg_copycat.GetSheHe] has come to tell you so, with a gratitude that sits somewhere between thanks and debt."
- eotg_aug_tier1.019.desc_worse:0 "[eotg_copycat.GetFirstName] is not recovering. The implant is failing in ways the clinic cannot name, and the readings keep drifting. [eotg_copycat.GetSheHe|U] is alive, and getting worse."
- eotg_aug_tier1.019.desc_dead:0 "[eotg_copycat.GetFirstName] died of the infection. The clinic's report is short and clinical, and it says nothing you did not already know."
+ eotg_aug_tier1.019.desc_worse:0 "[eotg_copycat.GetFirstName] is not recovering. The implant is failing in ways [ROOT.Char.Custom('eotg_aug_cl_company')] cannot name, and the readings keep drifting. [eotg_copycat.GetSheHe|U] is alive, and getting worse."
+ eotg_aug_tier1.019.desc_dead:0 "[eotg_copycat.GetFirstName] died of the infection. The report from [ROOT.Char.Custom('eotg_aug_cl_company')] is short and clinical, and it says nothing you did not already know."
  eotg_aug_tier1.019.a:0 "I see."
 
  # eotg_aug_tier1.020 Something Is Missing
@@ -1138,9 +1138,9 @@
 
  # eotg_aug_tier2.013 The Bidding War
  eotg_aug_tier2.013.t:0 "The Bidding War"
- eotg_aug_tier2.013.desc:0 "Two vendors have heard you are in the market. One offers tested hardware, a long warranty and a modest gain. The other offers more power now and fewer questions. Both sent a demonstration unit. Both want a decision by the end of the week."
- eotg_aug_tier2.013.a:0 "The careful vendor."
- eotg_aug_tier2.013.b:0 "The bold vendor."
+ eotg_aug_tier2.013.desc:0 "Two vendors have heard you are in the market. [ROOT.Char.Custom('eotg_aug_cl_vendor_careful')|U] offers tested hardware, a long warranty and a modest gain. [ROOT.Char.Custom('eotg_aug_cl_vendor_bold')|U] offers more power now and fewer questions. Both sent a demonstration unit. Both want a decision by the end of the week."
+ eotg_aug_tier2.013.a:0 "[ROOT.Char.Custom('eotg_aug_cl_vendor_careful')|U]: the careful offer."
+ eotg_aug_tier2.013.b:0 "[ROOT.Char.Custom('eotg_aug_cl_vendor_bold')|U]: the bold offer."
  eotg_aug_tier2.013.c:0 "Play them against each other."
  eotg_aug_tier2.013.c.success:0 "The vendors see each other's offers and both sharpen their terms."
  eotg_aug_tier2.013.c.failure:0 "Both vendors see what you are doing and walk away."
@@ -1149,10 +1149,10 @@
 
  # eotg_aug_tier2.014 The Vendors Return
  eotg_aug_tier2.014.t:0 "The Vendors Return"
- eotg_aug_tier2.014.desc_played:0 "The vendors are back, each with a sharper offer than before. Each has been told the other already left."
- eotg_aug_tier2.014.desc_waited:0 "A year on, the vendors are back and the offers have changed. The careful one's warranty has shortened. The bold one's firmware has matured. Neither has been waiting for you, but both have been watching the market."
- eotg_aug_tier2.014.a:0 "The careful offer."
- eotg_aug_tier2.014.b:0 "The bold offer."
+ eotg_aug_tier2.014.desc_played:0 "[ROOT.Char.Custom('eotg_aug_cl_vendor_careful')|U] and [ROOT.Char.Custom('eotg_aug_cl_vendor_bold')] are back, each with a sharper offer than before. Each has been told the other already left."
+ eotg_aug_tier2.014.desc_waited:0 "A year on, the vendors are back and the offers have changed. The warranty from [ROOT.Char.Custom('eotg_aug_cl_vendor_careful')] has shortened. The firmware from [ROOT.Char.Custom('eotg_aug_cl_vendor_bold')] has matured. Neither has been waiting for you, but both have been watching the market."
+ eotg_aug_tier2.014.a:0 "The new offer from [ROOT.Char.Custom('eotg_aug_cl_vendor_careful')]."
+ eotg_aug_tier2.014.b:0 "The new offer from [ROOT.Char.Custom('eotg_aug_cl_vendor_bold')]."
  eotg_aug_tier2.014.c:0 "Neither."
 
  # eotg_aug_tier2.015 Tampering
@@ -1463,11 +1463,11 @@
  # ---- The Patron (the syndicate) ----
 
  # init.018 e, init.019 The Arms Race
- eotg_aug_init.018.e:0 "A syndicate will pay."
+ eotg_aug_init.018.e:0 "[ROOT.Char.Custom('eotg_aug_cl_syndicate_offer')|U] will pay."
 
  # eotg_aug_patron.001 The Syndicate's Offer
  eotg_aug_patron.001.t:0 "The Syndicate's Offer"
- eotg_aug_patron.001.desc:0 "A syndicate envoy has asked for a private audience. They bring no gifts, only a contract, and they say it plainly: 'We would like to pay for it.' The clinic, the hardware, the technicians, all of it. The terms are on the second page. The envoy lets you reach it yourself."
+ eotg_aug_patron.001.desc:0 "An envoy from [ROOT.Char.Custom('eotg_aug_cl_syndicate_offer')] has asked for a private audience. They bring no gifts, only a contract, and they say it plainly: 'We would like to pay for it.' The clinic, the hardware, the technicians, all of it. The terms are on the second page. The envoy lets you reach it yourself."
  eotg_aug_patron.001.a:0 "Accept."
  eotg_aug_patron.001.b:0 "Decline."
  eotg_aug_patron.001.c:0 "Accept, after reading every clause."
@@ -1476,7 +1476,7 @@
 
  # eotg_aug_patron.002 Repayment
  eotg_aug_patron.002.t:0 "Repayment"
- eotg_aug_patron.002.desc:0 "The syndicate envoy presents an invoice. It is polite and itemized. It covers the hardware, the surgery, and a line called 'ongoing support.' A small matter, the envoy says, and then waits, like someone who has been paid before."
+ eotg_aug_patron.002.desc:0 "The envoy from [ROOT.Char.Custom('eotg_aug_cl_syndicate')] presents an invoice. It is polite and itemized. It covers the hardware, the surgery, and a line called 'ongoing support.' A small matter, the envoy says, and then waits, like someone who has been paid before."
  eotg_aug_patron.002.a:0 "Pay."
  eotg_aug_patron.002.b:0 "Refuse."
  eotg_aug_patron.002.c:0 "Renegotiate."
@@ -1489,7 +1489,7 @@
 
  # eotg_aug_patron.003 Exclusivity
  eotg_aug_patron.003.t:0 "Exclusivity"
- eotg_aug_patron.003.desc:0 "The syndicate envoy has one more clause. From now on only the syndicate's technicians are to service the hardware. It is framed as quality control. Any other hands in the casing, the envoy says, would end the support, and the firmware has been set to notice."
+ eotg_aug_patron.003.desc:0 "The envoy from [ROOT.Char.Custom('eotg_aug_cl_syndicate')] has one more clause. From now on only the syndicate's technicians are to service the hardware. It is framed as quality control. Any other hands in the casing, the envoy says, would end the support, and the firmware has been set to notice."
  eotg_aug_patron.003.a:0 "Agree."
  eotg_aug_patron.003.b:0 "Refuse."
  eotg_aug_patron.003.c:0 "Agree, on a trial basis."
@@ -1498,7 +1498,7 @@
 
  # eotg_aug_patron.004 The Errand
  eotg_aug_patron.004.t:0 "The Errand"
- eotg_aug_patron.004.desc:0 "The syndicate envoy mentions, almost in passing, that [eotg_critic.GetFirstName] has been speaking against the syndicate's interests. The envoy has heard it said, and does not say by whom. The envoy does not ask you to do anything. The envoy lets the pause do the asking."
+ eotg_aug_patron.004.desc:0 "The envoy from [ROOT.Char.Custom('eotg_aug_cl_syndicate')] mentions, almost in passing, that [eotg_critic.GetFirstName] has been speaking against the syndicate's interests. The envoy has heard it said, and does not say by whom. The envoy does not ask you to do anything. The envoy lets the pause do the asking."
  eotg_aug_patron.004.a:0 "It will be done."
  eotg_aug_patron.004.b:0 "No."
  eotg_aug_patron.004.c:0 "Warn the critic instead."
@@ -1507,8 +1507,8 @@
 
  # eotg_aug_patron.005 The Family Clause
  eotg_aug_patron.005.t:0 "The Family Clause"
- eotg_aug_patron.005.desc:0 "[eotg_heir.GetFirstName] sat in on part of the meeting, and the envoy noticed. The next clause covers your heir: [eotg_heir.GetHerHis] implants, [eotg_heir.GetHerHis] service, [eotg_heir.GetHerHis] upgrades, all on the syndicate's schedule. The syndicate was never buying the implant. It was buying your dynasty."
- eotg_aug_patron.005.desc_no_heir:0 "The next clause covers your next child, whenever and whoever they turn out to be: their implants, their service, their upgrades, all on the syndicate's schedule. The syndicate was never buying the implant. It was buying your line."
+ eotg_aug_patron.005.desc:0 "[eotg_heir.GetFirstName] sat in on part of the meeting, and the envoy from [ROOT.Char.Custom('eotg_aug_cl_syndicate')] noticed. The next clause covers your heir: [eotg_heir.GetHerHis] implants, [eotg_heir.GetHerHis] service, [eotg_heir.GetHerHis] upgrades, all on the syndicate's schedule. The syndicate was never buying the implant. It was buying your dynasty."
+ eotg_aug_patron.005.desc_no_heir:0 "The envoy from [ROOT.Char.Custom('eotg_aug_cl_syndicate')] turns the page. The next clause covers your next child, whenever and whoever they turn out to be: their implants, their service, their upgrades, all on the syndicate's schedule. The syndicate was never buying the implant. It was buying your line."
  eotg_aug_patron.005.a:0 "Agreed."
  eotg_aug_patron.005.b:0 "Never."
  eotg_aug_patron.005.c:0 "Take more of me instead."
@@ -1517,22 +1517,22 @@
 
  # eotg_aug_patron.006 The Final Demand
  eotg_aug_patron.006.t:0 "The Final Demand"
- eotg_aug_patron.006.desc_betrayal:0 "The envoy comes without the usual courtesy. The syndicate has kept a ledger of your refusals, and it is closed. The terms are final, and the envoy says them without heat: they were never buying the implant. They were buying you, and you have stopped being for sale."
- eotg_aug_patron.006.desc_settlement:0 "The envoy comes with the final account. The account is closed on the syndicate's side, and it would like to settle. The terms are generous and the envoy is relaxed, like someone who has already collected what they came for."
- eotg_aug_patron.006.desc_betrayal_absent:0 "The message comes without the usual courtesy, sealed and unsigned. The syndicate has kept a ledger of your refusals, and it is closed. The terms are final and written without heat: they were never buying the implant. They were buying you, and you have stopped being for sale."
- eotg_aug_patron.006.desc_settlement_absent:0 "A courier brings the final account, sealed. The account is closed on the syndicate's side, and it would like to settle. The terms are generous and the tone is relaxed, like that of someone who has already collected what they came for."
- eotg_aug_patron.006.desc_writeoff_absent:0 "The message arrives sealed, and no one waits for an answer. The syndicate has reviewed your account and closed it. The terms are brief: the syndicate does not service broken units, and what you owe is due now."
+ eotg_aug_patron.006.desc_betrayal:0 "The envoy comes without the usual courtesy. [ROOT.Char.Custom('eotg_aug_cl_syndicate')|U] has kept a ledger of your refusals, and it is closed. The terms are final, and the envoy says them without heat: they were never buying the implant. They were buying you, and you have stopped being for sale."
+ eotg_aug_patron.006.desc_settlement:0 "The envoy comes with the final account. [ROOT.Char.Custom('eotg_aug_cl_syndicate')|U] has closed it on its side, and would like to settle. The terms are generous and the envoy is relaxed, like someone who has already collected what they came for."
+ eotg_aug_patron.006.desc_betrayal_absent:0 "The message comes without the usual courtesy, sealed and unsigned. [ROOT.Char.Custom('eotg_aug_cl_syndicate')|U] has kept a ledger of your refusals, and it is closed. The terms are final and written without heat: they were never buying the implant. They were buying you, and you have stopped being for sale."
+ eotg_aug_patron.006.desc_settlement_absent:0 "A courier brings the final account, sealed. [ROOT.Char.Custom('eotg_aug_cl_syndicate')|U] has closed it on its side, and would like to settle. The terms are generous and the tone is relaxed, like that of someone who has already collected what they came for."
+ eotg_aug_patron.006.desc_writeoff_absent:0 "The message arrives sealed, and no one waits for an answer. [ROOT.Char.Custom('eotg_aug_cl_syndicate')|U] has reviewed your account and closed it. The terms are brief: the syndicate does not service broken units, and what you owe is due now."
  eotg_aug_patron.006.a:0 "Sign over the revenues."
  eotg_aug_patron.006.b:0 "Buy them out."
  eotg_aug_patron.006.c:0 "Betray them."
- eotg_aug_patron.006.d:0 "Sell them to a rival syndicate."
- eotg_aug_patron.006.d.success:0 "The rival syndicate pays, and the old one does not find out."
+ eotg_aug_patron.006.d:0 "Sell them to [ROOT.Char.Custom('eotg_aug_cl_rival_syndicate')]."
+ eotg_aug_patron.006.d.success:0 "[ROOT.Char.Custom('eotg_aug_cl_rival_syndicate')|U] pays, and the old one does not find out."
  eotg_aug_patron.006.d.failure:0 "The old syndicate finds out first."
  eotg_aug_patron.006.e:0 "Come and take it from me."
 
  # eotg_aug_patron.007 A New Envoy
  eotg_aug_patron.007.t:0 "A New Envoy"
- eotg_aug_patron.007.desc:0 "The syndicate has sent a new envoy. [eotg_patron_envoy.GetFirstName] presents the same contract, in the same words, with the same patience. The last one is not mentioned. The change has simply been made."
+ eotg_aug_patron.007.desc:0 "[ROOT.Char.Custom('eotg_aug_cl_syndicate')|U] has sent a new envoy. [eotg_patron_envoy.GetFirstName] presents the same contract, in the same words, with the same patience. The last one is not mentioned. The change has simply been made."
  eotg_aug_patron.007.a:0 "Welcome [eotg_patron_envoy.GetHerHim]."
  eotg_aug_patron.007.b:0 "And how did the last one die?"
  eotg_aug_patron.007.c:0 "Refuse [eotg_patron_envoy.GetHerHim] entry."
@@ -1730,11 +1730,11 @@
  eotg_aug_tier1.011.f:0 "Let them look. They always have."
  eotg_aug_patron.002.f:0 "Let their technicians service the debt."
  eotg_aug_retinue.003.f:0 "Lock their timing to mine."
- eotg_aug_init.006.desc_congenital:0 "You were born this way, and the clinics here do not pretend otherwise. They cannot change what you were born with. They can build around it: a frame, braces and servos under the skin, a gait the implant steadies at every step. The technician is careful to say what the contract covers. It covers you. It does not cover your children."
+ eotg_aug_init.006.desc_congenital:0 "You were born this way, and the clinics here do not pretend otherwise. They cannot change what you were born with. They can build around it: a frame, braces and servos under the skin, a gait the implant steadies at every step. The technician from [ROOT.Char.Custom('eotg_aug_cl_company')] is careful to say what the contract covers. It covers you. It does not cover your children."
  eotg_aug_heir.001.desc_overclocked:0 "[eotg_heir.GetFirstName] asks to speak with you alone. [eotg_heir.GetSheHe|U] has noticed the small things: the replies that arrive before the question ends, the pauses that come where no one else would pause. [eotg_heir.GetSheHe|U] does not accuse. [eotg_heir.GetSheHe|U] asks what the household should do if it gets worse, and the question stays in the room after [eotg_heir.GetSheHe] stops speaking."
  eotg_aug_heir.001.desc_patient:0 "\n\n[eotg_heir.GetSheHe|U] was a child when the surgeons saved [eotg_heir.GetHerHim], and [eotg_heir.GetSheHe] still carries the work. [eotg_heir.GetSheHe|U] knows what the hardware can do for a person. [eotg_heir.GetSheHe|U] is asking because [eotg_heir.GetSheHe] knows what else it can do."
  eotg_aug_patron.003.desc_voice:0 "\n\nThe model read the clause before the envoy reached it. It has already priced the refusal, and the figure is the one you were about to arrive at."
- eotg_aug_patron.006.desc_writeoff:0 "The envoy does not sit down. The syndicate has reviewed your account and closed it. The terms are brief: the syndicate does not service broken units, and what you owe is due now."
+ eotg_aug_patron.006.desc_writeoff:0 "The envoy does not sit down. [ROOT.Char.Custom('eotg_aug_cl_syndicate')|U] has reviewed your account and closed it. The terms are brief: the syndicate does not service broken units, and what you owe is due now."
  eotg_aug_retinue.003.desc_voice:0 "\n\nThe overlay has started tagging them: designation, response time, a column for drift. You did not ask it to. You were about to."
  eotg_aug_retinue.004.desc_voice:0 "\n\nThe overlay tags the passed-over knights too, in a separate column. It has already ranked them by how soon they could be brought up to standard."
  # eotg_lint: allow L012 a ruler's own retinue, not a state programme
@@ -1748,7 +1748,7 @@
  eotg_fracture.020.desc_true_spared:0 "The inquiry is finished. [eotg_accused.GetName] was what the flag said. The correspondence, the payments and the plan were all there, and you refused to act. Nothing came of it, and the file records both facts."
  eotg_fracture.020.c_spared:0 "It was right. I was not."
  eotg_decision_seek_augmentation_physician_tt:0 "Your own physician can do it too."
- eotg_aug_init.018.desc_syndicate:0 "\n\nOne more reply came that you did not send for. A syndicate's envoy offers to cover the cost, on the syndicate's terms."
+ eotg_aug_init.018.desc_syndicate:0 "\n\nOne more reply came that you did not send for. An envoy from [ROOT.Char.Custom('eotg_aug_cl_syndicate_offer')] offers to cover the cost, on its own terms."
  eotg_aug_init.018.e.tt:0 "A syndicate's envoy will call with an offer. The syndicate pays for it, on its own terms."
  eotg_aug_init.011.d.tt:0 "The surgeon cuts the rejected hardware out. The body's reaction follows."
  eotg_aug_end.001.b.tt:0 "The surgeons will not hold the table for you. Turning them away gives up the free excision."
@@ -1782,7 +1782,7 @@
  eotg_aug_heir.003.desc_successor:0 "[eotg_heir.GetFirstName] has brought the incident logs and a date. This has been said to you once before, by [eotg_prior_heir.GetFirstName], and [eotg_heir.GetFirstName] knows how that went. [eotg_heir.GetSheHe|U] does not rehearse it. 'Step aside,' [eotg_heir.GetSheHe] says, 'or I will make you.'"
  eotg_aug_heir.004.desc_successor:0 "[eotg_heir.GetFirstName] has decided. [eotg_heir.GetSheHe|U] knows how this went the last time, and has decided anyway. The question is settled, and only the method remains."
  eotg_aug_patron.008.t:0 "The Paper"
- eotg_aug_patron.008.desc:0 "The hardware is out of you, and the syndicate knows it. The debt is not. The paper names you, not the implants, and the syndicate still holds the paper. The terms have been re-priced for a body it no longer services."
+ eotg_aug_patron.008.desc:0 "The hardware is out of you, and [ROOT.Char.Custom('eotg_aug_cl_syndicate')] knows it. The debt is not. The paper names you, not the implants, and the syndicate still holds the paper. The terms have been re-priced for a body it no longer services."
  eotg_aug_patron.008.desc_clause:0 "\n\nThe clause still bills for technicians who have nothing left to service."
  eotg_aug_patron.008.a:0 "Pay off the principal."
  eotg_aug_patron.008.b:0 "Sign the lien on my revenues."
@@ -2177,7 +2177,7 @@
  eotg_aug_patron.006.f:0 "Burn the terms. Send no answer."
  eotg_aug_patron_paper_sold_tt:0 "None of the syndicate's hardware is left in you to stop servicing. It will sell your paper to someone who collects in person."
  eotg_aug_patron.009.t:0 "The Collector"
- eotg_aug_patron.009.desc:0 "The syndicate has sold your paper. [eotg_patron_collector.GetName] holds it now, and has come to your residence as a guest to say so. [eotg_patron_collector.GetSheHe|U] brings the original terms, and under them, in the syndicate's hand, an account of how you broke them. The paper came with a case of the syndicate's stock, made to your measure, and that has come too. [eotg_patron_collector.GetHerHis|U] people wait outside. No threat is spoken. [eotg_patron_collector.GetSheHe|U] names the sum, and then the alternatives."
+ eotg_aug_patron.009.desc:0 "[ROOT.Char.Custom('eotg_aug_cl_syndicate')|U] has sold your paper. [eotg_patron_collector.GetName] holds it now, and has come to your residence as a guest to say so. [eotg_patron_collector.GetSheHe|U] brings the original terms, and under them, in the syndicate's hand, an account of how you broke them. The paper came with a case of the syndicate's stock, made to your measure, and that has come too. [eotg_patron_collector.GetHerHis|U] people wait outside. No threat is spoken. [eotg_patron_collector.GetSheHe|U] names the sum, and then the alternatives."
  eotg_aug_patron.009.desc_envoy_dead:0 "\n\n[eotg_patron_collector.GetSheHe|U] asks after [eotg_patron_envoy.GetName] once, and does not ask again."
  eotg_aug_patron.009.a:0 "Pay what the paper says."
  eotg_aug_patron.009.b:0 "Sign the lien on my revenues."
@@ -2227,3 +2227,4 @@
  eotg_aug_tier3.006.e.strained:0 "The logs show a system running close to its limits. [eotg_delegation_leader.GetName] reads the logs in silence, and the delegation leaves more worried than it came."
  eotg_aug_tier3.019.d:0 "Work through its table. Don't read it."
  eotg_fracture.029.c:0 "Let it schedule the recovery."
+ eotg_mod_aug_bold_firmware_vendor_desc:0 "The firmware from [ROOT.Char.Custom('eotg_aug_cl_vendor_bold')] is aggressive and lightly tested. It buys reaction speed the implant was never meant to produce."

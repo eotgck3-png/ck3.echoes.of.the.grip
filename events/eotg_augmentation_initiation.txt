@@ -56,6 +56,14 @@ eotg_aug_init.001 = {
     # via Seek Augmentation in the days before this fires).
     trigger = { eotg_is_augmented_any = no }
 
+    # CB-42 (docs/specs/cybernetics_v2_seller_names.md §5.1): the seller, rolled
+    # once into a character variable before the desc and options render (no
+    # random_valid: the name never changes while the window is open)
+    immediate = {
+        hidden_effect = {
+            eotg_aug_roll_company_effect = { VAR = eotg_aug_seller_company }
+        }
+    }
     # Accept — receive the augmentation, remove the wound
     option = {
         name = eotg_aug_init.001.a
@@ -67,6 +75,7 @@ eotg_aug_init.001 = {
         custom_tooltip = eotg_aug_proc.install_tt
         hidden_effect = {
             eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = install  SURGEON = root }
+            eotg_aug_record_clinic_effect = yes    # CB-42: clinic of record
         }
         stress_impact = {
             base = minor_stress_impact_loss
@@ -135,6 +144,7 @@ eotg_aug_init.001 = {
         custom_tooltip = eotg_aug_proc.install_tt
         hidden_effect = {
             eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = install  SURGEON = root }
+            eotg_aug_record_clinic_effect = yes    # CB-42: clinic of record
         }
         stress_impact = {
             craven = minor_stress_impact_loss
@@ -164,6 +174,7 @@ eotg_aug_init.001 = {
         custom_tooltip = eotg_aug_proc.install_tt
         hidden_effect = {
             eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = install  SURGEON = root }
+            eotg_aug_record_clinic_effect = yes    # CB-42: clinic of record
         }
         add_prestige = 50
         add_piety = -50
@@ -200,6 +211,14 @@ eotg_aug_init.002 = {
     # via Seek Augmentation in the days before this fires).
     trigger = { eotg_is_augmented_any = no }
 
+    # CB-42 (docs/specs/cybernetics_v2_seller_names.md §5.1): the seller, rolled
+    # once into a character variable before the desc and options render (no
+    # random_valid: the name never changes while the window is open)
+    immediate = {
+        hidden_effect = {
+            eotg_aug_roll_company_effect = { VAR = eotg_aug_seller_company }
+        }
+    }
     # Accept the offer — a purchase, not a gift (Phase 1: the syndicate sells)
     option = {
         name = eotg_aug_init.002.a
@@ -212,6 +231,7 @@ eotg_aug_init.002 = {
         custom_tooltip = eotg_aug_proc.install_tt
         hidden_effect = {
             eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = install  SURGEON = root }
+            eotg_aug_record_clinic_effect = yes    # CB-42: clinic of record
         }
         eotg_aug_stress_surgery_effect = yes
         ai_chance = {
@@ -411,6 +431,14 @@ eotg_aug_init.004 = {
     # via Seek Augmentation in the days before this fires).
     trigger = { eotg_is_augmented_any = no }
 
+    # CB-42 (docs/specs/cybernetics_v2_seller_names.md §5.1): the seller, rolled
+    # once into a character variable before the desc and options render (no
+    # random_valid: the name never changes while the window is open)
+    immediate = {
+        hidden_effect = {
+            eotg_aug_roll_gang_effect = { VAR = eotg_aug_seller_gang }
+        }
+    }
     # "Do it. Whatever it takes." — black market augmentation, illegal implants, starts with risk = 10
     option = {
         name = eotg_aug_init.004.a
@@ -746,6 +774,8 @@ eotg_aug_init.006 = {
                 limit = { employs_court_position = court_physician_court_position }
                 court_position:court_physician_court_position = { save_scope_as = eotg_physician }
             }
+            # CB-42 (seller names §5.1): the company, rolled once
+            eotg_aug_roll_company_effect = { VAR = eotg_aug_seller_company }
         }
     }
 
@@ -766,6 +796,7 @@ eotg_aug_init.006 = {
         custom_tooltip = eotg_aug_proc.install_tt
         hidden_effect = {
             eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = install  SURGEON = root }
+            eotg_aug_record_clinic_effect = yes    # CB-42: clinic of record
         }
         eotg_aug_stress_surgery_effect = yes
         ai_chance = {
@@ -885,6 +916,7 @@ eotg_aug_init.006 = {
         custom_tooltip = eotg_aug_proc.install_tt
         hidden_effect = {
             eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = install  SURGEON = root }
+            eotg_aug_record_clinic_effect = yes    # CB-42: clinic of record
         }
         add_character_modifier = { modifier = eotg_mod_aug_lesson_prowess  years = 5 }
         eotg_aug_stress_surgery_effect = yes
@@ -938,6 +970,7 @@ eotg_aug_init.006 = {
         custom_tooltip = eotg_aug_proc.install_tt
         hidden_effect = {
             eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = install  SURGEON = root }
+            eotg_aug_record_clinic_effect = yes    # CB-42: clinic of record
         }
         eotg_aug_stress_surgery_effect = yes
         ai_chance = {
@@ -1414,6 +1447,14 @@ eotg_aug_init.010 = {
 
     trigger = { eotg_is_augmented_any = no }
 
+    # CB-42 (docs/specs/cybernetics_v2_seller_names.md §5.1): the seller, rolled
+    # once into a character variable before the desc and options render (no
+    # random_valid: the name never changes while the window is open)
+    immediate = {
+        hidden_effect = {
+            eotg_aug_roll_gang_effect = { VAR = eotg_aug_seller_gang }
+        }
+    }
     # "Cheap is cheap." Balance spec §5.6: whether you can tell a good back-
     # street surgeon from a bad one is an intrigue check against
     # average_skill_rating (8). Success sets eotg_flag_aug_chain_edge, failure
@@ -2626,6 +2667,26 @@ eotg_aug_init.018 = {
         animation = personality_rational
     }
 
+    # CB-42 (docs/specs/cybernetics_v2_seller_names.md §5.1): the seller, rolled
+    # once into a character variable before the desc and options render (no
+    # random_valid: the name never changes while the window is open)
+    immediate = {
+        hidden_effect = {
+            eotg_aug_roll_company_effect = { VAR = eotg_aug_seller_company }
+            eotg_aug_roll_gang_effect = { VAR = eotg_aug_seller_gang }
+            # The Patron's syndicate for e and desc_syndicate (seller names §5.4):
+            # once, kept while the offer stands (a declined offer re-offers the
+            # same syndicate); copied to the story in its on_setup
+            if = {
+                limit = {
+                    eotg_aug_has_patron = no
+                    NOT = { has_character_flag = eotg_flag_aug_had_patron }
+                    NOT = { has_variable = eotg_patron_syndicate_passthrough }
+                }
+                eotg_aug_roll_syndicate_effect = { VAR = eotg_patron_syndicate_passthrough }
+            }
+        }
+    }
     # "A sanctioned clinic." Published cynics are courted (init.009.c); the
     # discount is spent here.
     option = {
@@ -2660,6 +2721,7 @@ eotg_aug_init.018 = {
         custom_tooltip = eotg_aug_proc.install_tt
         hidden_effect = {
             eotg_aug_procedure_effect = { PATIENT = root  PROVIDER = clinic  PROCEDURE = install  SURGEON = root }
+            eotg_aug_record_clinic_effect = yes    # CB-42: clinic of record
         }
         add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 2 }
         eotg_aug_stress_surgery_effect = yes

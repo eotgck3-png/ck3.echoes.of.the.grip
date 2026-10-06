@@ -3107,3 +3107,30 @@ eotg_aug_self_repair_fit_effect = {
         }
     }
 }
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Seller names — docs/specs/cybernetics_v2_seller_names.md §5 (CB-42)
+# The roll effects themselves are generated
+# (common/scripted_effects/eotg_aug_seller_roll_effects.txt).
+# ═════════════════════════════════════════════════════════════════════════════
+
+# Both firmware vendors for tier2.013 / .014, always two different companies
+# (the generator guarantees at least two). Caller: eotg_aug_tier2.013
+# (immediate, once per life).
+eotg_aug_roll_vendors_effect = {
+    eotg_aug_roll_company_except_effect = { VAR = eotg_aug_vendor_careful  EXCLUDE = eotg_aug_vendor_bold }
+    eotg_aug_roll_company_except_effect = { VAR = eotg_aug_vendor_bold  EXCLUDE = eotg_aug_vendor_careful }
+}
+
+# The clinic of record: the company that fitted you, kept for the next model
+# (tier1.002, tier1.019) and the Pursue decision desc. Never removed; the next
+# clinic install overwrites it. Callers: the clinic options of the named-company
+# hosts, next to their procedure call (init.001 a/d/e, init.002 a, init.006
+# clinic options, init.018 a, tier1.002 a/d/e).
+eotg_aug_record_clinic_effect = {
+    if = {
+        limit = { has_variable = eotg_aug_seller_company }
+        set_variable = { name = eotg_aug_clinic_of_record  value = var:eotg_aug_seller_company }
+    }
+}

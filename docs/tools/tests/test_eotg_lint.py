@@ -293,6 +293,32 @@ class L010(LintCase):
             "localization/english/a_l_english.yml": self.LOC,
         }, "L010", allowlist={"vanilla_ok"})
 
+    # CB-42: customizable localization
+    CUSTOM = ("eotg_cl_x = {\n type = character\n"
+              " text = { trigger = { var:v ?= flag:a } localization_key = eotg_name_a }\n"
+              " text = { localization_key = eotg_name_fb fallback = yes }\n}\n")
+
+    def test_custom_loc_keys_and_calls(self):
+        res = self.assertHit({
+            "common/customizable_localization/c.txt": self.CUSTOM,
+            "localization/english/a_l_english.yml":
+                LOC_OK + ' eotg_name_a:0 "A"\n'
+                         ' eotg_x.desc:0 "From [ROOT.Char.Custom(\'eotg_cl_typo\')] and '
+                         '[ROOT.Char.Custom(\'eotg_cl_x\')]."\n',
+        }, "L010", count=2)
+        msgs = " ".join(f.message for f in res)
+        self.assertIn("eotg_name_fb", msgs)       # a localization_key not defined in loc
+        self.assertIn("eotg_cl_typo", msgs)       # a Custom() call with no custom loc key
+
+    def test_custom_loc_clean(self):
+        self.assertClean({
+            "common/customizable_localization/c.txt": self.CUSTOM,
+            "localization/english/a_l_english.yml":
+                LOC_OK + ' eotg_name_a:0 "A"\n eotg_name_fb:0 "F"\n'
+                         ' eotg_x.desc:0 "From [ROOT.Char.Custom(\'eotg_cl_x\')]."\n'
+                         ' eotg_y.desc:0 "[ROOT.Char.Custom(\'VanillaKey\')]"\n',
+        }, "L010")
+
 
 class Suppression(LintCase):
     BAD = EV + "eotg_t.1 = { option = { name = a trigger_event = eotg_t.2 } option = { } }"
@@ -390,6 +416,13 @@ class L012(LintCase):
         self.assertEqual(self.run12("eotg_void.0010.desc", "a whisper from the Void"), [])
         # [functions] and $keys$ are not text
         self.assertEqual(self.run12("eotg_mod_aug_x", "[GetPlayer.GetVoidName] $galactic$"), [])
+
+    def test_generated_syndicate_keys_are_exempt(self):
+        # CB-42: the generated canon-syndicate names carry a never-name on purpose
+        self.assertEqual(self.run12("eotg_aug_seller_syn_pill_mob", "the Pill Mob"), [])
+        # ...and only those keys: a hand-written line is still checked
+        self.assertTrue(self.run12("eotg_aug_patron.001.desc", "An envoy from the Pill Mob."))
+        self.assertTrue(self.run12("eotg_aug_seller_gang_pill_mob", "the Pill Mob"))
 
     def test_register_file_is_valid(self):
         reg = L.load_register()
@@ -518,6 +551,14 @@ eotg_x.1 = {
 
 
 class L014(LintCase):
+    def test_custom_loc_reference_counts(self):
+        # CB-42: a key reached only through a custom loc localization_key is referenced
+        self.assertClean({
+            "common/customizable_localization/c.txt":
+                "eotg_cl_x = { type = character text = { localization_key = eotg_name_a fallback = yes } }",
+            "localization/english/a_l_english.yml": LOC_OK + ' eotg_name_a:0 "A"\n',
+        }, "L014")
+
     LOC = "localization/english/eotg_a_l_english.yml"
 
     def files(self, *keys, **extra):

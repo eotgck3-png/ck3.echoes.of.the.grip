@@ -708,7 +708,28 @@ def rule_l010(mod, allowlist=None):
             if m.is_block and m.key and not m.key.startswith("@"):
                 refs.append((rel, m.line, m.key, "modifier %s name" % m.key))
                 refs.append((rel, m.line, m.key + "_desc", "modifier %s desc" % m.key))
+    # Customizable localization (CB-42): every localization_key in a custom loc
+    # text must be defined in loc
+    custom_keys = set()
+    for rel, doc in mod.common_dir("customizable_localization"):
+        for c in doc.nodes:
+            if not c.is_block or not c.key:
+                continue
+            custom_keys.add(c.key)
+            for t in pdx_parse.find(c.value, "text"):
+                for lk in pdx_parse.find(t.value, "localization_key"):
+                    v = _str_value(lk)
+                    if v:
+                        refs.append((rel, lk.line, v, "custom loc %s text" % c.key))
     out = []
+    # ...and every Custom('eotg_...') call in loc must name a custom loc key the mod
+    # defines (a mistyped key prints nothing in game)
+    for lrel, line, key, value in iter_loc_values(mod):
+        for name in CUSTOM_CALL_RE.findall(value):
+            if name.startswith("eotg_") and name not in custom_keys:
+                out.append(Finding("L010", lrel, line,
+                                   "%s calls Custom('%s'), which no file in "
+                                   "common/customizable_localization/ defines" % (key, name)))
     for rel, line, key, what in refs:
         if not _looks_like_key(key):
             continue
@@ -728,6 +749,7 @@ GENDER_FUNC_RE = re.compile(r"\[[^\]]*\.Get(SheHe|HerHim|HerHis|HerselfHimself|H
                             r"WomanMan|DaughterSon|WifeHusband|SisterBrother|MotherFather|"
                             r"GirlBoy|LadyLord|QueenKing)")
 THEY_RE = re.compile(r"\b(they|them|their|themself|theirs)\b", re.I)
+CUSTOM_CALL_RE = re.compile(r"\bCustom2?\(\s*'([^']+)'")
 
 
 def _visible_text(value):
@@ -778,7 +800,8 @@ def rule_l011(mod, allowlist=None):
 
 def load_register(path=REGISTER_FILE):
     data = json.loads(textio.read_text(path)[0])
-    compiled = {"key_prefixes": tuple(data["key_prefixes"])}
+    compiled = {"key_prefixes": tuple(data["key_prefixes"]),
+                "exempt": re.compile(data["exempt_key_regex"]) if data.get("exempt_key_regex") else None}
     for sev in ("error", "warning"):
         compiled[sev] = [(t["term"], re.compile(t["regex"], 0 if t.get("case") else re.I),
                           t.get("source", "")) for t in data[sev]]
@@ -790,6 +813,9 @@ def rule_l012(mod, register=None):
     out = []
     for rel, line, key, value in iter_loc_values(mod):
         if not key.startswith(reg["key_prefixes"]):
+            continue
+        # CB-42: the generated canon-syndicate name keys carry canon names on purpose
+        if reg.get("exempt") and reg["exempt"].search(key):
             continue
         text = _visible_text(value)
         for sev, severity in (("error", ERROR), ("warning", WARNING)):

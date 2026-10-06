@@ -321,7 +321,7 @@ No deviation from vanilla shape.
 
 ## 8. Lore constraints
 
-- **The syndicate is never named** (index §5.7): "the syndicate", "the syndicate envoy". No Helix, Pale Hand, Consortium, Compact, Continuity, Rooks, "Corp"/"Co.", no white-glove imagery.
+- **The syndicate's name** (index §5.7): Named once per story from the owner's `[syndicates]` list of canon syndicates; 'the syndicate' / 'the syndicate envoy' on later mentions. Reprisal P7 and U1 still bind: the name never appears with P7's ownership words, and the lien desc (`eotg_mod_aug_patron_clause_final_desc`) never names the syndicate. No white-glove imagery. (Owner ruling 2026-10-05, CB-42; `cybernetics_v2_seller_names.md` §5.4.)
 - **Licensing and law are local and unnamed** (index §5.3). patron.008.e is the holder's **own** court, never a galactic, League or interstellar authority. 866 AG: there is no Galactic League yet (CLAUDE.md §Canon).
 - **No monotheistic invocations; "self", not "humanity"** (index §5.4–5.5). heir.007 fires for every faith and species.
 - **Medieval leaks** (index §5.6): residence, not palace; the logs or archivists, not scribes.

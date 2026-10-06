@@ -98,7 +98,7 @@ Desc register escalates; **[voice]** variants as in Phase 3.
 - **init.018 e** (Phase 2 slot) "A patron will pay." Fires patron.001 in 1 day.
 
 ### 2.2 The envoy
-**Naming (lore review):** the Patron is never named. In loc it is always "the syndicate" and its courtier is "the syndicate envoy". Never use Helix or the Pale Hand, or the words Consortium, Compact, Continuity, Rooks, "Corp"/"Co." after a name, or pale-hand/white-glove imagery. The Errand (.004) may stay ambiguous: "reported but unconfirmed".
+**Naming:** Named once per story from the owner's `[syndicates]` list of canon syndicates; 'the syndicate' / 'the syndicate envoy' on later mentions. Reprisal P7 and U1 still bind: the name never appears with P7's ownership words, and the lien desc (`eotg_mod_aug_patron_clause_final_desc`) never names the syndicate. No pale-hand or white-glove imagery. (Owner ruling 2026-10-05, CB-42; `cybernetics_v2_seller_names.md` §5.4.) (Superseded: "the Patron is never named", lore review 2026-10-03.) The Errand (.004) may stay ambiguous: "reported but unconfirmed".
 
 The syndicate is off-map. Its face at court is an envoy created on acceptance:
 ```

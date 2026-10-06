@@ -19,9 +19,14 @@
 #   through its effect_group tick (.009 from the collection entry, both
 #   cadences). Cooldown authority: the story's
 #   effect_group (2-3 years, 3-4 on read terms). No event checks a flag.
-# Naming (index §5.3, §5.7): the patron is never named. Loc says "the
-#   syndicate" and "the syndicate envoy"; never Helix, Pale Hand, Consortium,
-#   Compact, Continuity, Rooks, "Corp"/"Co.", or white-glove imagery.
+# Naming (index §5.3, §5.7; CB-42, docs/specs/cybernetics_v2_seller_names.md
+#   §5.4): the Patron's syndicate is named once per story from the owner's
+#   [syndicates] list of canon syndicates (cybernetics_seller_names.txt):
+#   rolled into var:eotg_patron_syndicate_passthrough at the offer (init.018,
+#   .001), copied to the story's var:eotg_syndicate in on_setup, read by the
+#   generated custom loc. 'the syndicate' / 'the syndicate envoy' on later
+#   mentions; the name reaches loc only through Custom(). Never Helix, Pale
+#   Hand, white-glove imagery, or the authorities.
 # Resource: demands move eotg_fracture_risk through the firmware the syndicate
 #   controls; the betrayal path (eotg_aug_patron_betray_effect) can start the
 #   Countdown.
@@ -57,6 +62,19 @@ eotg_aug_patron.001 = {
         animation = thinking
     }
 
+    # CB-42 (docs/specs/cybernetics_v2_seller_names.md §5.1): the seller, rolled
+    # once into a character variable before the desc and options render (no
+    # random_valid: the name never changes while the window is open)
+    immediate = {
+        hidden_effect = {
+            # The Patron's syndicate (seller names §5.4): once per offer; init.018
+            # may already have rolled it
+            if = {
+                limit = { NOT = { has_variable = eotg_patron_syndicate_passthrough } }
+                eotg_aug_roll_syndicate_effect = { VAR = eotg_patron_syndicate_passthrough }
+            }
+        }
+    }
     # "Accept."
     option = {
         name = eotg_aug_patron.001.a
@@ -867,6 +885,18 @@ eotg_aug_patron.006 = {
                 save_scope_as = eotg_patron_story
                 var:eotg_envoy ?= { save_scope_as = eotg_patron_envoy }
             }
+            # CB-42 (seller names §5.4 item 4): the rival syndicate for d, never the
+            # story's own. With one syndicate in the list every entry is excluded,
+            # the rival stays unset and loc reads "a rival syndicate".
+            remove_variable = eotg_aug_rival_syndicate
+            if = {
+                limit = { exists = scope:eotg_patron_story.var:eotg_syndicate }
+                set_variable = { name = eotg_aug_rival_exclude  value = scope:eotg_patron_story.var:eotg_syndicate }
+            }
+            else = {
+                remove_variable = eotg_aug_rival_exclude
+            }
+            eotg_aug_roll_syndicate_except_effect = { VAR = eotg_aug_rival_syndicate  EXCLUDE = eotg_aug_rival_exclude }
         }
     }
 

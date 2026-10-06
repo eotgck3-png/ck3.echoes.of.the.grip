@@ -3,7 +3,8 @@
   "Cybernetics never-name and register rules for eotg_lint L012 (data, not code).",
   "Sources: docs/specs/cybernetics_v2.md \u00a75 items 2-3 (2026-10-04) and docs/specs/cybernetics_v2_*_lore.md.",
   "error = never-name (fails); warning = register word listed for human triage. 'warrant' also hits fracture.006 'The Warrant' (Phase 3a, a vassal faction), and 'program' hits the Iron Retinue's 'Program': expected triage hits.",
-  "regex is a Python regex on the loc value with [functions], $keys$ and #formatting removed; case=true means case-sensitive."
+  "regex is a Python regex on the loc value with [functions], $keys$ and #formatting removed; case=true means case-sensitive.",
+  "CB-42 seller names (docs/tools/gen_seller_names.py; not read by L012): name_never and name_banned_words apply to [companies] and [gangs] in cybernetics_seller_names.txt, together with every 'error' rule above. syndicate_never (reject) and syndicate_warn (print only) apply to [syndicates], which are canon names and skip the other lists. exempt_key_regex: L012 skips the generated canon-syndicate name keys and stays on all hand-written loc."
  ],
  "key_prefixes": [
   "eotg_aug_",
@@ -302,6 +303,723 @@
    "regex": "\\bprogram(me)?s?\\b",
    "case": false,
    "source": "docs/specs/cybernetics_v2.md \u00a75 item 3; realm lore R-section"
+  }
+ ],
+ "exempt_key_regex": "^eotg_aug_seller_syn_",
+ "name_never": [
+  {
+   "term": "Tribunal",
+   "regex": "\\bTribunal\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Helix",
+   "regex": "\\bHelix\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Pale Hand",
+   "regex": "\\bPale\\ Hand\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Consortium",
+   "regex": "\\bConsortium\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Compact",
+   "regex": "\\bCompact\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Continuity",
+   "regex": "\\bContinuity\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Rooks",
+   "regex": "\\bRooks\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "League",
+   "regex": "\\bLeague\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Corp",
+   "regex": "\\bCorp\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Co.",
+   "regex": "\\bCo\\.",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Inc",
+   "regex": "\\bInc\\b\\.?",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Xerxes",
+   "regex": "\\bXerxes\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Black Cogs",
+   "regex": "\\bBlack\\ Cogs\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Chains of Greed",
+   "regex": "\\bChains\\ of\\ Greed\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Jade Pact",
+   "regex": "\\bJade\\ Pact\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Iron Pact",
+   "regex": "\\bIron\\ Pact\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Stellar Compact",
+   "regex": "\\bStellar\\ Compact\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Ashen Compact",
+   "regex": "\\bAshen\\ Compact\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Scaled Compact",
+   "regex": "\\bScaled\\ Compact\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Forged Compact",
+   "regex": "\\bForged\\ Compact\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Slate Syndicate",
+   "regex": "\\bSlate\\ Syndicate\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Titanium Directive",
+   "regex": "\\bTitanium\\ Directive\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Enforcer Corps",
+   "regex": "\\bEnforcer\\ Corps\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Specter Drones",
+   "regex": "\\bSpecter\\ Drones\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Council of Executives",
+   "regex": "\\bCouncil\\ of\\ Executives\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Pump & Dump",
+   "regex": "\\bPump\\s*&\\s*Dump\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "New Cauldron",
+   "regex": "\\bNew\\ Cauldron\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Voidspire",
+   "regex": "\\bVoidspire\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  }
+ ],
+ "name_banned_words": {
+  "all": [
+   {
+    "term": "System(s)",
+    "regex": "\\bSystems?\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Titan",
+    "regex": "\\bTitan\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Exodus",
+    "regex": "\\bExodus\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Grip",
+    "regex": "\\bGrip\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Stellar",
+    "regex": "\\bStellar\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Galactic",
+    "regex": "\\bGalactic\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Interstellar",
+    "regex": "\\bInterstellar\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Pale",
+    "regex": "\\bPale\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Bone",
+    "regex": "\\bBone\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Shard",
+    "regex": "\\bShard\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Rift",
+    "regex": "\\bRift\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Hollow",
+    "regex": "\\bHollow\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Silent",
+    "regex": "\\bSilent\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Eye",
+    "regex": "\\bEye\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Wake",
+    "regex": "\\bWake\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Pact",
+    "regex": "\\bPact\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Directive",
+    "regex": "\\bDirective\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Corps",
+    "regex": "\\bCorps\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Network",
+    "regex": "\\bNetwork\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Clan(s)",
+    "regex": "\\bClans?\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Red (first word)",
+    "regex": "^Red\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Ledger",
+    "regex": "\\bLedger\\b",
+    "case": false,
+    "source": "lore-keeper sign-off, 2026-10-05 (seller names)"
+   },
+   {
+    "term": "Settlement",
+    "regex": "\\bSettlement\\b",
+    "case": false,
+    "source": "lore-keeper sign-off, 2026-10-05 (seller names)"
+   },
+   {
+    "term": "Gant",
+    "regex": "\\bGant\\b",
+    "case": false,
+    "source": "lore-keeper sign-off, 2026-10-05 (seller names)"
+   },
+   {
+    "term": "Palm(s)",
+    "regex": "\\bPalms?\\b",
+    "case": false,
+    "source": "lore-keeper sign-off, 2026-10-05 (seller names)"
+   },
+   {
+    "term": "Hand(s)",
+    "regex": "\\bHands?\\b",
+    "case": false,
+    "source": "lore-keeper sign-off, 2026-10-05 (seller names)"
+   },
+   {
+    "term": "Glove(s)",
+    "regex": "\\bGloves?\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Void",
+    "regex": "\\bVoid\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Whisper(s)",
+    "regex": "\\bWhispers?\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Orrin",
+    "regex": "\\bOrrin\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Demon(s)",
+    "regex": "\\bDemons?\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "God(s)",
+    "regex": "\\bGods?\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Nikios",
+    "regex": "\\bNikios\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Khan / Khanate",
+    "regex": "\\bKhan(ate)?s?\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Mankind",
+    "regex": "\\bMankind\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Human(s)",
+    "regex": "\\bHumans?\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   }
+  ],
+  "companies": [
+   {
+    "term": "Corp",
+    "regex": "\\bCorp\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Co.",
+    "regex": "\\bCo\\.",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Inc",
+    "regex": "\\bInc\\b\\.?",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Ltd",
+    "regex": "\\bLtd\\b\\.?",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Holdings",
+    "regex": "\\bHoldings\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Industries",
+    "regex": "\\bIndustries\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Group",
+    "regex": "\\bGroup\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Works",
+    "regex": "\\bWorks\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Foundry",
+    "regex": "\\bFoundry\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Fabrication(s)",
+    "regex": "\\bFabrications?\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Manufactory",
+    "regex": "\\bManufactory\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Dynamics",
+    "regex": "\\bDynamics\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Labs",
+    "regex": "\\bLabs\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   }
+  ],
+  "gangs": [
+   {
+    "term": "Mob",
+    "regex": "\\bMob\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Cartel",
+    "regex": "\\bCartel\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Market(s)",
+    "regex": "\\bMarkets?\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Contract(s)",
+    "regex": "\\bContracts?\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Saint(s)",
+    "regex": "\\bSaints?\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Angel(s)",
+    "regex": "\\bAngels?\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Apostle(s)",
+    "regex": "\\bApostles?\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Sinner(s)",
+    "regex": "\\bSinners?\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Black (first word)",
+    "regex": "^Black\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Scrap",
+    "regex": "\\bScrap\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Salvage",
+    "regex": "\\bSalvage\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Concrete",
+    "regex": "\\bConcrete\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Slate",
+    "regex": "\\bSlate\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Ash",
+    "regex": "\\bAsh\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Triad(s)",
+    "regex": "\\bTriads?\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Yakuza",
+    "regex": "\\bYakuza\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   },
+   {
+    "term": "Bratva",
+    "regex": "\\bBratva\\b",
+    "case": false,
+    "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+   }
+  ]
+ },
+ "syndicate_never": [
+  {
+   "term": "Helix",
+   "regex": "\\bHelix\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Pale Hand",
+   "regex": "\\bPale\\ Hand\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Acathea",
+   "regex": "\\bAcathea\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Codex",
+   "regex": "\\bCodex\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Archivist(s)",
+   "regex": "\\bArchivists?\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Conclave",
+   "regex": "\\bConclave\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Tribunal",
+   "regex": "\\bTribunal\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "League",
+   "regex": "\\bLeague\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Galactic",
+   "regex": "\\bGalactic\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "New Cauldron",
+   "regex": "\\bNew\\ Cauldron\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Slate Syndicate",
+   "regex": "\\bSlate\\ Syndicate\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Broken Ledger",
+   "regex": "\\bBroken\\ Ledger\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Ashen Compact",
+   "regex": "\\bAshen\\ Compact\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Orrin",
+   "regex": "\\bOrrin\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Kyros",
+   "regex": "\\bKyros\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "the Eye",
+   "regex": "\\bEye\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Void",
+   "regex": "\\bVoid\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Carrigore",
+   "regex": "\\bCarrigore\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Nikios",
+   "regex": "\\bNikios\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Trauma Team",
+   "regex": "\\bTrauma\\ Team\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  }
+ ],
+ "syndicate_warn": [
+  {
+   "term": "P&D",
+   "regex": "\\bP\\s*&\\s*D\\b",
+   "case": true,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Calix",
+   "regex": "\\bCalix\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
+  },
+  {
+   "term": "Black Cogs Consortium",
+   "regex": "\\bBlack\\ Cogs\\ Consortium\\b",
+   "case": false,
+   "source": "docs/specs/cybernetics_v2_seller_names.md \u00a78.3"
   }
  ]
 }

@@ -13,8 +13,11 @@ Runs, from the repo root:
   - port_religions_1_20 --check (staged 1.20 religion output is current)
   - gen_test_recipes --check  (docs/qa/generated/console_recipes.md is current)
   - spec_conformance --check  (docs/qa/generated/spec_conformance.md is current)
-    These two FAIL only on a stale file; the content (events that can't be
-    fired cold, spec gaps) is reported in the detail line, never as a failure.
+  - gen_seller_names --check  (the files generated from cybernetics_seller_names.txt
+                               are current and every name passes the CB-42 rules)
+    These FAIL only on a stale file (or, for the seller names, a rejected name); the
+    content (events that can't be fired cold, spec gaps) is reported in the detail
+    line, never as a failure.
   - docs/tools/qa/*.py analysis scripts (those that need no arguments)
   - px_vocab_check.py                     needs the PX Toolkit + the game install
   - px_lsp_diagnostics.js                 needs VS Code (+ PX Toolkit + game)
@@ -222,7 +225,8 @@ def default_checks(root=ROOT):
               else "no v1 religion sources or staged port in %s" % root),
     ]
     for tool, rel in (("gen_test_recipes", "docs/qa/generated/console_recipes.md"),
-                      ("spec_conformance", "docs/qa/generated/spec_conformance.md")):
+                      ("spec_conformance", "docs/qa/generated/spec_conformance.md"),
+                      ("gen_seller_names", "cybernetics_seller_names.txt")):
         present = os.path.exists(os.path.join(root, *rel.split("/")))
         checks.append(Check("%s --check" % tool,
                             [PY, os.path.join(HERE, tool + ".py"), "--root", root, "--check"],

@@ -477,6 +477,8 @@ eotg_story_aug_countdown = {
 #   eotg_terms      flag:standard / flag:read / flag:greedy (patron.001)
 #   eotg_paper_served  bare, one-shot: set by the tick when it fires
 #                   patron.008 The Paper (new beats §5.2)
+#   eotg_syndicate  the Patron's syndicate (flag), copied from the owner's
+#                   eotg_patron_syndicate_passthrough in on_setup (CB-42)
 #   eotg_paper_sold    bare, one-shot: set by eotg_aug_patron_betray_effect
 #                   when the owner has no implants (reprisal spec §5.2); the
 #                   story parks after .006 and the tick fires patron.009
@@ -491,11 +493,21 @@ eotg_story_aug_patron = {
             name = eotg_terms
             value = story_owner.var:eotg_patron_terms_passthrough
         }
+        # CB-42 (seller names §5.4): the syndicate named at the offer, kept for
+        # the whole story (vanilla var-to-var copy, 00_animal_effects.txt:395-398)
+        if = {
+            limit = { exists = story_owner.var:eotg_patron_syndicate_passthrough }
+            set_variable = {
+                name = eotg_syndicate
+                value = story_owner.var:eotg_patron_syndicate_passthrough
+            }
+        }
         set_variable = { name = eotg_demand  value = 0 }
         set_variable = { name = eotg_grievance  value = 0 }
         story_owner = {
             remove_variable = eotg_patron_envoy_passthrough
             remove_variable = eotg_patron_terms_passthrough
+            remove_variable = eotg_patron_syndicate_passthrough    # CB-42
             # New beats §5.2 "Once per life": permanent; read by the offer
             # sites only (the initiation check's Patron entry, init.018 desc
             # and e). Vanilla precedent: story_cycle_murders_at_court.txt:9.

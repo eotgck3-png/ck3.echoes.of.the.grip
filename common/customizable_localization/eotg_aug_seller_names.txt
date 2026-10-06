@@ -1,0 +1,330 @@
+﻿# GENERATED. Edit `cybernetics_seller_names.txt` and run `python docs/tools/gen_seller_names.py`.
+# Seller names for cybernetics events (docs/specs/cybernetics_v2_seller_names.md).
+# Each key reads a character variable holding a flag, set once by a roll effect
+# (vanilla GetAnimalTypeCaptive, common/customizable_localization/
+# 04_ep2_hunt_custom_loc.txt:413-418). No random_valid: the text never re-rolls.
+# companies: 12  gangs: 12  syndicates: 1
+
+eotg_aug_cl_company = {
+    type = character
+
+    text = {
+        trigger = { var:eotg_aug_seller_company ?= flag:eotg_aug_co_harlow_and_venn_surgical }
+        localization_key = eotg_aug_seller_co_harlow_and_venn_surgical
+    }
+    text = {
+        trigger = { var:eotg_aug_seller_company ?= flag:eotg_aug_co_brennick_fitting_house }
+        localization_key = eotg_aug_seller_co_brennick_fitting_house
+    }
+    text = {
+        trigger = { var:eotg_aug_seller_company ?= flag:eotg_aug_co_tarrant_implant_dealers }
+        localization_key = eotg_aug_seller_co_tarrant_implant_dealers
+    }
+    text = {
+        trigger = { var:eotg_aug_seller_company ?= flag:eotg_aug_co_calder_and_wynn_servicing }
+        localization_key = eotg_aug_seller_co_calder_and_wynn_servicing
+    }
+    text = {
+        trigger = { var:eotg_aug_seller_company ?= flag:eotg_aug_co_linden_searle_surgical }
+        localization_key = eotg_aug_seller_co_linden_searle_surgical
+    }
+    text = {
+        trigger = { var:eotg_aug_seller_company ?= flag:eotg_aug_co_dorrance_and_kell_fitters }
+        localization_key = eotg_aug_seller_co_dorrance_and_kell_fitters
+    }
+    text = {
+        trigger = { var:eotg_aug_seller_company ?= flag:eotg_aug_co_ambrose_hesketh_clinic }
+        localization_key = eotg_aug_seller_co_ambrose_hesketh_clinic
+    }
+    text = {
+        trigger = { var:eotg_aug_seller_company ?= flag:eotg_aug_co_prentice_and_pell_dealers }
+        localization_key = eotg_aug_seller_co_prentice_and_pell_dealers
+    }
+    text = {
+        trigger = { var:eotg_aug_seller_company ?= flag:eotg_aug_co_garrick_sloane_servicing }
+        localization_key = eotg_aug_seller_co_garrick_sloane_servicing
+    }
+    text = {
+        trigger = { var:eotg_aug_seller_company ?= flag:eotg_aug_co_tolliver_and_grane_surgical }
+        localization_key = eotg_aug_seller_co_tolliver_and_grane_surgical
+    }
+    text = {
+        trigger = { var:eotg_aug_seller_company ?= flag:eotg_aug_co_lenwick_fittings }
+        localization_key = eotg_aug_seller_co_lenwick_fittings
+    }
+    text = {
+        trigger = { var:eotg_aug_seller_company ?= flag:eotg_aug_co_yarrow_and_dunn_implant_practice }
+        localization_key = eotg_aug_seller_co_yarrow_and_dunn_implant_practice
+    }
+    text = {
+        localization_key = eotg_aug_seller_fallback_company
+        fallback = yes
+    }
+}
+
+eotg_aug_cl_gang = {
+    type = character
+
+    text = {
+        trigger = { var:eotg_aug_seller_gang ?= flag:eotg_aug_gang_cut_lines }
+        localization_key = eotg_aug_seller_gang_cut_lines
+    }
+    text = {
+        trigger = { var:eotg_aug_seller_gang ?= flag:eotg_aug_gang_short_fuses }
+        localization_key = eotg_aug_seller_gang_short_fuses
+    }
+    text = {
+        trigger = { var:eotg_aug_seller_gang ?= flag:eotg_aug_gang_glass_jaws }
+        localization_key = eotg_aug_seller_gang_glass_jaws
+    }
+    text = {
+        trigger = { var:eotg_aug_seller_gang ?= flag:eotg_aug_gang_cold_needles }
+        localization_key = eotg_aug_seller_gang_cold_needles
+    }
+    text = {
+        trigger = { var:eotg_aug_seller_gang ?= flag:eotg_aug_gang_narrow_doors }
+        localization_key = eotg_aug_seller_gang_narrow_doors
+    }
+    text = {
+        trigger = { var:eotg_aug_seller_gang ?= flag:eotg_aug_gang_bent_pins }
+        localization_key = eotg_aug_seller_gang_bent_pins
+    }
+    text = {
+        trigger = { var:eotg_aug_seller_gang ?= flag:eotg_aug_gang_thin_coats }
+        localization_key = eotg_aug_seller_gang_thin_coats
+    }
+    text = {
+        trigger = { var:eotg_aug_seller_gang ?= flag:eotg_aug_gang_back_stairs }
+        localization_key = eotg_aug_seller_gang_back_stairs
+    }
+    text = {
+        trigger = { var:eotg_aug_seller_gang ?= flag:eotg_aug_gang_loose_threads }
+        localization_key = eotg_aug_seller_gang_loose_threads
+    }
+    text = {
+        trigger = { var:eotg_aug_seller_gang ?= flag:eotg_aug_gang_quick_stitches }
+        localization_key = eotg_aug_seller_gang_quick_stitches
+    }
+    text = {
+        trigger = { var:eotg_aug_seller_gang ?= flag:eotg_aug_gang_open_ports }
+        localization_key = eotg_aug_seller_gang_open_ports
+    }
+    text = {
+        trigger = { var:eotg_aug_seller_gang ?= flag:eotg_aug_gang_dim_bulbs }
+        localization_key = eotg_aug_seller_gang_dim_bulbs
+    }
+    text = {
+        localization_key = eotg_aug_seller_fallback_gang
+        fallback = yes
+    }
+}
+
+eotg_aug_cl_vendor_careful = {
+    type = character
+
+    text = {
+        trigger = { var:eotg_aug_vendor_careful ?= flag:eotg_aug_co_harlow_and_venn_surgical }
+        localization_key = eotg_aug_seller_co_harlow_and_venn_surgical
+    }
+    text = {
+        trigger = { var:eotg_aug_vendor_careful ?= flag:eotg_aug_co_brennick_fitting_house }
+        localization_key = eotg_aug_seller_co_brennick_fitting_house
+    }
+    text = {
+        trigger = { var:eotg_aug_vendor_careful ?= flag:eotg_aug_co_tarrant_implant_dealers }
+        localization_key = eotg_aug_seller_co_tarrant_implant_dealers
+    }
+    text = {
+        trigger = { var:eotg_aug_vendor_careful ?= flag:eotg_aug_co_calder_and_wynn_servicing }
+        localization_key = eotg_aug_seller_co_calder_and_wynn_servicing
+    }
+    text = {
+        trigger = { var:eotg_aug_vendor_careful ?= flag:eotg_aug_co_linden_searle_surgical }
+        localization_key = eotg_aug_seller_co_linden_searle_surgical
+    }
+    text = {
+        trigger = { var:eotg_aug_vendor_careful ?= flag:eotg_aug_co_dorrance_and_kell_fitters }
+        localization_key = eotg_aug_seller_co_dorrance_and_kell_fitters
+    }
+    text = {
+        trigger = { var:eotg_aug_vendor_careful ?= flag:eotg_aug_co_ambrose_hesketh_clinic }
+        localization_key = eotg_aug_seller_co_ambrose_hesketh_clinic
+    }
+    text = {
+        trigger = { var:eotg_aug_vendor_careful ?= flag:eotg_aug_co_prentice_and_pell_dealers }
+        localization_key = eotg_aug_seller_co_prentice_and_pell_dealers
+    }
+    text = {
+        trigger = { var:eotg_aug_vendor_careful ?= flag:eotg_aug_co_garrick_sloane_servicing }
+        localization_key = eotg_aug_seller_co_garrick_sloane_servicing
+    }
+    text = {
+        trigger = { var:eotg_aug_vendor_careful ?= flag:eotg_aug_co_tolliver_and_grane_surgical }
+        localization_key = eotg_aug_seller_co_tolliver_and_grane_surgical
+    }
+    text = {
+        trigger = { var:eotg_aug_vendor_careful ?= flag:eotg_aug_co_lenwick_fittings }
+        localization_key = eotg_aug_seller_co_lenwick_fittings
+    }
+    text = {
+        trigger = { var:eotg_aug_vendor_careful ?= flag:eotg_aug_co_yarrow_and_dunn_implant_practice }
+        localization_key = eotg_aug_seller_co_yarrow_and_dunn_implant_practice
+    }
+    text = {
+        localization_key = eotg_aug_seller_fallback_vendor_careful
+        fallback = yes
+    }
+}
+
+eotg_aug_cl_vendor_bold = {
+    type = character
+
+    text = {
+        trigger = { var:eotg_aug_vendor_bold ?= flag:eotg_aug_co_harlow_and_venn_surgical }
+        localization_key = eotg_aug_seller_co_harlow_and_venn_surgical
+    }
+    text = {
+        trigger = { var:eotg_aug_vendor_bold ?= flag:eotg_aug_co_brennick_fitting_house }
+        localization_key = eotg_aug_seller_co_brennick_fitting_house
+    }
+    text = {
+        trigger = { var:eotg_aug_vendor_bold ?= flag:eotg_aug_co_tarrant_implant_dealers }
+        localization_key = eotg_aug_seller_co_tarrant_implant_dealers
+    }
+    text = {
+        trigger = { var:eotg_aug_vendor_bold ?= flag:eotg_aug_co_calder_and_wynn_servicing }
+        localization_key = eotg_aug_seller_co_calder_and_wynn_servicing
+    }
+    text = {
+        trigger = { var:eotg_aug_vendor_bold ?= flag:eotg_aug_co_linden_searle_surgical }
+        localization_key = eotg_aug_seller_co_linden_searle_surgical
+    }
+    text = {
+        trigger = { var:eotg_aug_vendor_bold ?= flag:eotg_aug_co_dorrance_and_kell_fitters }
+        localization_key = eotg_aug_seller_co_dorrance_and_kell_fitters
+    }
+    text = {
+        trigger = { var:eotg_aug_vendor_bold ?= flag:eotg_aug_co_ambrose_hesketh_clinic }
+        localization_key = eotg_aug_seller_co_ambrose_hesketh_clinic
+    }
+    text = {
+        trigger = { var:eotg_aug_vendor_bold ?= flag:eotg_aug_co_prentice_and_pell_dealers }
+        localization_key = eotg_aug_seller_co_prentice_and_pell_dealers
+    }
+    text = {
+        trigger = { var:eotg_aug_vendor_bold ?= flag:eotg_aug_co_garrick_sloane_servicing }
+        localization_key = eotg_aug_seller_co_garrick_sloane_servicing
+    }
+    text = {
+        trigger = { var:eotg_aug_vendor_bold ?= flag:eotg_aug_co_tolliver_and_grane_surgical }
+        localization_key = eotg_aug_seller_co_tolliver_and_grane_surgical
+    }
+    text = {
+        trigger = { var:eotg_aug_vendor_bold ?= flag:eotg_aug_co_lenwick_fittings }
+        localization_key = eotg_aug_seller_co_lenwick_fittings
+    }
+    text = {
+        trigger = { var:eotg_aug_vendor_bold ?= flag:eotg_aug_co_yarrow_and_dunn_implant_practice }
+        localization_key = eotg_aug_seller_co_yarrow_and_dunn_implant_practice
+    }
+    text = {
+        localization_key = eotg_aug_seller_fallback_vendor_bold
+        fallback = yes
+    }
+}
+
+eotg_aug_cl_clinic_of_record = {
+    type = character
+
+    text = {
+        trigger = { var:eotg_aug_clinic_of_record ?= flag:eotg_aug_co_harlow_and_venn_surgical }
+        localization_key = eotg_aug_seller_co_harlow_and_venn_surgical
+    }
+    text = {
+        trigger = { var:eotg_aug_clinic_of_record ?= flag:eotg_aug_co_brennick_fitting_house }
+        localization_key = eotg_aug_seller_co_brennick_fitting_house
+    }
+    text = {
+        trigger = { var:eotg_aug_clinic_of_record ?= flag:eotg_aug_co_tarrant_implant_dealers }
+        localization_key = eotg_aug_seller_co_tarrant_implant_dealers
+    }
+    text = {
+        trigger = { var:eotg_aug_clinic_of_record ?= flag:eotg_aug_co_calder_and_wynn_servicing }
+        localization_key = eotg_aug_seller_co_calder_and_wynn_servicing
+    }
+    text = {
+        trigger = { var:eotg_aug_clinic_of_record ?= flag:eotg_aug_co_linden_searle_surgical }
+        localization_key = eotg_aug_seller_co_linden_searle_surgical
+    }
+    text = {
+        trigger = { var:eotg_aug_clinic_of_record ?= flag:eotg_aug_co_dorrance_and_kell_fitters }
+        localization_key = eotg_aug_seller_co_dorrance_and_kell_fitters
+    }
+    text = {
+        trigger = { var:eotg_aug_clinic_of_record ?= flag:eotg_aug_co_ambrose_hesketh_clinic }
+        localization_key = eotg_aug_seller_co_ambrose_hesketh_clinic
+    }
+    text = {
+        trigger = { var:eotg_aug_clinic_of_record ?= flag:eotg_aug_co_prentice_and_pell_dealers }
+        localization_key = eotg_aug_seller_co_prentice_and_pell_dealers
+    }
+    text = {
+        trigger = { var:eotg_aug_clinic_of_record ?= flag:eotg_aug_co_garrick_sloane_servicing }
+        localization_key = eotg_aug_seller_co_garrick_sloane_servicing
+    }
+    text = {
+        trigger = { var:eotg_aug_clinic_of_record ?= flag:eotg_aug_co_tolliver_and_grane_surgical }
+        localization_key = eotg_aug_seller_co_tolliver_and_grane_surgical
+    }
+    text = {
+        trigger = { var:eotg_aug_clinic_of_record ?= flag:eotg_aug_co_lenwick_fittings }
+        localization_key = eotg_aug_seller_co_lenwick_fittings
+    }
+    text = {
+        trigger = { var:eotg_aug_clinic_of_record ?= flag:eotg_aug_co_yarrow_and_dunn_implant_practice }
+        localization_key = eotg_aug_seller_co_yarrow_and_dunn_implant_practice
+    }
+    text = {
+        localization_key = eotg_aug_seller_fallback_clinic_of_record
+        fallback = yes
+    }
+}
+
+eotg_aug_cl_syndicate_offer = {
+    type = character
+
+    text = {
+        trigger = { var:eotg_patron_syndicate_passthrough ?= flag:eotg_aug_syn_pill_mob }
+        localization_key = eotg_aug_seller_syn_pill_mob
+    }
+    text = {
+        localization_key = eotg_aug_seller_fallback_syndicate
+        fallback = yes
+    }
+}
+
+eotg_aug_cl_syndicate = {
+    type = character
+
+    text = {
+        trigger = { any_owned_story = { story_type = eotg_story_aug_patron  var:eotg_syndicate ?= flag:eotg_aug_syn_pill_mob } }
+        localization_key = eotg_aug_seller_syn_pill_mob
+    }
+    text = {
+        localization_key = eotg_aug_seller_fallback_syndicate
+        fallback = yes
+    }
+}
+
+eotg_aug_cl_rival_syndicate = {
+    type = character
+
+    text = {
+        trigger = { var:eotg_aug_rival_syndicate ?= flag:eotg_aug_syn_pill_mob }
+        localization_key = eotg_aug_seller_syn_pill_mob
+    }
+    text = {
+        localization_key = eotg_aug_seller_fallback_rival_syndicate
+        fallback = yes
+    }
+}

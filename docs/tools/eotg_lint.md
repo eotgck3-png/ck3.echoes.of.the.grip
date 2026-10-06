@@ -149,6 +149,10 @@ An event that only fires itself counts as unfired.
 
 **Lookup:** keys are looked up across all `localization/**/*_l_english.yml`, plus `docs/tools/eotg_lint_loc_allowlist.txt` for vanilla keys the mod borrows on purpose.
 
+**Customizable localization** (CB-42, `common/customizable_localization/`):
+- every `localization_key` inside a custom loc `text` must be defined in loc;
+- every `Custom('eotg_…')` (or `Custom2`) call in a loc value must name a key defined at the top level of a file in `common/customizable_localization/`. A mistyped name prints nothing in game, so it is reported on the loc line.
+
 **Skipped:** values containing spaces, `[`, `$` or `@`, which are inline text or parameters.
 
 **UNVERIFIED-VANILLA:**
@@ -177,6 +181,8 @@ The rules are data, in `docs/tools/eotg_lint_register.json`, encoded from:
 - the `telemetry|warrant|magistrat|inspector|registry|encourag|sponsor|patronag` grep in `docs/specs/cybernetics_v2_realm_lore.md`.
 
 **Scope:** only loc keys starting `eotg_aug_`, `eotg_fracture`, `eotg_mod_aug`, `eotg_decision_aug` or `eotg_opinion_aug`. Matching is on the **visible text**: `[functions]`, `$keys$` and `#formatting` are removed first.
+
+**Exempt:** keys matching `exempt_key_regex` in the JSON (`^eotg_aug_seller_syn_`): the generated canon-syndicate names of CB-42 (`docs/tools/gen_seller_names.py`), which carry a canon name such as "the Pill Mob" on purpose. Hand-written loc reaches them only through `Custom()`, which is stripped before matching, so every hand-written line is still checked. The same JSON holds `name_never`, `name_banned_words`, `syndicate_never` and `syndicate_warn`, which the generator reads; L012 does not.
 
 **ERROR (never-names):**
 - Blackstar, Shadow Market(s), Black Contract(s), Blackline, P&D, Calix, Pill Mob, Pillwake, Red Pills, Concrete Cartel;
@@ -226,7 +232,7 @@ From the owner's loc review (2026-10-04). Applies to values in `localization/**/
 
 ### L014 — `eotg_` loc key defined but never referenced (WARNING)
 A loc key containing `eotg_` that is defined in `localization/` and reached by none of these:
-- **a literal in script:** any key or string value in `common/` or `events/` (quoted or not), or any identifier-like word in a `gfx/**/*.gui` file;
+- **a literal in script:** any key or string value in `common/` or `events/` (quoted or not), or any identifier-like word in a `gfx/**/*.gui` file. This includes every `localization_key = X` in `common/customizable_localization/`, so generated seller names (CB-42) count as referenced;
 - **another loc value:** `$KEY$` or `Localize('KEY')` (the regexes are in the JSON);
 - **an engine naming convention:** for every object defined at the top level of `common/<folder>/`, the patterns in `docs/tools/eotg_lint_loc_conventions.json` (`{key}` = the object, `{n}` = any number). They start from what L010 already implies: decision `<d>`/`_desc`/`_tooltip`/`_confirm`; trait `trait_<t>`/`_desc`/`_character_desc`, leveled `trait_<t>_<n>…` and `trait_track_<t>`; modifier `<m>`/`_desc`; opinion `<o>`. Also deathreasons, character_interactions, scheme_types, laws, law_groups, court_positions/types, story_cycles and buildings.
 

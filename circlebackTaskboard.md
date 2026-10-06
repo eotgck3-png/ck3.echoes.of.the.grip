@@ -393,10 +393,21 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Next step:** check alongside CB-38 to CB-40.
 
 ### CB-42: Named cybernetics sellers, in a name file the owner can edit
-- **Status:** queued (2026-10-05)
+- **Status:** built and QA-passed, waiting-human for the in-game checks (2026-10-05)
+- **How to add a name:** put it on its own line in `cybernetics_seller_names.txt` (repo root), under `[companies]`, `[gangs]` or `[syndicates]`. Then run `python docs/tools/gen_seller_names.py`. Gangs are written without "the". Syndicates are canon groups, written exactly as they read mid-sentence (e.g. "the Pill Mob", "Samulo's Tieflings"). `check_all` fails if you forget to regenerate.
+- **In-game checks:**
+  - the names in the desc and the options match, and stay the same while you hover;
+  - tier2.013 → .014 show the same two different vendors, and the bold-firmware modifier names the bold vendor;
+  - init.010 → .011 show the same gang;
+  - the clinic of record appears in tier1.002 and in the Pursue decision desc;
+  - cold fires read the generic fallbacks;
+  - the Patron's name holds from .001 through .007, and through .009 when the story is parked;
+  - .006.d reads "a rival syndicate";
+  - `error.log` shows no `random_list` errors when patron.006 fires.
 - **What:** the owner wants cybernetics events to name the seller: a company or a gang instead of "a clinic", "a vendor" or "the syndicate". The owner wants one file they can add names to, starting with 12 made-up companies and 12 gangs. The name is rolled once and kept for the rest of a story: the Patron chain uses one syndicate throughout, and tier2.014 brings back the vendors from .013. This is approved flavour on existing events. It adds no new events or options and changes no mechanics.
 - **Owner:** Cybernetics Modding session (architect spec `docs/specs/cybernetics_v2_seller_names.md` → lore → scripter → localizer → QA) → orchestrator commits
-- **Next step:** starts once the tier-options batch is done. On return, show the owner the file to edit and the starting names.
+- **Ruling (owner, 2026-10-05):** the Patron syndicate is named, picked from a third list of canon syndicates. The list starts with exactly one entry, Pill Mob; the owner fills in the rest. This reverses the old rule that the syndicate is never named; licensing authorities still are never named. Not yet answered, so the defaults stand: the list file sits at the repo root, and a renamed or deleted name falls back to generic wording.
+- **Next step:** build (unblocked by 0ba3511). The starting 12 companies and 12 gangs are approved by the lore-keeper. When the build returns, commit the spec and both amendments with it.
 
 ### CB-43: In-game checks for the tier-options batch (16 options)
 - **Status:** waiting-human (2026-10-05)

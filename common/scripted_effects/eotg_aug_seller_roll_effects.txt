@@ -1,0 +1,183 @@
+﻿# GENERATED. Edit `cybernetics_seller_names.txt` and run `python docs/tools/gen_seller_names.py`.
+# Roll a seller into a character variable holding a flag (param VAR); the
+# _except variants skip the flag held in var:$EXCLUDE$. Shape: vanilla random_list
+# entries with a trigger, events/story_cycles/story_cycle_pet_animal_events.txt:108-200.
+# Callers roll in an event's immediate, inside hidden_effect.
+# companies: 12  gangs: 12  syndicates: 1
+
+eotg_aug_roll_company_effect = {
+    random_list = {
+        1 = {
+            set_variable = { name = $VAR$  value = flag:eotg_aug_co_harlow_and_venn_surgical }
+        }
+        1 = {
+            set_variable = { name = $VAR$  value = flag:eotg_aug_co_brennick_fitting_house }
+        }
+        1 = {
+            set_variable = { name = $VAR$  value = flag:eotg_aug_co_tarrant_implant_dealers }
+        }
+        1 = {
+            set_variable = { name = $VAR$  value = flag:eotg_aug_co_calder_and_wynn_servicing }
+        }
+        1 = {
+            set_variable = { name = $VAR$  value = flag:eotg_aug_co_linden_searle_surgical }
+        }
+        1 = {
+            set_variable = { name = $VAR$  value = flag:eotg_aug_co_dorrance_and_kell_fitters }
+        }
+        1 = {
+            set_variable = { name = $VAR$  value = flag:eotg_aug_co_ambrose_hesketh_clinic }
+        }
+        1 = {
+            set_variable = { name = $VAR$  value = flag:eotg_aug_co_prentice_and_pell_dealers }
+        }
+        1 = {
+            set_variable = { name = $VAR$  value = flag:eotg_aug_co_garrick_sloane_servicing }
+        }
+        1 = {
+            set_variable = { name = $VAR$  value = flag:eotg_aug_co_tolliver_and_grane_surgical }
+        }
+        1 = {
+            set_variable = { name = $VAR$  value = flag:eotg_aug_co_lenwick_fittings }
+        }
+        1 = {
+            set_variable = { name = $VAR$  value = flag:eotg_aug_co_yarrow_and_dunn_implant_practice }
+        }
+    }
+}
+
+eotg_aug_roll_company_except_effect = {
+    if = {
+        limit = {
+            OR = {
+                NOT = { var:$EXCLUDE$ ?= flag:eotg_aug_co_harlow_and_venn_surgical }
+                NOT = { var:$EXCLUDE$ ?= flag:eotg_aug_co_brennick_fitting_house }
+                NOT = { var:$EXCLUDE$ ?= flag:eotg_aug_co_tarrant_implant_dealers }
+                NOT = { var:$EXCLUDE$ ?= flag:eotg_aug_co_calder_and_wynn_servicing }
+                NOT = { var:$EXCLUDE$ ?= flag:eotg_aug_co_linden_searle_surgical }
+                NOT = { var:$EXCLUDE$ ?= flag:eotg_aug_co_dorrance_and_kell_fitters }
+                NOT = { var:$EXCLUDE$ ?= flag:eotg_aug_co_ambrose_hesketh_clinic }
+                NOT = { var:$EXCLUDE$ ?= flag:eotg_aug_co_prentice_and_pell_dealers }
+                NOT = { var:$EXCLUDE$ ?= flag:eotg_aug_co_garrick_sloane_servicing }
+                NOT = { var:$EXCLUDE$ ?= flag:eotg_aug_co_tolliver_and_grane_surgical }
+                NOT = { var:$EXCLUDE$ ?= flag:eotg_aug_co_lenwick_fittings }
+                NOT = { var:$EXCLUDE$ ?= flag:eotg_aug_co_yarrow_and_dunn_implant_practice }
+            }
+        }
+        random_list = {
+            1 = {
+                trigger = { NOT = { var:$EXCLUDE$ ?= flag:eotg_aug_co_harlow_and_venn_surgical } }
+                set_variable = { name = $VAR$  value = flag:eotg_aug_co_harlow_and_venn_surgical }
+            }
+            1 = {
+                trigger = { NOT = { var:$EXCLUDE$ ?= flag:eotg_aug_co_brennick_fitting_house } }
+                set_variable = { name = $VAR$  value = flag:eotg_aug_co_brennick_fitting_house }
+            }
+            1 = {
+                trigger = { NOT = { var:$EXCLUDE$ ?= flag:eotg_aug_co_tarrant_implant_dealers } }
+                set_variable = { name = $VAR$  value = flag:eotg_aug_co_tarrant_implant_dealers }
+            }
+            1 = {
+                trigger = { NOT = { var:$EXCLUDE$ ?= flag:eotg_aug_co_calder_and_wynn_servicing } }
+                set_variable = { name = $VAR$  value = flag:eotg_aug_co_calder_and_wynn_servicing }
+            }
+            1 = {
+                trigger = { NOT = { var:$EXCLUDE$ ?= flag:eotg_aug_co_linden_searle_surgical } }
+                set_variable = { name = $VAR$  value = flag:eotg_aug_co_linden_searle_surgical }
+            }
+            1 = {
+                trigger = { NOT = { var:$EXCLUDE$ ?= flag:eotg_aug_co_dorrance_and_kell_fitters } }
+                set_variable = { name = $VAR$  value = flag:eotg_aug_co_dorrance_and_kell_fitters }
+            }
+            1 = {
+                trigger = { NOT = { var:$EXCLUDE$ ?= flag:eotg_aug_co_ambrose_hesketh_clinic } }
+                set_variable = { name = $VAR$  value = flag:eotg_aug_co_ambrose_hesketh_clinic }
+            }
+            1 = {
+                trigger = { NOT = { var:$EXCLUDE$ ?= flag:eotg_aug_co_prentice_and_pell_dealers } }
+                set_variable = { name = $VAR$  value = flag:eotg_aug_co_prentice_and_pell_dealers }
+            }
+            1 = {
+                trigger = { NOT = { var:$EXCLUDE$ ?= flag:eotg_aug_co_garrick_sloane_servicing } }
+                set_variable = { name = $VAR$  value = flag:eotg_aug_co_garrick_sloane_servicing }
+            }
+            1 = {
+                trigger = { NOT = { var:$EXCLUDE$ ?= flag:eotg_aug_co_tolliver_and_grane_surgical } }
+                set_variable = { name = $VAR$  value = flag:eotg_aug_co_tolliver_and_grane_surgical }
+            }
+            1 = {
+                trigger = { NOT = { var:$EXCLUDE$ ?= flag:eotg_aug_co_lenwick_fittings } }
+                set_variable = { name = $VAR$  value = flag:eotg_aug_co_lenwick_fittings }
+            }
+            1 = {
+                trigger = { NOT = { var:$EXCLUDE$ ?= flag:eotg_aug_co_yarrow_and_dunn_implant_practice } }
+                set_variable = { name = $VAR$  value = flag:eotg_aug_co_yarrow_and_dunn_implant_practice }
+            }
+        }
+    }
+}
+
+eotg_aug_roll_gang_effect = {
+    random_list = {
+        1 = {
+            set_variable = { name = $VAR$  value = flag:eotg_aug_gang_cut_lines }
+        }
+        1 = {
+            set_variable = { name = $VAR$  value = flag:eotg_aug_gang_short_fuses }
+        }
+        1 = {
+            set_variable = { name = $VAR$  value = flag:eotg_aug_gang_glass_jaws }
+        }
+        1 = {
+            set_variable = { name = $VAR$  value = flag:eotg_aug_gang_cold_needles }
+        }
+        1 = {
+            set_variable = { name = $VAR$  value = flag:eotg_aug_gang_narrow_doors }
+        }
+        1 = {
+            set_variable = { name = $VAR$  value = flag:eotg_aug_gang_bent_pins }
+        }
+        1 = {
+            set_variable = { name = $VAR$  value = flag:eotg_aug_gang_thin_coats }
+        }
+        1 = {
+            set_variable = { name = $VAR$  value = flag:eotg_aug_gang_back_stairs }
+        }
+        1 = {
+            set_variable = { name = $VAR$  value = flag:eotg_aug_gang_loose_threads }
+        }
+        1 = {
+            set_variable = { name = $VAR$  value = flag:eotg_aug_gang_quick_stitches }
+        }
+        1 = {
+            set_variable = { name = $VAR$  value = flag:eotg_aug_gang_open_ports }
+        }
+        1 = {
+            set_variable = { name = $VAR$  value = flag:eotg_aug_gang_dim_bulbs }
+        }
+    }
+}
+
+eotg_aug_roll_syndicate_effect = {
+    random_list = {
+        1 = {
+            set_variable = { name = $VAR$  value = flag:eotg_aug_syn_pill_mob }
+        }
+    }
+}
+
+eotg_aug_roll_syndicate_except_effect = {
+    if = {
+        limit = {
+            OR = {
+                NOT = { var:$EXCLUDE$ ?= flag:eotg_aug_syn_pill_mob }
+            }
+        }
+        random_list = {
+            1 = {
+                trigger = { NOT = { var:$EXCLUDE$ ?= flag:eotg_aug_syn_pill_mob } }
+                set_variable = { name = $VAR$  value = flag:eotg_aug_syn_pill_mob }
+            }
+        }
+    }
+}
