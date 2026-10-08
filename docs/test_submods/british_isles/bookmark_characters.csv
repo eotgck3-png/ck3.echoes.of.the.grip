@@ -1,0 +1,18 @@
+# TEST ONLY: EotG Test: British Isles. The characters offered on the 1066 bookmark screen; gen_history.py reads it.
+# history_id must hold `title` at 1066.9.15 after isles_assignments.csv is applied (the generator checks).
+# x,y = portrait position on vanilla's Hastings bookmark map (England 320,620; Scotland 410,230; Normandy 830,810
+# are vanilla's own; the rest are estimates). difficulty = EASY, MEDIUM or HARD.
+# label/desc are used only for characters with no vanilla bookmark name (written to the generated loc file).
+# A character is shown ONLY if vanilla has a bookmark portrait for their name (common/bookmark_portraits/):
+# Tiger reports a missing portrait as a crash, and portraits cannot be authored outside the game. Rows without
+# one (Edwin, Bleddyn, Cadwgan, Cadoc) are skipped by the generator and listed in its output: pick them on the map.
+history_id,title,government,x,y,difficulty,label,desc
+5644,d_lancaster,feudal_government,360,540,EASY,Earl Edwin of Mercia,"TEST START (feudal duke with vassals). Edwin holds Mercia under King Harold, with counts and a bishop below him."
+83355,d_munster,tribal_government,150,450,EASY,,
+122,k_england,feudal_government,320,620,HARD,,
+984,k_scotland,clan_government,410,230,EASY,,
+6358,k_wales,administrative_government,270,560,MEDIUM,King Bleddyn of Wales,"TEST START (administrative). Bleddyn rules Gwynedd and Powys as an administrative kingdom. Not historical: k_wales is granted for the test."
+6362,c_glamorgan,republic_government,250,650,MEDIUM,Cadwgan of Morgannwg,"TEST START (republic). Glamorgan and Monmouth as a merchant republic."
+161281,c_cornwall,ecclesiastical_government,200,720,MEDIUM,Cadoc of Cornwall,"TEST START (theocracy). Cornwall as an independent church realm."
+140,d_normandy,feudal_government,830,810,MEDIUM,,
+90028,d_laamp_wake,landless_adventurer_government,400,560,MEDIUM,,

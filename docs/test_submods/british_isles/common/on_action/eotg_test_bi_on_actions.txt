@@ -1,0 +1,52 @@
+﻿# TEST ONLY: EotG Test: British Isles (docs/test_submods/british_isles/README.md). Never shipped.
+# Additive on vanilla's on_game_start and on_title_gain (invariant 4).
+#  - Game start: every void county gets the marker variable eotg_test_void_county and is
+#    painted near-black on the realms map, so the area outside the test zone reads as empty
+#    space (set_title_color on a county: main mod V-U6, unverified).
+#  - Game start: one Isles Unclaimed county is marked Unknown (Frontier Phase 3a), as the
+#    Corsica sub-mod does.
+#  - on_title_gain (QA S1 safety net, the main mod's eotg_unclaimed_on_title_gain pattern):
+#    whoever inherits a void county and holds no county outside the void takes the void
+#    government. A zone ruler who somehow gains a void county is never converted.
+# The Unsworn counties need nothing here: the main mod's eotg_unclaimed_game_start_effect
+# adopts the pre-generated placeholders (one Unsworn holder per county, with the trait).
+
+on_game_start = {
+	on_actions = { eotg_test_bi_on_game_start }
+}
+
+eotg_test_bi_on_game_start = {
+	effect = {
+		every_ruler = {
+			limit = { government_has_flag = eotg_test_government_is_void }
+			every_held_title = {
+				limit = { tier = tier_county }
+				set_variable = { name = eotg_test_void_county  value = yes }
+				set_title_color = { 24 24 28 }
+			}
+		}
+		title:c_sutherland ?= { eotg_frontier_mark_unknown_effect = yes }
+	}
+}
+
+# Root = the new holder, scope:title. change_government inside on_title_gain: vanilla
+# title_on_actions.txt:277.
+on_title_gain = {
+	on_actions = { eotg_test_bi_on_title_gain }
+}
+
+eotg_test_bi_on_title_gain = {
+	trigger = {
+		scope:title = { has_variable = eotg_test_void_county }
+		NOT = { government_has_flag = eotg_test_government_is_void }
+		NOT = {
+			any_held_title = {
+				tier = tier_county
+				NOT = { has_variable = eotg_test_void_county }
+			}
+		}
+	}
+	effect = {
+		change_government = eotg_test_void_government
+	}
+}

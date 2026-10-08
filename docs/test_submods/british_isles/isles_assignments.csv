@@ -1,0 +1,49 @@
+# TEST ONLY: EotG Test: British Isles. The owner's editable assignment table; tools/gen_history.py reads it.
+# Edit, then re-run:  python docs/test_submods/british_isles/tools/gen_history.py
+# Lines starting with # are ignored. One row per title. Columns:
+#   title       a vanilla title key inside the zone (e_britannia, e_france, e_spain)
+#   holder      vanilla  = the vanilla 1066.9.15 holder (must be alive then)
+#               unsworn  = an Unclaimed county: its own Unsworn placeholder (counties only)
+#               none     = no holder
+#               <id>     = a vanilla history character id, alive at 1066.9.15
+#   liege       blank or vanilla = keep vanilla's; 0 = independent; or a title key
+#   government  blank = no change; or a government key (vanilla or mod)
+#   scope       which characters the government is given to:
+#               holder = this title's holder only
+#               realm  = the holder and everyone below them in the zone at the start
+#               dejure = the holder of every county de jure under this title
+#   note        free text, shown nowhere in game
+# Defaults for titles NOT listed here:
+#   the Isles (e_britannia): vanilla 1066 holders, lieges and governments;
+#   France and Spain: every county Unsworn (independent); duchies and kingdoms vacant.
+title,holder,liege,government,scope,note
+# --- The Isles: the government mix ---
+k_england,vanilla,,feudal_government,holder,Harold Godwinson (122); his vassals keep vanilla governments (the bishops of Durham and Worcester stay ecclesiastical)
+d_lancaster,vanilla,,feudal_government,holder,PLAYER START (feudal duke with vassals): Edwin of Mercia (5644); also holds d_hereford
+k_scotland,vanilla,,clan_government,realm,Malcolm III (984) and his vassals: clan (clan has no faith or culture gate in 1.20)
+k_ireland,vanilla,,tribal_government,dejure,every Irish county holder tribal; capitals converted to tribal holdings
+d_munster,vanilla,,tribal_government,realm,PLAYER START (tribal): Murchad ua Briain (83355) with his vassal in Ormond
+k_wales,6358,0,administrative_government,realm,ADMIN: Bleddyn ap Cynfyn (6358) given k_wales (not vanilla) so the realm has a duchy tier for its themes
+c_glamorgan,vanilla,0,republic_government,holder,REPUBLIC: Cadwgan ap Meurig (6362) of Morgannwg; also holds c_monmouthshire; capital made a city
+c_cornwall,vanilla,0,ecclesiastical_government,holder,THEOCRACY: Cadoc of Cornwall (161281) independent; capital made a temple
+# --- The Isles: Unclaimed counties (Frontier and Raise Your Colours) ---
+c_caithness,unsworn,0,,,highlands; was the Earl of Orkney's (outside the zone)
+c_sutherland,unsworn,0,,,highlands; was the Earl of Orkney's (outside the zone)
+c_ross,unsworn,0,,,highlands; was Moray's
+c_mayo,unsworn,0,,,western Ireland; was Connacht's
+# --- France and Spain: the small normal-government pockets (everything else is Unsworn) ---
+d_normandy,vanilla,0,feudal_government,holder,FEUDAL DUKE: William of Normandy (140)
+c_rouen,140,0,,,William's pocket
+c_bayeux,140,0,,,William's pocket
+c_alencon,vanilla,0,,,William's pocket (vanilla holder is William)
+d_cordoba,vanilla,0,republic_government,holder,REPUBLIC: the Taifa of Cordoba (20852); vanilla already has it as a republic
+c_cordoba,vanilla,0,,,Cordoba pocket
+c_cabra,vanilla,0,,,Cordoba pocket
+d_toledo,vanilla,0,clan_government,holder,CLAN: the Taifa of Toledo (3924)
+c_toledo,vanilla,0,,,Toledo pocket
+c_calatrava,vanilla,0,,,Toledo pocket
+c_reims,vanilla,0,ecclesiastical_government,holder,THEOCRACY: the Archbishop of Reims (91173); vanilla already ecclesiastical
+c_ipuskoa,vanilla,0,tribal_government,holder,TRIBAL: Gipuzkoa (200164); capital made a tribal holding
+d_barcelona,vanilla,0,feudal_government,holder,FEUDAL COUNT: Ramon Berenguer of Barcelona (110520)
+c_barcelona,vanilla,0,,,Barcelona pocket
+c_girona,vanilla,0,,,Barcelona pocket
