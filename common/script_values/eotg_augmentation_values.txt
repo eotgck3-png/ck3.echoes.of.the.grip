@@ -420,3 +420,164 @@ eotg_aug_oc_wear_relief_value = {
         subtract = 1
     }
 }
+
+# -- A Fracturing Inheritance (docs/specs/cybernetics_v2_fracturing_inheritance.md §5A.4)
+# The hidden-roll chances. Each is evaluated in the RULER's scope (the scope
+# eotg_aug_inherit_roll_effect runs in) with scope:eotg_inh_heir saved, and
+# reads the stored profile (var:eotg_inh_profile) and bond (var:eotg_inh_bond).
+# The roll effect clamps every chance to 5-90. Inline chance shape: vanilla
+# events/activities/coronation_activity/coronation_events_1.txt:7325.
+
+# How deep into the ruler's line "the next in line" looks (spec §5.4.1):
+# places 1 to this. The one source for both eotg_aug_inherit_line_eligible
+# (the gate) and eotg_aug_inherit_pick_line_effect (the pick), so the gate
+# never promises a name the pick cannot find.
+eotg_aug_inherit_line_places = { value = 6 }
+
+# .003: the heir refuses the physicians. The .006.b route skips the roll.
+eotg_aug_inherit_refuse_chance = {
+    value = 0
+    if = { limit = { var:eotg_inh_profile ?= flag:rage }  add = 20 }
+    else_if = { limit = { var:eotg_inh_profile ?= flag:ledger }  add = 40 }
+    else_if = { limit = { var:eotg_inh_profile ?= flag:cold }  add = 5 }
+    else_if = { limit = { var:eotg_inh_profile ?= flag:certain }  add = 30 }
+    if = { limit = { var:eotg_inh_bond ?= flag:favourite }  add = -15 }
+    else_if = { limit = { var:eotg_inh_bond ?= flag:rival }  add = 20 }
+    if = { limit = { has_character_flag = eotg_flag_aug_inh_coerced }  add = 20 }
+}
+
+# .006: the heir accepts terms. Forced passes (.007.b, .009.c) skip the roll.
+eotg_aug_inherit_accept_chance = {
+    value = 50
+    if = { limit = { var:eotg_inh_profile ?= flag:rage }  add = -15 }
+    else_if = { limit = { var:eotg_inh_profile ?= flag:ledger }  add = -10 }
+    else_if = { limit = { var:eotg_inh_profile ?= flag:cold }  add = 10 }
+    else_if = { limit = { var:eotg_inh_profile ?= flag:certain }  add = -20 }
+    if = { limit = { var:eotg_inh_bond ?= flag:favourite }  add = 25 }
+    else_if = { limit = { var:eotg_inh_bond ?= flag:dutiful }  add = 10 }
+    else_if = { limit = { var:eotg_inh_bond ?= flag:claimant }  add = -10 }
+    else_if = { limit = { var:eotg_inh_bond ?= flag:estranged }  add = -20 }
+    else_if = { limit = { var:eotg_inh_bond ?= flag:rival }  add = -30 }
+    if = { limit = { has_character_flag = eotg_flag_aug_inh_gentle }  add = 15 }
+    if = { limit = { scope:eotg_inh_heir = { eotg_aug_pressure_flicker = yes } }  add = 10 }
+}
+
+# .007: the heir renounces. +30 when the ruler asked "Do you want to stop?"
+# (.002.p_cold saves scope value eotg_inh_asked).
+eotg_aug_inherit_renounce_chance = {
+    value = 0
+    if = { limit = { var:eotg_inh_profile ?= flag:rage }  add = 25 }
+    else_if = { limit = { var:eotg_inh_profile ?= flag:ledger }  add = 15 }
+    else_if = { limit = { var:eotg_inh_profile ?= flag:cold }  add = 70 }
+    else_if = { limit = { var:eotg_inh_profile ?= flag:certain }  add = 5 }
+    if = { limit = { exists = scope:eotg_inh_asked }  add = 30 }
+    if = { limit = { var:eotg_inh_bond ?= flag:dutiful }  add = 15 }
+    else_if = { limit = { var:eotg_inh_bond ?= flag:favourite }  add = 10 }
+    else_if = { limit = { var:eotg_inh_bond ?= flag:claimant }  add = -20 }
+    else_if = { limit = { var:eotg_inh_bond ?= flag:rival }  add = -20 }
+    if = { limit = { scope:eotg_inh_heir = { eotg_aug_pressure_storm = yes } }  add = -10 }
+}
+
+# The ward breaks (eotg_aug_inherit_ward_effect). The confinement type is
+# saved as scope value eotg_inh_confine_type by eotg_aug_inherit_confine_effect.
+eotg_aug_inherit_breakout_chance = {
+    value = 0
+    if = { limit = { var:eotg_inh_profile ?= flag:rage }  add = 30 }
+    else_if = { limit = { var:eotg_inh_profile ?= flag:certain }  add = 15 }
+    else_if = { limit = { var:eotg_inh_profile ?= flag:ledger }  add = 10 }
+    if = { limit = { scope:eotg_inh_heir = { eotg_aug_pressure_storm = yes } }  add = 15 }
+    if = { limit = { scope:eotg_inh_confine_type ?= flag:dungeon }  multiply = 0.5 }
+    if = { limit = { scope:eotg_inh_heir = { has_character_flag = eotg_flag_aug_sedated } }  multiply = 0.5 }
+}
+
+# .009.a: the arrest succeeds.
+eotg_aug_inherit_arrest_chance = {
+    value = 70
+    if = { limit = { var:eotg_inh_profile ?= flag:rage }  add = -20 }
+    else_if = { limit = { var:eotg_inh_profile ?= flag:certain }  add = -10 }
+    if = { limit = { has_character_flag = eotg_flag_aug_inh_guarded }  add = 10 }
+    if = { limit = { exists = cp:councillor_marshal }  add = 10 }
+}
+
+# .009.c: the talk-down succeeds.
+eotg_aug_inherit_talk_chance = {
+    value = 0
+    if = { limit = { var:eotg_inh_profile ?= flag:cold }  add = 10 }
+    else_if = { limit = { var:eotg_inh_profile ?= flag:rage }  add = -10 }
+    if = { limit = { var:eotg_inh_bond ?= flag:favourite }  add = 60 }
+    else_if = { limit = { var:eotg_inh_bond ?= flag:dutiful }  add = 45 }
+    else_if = { limit = { var:eotg_inh_bond ?= flag:claimant }  add = 25 }
+    else_if = { limit = { var:eotg_inh_bond ?= flag:estranged }  add = 20 }
+    else_if = { limit = { var:eotg_inh_bond ?= flag:rival }  add = 10 }
+    if = { limit = { has_trait = compassionate }  add = 10 }
+}
+
+# .018 / .028: the attempt on the ruler succeeds. The option's modifier is
+# saved as scope value eotg_inh_attempt_mod by eotg_aug_inherit_leaf_attempt_effect.
+eotg_aug_inherit_attempt_chance = {
+    value = 45
+    if = { limit = { var:eotg_inh_profile ?= flag:certain }  add = 10 }
+    else_if = { limit = { var:eotg_inh_profile ?= flag:rage }  add = 10 }
+    if = { limit = { scope:eotg_inh_heir = { prowess >= 12 } }  add = 10 }
+    if = { limit = { prowess >= 12 }  add = -10 }
+    if = { limit = { has_character_flag = eotg_flag_aug_inh_guarded }  add = -20 }
+    if = { limit = { has_character_flag = eotg_flag_aug_inh_ruler_ready }  add = -20 }
+    if = { limit = { exists = scope:eotg_inh_attempt_mod }  add = scope:eotg_inh_attempt_mod }
+}
+
+# .018.b's modifier: a favourite or dutiful heir hears their name (-25).
+eotg_aug_inherit_attempt_mod_name = {
+    value = 5
+    if = {
+        limit = {
+            OR = {
+                var:eotg_inh_bond ?= flag:favourite
+                var:eotg_inh_bond ?= flag:dutiful
+            }
+        }
+        add = -30    # 5 - 30 = -25
+    }
+}
+
+# .018.c's modifier: the stronger hand (-20).
+eotg_aug_inherit_attempt_mod_face = {
+    value = 5
+    if = {
+        limit = { prowess > scope:eotg_inh_heir.prowess }
+        add = -25    # 5 - 25 = -20
+    }
+}
+
+# .015.b: the second acts anyway.
+eotg_aug_inherit_second_acts_chance = {
+    value = 15
+    if = {
+        limit = {
+            scope:eotg_inh_second ?= {
+                OR = {
+                    has_trait = ambitious
+                    intrigue >= 12
+                }
+            }
+        }
+        add = 25    # 15 + 25 = 40
+    }
+}
+
+# .012.a: someone saw the heir alive (a dockhand or a fitter).
+eotg_aug_inherit_exposed_chance = {
+    value = 25
+    if = { limit = { intrigue >= 14 }  add = -10 }
+    if = { limit = { NOT = { exists = cp:councillor_spymaster } }  add = 10 }
+}
+
+# §5.4.2: how many the massacre kills. 2, +1 Storm band, +1 Running Hot,
+# -1 when the ruler stood ready (.009.d). 1-4.
+eotg_aug_inherit_massacre_count_value = {
+    value = 2
+    if = { limit = { scope:eotg_inh_heir = { eotg_aug_pressure_storm = yes } }  add = 1 }
+    if = { limit = { var:eotg_inh_profile ?= flag:rage }  add = 1 }
+    if = { limit = { has_character_flag = eotg_flag_aug_inh_ruler_ready }  add = -1 }
+    min = 1
+    max = 4
+}

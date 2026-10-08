@@ -670,3 +670,134 @@ eotg_aug_can_self_repair = {
     culture ?= { has_innovation = eotg_innovation_self_repairing_machinery }
     NOT = { has_character_modifier = eotg_mod_aug_self_repair }
 }
+
+# -- A Fracturing Inheritance (docs/specs/cybernetics_v2_fracturing_inheritance.md)
+# The ruler is sound and the primary heir is Neurofractured. Ruler scope
+# unless stated. The two firing sites (eotg_on_yearly_aug_inherit_check and
+# eotg_aug_nr_cascade_effect) evaluate the gate from different roots (the
+# ruler, or the cascading champion), so the gate saves the ruler as a
+# temporary scope instead of reading root.
+
+# The entry gate (spec §5.1). Reads the cooldown flag: only the on_action and
+# the cascade hook evaluate it, never an event trigger (lesson 5).
+# Users: eotg_on_yearly_aug_inherit_check (trigger), eotg_aug_nr_cascade_effect.
+eotg_aug_inherit_can_start = {
+    save_temporary_scope_as = eotg_inh_gate_ruler
+    is_landed = yes
+    is_adult = yes
+    is_imprisoned = no
+    NOT = { has_trait = incapable }
+    eotg_is_unclaimed_folk = no
+    NOT = { has_trait = eotg_total_integration }
+    NOT = { has_character_flag = eotg_flag_aug_inh_cooldown }
+    NOT = { has_variable = eotg_inh_heir }
+    # Heir's Arc exclusivity (§5.2): wait while an arc is live (stages 0-4);
+    # a dormant arc at stage 5 does not block.
+    NOT = {
+        any_owned_story = {
+            story_type = eotg_story_aug_heir_arc
+            NOT = { var:eotg_stage ?= 5 }
+        }
+    }
+    primary_heir ?= {
+        eotg_aug_inherit_heir_candidate = { RULER = scope:eotg_inh_gate_ruler }
+    }
+}
+
+# The heir half of the gate (heir scope). Landed, foreign and player heirs
+# are deferred (§10).
+eotg_aug_inherit_heir_candidate = {
+    has_trait = eotg_neurofractured
+    is_alive = yes
+    is_adult = yes
+    is_ai = yes
+    is_landed = no
+    is_courtier_of = $RULER$
+    is_imprisoned = no
+    NOT = { has_character_flag = eotg_flag_aug_inh_seen }
+}
+
+# Who gets the tree (owner Q5, spec §5.5.1): a player ruler. Everyone else
+# resolves in the hidden eotg_aug_inherit.028. One trigger, so widening it
+# later is a one-line change.
+# Users: eotg_aug_inherit_start_effect, eotg_aug_inherit_leaf_transit_effect,
+# eotg_aug_inherit.028 (trigger and on_trigger_fail).
+eotg_aug_inherit_tree_runs = {
+    is_ai = no
+}
+
+# World-state guard for every ruler-root node (§5.2). Reads no cooldown flag.
+# FULL = yes for the nodes before a leaf: the heir is still Neurofractured
+# and still at the ruler's court (or in the ruler's cells). Root is the
+# ruler in every event that uses it.
+eotg_aug_inherit_chain_valid = {
+    has_variable = eotg_inh_heir
+    var:eotg_inh_heir = {
+        is_alive = yes
+        trigger_if = {
+            limit = { always = $FULL$ }
+            has_trait = eotg_neurofractured
+            OR = {
+                is_courtier_of = root
+                imprisoner ?= root
+            }
+        }
+    }
+}
+
+# Someone other than the heir, and not a player, stands in the first
+# eotg_aug_inherit_line_places places of the ruler's line (§5.4.1, §5.5.4).
+# Players are skipped on BOTH paths (orchestrator ruling 2026-10-08: L13 must
+# never kill a human in multiplayer), matching eotg_aug_inherit_line_slot_effect.
+# Needs scope:eotg_inh_heir. Place test: vanilla
+# common/activities/intents/chariot_race_intents.txt:238-241 (title scope,
+# target the character, a comparison).
+# Users: eotg_aug_inherit_fire_threat_effect, eotg_aug_inherit_roll_threat_effect,
+# eotg_aug_inherit.028 (next_two gate).
+eotg_aug_inherit_line_eligible = {
+    save_temporary_scope_as = eotg_inh_line_owner
+    primary_title ?= {
+        save_temporary_scope_as = eotg_inh_line_title
+        any_title_heir = {
+            NOT = { this = scope:eotg_inh_heir }
+            NOT = { this = scope:eotg_inh_line_owner }
+            is_alive = yes
+            scope:eotg_inh_line_title = {
+                place_in_line_of_succession = {
+                    target = prev
+                    value <= eotg_aug_inherit_line_places
+                }
+            }
+            is_ai = yes
+        }
+    }
+}
+
+# The second in line can make the .015 offer (spec §5.3 .005.d): an adult AI
+# who is not Neurofractured, and ambitious or against the heir.
+# Users: eotg_aug_inherit.005 (d), eotg_aug_inherit.028 (coup).
+eotg_aug_inherit_second_qualifies = {
+    exists = scope:eotg_inh_second
+    scope:eotg_inh_second = {
+        is_alive = yes
+        is_ai = yes
+        is_adult = yes
+        NOT = { this = scope:eotg_inh_heir }
+        NOT = { has_trait = eotg_neurofractured }
+        OR = {
+            has_trait = ambitious
+            opinion = {
+                target = scope:eotg_inh_heir
+                value < 0
+            }
+        }
+    }
+}
+
+# The ruler can step down to the heir (spec §5.3 .005.b).
+# Users: eotg_aug_inherit.005 (b), eotg_aug_inherit.028 (abdicate_*).
+eotg_aug_inherit_can_abdicate = {
+    is_landed = yes
+    primary_heir ?= scope:eotg_inh_heir
+    scope:eotg_inh_heir = { is_imprisoned = no }
+}

@@ -347,3 +347,26 @@ eotg_mod_aug_fragments = {
     health = -0.25
     stress_gain_mult = 0.05
 }
+
+# -- A Fracturing Inheritance (docs/specs/cybernetics_v2_fracturing_inheritance.md §3.4)
+# Neither is removed by eotg_clean_all_aug_modifiers: the ruler may be
+# unaugmented, and both are about the heir, not the ruler's implants.
+
+# A succession that rests on the heir's terms holding (succession risk, never
+# taint or shame; lore review). On the ruler, 10 years.
+# Callers: eotg_aug_inherit_leaf_terms_effect; removed by eotg_aug_inherit.022 (slipping b).
+eotg_mod_aug_inh_terms = {
+    icon = diplomacy_negative
+    vassal_opinion = -5
+    stress_gain_mult = 0.1
+    monthly_prestige_gain_mult = -0.1
+}
+
+# The court after the massacre. On the ruler, 5 years.
+# Caller: eotg_aug_inherit_leaf_massacre_effect.
+eotg_mod_aug_inh_emptied_court = {
+    icon = diplomacy_negative
+    monthly_prestige_gain_mult = -0.15
+    general_opinion = -5
+    stress_gain_mult = 0.15
+}

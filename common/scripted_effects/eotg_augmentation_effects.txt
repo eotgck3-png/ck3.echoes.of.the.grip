@@ -1567,8 +1567,20 @@ eotg_aug_nr_cascade_effect = {
     # Countdown; the cascade is its ending, as in eotg_trigger_neurofracture.
     eotg_aug_end_countdown_effect = yes
     save_scope_as = eotg_champion
+    # A Fracturing Inheritance §5.1 site B (owner Q4): when the champion is
+    # the liege's primary heir and the tree can start, the tree replaces
+    # nr.006 (one cascade, one event). The gate holds the cooldown.
     employer ?= {
-        trigger_event = { id = eotg_aug_nr.006  days = { 1 7 } }
+        if = {
+            limit = {
+                primary_heir ?= scope:eotg_champion
+                eotg_aug_inherit_can_start = yes
+            }
+            eotg_aug_inherit_start_effect = { SOURCE = cascade }
+        }
+        else = {
+            trigger_event = { id = eotg_aug_nr.006  days = { 1 7 } }
+        }
     }
 }
 
@@ -3136,5 +3148,1093 @@ eotg_aug_record_clinic_effect = {
     if = {
         limit = { has_variable = eotg_aug_seller_company }
         set_variable = { name = eotg_aug_clinic_of_record  value = var:eotg_aug_seller_company }
+    }
+}
+
+# ═════════════════════════════════════════════════════════════════════════════
+# A Fracturing Inheritance — docs/specs/cybernetics_v2_fracturing_inheritance.md
+# The ruler is sound and the primary heir is Neurofractured. Every effect here
+# runs in the RULER's scope unless stated, and reads the people through saved
+# scopes (scope:eotg_inh_ruler, scope:eotg_inh_heir, ...) rather than root:
+# the start effect can run from the non-ruler cascade, whose root is the
+# cascading champion. Chain state lives in eotg_inh_* variables and
+# eotg_flag_aug_inh_* flags on the ruler (spec §3.3); the close effect clears
+# them. Outcome mechanics live in the leaf effects, called by the tree's leaf
+# events AND by the hidden eotg_aug_inherit.028 (owner Q5), so both paths
+# change the map the same way.
+# ═════════════════════════════════════════════════════════════════════════════
+
+# Entry (spec §5.1). SOURCE = report / cascade. The only place the cooldown
+# is set; it is read only in eotg_aug_inherit_can_start (lesson 5).
+# Callers: eotg_on_yearly_aug_inherit_check, eotg_aug_nr_cascade_effect.
+# Fires eotg_aug_inherit.001 (player ruler) or eotg_aug_inherit.028 (AI).
+eotg_aug_inherit_start_effect = {
+    save_scope_as = eotg_inh_ruler
+    add_character_flag = { flag = eotg_flag_aug_inh_cooldown  years = 3 }
+    add_character_flag = { flag = eotg_flag_aug_inh_active  years = 6 }
+    primary_heir = {
+        add_character_flag = eotg_flag_aug_inh_seen
+        save_scope_as = eotg_inh_heir
+    }
+    set_variable = { name = eotg_inh_heir  value = scope:eotg_inh_heir }
+    set_variable = { name = eotg_inh_source  value = flag:$SOURCE$ }
+
+    # The profile (§5A.1): how the Neurofracture shows. Weights from the
+    # heir's vanilla traits and the Neurofractured distortion modifier
+    # (eotg_apply_neurofracture_distortion). Flag-variable shape: the
+    # Patron's terms (eotg_aug_patron_accept_effect).
+    scope:eotg_inh_heir = {
+        random_list = {
+            20 = {    # Running Hot
+                modifier = { add = 25  has_trait = wrathful }
+                modifier = { add = 10  has_trait = impatient }
+                modifier = { add = 15  has_character_modifier = eotg_mod_nf_martial_distortion }
+                modifier = { add = 10  prowess >= 12 }
+                modifier = { add = 10  eotg_aug_pressure_storm = yes }
+                modifier = { factor = 0.5  has_trait = calm }
+                scope:eotg_inh_ruler = { set_variable = { name = eotg_inh_profile  value = flag:rage } }
+            }
+            20 = {    # The Ledger
+                modifier = { add = 25  has_trait = paranoid }
+                modifier = { add = 10  has_trait = deceitful }
+                modifier = { add = 15  has_character_modifier = eotg_mod_nf_intrigue_distortion }
+                modifier = { factor = 0.5  has_trait = trusting }
+                scope:eotg_inh_ruler = { set_variable = { name = eotg_inh_profile  value = flag:ledger } }
+            }
+            20 = {    # Flatline
+                modifier = { add = 20  has_trait = callous }
+                modifier = { add = 10  has_trait = shy }
+                modifier = { add = 10  has_trait = content }
+                modifier = {
+                    add = 15
+                    OR = {
+                        has_character_modifier = eotg_mod_nf_learning_distortion
+                        has_character_modifier = eotg_mod_nf_steward_distortion
+                    }
+                }
+                modifier = { factor = 0.5  has_trait = compassionate }
+                scope:eotg_inh_ruler = { set_variable = { name = eotg_inh_profile  value = flag:cold } }
+            }
+            20 = {    # Certainty
+                modifier = { add = 20  has_trait = arrogant }
+                modifier = { add = 20  has_trait = ambitious }
+                modifier = { add = 15  has_character_modifier = eotg_mod_nf_diplomacy_distortion }
+                modifier = { factor = 0.5  has_trait = humble }
+                scope:eotg_inh_ruler = { set_variable = { name = eotg_inh_profile  value = flag:certain } }
+            }
+        }
+    }
+
+    # The bond (§5A.2): first valid, read once.
+    if = {
+        limit = {
+            scope:eotg_inh_heir = {
+                OR = {
+                    has_relation_rival = scope:eotg_inh_ruler
+                    has_relation_potential_rival = scope:eotg_inh_ruler
+                }
+            }
+        }
+        set_variable = { name = eotg_inh_bond  value = flag:rival }
+    }
+    else_if = {
+        limit = {
+            scope:eotg_inh_heir = {
+                opinion = { target = scope:eotg_inh_ruler  value <= -25 }
+            }
+        }
+        set_variable = { name = eotg_inh_bond  value = flag:estranged }
+    }
+    else_if = {
+        limit = {
+            scope:eotg_inh_heir = {
+                has_trait = ambitious
+                opinion = { target = scope:eotg_inh_ruler  value < 20 }
+            }
+        }
+        set_variable = { name = eotg_inh_bond  value = flag:claimant }
+    }
+    else_if = {
+        limit = {
+            OR = {
+                has_relation_friend = scope:eotg_inh_heir
+                has_relation_best_friend = scope:eotg_inh_heir
+                has_relation_soulmate = scope:eotg_inh_heir
+                opinion = { target = scope:eotg_inh_heir  value >= 40 }
+                scope:eotg_inh_heir = {
+                    opinion = { target = scope:eotg_inh_ruler  value >= 50 }
+                }
+            }
+        }
+        set_variable = { name = eotg_inh_bond  value = flag:favourite }
+    }
+    else = {
+        set_variable = { name = eotg_inh_bond  value = flag:dutiful }
+    }
+
+    if = {
+        limit = { eotg_aug_inherit_tree_runs = yes }
+        # The witness, first valid: the court physician (endgame.txt:98
+        # shape), the spouse, an adult courtier (a non-violent pick of a
+        # speaker, index §6 item 6). May stay unset.
+        if = {
+            limit = { employs_court_position = court_physician_court_position }
+            court_position:court_physician_court_position = {
+                if = {
+                    limit = { NOT = { this = scope:eotg_inh_heir } }
+                    save_scope_as = eotg_inh_witness
+                }
+            }
+        }
+        if = {
+            limit = {
+                NOT = { exists = scope:eotg_inh_witness }
+                exists = primary_spouse
+                NOT = { primary_spouse = scope:eotg_inh_heir }
+            }
+            primary_spouse = { save_scope_as = eotg_inh_witness }
+        }
+        if = {
+            limit = { NOT = { exists = scope:eotg_inh_witness } }
+            random_courtier = {
+                limit = {
+                    is_adult = yes
+                    NOT = { this = scope:eotg_inh_heir }
+                }
+                save_scope_as = eotg_inh_witness
+            }
+        }
+        if = {
+            limit = { exists = scope:eotg_inh_witness }
+            set_variable = { name = eotg_inh_witness  value = scope:eotg_inh_witness }
+        }
+        trigger_event = { id = eotg_aug_inherit.001  days = { 3 10 } }
+    }
+    else = {
+        # The months the tree would have taken (spec §5.5)
+        trigger_event = { id = eotg_aug_inherit.028  days = { 30 180 } }
+    }
+}
+
+# Run first in every ruler-root node's immediate (spec §3.2). Saves the cast
+# from the variables and live links: eotg_inh_ruler, eotg_inh_heir,
+# eotg_inh_witness, eotg_inh_second (first in line who is not the heir; a
+# second carried in from an earlier node is kept while alive, so the one who
+# made the .015 offer is the one who acts at .027), eotg_inh_councillor.
+eotg_aug_inherit_scopes_effect = {
+    save_scope_as = eotg_inh_ruler
+    if = {
+        limit = { has_variable = eotg_inh_heir }
+        var:eotg_inh_heir = { save_scope_as = eotg_inh_heir }
+    }
+    if = {
+        limit = {
+            has_variable = eotg_inh_witness
+            var:eotg_inh_witness = { is_alive = yes }
+        }
+        var:eotg_inh_witness = { save_scope_as = eotg_inh_witness }
+    }
+    if = {
+        limit = {
+            exists = scope:eotg_inh_second
+            scope:eotg_inh_second = { is_alive = no }
+        }
+        clear_saved_scope = eotg_inh_second
+    }
+    if = {
+        limit = {
+            NOT = { exists = scope:eotg_inh_second }
+            exists = scope:eotg_inh_heir
+        }
+        eotg_aug_inherit_pick_line_effect = yes
+        if = {
+            limit = { exists = scope:eotg_inh_next_1 }
+            scope:eotg_inh_next_1 = { save_scope_as = eotg_inh_second }
+        }
+    }
+    if = {
+        limit = {
+            exists = cp:councillor_chancellor
+            NOT = { cp:councillor_chancellor = scope:eotg_inh_heir }
+        }
+        cp:councillor_chancellor = { save_scope_as = eotg_inh_councillor }
+    }
+    else_if = {
+        limit = {
+            exists = primary_spouse
+            NOT = { primary_spouse = scope:eotg_inh_heir }
+        }
+        primary_spouse = { save_scope_as = eotg_inh_councillor }
+    }
+}
+
+# Runs at every leaf and in every on_trigger_fail. Keeps the cooldown,
+# eotg_flag_aug_inh_buried_empty, eotg_inh_outcome, and on the heir
+# eotg_flag_aug_inh_seen and eotg_aug_inh_presumed_dead (spec §9 item 6).
+eotg_aug_inherit_close_effect = {
+    if = {
+        limit = { has_variable = eotg_inh_heir }
+        var:eotg_inh_heir = { remove_character_flag = eotg_flag_aug_inh_marked }
+    }
+    remove_variable = eotg_inh_heir
+    remove_variable = eotg_inh_profile
+    remove_variable = eotg_inh_bond
+    remove_variable = eotg_inh_source
+    remove_variable = eotg_inh_witness
+    remove_variable = eotg_inh_threat
+    remove_variable = eotg_inh_table
+    remove_variable = eotg_inh_reaction
+    remove_variable = eotg_inh_table_result
+    remove_variable = eotg_inh_dead_count
+    remove_variable = eotg_inh_force
+    remove_variable = eotg_inh_force_leaf
+    remove_character_flag = eotg_flag_aug_inh_active
+    remove_character_flag = eotg_flag_aug_inh_coerced
+    remove_character_flag = eotg_flag_aug_inh_gentle
+    remove_character_flag = eotg_flag_aug_inh_guarded
+    remove_character_flag = eotg_flag_aug_inh_talked
+    remove_character_flag = eotg_flag_aug_inh_pattern_seen
+    remove_character_flag = eotg_flag_aug_inh_physicians_seen
+    remove_character_flag = eotg_flag_aug_inh_ruler_ready
+}
+
+# Every hidden roll in the tree goes through this (spec §5A.4). CHANCE is a
+# script value (eotg_aug_inherit_*_chance), clamped 5-90. A pass saves the
+# scope value $NAME$ = yes. The console override var:eotg_inh_force
+# (flag:pass / flag:fail) on the ruler forces it (spec §9).
+eotg_aug_inherit_roll_effect = {
+    if = {
+        limit = { scope:eotg_inh_ruler ?= { var:eotg_inh_force ?= flag:pass } }
+        save_scope_value_as = { name = $NAME$  value = yes }
+    }
+    else_if = {
+        limit = {
+            NOT = { scope:eotg_inh_ruler ?= { var:eotg_inh_force ?= flag:fail } }
+        }
+        random = {
+            chance = {
+                value = $CHANCE$
+                min = 5
+                max = 90
+            }
+            save_scope_value_as = { name = $NAME$  value = yes }
+        }
+    }
+}
+
+# Heir scope: a course of sedation, as eotg_decision_aug_sedation (the flag is
+# what slows the drift, eotg_aug_nf_drift_value; the counter is the tolerance).
+# Callers: eotg_aug_inherit_leaf_terms_effect, eotg_aug_inherit_confine_effect.
+eotg_aug_inherit_sedate_effect = {
+    if = {
+        limit = { NOT = { has_character_flag = eotg_flag_aug_sedated } }
+        hidden_effect = {
+            increment_variable_effect = { VAR = eotg_aug_sedation_courses  VAL = 1 }
+        }
+        add_character_flag = { flag = eotg_flag_aug_sedated  years = 5 }
+        add_character_modifier = { modifier = eotg_mod_aug_sedated  years = 5 }
+    }
+}
+
+# The threat (spec §5A.3), unless already set (preset by .002, .013, .015 or
+# the debug effect). next_two is out when nobody else stands in the line.
+eotg_aug_inherit_roll_threat_effect = {
+    if = {
+        limit = { NOT = { has_variable = eotg_inh_threat } }
+        random_list = {
+            15 = {    # kill_ruler -> .018
+                modifier = { add = 10  var:eotg_inh_profile ?= flag:ledger }
+                modifier = { add = 35  var:eotg_inh_profile ?= flag:certain }
+                modifier = { add = 25  var:eotg_inh_bond ?= flag:rival }
+                modifier = { add = 15  var:eotg_inh_bond ?= flag:estranged }
+                modifier = { add = 15  var:eotg_inh_bond ?= flag:claimant }
+                modifier = { add = -10  var:eotg_inh_bond ?= flag:favourite }
+                modifier = { factor = 0.5  has_character_flag = eotg_flag_aug_inh_guarded }
+                set_variable = { name = eotg_inh_threat  value = flag:kill_ruler }
+            }
+            15 = {    # massacre -> .017
+                modifier = { add = 40  var:eotg_inh_profile ?= flag:rage }
+                modifier = { add = 5  var:eotg_inh_profile ?= flag:ledger }
+                modifier = { add = 10  var:eotg_inh_profile ?= flag:certain }
+                modifier = { add = 5  var:eotg_inh_bond ?= flag:estranged }
+                modifier = { add = 15  scope:eotg_inh_heir = { eotg_aug_pressure_storm = yes } }
+                modifier = { add = 5  scope:eotg_inh_heir = { eotg_aug_pressure_fracture = yes } }
+                set_variable = { name = eotg_inh_threat  value = flag:massacre }
+            }
+            10 = {    # next_two -> .016
+                modifier = { add = 5  var:eotg_inh_profile ?= flag:rage }
+                modifier = { add = 40  var:eotg_inh_profile ?= flag:ledger }
+                modifier = { add = 10  var:eotg_inh_profile ?= flag:certain }
+                modifier = { add = 20  var:eotg_inh_bond ?= flag:claimant }
+                modifier = { add = 25  scope:eotg_inh_heir = { has_character_flag = eotg_flag_aug_inh_marked } }
+                modifier = { factor = 0  eotg_aug_inherit_line_eligible = no }
+                set_variable = { name = eotg_inh_threat  value = flag:next_two }
+            }
+            10 = {    # self -> .019
+                modifier = { add = 40  var:eotg_inh_profile ?= flag:cold }
+                modifier = { add = 10  var:eotg_inh_bond ?= flag:favourite }
+                modifier = { add = 10  var:eotg_inh_bond ?= flag:dutiful }
+                modifier = { add = 10  scope:eotg_inh_heir = { stress_level >= 2 } }
+                modifier = { factor = 0.25  var:eotg_inh_profile ?= flag:certain }
+                set_variable = { name = eotg_inh_threat  value = flag:self }
+            }
+        }
+    }
+}
+
+# Fire the threat's event (spec §5.4.5): roll (no-op when preset); next_two
+# with nobody in the line becomes kill_ruler (the only name left is the
+# ruler's, §5.4.1); self while the heir is in the cells becomes a breakout
+# (massacre; .017 releases the heir). Callers: the .009 options,
+# eotg_aug_inherit_route_pattern_effect, .013 (violent a).
+eotg_aug_inherit_fire_threat_effect = {
+    eotg_aug_inherit_roll_threat_effect = yes
+    if = {
+        limit = {
+            var:eotg_inh_threat ?= flag:next_two
+            eotg_aug_inherit_line_eligible = no
+        }
+        set_variable = { name = eotg_inh_threat  value = flag:kill_ruler }
+    }
+    if = {
+        limit = {
+            var:eotg_inh_threat ?= flag:self
+            scope:eotg_inh_heir = { is_imprisoned = yes }
+        }
+        set_variable = { name = eotg_inh_threat  value = flag:massacre }
+    }
+    if = {
+        limit = { var:eotg_inh_threat ?= flag:kill_ruler }
+        trigger_event = { id = eotg_aug_inherit.018  days = { $DAYS_MIN$ $DAYS_MAX$ } }
+    }
+    else_if = {
+        limit = { var:eotg_inh_threat ?= flag:massacre }
+        trigger_event = { id = eotg_aug_inherit.017  days = { $DAYS_MIN$ $DAYS_MAX$ } }
+    }
+    else_if = {
+        limit = { var:eotg_inh_threat ?= flag:next_two }
+        trigger_event = { id = eotg_aug_inherit.016  days = { $DAYS_MIN$ $DAYS_MAX$ } }
+    }
+    else = {
+        trigger_event = { id = eotg_aug_inherit.019  days = { $DAYS_MIN$ $DAYS_MAX$ } }
+    }
+}
+
+# Every route into .009 (spec §5.3 loop guards): .009 runs once; after it,
+# the same route fires the threat with the same delay, and the tooltip says
+# the heir will not wait.
+eotg_aug_inherit_route_pattern_effect = {
+    if = {
+        limit = { has_character_flag = eotg_flag_aug_inh_pattern_seen }
+        custom_tooltip = eotg_aug_inherit.route_threat_tt
+        hidden_effect = {
+            eotg_aug_inherit_fire_threat_effect = { DAYS_MIN = $DAYS_MIN$  DAYS_MAX = $DAYS_MAX$ }
+        }
+    }
+    else = {
+        trigger_event = { id = eotg_aug_inherit.009  days = { $DAYS_MIN$ $DAYS_MAX$ } }
+    }
+}
+
+# The line (spec §5.4.1): saves eotg_inh_next_1 and eotg_inh_next_2, the first
+# two people in the ruler's line (places 1 to eotg_aug_inherit_line_places,
+# the same bound eotg_aug_inherit_line_eligible uses) who are not the heir.
+# Players are skipped on both paths (orchestrator ruling 2026-10-08: L13 must
+# never kill a human in multiplayer), so eotg_inh_second is never a player.
+# Loop shape: vanilla 07_dlc_ep3_scripted_effects.txt:2814 (while on a
+# local_var counter).
+# Exact places, lowest first, so the pick follows the line's order and is
+# not a random title heir (V-13). Place test: vanilla disinherit_effect,
+# common/scripted_effects/00_interaction_effects.txt:1620-1640.
+# Run before any death: deaths reorder the line.
+eotg_aug_inherit_pick_line_effect = {
+    save_temporary_scope_as = eotg_inh_line_owner
+    if = {
+        limit = { exists = scope:eotg_inh_next_1 }
+        clear_saved_scope = eotg_inh_next_1
+    }
+    if = {
+        limit = { exists = scope:eotg_inh_next_2 }
+        clear_saved_scope = eotg_inh_next_2
+    }
+    if = {
+        limit = { exists = primary_title }
+        primary_title = {
+            save_temporary_scope_as = eotg_inh_line_title
+            set_local_variable = { name = eotg_inh_line_place  value = 1 }
+            while = {
+                limit = {
+                    local_var:eotg_inh_line_place <= eotg_aug_inherit_line_places
+                    NOT = { exists = scope:eotg_inh_next_2 }
+                }
+                eotg_aug_inherit_line_slot_effect = { PLACE = local_var:eotg_inh_line_place }
+                change_local_variable = { name = eotg_inh_line_place  add = 1 }
+            }
+        }
+    }
+}
+
+# Title scope (the ruler's primary title), inside eotg_aug_inherit_pick_line_effect:
+# the person at place $PLACE$ fills the next empty slot.
+# UNVERIFIED-VANILLA (spec §9.1 V-13): that place 1 is the primary heir and the
+# places run in line order; check in game with 4+ people in the line.
+eotg_aug_inherit_line_slot_effect = {
+    if = {
+        limit = { NOT = { exists = scope:eotg_inh_next_2 } }
+        random_title_heir = {
+            limit = {
+                scope:eotg_inh_line_title = {
+                    place_in_line_of_succession = {
+                        target = prev
+                        value = $PLACE$
+                    }
+                }
+                is_alive = yes
+                NOT = { this = scope:eotg_inh_heir }
+                NOT = { this = scope:eotg_inh_line_owner }
+                is_ai = yes
+            }
+            if = {
+                limit = { exists = scope:eotg_inh_next_1 }
+                save_scope_as = eotg_inh_next_2
+            }
+            else = {
+                save_scope_as = eotg_inh_next_1
+            }
+        }
+    }
+}
+
+# The massacre picker (spec §5.4.2): eotg_aug_pick_victim_effect's body
+# (family factor 0.25, the Storm/Massacre convention; knights x1.5;
+# under-16s x0.25), excluding anyone already struck and the heir.
+eotg_aug_inherit_strike_effect = {
+    save_temporary_scope_as = eotg_aug_victim_owner
+    random_courtier = {
+        limit = {
+            eotg_aug_victim_candidate = yes
+            NOT = { has_character_flag = eotg_flag_aug_inh_struck }
+            NOT = { this = scope:eotg_inh_heir }
+        }
+        weight = {
+            base = 100
+            modifier = {
+                factor = 1.5
+                is_knight = yes
+            }
+            modifier = {
+                factor = 0.25
+                OR = {
+                    is_close_family_of = scope:eotg_aug_victim_owner
+                    is_spouse_of = scope:eotg_aug_victim_owner
+                }
+            }
+            modifier = {
+                factor = 0.25
+                age < 16
+            }
+        }
+        add_character_flag = { flag = eotg_flag_aug_inh_struck  days = 1 }
+        save_scope_as = $NAME$
+    }
+}
+
+# The heir's surgery (spec §5.4.3). HEIR scope; the ruler's physician
+# operates, so this is not eotg_aug_excision_surgery_effect (which reads the
+# patient's own access and fires end.002 to the patient). TABLE = physician /
+# back / self. Surgical odds, plus the resource: +10 death in the Storm band.
+# Stores eotg_inh_table_result on the ruler for .021.
+# Death: vanilla death_treatment (00_event_deaths.txt:214).
+eotg_aug_inherit_excision_effect = {
+    save_scope_value_as = { name = eotg_inh_table_kind  value = flag:$TABLE$ }
+    random_list = {
+        30 = {    # death: physician 40 (25 with access), back 50,
+                  # self 45 (30 with lifestyle_physician)
+            modifier = { add = 10  scope:eotg_inh_table_kind = flag:physician }
+            modifier = {
+                add = -15
+                scope:eotg_inh_table_kind = flag:physician
+                scope:eotg_inh_ruler = { eotg_has_physician_access = yes }
+            }
+            modifier = { add = 20  scope:eotg_inh_table_kind = flag:back }
+            modifier = { add = 15  scope:eotg_inh_table_kind = flag:self }
+            modifier = {
+                add = -15
+                scope:eotg_inh_table_kind = flag:self
+                scope:eotg_inh_ruler = { has_trait = lifestyle_physician }
+            }
+            modifier = { add = 5  scope:eotg_inh_ruler = { has_character_flag = eotg_flag_aug_inh_coerced } }
+            modifier = { add = 10  eotg_aug_pressure_storm = yes }
+            scope:eotg_inh_ruler = { set_variable = { name = eotg_inh_table_result  value = flag:dead } }
+            death = { death_reason = death_treatment }
+        }
+        30 = {    # survive, maimed: physician 30, back 40, self 30
+            modifier = { add = 10  scope:eotg_inh_table_kind = flag:back }
+            eotg_aug_excision_effect = yes
+            if = {
+                limit = { NOT = { has_trait = maimed } }
+                add_trait = maimed
+            }
+            scope:eotg_inh_ruler = { set_variable = { name = eotg_inh_table_result  value = flag:maimed } }
+        }
+        30 = {    # survive, clean: physician 30 (45 with access), back 10,
+                  # self 25 (40 with lifestyle_physician)
+                  # Base columns sum to 100 (back 50/40/10, ruling 2026-10-08);
+                  # coerced (+5) and Storm (+10) add death weight on top.
+            modifier = {
+                add = 15
+                scope:eotg_inh_table_kind = flag:physician
+                scope:eotg_inh_ruler = { eotg_has_physician_access = yes }
+            }
+            modifier = { add = -20  scope:eotg_inh_table_kind = flag:back }
+            modifier = { add = -5  scope:eotg_inh_table_kind = flag:self }
+            modifier = {
+                add = 15
+                scope:eotg_inh_table_kind = flag:self
+                scope:eotg_inh_ruler = { has_trait = lifestyle_physician }
+            }
+            eotg_aug_excision_effect = yes
+            scope:eotg_inh_ruler = { set_variable = { name = eotg_inh_table_result  value = flag:clean } }
+        }
+    }
+}
+
+# Tree only (spec §5A.4): confine the heir, then the hidden breakout roll.
+# A breakout sends .017 (the heir comes out of the ward); otherwise .023.
+# TYPE = house_arrest ("confined to quarters") / dungeon ("the cells").
+# OUTCOME as eotg_aug_inherit_confine_effect: no for custody after L13 (.016 a).
+# Callers: .008 (a, b), .009 (a, b), .013 (leave b, violent b), .016 (a),
+# .024 (b).
+eotg_aug_inherit_ward_effect = {
+    eotg_aug_inherit_confine_effect = { TYPE = $TYPE$  OUTCOME = $OUTCOME$ }
+    custom_tooltip = eotg_aug_inherit.ward_tt
+    hidden_effect = {
+        eotg_aug_inherit_roll_effect = { CHANCE = eotg_aug_inherit_breakout_chance  NAME = eotg_inh_breakout }
+        if = {
+            limit = { exists = scope:eotg_inh_breakout }
+            set_variable = { name = eotg_inh_threat  value = flag:massacre }
+            trigger_event = { id = eotg_aug_inherit.017  days = { 90 180 } }
+        }
+        else = {
+            trigger_event = { id = eotg_aug_inherit.023  days = { 90 180 } }
+        }
+    }
+}
+
+# ── The leaf effects (spec §5.5.3) ───────────────────────────────────────────
+# Each outcome's mechanics, once. Tree options add only what is
+# option-specific (extra opinion, stress helpers, follow-up events). Each sets
+# var:eotg_inh_outcome (flag:l1-l17) on the ruler, kept after close for the
+# observer run (§9 item 13).
+
+# L1-L3: the excision. TABLE = physician (major_gold_value) / back / self
+# (medium_gold_value). The surgery is hidden; the desc gave the odds in words.
+# Survivors (L1 clean, L2 maimed): the heir's gratitude, +100 prestige; L2
+# adds the heir's reassurance. Callers: .010 (a, b), .028 (excise).
+eotg_aug_inherit_leaf_excise_effect = {
+    save_scope_value_as = { name = eotg_inh_table_pay  value = flag:$TABLE$ }
+    if = {
+        limit = { scope:eotg_inh_table_pay = flag:physician }
+        remove_short_term_gold = major_gold_value
+    }
+    else = {
+        remove_short_term_gold = medium_gold_value
+    }
+    custom_tooltip = eotg_aug_inherit.010.tt
+    hidden_effect = {
+        scope:eotg_inh_heir = { eotg_aug_inherit_excision_effect = { TABLE = $TABLE$ } }
+        if = {
+            limit = { var:eotg_inh_table_result ?= flag:dead }
+            set_variable = { name = eotg_inh_outcome  value = flag:l3 }
+        }
+        else = {
+            if = {
+                limit = { var:eotg_inh_table_result ?= flag:maimed }
+                set_variable = { name = eotg_inh_outcome  value = flag:l2 }
+                scope:eotg_inh_heir = {
+                    add_opinion = { modifier = eotg_opinion_aug_reassured  target = scope:eotg_inh_ruler  years = 5 }
+                }
+            }
+            else = {
+                set_variable = { name = eotg_inh_outcome  value = flag:l1 }
+            }
+            scope:eotg_inh_heir = {
+                add_opinion = { modifier = eotg_opinion_aug_grateful_patient  target = scope:eotg_inh_ruler  years = 10 }
+            }
+            add_prestige = 100
+        }
+    }
+}
+
+# L4: terms. The heir sedated (5 years) and reassured, the ruler under
+# eotg_mod_aug_inh_terms (10 years), H-15. The tree adds .022 a year later.
+# Callers: .006 (a), .020 (b), .024 (c), .007 (b) and .009 (c) when .006 has
+# already run, .028 (terms).
+eotg_aug_inherit_leaf_terms_effect = {
+    scope:eotg_inh_heir = {
+        eotg_aug_inherit_sedate_effect = yes
+        add_opinion = { modifier = eotg_opinion_aug_reassured  target = scope:eotg_inh_ruler  years = 5 }
+        eotg_add_fracture_risk = { AMOUNT = -15 }
+    }
+    add_character_modifier = { modifier = eotg_mod_aug_inh_terms  years = 10 }
+    set_variable = { name = eotg_inh_outcome  value = flag:l4 }
+}
+
+# L5: confinement. TYPE = house_arrest (sedated too) / dungeon. OUTCOME = no
+# when it is a follow-up inside another leaf (custody after L13 / L14), so the
+# leaf keeps its own outcome. Vanilla imprison shape:
+# events/activities/hunt_activity/hunt_events.txt:529 (house_arrest),
+# imperial_examination_events.txt:2214 (dungeon).
+# Callers: eotg_aug_inherit_ward_effect, .016 (a), .017 (a, c), .028
+# (confine; the next_two and massacre follow-ups).
+eotg_aug_inherit_confine_effect = {
+    save_scope_value_as = { name = eotg_inh_confine_type  value = flag:$TYPE$ }
+    if = {
+        limit = { scope:eotg_inh_heir = { is_imprisoned = no } }
+        imprison = {
+            target = scope:eotg_inh_heir
+            type = $TYPE$
+        }
+    }
+    if = {
+        limit = { scope:eotg_inh_confine_type = flag:house_arrest }
+        scope:eotg_inh_heir = { eotg_aug_inherit_sedate_effect = yes }
+    }
+    if = {
+        limit = { always = $OUTCOME$ }
+        set_variable = { name = eotg_inh_outcome  value = flag:l5 }
+    }
+}
+
+# L6: exile, a paid berth out (no destination named; the heir stays in the
+# line). STYLE = plain (H+5) / credit (medium_gold_value, reassured, H-5) /
+# disinherit (vanilla disinherit_effect, H+8). The heir leaves court by
+# move_to_pool, as end.011. Callers: .011 (a plain, b credit, c disinherit),
+# .003 (b_ref plain), .013 (leave a plain), .028 (exile).
+eotg_aug_inherit_leaf_exile_effect = {
+    save_scope_value_as = { name = eotg_inh_exile_style  value = flag:$STYLE$ }
+    if = {
+        limit = { scope:eotg_inh_exile_style = flag:credit }
+        remove_short_term_gold = medium_gold_value
+        scope:eotg_inh_heir = {
+            add_opinion = { modifier = eotg_opinion_aug_reassured  target = scope:eotg_inh_ruler  years = 5 }
+            eotg_add_fracture_risk = { AMOUNT = -5 }
+        }
+    }
+    else_if = {
+        limit = { scope:eotg_inh_exile_style = flag:disinherit }
+        scope:eotg_inh_heir = {
+            disinherit_effect = { DISINHERITOR = scope:eotg_inh_ruler }
+            eotg_add_fracture_risk = { AMOUNT = 8 }
+        }
+    }
+    else = {
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 5 } }
+    }
+    scope:eotg_inh_heir = {
+        if = {
+            limit = { is_imprisoned = yes }
+            release_from_prison = yes
+        }
+        move_to_pool = yes
+    }
+    set_variable = { name = eotg_inh_outcome  value = flag:l6 }
+}
+
+# L7: struck from the line (vanilla disinherit_effect,
+# common/scripted_effects/00_interaction_effects.txt:1507), H-5. COST = yes:
+# -150 prestige, the event-side stand-in for the interaction's price.
+# Callers: .007 (a, no), .013 immediate (yes), .028 (disinherit).
+eotg_aug_inherit_leaf_disinherit_effect = {
+    scope:eotg_inh_heir = {
+        disinherit_effect = { DISINHERITOR = scope:eotg_inh_ruler }
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+    }
+    if = {
+        limit = { always = $COST$ }
+        add_prestige = -150
+    }
+    set_variable = { name = eotg_inh_outcome  value = flag:l7 }
+}
+
+# L8: lost in transit. The shuttle never docks; the heir is on a ship
+# elsewhere. Exposure is always a witness who saw the heir alive (hidden roll;
+# the toast only on the tree path). Callers: .012 (a), .028 (transit).
+eotg_aug_inherit_leaf_transit_effect = {
+    remove_short_term_gold = medium_gold_value
+    scope:eotg_inh_heir = {
+        disinherit_effect = { DISINHERITOR = scope:eotg_inh_ruler }
+        eotg_add_fracture_risk = { AMOUNT = -5 }
+        set_variable = { name = eotg_aug_inh_presumed_dead  value = yes }
+    }
+    add_character_flag = eotg_flag_aug_inh_buried_empty
+    hidden_effect = {
+        eotg_aug_inherit_roll_effect = { CHANCE = eotg_aug_inherit_exposed_chance  NAME = eotg_inh_exposed }
+        if = {
+            limit = { exists = scope:eotg_inh_exposed }
+            every_vassal = {
+                limit = { opinion = { target = scope:eotg_inh_ruler  value < 0 } }
+                add_opinion = { modifier = eotg_opinion_aug_disgust  target = scope:eotg_inh_ruler  years = 5 }
+            }
+            add_prestige = -100
+            if = {
+                limit = { eotg_aug_inherit_tree_runs = yes }
+                send_interface_toast = {
+                    title = eotg_aug_inherit.012.exposed_tt
+                    left_icon = scope:eotg_inh_heir
+                }
+            }
+        }
+    }
+    scope:eotg_inh_heir = { move_to_pool = yes }
+    set_variable = { name = eotg_inh_outcome  value = flag:l8 }
+}
+
+# L9 / L10: abdication to the heir (spec §5.4.4). eotg_aug_abdicate_effect's
+# body without the restraints and end.031: this ruler is sound.
+# set_player_character: tgp_dynastic_cycle_decisions.txt:2155-2170; depose:
+# stress_threshold_events.txt:16775. WARDEN = yes: the old ruler keeps the
+# controls through the Containment Regency (Q7 / CB-02 caveat: the engine may
+# end a capable adult's regency early; .026 has a "none" variant).
+# NOTIFY = yes (tree) fires .026 to the heir in 3 days (owner Q3);
+# .028 passes no. Callers: .014 (a, b), .028 (abdicate_warden, abdicate_quiet).
+eotg_aug_inherit_abdicate_effect = {
+    save_scope_as = eotg_inh_old_ruler_s
+    if = {
+        limit = { always = $WARDEN$ }
+        set_variable = { name = eotg_inh_outcome  value = flag:l9 }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = -10 } }
+    }
+    else = {
+        set_variable = { name = eotg_inh_outcome  value = flag:l10 }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 10 } }
+    }
+    if = {
+        limit = { always = $NOTIFY$ }
+        scope:eotg_inh_heir = {
+            set_variable = { name = eotg_inh_old_ruler  value = scope:eotg_inh_old_ruler_s }
+        }
+    }
+    if = {
+        limit = {
+            is_ai = no
+            scope:eotg_inh_heir = { is_ai = yes }
+        }
+        set_player_character = scope:eotg_inh_heir
+    }
+    depose = yes
+    # UNVERIFIED-VANILLA (spec §5.4.4, Q7 / CB-02): the titles have passed by
+    # the next line, and the engine keeps a regency over a capable adult.
+    if = {
+        limit = { always = $WARDEN$ }
+        scope:eotg_inh_heir = {
+            eotg_aug_start_containment_regency_effect = { KEEPER = scope:eotg_inh_old_ruler_s  SWING = 60 }
+        }
+    }
+    if = {
+        limit = { always = $NOTIFY$ }
+        scope:eotg_inh_heir = {
+            trigger_event = { id = eotg_aug_inherit.026  days = 3 }
+        }
+    }
+}
+
+# L11: the second in line removes the heir. LEAVE = yes "with your leave";
+# no: "without your leave", and the second keeps a vanilla secret_murder
+# (common/secret_types/00_secret_types.txt:326). Kinslayer first (M4 policy).
+# Callers: .027 immediate, .028 (coup).
+eotg_aug_inherit_leaf_coup_effect = {
+    if = {
+        limit = {
+            exists = scope:eotg_inh_second
+            scope:eotg_inh_second = { is_alive = yes }
+        }
+        scope:eotg_inh_second = {
+            add_kinslayer_trait_or_nothing_effect = { VICTIM = scope:eotg_inh_heir }
+            if = {
+                limit = { NOT = { always = $LEAVE$ } }
+                add_secret = {
+                    type = secret_murder
+                    target = scope:eotg_inh_heir
+                }
+            }
+        }
+        scope:eotg_inh_heir = {
+            death = {
+                death_reason = death_murder
+                killer = scope:eotg_inh_second
+            }
+        }
+        set_variable = { name = eotg_inh_outcome  value = flag:l11 }
+    }
+}
+
+# L12: the heir's own end. Flatline: vanilla death_suicide
+# (00_event_deaths.txt:243); otherwise the mod's cascade death. The ruler:
+# major stress; 25% depressed_1 unless callous. Value-neutral (lore review).
+# Callers: .019 immediate, .028 (heir_end).
+eotg_aug_inherit_leaf_heir_end_effect = {
+    if = {
+        limit = { var:eotg_inh_profile ?= flag:cold }
+        scope:eotg_inh_heir = { death = { death_reason = death_suicide } }
+    }
+    else = {
+        scope:eotg_inh_heir = { eotg_aug_cascade_death_effect = yes }
+    }
+    stress_impact = { base = major_stress_impact_gain }
+    if = {
+        limit = {
+            NOT = { has_trait = callous }
+            NOT = { has_trait = depressed_1 }
+        }
+        random = {
+            chance = 25
+            add_trait = depressed_1
+        }
+    }
+    set_variable = { name = eotg_inh_outcome  value = flag:l12 }
+}
+
+# L13 (required): the next two in line (spec §5.4.1). The heir arranges both
+# deaths (death_murder_known, killer the heir, kinslayer first). Guarded: a
+# victim at the ruler's court survives on 50%, wounded instead, but at least
+# one always dies. Saves for loc: eotg_inh_killed_a / _b, eotg_inh_spared,
+# eotg_inh_child_victim. One name only: H+10 (the forecast ran past the list).
+# Callers: .016 immediate, .028 (next_two).
+eotg_aug_inherit_leaf_next_two_effect = {
+    eotg_aug_inherit_pick_line_effect = yes
+    if = {
+        limit = { exists = scope:eotg_inh_next_1 }
+        # The first may be spared only if a second exists to die.
+        if = {
+            limit = {
+                exists = scope:eotg_inh_next_2
+                has_character_flag = eotg_flag_aug_inh_guarded
+                scope:eotg_inh_next_1 = { is_courtier_of = scope:eotg_inh_ruler }
+            }
+            random = {
+                chance = 50
+                scope:eotg_inh_next_1 = { save_scope_as = eotg_inh_spared }
+            }
+        }
+        if = {
+            limit = { exists = scope:eotg_inh_spared }
+            scope:eotg_inh_next_1 = { increase_wounds_effect = { REASON = attacked } }
+        }
+        else = {
+            scope:eotg_inh_next_1 = { save_scope_as = eotg_inh_killed_a }
+            scope:eotg_inh_heir = { add_kinslayer_trait_or_nothing_effect = { VICTIM = scope:eotg_inh_next_1 } }
+            if = {
+                limit = { scope:eotg_inh_next_1 = { age < 16 } }
+                scope:eotg_inh_next_1 = { save_scope_as = eotg_inh_child_victim }
+            }
+            scope:eotg_inh_next_1 = {
+                death = {
+                    death_reason = death_murder_known
+                    killer = scope:eotg_inh_heir
+                }
+            }
+        }
+    }
+    if = {
+        limit = { exists = scope:eotg_inh_next_2 }
+        # Spared only if the first already died.
+        if = {
+            limit = {
+                exists = scope:eotg_inh_killed_a
+                has_character_flag = eotg_flag_aug_inh_guarded
+                scope:eotg_inh_next_2 = { is_courtier_of = scope:eotg_inh_ruler }
+            }
+            random = {
+                chance = 50
+                scope:eotg_inh_next_2 = { save_scope_as = eotg_inh_spared }
+            }
+        }
+        if = {
+            limit = { scope:eotg_inh_spared ?= scope:eotg_inh_next_2 }
+            scope:eotg_inh_next_2 = { increase_wounds_effect = { REASON = attacked } }
+        }
+        else = {
+            if = {
+                limit = { exists = scope:eotg_inh_killed_a }
+                scope:eotg_inh_next_2 = { save_scope_as = eotg_inh_killed_b }
+            }
+            else = {
+                scope:eotg_inh_next_2 = { save_scope_as = eotg_inh_killed_a }
+            }
+            scope:eotg_inh_heir = { add_kinslayer_trait_or_nothing_effect = { VICTIM = scope:eotg_inh_next_2 } }
+            if = {
+                limit = {
+                    NOT = { exists = scope:eotg_inh_child_victim }
+                    scope:eotg_inh_next_2 = { age < 16 }
+                }
+                scope:eotg_inh_next_2 = { save_scope_as = eotg_inh_child_victim }
+            }
+            scope:eotg_inh_next_2 = {
+                death = {
+                    death_reason = death_murder_known
+                    killer = scope:eotg_inh_heir
+                }
+            }
+        }
+    }
+    else = {
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 10 } }
+    }
+    set_variable = { name = eotg_inh_outcome  value = flag:l13 }
+}
+
+# L14 (required): the massacre (spec §5.4.2). From the ward: release first.
+# eotg_aug_inherit_massacre_count_value dead (1-4), then one wounded; an
+# empty court wounds the ruler instead. Episode deaths: no kinslayer (M4).
+# Saves eotg_inh_dead_1..4, eotg_inh_wounded, eotg_inh_from_ward;
+# var:eotg_inh_dead_count. Callers: .017 immediate, .028 (massacre).
+eotg_aug_inherit_leaf_massacre_effect = {
+    if = {
+        limit = { scope:eotg_inh_heir = { is_imprisoned = yes } }
+        save_scope_value_as = { name = eotg_inh_from_ward  value = yes }
+        scope:eotg_inh_heir = { release_from_prison = yes }
+    }
+    save_scope_value_as = { name = eotg_inh_massacre_n  value = eotg_aug_inherit_massacre_count_value }
+    set_variable = { name = eotg_inh_dead_count  value = 0 }
+    eotg_aug_inherit_strike_effect = { NAME = eotg_inh_dead_1 }
+    if = {
+        limit = { scope:eotg_inh_massacre_n >= 2 }
+        eotg_aug_inherit_strike_effect = { NAME = eotg_inh_dead_2 }
+    }
+    if = {
+        limit = { scope:eotg_inh_massacre_n >= 3 }
+        eotg_aug_inherit_strike_effect = { NAME = eotg_inh_dead_3 }
+    }
+    if = {
+        limit = { scope:eotg_inh_massacre_n >= 4 }
+        eotg_aug_inherit_strike_effect = { NAME = eotg_inh_dead_4 }
+    }
+    eotg_aug_inherit_strike_effect = { NAME = eotg_inh_wounded }
+    if = {
+        limit = { exists = scope:eotg_inh_dead_1 }
+        scope:eotg_inh_dead_1 = { death = { death_reason = death_murder_known  killer = scope:eotg_inh_heir } }
+        change_variable = { name = eotg_inh_dead_count  add = 1 }
+    }
+    if = {
+        limit = { exists = scope:eotg_inh_dead_2 }
+        scope:eotg_inh_dead_2 = { death = { death_reason = death_murder_known  killer = scope:eotg_inh_heir } }
+        change_variable = { name = eotg_inh_dead_count  add = 1 }
+    }
+    if = {
+        limit = { exists = scope:eotg_inh_dead_3 }
+        scope:eotg_inh_dead_3 = { death = { death_reason = death_murder_known  killer = scope:eotg_inh_heir } }
+        change_variable = { name = eotg_inh_dead_count  add = 1 }
+    }
+    if = {
+        limit = { exists = scope:eotg_inh_dead_4 }
+        scope:eotg_inh_dead_4 = { death = { death_reason = death_murder_known  killer = scope:eotg_inh_heir } }
+        change_variable = { name = eotg_inh_dead_count  add = 1 }
+    }
+    if = {
+        limit = { exists = scope:eotg_inh_wounded }
+        scope:eotg_inh_wounded = { increase_wounds_effect = { REASON = attacked } }
+    }
+    if = {
+        limit = { NOT = { exists = scope:eotg_inh_dead_1 } }
+        increase_wounds_effect = { REASON = attacked }
+    }
+    add_character_modifier = { modifier = eotg_mod_aug_inh_emptied_court  years = 5 }
+    set_variable = { name = eotg_inh_outcome  value = flag:l14 }
+}
+
+# L15 (required): the heir comes for the ruler. MOD is the option's roll
+# modifier (a number or a script value). Success: kinslayer on the heir
+# (VICTIM the ruler), H-10, the chain closes, and the ruler dies
+# (death_murder_known, killer the heir; ep3_contract_events.txt:8779). The
+# event to the heir is queued before the death (heir.006's order). Failure:
+# the ruler is wounded, H+10, and NOTIFY sends .024. The AI default after a
+# failure (.024 a) is the caller's.
+# Callers: .018 (a, b, c; NOTIFY = yes), .028 (attempt; NOTIFY = no).
+eotg_aug_inherit_leaf_attempt_effect = {
+    save_scope_value_as = { name = eotg_inh_attempt_mod  value = $MOD$ }
+    eotg_aug_inherit_roll_effect = { CHANCE = eotg_aug_inherit_attempt_chance  NAME = eotg_inh_attempt_ok }
+    if = {
+        limit = { exists = scope:eotg_inh_attempt_ok }
+        save_scope_as = eotg_inh_old_ruler_s
+        save_scope_value_as = { name = eotg_inh_profile_s  value = var:eotg_inh_profile }
+        set_variable = { name = eotg_inh_outcome  value = flag:l15 }
+        scope:eotg_inh_heir = {
+            eotg_add_fracture_risk = { AMOUNT = -10 }
+            if = {
+                limit = { always = $NOTIFY$ }
+                trigger_event = { id = eotg_aug_inherit.025  days = 3 }
+            }
+            add_kinslayer_trait_or_nothing_effect = { VICTIM = scope:eotg_inh_old_ruler_s }
+        }
+        eotg_aug_inherit_close_effect = yes
+        death = {
+            death_reason = death_murder_known
+            killer = scope:eotg_inh_heir
+        }
+    }
+    else = {
+        increase_wounds_effect = { REASON = attacked }
+        scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 10 } }
+        if = {
+            limit = { always = $NOTIFY$ }
+            send_interface_toast = {
+                title = eotg_aug_inherit.018.fail_tt
+                left_icon = scope:eotg_inh_heir
+            }
+            trigger_event = { id = eotg_aug_inherit.024  days = 1 }
+        }
+    }
+}
+
+# L16: the ruler chooses the cascade (needs Overclocked). The full path:
+# eotg_trigger_neurofracture (fracture.0001, the cooldown, the Countdown's
+# end). Heir H-20, mutual admiration, and eotg_flag_aug_heir_arc_done (the
+# arc's premise, an heir watching the ruler break, is spent).
+# Callers: .020 (a), .028 (ruler_cascade).
+eotg_aug_inherit_leaf_ruler_cascade_effect = {
+    set_variable = { name = eotg_inh_outcome  value = flag:l16 }
+    add_character_flag = eotg_flag_aug_heir_arc_done
+    scope:eotg_inh_heir = {
+        eotg_add_fracture_risk = { AMOUNT = -20 }
+        add_opinion = { modifier = eotg_opinion_aug_admiration  target = scope:eotg_inh_ruler  years = 10 }
+    }
+    add_opinion = { modifier = eotg_opinion_aug_admiration  target = scope:eotg_inh_heir  years = 10 }
+    eotg_trigger_neurofracture = yes
+}
+
+# L17: the ruler kills the heir. REASON = murder (death_murder, in secret;
+# fracture.txt:187) / execution (death_execution) / guards
+# (death_slaughtered_by_guards, 00_event_deaths.txt:971). Vanilla kinslayer
+# on the ruler first (00_secret_effects.txt:433; M4 policy).
+# Callers: .009 (e), .013 (violent c), .016 (b), .017 (b), .024 (a),
+# .028 (kill_heir; the attempt follow-up).
+eotg_aug_inherit_leaf_kill_heir_effect = {
+    save_scope_value_as = { name = eotg_inh_kill_kind  value = flag:$REASON$ }
+    add_kinslayer_trait_or_nothing_effect = { VICTIM = scope:eotg_inh_heir }
+    set_variable = { name = eotg_inh_outcome  value = flag:l17 }
+    if = {
+        limit = { scope:eotg_inh_kill_kind = flag:murder }
+        scope:eotg_inh_heir = { death = { death_reason = death_murder  killer = scope:eotg_inh_ruler } }
+    }
+    else_if = {
+        limit = { scope:eotg_inh_kill_kind = flag:guards }
+        scope:eotg_inh_heir = { death = { death_reason = death_slaughtered_by_guards  killer = scope:eotg_inh_ruler } }
+    }
+    else = {
+        scope:eotg_inh_heir = { death = { death_reason = death_execution  killer = scope:eotg_inh_ruler } }
+    }
+}
+
+# DEBUG ONLY (spec §9.1): never called by script. Console:
+#   effect eotg_aug_inherit_debug_effect = { PROFILE = rage  BOND = dutiful  THREAT = none }
+# Overwrites the profile and bond; sets the threat unless THREAT = none.
+eotg_aug_inherit_debug_effect = {
+    set_variable = { name = eotg_inh_profile  value = flag:$PROFILE$ }
+    set_variable = { name = eotg_inh_bond  value = flag:$BOND$ }
+    save_temporary_scope_value_as = { name = eotg_inh_debug_threat  value = flag:$THREAT$ }
+    if = {
+        limit = { NOT = { scope:eotg_inh_debug_threat = flag:none } }
+        set_variable = { name = eotg_inh_threat  value = flag:$THREAT$ }
     }
 }
