@@ -12,7 +12,7 @@ being made. It runs with the main mod's shaders, cybernetics, Frontier and Uncla
   - **France and Spain:** 185 counties are independent **Unsworn** counties. Six small vanilla realms remain
     there as neighbours: feudal, republic, clan, theocracy, tribal and feudal.
   - **Outside the zone** the map and titles are vanilla but empty.
-    - Every county belongs to one of 35 inert **Void** holders, one per empire, painted near-black.
+    - Every county belongs to one of 35 inert **Off-Map** holders, one per empire, painted near-black.
     - Their non-capital baronies have no holding.
     - Every living history character out there dies the day before the start.
     - Nothing out there plays, raises troops or goes to war.
@@ -188,7 +188,7 @@ the bookmark entries. The table below is rewritten by the generator.
 | mainland | k_france | c_rouen | 140 William | feudal_government |
 | mainland | k_navarra | c_ipuskoa | 200164 Beila | tribal_government |
 
-Every other county of e_france, e_spain (185) is an independent Unsworn county; every county outside the zone (3187) belongs to one of 35 void holders.
+Every other county of e_france, e_spain (185) is an independent Unsworn county; every county outside the zone (3187) belongs to one of 35 offmap holders.
 <!-- END GENERATED TABLE -->
 
 ## How it is built (why it loads)
@@ -231,16 +231,16 @@ Every other county of e_france, e_spain (185) is an independent Unsworn county; 
   - The main mod's `eotg_unclaimed_game_start_effect` adopts each one as it is, so there is no
     `create_character` and no title transfer at game start.
   - That is lighter than the single-seed split: about 190 adoptions against 190 creations and transfers.
-- **Void holders** use the sub-mod's own `eotg_test_void_government`, not the Unclaimed government. If they
+- **Off-Map holders** use the sub-mod's own `eotg_test_offmap_government`, not the Unclaimed government. If they
   used the Unclaimed government, the main mod's split would turn them into about 3,200 placeholders. They are
-  mortal, and the engine picks their heirs. Two things keep a heir under the void government:
+  mortal, and the engine picks their heirs. Two things keep a heir under the offmap government:
   - `use_as_base_on_landed` and `sticky_government` in the government;
-  - a safety net on `on_title_gain`: a new holder of a county marked `eotg_test_void_county` at game start is
-    switched to it, unless he also holds a county outside the void.
+  - a safety net on `on_title_gain`: a new holder of a county marked `eotg_test_offmap_county` at game start is
+    switched to it, unless he also holds a county outside the offmap.
 - **War immunity:** `common/scripted_triggers/eotg_vanilla_overrides_triggers.txt` has the **same file name** as
   the main mod's override, so it replaces it.
   - Its body is vanilla's `herders_and_tributary_constraints` plus the main mod's two `# EOTG` lines plus two
-    `# EOTG TEST` lines for void holders.
+    `# EOTG TEST` lines for offmap holders.
   - The generator asserts that the diff from vanilla is exactly those four lines (pitfalls §16).
   - **Regenerate whenever the main mod's override, or vanilla's trigger, changes.** The generator stops if the
     main mod's file is no longer vanilla plus its two lines.
@@ -272,10 +272,10 @@ python docs/test_submods/british_isles/tools/gen_history.py [--game "<CK3>/game"
   and Corsica alike. Today the main mod ships only `map_data/seasons.txt`, and a sub-mod can't practically ship
   the whole vanilla map back.
 - **Only the 1066 start exists.** Custom start dates point at people who are now dead. Don't use them.
-- **The outside world is not impassable.** Void land is ordinary land with no levies and no wars. Armies can walk
+- **The outside world is not impassable.** Off-Map land is ordinary land with no levies and no wars. Armies can walk
   into it, but no casus belli is offered against it.
 - **Generated barons:** Isles and pocket counties still get vanilla's engine-generated mayors and bishops, which is
-  intended. Void and Unsworn counties don't, because their non-capital baronies have no holding.
+  intended. Off-Map and Unsworn counties don't, because their non-capital baronies have no holding.
 - **Tiger noise:** history is now mod files, so Tiger reports vanilla's own history quirks in them. Count only
   findings on lines marked `# EOTG TEST` or in `eotg_test_bi_*` files.
   - Tiger 1.17 also doesn't know the 1.20 `rite` field (about 78,000 lines). That is benign.
