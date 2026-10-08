@@ -31,6 +31,17 @@ The owner accepted every orchestrator recommendation ("follow your recommendatio
 - **Names (lore-keeper, UL2 and UL3):**
   - the status and modifier is **"Unclaimed Region"**;
   - the people and trait `eotg_unclaimed_folk` are **"the Unsworn"**;
+  - **Government name (owner, 2026-10-08):** `eotg_unclaimed_government` and its `_adjective` are both
+    **"Unsworn"**, after vanilla's Herder/Pastureland pattern: the people and their government are Unsworn. The
+    realm and map label (`_realm`) and the status stay **"Unclaimed Region"**. The `_desc` opens: "No ruler holds
+    this Region, and the Unsworn who live here want none."
+    Rejected names, with the lore-keeper's reasons:
+    - "Drifter": the Drift Wars and the Hollow Drift are canon, and "drifter peoples" are cultures.
+    - "Unbound": the Codex Unbound.
+    - "Commons": a pantheon role.
+    - "Homestead": implies a registered claim.
+    - "Free": suggests a movement.
+    This closes **UL2**.
   - the interaction is **"Raise Your Colours"**, not "Stake a Claim". CK3's [claim|E] concept means a claim
     pressed in war, and this interaction leaves none. The keys can stay `eotg_unclaimed_*`.
   - Interaction description: "Pay for the crews, the guns and the flag, and this Region is yours for as long as
@@ -492,7 +503,7 @@ It stays with its claimant, Unsettled, with no time limit. A lapse after N years
 ---
 
 ## 14. Loc surface (`localization/english/eotg_unclaimed_l_english.yml`; UTF-8 with exactly one BOM, Canadian English, bare `[x.GetName]`)
-- **Government:** `eotg_unclaimed_government` ("Unclaimed"), `_adjective`, `_realm` ("Unclaimed Region"), `_desc`, `_with_icon`. The icon is vanilla `@government_type_herder!` until art arrives. Also the flag line `eotg_government_is_unclaimed` (it shows in the government tooltip, as vanilla's flag lines do, `government_l_english.yml:272-285`).
+- **Government:** `eotg_unclaimed_government` ("Unsworn"), `_adjective` ("Unsworn"), `_realm` ("Unclaimed Region"), `_desc` (opens "No ruler holds this Region, and the Unsworn who live here want none."; §D), `_with_icon`. The icon is vanilla `@government_type_herder!` until art arrives. Also the flag line `eotg_government_is_unclaimed` (it shows in the government tooltip, as vanilla's flag lines do, `government_l_english.yml:272-285`).
 - **Trait:** `trait_eotg_unclaimed_folk`, `trait_eotg_unclaimed_folk_desc`.
 - **Modifier:** `eotg_unclaimed_mod_unclaimed`, `eotg_unclaimed_mod_unclaimed_desc`.
 - **Interaction:**
@@ -513,7 +524,7 @@ It stays with its claimant, Unsettled, with no time limit. A lapse after N years
 - **LAW AT 866** (`docs/lore/REVIEW_866.md`, draft errata): there is no authority above the polity. **A claim is asserted under the claimant's own law and recognized by no one else.** No text may imply a registry, a grant from above, or a recognized title to empty space. That is why the transfer type is `granted` and the wording is "stake a claim".
 - **Who lives there:** the placeholder is "the scattered people" (owner). Frontier §R allows Exodus arrivals and their descendants (ongoing since 131 AG), prospectors and isolated communities. Text stays time-neutral, as in all of Frontier (`frontier_v1.md` §V).
 - **Culture and faith** come from the county by scope. **UL1:** is it canon-safe that unclaimed space carries a culture and faith (the province's) at 866, or should the briefs mark some unclaimed space as mixed?
-- **UL2:** the player-facing term: "Unclaimed Region" or another word in the setting's register (vault question if no brief settles it).
+- **UL2 (closed 2026-10-08, §D):** the player-facing term. Status and realm label "Unclaimed Region"; government, adjective and people "Unsworn".
 - **UL3:** the interaction name ("Stake a Claim").
 
 ---
@@ -586,7 +597,7 @@ Batch 1 and Batch 2 are built on `claude/frontier-unclaimed-cloud` (from Frontie
    - the character flag `eotg_unclaimed_splitting`;
    - the global variable `eotg_unclaimed_sweep_fixed` (what the last sweep fixed; the readout shows it);
    - the saved scopes `eotg_unclaimed_previous`, `_former`, `_stray`, `_stray_holder`, `_probe` and `_debug_reader`.
-8. **Names:** the trait shows as "Unsworn" (one person; the people are "the Unsworn"). The interaction is "Raise Your Colours" (§D), and its key stays `eotg_unclaimed_claim_interaction`.
+8. **Names:** the trait shows as "Unsworn" (one person; the people are "the Unsworn"). The government and its adjective are "Unsworn"; its realm label stays "Unclaimed Region" (§D, owner 2026-10-08). The interaction is "Raise Your Colours" (§D), and its key stays `eotg_unclaimed_claim_interaction`.
 9. **Interaction category:** `interaction_category_diplomacy` (UNVERIFIED-VANILLA). The icon is the mod's existing placeholder `icon_personal`.
 10. **Placeholders and Phase 3a hooks:** an expedition to an Unclaimed Region fires `eotg_frontier_on_explored` with root = the placeholder, because Frontier hooks fire on the county holder. Listeners must not assume a real ruler there.
 11. **Test map:** c_aphion_seam and c_helios_shoal start unclaimed. They are adjacent, between them they border both big realms, and neither is anyone's only county. c_aphion_seam was listed among the development-10 counties for cybernetics §1c, but no ruler's gate read it.
@@ -600,7 +611,7 @@ Batch 1 and Batch 2 are built on `claude/frontier-unclaimed-cloud` (from Frontie
 - ask: build Batch 1 of `docs/specs/frontier_unclaimed_regions.md` (government, trait, template, triggers, effects except claim, modifier, the four vanilla hooks, the `herders_and_tributary_constraints` key override, two debug decisions, the vanilla sub-mod change), then hand V-U1 to V-U13 to the human through QA. The cartographer adds the seed and 2–3 unclaimed counties to the test map.
 - files: docs/specs/frontier_unclaimed_regions.md
 - needs-loc: §14 (about 30 keys) once Batch 1 lands
-- needs-lore: UL1 culture and faith in unclaimed space at 866; UL2 the player-facing term; UL3 the interaction name
+- needs-lore: UL1 culture and faith in unclaimed space at 866; UL3 the interaction name (UL2 closed 2026-10-08, §D)
 - needs-human: UQ1–UQ11 (UQ1 after V-U1); the in-game checks V-U1–V-U15; the pitfalls entry in §4.4 goes in when the override ships (orchestrator)
 
 
