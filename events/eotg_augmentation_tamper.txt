@@ -279,15 +279,18 @@ eotg_aug_tamper.004 = {
             }
             desc = eotg_aug_tamper.004.desc_aug
         }
+        # GQA-002: desc_known says the owner "made sure you would know it",
+        # true only when .002.b signed the deed (scope:eotg_tamper_signed).
+        # scope:scheme_discovered is .001's secrecy roll, independent of b,
+        # so discovered-but-unsigned (.002.a) gets its own line.
         first_valid = {
             triggered_desc = {
-                trigger = {
-                    OR = {
-                        exists = scope:scheme_discovered
-                        exists = scope:eotg_tamper_signed
-                    }
-                }
+                trigger = { exists = scope:eotg_tamper_signed }
                 desc = eotg_aug_tamper.004.desc_known
+            }
+            triggered_desc = {
+                trigger = { exists = scope:scheme_discovered }
+                desc = eotg_aug_tamper.004.desc_known_discovered
             }
             desc = eotg_aug_tamper.004.desc_unknown
         }

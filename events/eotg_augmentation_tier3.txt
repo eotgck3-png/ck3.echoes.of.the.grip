@@ -2517,6 +2517,15 @@ eotg_aug_tier3.018 = {
                 }
                 desc = eotg_aug_tier3.018.desc_quiet
             }
+            # GQA-003: false + executed (.017.b) must name the death;
+            # desc_false does not. Shape: eotg_fracture.020.desc_false_executed.
+            triggered_desc = {
+                trigger = {
+                    scope:eotg_plot_truth = flag:false
+                    scope:eotg_plot_action = flag:executed
+                }
+                desc = eotg_aug_tier3.018.desc_false_executed
+            }
             triggered_desc = {
                 trigger = { scope:eotg_plot_truth = flag:true }
                 desc = eotg_aug_tier3.018.desc_true
