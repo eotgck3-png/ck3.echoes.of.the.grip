@@ -33,3 +33,47 @@ eotg_aug_patron_envoy_template = {
     stewardship = { 10 14 }
     intrigue = { 10 14 }
 }
+
+# The Neurofractured Kingpin (docs/specs/cybernetics_v2_kingpin.md §3,
+# §5.1.2). No personality traits: the mind (eotg_aug_kp_add_mind_traits_effect)
+# adds two that never conflict, then a third from a filtered list (three in
+# total, the vanilla cap). random_traits = no keeps the template from rolling
+# more (vanilla shape, e.g. common/scripted_character_templates/
+# 00_court_position_templates.txt, random_traits = no). Culture and faith by
+# scope from the caller. Caller: eotg_aug_kp_start_effect (.001 immediate).
+eotg_aug_kingpin_template = {
+    age = { 32 58 }
+    gender_female_chance = 50
+
+    random_traits_list = {
+        count = 1
+        education_intrigue_3 = {}
+        education_martial_3 = {}
+        education_stewardship_2 = {}
+    }
+    random_traits = no
+
+    martial = { 10 16 }
+    intrigue = { 10 16 }
+    stewardship = { 6 12 }
+    prowess = { 10 16 }
+}
+
+# The kingpin's lieutenant (.009 The Lieutenant) and the planted informant
+# (.005 infiltration errand). One personality trait from the spec's list and
+# nothing else. Callers: eotg_aug_kingpin.005 and .009 (immediate).
+eotg_aug_kp_lieutenant_template = {
+    age = { 25 45 }
+    gender_female_chance = 50
+
+    random_traits_list = {
+        count = 1
+        ambitious = {}
+        deceitful = {}
+        craven = {}
+        honest = {}
+    }
+    random_traits = no
+
+    intrigue = { 8 12 }
+}

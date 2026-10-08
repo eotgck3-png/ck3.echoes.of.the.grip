@@ -1,0 +1,523 @@
+﻿# -- eotg_aug_kingpin_story.txt -----------------------------------------------
+# eotg_story_aug_kingpin: the Neurofractured Kingpin (docs/specs/
+# cybernetics_v2_kingpin.md §5.4-§5.7). Batch A.
+#
+# Created by: eotg_aug_kp_start_effect (eotg_aug_kingpin.001 immediate), the
+#   kingpin passed through root.var:eotg_kp_passthrough (the Patron's
+#   pattern, eotg_story_aug_patron on_setup).
+# Fires: the middle events .004-.009 and .014 (yearly tick T5/T6), the leaves
+#   .062 / .073 (T4) and .068 / .075 (T1), and .040 on the heir
+#   (on_owner_death). Cooldown authority for every chain stage is the tick
+#   (index §1 rule 5): no kingpin event checks a flag.
+# Ended by: every leaf (.060-.076, eotg_aug_kp_end_effect in `after`), the
+#   maintenance (M0-M2), or on_owner_death with no heir to take it.
+#
+# VISIBLE (owner ruling Q6, 2026-10-06; index cybernetics_v2.md §1 rule 3
+# amended): the one visible story in the mod. It shows the kingpin and the
+# leverage BAND (eotg_kp_leverage_band, 1-3, written only by
+# eotg_aug_kp_leverage_effect), never the kingpin's eotg_fracture_risk,
+# never raw eotg_kp_leverage, the stage or the path. Shape:
+# game/common/story_cycles/_story_cycles.info (visible, icon, background,
+# visualization) and bp2_story_cycle_foreign_raised_reformer.txt:3-33
+# (custom_string_key + a basic_counter). Tiger 1.17 does not know `visible`
+# (see eotg_augmentation_stories.txt:48-51): an "unknown field" there is
+# expected. Icon and background are vanilla files (no art debt); the mod
+# ships no event-scene reskin, so alley.dds stands (spec §5.4.2 note).
+#
+# Story variables (spec §5.4 table): eotg_kp, eotg_kp_stage, eotg_kp_path,
+#   eotg_kp_leverage, eotg_kp_leverage_band, eotg_kp_refusals, eotg_kp_years,
+#   eotg_kp_war_years, eotg_kp_calmed, eotg_kp_informant,
+#   eotg_kp_informant_unmasked, eotg_kp_playing, eotg_kp_forewarned,
+#   eotg_kp_evidence, eotg_kp_spiral_done, eotg_kp_inherited,
+#   eotg_kp_resolving; batch A additions: eotg_kp_arrangement_on (bare: the
+#   arrangement modifier is held), eotg_kp_hired_guns_on (bare, timed 5
+#   years: mirrors the hired-guns modifier), eotg_kp_guns_inherited (bare:
+#   the heir holds an open-ended copy the maintenance must remove).
+#
+# BATCH-B SEAM (kingpin): T2 (.072), T3 (.067), T7's .050 branch, T8 (war),
+#   T9 (pending), M3 (war resolution) and M4 (the spiral, .066) are marked
+#   below and written with batch B, as is the "imprisoned by the kingpin's
+#   side" exception in M1.
+# -----------------------------------------------------------------------------
+
+eotg_story_aug_kingpin = {
+    visible = yes
+
+    icon = {
+        reference = "gfx/interface/icons/story_cycles/story_icon_palace_politics.dds"
+    }
+    background = {
+        reference = "gfx/interface/illustrations/event_scenes/alley.dds"
+    }
+
+    visualization = {
+        custom_string_key = "eotg_story_aug_kingpin_info"
+        character = {
+            variable_name = "eotg_kp"
+            label = "eotg_story_aug_kingpin_kp_label"
+        }
+        basic_counter = {
+            variable_name = "eotg_kp_leverage_band"
+            min = 1
+            max = 3
+            label = "eotg_story_aug_kingpin_band_label"
+            min_label = "eotg_story_aug_kingpin_band_min_label"
+            max_label = "eotg_story_aug_kingpin_band_max_label"
+        }
+    }
+
+    on_setup = {
+        save_scope_as = eotg_kp_story
+        set_variable = {
+            name = eotg_kp
+            value = story_owner.var:eotg_kp_passthrough
+        }
+        set_variable = { name = eotg_kp_stage  value = flag:open }
+        # Leverage starts at 20 (spec §5.4); the band is written by the
+        # leverage effect, its only writer
+        set_variable = { name = eotg_kp_leverage  value = 0 }
+        eotg_aug_kp_leverage_effect = { AMOUNT = 20 }
+        set_variable = { name = eotg_kp_refusals  value = 0 }
+        set_variable = { name = eotg_kp_years  value = 0 }
+        set_variable = { name = eotg_kp_war_years  value = 0 }
+        set_variable = { name = eotg_kp_calmed  value = 0 }
+        set_variable = { name = eotg_kp_evidence  value = 0 }
+        story_owner = {
+            remove_variable = eotg_kp_passthrough
+            # Once per life (spec §5.1.3; precedent eotg_flag_aug_had_patron).
+            # Read by eotg_aug_kp_can_start only.
+            add_character_flag = eotg_flag_aug_had_kingpin
+        }
+    }
+
+    # The kingpin's flag goes with the story (spec §5.4). A living, unlanded,
+    # free kingpin who was put in the owner's court for the claim path goes
+    # back to the pool (Patron on_end precedent, move_to_pool); a kingpin a
+    # leaf placed at a court or in a seat stays where the leaf put them (no
+    # claim path is set outside the claim stages). The owner loses the
+    # open-ended modifiers; the county modifiers keep their timers.
+    on_end = {
+        if = {
+            limit = {
+                exists = var:eotg_kp
+                var:eotg_kp = { has_character_flag = eotg_flag_aug_kingpin }
+            }
+            var:eotg_kp = { remove_character_flag = eotg_flag_aug_kingpin }
+        }
+        if = {
+            limit = {
+                exists = var:eotg_kp
+                exists = var:eotg_kp_path
+                NOT = { has_variable = eotg_kp_resolving }
+                var:eotg_kp = {
+                    is_alive = yes
+                    is_landed = no
+                    is_imprisoned = no
+                }
+            }
+            var:eotg_kp = { move_to_pool = yes }
+        }
+        story_owner = {
+            if = {
+                limit = { has_character_modifier = eotg_mod_aug_kp_arrangement }
+                remove_character_modifier = eotg_mod_aug_kp_arrangement
+            }
+            if = {
+                limit = { has_character_modifier = eotg_mod_aug_kp_kept }
+                remove_character_modifier = eotg_mod_aug_kp_kept
+            }
+        }
+        if = {
+            limit = {
+                has_variable = eotg_kp_guns_inherited
+                story_owner = { has_character_modifier = eotg_mod_aug_kp_hired_guns }
+            }
+            story_owner = { remove_character_modifier = eotg_mod_aug_kp_hired_guns }
+        }
+    }
+
+    # Owner ruling Q2 (2026-10-06): the story passes to the heir (spec
+    # §5.4.1). Vanilla shape: common/story_cycles/
+    # ce1_story_cycle_black_death.txt:18-30 (make_story_owner =
+    # story_owner.player_heir, else end_story).
+    # V-K8: the heir is saved as scope:eotg_kp_heir BEFORE the hand-off and
+    # .040 is fired on that scope, so the event does not depend on what
+    # story_owner points to after make_story_owner (vanilla's
+    # story_cycle_mongol_invasion.txt:327-334 does the same with
+    # scope:new_story_owner; ep2_story_cycle_mysterious_journal.txt:30-32
+    # suggests story_owner already points to the new owner).
+    # Not passed on: a dead kingpin, a leaf already resolving
+    # (eotg_kp_resolving), an heir who is the kingpin, or an heir who already
+    # owns a kingpin story (one at a time).
+    on_owner_death = {
+        if = {
+            limit = {
+                exists = story_owner.player_heir
+                exists = var:eotg_kp
+                var:eotg_kp = { is_alive = yes }
+                NOT = { has_variable = eotg_kp_resolving }
+                NOT = { story_owner.player_heir = var:eotg_kp }
+                story_owner.player_heir = {
+                    NOT = { any_owned_story = { story_type = eotg_story_aug_kingpin } }
+                }
+            }
+            save_scope_as = eotg_kp_story
+            story_owner.player_heir = { save_scope_as = eotg_kp_heir }
+            eotg_aug_kp_inherit_effect = yes
+            make_story_owner = scope:eotg_kp_heir
+            scope:eotg_kp_heir = {
+                trigger_event = { id = eotg_aug_kingpin.040  days = { 3 10 } }
+            }
+        }
+        else = {
+            end_story = yes
+        }
+    }
+
+    # -- Maintenance (spec §5.5 M0-M4), monthly, first_valid ------------------
+    # Watchers: they fire nothing on a normal month. Vanilla shape: the
+    # maintenance group of common/story_cycles/fp3_story_cycle_zanj_rebellion.txt:17-31.
+    effect_group = {
+        months = 1
+
+        first_valid = {
+            # M1. The owner is no longer landed, or is imprisoned: silent end.
+            # BATCH-B SEAM (kingpin): batch B exempts imprisonment by the
+            # kingpin's side in a war stage.
+            triggered_effect = {
+                trigger = {
+                    story_owner = {
+                        OR = {
+                            is_landed = no
+                            is_imprisoned = yes
+                        }
+                    }
+                }
+                effect = {
+                    end_story = yes
+                }
+            }
+            # M2. The kingpin died outside the story's own leaves (which set
+            # eotg_kp_resolving and end the story themselves), and not in a
+            # war stage: a toast that reads nothing, then the end.
+            triggered_effect = {
+                trigger = {
+                    NOT = { has_variable = eotg_kp_resolving }
+                    NOT = { var:eotg_kp_stage = flag:war }
+                    OR = {
+                        NOT = { exists = var:eotg_kp }
+                        var:eotg_kp = { is_alive = no }
+                    }
+                }
+                effect = {
+                    story_owner = {
+                        send_interface_toast = {
+                            title = eotg_aug_kingpin_toast_dead
+                            left_icon = scope:story.story_owner
+                        }
+                    }
+                    end_story = yes
+                }
+            }
+            # M0 (V-K1). Someone else took the kingpin into their court while
+            # they were the ruler's problem (stage open, collab or kept): a
+            # toast, then the end. If the observer run shows this often, the
+            # fallback is a guest (add_visiting_courtier, the Collector).
+            triggered_effect = {
+                trigger = {
+                    NOT = { has_variable = eotg_kp_resolving }
+                    OR = {
+                        var:eotg_kp_stage = flag:open
+                        var:eotg_kp_stage = flag:collab
+                        var:eotg_kp_stage = flag:kept
+                    }
+                    var:eotg_kp = {
+                        exists = employer
+                        NOT = { employer = scope:story.story_owner }
+                    }
+                }
+                effect = {
+                    story_owner = {
+                        send_interface_toast = {
+                            title = eotg_aug_kingpin_toast_gone
+                            left_icon = scope:story.var:eotg_kp
+                        }
+                    }
+                    end_story = yes
+                }
+            }
+            # Custody without a cell: the kingpin escaped, was ransomed, or
+            # went free at a succession (spec §5.4.1 custody row). Back to
+            # open; the tick takes it from there.
+            triggered_effect = {
+                trigger = {
+                    var:eotg_kp_stage = flag:custody
+                    NOT = { has_variable = eotg_kp_resolving }
+                    var:eotg_kp = { is_imprisoned = no }
+                }
+                effect = {
+                    set_variable = { name = eotg_kp_stage  value = flag:open }
+                }
+            }
+            # An heir's open-ended copy of the hired guns ends when the
+            # story's 5-year mirror runs out (eotg_aug_kp_hired_guns_effect).
+            triggered_effect = {
+                trigger = {
+                    has_variable = eotg_kp_guns_inherited
+                    NOT = { has_variable = eotg_kp_hired_guns_on }
+                }
+                effect = {
+                    remove_variable = eotg_kp_guns_inherited
+                    story_owner = {
+                        if = {
+                            limit = { has_character_modifier = eotg_mod_aug_kp_hired_guns }
+                            remove_character_modifier = eotg_mod_aug_kp_hired_guns
+                        }
+                    }
+                }
+            }
+            # BATCH-B SEAM (kingpin): M3 (stage war and the owner no longer at
+            # war with var:eotg_kp_opponent -> the war-resolution table,
+            # .063 / .036 / .069 / .066 / .065) and M4 (war_years >= 3, or
+            # Storm and mind purge, and no eotg_kp_spiral_done -> .066).
+        }
+    }
+
+    # -- The yearly tick (spec §5.5 T0-T9) -------------------------------------
+    # One triggered_effect with an if / else_if chain, so the drift (T0)
+    # always runs first and at most one event fires a year (spec §5.7). The
+    # Patron's tick has the same shape (eotg_augmentation_stories.txt,
+    # the last triggered_effect of eotg_story_aug_patron).
+    effect_group = {
+        years = 1
+
+        triggered_effect = {
+            trigger = { always = yes }
+            effect = {
+                save_scope_as = eotg_kp_story
+                var:eotg_kp = { save_scope_as = eotg_kp }
+                story_owner = { save_scope_as = eotg_kp_owner }
+
+                # T0. Drift, then the counters (spec §2, §5.5 step 0). The
+                # value is taken in the story's scope before the kingpin is
+                # moved (eotg_aug_kp_drift_value reads story variables).
+                save_scope_value_as = { name = eotg_kp_drift  value = eotg_aug_kp_drift_value }
+                var:eotg_kp = { eotg_add_fracture_risk = { AMOUNT = scope:eotg_kp_drift } }
+                set_variable = { name = eotg_kp_calmed  value = 0 }
+                if = {
+                    limit = {
+                        OR = {
+                            var:eotg_kp_stage = flag:collab
+                            var:eotg_kp_stage = flag:kept
+                        }
+                    }
+                    change_variable = { name = eotg_kp_years  add = 1 }
+                }
+                else_if = {
+                    limit = { var:eotg_kp_stage = flag:war }
+                    change_variable = { name = eotg_kp_war_years  add = 1 }
+                }
+
+                # T1. Terminal pressure (>= 95), any stage but custody:
+                # The Break (L9) or The Fracture Finishes It (L16).
+                if = {
+                    limit = {
+                        NOT = { var:eotg_kp_stage = flag:custody }
+                        var:eotg_kp = {
+                            has_variable = eotg_fracture_risk
+                            var:eotg_fracture_risk >= 95
+                        }
+                    }
+                    random_list = {
+                        40 = {
+                            modifier = {
+                                factor = 1.5
+                                eotg_aug_kp_is = { AXIS = mind  VALUE = purge }
+                            }
+                            modifier = {
+                                factor = 1.5
+                                OR = {
+                                    eotg_aug_kp_is = { AXIS = kind  VALUE = crew }
+                                    eotg_aug_kp_is = { AXIS = kind  VALUE = hired }
+                                }
+                            }
+                            modifier = {
+                                factor = 0.5
+                                eotg_aug_kp_is = { AXIS = mind  VALUE = cold }
+                            }
+                            story_owner = { trigger_event = { id = eotg_aug_kingpin.068  days = { 1 5 } } }
+                        }
+                        60 = {
+                            story_owner = { trigger_event = { id = eotg_aug_kingpin.075  days = { 1 5 } } }
+                        }
+                    }
+                }
+                # BATCH-B SEAM (kingpin): T2 (stage collab or open, leverage
+                # >= 80, the kingpin in Fracture or Storm -> .072 The Hold
+                # Closes) and T3 (stage collab, refusals >= 2, 50% x1.25
+                # purge x1.25 grandeur -> .067 The Turn) go here, in this
+                # order, before T4.
+                # T4. The natural end of a long deal (collab, 6+ years).
+                else_if = {
+                    limit = {
+                        var:eotg_kp_stage = flag:collab
+                        var:eotg_kp_years >= 6
+                        var:eotg_kp_leverage < 80
+                    }
+                    if = {
+                        limit = {
+                            var:eotg_kp_leverage <= 40
+                            OR = {
+                                eotg_aug_kp_is = { AXIS = kind  VALUE = syndicate }
+                                eotg_aug_kp_is = { AXIS = kind  VALUE = front }
+                                var:eotg_kp = { eotg_aug_pressure_storm = yes }
+                            }
+                        }
+                        story_owner = { trigger_event = { id = eotg_aug_kingpin.062  days = { 1 30 } } }
+                    }
+                    else = {
+                        story_owner = { trigger_event = { id = eotg_aug_kingpin.073  days = { 1 30 } } }
+                    }
+                }
+                # T5. Neglect escalates (stage open): Bodies on the Docks 60%;
+                # The Lieutenant 20% (spec .009 "T5 at 20%").
+                else_if = {
+                    limit = { var:eotg_kp_stage = flag:open }
+                    random_list = {
+                        60 = {
+                            story_owner = { trigger_event = { id = eotg_aug_kingpin.014  days = { 1 30 } } }
+                        }
+                        20 = {
+                            story_owner = { trigger_event = { id = eotg_aug_kingpin.009  days = { 1 30 } } }
+                        }
+                        20 = { }
+                    }
+                }
+                # T6. The middle pool (spec §5.7). Entry triggers mirror what
+                # each event needs to name someone, so an event never fires
+                # without its people.
+                else_if = {
+                    limit = { var:eotg_kp_stage = flag:collab }
+                    random_list = {
+                        # .004 The Ledger: syndicate or bribery
+                        20 = {
+                            trigger = {
+                                OR = {
+                                    eotg_aug_kp_is = { AXIS = kind  VALUE = syndicate }
+                                    eotg_aug_kp_is = { AXIS = method  VALUE = bribery }
+                                }
+                            }
+                            modifier = {
+                                factor = 2
+                                eotg_aug_kp_is = { AXIS = kind  VALUE = syndicate }
+                            }
+                            story_owner = { trigger_event = { id = eotg_aug_kingpin.004  days = { 1 30 } } }
+                        }
+                        # .005 The Errand: the variant comes from the method
+                        25 = {
+                            trigger = {
+                                trigger_if = {
+                                    limit = { eotg_aug_kp_is = { AXIS = method  VALUE = violence } }
+                                    scope:eotg_kp_owner = {
+                                        any_courtier = { eotg_aug_kp_errand_target = { RULER = scope:eotg_kp_owner } }
+                                    }
+                                }
+                                trigger_if = {
+                                    limit = { eotg_aug_kp_is = { AXIS = method  VALUE = blackmail } }
+                                    scope:eotg_kp_owner = {
+                                        OR = {
+                                            exists = liege
+                                            any_vassal = { is_alive = yes }
+                                        }
+                                    }
+                                }
+                            }
+                            story_owner = { trigger_event = { id = eotg_aug_kingpin.005  days = { 1 30 } } }
+                        }
+                        # .006 The Episode: the variant comes from the mind
+                        25 = {
+                            trigger = {
+                                trigger_if = {
+                                    limit = { eotg_aug_kp_is = { AXIS = mind  VALUE = purge } }
+                                    scope:eotg_kp_owner = {
+                                        any_courtier = { eotg_aug_kp_purge_target = { RULER = scope:eotg_kp_owner } }
+                                    }
+                                }
+                            }
+                            modifier = {
+                                factor = 1.5
+                                var:eotg_kp = {
+                                    OR = {
+                                        eotg_aug_pressure_fracture = yes
+                                        eotg_aug_pressure_storm = yes
+                                    }
+                                }
+                            }
+                            story_owner = { trigger_event = { id = eotg_aug_kingpin.006  days = { 1 30 } } }
+                        }
+                        # .007 The Informant: infiltration, not yet unmasked
+                        20 = {
+                            trigger = {
+                                eotg_aug_kp_is = { AXIS = method  VALUE = infiltration }
+                                NOT = { has_variable = eotg_kp_informant_unmasked }
+                                OR = {
+                                    var:eotg_kp_informant ?= {
+                                        is_alive = yes
+                                        is_courtier_of = scope:eotg_kp_owner
+                                    }
+                                    scope:eotg_kp_owner = {
+                                        any_courtier = { eotg_aug_kp_informant_candidate = { RULER = scope:eotg_kp_owner } }
+                                    }
+                                }
+                            }
+                            story_owner = { trigger_event = { id = eotg_aug_kingpin.007  days = { 1 30 } } }
+                        }
+                        # .008 The Protection Bill: crew, hired, or violence
+                        20 = {
+                            trigger = {
+                                OR = {
+                                    eotg_aug_kp_is = { AXIS = kind  VALUE = crew }
+                                    eotg_aug_kp_is = { AXIS = kind  VALUE = hired }
+                                    eotg_aug_kp_is = { AXIS = method  VALUE = violence }
+                                }
+                            }
+                            modifier = {
+                                factor = 2
+                                eotg_aug_kp_is = { AXIS = method  VALUE = violence }
+                            }
+                            story_owner = { trigger_event = { id = eotg_aug_kingpin.008  days = { 1 30 } } }
+                        }
+                        # .009 The Lieutenant
+                        10 = {
+                            modifier = {
+                                factor = 2
+                                eotg_aug_kp_is = { AXIS = reach  VALUE = wide }
+                            }
+                            story_owner = { trigger_event = { id = eotg_aug_kingpin.009  days = { 1 30 } } }
+                        }
+                        # Nothing (AI x3, spec §5.7)
+                        30 = {
+                            modifier = {
+                                factor = 3
+                                story_owner = { is_ai = yes }
+                            }
+                        }
+                    }
+                }
+                # T7. Kept: if leverage has fallen below 40, the ruler has
+                # bought a truce -> .073 A Standing Arrangement.
+                # BATCH-B SEAM (kingpin): otherwise 70% -> .050 The Orders.
+                else_if = {
+                    limit = {
+                        var:eotg_kp_stage = flag:kept
+                        var:eotg_kp_leverage < 40
+                    }
+                    story_owner = { trigger_event = { id = eotg_aug_kingpin.073  days = { 1 30 } } }
+                }
+                # BATCH-B SEAM (kingpin): T8 (stage war: .033 60 / .034 25
+                # hired with leverage < 30 or purge / nothing 40, AI x3
+                # nothing) and T9 (stage pending -> .038 Now or Never).
+            }
+        }
+    }
+}

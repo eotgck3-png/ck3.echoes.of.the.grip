@@ -1,0 +1,102 @@
+﻿# -- eotg_aug_kingpin_modifiers.txt -------------------------------------------
+# Static modifiers for the Neurofractured Kingpin (docs/specs/
+# cybernetics_v2_kingpin.md §3). Batch A: the ones batch A applies or
+# removes. Keys checked in PX modifiers.log (2026-10-06). Values are the
+# spec's first guesses; QA tunes. Icon keys are vanilla ones already used by
+# the mod (eotg_augmentation_modifiers.txt, eotg_frontier_modifiers.txt).
+#
+# BATCH-B SEAM (kingpin): eotg_mod_aug_kp_exposed (L6, L8), eotg_mod_aug_kp_crisis
+# (L13) and eotg_mod_aug_kp_burned_levels (L7) are written with batch B.
+# -----------------------------------------------------------------------------
+
+# -- Character modifiers ------------------------------------------------------
+
+# "Take your cut and look away." (.003 e_syndicate). Open-ended while the
+# story runs; removed in the story's on_end; re-applied to an heir in
+# collab/kept (§5.4.1).
+eotg_mod_aug_kp_arrangement = {
+    icon = intrigue_positive
+    domain_tax_mult = 0.08
+    county_opinion_add = -5
+}
+
+# Their guns on retainer (.001 f_hired, .003 e_hired; L16 hired). Vanilla
+# shape: common/modifiers/00_activity_hold_court_modifiers.txt:29
+# (levy_size = 0.2).
+eotg_mod_aug_kp_hired_guns = {
+    icon = martial_positive
+    levy_size = 0.15
+}
+
+# L3 The Network Is Yours (.062 a, c)
+eotg_mod_aug_kp_network = {
+    icon = intrigue_positive
+    domain_tax_mult = 0.15
+    vassal_opinion = -5
+    enemy_hostile_scheme_success_chance_add = -10
+}
+
+# L13 The Hold Closes (batch B applies it; batch A removes it in on_end and
+# re-applies it to an heir in the kept stage, §5.4.1)
+eotg_mod_aug_kp_kept = {
+    icon = intrigue_negative
+    stress_gain_mult = 0.25
+    dread_gain_mult = 0.5
+    tyranny_gain_mult = 0.25
+    vassal_opinion = -15
+}
+
+# L14 A Standing Arrangement (.073). The L14 row of the spec adds county
+# control growth to the §3 entry: both are here.
+eotg_mod_aug_kp_tribute = {
+    icon = stewardship_negative
+    domain_tax_mult = -0.1
+    monthly_county_control_growth_add = 0.1
+}
+
+# L11 Brought Inside (.070)
+eotg_mod_aug_kp_informants = {
+    icon = intrigue_positive
+    enemy_hostile_scheme_success_chance_add = -10
+}
+
+# L17 The Clinic Changes Hands (.076)
+eotg_mod_aug_kp_seized_clinic = {
+    icon = stewardship_positive
+    domain_tax_mult = 0.05
+}
+
+# -- County modifiers ---------------------------------------------------------
+
+# .008 b "Not one credit." (capital, 2 years)
+eotg_mod_aug_kp_arson = {
+    icon = county_modifier_control_negative
+    monthly_county_control_decline_add = -0.5
+}
+
+# .011 b "Lock the underlevels down." (capital, 2 years)
+eotg_mod_aug_kp_lockdown = {
+    icon = county_modifier_control_positive
+    monthly_county_control_growth_add = 0.3
+    development_growth_factor = -0.2
+}
+
+# L1 (.060) and L16 crew (.075): the organization splinters (capital, 2 years)
+eotg_mod_aug_kp_loose_ends = {
+    icon = county_modifier_control_negative
+    monthly_county_control_decline_add = -0.3
+}
+
+# L2 The Streets Go Quiet (.061; capital, 10 years)
+eotg_mod_aug_kp_streets_cleared = {
+    icon = county_modifier_control_positive
+    monthly_county_control_growth_add = 0.3
+    county_opinion_add = 5
+}
+
+# L9 The Break (.068; capital, 10 years)
+eotg_mod_aug_kp_massacre = {
+    icon = county_modifier_development_negative
+    county_opinion_add = -15
+    development_growth_factor = -0.2
+}

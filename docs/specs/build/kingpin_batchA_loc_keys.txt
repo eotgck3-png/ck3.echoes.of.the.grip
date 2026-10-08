@@ -1,0 +1,418 @@
+# Kingpin batch A: loc keys the built script references (eotg-scripter, 2026-10-06).
+# Target file: localization/english/eotg_aug_kingpin_l_english.yml (UTF-8 with BOM).
+# Spec: docs/specs/cybernetics_v2_kingpin.md §7 (+ orchestrator desc rulings 2026-10-06).
+# [APPENDED] = an appended desc fragment: its value must start with two newline escapes (lint L013d).
+# Reused band keys (ruling 2): .005/.006 read eotg_aug_kingpin.002.desc_band_*; .010/.012 read
+#   eotg_aug_kingpin.001.desc_band_*. No separate band keys exist for those four events.
+# Variant option keys use <letter>_<variant> (.a_violence, .c_purge, .e_crew, .f_hired, .c_hired ...).
+# Duel outcomes: <option>.success / <option>.failure. Leverage tooltips are shared and numberless.
+# Scopes available to loc (bare, never scope:): eotg_kp (the boss), eotg_kp_reporter (.001),
+#   eotg_kp_errand_target (.005), eotg_kp_lieutenant (.005 infiltration, .009), eotg_kp_purge_target
+#   (.006), eotg_kp_informant (.007), eotg_kp_victim / eotg_kp_victim_2 (.012, .068), eotg_kp_county
+#   (.012 c, .014, .069, .071). Org name only via eotg_kp.Custom('eotg_aug_cl_gang' | 'eotg_aug_cl_company'
+#   | 'eotg_aug_cl_syndicate_offer'), per-kind lines only. Story panel strings have the Story scope.
+# Not yet referenced (batch B): .003 desc_vassal / desc_independent, .012 c_front, .068 desc_war,
+#   .069 desc_held, and every key of .030-.039, .050, .063-.067, .072.
+# Total keys: 337
+
+## events: eotg_aug_kingpin.001
+eotg_aug_kingpin.001.t
+eotg_aug_kingpin.001.desc_reporter
+eotg_aug_kingpin.001.desc_none
+eotg_aug_kingpin.001.desc_syndicate_patron    [APPENDED]
+eotg_aug_kingpin.001.desc_crew    [APPENDED]
+eotg_aug_kingpin.001.desc_syndicate    [APPENDED]
+eotg_aug_kingpin.001.desc_front    [APPENDED]
+eotg_aug_kingpin.001.desc_hired    [APPENDED]
+eotg_aug_kingpin.001.desc_m_violence    [APPENDED]
+eotg_aug_kingpin.001.desc_m_bribery    [APPENDED]
+eotg_aug_kingpin.001.desc_m_blackmail    [APPENDED]
+eotg_aug_kingpin.001.desc_m_infiltration    [APPENDED]
+eotg_aug_kingpin.001.desc_band_storm    [APPENDED]
+eotg_aug_kingpin.001.desc_band_fracture    [APPENDED]
+eotg_aug_kingpin.001.desc_band_flicker    [APPENDED]
+eotg_aug_kingpin.001.a
+eotg_aug_kingpin.001.b
+eotg_aug_kingpin.001.c
+eotg_aug_kingpin.001.d
+eotg_aug_kingpin.001.e
+eotg_aug_kingpin.001.f
+eotg_aug_kingpin.001.f_hired
+eotg_aug_kingpin.001.a.tt
+eotg_aug_kingpin.001.b.tt
+eotg_aug_kingpin.001.d.tt
+eotg_aug_kingpin.001.e.tt
+
+## events: eotg_aug_kingpin.002
+eotg_aug_kingpin.002.t
+eotg_aug_kingpin.002.desc_purge
+eotg_aug_kingpin.002.desc_grandeur
+eotg_aug_kingpin.002.desc_forecast
+eotg_aug_kingpin.002.desc_cold
+eotg_aug_kingpin.002.desc_k_crew    [APPENDED]
+eotg_aug_kingpin.002.desc_k_syndicate    [APPENDED]
+eotg_aug_kingpin.002.desc_k_front    [APPENDED]
+eotg_aug_kingpin.002.desc_k_hired    [APPENDED]
+eotg_aug_kingpin.002.desc_band_storm    [APPENDED]
+eotg_aug_kingpin.002.desc_band_fracture    [APPENDED]
+eotg_aug_kingpin.002.desc_band_flicker    [APPENDED]
+eotg_aug_kingpin.002.a
+eotg_aug_kingpin.002.b
+eotg_aug_kingpin.002.c
+eotg_aug_kingpin.002.d
+eotg_aug_kingpin.002.a.tt
+eotg_aug_kingpin.002.b.tt
+eotg_aug_kingpin.002.c.tt
+
+## events: eotg_aug_kingpin.003
+eotg_aug_kingpin.003.t
+eotg_aug_kingpin.003.desc_crew
+eotg_aug_kingpin.003.desc_syndicate
+eotg_aug_kingpin.003.desc_front
+eotg_aug_kingpin.003.desc_hired
+eotg_aug_kingpin.003.desc_noclaim    [APPENDED]
+eotg_aug_kingpin.003.a
+eotg_aug_kingpin.003.d
+eotg_aug_kingpin.003.e_crew
+eotg_aug_kingpin.003.e_syndicate
+eotg_aug_kingpin.003.e_front
+eotg_aug_kingpin.003.e_hired
+eotg_aug_kingpin.003.d.tt
+
+## events: eotg_aug_kingpin.004
+eotg_aug_kingpin.004.t
+eotg_aug_kingpin.004.desc
+eotg_aug_kingpin.004.a
+eotg_aug_kingpin.004.b
+eotg_aug_kingpin.004.c
+eotg_aug_kingpin.004.d
+eotg_aug_kingpin.004.b.tt
+
+## events: eotg_aug_kingpin.005
+eotg_aug_kingpin.005.t
+eotg_aug_kingpin.005.desc_violence
+eotg_aug_kingpin.005.desc_blackmail
+eotg_aug_kingpin.005.desc_infiltration
+eotg_aug_kingpin.005.desc_bribery
+eotg_aug_kingpin.005.a_violence
+eotg_aug_kingpin.005.b_violence
+eotg_aug_kingpin.005.c_violence
+eotg_aug_kingpin.005.a_blackmail
+eotg_aug_kingpin.005.b_blackmail
+eotg_aug_kingpin.005.c_blackmail
+eotg_aug_kingpin.005.a_infiltration
+eotg_aug_kingpin.005.b_infiltration
+eotg_aug_kingpin.005.c_infiltration
+eotg_aug_kingpin.005.a_bribery
+eotg_aug_kingpin.005.b_bribery
+eotg_aug_kingpin.005.c_bribery
+eotg_aug_kingpin.005.c_violence.tt
+eotg_aug_kingpin.005.c_blackmail.success
+eotg_aug_kingpin.005.c_blackmail.failure
+eotg_aug_kingpin.005.c_infiltration.tt
+
+## events: eotg_aug_kingpin.006
+eotg_aug_kingpin.006.t
+eotg_aug_kingpin.006.desc_purge
+eotg_aug_kingpin.006.desc_grandeur
+eotg_aug_kingpin.006.desc_forecast
+eotg_aug_kingpin.006.desc_cold
+eotg_aug_kingpin.006.a_purge
+eotg_aug_kingpin.006.b_purge
+eotg_aug_kingpin.006.c_purge
+eotg_aug_kingpin.006.a_grandeur
+eotg_aug_kingpin.006.b_grandeur
+eotg_aug_kingpin.006.c_grandeur
+eotg_aug_kingpin.006.a_forecast
+eotg_aug_kingpin.006.b_forecast
+eotg_aug_kingpin.006.c_forecast
+eotg_aug_kingpin.006.a_cold
+eotg_aug_kingpin.006.b_cold
+eotg_aug_kingpin.006.c_cold
+eotg_aug_kingpin.006.c_purge.success
+eotg_aug_kingpin.006.c_purge.failure
+eotg_aug_kingpin.006.c_forecast.tt
+
+## events: eotg_aug_kingpin.007
+eotg_aug_kingpin.007.t
+eotg_aug_kingpin.007.desc
+eotg_aug_kingpin.007.a
+eotg_aug_kingpin.007.b
+eotg_aug_kingpin.007.c
+eotg_aug_kingpin.007.b.success
+eotg_aug_kingpin.007.b.failure
+
+## events: eotg_aug_kingpin.008
+eotg_aug_kingpin.008.t
+eotg_aug_kingpin.008.desc
+eotg_aug_kingpin.008.a
+eotg_aug_kingpin.008.b
+eotg_aug_kingpin.008.c
+eotg_aug_kingpin.008.c.tt
+
+## events: eotg_aug_kingpin.009
+eotg_aug_kingpin.009.t
+eotg_aug_kingpin.009.desc
+eotg_aug_kingpin.009.a
+eotg_aug_kingpin.009.b
+eotg_aug_kingpin.009.c
+eotg_aug_kingpin.009.a.tt
+
+## events: eotg_aug_kingpin.010
+eotg_aug_kingpin.010.t
+eotg_aug_kingpin.010.desc_crew
+eotg_aug_kingpin.010.desc_syndicate
+eotg_aug_kingpin.010.desc_front
+eotg_aug_kingpin.010.desc_hired
+eotg_aug_kingpin.010.desc_audience
+eotg_aug_kingpin.010.a
+eotg_aug_kingpin.010.b
+eotg_aug_kingpin.010.c
+eotg_aug_kingpin.010.a.success
+eotg_aug_kingpin.010.a.failure
+eotg_aug_kingpin.010.b.success
+eotg_aug_kingpin.010.b.failure
+
+## events: eotg_aug_kingpin.011
+eotg_aug_kingpin.011.t
+eotg_aug_kingpin.011.desc
+eotg_aug_kingpin.011.a
+eotg_aug_kingpin.011.b
+eotg_aug_kingpin.011.c
+eotg_aug_kingpin.011.a.success
+eotg_aug_kingpin.011.a.failure
+
+## events: eotg_aug_kingpin.012
+eotg_aug_kingpin.012.t
+eotg_aug_kingpin.012.desc_crew
+eotg_aug_kingpin.012.desc_syndicate
+eotg_aug_kingpin.012.desc_front
+eotg_aug_kingpin.012.desc_hired
+eotg_aug_kingpin.012.desc_victim    [APPENDED]
+eotg_aug_kingpin.012.desc_none    [APPENDED]
+eotg_aug_kingpin.012.a
+eotg_aug_kingpin.012.b
+eotg_aug_kingpin.012.c
+eotg_aug_kingpin.012.c_hired
+eotg_aug_kingpin.012.c_syndicate
+eotg_aug_kingpin.012.a.tt
+eotg_aug_kingpin.012.c.tt
+
+## events: eotg_aug_kingpin.013
+eotg_aug_kingpin.013.t
+eotg_aug_kingpin.013.desc
+eotg_aug_kingpin.013.desc_band_storm    [APPENDED]
+eotg_aug_kingpin.013.desc_band_fracture    [APPENDED]
+eotg_aug_kingpin.013.desc_band_flicker    [APPENDED]
+eotg_aug_kingpin.013.a
+eotg_aug_kingpin.013.b
+eotg_aug_kingpin.013.c
+eotg_aug_kingpin.013.d
+eotg_aug_kingpin.013.e
+eotg_aug_kingpin.013.f
+eotg_aug_kingpin.013.a.tt
+eotg_aug_kingpin.013.c.tt
+eotg_aug_kingpin.013.d.tt
+eotg_aug_kingpin.013.e.tt
+eotg_aug_kingpin.013.f.tt
+
+## events: eotg_aug_kingpin.014
+eotg_aug_kingpin.014.t
+eotg_aug_kingpin.014.desc
+eotg_aug_kingpin.014.desc_county    [APPENDED]
+eotg_aug_kingpin.014.desc_none    [APPENDED]
+eotg_aug_kingpin.014.a
+eotg_aug_kingpin.014.b
+eotg_aug_kingpin.014.c
+eotg_aug_kingpin.014.a.tt
+eotg_aug_kingpin.014.b.tt
+
+## events: eotg_aug_kingpin.015
+eotg_aug_kingpin.015.t
+eotg_aug_kingpin.015.desc
+eotg_aug_kingpin.015.a
+eotg_aug_kingpin.015.b
+eotg_aug_kingpin.015.c
+eotg_aug_kingpin.015.a.success
+eotg_aug_kingpin.015.a.failure
+eotg_aug_kingpin.015.b.tt
+
+## events: eotg_aug_kingpin.040
+eotg_aug_kingpin.040.t
+eotg_aug_kingpin.040.desc
+eotg_aug_kingpin.040.desc_collab    [APPENDED]
+eotg_aug_kingpin.040.desc_custody    [APPENDED]
+eotg_aug_kingpin.040.desc_kept    [APPENDED]
+eotg_aug_kingpin.040.desc_war    [APPENDED]
+eotg_aug_kingpin.040.desc_open    [APPENDED]
+eotg_aug_kingpin.040.desc_band_storm    [APPENDED]
+eotg_aug_kingpin.040.desc_band_fracture    [APPENDED]
+eotg_aug_kingpin.040.desc_band_flicker    [APPENDED]
+eotg_aug_kingpin.040.a
+eotg_aug_kingpin.040.b
+eotg_aug_kingpin.040.c
+
+## events: eotg_aug_kingpin.060
+eotg_aug_kingpin.060.t
+eotg_aug_kingpin.060.desc
+eotg_aug_kingpin.060.desc_end_storm    [APPENDED]
+eotg_aug_kingpin.060.desc_end_fracture    [APPENDED]
+eotg_aug_kingpin.060.desc_end_flicker    [APPENDED]
+eotg_aug_kingpin.060.a
+eotg_aug_kingpin.060.b
+
+## events: eotg_aug_kingpin.061
+eotg_aug_kingpin.061.t
+eotg_aug_kingpin.061.desc
+eotg_aug_kingpin.061.desc_end_storm    [APPENDED]
+eotg_aug_kingpin.061.desc_end_fracture    [APPENDED]
+eotg_aug_kingpin.061.desc_end_flicker    [APPENDED]
+eotg_aug_kingpin.061.a
+eotg_aug_kingpin.061.b
+
+## events: eotg_aug_kingpin.062
+eotg_aug_kingpin.062.t
+eotg_aug_kingpin.062.desc
+eotg_aug_kingpin.062.desc_end_storm    [APPENDED]
+eotg_aug_kingpin.062.desc_end_fracture    [APPENDED]
+eotg_aug_kingpin.062.desc_end_flicker    [APPENDED]
+eotg_aug_kingpin.062.a
+eotg_aug_kingpin.062.b
+eotg_aug_kingpin.062.c
+
+## events: eotg_aug_kingpin.068
+eotg_aug_kingpin.068.t
+eotg_aug_kingpin.068.desc
+eotg_aug_kingpin.068.desc_victims    [APPENDED]
+eotg_aug_kingpin.068.desc_victim    [APPENDED]
+eotg_aug_kingpin.068.desc_none    [APPENDED]
+eotg_aug_kingpin.068.desc_end_storm    [APPENDED]
+eotg_aug_kingpin.068.desc_end_fracture    [APPENDED]
+eotg_aug_kingpin.068.desc_end_flicker    [APPENDED]
+eotg_aug_kingpin.068.a
+eotg_aug_kingpin.068.b
+eotg_aug_kingpin.068.c
+eotg_aug_kingpin.068.a.success
+eotg_aug_kingpin.068.a.failure
+
+## events: eotg_aug_kingpin.069
+eotg_aug_kingpin.069.t
+eotg_aug_kingpin.069.desc
+eotg_aug_kingpin.069.desc_end_storm    [APPENDED]
+eotg_aug_kingpin.069.desc_end_fracture    [APPENDED]
+eotg_aug_kingpin.069.desc_end_flicker    [APPENDED]
+eotg_aug_kingpin.069.a
+
+## events: eotg_aug_kingpin.070
+eotg_aug_kingpin.070.t
+eotg_aug_kingpin.070.desc
+eotg_aug_kingpin.070.desc_end_storm    [APPENDED]
+eotg_aug_kingpin.070.desc_end_fracture    [APPENDED]
+eotg_aug_kingpin.070.desc_end_flicker    [APPENDED]
+eotg_aug_kingpin.070.a
+eotg_aug_kingpin.070.b
+
+## events: eotg_aug_kingpin.071
+eotg_aug_kingpin.071.t
+eotg_aug_kingpin.071.desc
+eotg_aug_kingpin.071.desc_end_storm    [APPENDED]
+eotg_aug_kingpin.071.desc_end_fracture    [APPENDED]
+eotg_aug_kingpin.071.desc_end_flicker    [APPENDED]
+eotg_aug_kingpin.071.a
+
+## events: eotg_aug_kingpin.073
+eotg_aug_kingpin.073.t
+eotg_aug_kingpin.073.desc
+eotg_aug_kingpin.073.desc_contract    [APPENDED]
+eotg_aug_kingpin.073.desc_end_storm    [APPENDED]
+eotg_aug_kingpin.073.desc_end_fracture    [APPENDED]
+eotg_aug_kingpin.073.desc_end_flicker    [APPENDED]
+eotg_aug_kingpin.073.a
+eotg_aug_kingpin.073.b
+
+## events: eotg_aug_kingpin.074
+eotg_aug_kingpin.074.t
+eotg_aug_kingpin.074.desc
+eotg_aug_kingpin.074.desc_patron    [APPENDED]
+eotg_aug_kingpin.074.desc_end_storm    [APPENDED]
+eotg_aug_kingpin.074.desc_end_fracture    [APPENDED]
+eotg_aug_kingpin.074.desc_end_flicker    [APPENDED]
+eotg_aug_kingpin.074.a
+eotg_aug_kingpin.074.a.tt
+
+## events: eotg_aug_kingpin.075
+eotg_aug_kingpin.075.t
+eotg_aug_kingpin.075.desc
+eotg_aug_kingpin.075.desc_crew    [APPENDED]
+eotg_aug_kingpin.075.desc_syndicate    [APPENDED]
+eotg_aug_kingpin.075.desc_front    [APPENDED]
+eotg_aug_kingpin.075.desc_hired    [APPENDED]
+eotg_aug_kingpin.075.desc_end_storm    [APPENDED]
+eotg_aug_kingpin.075.desc_end_fracture    [APPENDED]
+eotg_aug_kingpin.075.desc_end_flicker    [APPENDED]
+eotg_aug_kingpin.075.a
+
+## events: eotg_aug_kingpin.076
+eotg_aug_kingpin.076.t
+eotg_aug_kingpin.076.desc
+eotg_aug_kingpin.076.desc_end_storm    [APPENDED]
+eotg_aug_kingpin.076.desc_end_fracture    [APPENDED]
+eotg_aug_kingpin.076.desc_end_flicker    [APPENDED]
+eotg_aug_kingpin.076.a
+eotg_aug_kingpin.076.b
+
+## decision
+eotg_decision_aug_debug_kingpin
+eotg_decision_aug_debug_kingpin_desc
+eotg_decision_aug_debug_kingpin_tooltip
+eotg_decision_aug_debug_kingpin_confirm
+
+## modifiers
+eotg_mod_aug_kp_arrangement
+eotg_mod_aug_kp_arrangement_desc
+eotg_mod_aug_kp_hired_guns
+eotg_mod_aug_kp_hired_guns_desc
+eotg_mod_aug_kp_network
+eotg_mod_aug_kp_network_desc
+eotg_mod_aug_kp_kept
+eotg_mod_aug_kp_kept_desc
+eotg_mod_aug_kp_tribute
+eotg_mod_aug_kp_tribute_desc
+eotg_mod_aug_kp_informants
+eotg_mod_aug_kp_informants_desc
+eotg_mod_aug_kp_seized_clinic
+eotg_mod_aug_kp_seized_clinic_desc
+eotg_mod_aug_kp_arson
+eotg_mod_aug_kp_arson_desc
+eotg_mod_aug_kp_lockdown
+eotg_mod_aug_kp_lockdown_desc
+eotg_mod_aug_kp_loose_ends
+eotg_mod_aug_kp_loose_ends_desc
+eotg_mod_aug_kp_streets_cleared
+eotg_mod_aug_kp_streets_cleared_desc
+eotg_mod_aug_kp_massacre
+eotg_mod_aug_kp_massacre_desc
+
+## opinions
+eotg_opinion_aug_kp_order
+eotg_opinion_aug_kp_harboured
+eotg_opinion_aug_kp_raised_criminal
+eotg_opinion_aug_kp_warned
+
+## shared tooltips + toasts
+eotg_aug_kp_leverage_up_tt
+eotg_aug_kp_leverage_down_tt
+eotg_aug_kingpin_toast_dead
+eotg_aug_kingpin_toast_gone
+
+## story panel + band custom loc
+eotg_aug_kp_band_3
+eotg_aug_kp_band_2
+eotg_aug_kp_band_1
+eotg_story_aug_kingpin_info
+eotg_story_aug_kingpin_kp_label
+eotg_story_aug_kingpin_band_label
+eotg_story_aug_kingpin_band_min_label
+eotg_story_aug_kingpin_band_max_label
+eotg_story_aug_kingpin
+

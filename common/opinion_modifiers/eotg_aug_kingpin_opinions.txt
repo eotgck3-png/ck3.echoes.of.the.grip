@@ -1,0 +1,33 @@
+﻿# -- eotg_aug_kingpin_opinions.txt --------------------------------------------
+# Opinion modifiers for the Neurofractured Kingpin (docs/specs/
+# cybernetics_v2_kingpin.md §3). System-scoped (index §1 rule 1), shared with
+# no government. Durations are passed by the callers (years = 10).
+#
+# BATCH-B SEAM (kingpin): eotg_opinion_aug_kp_kingmaker (L4) and
+# eotg_opinion_aug_kp_conspired (L8) are written with batch B.
+# -----------------------------------------------------------------------------
+
+# L2 (.061) and L3 b (.062): order restored. Every vassal, 10 years.
+eotg_opinion_aug_kp_order = {
+    opinion = 10
+    decaying = no
+}
+
+# L9 (.068) in the collab or kept stage: the ruler harboured the killer.
+# Every vassal, 10 years (halved by .068 c through an opinion override).
+eotg_opinion_aug_kp_harboured = {
+    opinion = -20
+    decaying = no
+}
+
+# L10 (.069): a criminal raised to a seat. Every vassal, 10 years.
+eotg_opinion_aug_kp_raised_criminal = {
+    opinion = -10
+    decaying = no
+}
+
+# .005 b (violence errand): the ruler warned the target. 10 years.
+eotg_opinion_aug_kp_warned = {
+    opinion = 20
+    decaying = no
+}

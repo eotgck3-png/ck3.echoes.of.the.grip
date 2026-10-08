@@ -1,0 +1,68 @@
+﻿# -- eotg_aug_kingpin_on_actions.txt ------------------------------------------
+# The Neurofractured Kingpin (docs/specs/cybernetics_v2_kingpin.md §5.3).
+#
+# yearly_playable_pulse is a vanilla hook, extended additively only
+# (invariant 4): one on_actions entry, no effect or trigger at its top level.
+# The custom on_action below holds the trigger, the roll and the cooldown.
+#
+# COOLDOWN AUTHORITY (invariant 4, lesson 5): eotg_flag_aug_kingpin_cooldown
+# (10 years) is set and read HERE ONLY. eotg_aug_kingpin.001's trigger is
+# eotg_aug_kp_can_start (world state) and reads no flag. The flag matters only
+# if a story ends before on_setup sets the once-per-life flag (a cold
+# cancel), and as the AI pacing floor.
+# -----------------------------------------------------------------------------
+
+yearly_playable_pulse = {
+    on_actions = {
+        eotg_on_yearly_aug_kingpin_check
+    }
+}
+
+# Fires eotg_aug_kingpin.001 Word From Below. Owner ruling Q3 (2026-10-06):
+# 2% a year at base (was 4%), x2 with a Patron, x1.5 augmented, x1.5 under
+# a Ban, x1.5 with illegal implants, x1.25 with an augmented courtier or
+# vassal, x0.25 for the AI. Once per life (eotg_flag_aug_had_kingpin, read
+# by eotg_aug_kp_can_start) and the 10-year cooldown cap it.
+eotg_on_yearly_aug_kingpin_check = {
+    trigger = {
+        eotg_is_unclaimed_folk = no
+        eotg_aug_kp_can_start = yes
+        NOT = { has_character_flag = eotg_flag_aug_kingpin_cooldown }
+    }
+    effect = {
+        random_list = {
+            2 = {
+                modifier = {
+                    factor = 2
+                    eotg_aug_has_patron = yes
+                }
+                modifier = {
+                    factor = 1.5
+                    eotg_is_augmented_any = yes
+                }
+                modifier = {
+                    factor = 1.5
+                    eotg_aug_under_policy = { LAW = ban }
+                }
+                modifier = {
+                    factor = 1.5
+                    has_character_modifier = eotg_mod_illegal_implants
+                }
+                modifier = {
+                    factor = 1.25
+                    OR = {
+                        any_courtier = { eotg_is_augmented_any = yes }
+                        any_vassal = { eotg_is_augmented_any = yes }
+                    }
+                }
+                modifier = {
+                    factor = 0.25
+                    is_ai = yes
+                }
+                add_character_flag = { flag = eotg_flag_aug_kingpin_cooldown  years = 10 }
+                trigger_event = { id = eotg_aug_kingpin.001  days = { 1 30 } }
+            }
+            98 = { }
+        }
+    }
+}

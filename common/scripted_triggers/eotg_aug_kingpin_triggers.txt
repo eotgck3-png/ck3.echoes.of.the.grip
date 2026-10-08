@@ -1,0 +1,111 @@
+﻿# -- eotg_aug_kingpin_triggers.txt --------------------------------------------
+# Scripted triggers for the Neurofractured Kingpin (docs/specs/
+# cybernetics_v2_kingpin.md §3, §5.1). Batch A. Map-agnostic: no title,
+# province, culture or faith keys; every title comes from a scope.
+#
+# BATCH-B SEAM (kingpin): eotg_aug_kp_root_is_independent,
+# eotg_aug_kp_liege_claim_possible, eotg_aug_kp_neighbour_target and
+# eotg_aug_kp_vassal_seat_target (spec §3) belong to the claim path
+# (.003 b/c/b_indep/c_indep, .030-.032) and are written with batch B, so no
+# trigger here is defined without a reader.
+# -----------------------------------------------------------------------------
+
+# Entry eligibility (spec §5.1.1), plus one kingpin at a time and once per
+# life (§5.1.3). World state only: the 10-year cooldown flag is read by
+# eotg_on_yearly_aug_kingpin_check alone (cooldown authority, invariant 4).
+# eotg_flag_aug_had_kingpin is the permanent once-per-life marker set in the
+# story's on_setup, not a cooldown (precedent eotg_flag_aug_had_patron).
+# Users: eotg_on_yearly_aug_kingpin_check, eotg_aug_kingpin.001 (trigger).
+eotg_aug_kp_can_start = {
+    is_landed = yes
+    highest_held_title_tier >= tier_county
+    is_adult = yes
+    is_imprisoned = no
+    eotg_is_unclaimed_folk = no
+    NOT = { government_has_flag = government_is_landless_adventurer }
+    # The same development floor as eotg_can_receive_augmented: implants are
+    # traded where the capital is developed enough
+    exists = capital_county
+    capital_county = { development_level >= 10 }
+    NOT = { any_owned_story = { story_type = eotg_story_aug_kingpin } }
+    NOT = { has_character_flag = eotg_flag_aug_had_kingpin }
+}
+
+# The character owns a running kingpin story whose kingpin is alive. World
+# state, read by every kingpin event after .001 so a delayed event never
+# fires into an ended story or onto a dead kingpin (the story's maintenance
+# ends those). Not a cooldown.
+eotg_aug_kp_has_story = {
+    any_owned_story = {
+        story_type = eotg_story_aug_kingpin
+        var:eotg_kp ?= { is_alive = yes }
+    }
+}
+
+# The kingpin is the character's own prisoner (custody leaves that execute or
+# keep them in the cells: .060, .061, .076 a). Evaluated in the ruler's scope.
+eotg_aug_kp_in_my_cells = {
+    any_owned_story = {
+        story_type = eotg_story_aug_kingpin
+        var:eotg_kp ?= {
+            is_alive = yes
+            is_imprisoned_by = root
+        }
+    }
+}
+
+# The root is a vassal: the liege-claim branches are open (spec §5.1.1).
+# Batch A reader: eotg_aug_kingpin.003 (e_front, "Your files on [liege]").
+eotg_aug_kp_root_is_vassal = {
+    is_independent_ruler = no
+    exists = liege
+}
+
+# A county the kingpin can be given (L10) or can seize (L12): held by the
+# ruler, not the capital, tier county (spec §3). Title scope; $RULER$ is the
+# ruler whose county it is (root in events).
+# Users: .012 c, .013 d, .014 c, .069, .071, eotg_aug_kp_grant_county_effect,
+# eotg_aug_kp_seize_county_effect.
+eotg_aug_kp_seizable_county = {
+    tier = tier_county
+    holder = $RULER$
+    NOT = { this = $RULER$.capital_county }
+}
+
+# Someone the violence errand (.005) can name: an adult courtier of $RULER$,
+# not the ruler, not their close family or spouse, free, and not the
+# kingpin's planted informant (index §1 rule 7: a chosen target).
+# Users: .005 (immediate), the story tick's middle pool.
+eotg_aug_kp_errand_target = {
+    is_alive = yes
+    is_adult = yes
+    is_imprisoned = no
+    NOT = { this = $RULER$ }
+    NOT = { is_close_family_of = $RULER$ }
+    NOT = { is_spouse_of = $RULER$ }
+    NOT = { has_character_flag = eotg_flag_aug_kingpin }
+    NOT = { has_trait = eotg_neurofractured }
+}
+
+# The purge mind's mark (.006 purge): one of the ruler's courtiers the
+# kingpin's implant has them going for. Same terms as the errand, and never
+# a child. Users: .006 (immediate), the story tick's middle pool.
+eotg_aug_kp_purge_target = {
+    eotg_aug_kp_errand_target = { RULER = $RULER$ }
+    age >= 16
+}
+
+# A courtier who can be the kingpin's informant when none was planted
+# (.007): adult, free, not family, with some intrigue.
+# Users: .007 (immediate), the story tick's middle pool.
+eotg_aug_kp_informant_candidate = {
+    eotg_aug_kp_errand_target = { RULER = $RULER$ }
+    intrigue >= 6
+}
+
+# Profile read (spec §3): the kingpin's axis $AXIS$ (kind / method / reach /
+# mind) holds flag:$VALUE$. Needs scope:eotg_kp (saved by
+# eotg_aug_kp_save_scopes_effect in events, and at the start of the tick).
+eotg_aug_kp_is = {
+    scope:eotg_kp ?= { var:eotg_kp_$AXIS$ ?= flag:$VALUE$ }
+}
