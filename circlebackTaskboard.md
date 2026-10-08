@@ -428,6 +428,43 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Owner:** human → orchestrator (route failures)
 - **Next step:** run sitting 1; send back the §S items.
 
+### CB-45: In-game checks for A Fracturing Inheritance and Kingpin batch A
+- **Status:** waiting-human (2026-10-08)
+- **What:** both trees are committed (`995d43d`, `60db01f`), and nothing in them has been seen in game yet. Console recipes are in each spec's §9.1.
+- **Inheritance checks:**
+  - the 17 tree leaves and the 15 hidden .028 branches;
+  - V-13, the succession-line order and the player skip;
+  - V-14/V-15, exclusivity with the Heir's Arc;
+  - Q7/CB-02, the regency persisting after L9;
+  - DoD 14, .026 is the first event after the character switch;
+  - the stacked trait icons;
+  - the seat word in .025/.026, and the dead count in .017.killed.
+- **Kingpin checks:**
+  - the story panel's icon, background, band name and info string;
+  - the band changing after .004 a / .007 a;
+  - V-K1, an AI inviting the pool kingpin;
+  - V-K8, .040 after inheritance;
+  - .002 b → .010 shows the audience desc with options a and c only;
+  - the lieutenant gone after .005 b_infiltration;
+  - no error.log lines from the .060/.061/.076 executions.
+- **Shipped fixes:** the three tamper.004 desc variants; tier3.018 desc_false_executed, and whether .018's option tooltip lists the opinion and tyranny costs (if not, add `.018.c.false_executed_tt`).
+- **Owner:** human → orchestrator
+- **Next step:** fold these into `docs/qa/IN_GAME_SESSION_PLAN.md` before the next sitting.
+
+### CB-46: Kingpin batch B (claim wars, crisis stage)
+- **Status:** ready (2026-10-08)
+- **What:** .030–.039, .050, .063–.067 and .072, the war stages, and M3/M4. The seams are marked `BATCH-B SEAM (kingpin)` and are inert. Gemini drafted 80 provisional batch B keys in `docs/proposals/kingpin_text_gemini_r1.md`; treat them as raw material.
+- **Owner:** orchestrator → eotg-scripter, then localizer, lore and QA
+- **Next step:** dispatch once batch A has had an in-game look (CB-45).
+
+### CB-47: Small open calls from the 2026-10-08 reviews
+- **Status:** waiting-human
+- **What:**
+  - GQF-002: should the no-time-of-day rule apply project-wide? Today it covers only cybernetics text; Frontier says "day and night" and "tomorrow". Orchestrator recommends no.
+  - "the yard" in init.019/retinue.003, and the "Knight's Request" title (tier1.004): include them in the next wording pass.
+  - The `wip/cyber-trees-2026-10-06` backup branch on GitHub is superseded by the commits above; delete it whenever.
+- **Owner:** human
+
 ## Tooling and environment
 
 ### CB-18: Game is 1.20.0.3; the tools target older versions
