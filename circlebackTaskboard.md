@@ -447,6 +447,7 @@ These are shared conditions. Clearing one unblocks every item that names it.
   - .002 b → .010 shows the audience desc with options a and c only;
   - the lieutenant gone after .005 b_infiltration;
   - no error.log lines from the .060/.061/.076 executions.
+- **Knight term (2026-10-08):** check that `Custom('KnightCulture…')` renders in the tier1.004 title and in the `eotg_decision_augment_retainer_candidate_tt` decision tooltip. If the tooltip comes up blank, fall back to "retainers or courtiers".
 - **Shipped fixes:** the three tamper.004 desc variants; tier3.018 desc_false_executed, and whether .018's option tooltip lists the opinion and tyranny costs (if not, add `.018.c.false_executed_tt`).
 - **Owner:** human → orchestrator
 - **Next step:** fold these into `docs/qa/IN_GAME_SESSION_PLAN.md` before the next sitting.
@@ -464,6 +465,17 @@ These are shared conditions. Clearing one unblocks every item that names it.
   - "the yard" in init.019/retinue.003, and the "Knight's Request" title (tier1.004): include them in the next wording pass.
   - The `wip/cyber-trees-2026-10-06` backup branch on GitHub is superseded by the commits above; delete it whenever.
 - **Owner:** human
+
+### CB-48: The mod's own knight term (KnightCulture override)
+- **Status:** parked: waits for the mod's governments and cultures (Gate 1/2)
+- **What:**
+  - **How it works:** vanilla picks the knight term per character through the customizable loc `KnightCulture` (`common/customizable_localization/00_knight_culture.txt`). It goes by language pillar and faith; the only government checks are tribal and landless adventurer. Governments have no knight-name field.
+  - **The problem today:** with no override, most mod characters see "Champion" (vanilla's catch-all for non-Christian, non-Frankish characters), and some see real-world terms (Fāris, Bushi, Hetaeria).
+  - **Owner direction (2026-10-08):** the term should come from the government: "Knight" for some, something like "Operator" or "Agent" for others.
+  - **The fix:** override `KnightCulture` with `eotg_` blocks per government flag (and culture if needed) above vanilla's blocks, ending in a mod fallback. Supply every suffix variant per term (`_no_tooltip`, `_plural`, `_lowercase`, `_possessive`, `_adjective`, and the concept-linked form). This also fixes vanilla's own knight UI.
+  - **Done already:** the mod's event loc already calls `Custom('KnightCulture…')` (2026-10-08), so it follows the override automatically.
+- **Owner:** owner (the term per government) → eotg-architect → scripter/localizer
+- **Next step:** when the government roster is designed, add a "knight term" column to it.
 
 ## Tooling and environment
 
