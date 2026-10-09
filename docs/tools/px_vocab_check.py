@@ -98,6 +98,29 @@ def trait_groups(root):
     return found
 
 
+def obligation_levels(text):
+    """Keys of the levels nested in each `obligation_levels = { }` block.
+
+    Subject contracts (common/subject_contracts/contracts) define their levels one block
+    below the contract (`obligation_levels = { <level> = { ... } }`), so TOP_RE misses
+    them, and every reference to a mod level was reported as unknown.
+    """
+    found, depth, in_levels = set(), 0, None
+    for m in re.finditer(r"([A-Za-z_]\w*)\s*=\s*\{|\{|\}", text):
+        if m.group(0) == "}":
+            depth -= 1
+            if in_levels is not None and depth < in_levels:
+                in_levels = None
+            continue
+        key = m.group(1)
+        if key and in_levels is not None and depth == in_levels:
+            found.add(key)
+        if key == "obligation_levels":
+            in_levels = depth + 1
+        depth += 1
+    return found
+
+
 def vanilla_index():
     if CACHE.exists():
         return {k: set(v) for k, v in json.loads(textio.read_text(CACHE)[0]).items()}
@@ -132,6 +155,9 @@ def mod_index():
     }
     for sub in ("common", "events"):
         mod["defs"] |= definitions(MOD, sub)
+    base = MOD / "common/subject_contracts/contracts"
+    for f in base.rglob("*.txt") if base.exists() else []:
+        mod["defs"] |= obligation_levels("\n".join(strip_comments(read(f))))
     # Parameter names of the mod's own scripted effects/triggers ($AMOUNT$, $EXCLUDE$, ...)
     # appear as keys at their call sites: eotg_add_fracture_risk = { AMOUNT = 5 }.
     for sub in ("common/scripted_effects", "common/scripted_triggers"):

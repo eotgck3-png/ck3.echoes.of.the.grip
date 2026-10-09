@@ -1,0 +1,55 @@
+﻿# -- eotg_government_contract_groups.txt --------------------------------------
+# Governments v2, Phase G1 (docs/specs/governments_v2.md §6.1): one subject
+# contract group per government, referenced by vassal_contract_group in each
+# common/governments/eotg_<gov>_government.txt.
+# Shape: feudal_vassal (G/common/subject_contracts/groups/
+# subject_contract_groups.txt:1-16). Each group: the government's tax tree and
+# levy tree (contracts/eotg_government_obligations.txt) plus the three generic
+# vanilla rights (special_contracts.txt:476-580: war_declaration_rights has no
+# is_shown; council_rights hides only for nomad lieges; title_revocation_rights
+# only on a jizya faith split).
+# Excluded on purpose (§6.1): special_contract, fortification_rights,
+# coinage_rights (government_is_feudal content), succession_rights (feudal or
+# tribal only), religious_rights, jizya_special_rights, kurultai_rights.
+# Third obligations (board seat, enforcement, field commission) are G2.
+# -----------------------------------------------------------------------------
+
+eotg_pmc_vassal = {
+    contracts = {
+        eotg_pmc_contractor_fee
+        eotg_pmc_operational_levy
+        war_declaration_rights
+        council_rights
+        title_revocation_rights
+    }
+}
+
+eotg_corporation_vassal = {
+    contracts = {
+        eotg_corporation_assessment
+        eotg_corporation_security_levy
+        war_declaration_rights
+        council_rights
+        title_revocation_rights
+    }
+}
+
+eotg_gobcorp_vassal = {
+    contracts = {
+        eotg_gobcorp_market_tithe
+        eotg_gobcorp_security_levy
+        war_declaration_rights
+        council_rights
+        title_revocation_rights
+    }
+}
+
+eotg_cartel_vassal = {
+    contracts = {
+        eotg_cartel_loyalty_tax
+        eotg_cartel_territory_tribute
+        war_declaration_rights
+        council_rights
+        title_revocation_rights
+    }
+}

@@ -1,0 +1,67 @@
+﻿# -- eotg_pmc_government.txt ---------------------------------------------------
+# Governments v2, Phase G1 (docs/specs/governments_v2.md §5.0, §5.1).
+# PMC: a military state run as a business, a command hierarchy that sells force.
+# Knights read "Operators" (KnightCulture override, §10).
+#
+# Map-agnostic (owner gate ruling 2026-10-08): no title, province, culture,
+# faith or character key. History data (the test sub-mod) assigns it.
+#
+# Shape: vanilla feudal_government (G/common/governments/00_government_types.txt
+# :5-62) for the castle holdings, rules and flags; extra rules from admin :450-558
+# and celestial :794-920 as cited per line.
+# Not set on purpose (§5.0): fallback, primary_heritages, preferred_religions,
+# can_get_government (§5.6 is the G1.1 fallback), mechanic_type,
+# use_as_base_on_rank_up, government_is_feudal (read 369x in vanilla).
+#
+# Tiger 1.17 and PX don't validate 1.20 government fields: QA checks this block
+# BY HAND against _governments.info and the cited vanilla lines (§13 item 2).
+# UNVERIFIED-VANILLA (V-G1, V-G3): a playable government with no mechanic_type
+#   loads and can be picked on the map (eotg_unclaimed_government precedent).
+# -----------------------------------------------------------------------------
+
+eotg_pmc_government = {
+    government_rules = {
+        create_cadet_branches = yes         # feudal :7
+        rulers_should_have_dynasty = yes    # feudal :8 (deviation from v1 `no`)
+        dynasty_named_realms = no           # admin :454
+        legitimacy = yes                    # feudal :10
+        allow_accolades = yes               # feudal :11 (V-G14)
+        use_as_base_on_landed = yes         # admin :458; .info:73-77
+        sticky_government = yes             # admin :462; .info:148-151
+        disable_regnal_numbers = yes        # celestial :816; .info:300-303
+    }
+
+    royal_court = any                       # feudal :14
+
+    # Castle shape, verbatim from feudal :18-20 (§5.0)
+    primary_holding = castle_holding
+    valid_holdings = { temple_citadel_holding }
+    required_county_holdings = { castle_holding city_holding church_holding }
+
+    vassal_contract_group = eotg_pmc_vassal # §6; feudal :22
+
+    court_generate_commanders = 2           # .info:427-432 (int); mercenary uses 5 (:335)
+
+    character_modifier = {
+        knight_limit = 2                    # landless adventurer :594 (+2)
+        knight_effectiveness_mult = 0.15    # v1
+        men_at_arms_maintenance = -0.1      # admin :514 uses the same modifier
+        mercenary_hire_cost_mult = -0.2     # admin :513
+    }
+
+    ai = {
+        use_legends = yes                   # feudal :24-26
+    }
+
+    flags = {
+        eotg_government_is_pmc              # identity flag (§3.1)
+        government_is_settled               # feudal :29-35
+        government_uses_domain_limit
+        government_uses_crown_authority     # load-bearing: crown authority law group (§5.0)
+    }
+
+    # Olive drab; distinct from steppe_admin and meritocratic orange (§5.1, V-G18)
+    color = hsv{ 0.20 0.60 0.55 }
+    realm_mask_offset = { 0.0 0.01 }        # feudal :60-61
+    realm_mask_scale = { 1 1 }
+}

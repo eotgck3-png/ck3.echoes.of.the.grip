@@ -1,0 +1,528 @@
+﻿# -- eotg_government_obligations.txt -----------------------------------------
+# Governments v2, Phase G1 (docs/specs/governments_v2.md §6.2): the 8 contracts,
+# a tax tree and a levy tree per government.
+#
+# Shape: vanilla feudal_government_levies (G/common/subject_contracts/contracts/
+# feudal.txt:128-190), copied for BOTH trees with fixed numbers: feudal's tax
+# tree computes AI desire through government_is_feudal branches (:29-115) that
+# never fire for these governments. subject_opinion, ai_liege_desire,
+# ai_subject_desire and score are copied by position from the levy tree. Flags:
+# obligation_high_levies (levy trees) and obligation_high_taxes (tax trees, as
+# feudal_tax_high/_extortionate :71-121) at the high and extortionate levels;
+# vanilla AI and opinion logic read them.
+# Numbers are first-pass balance (§6.2 table); V-G12 is the check.
+# Loc (localizer): <contract>, <contract>_<level>, <contract>_<level>_short,
+# <contract>_<level>_desc (_subject_contracts.info "Text").
+# -----------------------------------------------------------------------------
+
+# PMC tax tree: low cash
+eotg_pmc_contractor_fee = {
+    display_mode = tree
+    icon = gold_icon
+    obligation_levels = {
+        eotg_pmc_contractor_fee_none = {
+            position = { 0 0 }
+
+            tax = 0
+            subject_opinion = 10
+
+            ai_liege_desire = 1
+            ai_subject_desire = 5
+            score = 2
+        }
+        eotg_pmc_contractor_fee_low = {
+            parent = eotg_pmc_contractor_fee_none
+            position = { 1 0 }
+
+            tax = 0.025
+            subject_opinion = 5
+
+            ai_liege_desire = 2
+            ai_subject_desire = 4
+            score = 1
+        }
+        eotg_pmc_contractor_fee_standard = {
+            default = yes
+            parent = eotg_pmc_contractor_fee_low
+            position = { 2 0 }
+
+            tax = 0.05
+
+            ai_liege_desire = 3
+            ai_subject_desire = 3
+            score = 0
+        }
+        eotg_pmc_contractor_fee_high = {
+            parent = eotg_pmc_contractor_fee_standard
+            position = { 3 0 }
+
+            tax = 0.1
+            subject_opinion = -15
+
+            ai_liege_desire = 4
+            ai_subject_desire = 2
+            score = -1
+            flag = obligation_high_taxes
+        }
+        eotg_pmc_contractor_fee_extortionate = {
+            parent = eotg_pmc_contractor_fee_high
+            position = { 4 0 }
+
+            tax = 0.15
+            subject_opinion = -25
+
+            ai_liege_desire = 5
+            ai_subject_desire = 1
+            score = -2
+            flag = obligation_high_taxes
+        }
+    }
+}
+
+# PMC levy tree: troops owed
+eotg_pmc_operational_levy = {
+    display_mode = tree
+    icon = soldier_icon
+    obligation_levels = {
+        eotg_pmc_operational_levy_none = {
+            position = { 0 0 }
+
+            levies = 0
+            subject_opinion = 10
+
+            ai_liege_desire = 1
+            ai_subject_desire = 5
+            score = 2
+        }
+        eotg_pmc_operational_levy_low = {
+            parent = eotg_pmc_operational_levy_none
+            position = { 1 0 }
+
+            levies = 0.15
+            subject_opinion = 5
+
+            ai_liege_desire = 2
+            ai_subject_desire = 4
+            score = 1
+        }
+        eotg_pmc_operational_levy_standard = {
+            default = yes
+            parent = eotg_pmc_operational_levy_low
+            position = { 2 0 }
+
+            levies = 0.35
+
+            ai_liege_desire = 3
+            ai_subject_desire = 3
+            score = 0
+        }
+        eotg_pmc_operational_levy_high = {
+            parent = eotg_pmc_operational_levy_standard
+            position = { 3 0 }
+
+            levies = 0.45
+            subject_opinion = -15
+
+            ai_liege_desire = 4
+            ai_subject_desire = 2
+            score = -1
+            flag = obligation_high_levies
+        }
+        eotg_pmc_operational_levy_extortionate = {
+            parent = eotg_pmc_operational_levy_high
+            position = { 4 0 }
+
+            levies = 0.6
+            subject_opinion = -25
+
+            ai_liege_desire = 5
+            ai_subject_desire = 1
+            score = -2
+            flag = obligation_high_levies
+        }
+    }
+}
+
+# Corporation tax tree: cash owed
+eotg_corporation_assessment = {
+    display_mode = tree
+    icon = gold_icon
+    obligation_levels = {
+        eotg_corporation_assessment_none = {
+            position = { 0 0 }
+
+            tax = 0
+            subject_opinion = 10
+
+            ai_liege_desire = 1
+            ai_subject_desire = 5
+            score = 2
+        }
+        eotg_corporation_assessment_low = {
+            parent = eotg_corporation_assessment_none
+            position = { 1 0 }
+
+            tax = 0.05
+            subject_opinion = 5
+
+            ai_liege_desire = 2
+            ai_subject_desire = 4
+            score = 1
+        }
+        eotg_corporation_assessment_standard = {
+            default = yes
+            parent = eotg_corporation_assessment_low
+            position = { 2 0 }
+
+            tax = 0.15
+
+            ai_liege_desire = 3
+            ai_subject_desire = 3
+            score = 0
+        }
+        eotg_corporation_assessment_high = {
+            parent = eotg_corporation_assessment_standard
+            position = { 3 0 }
+
+            tax = 0.2
+            subject_opinion = -15
+
+            ai_liege_desire = 4
+            ai_subject_desire = 2
+            score = -1
+            flag = obligation_high_taxes
+        }
+        eotg_corporation_assessment_extortionate = {
+            parent = eotg_corporation_assessment_high
+            position = { 4 0 }
+
+            tax = 0.25
+            subject_opinion = -25
+
+            ai_liege_desire = 5
+            ai_subject_desire = 1
+            score = -2
+            flag = obligation_high_taxes
+        }
+    }
+}
+
+# Corporation levy tree: few troops
+eotg_corporation_security_levy = {
+    display_mode = tree
+    icon = soldier_icon
+    obligation_levels = {
+        eotg_corporation_security_levy_none = {
+            position = { 0 0 }
+
+            levies = 0
+            subject_opinion = 10
+
+            ai_liege_desire = 1
+            ai_subject_desire = 5
+            score = 2
+        }
+        eotg_corporation_security_levy_low = {
+            parent = eotg_corporation_security_levy_none
+            position = { 1 0 }
+
+            levies = 0.05
+            subject_opinion = 5
+
+            ai_liege_desire = 2
+            ai_subject_desire = 4
+            score = 1
+        }
+        eotg_corporation_security_levy_standard = {
+            default = yes
+            parent = eotg_corporation_security_levy_low
+            position = { 2 0 }
+
+            levies = 0.1
+
+            ai_liege_desire = 3
+            ai_subject_desire = 3
+            score = 0
+        }
+        eotg_corporation_security_levy_high = {
+            parent = eotg_corporation_security_levy_standard
+            position = { 3 0 }
+
+            levies = 0.2
+            subject_opinion = -15
+
+            ai_liege_desire = 4
+            ai_subject_desire = 2
+            score = -1
+            flag = obligation_high_levies
+        }
+        eotg_corporation_security_levy_extortionate = {
+            parent = eotg_corporation_security_levy_high
+            position = { 4 0 }
+
+            levies = 0.3
+            subject_opinion = -25
+
+            ai_liege_desire = 5
+            ai_subject_desire = 1
+            score = -2
+            flag = obligation_high_levies
+        }
+    }
+}
+
+# Gob-Corp tax tree: cash
+eotg_gobcorp_market_tithe = {
+    display_mode = tree
+    icon = gold_icon
+    obligation_levels = {
+        eotg_gobcorp_market_tithe_none = {
+            position = { 0 0 }
+
+            tax = 0
+            subject_opinion = 10
+
+            ai_liege_desire = 1
+            ai_subject_desire = 5
+            score = 2
+        }
+        eotg_gobcorp_market_tithe_low = {
+            parent = eotg_gobcorp_market_tithe_none
+            position = { 1 0 }
+
+            tax = 0.05
+            subject_opinion = 5
+
+            ai_liege_desire = 2
+            ai_subject_desire = 4
+            score = 1
+        }
+        eotg_gobcorp_market_tithe_standard = {
+            default = yes
+            parent = eotg_gobcorp_market_tithe_low
+            position = { 2 0 }
+
+            tax = 0.125
+
+            ai_liege_desire = 3
+            ai_subject_desire = 3
+            score = 0
+        }
+        eotg_gobcorp_market_tithe_high = {
+            parent = eotg_gobcorp_market_tithe_standard
+            position = { 3 0 }
+
+            tax = 0.175
+            subject_opinion = -15
+
+            ai_liege_desire = 4
+            ai_subject_desire = 2
+            score = -1
+            flag = obligation_high_taxes
+        }
+        eotg_gobcorp_market_tithe_extortionate = {
+            parent = eotg_gobcorp_market_tithe_high
+            position = { 4 0 }
+
+            tax = 0.225
+            subject_opinion = -25
+
+            ai_liege_desire = 5
+            ai_subject_desire = 1
+            score = -2
+            flag = obligation_high_taxes
+        }
+    }
+}
+
+# Gob-Corp levy tree
+eotg_gobcorp_security_levy = {
+    display_mode = tree
+    icon = soldier_icon
+    obligation_levels = {
+        eotg_gobcorp_security_levy_none = {
+            position = { 0 0 }
+
+            levies = 0
+            subject_opinion = 10
+
+            ai_liege_desire = 1
+            ai_subject_desire = 5
+            score = 2
+        }
+        eotg_gobcorp_security_levy_low = {
+            parent = eotg_gobcorp_security_levy_none
+            position = { 1 0 }
+
+            levies = 0.05
+            subject_opinion = 5
+
+            ai_liege_desire = 2
+            ai_subject_desire = 4
+            score = 1
+        }
+        eotg_gobcorp_security_levy_standard = {
+            default = yes
+            parent = eotg_gobcorp_security_levy_low
+            position = { 2 0 }
+
+            levies = 0.15
+
+            ai_liege_desire = 3
+            ai_subject_desire = 3
+            score = 0
+        }
+        eotg_gobcorp_security_levy_high = {
+            parent = eotg_gobcorp_security_levy_standard
+            position = { 3 0 }
+
+            levies = 0.25
+            subject_opinion = -15
+
+            ai_liege_desire = 4
+            ai_subject_desire = 2
+            score = -1
+            flag = obligation_high_levies
+        }
+        eotg_gobcorp_security_levy_extortionate = {
+            parent = eotg_gobcorp_security_levy_high
+            position = { 4 0 }
+
+            levies = 0.35
+            subject_opinion = -25
+
+            ai_liege_desire = 5
+            ai_subject_desire = 1
+            score = -2
+            flag = obligation_high_levies
+        }
+    }
+}
+
+# Cartel tax tree: the steep top end is the loyalty tax
+eotg_cartel_loyalty_tax = {
+    display_mode = tree
+    icon = gold_icon
+    obligation_levels = {
+        eotg_cartel_loyalty_tax_none = {
+            position = { 0 0 }
+
+            tax = 0
+            subject_opinion = 10
+
+            ai_liege_desire = 1
+            ai_subject_desire = 5
+            score = 2
+        }
+        eotg_cartel_loyalty_tax_low = {
+            parent = eotg_cartel_loyalty_tax_none
+            position = { 1 0 }
+
+            tax = 0.05
+            subject_opinion = 5
+
+            ai_liege_desire = 2
+            ai_subject_desire = 4
+            score = 1
+        }
+        eotg_cartel_loyalty_tax_standard = {
+            default = yes
+            parent = eotg_cartel_loyalty_tax_low
+            position = { 2 0 }
+
+            tax = 0.1
+
+            ai_liege_desire = 3
+            ai_subject_desire = 3
+            score = 0
+        }
+        eotg_cartel_loyalty_tax_high = {
+            parent = eotg_cartel_loyalty_tax_standard
+            position = { 3 0 }
+
+            tax = 0.2
+            subject_opinion = -15
+
+            ai_liege_desire = 4
+            ai_subject_desire = 2
+            score = -1
+            flag = obligation_high_taxes
+        }
+        eotg_cartel_loyalty_tax_extortionate = {
+            parent = eotg_cartel_loyalty_tax_high
+            position = { 4 0 }
+
+            tax = 0.3
+            subject_opinion = -25
+
+            ai_liege_desire = 5
+            ai_subject_desire = 1
+            score = -2
+            flag = obligation_high_taxes
+        }
+    }
+}
+
+# Cartel levy tree: feudal-like
+eotg_cartel_territory_tribute = {
+    display_mode = tree
+    icon = soldier_icon
+    obligation_levels = {
+        eotg_cartel_territory_tribute_none = {
+            position = { 0 0 }
+
+            levies = 0
+            subject_opinion = 10
+
+            ai_liege_desire = 1
+            ai_subject_desire = 5
+            score = 2
+        }
+        eotg_cartel_territory_tribute_low = {
+            parent = eotg_cartel_territory_tribute_none
+            position = { 1 0 }
+
+            levies = 0.1
+            subject_opinion = 5
+
+            ai_liege_desire = 2
+            ai_subject_desire = 4
+            score = 1
+        }
+        eotg_cartel_territory_tribute_standard = {
+            default = yes
+            parent = eotg_cartel_territory_tribute_low
+            position = { 2 0 }
+
+            levies = 0.25
+
+            ai_liege_desire = 3
+            ai_subject_desire = 3
+            score = 0
+        }
+        eotg_cartel_territory_tribute_high = {
+            parent = eotg_cartel_territory_tribute_standard
+            position = { 3 0 }
+
+            levies = 0.35
+            subject_opinion = -15
+
+            ai_liege_desire = 4
+            ai_subject_desire = 2
+            score = -1
+            flag = obligation_high_levies
+        }
+        eotg_cartel_territory_tribute_extortionate = {
+            parent = eotg_cartel_territory_tribute_high
+            position = { 4 0 }
+
+            levies = 0.5
+            subject_opinion = -25
+
+            ai_liege_desire = 5
+            ai_subject_desire = 1
+            score = -2
+            flag = obligation_high_levies
+        }
+    }
+}

@@ -1,0 +1,47 @@
+﻿# MOD(eotg) NGovernment.GOVERNMENT_TYPES.
+#
+# The engine pre-registers each government's built-in modifiers (the <government>_vassal_opinion,
+# _levy_contribution etc. family) ONLY for governments named in this array. A government missing
+# from it logs 12 "Could not find the preregistered modifier type..." errors on load.
+#
+# Unlike most defines this is an ARRAY: our copy REPLACES vanilla's whole list, it does not merge.
+# The vanilla entries below are copied verbatim from 1.20.0.3 game/common/defines/00_defines.txt
+# (NGovernment, ~:550-573). RE-COPY THEM AFTER EVERY CK3 UPDATE (docs/pitfalls.md section 2) -
+# a vanilla government added in a patch and missing here silently loses its modifiers.
+# Precedent: After the End (workshop 3192256710) common/defines/ate_defines.txt:35-62.
+#
+# The British Isles test sub-mod restates this whole list plus its own government in
+# docs/test_submods/british_isles/common/defines/zz_eotg_test_bi_government_defines.txt; keep
+# the two in step.
+
+NGovernment = {
+	GOVERNMENT_TYPES = {
+		# vanilla 1.20.0.3, verbatim
+		"feudal_government"
+		"republic_government"
+		"theocracy_government"
+		"clan_government"
+		"tribal_government"
+		"mercenary_government"
+		"holy_order_government"
+		"monastic_holy_order_government"
+		"administrative_government"
+		"landless_adventurer_government"
+		"nomad_government"
+		"herder_government"
+		"celestial_government"
+		"japan_administrative_government"
+		"japan_feudal_government"
+		"mandala_government"
+		"wanua_government"
+		"meritocratic_government"
+		"steppe_admin_government"
+		"ecclesiastical_government"
+		# MOD(eotg)
+		"eotg_unclaimed_government"
+		"eotg_pmc_government"
+		"eotg_corporation_government"
+		"eotg_gobcorp_government"
+		"eotg_cartel_government"
+	}
+}

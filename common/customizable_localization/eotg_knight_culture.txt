@@ -1,0 +1,94 @@
+﻿# -- eotg_knight_culture.txt --------------------------------------------------
+# Governments v2, Phase G1 (docs/specs/governments_v2.md §10; CB-48).
+# KEY-LEVEL OVERRIDE of vanilla KnightCulture
+# (G/common/customizable_localization/00_knight_culture.txt:1-89), in a
+# differently named file so vanilla's file still loads (pitfalls §16 mechanism).
+# KnightCulture is redefined, and vanilla's 7 children (KnightCulturePlural ...
+# KnightCultureAdjectiveNoTooltipLowercase, :91-123) are re-copied verbatim
+# after it so all 8 bind to this parent, not vanilla's (precedent: TFE, workshop
+# 3515718688, TFE_governor_concept_custom_loc.txt:100-103). Each term below
+# needs the 7 suffixed loc keys as well (localizer;
+# docs/specs/build/governments_g1_loc_keys.txt).
+#
+# Vanilla's culture and faith blocks (:5-83) are NOT copied: they name
+# christianity_religion, language_frankish and other real-world keys, and mod
+# script must not name culture or faith keys (owner gate ruling 2026-10-08).
+# Consequence on the vanilla-map test: vanilla-government knights read "Knight"
+# (the CB-48 intent). The landless-adventurer "Champion" block is dropped too.
+# Terms: OQ1 defaults (PENDING OWNER): Operator, Specialist, Strongarm, Brute (Brute: owner ruling 2026-10-08).
+#
+# UNVERIFIED-VANILLA (V-G1, V-G8): the later definition of a customizable_localization
+#   key replaces the earlier one. Confirm in logs/database_conflicts.log
+#   (KnightCulture overridden by eotg_knight_culture.txt). After every CK3
+#   update, diff vanilla 00_knight_culture.txt for new child suffixes.
+# -----------------------------------------------------------------------------
+
+KnightCulture = {
+    type = character
+
+    text = {
+        trigger = {
+            eotg_gov_knight_realm_is_pmc = yes
+        }
+        localization_key = eotg_knight_operator
+    }
+    text = {
+        trigger = {
+            eotg_gov_knight_realm_is_corporation = yes
+        }
+        localization_key = eotg_knight_specialist
+    }
+    text = {
+        trigger = {
+            eotg_gov_knight_realm_is_gobcorp = yes
+        }
+        localization_key = eotg_knight_strongarm
+    }
+    text = {
+        trigger = {
+            eotg_gov_knight_realm_is_cartel = yes
+        }
+        localization_key = eotg_knight_brute
+    }
+    # Vanilla "Knight" (00_knight_culture.txt:85-88)
+    text = {
+        localization_key = knight_default
+        fallback = yes
+    }
+}
+
+# Vanilla children, verbatim (G/common/customizable_localization/00_knight_culture.txt:91-123)
+KnightCulturePlural = {
+	parent = KnightCulture
+	suffix = "_plural"
+}
+
+KnightCultureNoTooltip = {
+	parent = KnightCulture
+	suffix = "_no_tooltip"
+}
+
+KnightCulturePluralNoTooltip = {
+	parent = KnightCulture
+	suffix = "_no_tooltip_plural"
+}
+
+KnightCultureNoTooltipLowercase = {
+	parent = KnightCulture
+	suffix = "_no_tooltip_lowercase"
+}
+
+KnightCulturePluralNoTooltipLowercase = {
+	parent = KnightCulture
+	suffix = "_no_tooltip_lowercase_plural"
+}
+
+KnightCulturePluralPossessiveNoTooltipLowercase = {
+	parent = KnightCulture
+	suffix = "_no_tooltip_lowercase_plural_possessive"
+}
+
+KnightCultureAdjectiveNoTooltipLowercase = {
+	parent = KnightCulture
+	suffix = "_no_tooltip_lowercase_adjective"
+}

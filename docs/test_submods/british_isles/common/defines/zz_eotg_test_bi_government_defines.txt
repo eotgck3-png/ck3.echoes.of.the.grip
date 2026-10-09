@@ -1,0 +1,42 @@
+﻿# EOTG TEST. NGovernment.GOVERNMENT_TYPES for the British Isles test sub-mod.
+#
+# GOVERNMENT_TYPES is an array, so the last file to set it replaces the whole list. This file
+# restates the main mod's list (common/defines/eotg_government_defines.txt: vanilla 1.20.0.3
+# verbatim plus the five eotg_ governments) and adds the sub-mod's eotg_test_offmap_government,
+# without which the offmap government logs 12 "Could not find the preregistered modifier type"
+# errors. The zz_ name makes it load after the main mod's eotg_government_defines.txt.
+# Keep it in step with the main mod's file; re-copy the vanilla entries after every CK3 update.
+
+NGovernment = {
+	GOVERNMENT_TYPES = {
+		# vanilla 1.20.0.3, verbatim
+		"feudal_government"
+		"republic_government"
+		"theocracy_government"
+		"clan_government"
+		"tribal_government"
+		"mercenary_government"
+		"holy_order_government"
+		"monastic_holy_order_government"
+		"administrative_government"
+		"landless_adventurer_government"
+		"nomad_government"
+		"herder_government"
+		"celestial_government"
+		"japan_administrative_government"
+		"japan_feudal_government"
+		"mandala_government"
+		"wanua_government"
+		"meritocratic_government"
+		"steppe_admin_government"
+		"ecclesiastical_government"
+		# MOD(eotg)
+		"eotg_unclaimed_government"
+		"eotg_pmc_government"
+		"eotg_corporation_government"
+		"eotg_gobcorp_government"
+		"eotg_cartel_government"
+		# EOTG TEST
+		"eotg_test_offmap_government"
+	}
+}

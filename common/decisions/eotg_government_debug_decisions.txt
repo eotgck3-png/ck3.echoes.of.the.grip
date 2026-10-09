@@ -1,0 +1,175 @@
+﻿# -- eotg_government_debug_decisions.txt --------------------------------------
+# Governments v2, Phase G1 (docs/specs/governments_v2.md §7.3): debug decisions
+# only (debug_only = yes), not reachable in a normal game. Shape as
+# eotg_decision_unclaimed_debug_release (eotg_unclaimed_decisions.txt:9-24).
+# change_government fires on_government_change, whose mod hook
+# (eotg_gov_on_government_change) sets the government's succession law.
+# -----------------------------------------------------------------------------
+
+# V-G16: the ruler becomes pmc and gets eotg_pmc_succession_law.
+eotg_decision_gov_debug_become_pmc = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 0
+        kingdom = 0
+        empire = 0
+        hegemony = 0
+    }
+
+    is_shown = {
+        debug_only = yes
+        is_landed = yes
+        NOT = { government_has_flag = eotg_government_is_pmc }
+    }
+
+    effect = {
+        change_government = eotg_pmc_government
+    }
+
+    ai_potential = {
+        always = no
+    }
+    ai_will_do = {
+        base = 0
+    }
+}
+
+# V-G16: the ruler becomes corporation and gets eotg_corporation_succession_law.
+eotg_decision_gov_debug_become_corporation = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 0
+        kingdom = 0
+        empire = 0
+        hegemony = 0
+    }
+
+    is_shown = {
+        debug_only = yes
+        is_landed = yes
+        NOT = { government_has_flag = eotg_government_is_corporation }
+    }
+
+    effect = {
+        change_government = eotg_corporation_government
+    }
+
+    ai_potential = {
+        always = no
+    }
+    ai_will_do = {
+        base = 0
+    }
+}
+
+# V-G16: the ruler becomes gobcorp and gets eotg_gobcorp_succession_law.
+eotg_decision_gov_debug_become_gobcorp = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 0
+        kingdom = 0
+        empire = 0
+        hegemony = 0
+    }
+
+    is_shown = {
+        debug_only = yes
+        is_landed = yes
+        NOT = { government_has_flag = eotg_government_is_gobcorp }
+    }
+
+    effect = {
+        change_government = eotg_gobcorp_government
+    }
+
+    ai_potential = {
+        always = no
+    }
+    ai_will_do = {
+        base = 0
+    }
+}
+
+# V-G16: the ruler becomes cartel and gets eotg_cartel_succession_law.
+eotg_decision_gov_debug_become_cartel = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 0
+        kingdom = 0
+        empire = 0
+        hegemony = 0
+    }
+
+    is_shown = {
+        debug_only = yes
+        is_landed = yes
+        NOT = { government_has_flag = eotg_government_is_cartel }
+    }
+
+    effect = {
+        change_government = eotg_cartel_government
+    }
+
+    ai_potential = {
+        always = no
+    }
+    ai_will_do = {
+        base = 0
+    }
+}
+
+# V-G16: back to feudal; tests can_keep dropping the mod law. Shown only to
+# rulers of the four governments, so it is never a stray debug option.
+eotg_decision_gov_debug_become_feudal = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 0
+        kingdom = 0
+        empire = 0
+        hegemony = 0
+    }
+
+    is_shown = {
+        debug_only = yes
+        is_landed = yes
+        NOT = { has_government = feudal_government }
+        OR = {
+            government_has_flag = eotg_government_is_pmc
+            government_has_flag = eotg_government_is_corporation
+            government_has_flag = eotg_government_is_gobcorp
+            government_has_flag = eotg_government_is_cartel
+        }
+    }
+
+    effect = {
+        change_government = feudal_government
+    }
+
+    ai_potential = {
+        always = no
+    }
+    ai_will_do = {
+        base = 0
+    }
+}
+

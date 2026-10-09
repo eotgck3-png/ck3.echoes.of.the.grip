@@ -1,0 +1,341 @@
+# Governments v2 Phase G1: loc keys the built script references (eotg-scripter, 2026-10-08).
+# Target file: localization/english/eotg_government_l_english.yml (UTF-8 with exactly one BOM,
+#   Canadian English, bare [x.GetName], never [scope:x]).
+# Spec: docs/specs/governments_v2.md §9 (key set), §8 (rank words), §10 (knight terms), §11 (desc rules,
+#   B2 ban: no Don/capo/consigliere/omerta/made man/the Family/fedora/tommy gun/underboss/outfit/racket;
+#   no nation or person named; prose says Bastion/Port or [castle|E]/[city|E], never castle/city).
+# Text after '=>' is the intended English (a guide, the localizer owns wording).
+# No replace/ override: KnightCulture is overridden in script, not loc.
+# Not listed: contract level _desc keys (_subject_contracts.info names them, but vanilla defines none
+#   for feudal_government_levies/feudal_government_taxes; omit unless PX locCoverage asks).
+# Total keys: 304
+
+## government: eotg_pmc_government
+eotg_pmc_government => PMC
+eotg_pmc_government_adjective
+eotg_pmc_government_realm
+eotg_pmc_government_desc
+eotg_pmc_government_with_icon => @government_type_mercenary! $eotg_pmc_government$ (localizer confirms the @ icon exists)
+eotg_pmc_government_filter_option
+eotg_pmc_government_filter_option_desc
+eotg_pmc_government_obligations
+eotg_pmc_government_vassals_label
+eotg_pmc_government_vassal_opinion => engine-generated modifier name (vanilla shape: feudal_government_vassal_opinion)
+eotg_pmc_government_opinion => engine-generated modifier name (vanilla shape: feudal_government_opinion)
+eotg_pmc_government_tax_contribution_add => engine-generated modifier name (vanilla shape: feudal_government_tax_contribution_add)
+eotg_pmc_government_tax_contribution_mult => engine-generated modifier name (vanilla shape: feudal_government_tax_contribution_mult)
+eotg_pmc_government_levy_contribution_add => engine-generated modifier name (vanilla shape: feudal_government_levy_contribution_add)
+eotg_pmc_government_levy_contribution_mult => engine-generated modifier name (vanilla shape: feudal_government_levy_contribution_mult)
+
+## government: eotg_corporation_government
+eotg_corporation_government => Corporation
+eotg_corporation_government_adjective
+eotg_corporation_government_realm
+eotg_corporation_government_desc
+eotg_corporation_government_with_icon => @government_type_administrative! $eotg_corporation_government$ (localizer confirms the @ icon exists)
+eotg_corporation_government_filter_option
+eotg_corporation_government_filter_option_desc
+eotg_corporation_government_obligations
+eotg_corporation_government_vassals_label
+eotg_corporation_government_vassal_opinion => engine-generated modifier name (vanilla shape: feudal_government_vassal_opinion)
+eotg_corporation_government_opinion => engine-generated modifier name (vanilla shape: feudal_government_opinion)
+eotg_corporation_government_tax_contribution_add => engine-generated modifier name (vanilla shape: feudal_government_tax_contribution_add)
+eotg_corporation_government_tax_contribution_mult => engine-generated modifier name (vanilla shape: feudal_government_tax_contribution_mult)
+eotg_corporation_government_levy_contribution_add => engine-generated modifier name (vanilla shape: feudal_government_levy_contribution_add)
+eotg_corporation_government_levy_contribution_mult => engine-generated modifier name (vanilla shape: feudal_government_levy_contribution_mult)
+
+## government: eotg_gobcorp_government
+eotg_gobcorp_government => Trade Oligarchy (OQ3 default; alternative "Gob-Corp")
+eotg_gobcorp_government_adjective
+eotg_gobcorp_government_realm
+eotg_gobcorp_government_desc
+eotg_gobcorp_government_with_icon => @government_type_republic! $eotg_gobcorp_government$ (localizer confirms the @ icon exists)
+eotg_gobcorp_government_filter_option
+eotg_gobcorp_government_filter_option_desc
+eotg_gobcorp_government_obligations
+eotg_gobcorp_government_vassals_label
+eotg_gobcorp_government_vassal_opinion => engine-generated modifier name (vanilla shape: feudal_government_vassal_opinion)
+eotg_gobcorp_government_opinion => engine-generated modifier name (vanilla shape: feudal_government_opinion)
+eotg_gobcorp_government_tax_contribution_add => engine-generated modifier name (vanilla shape: feudal_government_tax_contribution_add)
+eotg_gobcorp_government_tax_contribution_mult => engine-generated modifier name (vanilla shape: feudal_government_tax_contribution_mult)
+eotg_gobcorp_government_levy_contribution_add => engine-generated modifier name (vanilla shape: feudal_government_levy_contribution_add)
+eotg_gobcorp_government_levy_contribution_mult => engine-generated modifier name (vanilla shape: feudal_government_levy_contribution_mult)
+
+## government: eotg_cartel_government
+eotg_cartel_government => Cartel
+eotg_cartel_government_adjective
+eotg_cartel_government_realm
+eotg_cartel_government_desc
+eotg_cartel_government_with_icon => @government_type_clan! $eotg_cartel_government$ (localizer confirms the @ icon exists)
+eotg_cartel_government_filter_option
+eotg_cartel_government_filter_option_desc
+eotg_cartel_government_obligations
+eotg_cartel_government_vassals_label
+eotg_cartel_government_vassal_opinion => engine-generated modifier name (vanilla shape: feudal_government_vassal_opinion)
+eotg_cartel_government_opinion => engine-generated modifier name (vanilla shape: feudal_government_opinion)
+eotg_cartel_government_tax_contribution_add => engine-generated modifier name (vanilla shape: feudal_government_tax_contribution_add)
+eotg_cartel_government_tax_contribution_mult => engine-generated modifier name (vanilla shape: feudal_government_tax_contribution_mult)
+eotg_cartel_government_levy_contribution_add => engine-generated modifier name (vanilla shape: feudal_government_levy_contribution_add)
+eotg_cartel_government_levy_contribution_mult => engine-generated modifier name (vanilla shape: feudal_government_levy_contribution_mult)
+
+## succession laws (shape succession_laws_l_english.yml:14-16)
+eotg_pmc_succession_law
+eotg_pmc_succession_law_subname
+eotg_pmc_succession_law_effects
+eotg_corporation_succession_law
+eotg_corporation_succession_law_subname
+eotg_corporation_succession_law_effects
+eotg_gobcorp_succession_law
+eotg_gobcorp_succession_law_subname
+eotg_gobcorp_succession_law_effects
+eotg_cartel_succession_law
+eotg_cartel_succession_law_subname
+eotg_cartel_succession_law_effects
+
+## subject contracts (shape government_l_english.yml: feudal_government_levies, feudal_levies_low, feudal_levies_low_short)
+eotg_pmc_contractor_fee
+eotg_pmc_contractor_fee_none
+eotg_pmc_contractor_fee_none_short
+eotg_pmc_contractor_fee_low
+eotg_pmc_contractor_fee_low_short
+eotg_pmc_contractor_fee_standard
+eotg_pmc_contractor_fee_standard_short
+eotg_pmc_contractor_fee_high
+eotg_pmc_contractor_fee_high_short
+eotg_pmc_contractor_fee_extortionate
+eotg_pmc_contractor_fee_extortionate_short
+eotg_pmc_operational_levy
+eotg_pmc_operational_levy_none
+eotg_pmc_operational_levy_none_short
+eotg_pmc_operational_levy_low
+eotg_pmc_operational_levy_low_short
+eotg_pmc_operational_levy_standard
+eotg_pmc_operational_levy_standard_short
+eotg_pmc_operational_levy_high
+eotg_pmc_operational_levy_high_short
+eotg_pmc_operational_levy_extortionate
+eotg_pmc_operational_levy_extortionate_short
+eotg_corporation_assessment
+eotg_corporation_assessment_none
+eotg_corporation_assessment_none_short
+eotg_corporation_assessment_low
+eotg_corporation_assessment_low_short
+eotg_corporation_assessment_standard
+eotg_corporation_assessment_standard_short
+eotg_corporation_assessment_high
+eotg_corporation_assessment_high_short
+eotg_corporation_assessment_extortionate
+eotg_corporation_assessment_extortionate_short
+eotg_corporation_security_levy
+eotg_corporation_security_levy_none
+eotg_corporation_security_levy_none_short
+eotg_corporation_security_levy_low
+eotg_corporation_security_levy_low_short
+eotg_corporation_security_levy_standard
+eotg_corporation_security_levy_standard_short
+eotg_corporation_security_levy_high
+eotg_corporation_security_levy_high_short
+eotg_corporation_security_levy_extortionate
+eotg_corporation_security_levy_extortionate_short
+eotg_gobcorp_market_tithe
+eotg_gobcorp_market_tithe_none
+eotg_gobcorp_market_tithe_none_short
+eotg_gobcorp_market_tithe_low
+eotg_gobcorp_market_tithe_low_short
+eotg_gobcorp_market_tithe_standard
+eotg_gobcorp_market_tithe_standard_short
+eotg_gobcorp_market_tithe_high
+eotg_gobcorp_market_tithe_high_short
+eotg_gobcorp_market_tithe_extortionate
+eotg_gobcorp_market_tithe_extortionate_short
+eotg_gobcorp_security_levy
+eotg_gobcorp_security_levy_none
+eotg_gobcorp_security_levy_none_short
+eotg_gobcorp_security_levy_low
+eotg_gobcorp_security_levy_low_short
+eotg_gobcorp_security_levy_standard
+eotg_gobcorp_security_levy_standard_short
+eotg_gobcorp_security_levy_high
+eotg_gobcorp_security_levy_high_short
+eotg_gobcorp_security_levy_extortionate
+eotg_gobcorp_security_levy_extortionate_short
+eotg_cartel_loyalty_tax
+eotg_cartel_loyalty_tax_none
+eotg_cartel_loyalty_tax_none_short
+eotg_cartel_loyalty_tax_low
+eotg_cartel_loyalty_tax_low_short
+eotg_cartel_loyalty_tax_standard
+eotg_cartel_loyalty_tax_standard_short
+eotg_cartel_loyalty_tax_high
+eotg_cartel_loyalty_tax_high_short
+eotg_cartel_loyalty_tax_extortionate
+eotg_cartel_loyalty_tax_extortionate_short
+eotg_cartel_territory_tribute
+eotg_cartel_territory_tribute_none
+eotg_cartel_territory_tribute_none_short
+eotg_cartel_territory_tribute_low
+eotg_cartel_territory_tribute_low_short
+eotg_cartel_territory_tribute_standard
+eotg_cartel_territory_tribute_standard_short
+eotg_cartel_territory_tribute_high
+eotg_cartel_territory_tribute_high_short
+eotg_cartel_territory_tribute_extortionate
+eotg_cartel_territory_tribute_extortionate_short
+
+## flavourization (92): the entry key is the loc key
+eotg_barony_pmc => Garrison
+eotg_county_pmc => Command
+eotg_duchy_pmc => Theatre
+eotg_kingdom_pmc => Field Army
+eotg_empire_pmc => Company
+eotg_pmc_barony_male => Post Commander
+eotg_pmc_barony_female => Post Commander
+eotg_pmc_county_male => Contractor
+eotg_pmc_county_female => Contractor
+eotg_pmc_duchy_male => Field Director
+eotg_pmc_duchy_female => Field Director
+eotg_pmc_kingdom_male => Executive Commander
+eotg_pmc_kingdom_female => Executive Commander
+eotg_pmc_empire_male => Contractor-General
+eotg_pmc_empire_female => Contractor-General
+eotg_pmc_top_county_male => Contractor-General
+eotg_pmc_top_county_female => Contractor-General
+eotg_pmc_top_duchy_male => Contractor-General
+eotg_pmc_top_duchy_female => Contractor-General
+eotg_pmc_top_kingdom_male => Contractor-General
+eotg_pmc_top_kingdom_female => Contractor-General
+eotg_pmc_top_empire_male => Contractor-General
+eotg_pmc_top_empire_female => Contractor-General
+eotg_barony_corporation => Site
+eotg_county_corporation => Branch
+eotg_duchy_corporation => Division
+eotg_kingdom_corporation => Group
+eotg_empire_corporation => Conglomerate
+eotg_corporation_barony_male => Site Manager
+eotg_corporation_barony_female => Site Manager
+eotg_corporation_county_male => Branch Director
+eotg_corporation_county_female => Branch Director
+eotg_corporation_duchy_male => Operations Chief
+eotg_corporation_duchy_female => Operations Chief
+eotg_corporation_kingdom_male => Regional Director
+eotg_corporation_kingdom_female => Regional Director
+eotg_corporation_empire_male => CEO
+eotg_corporation_empire_female => CEO
+eotg_corporation_top_county_male => CEO
+eotg_corporation_top_county_female => CEO
+eotg_corporation_top_duchy_male => CEO
+eotg_corporation_top_duchy_female => CEO
+eotg_corporation_top_kingdom_male => CEO
+eotg_corporation_top_kingdom_female => CEO
+eotg_corporation_top_empire_male => CEO
+eotg_corporation_top_empire_female => CEO
+eotg_barony_gobcorp => Works
+eotg_county_gobcorp => Concession
+eotg_duchy_gobcorp => Monopoly
+eotg_kingdom_gobcorp => Bloc
+eotg_empire_gobcorp => Combine
+eotg_gobcorp_barony_male => Works Boss
+eotg_gobcorp_barony_female => Works Boss
+eotg_gobcorp_county_male => Trade Prince
+eotg_gobcorp_county_female => Trade Prince
+eotg_gobcorp_duchy_male => Trade Prince
+eotg_gobcorp_duchy_female => Trade Prince
+eotg_gobcorp_kingdom_male => Trade Magnate
+eotg_gobcorp_kingdom_female => Trade Magnate
+eotg_gobcorp_empire_male => First Prince
+eotg_gobcorp_empire_female => First Prince
+eotg_gobcorp_top_county_male => First Prince
+eotg_gobcorp_top_county_female => First Prince
+eotg_gobcorp_top_duchy_male => First Prince
+eotg_gobcorp_top_duchy_female => First Prince
+eotg_gobcorp_top_kingdom_male => First Prince
+eotg_gobcorp_top_kingdom_female => First Prince
+eotg_gobcorp_top_empire_male => First Prince
+eotg_gobcorp_top_empire_female => First Prince
+eotg_barony_cartel => Den
+eotg_county_cartel => Turf
+eotg_duchy_cartel => Run
+eotg_kingdom_cartel => Ring
+eotg_empire_cartel => Cartel
+eotg_cartel_barony_male => Den Keeper
+eotg_cartel_barony_female => Den Keeper
+eotg_cartel_county_male => Route Boss
+eotg_cartel_county_female => Route Boss
+eotg_cartel_duchy_male => Ringleader
+eotg_cartel_duchy_female => Ringleader
+eotg_cartel_kingdom_male => Overboss
+eotg_cartel_kingdom_female => Overboss
+eotg_cartel_empire_male => Grand Underlord
+eotg_cartel_empire_female => Grand Underlord
+eotg_cartel_top_county_male => Grand Underlord
+eotg_cartel_top_county_female => Grand Underlord
+eotg_cartel_top_duchy_male => Grand Underlord
+eotg_cartel_top_duchy_female => Grand Underlord
+eotg_cartel_top_kingdom_male => Grand Underlord
+eotg_cartel_top_kingdom_female => Grand Underlord
+eotg_cartel_top_empire_male => Grand Underlord
+eotg_cartel_top_empire_female => Grand Underlord
+
+## knight terms (KnightCulture override; shapes knight_culture_l_english.yml:30-31, 67-70, 96-97; OQ1 defaults)
+eotg_knight_operator => [Concept( 'knight', '$eotg_knight_operator_no_tooltip|q$' )|E]
+eotg_knight_operator_plural => [Concept( 'knight', '$eotg_knight_operator_no_tooltip_plural|q$' )|E]
+eotg_knight_operator_no_tooltip => Operator
+eotg_knight_operator_no_tooltip_plural => Operators
+eotg_knight_operator_no_tooltip_lowercase => operator
+eotg_knight_operator_no_tooltip_lowercase_plural => operators
+eotg_knight_operator_no_tooltip_lowercase_plural_possessive => operators'
+eotg_knight_operator_no_tooltip_lowercase_adjective => operator
+eotg_knight_specialist => [Concept( 'knight', '$eotg_knight_specialist_no_tooltip|q$' )|E]
+eotg_knight_specialist_plural => [Concept( 'knight', '$eotg_knight_specialist_no_tooltip_plural|q$' )|E]
+eotg_knight_specialist_no_tooltip => Specialist
+eotg_knight_specialist_no_tooltip_plural => Specialists
+eotg_knight_specialist_no_tooltip_lowercase => specialist
+eotg_knight_specialist_no_tooltip_lowercase_plural => specialists
+eotg_knight_specialist_no_tooltip_lowercase_plural_possessive => specialists'
+eotg_knight_specialist_no_tooltip_lowercase_adjective => specialist
+eotg_knight_strongarm => [Concept( 'knight', '$eotg_knight_strongarm_no_tooltip|q$' )|E]
+eotg_knight_strongarm_plural => [Concept( 'knight', '$eotg_knight_strongarm_no_tooltip_plural|q$' )|E]
+eotg_knight_strongarm_no_tooltip => Strongarm
+eotg_knight_strongarm_no_tooltip_plural => Strongarms
+eotg_knight_strongarm_no_tooltip_lowercase => strongarm
+eotg_knight_strongarm_no_tooltip_lowercase_plural => strongarms
+eotg_knight_strongarm_no_tooltip_lowercase_plural_possessive => strongarms'
+eotg_knight_strongarm_no_tooltip_lowercase_adjective => strongarm
+eotg_knight_brute => [Concept( 'knight', '$eotg_knight_brute_no_tooltip|q$' )|E]
+eotg_knight_brute_plural => [Concept( 'knight', '$eotg_knight_brute_no_tooltip_plural|q$' )|E]
+eotg_knight_brute_no_tooltip => Brute
+eotg_knight_brute_no_tooltip_plural => Brutes
+eotg_knight_brute_no_tooltip_lowercase => brute
+eotg_knight_brute_no_tooltip_lowercase_plural => brutes
+eotg_knight_brute_no_tooltip_lowercase_plural_possessive => brutes'
+eotg_knight_brute_no_tooltip_lowercase_adjective => brute
+
+## debug decisions (debug_only)
+eotg_decision_gov_debug_become_pmc
+eotg_decision_gov_debug_become_pmc_desc
+eotg_decision_gov_debug_become_pmc_tooltip
+eotg_decision_gov_debug_become_pmc_confirm
+eotg_decision_gov_debug_become_corporation
+eotg_decision_gov_debug_become_corporation_desc
+eotg_decision_gov_debug_become_corporation_tooltip
+eotg_decision_gov_debug_become_corporation_confirm
+eotg_decision_gov_debug_become_gobcorp
+eotg_decision_gov_debug_become_gobcorp_desc
+eotg_decision_gov_debug_become_gobcorp_tooltip
+eotg_decision_gov_debug_become_gobcorp_confirm
+eotg_decision_gov_debug_become_cartel
+eotg_decision_gov_debug_become_cartel_desc
+eotg_decision_gov_debug_become_cartel_tooltip
+eotg_decision_gov_debug_become_cartel_confirm
+eotg_decision_gov_debug_become_feudal
+eotg_decision_gov_debug_become_feudal_desc
+eotg_decision_gov_debug_become_feudal_tooltip
+eotg_decision_gov_debug_become_feudal_confirm
+eotg_pmc_vassal
+eotg_pmc_vassal_desc
+eotg_corporation_vassal
+eotg_corporation_vassal_desc
+eotg_gobcorp_vassal
+eotg_gobcorp_vassal_desc
+eotg_cartel_vassal
+eotg_cartel_vassal_desc

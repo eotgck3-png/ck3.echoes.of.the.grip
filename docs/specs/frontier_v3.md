@@ -148,6 +148,8 @@ Nothing else in Phases 1–2 changes. No Phase 1/2 event or loc key is edited.
 
 **The decision:** shown to a holder of an Unknown or Partial Region (`eotg_frontier_holds_explorable`). Cost: `eotg_frontier_explore_cost_value` (minor gold). One expedition a year per Region. It picks the target through `eotg_frontier_pick_expedition_target_effect` (Unknown first, else Partial; then the most developed), marks the year, and fires .042.
 
+> **Amended 2026-10-08 (built and committed, `common/decisions/eotg_frontier_decisions.txt`):** the player now chooses the target with vanilla's county-picker widget (`gui = "decision_view_widget_select_realm_county"`, `controller = select_scope_object`; precedent `G/common/decisions/dlc_decisions/pam/pam_decisions.txt:1334-1460` and `G/common/decisions/50_holy_site_decisions.txt:119-169`). The list holds every Region that passes `eotg_frontier_can_target_expedition`, **including Unclaimed Regions within reach** (§4.1). The pick effect above supplies the **default item**, so an untouched picker gives the old automatic choice. **The AI is unchanged:** it takes the default.
+
 **.042 *The Expedition Returns*** (player-initiated, so not part of the prompt budget). `immediate` runs one step:
 - Unknown → **Partial**: a trait is revealed.
 - Partial → **Known**: a trait is revealed (if there is room), and the variable is removed.

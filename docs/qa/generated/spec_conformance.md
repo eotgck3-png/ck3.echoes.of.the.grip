@@ -14,12 +14,14 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | Family | Specs | Built | Ids | Present | Referenced only | Missing in built specs |
 |---|---|---|---|---|---|---|
 | `cybernetics` | 1 | 1 | 53 | 53 | 0 | 0 |
-| `cybernetics_v2` | 27 | 27 | 1781 | 1690 | 86 | 5 |
-| `frontier` | 1 | 1 | 92 | 90 | 2 | 0 |
+| `cybernetics_v2` | 27 | 27 | 1780 | 1689 | 86 | 5 |
+| `frontier` | 1 | 1 | 92 | 89 | 3 | 0 |
 | `frontier_v1` | 2 | 2 | 159 | 158 | 1 | 0 |
 | `frontier_v2` | 1 | 1 | 109 | 109 | 0 | 0 |
 | `frontier_v3` | 1 | 1 | 79 | 79 | 0 | 0 |
 | `glossary` | 1 | 0 | 1 | 0 | 0 | 0 |
+| `governments_v2` | 1 | 1 | 65 | 48 | 5 | 12 |
+| `loc` | 1 | 1 | 91 | 84 | 6 | 1 |
 | `void` | 1 | 0 | 86 | 0 | 0 | 0 |
 
 ## Summary by spec
@@ -44,7 +46,7 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | `cybernetics_v2_phase6.md` | yes | 27 | 26 | 1 | 0 | 0 |
 | `cybernetics_v2_procedures.md` | yes | 146 | 144 | 1 | 0 | 1 |
 | `cybernetics_v2_procedures_lore.md` | yes | 7 | 7 | 0 | 0 | 0 |
-| `cybernetics_v2_realm.md` | yes | 125 | 120 | 4 | 0 | 1 |
+| `cybernetics_v2_realm.md` | yes | 124 | 119 | 4 | 0 | 1 |
 | `cybernetics_v2_realm_lore.md` | yes | 3 | 3 | 0 | 0 | 0 |
 | `cybernetics_v2_reprisal.md` | yes | 37 | 36 | 1 | 0 | 0 |
 | `cybernetics_v2_reprisal_lore.md` | yes | 3 | 3 | 0 | 0 | 0 |
@@ -54,12 +56,14 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | `cybernetics_v2_tier_options.md` | yes | 94 | 91 | 1 | 2 | 0 |
 | `cybernetics_v2_tier_options_lore.md` | yes | 8 | 8 | 0 | 0 | 0 |
 | `cybernetics_v2_trait_depth.md` | yes | 42 | 41 | 1 | 0 | 0 |
-| `frontier_unclaimed_regions.md` | yes | 95 | 90 | 2 | 0 | 3 |
+| `frontier_unclaimed_regions.md` | yes | 95 | 89 | 3 | 0 | 3 |
 | `frontier_v1.md` | yes | 146 | 137 | 1 | 0 | 8 |
 | `frontier_v1_open_questions.md` | yes | 21 | 21 | 0 | 0 | 0 |
 | `frontier_v2.md` | yes | 109 | 109 | 0 | 0 | 0 |
 | `frontier_v3.md` | yes | 80 | 79 | 0 | 0 | 1 |
 | `glossary_proposal_cloud.md` | **no** | 1 | 0 | 0 | 1 | 0 |
+| `governments_v2.md` | yes | 68 | 48 | 5 | 12 | 3 |
+| `loc_dynamic_terms_ruling.md` | yes | 91 | 84 | 6 | 1 | 0 |
 | `void_lift_plan_cloud.md` | **no** | 86 | 0 | 0 | 86 | 0 |
 
 ## Family `cybernetics`
@@ -209,11 +213,11 @@ None.
 
 #### `docs/specs/cybernetics_v2_realm.md`
 
-- Specced and present: 120
+- Specced and present: 119
 - Specced, missing from script (0): none
 - Referenced only, never defined or set (4): `eotg_aug_has_court_physician` (trigger, l.117), `eotg_contraband_subject.GetName` (loc, l.275), `eotg_aug_accuser.GetName` (loc, l.427), `eotg_aug_accused.GetName` (loc, l.427)
 - Exempt (1): `eotg_opinion_aug_demanded_removal` (opinion, l.161)
-- Suffix shorthand that matches no key (1, not counted): l.157: `eotg_aug_price_mult_physician` + `_for`
+- Suffix shorthand that matches no key (2, not counted): l.157: `eotg_aug_price_mult_physician` + `_for`; l.592: `eotg_aug_policy_ban` + `_desc`
 
 #### `docs/specs/cybernetics_v2_realm_lore.md`
 
@@ -289,10 +293,10 @@ None.
 
 #### `docs/specs/frontier_unclaimed_regions.md`
 
-- Specced and present: 90
+- Specced and present: 89
 - Specced, missing from script (0): none
-- Referenced only, never defined or set (2): `eotg_government_is_unclaimed` (decision, l.20), `eotg_unclaimed_seed` (decision, l.23)
-- Exempt (3): `eotg_unclaimed_toast_unplayable` (unknown, l.240), `eotg_unclaimed_toast_claimed` (unknown, l.502), `eotg_unclaimed_defender_tt` (loc, l.507)
+- Referenced only, never defined or set (3): `eotg_government_is_unclaimed` (decision, l.20), `eotg_unclaimed_seed` (decision, l.23), `eotg_unclaimed_government_adjective` (decision, l.34)
+- Exempt (3): `eotg_unclaimed_toast_unplayable` (unknown, l.251), `eotg_unclaimed_toast_claimed` (unknown, l.513), `eotg_unclaimed_defender_tt` (loc, l.518)
 
 ### Unbuilt specs (expected gaps)
 
@@ -307,8 +311,8 @@ None.
 
 - Specced and present: 137
 - Specced, missing from script (0): none
-- Referenced only, never defined or set (1): `eotg_lint` (unknown, l.679)
-- Exempt (8): `eotg_frontier_active_count` (unknown, l.39), `eotg_frontier_ticked` (unknown, l.50), `eotg_k_cauldron` (unknown, l.162), `eotg_frontier_former_type` (unknown, l.235), `eotg_frontier_history` (unknown, l.236), `eotg_frontier_hook_started_effect` (effect, l.570), `eotg_frontier_debug` (unknown, l.615), `eotg_frontier_on_founder_changed` (unknown, l.760)
+- Referenced only, never defined or set (1): `eotg_lint` (unknown, l.680)
+- Exempt (8): `eotg_frontier_active_count` (unknown, l.39), `eotg_frontier_ticked` (unknown, l.50), `eotg_k_cauldron` (unknown, l.162), `eotg_frontier_former_type` (unknown, l.235), `eotg_frontier_history` (unknown, l.236), `eotg_frontier_hook_started_effect` (effect, l.570), `eotg_frontier_debug` (unknown, l.616), `eotg_frontier_on_founder_changed` (unknown, l.761)
 - Suffix shorthand that matches no key (1, not counted): l.261: `eotg_frontier_state` + `_ticked`
 
 #### `docs/specs/frontier_v1_open_questions.md`
@@ -372,6 +376,39 @@ None.
 - Exempt (0): none
 
 
+## Family `governments_v2`
+
+### Built specs: gaps
+
+#### `docs/specs/governments_v2.md`
+
+- Specced and present: 48
+- Specced, missing from script (12): `eotg_pmc_standing` (variable, l.31), `eotg_corp_board_influence` (variable, l.32), `eotg_gobcorp_market_share` (variable, l.33), `eotg_market_faction_cycle` (flag, l.50), `eotg_pmc` (unknown, l.71), `eotg_corp` (unknown, l.71), `eotg_gobcorp` (unknown, l.71), `eotg_cartel` (unknown, l.71), `eotg_st_is_contractor_general` (unknown, l.161), `eotg_boardroom_war` (unknown, l.641), `eotg_st_is_field_director` (unknown, l.645), `eotg_pmc_role_duchy` (unknown, l.645)
+- Referenced only, never defined or set (5): `eotg_government_is_pmc` (flag, l.49), `eotg_government_is_corporation` (flag, l.49), `eotg_government_is_gobcorp` (flag, l.49), `eotg_government_is_cartel` (flag, l.49), `eotg_government_is_corporate` (flag, l.50)
+- Exempt (3): `eotg_knight_specialist` (unknown, l.506), `eotg_knight_strongarm` (unknown, l.506), `eotg_knight_brute` (unknown, l.506)
+- Suffix shorthand that matches no key (2, not counted): l.71: `eotg_cartel` + `_desc`; l.71: `eotg_cartel` + `_a`
+
+### Unbuilt specs (expected gaps)
+
+None.
+
+
+## Family `loc`
+
+### Built specs: gaps
+
+#### `docs/specs/loc_dynamic_terms_ruling.md`
+
+- Specced and present: 84
+- Specced, missing from script (1): `eotg_lucid_heir` (unknown, l.111)
+- Referenced only, never defined or set (6): `eotg_champion.GetFirstName` (loc, l.188), `eotg_champion.GetFirstNameNoTooltip` (loc, l.193), `eotg_flagged.GetFirstName` (loc, l.202), `eotg_warden_chancellor.GetFirstNameNoTooltip` (loc, l.204), `eotg_aug_spouse.GetFirstName` (loc, l.220), `eotg_warden_spouse.GetFirstNameNoTooltip` (loc, l.221)
+- Exempt (0): none
+
+### Unbuilt specs (expected gaps)
+
+None.
+
+
 ## Family `void`
 
 ### Built specs: gaps
@@ -393,12 +430,14 @@ None.
 
 Mod definitions (`common/` top-level keys, events, namespaces, flags and variables that are set, saved scopes) that no spec read here names. An event also counts as mentioned by its short form (`tier1.005`).
 
+- **decision** (3): `eotg_decision_gov_debug_become_cartel`, `eotg_decision_gov_debug_become_corporation`, `eotg_decision_gov_debug_become_gobcorp`
 - **effect** (31): `eotg_aug_bridge_success_effect`, `eotg_aug_end_countdown_effect`, `eotg_aug_excision_pay_effect`, `eotg_aug_f006_concessions_effect`, `eotg_aug_f006_crush_effect`, `eotg_aug_f006_tribunal_effect`, `eotg_aug_f009_misled_toast_effect`, `eotg_aug_f015_send_effect`, `eotg_aug_f016_burn_effect`, `eotg_aug_f016_confess_effect`, `eotg_aug_f019_arrest_effect`, `eotg_aug_f019_spare_effect`, `eotg_aug_f019_watch_effect`, `eotg_aug_f023_muster_effect`, `eotg_aug_f023_stand_down_effect`, `eotg_aug_f024_restrain_effect`, `eotg_aug_f024_sit_with_effect`, `eotg_aug_f025_hold_keeper_effect`, `eotg_aug_f025_let_them_effect`, `eotg_aug_f025_take_it_effect`, `eotg_aug_inherit_route_pattern_effect`, `eotg_aug_inherit_sedate_effect`, `eotg_aug_kp_hired_guns_effect`, `eotg_aug_kp_leaf_open_effect`, `eotg_aug_kp_leverage_down_effect`, `eotg_aug_kp_leverage_up_effect`, `eotg_aug_parent_hardware_clear_effect`, `eotg_aug_realm001_forgive_effect`, `eotg_aug_retinue_install_effect`, `eotg_aug_retinue_reverse_effect`, `eotg_aug_unmask_congenital_effect`
 - **event** (51): `eotg_aug_countdown.002`, `eotg_aug_countdown.003`, `eotg_aug_inherit.002`, `eotg_aug_inherit.003`, `eotg_aug_inherit.004`, `eotg_aug_inherit.005`, `eotg_aug_inherit.006`, `eotg_aug_inherit.007`, `eotg_aug_inherit.008`, `eotg_aug_inherit.009`, `eotg_aug_inherit.011`, `eotg_aug_inherit.012`, `eotg_aug_inherit.013`, `eotg_aug_inherit.014`, `eotg_aug_inherit.015`, `eotg_aug_inherit.016`, `eotg_aug_inherit.017`, `eotg_aug_inherit.018`, `eotg_aug_inherit.019`, `eotg_aug_inherit.020`, `eotg_aug_inherit.021`, `eotg_aug_inherit.023`, `eotg_aug_inherit.024`, `eotg_aug_inherit.025`, `eotg_aug_inherit.027`, `eotg_aug_kingpin.002`, `eotg_aug_kingpin.003`, `eotg_aug_kingpin.004`, `eotg_aug_kingpin.005`, `eotg_aug_kingpin.006`, `eotg_aug_kingpin.007`, `eotg_aug_kingpin.008`, `eotg_aug_kingpin.009`, `eotg_aug_kingpin.010`, `eotg_aug_kingpin.011`, `eotg_aug_kingpin.012`, `eotg_aug_kingpin.013`, `eotg_aug_kingpin.014`, `eotg_aug_kingpin.015`, `eotg_aug_kingpin.061`, `eotg_aug_kingpin.062`, `eotg_aug_kingpin.068`, `eotg_aug_kingpin.069`, `eotg_aug_kingpin.070`, `eotg_aug_kingpin.071`, `eotg_aug_kingpin.073`, `eotg_aug_kingpin.074`, `eotg_aug_kingpin.075`, `eotg_aug_retinue.002`, `eotg_aug_retinue.004`, `eotg_frontier.002`
 - **flag** (12): `eotg_flag_aug_bleed_purged`, `eotg_flag_aug_bleed_ridden`, `eotg_flag_aug_bout_unaided`, `eotg_flag_aug_bridge_full_current`, `eotg_flag_aug_cascaded_this_pulse`, `eotg_flag_aug_declined_bridge`, `eotg_flag_aug_declined_prosthetic`, `eotg_flag_aug_rejection_brave`, `eotg_flag_aug_rejection_rested`, `eotg_flag_aug_rejection_treated`, `eotg_flag_aug_upgrade_reassured`, `eotg_flag_tier1_vassal_suspicion_fired`
+- **flavorization** (89): `eotg_barony_cartel`, `eotg_barony_corporation`, `eotg_barony_gobcorp`, `eotg_barony_pmc`, `eotg_cartel_barony_female`, `eotg_cartel_barony_male`, `eotg_cartel_county_female`, `eotg_cartel_county_male`, `eotg_cartel_duchy_female`, `eotg_cartel_duchy_male`, `eotg_cartel_empire_female`, `eotg_cartel_empire_male`, `eotg_cartel_kingdom_female`, `eotg_cartel_kingdom_male`, `eotg_cartel_top_county_female`, `eotg_cartel_top_county_male`, `eotg_cartel_top_duchy_female`, `eotg_cartel_top_duchy_male`, `eotg_cartel_top_empire_female`, `eotg_cartel_top_empire_male`, `eotg_cartel_top_kingdom_female`, `eotg_cartel_top_kingdom_male`, `eotg_corporation_barony_female`, `eotg_corporation_barony_male`, `eotg_corporation_county_female`, `eotg_corporation_county_male`, `eotg_corporation_duchy_female`, `eotg_corporation_duchy_male`, `eotg_corporation_empire_female`, `eotg_corporation_empire_male`, `eotg_corporation_kingdom_female`, `eotg_corporation_kingdom_male`, `eotg_corporation_top_county_female`, `eotg_corporation_top_county_male`, `eotg_corporation_top_duchy_female`, `eotg_corporation_top_duchy_male`, `eotg_corporation_top_empire_female`, `eotg_corporation_top_empire_male`, `eotg_corporation_top_kingdom_female`, `eotg_corporation_top_kingdom_male`, `eotg_county_cartel`, `eotg_county_corporation`, `eotg_county_gobcorp`, `eotg_county_pmc`, `eotg_duchy_cartel`, `eotg_duchy_corporation`, `eotg_duchy_gobcorp`, `eotg_empire_cartel`, `eotg_empire_corporation`, `eotg_empire_gobcorp`, `eotg_empire_pmc`, `eotg_gobcorp_barony_female`, `eotg_gobcorp_barony_male`, `eotg_gobcorp_county_female`, `eotg_gobcorp_county_male`, `eotg_gobcorp_duchy_female`, `eotg_gobcorp_duchy_male`, `eotg_gobcorp_empire_female`, `eotg_gobcorp_empire_male`, `eotg_gobcorp_kingdom_female`, `eotg_gobcorp_kingdom_male`, `eotg_gobcorp_top_county_female`, `eotg_gobcorp_top_county_male`, `eotg_gobcorp_top_duchy_female`, `eotg_gobcorp_top_duchy_male`, `eotg_gobcorp_top_empire_female`, `eotg_gobcorp_top_empire_male`, `eotg_gobcorp_top_kingdom_female`, `eotg_gobcorp_top_kingdom_male`, `eotg_kingdom_cartel`, `eotg_kingdom_corporation`, `eotg_kingdom_gobcorp`, `eotg_kingdom_pmc`, `eotg_pmc_barony_female`, `eotg_pmc_barony_male`, `eotg_pmc_county_female`, `eotg_pmc_county_male`, `eotg_pmc_duchy_female`, `eotg_pmc_empire_female`, `eotg_pmc_empire_male`, `eotg_pmc_kingdom_female`, `eotg_pmc_kingdom_male`, `eotg_pmc_top_county_female`, `eotg_pmc_top_county_male`, `eotg_pmc_top_duchy_female`, `eotg_pmc_top_empire_female`, `eotg_pmc_top_empire_male`, `eotg_pmc_top_kingdom_female`, `eotg_pmc_top_kingdom_male`
 - **modifier** (15): `eotg_frontier_mod_waiting_control`, `eotg_mod_aug_diplomacy_bonus`, `eotg_mod_aug_intrigue_bonus`, `eotg_mod_aug_learning_bonus`, `eotg_mod_aug_martial_bonus`, `eotg_mod_aug_steward_bonus`, `eotg_mod_enh_diplomacy_bonus`, `eotg_mod_enh_learning_bonus`, `eotg_mod_enh_martial_bonus`, `eotg_mod_enh_steward_bonus`, `eotg_mod_nf_steward_distortion`, `eotg_mod_oc_diplomacy_bonus`, `eotg_mod_oc_intrigue_bonus`, `eotg_mod_oc_learning_bonus`, `eotg_mod_oc_steward_bonus`
 - **namespace** (3): `eotg_aug_tier1`, `eotg_aug_tier2`, `eotg_aug_tier3`
-- **scope** (100): `eotg_accused_kin`, `eotg_aug_peer`, `eotg_aug_victim_owner`, `eotg_aug_withdrawn`, `eotg_bleed_outcome`, `eotg_blood_outcome`, `eotg_bout_outcome`, `eotg_bridge_outcome`, `eotg_campaign_outcome`, `eotg_claim_truth`, `eotg_concerned_vassal`, `eotg_confessor`, `eotg_confidant`, `eotg_copycat_outcome`, `eotg_copycat_recipient`, `eotg_delay_speaker`, `eotg_demand_provider`, `eotg_departed_courtier`, `eotg_executed`, `eotg_former_self`, `eotg_frontier_change`, `eotg_frontier_heir_sponsor`, `eotg_frontier_kept_faith`, `eotg_frontier_kept_order`, `eotg_frontier_lapsed_sponsor`, `eotg_frontier_leader`, `eotg_frontier_new_barony`, `eotg_frontier_offer_2`, `eotg_frontier_offer_3`, `eotg_frontier_old_progress`, `eotg_frontier_sponsor_candidate`, `eotg_grief_killer`, `eotg_hire_first`, `eotg_hire_second`, `eotg_inh_accept_forced`, `eotg_inh_accepted`, `eotg_inh_asked`, `eotg_inh_attempt_mod`, `eotg_inh_child_victim`, `eotg_inh_confine_type`, `eotg_inh_debug_threat`, `eotg_inh_exile_style`, `eotg_inh_from_ward`, `eotg_inh_gate_ruler`, `eotg_inh_kill_kind`, `eotg_inh_killed_a`, `eotg_inh_killed_b`, `eotg_inh_leave`, `eotg_inh_line_owner`, `eotg_inh_line_title`, `eotg_inh_massacre_n`, `eotg_inh_no_refusal`, `eotg_inh_profile_s`, `eotg_inh_spared`, `eotg_inh_table_pay`, `eotg_inh_violent_plus`, `eotg_inh_watcher`, `eotg_iron_knight`, `eotg_kept_retinue_bonus`, `eotg_kp_audience_arrest`, `eotg_kp_change`, `eotg_kp_contract`, `eotg_kp_drift`, `eotg_kp_owner`, `eotg_kp_patron_source`, `eotg_letter_kind`, `eotg_machines_bond`, `eotg_misled_outcome`, `eotg_missing_outcome`, `eotg_nr_cascaded`, `eotg_nr_reported`, `eotg_offer_provider`, `eotg_other_parent`, `eotg_petitioning_knight`, `eotg_phantom_order`, `eotg_plot_action`, `eotg_plot_learned`, `eotg_plot_truth`, `eotg_rejection_outcome`, `eotg_report_truth`, `eotg_resentful`, `eotg_retainer_installed`, `eotg_retinue_story`, `eotg_salvage_provider`, `eotg_scrambled_into`, `eotg_seamless_heir_arc`, `eotg_surgeon`, `eotg_tamper_trace`, `eotg_unclaimed_debug_reader`, `eotg_unclaimed_former`, `eotg_unclaimed_probe`, `eotg_unclaimed_stray`, `eotg_unclaimed_stray_holder`, `eotg_victim_portrait`, `eotg_volunteer_b`, `eotg_warden_chancellor`, `eotg_warden_heir`, `eotg_warden_spouse`, `eotg_warrant_result`, `eotg_watching_heir`
+- **scope** (95): `eotg_accused_kin`, `eotg_aug_victim_owner`, `eotg_aug_withdrawn`, `eotg_bleed_outcome`, `eotg_blood_outcome`, `eotg_bout_outcome`, `eotg_bridge_outcome`, `eotg_campaign_outcome`, `eotg_claim_truth`, `eotg_concerned_vassal`, `eotg_confessor`, `eotg_confidant`, `eotg_copycat_outcome`, `eotg_copycat_recipient`, `eotg_delay_speaker`, `eotg_demand_provider`, `eotg_departed_courtier`, `eotg_executed`, `eotg_former_self`, `eotg_frontier_change`, `eotg_frontier_heir_sponsor`, `eotg_frontier_kept_faith`, `eotg_frontier_kept_order`, `eotg_frontier_lapsed_sponsor`, `eotg_frontier_leader`, `eotg_frontier_new_barony`, `eotg_frontier_offer_2`, `eotg_frontier_offer_3`, `eotg_frontier_old_progress`, `eotg_frontier_sponsor_candidate`, `eotg_grief_killer`, `eotg_hire_first`, `eotg_hire_second`, `eotg_inh_accept_forced`, `eotg_inh_accepted`, `eotg_inh_asked`, `eotg_inh_attempt_mod`, `eotg_inh_child_victim`, `eotg_inh_confine_type`, `eotg_inh_debug_threat`, `eotg_inh_exile_style`, `eotg_inh_from_ward`, `eotg_inh_gate_ruler`, `eotg_inh_kill_kind`, `eotg_inh_killed_a`, `eotg_inh_killed_b`, `eotg_inh_leave`, `eotg_inh_line_owner`, `eotg_inh_line_title`, `eotg_inh_massacre_n`, `eotg_inh_no_refusal`, `eotg_inh_profile_s`, `eotg_inh_spared`, `eotg_inh_table_pay`, `eotg_inh_violent_plus`, `eotg_inh_watcher`, `eotg_iron_knight`, `eotg_kept_retinue_bonus`, `eotg_kp_audience_arrest`, `eotg_kp_change`, `eotg_kp_contract`, `eotg_kp_drift`, `eotg_kp_owner`, `eotg_kp_patron_source`, `eotg_letter_kind`, `eotg_machines_bond`, `eotg_misled_outcome`, `eotg_missing_outcome`, `eotg_nr_cascaded`, `eotg_nr_reported`, `eotg_offer_provider`, `eotg_other_parent`, `eotg_petitioning_knight`, `eotg_phantom_order`, `eotg_plot_action`, `eotg_plot_learned`, `eotg_plot_truth`, `eotg_rejection_outcome`, `eotg_report_truth`, `eotg_resentful`, `eotg_retainer_installed`, `eotg_retinue_story`, `eotg_salvage_provider`, `eotg_scrambled_into`, `eotg_seamless_heir_arc`, `eotg_surgeon`, `eotg_tamper_trace`, `eotg_unclaimed_debug_reader`, `eotg_unclaimed_former`, `eotg_unclaimed_probe`, `eotg_unclaimed_stray`, `eotg_unclaimed_stray_holder`, `eotg_victim_portrait`, `eotg_volunteer_b`, `eotg_warrant_result`
 - **script value** (15): `eotg_aug_inherit_accept_chance`, `eotg_aug_inherit_arrest_chance`, `eotg_aug_inherit_attempt_chance`, `eotg_aug_inherit_attempt_mod_face`, `eotg_aug_inherit_attempt_mod_name`, `eotg_aug_inherit_breakout_chance`, `eotg_aug_inherit_exposed_chance`, `eotg_aug_inherit_massacre_count_value`, `eotg_aug_inherit_refuse_chance`, `eotg_aug_inherit_renounce_chance`, `eotg_aug_inherit_second_acts_chance`, `eotg_aug_inherit_talk_chance`, `eotg_aug_kp_evidence_value`, `eotg_frontier_current_control_value`, `eotg_frontier_current_dev_value`
 - **trigger** (10): `eotg_aug_containment_possible`, `eotg_aug_inherit_can_abdicate`, `eotg_aug_inherit_second_qualifies`, `eotg_aug_keeper_candidate`, `eotg_aug_kp_has_story`, `eotg_aug_kp_in_my_cells`, `eotg_aug_patron_heir_candidate`, `eotg_aug_sick_child_candidate`, `eotg_can_progress_to_overclocked`, `eotg_frontier_is_abandoned`
 - **variable** (15): `eotg_aug_escrow`, `eotg_aug_plot_vassals`, `eotg_frontier_debug_control`, `eotg_frontier_debug_floor_control`, `eotg_frontier_debug_floor_dev`, `eotg_hall_gone`, `eotg_kp_arrangement_on`, `eotg_kp_guns_inherited`, `eotg_kp_hired_guns_on`, `eotg_patron_terms_passthrough`, `eotg_phase1_grace`, `eotg_retinue_phase_passthrough`, `eotg_unclaimed_debug_counties`, `eotg_unclaimed_debug_fixed`, `eotg_unclaimed_debug_folk`

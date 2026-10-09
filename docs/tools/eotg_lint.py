@@ -961,16 +961,40 @@ def load_conventions(path=CONVENTIONS_FILE):
     return data
 
 
+def _convention_keys(doc, spec):
+    """(name, patterns) pairs one common/ file implies for L014.
+
+    Top-level objects take spec["patterns"]. Two optional spec fields cover names the
+    engine reads below the top level:
+      "nested": {"<block>": [...]}  every block directly inside a block named <block>
+                (subject contract obligation_levels: <level>, <level>_short);
+      "values": {"<field>": [...]}  every value of a field named <field>
+                (customizable_localization localization_key + the child suffixes).
+    """
+    for n in doc.nodes:
+        if n.is_block and n.key and not n.key.startswith("@"):
+            yield n.key, spec["patterns"]
+    nested, values = spec.get("nested", {}), spec.get("values", {})
+    if not (nested or values):
+        return
+    for n, _ in pdx_parse.walk(doc.nodes):
+        if n.is_block and n.key in nested:
+            for c in n.children:
+                if c.is_block and c.key and not c.key.startswith("@"):
+                    yield c.key, nested[n.key]
+        elif n.key in values and isinstance(n.value, str):
+            yield n.value.strip('"'), values[n.key]
+
+
 def _convention_regex(conv, mod):
     """One regex matching every loc key implied by a defined object."""
     alts = []
     for folder, spec in sorted(conv["folders"].items()):
-        keys = [n.key for _, doc in mod.common_dir(folder) for n in doc.nodes
-                if n.is_block and n.key and not n.key.startswith("@")]
-        for key in keys:
-            for pat in spec["patterns"]:
-                alts.append(re.escape(pat).replace(r"\{key\}", re.escape(key))
-                            .replace(r"\{n\}", r"\d+"))
+        for _, doc in mod.common_dir(folder):
+            for key, pats in _convention_keys(doc, spec):
+                for pat in pats:
+                    alts.append(re.escape(pat).replace(r"\{key\}", re.escape(key))
+                                .replace(r"\{n\}", r"\d+"))
     if not alts:
         return None
     return re.compile(r"^(?:%s)$" % "|".join(alts))

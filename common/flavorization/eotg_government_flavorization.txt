@@ -1,0 +1,1164 @@
+﻿# -- eotg_government_flavorization.txt ----------------------------------------
+# Governments v2, Phase G1 (docs/specs/governments_v2.md §8): 92 rank entries.
+# Shape: G/common/flavorization/00_title_holders.txt (count_feudal_male
+# :8518-8525, county_feudal :8534-8539, count_republic_male_* with top_liege = no
+# :3415-3426, only_independent :462, only_vassals :10542). Field spec:
+# G/common/flavorization/_flavourization.info.
+#
+# Rules (§8):
+# - every entry: governments = { eotg_<gov>_government } and
+#   flavourization_rules = { top_liege = no }, so the character's OWN
+#   government names him, not the top liege's;
+# - title rank (type = title, barony..empire): priority 60;
+# - vassal rank (type = character, special = holder, per gender, barony..empire):
+#   priority 60, only_vassals = yes (the empire entry exists only for spouses);
+# - top rank (county..empire): priority 61, only_independent = yes: the
+#   independent ruler gets the top word at ANY tier (correction to v1's ladder);
+# - no name_lists / heritages: map-agnostic.
+# The loc key of each entry is its own key (localizer; text in the comment).
+# -----------------------------------------------------------------------------
+
+########## pmc ##########
+
+eotg_barony_pmc = {  # "Garrison"
+    type = title
+    tier = barony
+    priority = 60
+    governments = { eotg_pmc_government }
+    flavourization_rules = {
+        top_liege = no
+    }
+}
+
+eotg_county_pmc = {  # "Command"
+    type = title
+    tier = county
+    priority = 60
+    governments = { eotg_pmc_government }
+    flavourization_rules = {
+        top_liege = no
+    }
+}
+
+eotg_duchy_pmc = {  # "Theatre"
+    type = title
+    tier = duchy
+    priority = 60
+    governments = { eotg_pmc_government }
+    flavourization_rules = {
+        top_liege = no
+    }
+}
+
+eotg_kingdom_pmc = {  # "Field Army"
+    type = title
+    tier = kingdom
+    priority = 60
+    governments = { eotg_pmc_government }
+    flavourization_rules = {
+        top_liege = no
+    }
+}
+
+eotg_empire_pmc = {  # "Company"
+    type = title
+    tier = empire
+    priority = 60
+    governments = { eotg_pmc_government }
+    flavourization_rules = {
+        top_liege = no
+    }
+}
+
+eotg_pmc_barony_male = {  # "Post Commander"
+    type = character
+    gender = male
+    special = holder
+    tier = barony
+    priority = 60
+    governments = { eotg_pmc_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_pmc_barony_female = {  # "Post Commander"
+    type = character
+    gender = female
+    special = holder
+    tier = barony
+    priority = 60
+    governments = { eotg_pmc_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_pmc_county_male = {  # "Contractor"
+    type = character
+    gender = male
+    special = holder
+    tier = county
+    priority = 60
+    governments = { eotg_pmc_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_pmc_county_female = {  # "Contractor"
+    type = character
+    gender = female
+    special = holder
+    tier = county
+    priority = 60
+    governments = { eotg_pmc_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_pmc_duchy_male = {  # "Field Director"
+    type = character
+    gender = male
+    special = holder
+    tier = duchy
+    priority = 60
+    governments = { eotg_pmc_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_pmc_duchy_female = {  # "Field Director"
+    type = character
+    gender = female
+    special = holder
+    tier = duchy
+    priority = 60
+    governments = { eotg_pmc_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_pmc_kingdom_male = {  # "Executive Commander"
+    type = character
+    gender = male
+    special = holder
+    tier = kingdom
+    priority = 60
+    governments = { eotg_pmc_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_pmc_kingdom_female = {  # "Executive Commander"
+    type = character
+    gender = female
+    special = holder
+    tier = kingdom
+    priority = 60
+    governments = { eotg_pmc_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_pmc_empire_male = {  # "Contractor-General"
+    type = character
+    gender = male
+    special = holder
+    tier = empire
+    priority = 60
+    governments = { eotg_pmc_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_pmc_empire_female = {  # "Contractor-General"
+    type = character
+    gender = female
+    special = holder
+    tier = empire
+    priority = 60
+    governments = { eotg_pmc_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_pmc_top_county_male = {  # "Contractor-General"
+    type = character
+    gender = male
+    special = holder
+    tier = county
+    priority = 61
+    governments = { eotg_pmc_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+
+eotg_pmc_top_county_female = {  # "Contractor-General"
+    type = character
+    gender = female
+    special = holder
+    tier = county
+    priority = 61
+    governments = { eotg_pmc_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+
+eotg_pmc_top_duchy_male = {  # "Contractor-General"
+    type = character
+    gender = male
+    special = holder
+    tier = duchy
+    priority = 61
+    governments = { eotg_pmc_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+
+eotg_pmc_top_duchy_female = {  # "Contractor-General"
+    type = character
+    gender = female
+    special = holder
+    tier = duchy
+    priority = 61
+    governments = { eotg_pmc_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+
+eotg_pmc_top_kingdom_male = {  # "Contractor-General"
+    type = character
+    gender = male
+    special = holder
+    tier = kingdom
+    priority = 61
+    governments = { eotg_pmc_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+
+eotg_pmc_top_kingdom_female = {  # "Contractor-General"
+    type = character
+    gender = female
+    special = holder
+    tier = kingdom
+    priority = 61
+    governments = { eotg_pmc_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+
+eotg_pmc_top_empire_male = {  # "Contractor-General"
+    type = character
+    gender = male
+    special = holder
+    tier = empire
+    priority = 61
+    governments = { eotg_pmc_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+
+eotg_pmc_top_empire_female = {  # "Contractor-General"
+    type = character
+    gender = female
+    special = holder
+    tier = empire
+    priority = 61
+    governments = { eotg_pmc_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+
+########## corporation ##########
+
+eotg_barony_corporation = {  # "Site"
+    type = title
+    tier = barony
+    priority = 60
+    governments = { eotg_corporation_government }
+    flavourization_rules = {
+        top_liege = no
+    }
+}
+
+eotg_county_corporation = {  # "Branch"
+    type = title
+    tier = county
+    priority = 60
+    governments = { eotg_corporation_government }
+    flavourization_rules = {
+        top_liege = no
+    }
+}
+
+eotg_duchy_corporation = {  # "Division"
+    type = title
+    tier = duchy
+    priority = 60
+    governments = { eotg_corporation_government }
+    flavourization_rules = {
+        top_liege = no
+    }
+}
+
+eotg_kingdom_corporation = {  # "Group"
+    type = title
+    tier = kingdom
+    priority = 60
+    governments = { eotg_corporation_government }
+    flavourization_rules = {
+        top_liege = no
+    }
+}
+
+eotg_empire_corporation = {  # "Conglomerate"
+    type = title
+    tier = empire
+    priority = 60
+    governments = { eotg_corporation_government }
+    flavourization_rules = {
+        top_liege = no
+    }
+}
+
+eotg_corporation_barony_male = {  # "Site Manager"
+    type = character
+    gender = male
+    special = holder
+    tier = barony
+    priority = 60
+    governments = { eotg_corporation_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_corporation_barony_female = {  # "Site Manager"
+    type = character
+    gender = female
+    special = holder
+    tier = barony
+    priority = 60
+    governments = { eotg_corporation_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_corporation_county_male = {  # "Branch Director"
+    type = character
+    gender = male
+    special = holder
+    tier = county
+    priority = 60
+    governments = { eotg_corporation_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_corporation_county_female = {  # "Branch Director"
+    type = character
+    gender = female
+    special = holder
+    tier = county
+    priority = 60
+    governments = { eotg_corporation_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_corporation_duchy_male = {  # "Operations Chief"
+    type = character
+    gender = male
+    special = holder
+    tier = duchy
+    priority = 60
+    governments = { eotg_corporation_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_corporation_duchy_female = {  # "Operations Chief"
+    type = character
+    gender = female
+    special = holder
+    tier = duchy
+    priority = 60
+    governments = { eotg_corporation_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_corporation_kingdom_male = {  # "Regional Director"
+    type = character
+    gender = male
+    special = holder
+    tier = kingdom
+    priority = 60
+    governments = { eotg_corporation_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_corporation_kingdom_female = {  # "Regional Director"
+    type = character
+    gender = female
+    special = holder
+    tier = kingdom
+    priority = 60
+    governments = { eotg_corporation_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_corporation_empire_male = {  # "CEO"
+    type = character
+    gender = male
+    special = holder
+    tier = empire
+    priority = 60
+    governments = { eotg_corporation_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_corporation_empire_female = {  # "CEO"
+    type = character
+    gender = female
+    special = holder
+    tier = empire
+    priority = 60
+    governments = { eotg_corporation_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_corporation_top_county_male = {  # "CEO"
+    type = character
+    gender = male
+    special = holder
+    tier = county
+    priority = 61
+    governments = { eotg_corporation_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+
+eotg_corporation_top_county_female = {  # "CEO"
+    type = character
+    gender = female
+    special = holder
+    tier = county
+    priority = 61
+    governments = { eotg_corporation_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+
+eotg_corporation_top_duchy_male = {  # "CEO"
+    type = character
+    gender = male
+    special = holder
+    tier = duchy
+    priority = 61
+    governments = { eotg_corporation_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+
+eotg_corporation_top_duchy_female = {  # "CEO"
+    type = character
+    gender = female
+    special = holder
+    tier = duchy
+    priority = 61
+    governments = { eotg_corporation_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+
+eotg_corporation_top_kingdom_male = {  # "CEO"
+    type = character
+    gender = male
+    special = holder
+    tier = kingdom
+    priority = 61
+    governments = { eotg_corporation_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+
+eotg_corporation_top_kingdom_female = {  # "CEO"
+    type = character
+    gender = female
+    special = holder
+    tier = kingdom
+    priority = 61
+    governments = { eotg_corporation_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+
+eotg_corporation_top_empire_male = {  # "CEO"
+    type = character
+    gender = male
+    special = holder
+    tier = empire
+    priority = 61
+    governments = { eotg_corporation_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+
+eotg_corporation_top_empire_female = {  # "CEO"
+    type = character
+    gender = female
+    special = holder
+    tier = empire
+    priority = 61
+    governments = { eotg_corporation_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+
+########## gobcorp ##########
+
+eotg_barony_gobcorp = {  # "Works"
+    type = title
+    tier = barony
+    priority = 60
+    governments = { eotg_gobcorp_government }
+    flavourization_rules = {
+        top_liege = no
+    }
+}
+
+eotg_county_gobcorp = {  # "Concession"
+    type = title
+    tier = county
+    priority = 60
+    governments = { eotg_gobcorp_government }
+    flavourization_rules = {
+        top_liege = no
+    }
+}
+
+eotg_duchy_gobcorp = {  # "Monopoly"
+    type = title
+    tier = duchy
+    priority = 60
+    governments = { eotg_gobcorp_government }
+    flavourization_rules = {
+        top_liege = no
+    }
+}
+
+eotg_kingdom_gobcorp = {  # "Bloc"
+    type = title
+    tier = kingdom
+    priority = 60
+    governments = { eotg_gobcorp_government }
+    flavourization_rules = {
+        top_liege = no
+    }
+}
+
+eotg_empire_gobcorp = {  # "Combine"
+    type = title
+    tier = empire
+    priority = 60
+    governments = { eotg_gobcorp_government }
+    flavourization_rules = {
+        top_liege = no
+    }
+}
+
+eotg_gobcorp_barony_male = {  # "Works Boss"
+    type = character
+    gender = male
+    special = holder
+    tier = barony
+    priority = 60
+    governments = { eotg_gobcorp_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_gobcorp_barony_female = {  # "Works Boss"
+    type = character
+    gender = female
+    special = holder
+    tier = barony
+    priority = 60
+    governments = { eotg_gobcorp_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_gobcorp_county_male = {  # "Trade Prince"
+    type = character
+    gender = male
+    special = holder
+    tier = county
+    priority = 60
+    governments = { eotg_gobcorp_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_gobcorp_county_female = {  # "Trade Prince"
+    type = character
+    gender = female
+    special = holder
+    tier = county
+    priority = 60
+    governments = { eotg_gobcorp_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_gobcorp_duchy_male = {  # "Trade Prince"
+    type = character
+    gender = male
+    special = holder
+    tier = duchy
+    priority = 60
+    governments = { eotg_gobcorp_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_gobcorp_duchy_female = {  # "Trade Prince"
+    type = character
+    gender = female
+    special = holder
+    tier = duchy
+    priority = 60
+    governments = { eotg_gobcorp_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_gobcorp_kingdom_male = {  # "Trade Magnate"
+    type = character
+    gender = male
+    special = holder
+    tier = kingdom
+    priority = 60
+    governments = { eotg_gobcorp_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_gobcorp_kingdom_female = {  # "Trade Magnate"
+    type = character
+    gender = female
+    special = holder
+    tier = kingdom
+    priority = 60
+    governments = { eotg_gobcorp_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_gobcorp_empire_male = {  # "First Prince"
+    type = character
+    gender = male
+    special = holder
+    tier = empire
+    priority = 60
+    governments = { eotg_gobcorp_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_gobcorp_empire_female = {  # "First Prince"
+    type = character
+    gender = female
+    special = holder
+    tier = empire
+    priority = 60
+    governments = { eotg_gobcorp_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_gobcorp_top_county_male = {  # "First Prince"
+    type = character
+    gender = male
+    special = holder
+    tier = county
+    priority = 61
+    governments = { eotg_gobcorp_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+
+eotg_gobcorp_top_county_female = {  # "First Prince"
+    type = character
+    gender = female
+    special = holder
+    tier = county
+    priority = 61
+    governments = { eotg_gobcorp_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+
+eotg_gobcorp_top_duchy_male = {  # "First Prince"
+    type = character
+    gender = male
+    special = holder
+    tier = duchy
+    priority = 61
+    governments = { eotg_gobcorp_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+
+eotg_gobcorp_top_duchy_female = {  # "First Prince"
+    type = character
+    gender = female
+    special = holder
+    tier = duchy
+    priority = 61
+    governments = { eotg_gobcorp_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+
+eotg_gobcorp_top_kingdom_male = {  # "First Prince"
+    type = character
+    gender = male
+    special = holder
+    tier = kingdom
+    priority = 61
+    governments = { eotg_gobcorp_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+
+eotg_gobcorp_top_kingdom_female = {  # "First Prince"
+    type = character
+    gender = female
+    special = holder
+    tier = kingdom
+    priority = 61
+    governments = { eotg_gobcorp_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+
+eotg_gobcorp_top_empire_male = {  # "First Prince"
+    type = character
+    gender = male
+    special = holder
+    tier = empire
+    priority = 61
+    governments = { eotg_gobcorp_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+
+eotg_gobcorp_top_empire_female = {  # "First Prince"
+    type = character
+    gender = female
+    special = holder
+    tier = empire
+    priority = 61
+    governments = { eotg_gobcorp_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+
+########## cartel ##########
+
+eotg_barony_cartel = {  # "Den"
+    type = title
+    tier = barony
+    priority = 60
+    governments = { eotg_cartel_government }
+    flavourization_rules = {
+        top_liege = no
+    }
+}
+
+eotg_county_cartel = {  # "Turf"
+    type = title
+    tier = county
+    priority = 60
+    governments = { eotg_cartel_government }
+    flavourization_rules = {
+        top_liege = no
+    }
+}
+
+eotg_duchy_cartel = {  # "Run"
+    type = title
+    tier = duchy
+    priority = 60
+    governments = { eotg_cartel_government }
+    flavourization_rules = {
+        top_liege = no
+    }
+}
+
+eotg_kingdom_cartel = {  # "Ring"
+    type = title
+    tier = kingdom
+    priority = 60
+    governments = { eotg_cartel_government }
+    flavourization_rules = {
+        top_liege = no
+    }
+}
+
+eotg_empire_cartel = {  # "Cartel"
+    type = title
+    tier = empire
+    priority = 60
+    governments = { eotg_cartel_government }
+    flavourization_rules = {
+        top_liege = no
+    }
+}
+
+eotg_cartel_barony_male = {  # "Den Keeper"
+    type = character
+    gender = male
+    special = holder
+    tier = barony
+    priority = 60
+    governments = { eotg_cartel_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_cartel_barony_female = {  # "Den Keeper"
+    type = character
+    gender = female
+    special = holder
+    tier = barony
+    priority = 60
+    governments = { eotg_cartel_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_cartel_county_male = {  # "Route Boss"
+    type = character
+    gender = male
+    special = holder
+    tier = county
+    priority = 60
+    governments = { eotg_cartel_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_cartel_county_female = {  # "Route Boss"
+    type = character
+    gender = female
+    special = holder
+    tier = county
+    priority = 60
+    governments = { eotg_cartel_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_cartel_duchy_male = {  # "Ringleader"
+    type = character
+    gender = male
+    special = holder
+    tier = duchy
+    priority = 60
+    governments = { eotg_cartel_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_cartel_duchy_female = {  # "Ringleader"
+    type = character
+    gender = female
+    special = holder
+    tier = duchy
+    priority = 60
+    governments = { eotg_cartel_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_cartel_kingdom_male = {  # "Overboss"
+    type = character
+    gender = male
+    special = holder
+    tier = kingdom
+    priority = 60
+    governments = { eotg_cartel_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_cartel_kingdom_female = {  # "Overboss"
+    type = character
+    gender = female
+    special = holder
+    tier = kingdom
+    priority = 60
+    governments = { eotg_cartel_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_cartel_empire_male = {  # "Grand Underlord"
+    type = character
+    gender = male
+    special = holder
+    tier = empire
+    priority = 60
+    governments = { eotg_cartel_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_cartel_empire_female = {  # "Grand Underlord"
+    type = character
+    gender = female
+    special = holder
+    tier = empire
+    priority = 60
+    governments = { eotg_cartel_government }
+    flavourization_rules = {
+        top_liege = no
+        only_vassals = yes
+    }
+}
+
+eotg_cartel_top_county_male = {  # "Grand Underlord"
+    type = character
+    gender = male
+    special = holder
+    tier = county
+    priority = 61
+    governments = { eotg_cartel_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+
+eotg_cartel_top_county_female = {  # "Grand Underlord"
+    type = character
+    gender = female
+    special = holder
+    tier = county
+    priority = 61
+    governments = { eotg_cartel_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+
+eotg_cartel_top_duchy_male = {  # "Grand Underlord"
+    type = character
+    gender = male
+    special = holder
+    tier = duchy
+    priority = 61
+    governments = { eotg_cartel_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+
+eotg_cartel_top_duchy_female = {  # "Grand Underlord"
+    type = character
+    gender = female
+    special = holder
+    tier = duchy
+    priority = 61
+    governments = { eotg_cartel_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+
+eotg_cartel_top_kingdom_male = {  # "Grand Underlord"
+    type = character
+    gender = male
+    special = holder
+    tier = kingdom
+    priority = 61
+    governments = { eotg_cartel_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+
+eotg_cartel_top_kingdom_female = {  # "Grand Underlord"
+    type = character
+    gender = female
+    special = holder
+    tier = kingdom
+    priority = 61
+    governments = { eotg_cartel_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+
+eotg_cartel_top_empire_male = {  # "Grand Underlord"
+    type = character
+    gender = male
+    special = holder
+    tier = empire
+    priority = 61
+    governments = { eotg_cartel_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+
+eotg_cartel_top_empire_female = {  # "Grand Underlord"
+    type = character
+    gender = female
+    special = holder
+    tier = empire
+    priority = 61
+    governments = { eotg_cartel_government }
+    flavourization_rules = {
+        top_liege = no
+        only_independent = yes
+    }
+}
+

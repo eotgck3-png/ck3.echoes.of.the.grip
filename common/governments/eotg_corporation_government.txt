@@ -1,0 +1,67 @@
+﻿# -- eotg_corporation_government.txt -------------------------------------------
+# Governments v2, Phase G1 (docs/specs/governments_v2.md §5.0, §5.2).
+# Corporation: a company state run by a board. Knights read "Specialists"
+# (KnightCulture override, §10).
+#
+# Map-agnostic (owner gate ruling 2026-10-08): no title, province, culture,
+# faith or character key. History data (the test sub-mod) assigns it.
+#
+# Shape: vanilla feudal_government (G/common/governments/00_government_types.txt
+# :5-62) for rules and flags; holdings from republic_government :64-67 (the
+# city shape, §5.0); extra rules from admin :450-558 and celestial :794-920.
+# Not set on purpose (§5.0): fallback, primary_heritages, preferred_religions,
+# can_get_government (§5.6), mechanic_type (influence is a G2 probe, §14.5),
+# use_as_base_on_rank_up, government_is_feudal, government_is_republic.
+#
+# Tiger 1.17 and PX don't validate 1.20 government fields: QA checks this block
+# BY HAND against _governments.info and the cited vanilla lines (§13 item 2).
+# UNVERIFIED-VANILLA (V-G3, V-G17): a PLAYABLE city-primary government works
+#   (republic, the only vanilla city-primary one, is unplayable). Fallback if
+#   broken: the castle shape (one field change, §5.2 risks).
+# -----------------------------------------------------------------------------
+
+eotg_corporation_government = {
+    government_rules = {
+        create_cadet_branches = yes         # feudal :7
+        rulers_should_have_dynasty = yes    # feudal :8 (deviation from v1 `no`)
+        dynasty_named_realms = no           # admin :454
+        legitimacy = yes                    # feudal :10
+        allow_accolades = yes               # feudal :11
+        use_as_base_on_landed = yes         # admin :458; .info:73-77
+        sticky_government = yes             # admin :462; .info:148-151
+        disable_regnal_numbers = yes        # celestial :816; .info:300-303
+    }
+
+    royal_court = any                       # feudal :14 (V-G15)
+
+    # City shape, verbatim from republic :65-67 (§5.0)
+    primary_holding = city_holding
+    valid_holdings = { castle_holding }
+    required_county_holdings = { city_holding castle_holding church_holding }
+
+    vassal_contract_group = eotg_corporation_vassal # §6; feudal :22
+
+    character_modifier = {
+        monthly_income_mult = 0.05          # v1
+        diplomacy = 1                       # v1; skills are generic modifiers (.info:721-733)
+        build_gold_cost = -0.1
+        levy_size = -0.15                   # admin :502 (-0.5)
+    }
+
+    ai = {
+        use_legends = yes                   # feudal :24-26
+    }
+
+    flags = {
+        eotg_government_is_corporation      # identity flag (§3.1)
+        eotg_government_is_corporate        # shared family flag (Corporation + Gob-Corp). # RESERVED G2 (spec §5.3): no reader in G1
+        government_is_settled               # feudal :29-35
+        government_uses_domain_limit
+        government_uses_crown_authority     # load-bearing: crown authority law group (§5.0)
+    }
+
+    # Teal; away from feudal blue (§5.2, V-G18)
+    color = hsv{ 0.50 0.75 0.75 }
+    realm_mask_offset = { 0.0 -0.01 }       # republic :90-91
+    realm_mask_scale = { 1 1 }
+}

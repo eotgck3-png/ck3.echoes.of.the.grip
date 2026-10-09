@@ -1,0 +1,49 @@
+﻿# -- eotg_government_triggers.txt ---------------------------------------------
+# Governments v2, Phase G1 (docs/specs/governments_v2.md §10).
+# eotg_gov_knight_realm_is_<gov> (character scope): the character's own
+# government, or, for an unlanded character, the employer's. The scope may be a
+# ruler (vanilla KnightCulture tests has_government on it,
+# 00_knight_culture.txt:5) or an unlanded knight, whose realm is the employer's.
+# Callers: common/customizable_localization/eotg_knight_culture.txt.
+# -----------------------------------------------------------------------------
+
+eotg_gov_knight_realm_is_pmc = {
+    OR = {
+        government_has_flag = eotg_government_is_pmc
+        AND = {
+            is_landed = no
+            employer ?= { government_has_flag = eotg_government_is_pmc }
+        }
+    }
+}
+
+eotg_gov_knight_realm_is_corporation = {
+    OR = {
+        government_has_flag = eotg_government_is_corporation
+        AND = {
+            is_landed = no
+            employer ?= { government_has_flag = eotg_government_is_corporation }
+        }
+    }
+}
+
+eotg_gov_knight_realm_is_gobcorp = {
+    OR = {
+        government_has_flag = eotg_government_is_gobcorp
+        AND = {
+            is_landed = no
+            employer ?= { government_has_flag = eotg_government_is_gobcorp }
+        }
+    }
+}
+
+eotg_gov_knight_realm_is_cartel = {
+    OR = {
+        government_has_flag = eotg_government_is_cartel
+        AND = {
+            is_landed = no
+            employer ?= { government_has_flag = eotg_government_is_cartel }
+        }
+    }
+}
+

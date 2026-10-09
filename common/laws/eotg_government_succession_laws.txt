@@ -1,0 +1,151 @@
+﻿# -- eotg_government_succession_laws.txt --------------------------------------
+# Governments v2, Phase G1 (docs/specs/governments_v2.md §7.1): one realm
+# succession law per government, added to vanilla's succession_order_laws group
+# by law_group_type (1.20 splits groups from laws), so the vanilla group file is
+# not touched.
+#
+# Why the mod needs them: every vanilla realm succession law is unavailable or
+# unsafe here (partition needs feudal/clan, 00_law_triggers.txt:268-280; city
+# succession needs republic :589-591; appointment/acclamation need the admin
+# mechanic :641-670; single heir needs innovation_primogeniture :343-370 AND a
+# feudal/clan/admin/japan_feudal government :371-397, which none of the four
+# is, so vanilla single heir is never valid for them).
+#
+# Shape: single_heir_succession_law (G/common/laws/00_succession_laws.txt:249-347).
+# index 50-53: vanilla's succession_order_laws run 0-34; the mod has no other
+# succession law. Each government's own law is its only valid realm succession
+# law (spec §7.1 assumed vanilla single heir stayed available; it does not).
+# The default-law pick (_laws.info:300-308) puts vanilla partition first in
+# definition order; common/on_action/eotg_government_on_actions.txt is the
+# safety net (§7.2).
+# UNVERIFIED-VANILLA (V-G4): the engine skips a default-law candidate whose
+#   can_have fails; if not, the on_game_start net corrects it.
+# -----------------------------------------------------------------------------
+
+eotg_pmc_succession_law = {
+    law_group_type = succession_order_laws  # G/common/law_groups/00_succession_law_groups.txt:1
+    index = 50
+
+    potential = { government_has_flag = eotg_government_is_pmc }
+    can_have = { government_has_flag = eotg_government_is_pmc }
+    can_keep = { government_has_flag = eotg_government_is_pmc }
+    can_pass = {
+        can_change_succession_law_trigger = yes  # single_heir :270; 00_legal_triggers.txt:49
+    }
+    should_start_with = { government_has_flag = eotg_government_is_pmc }
+
+    succession = {
+        order_of_succession = inheritance
+        traversal_order = children
+        rank = oldest
+        title_division = single_heir
+    }
+    flag = advanced_succession_law  # single_heir :303
+
+    pass_cost = {
+        prestige = change_succession_law_prestige_cost
+    }
+    revoke_cost = {
+        prestige = change_succession_law_prestige_cost
+    }
+
+    ai_will_do = {
+        value = 3  # single_heir :330-332
+    }
+}
+
+eotg_corporation_succession_law = {
+    law_group_type = succession_order_laws  # G/common/law_groups/00_succession_law_groups.txt:1
+    index = 51
+
+    potential = { government_has_flag = eotg_government_is_corporation }
+    can_have = { government_has_flag = eotg_government_is_corporation }
+    can_keep = { government_has_flag = eotg_government_is_corporation }
+    can_pass = {
+        can_change_succession_law_trigger = yes  # single_heir :270; 00_legal_triggers.txt:49
+    }
+    should_start_with = { government_has_flag = eotg_government_is_corporation }
+
+    succession = {
+        order_of_succession = inheritance
+        traversal_order = children
+        rank = oldest
+        title_division = single_heir
+    }
+    flag = advanced_succession_law  # single_heir :303
+
+    pass_cost = {
+        prestige = change_succession_law_prestige_cost
+    }
+    revoke_cost = {
+        prestige = change_succession_law_prestige_cost
+    }
+
+    ai_will_do = {
+        value = 3  # single_heir :330-332
+    }
+}
+
+eotg_gobcorp_succession_law = {
+    law_group_type = succession_order_laws  # G/common/law_groups/00_succession_law_groups.txt:1
+    index = 52
+
+    potential = { government_has_flag = eotg_government_is_gobcorp }
+    can_have = { government_has_flag = eotg_government_is_gobcorp }
+    can_keep = { government_has_flag = eotg_government_is_gobcorp }
+    can_pass = {
+        can_change_succession_law_trigger = yes  # single_heir :270; 00_legal_triggers.txt:49
+    }
+    should_start_with = { government_has_flag = eotg_government_is_gobcorp }
+
+    succession = {
+        order_of_succession = inheritance
+        traversal_order = children
+        rank = oldest
+        title_division = single_heir
+    }
+    flag = advanced_succession_law  # single_heir :303
+
+    pass_cost = {
+        prestige = change_succession_law_prestige_cost
+    }
+    revoke_cost = {
+        prestige = change_succession_law_prestige_cost
+    }
+
+    ai_will_do = {
+        value = 3  # single_heir :330-332
+    }
+}
+
+eotg_cartel_succession_law = {
+    law_group_type = succession_order_laws  # G/common/law_groups/00_succession_law_groups.txt:1
+    index = 53
+
+    potential = { government_has_flag = eotg_government_is_cartel }
+    can_have = { government_has_flag = eotg_government_is_cartel }
+    can_keep = { government_has_flag = eotg_government_is_cartel }
+    can_pass = {
+        can_change_succession_law_trigger = yes  # single_heir :270; 00_legal_triggers.txt:49
+    }
+    should_start_with = { government_has_flag = eotg_government_is_cartel }
+
+    succession = {
+        order_of_succession = inheritance
+        traversal_order = children
+        rank = oldest
+        title_division = single_heir
+    }
+    flag = advanced_succession_law  # single_heir :303
+
+    pass_cost = {
+        prestige = change_succession_law_prestige_cost
+    }
+    revoke_cost = {
+        prestige = change_succession_law_prestige_cost
+    }
+
+    ai_will_do = {
+        value = 3  # single_heir :330-332
+    }
+}

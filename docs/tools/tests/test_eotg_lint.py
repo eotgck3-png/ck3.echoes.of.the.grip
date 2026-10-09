@@ -601,6 +601,22 @@ class L014(LintCase):
         self.assertEqual(dead, ["eotg_decision_d_confirm", "eotg_decision_d_desc",
                                 "eotg_decision_d_tooltip"])
 
+    def test_nested_and_value_conventions(self):
+        # contract obligation levels (one block below obligation_levels) and custom loc
+        # localization_key values + KnightCulture child suffixes are engine-read names
+        files = self.files(
+            "eotg_lvl_low_short", "eotg_term_plural", "eotg_term_no_tooltip_lowercase_adjective",
+            **{"common/subject_contracts/contracts/c.txt":
+               "eotg_c = { obligation_levels = { eotg_lvl_low = { default = yes } } }",
+               "common/customizable_localization/k.txt":
+               "KnightCulture = { type = character text = { localization_key = eotg_term fallback = yes } }"})
+        self.assertClean(files, "L014")
+        # a block that is not directly under obligation_levels implies nothing
+        self.assertHit(self.files("eotg_inner_short", **{
+            "common/subject_contracts/contracts/c.txt":
+            "eotg_c = { obligation_levels = { eotg_lvl = { ai = { eotg_inner = { } } } } }"}),
+            "L014", "'eotg_inner_short' is defined", count=1)
+
     def test_not_key_exempt_when_base_used(self):
         # NOT_<key> is read by the engine when custom_description <key> fails;
         # it counts as used whenever its base key is referenced in script

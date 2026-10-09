@@ -197,6 +197,7 @@ Saved scopes: `eotg_frontier_discovered` (a flag value: the trait just revealed,
 
 ### 4.1 Building it
 - **Decision `eotg_decision_frontier_build`:** shown to a holder of a Frontier with room (`eotg_frontier_holds_buildable`). It picks the most advanced such Region and fires .021, *What to Build*, which charges `eotg_frontier_infra_cost_value` in the option chosen (as .001 does).
+  - **Amended 2026-10-08 (built and committed):** the player chooses the Region with vanilla's county-picker widget (`decision_view_widget_select_realm_county`, `controller = select_scope_object`; `G/common/decisions/dlc_decisions/pam/pam_decisions.txt:1334-1460`, `G/common/decisions/50_holy_site_decisions.txt:119-169`). The "most advanced" pick is the **default item**; the AI is unchanged. See `frontier_v1.md` §8.1.
 - **Slots:** 1 from the start, 2 from Foothold (progress ≥ 33). One build a year per Region (`eotg_frontier_built`).
 - **Not every Frontier needs it** (design §9): nothing requires infrastructure.
 
@@ -332,6 +333,7 @@ Traits adjust the floors (§5.2); the development floor stays capped by what the
 ## 8. Discoveries (design §13)
 
 - **Decision `eotg_decision_frontier_survey`** (Survey a Region): cost `eotg_frontier_survey_cost_value`. Shown to a holder of a Region that `eotg_frontier_can_survey`: Unsettled, Abandoned or a Frontier, with trait room, not surveyed in 5 years. It picks the most developed such Region, marks it surveyed and fires .020.
+  - **Amended 2026-10-08 (built and committed):** the Region is chosen with the same county-picker widget as Build (§4.1 note; `frontier_v1.md` §8.1). The "most developed" pick is the **default item**; the AI is unchanged.
 - **.020 *Survey Report*** reveals a trait in `immediate`; the desc names it.
   - **(a) "File the report."** Before a project, the survey data gives the next project a head start (`eotg_frontier_survey_bonus_value`); during one, progress +2. Ungated.
   - **(b) "Send them deeper."** Costs the survey cost again: a second trait (if there is room), plus (a)'s result.

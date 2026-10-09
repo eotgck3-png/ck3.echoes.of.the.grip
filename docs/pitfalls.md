@@ -142,6 +142,21 @@ the same relative path exists under the game folder; if it does, it is an overri
 every patch. That rule alone would have caught `gfx/particles`, `map_object_data`, `seasons.txt`
 and `fonts.font` the first time.
 
+### Define arrays replace, they do not merge: `NGovernment.GOVERNMENT_TYPES`
+
+Define files merge key by key, but an **array** value is replaced whole by the last file that sets
+it. `common/defines/eotg_government_defines.txt` restates vanilla's entire `GOVERNMENT_TYPES`
+list (1.20.0.3, `00_defines.txt` ~:550-573) plus the five `eotg_` governments, because the engine
+pre-registers a government's built-in modifiers only for governments in that list. A government
+missing from it logs 12 `Could not find the preregistered modifier type` errors (2026-10-08:
+`eotg_unclaimed_government` and the test sub-mod's `eotg_test_offmap_government`).
+
+**After every CK3 update, diff vanilla's list against ours and re-copy it.** A vanilla government
+added in a patch and missing from our copy silently loses its modifiers, in vanilla content we
+never touched. The British Isles test sub-mod has a second copy
+(`common/defines/zz_eotg_test_bi_government_defines.txt`, loads later and wins); update both.
+Any new mod government must be added to both files too.
+
 ---
 
 ## 3. Black map = the terrain shader failed to compile

@@ -47,7 +47,7 @@ Owner = the agent who writes it. "Shared" means it is used by more than one gove
 |---|---|---|
 | government | `eotg_pmc_government`, `eotg_corporation_government`, `eotg_gobcorp_government`, `eotg_cartel_government` | scripter |
 | government flag (identity) | `eotg_government_is_pmc`, `eotg_government_is_corporation`, `eotg_government_is_gobcorp`, `eotg_government_is_cartel` | scripter |
-| government flag (shared family) | `eotg_government_is_corporate` (Corporation + Gob-Corp; v1 precedent, the only v1 government flag in real use) | scripter |
+| government flag (shared family) | `eotg_government_is_corporate` (Corporation + Gob-Corp; v1 precedent, the only v1 government flag in real use). **Reserved for G2: set in G1, read by nothing in G1.** A documented exception to robustness plan F5 (no dead flags): its consumer is the G2 lift of `eotg_market_faction_cycle` (§5.3). DoD 4 exempts it. | scripter |
 | succession law (group `succession_order_laws`) | `eotg_pmc_succession_law`, `eotg_corporation_succession_law`, `eotg_gobcorp_succession_law`, `eotg_cartel_succession_law` | scripter |
 | subject contract group | `eotg_pmc_vassal`, `eotg_corporation_vassal`, `eotg_gobcorp_vassal`, `eotg_cartel_vassal` (v1 names kept) | scripter |
 | subject contract (tax tree) | `eotg_pmc_contractor_fee`, `eotg_corporation_assessment`, `eotg_gobcorp_market_tithe`, `eotg_cartel_loyalty_tax` | scripter |
@@ -61,6 +61,7 @@ Owner = the agent who writes it. "Shared" means it is used by more than one gove
 | scripted effect | `eotg_gov_ensure_succession_law_effect` (character: adds the government's own succession law if the ruler has none valid; §7.2) | scripter |
 | on_action (mod) | `eotg_gov_on_game_start`, `eotg_gov_on_government_change` | scripter |
 | decision (debug only) | `eotg_decision_gov_debug_become_pmc` / `_corporation` / `_gobcorp` / `_cartel`, `eotg_decision_gov_debug_become_feudal` | scripter |
+| define (mod-owned list) | `NGovernment.GOVERNMENT_TYPES` must list all four keys (plus `eotg_unclaimed_government`) alongside the 20 vanilla ones (`G/common/defines/00_defines.txt:550-573`). **The engine registers a government's built-in modifiers (`<g>_vassal_opinion`, `<g>_opinion`, `<g>_tax/levy_contribution_add/_mult`) only for governments in this list.** A government missing from it logs 12 "Could not find the preregistered modifier type" errors. Added 2026-10-08 from QA; built as `common/defines/eotg_government_defines.txt` (§4). | scripter |
 | government icon (placeholder) | `gfx/interface/icons/government_types/eotg_pmc_government.dds` (and the other three) | orchestrator (copied from vanilla; real art is human debt) |
 
 ### 3.2 Loc keys (localizer; full list in §9)
@@ -85,6 +86,7 @@ Government display keys, law keys, contract keys, flavourization keys, knight te
 | `common/scripted_effects/eotg_government_effects.txt` | succession safety net |
 | `common/on_action/eotg_government_on_actions.txt` | additive hooks (§7) |
 | `common/decisions/eotg_government_debug_decisions.txt` | 5 debug decisions |
+| `common/defines/eotg_government_defines.txt` | `NGovernment = { GOVERNMENT_TYPES = { ...vanilla 20, verbatim... eotg_unclaimed_government eotg_pmc_government eotg_corporation_government eotg_gobcorp_government eotg_cartel_government } }`. The array replaces vanilla's list, so it is re-copied after every CK3 update. The British Isles sub-mod restates the whole list in `docs/test_submods/british_isles/common/defines/zz_eotg_test_bi_government_defines.txt`; the two must stay in step. |
 | `localization/english/eotg_government_l_english.yml` | all G1 loc (UTF-8 with one BOM) |
 | `gfx/interface/icons/government_types/eotg_*_government.dds` | placeholder icons |
 
@@ -97,6 +99,8 @@ Government display keys, law keys, contract keys, flavourization keys, knight te
 ### 5.0 Fields shared by all four, with precedent
 
 Every field below is listed in `G/common/governments/_governments.info`, or (`allow_accolades`, `realm_mask_*`, `royal_court`) used verbatim by vanilla 1.20 governments. **Tiger 1.17 and PX don't validate 1.20 government fields.** QA checks these blocks by hand against the cited lines, as for `eotg_unclaimed_government` (see that file's header).
+
+**Lesson (2026-10-08): `.info` alone is not proof.** `use_great_projects` is documented in `_governments.info:630`, yet the 1.20 parser rejects it, and no vanilla government uses it. A field that appears only in `.info` and in no vanilla file is unverified: use it only after an in-game error.log check, and prefer fields with a vanilla call site. (This supersedes the `CLAUDE.md` known-benign note that treated the PX finding on `use_great_projects` as vocabulary lag; the orchestrator should update that note.)
 
 | Field | Value (all four) | Precedent | Why |
 |---|---|---|---|
@@ -246,7 +250,13 @@ realm_mask_offset = { 0.0 0.01 }  realm_mask_scale = { 1 1 }   # feudal
 ```
 **No `deny_powerful_vassal`.** It was rejected in v1 for design reasons (robustness plan 2.2): the Cartel's drama needs strong internal bosses. **No `government_can_raid_rule`** (v1 1.1). **Tributaries need crown authority ≥ 1**: `can_have_tributaries_trigger` reads the realm-law flag `can_have_tributaries` (`G/common/scripted_triggers/mpo_scripted_triggers.txt:912-916`), and crown authority 1, the group default (`00_realm_law_groups.txt:3`), grants it (`00_realm_laws.txt:64`). A Cartel that drops to crown authority 0 loses the interaction, as vanilla intends.
 
-Holdings: the castle shape. Succession: `eotg_cartel_succession_law`. Contracts: `eotg_cartel_vassal`. The tributary contract is vanilla's `tributary_settled` (`G/common/subject_contracts/groups/subject_contract_groups.txt:72-86`).
+Holdings: the castle shape. Succession: `eotg_cartel_succession_law`. Contracts: `eotg_cartel_vassal`.
+
+**The tributary contract is vanilla's `tributary_subjugated`** (`G/common/subject_contracts/groups/subject_contract_groups.txt:103-115`), not `tributary_settled` (corrected 2026-10-08 from QA). `start_tributary_interaction_effect` picks the group by the suzerain's government; the Cartel matches none of the named branches and falls to the final `else` (`G/common/scripted_effects/00_interaction_effects.txt:2981-2986`). Consequences, accepted for G1:
+- `tributary_can_break_free = { always = no }`: a tributary cannot break free by itself.
+- `suzerain_heir_succession = no`: **the tribute lapses when the Cartel ruler dies**; the heir must re-offer. This fits "the top is always under threat" and is not patched in G1.
+- **Offer Tributary Status costs piety** (`minor_piety_value`, era-scaled; `G/common/character_interactions/00_tributary_interactions.txt` `cost = { piety = ... }`, ~:4532). A low-piety Cartel ruler may be unable to offer.
+- G2 may revisit (a mod contract group plus an override of the effect's branch), only if V-G12 shows the lapse churn breaks the Cartel AI.
 
 **Coupling (G1: none):**
 - **Cybernetics syndicates, Patron and Kingpin** (`cybernetics_v2_kingpin.md` §5.1.3, §5.2.1): G2 may tilt kingpin kind weights under a Cartel liege (crew ×1.5, the same mechanism as the Ban law). **The syndicate kind stays Patron-only** (ruling, index §5 item 3). The generated syndicate names are canon syndicates, and a Cartel government must not be read as one of them (LQ6).
@@ -332,7 +342,7 @@ Feudal reference: taxes 0 / 0.025 / **0.10** / 0.15 / 0.25 (`G/common/script_val
   - partition and high partition need `government_is_feudal`, `_clan` or `_japan_feudal` (`G/common/scripted_triggers/00_law_triggers.txt:268-280`);
   - city succession needs `government_is_republic` (`:589-591`), and generates a successor: unplayable;
   - appointment and acclamation need the administrative mechanic (`:641-670`);
-  - single heir needs the culture innovation `innovation_primogeniture` (`:343-370`). A map-agnostic government can't depend on a culture's innovations.
+  - single heir needs the culture innovation `innovation_primogeniture` (`:343-370`). A map-agnostic government can't depend on a culture's innovations. **It also needs a feudal, clan, administrative, merit or Japanese-feudal government** (`can_have_single_heir_succession_law_trigger`, `:371-397`: `government_is_feudal` / `_clan` / `government_has_mechanic = administrative` / `government_allows = merit` / `government_is_japan_feudal`). None of the four qualifies, so vanilla Primogeniture is never available to them (QA, 2026-10-08).
 - So a ruler of these governments could otherwise be left with **no valid succession law**.
 
 Four laws, one per government (separate names for the UI). Each:
@@ -355,7 +365,7 @@ eotg_<gov>_succession_law = {
 - **Single heir, not partition.** Partition fragments AI realms in a 4-realm test and isn't the identity of any of the four governments.
 - Board elections, wealth votes and violent succession are **G2**, as title succession laws with `order_of_succession = election` and an `election_type` in `common/succession_election/` (shape: `G/common/laws/01_title_succession_laws.txt:2-34`, `feudal_elective_succession_law`).
 - The vanilla gender law (`succession_gender_laws`, default `male_preference_law`) is unchanged.
-- **The vanilla single heir law stays available** when the culture has the innovation, so players may pick either.
+- **Each government has exactly one valid succession-order law: its own.** (Corrected 2026-10-08 from QA. The earlier text said vanilla single heir stayed available with the innovation; it can't, see the government gate above.) The law is therefore not changeable in G1, and `can_pass` only matters once G2 adds a second order law.
 
 ### 7.2 Safety net (additive on_actions, invariant 4)
 The default-law rule ("the first law in definition order whose `should_start_with` is true", `G/common/laws/_laws.info:300-308`) puts vanilla's partition law ahead of the mod's. Whether the engine skips it on `can_have` is not documented. Vanilla itself forces laws after setup with the same effect (`G/common/on_action/game_start.txt:2503`, `add_realm_law_skip_effects = theocratic_elective_succession_law`).
@@ -383,7 +393,7 @@ eotg_gov_on_game_start = {
 eotg_gov_on_government_change = { effect = { eotg_gov_ensure_succession_law_effect = yes } }
 ```
 
-`eotg_gov_ensure_succession_law_effect` (character scope): for each government, `if` the ruler has that government's flag and has neither `eotg_<gov>_succession_law` nor `single_heir_succession_law`, then `add_realm_law_skip_effects = eotg_<gov>_succession_law`. **No cooldown** is involved, so the cooldown-authority rule (invariant 4) doesn't apply. No event is fired.
+`eotg_gov_ensure_succession_law_effect` (character scope): for each government, `if` the ruler has that government's flag and does not have `eotg_<gov>_succession_law`, then `add_realm_law_skip_effects = eotg_<gov>_succession_law`. **No cooldown** is involved, so the cooldown-authority rule (invariant 4) doesn't apply. No event is fired.
 
 **Tier gating:** these are not content pulses. They run on every ruler of the four governments at every tier, which is the role-ladder rule (v1 lesson 4) in its simplest form.
 
@@ -432,7 +442,7 @@ For each of the 4 governments (`<g>` = the full key, e.g. `eotg_pmc_government`)
 
 | Key | Content |
 |---|---|
-| `<g>` | name: "PMC", "Corporation", **"Trade Oligarchy"** (lore pick; PENDING OWNER OQ3, the alternative being "Gob-Corp"), "Cartel" |
+| `<g>` | name: "PMC", "Corporation", **"Trade Oligarchy"** (RULED by the owner, OQ3; the name fits the Gob-Ogre Trade League while leaving room for ogre involvement, so the desc stays species-neutral and must not read as goblin-only), "Cartel" |
 | `<g>_adjective`, `<g>_realm` | |
 | `<g>_desc` | 2–4 sentences: identity plus the G1 mechanics (holdings, contract identity, the Cartel's tributaries). Names no nation (§11). |
 | `<g>_with_icon` | `@government_type_<vanilla>! $<g>$`: reuse a vanilla text icon (unclaimed precedent: `@government_type_herder!`). PMC: mercenary; Corporation: administrative; Gob-Corp: republic; Cartel: clan. The localizer confirms each `@` icon exists. |
@@ -442,6 +452,7 @@ For each of the 4 governments (`<g>` = the full key, e.g. `eotg_pmc_government`)
 
 Also:
 - **Laws (4 each):** `eotg_<gov>_succession_law`, `_subname`, `_effects` (shape: `succession_laws_l_english.yml:14-16`).
+- **Contract groups (4 × 2 = 8):** `eotg_<gov>_vassal` and `eotg_<gov>_vassal_desc` (shape: vanilla `feudal_vassal` "Feudal" and its `_desc`; added 2026-10-08 from QA).
 - **Contracts (8):** `<contract>`; each of its 5 levels `<contract>_<level>` and `<contract>_<level>_short` (shape: `feudal_government_levies`, `feudal_levies_low`, `feudal_levies_low_short`).
 - **Flavourization:** 92 keys, one per entry key in §3.1, text from §8.
 - **Knight terms:** §10, 4 terms × 8 keys.
@@ -462,7 +473,7 @@ KnightCulture = {
     text = { trigger = { eotg_gov_knight_realm_is_pmc = yes }         localization_key = eotg_knight_operator }
     text = { trigger = { eotg_gov_knight_realm_is_corporation = yes } localization_key = eotg_knight_specialist }
     text = { trigger = { eotg_gov_knight_realm_is_gobcorp = yes }     localization_key = eotg_knight_strongarm }
-    text = { trigger = { eotg_gov_knight_realm_is_cartel = yes }      localization_key = eotg_knight_breaker }
+    text = { trigger = { eotg_gov_knight_realm_is_cartel = yes }      localization_key = eotg_knight_brute }
     text = { localization_key = knight_default  fallback = yes }      # vanilla "Knight" (00_knight_culture.txt:85-88)
 }
 ```
@@ -492,7 +503,7 @@ KnightCulture = {
 | `eotg_knight_operator_no_tooltip_lowercase_plural_possessive` | "operators'" |
 | `eotg_knight_operator_no_tooltip_lowercase_adjective` | "operator" (vanilla's "champion" pattern, `:70`) |
 
-The other three terms get the same 8 keys: `eotg_knight_specialist`, `eotg_knight_strongarm`, `eotg_knight_breaker`. **PENDING OWNER (OQ1):** these are the lore picks, used as defaults. "Agent" was rejected because it clashes with the vanilla scheme-agent concept. "Enforcer" was rejected because it collides with Blackstar's Enforcer Corps, and "enforcers" would print in the cybernetics retinue lines.
+The other three terms get the same 8 keys: `eotg_knight_specialist`, `eotg_knight_strongarm`, `eotg_knight_brute`. **RULED (owner, 2026-10-08, OQ1):** Operator, Specialist, Strongarm and Brute. "Agent" was rejected because it clashes with the vanilla scheme-agent concept. "Enforcer" was rejected because it collides with Blackstar's Enforcer Corps and would print "enforcers" in the cybernetics retinue lines. The Cartel term is the owner's own choice, Brute.
 
 ---
 
@@ -533,6 +544,11 @@ The other three terms get the same 8 keys: `eotg_knight_specialist`, `eotg_knigh
 - **Gob-Corp:** `d_provence`, held by Bertrand (420).
 - **Vassals:** each realm has vassal counts on the same government, including two generated lowborn counts. These get a dynasty when landed (`rulers_should_have_dynasty = yes`).
 - **Capital baronies:** the Corporation (`k_brittany`) and Gob-Corp (`d_provence`) capital baronies get **`city_holding`**. The PMC and Cartel capitals stay castles.
+
+**As built (recorded 2026-10-08; the generator and `docs/test_submods/british_isles/README.md` are authoritative where they differ from the reference rows below):**
+- **León:** Rodrigo (108512) holds `d_asturias` (with `c_asturias_de_oviedo`) as a **vassal duke** of Alfonso VI, so the Cartel realm has three tiers. Urraca (108501) holds Zamora, Pedro (`asturleonese0078`) Pravia, and a generated count Ávila.
+- **Brittany and Provence:** the capital barony of **every county in the pocket** is a city (CSV `holding = city_holding` on the pocket row), not only the realm capital.
+- **Provence's capital county is `c_venaissin`**, held by Bertrand (420) with `c_provence` in his domain, not `c_provence`. Nice and Forcalquier are vassal counts.
 - **The holders are accepted by G1.** There is no `can_get_government`, history `government =` sets the government directly, and no government reads culture or faith.
 - **Keys unchanged.**
 
@@ -557,8 +573,7 @@ The other three terms get the same 8 keys: `eotg_knight_specialist`, `eotg_knigh
 | `c_zamora` | `108501` | `k_leon` | | | Urraca (b. 1033) |
 | `d_asturias`, `c_asturias_de_oviedo` | `108512` | `k_leon` | | | Rodrigo as a vassal duke (Ringleader) |
 | `c_pravia` | `asturleonese0078` | `d_asturias` | | | Pedro, a count under the duke: three tiers in one realm |
-| `d_provence`, `c_provence` | `420` | `0` | `eotg_gobcorp_government` | `realm` | **Gob-Corp duke: Bertrand (b. 1047).** The capital barony of `c_provence` (`b_toulon`, listed first) is **made a city**. |
-| `c_venaissin` | `32534` | `d_provence` | | | |
+| `d_provence`, `c_venaissin`, `c_provence` | `420` | `0` | `eotg_gobcorp_government` | `realm` | **Gob-Corp duke: Bertrand (b. 1047).** As built, the capital county is `c_venaissin`; every pocket county's capital barony is **made a city**. (Earlier row: `c_venaissin` to 32534 as a vassal; superseded.) |
 | `c_nice` | `20315` | `d_provence` | | | coastal vassal |
 | `c_forcalquier` | `40802` | `d_provence` | | | |
 
@@ -579,7 +594,7 @@ The other three terms get the same 8 keys: `eotg_knight_specialist`, `eotg_knigh
 1. Tiger is clean except the known-benign list in `CLAUDE.md`. PX LSP and `px_vocab_check.py` are clean over the new files. PX `locCoverage` shows no missing `eotg_` key.
 2. QA checks all four government blocks by hand against `_governments.info` and the vanilla lines cited in §5 (Tiger 1.17 can't).
 3. `grep -rnE 'eotg_[ekdcb]_'` is empty. No title, province, culture, faith or character key appears in any G1 file. The test sub-mod CSV is history data and is exempt.
-4. Each `<g>` key appears in the 4 government files, each flavourization entry and the law `potential`. Each `eotg_government_is_<gov>` flag is read by ≥1 trigger (no dead flags: robustness plan F5).
+4. Each `<g>` key appears in the 4 government files, each flavourization entry and the law `potential`. Each `eotg_government_is_<gov>` flag is read by ≥1 trigger (no dead flags: robustness plan F5). The one exception is `eotg_government_is_corporate`, reserved for G2 (§3.1).
 5. The loc file has exactly one BOM and no `[scope:`, and every §9 key is defined exactly once.
 
 **In game (human, British Isles sub-mod with the §12 rows; checklist V-G below):**
@@ -589,19 +604,19 @@ The other three terms get the same 8 keys: `eotg_knight_specialist`, `eotg_knigh
 ### V-G checklist (in game, `-debug_mode`)
 | ID | Check | Pass |
 |---|---|---|
-| V-G1 | The game loads; error.log shows nothing from the 12 new files; `database_conflicts.log` lists the `KnightCulture` override | yes |
+| V-G1 | The game loads; error.log shows nothing from the new files; `database_conflicts.log` lists the `KnightCulture` override. error.log has no "Could not find the preregistered modifier type" line for any `eotg_*_government` (the `NGovernment.GOVERNMENT_TYPES` define, §3.1), and a vassal-opinion tooltip shows `<g>_vassal_opinion` resolved | yes |
 | V-G2 | The four test rulers and their realm-scope vassals show the right government (character window, government map mode) | yes |
 | V-G3 | Each test ruler can be picked on the map and played (not "Is unplayable") | yes |
-| V-G4 | The realm screen shows `eotg_<gov>_succession_law` with a named heir. After crown authority 2, the law can be changed to vanilla Primogeniture if the culture has the innovation | yes |
+| V-G4 | The realm screen shows `eotg_<gov>_succession_law` with a named heir. No other succession-order law is selectable (vanilla Primogeniture shows as unavailable on the government requirement, `00_law_triggers.txt:371-397`), whatever the culture's innovations | yes |
 | V-G5 | Crown authority laws are listed and passable | yes |
 | V-G6 | Modify Vassal Contract shows the government's 2 trees + 3 rights with loc. The player changes a level; an AI liege changes one over time | yes |
 | V-G7 | An independent ruler shows the top rank ("Contractor-General Raoul"); vassals show tier ranks; titles show the government's rank word | yes |
-| V-G8 | The Knights tab and cybernetics lines using `KnightCulture` say Operator / Specialist / Strongarm / Breaker; William's knights say "Knight" | yes |
+| V-G8 | The Knights tab and cybernetics lines using `KnightCulture` say Operator / Specialist / Strongarm / Brute; William's knights say "Knight" | yes |
 | V-G9 | Conan II's death (1066.12.11): his heir holds d_brittany **as Corporation**. Also `kill` each top ruler in console: the heir keeps the government and the law | yes |
 | V-G10 | Grant a county to a courtier in each realm; record the new vassal's government (expected: the liege's) | recorded |
 | V-G11 | Leakage: after 50 years, the government map mode shows a mod government only in the four realms and their conquests or grants | yes, else build §5.6 |
 | V-G12 | 50-year AI run: no realm without a succession law, no permanent bankruptcy, no law-change churn, the realms claim Unsworn counties | yes |
-| V-G13 | Cartel: Offer Tributary Status is available against an independent pocket. A tributary forms (`tributary_settled`); tributary land counts toward title creation | yes |
+| V-G13 | Cartel: Offer Tributary Status is available against an independent pocket and shows a piety cost. A tributary forms as `tributary_subjugated` (cannot break free); tributary land counts toward title creation. `kill` the Cartel ruler: record that the tributary lapses (expected, `suzerain_heir_succession = no`) | yes |
 | V-G14 | PMC: accolades are available | yes |
 | V-G15 | Kingdom-tier Brittany and León have a royal court | yes |
 | V-G16 | Debug decisions: William becomes each government and gets its law; "become feudal" drops the mod law to a feudal one | yes |
@@ -661,10 +676,10 @@ Does vanilla influence work without `mechanic_type = administrative`? Influence 
 
 ---
 
-## 16. Owner questions (PENDING OWNER; the defaults are the lore picks)
+## 16. Owner questions (all ruled)
 
-- **OQ1, knight terms. PENDING OWNER.** Defaults: PMC **Operator**, Corporation **Specialist**, Gob-Corp **Strongarm**, Cartel **Breaker**, and everyone else **Knight** (vanilla `knight_default`). The lore keeper rejected "Agent", which clashes with the scheme-agent concept. It also rejected "Enforcer", which collides with Blackstar's Enforcer Corps and would print "enforcers" in the cybernetics retinue lines. The scripter builds with the defaults. A change touches loc only, plus 3 keys in `eotg_knight_culture.txt`.
-- **OQ3, the trade oligarchy's display name. PENDING OWNER.** Default: **"Trade Oligarchy"** (lore pick). The alternative is "Gob-Corp", the owner's working name. **The keys stay `eotg_gobcorp_*` either way.** Only `eotg_gobcorp_government` and its adjective, realm and filter loc change.
+- **OQ1, knight terms: RULED (owner, 2026-10-08).** PMC **Operator**, Corporation **Specialist**, Gob-Corp **Strongarm**, Cartel **Brute**, and everyone else **Knight** (vanilla `knight_default`). Brute is the owner's own choice; Breaker (the lore pick) and Enforcer (it collides with Blackstar's Enforcer Corps) were both rejected. The key stems are `eotg_knight_operator`, `eotg_knight_specialist`, `eotg_knight_strongarm` and `eotg_knight_brute`.
+- **OQ3, the display name: RULED (owner, 2026-10-08).** The name is **"Trade Oligarchy"**. The owner means it to fit the Gob-Ogre Trade League while leaving room for ogre involvement, so the desc stays species-neutral and must not read as goblin-only. **The keys stay `eotg_gobcorp_*`.**
 - **OQ2 is closed:** Raoul for the PMC; Hoël as king with Konan as vassal duke (§12).
 - **Settled by precedent:**
   - all four are dynastic and have legitimacy;
@@ -674,7 +689,7 @@ Does vanilla influence work without `mechanic_type = administrative`? Influence 
 ## 17. Lore rulings (eotg-lore-keeper, 2026-10-08: CHANGES REQUIRED, applied)
 
 - **LQ1:** The Slate Syndicate is post-866 (`Third era Nations.md:1402-1405`, `:4668-4671`). The Cartel's identity is the generic syndicate-state form (§5.4). The text names no 866 state.
-- **LQ2:** There is no single head; the trade oligarchy's top rank is First Prince. The modifier is men-at-arms maintenance, for owned corporate armies (§5.3). The display name is OQ3.
+- **LQ2:** There is no single head; the trade oligarchy's top rank is First Prince. The modifier is men-at-arms maintenance, for owned corporate armies (§5.3). The display name is "Trade Oligarchy" (OQ3, ruled).
 - **LQ3:** The PMC is mod-original but plausible. Never give the 7th Legion this government.
 - **LQ4:** The Corporation ladder is Branch Director → Operations Chief → Regional Director → CEO. Government text names no corporation.
 - **LQ5:** The §8 table carries the lore picks.
@@ -684,8 +699,8 @@ Does vanilla influence work without `mechanic_type = administrative`? Influence 
 ### HANDOFF
 - status: done
 - next: eotg-scripter
-- ask: Build Phase G1 from docs/specs/governments_v2.md (§3–§8, §10): the 4 governments, 4 contract groups with 8 contracts, 4 succession laws plus the on_game_start/on_government_change safety net, 92 flavourization entries with the §8 lore-picked names, the KnightCulture override with the OQ1 defaults (operator, specialist, strongarm, breaker), the knight-realm triggers and 5 debug decisions. No events. Then eotg-localizer writes §9 under the §11 desc rules and B2 ban, and eotg-qa checks the government blocks by hand.
+- ask: Build Phase G1 from docs/specs/governments_v2.md (§3–§8, §10): the 4 governments, 4 contract groups with 8 contracts, 4 succession laws plus the on_game_start/on_government_change safety net, 92 flavourization entries with the §8 lore-picked names, the KnightCulture override with the ruled OQ1 terms (operator, specialist, strongarm, brute), the knight-realm triggers and 5 debug decisions. No events. Then eotg-localizer writes §9 under the §11 desc rules and B2 ban, and eotg-qa checks the government blocks by hand.
 - files: docs/specs/governments_v2.md
-- needs-loc: §9 (government keys ×4 with the OQ3 default "Trade Oligarchy", 4 laws × 3, 8 contracts × 11, 92 flavourization keys, 4 knight terms × 8, 5 debug decisions × 4)
+- needs-loc: §9 (government keys ×4 with "Trade Oligarchy", ruled under OQ3, 4 laws × 3, 4 contract groups × 2 (added 2026-10-08), 8 contracts × 11, 92 flavourization keys, 4 knight terms × 8, 5 debug decisions × 4)
 - needs-lore: none (the review is applied; re-review the localizer's descs)
-- needs-human: OQ1 knight terms and OQ3 the trade oligarchy's display name (both default to the lore picks); in-game V-G1–V-G20 after G1 lands. Orchestrator: add the 4 new folders to the CLAUDE.md placement list, copy the 4 placeholder icons, add the KnightCulture pitfalls entry.
+- needs-human: in-game V-G1–V-G20 after G1 lands. Orchestrator: add the 4 new folders to the CLAUDE.md placement list, copy the 4 placeholder icons, add the KnightCulture pitfalls entry.

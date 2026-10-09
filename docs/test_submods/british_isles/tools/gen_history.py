@@ -53,7 +53,7 @@ MOVED_DATE = (1066, 9, 13)     # vanilla title blocks ON the start date move her
 # Flip to 'on' (or pass --mod-governments on) once the scripter reports them built;
 # 'on' refuses to generate if a named government is not defined in vanilla, the main
 # mod or this sub-mod.
-MOD_GOVERNMENTS_DEFAULT = 'off'
+MOD_GOVERNMENTS_DEFAULT = 'on'
 DEFAULT_STANDIN = 'feudal_government'
 # Counties a pocket holder keeps in his own hands, the capital county included
 # (CSV column `demesne` overrides it per row).

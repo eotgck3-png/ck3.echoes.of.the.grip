@@ -1,0 +1,51 @@
+﻿# -- eotg_government_on_actions.txt -------------------------------------------
+# Governments v2, Phase G1 (docs/specs/governments_v2.md §7.2): the succession
+# law safety net. Vanilla hooks are extended ADDITIVELY only (CLAUDE.md
+# invariant 4): `on_actions = { }` lists, never a top-level effect/trigger on a
+# vanilla hook. No cooldown is involved; no event is fired.
+# -----------------------------------------------------------------------------
+
+# Vanilla G/common/on_action/game_start.txt; runs before the lobby, after
+# history (and therefore history `government =`) is applied.
+on_game_start = {
+    on_actions = {
+        eotg_gov_on_game_start
+    }
+}
+
+# Vanilla G/common/on_action/government_on_actions.txt:4
+# root = the character who changed government; scope:old_government.
+on_government_change = {
+    on_actions = {
+        eotg_gov_on_government_change
+    }
+}
+
+eotg_gov_on_game_start = {
+    effect = {
+        every_ruler = {
+            limit = {
+                OR = {
+                    government_has_flag = eotg_government_is_pmc
+                    government_has_flag = eotg_government_is_corporation
+                    government_has_flag = eotg_government_is_gobcorp
+                    government_has_flag = eotg_government_is_cartel
+                }
+            }
+            eotg_gov_ensure_succession_law_effect = yes
+        }
+    }
+}
+
+# The effect only acts on the four governments' flags, so a change to any
+# other government (the debug "become feudal", V-G16) is a no-op here; the
+# engine drops the mod law through its can_keep.
+eotg_gov_on_government_change = {
+    # Realm laws exist only for landed rulers
+    trigger = {
+        is_landed = yes
+    }
+    effect = {
+        eotg_gov_ensure_succession_law_effect = yes
+    }
+}

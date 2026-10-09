@@ -196,7 +196,7 @@ eotg_unclaimed_government = {
     ai = {
         use_lifestyle = no  arrange_marriage = no  use_goals = no  use_decisions = no
         use_scripted_guis = no  use_legends = no  perform_religious_reformation = no
-        use_great_projects = no
+        use_great_projects = no      # REJECTED by the 1.20 parser despite _governments.info:630 (2026-10-08); scripter: remove from common/governments/eotg_unclaimed_government.txt:75. See governments_v2.md §5.0 lesson.
     }
     flags = { eotg_government_is_unclaimed  cannot_be_vassal_or_liege }
     supply_limit_mult_for_others = -0.5     # §7
@@ -242,7 +242,7 @@ The engine assigns governments when a character is landed. Vanilla guards holy o
 **What the evidence says (new):**
 - The "Is unplayable" label is tied to the flags `government_is_republic`, `government_is_mercenary`, `government_is_holy_order` and `government_is_herder` (`G/localization/english/government_l_english.yml:272, 280, 281, 285`).
 - **Republic has no `mechanic_type`** (`00_government_types.txt:64-92`) and is still unplayable. So unplayability does not come from `mechanic_type`.
-- The four unplayable governments are hard-coded engine keys: every one is listed in `NGovernment.GOVERNMENT_TYPES` (`G/common/defines/00_defines.txt:550-573`), and the herder block says "This is referenced in code".
+- ~~The four unplayable governments are hard-coded engine keys: every one is listed in `NGovernment.GOVERNMENT_TYPES`~~ **Corrected 2026-10-08 (QA):** `NGovernment.GOVERNMENT_TYPES` (`G/common/defines/00_defines.txt:550-573`) is not a list of hard-coded keys. It lists all 20 vanilla governments, playable ones included, and it is the list of governments **whose built-in modifiers the engine registers** (`<g>_vassal_opinion`, `<g>_opinion`, `<g>_tax/levy_contribution_*`). Listing in it says nothing about playability. **`eotg_unclaimed_government` is now listed in the mod's define** (with the governments v2 keys, `governments_v2.md` §3.1). The herder block's "This is referenced in code" remains the only hint of hard-coding.
 - **Inference: a custom government is most likely *playable*.** Its holder would then pass `is_playable_character`, get `yearly_playable_pulse`, and could be clicked in the lobby's free pick.
 
 **Plan:** build A as specified, and probe it in Batch 1 (V-U1, through the debug readout). If the holder is playable, apply these mitigations:

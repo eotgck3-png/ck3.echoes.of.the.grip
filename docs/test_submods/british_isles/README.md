@@ -87,7 +87,7 @@ Unsworn. Pick the holders **on the map**: none of them has a vanilla bookmark po
 |---|---|---|---|---|
 | PMC | `d_valois`, the Paris duchy | Philippe I (214), 14 years old | Île-de-France, Brie, Beaumont | Herbert of Vermandois (418); Raoul of Valois (40406, Valois and Amiens); Renaud of Clermont (303412) |
 | Corporation | `k_brittany` | Duke Konan II (348), who also keeps `d_brittany` | Vannes, Rennes | Hoël (178, Nantes and Cornouaille); Morvan (10059, Léon); Edouarzh (346, Penthièvre) |
-| Cartel | `k_leon` | Alfonso VI (108500) | León, Benavente, Salamanca | Urraca (108501, Zamora); Rodrigo (108512, Oviedo); Pedru (Pravia); a generated count in Ávila |
+| Cartel | `k_leon` | Alfonso VI (108500) | León, Benavente, Salamanca | Urraca (108501, Zamora); a generated count in Ávila; **vassal duke** Rodrigo (108512, `d_asturias` + Oviedo, own CSV rows) with his vassal count Pedru (Pravia), so the Cartel's duke-tier rank shows |
 | Gob-Corp | `d_provence` | Count Bertrand (420) | Venaissin (Arles), Provence (Marseille, Toulon) | Jaufret (40802, Forcalquier); a generated count in Nice |
 
 - **Vanilla 1.20 has no `d_paris` or `d_ile_de_france`.** Paris is `b_paris` in `c_ile_de_france`, the capital
@@ -237,44 +237,44 @@ the bookmark entries. The table below is rewritten by the generator.
 | mainland | k_andalusia | c_toledo | 3924 Yahya | clan_government |
 | mainland | k_aragon | c_barcelona | 110520 Ramon-Berenguer | feudal_government |
 | mainland | k_aragon | c_girona | 110520 Ramon-Berenguer | feudal_government |
-| mainland | k_brittany | c_cornouaille | 178 HoE_l | feudal_government (stand-in for eotg_corporation_government) (vassal of 348 Konan) |
-| mainland | k_brittany | c_french_leon | 10059 Morvan | feudal_government (stand-in for eotg_corporation_government) (vassal of 348 Konan) |
-| mainland | k_brittany | c_nantes | 178 HoE_l | feudal_government (stand-in for eotg_corporation_government) (vassal of 348 Konan) |
-| mainland | k_brittany | c_penthievre | 346 Edouarzh | feudal_government (stand-in for eotg_corporation_government) (vassal of 348 Konan) |
-| mainland | k_brittany | c_rennes | 348 Konan | feudal_government (stand-in for eotg_corporation_government) |
-| mainland | k_brittany | c_vannes | 348 Konan | feudal_government (stand-in for eotg_corporation_government) |
-| mainland | k_burgundy | c_forcalquier | 40802 Jaufret | feudal_government (stand-in for eotg_gobcorp_government) (vassal of 420 Bertrand) |
-| mainland | k_burgundy | c_nice | eotg_test_bi_vassal_nice EufE_mia | feudal_government (stand-in for eotg_gobcorp_government) (vassal of 420 Bertrand) |
-| mainland | k_burgundy | c_provence | 420 Bertrand | feudal_government (stand-in for eotg_gobcorp_government) |
-| mainland | k_burgundy | c_venaissin | 420 Bertrand | feudal_government (stand-in for eotg_gobcorp_government) |
+| mainland | k_brittany | c_cornouaille | 178 HoE_l | eotg_corporation_government |
+| mainland | k_brittany | c_french_leon | 10059 Morvan | eotg_corporation_government (vassal of 178 HoE_l) |
+| mainland | k_brittany | c_nantes | 178 HoE_l | eotg_corporation_government |
+| mainland | k_brittany | c_penthievre | 346 Edouarzh | eotg_corporation_government (vassal of 178 HoE_l) |
+| mainland | k_brittany | c_rennes | 348 Konan | eotg_corporation_government (vassal of 178 HoE_l) |
+| mainland | k_brittany | c_vannes | 348 Konan | eotg_corporation_government (vassal of 178 HoE_l) |
+| mainland | k_burgundy | c_forcalquier | 40802 Jaufret | eotg_gobcorp_government (vassal of 420 Bertrand) |
+| mainland | k_burgundy | c_nice | eotg_test_bi_vassal_nice EufE_mia | eotg_gobcorp_government (vassal of 420 Bertrand) |
+| mainland | k_burgundy | c_provence | 420 Bertrand | eotg_gobcorp_government |
+| mainland | k_burgundy | c_venaissin | 420 Bertrand | eotg_gobcorp_government |
 | mainland | k_france | c_alencon | 140 William | feudal_government |
-| mainland | k_france | c_amiens | 40406 Raoul | feudal_government (stand-in for eotg_pmc_government) |
+| mainland | k_france | c_amiens | 40406 Raoul | eotg_pmc_government |
 | mainland | k_france | c_bayeux | 140 William | feudal_government |
-| mainland | k_france | c_beaumont | 214 Philippe | feudal_government (stand-in for eotg_pmc_government) (vassal of 40406 Raoul) |
-| mainland | k_france | c_brie_francaise | 214 Philippe | feudal_government (stand-in for eotg_pmc_government) (vassal of 40406 Raoul) |
-| mainland | k_france | c_clermont | 303412 Renaud | feudal_government (stand-in for eotg_pmc_government) (vassal of 40406 Raoul) |
-| mainland | k_france | c_ile_de_france | 40406 Raoul | feudal_government (stand-in for eotg_pmc_government) |
+| mainland | k_france | c_beaumont | 214 Philippe | eotg_pmc_government (vassal of 40406 Raoul) |
+| mainland | k_france | c_brie_francaise | 214 Philippe | eotg_pmc_government (vassal of 40406 Raoul) |
+| mainland | k_france | c_clermont | 303412 Renaud | eotg_pmc_government (vassal of 40406 Raoul) |
+| mainland | k_france | c_ile_de_france | 40406 Raoul | eotg_pmc_government |
 | mainland | k_france | c_reims | 91173 Gervais | ecclesiastical_government |
 | mainland | k_france | c_rouen | 140 William | feudal_government |
-| mainland | k_france | c_valois | 40406 Raoul | feudal_government (stand-in for eotg_pmc_government) |
-| mainland | k_france | c_vermandois | 418 Herbert | feudal_government (stand-in for eotg_pmc_government) (vassal of 40406 Raoul) |
-| mainland | k_leon | c_asturias_de_oviedo | 108512 Rodrigu | feudal_government (stand-in for eotg_cartel_government) (vassal of 108500 Alfonso) |
-| mainland | k_leon | c_avila | eotg_test_bi_vassal_avila Facundu | feudal_government (stand-in for eotg_cartel_government) (vassal of 108500 Alfonso) |
-| mainland | k_leon | c_benavente | 108500 Alfonso | feudal_government (stand-in for eotg_cartel_government) |
-| mainland | k_leon | c_leon | 108500 Alfonso | feudal_government (stand-in for eotg_cartel_government) |
-| mainland | k_leon | c_pravia | asturleonese0078 Pedru | feudal_government (stand-in for eotg_cartel_government) (vassal of 108500 Alfonso) |
-| mainland | k_leon | c_salamanca | 108500 Alfonso | feudal_government (stand-in for eotg_cartel_government) |
-| mainland | k_leon | c_zamora | 108501 Urraca | feudal_government (stand-in for eotg_cartel_government) (vassal of 108500 Alfonso) |
+| mainland | k_france | c_valois | 40406 Raoul | eotg_pmc_government |
+| mainland | k_france | c_vermandois | 418 Herbert | eotg_pmc_government (vassal of 40406 Raoul) |
+| mainland | k_leon | c_asturias_de_oviedo | 108512 Rodrigu | eotg_cartel_government (vassal of 108500 Alfonso) |
+| mainland | k_leon | c_avila | eotg_test_bi_vassal_avila Facundu | eotg_cartel_government (vassal of 108500 Alfonso) |
+| mainland | k_leon | c_benavente | 108500 Alfonso | eotg_cartel_government |
+| mainland | k_leon | c_leon | 108500 Alfonso | eotg_cartel_government |
+| mainland | k_leon | c_pravia | asturleonese0078 Pedru | eotg_cartel_government (vassal of 108500 Alfonso) |
+| mainland | k_leon | c_salamanca | 108500 Alfonso | eotg_cartel_government |
+| mainland | k_leon | c_zamora | 108501 Urraca | eotg_cartel_government (vassal of 108500 Alfonso) |
 | mainland | k_navarra | c_ipuskoa | 200164 Beila | tribal_government |
 
-Mod-government pockets (mod governments **off**):
+Mod-government pockets (mod governments **on**):
 
 | Pocket | Holder | How chosen | CSV government | Generated with | Demesne | Vassal counts |
 |---|---|---|---|---|---|---|
-| d_valois | 40406 Raoul | named in the CSV | eotg_pmc_government | feudal_government | c_ile_de_france, c_valois, c_amiens | c_brie_francaise: 214 Philippe; c_vermandois: 418 Herbert; c_beaumont: 214 Philippe; c_clermont: 303412 Renaud |
-| k_brittany | 348 Konan | vanilla 1066 holder of d_brittany | eotg_corporation_government | feudal_government | c_vannes, c_rennes | c_nantes: 178 HoE_l; c_cornouaille: 178 HoE_l; c_french_leon: 10059 Morvan; c_penthievre: 346 Edouarzh |
-| k_leon | 108500 Alfonso | vanilla 1066 holder of k_leon | eotg_cartel_government | feudal_government | c_leon, c_benavente, c_salamanca | c_zamora: 108501 Urraca; c_avila: eotg_test_bi_vassal_avila Facundu; c_asturias_de_oviedo: 108512 Rodrigu; c_pravia: asturleonese0078 Pedru |
-| d_provence | 420 Bertrand | vanilla 1066 holder of d_provence | eotg_gobcorp_government | feudal_government | c_venaissin, c_provence | c_nice: eotg_test_bi_vassal_nice EufE_mia; c_forcalquier: 40802 Jaufret |
+| d_valois | 40406 Raoul | named in the CSV | eotg_pmc_government | eotg_pmc_government | c_ile_de_france, c_valois, c_amiens | c_brie_francaise: 214 Philippe; c_vermandois: 418 Herbert; c_beaumont: 214 Philippe; c_clermont: 303412 Renaud |
+| k_brittany | 178 HoE_l | named in the CSV | eotg_corporation_government | eotg_corporation_government | c_nantes, c_cornouaille | c_french_leon: 10059 Morvan; c_penthievre: 346 Edouarzh |
+| k_leon | 108500 Alfonso | vanilla 1066 holder of k_leon | eotg_cartel_government | eotg_cartel_government | c_leon, c_benavente, c_salamanca | c_zamora: 108501 Urraca; c_avila: eotg_test_bi_vassal_avila Facundu |
+| d_provence | 420 Bertrand | vanilla 1066 holder of d_provence | eotg_gobcorp_government | eotg_gobcorp_government | c_venaissin, c_provence | c_nice: eotg_test_bi_vassal_nice EufE_mia; c_forcalquier: 40802 Jaufret |
 
 Every other county of e_france, e_spain (161) is an independent Unsworn county; every county outside the zone (3187) belongs to one of 35 offmap holders.
 <!-- END GENERATED TABLE -->
@@ -325,6 +325,12 @@ Every other county of e_france, e_spain (161) is an independent Unsworn county; 
   - `use_as_base_on_landed` and `sticky_government` in the government;
   - a safety net on `on_title_gain`: a new holder of a county marked `eotg_test_offmap_county` at game start is
     switched to it, unless he also holds a county outside the offmap.
+- **Government defines:** `common/defines/zz_eotg_test_bi_government_defines.txt` restates the main mod's whole
+  `NGovernment.GOVERNMENT_TYPES` list (vanilla 1.20 plus the five `eotg_` governments) and adds
+  `eotg_test_offmap_government`. The list is an array, so the last file wins and replaces it whole; the `zz_` name
+  loads it after the main mod's `eotg_government_defines.txt`. Without it the offmap government logs 12
+  "preregistered modifier type" errors. **Keep it in step with the main mod's file**, and re-copy vanilla's list
+  after every CK3 update (pitfalls §2). It is hand-written, not generated.
 - **War immunity:** `common/scripted_triggers/eotg_vanilla_overrides_triggers.txt` has the **same file name** as
   the main mod's override, so it replaces it.
   - Its body is vanilla's `herders_and_tributary_constraints` plus the main mod's two `# EOTG` lines plus two

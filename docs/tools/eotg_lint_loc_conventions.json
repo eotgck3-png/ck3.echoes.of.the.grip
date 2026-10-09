@@ -1,5 +1,5 @@
 {
- "_comment": "Data for eotg_lint rule L014 (defined but unused loc keys). For each object defined at the top level of common/<folder>/*.txt, the engine reads these loc keys by naming convention; {key} is the object's key, {n} any number (trait levels). A loc key that matches one of these is 'referenced'. 'verified' says whether the convention was checked against vanilla 1.20 files; unverified ones are listed in eotg_lint.md as UNVERIFIED-VANILLA. Add folders/patterns here, not to the code.",
+ "_comment": "Data for eotg_lint rule L014 (defined but unused loc keys). For each object defined at the top level of common/<folder>/*.txt, the engine reads these loc keys by naming convention; {key} is the object's key, {n} any number (trait levels). A loc key that matches one of these is 'referenced'. 'verified' says whether the convention was checked against vanilla 1.20 files; unverified ones are listed in eotg_lint.md as UNVERIFIED-VANILLA. Add folders/patterns here, not to the code. Optional per folder: 'nested' {block: patterns} for blocks one level inside a named block (contract obligation_levels), and 'values' {field: patterns} for every value of a named field (custom loc localization_key); {key} is then that block's key or that value.",
  "folders": {
   "governments": {
    "patterns": [
@@ -7,10 +7,20 @@
     "{key}_adjective",
     "{key}_realm",
     "{key}_desc",
-    "{key}_with_icon"
+    "{key}_with_icon",
+    "{key}_vassals_label",
+    "{key}_obligations",
+    "{key}_filter_option",
+    "{key}_filter_option_desc",
+    "{key}_opinion",
+    "{key}_vassal_opinion",
+    "{key}_tax_contribution_add",
+    "{key}_tax_contribution_mult",
+    "{key}_levy_contribution_add",
+    "{key}_levy_contribution_mult"
    ],
-   "verified": false,
-   "source": "frontier_unclaimed_regions.md §14 (vanilla herder_government loc, government_l_english.yml); not checked against 1.20 here"
+   "verified": true,
+   "source": "vanilla 1.20 loc for feudal_government: government_l_english.yml:2-8 (name, _with_icon, _adjective, _realm, _vassals_label, _desc, _obligations); gui/character_list_l_english.yml:273,294 (_filter_option, _filter_option_desc); modifiers/modifiers_l_english.yml:586-587 (_tax_contribution_add/_mult), :1027 (_opinion), :1066 (_vassal_opinion); :584-585 theocracy_government_levy_contribution_add/_mult. The modifier forms are the built-in modifiers the engine registers for governments listed in NGovernment.GOVERNMENT_TYPES (common/defines/eotg_government_defines.txt)."
   },
   "decisions": {
    "patterns": [
@@ -86,11 +96,11 @@
   "laws": {
    "patterns": [
     "{key}",
-    "{key}_desc",
+    "{key}_subname",
     "{key}_effects"
    ],
-   "verified": false,
-   "source": "1.20 laws; not built in the mod yet"
+   "verified": true,
+   "source": "vanilla 1.20 succession_laws_l_english.yml:14-16 (single_heir_succession_law, _subname, _effects); laws_l_english.yml:31-32 (crown_authority_1, _effects). No _desc: none of vanilla's 217 laws has a <law>_desc loc key (checked 2026-10-08), so it was dropped from the convention."
   },
   "law_groups": {
    "patterns": [
@@ -133,6 +143,50 @@
    ],
    "verified": false,
    "source": "vanilla buildings"
+  },
+  "subject_contracts/groups": {
+   "patterns": [
+    "{key}",
+    "{key}_desc"
+   ],
+   "verified": true,
+   "source": "vanilla 1.20 government_l_english.yml:63-64 (feudal_vassal, feudal_vassal_desc); dlc/mpo/mpo_interactions_l_english.yml:126-127 (tributary_subjugated, _desc)"
+  },
+  "subject_contracts/contracts": {
+   "patterns": [
+    "{key}"
+   ],
+   "nested": {
+    "obligation_levels": [
+     "{key}",
+     "{key}_short"
+    ]
+   },
+   "verified": true,
+   "source": "vanilla 1.20 common/subject_contracts/contracts/feudal.txt:1-5 (feudal_government_taxes > obligation_levels > feudal_tax_low ...); government_l_english.yml:30 (feudal_government_taxes), :33-34 (feudal_tax_low, feudal_tax_low_short). Level keys sit one block below obligation_levels ('nested')."
+  },
+  "flavorization": {
+   "patterns": [
+    "{key}"
+   ],
+   "verified": true,
+   "source": "vanilla 1.20 common/flavorization/_flavourization.info:32-33 ('will localize a localization key of the same name'); culture/culture_titles_l_english.yml:1050 (prince_male_roman). No vanilla _desc form."
+  },
+  "customizable_localization": {
+   "patterns": [],
+   "values": {
+    "localization_key": [
+     "{key}_plural",
+     "{key}_no_tooltip",
+     "{key}_no_tooltip_plural",
+     "{key}_no_tooltip_lowercase",
+     "{key}_no_tooltip_lowercase_plural",
+     "{key}_no_tooltip_lowercase_plural_possessive",
+     "{key}_no_tooltip_lowercase_adjective"
+    ]
+   },
+   "verified": true,
+   "source": "vanilla 1.20 common/customizable_localization/00_knight_culture.txt:91-124 (the 7 KnightCulture children: parent = KnightCulture + suffix, so each text's localization_key is read with these suffixes); knight_culture_l_english.yml:12-13,37-40,78-79 (knight_default_*). The bare localization_key value is already a script literal. 'values' = every value of the named field."
   }
  },
  "loc_reference_regexes": [

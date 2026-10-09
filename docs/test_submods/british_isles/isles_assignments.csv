@@ -66,6 +66,12 @@ c_girona,vanilla,0,,,,,,Barcelona pocket
 # --- France and Spain: mod-government test realms (scope=pocket; owner request 2026-10-08) ---
 # Government keys are the planned ones; the architect may rename them: edit the government column.
 d_valois,40406,0,eotg_pmc_government,pocket,feudal_government,,,PMC: the Paris duchy (vanilla has no d_paris/d_ile_de_france; Paris = c_ile_de_france = capital of d_valois). Holder Raoul of Valois (adult) instead of 14-year-old Philippe I, so the PMC is not under a regency
-k_brittany,auto,0,eotg_corporation_government,pocket,feudal_government,,,CORPORATION: the Kingdom of Brittany (vacant in 1066; Duke Konan II holds d_brittany)
+k_brittany,178,0,eotg_corporation_government,pocket,feudal_government,,city_holding,CORPORATION king: Hoel (178) (governments_v2.md s12); pocket capital holdings made cities
+d_brittany,348,k_brittany,eotg_corporation_government,holder,feudal_government,,,CORPORATION vassal duke: Konan II (348) under Hoel; dies 1066.12.11 in vanilla history (V-G9: the heir keeps the government)
+c_vannes,348,d_brittany,,,,,,Konan's domain (vanilla k_brittany/d_brittany capital)
+c_rennes,348,d_brittany,,,,,,Konan's domain
 k_leon,auto,0,eotg_cartel_government,pocket,feudal_government,,,CARTEL: the Kingdom of Leon (Alfonso VI)
-d_provence,auto,0,eotg_gobcorp_government,pocket,feudal_government,,,GOB-CORP: Mediterranean-coast duke (d_provence: most coastline in southern France; Count Bertrand)
+d_asturias,108512,k_leon,eotg_cartel_government,holder,feudal_government,,,CARTEL vassal duke: Rodrigo (108512) under Alfonso, so the Cartel's duke-tier rank shows (QA S3-5)
+c_asturias_de_oviedo,108512,d_asturias,,,,,,Rodrigo's domain (his vanilla 1066 county; d_asturias capital)
+c_pravia,vanilla,d_asturias,eotg_cartel_government,holder,feudal_government,,,Rodrigo's vassal count: Pedru (vanilla 1066 holder), so the duke has a vassal
+d_provence,auto,0,eotg_gobcorp_government,pocket,feudal_government,,city_holding,GOB-CORP: Mediterranean-coast duke (d_provence: most coastline in southern France; Count Bertrand)
