@@ -93,6 +93,18 @@ class Cp1252Console(unittest.TestCase):
         self.assertEqual(rc, 0, out)
         self.assertIn("\u2192", out)
 
+    def test_eotg_quote_convert(self):
+        rc, out = self.run_cli(os.path.join(TOOLS, "eotg_quote_convert.py"), "--root", self.root,
+                               "--report", os.path.join(self.root, "q.md"))
+        self.assertEqual(rc, 0, out)
+        self.assertIn("dry run: AUTO 0", out)
+
+    def test_eotg_event_quality_event(self):
+        rc, out = self.run_cli(os.path.join(TOOLS, "eotg_event_quality.py"), "--root", self.root,
+                               "--event", "eotg_x.1")
+        self.assertEqual(rc, 0, out)
+        self.assertIn("eotg_x.1", out)
+
     def test_check_all(self):
         # gen_test_recipes --check prints the generated file's absolute path,
         # which holds the root's non-ASCII character

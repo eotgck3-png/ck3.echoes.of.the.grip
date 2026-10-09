@@ -19,6 +19,8 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import pdx_parse  # noqa: E402
 import textio  # noqa: E402
+import eotg_quote_convert as quotes  # noqa: E402  (L013e: the W0e speech detector)
+import eotg_event_quality as evq  # noqa: E402  (L017: option gate axes)
 
 ERROR = "ERROR"
 WARNING = "WARNING"
@@ -37,9 +39,12 @@ RULES = {
     "L010": (ERROR, "loc key referenced but not defined"),
     "L011": (WARNING, "single named character referred to as they/them (house rule: gendered)"),
     "L012": (ERROR, "cybernetics loc: never-name (ERROR) or register word to triage (WARNING)"),
-    "L013": (WARNING, "loc house style: dash, non-Canadian spelling, stray space, appended desc without \\n\\n"),
+    "L013": (WARNING, "loc house style: dash, non-Canadian spelling, stray space, appended desc "
+                      "without \\n\\n, quote form (L013e, partly ERROR)"),
     "L014": (WARNING, "eotg_ loc key defined but never referenced"),
+    "L015": (WARNING, "visible character event without override_background"),
     "L016": (ERROR, "BOM (U+FEFF) anywhere but byte 0: a stacked or mid-file BOM"),
+    "L017": (WARNING, "event with 2+ options gated on root personality traits"),
 }
 
 SCRIPT_DIRS = ("common", "events")
@@ -943,6 +948,8 @@ def rule_l013(mod, style=None):
         if probs:
             out.append(Finding("L013", rel, line, "L013c %s: %s inside the quoted value"
                                % (key, ", ".join(probs))))
+        out.extend(_l013e_value(rel, line, key, value))
+    out.extend(_l013e_comments(mod))
     appended, skipped = appended_desc_keys(mod)
     mod.skipped["L013d"] = skipped
     for key, (srel, sline, eid) in sorted(appended.items()):
@@ -953,6 +960,36 @@ def rule_l013(mod, style=None):
             out.append(Finding("L013", rel, line,
                                "L013d %s: appended after the opener in %s (%s:%d) but does not "
                                "start with \\n\\n" % (key, eid, srel, sline)))
+    return out
+
+
+def _l013e_value(rel, line, key, value):
+    """L013e quote form (event_quality_v1 §12.2): speech is an unescaped inner \"."""
+    out = []
+    if '\\"' in value:
+        out.append(Finding("L013", rel, line, 'L013e %s: escaped \\" in the value; write speech '
+                           'with an unescaped " (the vanilla form)' % key, severity=ERROR))
+    if quotes.analyze_value(value).has_single_quote_speech:
+        out.append(Finding("L013", rel, line, "L013e %s: '...' used as speech or quotation; the "
+                           'house form is an unescaped "..." (docs/tools/eotg_quote_convert.py)'
+                           % key))
+    return out
+
+
+def _l013e_comments(mod):
+    """L013e: a trailing # comment holding a \" makes the value boundary ambiguous."""
+    import fnmatch
+    out = []
+    for rel in sorted(mod.loc_files):
+        if not fnmatch.fnmatch(os.path.basename(rel), "eotg_*.yml"):
+            continue
+        text, _ = pdx_parse.read_text(os.path.join(mod.root, rel))
+        for i, line in enumerate(text.splitlines(), 1):
+            km = LOC_KEY_RE.match(line)
+            if km and quotes.COMMENT_QUOTE_RE.search(line):
+                out.append(Finding("L013", rel, i, 'L013e %s: the trailing # comment holds a "; '
+                                   'the loc reader takes the value to the last " on the line'
+                                   % km.group(1), severity=ERROR))
     return out
 
 
@@ -1044,6 +1081,57 @@ def rule_l014(mod, conventions=None):
     return out
 
 
+# ------------------------------------------------------------------ L015 / L017
+def _is_hidden(ev):
+    return any(c.key == "hidden" and c.value == "yes" for c in ev.value)
+
+
+def _event_type(ev):
+    t = pdx_parse.first(ev.value, "type")
+    return _str_value(t) if t is not None else "character_event"
+
+
+def rule_l015(mod):
+    """A visible character event with no override_background shows its theme's default
+    room, which is vanilla's medieval one (event_quality_v1 W2, §14). Letter, activity and
+    other event types have no background slot and are not checked."""
+    out = []
+    for rel, eid, ev in mod.events():
+        if _is_hidden(ev) or _event_type(ev) != "character_event":
+            continue
+        if pdx_parse.first(ev.value, "override_background") is None:
+            out.append(Finding("L015", rel, ev.line, "event %s has no override_background "
+                               "(event_quality_v1 §14 maps it to an eotg_bg_* key)" % eid))
+    return out
+
+
+def rule_l017(mod, personality=None):
+    """Two or more options gated on root personality traits (event_quality_v1 §13, R2).
+    The trait set is vanilla's category = personality (docs/tools/eotg_personality_traits.json)."""
+    pers = evq.load_personality_traits() if personality is None else personality
+    if not pers:
+        mod.skipped["L017"] = ["no personality trait list (docs/tools/eotg_personality_traits.json)"]
+        return []
+    out = []
+    for rel, eid, ev in mod.events():
+        if _is_hidden(ev):
+            continue
+        gated = []
+        for opt in pdx_parse.find(ev.value, "option"):
+            if not opt.is_block:
+                continue
+            g = evq.option_gates(opt, pers)
+            if g["axis"] == "personality":
+                nm = pdx_parse.first(opt.value, "name")
+                gated.append("%s (%s)" % (_str_value(nm) if nm else "?",
+                                          "/".join(g["personality"])))
+        if len(gated) >= 2:
+            out.append(Finding("L017", rel, ev.line, "event %s has %d options gated on root "
+                               "personality traits: %s. Vary the axes (education, skill, tier; "
+                               "event_quality_v1 §13)" % (eid, len(gated), ", ".join(gated))))
+    return out
+
+
 # ------------------------------------------------------------------ suppression
 ALLOW_RE = re.compile(r"#\s*eotg_lint:\s*allow\b(.*)$")
 ALLOW_ARGS_RE = re.compile(r"^\s*((?:L\d{3})(?:\s*,\s*L\d{3})*)\s*(.*)$")
@@ -1099,7 +1187,8 @@ RULE_FUNCS = [
     ("L001", rule_l001), ("L002", rule_l002), ("L003", rule_l003), ("L004", rule_l004),
     ("L005", rule_l005), ("L006", rule_l006), ("L007", rule_l007), ("L008", rule_l008),
     ("L009", rule_l009), ("L010", rule_l010), ("L011", rule_l011), ("L012", rule_l012),
-    ("L013", rule_l013), ("L014", rule_l014), ("L016", rule_l016),
+    ("L013", rule_l013), ("L014", rule_l014), ("L015", rule_l015), ("L016", rule_l016),
+    ("L017", rule_l017),
 ]
 
 

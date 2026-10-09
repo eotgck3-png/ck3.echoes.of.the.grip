@@ -741,6 +741,118 @@ class L016(LintCase):
                        "L016", count=1)
 
 
+class L013e(LintCase):
+    """Quote form (event_quality_v1 §12.2): unescaped inner " is the vanilla form."""
+    LOC = "localization/english/eotg_a_l_english.yml"
+
+    def l013e(self, text):
+        root = make_mod({self.LOC: LOC_OK + text})
+        self.addCleanup(rmtree, root)
+        return [f for f in L.lint(root, {"L013"}) if "L013e" in f.message]
+
+    def test_vanilla_forms_are_clean(self):
+        # the three vanilla lines cited in §12.2 (hold_court.7000, tournament_events.9001/.9004)
+        for line in (
+                ' eotg_x.1.desc:0 "[a.GetFirstName|U] wanders into court.\\n\\n"It\'s no secret, '
+                '[ROOT.Char.Custom(\'FormOfAddressForLiege\')], is it?""\n',
+                ' eotg_x.2.desc:0 "A figure approaches me.\\n\\n"[ROOT.Char.GetTitledFirstName], '
+                'it is an honour." [k.GetSheHe] says. "#EMP [k.GetHouse.GetMotto]!#!""\n',
+                ' eotg_x.3.desc:0 ""Go, #EMP [f.Custom(\'GetBirdName\')|U]#!, go faster!" I hear '
+                'a voice."\n',
+                " eotg_x.4.desc:0 \"Konan's ship, the soldiers' quarters, don't.\" # a note\n"):
+            self.assertEqual(self.l013e(line), [], line)
+
+    def test_escaped_quote_is_error(self):
+        res = self.l013e(' eotg_x.1.desc:0 "She says, \\"Go.\\""\n')
+        self.assertEqual([(f.severity, "escaped" in f.message) for f in res], [("ERROR", True)])
+
+    def test_single_quote_speech_is_warning(self):
+        res = self.l013e(" eotg_x.1.desc:0 \"'Step aside,' she says.\"\n"
+                         " eotg_x.2.desc:0 \"I said 'we'.\"\n")
+        self.assertEqual([f.severity for f in res], ["WARNING", "WARNING"])
+        self.assertIn("eotg_x.2.desc", res[1].message)
+
+    def test_comment_with_quote_is_error(self):
+        res = self.l013e(' eotg_x.1.desc:0 "Plain text." # was "other"\n')
+        self.assertEqual([f.severity for f in res], ["ERROR"])
+        self.assertIn("trailing # comment", res[0].message)
+
+
+EV_BG = """namespace = eotg_e
+eotg_e.1 = { type = character_event title = eotg_e.1.t desc = eotg_e.1.desc
+\toverride_background = { reference = eotg_bg_clinic } option = { name = eotg_e.1.a } }
+eotg_e.2 = { type = character_event title = eotg_e.2.t desc = eotg_e.2.desc option = { name = eotg_e.2.a } }
+eotg_e.3 = { hidden = yes immediate = { } }
+eotg_e.4 = { type = activity_event title = eotg_e.4.t desc = eotg_e.4.desc option = { name = eotg_e.4.a } }
+eotg_e.5 = { type = letter_event opening = eotg_e.5.o sender = root desc = eotg_e.5.desc option = { name = eotg_e.5.a } }
+eotg_e.6 = { title = eotg_e.6.t desc = eotg_e.6.desc option = { name = eotg_e.6.a } }
+"""
+
+
+class L015(LintCase):
+    def test_hits_only_visible_character_events(self):
+        res = self.assertHit({"events/eotg_e.txt": EV_BG}, "L015", count=2)
+        self.assertEqual(sorted(f.message.split()[1] for f in res), ["eotg_e.2", "eotg_e.6"])
+
+    def test_allow(self):
+        src = EV_BG.replace("eotg_e.2 = {", "# eotg_lint: allow L015 keep the theme's room\neotg_e.2 = {")
+        self.assertHit({"events/eotg_e.txt": src}, "L015", "eotg_e.6", count=1)
+
+
+EV_GATES = """namespace = eotg_g
+eotg_g.1 = { type = character_event
+\toption = { name = eotg_g.1.a trait = brave trigger = { has_trait = brave } }
+\toption = { name = eotg_g.1.b trigger = { OR = { has_trait = paranoid has_trait = craven } } }
+\toption = { name = eotg_g.1.c }
+}
+eotg_g.2 = { type = character_event
+\toption = { name = eotg_g.2.a trigger = { has_trait = brave } }
+\toption = { name = eotg_g.2.b skill = intrigue trigger = { has_trait = education_intrigue_2 } }
+\toption = { name = eotg_g.2.c trigger = { highest_held_title_tier >= tier_duchy } }
+\toption = { name = eotg_g.2.d trigger = { scope:spouse = { has_trait = craven } } }
+}
+"""
+
+
+class L017(LintCase):
+    def test_hit_on_two_personality_gates(self):
+        res = self.assertHit({"events/eotg_g.txt": EV_GATES}, "L017", count=1)
+        self.assertIn("eotg_g.1 has 2 options", res[0].message)
+        self.assertIn("eotg_g.1.b (craven/paranoid)", res[0].message)
+
+    def test_varied_axes_are_clean(self):
+        # one personality gate, plus education/skill, tier and another character's trait
+        self.assertClean({"events/eotg_g.txt": "namespace = eotg_g\neotg_g.2 = {"
+                          + EV_GATES.split("eotg_g.2 = {")[1]}, "L017")
+
+    def test_allow(self):
+        src = EV_GATES.replace("eotg_g.1 = {", "# eotg_lint: allow L017 a temperament event\neotg_g.1 = {")
+        self.assertClean({"events/eotg_g.txt": src}, "L017")
+
+    def test_personality_list_is_vanilla(self):
+        pers = L.evq.load_personality_traits()
+        self.assertIn("paranoid", pers)
+        self.assertNotIn("education_intrigue_2", pers)
+
+
+class L014Suffixes(LintCase):
+    """event_quality_v1 §7: .toast, .msg, .opening and _v2/_v3 keys are referenced literally
+    from script, so L014 needs no naming convention for them."""
+
+    def test_script_referenced_suffix_keys_are_clean(self):
+        files = {
+            "events/eotg_s.txt": "namespace = eotg_s\neotg_s.1 = { desc = { random_valid = { "
+                                 "desc = eotg_s.1.desc desc = eotg_s.1.desc_v2 } } opening = "
+                                 "{ desc = eotg_s.1.opening } after = { send_interface_toast = "
+                                 "{ title = eotg_s.1.toast } send_interface_message = { title = "
+                                 "eotg_s.1.msg_heir } } }\n",
+            "localization/english/eotg_s_l_english.yml": LOC_OK + "".join(
+                ' %s:0 "x"\n' % k for k in ("eotg_s.1.desc", "eotg_s.1.desc_v2", "eotg_s.1.opening",
+                                           "eotg_s.1.toast", "eotg_s.1.msg_heir")),
+        }
+        self.assertClean(files, "L014")
+
+
 class RealRepoBaseline(unittest.TestCase):
     """The committed baseline must cover the current tree (skips outside the repo)."""
 

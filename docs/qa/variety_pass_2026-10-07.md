@@ -210,6 +210,7 @@ The script checks:
 - the banned list: feedback §3, r2 "Global rules", the brief's additions (station, breach, mortal, registry, magistrate, whispers, citizen, human, royal), and the voice and Neurofractured list in `cybernetics_v2.md` §5;
 - that no `[scope:` form is used;
 - that no embedded double quote is used;
+  *(superseded 2026-10-08: an unescaped inner `"` is the vanilla speech form, event_quality_v1 §12.2. Future checklists check for no `\"` and no `'…'` speech instead.)*
 - that `\n\n` openers match the old line;
 - that descs are at most 80 words;
 - that every placeholder scope already appears in that event's loc;

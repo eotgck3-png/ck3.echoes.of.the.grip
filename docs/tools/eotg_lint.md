@@ -29,6 +29,8 @@ python docs/tools/eotg_lint.py --write-baseline docs/tools/eotg_lint_baseline.js
 | `docs/tools/eotg_lint_register.json` | The cybernetics never-name and register terms (L012), as data. |
 | `docs/tools/eotg_lint_style.json` | The loc house-style data (L013): dash characters, the spellings Canadian English does not use (`american_forms`, `british_forms_not_canadian`) and their Canadian forms, the `-ise` exceptions, literal exceptions, the appended-desc prefix. |
 | `docs/tools/eotg_lint_loc_conventions.json` | Engine naming conventions per `common/` folder (L014): which loc keys a defined object makes "referenced". |
+| `docs/tools/eotg_personality_traits.json` | Vanilla's `category = personality` traits (L017), written by `eotg_event_quality.py --vanilla`. |
+| `docs/tools/eotg_quote_convert.py`, `docs/tools/eotg_event_quality.py` | Shared with L013e (the `'…'` speech detector) and L017 (the option gate classifier). |
 | `docs/tools/tests/test_eotg_lint.py`, `test_pdx_parse.py` | Fixture tests: one hit and one non-hit for every rule. Run `python -m unittest discover -s docs/tools/tests`. |
 
 ## Rules
@@ -203,8 +205,8 @@ The rules are data, in `docs/tools/eotg_lint_register.json`, encoded from:
 
 Edit the JSON, not the code, when the rules change. Each entry has `term`, `regex`, `case` (true means case-sensitive) and `source`.
 
-### L013 — loc house style (WARNING)
-From the owner's loc review (2026-10-04). Applies to values in `localization/**/eotg_*.yml`. The data lives in `docs/tools/eotg_lint_style.json`; edit it, not the code. The message starts with the sub-rule id, so the four can be told apart in the output and the baseline.
+### L013 — loc house style (WARNING; L013e partly ERROR)
+From the owner's loc review (2026-10-04). Applies to values in `localization/**/eotg_*.yml`. The data lives in `docs/tools/eotg_lint_style.json`; edit it, not the code. The message starts with the sub-rule id, so the five can be told apart in the output and the baseline.
 
 **L013a: em or en dash.** Any `—` or `–` in a value. *Why:* the owner removed them all from mod prose. Use a comma, colon, full stop or parentheses. *False positives:* none expected; a hyphen `-` is not flagged.
 
@@ -230,6 +232,13 @@ From the owner's loc review (2026-10-04). Applies to values in `localization/**/
 - **On the current tree:** 34 appended keys are checked and all pass. 108 are skipped, all `first_valid` after the opener, and all 108 happen to start with `\n\n` anyway.
 - **UNVERIFIED-VANILLA:** that the engine concatenates `desc = { }` children in order with no separator. This matches how the mod's loc is written, but wasn't checked against vanilla 1.20 code.
 
+**L013e: quote form** (2026-10-08, `docs/specs/event_quality_v1.md` §12.2). Speech is written with an **unescaped** straight double quote inside the value, the form vanilla uses on 8,677 lines: ` key:0 "Narration. "Speech," [x.GetSheHe] says."`. CK3's loc reader takes the value to the last `"` on the line, so inner quotes need no escape. Three checks, on `localization/**/eotg_*.yml`:
+- **ERROR: `\"` in a value.** It parses, but it is the minority form (89 vanilla lines, the coronation oaths) and the house rule allows one form.
+- **WARNING: `'…'` used as speech or quotation.** The detector is `docs/tools/eotg_quote_convert.py`'s (`analyze_value(...).has_single_quote_speech`): a `'` that opens after a space, `\n`, `(`, `:` or the value start and closes after `. , ! ?` or a letter. Apostrophes (`don't`, `Konan's`, `[x.GetName]'s`), possessive plurals (`the soldiers' quarters`) and anything inside `[ … ]` (`Custom('X')`) never count. Fix with `eotg_quote_convert.py` (dry run, then `--apply`).
+- **ERROR: a trailing `# comment` that holds a `"`.** The loc reader takes the value to the last `"` on the line, so the comment becomes part of the text.
+
+*False positives:* a single word in quotes (`'we'`) is reported on purpose: §12.2 wants `"we"` too. The unescaped vanilla forms in §12.2 (speech opening the value, `…?""` at the end, `#EMP …#!` inside speech) are clean; `tests/test_eotg_lint.py` holds all three.
+
 ### L014 — `eotg_` loc key defined but never referenced (WARNING)
 A loc key containing `eotg_` that is defined in `localization/` and reached by none of these:
 - **a literal in script:** any key or string value in `common/` or `events/` (quoted or not), or any identifier-like word in a `gfx/**/*.gui` file. This includes every `localization_key = X` in `common/customizable_localization/`, so generated seller names (CB-42) count as referenced;
@@ -243,6 +252,11 @@ A loc key containing `eotg_` that is defined in `localization/` and reached by n
 - a convention the JSON doesn't know yet.
 
 Add the convention to the JSON, or an inline `# eotg_lint: allow L014 <reason>` on the loc line.
+
+**Event-quality suffixes** (`event_quality_v1` §7: `<event_id>.toast*`, `.msg*`, `.opening`, `<desc_key>_v2/_v3`): these need **no** convention entry. Script names each one literally (`send_interface_toast = { title = eotg_x.1.toast }`, `opening = { desc = … }`, a `random_valid` desc), so L014 already counts them as referenced. A naming convention would hide a dead `.toast` key whose event lost its toast. `tests/test_eotg_lint.py` (`L014Suffixes`) pins this.
+
+### L015 — visible character event without `override_background` (WARNING)
+A non-hidden `character_event` (or an event with no `type`, which defaults to it) that sets no `override_background`. *Why:* it shows its theme's default room, which is vanilla's medieval one (`event_quality_v1` W2; §14 maps every event to an `eotg_bg_*` key). Letter, activity and other event types have no background slot and are not checked. *Exempt:* events W2 decides to keep on the theme's room get `# eotg_lint: allow L015 <reason>` on the event line or the line above. On 2026-10-08 the rule reports 243, the whole visible character-event set; all of them are baselined until W2.
 
 ### L016 — BOM anywhere but byte 0 (ERROR)
 Every mod text file has at most one UTF-8 BOM (`EF BB BF`), and only at byte 0. Scanned: `common/`, `events/`, `localization/`, `history/`, `docs/test_map/` (recursively) and the files at the repo root, with extensions `.txt .yml .mod .csv .settings .gui`. Reported:
@@ -259,6 +273,9 @@ Every mod text file has at most one UTF-8 BOM (`EF BB BF`), and only at byte 0. 
 - **Verified:** decisions, traits, modifiers and opinion modifiers (what L010 already used, plus the leveled-trait keys in the mod's own loc).
 - **Not verified against vanilla 1.20:** governments (`_adjective`, `_realm`, `_desc`, `_with_icon`), deathreasons (`_killer` / `_unknown`), character_interactions (`_extra_icon`), scheme_types (`_action`, `_name`, `_success_desc`…), laws (`_effects`), law_groups, court positions (`court_position_<x>`), story_cycles and buildings. These only widen what counts as referenced, so a wrong pattern can hide a dead key but never invent one.
 
+### L017 — stacked personality gates (WARNING)
+An event with two or more options whose `trigger` requires **root** to have a `category = personality` trait (`event_quality_v1` §13, R2). The spec proposed this as L016; it was renumbered because L016 is the BOM rule. *Root only:* a `has_trait` counts when every block between it and the option's `trigger` is a logic block (`OR`, `AND`, `trigger_if`, `limit`, …). Under `NOT`/`NOR` or inside a scope change (`scope:spouse = { … }`, `any_vassal`) it doesn't count. *The trait set* is vanilla's `common/traits/00_traits.txt` `category = personality` (36 traits in 1.20.0.4), cached in `docs/tools/eotg_personality_traits.json` so the lint runs without the game. `python docs/tools/eotg_event_quality.py --vanilla` refreshes it. The gate classifier is shared with the scorecard (`eotg_event_quality.option_gates`). *Exempt* with `# eotg_lint: allow L017 <reason>` on the event line or the line above. On 2026-10-08 the rule reports 115 (the spec estimated 117 ±2), all baselined until the W5 re-gating batches.
+
 ## Inline suppression
 To silence one finding, put this on the finding's line or on the line directly before it:
 
@@ -271,7 +288,10 @@ To silence one finding, put this on the finding's line or on the line directly b
 - **Where it works:** script (`.txt`) and loc (`.yml`) files alike. For L007, the finding's line is the `option = {` line.
 - **Suppression vs baseline:** use suppression for a deliberate, reviewed exception that should stay quiet forever. Use the baseline for known debt that should be fixed later.
 
-## Current baseline (2026-10-04, tree at `33f27a4`)
+## Current baseline (2026-10-08, regenerated on purpose for event_quality_v1 W0c)
+411 findings, all from the three new rules: **L013e** 53 (`'…'` speech: the quote converter's 40 AUTO keys plus 13 REVIEW quotations), **L015** 243, **L017** 115. Each falls as its work item lands: W0e for L013e, W2 for L015, W5 for L017. The 15 earlier entries no longer occurred in the tree (the tree had 0 findings before the new rules), so the regeneration dropped them.
+
+## Earlier baseline (2026-10-04, tree at `33f27a4`)
 | Rule | Count | What |
 |---|---|---|
 | L012 | 14 | All WARNING (register triage), 0 never-name ERRORs. The hits are "warrant" ×6 (fracture.006 *The Warrant*), "program" ×4 (the Iron Retinue's Program, init.019.b), "encourage" ×2, "answers" ×2. |

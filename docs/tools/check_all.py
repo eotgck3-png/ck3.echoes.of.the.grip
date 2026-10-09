@@ -18,6 +18,8 @@ Runs, from the repo root:
     These FAIL only on a stale file (or, for the seller names, a rejected name); the
     content (events that can't be fired cold, spec gaps) is reported in the detail
     line, never as a failure.
+  - eotg_event_quality --check (docs/qa/generated/event_quality.md is current): RAN,
+    informational only; the detail line gives the scorecard headline or STALE
   - docs/tools/qa/*.py analysis scripts (those that need no arguments)
   - px_vocab_check.py                     needs the PX Toolkit + the game install
   - px_lsp_diagnostics.js                 needs VS Code (+ PX Toolkit + game)
@@ -232,6 +234,14 @@ def default_checks(root=ROOT):
                             [PY, os.path.join(HERE, tool + ".py"), "--root", root, "--check"],
                             cwd=root, skip_reason=None if present
                             else "no %s in %s (generate it first)" % (rel, root)))
+    # the event quality scorecard (event_quality_v1 W0b): informational, never a FAIL;
+    # the detail line carries the headline numbers and says when the report is stale
+    eq_rel = "docs/qa/generated/event_quality.json"
+    checks.append(Check("eotg_event_quality --check (informational)",
+                        [PY, os.path.join(HERE, "eotg_event_quality.py"), "--root", root, "--check"],
+                        cwd=root, informational=True,
+                        skip_reason=None if os.path.exists(os.path.join(root, *eq_rel.split("/")))
+                        else "no %s in %s (generate it first)" % (eq_rel, root)))
     for f in sorted(glob.glob(os.path.join(q, "*.py"))):
         base = os.path.basename(f)
         if base in QA_MODULES:

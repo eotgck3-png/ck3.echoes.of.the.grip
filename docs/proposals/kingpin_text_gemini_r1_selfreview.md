@@ -1,12 +1,14 @@
 # Neurofractured Kingpin: Self-Review Table (W4)
 
+> **Superseded 2026-10-08 (quote form):** this review checked for the old single-quote speech rule. Speech is now written with vanilla's unescaped straight double quotes inside the loc string, never `\"` and never `'…'` (binding text: `docs/specs/event_quality_v1.md` §12). The `\"` left in `kingpin_text_gemini_r1.md` convert to an unescaped `"` when applied.
+
 Self-review of `docs/proposals/kingpin_text_gemini_r1.md` against:
 - `docs/specs/cybernetics_v2_kingpin.md` §5.2, §5.4.2, §5.8, §7, §7.3, §7.4, §8
 - `docs/specs/build/kingpin_batchA_loc_keys.txt` (336 built keys) and provisional Batch B keys (80 keys)
 - `docs/proposals/kingpin_fragments_r1_apply_instructions.md` exact texts and error classes
 
 ### Key Audit and Application Check
-Verification: Confirmed all 336 built Batch A keys are present and mapped. Keys specified in `kingpin_fragments_r1_apply_instructions.md` incorporate the exact approved text marked `# from apply instructions`. Double newlines `\n\n` are verified on all appended fragment keys. Speech is in single quotes `'...'` only, with no `\"`. Canadian spelling conventions (`armour`, `harbour`, `colour`, `odour`, `demeanour`, `neighbour`, `levelled`) are maintained throughout.
+Verification: Confirmed all 336 built Batch A keys are present and mapped. Keys specified in `kingpin_fragments_r1_apply_instructions.md` incorporate the exact approved text marked `# from apply instructions`. Double newlines `\n\n` are verified on all appended fragment keys. Speech is in single quotes `'...'` only, with no `\"` *(superseded 2026-10-08: see the note at the top)*. Canadian spelling conventions (`armour`, `harbour`, `colour`, `odour`, `demeanour`, `neighbour`, `levelled`) are maintained throughout.
 
 | Key | Problem | Corrected Text |
 |---|---|---|

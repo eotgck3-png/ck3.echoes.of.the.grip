@@ -95,10 +95,11 @@ class RunLogic(unittest.TestCase):
         names = [c.name for c in C.default_checks()]
         for n in ("eotg_lint (vs baseline)", "px_vocab_check", "px_lsp_diagnostics", "ck3-tiger",
                   "qa/event_graph.py", "qa/show_option.py", "gen_test_recipes --check",
-                  "spec_conformance --check"):
+                  "spec_conformance --check", "eotg_event_quality --check (informational)"):
             self.assertIn(n, names)
         self.assertNotIn("qa/aug_parse.py", names)
         by = {c.name: c for c in C.default_checks()}
+        self.assertTrue(by["eotg_event_quality --check (informational)"].informational)
         self.assertEqual(set(by["px_vocab_check"].needs), {"px", "game"})
         self.assertIn("vscode", by["px_lsp_diagnostics"].needs)
         self.assertIsNotNone(by["qa/progression_sim.py"].skip_reason)

@@ -1,5 +1,7 @@
 # Applying the Kingpin fragments (Gemini round 1): review and apply instructions (2026-10-06)
 
+> **Superseded 2026-10-08 (quote form and voice):** speech is written with vanilla's **unescaped straight double quotes** inside the loc string (`key:0 "Narration. "Speech," [x.GetSheHe] says."`), stress with `#EMP …#!` (at most once per event), never `\"` and never `'…'` for speech; narration is first person per `docs/specs/event_quality_v1.md` §12.1. Binding text: `docs/specs/event_quality_v1.md` §12. Any `\"` in a draft converts to an unescaped `"` when applied, never to `'`.
+
 **For:** eotg-localizer, when writing `localization/english/eotg_aug_kingpin_l_english.yml` after the Kingpin batch A build.
 **Source:** `kingpin_fragments_gemini_r1.md` (57 keys; the 58th `:0 "` line is in the self-check table, not a key).
 **Review:** lore-keeper, 2026-10-06. **Verdict:** ACCEPT WITH EDITS. 11 fragments pass unchanged; 42 need the edits below. Keys follow the final names in the scripter's key list; map them where the build renamed anything.
@@ -19,7 +21,7 @@
 - **U3. Currency.** Avoid currency nouns ("credit chips", "chits", "hard currency"), because canon has no unit.
 
 ## Global edits
-- **G1.** Write speech in single quotes, never `\"` (shipped style: `eotg_augmentation_l_english.yml:413-414`).
+- **G1.** ~~Write speech in single quotes, never `\"`~~ (shipped style: `eotg_augmentation_l_english.yml:413-414`). *(superseded 2026-10-08: see the note at the top)* Speech now goes in unescaped `"`; batch B's `\"` convert to `"`.
 - **G3. No eye implant.** No "optical iris", "optic flutter", "optical feed" or "optical jitter".
 - Canadian spelling: "levelled", not "leveled".
 - The front's signature is the recovery logs: what clients said under sedation. Cut "telemetry" down to one use at most.

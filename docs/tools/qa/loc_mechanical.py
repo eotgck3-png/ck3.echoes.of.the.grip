@@ -1,7 +1,8 @@
 """Mechanical check of the cybernetics loc file against the script.
 
-Checks BOM, header, line shape, tabs, version numbers, unescaped inner quotes,
-duplicate keys (in the file and across localization/), keys referenced by
+Checks BOM, header, line shape, tabs, version numbers, quote form (WARNING on an
+escaped \\", an odd number of inner ", or '...' used as speech; an unescaped inner "
+is vanilla's speech form and is accepted, event_quality_v1 §12.2), duplicate keys (in the file and across localization/), keys referenced by
 script but missing, implied keys missing (decision _desc/_tooltip/_confirm,
 modifier _desc, opinion, death reason, trait name/desc), unused keys, and
 unresolved $KEY$ references. Reports "missing" hits for set_variable /
@@ -17,6 +18,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from aug_parse import (LOC_FILE, common_files, event_files, read, root_arg,
                        strip_comments_fast)
 import textio  # noqa: E402  (aug_parse put docs/tools on sys.path)
+import eotg_quote_convert as quotes  # noqa: E402
 
 FIELD_RE = re.compile(
     r"\b(title|desc|name|custom_tooltip|text|tooltip|confirm_text|selection_tooltip|"
@@ -54,8 +56,15 @@ def main():
         k, num, txt = m.group(1), m.group(2), m.group(3)
         if num is None:
             print("NOVERSION", i, k)
-        if re.search(r'(?<!\\)"', txt):
-            print("INNERQUOTE", i, k, txt[:80])
+        # quote form (event_quality_v1 §12.2): an unescaped inner " is vanilla's speech
+        # form and is accepted. Warned: an escaped \" (the minority form), an odd count of
+        # unescaped inner quotes (an unclosed quotation), and '...' used as speech.
+        if '\\"' in txt:
+            print("WARNING ESCQUOTE", i, k, txt[:80])
+        if len(re.findall(r'(?<!\\)"', txt)) % 2:
+            print("WARNING ODDQUOTE", i, k, txt[:80])
+        if quotes.analyze_value(txt).has_single_quote_speech:
+            print("WARNING SQSPEECH", i, k, txt[:80])
         if k in keys:
             dups.append((k, keys[k][0], i))
         keys[k] = (i, txt)

@@ -1,5 +1,7 @@
 # Gemini work queues (2026-10-06): long-form and unattended
 
+> **Superseded 2026-10-08 (quote form and voice):** speech is written with vanilla's **unescaped straight double quotes** inside the loc string (`key:0 "Narration. "Speech," [x.GetSheHe] says."`), stress with `#EMP …#!` (at most once per event), never `\"` and never `'…'` for speech; narration is first person per `docs/specs/event_quality_v1.md` §12.1. Binding text: `docs/specs/event_quality_v1.md` §12. Any `\"` in a draft converts to an unescaped `"` when applied, never to `'`.
+
 The orchestrator (Claude) may be unavailable for several hours. Each queue below runs **top to bottom without waiting for input**.
 
 **Rules for every task:**
@@ -18,7 +20,7 @@ All writing tasks follow `docs/proposals/gemini_rewrite_feedback_2026-10-06.md` 
 
 The shared rules for W1–W4:
 - **Voice:** the implant forecasts and logs its own user only.
-- **Speech:** single quotes for speech; never `\"`.
+- **Speech:** ~~single quotes for speech; never `\"`.~~ *(superseded 2026-10-08: see the note at the top)* Unescaped `"…"` inside the value; never `\"`.
 - **No eye implants.**
 - **Pronouns:** never "they" for one person; `|U` when a line starts with a pronoun function.
 - **Placeholders:** never `[scope:`.

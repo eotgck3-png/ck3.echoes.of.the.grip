@@ -9,7 +9,7 @@
   - Vanilla: 6,631 character events, of which 2,242 are recent DLC events, the "polished" baseline.
   - Mod: 243 character events and 6 activity events, from all files in `events/` (cybernetics, Frontier and the rest).
 - eotg-vanilla-scout documented the conventions a count can't see (fields from `G/events/_events.info`, excerpts from ep3/bp2/fp3/ce1 events).
-- Script and data: scratchpad `evq/evq.py`, `evq/evq.json`.
+- Script and data: scratchpad `evq/evq.py`, `evq/evq.json`. *(2026-10-08: ported to `docs/tools/eotg_event_quality.py`; output in `docs/qa/generated/event_quality.{md,json}`.)*
 
 **Caveats:** the dialogue and voice detection is pattern-based, so treat it to ±5 points. Counts are of options as **defined**, not as shown to any one player.
 
@@ -88,7 +88,7 @@ The mod never sets `override_background`, so every event shows its theme's defau
 ### 2. Dialogue is rare (8%, against 54%)
 Vanilla lets characters talk in roughly every second event, using straight `"` quotes inside the string, with `#EMP …#!` for stress. The mod mostly describes speech ("They speak of governance concerns", "They ask what the household should do"). The kingpin and inheritance files already show the mod can do it well: "'Sorry. It ran ahead of me again.'"
 - Proposal: for every event with a named NPC who talks (vassals, envoys, physicians, the heir, the spouse, the delegation), give that NPC one line of direct speech.
-- **House rule needed:** quote style. The mod uses single quotes `'…'`; vanilla uses `"`. Pick one, and add it to eotg_lint.
+- **House rule needed:** quote style. The mod uses single quotes `'…'`; vanilla uses `"`. Pick one, and add it to eotg_lint. *(Superseded 2026-10-08: ruled for vanilla's unescaped `"`, event_quality_v1 §12.2; lint rule L013e.)*
 
 ### 3. Narration voice: second person against vanilla's first person (**DECISION**)
 Vanilla flavour-event descriptions are about 61% first person ("As I am relaxing in my…") and about 5% second person. Second person is reserved mostly for letters. The mod is 52% second person ("You wake with blood on your sleeve") and has no first-person narration. No spec mandates second person, so it accumulated rather than being chosen.

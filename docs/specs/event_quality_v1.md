@@ -59,7 +59,7 @@ There is no game resource here. The **signature measure is the event-quality sco
 | `eotg_aug_cl_*` (new entries) | customizable loc | eotg-scripter (`common/`), eotg-localizer (text) | W8; extends the existing family |
 | `docs/tools/eotg_event_quality.py` | tool | orchestrator (tooling session) | W0b |
 | `docs/tools/eotg_quote_convert.py` | tool | orchestrator (tooling session) | W0e |
-| eotg_lint `L013e` quote style, `L015` missing background, `L016` stacked personality gates | lint rules | orchestrator (tooling session) | Provisional numbers; the tool owner may renumber |
+| eotg_lint `L013e` quote style, `L015` missing background, `L017` stacked personality gates | lint rules | orchestrator (tooling session) | Provisional numbers; the tool owner may renumber |
 
 There are no new namespaces, events, flags, variables or modifiers. Icons: none. Fullscreen `queue_icon` art is deferred (§10).
 
@@ -232,14 +232,14 @@ New text written in the meantime follows §12 from the day it is dispatched. Tha
     - WARN on a `'…'` speech pair (same detector as W0e);
     - ERROR on a trailing comment after the closing quote that contains `"`.
   - **L015:** WARN when a non-hidden, non-activity mod event has no `override_background`.
-  - **L016:** WARN when an event has 2+ options gated on root personality traits. Exempt with `# eotg_lint: allow L016 <reason>`.
+  - **L017** *(proposed as L016; renumbered 2026-10-08 because L016 is the BOM rule)*: WARN when an event has 2+ options gated on root personality traits. Exempt with `# eotg_lint: allow L017 <reason>`.
   - **Invert `docs/tools/qa/loc_mechanical.py:57-58`.** It currently prints `INNERQUOTE` for every unescaped inner `"`, the very form vanilla uses. Change it to flag `\"` and odd quote counts instead.
   - L014 conventions get the new suffixes (§7).
 - **Owner:** orchestrator (tooling session).
 - **DoD:**
   - Tests in `docs/tools/tests/test_eotg_lint.py` cover each new rule, including the vanilla line forms in §12.2.
-  - Today's tree produces the expected L015/L016 counts (243/117 ±2; L015 skips the "keep" list once W2 records it as allows), and the baseline is regenerated on purpose.
-- **Risk:** the L016 personality-trait set must come from vanilla `00_traits.txt` (`category = personality`), not a hand list.
+  - Today's tree produces the expected L015/L017 counts (243/117 ±2; L015 skips the "keep" list once W2 records it as allows), and the baseline is regenerated on purpose.
+- **Risk:** the L017 personality-trait set must come from vanilla `00_traits.txt` (`category = personality`), not a hand list.
 
 ### W0d: Quote pilot. REWRITE
 - **Scope:** Convert **one** key by hand, `eotg_aug_heir.003.desc` (§12.3 example 3).
@@ -631,7 +631,7 @@ That is 230 events overridden and 19 kept: the 6 activity events plus 13 family,
 - `highest_held_title_tier` in the option `trigger`;
 - other.
 
-**Per-event:** personality-gate count, which feeds L016.
+**Per-event:** personality-gate count, which feeds L017.
 
 **Output and flags:**
 - per-file and total tables, with the vanilla-DLC column from `--vanilla`;

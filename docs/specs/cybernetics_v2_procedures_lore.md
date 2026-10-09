@@ -28,6 +28,7 @@ No never-name violations, no remote-kill, no state programmes. The neutral clini
   - **Every residue line ends with the thing logged, filed or pruned.**
 - **(b) Titles:** all approved except proc.004, which becomes *A Part Replaced*.
 - **(c) Register.**
+  - *(Pending L-1, 2026-10-08: this register was written for second-person narration. event_quality_v1 §12.1 moves narration to first person; the lore-keeper restates it for first person (§16 L-1). Until then, Seamless keys keep their current voice.)*
   - **Seamless:** the logging or report voice. Short declaratives, often passive. "You" may be the subject of a bodily action or a decision outcome, never of a feeling. The court may feel things; the ruler may not.
   - **Tech ceiling:** no upload, backup, copy or transfer of the mind; no datavault or secretariat; the implant is not networked into the treasury or the realm's records; no self-replicating repair.
   - **Phantom Static:** internal and bodily only. No signal arriving, no "someone/something", no whisper or voice. The full §5.2 banned list applies.

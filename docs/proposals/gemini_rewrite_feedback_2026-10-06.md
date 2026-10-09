@@ -1,5 +1,7 @@
 # Feedback on the cybernetics event rewrite proposals (round 1)
 
+> **Superseded 2026-10-08 (quote form and voice):** speech is written with vanilla's **unescaped straight double quotes** inside the loc string (`key:0 "Narration. "Speech," [x.GetSheHe] says."`), stress with `#EMP …#!` (at most once per event), never `\"` and never `'…'` for speech; narration is first person per `docs/specs/event_quality_v1.md` §12.1. Binding text: `docs/specs/event_quality_v1.md` §12. Any `\"` in a draft converts to an unescaped `"` when applied, never to `'`.
+
 **For:** the agent that wrote `docs/proposals/cybernetics_events_rewrite_proposals.md` (round 1, 2026-10-05).
 **From:** the project's lore-keeper and QA reviews, collected by the orchestrator, 2026-10-06.
 **Your task:** read this file, review your round-1 drafts against it, and write a **round-2** file:
@@ -71,6 +73,7 @@ Canon rules (from `OLD PROJECT VERSION/docs/SETTING LORE` ERRATA and `docs/specs
 - "'The leads took. You'll walk. You won't walk the same.'"
 - "'Your body threw it. If I'd left it in, the infection would have had you by the next shift.'"
 - "'Your implant made a pattern out of me, and I paid for it in the cells.'"
+- *(Superseded 2026-10-08, see the note at the top: the three speech samples above would now be written `"The leads took. …"` inside the value, and the narration below in first person, "The cup in my hand dents".)*
 - "In council, cold runs down a wrist that has no nerves left to feel it, then an itch in fingers that are not
   flesh. The grip closes on its own. The cup in your hand dents, and the room goes quiet mid-petition."
 - "Months pass. Nothing happens."

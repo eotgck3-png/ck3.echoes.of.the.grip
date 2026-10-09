@@ -1,5 +1,7 @@
 # Writing brief: A Fracturing Inheritance, event text (Gemini, round 1)
 
+> **Superseded 2026-10-08 (quote form and voice):** speech is written with vanilla's **unescaped straight double quotes** inside the loc string (`key:0 "Narration. "Speech," [x.GetSheHe] says."`), stress with `#EMP …#!` (at most once per event), never `\"` and never `'…'` for speech; narration is first person per `docs/specs/event_quality_v1.md` §12.1. Binding text: `docs/specs/event_quality_v1.md` §12. Any `\"` in a draft converts to an unescaped `"` when applied, never to `'`.
+
 **For:** the external Gemini writing agent. **Date:** 2026-10-06.
 **Deliver to:** `docs/proposals/inherit_text_gemini_r1.md`, and nowhere else. **Never edit `.yml` or `.txt` files.**
 The project's localizer applies your draft once the lore-keeper and QA have reviewed it, against the built script.
@@ -40,7 +42,7 @@ Text varies along two axes (spec §5A):
   - **Never `[scope:`. Never `GetHeir`.**
   - Never invent a scope or a person; use only those spec §7 lists. Unscoped people are described by role, with no gender.
 - **Pronouns:** one scoped person takes GetSheHe, GetHerHis or GetHerHim. Never "they" for one person. Never assume the heir's gender.
-- **Speech** goes in single quotes ('…'), **never `\"`**. Paragraph breaks are `\n\n` inside the quotes, with no literal newlines.
+- **Speech** ~~goes in single quotes ('…'), never `\"`~~ *(superseded 2026-10-08: see the note at the top)*: speech goes in unescaped `"…"` inside the value. Paragraph breaks are `\n\n` inside the quotes, with no literal newlines.
 - **Voice:** the implant forecasts and logs **only its own user**. The heir may believe it predicts other people, as the ledger profile does, but the text must make clear that this is the heir's belief, never the machine's ability. The implant never "says", "speaks", "whispers" or "answers". Allowed verbs: *has [x] doing*, *runs [x] forward*, *shows*, *logs*, *flags*.
 - **No eye implant.** No optical feeds, glowing eyes or irises. Don't assume where the implant sits beyond "the port" or "the casing".
 - **Banned words.** Everything in feedback §3, plus:

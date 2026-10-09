@@ -659,6 +659,8 @@ A key beat's desc is `desc = { <fragment A first_valid>  <fragment B first_valid
 
 ### 7.4 Lore wording fixes (lore review 2026-10-06; binding on the localizer)
 
+*(Note 2026-10-08: speech in these lines is rendered with inner unescaped `"` (event_quality_v1 §12.2); narration is first person per §12.1. The approved wording itself is unchanged.)*
+
 **Banned in every line of this chain** (in addition to index §5 item 2 and seller spec B1/B2):
 - warrant, police, officers (as law), law enforcement, authorities, law-and-order;
 - puppet, strings, "owns you", clean house;
