@@ -14,8 +14,8 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | Family | Specs | Built | Ids | Present | Referenced only | Missing in built specs |
 |---|---|---|---|---|---|---|
 | `cybernetics` | 1 | 1 | 53 | 53 | 0 | 0 |
-| `cybernetics_v2` | 27 | 27 | 1780 | 1708 | 70 | 2 |
-| `event` | 2 | 2 | 74 | 62 | 6 | 6 |
+| `cybernetics_v2` | 27 | 27 | 1781 | 1709 | 70 | 2 |
+| `event` | 2 | 2 | 74 | 63 | 5 | 6 |
 | `frontier` | 1 | 1 | 92 | 89 | 3 | 0 |
 | `frontier_v1` | 2 | 2 | 159 | 158 | 1 | 0 |
 | `frontier_v2` | 1 | 1 | 109 | 109 | 0 | 0 |
@@ -41,7 +41,7 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | `cybernetics_v2_phase0.md` | yes | 49 | 49 | 0 | 0 | 0 |
 | `cybernetics_v2_phase1.md` | yes | 20 | 17 | 3 | 0 | 0 |
 | `cybernetics_v2_phase2.md` | yes | 52 | 52 | 0 | 0 | 0 |
-| `cybernetics_v2_phase3.md` | yes | 84 | 80 | 3 | 0 | 1 |
+| `cybernetics_v2_phase3.md` | yes | 84 | 81 | 2 | 0 | 1 |
 | `cybernetics_v2_phase4.md` | yes | 65 | 64 | 1 | 0 | 0 |
 | `cybernetics_v2_phase5.md` | yes | 53 | 49 | 3 | 0 | 1 |
 | `cybernetics_v2_phase6.md` | yes | 27 | 26 | 1 | 0 | 0 |
@@ -54,11 +54,11 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | `cybernetics_v2_self_repair.md` | yes | 58 | 55 | 2 | 0 | 1 |
 | `cybernetics_v2_self_repair_lore.md` | yes | 5 | 5 | 0 | 0 | 0 |
 | `cybernetics_v2_seller_names.md` | yes | 89 | 75 | 14 | 0 | 0 |
-| `cybernetics_v2_tier_options.md` | yes | 94 | 91 | 1 | 2 | 0 |
+| `cybernetics_v2_tier_options.md` | yes | 95 | 91 | 2 | 2 | 0 |
 | `cybernetics_v2_tier_options_lore.md` | yes | 8 | 8 | 0 | 0 | 0 |
 | `cybernetics_v2_trait_depth.md` | yes | 42 | 41 | 1 | 0 | 0 |
 | `event_quality_v1.md` | yes | 33 | 27 | 4 | 2 | 0 |
-| `event_quality_w7_set_pieces.md` | yes | 41 | 35 | 2 | 4 | 0 |
+| `event_quality_w7_set_pieces.md` | yes | 41 | 36 | 1 | 4 | 0 |
 | `frontier_unclaimed_regions.md` | yes | 95 | 89 | 3 | 0 | 3 |
 | `frontier_v1.md` | yes | 146 | 137 | 1 | 0 | 8 |
 | `frontier_v1_open_questions.md` | yes | 21 | 21 | 0 | 0 | 0 |
@@ -174,9 +174,9 @@ None.
 
 #### `docs/specs/cybernetics_v2_phase3.md`
 
-- Specced and present: 80
+- Specced and present: 81
 - Specced, missing from script (0): none
-- Referenced only, never defined or set (3): `eotg_victim` (unknown, l.163), `eotg_witness` (unknown, l.178), `eotg_missing` (unknown, l.267)
+- Referenced only, never defined or set (2): `eotg_victim` (unknown, l.163), `eotg_missing` (unknown, l.267)
 - Exempt (1): `eotg_is_aug_tier3` (decision, l.541)
 
 #### `docs/specs/cybernetics_v2_phase4.md`
@@ -268,7 +268,7 @@ None.
 
 - Specced and present: 91
 - Specced, missing from script (2): `eotg_aug_act.00` (event, l.24), `eotg_is_aug_tier` (unknown, l.25)
-- Referenced only, never defined or set (1): `eotg_champion.GetHerHim` (loc, l.342)
+- Referenced only, never defined or set (2): `eotg_champion.GetHerHim` (loc, l.342), `eotg_delegation_leader.GetSheHe` (loc, l.350)
 - Exempt (0): none
 
 #### `docs/specs/cybernetics_v2_tier_options_lore.md`
@@ -303,9 +303,9 @@ None.
 
 #### `docs/specs/event_quality_w7_set_pieces.md`
 
-- Specced and present: 35
+- Specced and present: 36
 - Specced, missing from script (4): `eotg_cascade_witness` (scope, l.30), `eotg_bg_fs_cascade` (unknown, l.370), `eotg_bg_fs_threshold` (unknown, l.370), `eotg_bg_fs_succession` (unknown, l.370)
-- Referenced only, never defined or set (2): `eotg_witness` (scope, l.32), `eotg_victim_dead` (unknown, l.206)
+- Referenced only, never defined or set (1): `eotg_victim_dead` (unknown, l.206)
 - Exempt (0): none
 
 ### Unbuilt specs (expected gaps)

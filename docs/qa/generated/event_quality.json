@@ -2,9 +2,13 @@
  "events": [
   {
    "after": false,
-   "animation": 2,
+   "animation": 10,
    "animations": [
+    "paranoia",
     "personality_bold",
+    "personality_cynical",
+    "personality_irrational",
+    "personality_zealous",
     "thinking"
    ],
    "artifact": false,
@@ -23,7 +27,8 @@
    "formatting": false,
    "gate_axes": {
     "other": 1,
-    "personality": 2,
+    "personality": 1,
+    "tier": 1,
     "ungated": 3
    },
    "id": "eotg_aug_act.001",
@@ -42,8 +47,8 @@
    "opt_flavor": 0,
    "opt_highlight": 0,
    "opt_skill": 0,
-   "opt_stress": 0,
-   "opt_trait": 3,
+   "opt_stress": 2,
+   "opt_trait": 2,
    "opt_unavail": 0,
    "opt_words_avg": 6,
    "option_gates": [
@@ -63,11 +68,9 @@
      "personality": []
     },
     {
-     "axis": "personality",
+     "axis": "tier",
      "name": "eotg_aug_act.001.d",
-     "personality": [
-      "cynical"
-     ]
+     "personality": []
     },
     {
      "axis": "personality",
@@ -90,7 +93,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": true,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 2,
    "random_valid": false,
    "sender": false,
@@ -99,7 +102,7 @@
    "theme": true,
    "title_words": 5,
    "toasts": 0,
-   "triggered_animation": 0,
+   "triggered_animation": 4,
    "triggered_desc": 5,
    "type": "activity_event",
    "voice": "2nd",
@@ -113,9 +116,12 @@
   },
   {
    "after": false,
-   "animation": 1,
+   "animation": 7,
    "animations": [
-    "personality_bold"
+    "anger",
+    "fear",
+    "personality_bold",
+    "scheme"
    ],
    "artifact": false,
    "backgrounds": [],
@@ -132,8 +138,9 @@
    "file": "events/eotg_augmentation_activities.txt",
    "formatting": false,
    "gate_axes": {
+    "education": 2,
     "other": 1,
-    "personality": 3,
+    "personality": 1,
     "ungated": 3
    },
    "id": "eotg_aug_act.002",
@@ -151,9 +158,9 @@
    "opt_flag": 1,
    "opt_flavor": 0,
    "opt_highlight": 0,
-   "opt_skill": 0,
-   "opt_stress": 1,
-   "opt_trait": 4,
+   "opt_skill": 2,
+   "opt_stress": 3,
+   "opt_trait": 3,
    "opt_unavail": 0,
    "opt_words_avg": 4.9,
    "option_gates": [
@@ -173,11 +180,9 @@
      "personality": []
     },
     {
-     "axis": "personality",
+     "axis": "education",
      "name": "eotg_aug_act.002.d",
-     "personality": [
-      "deceitful"
-     ]
+     "personality": []
     },
     {
      "axis": "personality",
@@ -187,11 +192,9 @@
      ]
     },
     {
-     "axis": "personality",
+     "axis": "education",
      "name": "eotg_aug_act.002.f",
-     "personality": [
-      "wrathful"
-     ]
+     "personality": []
     },
     {
      "axis": "other",
@@ -207,7 +210,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": true,
-   "personality_gates": 3,
+   "personality_gates": 1,
    "portraits": 1,
    "random_valid": false,
    "sender": false,
@@ -216,7 +219,7 @@
    "theme": true,
    "title_words": 2,
    "toasts": 1,
-   "triggered_animation": 0,
+   "triggered_animation": 3,
    "triggered_desc": 3,
    "type": "activity_event",
    "voice": "2nd",
@@ -230,8 +233,14 @@
   },
   {
    "after": false,
-   "animation": 2,
+   "animation": 13,
    "animations": [
+    "anger",
+    "disapproval",
+    "eyeroll",
+    "paranoia",
+    "personality_honorable",
+    "stress",
     "thinking",
     "worry"
    ],
@@ -250,8 +259,9 @@
    "file": "events/eotg_augmentation_activities.txt",
    "formatting": false,
    "gate_axes": {
+    "education": 1,
     "other": 2,
-    "personality": 2,
+    "personality": 1,
     "ungated": 3
    },
    "id": "eotg_aug_act.003",
@@ -269,9 +279,9 @@
    "opt_flag": 1,
    "opt_flavor": 0,
    "opt_highlight": 0,
-   "opt_skill": 0,
-   "opt_stress": 1,
-   "opt_trait": 3,
+   "opt_skill": 1,
+   "opt_stress": 2,
+   "opt_trait": 2,
    "opt_unavail": 0,
    "opt_words_avg": 5,
    "option_gates": [
@@ -303,11 +313,9 @@
      ]
     },
     {
-     "axis": "personality",
+     "axis": "education",
      "name": "eotg_aug_act.003.f",
-     "personality": [
-      "diligent"
-     ]
+     "personality": []
     },
     {
      "axis": "other",
@@ -323,7 +331,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": true,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 3,
    "random_valid": false,
    "sender": false,
@@ -332,7 +340,7 @@
    "theme": true,
    "title_words": 2,
    "toasts": 0,
-   "triggered_animation": 0,
+   "triggered_animation": 5,
    "triggered_desc": 5,
    "type": "activity_event",
    "voice": "2nd",
@@ -346,9 +354,12 @@
   },
   {
    "after": false,
-   "animation": 1,
+   "animation": 7,
    "animations": [
-    "personality_bold"
+    "nervous",
+    "paranoia",
+    "personality_bold",
+    "toast_goblet"
    ],
    "artifact": false,
    "backgrounds": [],
@@ -365,8 +376,9 @@
    "file": "events/eotg_augmentation_activities.txt",
    "formatting": false,
    "gate_axes": {
+    "education": 2,
     "other": 1,
-    "personality": 3,
+    "personality": 1,
     "ungated": 3
    },
    "id": "eotg_aug_act.004",
@@ -384,9 +396,9 @@
    "opt_flag": 1,
    "opt_flavor": 0,
    "opt_highlight": 0,
-   "opt_skill": 0,
-   "opt_stress": 1,
-   "opt_trait": 4,
+   "opt_skill": 2,
+   "opt_stress": 3,
+   "opt_trait": 3,
    "opt_unavail": 0,
    "opt_words_avg": 5.7,
    "option_gates": [
@@ -406,11 +418,9 @@
      "personality": []
     },
     {
-     "axis": "personality",
+     "axis": "education",
      "name": "eotg_aug_act.004.d",
-     "personality": [
-      "gregarious"
-     ]
+     "personality": []
     },
     {
      "axis": "personality",
@@ -425,11 +435,9 @@
      "personality": []
     },
     {
-     "axis": "personality",
+     "axis": "education",
      "name": "eotg_aug_act.004.g",
-     "personality": [
-      "trusting"
-     ]
+     "personality": []
     }
    ],
    "options": 7,
@@ -440,7 +448,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": true,
-   "personality_gates": 3,
+   "personality_gates": 1,
    "portraits": 1,
    "random_valid": false,
    "sender": false,
@@ -449,7 +457,7 @@
    "theme": true,
    "title_words": 5,
    "toasts": 0,
-   "triggered_animation": 0,
+   "triggered_animation": 3,
    "triggered_desc": 3,
    "type": "activity_event",
    "voice": "2nd",
@@ -463,9 +471,12 @@
   },
   {
    "after": false,
-   "animation": 1,
+   "animation": 7,
    "animations": [
-    "personality_bold"
+    "fear",
+    "personality_bold",
+    "survey",
+    "thinking"
    ],
    "artifact": false,
    "backgrounds": [],
@@ -500,7 +511,7 @@
    "opt_flavor": 0,
    "opt_highlight": 0,
    "opt_skill": 0,
-   "opt_stress": 0,
+   "opt_stress": 1,
    "opt_trait": 2,
    "opt_unavail": 0,
    "opt_words_avg": 4.8,
@@ -550,7 +561,7 @@
    "theme": true,
    "title_words": 4,
    "toasts": 0,
-   "triggered_animation": 0,
+   "triggered_animation": 3,
    "triggered_desc": 2,
    "type": "activity_event",
    "voice": "neutral",
@@ -564,9 +575,12 @@
   },
   {
    "after": false,
-   "animation": 1,
+   "animation": 7,
    "animations": [
-    "personality_zealous"
+    "personality_cynical",
+    "personality_zealous",
+    "prayer",
+    "stress"
    ],
    "artifact": false,
    "backgrounds": [],
@@ -583,7 +597,8 @@
    "file": "events/eotg_augmentation_activities.txt",
    "formatting": false,
    "gate_axes": {
-    "personality": 2,
+    "personality": 1,
+    "tier": 1,
     "ungated": 3
    },
    "id": "eotg_aug_act.006",
@@ -601,7 +616,7 @@
    "opt_highlight": 0,
    "opt_skill": 0,
    "opt_stress": 4,
-   "opt_trait": 2,
+   "opt_trait": 1,
    "opt_unavail": 0,
    "opt_words_avg": 4.2,
    "option_gates": [
@@ -628,11 +643,9 @@
      ]
     },
     {
-     "axis": "personality",
+     "axis": "tier",
      "name": "eotg_aug_act.006.e",
-     "personality": [
-      "cynical"
-     ]
+     "personality": []
     }
    ],
    "options": 5,
@@ -643,7 +656,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": true,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 1,
    "random_valid": false,
    "sender": false,
@@ -652,7 +665,7 @@
    "theme": true,
    "title_words": 4,
    "toasts": 0,
-   "triggered_animation": 0,
+   "triggered_animation": 3,
    "triggered_desc": 1,
    "type": "activity_event",
    "voice": "2nd",
@@ -2286,9 +2299,12 @@
   },
   {
    "after": false,
-   "animation": 2,
+   "animation": 8,
    "animations": [
+    "crying",
+    "fear",
     "pain",
+    "schadenfreude",
     "stress"
    ],
    "artifact": false,
@@ -2354,7 +2370,7 @@
    "theme": true,
    "title_words": 2,
    "toasts": 0,
-   "triggered_animation": 0,
+   "triggered_animation": 3,
    "triggered_desc": 1,
    "type": "character_event",
    "voice": "neutral",
@@ -2368,10 +2384,13 @@
   },
   {
    "after": false,
-   "animation": 4,
+   "animation": 10,
    "animations": [
+    "crying",
     "dead",
+    "dismissal",
     "pain",
+    "schadenfreude",
     "stress"
    ],
    "artifact": false,
@@ -2393,8 +2412,9 @@
    "file": "events/eotg_augmentation_fracture.txt",
    "formatting": false,
    "gate_axes": {
+    "education": 1,
     "other": 2,
-    "personality": 2,
+    "personality": 1,
     "ungated": 1
    },
    "id": "eotg_fracture.002",
@@ -2412,9 +2432,9 @@
    "opt_flag": 1,
    "opt_flavor": 0,
    "opt_highlight": 0,
-   "opt_skill": 0,
+   "opt_skill": 1,
    "opt_stress": 2,
-   "opt_trait": 2,
+   "opt_trait": 1,
    "opt_unavail": 0,
    "opt_words_avg": 6.6,
    "option_gates": [
@@ -2441,11 +2461,9 @@
      ]
     },
     {
-     "axis": "personality",
+     "axis": "education",
      "name": "eotg_fracture.002.e",
-     "personality": [
-      "compassionate"
-     ]
+     "personality": []
     }
    ],
    "options": 5,
@@ -2456,7 +2474,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": true,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 2,
    "random_valid": false,
    "sender": false,
@@ -2465,7 +2483,7 @@
    "theme": true,
    "title_words": 2,
    "toasts": 0,
-   "triggered_animation": 1,
+   "triggered_animation": 4,
    "triggered_desc": 3,
    "type": "character_event",
    "voice": "neutral",
@@ -2479,8 +2497,11 @@
   },
   {
    "after": false,
-   "animation": 1,
+   "animation": 7,
    "animations": [
+    "disgust",
+    "grief",
+    "prayer",
     "worry"
    ],
    "artifact": false,
@@ -2570,7 +2591,7 @@
    "theme": true,
    "title_words": 2,
    "toasts": 1,
-   "triggered_animation": 0,
+   "triggered_animation": 3,
    "triggered_desc": 0,
    "type": "character_event",
    "voice": "neutral",
@@ -2584,10 +2605,13 @@
   },
   {
    "after": false,
-   "animation": 4,
+   "animation": 10,
    "animations": [
     "dead",
     "pain",
+    "personality_callous",
+    "rage",
+    "shock",
     "stress"
    ],
    "artifact": false,
@@ -2609,7 +2633,9 @@
    "file": "events/eotg_augmentation_fracture.txt",
    "formatting": false,
    "gate_axes": {
-    "personality": 3,
+    "education": 1,
+    "personality": 1,
+    "tier": 1,
     "ungated": 2
    },
    "id": "eotg_fracture.004",
@@ -2625,9 +2651,9 @@
    "opt_flag": 0,
    "opt_flavor": 0,
    "opt_highlight": 0,
-   "opt_skill": 0,
+   "opt_skill": 1,
    "opt_stress": 3,
-   "opt_trait": 3,
+   "opt_trait": 1,
    "opt_unavail": 0,
    "opt_words_avg": 6.2,
    "option_gates": [
@@ -2642,11 +2668,9 @@
      "personality": []
     },
     {
-     "axis": "personality",
+     "axis": "education",
      "name": "eotg_fracture.004.c",
-     "personality": [
-      "zealous"
-     ]
+     "personality": []
     },
     {
      "axis": "personality",
@@ -2656,11 +2680,9 @@
      ]
     },
     {
-     "axis": "personality",
+     "axis": "tier",
      "name": "eotg_fracture.004.e",
-     "personality": [
-      "callous"
-     ]
+     "personality": []
     }
    ],
    "options": 5,
@@ -2671,8 +2693,8 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": true,
-   "personality_gates": 3,
-   "portraits": 2,
+   "personality_gates": 1,
+   "portraits": 3,
    "random_valid": false,
    "sender": false,
    "signature": false,
@@ -2680,7 +2702,7 @@
    "theme": true,
    "title_words": 3,
    "toasts": 1,
-   "triggered_animation": 1,
+   "triggered_animation": 4,
    "triggered_desc": 3,
    "type": "character_event",
    "voice": "2nd",
@@ -2694,8 +2716,12 @@
   },
   {
    "after": false,
-   "animation": 2,
+   "animation": 10,
    "animations": [
+    "dismissal",
+    "fear",
+    "sadness",
+    "scheme",
     "stress",
     "worry"
    ],
@@ -2716,7 +2742,8 @@
    "file": "events/eotg_augmentation_fracture.txt",
    "formatting": false,
    "gate_axes": {
-    "personality": 2,
+    "education": 1,
+    "personality": 1,
     "ungated": 3
    },
    "id": "eotg_fracture.005",
@@ -2732,9 +2759,9 @@
    "opt_flag": 0,
    "opt_flavor": 0,
    "opt_highlight": 0,
-   "opt_skill": 0,
+   "opt_skill": 1,
    "opt_stress": 2,
-   "opt_trait": 2,
+   "opt_trait": 1,
    "opt_unavail": 0,
    "opt_words_avg": 5.4,
    "option_gates": [
@@ -2761,11 +2788,9 @@
      ]
     },
     {
-     "axis": "personality",
+     "axis": "education",
      "name": "eotg_fracture.005.e",
-     "personality": [
-      "deceitful"
-     ]
+     "personality": []
     }
    ],
    "options": 5,
@@ -2776,7 +2801,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": false,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 2,
    "random_valid": false,
    "sender": false,
@@ -2785,7 +2810,7 @@
    "theme": true,
    "title_words": 4,
    "toasts": 3,
-   "triggered_animation": 0,
+   "triggered_animation": 4,
    "triggered_desc": 0,
    "type": "character_event",
    "voice": "2nd",
@@ -2799,9 +2824,13 @@
   },
   {
    "after": false,
-   "animation": 2,
+   "animation": 10,
    "animations": [
     "anger",
+    "disapproval",
+    "fear",
+    "paranoia",
+    "rage",
     "stress"
    ],
    "artifact": false,
@@ -2821,7 +2850,8 @@
    "file": "events/eotg_augmentation_fracture.txt",
    "formatting": false,
    "gate_axes": {
-    "personality": 2,
+    "education": 1,
+    "personality": 1,
     "ungated": 3
    },
    "id": "eotg_fracture.006",
@@ -2841,7 +2871,7 @@
    "opt_highlight": 0,
    "opt_skill": 1,
    "opt_stress": 2,
-   "opt_trait": 2,
+   "opt_trait": 1,
    "opt_unavail": 0,
    "opt_words_avg": 5.8,
    "option_gates": [
@@ -2868,11 +2898,9 @@
      ]
     },
     {
-     "axis": "personality",
+     "axis": "education",
      "name": "eotg_fracture.006.e",
-     "personality": [
-      "gregarious"
-     ]
+     "personality": []
     }
    ],
    "options": 5,
@@ -2883,7 +2911,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": true,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 2,
    "random_valid": false,
    "sender": false,
@@ -2892,7 +2920,7 @@
    "theme": true,
    "title_words": 2,
    "toasts": 7,
-   "triggered_animation": 0,
+   "triggered_animation": 4,
    "triggered_desc": 2,
    "type": "character_event",
    "voice": "2nd",
@@ -2906,9 +2934,12 @@
   },
   {
    "after": false,
-   "animation": 1,
+   "animation": 7,
    "animations": [
-    "personality_rational"
+    "personality_content",
+    "personality_greedy",
+    "personality_rational",
+    "writing"
    ],
    "artifact": false,
    "backgrounds": [
@@ -2927,8 +2958,9 @@
    "file": "events/eotg_augmentation_fracture.txt",
    "formatting": false,
    "gate_axes": {
+    "education": 1,
     "other": 1,
-    "personality": 2,
+    "personality": 1,
     "ungated": 3
    },
    "id": "eotg_fracture.007",
@@ -2944,9 +2976,9 @@
    "opt_flag": 0,
    "opt_flavor": 0,
    "opt_highlight": 0,
-   "opt_skill": 1,
-   "opt_stress": 2,
-   "opt_trait": 2,
+   "opt_skill": 2,
+   "opt_stress": 3,
+   "opt_trait": 1,
    "opt_unavail": 0,
    "opt_words_avg": 6.3,
    "option_gates": [
@@ -2966,11 +2998,9 @@
      "personality": []
     },
     {
-     "axis": "personality",
+     "axis": "education",
      "name": "eotg_fracture.007.d",
-     "personality": [
-      "greedy"
-     ]
+     "personality": []
     },
     {
      "axis": "personality",
@@ -2993,7 +3023,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": false,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 1,
    "random_valid": false,
    "sender": false,
@@ -3002,7 +3032,7 @@
    "theme": true,
    "title_words": 2,
    "toasts": 2,
-   "triggered_animation": 0,
+   "triggered_animation": 3,
    "triggered_desc": 0,
    "type": "character_event",
    "voice": "neutral",
@@ -3016,8 +3046,12 @@
   },
   {
    "after": false,
-   "animation": 2,
+   "animation": 10,
    "animations": [
+    "crying",
+    "dismissal",
+    "fear",
+    "paranoia",
     "shock",
     "stress"
    ],
@@ -3036,8 +3070,9 @@
    "file": "events/eotg_augmentation_fracture.txt",
    "formatting": false,
    "gate_axes": {
+    "education": 1,
     "other": 1,
-    "personality": 2,
+    "personality": 1,
     "ungated": 3
    },
    "id": "eotg_fracture.008",
@@ -3053,9 +3088,9 @@
    "opt_flag": 0,
    "opt_flavor": 0,
    "opt_highlight": 0,
-   "opt_skill": 0,
+   "opt_skill": 1,
    "opt_stress": 2,
-   "opt_trait": 3,
+   "opt_trait": 2,
    "opt_unavail": 0,
    "opt_words_avg": 6.7,
    "option_gates": [
@@ -3075,11 +3110,9 @@
      "personality": []
     },
     {
-     "axis": "personality",
+     "axis": "education",
      "name": "eotg_fracture.008.d",
-     "personality": [
-      "compassionate"
-     ]
+     "personality": []
     },
     {
      "axis": "personality",
@@ -3102,7 +3135,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": true,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 2,
    "random_valid": false,
    "sender": false,
@@ -3111,7 +3144,7 @@
    "theme": true,
    "title_words": 2,
    "toasts": 0,
-   "triggered_animation": 0,
+   "triggered_animation": 4,
    "triggered_desc": 1,
    "type": "character_event",
    "voice": "2nd",
@@ -3125,8 +3158,11 @@
   },
   {
    "after": false,
-   "animation": 1,
+   "animation": 7,
    "animations": [
+    "fear",
+    "paranoia",
+    "pondering",
     "worry"
    ],
    "artifact": false,
@@ -3148,8 +3184,9 @@
    "file": "events/eotg_augmentation_fracture.txt",
    "formatting": false,
    "gate_axes": {
+    "education": 1,
     "other": 1,
-    "personality": 2,
+    "personality": 1,
     "ungated": 3
    },
    "id": "eotg_fracture.009",
@@ -3165,9 +3202,9 @@
    "opt_flag": 0,
    "opt_flavor": 0,
    "opt_highlight": 0,
-   "opt_skill": 0,
-   "opt_stress": 2,
-   "opt_trait": 3,
+   "opt_skill": 1,
+   "opt_stress": 3,
+   "opt_trait": 2,
    "opt_unavail": 0,
    "opt_words_avg": 5.2,
    "option_gates": [
@@ -3194,11 +3231,9 @@
      ]
     },
     {
-     "axis": "personality",
+     "axis": "education",
      "name": "eotg_fracture.009.e",
-     "personality": [
-      "diligent"
-     ]
+     "personality": []
     },
     {
      "axis": "other",
@@ -3214,7 +3249,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": false,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 1,
    "random_valid": false,
    "sender": false,
@@ -3223,7 +3258,7 @@
    "theme": true,
    "title_words": 2,
    "toasts": 3,
-   "triggered_animation": 0,
+   "triggered_animation": 3,
    "triggered_desc": 1,
    "type": "character_event",
    "voice": "2nd",
@@ -3237,8 +3272,11 @@
   },
   {
    "after": false,
-   "animation": 1,
+   "animation": 7,
    "animations": [
+    "fear",
+    "interested",
+    "prayer",
     "shock"
    ],
    "artifact": false,
@@ -3258,8 +3296,9 @@
    "file": "events/eotg_augmentation_fracture.txt",
    "formatting": false,
    "gate_axes": {
+    "education": 1,
     "other": 2,
-    "personality": 2,
+    "personality": 1,
     "ungated": 3
    },
    "id": "eotg_fracture.010",
@@ -3275,9 +3314,9 @@
    "opt_flag": 0,
    "opt_flavor": 0,
    "opt_highlight": 0,
-   "opt_skill": 0,
+   "opt_skill": 1,
    "opt_stress": 1,
-   "opt_trait": 4,
+   "opt_trait": 3,
    "opt_unavail": 0,
    "opt_words_avg": 4.4,
    "option_gates": [
@@ -3297,11 +3336,9 @@
      "personality": []
     },
     {
-     "axis": "personality",
+     "axis": "education",
      "name": "eotg_fracture.010.d",
-     "personality": [
-      "zealous"
-     ]
+     "personality": []
     },
     {
      "axis": "personality",
@@ -3329,7 +3366,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": true,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 1,
    "random_valid": false,
    "sender": false,
@@ -3338,7 +3375,7 @@
    "theme": true,
    "title_words": 4,
    "toasts": 0,
-   "triggered_animation": 0,
+   "triggered_animation": 3,
    "triggered_desc": 4,
    "type": "character_event",
    "voice": "2nd",
@@ -3352,9 +3389,13 @@
   },
   {
    "after": false,
-   "animation": 2,
+   "animation": 10,
    "animations": [
     "disbelief",
+    "interested",
+    "physician",
+    "scheme",
+    "shame",
     "worry"
    ],
    "artifact": false,
@@ -3374,8 +3415,9 @@
    "file": "events/eotg_augmentation_fracture.txt",
    "formatting": false,
    "gate_axes": {
+    "education": 1,
     "other": 3,
-    "personality": 2,
+    "personality": 1,
     "ungated": 1
    },
    "id": "eotg_fracture.011",
@@ -3391,9 +3433,9 @@
    "opt_flag": 0,
    "opt_flavor": 0,
    "opt_highlight": 0,
-   "opt_skill": 0,
+   "opt_skill": 1,
    "opt_stress": 1,
-   "opt_trait": 2,
+   "opt_trait": 1,
    "opt_unavail": 0,
    "opt_words_avg": 3.7,
    "option_gates": [
@@ -3420,11 +3462,9 @@
      ]
     },
     {
-     "axis": "personality",
+     "axis": "education",
      "name": "eotg_fracture.011.e",
-     "personality": [
-      "deceitful"
-     ]
+     "personality": []
     },
     {
      "axis": "ungated",
@@ -3440,7 +3480,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": true,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 2,
    "random_valid": false,
    "sender": false,
@@ -3449,7 +3489,7 @@
    "theme": true,
    "title_words": 4,
    "toasts": 1,
-   "triggered_animation": 0,
+   "triggered_animation": 4,
    "triggered_desc": 1,
    "type": "character_event",
    "voice": "2nd",
@@ -3463,9 +3503,12 @@
   },
   {
    "after": false,
-   "animation": 2,
+   "animation": 8,
    "animations": [
     "disbelief",
+    "dismissal",
+    "paranoia",
+    "sadness",
     "worry"
    ],
    "artifact": false,
@@ -3483,7 +3526,8 @@
    "file": "events/eotg_augmentation_fracture.txt",
    "formatting": false,
    "gate_axes": {
-    "personality": 2,
+    "education": 1,
+    "personality": 1,
     "ungated": 3
    },
    "id": "eotg_fracture.012",
@@ -3499,9 +3543,9 @@
    "opt_flag": 0,
    "opt_flavor": 0,
    "opt_highlight": 0,
-   "opt_skill": 0,
-   "opt_stress": 1,
-   "opt_trait": 2,
+   "opt_skill": 1,
+   "opt_stress": 2,
+   "opt_trait": 1,
    "opt_unavail": 0,
    "opt_words_avg": 4.6,
    "option_gates": [
@@ -3528,11 +3572,9 @@
      ]
     },
     {
-     "axis": "personality",
+     "axis": "education",
      "name": "eotg_fracture.012.e",
-     "personality": [
-      "paranoid"
-     ]
+     "personality": []
     }
    ],
    "options": 5,
@@ -3543,7 +3585,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": false,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 2,
    "random_valid": false,
    "sender": false,
@@ -3552,7 +3594,7 @@
    "theme": true,
    "title_words": 3,
    "toasts": 0,
-   "triggered_animation": 0,
+   "triggered_animation": 3,
    "triggered_desc": 0,
    "type": "character_event",
    "voice": "2nd",
@@ -3566,8 +3608,11 @@
   },
   {
    "after": false,
-   "animation": 1,
+   "animation": 7,
    "animations": [
+    "fear",
+    "interested",
+    "pondering",
     "thinking"
    ],
    "artifact": false,
@@ -3589,7 +3634,8 @@
    "file": "events/eotg_augmentation_fracture.txt",
    "formatting": false,
    "gate_axes": {
-    "personality": 2,
+    "education": 1,
+    "personality": 1,
     "ungated": 3
    },
    "id": "eotg_fracture.013",
@@ -3605,9 +3651,9 @@
    "opt_flag": 0,
    "opt_flavor": 0,
    "opt_highlight": 0,
-   "opt_skill": 0,
-   "opt_stress": 1,
-   "opt_trait": 2,
+   "opt_skill": 1,
+   "opt_stress": 2,
+   "opt_trait": 1,
    "opt_unavail": 0,
    "opt_words_avg": 4.8,
    "option_gates": [
@@ -3627,11 +3673,9 @@
      "personality": []
     },
     {
-     "axis": "personality",
+     "axis": "education",
      "name": "eotg_fracture.013.d",
-     "personality": [
-      "eccentric"
-     ]
+     "personality": []
     },
     {
      "axis": "personality",
@@ -3649,7 +3693,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": false,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 1,
    "random_valid": false,
    "sender": false,
@@ -3658,7 +3702,7 @@
    "theme": true,
    "title_words": 3,
    "toasts": 4,
-   "triggered_animation": 0,
+   "triggered_animation": 3,
    "triggered_desc": 0,
    "type": "character_event",
    "voice": "2nd",
@@ -8505,8 +8549,10 @@
   },
   {
    "after": false,
-   "animation": 1,
+   "animation": 5,
    "animations": [
+    "disapproval",
+    "fear",
     "stress"
    ],
    "artifact": false,
@@ -8526,7 +8572,8 @@
    "file": "events/eotg_augmentation_initiation.txt",
    "formatting": false,
    "gate_axes": {
-    "personality": 3,
+    "education": 2,
+    "personality": 1,
     "ungated": 2
    },
    "id": "eotg_aug_init.001",
@@ -8542,9 +8589,9 @@
    "opt_flag": 0,
    "opt_flavor": 0,
    "opt_highlight": 0,
-   "opt_skill": 0,
+   "opt_skill": 2,
    "opt_stress": 5,
-   "opt_trait": 2,
+   "opt_trait": 1,
    "opt_unavail": 0,
    "opt_words_avg": 6.4,
    "option_gates": [
@@ -8568,18 +8615,14 @@
      ]
     },
     {
-     "axis": "personality",
+     "axis": "education",
      "name": "eotg_aug_init.001.d",
-     "personality": [
-      "craven"
-     ]
+     "personality": []
     },
     {
-     "axis": "personality",
+     "axis": "education",
      "name": "eotg_aug_init.001.e",
-     "personality": [
-      "cynical"
-     ]
+     "personality": []
     }
    ],
    "options": 5,
@@ -8590,7 +8633,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": false,
-   "personality_gates": 3,
+   "personality_gates": 1,
    "portraits": 1,
    "random_valid": false,
    "sender": false,
@@ -8599,7 +8642,7 @@
    "theme": true,
    "title_words": 4,
    "toasts": 1,
-   "triggered_animation": 0,
+   "triggered_animation": 2,
    "triggered_desc": 0,
    "type": "character_event",
    "voice": "2nd",
@@ -8613,8 +8656,10 @@
   },
   {
    "after": false,
-   "animation": 1,
+   "animation": 5,
    "animations": [
+    "disapproval",
+    "interested",
     "personality_rational"
    ],
    "artifact": false,
@@ -8652,7 +8697,7 @@
    "opt_flavor": 0,
    "opt_highlight": 0,
    "opt_skill": 0,
-   "opt_stress": 1,
+   "opt_stress": 2,
    "opt_trait": 1,
    "opt_unavail": 0,
    "opt_words_avg": 5,
@@ -8697,7 +8742,7 @@
    "theme": true,
    "title_words": 3,
    "toasts": 0,
-   "triggered_animation": 0,
+   "triggered_animation": 2,
    "triggered_desc": 0,
    "type": "character_event",
    "voice": "neutral",
@@ -8711,8 +8756,10 @@
   },
   {
    "after": false,
-   "animation": 1,
+   "animation": 5,
    "animations": [
+    "anger",
+    "sadness",
     "worry"
    ],
    "artifact": false,
@@ -8732,7 +8779,8 @@
    "file": "events/eotg_augmentation_initiation.txt",
    "formatting": false,
    "gate_axes": {
-    "personality": 2,
+    "personality": 1,
+    "tier": 1,
     "ungated": 2
    },
    "id": "eotg_aug_init.003",
@@ -8750,7 +8798,7 @@
    "opt_highlight": 0,
    "opt_skill": 0,
    "opt_stress": 4,
-   "opt_trait": 2,
+   "opt_trait": 1,
    "opt_unavail": 0,
    "opt_words_avg": 5,
    "option_gates": [
@@ -8765,11 +8813,9 @@
      "personality": []
     },
     {
-     "axis": "personality",
+     "axis": "tier",
      "name": "eotg_aug_init.003.d",
-     "personality": [
-      "arrogant"
-     ]
+     "personality": []
     },
     {
      "axis": "personality",
@@ -8787,7 +8833,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": false,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 1,
    "random_valid": false,
    "sender": false,
@@ -8796,7 +8842,7 @@
    "theme": true,
    "title_words": 2,
    "toasts": 0,
-   "triggered_animation": 0,
+   "triggered_animation": 2,
    "triggered_desc": 0,
    "type": "character_event",
    "voice": "2nd",
@@ -8810,8 +8856,10 @@
   },
   {
    "after": false,
-   "animation": 1,
+   "animation": 5,
    "animations": [
+    "anger",
+    "fear",
     "stress"
    ],
    "artifact": false,
@@ -8833,7 +8881,8 @@
    "file": "events/eotg_augmentation_initiation.txt",
    "formatting": false,
    "gate_axes": {
-    "personality": 2,
+    "personality": 1,
+    "tier": 1,
     "ungated": 2
    },
    "id": "eotg_aug_init.004",
@@ -8851,7 +8900,7 @@
    "opt_highlight": 0,
    "opt_skill": 0,
    "opt_stress": 3,
-   "opt_trait": 2,
+   "opt_trait": 1,
    "opt_unavail": 0,
    "opt_words_avg": 5.2,
    "option_gates": [
@@ -8866,11 +8915,9 @@
      "personality": []
     },
     {
-     "axis": "personality",
+     "axis": "tier",
      "name": "eotg_aug_init.004.d",
-     "personality": [
-      "brave"
-     ]
+     "personality": []
     },
     {
      "axis": "personality",
@@ -8888,7 +8935,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": false,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 1,
    "random_valid": false,
    "sender": false,
@@ -8897,7 +8944,7 @@
    "theme": true,
    "title_words": 2,
    "toasts": 0,
-   "triggered_animation": 0,
+   "triggered_animation": 2,
    "triggered_desc": 0,
    "type": "character_event",
    "voice": "2nd",
@@ -8911,8 +8958,11 @@
   },
   {
    "after": false,
-   "animation": 2,
+   "animation": 8,
    "animations": [
+    "disgust",
+    "interested",
+    "paranoia",
     "personality_bold",
     "personality_rational"
    ],
@@ -8933,7 +8983,8 @@
    "file": "events/eotg_augmentation_initiation.txt",
    "formatting": false,
    "gate_axes": {
-    "personality": 2,
+    "education": 1,
+    "personality": 1,
     "ungated": 3
    },
    "id": "eotg_aug_init.005",
@@ -8949,9 +9000,9 @@
    "opt_flag": 0,
    "opt_flavor": 0,
    "opt_highlight": 0,
-   "opt_skill": 0,
-   "opt_stress": 1,
-   "opt_trait": 2,
+   "opt_skill": 1,
+   "opt_stress": 2,
+   "opt_trait": 1,
    "opt_unavail": 0,
    "opt_words_avg": 5.8,
    "option_gates": [
@@ -8978,11 +9029,9 @@
      ]
     },
     {
-     "axis": "personality",
+     "axis": "education",
      "name": "eotg_aug_init.005.e",
-     "personality": [
-      "paranoid"
-     ]
+     "personality": []
     }
    ],
    "options": 5,
@@ -8993,7 +9042,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": false,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 2,
    "random_valid": false,
    "sender": false,
@@ -9002,7 +9051,7 @@
    "theme": true,
    "title_words": 4,
    "toasts": 0,
-   "triggered_animation": 0,
+   "triggered_animation": 3,
    "triggered_desc": 0,
    "type": "character_event",
    "voice": "2nd",
@@ -9016,9 +9065,11 @@
   },
   {
    "after": false,
-   "animation": 2,
+   "animation": 6,
    "animations": [
-    "personality_rational",
+    "disapproval",
+    "interested",
+    "physician",
     "worry"
    ],
    "artifact": false,
@@ -9038,8 +9089,9 @@
    "file": "events/eotg_augmentation_initiation.txt",
    "formatting": false,
    "gate_axes": {
+    "education": 1,
     "other": 3,
-    "personality": 2,
+    "personality": 1,
     "ungated": 1
    },
    "id": "eotg_aug_init.006",
@@ -9055,9 +9107,9 @@
    "opt_flag": 0,
    "opt_flavor": 0,
    "opt_highlight": 0,
-   "opt_skill": 0,
+   "opt_skill": 1,
    "opt_stress": 2,
-   "opt_trait": 2,
+   "opt_trait": 1,
    "opt_unavail": 0,
    "opt_words_avg": 6.2,
    "option_gates": [
@@ -9084,11 +9136,9 @@
      ]
     },
     {
-     "axis": "personality",
+     "axis": "education",
      "name": "eotg_aug_init.006.e",
-     "personality": [
-      "cynical"
-     ]
+     "personality": []
     },
     {
      "axis": "other",
@@ -9104,7 +9154,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": true,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 2,
    "random_valid": false,
    "sender": false,
@@ -9113,7 +9163,7 @@
    "theme": true,
    "title_words": 2,
    "toasts": 0,
-   "triggered_animation": 0,
+   "triggered_animation": 2,
    "triggered_desc": 6,
    "type": "character_event",
    "voice": "2nd",
@@ -9127,8 +9177,10 @@
   },
   {
    "after": false,
-   "animation": 1,
+   "animation": 5,
    "animations": [
+    "disapproval",
+    "fear",
     "worry"
    ],
    "artifact": false,
@@ -9148,8 +9200,9 @@
    "file": "events/eotg_augmentation_initiation.txt",
    "formatting": false,
    "gate_axes": {
+    "education": 1,
     "other": 2,
-    "personality": 2,
+    "personality": 1,
     "ungated": 1
    },
    "id": "eotg_aug_init.007",
@@ -9165,9 +9218,9 @@
    "opt_flag": 0,
    "opt_flavor": 0,
    "opt_highlight": 0,
-   "opt_skill": 0,
+   "opt_skill": 1,
    "opt_stress": 2,
-   "opt_trait": 2,
+   "opt_trait": 1,
    "opt_unavail": 0,
    "opt_words_avg": 5.4,
    "option_gates": [
@@ -9194,11 +9247,9 @@
      ]
     },
     {
-     "axis": "personality",
+     "axis": "education",
      "name": "eotg_aug_init.007.e",
-     "personality": [
-      "ambitious"
-     ]
+     "personality": []
     }
    ],
    "options": 5,
@@ -9209,7 +9260,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": false,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 1,
    "random_valid": false,
    "sender": false,
@@ -9218,7 +9269,7 @@
    "theme": true,
    "title_words": 3,
    "toasts": 2,
-   "triggered_animation": 0,
+   "triggered_animation": 2,
    "triggered_desc": 0,
    "type": "character_event",
    "voice": "neutral",
@@ -9232,8 +9283,10 @@
   },
   {
    "after": true,
-   "animation": 3,
+   "animation": 7,
    "animations": [
+    "anger",
+    "fear",
     "happiness",
     "pain"
    ],
@@ -9312,7 +9365,7 @@
    "theme": true,
    "title_words": 3,
    "toasts": 5,
-   "triggered_animation": 1,
+   "triggered_animation": 3,
    "triggered_desc": 2,
    "type": "character_event",
    "voice": "neutral",
@@ -9326,9 +9379,11 @@
   },
   {
    "after": false,
-   "animation": 1,
+   "animation": 5,
    "animations": [
-    "personality_rational"
+    "eyeroll",
+    "personality_rational",
+    "thinking"
    ],
    "artifact": false,
    "backgrounds": [
@@ -9415,7 +9470,7 @@
    "theme": true,
    "title_words": 3,
    "toasts": 0,
-   "triggered_animation": 0,
+   "triggered_animation": 2,
    "triggered_desc": 1,
    "type": "character_event",
    "voice": "2nd",
@@ -9429,8 +9484,10 @@
   },
   {
    "after": false,
-   "animation": 1,
+   "animation": 5,
    "animations": [
+    "fear",
+    "paranoia",
     "scheme"
    ],
    "artifact": false,
@@ -9450,8 +9507,9 @@
    "file": "events/eotg_augmentation_initiation.txt",
    "formatting": false,
    "gate_axes": {
+    "education": 1,
     "other": 1,
-    "personality": 2,
+    "personality": 1,
     "ungated": 1
    },
    "id": "eotg_aug_init.010",
@@ -9467,9 +9525,9 @@
    "opt_flag": 0,
    "opt_flavor": 0,
    "opt_highlight": 0,
-   "opt_skill": 1,
+   "opt_skill": 2,
    "opt_stress": 2,
-   "opt_trait": 2,
+   "opt_trait": 1,
    "opt_unavail": 0,
    "opt_words_avg": 6,
    "option_gates": [
@@ -9484,11 +9542,9 @@
      "personality": []
     },
     {
-     "axis": "personality",
+     "axis": "education",
      "name": "eotg_aug_init.010.c",
-     "personality": [
-      "deceitful"
-     ]
+     "personality": []
     },
     {
      "axis": "personality",
@@ -9506,7 +9562,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": false,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 1,
    "random_valid": false,
    "sender": false,
@@ -9515,7 +9571,7 @@
    "theme": true,
    "title_words": 3,
    "toasts": 2,
-   "triggered_animation": 0,
+   "triggered_animation": 2,
    "triggered_desc": 0,
    "type": "character_event",
    "voice": "neutral",
@@ -9529,10 +9585,14 @@
   },
   {
    "after": false,
-   "animation": 3,
+   "animation": 11,
    "animations": [
+    "boredom",
+    "happiness",
     "pain",
-    "personality_rational"
+    "paranoia",
+    "personality_rational",
+    "shame"
    ],
    "artifact": false,
    "backgrounds": [
@@ -9624,7 +9684,7 @@
    "theme": true,
    "title_words": 3,
    "toasts": 2,
-   "triggered_animation": 1,
+   "triggered_animation": 5,
    "triggered_desc": 7,
    "type": "character_event",
    "voice": "neutral",
@@ -9638,8 +9698,10 @@
   },
   {
    "after": true,
-   "animation": 1,
+   "animation": 5,
    "animations": [
+    "anger",
+    "fear",
     "pain"
    ],
    "artifact": false,
@@ -9711,7 +9773,7 @@
    "theme": true,
    "title_words": 3,
    "toasts": 2,
-   "triggered_animation": 0,
+   "triggered_animation": 2,
    "triggered_desc": 1,
    "type": "character_event",
    "voice": "neutral",
@@ -9725,9 +9787,12 @@
   },
   {
    "after": false,
-   "animation": 2,
+   "animation": 8,
    "animations": [
+    "boredom",
+    "crying",
     "dead",
+    "interested",
     "sadness"
    ],
    "artifact": false,
@@ -9747,8 +9812,9 @@
    "file": "events/eotg_augmentation_initiation.txt",
    "formatting": false,
    "gate_axes": {
+    "education": 1,
     "other": 1,
-    "personality": 2,
+    "personality": 1,
     "ungated": 2
    },
    "id": "eotg_aug_init.013",
@@ -9764,9 +9830,9 @@
    "opt_flag": 0,
    "opt_flavor": 0,
    "opt_highlight": 0,
-   "opt_skill": 0,
+   "opt_skill": 1,
    "opt_stress": 3,
-   "opt_trait": 2,
+   "opt_trait": 1,
    "opt_unavail": 0,
    "opt_words_avg": 4.6,
    "option_gates": [
@@ -9786,11 +9852,9 @@
      "personality": []
     },
     {
-     "axis": "personality",
+     "axis": "education",
      "name": "eotg_aug_init.013.d",
-     "personality": [
-      "greedy"
-     ]
+     "personality": []
     },
     {
      "axis": "personality",
@@ -9808,7 +9872,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": true,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 2,
    "random_valid": false,
    "sender": false,
@@ -9817,7 +9881,7 @@
    "theme": true,
    "title_words": 3,
    "toasts": 0,
-   "triggered_animation": 0,
+   "triggered_animation": 3,
    "triggered_desc": 1,
    "type": "character_event",
    "voice": "2nd",
@@ -9831,9 +9895,11 @@
   },
   {
    "after": false,
-   "animation": 2,
+   "animation": 6,
    "animations": [
-    "sadness",
+    "crying",
+    "dismissal",
+    "sick",
     "worry"
    ],
    "artifact": false,
@@ -9853,8 +9919,9 @@
    "file": "events/eotg_augmentation_initiation.txt",
    "formatting": false,
    "gate_axes": {
+    "education": 1,
     "other": 2,
-    "personality": 2,
+    "personality": 1,
     "ungated": 1
    },
    "id": "eotg_aug_init.014",
@@ -9870,9 +9937,9 @@
    "opt_flag": 0,
    "opt_flavor": 0,
    "opt_highlight": 0,
-   "opt_skill": 0,
+   "opt_skill": 1,
    "opt_stress": 3,
-   "opt_trait": 2,
+   "opt_trait": 1,
    "opt_unavail": 0,
    "opt_words_avg": 6.8,
    "option_gates": [
@@ -9892,11 +9959,9 @@
      "personality": []
     },
     {
-     "axis": "personality",
+     "axis": "education",
      "name": "eotg_aug_init.014.d",
-     "personality": [
-      "compassionate"
-     ]
+     "personality": []
     },
     {
      "axis": "personality",
@@ -9914,7 +9979,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": false,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 2,
    "random_valid": false,
    "sender": false,
@@ -9923,7 +9988,7 @@
    "theme": true,
    "title_words": 3,
    "toasts": 2,
-   "triggered_animation": 0,
+   "triggered_animation": 2,
    "triggered_desc": 0,
    "type": "character_event",
    "voice": "2nd",
@@ -9937,9 +10002,11 @@
   },
   {
    "after": false,
-   "animation": 2,
+   "animation": 6,
    "animations": [
     "idle",
+    "interested",
+    "paranoia",
     "worry"
    ],
    "artifact": false,
@@ -10019,7 +10086,7 @@
    "theme": true,
    "title_words": 4,
    "toasts": 0,
-   "triggered_animation": 0,
+   "triggered_animation": 2,
    "triggered_desc": 0,
    "type": "character_event",
    "voice": "2nd",
@@ -10033,8 +10100,10 @@
   },
   {
    "after": false,
-   "animation": 2,
+   "animation": 6,
    "animations": [
+    "anger",
+    "fear",
     "schadenfreude",
     "shame"
    ],
@@ -10056,7 +10125,8 @@
    "formatting": false,
    "gate_axes": {
     "other": 1,
-    "personality": 2,
+    "personality": 1,
+    "tier": 1,
     "ungated": 2
    },
    "id": "eotg_aug_init.016",
@@ -10073,8 +10143,8 @@
    "opt_flavor": 0,
    "opt_highlight": 0,
    "opt_skill": 1,
-   "opt_stress": 3,
-   "opt_trait": 2,
+   "opt_stress": 4,
+   "opt_trait": 1,
    "opt_unavail": 0,
    "opt_words_avg": 3.4,
    "option_gates": [
@@ -10101,11 +10171,9 @@
      ]
     },
     {
-     "axis": "personality",
+     "axis": "tier",
      "name": "eotg_aug_init.016.e",
-     "personality": [
-      "arrogant"
-     ]
+     "personality": []
     }
    ],
    "options": 5,
@@ -10116,7 +10184,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": false,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 2,
    "random_valid": false,
    "sender": false,
@@ -10125,7 +10193,7 @@
    "theme": true,
    "title_words": 2,
    "toasts": 2,
-   "triggered_animation": 0,
+   "triggered_animation": 2,
    "triggered_desc": 1,
    "type": "character_event",
    "voice": "2nd",
@@ -10139,9 +10207,13 @@
   },
   {
    "after": false,
-   "animation": 2,
+   "animation": 8,
    "animations": [
-    "personality_rational"
+    "disapproval",
+    "interested",
+    "paranoia",
+    "personality_rational",
+    "physician"
    ],
    "artifact": false,
    "backgrounds": [
@@ -10160,8 +10232,9 @@
    "file": "events/eotg_augmentation_initiation.txt",
    "formatting": false,
    "gate_axes": {
+    "education": 1,
     "other": 2,
-    "personality": 2,
+    "personality": 1,
     "ungated": 1
    },
    "id": "eotg_aug_init.017",
@@ -10177,9 +10250,9 @@
    "opt_flag": 0,
    "opt_flavor": 0,
    "opt_highlight": 0,
-   "opt_skill": 0,
-   "opt_stress": 1,
-   "opt_trait": 2,
+   "opt_skill": 1,
+   "opt_stress": 2,
+   "opt_trait": 1,
    "opt_unavail": 0,
    "opt_words_avg": 4.8,
    "option_gates": [
@@ -10206,11 +10279,9 @@
      ]
     },
     {
-     "axis": "personality",
+     "axis": "education",
      "name": "eotg_aug_init.017.e",
-     "personality": [
-      "paranoid"
-     ]
+     "personality": []
     }
    ],
    "options": 5,
@@ -10221,7 +10292,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": false,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 2,
    "random_valid": false,
    "sender": false,
@@ -10230,7 +10301,7 @@
    "theme": true,
    "title_words": 3,
    "toasts": 0,
-   "triggered_animation": 0,
+   "triggered_animation": 3,
    "triggered_desc": 1,
    "type": "character_event",
    "voice": "2nd",
@@ -10244,9 +10315,12 @@
   },
   {
    "after": false,
-   "animation": 1,
+   "animation": 7,
    "animations": [
-    "personality_rational"
+    "interested",
+    "personality_rational",
+    "scheme",
+    "worry"
    ],
    "artifact": false,
    "backgrounds": [
@@ -10330,7 +10404,7 @@
    "theme": true,
    "title_words": 4,
    "toasts": 0,
-   "triggered_animation": 0,
+   "triggered_animation": 3,
    "triggered_desc": 1,
    "type": "character_event",
    "voice": "2nd",
@@ -10344,10 +10418,12 @@
   },
   {
    "after": false,
-   "animation": 2,
+   "animation": 6,
    "animations": [
+    "interested",
     "personality_bold",
-    "thinking"
+    "thinking",
+    "worry"
    ],
    "artifact": false,
    "backgrounds": [
@@ -10434,7 +10510,7 @@
    "theme": true,
    "title_words": 3,
    "toasts": 0,
-   "triggered_animation": 0,
+   "triggered_animation": 2,
    "triggered_desc": 0,
    "type": "character_event",
    "voice": "2nd",
@@ -10448,10 +10524,12 @@
   },
   {
    "after": true,
-   "animation": 2,
+   "animation": 6,
    "animations": [
-    "personality_bold",
-    "personality_rational"
+    "dismissal",
+    "personality_rational",
+    "throne_room_bow_1",
+    "worry"
    ],
    "artifact": false,
    "backgrounds": [
@@ -10488,7 +10566,7 @@
    "opt_flavor": 0,
    "opt_highlight": 0,
    "opt_skill": 0,
-   "opt_stress": 0,
+   "opt_stress": 1,
    "opt_trait": 1,
    "opt_unavail": 0,
    "opt_words_avg": 5.4,
@@ -10538,7 +10616,7 @@
    "theme": true,
    "title_words": 3,
    "toasts": 0,
-   "triggered_animation": 0,
+   "triggered_animation": 2,
    "triggered_desc": 3,
    "type": "character_event",
    "voice": "2nd",
@@ -10776,8 +10854,8 @@
    "custom_loc": true,
    "desc_has_scope_text": true,
    "desc_keys": 14,
-   "desc_words_main": 34,
-   "desc_words_total": 324,
+   "desc_words_main": 37,
+   "desc_words_total": 385,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_kingpin.txt",
@@ -10854,17 +10932,17 @@
    "random_valid": false,
    "sender": false,
    "signature": false,
-   "speech": false,
+   "speech": true,
    "theme": true,
    "title_words": 3,
    "toasts": 0,
    "triggered_animation": 3,
    "triggered_desc": 10,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    1
+    1,
+    0
    ],
    "widget": false,
    "window": false,
@@ -10889,8 +10967,8 @@
    "custom_loc": false,
    "desc_has_scope_text": true,
    "desc_keys": 11,
-   "desc_words_main": 40,
-   "desc_words_total": 288,
+   "desc_words_main": 42,
+   "desc_words_total": 313,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_kingpin.txt",
@@ -10962,10 +11040,10 @@
    "triggered_animation": 3,
    "triggered_desc": 8,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    1
+    1,
+    0
    ],
    "widget": false,
    "window": false,
@@ -10992,7 +11070,7 @@
    "desc_has_scope_text": true,
    "desc_keys": 7,
    "desc_words_main": 43,
-   "desc_words_total": 228,
+   "desc_words_total": 232,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_kingpin.txt",
@@ -11091,10 +11169,10 @@
    "triggered_animation": 3,
    "triggered_desc": 5,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    3
+    3,
+    0
    ],
    "widget": false,
    "window": false,
@@ -11120,8 +11198,8 @@
    "custom_loc": false,
    "desc_has_scope_text": true,
    "desc_keys": 1,
-   "desc_words_main": 49,
-   "desc_words_total": 49,
+   "desc_words_main": 60,
+   "desc_words_total": 60,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_kingpin.txt",
@@ -11185,17 +11263,17 @@
    "random_valid": false,
    "sender": false,
    "signature": false,
-   "speech": false,
+   "speech": true,
    "theme": true,
    "title_words": 2,
    "toasts": 0,
    "triggered_animation": 3,
    "triggered_desc": 0,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    3
+    3,
+    0
    ],
    "widget": false,
    "window": false,
@@ -11220,8 +11298,8 @@
    "custom_loc": false,
    "desc_has_scope_text": true,
    "desc_keys": 7,
-   "desc_words_main": 43,
-   "desc_words_total": 197,
+   "desc_words_main": 47,
+   "desc_words_total": 225,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_kingpin.txt",
@@ -11248,7 +11326,7 @@
    "opt_stress": 2,
    "opt_trait": 1,
    "opt_unavail": 0,
-   "opt_words_avg": 6.6,
+   "opt_words_avg": 6.7,
    "option_gates": [
     {
      "axis": "other",
@@ -11333,9 +11411,9 @@
    "triggered_animation": 2,
    "triggered_desc": 5,
    "type": "character_event",
-   "voice": "neutral",
+   "voice": "1st",
    "voice_counts": [
-    0,
+    1,
     0
    ],
    "widget": false,
@@ -11361,7 +11439,7 @@
    "desc_has_scope_text": true,
    "desc_keys": 7,
    "desc_words_main": 38,
-   "desc_words_total": 196,
+   "desc_words_total": 213,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_kingpin.txt",
@@ -11388,7 +11466,7 @@
    "opt_stress": 1,
    "opt_trait": 1,
    "opt_unavail": 0,
-   "opt_words_avg": 6.5,
+   "opt_words_avg": 6.6,
    "option_gates": [
     {
      "axis": "other",
@@ -11473,10 +11551,10 @@
    "triggered_animation": 2,
    "triggered_desc": 5,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    1
+    1,
+    0
    ],
    "widget": false,
    "window": false,
@@ -11501,8 +11579,8 @@
    "custom_loc": false,
    "desc_has_scope_text": true,
    "desc_keys": 1,
-   "desc_words_main": 49,
-   "desc_words_total": 49,
+   "desc_words_main": 64,
+   "desc_words_total": 64,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_kingpin.txt",
@@ -11559,17 +11637,17 @@
    "random_valid": false,
    "sender": false,
    "signature": false,
-   "speech": false,
+   "speech": true,
    "theme": true,
    "title_words": 2,
    "toasts": 2,
    "triggered_animation": 2,
    "triggered_desc": 0,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    2
+    2,
+    0
    ],
    "widget": false,
    "window": false,
@@ -11688,8 +11766,8 @@
    "custom_loc": false,
    "desc_has_scope_text": true,
    "desc_keys": 1,
-   "desc_words_main": 51,
-   "desc_words_total": 51,
+   "desc_words_main": 52,
+   "desc_words_total": 52,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_kingpin.txt",
@@ -11752,10 +11830,10 @@
    "triggered_animation": 2,
    "triggered_desc": 0,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    1
+    1,
+    0
    ],
    "widget": false,
    "window": false,
@@ -11783,8 +11861,8 @@
    "custom_loc": true,
    "desc_has_scope_text": true,
    "desc_keys": 8,
-   "desc_words_main": 45,
-   "desc_words_total": 248,
+   "desc_words_main": 53,
+   "desc_words_total": 276,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_kingpin.txt",
@@ -11841,17 +11919,17 @@
    "random_valid": false,
    "sender": false,
    "signature": false,
-   "speech": false,
+   "speech": true,
    "theme": true,
    "title_words": 2,
    "toasts": 4,
    "triggered_animation": 3,
    "triggered_desc": 6,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    3
+    3,
+    0
    ],
    "widget": false,
    "window": false,
@@ -11877,8 +11955,8 @@
    "custom_loc": false,
    "desc_has_scope_text": true,
    "desc_keys": 1,
-   "desc_words_main": 47,
-   "desc_words_total": 47,
+   "desc_words_main": 67,
+   "desc_words_total": 67,
    "effects_2d": [
     "smoke"
    ],
@@ -11936,17 +12014,17 @@
    "random_valid": false,
    "sender": false,
    "signature": false,
-   "speech": false,
+   "speech": true,
    "theme": true,
    "title_words": 2,
    "toasts": 2,
    "triggered_animation": 3,
    "triggered_desc": 0,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    1
+    1,
+    0
    ],
    "widget": false,
    "window": false,
@@ -11973,7 +12051,7 @@
    "desc_has_scope_text": true,
    "desc_keys": 9,
    "desc_words_main": 38,
-   "desc_words_total": 225,
+   "desc_words_total": 257,
    "effects_2d": [
     "smoke"
    ],
@@ -12047,16 +12125,16 @@
    "random_valid": false,
    "sender": false,
    "signature": false,
-   "speech": false,
+   "speech": true,
    "theme": true,
    "title_words": 1,
    "toasts": 0,
    "triggered_animation": 3,
    "triggered_desc": 7,
    "type": "character_event",
-   "voice": "neutral",
+   "voice": "1st",
    "voice_counts": [
-    0,
+    1,
     0
    ],
    "widget": false,
@@ -12083,7 +12161,7 @@
    "desc_has_scope_text": true,
    "desc_keys": 4,
    "desc_words_main": 38,
-   "desc_words_total": 102,
+   "desc_words_total": 112,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_kingpin.txt",
@@ -12162,10 +12240,10 @@
    "triggered_animation": 2,
    "triggered_desc": 2,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    1
+    1,
+    0
    ],
    "widget": false,
    "window": false,
@@ -12190,8 +12268,8 @@
    "custom_loc": false,
    "desc_has_scope_text": true,
    "desc_keys": 3,
-   "desc_words_main": 35,
-   "desc_words_total": 71,
+   "desc_words_main": 45,
+   "desc_words_total": 81,
    "effects_2d": [
     "flies"
    ],
@@ -12249,7 +12327,7 @@
    "random_valid": false,
    "sender": false,
    "signature": false,
-   "speech": false,
+   "speech": true,
    "theme": true,
    "title_words": 4,
    "toasts": 0,
@@ -12285,8 +12363,8 @@
    "custom_loc": true,
    "desc_has_scope_text": true,
    "desc_keys": 1,
-   "desc_words_main": 54,
-   "desc_words_total": 54,
+   "desc_words_main": 64,
+   "desc_words_total": 64,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_kingpin.txt",
@@ -12342,17 +12420,17 @@
    "random_valid": false,
    "sender": false,
    "signature": false,
-   "speech": false,
+   "speech": true,
    "theme": true,
    "title_words": 2,
    "toasts": 2,
    "triggered_animation": 3,
    "triggered_desc": 0,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    1
+    2,
+    0
    ],
    "widget": false,
    "window": false,
@@ -12377,7 +12455,7 @@
    "desc_has_scope_text": true,
    "desc_keys": 5,
    "desc_words_main": 45,
-   "desc_words_total": 143,
+   "desc_words_total": 157,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_kingpin.txt",
@@ -12472,7 +12550,7 @@
    "desc_has_scope_text": true,
    "desc_keys": 4,
    "desc_words_main": 50,
-   "desc_words_total": 105,
+   "desc_words_total": 119,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_kingpin.txt",
@@ -12566,7 +12644,7 @@
    "desc_has_scope_text": true,
    "desc_keys": 4,
    "desc_words_main": 39,
-   "desc_words_total": 94,
+   "desc_words_total": 108,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_kingpin.txt",
@@ -12660,7 +12738,7 @@
    "desc_has_scope_text": true,
    "desc_keys": 7,
    "desc_words_main": 40,
-   "desc_words_total": 195,
+   "desc_words_total": 209,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_kingpin.txt",
@@ -12782,7 +12860,7 @@
    "desc_has_scope_text": true,
    "desc_keys": 4,
    "desc_words_main": 48,
-   "desc_words_total": 103,
+   "desc_words_total": 117,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_kingpin.txt",
@@ -12879,7 +12957,7 @@
    "desc_has_scope_text": true,
    "desc_keys": 4,
    "desc_words_main": 45,
-   "desc_words_total": 100,
+   "desc_words_total": 114,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_kingpin.txt",
@@ -13072,7 +13150,7 @@
    "desc_has_scope_text": true,
    "desc_keys": 4,
    "desc_words_main": 42,
-   "desc_words_total": 101,
+   "desc_words_total": 121,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_kingpin.txt",
@@ -13158,8 +13236,8 @@
    "custom_loc": false,
    "desc_has_scope_text": true,
    "desc_keys": 9,
-   "desc_words_main": 29,
-   "desc_words_total": 206,
+   "desc_words_main": 42,
+   "desc_words_total": 223,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_kingpin.txt",
@@ -13216,17 +13294,17 @@
    "random_valid": false,
    "sender": false,
    "signature": false,
-   "speech": false,
+   "speech": true,
    "theme": true,
    "title_words": 2,
    "toasts": 0,
    "triggered_animation": 2,
    "triggered_desc": 6,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    2
+    2,
+    0
    ],
    "widget": false,
    "window": false,
@@ -13440,8 +13518,8 @@
    "custom_loc": false,
    "desc_has_scope_text": true,
    "desc_keys": 4,
-   "desc_words_main": 52,
-   "desc_words_total": 126,
+   "desc_words_main": 61,
+   "desc_words_total": 142,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_kingpin.txt",
@@ -13492,17 +13570,17 @@
    "random_valid": false,
    "sender": false,
    "signature": false,
-   "speech": false,
+   "speech": true,
    "theme": true,
    "title_words": 4,
    "toasts": 0,
    "triggered_animation": 2,
    "triggered_desc": 2,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    4
+    4,
+    0
    ],
    "widget": false,
    "window": false,
@@ -13593,10 +13671,10 @@
    "triggered_animation": 2,
    "triggered_desc": 2,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "neutral",
    "voice_counts": [
     0,
-    2
+    0
    ],
    "widget": false,
    "window": false,
@@ -14146,7 +14224,7 @@
    "desc_has_scope_text": true,
    "desc_keys": 6,
    "desc_words_main": 57,
-   "desc_words_total": 224,
+   "desc_words_total": 238,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_kingpin.txt",
@@ -14192,7 +14270,7 @@
    "random_valid": false,
    "sender": false,
    "signature": false,
-   "speech": false,
+   "speech": true,
    "theme": true,
    "title_words": 4,
    "toasts": 0,
@@ -14227,8 +14305,8 @@
    "custom_loc": false,
    "desc_has_scope_text": true,
    "desc_keys": 4,
-   "desc_words_main": 38,
-   "desc_words_total": 112,
+   "desc_words_main": 44,
+   "desc_words_total": 125,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_kingpin.txt",
@@ -14282,17 +14360,17 @@
    "random_valid": false,
    "sender": false,
    "signature": false,
-   "speech": false,
+   "speech": true,
    "theme": true,
    "title_words": 2,
    "toasts": 0,
    "triggered_animation": 2,
    "triggered_desc": 2,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    2
+    2,
+    0
    ],
    "widget": false,
    "window": false,
@@ -14373,10 +14451,10 @@
    "triggered_animation": 2,
    "triggered_desc": 2,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "neutral",
    "voice_counts": [
     0,
-    1
+    0
    ],
    "widget": false,
    "window": false,
@@ -14402,7 +14480,7 @@
    "desc_has_scope_text": true,
    "desc_keys": 7,
    "desc_words_main": 64,
-   "desc_words_total": 266,
+   "desc_words_total": 280,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_kingpin.txt",
@@ -14497,7 +14575,7 @@
    "desc_has_scope_text": true,
    "desc_keys": 5,
    "desc_words_main": 47,
-   "desc_words_total": 148,
+   "desc_words_total": 158,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_kingpin.txt",
@@ -14558,10 +14636,10 @@
    "triggered_animation": 2,
    "triggered_desc": 3,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    2
+    2,
+    0
    ],
    "widget": false,
    "window": false,
@@ -14586,7 +14664,7 @@
    "desc_has_scope_text": true,
    "desc_keys": 5,
    "desc_words_main": 41,
-   "desc_words_total": 128,
+   "desc_words_total": 129,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_kingpin.txt",
@@ -14666,8 +14744,8 @@
    "custom_loc": true,
    "desc_has_scope_text": true,
    "desc_keys": 8,
-   "desc_words_main": 29,
-   "desc_words_total": 173,
+   "desc_words_main": 30,
+   "desc_words_total": 174,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_kingpin.txt",
@@ -14720,10 +14798,10 @@
    "triggered_animation": 2,
    "triggered_desc": 5,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "neutral",
    "voice_counts": [
     0,
-    1
+    0
    ],
    "widget": false,
    "window": false,
@@ -14748,8 +14826,8 @@
    "custom_loc": true,
    "desc_has_scope_text": true,
    "desc_keys": 4,
-   "desc_words_main": 44,
-   "desc_words_total": 118,
+   "desc_words_main": 45,
+   "desc_words_total": 119,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_kingpin.txt",
@@ -14808,10 +14886,10 @@
    "triggered_animation": 2,
    "triggered_desc": 2,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "neutral",
    "voice_counts": [
     0,
-    3
+    0
    ],
    "widget": false,
    "window": false,
@@ -14819,10 +14897,14 @@
   },
   {
    "after": false,
-   "animation": 2,
+   "animation": 10,
    "animations": [
+    "disapproval",
+    "paranoia",
     "personality_bold",
-    "thinking"
+    "personality_greedy",
+    "thinking",
+    "throne_room_bow_1"
    ],
    "artifact": false,
    "backgrounds": [
@@ -14841,8 +14923,9 @@
    "file": "events/eotg_augmentation_nonruler.txt",
    "formatting": false,
    "gate_axes": {
+    "education": 1,
     "other": 1,
-    "personality": 2,
+    "personality": 1,
     "ungated": 2
    },
    "id": "eotg_aug_nr.001",
@@ -14858,9 +14941,9 @@
    "opt_flag": 0,
    "opt_flavor": 0,
    "opt_highlight": 0,
-   "opt_skill": 0,
+   "opt_skill": 1,
    "opt_stress": 2,
-   "opt_trait": 2,
+   "opt_trait": 1,
    "opt_unavail": 0,
    "opt_words_avg": 4.2,
    "option_gates": [
@@ -14887,11 +14970,9 @@
      ]
     },
     {
-     "axis": "personality",
+     "axis": "education",
      "name": "eotg_aug_nr.001.e",
-     "personality": [
-      "paranoid"
-     ]
+     "personality": []
     }
    ],
    "options": 5,
@@ -14902,7 +14983,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": false,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 2,
    "random_valid": false,
    "sender": false,
@@ -14911,7 +14992,7 @@
    "theme": true,
    "title_words": 3,
    "toasts": 0,
-   "triggered_animation": 0,
+   "triggered_animation": 4,
    "triggered_desc": 0,
    "type": "character_event",
    "voice": "2nd",
@@ -14925,8 +15006,12 @@
   },
   {
    "after": false,
-   "animation": 2,
+   "animation": 10,
    "animations": [
+    "admiration",
+    "fear",
+    "hero_flex",
+    "paranoia",
     "personality_rational",
     "war_attacker"
    ],
@@ -14948,7 +15033,8 @@
    "formatting": false,
    "gate_axes": {
     "other": 1,
-    "personality": 2,
+    "personality": 1,
+    "tier": 1,
     "ungated": 2
    },
    "id": "eotg_aug_nr.002",
@@ -14966,7 +15052,7 @@
    "opt_highlight": 0,
    "opt_skill": 0,
    "opt_stress": 2,
-   "opt_trait": 2,
+   "opt_trait": 1,
    "opt_unavail": 0,
    "opt_words_avg": 4,
    "option_gates": [
@@ -14986,11 +15072,9 @@
      "personality": []
     },
     {
-     "axis": "personality",
+     "axis": "tier",
      "name": "eotg_aug_nr.002.d",
-     "personality": [
-      "ambitious"
-     ]
+     "personality": []
     },
     {
      "axis": "personality",
@@ -15008,7 +15092,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": true,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 2,
    "random_valid": false,
    "sender": false,
@@ -15017,7 +15101,7 @@
    "theme": true,
    "title_words": 4,
    "toasts": 0,
-   "triggered_animation": 0,
+   "triggered_animation": 4,
    "triggered_desc": 2,
    "type": "character_event",
    "voice": "neutral",
@@ -15031,8 +15115,12 @@
   },
   {
    "after": false,
-   "animation": 2,
+   "animation": 10,
    "animations": [
+    "dismissal",
+    "paranoia",
+    "sadness",
+    "shame",
     "stress",
     "worry"
    ],
@@ -15053,8 +15141,9 @@
    "file": "events/eotg_augmentation_nonruler.txt",
    "formatting": false,
    "gate_axes": {
+    "education": 1,
     "other": 3,
-    "personality": 2,
+    "personality": 1,
     "ungated": 2
    },
    "id": "eotg_aug_nr.003",
@@ -15072,9 +15161,9 @@
    "opt_flag": 1,
    "opt_flavor": 0,
    "opt_highlight": 0,
-   "opt_skill": 0,
+   "opt_skill": 1,
    "opt_stress": 3,
-   "opt_trait": 4,
+   "opt_trait": 3,
    "opt_unavail": 0,
    "opt_words_avg": 5.4,
    "option_gates": [
@@ -15101,11 +15190,9 @@
      ]
     },
     {
-     "axis": "personality",
+     "axis": "education",
      "name": "eotg_aug_nr.003.e",
-     "personality": [
-      "callous"
-     ]
+     "personality": []
     },
     {
      "axis": "other",
@@ -15126,7 +15213,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": false,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 2,
    "random_valid": false,
    "sender": false,
@@ -15135,7 +15222,7 @@
    "theme": true,
    "title_words": 3,
    "toasts": 0,
-   "triggered_animation": 0,
+   "triggered_animation": 4,
    "triggered_desc": 0,
    "type": "character_event",
    "voice": "2nd",
@@ -15149,9 +15236,13 @@
   },
   {
    "after": false,
-   "animation": 2,
+   "animation": 10,
    "animations": [
+    "anger",
+    "crying",
     "rage",
+    "schadenfreude",
+    "shame",
     "shock"
    ],
    "artifact": false,
@@ -15171,8 +15262,10 @@
    "file": "events/eotg_augmentation_nonruler.txt",
    "formatting": false,
    "gate_axes": {
+    "education": 1,
     "other": 2,
-    "personality": 3,
+    "personality": 1,
+    "tier": 1,
     "ungated": 1
    },
    "id": "eotg_aug_nr.004",
@@ -15188,9 +15281,9 @@
    "opt_flag": 0,
    "opt_flavor": 0,
    "opt_highlight": 0,
-   "opt_skill": 0,
+   "opt_skill": 1,
    "opt_stress": 2,
-   "opt_trait": 2,
+   "opt_trait": 1,
    "opt_unavail": 0,
    "opt_words_avg": 3.8,
    "option_gates": [
@@ -15210,18 +15303,14 @@
      "personality": []
     },
     {
-     "axis": "personality",
+     "axis": "tier",
      "name": "eotg_aug_nr.004.d",
-     "personality": [
-      "just"
-     ]
+     "personality": []
     },
     {
-     "axis": "personality",
+     "axis": "education",
      "name": "eotg_aug_nr.004.e",
-     "personality": [
-      "sadistic"
-     ]
+     "personality": []
     },
     {
      "axis": "personality",
@@ -15239,7 +15328,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": false,
-   "personality_gates": 3,
+   "personality_gates": 1,
    "portraits": 3,
    "random_valid": false,
    "sender": false,
@@ -15248,7 +15337,7 @@
    "theme": true,
    "title_words": 2,
    "toasts": 0,
-   "triggered_animation": 0,
+   "triggered_animation": 4,
    "triggered_desc": 1,
    "type": "character_event",
    "voice": "neutral",
@@ -15262,9 +15351,13 @@
   },
   {
    "after": false,
-   "animation": 2,
+   "animation": 10,
    "animations": [
+    "anger",
+    "dismissal",
+    "paranoia",
     "personality_irrational",
+    "sadness",
     "worry"
    ],
    "artifact": false,
@@ -15285,7 +15378,8 @@
    "formatting": false,
    "gate_axes": {
     "other": 1,
-    "personality": 2,
+    "personality": 1,
+    "tier": 1,
     "ungated": 2
    },
    "id": "eotg_aug_nr.005",
@@ -15303,7 +15397,7 @@
    "opt_highlight": 0,
    "opt_skill": 0,
    "opt_stress": 1,
-   "opt_trait": 2,
+   "opt_trait": 1,
    "opt_unavail": 0,
    "opt_words_avg": 3.4,
    "option_gates": [
@@ -15330,11 +15424,9 @@
      ]
     },
     {
-     "axis": "personality",
+     "axis": "tier",
      "name": "eotg_aug_nr.005.e",
-     "personality": [
-      "paranoid"
-     ]
+     "personality": []
     }
    ],
    "options": 5,
@@ -15345,7 +15437,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": false,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 2,
    "random_valid": false,
    "sender": false,
@@ -15354,7 +15446,7 @@
    "theme": true,
    "title_words": 3,
    "toasts": 0,
-   "triggered_animation": 0,
+   "triggered_animation": 4,
    "triggered_desc": 0,
    "type": "character_event",
    "voice": "2nd",
@@ -15368,8 +15460,12 @@
   },
   {
    "after": false,
-   "animation": 2,
+   "animation": 10,
    "animations": [
+    "anger",
+    "crying",
+    "fear",
+    "personality_irrational",
     "rage",
     "shock"
    ],
@@ -15390,8 +15486,9 @@
    "file": "events/eotg_augmentation_nonruler.txt",
    "formatting": false,
    "gate_axes": {
+    "education": 1,
     "other": 2,
-    "personality": 2,
+    "personality": 1,
     "ungated": 2
    },
    "id": "eotg_aug_nr.006",
@@ -15409,9 +15506,9 @@
    "opt_flag": 1,
    "opt_flavor": 0,
    "opt_highlight": 0,
-   "opt_skill": 0,
+   "opt_skill": 1,
    "opt_stress": 2,
-   "opt_trait": 2,
+   "opt_trait": 1,
    "opt_unavail": 0,
    "opt_words_avg": 3.5,
    "option_gates": [
@@ -15443,11 +15540,9 @@
      ]
     },
     {
-     "axis": "personality",
+     "axis": "education",
      "name": "eotg_aug_nr.006.f",
-     "personality": [
-      "callous"
-     ]
+     "personality": []
     }
    ],
    "options": 6,
@@ -15458,7 +15553,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": false,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 2,
    "random_valid": false,
    "sender": false,
@@ -15467,7 +15562,7 @@
    "theme": true,
    "title_words": 4,
    "toasts": 2,
-   "triggered_animation": 0,
+   "triggered_animation": 4,
    "triggered_desc": 0,
    "type": "character_event",
    "voice": "2nd",
@@ -17117,10 +17212,15 @@
   },
   {
    "after": false,
-   "animation": 2,
+   "animation": 12,
    "animations": [
+    "nervous",
+    "paranoia",
     "personality_bold",
-    "war_attacker"
+    "personality_greedy",
+    "personality_zealous",
+    "war_attacker",
+    "worry"
    ],
    "artifact": false,
    "backgrounds": [
@@ -17140,7 +17240,8 @@
    "formatting": false,
    "gate_axes": {
     "other": 2,
-    "personality": 2,
+    "personality": 1,
+    "tier": 1,
     "ungated": 1
    },
    "id": "eotg_aug_retinue.001",
@@ -17158,7 +17259,7 @@
    "opt_highlight": 0,
    "opt_skill": 0,
    "opt_stress": 2,
-   "opt_trait": 2,
+   "opt_trait": 1,
    "opt_unavail": 0,
    "opt_words_avg": 5.8,
    "option_gates": [
@@ -17178,11 +17279,9 @@
      "personality": []
     },
     {
-     "axis": "personality",
+     "axis": "tier",
      "name": "eotg_aug_retinue.001.d",
-     "personality": [
-      "ambitious"
-     ]
+     "personality": []
     },
     {
      "axis": "personality",
@@ -17200,7 +17299,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": false,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 2,
    "random_valid": false,
    "sender": false,
@@ -17209,7 +17308,7 @@
    "theme": true,
    "title_words": 4,
    "toasts": 0,
-   "triggered_animation": 0,
+   "triggered_animation": 5,
    "triggered_desc": 0,
    "type": "character_event",
    "voice": "2nd",
@@ -17223,10 +17322,15 @@
   },
   {
    "after": true,
-   "animation": 2,
+   "animation": 11,
    "animations": [
+    "beg",
+    "happiness",
+    "paranoia",
     "personality_bold",
-    "thinking"
+    "personality_greedy",
+    "thinking",
+    "throne_room_bow_1"
    ],
    "artifact": false,
    "backgrounds": [
@@ -17245,8 +17349,9 @@
    "file": "events/eotg_augmentation_retinue.txt",
    "formatting": false,
    "gate_axes": {
+    "education": 1,
     "other": 2,
-    "personality": 2,
+    "personality": 1,
     "ungated": 1
    },
    "id": "eotg_aug_retinue.002",
@@ -17262,9 +17367,9 @@
    "opt_flag": 0,
    "opt_flavor": 0,
    "opt_highlight": 0,
-   "opt_skill": 0,
+   "opt_skill": 1,
    "opt_stress": 2,
-   "opt_trait": 2,
+   "opt_trait": 1,
    "opt_unavail": 0,
    "opt_words_avg": 5.2,
    "option_gates": [
@@ -17284,11 +17389,9 @@
      "personality": []
     },
     {
-     "axis": "personality",
+     "axis": "education",
      "name": "eotg_aug_retinue.002.d",
-     "personality": [
-      "greedy"
-     ]
+     "personality": []
     },
     {
      "axis": "personality",
@@ -17306,7 +17409,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": true,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 3,
    "random_valid": false,
    "sender": false,
@@ -17315,7 +17418,7 @@
    "theme": true,
    "title_words": 3,
    "toasts": 0,
-   "triggered_animation": 0,
+   "triggered_animation": 4,
    "triggered_desc": 1,
    "type": "character_event",
    "voice": "2nd",
@@ -17329,9 +17432,12 @@
   },
   {
    "after": true,
-   "animation": 1,
+   "animation": 7,
    "animations": [
-    "marshal"
+    "marshal",
+    "paranoia",
+    "personality_bold",
+    "worry"
    ],
    "artifact": false,
    "backgrounds": [
@@ -17350,8 +17456,9 @@
    "file": "events/eotg_augmentation_retinue.txt",
    "formatting": false,
    "gate_axes": {
+    "education": 1,
     "other": 1,
-    "personality": 2,
+    "personality": 1,
     "ungated": 3
    },
    "id": "eotg_aug_retinue.003",
@@ -17367,9 +17474,9 @@
    "opt_flag": 0,
    "opt_flavor": 0,
    "opt_highlight": 0,
-   "opt_skill": 0,
+   "opt_skill": 1,
    "opt_stress": 2,
-   "opt_trait": 2,
+   "opt_trait": 1,
    "opt_unavail": 0,
    "opt_words_avg": 5,
    "option_gates": [
@@ -17396,11 +17503,9 @@
      ]
     },
     {
-     "axis": "personality",
+     "axis": "education",
      "name": "eotg_aug_retinue.003.e",
-     "personality": [
-      "paranoid"
-     ]
+     "personality": []
     },
     {
      "axis": "other",
@@ -17416,7 +17521,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": true,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 1,
    "random_valid": false,
    "sender": false,
@@ -17425,7 +17530,7 @@
    "theme": true,
    "title_words": 3,
    "toasts": 0,
-   "triggered_animation": 0,
+   "triggered_animation": 3,
    "triggered_desc": 1,
    "type": "character_event",
    "voice": "neutral",
@@ -17439,9 +17544,12 @@
   },
   {
    "after": true,
-   "animation": 2,
+   "animation": 10,
    "animations": [
     "anger",
+    "disapproval",
+    "personality_honorable",
+    "sadness",
     "stress"
    ],
    "artifact": false,
@@ -17462,7 +17570,8 @@
    "formatting": false,
    "gate_axes": {
     "other": 2,
-    "personality": 2,
+    "personality": 1,
+    "tier": 1,
     "ungated": 1
    },
    "id": "eotg_aug_retinue.004",
@@ -17480,7 +17589,7 @@
    "opt_highlight": 0,
    "opt_skill": 0,
    "opt_stress": 2,
-   "opt_trait": 2,
+   "opt_trait": 1,
    "opt_unavail": 0,
    "opt_words_avg": 3,
    "option_gates": [
@@ -17507,11 +17616,9 @@
      ]
     },
     {
-     "axis": "personality",
+     "axis": "tier",
      "name": "eotg_aug_retinue.004.e",
-     "personality": [
-      "callous"
-     ]
+     "personality": []
     }
    ],
    "options": 5,
@@ -17522,7 +17629,7 @@
    "override_icon": false,
    "override_sound": false,
    "paragraphs": true,
-   "personality_gates": 2,
+   "personality_gates": 1,
    "portraits": 2,
    "random_valid": false,
    "sender": false,
@@ -17531,7 +17638,7 @@
    "theme": true,
    "title_words": 4,
    "toasts": 0,
-   "triggered_animation": 0,
+   "triggered_animation": 4,
    "triggered_desc": 1,
    "type": "character_event",
    "voice": "neutral",
@@ -17545,8 +17652,11 @@
   },
   {
    "after": true,
-   "animation": 1,
+   "animation": 7,
    "animations": [
+    "personality_bold",
+    "personality_irrational",
+    "personality_zealous",
     "thinking"
    ],
    "artifact": false,
@@ -17633,7 +17743,7 @@
    "theme": true,
    "title_words": 4,
    "toasts": 0,
-   "triggered_animation": 0,
+   "triggered_animation": 3,
    "triggered_desc": 1,
    "type": "character_event",
    "voice": "2nd",
@@ -22429,7 +22539,7 @@
    "desc_has_scope_text": true,
    "desc_keys": 3,
    "desc_words_main": 26,
-   "desc_words_total": 62,
+   "desc_words_total": 68,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_tier3.txt",
@@ -22457,7 +22567,7 @@
    "opt_stress": 3,
    "opt_trait": 1,
    "opt_unavail": 0,
-   "opt_words_avg": 5.6,
+   "opt_words_avg": 6.2,
    "option_gates": [
     {
      "axis": "ungated",
@@ -22507,10 +22617,10 @@
    "triggered_animation": 3,
    "triggered_desc": 1,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    1
+    1,
+    0
    ],
    "widget": false,
    "window": false,
@@ -22563,7 +22673,7 @@
    "opt_stress": 3,
    "opt_trait": 1,
    "opt_unavail": 0,
-   "opt_words_avg": 5.2,
+   "opt_words_avg": 6.6,
    "option_gates": [
     {
      "axis": "ungated",
@@ -22613,10 +22723,10 @@
    "triggered_animation": 3,
    "triggered_desc": 0,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    3
+    3,
+    0
    ],
    "widget": false,
    "window": false,
@@ -22640,8 +22750,8 @@
    "custom_loc": false,
    "desc_has_scope_text": false,
    "desc_keys": 1,
-   "desc_words_main": 41,
-   "desc_words_total": 41,
+   "desc_words_main": 47,
+   "desc_words_total": 47,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_tier3.txt",
@@ -22669,7 +22779,7 @@
    "opt_stress": 3,
    "opt_trait": 1,
    "opt_unavail": 0,
-   "opt_words_avg": 6.3,
+   "opt_words_avg": 7.3,
    "option_gates": [
     {
      "axis": "ungated",
@@ -22717,17 +22827,17 @@
    "random_valid": false,
    "sender": false,
    "signature": false,
-   "speech": false,
+   "speech": true,
    "theme": true,
    "title_words": 1,
    "toasts": 0,
    "triggered_animation": 2,
    "triggered_desc": 0,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    2
+    2,
+    0
    ],
    "widget": false,
    "window": false,
@@ -22754,7 +22864,7 @@
    "desc_has_scope_text": true,
    "desc_keys": 3,
    "desc_words_main": 44,
-   "desc_words_total": 74,
+   "desc_words_total": 77,
    "effects_2d": [
     "fog"
    ],
@@ -22784,7 +22894,7 @@
    "opt_stress": 3,
    "opt_trait": 1,
    "opt_unavail": 0,
-   "opt_words_avg": 5.4,
+   "opt_words_avg": 6,
    "option_gates": [
     {
      "axis": "ungated",
@@ -22827,17 +22937,17 @@
    "random_valid": false,
    "sender": false,
    "signature": false,
-   "speech": false,
+   "speech": true,
    "theme": true,
    "title_words": 2,
    "toasts": 1,
    "triggered_animation": 3,
    "triggered_desc": 1,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "neutral",
    "voice_counts": [
     0,
-    1
+    0
    ],
    "widget": false,
    "window": false,
@@ -22890,7 +23000,7 @@
    "opt_stress": 2,
    "opt_trait": 1,
    "opt_unavail": 0,
-   "opt_words_avg": 4.6,
+   "opt_words_avg": 6.6,
    "option_gates": [
     {
      "axis": "ungated",
@@ -22940,10 +23050,10 @@
    "triggered_animation": 3,
    "triggered_desc": 0,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    1
+    1,
+    0
    ],
    "widget": false,
    "window": false,
@@ -22970,8 +23080,8 @@
    "custom_loc": false,
    "desc_has_scope_text": true,
    "desc_keys": 1,
-   "desc_words_main": 39,
-   "desc_words_total": 39,
+   "desc_words_main": 38,
+   "desc_words_total": 38,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_tier3.txt",
@@ -22998,7 +23108,7 @@
    "opt_stress": 3,
    "opt_trait": 1,
    "opt_unavail": 0,
-   "opt_words_avg": 6.2,
+   "opt_words_avg": 6.8,
    "option_gates": [
     {
      "axis": "ungated",
@@ -23041,17 +23151,17 @@
    "random_valid": false,
    "sender": false,
    "signature": false,
-   "speech": false,
+   "speech": true,
    "theme": true,
    "title_words": 2,
    "toasts": 2,
    "triggered_animation": 3,
    "triggered_desc": 0,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    2
+    1,
+    0
    ],
    "widget": false,
    "window": false,
@@ -23075,8 +23185,8 @@
    "custom_loc": false,
    "desc_has_scope_text": true,
    "desc_keys": 1,
-   "desc_words_main": 37,
-   "desc_words_total": 37,
+   "desc_words_main": 46,
+   "desc_words_total": 46,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_tier3.txt",
@@ -23140,17 +23250,17 @@
    "random_valid": false,
    "sender": false,
    "signature": false,
-   "speech": false,
+   "speech": true,
    "theme": true,
    "title_words": 2,
    "toasts": 2,
    "triggered_animation": 2,
    "triggered_desc": 0,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    4
+    2,
+    0
    ],
    "widget": false,
    "window": false,
@@ -23255,10 +23365,10 @@
    "triggered_animation": 3,
    "triggered_desc": 0,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    5
+    5,
+    0
    ],
    "widget": false,
    "window": false,
@@ -23284,8 +23394,8 @@
    "custom_loc": false,
    "desc_has_scope_text": true,
    "desc_keys": 4,
-   "desc_words_main": 34,
-   "desc_words_total": 112,
+   "desc_words_main": 37,
+   "desc_words_total": 115,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_tier3.txt",
@@ -23313,7 +23423,7 @@
    "opt_stress": 2,
    "opt_trait": 1,
    "opt_unavail": 0,
-   "opt_words_avg": 4.2,
+   "opt_words_avg": 4.8,
    "option_gates": [
     {
      "axis": "other",
@@ -23356,17 +23466,17 @@
    "random_valid": false,
    "sender": false,
    "signature": false,
-   "speech": false,
+   "speech": true,
    "theme": true,
    "title_words": 2,
    "toasts": 0,
    "triggered_animation": 3,
    "triggered_desc": 2,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    5
+    4,
+    0
    ],
    "widget": false,
    "window": false,
@@ -23391,8 +23501,8 @@
    "custom_loc": false,
    "desc_has_scope_text": false,
    "desc_keys": 1,
-   "desc_words_main": 43,
-   "desc_words_total": 43,
+   "desc_words_main": 42,
+   "desc_words_total": 42,
    "effects_2d": [
     "smoke"
    ],
@@ -23423,7 +23533,7 @@
    "opt_stress": 3,
    "opt_trait": 1,
    "opt_unavail": 0,
-   "opt_words_avg": 4.2,
+   "opt_words_avg": 6.3,
    "option_gates": [
     {
      "axis": "other",
@@ -23478,10 +23588,10 @@
    "triggered_animation": 3,
    "triggered_desc": 0,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    1
+    2,
+    0
    ],
    "widget": false,
    "window": false,
@@ -23585,10 +23695,10 @@
    "triggered_animation": 3,
    "triggered_desc": 0,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    7
+    7,
+    0
    ],
    "widget": false,
    "window": false,
@@ -23613,8 +23723,8 @@
    "custom_loc": false,
    "desc_has_scope_text": false,
    "desc_keys": 3,
-   "desc_words_main": 39,
-   "desc_words_total": 104,
+   "desc_words_main": 38,
+   "desc_words_total": 105,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_tier3.txt",
@@ -23642,7 +23752,7 @@
    "opt_stress": 3,
    "opt_trait": 1,
    "opt_unavail": 0,
-   "opt_words_avg": 5.2,
+   "opt_words_avg": 6.8,
    "option_gates": [
     {
      "axis": "ungated",
@@ -23692,10 +23802,10 @@
    "triggered_animation": 3,
    "triggered_desc": 1,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    4
+    4,
+    0
    ],
    "widget": false,
    "window": false,
@@ -23748,7 +23858,7 @@
    "opt_stress": 1,
    "opt_trait": 1,
    "opt_unavail": 0,
-   "opt_words_avg": 4.6,
+   "opt_words_avg": 5.2,
    "option_gates": [
     {
      "axis": "other",
@@ -23791,17 +23901,17 @@
    "random_valid": false,
    "sender": false,
    "signature": false,
-   "speech": false,
+   "speech": true,
    "theme": true,
    "title_words": 1,
    "toasts": 0,
    "triggered_animation": 2,
    "triggered_desc": 1,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    6
+    5,
+    0
    ],
    "widget": false,
    "window": false,
@@ -23827,8 +23937,8 @@
    "custom_loc": false,
    "desc_has_scope_text": true,
    "desc_keys": 1,
-   "desc_words_main": 44,
-   "desc_words_total": 44,
+   "desc_words_main": 49,
+   "desc_words_total": 49,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_tier3.txt",
@@ -23856,7 +23966,7 @@
    "opt_stress": 1,
    "opt_trait": 1,
    "opt_unavail": 0,
-   "opt_words_avg": 1.8,
+   "opt_words_avg": 3.8,
    "option_gates": [
     {
      "axis": "other",
@@ -23899,17 +24009,17 @@
    "random_valid": false,
    "sender": false,
    "signature": false,
-   "speech": false,
+   "speech": true,
    "theme": true,
    "title_words": 3,
    "toasts": 3,
    "triggered_animation": 3,
    "triggered_desc": 0,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    3
+    3,
+    0
    ],
    "widget": false,
    "window": false,
@@ -23934,8 +24044,8 @@
    "custom_loc": false,
    "desc_has_scope_text": true,
    "desc_keys": 2,
-   "desc_words_main": 48,
-   "desc_words_total": 93,
+   "desc_words_main": 55,
+   "desc_words_total": 100,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_tier3.txt",
@@ -24000,17 +24110,17 @@
    "random_valid": false,
    "sender": false,
    "signature": false,
-   "speech": false,
+   "speech": true,
    "theme": true,
    "title_words": 5,
    "toasts": 4,
    "triggered_animation": 4,
    "triggered_desc": 1,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    3
+    1,
+    0
    ],
    "widget": false,
    "window": false,
@@ -24034,8 +24144,8 @@
    "custom_loc": false,
    "desc_has_scope_text": false,
    "desc_keys": 1,
-   "desc_words_main": 47,
-   "desc_words_total": 47,
+   "desc_words_main": 43,
+   "desc_words_total": 43,
    "effects_2d": [
     "fog"
    ],
@@ -24109,10 +24219,10 @@
    "triggered_animation": 2,
    "triggered_desc": 0,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    5
+    5,
+    0
    ],
    "widget": false,
    "window": false,
@@ -24137,8 +24247,8 @@
    "custom_loc": false,
    "desc_has_scope_text": true,
    "desc_keys": 1,
-   "desc_words_main": 44,
-   "desc_words_total": 44,
+   "desc_words_main": 45,
+   "desc_words_total": 45,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_tier3.txt",
@@ -24168,7 +24278,7 @@
    "opt_stress": 1,
    "opt_trait": 1,
    "opt_unavail": 0,
-   "opt_words_avg": 3.8,
+   "opt_words_avg": 4.7,
    "option_gates": [
     {
      "axis": "other",
@@ -24223,10 +24333,10 @@
    "triggered_animation": 2,
    "triggered_desc": 0,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    2
+    2,
+    0
    ],
    "widget": false,
    "window": false,
@@ -24255,8 +24365,8 @@
    "custom_loc": false,
    "desc_has_scope_text": true,
    "desc_keys": 6,
-   "desc_words_main": 63,
-   "desc_words_total": 263,
+   "desc_words_main": 64,
+   "desc_words_total": 264,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_tier3.txt",
@@ -24315,10 +24425,10 @@
    "triggered_animation": 5,
    "triggered_desc": 5,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    3
+    3,
+    0
    ],
    "widget": false,
    "window": false,
@@ -24344,8 +24454,8 @@
    "custom_loc": false,
    "desc_has_scope_text": true,
    "desc_keys": 1,
-   "desc_words_main": 46,
-   "desc_words_total": 46,
+   "desc_words_main": 48,
+   "desc_words_total": 48,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_tier3.txt",
@@ -24373,7 +24483,7 @@
    "opt_stress": 3,
    "opt_trait": 1,
    "opt_unavail": 0,
-   "opt_words_avg": 4.5,
+   "opt_words_avg": 6.5,
    "option_gates": [
     {
      "axis": "other",
@@ -24411,17 +24521,17 @@
    "random_valid": false,
    "sender": false,
    "signature": false,
-   "speech": false,
+   "speech": true,
    "theme": true,
    "title_words": 2,
    "toasts": 2,
    "triggered_animation": 3,
    "triggered_desc": 0,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    2
+    2,
+    0
    ],
    "widget": false,
    "window": false,
@@ -24445,8 +24555,8 @@
    "custom_loc": false,
    "desc_has_scope_text": true,
    "desc_keys": 1,
-   "desc_words_main": 49,
-   "desc_words_total": 49,
+   "desc_words_main": 47,
+   "desc_words_total": 47,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_tier3.txt",
@@ -24473,7 +24583,7 @@
    "opt_stress": 3,
    "opt_trait": 1,
    "opt_unavail": 0,
-   "opt_words_avg": 3.3,
+   "opt_words_avg": 6,
    "option_gates": [
     {
      "axis": "ungated",
@@ -24521,17 +24631,17 @@
    "random_valid": false,
    "sender": false,
    "signature": false,
-   "speech": false,
+   "speech": true,
    "theme": true,
    "title_words": 2,
    "toasts": 0,
    "triggered_animation": 3,
    "triggered_desc": 0,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    3
+    1,
+    0
    ],
    "widget": false,
    "window": false,
@@ -24556,8 +24666,8 @@
    "custom_loc": false,
    "desc_has_scope_text": true,
    "desc_keys": 1,
-   "desc_words_main": 36,
-   "desc_words_total": 36,
+   "desc_words_main": 31,
+   "desc_words_total": 31,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_tier3.txt",
@@ -24621,17 +24731,17 @@
    "random_valid": false,
    "sender": false,
    "signature": false,
-   "speech": false,
+   "speech": true,
    "theme": true,
    "title_words": 3,
    "toasts": 0,
    "triggered_animation": 2,
    "triggered_desc": 0,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    2
+    2,
+    0
    ],
    "widget": false,
    "window": false,
@@ -24657,7 +24767,7 @@
    "desc_has_scope_text": false,
    "desc_keys": 3,
    "desc_words_main": 56,
-   "desc_words_total": 127,
+   "desc_words_total": 126,
    "effects_2d": [
     "fog"
    ],
@@ -24712,10 +24822,10 @@
    "triggered_animation": 3,
    "triggered_desc": 2,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    1
+    1,
+    0
    ],
    "widget": false,
    "window": false,
@@ -24739,8 +24849,8 @@
    "custom_loc": false,
    "desc_has_scope_text": false,
    "desc_keys": 1,
-   "desc_words_main": 46,
-   "desc_words_total": 46,
+   "desc_words_main": 39,
+   "desc_words_total": 39,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_tier3.txt",
@@ -24767,7 +24877,7 @@
    "opt_stress": 3,
    "opt_trait": 1,
    "opt_unavail": 0,
-   "opt_words_avg": 3.4,
+   "opt_words_avg": 4.6,
    "option_gates": [
     {
      "axis": "ungated",
@@ -24817,10 +24927,10 @@
    "triggered_animation": 2,
    "triggered_desc": 0,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "neutral",
    "voice_counts": [
     0,
-    3
+    0
    ],
    "widget": false,
    "window": false,
@@ -24846,8 +24956,8 @@
    "custom_loc": false,
    "desc_has_scope_text": false,
    "desc_keys": 3,
-   "desc_words_main": 40,
-   "desc_words_total": 113,
+   "desc_words_main": 41,
+   "desc_words_total": 115,
    "effects_2d": [
     "smoke"
    ],
@@ -24910,10 +25020,10 @@
    "triggered_animation": 4,
    "triggered_desc": 2,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "neutral",
    "voice_counts": [
     0,
-    1
+    0
    ],
    "widget": false,
    "window": false,
@@ -26721,26 +26831,26 @@
    "desc_words_p10": 18,
    "desc_words_p90": 32,
    "dialogue_pct": 0.0,
-   "distinct_animations": 4,
+   "distinct_animations": 18,
    "emp_pct": 0.0,
    "events": 6,
-   "events_2plus_personality_gates": 5,
-   "events_3plus_personality_gates": 2,
+   "events_2plus_personality_gates": 0,
+   "events_3plus_personality_gates": 0,
    "flavor_pct": 0.0,
    "formatting_pct": 0.0,
    "gate_axes_options": {
-    "education": 0,
+    "education": 5,
     "other": 6,
-    "personality": 13,
-    "tier": 0,
+    "personality": 6,
+    "tier": 2,
     "ungated": 18
    },
    "internal_flag_pct": 66.7,
    "letter_events": 0,
    "messages": 0,
    "music_cues": 0,
-   "option_skill_icon_pct": 0.0,
-   "option_trait_icon_pct": 48.6,
+   "option_skill_icon_pct": 13.5,
+   "option_trait_icon_pct": 35.1,
    "options_median": 6.5,
    "options_p90": 7,
    "outfit_tags_pct": 0.0,
@@ -26748,11 +26858,11 @@
    "override_effect_2d_uses": 0,
    "paragraphs_pct": 100.0,
    "random_valid_pct": 0.0,
-   "stress_on_an_option_pct": 66.7,
+   "stress_on_an_option_pct": 100.0,
    "theme_pct": 100.0,
    "three_plus_portraits_pct": 16.7,
    "toasts_per_event": 0.17,
-   "triggered_animation_per_event": 0.0,
+   "triggered_animation_per_event": 3.5,
    "triggered_desc_pct": 100.0,
    "types": {
     "activity_event": 6
@@ -26874,26 +26984,26 @@
    "desc_words_p10": 35,
    "desc_words_p90": 52,
    "dialogue_pct": 10.3,
-   "distinct_animations": 13,
+   "distinct_animations": 30,
    "emp_pct": 0.0,
    "events": 29,
-   "events_2plus_personality_gates": 22,
-   "events_3plus_personality_gates": 1,
+   "events_2plus_personality_gates": 11,
+   "events_3plus_personality_gates": 0,
    "flavor_pct": 0.0,
    "formatting_pct": 0.0,
    "gate_axes_options": {
-    "education": 0,
+    "education": 11,
     "other": 23,
-    "personality": 49,
-    "tier": 0,
+    "personality": 37,
+    "tier": 1,
     "ungated": 69
    },
    "internal_flag_pct": 31.0,
    "letter_events": 0,
    "messages": 1,
    "music_cues": 9,
-   "option_skill_icon_pct": 2.8,
-   "option_trait_icon_pct": 41.8,
+   "option_skill_icon_pct": 9.9,
+   "option_trait_icon_pct": 33.3,
    "options_median": 5,
    "options_p90": 6,
    "outfit_tags_pct": 0.0,
@@ -26903,9 +27013,9 @@
    "random_valid_pct": 0.0,
    "stress_on_an_option_pct": 79.3,
    "theme_pct": 100.0,
-   "three_plus_portraits_pct": 3.4,
+   "three_plus_portraits_pct": 6.9,
    "toasts_per_event": 1.62,
-   "triggered_animation_per_event": 0.1,
+   "triggered_animation_per_event": 1.59,
    "triggered_desc_pct": 58.6,
    "types": {
     "character_event": 29
@@ -27027,26 +27137,26 @@
    "desc_words_p10": 26,
    "desc_words_p90": 53,
    "dialogue_pct": 10.0,
-   "distinct_animations": 13,
+   "distinct_animations": 26,
    "emp_pct": 0.0,
    "events": 20,
-   "events_2plus_personality_gates": 11,
-   "events_3plus_personality_gates": 1,
+   "events_2plus_personality_gates": 0,
+   "events_3plus_personality_gates": 0,
    "flavor_pct": 0.0,
    "formatting_pct": 0.0,
    "gate_axes_options": {
-    "education": 0,
+    "education": 9,
     "other": 30,
-    "personality": 31,
-    "tier": 0,
+    "personality": 19,
+    "tier": 3,
     "ungated": 31
    },
    "internal_flag_pct": 0.0,
    "letter_events": 0,
    "messages": 0,
    "music_cues": 0,
-   "option_skill_icon_pct": 2.2,
-   "option_trait_icon_pct": 33.7,
+   "option_skill_icon_pct": 12.0,
+   "option_trait_icon_pct": 21.7,
    "options_median": 5,
    "options_p90": 5,
    "outfit_tags_pct": 0.0,
@@ -27054,11 +27164,11 @@
    "override_effect_2d_uses": 1,
    "paragraphs_pct": 30.0,
    "random_valid_pct": 0.0,
-   "stress_on_an_option_pct": 85.0,
+   "stress_on_an_option_pct": 90.0,
    "theme_pct": 100.0,
    "three_plus_portraits_pct": 5.0,
    "toasts_per_event": 0.9,
-   "triggered_animation_per_event": 0.1,
+   "triggered_animation_per_event": 2.4,
    "triggered_desc_pct": 50.0,
    "types": {
     "character_event": 20
@@ -27126,9 +27236,9 @@
    "camera_pct": 0.0,
    "custom_loc_pct": 23.8,
    "desc_words_median": 45,
-   "desc_words_p10": 35,
-   "desc_words_p90": 54,
-   "dialogue_pct": 14.3,
+   "desc_words_p10": 38,
+   "desc_words_p90": 61,
+   "dialogue_pct": 42.9,
    "distinct_animations": 33,
    "emp_pct": 0.0,
    "events": 42,
@@ -27165,9 +27275,9 @@
    "types": {
     "character_event": 42
    },
-   "voice_1st_pct": 35.7,
-   "voice_2nd_pct": 45.2,
-   "voice_neutral_pct": 19.0,
+   "voice_1st_pct": 76.2,
+   "voice_2nd_pct": 0.0,
+   "voice_neutral_pct": 23.8,
    "voice_none_pct": 0.0,
    "window_set": 0
   },
@@ -27180,26 +27290,26 @@
    "desc_words_p10": 36,
    "desc_words_p90": 45,
    "dialogue_pct": 0.0,
-   "distinct_animations": 9,
+   "distinct_animations": 22,
    "emp_pct": 0.0,
    "events": 6,
-   "events_2plus_personality_gates": 6,
-   "events_3plus_personality_gates": 1,
+   "events_2plus_personality_gates": 0,
+   "events_3plus_personality_gates": 0,
    "flavor_pct": 0.0,
    "formatting_pct": 0.0,
    "gate_axes_options": {
-    "education": 0,
+    "education": 4,
     "other": 10,
-    "personality": 13,
-    "tier": 0,
+    "personality": 6,
+    "tier": 3,
     "ungated": 11
    },
    "internal_flag_pct": 33.3,
    "letter_events": 0,
    "messages": 12,
    "music_cues": 1,
-   "option_skill_icon_pct": 0.0,
-   "option_trait_icon_pct": 41.2,
+   "option_skill_icon_pct": 11.8,
+   "option_trait_icon_pct": 23.5,
    "options_median": 5.5,
    "options_p90": 6,
    "outfit_tags_pct": 0.0,
@@ -27211,7 +27321,7 @@
    "theme_pct": 100.0,
    "three_plus_portraits_pct": 16.7,
    "toasts_per_event": 0.33,
-   "triggered_animation_per_event": 0.0,
+   "triggered_animation_per_event": 4.0,
    "triggered_desc_pct": 33.3,
    "types": {
     "character_event": 6
@@ -27384,26 +27494,26 @@
    "desc_words_p10": 43,
    "desc_words_p90": 60,
    "dialogue_pct": 40.0,
-   "distinct_animations": 6,
+   "distinct_animations": 18,
    "emp_pct": 0.0,
    "events": 5,
-   "events_2plus_personality_gates": 4,
+   "events_2plus_personality_gates": 0,
    "events_3plus_personality_gates": 0,
    "flavor_pct": 0.0,
    "formatting_pct": 0.0,
    "gate_axes_options": {
-    "education": 0,
+    "education": 2,
     "other": 7,
-    "personality": 9,
-    "tier": 0,
+    "personality": 5,
+    "tier": 2,
     "ungated": 10
    },
    "internal_flag_pct": 0.0,
    "letter_events": 0,
    "messages": 0,
    "music_cues": 0,
-   "option_skill_icon_pct": 0.0,
-   "option_trait_icon_pct": 34.6,
+   "option_skill_icon_pct": 7.7,
+   "option_trait_icon_pct": 19.2,
    "options_median": 5,
    "options_p90": 6,
    "outfit_tags_pct": 0.0,
@@ -27415,7 +27525,7 @@
    "theme_pct": 100.0,
    "three_plus_portraits_pct": 20.0,
    "toasts_per_event": 0.0,
-   "triggered_animation_per_event": 0.0,
+   "triggered_animation_per_event": 3.8,
    "triggered_desc_pct": 80.0,
    "types": {
     "character_event": 5
@@ -27585,9 +27695,9 @@
    "camera_pct": 0.0,
    "custom_loc_pct": 0.0,
    "desc_words_median": 44,
-   "desc_words_p10": 36,
-   "desc_words_p90": 50,
-   "dialogue_pct": 0.0,
+   "desc_words_p10": 37,
+   "desc_words_p90": 55,
+   "dialogue_pct": 45.8,
    "distinct_animations": 30,
    "emp_pct": 0.0,
    "events": 24,
@@ -27624,9 +27734,9 @@
    "types": {
     "character_event": 24
    },
-   "voice_1st_pct": 0.0,
-   "voice_2nd_pct": 100.0,
-   "voice_neutral_pct": 0.0,
+   "voice_1st_pct": 87.5,
+   "voice_2nd_pct": 0.0,
+   "voice_neutral_pct": 12.5,
    "voice_none_pct": 0.0,
    "window_set": 0
   },
@@ -27728,30 +27838,30 @@
    "ai_chance_every_option_pct": 97.3,
    "camera_pct": 0.0,
    "custom_loc_pct": 14.0,
-   "desc_words_median": 44,
-   "desc_words_p10": 30,
-   "desc_words_p90": 57,
-   "dialogue_pct": 20.1,
-   "distinct_animations": 57,
+   "desc_words_median": 45,
+   "desc_words_p10": 31,
+   "desc_words_p90": 59,
+   "dialogue_pct": 28.8,
+   "distinct_animations": 65,
    "emp_pct": 0.0,
    "events": 264,
-   "events_2plus_personality_gates": 69,
-   "events_3plus_personality_gates": 5,
+   "events_2plus_personality_gates": 32,
+   "events_3plus_personality_gates": 0,
    "flavor_pct": 0.0,
    "formatting_pct": 0.0,
    "gate_axes_options": {
-    "education": 40,
+    "education": 71,
     "other": 344,
-    "personality": 254,
-    "tier": 18,
+    "personality": 212,
+    "tier": 29,
     "ungated": 485
    },
    "internal_flag_pct": 14.0,
    "letter_events": 0,
    "messages": 28,
    "music_cues": 30,
-   "option_skill_icon_pct": 6.0,
-   "option_trait_icon_pct": 24.4,
+   "option_skill_icon_pct": 8.6,
+   "option_trait_icon_pct": 21.0,
    "options_median": 5,
    "options_p90": 6,
    "outfit_tags_pct": 0.8,
@@ -27759,19 +27869,19 @@
    "override_effect_2d_uses": 21,
    "paragraphs_pct": 46.2,
    "random_valid_pct": 0.0,
-   "stress_on_an_option_pct": 64.8,
+   "stress_on_an_option_pct": 65.9,
    "theme_pct": 100.0,
-   "three_plus_portraits_pct": 13.3,
+   "three_plus_portraits_pct": 13.6,
    "toasts_per_event": 0.76,
-   "triggered_animation_per_event": 1.28,
+   "triggered_animation_per_event": 1.86,
    "triggered_desc_pct": 60.6,
    "types": {
     "activity_event": 6,
     "character_event": 258
    },
-   "voice_1st_pct": 26.5,
-   "voice_2nd_pct": 49.6,
-   "voice_neutral_pct": 23.9,
+   "voice_1st_pct": 40.9,
+   "voice_2nd_pct": 33.3,
+   "voice_neutral_pct": 25.8,
    "voice_none_pct": 0.0,
    "window_set": 5
   },
