@@ -818,7 +818,12 @@ eotg_aug_kp_war_started_effect = {
     if = {
         limit = {
             is_ai = yes
-            scope:eotg_kp_opponent = { is_ai = no }
+            scope:eotg_kp_opponent = {
+                is_ai = no
+                # Seamless exposure (event_quality_v1 §12.5.3 B13 item 2):
+                # .039 is first person; a Seamless liege gets no letter
+                NOT = { has_trait = eotg_total_integration }
+            }
             OR = {
                 scope:eotg_kp_story.var:eotg_kp_path ?= flag:own
                 scope:eotg_kp_story.var:eotg_kp_path ?= flag:back_kp

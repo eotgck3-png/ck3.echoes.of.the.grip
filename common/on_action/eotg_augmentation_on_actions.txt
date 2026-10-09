@@ -414,8 +414,11 @@ eotg_on_yearly_aug_initiation_check = {
 
         # The Sickly Child — outside the unaugmented gate: the ruler may be
         # augmented or not; the child must not be. Own cooldown, set here.
+        # Seamless exposure (event_quality_v1 §12.5.3 B13 item 3): a parent's
+        # choice needs a self, so not for a Seamless ruler (rule a).
         if = {
             limit = {
+                NOT = { has_trait = eotg_total_integration }
                 NOT = { has_character_flag = eotg_flag_aug_child_offer_cooldown }
                 gold >= minor_gold_value
                 any_child = { eotg_aug_sick_child_candidate = yes }
@@ -1537,6 +1540,8 @@ eotg_on_yearly_aug_nonruler_check = {
                 eotg_is_augmented_any = no
                 scope:eotg_nr_liege = {
                     NOT = { has_character_flag = eotg_flag_aug_nr_cooldown }
+                    # Seamless exposure (event_quality_v1 §12.5.3 B13 item 3)
+                    NOT = { has_trait = eotg_total_integration }
                     OR = {
                         has_trait = eotg_cybernetics
                         has_character_flag = eotg_flag_aug_want_more
@@ -1595,6 +1600,9 @@ eotg_on_yearly_aug_nonruler_check = {
                             is_knight = yes
                             scope:eotg_nr_liege = {
                                 NOT = { has_character_flag = eotg_flag_aug_nr_cooldown }
+                                # Seamless exposure (event_quality_v1 §12.5.3 B13 item 3):
+                                # the progression still happens, unreported
+                                NOT = { has_trait = eotg_total_integration }
                             }
                         }
                         scope:eotg_nr_liege = {
@@ -1674,6 +1682,8 @@ eotg_on_yearly_aug_nonruler_check = {
                     # The Champion's Mistake
                     20 = {
                         trigger = {
+                            # Seamless exposure (event_quality_v1 §12.5.3 B13 item 3)
+                            scope:eotg_nr_liege = { NOT = { has_trait = eotg_total_integration } }
                             is_imprisoned = no
                             OR = {
                                 has_trait = eotg_neurofractured
@@ -1699,6 +1709,8 @@ eotg_on_yearly_aug_nonruler_check = {
                     # The Familiar Change (courtiers)
                     10 = {
                         trigger = {
+                            # Seamless exposure (event_quality_v1 §12.5.3 B13 item 3)
+                            scope:eotg_nr_liege = { NOT = { has_trait = eotg_total_integration } }
                             is_knight = no
                             OR = {
                                 eotg_is_aug_tier2 = yes

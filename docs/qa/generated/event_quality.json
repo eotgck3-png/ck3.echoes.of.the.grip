@@ -18,9 +18,9 @@
    "court_scene": false,
    "custom_loc": false,
    "desc_has_scope_text": true,
-   "desc_keys": 6,
-   "desc_words_main": 38,
-   "desc_words_total": 128,
+   "desc_keys": 7,
+   "desc_words_main": 48,
+   "desc_words_total": 177,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_activities.txt",
@@ -103,7 +103,7 @@
    "title_words": 5,
    "toasts": 0,
    "triggered_animation": 4,
-   "triggered_desc": 5,
+   "triggered_desc": 6,
    "type": "activity_event",
    "voice": "1st",
    "voice_counts": [
@@ -251,18 +251,18 @@
    "court_scene": false,
    "custom_loc": false,
    "desc_has_scope_text": true,
-   "desc_keys": 6,
-   "desc_words_main": 31,
-   "desc_words_total": 124,
+   "desc_keys": 7,
+   "desc_words_main": 42,
+   "desc_words_total": 166,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_activities.txt",
    "formatting": false,
    "gate_axes": {
     "education": 1,
-    "other": 2,
+    "other": 3,
     "personality": 1,
-    "ungated": 3
+    "ungated": 2
    },
    "id": "eotg_aug_act.003",
    "internal_flags": [
@@ -291,7 +291,7 @@
      "personality": []
     },
     {
-     "axis": "ungated",
+     "axis": "other",
      "name": "eotg_aug_act.003.b",
      "personality": []
     },
@@ -341,7 +341,7 @@
    "title_words": 2,
    "toasts": 0,
    "triggered_animation": 5,
-   "triggered_desc": 5,
+   "triggered_desc": 6,
    "type": "activity_event",
    "voice": "1st",
    "voice_counts": [
@@ -1401,10 +1401,11 @@
   },
   {
    "after": false,
-   "animation": 5,
+   "animation": 6,
    "animations": [
     "pain",
     "personality_content",
+    "physician",
     "sadness"
    ],
    "artifact": false,
@@ -1417,9 +1418,11 @@
    "custom_loc": false,
    "desc_has_scope_text": false,
    "desc_keys": 2,
-   "desc_words_main": 31,
-   "desc_words_total": 61,
-   "effects_2d": [],
+   "desc_words_main": 102,
+   "desc_words_total": 132,
+   "effects_2d": [
+    "legend_glow"
+   ],
    "emp": false,
    "file": "events/eotg_augmentation_endgame.txt",
    "formatting": false,
@@ -1432,7 +1435,7 @@
    "letter": false,
    "main_desc_key": "eotg_aug_end.002.desc",
    "messages": 0,
-   "music_cues": 0,
+   "music_cues": 1,
    "on_trigger_fail": false,
    "opening": false,
    "opening_key": null,
@@ -1468,12 +1471,12 @@
    "orphan": false,
    "outfit": false,
    "override_background": true,
-   "override_effect_2d": false,
+   "override_effect_2d": true,
    "override_icon": false,
    "override_sound": false,
    "paragraphs": true,
    "personality_gates": 1,
-   "portraits": 1,
+   "portraits": 2,
    "random_valid": false,
    "sender": false,
    "signature": false,
@@ -1484,14 +1487,14 @@
    "triggered_animation": 2,
    "triggered_desc": 1,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    1
+    9,
+    0
    ],
    "widget": false,
-   "window": false,
-   "window_value": null
+   "window": true,
+   "window_value": "big_event_window"
   },
   {
    "after": false,
@@ -1511,9 +1514,11 @@
    "custom_loc": false,
    "desc_has_scope_text": false,
    "desc_keys": 1,
-   "desc_words_main": 77,
-   "desc_words_total": 77,
-   "effects_2d": [],
+   "desc_words_main": 99,
+   "desc_words_total": 99,
+   "effects_2d": [
+    "fog"
+   ],
    "emp": false,
    "file": "events/eotg_augmentation_endgame.txt",
    "formatting": false,
@@ -1528,7 +1533,7 @@
    "letter": false,
    "main_desc_key": "eotg_aug_end.009.desc",
    "messages": 0,
-   "music_cues": 2,
+   "music_cues": 3,
    "on_trigger_fail": false,
    "opening": false,
    "opening_key": null,
@@ -1564,10 +1569,10 @@
    "orphan": false,
    "outfit": false,
    "override_background": true,
-   "override_effect_2d": false,
+   "override_effect_2d": true,
    "override_icon": false,
    "override_sound": false,
-   "paragraphs": false,
+   "paragraphs": true,
    "personality_gates": 1,
    "portraits": 1,
    "random_valid": false,
@@ -1580,14 +1585,14 @@
    "triggered_animation": 2,
    "triggered_desc": 0,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    6
+    7,
+    0
    ],
-   "widget": false,
-   "window": false,
-   "window_value": null
+   "widget": true,
+   "window": true,
+   "window_value": "big_event_window"
   },
   {
    "after": false,
@@ -1605,8 +1610,8 @@
    "custom_loc": false,
    "desc_has_scope_text": false,
    "desc_keys": 1,
-   "desc_words_main": 39,
-   "desc_words_total": 39,
+   "desc_words_main": 94,
+   "desc_words_total": 94,
    "effects_2d": [
     "fog"
    ],
@@ -1621,7 +1626,7 @@
    "letter": false,
    "main_desc_key": "eotg_aug_end.010.desc",
    "messages": 0,
-   "music_cues": 0,
+   "music_cues": 1,
    "on_trigger_fail": false,
    "opening": false,
    "opening_key": null,
@@ -1648,7 +1653,7 @@
    "override_effect_2d": true,
    "override_icon": false,
    "override_sound": false,
-   "paragraphs": false,
+   "paragraphs": true,
    "personality_gates": 0,
    "portraits": 1,
    "random_valid": false,
@@ -1661,14 +1666,14 @@
    "triggered_animation": 0,
    "triggered_desc": 0,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    1
+    5,
+    0
    ],
    "widget": false,
-   "window": false,
-   "window_value": null
+   "window": true,
+   "window_value": "big_event_window"
   },
   {
    "after": true,
@@ -2650,8 +2655,8 @@
    "custom_loc": false,
    "desc_has_scope_text": true,
    "desc_keys": 4,
-   "desc_words_main": 56,
-   "desc_words_total": 99,
+   "desc_words_main": 105,
+   "desc_words_total": 150,
    "effects_2d": [
     "smoke"
    ],
@@ -2669,7 +2674,7 @@
    "letter": false,
    "main_desc_key": "eotg_fracture.004.desc",
    "messages": 0,
-   "music_cues": 1,
+   "music_cues": 2,
    "on_trigger_fail": false,
    "opening": false,
    "opening_key": null,
@@ -2731,14 +2736,14 @@
    "triggered_animation": 4,
    "triggered_desc": 3,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    3
+    5,
+    0
    ],
-   "widget": false,
-   "window": false,
-   "window_value": null
+   "widget": true,
+   "window": true,
+   "window_value": "big_event_window"
   },
   {
    "after": false,
@@ -5145,12 +5150,13 @@
   },
   {
    "after": false,
-   "animation": 7,
+   "animation": 8,
    "animations": [
     "anger",
     "fear",
     "pain",
-    "rage"
+    "rage",
+    "shock"
    ],
    "artifact": false,
    "backgrounds": [
@@ -5162,8 +5168,8 @@
    "custom_loc": false,
    "desc_has_scope_text": false,
    "desc_keys": 6,
-   "desc_words_main": 52,
-   "desc_words_total": 204,
+   "desc_words_main": 72,
+   "desc_words_total": 208,
    "effects_2d": [
     "smoke"
    ],
@@ -5182,7 +5188,7 @@
    "letter": false,
    "main_desc_key": "eotg_fracture.027.desc",
    "messages": 0,
-   "music_cues": 4,
+   "music_cues": 5,
    "on_trigger_fail": false,
    "opening": false,
    "opening_key": null,
@@ -5228,7 +5234,7 @@
    "override_sound": false,
    "paragraphs": true,
    "personality_gates": 1,
-   "portraits": 1,
+   "portraits": 2,
    "random_valid": false,
    "sender": false,
    "signature": false,
@@ -5239,14 +5245,14 @@
    "triggered_animation": 3,
    "triggered_desc": 4,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    2
+    6,
+    0
    ],
-   "widget": false,
-   "window": false,
-   "window_value": null
+   "widget": true,
+   "window": true,
+   "window_value": "big_event_window"
   },
   {
    "after": false,
@@ -5461,7 +5467,7 @@
    "id": "eotg_aug_heir.001",
    "internal_flags": [],
    "letter": false,
-   "main_desc_key": "eotg_aug_heir.001.desc_seamless",
+   "main_desc_key": "eotg_aug_heir.001.desc_overclocked",
    "messages": 0,
    "music_cues": 0,
    "on_trigger_fail": false,
@@ -5525,9 +5531,9 @@
    "triggered_animation": 4,
    "triggered_desc": 3,
    "type": "character_event",
-   "voice": "neutral",
+   "voice": "1st",
    "voice_counts": [
-    0,
+    1,
     0
    ],
    "widget": false,
@@ -5568,7 +5574,7 @@
    "id": "eotg_aug_heir.003",
    "internal_flags": [],
    "letter": false,
-   "main_desc_key": "eotg_aug_heir.003.desc_seamless",
+   "main_desc_key": "eotg_aug_heir.003.desc_successor",
    "messages": 0,
    "music_cues": 0,
    "on_trigger_fail": false,
@@ -5632,9 +5638,9 @@
    "triggered_animation": 4,
    "triggered_desc": 2,
    "type": "character_event",
-   "voice": "neutral",
+   "voice": "1st",
    "voice_counts": [
-    0,
+    1,
     0
    ],
    "widget": false,
@@ -5772,9 +5778,11 @@
    "custom_loc": false,
    "desc_has_scope_text": true,
    "desc_keys": 1,
-   "desc_words_main": 55,
-   "desc_words_total": 55,
-   "effects_2d": [],
+   "desc_words_main": 98,
+   "desc_words_total": 98,
+   "effects_2d": [
+    "fog"
+   ],
    "emp": false,
    "file": "events/eotg_augmentation_heir.txt",
    "formatting": false,
@@ -5786,7 +5794,7 @@
    },
    "id": "eotg_aug_heir.005",
    "internal_flags": [
-    "special"
+    "dangerous"
    ],
    "letter": false,
    "main_desc_key": "eotg_aug_heir.005.desc",
@@ -5832,10 +5840,10 @@
    "orphan": false,
    "outfit": false,
    "override_background": true,
-   "override_effect_2d": false,
+   "override_effect_2d": true,
    "override_icon": false,
    "override_sound": false,
-   "paragraphs": false,
+   "paragraphs": true,
    "personality_gates": 1,
    "portraits": 3,
    "random_valid": false,
@@ -5848,14 +5856,14 @@
    "triggered_animation": 2,
    "triggered_desc": 0,
    "type": "character_event",
-   "voice": "2nd",
+   "voice": "1st",
    "voice_counts": [
-    0,
-    2
+    6,
+    0
    ],
-   "widget": false,
-   "window": false,
-   "window_value": null
+   "widget": true,
+   "window": true,
+   "window_value": "big_event_window"
   },
   {
    "after": false,
@@ -5891,7 +5899,7 @@
    "id": "eotg_aug_heir.007",
    "internal_flags": [],
    "letter": false,
-   "main_desc_key": "eotg_aug_heir.007.desc_seamless",
+   "main_desc_key": "eotg_aug_heir.007.desc_executed",
    "messages": 0,
    "music_cues": 0,
    "on_trigger_fail": false,
@@ -5955,9 +5963,9 @@
    "triggered_animation": 5,
    "triggered_desc": 3,
    "type": "character_event",
-   "voice": "neutral",
+   "voice": "1st",
    "voice_counts": [
-    0,
+    3,
     0
    ],
    "widget": false,
@@ -15215,9 +15223,9 @@
    "court_scene": false,
    "custom_loc": false,
    "desc_has_scope_text": true,
-   "desc_keys": 1,
-   "desc_words_main": 41,
-   "desc_words_total": 41,
+   "desc_keys": 2,
+   "desc_words_main": 46,
+   "desc_words_total": 87,
    "effects_2d": [],
    "emp": false,
    "file": "events/eotg_augmentation_nonruler.txt",
@@ -15305,7 +15313,7 @@
    "title_words": 3,
    "toasts": 0,
    "triggered_animation": 4,
-   "triggered_desc": 0,
+   "triggered_desc": 1,
    "type": "character_event",
    "voice": "1st",
    "voice_counts": [
@@ -26999,9 +27007,9 @@
    "ai_chance_every_option_pct": 100.0,
    "camera_pct": 0.0,
    "custom_loc_pct": 0.0,
-   "desc_words_median": 30.5,
+   "desc_words_median": 35,
    "desc_words_p10": 18,
-   "desc_words_p90": 38,
+   "desc_words_p90": 42,
    "dialogue_pct": 66.7,
    "distinct_animations": 18,
    "emp_pct": 0.0,
@@ -27012,10 +27020,10 @@
    "formatting_pct": 0.0,
    "gate_axes_options": {
     "education": 4,
-    "other": 6,
+    "other": 7,
     "personality": 7,
     "tier": 2,
-    "ungated": 18
+    "ungated": 17
    },
    "internal_flag_pct": 66.7,
    "letter_events": 0,
@@ -27101,9 +27109,9 @@
    "ai_chance_every_option_pct": 90.9,
    "camera_pct": 0.0,
    "custom_loc_pct": 9.1,
-   "desc_words_median": 39,
-   "desc_words_p10": 31,
-   "desc_words_p90": 60,
+   "desc_words_median": 44,
+   "desc_words_p10": 33,
+   "desc_words_p90": 99,
    "dialogue_pct": 45.5,
    "distinct_animations": 15,
    "emp_pct": 0.0,
@@ -27122,15 +27130,15 @@
    "internal_flag_pct": 45.5,
    "letter_events": 0,
    "messages": 3,
-   "music_cues": 4,
+   "music_cues": 7,
    "option_skill_icon_pct": 2.9,
    "option_trait_icon_pct": 14.7,
    "options_median": 3,
    "options_p90": 5,
    "outfit_tags_pct": 0.0,
    "override_background_pct": 100.0,
-   "override_effect_2d_uses": 1,
-   "paragraphs_pct": 45.5,
+   "override_effect_2d_uses": 3,
+   "paragraphs_pct": 63.6,
    "random_valid_pct": 0.0,
    "stress_on_an_option_pct": 27.3,
    "theme_pct": 100.0,
@@ -27141,11 +27149,11 @@
    "types": {
     "character_event": 11
    },
-   "voice_1st_pct": 36.4,
-   "voice_2nd_pct": 27.3,
+   "voice_1st_pct": 63.6,
+   "voice_2nd_pct": 0.0,
    "voice_neutral_pct": 36.4,
    "voice_none_pct": 0.0,
-   "window_set": 0
+   "window_set": 3
   },
   "events/eotg_augmentation_fracture.txt": {
    "after_pct": 3.4,
@@ -27154,7 +27162,7 @@
    "custom_loc_pct": 0.0,
    "desc_words_median": 46,
    "desc_words_p10": 35,
-   "desc_words_p90": 57,
+   "desc_words_p90": 58,
    "dialogue_pct": 48.3,
    "distinct_animations": 35,
    "emp_pct": 0.0,
@@ -27173,7 +27181,7 @@
    "internal_flag_pct": 31.0,
    "letter_events": 0,
    "messages": 1,
-   "music_cues": 9,
+   "music_cues": 11,
    "option_skill_icon_pct": 14.2,
    "option_trait_icon_pct": 25.5,
    "options_median": 5,
@@ -27192,11 +27200,11 @@
    "types": {
     "character_event": 29
    },
-   "voice_1st_pct": 93.1,
-   "voice_2nd_pct": 6.9,
+   "voice_1st_pct": 100.0,
+   "voice_2nd_pct": 0.0,
    "voice_neutral_pct": 0.0,
    "voice_none_pct": 0.0,
-   "window_set": 0
+   "window_set": 2
   },
   "events/eotg_augmentation_heir.txt": {
    "after_pct": 20.0,
@@ -27205,7 +27213,7 @@
    "custom_loc_pct": 0.0,
    "desc_words_median": 52,
    "desc_words_p10": 37,
-   "desc_words_p90": 57,
+   "desc_words_p90": 98,
    "dialogue_pct": 60.0,
    "distinct_animations": 14,
    "emp_pct": 0.0,
@@ -27231,8 +27239,8 @@
    "options_p90": 5,
    "outfit_tags_pct": 0.0,
    "override_background_pct": 60.0,
-   "override_effect_2d_uses": 0,
-   "paragraphs_pct": 40.0,
+   "override_effect_2d_uses": 1,
+   "paragraphs_pct": 60.0,
    "random_valid_pct": 0.0,
    "stress_on_an_option_pct": 100.0,
    "theme_pct": 100.0,
@@ -27243,11 +27251,11 @@
    "types": {
     "character_event": 5
    },
-   "voice_1st_pct": 0.0,
-   "voice_2nd_pct": 20.0,
-   "voice_neutral_pct": 80.0,
+   "voice_1st_pct": 80.0,
+   "voice_2nd_pct": 0.0,
+   "voice_neutral_pct": 20.0,
    "voice_none_pct": 0.0,
-   "window_set": 0
+   "window_set": 1
   },
   "events/eotg_augmentation_inherit.txt": {
    "after_pct": 3.7,
@@ -27458,9 +27466,9 @@
    "ai_chance_every_option_pct": 100.0,
    "camera_pct": 0.0,
    "custom_loc_pct": 0.0,
-   "desc_words_median": 43.5,
+   "desc_words_median": 44.5,
    "desc_words_p10": 39,
-   "desc_words_p90": 45,
+   "desc_words_p90": 46,
    "dialogue_pct": 50.0,
    "distinct_animations": 22,
    "emp_pct": 0.0,
@@ -27494,7 +27502,7 @@
    "three_plus_portraits_pct": 16.7,
    "toasts_per_event": 0.33,
    "triggered_animation_per_event": 4.0,
-   "triggered_desc_pct": 33.3,
+   "triggered_desc_pct": 50.0,
    "types": {
     "character_event": 6
    },
@@ -28012,7 +28020,7 @@
    "custom_loc_pct": 14.0,
    "desc_words_median": 45,
    "desc_words_p10": 32,
-   "desc_words_p90": 60,
+   "desc_words_p90": 61,
    "dialogue_pct": 52.3,
    "distinct_animations": 66,
    "emp_pct": 0.0,
@@ -28023,39 +28031,39 @@
    "formatting_pct": 0.0,
    "gate_axes_options": {
     "education": 84,
-    "other": 344,
+    "other": 345,
     "personality": 185,
     "tier": 42,
-    "ungated": 485
+    "ungated": 484
    },
    "internal_flag_pct": 14.0,
    "letter_events": 0,
    "messages": 28,
-   "music_cues": 30,
+   "music_cues": 35,
    "option_skill_icon_pct": 9.7,
    "option_trait_icon_pct": 18.7,
    "options_median": 5,
    "options_p90": 6,
    "outfit_tags_pct": 0.8,
    "override_background_pct": 92.8,
-   "override_effect_2d_uses": 21,
-   "paragraphs_pct": 46.2,
+   "override_effect_2d_uses": 24,
+   "paragraphs_pct": 47.3,
    "random_valid_pct": 0.0,
    "stress_on_an_option_pct": 69.3,
    "theme_pct": 100.0,
    "three_plus_portraits_pct": 14.0,
    "toasts_per_event": 0.76,
    "triggered_animation_per_event": 2.68,
-   "triggered_desc_pct": 60.6,
+   "triggered_desc_pct": 61.0,
    "types": {
     "activity_event": 6,
     "character_event": 258
    },
-   "voice_1st_pct": 79.2,
-   "voice_2nd_pct": 2.3,
-   "voice_neutral_pct": 18.6,
+   "voice_1st_pct": 82.6,
+   "voice_2nd_pct": 0.0,
+   "voice_neutral_pct": 17.4,
    "voice_none_pct": 0.0,
-   "window_set": 5
+   "window_set": 11
   },
   "vanilla_all": {
    "after_pct": 26.5,

@@ -38,9 +38,10 @@
 # (.010, .011, .040-.042) get none: the 36 personality traits are removed at
 # Total Integration (eotg_aug_total_integration_effect), and a still frame is
 # the register (§12.1 rule 7; W7 addendum §6.3 makes the same call for .010).
-# end.002 and end.009 are W7 set pieces: the reactions here are the ones the
-# W7 addendum (§6.2, §6.6) specifies; its new portraits, effects, widgets and
-# music are left to W7.
+# end.002, end.009 and end.010 are W7 set pieces
+# (docs/specs/event_quality_w7_set_pieces.md §6.2, §6.3, §6.6): big window,
+# one opening music cue in immediate, the addendum's effects, widgets and
+# portraits. Presentation only; options, weights and callers are unchanged.
 # -----------------------------------------------------------------------------
 
 namespace = eotg_aug_end
@@ -245,6 +246,11 @@ eotg_aug_end.001 = {
         eotg_aug_pay_procedure_effect = { BASE = major_gold_value  MULT = eotg_aug_price_mult_backstreet_removal }
         custom_tooltip = eotg_aug_end.001.tt
         hidden_effect = {
+            # W7 §6.6 (presentation only): end.002 inherits scope:eotg_surgeon
+            # from this event's immediate, so mark the back-street table and
+            # end.002 hides the court physician (lore ruling (d)). Shape:
+            # vanilla petition_liege_events.txt:1690.
+            save_scope_value_as = { name = eotg_excision_backstreet  value = yes }
             eotg_aug_excision_surgery_effect = { DEATH_BASE = 25  BRAVE = no  MAIMED_BASE = 40  PHYSICIAN = no }
         }
         eotg_aug_stress_reject_effect = yes
@@ -265,6 +271,7 @@ eotg_aug_end.001 = {
 
 eotg_aug_end.002 = {
     type = character_event
+    window = big_event_window    # W7 §6.6; _events.info:19
     title = eotg_aug_end.002.t
     desc = {
         desc = eotg_aug_end.002.desc
@@ -278,6 +285,9 @@ eotg_aug_end.002 = {
     }
     theme = recovery
     override_background = { reference = eotg_bg_clinic }
+    # W7 §6.6: a soft light where the overlay was. No widgets: nothing
+    # doubles now. Vanilla coronation_events.txt:1426-1428. CB-44 fallback: fog.
+    override_effect_2d = { reference = legend_glow }
 
     left_portrait = {
         character = root
@@ -294,6 +304,36 @@ eotg_aug_end.002 = {
             animation = personality_content
         }
         animation = sadness
+    }
+    # W7 §6.6: the physician who did the work. Hidden on the back-street
+    # table (scope:eotg_excision_backstreet, set by end.001.e) and when root
+    # has no physician. physician: animations.txt:6586.
+    right_portrait = {
+        trigger = {
+            exists = scope:eotg_surgeon
+            scope:eotg_surgeon = { is_alive = yes }    # may have died in the 3-day delay
+            NOT = { exists = scope:eotg_excision_backstreet }
+        }
+        character = scope:eotg_surgeon
+        animation = physician
+    }
+
+    immediate = {
+        # W7 §6.6 opening cue: vanilla's recovery-from-injury cue
+        # (music/in_game/music.txt:339; events/health_events.txt:163).
+        play_music_cue = mx_cue_peace_ensues
+        hidden_effect = {
+            # end.001's surgeon pick (above), only when the scope did not
+            # carry over and the table was the sanctioned one.
+            if = {
+                limit = {
+                    NOT = { exists = scope:eotg_surgeon }
+                    NOT = { exists = scope:eotg_excision_backstreet }
+                    employs_court_position = court_physician_court_position
+                }
+                court_position:court_physician_court_position = { save_scope_as = eotg_surgeon }
+            }
+        }
     }
 
     # "It's quiet."
@@ -355,10 +395,18 @@ eotg_aug_end.002 = {
 
 eotg_aug_end.009 = {
     type = character_event
+    window = big_event_window    # W7 §6.2; decision outcomes use it (major_decisions_events.txt:1677-1698)
     title = eotg_aug_end.009.t
     desc = eotg_aug_end.009.desc
     theme = mental_health
     override_background = { reference = eotg_bg_private_quarters }
+    # W7 §6.2: milder than the Cascade, because here the ruler is choosing.
+    # Vanilla events/dlc/pam/pam_secular_faith_events.txt:3414-3418 (.0026).
+    override_effect_2d = { reference = fog }
+    widgets = {
+        widget = { gui = event_window_widget_vfx_background_double_vision_milder container = foreground_shader_vfx_container }
+        widget = { gui = event_window_widget_vfx_left_character_double_vision_milder container = foreground_shader_vfx_container }
+    }
 
     trigger = {
         has_trait = eotg_neurofractured
@@ -376,6 +424,14 @@ eotg_aug_end.009 = {
             animation = ecstasy
         }
         animation = personality_rational
+    }
+    # No other portrait: the decision is made alone (W7 §6.2).
+
+    immediate = {
+        # W7 §6.2 opening cue (music/in_game/music.txt:411; vanilla
+        # events/dlc/ep3/ep3_story_cycle_admin_eunuch_events.txt:4280). The
+        # death branches keep W3's mx_cue_death (§5.1 rule 2).
+        play_music_cue = mx_cue_secret
     }
 
     # "Yes."
@@ -476,17 +532,21 @@ eotg_aug_end.009 = {
 
 
 # -- eotg_aug_end.010 ---------------------------------------------------------
-# There Is No Static (Total Integration notification). Voice is 5: "There is
-# no voice now. There is no one left for it to speak to."
+# There Is No Static (Total Integration notification). The threshold: the one
+# place the "I" fades into the log register (W7 §6.3, Q3). The old closing
+# line about the voice is retired (L-W7-1).
 # Caller: eotg_aug_total_integration_effect. Fires eotg_aug_end.011 in 180 days.
 
 eotg_aug_end.010 = {
     type = character_event
+    window = big_event_window    # W7 §6.3; the only portrait renders centred (big_event_window.gui:119)
     title = eotg_aug_end.010.t
     desc = eotg_aug_end.010.desc
     theme = mental_health
     override_background = { reference = eotg_bg_private_quarters }
     override_effect_2d = { reference = fog }
+    # W7 §6.3: no VFX widgets, on purpose. .027 and .009 double the image;
+    # this is the first steady frame.
 
     # W6: no triggered_animation, on purpose (W7 addendum §6.3): the
     # personality traits have just been removed, and that absence is the point.
@@ -496,6 +556,11 @@ eotg_aug_end.010 = {
     }
 
     immediate = {
+        # W7 §6.3 opening cue: the seat changes hands without changing holder
+        # (music/in_game/music.txt:385; vanilla
+        # events/decisions_events/iberia_north_africa_events.txt:1336).
+        # CB-44 fallback: mx_cue_secret.
+        play_music_cue = mx_cue_succession_instrumental
         trigger_event = { id = eotg_aug_end.011  days = 180 }
     }
 

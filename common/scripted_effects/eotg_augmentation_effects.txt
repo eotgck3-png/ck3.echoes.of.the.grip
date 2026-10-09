@@ -1120,6 +1120,13 @@ eotg_aug_total_integration_effect = {
         remove_character_flag = eotg_flag_aug_restrained
         remove_character_flag = eotg_flag_aug_sedated
         remove_character_flag = eotg_flag_aug_containment_regency
+        # Seamless exposure (event_quality_v1 §12.5 S5, B13 item 5): a live
+        # Fracturing Inheritance tree closes silently, with the same close
+        # every on_trigger_fail uses; the tree's events are first person.
+        if = {
+            limit = { has_variable = eotg_inh_heir }
+            eotg_aug_inherit_close_effect = yes
+        }
     }
     # The people who knew them
     every_relation = {
@@ -1580,7 +1587,10 @@ eotg_aug_nr_cascade_effect = {
             }
             eotg_aug_inherit_start_effect = { SOURCE = cascade }
         }
-        else = {
+        # Seamless exposure (event_quality_v1 §12.5.3 B13 item 3): no nr.006
+        # for a Seamless employer; the cascade above still runs
+        else_if = {
+            limit = { NOT = { has_trait = eotg_total_integration } }
             trigger_event = { id = eotg_aug_nr.006  days = { 1 7 } }
         }
     }

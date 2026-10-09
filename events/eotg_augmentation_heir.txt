@@ -1048,13 +1048,24 @@ eotg_aug_heir.006 = {
 # var:eotg_parent_hardware and the fractured flag on the heir, so d installs
 # exactly as eotg_aug_init.013.a would.
 # Caller: eotg_aug_heir.006 (5 days after the death).
+# W7 set piece (docs/specs/event_quality_w7_set_pieces.md §6.5): big window,
+# fog and night-scene lighting, mx_cue_murder. Presentation only.
 
 eotg_aug_heir.005 = {
     type = character_event
+    window = big_event_window    # W7 §6.5; _events.info:19
     title = eotg_aug_heir.005.t
     desc = eotg_aug_heir.005.desc
     theme = death
     override_background = { reference = eotg_bg_corridor_night }
+    # W7 §6.5 (§14.2 change: CN + fog). The night-scene widgets are lighting
+    # only; no time-of-day word goes in the text. Vanilla
+    # events/dlc/pam/pam_secular_faith_events.txt:6718-6725 (.0048).
+    override_effect_2d = { reference = fog }
+    widgets = {
+        widget = { gui = event_window_widget_vfx_background_night_scene container = foreground_shader_vfx_container }
+        widget = { gui = event_window_widget_vfx_left_character_night_scene container = foreground_shader_vfx_container }
+    }
 
     trigger = {
         exists = scope:eotg_parent_ruler
@@ -1092,7 +1103,7 @@ eotg_aug_heir.005 = {
     }
 
     immediate = {
-        play_music_cue = mx_cue_murder    # W3 (event_quality_v1)
+        play_music_cue = mx_cue_murder    # W3, kept as W7's opening cue (§5.1 rule 1; music.txt:372)
         hidden_effect = {
             if = {
                 limit = {
@@ -1180,7 +1191,7 @@ eotg_aug_heir.005 = {
     # Coupling: tier change.
     option = {
         name = eotg_aug_heir.005.d
-        add_internal_flag = special    # W3: once per life: the dead parent's hardware
+        add_internal_flag = dangerous    # W3/W7 §5.1 rule 3: the dead parent's hardware, a hidden flaw and risk 25
         trigger = {
             eotg_is_augmented_any = no
             gold >= tiny_gold_value

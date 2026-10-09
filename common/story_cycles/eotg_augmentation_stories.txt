@@ -243,8 +243,14 @@ eotg_story_aug_heir_arc = {
                 }
                 effect = {
                     set_variable = { name = eotg_stage  value = 2 }
+                    # Seamless exposure (event_quality_v1 §12.5.3 B13 item 1):
+                    # fracture.005 is first person; a Seamless owner moves to
+                    # stage 2 with no event (heir.003 carries the log variant)
                     story_owner = {
-                        trigger_event = { id = eotg_fracture.005  days = { 1 30 } }
+                        if = {
+                            limit = { NOT = { has_trait = eotg_total_integration } }
+                            trigger_event = { id = eotg_fracture.005  days = { 1 30 } }
+                        }
                     }
                 }
             }
@@ -573,6 +579,19 @@ eotg_story_aug_patron = {
                     end_story = yes
                 }
             }
+            # Seamless exposure (event_quality_v1 §12.5 S4, B13 item 1): the
+            # syndicate's beats are first person; a Seamless owner ends the
+            # debt silently on every tick. on_end does the cleanup (clause
+            # modifier, envoy to the pool), the landless-end shape above.
+            # No write-off beat (NEW, §12.5.3 Deferred).
+            triggered_effect = {
+                trigger = {
+                    story_owner = { has_trait = eotg_total_integration }
+                }
+                effect = {
+                    end_story = yes
+                }
+            }
             # Reprisal spec §5.3: the paper has been sold (a betrayal by an
             # owner with no implants, eotg_aug_patron_betray_effect). The
             # collector comes in person. Second, after the landless ending,
@@ -698,6 +717,19 @@ eotg_story_aug_patron = {
             triggered_effect = {
                 trigger = {
                     story_owner = { is_landed = no }
+                }
+                effect = {
+                    end_story = yes
+                }
+            }
+            # Seamless exposure (event_quality_v1 §12.5 S4, B13 item 1): the
+            # syndicate's beats are first person; a Seamless owner ends the
+            # debt silently on every tick. on_end does the cleanup (clause
+            # modifier, envoy to the pool), the landless-end shape above.
+            # No write-off beat (NEW, §12.5.3 Deferred).
+            triggered_effect = {
+                trigger = {
+                    story_owner = { has_trait = eotg_total_integration }
                 }
                 effect = {
                     end_story = yes
@@ -889,6 +921,22 @@ eotg_story_aug_retinue = {
                         add_character_flag = eotg_flag_aug_retinue_done
                     }
                     end_story = yes
+                }
+            }
+
+            # Seamless exposure (event_quality_v1 §12.5 S4, B13 item 1): the
+            # Program's beats are first person. A Seamless owner parks it: this
+            # branch matches every tick and does nothing, so no retinue event
+            # fires and eotg_mod_aug_iron_retinue (kept by
+            # eotg_aug_total_integration_effect) stays. The phase variable is
+            # left as it is; the owner's death or the landless branch above
+            # still ends the story. No Seamless beat (NEW, §12.5.3 Deferred).
+            triggered_effect = {
+                trigger = {
+                    story_owner = { has_trait = eotg_total_integration }
+                }
+                effect = {
+                    # Parked: nothing to do
                 }
             }
 

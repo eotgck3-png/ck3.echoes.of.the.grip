@@ -15,7 +15,7 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 |---|---|---|---|---|---|---|
 | `cybernetics` | 1 | 1 | 53 | 53 | 0 | 0 |
 | `cybernetics_v2` | 27 | 27 | 1781 | 1709 | 70 | 2 |
-| `event` | 2 | 2 | 87 | 73 | 5 | 9 |
+| `event` | 2 | 2 | 88 | 78 | 5 | 5 |
 | `frontier` | 1 | 1 | 92 | 89 | 3 | 0 |
 | `frontier_v1` | 2 | 2 | 159 | 158 | 1 | 0 |
 | `frontier_v2` | 1 | 1 | 109 | 109 | 0 | 0 |
@@ -57,8 +57,8 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | `cybernetics_v2_tier_options.md` | yes | 95 | 91 | 2 | 2 | 0 |
 | `cybernetics_v2_tier_options_lore.md` | yes | 8 | 8 | 0 | 0 | 0 |
 | `cybernetics_v2_trait_depth.md` | yes | 42 | 41 | 1 | 0 | 0 |
-| `event_quality_v1.md` | yes | 46 | 37 | 4 | 5 | 0 |
-| `event_quality_w7_set_pieces.md` | yes | 41 | 36 | 1 | 4 | 0 |
+| `event_quality_v1.md` | yes | 46 | 40 | 4 | 2 | 0 |
+| `event_quality_w7_set_pieces.md` | yes | 42 | 38 | 1 | 3 | 0 |
 | `frontier_unclaimed_regions.md` | yes | 95 | 89 | 3 | 0 | 3 |
 | `frontier_v1.md` | yes | 146 | 137 | 1 | 0 | 8 |
 | `frontier_v1_open_questions.md` | yes | 21 | 21 | 0 | 0 | 0 |
@@ -296,16 +296,16 @@ None.
 
 #### `docs/specs/event_quality_v1.md`
 
-- Specced and present: 37
-- Specced, missing from script (5): `eotg_event_quality.py` (loc, l.11), `eotg_lint_loc_conventions.json` (loc, l.139), `eotg_aug_act.001.desc_seamless` (loc, l.618), `eotg_aug_act.003.desc_seamless` (loc, l.618), `eotg_aug_nr.003.desc_seamless` (loc, l.618)
+- Specced and present: 40
+- Specced, missing from script (2): `eotg_event_quality.py` (loc, l.11), `eotg_lint_loc_conventions.json` (loc, l.139)
 - Referenced only, never defined or set (4): `eotg_lint` (unknown, l.238), `eotg_heir.GetFirstName` (loc, l.493), `eotg_heir.GetSheHe` (loc, l.493), `eotg_heir.GetHerHim` (loc, l.493)
 - Exempt (0): none
 
 #### `docs/specs/event_quality_w7_set_pieces.md`
 
-- Specced and present: 36
-- Specced, missing from script (4): `eotg_cascade_witness` (scope, l.30), `eotg_bg_fs_cascade` (unknown, l.370), `eotg_bg_fs_threshold` (unknown, l.370), `eotg_bg_fs_succession` (unknown, l.370)
-- Referenced only, never defined or set (1): `eotg_victim_dead` (unknown, l.206)
+- Specced and present: 38
+- Specced, missing from script (3): `eotg_bg_fs_cascade` (unknown, l.372), `eotg_bg_fs_threshold` (unknown, l.372), `eotg_bg_fs_succession` (unknown, l.372)
+- Referenced only, never defined or set (1): `eotg_victim_dead` (unknown, l.208)
 - Exempt (0): none
 
 ### Unbuilt specs (expected gaps)

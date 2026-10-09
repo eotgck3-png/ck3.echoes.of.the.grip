@@ -282,8 +282,19 @@ def analyze_event(eid, b, rel, loc, personality):
     r["emp"] = any("#EMP" in t for t in texts)
     r["formatting"] = any(re.search(r"#(?!!)[A-Za-z]", t) for t in texts)
     r["paragraphs"] = any("\\n\\n" in t for t in texts)
-    main = next((t for t in texts if t), "")
-    r["main_desc_key"] = next((k for k, t in zip(dkeys, texts) if t), dkeys[0] if dkeys else "")
+    # The "main" desc skips Seamless-only branches (a triggered_desc whose
+    # trigger has `has_trait = eotg_total_integration`; event_quality_v1
+    # §12.5 S3 puts them first in first_valid), else a Seamless-first event
+    # reads as neutral. If every keyed branch is Seamless, fall back.
+    seamless = set()
+    if descblk.startswith("{"):
+        for td in subblocks(descblk, "triggered_desc"):
+            if re.search(r"has_trait\s*=\s*eotg_total_integration\b", td):
+                seamless.update(re.findall(r"(?<![\w.])desc\s*=\s*([\w.\-]+)", td))
+    pairs = [(k, t) for k, t in zip(dkeys, texts) if t]
+    pick = [(k, t) for k, t in pairs if k not in seamless] or pairs
+    main = pick[0][1] if pick else ""
+    r["main_desc_key"] = pick[0][0] if pick else (dkeys[0] if dkeys else "")
     r["voice"] = voice_label(main)
     r["voice_counts"] = list(voice_counts(main)) if main else [0, 0]
     opening = _value_of(b, "opening")

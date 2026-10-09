@@ -531,6 +531,7 @@ eotg_fracture.003 = {
 
 eotg_fracture.004 = {
     type = character_event
+    window = big_event_window    # W7 set piece (event_quality_w7_set_pieces.md §6.4); _events.info:19
     title = eotg_fracture.004.t
     desc = {
         desc = eotg_fracture.004.desc
@@ -553,6 +554,12 @@ eotg_fracture.004 = {
     theme = battle
     override_background = { reference = eotg_bg_council }
     override_effect_2d = { reference = smoke }
+    # W7 §6.4: the coolant venting the desc describes. Shape: vanilla
+    # events/dlc/pam/pam_secular_faith_events.txt:125-127 (.0002); the
+    # container exists in gui/event_windows/big_event_window.gui:375.
+    widgets = {
+        widget = { gui = event_window_widget_vfx_heavy_smoke container = foreground_shader_vfx_container }
+    }
 
     trigger = {
         stress_level >= 2
@@ -604,7 +611,6 @@ eotg_fracture.004 = {
             eotg_aug_pick_victim_effect = { NAME = eotg_victim_dead  FAMILY_FACTOR = 0.25 }
             if = {
                 limit = { exists = scope:eotg_victim_dead }
-                play_music_cue = mx_cue_death    # W3: a cascade death
                 scope:eotg_victim_dead = {
                     death = { death_reason = death_murder  killer = root }
                 }
@@ -640,6 +646,18 @@ eotg_fracture.004 = {
                 }
                 save_scope_as = eotg_witness
             }
+        }
+        # W7 §6.4 opening cue, exactly one per event, outside hidden_effect.
+        # Replaces W3's mx_cue_death inside the kill branch. mx_cue_murder:
+        # music/in_game/music.txt:372 (years = 1), vanilla
+        # events/blackmail_events.txt:28; mx_cue_negative: music.txt:403,
+        # vanilla events/dlc/bp1/bp1_yearly_events_nick.txt:3105.
+        if = {
+            limit = { exists = scope:eotg_victim_dead }
+            play_music_cue = mx_cue_murder
+        }
+        else = {
+            play_music_cue = mx_cue_negative
         }
     }
 
@@ -776,6 +794,8 @@ eotg_fracture.005 = {
             exists = var:eotg_heir
             var:eotg_heir = { is_alive = yes }
         }
+        # Seamless exposure (event_quality_v1 §12.5 S1 in-flight, B13 QA S3)
+        NOT = { has_trait = eotg_total_integration }
     }
 
     left_portrait = {
@@ -5251,9 +5271,12 @@ eotg_fracture.026 = {
 
 
 # -- eotg_fracture.027 --------------------------------------------------------
-# The Cascade (terminal, risk >= 95). The player picks a stance; the implant
-# decides. Each option rolls the outcome list hidden (custom tooltip "the
-# implant decides"), and the outcome fires its follow-up.
+# The Cascade (terminal, risk >= 95). The player picks a stance; the outcome
+# is not root's to choose. Each option rolls the outcome list hidden (custom
+# tooltip eotg_fracture.027.tt, L-W7-3), and the outcome fires its follow-up.
+# W7 set piece (docs/specs/event_quality_w7_set_pieces.md §6.1): big window,
+# severe double vision, mx_cue_stress, a witness at the door. No threshold
+# fade here (L-W7-4). Presentation only: options and weights unchanged.
 # Caller: NF on_action, terminal step (eotg_flag_aug_terminal_cooldown).
 #
 # Outcomes (Phase 3b): death (eotg_aug_cascade_death_effect), total
@@ -5266,6 +5289,7 @@ eotg_fracture.026 = {
 
 eotg_fracture.027 = {
     type = character_event
+    window = big_event_window    # W7 §6.1; _events.info:19
     title = eotg_fracture.027.t
     desc = {
         desc = eotg_fracture.027.desc
@@ -5302,6 +5326,13 @@ eotg_fracture.027 = {
     theme = mental_health
     override_background = { reference = eotg_bg_private_quarters }
     override_effect_2d = { reference = smoke }
+    # W7 §6.1: severe double vision on the background and the left portrait.
+    # Shape: vanilla events/dlc/pam/pam_secular_faith_events.txt:7197-7200
+    # (.0051); container in gui/event_windows/big_event_window.gui:375.
+    widgets = {
+        widget = { gui = event_window_widget_vfx_background_double_vision_severe container = foreground_shader_vfx_container }
+        widget = { gui = event_window_widget_vfx_left_character_double_vision_severe container = foreground_shader_vfx_container }
+    }
 
     # W6 trait reactions per the W7 addendum §6.1 (brave → rage, stubborn →
     # anger, craven → fear); the cascade-witness right portrait is W7's.
@@ -5320,6 +5351,52 @@ eotg_fracture.027 = {
             animation = fear
         }
         animation = pain
+    }
+    # W7 §6.1: someone at the door saying my name. Picked in immediate;
+    # guarded, so it hides when no one matches. shock: vanilla
+    # gfx/portraits/portrait_animations/animations.txt:5280.
+    right_portrait = {
+        trigger = { exists = scope:eotg_cascade_witness }
+        character = scope:eotg_cascade_witness
+        animation = shock
+    }
+
+    immediate = {
+        # W7 §6.1 opening cue (music/in_game/music.txt:358, calls = 3; vanilla
+        # events/interaction_events/character_interaction_events.txt:1329).
+        # The death branches below keep W3's mx_cue_death (§5.1 rule 2).
+        play_music_cue = mx_cue_stress
+        hidden_effect = {
+            # Presentation only (W7 §3): first match wins, else unsaved.
+            if = {
+                limit = {
+                    exists = primary_spouse
+                    primary_spouse = {
+                        is_alive = yes
+                        is_imprisoned = no
+                        is_in_the_same_court_as = root    # vanilla birth_events.txt:923
+                    }
+                }
+                primary_spouse = { save_scope_as = eotg_cascade_witness }
+            }
+            else_if = {
+                limit = {
+                    exists = primary_heir
+                    primary_heir = {
+                        is_alive = yes
+                        is_imprisoned = no
+                        age >= 14
+                        is_in_the_same_court_as = root
+                    }
+                }
+                primary_heir = { save_scope_as = eotg_cascade_witness }
+            }
+            else_if = {
+                # As eotg_aug_end.001's surgeon pick
+                limit = { employs_court_position = court_physician_court_position }
+                court_position:court_physician_court_position = { save_scope_as = eotg_cascade_witness }
+            }
+        }
     }
 
     # "Let go."  (total integration +15)

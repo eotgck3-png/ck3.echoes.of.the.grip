@@ -197,6 +197,53 @@ class Analyze(unittest.TestCase):
             self.assertEqual(json.load(fh)["summary"]["mod"]["events"], 2)
 
 
+
+SEAMLESS_EVENT = """namespace = eotg_s
+eotg_s.1 = {
+	type = character_event
+	title = eotg_s.1.t
+	desc = {
+		first_valid = {
+			triggered_desc = { trigger = { has_trait = eotg_total_integration } desc = eotg_s.1.desc_seamless }
+			desc = eotg_s.1.desc
+		}
+	}
+	option = { name = eotg_s.1.a }
+}
+eotg_s.2 = {
+	type = character_event
+	desc = { triggered_desc = { trigger = { has_trait = eotg_total_integration } desc = eotg_s.2.desc_seamless } }
+	option = { name = eotg_s.2.a }
+}
+"""
+SEAMLESS_LOC = ('﻿l_english:\n'
+                ' eotg_s.1.desc_seamless:0 "Reading complete. Next item."\n'
+                ' eotg_s.1.desc:0 "I see the heir at my door, and I let my hand rest."\n'
+                ' eotg_s.2.desc_seamless:0 "Static: none logged."\n')
+
+
+class SeamlessFirst(unittest.TestCase):
+    """event_quality_v1 §12.5 S3: a Seamless branch first in first_valid is not the main desc."""
+
+    def setUp(self):
+        self.d = tempfile.mkdtemp(prefix="eotg_evq_s_")
+        self.addCleanup(rmtree, self.d)
+        for rel, text in (("events/eotg_s.txt", SEAMLESS_EVENT),
+                          ("localization/english/eotg_s_l_english.yml", SEAMLESS_LOC)):
+            p = os.path.join(self.d, *rel.split("/"))
+            os.makedirs(os.path.dirname(p), exist_ok=True)
+            with open(p, "w", encoding="utf-8", newline="") as fh:
+                fh.write(text)
+
+    def test_seamless_branch_skipped(self):
+        rows = {r["id"]: r for r in E.analyze(self.d, E.load_loc(self.d), PERS)}
+        self.assertEqual(rows["eotg_s.1"]["main_desc_key"], "eotg_s.1.desc")
+        self.assertEqual(rows["eotg_s.1"]["voice"], "1st")
+        # every keyed branch is Seamless: fall back to it
+        self.assertEqual(rows["eotg_s.2"]["main_desc_key"], "eotg_s.2.desc_seamless")
+        self.assertEqual(rows["eotg_s.2"]["voice"], "neutral")
+
+
 class Traits(unittest.TestCase):
     def test_cached_list(self):
         t = E.load_personality_traits()

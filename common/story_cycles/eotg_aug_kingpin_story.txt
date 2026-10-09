@@ -167,6 +167,10 @@ eotg_story_aug_kingpin = {
                 NOT = { story_owner.player_heir = var:eotg_kp }
                 story_owner.player_heir = {
                     NOT = { any_owned_story = { story_type = eotg_story_aug_kingpin } }
+                    # Seamless exposure (§12.5 B13 item 2): .040 is first
+                    # person and fires before M1's monthly check could end
+                    # the story, so a Seamless heir does not inherit it
+                    NOT = { has_trait = eotg_total_integration }
                 }
             }
             save_scope_as = eotg_kp_story
@@ -194,6 +198,12 @@ eotg_story_aug_kingpin = {
             # M1 "imprisoned by anyone but the kingpin's side": a capture in
             # the claim war is the war's business, and vanilla's peace
             # releases them); M3 resolves the war when it ends.
+            # Seamless exposure (event_quality_v1 §12.5 S4, B13 item 2): a
+            # Seamless owner (the threshold crossed mid-story) also ends it
+            # silently, outside the war stage; on_end does the cleanup. A
+            # Seamless heir never receives the story (on_owner_death). In the
+            # war stage .033/.034 carry the guard, and M3 / M4 / T1 end the
+            # story silently instead of firing their first-person leaves.
             triggered_effect = {
                 trigger = {
                     story_owner = {
@@ -201,6 +211,10 @@ eotg_story_aug_kingpin = {
                             is_landed = no
                             AND = {
                                 is_imprisoned = yes
+                                NOT = { scope:story.var:eotg_kp_stage = flag:war }
+                            }
+                            AND = {
+                                has_trait = eotg_total_integration
                                 NOT = { scope:story.var:eotg_kp_stage = flag:war }
                             }
                         }
@@ -330,7 +344,19 @@ eotg_story_aug_kingpin = {
                             }
                         }
                     }
+                    # Seamless exposure (§12.5 S4, B13 QA S2): an owner who
+                    # crossed the threshold mid-war gets no first-person leaf
+                    # (.063/.036/.069/.066/.065). Silent end after the
+                    # war-support clean-up above; on_end does the rest.
                     if = {
+                        limit = { story_owner = { has_trait = eotg_total_integration } }
+                        # Not a leaf: lift the guard M3 just set, so on_end
+                        # sends a living kingpin to the pool like any other
+                        # silent end
+                        remove_variable = eotg_kp_resolving
+                        end_story = yes
+                    }
+                    else_if = {
                         limit = {
                             OR = {
                                 NOT = { exists = var:eotg_kp }
@@ -408,10 +434,29 @@ eotg_story_aug_kingpin = {
                     }
                 }
                 effect = {
-                    set_variable = eotg_kp_spiral_done
-                    set_variable = eotg_kp_resolving
-                    set_variable = { name = eotg_kp_resolve_window  value = yes  days = 60 }
-                    story_owner = { trigger_event = { id = eotg_aug_kingpin.066  days = { 1 5 } } }
+                    # Seamless exposure (§12.5 S4, B13 QA S2): no .066 for an
+                    # owner who crossed the threshold mid-war. The war-support
+                    # clean-up as in M3, then a silent end; on_end does the rest.
+                    if = {
+                        limit = { story_owner = { has_trait = eotg_total_integration } }
+                        if = {
+                            limit = { has_variable = eotg_kp_war_guns_on }
+                            remove_variable = eotg_kp_war_guns_on
+                            story_owner = {
+                                if = {
+                                    limit = { has_character_modifier = eotg_mod_aug_kp_hired_guns }
+                                    remove_character_modifier = eotg_mod_aug_kp_hired_guns
+                                }
+                            }
+                        }
+                        end_story = yes
+                    }
+                    else = {
+                        set_variable = eotg_kp_spiral_done
+                        set_variable = eotg_kp_resolving
+                        set_variable = { name = eotg_kp_resolve_window  value = yes  days = 60 }
+                        story_owner = { trigger_event = { id = eotg_aug_kingpin.066  days = { 1 5 } } }
+                    }
                 }
             }
             # The pending faction went to war without .038 (the player
@@ -533,27 +578,46 @@ eotg_story_aug_kingpin = {
                             var:eotg_fracture_risk >= 95
                         }
                     }
-                    random_list = {
-                        40 = {
-                            modifier = {
-                                factor = 1.5
-                                eotg_aug_kp_is = { AXIS = mind  VALUE = purge }
-                            }
-                            modifier = {
-                                factor = 1.5
-                                OR = {
-                                    eotg_aug_kp_is = { AXIS = kind  VALUE = crew }
-                                    eotg_aug_kp_is = { AXIS = kind  VALUE = hired }
+                    # Seamless exposure (§12.5 S4, B13 QA S2): no .068/.075
+                    # for a Seamless owner. The war-support clean-up as in M3,
+                    # then a silent end; on_end does the rest.
+                    if = {
+                        limit = { story_owner = { has_trait = eotg_total_integration } }
+                        if = {
+                            limit = { has_variable = eotg_kp_war_guns_on }
+                            remove_variable = eotg_kp_war_guns_on
+                            story_owner = {
+                                if = {
+                                    limit = { has_character_modifier = eotg_mod_aug_kp_hired_guns }
+                                    remove_character_modifier = eotg_mod_aug_kp_hired_guns
                                 }
                             }
-                            modifier = {
-                                factor = 0.5
-                                eotg_aug_kp_is = { AXIS = mind  VALUE = cold }
-                            }
-                            story_owner = { trigger_event = { id = eotg_aug_kingpin.068  days = { 1 5 } } }
                         }
-                        60 = {
-                            story_owner = { trigger_event = { id = eotg_aug_kingpin.075  days = { 1 5 } } }
+                        end_story = yes
+                    }
+                    else = {
+                        random_list = {
+                            40 = {
+                                modifier = {
+                                    factor = 1.5
+                                    eotg_aug_kp_is = { AXIS = mind  VALUE = purge }
+                                }
+                                modifier = {
+                                    factor = 1.5
+                                    OR = {
+                                        eotg_aug_kp_is = { AXIS = kind  VALUE = crew }
+                                        eotg_aug_kp_is = { AXIS = kind  VALUE = hired }
+                                    }
+                                }
+                                modifier = {
+                                    factor = 0.5
+                                    eotg_aug_kp_is = { AXIS = mind  VALUE = cold }
+                                }
+                                story_owner = { trigger_event = { id = eotg_aug_kingpin.068  days = { 1 5 } } }
+                            }
+                            60 = {
+                                story_owner = { trigger_event = { id = eotg_aug_kingpin.075  days = { 1 5 } } }
+                            }
                         }
                     }
                 }

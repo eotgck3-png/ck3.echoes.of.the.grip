@@ -374,7 +374,20 @@ eotg_aug_nr.002 = {
 eotg_aug_nr.003 = {
     type = character_event
     title = eotg_aug_nr.003.t
-    desc = eotg_aug_nr.003.desc
+    # Seamless exposure (event_quality_v1 §12.5 S3, B13 item 6): the log
+    # register first. Options a-c and e are already imperative; f is closed
+    # to a Seamless root by its tier gate; g is its own. d (compassionate) is
+    # closed only at the threshold, which strips personality: a Seamless
+    # ruler can regain the trait from vanilla, and d's text is neutral.
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { has_trait = eotg_total_integration }
+                desc = eotg_aug_nr.003.desc_seamless
+            }
+            desc = eotg_aug_nr.003.desc
+        }
+    }
     theme = mental_health
     override_background = { reference = eotg_bg_corridor_night }
 

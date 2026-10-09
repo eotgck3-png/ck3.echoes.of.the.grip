@@ -22,6 +22,9 @@ eotg_aug_kp_can_start = {
     is_adult = yes
     is_imprisoned = no
     eotg_is_unclaimed_folk = no
+    # Seamless exposure (event_quality_v1 §12.5.3 B13 item 2): the kingpin
+    # beats are first person; a Seamless ruler does not start the story
+    NOT = { has_trait = eotg_total_integration }
     NOT = { government_has_flag = government_is_landless_adventurer }
     # The same development floor as eotg_can_receive_augmented: implants are
     # traded where the capital is developed enough

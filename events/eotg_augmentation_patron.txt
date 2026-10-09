@@ -192,7 +192,11 @@ eotg_aug_patron.002 = {
     theme = stewardship_wealth_focus
     override_background = { reference = eotg_bg_office }
 
-    trigger = { eotg_aug_has_patron = yes }
+    trigger = {
+        eotg_aug_has_patron = yes
+        # Seamless exposure (event_quality_v1 §12.5 S1 in-flight, B13 QA S3)
+        NOT = { has_trait = eotg_total_integration }
+    }
 
     left_portrait = {
         character = root
@@ -437,7 +441,11 @@ eotg_aug_patron.003 = {
     theme = stewardship_wealth_focus
     override_background = { reference = eotg_bg_office }
 
-    trigger = { eotg_aug_has_patron = yes }
+    trigger = {
+        eotg_aug_has_patron = yes
+        # Seamless exposure (event_quality_v1 §12.5 S1 in-flight, B13 QA S3)
+        NOT = { has_trait = eotg_total_integration }
+    }
 
     left_portrait = {
         character = root
@@ -604,6 +612,8 @@ eotg_aug_patron.004 = {
     override_background = { reference = eotg_bg_underlevel_night }
 
     trigger = {
+        # Seamless exposure (event_quality_v1 §12.5 S1 in-flight, B13 QA S3)
+        NOT = { has_trait = eotg_total_integration }
         eotg_aug_has_patron = yes
         any_courtier = { eotg_aug_patron_critic_candidate = { RULER = root } }
     }
@@ -800,7 +810,11 @@ eotg_aug_patron.005 = {
     theme = family
     override_background = { reference = eotg_bg_office }
 
-    trigger = { eotg_aug_has_patron = yes }
+    trigger = {
+        eotg_aug_has_patron = yes
+        # Seamless exposure (event_quality_v1 §12.5 S1 in-flight, B13 QA S3)
+        NOT = { has_trait = eotg_total_integration }
+    }
 
     left_portrait = {
         character = root
@@ -996,7 +1010,11 @@ eotg_aug_patron.006 = {
     theme = intrigue
     override_background = { reference = eotg_bg_council }
 
-    trigger = { eotg_aug_has_patron = yes }
+    trigger = {
+        eotg_aug_has_patron = yes
+        # Seamless exposure (event_quality_v1 §12.5 S1 in-flight, B13 QA S3)
+        NOT = { has_trait = eotg_total_integration }
+    }
 
     left_portrait = {
         character = root
@@ -1205,7 +1223,11 @@ eotg_aug_patron.007 = {
     theme = intrigue
     override_background = { reference = eotg_bg_council }
 
-    trigger = { eotg_aug_has_patron = yes }
+    trigger = {
+        eotg_aug_has_patron = yes
+        # Seamless exposure (event_quality_v1 §12.5 S1 in-flight, B13 QA S3)
+        NOT = { has_trait = eotg_total_integration }
+    }
 
     left_portrait = {
         character = root
@@ -1337,6 +1359,8 @@ eotg_aug_patron.008 = {
     override_background = { reference = eotg_bg_office }
 
     trigger = {
+        # Seamless exposure (event_quality_v1 §12.5 S1 in-flight, B13 QA S3)
+        NOT = { has_trait = eotg_total_integration }
         eotg_aug_has_patron = yes
         eotg_is_augmented_any = no
     }
@@ -1555,7 +1579,11 @@ eotg_aug_patron.009 = {
     theme = intrigue
     override_background = { reference = eotg_bg_underlevel_night }
 
-    trigger = { eotg_aug_has_patron = yes }
+    trigger = {
+        eotg_aug_has_patron = yes
+        # Seamless exposure (event_quality_v1 §12.5 S1 in-flight, B13 QA S3)
+        NOT = { has_trait = eotg_total_integration }
+    }
 
     left_portrait = {
         character = root

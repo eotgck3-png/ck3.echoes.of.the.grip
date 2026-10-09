@@ -44,6 +44,10 @@ eotg_aug_tamper = {
     allow = {
         is_adult = yes
         is_imprisoned = no
+        # Seamless exposure (event_quality_v1 §12.5.3 B13 item 4): the owner
+        # gate; tamper.002/.003 are first person. In valid, a running scheme
+        # ends when its owner crosses the threshold.
+        NOT = { has_trait = eotg_total_integration }
 
         scope:target = {
             is_adult = yes
@@ -95,6 +99,10 @@ eotg_aug_tamper = {
     # hardware ends and the body begins, so there is no panel to open.
     valid = {
         is_incapable = no
+        # Seamless exposure (event_quality_v1 §12.5.3 B13 item 4): the owner
+        # gate; tamper.002/.003 are first person. In valid, a running scheme
+        # ends when its owner crosses the threshold.
+        NOT = { has_trait = eotg_total_integration }
         scope:target = {
             is_alive = yes
             is_imprisoned = no

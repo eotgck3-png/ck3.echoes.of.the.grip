@@ -3759,6 +3759,10 @@ eotg_aug_kingpin.033 = {
 
     trigger = {
         eotg_aug_kp_has_story = yes
+        # Seamless exposure (event_quality_v1 §12.5.3 B13 item 2): war-stage
+        # residue. M1 does not end the story in the war stage, so the
+        # first-person war beats are closed to a Seamless owner here.
+        NOT = { has_trait = eotg_total_integration }
         any_owned_story = {
             story_type = eotg_story_aug_kingpin
             var:eotg_kp_stage = flag:war
@@ -4001,6 +4005,10 @@ eotg_aug_kingpin.034 = {
 
     trigger = {
         eotg_aug_kp_has_story = yes
+        # Seamless exposure (event_quality_v1 §12.5.3 B13 item 2): war-stage
+        # residue. M1 does not end the story in the war stage, so the
+        # first-person war beats are closed to a Seamless owner here.
+        NOT = { has_trait = eotg_total_integration }
         any_owned_story = {
             story_type = eotg_story_aug_kingpin
             var:eotg_kp_stage = flag:war

@@ -513,6 +513,13 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Next step:** decide one of two fixes. Either the text drops the concealment, or the effect becomes secret: a murder secret instead of public dread.
 - **Refs:** `events/eotg_augmentation_nonruler.txt` nr.004; B9 QA 2026-10-09
 
+### CB-52: Can a Seamless character regain personality traits?
+- **Status:** waiting-human (2026-10-09)
+- **What:** the threshold strips all 36 personality traits (`eotg_augmentation_effects.txt:1064-1099`). Nothing stops vanilla events adding them back later: `eotg_total_integration` lists only cybernetics and neurofractured as opposites. Canon says "the person is gone" (Q9) but doesn't say whether the trait strip is permanent. For now, first-person options that a regained trait would reopen are guarded (B13; e.g. act.001.e).
+- **Owner:** human (canon ruling), then eotg-architect
+- **Next step:** choose one: (a) regained traits are surface behaviour, and the per-option guards are enough (current state); or (b) make the strip permanent in script, using trait opposites or an on_action re-strip.
+- **Refs:** B13 lore review 2026-10-09; `docs/specs/event_quality_v1.md` §12.5
+
 ## Tooling and environment
 
 ### CB-18: Game is 1.20.0.3; the tools target older versions

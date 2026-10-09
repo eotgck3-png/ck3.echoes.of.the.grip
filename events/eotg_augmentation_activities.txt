@@ -50,9 +50,18 @@ eotg_aug_act.001 = {
     window = widget_activity_locale_fullscreen_event
     title = eotg_aug_act.001.t
     desc = {
-        desc = eotg_aug_act.001.desc
+        # Seamless exposure (event_quality_v1 §12.5 S3, B13 item 6): the log
+        # register first; the first-person fragments below are guarded.
+        first_valid = {
+            triggered_desc = {
+                trigger = { has_trait = eotg_total_integration }
+                desc = eotg_aug_act.001.desc_seamless
+            }
+            desc = eotg_aug_act.001.desc
+        }
         triggered_desc = {
             trigger = {
+                NOT = { has_trait = eotg_total_integration }
                 involved_activity = {
                     any_attending_character = {
                         count >= 2
@@ -64,17 +73,24 @@ eotg_aug_act.001 = {
         }
         first_valid = {
             triggered_desc = {
-                trigger = { scope:eotg_aug_entrant = { has_trait = eotg_neurofractured } }
+                trigger = {
+                    NOT = { has_trait = eotg_total_integration }
+                    scope:eotg_aug_entrant = { has_trait = eotg_neurofractured }
+                }
                 desc = eotg_aug_act.001.desc_entrant_nf
             }
             triggered_desc = {
-                trigger = { scope:eotg_aug_entrant = { eotg_is_aug_tier3 = yes } }
+                trigger = {
+                    NOT = { has_trait = eotg_total_integration }
+                    scope:eotg_aug_entrant = { eotg_is_aug_tier3 = yes }
+                }
                 desc = eotg_aug_act.001.desc_entrant_oc
             }
         }
         # Lore R1: only an independent ruler reads "your law"
         triggered_desc = {
             trigger = {
+                NOT = { has_trait = eotg_total_integration }
                 eotg_aug_under_policy = { LAW = ban }
                 is_independent_ruler = yes
             }
@@ -82,6 +98,7 @@ eotg_aug_act.001 = {
         }
         triggered_desc = {
             trigger = {
+                NOT = { has_trait = eotg_total_integration }
                 eotg_aug_under_policy = { LAW = ban }
                 is_independent_ruler = no
             }
@@ -212,7 +229,10 @@ eotg_aug_act.001 = {
     # e (zealous) is the kept personality gate.
     option = {
         name = eotg_aug_act.001.d
-        trigger = { highest_held_title_tier >= tier_duchy }
+        trigger = {
+            highest_held_title_tier >= tier_duchy
+            NOT = { has_trait = eotg_total_integration }    # §12.5 B13 item 6: "my rank"
+        }
         involved_activity = {
             every_attending_character = {
                 limit = { eotg_aug_tournament_entrant = yes }
@@ -244,7 +264,10 @@ eotg_aug_act.001 = {
     # are the zealotry. Step 5: stress entry added.
     option = {
         name = eotg_aug_act.001.e
-        trigger = { has_trait = zealous }
+        trigger = {
+            has_trait = zealous
+            NOT = { has_trait = eotg_total_integration }    # §12.5 B13: "My field"
+        }
         trait = zealous
         involved_activity = {
             every_attending_character = {
@@ -554,9 +577,18 @@ eotg_aug_act.003 = {
     window = widget_activity_locale_fullscreen_event
     title = eotg_aug_act.003.t
     desc = {
-        desc = eotg_aug_act.003.desc
+        # Seamless exposure (event_quality_v1 §12.5 S3, B13 item 6): the log
+        # register first; the first-person fragments below are guarded.
+        first_valid = {
+            triggered_desc = {
+                trigger = { has_trait = eotg_total_integration }
+                desc = eotg_aug_act.003.desc_seamless
+            }
+            desc = eotg_aug_act.003.desc
+        }
         triggered_desc = {
             trigger = {
+                NOT = { has_trait = eotg_total_integration }
                 scope:eotg_aug_accused ?= {
                     OR = {
                         eotg_is_aug_tier3 = yes
@@ -567,28 +599,36 @@ eotg_aug_act.003 = {
             }
             desc = eotg_aug_act.003.desc_hot
         }
-        # Lore R1 variants
+        # Lore R1 variants (none for a Seamless root: first person)
         first_valid = {
             triggered_desc = {
                 trigger = {
+                    NOT = { has_trait = eotg_total_integration }
                     eotg_aug_under_policy = { LAW = ban }
                     is_independent_ruler = yes
                 }
                 desc = eotg_aug_act.003.desc_ban
             }
             triggered_desc = {
-                trigger = { eotg_aug_under_policy = { LAW = ban } }
+                trigger = {
+                    NOT = { has_trait = eotg_total_integration }
+                    eotg_aug_under_policy = { LAW = ban }
+                }
                 desc = eotg_aug_act.003.desc_ban_v
             }
             triggered_desc = {
                 trigger = {
+                    NOT = { has_trait = eotg_total_integration }
                     eotg_aug_under_policy = { LAW = license }
                     is_independent_ruler = yes
                 }
                 desc = eotg_aug_act.003.desc_license
             }
             triggered_desc = {
-                trigger = { eotg_aug_under_policy = { LAW = license } }
+                trigger = {
+                    NOT = { has_trait = eotg_total_integration }
+                    eotg_aug_under_policy = { LAW = license }
+                }
                 desc = eotg_aug_act.003.desc_license_v
             }
         }
@@ -707,6 +747,7 @@ eotg_aug_act.003 = {
     # "The accusation fails."
     option = {
         name = eotg_aug_act.003.b
+        trigger = { NOT = { has_trait = eotg_total_integration } }    # §12.5 B13 item 6: "I see"
         scope:eotg_aug_accuser ?= {
             add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
         }

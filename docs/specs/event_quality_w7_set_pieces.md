@@ -4,6 +4,7 @@
 **Parent:** [`event_quality_v1.md`](event_quality_v1.md) §11 W7. The parent spec's rules bind here unless this file says otherwise: §8 lore, §12 voice and quotes, §14 backgrounds.
 **Approval:** NEW content, approved by the owner on 2026-10-09 (Q2). Tone ruled the same day (Q3): the Seamless fade is staged once, at the threshold, as a record.
 **State read:** the working tree on `v2-space-map` after 25eb918 (W2 landed). W3 is in flight on the same event files. No `play_music_cue` or `add_internal_flag` existed in `events/` when this was written. Vanilla is 1.20.0.3; every vanilla path and line below was checked this session.
+**Build delta (2026-10-09):** the fracture.027 witness pick (§6.1) also requires the witness to be in root's court, and the heir step requires an unimprisoned heir. end.002's physician portrait (§6.6) also requires the physician to be alive.
 
 ---
 
@@ -29,6 +30,7 @@ The parent's signature measure (the scorecard) applies: length, paragraphing, ba
 |---|---|---|---|
 | `eotg_cascade_witness` | saved scope (presentation only) | eotg-scripter | fracture.027 right portrait (§6.1). Set in `immediate` inside `hidden_effect`; read by nothing else. |
 | `eotg_surgeon` | saved scope (existing name, reused) | eotg-scripter | end.002 re-saves the court physician the way end.001 does (`eotg_augmentation_endgame.txt:96-103`), only when it doesn't already exist. |
+| `eotg_excision_backstreet` | saved scope value (presentation only) | eotg-scripter | Added at build (§6.6): set by end.001.e, read only by end.002's physician portrait. |
 | `eotg_witness` | saved scope (presentation only) | eotg-scripter (W6) | Proposed name for the W6 witness portrait on fracture.004 and heir.005 (parent §11 W6). If W6 lands a different name, W7 uses that. |
 | Existing loc keys of the six events | loc text | eotg-localizer | Text replaced; **no new loc keys**. The full list is in §7. |
 | *(deferred)* `eotg_bg_fs_cascade`, `eotg_bg_fs_threshold`, `eotg_bg_fs_succession` | fullscreen background keys | eotg-scripter, after art | §9. Not created now. |
@@ -94,7 +96,7 @@ Words marked **[new]** in the text drafts are added sentences or clauses, listed
   - `event_window_widget_vfx_background_double_vision_severe`
   - `event_window_widget_vfx_left_character_double_vision_severe`
 
-  Both use `container = foreground_shader_vfx_container`. Precedent: `events/dlc/pam/pam_secular_faith_events.txt:6718-6725` (pam_secular_faith_events.0048, severe double vision plus fog on a tormenting dream).
+  Both use `container = foreground_shader_vfx_container`. Precedent: `events/dlc/pam/pam_secular_faith_events.txt:7197-7200` (pam_secular_faith_events.0051, the exact severe background + left-character pair). (Corrected 2026-10-09: this previously cited .0048, which is the night-scene/fog precedent used in §6.5.)
 - **Music:** `mx_cue_stress` (`music/in_game/music.txt:358`; vanilla use `events/interaction_events/character_interaction_events.txt:1329`). It carries `calls = 3`: after it plays, the next three requests are skipped. Nothing else in the mod plays it, so only vanilla stress events compete. **Fallback** if CB-44 finds it skipped: `mx_cue_combat_stinger` (:325, no cooldown).
 - **Portraits:**
   - `left_portrait` = root, `animation = pain` (kept), plus `triggered_animation`: `brave` → `rage` (:5081), `stubborn` → `anger` (:4468), `craven` → `fear` (:4760).
@@ -116,7 +118,7 @@ Words marked **[new]** in the text drafts are added sentences or clauses, listed
   |---|---|---|---|
   | a | "Let go." | none | hidden roll: death 35, Seamless 40, Excision 15, abdication 15 (needs an heir), passes 10, with their modifiers (:4495-4545) |
   | b | "Hold on." | none | death 45, Seamless 25, Excision 15, abdication 15, passes 40 (:4548-4598) |
-  | c | "Fight it." | brave | death 35, Seamless 15, Excision 15, abdication 15, passes 50 (:4601-4653) |
+  | c | "Fight it." | education_martial (B5 re-axed it from brave) | death 35, Seamless 15, Excision 15, abdication 15, passes 50 (:4601-4653) |
   | d | "Not yet. I am not finished." | stubborn | death 35, Seamless 15, Excision 15, abdication 15, passes 40 (:4656-4708) |
 
   W5 (B5) may re-axe c or d. W7 takes whatever gate B5 leaves; the effects never change.
@@ -127,7 +129,7 @@ Words marked **[new]** in the text drafts are added sentences or clauses, listed
   |---|---|---|
   | `eotg_fracture.027.desc` | "Everything fires at once. Every sensor, every channel, every forecast the implant has ever run arrives together, and I am standing in the middle of the delivery. The room is a long way off.\n\n**[new]** Someone at the door is saying my name. I hear it three times: once early, once on time, once late. I cannot tell which one I replied to.\n\nThere is very little left between my thoughts and the system, and every second it gets thinner." | Neurofractured, first person. "Hearing one's own words late" and the forecast running ahead are both allowed. The name comes from a person, not from the implant. |
   | `.desc_premonition` | "\n\nI remember this. It was filed months ago as a forecast and stored as a memory: this room, these hands. The memory stops where the forecast's confidence ran out, before the ending." | converted and **shortened** (44 to 31 words) so the worst case fits the band; same facts. Lore polish taken 2026-10-09 |
-  | `.desc_voice01` | "\n\nThe thought that arrives half a second early is arriving earlier now: a full second, then three, then too many to follow." | already neutral; unchanged |
+  | `.desc_voice01` | "\n\nThe thought that arrives half a second early is arriving earlier now: a full second, then three, then too many to follow." | shipped wording; needs a first person under §12.1 rule 13, which it now has at build (the shipped text governs) |
   | `.desc_voice2` | "\n\nThe model is running in plain view. Every future it has computed for me scrolls past, each one ranked, and the list is converging." | conversion only |
   | `.desc_voice3` | "\n\nI keep starting sentences with "we". There is less and less room in the word for two." | **L-W7-2 RULED:** the shipped line ("…only "we", and we are running out of room to be two") is possession framing and is replaced. The new line keeps the "we" in the ruler's own mouth (rule 6). |
   | `.desc_voice4` | "\n\nThe terms I agreed to are being exercised all at once. Every permission is live. It is a clean, orderly cascade, and nothing in it is out of bounds. That is what makes it frightening." | conversion only |
@@ -220,9 +222,9 @@ Words marked **[new]** in the text drafts are added sentences or clauses, listed
   |---|---|---|---|
   | a | "They were threats. The implant confirmed it." | none | dread +40, risk +10, `eotg_aug_stress_cruelty_effect` (:550-560) |
   | b | "I do not remember." | none | stress medium gain, risk −5, 30% `depressed_1` (:563-576) |
-  | c | "Bury them with honours." | zealous + someone died | prestige −100, piety +50, risk −3 (:581-596) |
+  | c | "Bury them with honours." | education_learning + someone died (B4 re-axed it from zealous) | prestige −100, piety +50, risk −3 (:581-596) |
   | d | "Confess to the court and accept the cost." | just | prestige −200, tyranny −20, risk −8, just stress loss (:600-615) |
-  | e | "Fill the empty places by the next watch." | callous + a victim | dread +20, risk +5, callous stress loss (:620-640) |
+  | e | "Fill the empty places by the next watch." | tier ≥ duchy + a victim (B4 re-axed it from callous) | dread +20, risk +5, callous stress loss (:620-640) |
 
   Three personality gates, so B4 (W5) will re-axe two of them. W7 takes the result and does not touch effects.
 - **Loc keys and drafts:**
@@ -230,7 +232,7 @@ Words marked **[new]** in the text drafts are added sentences or clauses, listed
   | Key | Draft | Voice note |
   |---|---|---|
   | `eotg_fracture.004.desc` | "There will be an official account. It will speak of a loss of control in the audience chamber, and it will not resemble what the witnesses saw: me crossing the room faster than the guards could follow, coolant hissing from my hot casings, screens shattered and sparking along the wall, and the guards backing away from me.\n\n**[new]** My own memory of it is three seconds long and does not match. The log has all of it, to the tenth of a second, filed under granted motor access.\n\n**[new]** The guards will not look at me. Someone is already at the wall with a cloth." | Neurofractured, first person. Allowed items used: motor pre-emption as granted and logged access, and unreliable narration set against the log. No second speaker. The "three seconds" is a memory, not a risk figure, so it is allowed (parent §8). |
-  | `.desc_killed`, `.desc_wounded`, `.desc_none` | unchanged (already neutral) | |
+  | `.desc_killed`, `.desc_wounded`, `.desc_none` | given a first person at build (§12.1 rule 13); the shipped text governs | |
   | `.a`–`.e`, `.t` | unchanged, except where B4 re-axes an option's text | |
 
   Rendered length: main about 92 words; with one or both fragments 104 to 124.
@@ -250,20 +252,20 @@ Words marked **[new]** in the text drafts are added sentences or clauses, listed
   1. The parent is dead; it was quick.
   2. **[new]** My hands are still steady.
   3. **[new]** Nobody asks me what to call it; they wait to see what I do with the seat and the hardware.
-  4. The implants kept logging; the last entry is my arrival.
+  4. In the next room the implants logged right up to the end; the last entry is my arrival. (Amended 2026-10-09: the earlier "kept logging after the rest of [him] had stopped" contradicted the heir being present as the killer.)
 - **Options (unchanged):**
 
   | Opt | Text | Gate | Effect (as shipped, `eotg_augmentation_heir.txt`) |
   |---|---|---|---|
   | a | "It was mercy." | none | `eotg_aug_stress_murder_effect` (:912-920) |
-  | b | "It was murder." | compassionate | stress major gain (:923-933) |
+  | b | "It was murder." | education_learning (B7 re-axed it from compassionate; option text re-worded under B7) | stress major gain (:923-933) |
   | c | "It was necessary." | callous | prestige +100, `eotg_aug_stress_murder_effect` (:936-947) |
   | d | "Take the implants." | not augmented, gold ≥ tiny | initiate; risk 25; hidden flaw; voice stage 1 if the parent's voice ≥ 2; clear the parent hardware; murder and surgery stress (:952-983) |
 - **Loc keys and drafts:**
 
   | Key | Draft | Voice note |
   |---|---|---|
-  | `eotg_aug_heir.005.desc` | "[eotg_parent_ruler.GetFirstName] is dead, and the succession is done. It was quick, in the lull between two incidents, and it caught the residence unprepared. My hands were steady. **[new]** They are still steady, and that is the part I keep returning to.\n\nThe household has called it whatever it needed to call it. **[new]** Nobody has asked me what to call it. They are waiting to see what I will do with the seat, and with the hardware.\n\nIn the next room the implants kept logging **[new]** after the rest of [eotg_parent_ruler.GetHerHim] had stopped. The last entry is a timestamp: my arrival." | Heir's own first person; the heir may be unaugmented, so it is ordinary narration. "Hardware" sets up option d without promising it. Bare `[x.GetName]` form. The parent may have been Seamless (the Heir's Arc jumps to the Choice on Total Integration), and the logging line holds either way. |
+  | `eotg_aug_heir.005.desc` | "[eotg_parent_ruler.GetFirstName] is dead, and the succession is done. It was quick, in the lull between two incidents, and it caught the residence unprepared. My hands were steady. **[new]** They are still steady, and that is the part I keep returning to.\n\nThe household has called it whatever it needed to call it. **[new]** Nobody has asked me what to call it. They are waiting to see what I will do with the seat, and with the hardware.\n\nIn the next room the implants logged right up to the end. The last entry is a timestamp: my arrival." | Heir's own first person; the heir may be unaugmented, so it is ordinary narration. "Hardware" sets up option d without promising it. Bare `[x.GetName]` form. The parent may have been Seamless (the Heir's Arc jumps to the Choice on Total Integration), and the logging line holds either way. Final sentence amended 2026-10-09 (QA/lore): logging "after the rest of [him] had stopped" with the heir's arrival as the last entry was self-contradictory, since the heir is the killer and is present. |
   | `.a`–`.d`, `.t` | unchanged | |
 
   Rendered length: about 100 words.
@@ -277,7 +279,7 @@ Words marked **[new]** in the text drafts are added sentences or clauses, listed
 - **Music:** `mx_cue_peace_ensues` (`music.txt:339`, plays every time). Vanilla uses it for recovery from severe injury: `events/health_events.txt:163`, health.0002, `theme = recovery`, the same theme end.002 has.
 - **Portraits:**
   - `left_portrait` = root, `animation = sadness` (kept), plus `triggered_animation`: `scope:eotg_excision_outcome = flag:maimed` (guarded with `exists`) → `pain` (:4980); `content` or `calm` → `personality_content` (:3720).
-  - **[new]** `right_portrait` = `scope:eotg_surgeon`, `animation = physician` (:6586), guarded with `exists`. In `immediate`, inside `hidden_effect`: if `scope:eotg_surgeon` doesn't exist and root employs a court physician, save it (end.001's own block, `eotg_augmentation_endgame.txt:96-103`). The back-street path (`PHYSICIAN = no`) usually has no court physician involved, and the guard then hides the portrait. That matches lore ruling (d): option e never mentions the physician.
+  - **[new]** `right_portrait` = `scope:eotg_surgeon`, `animation = physician` (:6586), guarded with `exists`. In `immediate`, inside `hidden_effect`: if `scope:eotg_surgeon` doesn't exist and root employs a court physician, save it (end.001's own block, `eotg_augmentation_endgame.txt:96-103`). The back-street path (`PHYSICIAN = no`) must not show the physician (lore ruling (d): option e never mentions the physician). **Corrected at build (2026-10-09, scripter):** end.001's `immediate` saves `scope:eotg_surgeon` before any option is chosen, and end.002 inherits it, so an `exists` guard alone would show the court physician after the back streets too. end.001.e therefore saves `scope:eotg_excision_backstreet` (a presentation-only scope value, set inside its `hidden_effect`), and end.002's portrait trigger and re-save both require it to be absent.
 - **Beats:**
   1. Nothing arrives early.
   2. **[new]** Habit reaches for an answer and finds only the question; I count the steps.
@@ -290,7 +292,7 @@ Words marked **[new]** in the text drafts are added sentences or clauses, listed
   |---|---|---|---|
   | a | "It's quiet." | none | stress medium loss (:243-251) |
   | b | "I miss it." | none | stress minor gain (:254-262) |
-  | c | "Quiet. At last." | zealous | piety +100 (:265-275) |
+  | c | "Quiet. At last." | zealous | piety +100; zealous minor stress loss (B7, W5 step 5) (:265-275) |
 - **Loc keys and drafts:**
 
   | Key | Draft | Voice note |
@@ -325,7 +327,7 @@ All keys are existing; **0 new keys**. Text is replaced in:
 - `eotg_aug_heir.005.desc`
 - `eotg_aug_end.002.desc`, `.desc_maimed`
 
-That is 15 keys. `replace/`: none.
+That is 14 keys (13 rewritten plus the already-ruled `.tt`). `replace/`: none. (Corrected 2026-10-09 from "15".)
 
 ### 7.2 Ownership against the P3 batches
 
@@ -350,7 +352,7 @@ The test's pinned set (parent §9 item 2) becomes:
 5. Voice:
    - fracture.027, fracture.004, end.009 (desc), heir.005 and end.002 are first person, with no "you" in narration;
    - end.010 after "Reading complete." and both `*.seamless` lines carry no I, me, my, we, our or you;
-   - L012 (banned and register terms) is clean on the 15 keys, including "voice", "answers", "whisper", "prison", "tear", "grip" and "Void", and "the implant decides".
+   - L012 (banned and register terms) is clean on the 14 keys, including "voice", "answers", "whisper", "prison", "tear", "grip" and "Void", and "the implant decides".
 6. Every portrait that names a saved scope is guarded with `exists`. The `triggered_animation` keys are the verified ones in §6. Tiger shows no unknown-animation or unknown-widget error.
 7. Tiger clean except the CLAUDE.md known-benign list. PX LSP and vocab show no new findings. eotg_lint shows no new findings against the baseline, and `loc_mechanical.py` is clean.
 8. Lore sign-off: done 2026-10-09 (§11). The shipped text matches the §6 drafts as amended.
@@ -386,7 +388,8 @@ The test's pinned set (parent §9 item 2) becomes:
 | Big window on a dramatic personal beat | `events/bookmark_events.txt:2324-2335` (bookmark.0500) |
 | Big window portrait slots; lower slots static; VFX container | `gui/event_windows/big_event_window.gui:115-290, 375, 606` |
 | `widgets = { widget = { gui container } }` field | `events/_events.info:165-188` |
-| Double vision, severe, with fog | `events/dlc/pam/pam_secular_faith_events.txt:6718-6725` |
+| Double vision, severe (background + left character) | `events/dlc/pam/pam_secular_faith_events.txt:7197-7200` (pam_secular_faith_events.0051) |
+| Night scene with fog (and severe character double vision) | `events/dlc/pam/pam_secular_faith_events.txt:6718-6725` (pam_secular_faith_events.0048) |
 | Double vision, milder, background and characters | `events/dlc/pam/pam_secular_faith_events.txt:3414-3418` |
 | Heavy smoke widget | `events/dlc/pam/pam_secular_faith_events.txt:125-127` |
 | Dead portrait, `animate_if_dead` | already in the mod (fracture.004, heir.005); vanilla `events/activities/chariot_race_activity/chariot_ongoing_events_jp.txt:2544` |
@@ -417,6 +420,6 @@ The test's pinned set (parent §9 item 2) becomes:
 - next: eotg-scripter (P5, after B4/B5/B7 have landed on these files and W3 has committed)
 - ask (scripter): apply §6 presentation fields to the six events (window, effect, widgets, music, portraits, the two presentation-only scopes) and §5.1's coordination rules. Change no option effect, trigger, weight or caller. Report any W3 cue you replace.
 - files: docs/specs/event_quality_w7_set_pieces.md, docs/specs/event_quality_v1.md
-- needs-loc: eotg-localizer writes the 15 keys in §7.1 from the lore-approved drafts, after the scripter (§7.2: these keys are W7's, not B4/B5/B7's)
+- needs-loc: eotg-localizer writes the 14 keys in §7.1 from the lore-approved drafts, after the scripter (§7.2: these keys are W7's, not B4/B5/B7's)
 - needs-lore: none (signed off 2026-10-09)
 - needs-human: CB-44 in-game checks in §8 item 9; art for §9 when W10 opens

@@ -913,6 +913,9 @@ eotg_aug_examine_interaction = {
     # body.
     is_shown = {
         NOT = { scope:recipient = scope:actor }
+        # Seamless exposure (event_quality_v1 §12.5.3 B13 item 4): the actor
+        # gate; int.001 is first person
+        scope:actor = { NOT = { has_trait = eotg_total_integration } }
         scope:recipient = {
             eotg_aug_tamper_target = yes
             OR = {
@@ -1104,6 +1107,9 @@ eotg_aug_start_tamper_interaction = {
             scope:recipient = scope:actor
             scope:recipient = { is_imprisoned_by = scope:actor }
         }
+        # Seamless exposure (event_quality_v1 §12.5.3 B13 item 4): the actor
+        # gate; tamper.002/.003 are first person
+        scope:actor = { NOT = { has_trait = eotg_total_integration } }
         scope:recipient = { eotg_aug_tamper_target = yes }
 
         NAND = { # Game Rules! (vanilla start_abduct)
@@ -1380,7 +1386,12 @@ eotg_aug_salvage_interaction = {
     # Seamless hardware ends and the body begins, so there is nothing to cut
     # out apart from the body. eotg_aug_tamper_target already excludes them.
     is_shown = {
-        scope:actor = { is_adult = yes }
+        # Seamless exposure (event_quality_v1 §12.5.3 B13 item 4): the actor
+        # gate; int.002 is first person
+        scope:actor = {
+            is_adult = yes
+            NOT = { has_trait = eotg_total_integration }
+        }
         scope:recipient = {
             is_imprisoned_by = scope:actor
             eotg_aug_tamper_target = yes
