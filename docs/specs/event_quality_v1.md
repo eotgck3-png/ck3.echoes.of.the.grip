@@ -595,10 +595,10 @@ Each key is one `background = { reference environment ambience }` block, copied 
 | `eotg_bg_office` | `study` (`study.dds`) | 8232 | `environment_event_study` | ledgers, contracts, reports, audits, records |
 | `eotg_bg_battlefield` | `battlefield` (`battlefield.dds`) | 465 | `environment_event_battlefield` | combat, engagements, cascades in the field |
 | `eotg_bg_field_camp` | `army_camp` (`genericcamp.dds`) | 10031 | `environment_event_genericcamp` | Frontier camps, retinue drill, bouts |
-| `eotg_bg_command_tent` | `ep3_military_tent` (`ep3_military_tent.dds`) | 451 | `environment_ep3_military_tent_interior` | war councils, campaign orders |
+| `eotg_bg_command_tent` | `ep3_military_tent` (`ep3_military_tent.dds`) | 17106 | `environment_ep3_military_tent_interior` | war councils, campaign orders |
 | `eotg_bg_vault` | `ce1_catacombs` (`fp4_catacombs.dds`) | 15648 | `environment_ce1_catacombs` | the quiet room, aftermath of death, ruins |
 | `eotg_bg_cavern` | `fp3_cave` (`fp3_cave.dds`) | 10793 | `environment_event_sittingroom` | Frontier finds, seams |
-| `eotg_bg_barren_world` | `drylands` (`drylands.dds`) | 3351 | `environment_event_desert` | Frontier surveys, supply runs |
+| `eotg_bg_barren_world` | `drylands` (`drylands.dds`) | 3960 | `environment_event_desert` | Frontier surveys, supply runs |
 | `eotg_bg_riot` | `burning_building` (`raid_burning.dds`) | 7550 | `environment_ep3_constantinople_on_fire` | crackdowns, regions falling (on probation, see W2) |
 
 The ambience string is copied from the line after `environment` at the cited vanilla line.

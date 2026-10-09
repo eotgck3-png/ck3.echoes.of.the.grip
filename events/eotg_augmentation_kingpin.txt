@@ -1861,7 +1861,28 @@ eotg_aug_kingpin.010 = {
         }
     }
     theme = intrigue
-    override_background = { reference = eotg_bg_council }
+    # Backgrounds follow the first desc block: the council for the audience
+    # arrest, the study for the front's records vault, the underlevel at night
+    # for the stacks, the cargo hulk and the hangar. Triggered set shape:
+    # vanilla events/activities/activity_system_events.txt:448-455.
+    override_background = {
+        trigger = { exists = scope:eotg_kp_audience_arrest }
+        reference = eotg_bg_council
+    }
+    override_background = {
+        trigger = {
+            NOT = { exists = scope:eotg_kp_audience_arrest }
+            eotg_aug_kp_is = { AXIS = kind  VALUE = front }
+        }
+        reference = eotg_bg_office
+    }
+    override_background = {
+        trigger = {
+            NOT = { exists = scope:eotg_kp_audience_arrest }
+            NOT = { eotg_aug_kp_is = { AXIS = kind  VALUE = front } }
+        }
+        reference = eotg_bg_underlevel_night
+    }
 
     trigger = {
         eotg_aug_kp_has_story = yes

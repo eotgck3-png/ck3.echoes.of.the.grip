@@ -256,7 +256,7 @@ Add the convention to the JSON, or an inline `# eotg_lint: allow L014 <reason>` 
 **Event-quality suffixes** (`event_quality_v1` §7: `<event_id>.toast*`, `.msg*`, `.opening`, `<desc_key>_v2/_v3`): these need **no** convention entry. Script names each one literally (`send_interface_toast = { title = eotg_x.1.toast }`, `opening = { desc = … }`, a `random_valid` desc), so L014 already counts them as referenced. A naming convention would hide a dead `.toast` key whose event lost its toast. `tests/test_eotg_lint.py` (`L014Suffixes`) pins this.
 
 ### L015 — visible character event without `override_background` (WARNING)
-A non-hidden `character_event` (or an event with no `type`, which defaults to it) that sets no `override_background`. *Why:* it shows its theme's default room, which is vanilla's medieval one (`event_quality_v1` W2; §14 maps every event to an `eotg_bg_*` key). Letter, activity and other event types have no background slot and are not checked. *Exempt:* events W2 decides to keep on the theme's room get `# eotg_lint: allow L015 <reason>` on the event line or the line above. On 2026-10-08 the rule reports 243, the whole visible character-event set; all of them are baselined until W2.
+A non-hidden `character_event` (or an event with no `type`, which defaults to it) that sets no `override_background`. *Why:* it shows its theme's default room, which is vanilla's medieval one (`event_quality_v1` W2; §14 maps every event to an `eotg_bg_*` key). Letter, activity and other event types have no background slot and are not checked. *Exempt:* events W2 decides to keep on the theme's room get `# eotg_lint: allow L015 <reason>` on the event line or the line above. W2 (2026-10-09) set `override_background` on 230 events and marked the 13 §14.2 keep events with `# eotg_lint: allow L015`, so the rule reports 0 and has no baseline entries. A new visible character event must take an `eotg_bg_*` key or a reasoned allow.
 
 ### L016 — BOM anywhere but byte 0 (ERROR)
 Every mod text file has at most one UTF-8 BOM (`EF BB BF`), and only at byte 0. Scanned: `common/`, `events/`, `localization/`, `history/`, `docs/test_map/` (recursively) and the files at the repo root, with extensions `.txt .yml .mod .csv .settings .gui`. Reported:
@@ -288,8 +288,8 @@ To silence one finding, put this on the finding's line or on the line directly b
 - **Where it works:** script (`.txt`) and loc (`.yml`) files alike. For L007, the finding's line is the `option = {` line.
 - **Suppression vs baseline:** use suppression for a deliberate, reviewed exception that should stay quiet forever. Use the baseline for known debt that should be fixed later.
 
-## Current baseline (2026-10-08, regenerated on purpose for event_quality_v1 W0c)
-411 findings, all from the three new rules: **L013e** 53 (`'…'` speech: the quote converter's 40 AUTO keys plus 13 REVIEW quotations), **L015** 243, **L017** 115. Each falls as its work item lands: W0e for L013e, W2 for L015, W5 for L017. The 15 earlier entries no longer occurred in the tree (the tree had 0 findings before the new rules), so the regeneration dropped them.
+## Current baseline (2026-10-09, W2 regeneration)
+115 entries, all L017 (falls with W5). L013e and L015 are at 0.
 
 ## Earlier baseline (2026-10-04, tree at `33f27a4`)
 | Rule | Count | What |

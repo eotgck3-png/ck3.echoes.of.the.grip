@@ -2554,7 +2554,28 @@ eotg_aug_tier3.018 = {
         }
     }
     theme = intrigue
-    override_background = { reference = eotg_bg_corridor_night }
+    # Backgrounds mirror the desc: the corridor only for desc_attempt (the
+    # first triggered_desc above, same trigger); the council for every other
+    # desc. Triggered pair shape: vanilla events/activities/
+    # activity_system_events.txt:448-455.
+    override_background = {
+        trigger = {
+            scope:eotg_plot_action = flag:ignored
+            scope:eotg_plot_truth = flag:true
+        }
+        reference = eotg_bg_corridor_night
+    }
+    override_background = {
+        trigger = {
+            NOT = {
+                AND = {
+                    scope:eotg_plot_action = flag:ignored
+                    scope:eotg_plot_truth = flag:true
+                }
+            }
+        }
+        reference = eotg_bg_council
+    }
 
     left_portrait = {
         character = root
