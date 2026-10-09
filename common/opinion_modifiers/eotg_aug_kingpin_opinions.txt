@@ -1,10 +1,11 @@
 ﻿# -- eotg_aug_kingpin_opinions.txt --------------------------------------------
 # Opinion modifiers for the Neurofractured Kingpin (docs/specs/
 # cybernetics_v2_kingpin.md §3). System-scoped (index §1 rule 1), shared with
-# no government. Durations are passed by the callers (years = 10).
+# no government. Durations are passed by the callers (years = 10), except
+# the kingmaker's, which decays over its own 20 years.
 #
-# BATCH-B SEAM (kingpin): eotg_opinion_aug_kp_kingmaker (L4) and
-# eotg_opinion_aug_kp_conspired (L8) are written with batch B.
+# Batch B: eotg_opinion_aug_kp_kingmaker (L4) and eotg_opinion_aug_kp_conspired
+# (L8), at the end.
 # -----------------------------------------------------------------------------
 
 # L2 (.061) and L3 b (.062): order restored. Every vassal, 10 years.
@@ -29,5 +30,21 @@ eotg_opinion_aug_kp_raised_criminal = {
 # .005 b (violence errand): the ruler warned the target. 10 years.
 eotg_opinion_aug_kp_warned = {
     opinion = 20
+    decaying = no
+}
+
+# L4 Kingmaker (.063): the boss remembers who put them in the seat. +50,
+# decaying to nothing over 20 years (vanilla shape: exposed_my_secret_opinion,
+# common/opinion_modifiers/00_opinion_modifiers.txt:541-545).
+eotg_opinion_aug_kp_kingmaker = {
+    opinion = 50
+    years = 20
+    decaying = yes
+}
+
+# L8 The Turn (.067), vassal variant: the liege learns the ruler conspired
+# with the lower levels. -30 (halved when forewarned or softened), 10 years.
+eotg_opinion_aug_kp_conspired = {
+    opinion = -30
     decaying = no
 }

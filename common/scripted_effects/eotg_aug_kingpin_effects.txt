@@ -1,6 +1,6 @@
 ﻿# -- eotg_aug_kingpin_effects.txt ---------------------------------------------
 # Scripted effects for the Neurofractured Kingpin (docs/specs/
-# cybernetics_v2_kingpin.md §3, §5). Batch A.
+# cybernetics_v2_kingpin.md §3, §5). Batches A and B.
 #
 # Scopes: event effects run in the ruler's scope (root) after
 # eotg_aug_kp_save_scopes_effect has saved scope:eotg_kp_story and
@@ -12,9 +12,14 @@
 # of two shared tooltips (eotg_aug_kp_leverage_up_tt / _down_tt) and as the
 # story panel's band; the number never reaches a tooltip.
 #
-# BATCH-B SEAM (kingpin): eotg_aug_kp_raise_claimant_effect and
-# eotg_aug_kp_war_support_effect (spec §3, §5.8 war support) are written
-# with batch B, with their callers .030-.032 and .038.
+# Batch B (the claim path and the wars, spec §5.8 .030-.038, L4-L8, L13) is
+# at the end of the file: eotg_aug_kp_raise_claimant_effect,
+# eotg_aug_kp_war_support_effect, and the helpers their callers share
+# (eotg_aug_kp_clear_claim_effect, eotg_aug_kp_war_started_effect,
+# eotg_aug_kp_end_claim_effect, eotg_aug_kp_seat_transfer_effect,
+# eotg_aug_kp_civil_war_effect, eotg_aug_kp_turn_effect,
+# eotg_aug_kp_guns_turned_effect, eotg_aug_kp_obey_order_effect,
+# eotg_aug_kp_kept_effect, eotg_aug_kp_burn_levels_effect).
 # -----------------------------------------------------------------------------
 
 # -- Start (spec §5.1.2, §5.2, §5.3) ------------------------------------------
@@ -299,10 +304,12 @@ eotg_aug_kp_add_mind_traits_effect = {
 # -- Scopes (spec §3 "every event's immediate opener") ------------------------
 
 # Save the story and its characters for the event. Root = the ruler.
-# Saves: eotg_kp_story, eotg_kp, eotg_kp_informant (if planted), and, with a
-# Patron, eotg_patron_story and eotg_patron_envoy (the Patron's own scope
-# names, so eotg_aug_patron_envoy_present and eotg_aug_patron_demand_effect
-# work unchanged).
+# Saves: eotg_kp_story, eotg_kp, eotg_kp_informant (if planted), the claim
+# path's eotg_kp_target / eotg_kp_opponent / eotg_kp_rival / eotg_kp_war
+# (batch B, when the story holds them), and, with a Patron,
+# eotg_patron_story and eotg_patron_envoy (the Patron's own scope names, so
+# eotg_aug_patron_envoy_present and eotg_aug_patron_demand_effect work
+# unchanged).
 # Callers: every eotg_aug_kingpin event's immediate.
 eotg_aug_kp_save_scopes_effect = {
     random_owned_story = {
@@ -315,6 +322,22 @@ eotg_aug_kp_save_scopes_effect = {
         if = {
             limit = { exists = var:eotg_kp_informant }
             var:eotg_kp_informant = { save_scope_as = eotg_kp_informant }
+        }
+        if = {
+            limit = { exists = var:eotg_kp_target }
+            var:eotg_kp_target = { save_scope_as = eotg_kp_target }
+        }
+        if = {
+            limit = { exists = var:eotg_kp_opponent }
+            var:eotg_kp_opponent = { save_scope_as = eotg_kp_opponent }
+        }
+        if = {
+            limit = { exists = var:eotg_kp_rival }
+            var:eotg_kp_rival = { save_scope_as = eotg_kp_rival }
+        }
+        if = {
+            limit = { exists = var:eotg_kp_war }
+            var:eotg_kp_war = { save_scope_as = eotg_kp_war }
         }
     }
     random_owned_story = {
@@ -423,7 +446,12 @@ eotg_aug_kp_hired_guns_effect = {
 # on_owner_death ends it instead of passing it on, and the maintenance does
 # not end it under the leaf. Callers: every leaf's immediate (.060-.076).
 eotg_aug_kp_leaf_open_effect = {
-    scope:eotg_kp_story = { set_variable = eotg_kp_resolving }
+    scope:eotg_kp_story = {
+        set_variable = eotg_kp_resolving
+        # The stuck-resolution watcher (story maintenance) reads these two
+        set_variable = eotg_kp_leaf_seen
+        set_variable = { name = eotg_kp_resolve_window  value = yes  days = 60 }
+    }
 }
 
 # End the story (every leaf's `after`). Root = the ruler. on_end does the
@@ -463,7 +491,8 @@ eotg_aug_kp_inherit_effect = {
         limit = { has_variable = eotg_kp_forewarned }
         remove_variable = eotg_kp_forewarned
     }
-    # Stage reset (batch B stages; harmless before they exist)
+    # Stage reset (spec §5.4.1: the faction or the claim was the dead
+    # ruler's; the path, target, opponent, rival and war are forgotten)
     if = {
         limit = {
             OR = {
@@ -475,14 +504,7 @@ eotg_aug_kp_inherit_effect = {
             }
         }
         set_variable = { name = eotg_kp_stage  value = flag:collab }
-        if = {
-            limit = { has_variable = eotg_kp_path }
-            remove_variable = eotg_kp_path
-        }
-        if = {
-            limit = { has_variable = eotg_kp_target }
-            remove_variable = eotg_kp_target
-        }
+        eotg_aug_kp_clear_claim_effect = yes
     }
     if = {
         limit = {
@@ -601,4 +623,667 @@ eotg_aug_kp_seize_county_effect = {
     }
     resolve_title_and_vassal_change = scope:eotg_kp_change
     add_pressed_claim = scope:eotg_kp_county
+}
+
+# == The claim path and the wars (batch B) ====================================
+
+# Forget the claim-path state on the story (path, target, opponent, rival,
+# war). Run in the story's scope. The stage is set by the caller.
+# Drops the claim path's pressed claim first (eotg_aug_kp_drop_claim_effect).
+# Callers: eotg_aug_kp_inherit_effect (pending, or war on the own path),
+# .030 c, .038 b.
+eotg_aug_kp_clear_claim_effect = {
+    eotg_aug_kp_drop_claim_effect = yes
+    if = {
+        limit = { has_variable = eotg_kp_path }
+        remove_variable = eotg_kp_path
+    }
+    if = {
+        limit = { has_variable = eotg_kp_target }
+        remove_variable = eotg_kp_target
+    }
+    if = {
+        limit = { has_variable = eotg_kp_opponent }
+        remove_variable = eotg_kp_opponent
+    }
+    if = {
+        limit = { has_variable = eotg_kp_rival }
+        remove_variable = eotg_kp_rival
+    }
+    if = {
+        limit = { has_variable = eotg_kp_war }
+        remove_variable = eotg_kp_war
+    }
+}
+
+# Raise a claimant faction against the liege (scope:eotg_kp_opponent) for
+# scope:eotg_kp_target, with $CLAIMANT$ as its claimant (root for the own
+# path, scope:eotg_kp for back_kp). Root = the vassal ruler, who leads it.
+# Vanilla shape, verified 2026-10-09: common/character_interactions/
+# 00_vassal_interactions.txt:1548-1597 (create_claimant_faction_against_
+# interaction on_send: var:claiming_title -> can_create_faction ->
+# create_faction -> joined_faction set_special_character / set_special_title
+# -> the claimant's claimant_factions list -> remove claiming_title).
+# can_create_faction needs var:claiming_title (common/factions/
+# 00_factions.txt:1146-1155), so the caller's immediate sets it (the option
+# triggers read it); this effect sets it again in case the caller did not.
+# Saves scope:eotg_kp_faction when the faction exists.
+# Callers: eotg_aug_kingpin.030 a / b.
+eotg_aug_kp_raise_claimant_effect = {
+    # eotg_lint: allow L001 vanilla's own variable name: can_create_faction reads var:claiming_title (common/factions/00_factions.txt:1146-1155)
+    set_variable = {
+        name = claiming_title
+        value = scope:eotg_kp_target
+    }
+    if = {
+        limit = {
+            can_create_faction = {
+                type = claimant_faction
+                target = scope:eotg_kp_opponent
+            }
+        }
+        create_faction = {
+            type = claimant_faction
+            target = scope:eotg_kp_opponent
+        }
+        joined_faction = {
+            set_special_character = $CLAIMANT$
+            set_special_title = scope:eotg_kp_target
+            save_scope_as = eotg_kp_faction
+        }
+        $CLAIMANT$ = {
+            # eotg_lint: allow L001 vanilla's own list name: the claimant-death cleanup reads it (common/scripted_effects/00_faction_effects.txt:1662-1677)
+            add_to_variable_list = {
+                name = claimant_factions
+                target = root.joined_faction
+            }
+        }
+    }
+    remove_variable = claiming_title
+}
+
+# The organization backs the ruler's war, by kind (spec §5.8 "War support by
+# kind"). Root = the ruler; needs scope:eotg_kp, scope:eotg_kp_story,
+# scope:eotg_kp_opponent and scope:eotg_kp_war.
+# - crew, hired: levies (eotg_aug_kp_levies_value) tied to the war (PX
+#   effects.log:9774 spawn_army; vanilla spawns after faction_start_war,
+#   events/factions/faction_demands.txt:1855-1857, and passes
+#   war = <faction>.faction_war, common/scripted_effects/
+#   00_faction_effects.txt:2063). Hired also lends the hired-guns modifier
+#   for the war's span (the story removes it when the war resolves, or in
+#   on_end) unless the ruler already holds it.
+# - syndicate: gold for mercenaries (major when wide).
+# - front: weak hooks on the opponent's two strongest vassals (their files).
+# Callers: eotg_aug_kp_war_started_effect.
+eotg_aug_kp_war_support_effect = {
+    if = {
+        limit = {
+            OR = {
+                eotg_aug_kp_is = { AXIS = kind  VALUE = crew }
+                eotg_aug_kp_is = { AXIS = kind  VALUE = hired }
+            }
+            exists = scope:eotg_kp_war
+            eotg_aug_kp_levies_value > 0
+        }
+        spawn_army = {
+            name = eotg_aug_kp_army_name
+            levies = eotg_aug_kp_levies_value
+            location = capital_province
+            war = scope:eotg_kp_war
+            inheritable = no
+        }
+        if = {
+            limit = {
+                eotg_aug_kp_is = { AXIS = kind  VALUE = hired }
+                NOT = { has_character_modifier = eotg_mod_aug_kp_hired_guns }
+            }
+            add_character_modifier = { modifier = eotg_mod_aug_kp_hired_guns }
+            hidden_effect = {
+                scope:eotg_kp_story = { set_variable = eotg_kp_war_guns_on }
+            }
+        }
+    }
+    else_if = {
+        limit = { eotg_aug_kp_is = { AXIS = kind  VALUE = syndicate } }
+        if = {
+            limit = { eotg_aug_kp_is = { AXIS = reach  VALUE = wide } }
+            add_gold = major_gold_value
+        }
+        else = {
+            add_gold = medium_gold_value
+        }
+    }
+    else_if = {
+        limit = {
+            eotg_aug_kp_is = { AXIS = kind  VALUE = front }
+            exists = scope:eotg_kp_opponent
+        }
+        scope:eotg_kp_opponent = {
+            ordered_vassal = {
+                limit = { NOT = { this = root } }
+                order_by = max_military_strength
+                position = 0
+                save_scope_as = eotg_kp_file_1
+            }
+            ordered_vassal = {
+                limit = { NOT = { this = root } }
+                order_by = max_military_strength
+                position = 1
+                save_scope_as = eotg_kp_file_2
+            }
+        }
+        if = {
+            limit = { exists = scope:eotg_kp_file_1 }
+            add_hook = {
+                type = weak_blackmail_hook
+                target = scope:eotg_kp_file_1
+            }
+        }
+        if = {
+            limit = { exists = scope:eotg_kp_file_2 }
+            add_hook = {
+                type = weak_blackmail_hook
+                target = scope:eotg_kp_file_2
+            }
+        }
+    }
+}
+
+# A claim war has started and scope:eotg_kp_war holds it: record it on the
+# story (stage war, the war, the opponent, the target), back it by kind, move
+# the kingpin's pressure, and tell a player opponent when an AI ruler started
+# it (spec §5.7: .039 is the only player-visible face of an AI's story).
+# .039 goes only to the liege on the own / back_kp paths (.030 a, .038 a;
+# spec §5.7): on .031 the opponent is a neighbour and on .032 a rebel
+# vassal, and .039's text is the liege's (QA 2026-10-09, fix 2).
+# The caller sets the path first. Root = the ruler; needs scope:eotg_kp,
+# scope:eotg_kp_story, scope:eotg_kp_opponent and scope:eotg_kp_war
+# (scope:eotg_kp_target when there is one).
+# Callers: .030 a, .031 a, .032 a, .038 a.
+eotg_aug_kp_war_started_effect = {
+    hidden_effect = {
+        scope:eotg_kp_story = {
+            set_variable = { name = eotg_kp_stage  value = flag:war }
+            set_variable = { name = eotg_kp_war  value = scope:eotg_kp_war }
+            set_variable = { name = eotg_kp_opponent  value = scope:eotg_kp_opponent }
+            if = {
+                limit = { exists = scope:eotg_kp_target }
+                set_variable = { name = eotg_kp_target  value = scope:eotg_kp_target }
+            }
+            set_variable = { name = eotg_kp_war_years  value = 0 }
+        }
+        scope:eotg_kp = { eotg_add_fracture_risk = { AMOUNT = 5 } }
+    }
+    eotg_aug_kp_war_support_effect = yes
+    if = {
+        limit = {
+            is_ai = yes
+            scope:eotg_kp_opponent = { is_ai = no }
+            OR = {
+                scope:eotg_kp_story.var:eotg_kp_path ?= flag:own
+                scope:eotg_kp_story.var:eotg_kp_path ?= flag:back_kp
+            }
+        }
+        save_scope_as = eotg_kp_owner
+        scope:eotg_kp_opponent = {
+            trigger_event = { id = eotg_aug_kingpin.039  days = { 3 10 } }
+        }
+    }
+}
+
+# End the ruler's own claimant faction for the kingpin's claim, if any: its
+# war ends in a white peace, then the faction is destroyed. Vanilla order:
+# events/activities/hold_court_activity/hold_court_events_general.txt:
+# 26151-26156 (faction_war = { end_war = ... }, then destroy_faction).
+# Root = the ruler; needs scope:eotg_kp_story.
+# Callers: .038 b / c, .066 a, .068 (war variant).
+eotg_aug_kp_end_claim_effect = {
+    if = {
+        limit = {
+            exists = joined_faction
+            exists = scope:eotg_kp_story.var:eotg_kp_target
+            joined_faction = {
+                faction_is_type = claimant_faction
+                special_title ?= scope:eotg_kp_story.var:eotg_kp_target
+            }
+        }
+        joined_faction = {
+            if = {
+                limit = { faction_is_at_war = yes }
+                faction_war = { end_war = white_peace }
+            }
+            destroy_faction = yes
+        }
+    }
+}
+
+# Hand scope:eotg_kp_rival's seat to the kingpin (.032): their primary title
+# (scope:eotg_kp_target) and, if it is a different title the rival holds,
+# their capital county, so the seat comes with ground under it. The kingpin
+# joins the ruler's court first, so the seat makes them the ruler's vassal.
+# $TYPE$ is the change type: revoked (a, the decree) or granted (b, bought
+# out). Shape: the Zanj hand-over, events/dlc/fp3/
+# fp3_story_cycle_zanj_rebellion_events.txt:414-477
+# (create_title_and_vassal_change, change_title_holder, resolve), with
+# vanilla's revoke type (common/character_interactions/
+# 00_diarch_interactions.txt:9731). Root = the ruler.
+# Callers: .032 a / b.
+eotg_aug_kp_seat_transfer_effect = {
+    scope:eotg_kp_rival = {
+        if = {
+            limit = {
+                exists = capital_county
+                capital_county.holder = this
+                NOT = { capital_county = scope:eotg_kp_target }
+            }
+            capital_county = { save_scope_as = eotg_kp_seat_county }
+        }
+    }
+    if = {
+        limit = { NOT = { scope:eotg_kp = { is_courtier_of = root } } }
+        add_courtier = scope:eotg_kp
+    }
+    create_title_and_vassal_change = {
+        type = $TYPE$
+        save_scope_as = eotg_kp_change
+        add_claim_on_loss = yes
+    }
+    scope:eotg_kp_target = {
+        change_title_holder = {
+            holder = scope:eotg_kp
+            change = scope:eotg_kp_change
+        }
+    }
+    if = {
+        limit = { exists = scope:eotg_kp_seat_county }
+        scope:eotg_kp_seat_county = {
+            change_title_holder = {
+                holder = scope:eotg_kp
+                change = scope:eotg_kp_change
+            }
+        }
+    }
+    resolve_title_and_vassal_change = scope:eotg_kp_change
+}
+
+# The independent ruler's civil war (.032 a, L8 independent): the angriest
+# landed vassal who can (lowest opinion of the ruler; never the kingpin or
+# an Unclaimed placeholder) raises a liberty faction against the ruler, and
+# goes to war at $WAR_CHANCE$ percent. Vanilla shapes: create_faction
+# guarded by can_create_faction (events/dlc/ep3/
+# ep3_story_cycle_admin_eunuch_events.txt:5479-5512), faction_start_war
+# (events/factions/faction_demands.txt:396), order_by opinion
+# (events/activities/coronation_activity/coronation_events_6.txt:5868).
+# Saves scope:eotg_kp_rebel and scope:eotg_kp_faction, and scope:eotg_kp_war
+# when the war starts. Root = the ruler.
+# Callers: .032 a, eotg_aug_kp_turn_effect.
+eotg_aug_kp_civil_war_effect = {
+    ordered_vassal = {
+        limit = {
+            is_landed = yes
+            NOT = { has_character_flag = eotg_flag_aug_kingpin }
+            eotg_is_unclaimed_holder = no
+            can_create_faction = {
+                type = liberty_faction
+                target = root
+            }
+        }
+        order_by = {
+            value = "opinion(root)"
+            multiply = -1
+        }
+        save_scope_as = eotg_kp_rebel
+    }
+    if = {
+        limit = { exists = scope:eotg_kp_rebel }
+        scope:eotg_kp_rebel = {
+            create_faction = {
+                type = liberty_faction
+                target = root
+            }
+            joined_faction ?= { save_scope_as = eotg_kp_faction }
+        }
+        if = {
+            limit = { exists = scope:eotg_kp_faction }
+            random = {
+                chance = $WAR_CHANCE$
+                scope:eotg_kp_faction = { faction_start_war = {} }
+            }
+            if = {
+                limit = { scope:eotg_kp_faction = { faction_is_at_war = yes } }
+                scope:eotg_kp_faction.faction_war = { save_scope_as = eotg_kp_war }
+            }
+        }
+    }
+}
+
+# L8 The Turn (spec §5.8 .067): the boss sells the ruler. Root = the ruler;
+# needs scope:eotg_kp and scope:eotg_kp_story. $SOFTEN$ = yes for .067 b
+# (paid to soften it: the opinion hit halves and the exposed modifier does
+# not land). A forewarned ruler (.006 c_forecast, eotg_kp_forewarned) halves
+# every cost.
+# - Vassal: the liege gets a strong blackmail hook and the conspired opinion
+#   (-30, 10 years); the exposed modifier (10 years); the boss moves to the
+#   liege's court.
+# - Independent ("causing a civil war"): the boss arms the angriest vassal
+#   (eotg_aug_kp_civil_war_effect: a war for crew, hired or violence, else a
+#   faction that builds). With no vassal able to rise, the exposed modifier
+#   lands instead, so the leaf always costs something (deviation, reported).
+# - Front: the client files are published (prestige -medium).
+# Callers: eotg_aug_kingpin.067 a / b / c.
+eotg_aug_kp_turn_effect = {
+    if = {
+        limit = { eotg_aug_kp_root_is_vassal = yes }
+        liege = {
+            if = {
+                limit = {
+                    NOT = { has_hook_of_type = { target = root  type = strong_blackmail_hook } }
+                }
+                add_hook = {
+                    type = strong_blackmail_hook
+                    target = root
+                }
+            }
+            if = {
+                limit = {
+                    always = $SOFTEN$
+                    scope:eotg_kp_story = { has_variable = eotg_kp_forewarned }
+                }
+                add_opinion = {
+                    modifier = eotg_opinion_aug_kp_conspired
+                    target = root
+                    years = 10
+                    opinion = -8
+                }
+            }
+            else_if = {
+                limit = {
+                    OR = {
+                        always = $SOFTEN$
+                        scope:eotg_kp_story = { has_variable = eotg_kp_forewarned }
+                    }
+                }
+                add_opinion = {
+                    modifier = eotg_opinion_aug_kp_conspired
+                    target = root
+                    years = 10
+                    opinion = -15
+                }
+            }
+            else = {
+                add_opinion = {
+                    modifier = eotg_opinion_aug_kp_conspired
+                    target = root
+                    years = 10
+                }
+            }
+        }
+        if = {
+            limit = { NOT = { always = $SOFTEN$ } }
+            if = {
+                limit = { scope:eotg_kp_story = { has_variable = eotg_kp_forewarned } }
+                add_character_modifier = { modifier = eotg_mod_aug_kp_exposed  years = 5 }
+            }
+            else = {
+                add_character_modifier = { modifier = eotg_mod_aug_kp_exposed  years = 10 }
+            }
+        }
+        if = {
+            limit = {
+                scope:eotg_kp = {
+                    is_alive = yes
+                    is_landed = no
+                }
+            }
+            scope:eotg_kp = {
+                if = {
+                    limit = { is_imprisoned = yes }
+                    release_from_prison = yes
+                }
+            }
+            liege = { add_courtier = scope:eotg_kp }
+        }
+    }
+    else = {
+        if = {
+            limit = {
+                OR = {
+                    eotg_aug_kp_is = { AXIS = kind  VALUE = crew }
+                    eotg_aug_kp_is = { AXIS = kind  VALUE = hired }
+                    eotg_aug_kp_is = { AXIS = method  VALUE = violence }
+                }
+            }
+            eotg_aug_kp_civil_war_effect = { WAR_CHANCE = 100 }
+        }
+        else = {
+            eotg_aug_kp_civil_war_effect = { WAR_CHANCE = 0 }
+        }
+        if = {
+            limit = {
+                NOT = { exists = scope:eotg_kp_faction }
+                NOT = { always = $SOFTEN$ }
+            }
+            if = {
+                limit = { scope:eotg_kp_story = { has_variable = eotg_kp_forewarned } }
+                add_character_modifier = { modifier = eotg_mod_aug_kp_exposed  years = 5 }
+            }
+            else = {
+                add_character_modifier = { modifier = eotg_mod_aug_kp_exposed  years = 10 }
+            }
+        }
+    }
+    if = {
+        limit = { eotg_aug_kp_is = { AXIS = kind  VALUE = front } }
+        if = {
+            limit = {
+                OR = {
+                    always = $SOFTEN$
+                    scope:eotg_kp_story = { has_variable = eotg_kp_forewarned }
+                }
+            }
+            add_prestige = {
+                value = medium_prestige_value
+                multiply = -0.5
+            }
+        }
+        else = {
+            add_prestige = {
+                value = medium_prestige_value
+                multiply = -1
+            }
+        }
+    }
+}
+
+# .034 Turned Guns (b, and c on a failed duel): the hired crew goes over to
+# the other side. Root = the ruler; needs scope:eotg_kp, scope:eotg_kp_story,
+# scope:eotg_kp_opponent and scope:eotg_kp_war.
+# - The opponent gets the crew's levies for the war (spawn_army, as war
+#   support; the value is taken in the ruler's scope first).
+# - The boss, unless landed, moves to the opponent's court. claim_cb
+#   (neighbour) invalidates by itself when its claimant leaves the attacker's
+#   court (common/casus_belli_types/00_claim.txt:305-316). Vanilla's
+#   claimant_faction_war does not (00_civil_war.txt:980-991), so on the
+#   back_kp path the war ends here as a defender win (end_war, PX
+#   effects.log:13682): the claimant is the other side's now. M3 then
+#   resolves either to .065 Sold to the Winner.
+# - The boss's pressure +5.
+# Callers: eotg_aug_kingpin.034 b / c.
+eotg_aug_kp_guns_turned_effect = {
+    save_scope_value_as = { name = eotg_kp_levies  value = eotg_aug_kp_levies_value }
+    if = {
+        limit = {
+            exists = scope:eotg_kp_opponent
+            exists = scope:eotg_kp_war
+            scope:eotg_kp_levies > 0
+            scope:eotg_kp_opponent = { is_alive = yes }
+        }
+        scope:eotg_kp_opponent = {
+            spawn_army = {
+                name = eotg_aug_kp_army_name
+                levies = scope:eotg_kp_levies
+                location = capital_province
+                war = scope:eotg_kp_war
+                inheritable = no
+            }
+        }
+    }
+    if = {
+        limit = {
+            scope:eotg_kp_story.var:eotg_kp_path ?= flag:back_kp
+            scope:eotg_kp_war ?= { is_participant = root }
+        }
+        scope:eotg_kp_war = { end_war = defender }
+    }
+    if = {
+        limit = {
+            exists = scope:eotg_kp_opponent
+            scope:eotg_kp_opponent = {
+                is_alive = yes
+                NOT = { this = root }
+            }
+            scope:eotg_kp = {
+                is_alive = yes
+                is_landed = no
+                is_imprisoned = no
+            }
+        }
+        scope:eotg_kp_opponent = { add_courtier = scope:eotg_kp }
+    }
+    hidden_effect = {
+        scope:eotg_kp = { eotg_add_fracture_risk = { AMOUNT = 5 } }
+    }
+}
+
+# .050 The Orders (a, d): the ruler carries out the boss's order. Root = the
+# ruler; needs scope:eotg_kp and the scope value eotg_kp_order (show / name /
+# march / squeeze; scope:eotg_kp_order_target for name). The squeeze costs
+# gold; the other three cost tyranny +10 (the name also imprisons the named
+# courtier, vanilla imprison_character_effect, 00_prison_effects.txt:1644).
+# Every order: dread +10, the boss's pressure -5.
+# Callers: eotg_aug_kingpin.050 a / d.
+eotg_aug_kp_obey_order_effect = {
+    if = {
+        limit = { scope:eotg_kp_order ?= flag:squeeze }
+        remove_short_term_gold = medium_gold_value
+    }
+    else = {
+        add_tyranny = 10
+    }
+    if = {
+        limit = {
+            scope:eotg_kp_order ?= flag:name
+            exists = scope:eotg_kp_order_target
+            scope:eotg_kp_order_target = {
+                is_alive = yes
+                is_imprisoned = no
+            }
+        }
+        imprison_character_effect = {
+            TARGET = scope:eotg_kp_order_target
+            IMPRISONER = root
+        }
+    }
+    add_dread = 10
+    hidden_effect = {
+        scope:eotg_kp = { eotg_add_fracture_risk = { AMOUNT = -5 } }
+    }
+}
+
+# .072 The Hold Closes (a, c): the kept stage. Root = the ruler; needs
+# scope:eotg_kp and scope:eotg_kp_story. The kept modifier is open-ended
+# while kept (on_end removes it; an heir gets it again, §5.4.1); the
+# capital's crisis runs 10 years; the boss holds a strong blackmail hook.
+# Callers: eotg_aug_kingpin.072 a / c.
+eotg_aug_kp_kept_effect = {
+    eotg_aug_kp_set_stage_effect = { STAGE = kept }
+    if = {
+        limit = { NOT = { has_character_modifier = eotg_mod_aug_kp_kept } }
+        add_character_modifier = { modifier = eotg_mod_aug_kp_kept }
+    }
+    capital_county = {
+        add_county_modifier = {
+            modifier = eotg_mod_aug_kp_crisis
+            years = 10
+        }
+    }
+    scope:eotg_kp = {
+        if = {
+            limit = {
+                NOT = { has_hook_of_type = { target = root  type = strong_blackmail_hook } }
+            }
+            add_hook = {
+                type = strong_blackmail_hook
+                target = root
+            }
+        }
+    }
+}
+
+# .066 Every Level Burning (a, b): the ruler's capital and the opponent's
+# capital burn for 10 years. Root = the ruler; reads
+# scope:eotg_kp_opponent_capital (saved in .066's immediate).
+# Callers: eotg_aug_kingpin.066 a / b.
+eotg_aug_kp_burn_levels_effect = {
+    capital_county = {
+        add_county_modifier = {
+            modifier = eotg_mod_aug_kp_burned_levels
+            years = 10
+        }
+    }
+    if = {
+        limit = {
+            exists = scope:eotg_kp_opponent_capital
+            NOT = { scope:eotg_kp_opponent_capital = root.capital_county }
+        }
+        scope:eotg_kp_opponent_capital = {
+            add_county_modifier = {
+                modifier = eotg_mod_aug_kp_burned_levels
+                years = 10
+            }
+        }
+    }
+}
+
+# Remove the pressed claim the claim path granted (.030 a / b: root on the own
+# path, the kingpin on back_kp; .031 a: the kingpin on the neighbour path),
+# unless the claimant now holds the title. Run in the STORY's scope (reads
+# var:eotg_kp_path and var:eotg_kp_target). remove_claim takes explicit
+# claims only (PX effects.log:8689); a dead owner's claims are vanilla's to
+# pass on. Pattern: .031 a's no-war branch (remove_claim on the claimant).
+# Callers: eotg_aug_kp_clear_claim_effect (.038 b, the inheritance reset),
+# the story's on_end (every other exit: .038 c -> .067, .065, .066, .068 and
+# the other leaves, the stuck-resolution watcher). QA 2026-10-09, fix 3.
+eotg_aug_kp_drop_claim_effect = {
+    save_temporary_scope_as = eotg_kp_claim_story
+    if = {
+        limit = {
+            exists = var:eotg_kp_target
+            var:eotg_kp_path ?= flag:own
+            exists = story_owner
+        }
+        story_owner = {
+            if = {
+                limit = { NOT = { has_title = scope:eotg_kp_claim_story.var:eotg_kp_target } }
+                remove_claim = scope:eotg_kp_claim_story.var:eotg_kp_target
+            }
+        }
+    }
+    else_if = {
+        limit = {
+            exists = var:eotg_kp_target
+            OR = {
+                var:eotg_kp_path ?= flag:back_kp
+                var:eotg_kp_path ?= flag:neighbour
+            }
+            exists = var:eotg_kp
+            var:eotg_kp = { is_alive = yes }
+        }
+        var:eotg_kp = {
+            if = {
+                limit = { NOT = { has_title = scope:eotg_kp_claim_story.var:eotg_kp_target } }
+                remove_claim = scope:eotg_kp_claim_story.var:eotg_kp_target
+            }
+        }
+    }
 }

@@ -403,3 +403,209 @@
  eotg_story_aug_kingpin_band_min_label:0 "A favour owed"
  eotg_story_aug_kingpin_band_max_label:0 "They own the room"
  eotg_story_aug_kingpin:0 "The Hold From Below"
+
+ # ═══ BATCH B ═══════════════════════════════════════════════════════════════════
+ # Events .030-.039, .050, .063-.067, .072 and the batch B keys of .003, .012, .068 and .069.
+ # Written in the new voice (event_quality_v1 section 12): the ruler narrates in the first person,
+ # appended fragments are neutral or third person, speech uses unescaped straight quotes.
+ # Shared lines name only the boss by name; per-kind lines use the kind's noun (spec 7.3 and 7.4).
+
+ # ── eotg_aug_kingpin.003  The Offer (batch B keys) ───────────────────────────
+ eotg_aug_kingpin.003.desc_vassal:0 "\n\nThere is more under the offer. [ROOT.Char.GetLiege.GetFirstName] holds the seat above mine, and [eotg_kp.GetFirstName] has worked out what it would take to move [ROOT.Char.GetLiege.GetHerHim] off it. The claim could be raised in my name, or in [eotg_kp.GetHerHis] with my levies behind it."
+ eotg_aug_kingpin.003.desc_independent:0 "\n\nThere is more under the offer. [eotg_kp.GetFirstName] has been counting the seats around me that could be moved, inside my borders or across them. [eotg_kp.GetSheHe|U] offers to do the work, if I supply the authority."
+ eotg_aug_kingpin.003.b:0 "Put me in [ROOT.Char.GetLiege.GetFirstName]'s seat."
+ eotg_aug_kingpin.003.b.tt:0 "The claim on that seat is put in my name. [eotg_kp.GetFirstName] brings a plan within days."
+ eotg_aug_kingpin.003.c:0 "Take the seat yourself. I'll hold the door."
+ eotg_aug_kingpin.003.c.tt:0 "The claim goes to [eotg_kp.GetFirstName], with my name behind it. A plan for the seat follows within days."
+ eotg_aug_kingpin.003.b_indep:0 "Take a neighbour's seat. [eotg_kp.GetFirstName]'s claim, my war."
+ eotg_aug_kingpin.003.b_indep.tt:0 "A claim on a neighbour's seat is pressed in [eotg_kp.GetFirstName]'s name. A plan for the war arrives within days."
+ eotg_aug_kingpin.003.c_indep:0 "Give a vassal's seat to [eotg_kp.GetFirstName]."
+ eotg_aug_kingpin.003.c_indep.tt:0 "A vassal's seat is to pass to [eotg_kp.GetFirstName]. The plan for it arrives within days."
+
+ # ── eotg_aug_kingpin.012  Retaliation (batch B key) ──────────────────────────
+ eotg_aug_kingpin.012.c_front:0 "Let them publish."
+ eotg_aug_kingpin.012.c_front.tt:0 "The client files are published within days, and the cost of it lands on me."
+
+ # ── eotg_aug_kingpin.030  The Claim ──────────────────────────────────────────
+ eotg_aug_kingpin.030.t:0 "The Claim"
+ eotg_aug_kingpin.030.desc_own:0 "[eotg_kp.GetFirstName] lays out the claim on [eotg_kp_target.GetName], which [eotg_kp_opponent.GetTitledFirstName] holds over me. It would be mine to raise, and the faction would carry my name. [eotg_kp.GetSheHe|U] has help ready for the first weeks of a war, and does not pretend it comes free."
+ eotg_aug_kingpin.030.desc_back_kp:0 "[eotg_kp.GetFirstName] lays out the claim on [eotg_kp_target.GetName], held by [eotg_kp_opponent.GetTitledFirstName] above me. This claim would be [eotg_kp.GetHerHis], not mine. My name would be on the faction and my levies in the field, and if the seat fell, [eotg_kp.GetSheHe] would be the one to fill it."
+ eotg_aug_kingpin.030.a:0 "Raise the faction. Strike now."
+ eotg_aug_kingpin.030.a.tt:0 "The claim is pressed and the faction raised. The war begins at once, with help from below."
+ eotg_aug_kingpin.030.b:0 "Gather support first."
+ eotg_aug_kingpin.030.b.tt:0 "The claim is pressed and the faction raised. The war waits, and the secret has to hold until it starts."
+ eotg_aug_kingpin.030.c:0 "Walk away from it."
+
+ # ── eotg_aug_kingpin.031  The Neighbour's Seat ───────────────────────────────
+ eotg_aug_kingpin.031.t:0 "The Neighbour's Seat"
+ eotg_aug_kingpin.031.desc:0 "[eotg_kp.GetFirstName] has been reading my borders. [eotg_kp_rival.GetTitledFirstName] holds [eotg_kp_target.GetName], and holds it more loosely than anyone else I could reach. [eotg_kp.GetSheHe|U] wants a claim on it in [eotg_kp.GetHerHis] own name. I would supply the war, [eotg_kp.GetSheHe] the first weeks of it, and if the seat fell, it would be [eotg_kp.GetHerHis]."
+ eotg_aug_kingpin.031.a:0 "Declare it."
+ eotg_aug_kingpin.031.b:0 "Not yet."
+ eotg_aug_kingpin.031.c:0 "Walk away."
+ eotg_aug_kingpin.031.toast_a_no_war:0 "The Claim Came to Nothing"
+
+ # ── eotg_aug_kingpin.032  The Vassal's Seat ──────────────────────────────────
+ eotg_aug_kingpin.032.t:0 "The Vassal's Seat"
+ eotg_aug_kingpin.032.desc:0 "[eotg_kp.GetFirstName] has a different kind of conquest in mind. [eotg_kp_rival.GetTitledFirstName] holds [eotg_kp_target.GetName] under me, and [eotg_kp.GetSheHe] wants it. I can take it back by decree, or I can buy [eotg_kp_rival.GetHerHim] out, and either way the seat ends up [eotg_kp.GetHerHis]."
+ eotg_aug_kingpin.032.a:0 "Revoke it by decree."
+ eotg_aug_kingpin.032.a.tt:0 "The seat passes to [eotg_kp.GetFirstName] by decree. [eotg_kp_rival.GetFirstName] loses it, I gain tyranny, and another vassal may take up arms."
+ eotg_aug_kingpin.032.b:0 "Buy [eotg_kp_rival.GetFirstName] out."
+ eotg_aug_kingpin.032.c:0 "Walk away."
+ eotg_aug_kingpin.032.toast_a_war:0 "A Vassal Rises Against the Decree"
+ eotg_aug_kingpin.032.toast_a_no_war:0 "The Decree Stands Unchallenged"
+
+ # ── eotg_aug_kingpin.033  The War Below ──────────────────────────────────────
+ eotg_aug_kingpin.033.t:0 "The War Below"
+ eotg_aug_kingpin.033.desc_crew:0 "The reports from the line are good, and they come from the wrong people. [eotg_kp.Custom('eotg_aug_cl_gang')|U] have been raiding [eotg_kp_opponent.GetFirstName]'s supply stores behind the front, on their own account, and their boss, [eotg_kp.GetFirstName], wants to know whether I mind."
+ eotg_aug_kingpin.033.desc_syndicate:0 "The syndicate's boss here, [eotg_kp.GetFirstName], hears most things first at the docks. [eotg_kp.GetSheHe|U] has heard that someone in [eotg_kp_opponent.GetFirstName]'s command can be bought, and brings the price with the news."
+ eotg_aug_kingpin.033.desc_front:0 "[eotg_kp.Custom('eotg_aug_cl_company')] keeps a file on everyone who ever sat in its chairs, and the director, [eotg_kp.GetFirstName], has pulled one that touches [eotg_kp_opponent.GetFirstName]'s council. [eotg_kp.GetSheHe|U] sets it on my table, closed, and waits to see what I will do with it."
+ eotg_aug_kingpin.033.desc_hired:0 "[eotg_kp.Custom('eotg_aug_cl_gang')|U] want a raise, and the war is the reason. The captain, [eotg_kp.GetFirstName], says it plainly and without heat: the contract was written for a shorter war, and the squads have noticed."
+ eotg_aug_kingpin.033.a_crew:0 "Let them."
+ eotg_aug_kingpin.033.b_crew:0 "Keep them on the front."
+ eotg_aug_kingpin.033.a_syndicate:0 "Buy [eotg_kp_officer.GetFirstName] out of [eotg_kp_opponent.GetFirstName]'s service."
+ eotg_aug_kingpin.033.b_syndicate:0 "No. Not that way."
+ eotg_aug_kingpin.033.a_front:0 "Keep the file on [eotg_kp_councillor.GetFirstName]."
+ eotg_aug_kingpin.033.b_front:0 "Burn it."
+ eotg_aug_kingpin.033.a_hired:0 "Pay what they ask."
+ eotg_aug_kingpin.033.b_hired:0 "Not in the middle of a war."
+ eotg_aug_kingpin.033.c:0 "Keep [eotg_kp.GetFirstName] away from the line."
+ eotg_aug_kingpin.033.c.tt:0 "[eotg_kp.GetFirstName] is kept back from the line, and the strain on [eotg_kp.GetHerHim] eases."
+
+ # ── eotg_aug_kingpin.034  Turned Guns ────────────────────────────────────────
+ eotg_aug_kingpin.034.t:0 "Turned Guns"
+ eotg_aug_kingpin.034.desc:0 "The word from the line is the one I was afraid of. [eotg_kp.Custom('eotg_aug_cl_gang')|U] have stopped taking orders from my commanders, and their captain, [eotg_kp.GetFirstName], is in talks with [eotg_kp_opponent.GetTitledFirstName]'s people. The terms are simple. Either I pay more than the other side, or the guns go to them."
+ eotg_aug_kingpin.034.a:0 "Outbid the other side."
+ eotg_aug_kingpin.034.b:0 "Let them go."
+ eotg_aug_kingpin.034.c:0 "Meet them at the hangar first."
+ eotg_aug_kingpin.034.c.success:0 "I reach the hangar before the crew moves. [eotg_kp.GetFirstName] does not leave it."
+ eotg_aug_kingpin.034.c.failure:0 "[eotg_kp.GetFirstName] is ready for me. I leave the hangar hurt, and the guns go over anyway."
+ eotg_aug_kingpin.034.toast_c_success:0 "The Captain Fell at the Hangar"
+ eotg_aug_kingpin.034.toast_c_failure:0 "Hurt at the Hangar"
+
+ # ── eotg_aug_kingpin.036  The Partner's Price ────────────────────────────────
+ eotg_aug_kingpin.036.t:0 "The Partner's Price"
+ eotg_aug_kingpin.036.desc:0 "The seat is mine. [eotg_kp.GetFirstName] has already asked to be received, and stands in my audience chamber before I have settled into it. [eotg_kp.GetSheHe|U] names a price calmly, the way a bill is read out. It is not small. It was never going to be."
+ eotg_aug_kingpin.036.a:0 "A Region of your own."
+ eotg_aug_kingpin.036.a.tt:0 "[eotg_kp.GetFirstName] is given a Region to hold under me. My vassals will not like it."
+ eotg_aug_kingpin.036.b:0 "A seat at my court."
+ eotg_aug_kingpin.036.b.tt:0 "[eotg_kp.GetFirstName] joins my household, on a short lead."
+ eotg_aug_kingpin.036.c:0 "Loose ends."
+ eotg_aug_kingpin.036.c.success:0 "My plan holds. [eotg_kp.GetFirstName] never gets to collect."
+ eotg_aug_kingpin.036.c.failure:0 "[eotg_kp.GetFirstName] has people in my household too. Word of the plan reaches [eotg_kp.GetHerHim] before it is ready, and [eotg_kp.GetSheHe] takes it personally."
+ eotg_aug_kingpin.036.toast_c_success:0 "The Loose Ends Were Tied"
+ eotg_aug_kingpin.036.toast_c_failure:0 "The Plan Was Seen"
+ eotg_aug_kingpin.036.d:0 "You've been paid enough."
+ eotg_aug_kingpin.036.d.tt:0 "[eotg_kp.GetFirstName] will not take it quietly. The answer comes within weeks."
+
+ # ── eotg_aug_kingpin.038  Now or Never ───────────────────────────────────────
+ eotg_aug_kingpin.038.t:0 "Now or Never"
+ eotg_aug_kingpin.038.desc:0 "The faction is raised and waiting on me. [eotg_kp.GetFirstName] says what we both know: every day it waits, someone talks. [eotg_kp_opponent.GetTitledFirstName] has heard nothing so far. That will not last, and it is for me to decide whether to strike first or put it out."
+ eotg_aug_kingpin.038.desc_discovered:0 "[eotg_kp_opponent.GetTitledFirstName] knows. Someone talked, and by the time the word reached me it had already reached [eotg_kp_opponent.GetHerHis] court. The faction is finished, and so is the secret."
+ eotg_aug_kingpin.038.a:0 "Strike."
+ eotg_aug_kingpin.038.a.tt:0 "The faction's war begins now, with help from below."
+ eotg_aug_kingpin.038.b:0 "Disband it."
+ eotg_aug_kingpin.038.c:0 "Then it's done."
+ eotg_aug_kingpin.038.c.tt:0 "The faction ends. The cost of being found out follows within days."
+
+ # ── eotg_aug_kingpin.039  Word From the Docks ────────────────────────────────
+ eotg_aug_kingpin.039.t:0 "Word From the Docks"
+ eotg_aug_kingpin.039.desc:0 "The word comes up from the docks before it reaches my council. [eotg_kp_owner.GetTitledFirstName] and I are at war, and it was not [eotg_kp_owner.GetHerHis] idea alone. [eotg_kp.GetFirstName] is behind it, working from the lower levels, and the dock hands already know the name."
+ eotg_aug_kingpin.039.a:0 "Noted."
+ eotg_aug_kingpin.039.b:0 "Put a bounty on [eotg_kp.GetFirstName]."
+ eotg_aug_kingpin.039.b.tt:0 "The bounty is posted. The hunt for [eotg_kp.GetFirstName] begins, and it frays [eotg_kp.GetHerHis] nerves."
+
+ # ── eotg_aug_kingpin.050  The Orders ─────────────────────────────────────────
+ eotg_aug_kingpin.050.t:0 "The Orders"
+ eotg_aug_kingpin.050.desc_show:0 "[eotg_kp.GetFirstName] sends the order by courier, in a hand that never wavers. [eotg_kp.GetSheHe|U] wants honours, in public: a seat at my table when the court gathers, and [eotg_kp.GetHerHis] name read out before mine. It is not a petition any more, and [eotg_kp.GetSheHe] holds enough on me to make that clear."
+ eotg_aug_kingpin.050.desc_name:0 "[eotg_kp.GetFirstName] sends a name and nothing else: [eotg_kp_order_target.GetFirstName]. A courtier of mine, in my own household. [eotg_kp.GetSheHe|U] wants the arrest ordered by my hand, in my name, before the next shift. No reason is given, and none is needed."
+ eotg_aug_kingpin.050.desc_march:0 "A show of force, [eotg_kp.GetFirstName] writes. [eotg_kp.GetSheHe|U] wants my own levies marched through my own Regions in full kit, so that everyone sees what stands behind [eotg_kp.GetHerHis] name. The orders would be mine to give, and so would the cost."
+ eotg_aug_kingpin.050.desc_squeeze:0 "[eotg_kp.GetFirstName] sends a number. It is a sum I am to pay before the next shift, and it will not be the last. There is no argument attached, only a reminder of the file [eotg_kp.GetSheHe] holds, and what is in it."
+ eotg_aug_kingpin.050.a:0 "Do as [eotg_kp.GetSheHe] says."
+ eotg_aug_kingpin.050.b:0 "Stall."
+ eotg_aug_kingpin.050.c:0 "Not this one."
+ eotg_aug_kingpin.050.c.tt:0 "[eotg_kp.GetFirstName] counts every refusal, and will answer the second."
+ eotg_aug_kingpin.050.d:0 "Do what mine already has me doing."
+
+ # ── eotg_aug_kingpin.063  L4 Kingmaker ───────────────────────────────────────
+ eotg_aug_kingpin.063.t:0 "Kingmaker"
+ eotg_aug_kingpin.063.desc:0 "The war is over, and the seat is [eotg_kp.GetHerHis]. [eotg_kp.GetFirstName] sits in [eotg_kp_target.GetName] now, and I am [eotg_kp.GetHerHis] vassal, which is a sentence I never meant to say. [eotg_kp.GetSheHe|U] does not gloat. [eotg_kp.GetSheHe|U] sends for me, thanks me in front of the court, and settles accounts the same day."
+ eotg_aug_kingpin.063.desc_indep:0 "The war is over. [eotg_kp.GetFirstName] holds [eotg_kp_target.GetName], taken from a neighbour with my levies and [eotg_kp.GetHerHis] claim. The seat sits where I put it, and [eotg_kp.GetFirstName] sits in it. Gratitude is another matter, and [eotg_kp.GetSheHe] has not yet said what [eotg_kp.GetSheHe] thinks I am owed."
+ eotg_aug_kingpin.063.desc_purge_half:0 "\n\nThe gold is half what it should have been. [eotg_kp.GetFirstName] keeps a file on me where a shared secret should have been, and does not hide that [eotg_kp.GetSheHe] is keeping it."
+ eotg_aug_kingpin.063.desc_syndicate:0 "\n\nThe syndicate has no part in this. [eotg_kp.GetFirstName] acts for [eotg_kp.GetHerselfHimself] now, and has left the cargo trade behind."
+ eotg_aug_kingpin.063.desc_end_storm:0 "\n\nThe casing at the base of [eotg_kp.GetHerHis] skull runs hot to the touch, and [eotg_kp.GetSheHe] loses stretches of conversation. The victory has not slowed it."
+ eotg_aug_kingpin.063.desc_end_fracture:0 "\n\nSudden pauses, a tremor in the hands, a sentence begun and dropped halfway: [eotg_kp.GetFirstName] is breaking down in plain view, and wears the seat anyway."
+ eotg_aug_kingpin.063.desc_end_flicker:0 "\n\nThe tells are small: a hand that moves a moment before the decision does, a step taken early. [eotg_kp.GetFirstName] hides it well."
+ eotg_aug_kingpin.063.a:0 "I backed this. Let [eotg_kp.GetHerHim] remember it."
+
+ # ── eotg_aug_kingpin.064  L5 Before the Bill Came ────────────────────────────
+ eotg_aug_kingpin.064.t:0 "Before the Bill Came"
+ eotg_aug_kingpin.064.desc:0 "The seat is mine, and [eotg_kp.GetFirstName] is still in the building, waiting on my answer. I know what paying would look like: the price [eotg_kp.GetSheHe] named, then the next one, in a currency I would have to keep paying. So I give no answer. The arrangements are made, quietly, with people [eotg_kp.GetSheHe] never counted."
+ eotg_aug_kingpin.064.desc_end_storm:0 "\n\nThe casing at the base of [eotg_kp.GetHerHis] skull runs hot now, and [eotg_kp.GetSheHe] loses whole conversations. Nobody will find it odd that [eotg_kp.GetSheHe] is gone."
+ eotg_aug_kingpin.064.desc_end_fracture:0 "\n\nTremors in the hands, pauses in the speech. A breakdown makes a good cover."
+ eotg_aug_kingpin.064.desc_end_flicker:0 "\n\nStill only the small tells: a reflex that fires early, a step ahead of the decision. [eotg_kp.GetFirstName] suspects nothing."
+ eotg_aug_kingpin.064.a:0 "No partners. No bill. Not after this."
+
+ # ── eotg_aug_kingpin.065  L6 Sold to the Winner ──────────────────────────────
+ eotg_aug_kingpin.065.t:0 "Sold to the Winner"
+ eotg_aug_kingpin.065.desc:0 "The war is over, and I have nothing to show for it. [eotg_kp.GetFirstName] saw the end before I did, and was already selling by the time I looked: what [eotg_kp.GetSheHe] knows about me has gone to the winner, with a fee attached that I will be paying. I find out last what I was worth."
+ eotg_aug_kingpin.065.desc_indep:0 "The war is over, and I have nothing to show for it. [eotg_kp.GetFirstName] had crossed the border in [eotg_kp.GetHerHis] head long before the end, and sold what [eotg_kp.GetSheHe] knows of my holdings. The winner now knows where I am thinnest."
+ eotg_aug_kingpin.065.desc_end_storm:0 "\n\nThe casing at the base of [eotg_kp.GetHerHis] skull ran hot through the whole sale, and [eotg_kp.GetSheHe] still never missed a figure."
+ eotg_aug_kingpin.065.desc_end_fracture:0 "\n\nThe tremors were in [eotg_kp.GetHerHis] hands the whole time, and [eotg_kp.GetSheHe] still signed [eotg_kp.GetHerHis] name clean."
+ eotg_aug_kingpin.065.desc_end_flicker:0 "\n\nThere were only the small tells: a hand early to the table, a step ahead of the decision. I should have read more into them."
+ eotg_aug_kingpin.065.a:0 "Then I know what [eotg_kp.GetFirstName] was worth."
+
+ # ── eotg_aug_kingpin.066  L7 Every Level Burning ─────────────────────────────
+ eotg_aug_kingpin.066.t:0 "Every Level Burning"
+ eotg_aug_kingpin.066.desc:0 "The war has stopped being about the seat. Neither side can win it, and neither will stop. Fires run through the lower levels of both realms, fuel lines and transit hubs and sealed corridors, and the smoke comes up through my own vents. I can no longer say who lit the first one."
+ eotg_aug_kingpin.066.desc_lost:0 "The war is over and the seat is lost, but the burning is not. Fires still run through the lower levels of both realms, through fuel lines and transit hubs and sealed corridors, and nobody is left whose work it is to put them out."
+ eotg_aug_kingpin.066.desc_end_storm:0 "\n\nIn the middle of it the casing at the base of [eotg_kp.GetHerHis] skull runs hot, and [eotg_kp.GetFirstName] gives orders that no longer match the map."
+ eotg_aug_kingpin.066.desc_end_fracture:0 "\n\n[eotg_kp.GetFirstName] is in it too, with a tremor in the hands and a sentence dropped halfway, and the fighting does not slow for it."
+ eotg_aug_kingpin.066.desc_end_flicker:0 "\n\n[eotg_kp.GetFirstName] is calm through all of it, with only a hand that moves early to show the strain."
+ eotg_aug_kingpin.066.a:0 "End it. Any terms."
+ eotg_aug_kingpin.066.b:0 "Burn it all down."
+ eotg_aug_kingpin.066.toast_a_killed:0 "The Figure Below Died in the Fighting"
+
+ # ── eotg_aug_kingpin.067  L8 The Turn ────────────────────────────────────────
+ eotg_aug_kingpin.067.t:0 "The Turn"
+ eotg_aug_kingpin.067.desc:0 "[eotg_kp.GetFirstName] has sold me to [eotg_kp_liege.GetTitledFirstName]. The proof comes by courier, in [eotg_kp_liege.GetHerHis] own hand: the ledgers, the meetings, the names I would not say aloud. [eotg_kp.GetFirstName] sold it quietly, and sold it whole."
+ eotg_aug_kingpin.067.desc_indep:0 "[eotg_kp.GetFirstName] has sold me, and not to a neighbour. What [eotg_kp.GetSheHe] knew has gone to my own vassals, the angriest of them first. It may come back to me as a demand, or as a war."
+ eotg_aug_kingpin.067.desc_front:0 "\n\nThe client files are published. They go out in full, with names, dates and what was said under sedation, and anyone who cares to read them can."
+ eotg_aug_kingpin.067.desc_end_storm:0 "\n\nThe casing at the base of [eotg_kp.GetHerHis] skull ran hot through all of it, and [eotg_kp.GetSheHe] lost whole stretches of the meeting. It was enough."
+ eotg_aug_kingpin.067.desc_end_fracture:0 "\n\nThe betrayal was not clean: a tremor in the hands, a sentence begun and dropped halfway, and the trail shows it. The damage is done anyway."
+ eotg_aug_kingpin.067.desc_end_flicker:0 "\n\nThe tells were small: a hand early, a step ahead of the decision. [eotg_kp.GetFirstName] kept the tells out of the room."
+ eotg_aug_kingpin.067.a:0 "Let it land."
+ eotg_aug_kingpin.067.b:0 "Pay [eotg_kp.GetFirstName] to soften it."
+ eotg_aug_kingpin.067.c:0 "Hunt [eotg_kp.GetFirstName] down."
+ eotg_aug_kingpin.067.c.success:0 "I reach [eotg_kp.GetFirstName] first. The sale ends there."
+ eotg_aug_kingpin.067.c.failure:0 "[eotg_kp.GetFirstName] is gone before I arrive, and I have only made it louder."
+ eotg_aug_kingpin.067.toast_c_success:0 "The Hunt Found Its Mark"
+ eotg_aug_kingpin.067.toast_c_failure:0 "The Hunt Came Up Empty"
+
+ # ── eotg_aug_kingpin.068  The Break (batch B key) ────────────────────────────
+ eotg_aug_kingpin.068.desc_war:0 "\n\nAll of this in the middle of a war [eotg_kp.GetFirstName] helped to start. Whatever [eotg_kp.GetSheHe] brought to it will not survive the news."
+
+ # ── eotg_aug_kingpin.069  A Seat Under You (batch B keys) ────────────────────
+ eotg_aug_kingpin.069.desc_held:0 "The war is over, and the seat held. [eotg_kp.GetFirstName] kept [eotg_kp_target.GetName] through every week of it, with my levies behind. [eotg_kp.GetSheHe|U] is brought up and told the terms: the seat stays [eotg_kp.GetHerHis], under me, and the lower levels will be quiet because [eotg_kp.GetSheHe] says so. The court mutters. My vassals are already counting what this costs me."
+ eotg_aug_kingpin.069.desc_decree:0 "[eotg_kp.GetFirstName] is brought up and told the terms. [eotg_kp_target.GetName] passed to [eotg_kp.GetHerHim] by my own hand, and [eotg_kp.GetSheHe] holds it under me from here. The lower levels will be quiet because [eotg_kp.GetSheHe] says so. The court mutters. My vassals are already counting what this costs me."
+
+ # ── eotg_aug_kingpin.072  L13 The Hold Closes ────────────────────────────────
+ eotg_aug_kingpin.072.t:0 "The Hold Closes"
+ eotg_aug_kingpin.072.desc_purge:0 "[eotg_kp.GetFirstName] comes in without being sent for, and with no one to announce [eotg_kp.GetHerHim]. [eotg_kp.GetSheHe|U] sets the files down one at a time, each in front of me, with a courtesy that is worse than shouting. "It has been right about me every time," [eotg_kp.GetSheHe] says. "It has me reaching for my own people already. Do as I ask, or I start with yours.""
+ eotg_aug_kingpin.072.desc_grandeur:0 "[eotg_kp.GetFirstName] arrives with an entourage and does not wait to be announced. "It never shows me hesitating now," [eotg_kp.GetSheHe] says, taking my chair. "So I will not hesitate here. Do as I ask, and do it where they can see. Kneel, if that is what it takes.""
+ eotg_aug_kingpin.072.desc_forecast:0 "[eotg_kp.GetFirstName] crosses the room and puts out a hand. "It already has me shaking your hand," [eotg_kp.GetSheHe] says, and does, once. "It is usually right about me." I take the hand, because the court is watching. The papers [eotg_kp.GetSheHe] lays down after that are not a request."
+ eotg_aug_kingpin.072.desc_cold:0 "[eotg_kp.GetFirstName] enters without ceremony and sets three slates in a row on my table, each with a price at the foot. They are my options, priced: what I pay if I agree, what I pay if I stall, and what I pay if I refuse. [eotg_kp.GetSheHe|U] does not look up while I read."
+ eotg_aug_kingpin.072.a:0 "Do as [eotg_kp.GetSheHe] says."
+ eotg_aug_kingpin.072.b:0 "No."
+ eotg_aug_kingpin.072.b.tt:0 "[eotg_kp.GetFirstName] will answer the refusal within days."
+ eotg_aug_kingpin.072.c:0 "Do what mine already has me doing."
+
+ # ── batch B modifiers, opinions and the army ─────────────────────────────────
+ eotg_mod_aug_kp_exposed:0 "Dealings Exposed"
+ eotg_mod_aug_kp_exposed_desc:0 "What I did with the lower levels is known. My vassals think less of me for it, and so does everyone else."
+ eotg_mod_aug_kp_crisis:0 "Orders From Below"
+ eotg_mod_aug_kp_crisis_desc:0 "The lower levels give orders to the capital now. Development slows, the people think less of their ruler, and the levies refill slowly."
+ eotg_mod_aug_kp_burned_levels:0 "Burned Levels"
+ eotg_mod_aug_kp_burned_levels_desc:0 "Fire ran through the lower levels. Development has slowed, and the levy is smaller than it was."
+ eotg_opinion_aug_kp_kingmaker:0 "Backed My Claim"
+ eotg_opinion_aug_kp_conspired:0 "Conspired With the Lower Levels"
+ eotg_aug_kp_army_name:0 "Guns From the Lower Levels"

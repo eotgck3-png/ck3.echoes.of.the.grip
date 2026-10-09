@@ -1,0 +1,285 @@
+# Kingpin batch B: loc keys the built script references (eotg-scripter, 2026-10-09).
+# Target file: localization/english/eotg_aug_kingpin_l_english.yml (UTF-8 with BOM), appended to batch A's keys.
+# Spec: docs/specs/cybernetics_v2_kingpin.md §5.8 (.030-.039, .050, .063-.067, .072), §7.1-§7.4.
+#
+# VOICE (binding, event_quality_v1 §12; this batch is written in the NEW voice, CB-46 / §13.3 B11):
+#   - The narrator is root, first person, present tense (about 60% of desc text): "I", "me", "my".
+#     In .039 root is the PLAYER LIEGE (the war's opponent), not the story's owner: "I" is the liege.
+#   - Appended fragments (marked [APPENDED]) are neutral or third person; when they refer to root,
+#     "me" / "my".
+#   - Speech in vanilla double quotes, UNESCAPED inner " (§12.2):  key:0 "Narration. "Speech," [eotg_kp.GetSheHe] says."
+#     Never \" and never '...' for speech. At most one #EMP ...#! per event.
+#   - Options: first person or imperative, 5-9 words. Second person only inside quotes.
+#   - Gemini's draft (docs/proposals/kingpin_text_gemini_r1.md, 80 batch B keys) is raw material only:
+#     re-voice it, convert its \" to ", and re-check every line against §7.3-§7.4.
+#
+# REGISTER (spec §7.3-§7.4, index §5, seller spec B1/B2): "kingpin" never in prose and never in any
+#   line a syndicate-kind story can show (per-kind nouns: crew "boss", syndicate "the syndicate's
+#   boss here", front "the director", hired "the captain"; shared lines use [eotg_kp.GetFirstName]).
+#   The organization is named only through Custom() in per-kind lines; never 's after Custom().
+#   The kingpin's implant forecasts the kingpin only, never "says"; it never acts on the ruler
+#   (.050, .072: the hold is hooks, money and fear; .050's march is a show of force the ruler stages).
+#   Syndicate-kind landed outcomes (.063 .desc_syndicate) are a text-only break with the syndicate:
+#   the boss acts for themself; no line implies the syndicate's head knows or cares.
+#   Banned: warrant, police, officers (as law), authorities, puppet, strings, "owns you", clean house,
+#   today, tonight, decks (as the umbrella), hang/gallows/noose, neural copies; no real-world mafia
+#   words; no Void/Orrin lexicon. Canadian spelling.
+#
+# [APPENDED] = an appended desc fragment: its value must start with two newline escapes (lint L013d).
+# Reused band keys (orchestrator ruling 2, unchanged): .030, .031, .032, .033, .034, .036 and .072
+#   read eotg_aug_kingpin.002.desc_band_*; .039 reads eotg_aug_kingpin.001.desc_band_*. No new band
+#   keys for those events. Leaves have their own .desc_end_* (how far gone the boss was).
+# Leverage tooltips are the shared batch A keys (eotg_aug_kp_leverage_up_tt / _down_tt); not repeated.
+# Toast titles (W3 form <ns>.<id>.toast_<option>_<outcome>): say what happened; never a number,
+#   odds or "risk". Duel outcomes: <option>.success / <option>.failure (the option's roll tooltip).
+#
+# Scopes available to loc (bare, never scope:), per event:
+#   .003   eotg_kp; the liege via [ROOT.Char.GetLiege.GetFirstName]. NO rival scope exists at .003:
+#          b_indep / c_indep must not name the rival (it is picked in .031 / .032).
+#   .030   eotg_kp, eotg_kp_opponent (the liege), eotg_kp_target (the liege's primary title:
+#          [eotg_kp_target.GetName]). .desc_own: I claim it; .desc_back_kp: the boss claims it.
+#   .031   eotg_kp, eotg_kp_rival (= eotg_kp_opponent, the neighbouring ruler), eotg_kp_target.
+#   .032   eotg_kp, eotg_kp_rival (the vassal), eotg_kp_target (their seat); toast_a_war also has
+#          eotg_kp_rebel (the vassal who rose).
+#   .033   eotg_kp, eotg_kp_opponent. eotg_kp_officer (syndicate) and eotg_kp_councillor (front) exist
+#          only when the a_ option shows: the a_ option text may name them, the desc may not.
+#   .034   eotg_kp, eotg_kp_opponent.
+#   .036   eotg_kp, eotg_kp_target (the seat I now hold).
+#   .038   eotg_kp, eotg_kp_opponent (the liege), eotg_kp_target.
+#   .039   root = the player liege; eotg_kp; eotg_kp_owner (the AI vassal who started the war).
+#   .050   eotg_kp; eotg_kp_order_target (only in .desc_name).
+#   .063   eotg_kp, eotg_kp_target. (.desc = vassal variant: the boss is my liege now;
+#          .desc_indep = the boss holds the neighbour's seat. Do NOT say the boss is my vassal:
+#          vanilla claim_cb makes them one only when the won title ranks below mine.)
+#   .064   eotg_kp.   .065 eotg_kp, eotg_kp_opponent.   .066 eotg_kp, eotg_kp_opponent.
+#   .067   eotg_kp; eotg_kp_liege only in .desc (vassal variant), never in .desc_indep.
+#   .068   .desc_war: eotg_kp.   .069 .desc_held / .desc_decree: eotg_kp, eotg_kp_target.
+#   .072   eotg_kp.
+# Content notes for the text (what each variant must stay true to):
+#   .003.desc_vassal shows only when b / c (the liege's seat) show; .desc_independent when b_indep
+#     or c_indep shows (ruling 2026-10-06: covers both the neighbour's and a vassal's seat).
+#   .003.b: the own path (I take the seat); .003.c: the boss takes it, I "hold the door".
+#   .030.a strikes now (the faction and its war); .b raises the faction and waits; .c walks away.
+#   .032.a is a revocation by decree (tyranny); .b buys the vassal out; the civil war is a separate
+#     roll (toast_a_war / toast_a_no_war).
+#   .036 own path won: the boss names a price. .c = loose ends (an intrigue roll against the boss).
+#   .038.desc_discovered: the liege has learned of the faction; only .c shows ("Then it's done.").
+#   .050: four order types (desc_show / _name / _march / _squeeze) per spec §5.8 .050; .c.tt warns
+#     that a second refusal will be answered; .d is "Do what mine already has me doing." (§7.4).
+#   .063.desc_purge_half: the purge mind paid half and kept a file on me instead of a shared hook.
+#   .066.desc runs while the war still burns (the spiral); .desc_lost after the vassal-seat war
+#     is over and lost.
+#   .067.desc_front: the client files are published.
+#   .068.desc_war: the break comes mid-war; my claim faction ends with it.
+#   .069.desc_held: the seat was kept by force through the war; .desc_decree: the seat changed hands
+#     by my decree or purchase (.032) and the boss sits under me now.
+#   .072 fixed wordings (§7.4): .a "Do as [eotg_kp.GetSheHe] says."; .c "Do what mine already has me
+#     doing."; the purge line ends "or I start with yours".
+#   Retitles (§7.4): .033 "The War Below"; .036 "The Partner's Price"; .064 "Before the Bill Came";
+#     .065 "Sold to the Winner"; .066 "Every Level Burning"; .067 "The Turn".
+#
+# Total keys: 160 (155 event/script keys + 3 modifier _desc + 2 opinion names)
+
+## events: eotg_aug_kingpin.003 (batch A event; batch B keys only)
+eotg_aug_kingpin.003.desc_vassal    [APPENDED]
+eotg_aug_kingpin.003.desc_independent    [APPENDED]
+eotg_aug_kingpin.003.b
+eotg_aug_kingpin.003.b.tt
+eotg_aug_kingpin.003.c
+eotg_aug_kingpin.003.c.tt
+eotg_aug_kingpin.003.b_indep
+eotg_aug_kingpin.003.b_indep.tt
+eotg_aug_kingpin.003.c_indep
+eotg_aug_kingpin.003.c_indep.tt
+
+## events: eotg_aug_kingpin.012 (batch A event; batch B keys only)
+eotg_aug_kingpin.012.c_front
+eotg_aug_kingpin.012.c_front.tt
+
+## events: eotg_aug_kingpin.030 The Claim
+eotg_aug_kingpin.030.t
+eotg_aug_kingpin.030.desc_own
+eotg_aug_kingpin.030.desc_back_kp
+eotg_aug_kingpin.030.a
+eotg_aug_kingpin.030.a.tt
+eotg_aug_kingpin.030.b
+eotg_aug_kingpin.030.b.tt
+eotg_aug_kingpin.030.c
+
+## events: eotg_aug_kingpin.031 The Neighbour's Seat
+eotg_aug_kingpin.031.t
+eotg_aug_kingpin.031.desc
+eotg_aug_kingpin.031.a
+eotg_aug_kingpin.031.b
+eotg_aug_kingpin.031.c
+eotg_aug_kingpin.031.toast_a_no_war
+
+## events: eotg_aug_kingpin.032 The Vassal's Seat
+eotg_aug_kingpin.032.t
+eotg_aug_kingpin.032.desc
+eotg_aug_kingpin.032.a
+eotg_aug_kingpin.032.a.tt
+eotg_aug_kingpin.032.b
+eotg_aug_kingpin.032.c
+eotg_aug_kingpin.032.toast_a_war
+eotg_aug_kingpin.032.toast_a_no_war
+
+## events: eotg_aug_kingpin.033 The War Below
+eotg_aug_kingpin.033.t
+eotg_aug_kingpin.033.desc_crew
+eotg_aug_kingpin.033.desc_syndicate
+eotg_aug_kingpin.033.desc_front
+eotg_aug_kingpin.033.desc_hired
+eotg_aug_kingpin.033.a_crew
+eotg_aug_kingpin.033.b_crew
+eotg_aug_kingpin.033.a_syndicate
+eotg_aug_kingpin.033.b_syndicate
+eotg_aug_kingpin.033.a_front
+eotg_aug_kingpin.033.b_front
+eotg_aug_kingpin.033.a_hired
+eotg_aug_kingpin.033.b_hired
+eotg_aug_kingpin.033.c
+eotg_aug_kingpin.033.c.tt
+
+## events: eotg_aug_kingpin.034 Turned Guns
+eotg_aug_kingpin.034.t
+eotg_aug_kingpin.034.desc
+eotg_aug_kingpin.034.a
+eotg_aug_kingpin.034.b
+eotg_aug_kingpin.034.c
+eotg_aug_kingpin.034.c.success
+eotg_aug_kingpin.034.c.failure
+eotg_aug_kingpin.034.toast_c_success
+eotg_aug_kingpin.034.toast_c_failure
+
+## events: eotg_aug_kingpin.036 The Partner's Price
+eotg_aug_kingpin.036.t
+eotg_aug_kingpin.036.desc
+eotg_aug_kingpin.036.a
+eotg_aug_kingpin.036.a.tt
+eotg_aug_kingpin.036.b
+eotg_aug_kingpin.036.b.tt
+eotg_aug_kingpin.036.c
+eotg_aug_kingpin.036.c.success
+eotg_aug_kingpin.036.c.failure
+eotg_aug_kingpin.036.toast_c_success
+eotg_aug_kingpin.036.toast_c_failure
+eotg_aug_kingpin.036.d
+eotg_aug_kingpin.036.d.tt
+
+## events: eotg_aug_kingpin.038 Now or Never
+eotg_aug_kingpin.038.t
+eotg_aug_kingpin.038.desc
+eotg_aug_kingpin.038.desc_discovered
+eotg_aug_kingpin.038.a
+eotg_aug_kingpin.038.a.tt
+eotg_aug_kingpin.038.b
+eotg_aug_kingpin.038.c
+eotg_aug_kingpin.038.c.tt
+
+## events: eotg_aug_kingpin.039 Word From the Docks
+eotg_aug_kingpin.039.t
+eotg_aug_kingpin.039.desc
+eotg_aug_kingpin.039.a
+eotg_aug_kingpin.039.b
+eotg_aug_kingpin.039.b.tt
+
+## events: eotg_aug_kingpin.050 The Orders
+eotg_aug_kingpin.050.t
+eotg_aug_kingpin.050.desc_show
+eotg_aug_kingpin.050.desc_name
+eotg_aug_kingpin.050.desc_march
+eotg_aug_kingpin.050.desc_squeeze
+eotg_aug_kingpin.050.a
+eotg_aug_kingpin.050.b
+eotg_aug_kingpin.050.c
+eotg_aug_kingpin.050.c.tt
+eotg_aug_kingpin.050.d
+
+## events: eotg_aug_kingpin.063 L4 Kingmaker
+eotg_aug_kingpin.063.t
+eotg_aug_kingpin.063.desc
+eotg_aug_kingpin.063.desc_indep
+eotg_aug_kingpin.063.desc_purge_half    [APPENDED]
+eotg_aug_kingpin.063.desc_syndicate    [APPENDED]
+eotg_aug_kingpin.063.desc_end_storm    [APPENDED]
+eotg_aug_kingpin.063.desc_end_fracture    [APPENDED]
+eotg_aug_kingpin.063.desc_end_flicker    [APPENDED]
+eotg_aug_kingpin.063.a
+
+## events: eotg_aug_kingpin.064 L5 Before the Bill Came
+eotg_aug_kingpin.064.t
+eotg_aug_kingpin.064.desc
+eotg_aug_kingpin.064.desc_end_storm    [APPENDED]
+eotg_aug_kingpin.064.desc_end_fracture    [APPENDED]
+eotg_aug_kingpin.064.desc_end_flicker    [APPENDED]
+eotg_aug_kingpin.064.a
+
+## events: eotg_aug_kingpin.065 L6 Sold to the Winner
+eotg_aug_kingpin.065.t
+eotg_aug_kingpin.065.desc
+eotg_aug_kingpin.065.desc_indep
+eotg_aug_kingpin.065.desc_end_storm    [APPENDED]
+eotg_aug_kingpin.065.desc_end_fracture    [APPENDED]
+eotg_aug_kingpin.065.desc_end_flicker    [APPENDED]
+eotg_aug_kingpin.065.a
+
+## events: eotg_aug_kingpin.066 L7 Every Level Burning
+eotg_aug_kingpin.066.t
+eotg_aug_kingpin.066.desc
+eotg_aug_kingpin.066.desc_lost
+eotg_aug_kingpin.066.desc_end_storm    [APPENDED]
+eotg_aug_kingpin.066.desc_end_fracture    [APPENDED]
+eotg_aug_kingpin.066.desc_end_flicker    [APPENDED]
+eotg_aug_kingpin.066.a
+eotg_aug_kingpin.066.b
+eotg_aug_kingpin.066.toast_a_killed
+
+## events: eotg_aug_kingpin.067 L8 The Turn
+eotg_aug_kingpin.067.t
+eotg_aug_kingpin.067.desc
+eotg_aug_kingpin.067.desc_indep
+eotg_aug_kingpin.067.desc_front    [APPENDED]
+eotg_aug_kingpin.067.desc_end_storm    [APPENDED]
+eotg_aug_kingpin.067.desc_end_fracture    [APPENDED]
+eotg_aug_kingpin.067.desc_end_flicker    [APPENDED]
+eotg_aug_kingpin.067.a
+eotg_aug_kingpin.067.b
+eotg_aug_kingpin.067.c
+eotg_aug_kingpin.067.c.success
+eotg_aug_kingpin.067.c.failure
+eotg_aug_kingpin.067.toast_c_success
+eotg_aug_kingpin.067.toast_c_failure
+
+## events: eotg_aug_kingpin.068 (batch A event; batch B key only)
+eotg_aug_kingpin.068.desc_war    [APPENDED]
+
+## events: eotg_aug_kingpin.069 (batch A event; batch B keys only; both replace .069.desc as the FIRST fragment)
+eotg_aug_kingpin.069.desc_held
+eotg_aug_kingpin.069.desc_decree
+
+## events: eotg_aug_kingpin.072 L13 The Hold Closes
+eotg_aug_kingpin.072.t
+eotg_aug_kingpin.072.desc_purge
+eotg_aug_kingpin.072.desc_grandeur
+eotg_aug_kingpin.072.desc_forecast
+eotg_aug_kingpin.072.desc_cold
+eotg_aug_kingpin.072.a
+eotg_aug_kingpin.072.b
+eotg_aug_kingpin.072.b.tt
+eotg_aug_kingpin.072.c
+
+## modifiers (name + _desc)
+eotg_mod_aug_kp_exposed
+eotg_mod_aug_kp_exposed_desc
+eotg_mod_aug_kp_crisis
+eotg_mod_aug_kp_crisis_desc
+eotg_mod_aug_kp_burned_levels
+eotg_mod_aug_kp_burned_levels_desc
+
+## opinion modifiers (name)
+eotg_opinion_aug_kp_kingmaker
+eotg_opinion_aug_kp_conspired
+
+## army (spawn_army name; shared by crew and hired, so no organization name)
+eotg_aug_kp_army_name

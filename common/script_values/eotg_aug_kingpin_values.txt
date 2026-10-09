@@ -1,11 +1,11 @@
 ﻿# -- eotg_aug_kingpin_values.txt ----------------------------------------------
 # Script values for the Neurofractured Kingpin (docs/specs/
-# cybernetics_v2_kingpin.md §5.6). Batch A.
+# cybernetics_v2_kingpin.md §5.6). Batches A and B.
 #
-# BATCH-B SEAM (kingpin): eotg_aug_kp_levies_value (war support, spawn_army)
-# is written with the war stages in batch B. V-K4 is settled already:
-# max_military_strength is a vanilla value (order_by = max_military_strength,
-# e.g. common/decisions/dlc_decisions/ep3_decisions.txt).
+# Batch B: eotg_aug_kp_levies_value (war support, spawn_army), at the end.
+# V-K4 settled: max_military_strength is a vanilla character value (PX
+# triggers.log; used as a value at vanilla common/scripted_effects/
+# 00_almohad_invasion_effects.txt:366).
 # -----------------------------------------------------------------------------
 
 # Yearly drift of the kingpin's eotg_fracture_risk (spec §2, §5.6). Run in
@@ -92,4 +92,37 @@ eotg_aug_kp_evidence_value = {
             max = 30
         }
     }
+}
+
+# Levies the organization fields for the ruler in a claim war (spec §5.6,
+# war support by kind §5.8): crew 0.1, hired 0.35, syndicate and front 0, of
+# the ruler's max_military_strength; x1.5 for a wide reach; x1.25 for the cold
+# mind (the spec's "+1 step": the captain prices the job well). Run in the
+# ruler's scope with scope:eotg_kp saved. Users: eotg_aug_kp_war_support_effect,
+# eotg_aug_kingpin.034 b / c (the guns turned over to the other side).
+eotg_aug_kp_levies_value = {
+    value = 0
+    if = {
+        limit = { eotg_aug_kp_is = { AXIS = kind  VALUE = crew } }
+        add = {
+            value = max_military_strength
+            multiply = 0.1
+        }
+    }
+    else_if = {
+        limit = { eotg_aug_kp_is = { AXIS = kind  VALUE = hired } }
+        add = {
+            value = max_military_strength
+            multiply = 0.35
+        }
+    }
+    if = {
+        limit = { eotg_aug_kp_is = { AXIS = reach  VALUE = wide } }
+        multiply = 1.5
+    }
+    if = {
+        limit = { eotg_aug_kp_is = { AXIS = mind  VALUE = cold } }
+        multiply = 1.25
+    }
+    round = yes
 }

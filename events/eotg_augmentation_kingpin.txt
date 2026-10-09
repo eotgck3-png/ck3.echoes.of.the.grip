@@ -1,5 +1,6 @@
 ﻿# ── eotg_augmentation_kingpin.txt ────────────────────────────────────────────
-# The Neurofractured Kingpin: docs/specs/cybernetics_v2_kingpin.md. BATCH A.
+# The Neurofractured Kingpin: docs/specs/cybernetics_v2_kingpin.md. BATCHES A
+# AND B.
 # Somebody runs the lower levels of your capital, and their boss has gone
 # Neurofractured.
 #
@@ -19,7 +20,17 @@
 # eotg_aug_kingpin.013 — In Custody
 # eotg_aug_kingpin.014 — Bodies on the Docks      (T5)
 # eotg_aug_kingpin.015 — The Audit                (front)
+# Nodes (batch B: the claim path, the wars, the kept stage)
+# eotg_aug_kingpin.030 — The Claim                (vassal: own / back_kp)
+# eotg_aug_kingpin.031 — The Neighbour's Seat     (independent)
+# eotg_aug_kingpin.032 — The Vassal's Seat        (independent: civil war)
+# eotg_aug_kingpin.033 — The War Below            (T8, by kind)
+# eotg_aug_kingpin.034 — Turned Guns              (T8, hired)
+# eotg_aug_kingpin.036 — The Partner's Price      (M3, own won)
+# eotg_aug_kingpin.038 — Now or Never             (T9, pending)
+# eotg_aug_kingpin.039 — Word From the Docks      (on a player opponent)
 # eotg_aug_kingpin.040 — The Inheritance          (the heir; on_owner_death)
+# eotg_aug_kingpin.050 — The Orders               (T7, kept)
 # Leaves (batch A)
 # eotg_aug_kingpin.060 — L1  A Quick Ending
 # eotg_aug_kingpin.061 — L2  The Streets Go Quiet
@@ -32,17 +43,31 @@
 # eotg_aug_kingpin.074 — L15 The Syndicate Settles It (syndicate only)
 # eotg_aug_kingpin.075 — L16 The Fracture Finishes It
 # eotg_aug_kingpin.076 — L17 The Clinic Changes Hands (front only)
+# Leaves (batch B)
+# eotg_aug_kingpin.063 — L4  Kingmaker
+# eotg_aug_kingpin.064 — L5  Before the Bill Came
+# eotg_aug_kingpin.065 — L6  Sold to the Winner
+# eotg_aug_kingpin.066 — L7  Every Level Burning
+# eotg_aug_kingpin.067 — L8  The Turn
+# eotg_aug_kingpin.072 — L13 The Hold Closes      (opens the kept stage)
 #
-# BATCH-B SEAMS (grep "BATCH-B SEAM (kingpin)"): .003 b / c / b_indep /
-#   c_indep (-> .030 / .031 / .032) and .012 c_front (-> .067) are commented
-#   out until their targets exist; the story's T2, T3, T7 (.050), T8, T9, M3
-#   and M4; .068's war variant and .069's "kept by force" variant.
+# Batch B wired the batch A seams: .003 b / c / b_indep / c_indep (-> .030 /
+#   .031 / .032), .012 c_front (-> .067), .068's war variant, .069's "held"
+#   variant, and the story's T2, T3, T7 (.050), T8, T9, M3 and M4.
+# Event quality (event_quality_v1 §12-§14) for the batch B events:
+#   override_background from the eotg_bg_* set; at most one personality-gated
+#   option per event (trait icon, trigger and stress entry); toasts on rolled
+#   outcomes (W3 form: <ns>.<id>.toast_<option>_<outcome>); dangerous on
+#   options that can wound the ruler or hand over control. Batch B loc is
+#   written in the new voice (§12: first person, vanilla double quotes).
 #
 # Fires from: .001 from eotg_on_yearly_aug_kingpin_check (cooldown authority,
-#   10 years) and eotg_decision_aug_debug_kingpin; .004-.009, .014, .062,
-#   .068, .073, .075 from the story eotg_story_aug_kingpin's yearly tick;
-#   .040 from the story's on_owner_death; everything else from another event
-#   here (each header names its callers). No event checks a cooldown flag.
+#   10 years) and eotg_decision_aug_debug_kingpin; .004-.009, .014, .033,
+#   .034, .038, .050, .062, .067, .068, .072, .073, .075 from the story
+#   eotg_story_aug_kingpin's yearly tick; .036, .063, .065, .066, .069 from
+#   its monthly maintenance (M3 / M4); .040 from the story's on_owner_death;
+#   .039 from eotg_aug_kp_war_started_effect; everything else from another
+#   event here (each header names its callers). No event checks a cooldown flag.
 #   Every event after .001 asks eotg_aug_kp_has_story (world state: the story
 #   runs and its kingpin lives), so a delayed event never fires into an ended
 #   story.
@@ -424,12 +449,14 @@ eotg_aug_kingpin.002 = {
 # ── eotg_aug_kingpin.003 ──────────────────────────────────────────────────────
 # The Offer. The boss names terms.
 # Callers: .002 a / c / d, .012 b.
-# Desc: the offer by kind, then the role fragment. Batch A shows
-# .desc_noclaim only: the claim options it would describe are batch B, and a
-# fragment must be true on every path that shows it (spec §7.3).
+# Desc: the offer by kind, then the role fragment, true on every path that
+# shows it (spec §7.3): .desc_vassal when the liege claim (b / c) shows,
+# .desc_independent when b_indep or c_indep shows, else .desc_noclaim.
+# Options: at most five show (spec §5.8 .003): e_syndicate's bribery variant
+# yields when the kind has its own e option and a claim option is open.
 # Signature: every option moves the kingpin's pressure except e_syndicate,
-# e_front and e_hired (leverage moves); the BATCH-B claim options read the
-# band through their own events.
+# e_front and e_hired (leverage moves); the claim options read the band
+# through their own events (.030-.032).
 
 eotg_aug_kingpin.003 = {
     type = character_event
@@ -450,13 +477,23 @@ eotg_aug_kingpin.003 = {
             }
             desc = eotg_aug_kingpin.003.desc_hired
         }
-        # BATCH-B SEAM (kingpin): batch B adds, before .desc_noclaim,
-        # .desc_vassal (eotg_aug_kp_liege_claim_possible = yes) and
-        # .desc_independent (orchestrator ruling 2026-10-06: no extra
-        # gating beyond an independent role with either claim option open;
-        # the loc covers both the neighbour-seat and the vassal-seat
-        # targets), with the claim options below.
-        desc = eotg_aug_kingpin.003.desc_noclaim
+        # .desc_independent: orchestrator ruling 2026-10-06, no extra gating
+        # beyond an independent role with either claim option open; the loc
+        # covers both the neighbour-seat and the vassal-seat targets.
+        first_valid = {
+            triggered_desc = {
+                trigger = { eotg_aug_kp_liege_claim_possible = yes }
+                desc = eotg_aug_kingpin.003.desc_vassal
+            }
+            triggered_desc = {
+                trigger = {
+                    eotg_aug_kp_root_is_independent = yes
+                    eotg_aug_kp_claim_open = yes
+                }
+                desc = eotg_aug_kingpin.003.desc_independent
+            }
+            desc = eotg_aug_kingpin.003.desc_noclaim
+        }
     }
     theme = intrigue
     override_background = { reference = eotg_bg_underlevel_night }
@@ -510,16 +547,118 @@ eotg_aug_kingpin.003 = {
         }
     }
 
-    # BATCH-B SEAM (kingpin): the claim options, written with batch B when
-    # .030 / .031 / .032 exist (spec §5.8 .003):
-    #   b       [vassal; eotg_aug_kp_liege_claim_possible] "Put me in [liege]'s
-    #           seat." path own -> .030 (5-10); leverage +20 (+0 blackmail)
-    #   c       [vassal; same] "Take the seat yourself. I'll hold the door."
-    #           path back_kp -> .030 (5-10); leverage +10
-    #   b_indep [independent; eotg_aug_kp_neighbour_target] -> .031 (5-10)
-    #   c_indep [independent; eotg_aug_kp_vassal_seat_target] -> .032 (5-10)
-    # Until then they are hidden, as the spec does when neither role branch
-    # is available (§5.1.1 "the claim options are hidden").
+    # b [vassal; eotg_aug_kp_liege_claim_possible] "Put me in [liege]'s
+    # seat." The own path -> .030 (5-10); leverage +20, or +0 for the
+    # blackmail method (they forge the claim from their files).
+    option = {
+        name = eotg_aug_kingpin.003.b
+        trigger = { eotg_aug_kp_liege_claim_possible = yes }
+        if = {
+            limit = { NOT = { eotg_aug_kp_is = { AXIS = method  VALUE = blackmail } } }
+            eotg_aug_kp_leverage_up_effect = { AMOUNT = 20 }
+        }
+        save_scope_value_as = { name = eotg_kp_claim_path  value = flag:own }
+        custom_tooltip = eotg_aug_kingpin.003.b.tt
+        trigger_event = { id = eotg_aug_kingpin.030  days = { 5 10 } }
+        ai_chance = {
+            base = 5
+            modifier = { add = 15  has_trait = ambitious }
+            modifier = { add = 10  has_trait = deceitful }
+            modifier = { add = 10  has_trait = arrogant }
+            modifier = {
+                factor = 0
+                is_at_war = yes
+            }
+            modifier = {
+                factor = 0.25
+                highest_held_title_tier <= tier_county
+                liege = { highest_held_title_tier >= tier_kingdom }
+            }
+            modifier = {
+                factor = 0.25
+                highest_held_title_tier = tier_duchy
+                liege = { highest_held_title_tier >= tier_empire }
+            }
+        }
+    }
+
+    # c [vassal; same] "Take the seat yourself. I'll hold the door." The
+    # back_kp path -> .030 (5-10); leverage +10. Grandeur: the boss's side
+    # pushes it (ai +20, spec §5.2.3).
+    option = {
+        name = eotg_aug_kingpin.003.c
+        trigger = { eotg_aug_kp_liege_claim_possible = yes }
+        eotg_aug_kp_leverage_up_effect = { AMOUNT = 10 }
+        save_scope_value_as = { name = eotg_kp_claim_path  value = flag:back_kp }
+        custom_tooltip = eotg_aug_kingpin.003.c.tt
+        trigger_event = { id = eotg_aug_kingpin.030  days = { 5 10 } }
+        ai_chance = {
+            base = 5
+            modifier = { add = 15  has_trait = ambitious }
+            modifier = { add = 10  has_trait = deceitful }
+            modifier = { add = 10  has_trait = arrogant }
+            modifier = {
+                add = 20
+                eotg_aug_kp_is = { AXIS = mind  VALUE = grandeur }
+            }
+            modifier = {
+                factor = 0
+                is_at_war = yes
+            }
+            modifier = {
+                factor = 0.25
+                highest_held_title_tier <= tier_county
+                liege = { highest_held_title_tier >= tier_kingdom }
+            }
+        }
+    }
+
+    # b_indep [independent; a neighbour to claim from] "Take [rival]'s seat.
+    # My guns, your name." -> .031 The Neighbour's Seat (5-10).
+    option = {
+        name = eotg_aug_kingpin.003.b_indep
+        trigger = {
+            eotg_aug_kp_root_is_independent = yes
+            any_neighboring_top_liege_realm_owner = { eotg_aug_kp_neighbour_target = { RULER = root } }
+        }
+        custom_tooltip = eotg_aug_kingpin.003.b_indep.tt
+        trigger_event = { id = eotg_aug_kingpin.031  days = { 5 10 } }
+        ai_chance = {
+            base = 5
+            modifier = { add = 15  has_trait = ambitious }
+            modifier = { add = 10  has_trait = arrogant }
+            modifier = {
+                add = 20
+                eotg_aug_kp_is = { AXIS = mind  VALUE = grandeur }
+            }
+            modifier = {
+                factor = 0
+                is_at_war = yes
+            }
+        }
+    }
+
+    # c_indep [independent; a vassal seat to hand over] "[rival]'s seat could
+    # be yours." -> .032 The Vassal's Seat (5-10).
+    option = {
+        name = eotg_aug_kingpin.003.c_indep
+        trigger = {
+            eotg_aug_kp_root_is_independent = yes
+            any_vassal = { eotg_aug_kp_vassal_seat_target = { RULER = root } }
+        }
+        custom_tooltip = eotg_aug_kingpin.003.c_indep.tt
+        trigger_event = { id = eotg_aug_kingpin.032  days = { 5 10 } }
+        ai_chance = {
+            base = 5
+            modifier = { add = 15  has_trait = arbitrary }
+            modifier = { add = 10  has_trait = callous }
+            modifier = {
+                factor = 0
+                is_at_war = yes
+            }
+        }
+    }
+
 
     # d "No. Get out." Refusals +1, kp +5; then 70% (crew or hired) / 40%
     # (others) Retaliation in 30-90 days, else stage open.
@@ -584,7 +723,22 @@ eotg_aug_kingpin.003 = {
         trigger = {
             OR = {
                 eotg_aug_kp_is = { AXIS = kind  VALUE = syndicate }
-                eotg_aug_kp_is = { AXIS = method  VALUE = bribery }
+                AND = {
+                    eotg_aug_kp_is = { AXIS = method  VALUE = bribery }
+                    # Yields to the kind's own e option when a claim option
+                    # is open (at most five options, spec §5.8 .003)
+                    NAND = {
+                        OR = {
+                            eotg_aug_kp_is = { AXIS = kind  VALUE = crew }
+                            eotg_aug_kp_is = { AXIS = kind  VALUE = hired }
+                            AND = {
+                                eotg_aug_kp_is = { AXIS = kind  VALUE = front }
+                                eotg_aug_kp_root_is_vassal = yes
+                            }
+                        }
+                        eotg_aug_kp_claim_open = yes
+                    }
+                }
             }
         }
         eotg_aug_kp_set_stage_effect = { STAGE = collab }
@@ -2139,8 +2293,7 @@ eotg_aug_kingpin.011 = {
 # named in the desc; that also moves the pressure (+5).
 # Band lines: the .001 keys (orchestrator ruling 2026-10-06).
 # Signature: the desc reads the band; c_syndicate and the victim move it.
-# BATCH-B SEAM (kingpin): c_front "Let them publish." -> .067 The Turn
-# (spec §5.8 .012 c') is commented out until .067 exists.
+# c_front "Let them publish." -> .067 The Turn (spec §5.8 .012 c', batch B).
 
 eotg_aug_kingpin.012 = {
     type = character_event
@@ -2305,8 +2458,19 @@ eotg_aug_kingpin.012 = {
         }
     }
 
-    # BATCH-B SEAM (kingpin): c_front [front] "Let them publish." -> .067 The
-    # Turn (5 days), written with batch B.
+    # c_front [front] "Let them publish." -> .067 The Turn (5 days): the
+    # client files go out (the Turn's front line).
+    option = {
+        name = eotg_aug_kingpin.012.c_front
+        trigger = { eotg_aug_kp_is = { AXIS = kind  VALUE = front } }
+        custom_tooltip = eotg_aug_kingpin.012.c_front.tt
+        trigger_event = { id = eotg_aug_kingpin.067  days = 5 }
+        ai_chance = {
+            base = 10
+            modifier = { add = 15  has_trait = honest }
+            modifier = { add = 10  has_trait = stubborn }
+        }
+    }
 
     # c_syndicate [syndicate] "Pay what my guards were paid." Gold -medium;
     # leverage -5; stage open; kp +5.
@@ -2666,6 +2830,1313 @@ eotg_aug_kingpin.015 = {
 }
 
 
+# ══ The claim path and the wars (batch B; spec §5.8 .030-.039) ══════════════
+# Courtier status (spec §5.1.2): in the back_kp and neighbour paths the boss
+# is the claimant in the ruler's court (added when the faction or the war is
+# raised); in the own path the boss stays in the pool. Stage, path, target,
+# opponent, rival and war live on the story; eotg_aug_kp_save_scopes_effect
+# saves them for each event.
+# Toasts (event_quality_v1 W3): on each rolled outcome (duel branches, the
+# civil war's roll); titles say what happened, never a number.
+
+
+# ── eotg_aug_kingpin.030 ──────────────────────────────────────────────────────
+# The Claim. A vassal ruler moves on the liege's seat with the boss: the own
+# path (the ruler claims) or back_kp (the boss claims).
+# Callers: .003 b (own) / c (back_kp), 5-10 days; the path rides in as the
+#   scope value eotg_kp_claim_path.
+# immediate: the liege is the opponent, the liege's primary title the
+# target, and root.var:claiming_title is set, because can_create_faction
+# needs it (vanilla common/factions/00_factions.txt:1146-1155) and a / b read
+# can_create_faction in their triggers. c and the raise effect remove it.
+# Deviation: the pressed claim is granted in a / b (shown in the tooltip),
+# not in immediate, so c has nothing to take back.
+# Signature: a moves the kingpin's pressure (+5, eotg_aug_kp_war_started_effect).
+
+eotg_aug_kingpin.030 = {
+    type = character_event
+    title = eotg_aug_kingpin.030.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_kp_claim_path ?= flag:back_kp }
+                desc = eotg_aug_kingpin.030.desc_back_kp
+            }
+            desc = eotg_aug_kingpin.030.desc_own
+        }
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_kp = { eotg_aug_pressure_storm = yes } }
+                desc = eotg_aug_kingpin.002.desc_band_storm
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_kp = { eotg_aug_pressure_fracture = yes } }
+                desc = eotg_aug_kingpin.002.desc_band_fracture
+            }
+            desc = eotg_aug_kingpin.002.desc_band_flicker
+        }
+    }
+    theme = war
+    override_background = { reference = eotg_bg_council }
+
+    trigger = {
+        eotg_aug_kp_has_story = yes
+        eotg_aug_kp_root_is_vassal = yes
+    }
+
+    left_portrait = {
+        character = root
+        animation = war_attacker
+    }
+    right_portrait = {
+        character = scope:eotg_kp
+        animation = scheme
+    }
+    lower_right_portrait = {
+        trigger = { exists = scope:eotg_kp_opponent }
+        character = scope:eotg_kp_opponent
+    }
+
+    immediate = {
+        hidden_effect = {
+            eotg_aug_kp_save_scopes_effect = yes
+            liege = { save_scope_as = eotg_kp_opponent }
+            liege.primary_title = { save_scope_as = eotg_kp_target }
+            # eotg_lint: allow L001 vanilla's own variable name: can_create_faction reads var:claiming_title (common/factions/00_factions.txt:1146-1155)
+            set_variable = {
+                name = claiming_title
+                value = scope:eotg_kp_target
+            }
+        }
+    }
+
+    # a "Raise the faction. Strike now." The claimant faction, then its war
+    # (vanilla faction_start_war, events/factions/faction_demands.txt:396),
+    # then the organization's support; stage war. Greyed out when vanilla
+    # will not let the ruler raise the faction.
+    option = {
+        name = eotg_aug_kingpin.030.a
+        trigger = {
+            can_create_faction = {
+                type = claimant_faction
+                target = scope:eotg_kp_opponent
+            }
+        }
+        show_as_unavailable = { always = yes }
+        if = {
+            limit = { scope:eotg_kp_claim_path ?= flag:back_kp }
+            if = {
+                limit = { NOT = { scope:eotg_kp = { is_courtier_of = root } } }
+                add_courtier = scope:eotg_kp
+            }
+            scope:eotg_kp = { add_pressed_claim = scope:eotg_kp_target }
+            eotg_aug_kp_raise_claimant_effect = { CLAIMANT = scope:eotg_kp }
+        }
+        else = {
+            add_pressed_claim = scope:eotg_kp_target
+            eotg_aug_kp_raise_claimant_effect = { CLAIMANT = root }
+        }
+        hidden_effect = {
+            scope:eotg_kp_story = {
+                if = {
+                    limit = { scope:eotg_kp_claim_path ?= flag:back_kp }
+                    set_variable = { name = eotg_kp_path  value = flag:back_kp }
+                }
+                else = {
+                    set_variable = { name = eotg_kp_path  value = flag:own }
+                }
+                set_variable = { name = eotg_kp_target  value = scope:eotg_kp_target }
+                set_variable = { name = eotg_kp_opponent  value = scope:eotg_kp_opponent }
+            }
+        }
+        if = {
+            limit = { exists = scope:eotg_kp_faction }
+            scope:eotg_kp_faction = { faction_start_war = {} }
+            if = {
+                limit = { scope:eotg_kp_faction = { faction_is_at_war = yes } }
+                scope:eotg_kp_faction.faction_war = { save_scope_as = eotg_kp_war }
+            }
+        }
+        if = {
+            limit = { exists = scope:eotg_kp_war }
+            eotg_aug_kp_war_started_effect = yes
+        }
+        else_if = {
+            limit = { exists = scope:eotg_kp_faction }
+            # The faction stands but the war did not start: it waits (T9)
+            eotg_aug_kp_set_stage_effect = { STAGE = pending }
+        }
+        custom_tooltip = eotg_aug_kingpin.030.a.tt
+        ai_chance = {
+            base = 5
+            modifier = { add = 15  has_trait = ambitious }
+            modifier = { add = 10  has_trait = deceitful }
+            modifier = { add = 10  has_trait = arrogant }
+            modifier = {
+                factor = 0
+                is_at_war = yes
+            }
+            modifier = {
+                factor = 0.25
+                highest_held_title_tier <= tier_county
+                scope:eotg_kp_opponent = { highest_held_title_tier >= tier_kingdom }
+            }
+            modifier = {
+                factor = 0.25
+                highest_held_title_tier = tier_duchy
+                scope:eotg_kp_opponent = { highest_held_title_tier >= tier_empire }
+            }
+        }
+    }
+
+    # b "Gather support first." The same faction, without the war; stage
+    # pending (T9 brings .038 Now or Never).
+    option = {
+        name = eotg_aug_kingpin.030.b
+        trigger = {
+            can_create_faction = {
+                type = claimant_faction
+                target = scope:eotg_kp_opponent
+            }
+        }
+        show_as_unavailable = { always = yes }
+        if = {
+            limit = { scope:eotg_kp_claim_path ?= flag:back_kp }
+            if = {
+                limit = { NOT = { scope:eotg_kp = { is_courtier_of = root } } }
+                add_courtier = scope:eotg_kp
+            }
+            scope:eotg_kp = { add_pressed_claim = scope:eotg_kp_target }
+            eotg_aug_kp_raise_claimant_effect = { CLAIMANT = scope:eotg_kp }
+        }
+        else = {
+            add_pressed_claim = scope:eotg_kp_target
+            eotg_aug_kp_raise_claimant_effect = { CLAIMANT = root }
+        }
+        hidden_effect = {
+            scope:eotg_kp_story = {
+                if = {
+                    limit = { scope:eotg_kp_claim_path ?= flag:back_kp }
+                    set_variable = { name = eotg_kp_path  value = flag:back_kp }
+                }
+                else = {
+                    set_variable = { name = eotg_kp_path  value = flag:own }
+                }
+                set_variable = { name = eotg_kp_target  value = scope:eotg_kp_target }
+                set_variable = { name = eotg_kp_opponent  value = scope:eotg_kp_opponent }
+            }
+        }
+        eotg_aug_kp_set_stage_effect = { STAGE = pending }
+        custom_tooltip = eotg_aug_kingpin.030.b.tt
+        ai_chance = {
+            base = 5
+            modifier = { add = 15  has_trait = ambitious }
+            modifier = { add = 10  has_trait = patient }
+            modifier = {
+                factor = 0
+                is_at_war = yes
+            }
+        }
+    }
+
+    # c "Walk away from it." Refusals +1, leverage +20; stage collab.
+    option = {
+        name = eotg_aug_kingpin.030.c
+        hidden_effect = {
+            remove_variable = claiming_title
+            scope:eotg_kp_story = { eotg_aug_kp_clear_claim_effect = yes }
+        }
+        eotg_aug_kp_refuse_effect = { RISK = 0 }
+        eotg_aug_kp_leverage_up_effect = { AMOUNT = 20 }
+        eotg_aug_kp_set_stage_effect = { STAGE = collab }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 15  has_trait = craven }
+        }
+    }
+}
+
+
+# ── eotg_aug_kingpin.031 ──────────────────────────────────────────────────────
+# The Neighbour's Seat. An independent ruler backs the boss's claim on the
+# weakest neighbouring independent ruler's primary title.
+# Caller: .003 b_indep (5-10 days).
+# a: vanilla claim_cb with claimant and target_title (PX effects.log:9881
+# start_war; common/casus_belli_types/00_claim.txt reads scope:claimant,
+# which must be the attacker's courtier or vassal, :305-316). The war is
+# found afterwards with random_character_war (V-K3, V-K7). If no war
+# started, the claim is withdrawn and the deal goes back to collab.
+# Signature: a moves the kingpin's pressure (+5); c moves it (refusal).
+
+eotg_aug_kingpin.031 = {
+    type = character_event
+    title = eotg_aug_kingpin.031.t
+    desc = {
+        desc = eotg_aug_kingpin.031.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_kp = { eotg_aug_pressure_storm = yes } }
+                desc = eotg_aug_kingpin.002.desc_band_storm
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_kp = { eotg_aug_pressure_fracture = yes } }
+                desc = eotg_aug_kingpin.002.desc_band_fracture
+            }
+            desc = eotg_aug_kingpin.002.desc_band_flicker
+        }
+    }
+    theme = war
+    override_background = { reference = eotg_bg_command_tent }
+
+    trigger = {
+        eotg_aug_kp_has_story = yes
+        eotg_aug_kp_root_is_independent = yes
+        any_neighboring_top_liege_realm_owner = { eotg_aug_kp_neighbour_target = { RULER = root } }
+    }
+
+    left_portrait = {
+        character = root
+        animation = war_attacker
+    }
+    right_portrait = {
+        character = scope:eotg_kp
+        animation = personality_bold
+    }
+    lower_right_portrait = {
+        trigger = { exists = scope:eotg_kp_rival }
+        character = scope:eotg_kp_rival
+    }
+
+    immediate = {
+        hidden_effect = {
+            eotg_aug_kp_save_scopes_effect = yes
+            ordered_neighboring_top_liege_realm_owner = {
+                limit = { eotg_aug_kp_neighbour_target = { RULER = root } }
+                order_by = {
+                    value = max_military_strength
+                    multiply = -1
+                }
+                save_scope_as = eotg_kp_rival
+            }
+            scope:eotg_kp_rival = {
+                save_scope_as = eotg_kp_opponent
+                primary_title = { save_scope_as = eotg_kp_target }
+            }
+        }
+    }
+
+    # a "Declare it." The boss is the claimant, in my court; claim_cb.
+    option = {
+        name = eotg_aug_kingpin.031.a
+        if = {
+            limit = { NOT = { scope:eotg_kp = { is_courtier_of = root } } }
+            add_courtier = scope:eotg_kp
+        }
+        scope:eotg_kp = { add_pressed_claim = scope:eotg_kp_target }
+        start_war = {
+            casus_belli = claim_cb
+            target = scope:eotg_kp_rival
+            claimant = scope:eotg_kp
+            target_title = scope:eotg_kp_target
+        }
+        # Verified (QA 2026-10-09, V-K3 / V-K7): vanilla starts a war with
+        # claimant and target_title and finds it the same effect with
+        # random_character_war (events/dlc/ep3/ep3_contract_events.txt:
+        # 4583-4598; events/activities/coronation_activity/
+        # coronation_events_6.txt:2940-2944).
+        random_character_war = {
+            limit = {
+                using_cb = claim_cb
+                primary_defender = scope:eotg_kp_rival
+            }
+            save_scope_as = eotg_kp_war
+        }
+        if = {
+            limit = { exists = scope:eotg_kp_war }
+            hidden_effect = {
+                scope:eotg_kp_story = {
+                    set_variable = { name = eotg_kp_path  value = flag:neighbour }
+                    set_variable = { name = eotg_kp_rival  value = scope:eotg_kp_rival }
+                }
+            }
+            eotg_aug_kp_war_started_effect = yes
+        }
+        else = {
+            # No war: the claim goes, the boss goes back below
+            send_interface_toast = {    # W3
+                type = event_toast_effect_neutral
+                title = eotg_aug_kingpin.031.toast_a_no_war
+                left_icon = root
+                right_icon = scope:eotg_kp
+            }
+            hidden_effect = {
+                scope:eotg_kp = {
+                    remove_claim = scope:eotg_kp_target
+                    if = {
+                        limit = { is_courtier_of = root }
+                        move_to_pool = yes
+                    }
+                }
+            }
+            eotg_aug_kp_set_stage_effect = { STAGE = collab }
+        }
+        ai_chance = {
+            base = 5
+            modifier = { add = 15  has_trait = ambitious }
+            modifier = { add = 10  has_trait = arrogant }
+            modifier = { add = 10  has_trait = deceitful }
+            modifier = {
+                factor = 0
+                is_at_war = yes
+            }
+            modifier = {
+                factor = 0.25
+                highest_held_title_tier <= tier_county
+                scope:eotg_kp_rival = { highest_held_title_tier >= tier_kingdom }
+            }
+        }
+    }
+
+    # b "Not yet." Collab; leverage +10.
+    option = {
+        name = eotg_aug_kingpin.031.b
+        eotg_aug_kp_set_stage_effect = { STAGE = collab }
+        eotg_aug_kp_leverage_up_effect = { AMOUNT = 10 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = patient }
+            modifier = { add = 10  has_trait = craven }
+        }
+    }
+
+    # c "Walk away." Refusals +1; leverage +20; collab.
+    option = {
+        name = eotg_aug_kingpin.031.c
+        eotg_aug_kp_refuse_effect = { RISK = 5 }
+        eotg_aug_kp_leverage_up_effect = { AMOUNT = 20 }
+        eotg_aug_kp_set_stage_effect = { STAGE = collab }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = content }
+            modifier = { add = 15  has_trait = just }
+        }
+    }
+}
+
+
+# ── eotg_aug_kingpin.032 ──────────────────────────────────────────────────────
+# The Vassal's Seat. An independent ruler hands the boss a landed vassal's
+# seat by decree: the independent ruler's civil war.
+# Caller: .003 c_indep (5-10 days).
+# The rival is the weakest eligible vassal (eotg_aug_kp_vassal_seat_target).
+# a: the seat goes by revocation (eotg_aug_kp_seat_transfer_effect, type
+# revoked); tyranny +40; the dispossessed takes vanilla revoked_title (-80,
+# common/opinion_modifiers/00_title_opinions.txt:26: the spec's -50 named
+# this modifier, so vanilla's value stands). Then the angriest vassal raises
+# a liberty faction (eotg_aug_kp_civil_war_effect): war at 100% for the
+# violence method or a hired crew, else 60%. War -> stage war, path
+# vassal_seat, the opponent is the faction leader. No war -> .069 (5).
+# b: bought out (type granted), no tyranny; the dispossessed is compensated
+# (+10, vanilla bribed_opinion); -> .069 (5).
+# Signature: a and c move the kingpin's pressure.
+
+eotg_aug_kingpin.032 = {
+    type = character_event
+    title = eotg_aug_kingpin.032.t
+    desc = {
+        desc = eotg_aug_kingpin.032.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_kp = { eotg_aug_pressure_storm = yes } }
+                desc = eotg_aug_kingpin.002.desc_band_storm
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_kp = { eotg_aug_pressure_fracture = yes } }
+                desc = eotg_aug_kingpin.002.desc_band_fracture
+            }
+            desc = eotg_aug_kingpin.002.desc_band_flicker
+        }
+    }
+    theme = realm
+    override_background = { reference = eotg_bg_council }
+
+    trigger = {
+        eotg_aug_kp_has_story = yes
+        eotg_aug_kp_root_is_independent = yes
+        any_vassal = { eotg_aug_kp_vassal_seat_target = { RULER = root } }
+    }
+
+    left_portrait = {
+        character = root
+        animation = personality_callous
+    }
+    right_portrait = {
+        character = scope:eotg_kp
+        animation = scheme
+    }
+    lower_right_portrait = {
+        trigger = { exists = scope:eotg_kp_rival }
+        character = scope:eotg_kp_rival
+    }
+
+    immediate = {
+        hidden_effect = {
+            eotg_aug_kp_save_scopes_effect = yes
+            ordered_vassal = {
+                limit = { eotg_aug_kp_vassal_seat_target = { RULER = root } }
+                order_by = {
+                    value = max_military_strength
+                    multiply = -1
+                }
+                save_scope_as = eotg_kp_rival
+            }
+            scope:eotg_kp_rival.primary_title = { save_scope_as = eotg_kp_target }
+        }
+    }
+
+    # a "Revoke it by decree."
+    option = {
+        name = eotg_aug_kingpin.032.a
+        eotg_aug_kp_seat_transfer_effect = { TYPE = revoked }
+        add_tyranny = 40
+        scope:eotg_kp_rival = {
+            add_opinion = {
+                modifier = revoked_title
+                target = root
+            }
+        }
+        hidden_effect = {
+            scope:eotg_kp_story = {
+                set_variable = { name = eotg_kp_path  value = flag:vassal_seat }
+                set_variable = { name = eotg_kp_target  value = scope:eotg_kp_target }
+                set_variable = { name = eotg_kp_rival  value = scope:eotg_kp_rival }
+            }
+        }
+        custom_tooltip = eotg_aug_kingpin.032.a.tt
+        if = {
+            limit = {
+                OR = {
+                    eotg_aug_kp_is = { AXIS = method  VALUE = violence }
+                    eotg_aug_kp_is = { AXIS = kind  VALUE = hired }
+                }
+            }
+            hidden_effect = { eotg_aug_kp_civil_war_effect = { WAR_CHANCE = 100 } }
+        }
+        else = {
+            hidden_effect = { eotg_aug_kp_civil_war_effect = { WAR_CHANCE = 60 } }
+        }
+        if = {
+            limit = { exists = scope:eotg_kp_war }
+            send_interface_toast = {    # W3
+                type = event_toast_effect_bad
+                title = eotg_aug_kingpin.032.toast_a_war
+                left_icon = root
+                right_icon = scope:eotg_kp_rebel
+            }
+            scope:eotg_kp_rebel = { save_scope_as = eotg_kp_opponent }
+            eotg_aug_kp_war_started_effect = yes
+        }
+        else = {
+            send_interface_toast = {    # W3
+                type = event_toast_effect_neutral
+                title = eotg_aug_kingpin.032.toast_a_no_war
+                left_icon = root
+                right_icon = scope:eotg_kp
+            }
+            hidden_effect = {
+                scope:eotg_kp = { eotg_add_fracture_risk = { AMOUNT = 5 } }
+            }
+            trigger_event = { id = eotg_aug_kingpin.069  days = 5 }
+        }
+        stress_impact = {
+            just = minor_stress_impact_gain
+            compassionate = minor_stress_impact_gain
+        }
+        ai_chance = {
+            base = 5
+            modifier = { add = 15  has_trait = arbitrary }
+            modifier = { add = 10  has_trait = callous }
+            modifier = { add = -5  has_trait = just }
+        }
+    }
+
+    # b "Buy [rival] out." Gold -major; the same transfer, no tyranny.
+    option = {
+        name = eotg_aug_kingpin.032.b
+        remove_short_term_gold = major_gold_value
+        eotg_aug_kp_seat_transfer_effect = { TYPE = granted }
+        scope:eotg_kp_rival = {
+            add_opinion = {
+                modifier = bribed_opinion
+                target = root
+                opinion = 10
+            }
+        }
+        hidden_effect = {
+            scope:eotg_kp_story = {
+                set_variable = { name = eotg_kp_path  value = flag:vassal_seat }
+                set_variable = { name = eotg_kp_target  value = scope:eotg_kp_target }
+                set_variable = { name = eotg_kp_rival  value = scope:eotg_kp_rival }
+            }
+        }
+        trigger_event = { id = eotg_aug_kingpin.069  days = 5 }
+        ai_chance = {
+            base = 10
+            modifier = { add = 15  has_trait = generous }
+            modifier = { add = 10  has_trait = diligent }
+        }
+    }
+
+    # c "Walk away." Refusals +1.
+    option = {
+        name = eotg_aug_kingpin.032.c
+        eotg_aug_kp_refuse_effect = { RISK = 5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = just }
+            modifier = { add = 15  has_trait = content }
+        }
+    }
+}
+
+
+# ── eotg_aug_kingpin.033 ──────────────────────────────────────────────────────
+# The War Below. The organization's war, by kind (spec §5.2.4): raids on the
+# enemy's stores (crew), an enemy officer for sale (syndicate), a
+# councillor's file (front), the crew wants a raise (hired).
+# Caller: the story's tick (T8, stage war, 60%).
+# Option keys: <letter>_<kind>; c (the boss in Storm) is shared.
+# V-K6: the officer is one of the opponent's knights (PX effects.log:8003
+# random_knight); buying them sends them to the pool (move_to_pool,
+# effects.log:5261). The option needs a knight to buy.
+# Signature: every variant moves the kingpin's pressure; the desc reads the
+# band.
+
+eotg_aug_kingpin.033 = {
+    type = character_event
+    title = eotg_aug_kingpin.033.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { eotg_aug_kp_is = { AXIS = kind  VALUE = crew } }
+                desc = eotg_aug_kingpin.033.desc_crew
+            }
+            triggered_desc = {
+                trigger = { eotg_aug_kp_is = { AXIS = kind  VALUE = syndicate } }
+                desc = eotg_aug_kingpin.033.desc_syndicate
+            }
+            triggered_desc = {
+                trigger = { eotg_aug_kp_is = { AXIS = kind  VALUE = front } }
+                desc = eotg_aug_kingpin.033.desc_front
+            }
+            desc = eotg_aug_kingpin.033.desc_hired
+        }
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_kp = { eotg_aug_pressure_storm = yes } }
+                desc = eotg_aug_kingpin.002.desc_band_storm
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_kp = { eotg_aug_pressure_fracture = yes } }
+                desc = eotg_aug_kingpin.002.desc_band_fracture
+            }
+            desc = eotg_aug_kingpin.002.desc_band_flicker
+        }
+    }
+    theme = war
+    override_background = { reference = eotg_bg_command_tent }
+
+    trigger = {
+        eotg_aug_kp_has_story = yes
+        any_owned_story = {
+            story_type = eotg_story_aug_kingpin
+            var:eotg_kp_stage = flag:war
+            exists = var:eotg_kp_opponent
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = war_attacker
+    }
+    right_portrait = {
+        character = scope:eotg_kp
+        animation = scheme
+    }
+    lower_right_portrait = {
+        trigger = { exists = scope:eotg_kp_opponent }
+        character = scope:eotg_kp_opponent
+    }
+
+    immediate = {
+        hidden_effect = {
+            eotg_aug_kp_save_scopes_effect = yes
+            if = {
+                limit = { eotg_aug_kp_is = { AXIS = kind  VALUE = syndicate } }
+                scope:eotg_kp_opponent ?= {
+                    random_knight = {
+                        limit = {
+                            is_ruler = no
+                            is_imprisoned = no
+                        }
+                        save_scope_as = eotg_kp_officer
+                    }
+                }
+            }
+            else_if = {
+                limit = { eotg_aug_kp_is = { AXIS = kind  VALUE = front } }
+                scope:eotg_kp_opponent ?= {
+                    random_councillor = {
+                        limit = { NOT = { this = root } }
+                        save_scope_as = eotg_kp_councillor
+                    }
+                }
+            }
+        }
+    }
+
+    # -- crew: "raid their stores" -----------------------------------------
+
+    # a_crew "Let them." Dread +10; kp +5.
+    option = {
+        name = eotg_aug_kingpin.033.a_crew
+        trigger = { eotg_aug_kp_is = { AXIS = kind  VALUE = crew } }
+        add_dread = 10
+        hidden_effect = {
+            scope:eotg_kp = { eotg_add_fracture_risk = { AMOUNT = 5 } }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = callous }
+            modifier = { add = 10  has_trait = wrathful }
+        }
+    }
+
+    # b_crew "Keep them on the front." kp -3.
+    option = {
+        name = eotg_aug_kingpin.033.b_crew
+        trigger = { eotg_aug_kp_is = { AXIS = kind  VALUE = crew } }
+        hidden_effect = {
+            scope:eotg_kp = { eotg_add_fracture_risk = { AMOUNT = -3 } }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = just }
+            modifier = { add = 10  has_trait = diligent }
+        }
+    }
+
+    # -- syndicate: "an enemy officer for sale" ----------------------------
+
+    # a_syndicate "Buy." Gold -medium; the officer leaves the opponent's
+    # service (to the pool).
+    option = {
+        name = eotg_aug_kingpin.033.a_syndicate
+        trigger = {
+            eotg_aug_kp_is = { AXIS = kind  VALUE = syndicate }
+            exists = scope:eotg_kp_officer
+        }
+        remove_short_term_gold = medium_gold_value
+        scope:eotg_kp_officer = { move_to_pool = yes }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = greedy }
+            modifier = { add = 15  has_trait = schemer }
+        }
+    }
+
+    # b_syndicate "No." kp +3.
+    option = {
+        name = eotg_aug_kingpin.033.b_syndicate
+        trigger = { eotg_aug_kp_is = { AXIS = kind  VALUE = syndicate } }
+        hidden_effect = {
+            scope:eotg_kp = { eotg_add_fracture_risk = { AMOUNT = 3 } }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = honest }
+            modifier = { add = 10  has_trait = just }
+        }
+    }
+
+    # -- front: "a councillor's file" --------------------------------------
+
+    # a_front "Keep the file." A weak hook on the opponent's councillor;
+    # kp +3.
+    option = {
+        name = eotg_aug_kingpin.033.a_front
+        trigger = {
+            eotg_aug_kp_is = { AXIS = kind  VALUE = front }
+            exists = scope:eotg_kp_councillor
+        }
+        add_hook = {
+            type = weak_blackmail_hook
+            target = scope:eotg_kp_councillor
+        }
+        hidden_effect = {
+            scope:eotg_kp = { eotg_add_fracture_risk = { AMOUNT = 3 } }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = schemer }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+
+    # b_front "Burn it." kp +3.
+    option = {
+        name = eotg_aug_kingpin.033.b_front
+        trigger = { eotg_aug_kp_is = { AXIS = kind  VALUE = front } }
+        hidden_effect = {
+            scope:eotg_kp = { eotg_add_fracture_risk = { AMOUNT = 3 } }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = honest }
+            modifier = { add = 10  has_trait = just }
+        }
+    }
+
+    # -- hired: "the crew wants a raise" -----------------------------------
+
+    # a_hired "Pay." Gold -medium; leverage +5.
+    option = {
+        name = eotg_aug_kingpin.033.a_hired
+        trigger = { eotg_aug_kp_is = { AXIS = kind  VALUE = hired } }
+        remove_short_term_gold = medium_gold_value
+        eotg_aug_kp_leverage_up_effect = { AMOUNT = 5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = generous }
+            modifier = { add = 10  has_trait = craven }
+        }
+    }
+
+    # b_hired "Not mid-war." Leverage -10; kp +5.
+    option = {
+        name = eotg_aug_kingpin.033.b_hired
+        trigger = { eotg_aug_kp_is = { AXIS = kind  VALUE = hired } }
+        eotg_aug_kp_leverage_down_effect = { AMOUNT = 10 }
+        hidden_effect = {
+            scope:eotg_kp = { eotg_add_fracture_risk = { AMOUNT = 5 } }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = greedy }
+            modifier = { add = 15  has_trait = stubborn }
+        }
+    }
+
+    # c [the boss in Storm] "Keep [kp] away from the line." Calmed +1;
+    # kp -5.
+    option = {
+        name = eotg_aug_kingpin.033.c
+        trigger = { scope:eotg_kp = { eotg_aug_pressure_storm = yes } }
+        eotg_aug_kp_calm_effect = { RISK = 5 }
+        custom_tooltip = eotg_aug_kingpin.033.c.tt
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = compassionate }
+            modifier = { add = 10  has_trait = patient }
+        }
+    }
+}
+
+
+# ── eotg_aug_kingpin.034 ──────────────────────────────────────────────────────
+# Turned Guns. The hired crew turns on the ruler mid-war.
+# Caller: the story's tick (T8: hired, and leverage < 30 or the purge mind).
+# b, and c on a failed duel, run eotg_aug_kp_guns_turned_effect: the
+# opponent gets the crew's levies and the boss (unless landed) moves to the
+# opponent's court. Correction to the spec: vanilla's claimant_faction_war
+# does NOT invalidate when its claimant changes court (common/
+# casus_belli_types/00_civil_war.txt:980-991 checks only that the claimant
+# lives and the faction holds the title), so on the back_kp path the effect
+# ends the war as a defender win (end_war, PX effects.log:13682). claim_cb
+# (neighbour) invalidates by itself when the claimant leaves the attacker's
+# court (00_claim.txt:305-316). Both then resolve through M3 to .065.
+# Signature: every option moves the kingpin's pressure (b and c in the
+# effect).
+
+eotg_aug_kingpin.034 = {
+    type = character_event
+    title = eotg_aug_kingpin.034.t
+    desc = {
+        desc = eotg_aug_kingpin.034.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_kp = { eotg_aug_pressure_storm = yes } }
+                desc = eotg_aug_kingpin.002.desc_band_storm
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_kp = { eotg_aug_pressure_fracture = yes } }
+                desc = eotg_aug_kingpin.002.desc_band_fracture
+            }
+            desc = eotg_aug_kingpin.002.desc_band_flicker
+        }
+    }
+    theme = war
+    override_background = { reference = eotg_bg_field_camp }
+
+    trigger = {
+        eotg_aug_kp_has_story = yes
+        any_owned_story = {
+            story_type = eotg_story_aug_kingpin
+            var:eotg_kp_stage = flag:war
+            exists = var:eotg_kp_opponent
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = anger
+    }
+    right_portrait = {
+        character = scope:eotg_kp
+        animation = threatening
+    }
+
+    immediate = {
+        hidden_effect = {
+            eotg_aug_kp_save_scopes_effect = yes
+        }
+    }
+
+    # a "Outbid the other side." Gold -major; kp +5.
+    option = {
+        name = eotg_aug_kingpin.034.a
+        remove_short_term_gold = major_gold_value
+        hidden_effect = {
+            scope:eotg_kp = { eotg_add_fracture_risk = { AMOUNT = 5 } }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = greedy }
+            modifier = { add = 15  has_trait = ambitious }
+        }
+    }
+
+    # b "Let them go." The guns go to the other side.
+    option = {
+        name = eotg_aug_kingpin.034.b
+        eotg_aug_kp_guns_turned_effect = yes
+        ai_chance = {
+            base = 20
+            modifier = { add = 15  has_trait = content }
+            modifier = { add = 15  has_trait = craven }
+        }
+    }
+
+    # c [brave] "Meet them at the hangar first." Prowess against the boss:
+    # success, the boss dies and the war goes on; failure, the ruler is
+    # wounded and the guns turn anyway. Duel shape: vanilla events/
+    # activities/chariot_race_activity/chariot_ongoing_events_jp.txt:195.
+    option = {
+        name = eotg_aug_kingpin.034.c
+        trigger = { has_trait = brave }
+        trait = brave
+        add_internal_flag = dangerous
+        duel = {
+            skill = prowess
+            target = scope:eotg_kp
+            50 = {
+                desc = eotg_aug_kingpin.034.c.success
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = 3.5
+                    min = -49
+                }
+                send_interface_toast = {    # W3
+                    type = event_toast_effect_good
+                    title = eotg_aug_kingpin.034.toast_c_success
+                    left_icon = root
+                    right_icon = scope:eotg_kp
+                }
+                scope:eotg_kp = {
+                    death = {
+                        death_reason = death_battle
+                        killer = root
+                    }
+                }
+            }
+            50 = {
+                desc = eotg_aug_kingpin.034.c.failure
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = -3.5
+                    min = -49
+                }
+                send_interface_toast = {    # W3
+                    type = event_toast_effect_bad
+                    title = eotg_aug_kingpin.034.toast_c_failure
+                    left_icon = root
+                    right_icon = scope:eotg_kp
+                }
+                increase_wounds_effect = { REASON = fight }
+                eotg_aug_kp_guns_turned_effect = yes
+            }
+        }
+        stress_impact = {
+            brave = minor_stress_impact_loss
+            craven = medium_stress_impact_gain
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = brave }
+            modifier = { add = 10  has_trait = wrathful }
+        }
+    }
+}
+
+
+# ── eotg_aug_kingpin.036 ──────────────────────────────────────────────────────
+# The Partner's Price. The ruler took the liege's seat on the own path; the
+# boss comes to collect.
+# Caller: the story's maintenance (M3: own path, the owner holds the target).
+# immediate sets the leaf guard (spec §3: every leaf and .036) and resets
+# the refusals (spec §5.4: reset by .036).
+# Signature: the desc reads the band.
+
+eotg_aug_kingpin.036 = {
+    type = character_event
+    title = eotg_aug_kingpin.036.t
+    desc = {
+        desc = eotg_aug_kingpin.036.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_kp = { eotg_aug_pressure_storm = yes } }
+                desc = eotg_aug_kingpin.002.desc_band_storm
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_kp = { eotg_aug_pressure_fracture = yes } }
+                desc = eotg_aug_kingpin.002.desc_band_fracture
+            }
+            desc = eotg_aug_kingpin.002.desc_band_flicker
+        }
+    }
+    theme = intrigue
+    override_background = { reference = eotg_bg_council }
+
+    trigger = {
+        eotg_aug_kp_has_story = yes
+    }
+
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+    right_portrait = {
+        character = scope:eotg_kp
+        animation = personality_bold
+    }
+
+    immediate = {
+        hidden_effect = {
+            eotg_aug_kp_save_scopes_effect = yes
+            eotg_aug_kp_leaf_open_effect = yes
+            scope:eotg_kp_story = { set_variable = { name = eotg_kp_refusals  value = 0 } }
+        }
+    }
+
+    # a [a county to give] "A Region of your own." -> .069 L10
+    option = {
+        name = eotg_aug_kingpin.036.a
+        trigger = {
+            any_held_title = { eotg_aug_kp_seizable_county = { RULER = root } }
+        }
+        custom_tooltip = eotg_aug_kingpin.036.a.tt
+        trigger_event = { id = eotg_aug_kingpin.069  days = 1 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = generous }
+            modifier = { add = 15  has_trait = honest }
+        }
+    }
+
+    # b "A seat at my court." -> .070 L11
+    option = {
+        name = eotg_aug_kingpin.036.b
+        custom_tooltip = eotg_aug_kingpin.036.b.tt
+        trigger_event = { id = eotg_aug_kingpin.070  days = 1 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = schemer }
+            modifier = { add = 10  has_trait = paranoid }
+        }
+    }
+
+    # c "Loose ends." Intrigue against the boss: success -> .064 L5;
+    # failure -> .067 L8 (5-10 days).
+    option = {
+        name = eotg_aug_kingpin.036.c
+        add_internal_flag = dangerous
+        duel = {
+            skill = intrigue
+            target = scope:eotg_kp
+            50 = {
+                desc = eotg_aug_kingpin.036.c.success
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = 3.5
+                    min = -49
+                }
+                send_interface_toast = {    # W3
+                    type = event_toast_effect_good
+                    title = eotg_aug_kingpin.036.toast_c_success
+                    left_icon = root
+                    right_icon = scope:eotg_kp
+                }
+                trigger_event = { id = eotg_aug_kingpin.064  days = 1 }
+            }
+            50 = {
+                desc = eotg_aug_kingpin.036.c.failure
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = -3.5
+                    min = -49
+                }
+                send_interface_toast = {    # W3
+                    type = event_toast_effect_bad
+                    title = eotg_aug_kingpin.036.toast_c_failure
+                    left_icon = root
+                    right_icon = scope:eotg_kp
+                }
+                trigger_event = { id = eotg_aug_kingpin.067  days = { 5 10 } }
+            }
+        }
+        stress_impact = {
+            honest = minor_stress_impact_gain
+            compassionate = minor_stress_impact_gain
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = callous }
+            modifier = { add = 15  has_trait = deceitful }
+            modifier = { add = -15  has_trait = honest }
+        }
+    }
+
+    # d "You've been paid enough." -> .067 L8 (10-30 days)
+    option = {
+        name = eotg_aug_kingpin.036.d
+        custom_tooltip = eotg_aug_kingpin.036.d.tt
+        trigger_event = { id = eotg_aug_kingpin.067  days = { 10 30 } }
+        ai_chance = {
+            base = 20
+            modifier = { add = 15  has_trait = greedy }
+            modifier = { add = 15  has_trait = arrogant }
+        }
+    }
+}
+
+
+# ── eotg_aug_kingpin.038 ──────────────────────────────────────────────────────
+# Now or Never. The faction is raised and waiting.
+# Caller: the story's tick (T9, stage pending).
+# immediate: 20% the liege learns of it (scope value eotg_kp_discovered):
+# then only c shows (.desc_discovered), and the faction is ended.
+# Signature: a moves the kingpin's pressure (+5, war started); b moves it
+# (refusal).
+
+eotg_aug_kingpin.038 = {
+    type = character_event
+    title = eotg_aug_kingpin.038.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { exists = scope:eotg_kp_discovered }
+                desc = eotg_aug_kingpin.038.desc_discovered
+            }
+            desc = eotg_aug_kingpin.038.desc
+        }
+    }
+    theme = war
+    override_background = { reference = eotg_bg_command_tent }
+
+    trigger = {
+        eotg_aug_kp_has_story = yes
+        any_owned_story = {
+            story_type = eotg_story_aug_kingpin
+            var:eotg_kp_stage = flag:pending
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = thinking
+    }
+    right_portrait = {
+        character = scope:eotg_kp
+        animation = scheme
+    }
+    lower_right_portrait = {
+        trigger = { exists = scope:eotg_kp_opponent }
+        character = scope:eotg_kp_opponent
+    }
+
+    immediate = {
+        hidden_effect = {
+            eotg_aug_kp_save_scopes_effect = yes
+            if = {
+                limit = {
+                    exists = joined_faction
+                    exists = scope:eotg_kp_target
+                    joined_faction = {
+                        faction_is_type = claimant_faction
+                        special_title ?= scope:eotg_kp_target
+                    }
+                }
+                joined_faction = { save_scope_as = eotg_kp_faction }
+            }
+            random = {
+                chance = 20
+                save_scope_value_as = { name = eotg_kp_discovered  value = yes }
+            }
+        }
+    }
+
+    # a "Strike." The faction's war; stage war.
+    option = {
+        name = eotg_aug_kingpin.038.a
+        trigger = {
+            NOT = { exists = scope:eotg_kp_discovered }
+            exists = scope:eotg_kp_faction
+            exists = scope:eotg_kp_opponent
+            scope:eotg_kp_faction = { faction_is_at_war = no }
+        }
+        scope:eotg_kp_faction = { faction_start_war = {} }
+        if = {
+            limit = { scope:eotg_kp_faction = { faction_is_at_war = yes } }
+            scope:eotg_kp_faction.faction_war = { save_scope_as = eotg_kp_war }
+            eotg_aug_kp_war_started_effect = yes
+        }
+        custom_tooltip = eotg_aug_kingpin.038.a.tt
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = ambitious }
+            modifier = { add = 15  has_trait = brave }
+            modifier = {
+                factor = 0
+                is_at_war = yes
+            }
+        }
+    }
+
+    # b "Disband it." The faction goes; refusals +1; leverage +10; collab.
+    option = {
+        name = eotg_aug_kingpin.038.b
+        trigger = { NOT = { exists = scope:eotg_kp_discovered } }
+        eotg_aug_kp_end_claim_effect = yes
+        eotg_aug_kp_refuse_effect = { RISK = 5 }
+        eotg_aug_kp_leverage_up_effect = { AMOUNT = 10 }
+        hidden_effect = {
+            scope:eotg_kp = {
+                if = {
+                    limit = { is_courtier_of = root }
+                    move_to_pool = yes
+                }
+            }
+            scope:eotg_kp_story = { eotg_aug_kp_clear_claim_effect = yes }
+        }
+        eotg_aug_kp_set_stage_effect = { STAGE = collab }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = craven }
+            modifier = { add = 15  has_trait = content }
+        }
+    }
+
+    # c [discovered] "Then it's done." The faction ends; -> .067 L8.
+    option = {
+        name = eotg_aug_kingpin.038.c
+        trigger = { exists = scope:eotg_kp_discovered }
+        eotg_aug_kp_end_claim_effect = yes
+        custom_tooltip = eotg_aug_kingpin.038.c.tt
+        trigger_event = { id = eotg_aug_kingpin.067  days = { 5 15 } }
+        ai_chance = {
+            base = 30
+        }
+    }
+}
+
+
+# ── eotg_aug_kingpin.039 ──────────────────────────────────────────────────────
+# Word From the Docks. The player liege hears that an AI vassal's war came
+# up from below, with the boss behind it (spec §5.7).
+# Caller: eotg_aug_kp_war_started_effect (.030 a, .038 a, and the other war
+# starts), fired on a player opponent when the claim ruler is an AI, 3-10
+# days. Root is the opponent, not the story's owner: the scopes come from
+# the caller (eotg_kp, eotg_kp_story, eotg_kp_owner), so this event never
+# runs eotg_aug_kp_save_scopes_effect.
+# Band lines: the .001 keys (report-style, orchestrator ruling 2026-10-06).
+# Signature: the desc reads the band; b moves it.
+
+eotg_aug_kingpin.039 = {
+    type = character_event
+    title = eotg_aug_kingpin.039.t
+    desc = {
+        desc = eotg_aug_kingpin.039.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_kp = { eotg_aug_pressure_storm = yes } }
+                desc = eotg_aug_kingpin.001.desc_band_storm
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_kp = { eotg_aug_pressure_fracture = yes } }
+                desc = eotg_aug_kingpin.001.desc_band_fracture
+            }
+            desc = eotg_aug_kingpin.001.desc_band_flicker
+        }
+    }
+    theme = war
+    override_background = { reference = eotg_bg_office }
+
+    trigger = {
+        exists = scope:eotg_kp
+        scope:eotg_kp = { is_alive = yes }
+        exists = scope:eotg_kp_owner
+    }
+
+    left_portrait = {
+        character = root
+        animation = war_defender
+    }
+    right_portrait = {
+        character = scope:eotg_kp_owner
+        animation = war_attacker
+    }
+    lower_right_portrait = {
+        character = scope:eotg_kp
+    }
+
+    # a "Noted."
+    option = {
+        name = eotg_aug_kingpin.039.a
+        ai_chance = {
+            base = 30
+            modifier = { add = 10  has_trait = calm }
+            modifier = { add = 10  has_trait = lazy }
+        }
+    }
+
+    # b "Put a bounty on [kp]." Gold -minor; kp +5 (the hunt).
+    option = {
+        name = eotg_aug_kingpin.039.b
+        remove_short_term_gold = minor_gold_value
+        hidden_effect = {
+            scope:eotg_kp = { eotg_add_fracture_risk = { AMOUNT = 5 } }
+        }
+        custom_tooltip = eotg_aug_kingpin.039.b.tt
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = vengeful }
+            modifier = { add = 15  has_trait = wrathful }
+        }
+    }
+}
+
+
 # ── eotg_aug_kingpin.040 ──────────────────────────────────────────────────────
 # The Inheritance. The heir learns what they inherited (owner ruling Q2;
 # spec §5.4.1).
@@ -2788,6 +4259,165 @@ eotg_aug_kingpin.040 = {
                 limit = { scope:eotg_kp_story ?= { has_variable = eotg_kp_inherited } }
                 scope:eotg_kp_story = { remove_variable = eotg_kp_inherited }
             }
+        }
+    }
+}
+
+
+# ── eotg_aug_kingpin.050 ──────────────────────────────────────────────────────
+# The Orders. In the kept stage the boss stops asking and sends orders. Four
+# order types, all acts the ruler performs (spec §5.8 .050; lore review
+# §7.4: the hold is hooks, money and fear; the boss's implant never acts on
+# the ruler):
+#   show    (mind grandeur)               public honours for the boss
+#   name    (mind purge, a courtier to name) an arrest the ruler orders
+#   march   (method violence)             a show of force the ruler stages
+#                                         with their own levies
+#   squeeze (otherwise)                   money
+# The type rides as the scope value eotg_kp_order. A purge mind with nobody
+# to name falls through to the march or the squeeze.
+# Caller: the story's tick (T7, stage kept, leverage 40+, 70%).
+# c: a refusal; at two or more the boss answers (.068 in Storm, else .067),
+# 10-30 days.
+# Signature: every option moves the kingpin's pressure.
+
+eotg_aug_kingpin.050 = {
+    type = character_event
+    title = eotg_aug_kingpin.050.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_kp_order ?= flag:show }
+                desc = eotg_aug_kingpin.050.desc_show
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_kp_order ?= flag:name }
+                desc = eotg_aug_kingpin.050.desc_name
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_kp_order ?= flag:march }
+                desc = eotg_aug_kingpin.050.desc_march
+            }
+            desc = eotg_aug_kingpin.050.desc_squeeze
+        }
+    }
+    theme = dread
+    override_background = { reference = eotg_bg_council }
+
+    trigger = {
+        eotg_aug_kp_has_story = yes
+        any_owned_story = {
+            story_type = eotg_story_aug_kingpin
+            var:eotg_kp_stage = flag:kept
+        }
+    }
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+    right_portrait = {
+        character = scope:eotg_kp
+        animation = dismissal
+    }
+    lower_right_portrait = {
+        trigger = { exists = scope:eotg_kp_order_target }
+        character = scope:eotg_kp_order_target
+    }
+
+    immediate = {
+        hidden_effect = {
+            eotg_aug_kp_save_scopes_effect = yes
+            if = {
+                limit = { eotg_aug_kp_is = { AXIS = mind  VALUE = grandeur } }
+                save_scope_value_as = { name = eotg_kp_order  value = flag:show }
+            }
+            else_if = {
+                limit = {
+                    eotg_aug_kp_is = { AXIS = mind  VALUE = purge }
+                    any_courtier = { eotg_aug_kp_purge_target = { RULER = root } }
+                }
+                random_courtier = {
+                    limit = { eotg_aug_kp_purge_target = { RULER = root } }
+                    save_scope_as = eotg_kp_order_target
+                }
+                save_scope_value_as = { name = eotg_kp_order  value = flag:name }
+            }
+            else_if = {
+                limit = { eotg_aug_kp_is = { AXIS = method  VALUE = violence } }
+                save_scope_value_as = { name = eotg_kp_order  value = flag:march }
+            }
+            else = {
+                save_scope_value_as = { name = eotg_kp_order  value = flag:squeeze }
+            }
+        }
+    }
+
+    # a "Do as [kp] says." The order (eotg_aug_kp_obey_order_effect);
+    # leverage +5.
+    option = {
+        name = eotg_aug_kingpin.050.a
+        eotg_aug_kp_obey_order_effect = yes
+        eotg_aug_kp_leverage_up_effect = { AMOUNT = 5 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = craven }
+            modifier = { add = 10  has_trait = content }
+        }
+    }
+
+    # b "Stall." kp +10; leverage -10.
+    option = {
+        name = eotg_aug_kingpin.050.b
+        hidden_effect = {
+            scope:eotg_kp = { eotg_add_fracture_risk = { AMOUNT = 10 } }
+        }
+        eotg_aug_kp_leverage_down_effect = { AMOUNT = 10 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = patient }
+            modifier = { add = 10  has_trait = deceitful }
+        }
+    }
+
+    # c "Not this one." Refusals +1; at two or more, the boss answers.
+    option = {
+        name = eotg_aug_kingpin.050.c
+        eotg_aug_kp_refuse_effect = { RISK = 5 }
+        custom_tooltip = eotg_aug_kingpin.050.c.tt
+        hidden_effect = {
+            if = {
+                limit = { scope:eotg_kp_story.var:eotg_kp_refusals >= 2 }
+                if = {
+                    limit = { scope:eotg_kp = { eotg_aug_pressure_storm = yes } }
+                    trigger_event = { id = eotg_aug_kingpin.068  days = { 10 30 } }
+                }
+                else = {
+                    trigger_event = { id = eotg_aug_kingpin.067  days = { 10 30 } }
+                }
+            }
+        }
+        ai_chance = {
+            base = 20
+            modifier = { add = 15  has_trait = stubborn }
+            modifier = { add = 15  has_trait = brave }
+        }
+    }
+
+    # d [the ruler Neurofractured] "Do what mine already has me doing." As a,
+    # with the ruler's own pressure +5 and leverage -5 (in place of +5).
+    option = {
+        name = eotg_aug_kingpin.050.d
+        trigger = { has_trait = eotg_neurofractured }
+        eotg_aug_kp_obey_order_effect = yes
+        eotg_aug_kp_leverage_down_effect = { AMOUNT = 5 }
+        hidden_effect = {
+            eotg_add_fracture_risk = { AMOUNT = 5 }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = eccentric }
+            modifier = { add = 10  has_trait = callous }
         }
     }
 }
@@ -3114,17 +4744,787 @@ eotg_aug_kingpin.062 = {
 }
 
 
+# ── eotg_aug_kingpin.063 ── L4 Kingmaker ─────────────────────────────────────
+# The boss won the seat and remembers friends.
+# Caller: the story's maintenance (M3: back_kp or neighbour, the boss holds
+#   the target).
+# Vassal (back_kp): the boss is the ruler's liege now. Gold major (x1.5
+# grandeur); a non-capital county from the boss's demesne, granted (vanilla
+# granted change, as eotg_aug_kp_grant_county_effect), else a second gold
+# major; the kingmaker opinion (+50, decaying over 20 years); a mutual major
+# crime hook. Purge mind: 30% the boss pays half and keeps a strong
+# blackmail hook on the ruler instead of the mutual hook (.desc_purge_half;
+# rolled in immediate as the scope value eotg_kp_purge_half).
+# Independent (neighbour): the boss holds the conquered title. Vanilla
+# claim_cb makes a courtier claimant the attacker's vassal only when the won
+# title is below the attacker's tier (common/casus_belli_types/00_claim.txt
+# on_victory, about :545-558, change_liege); otherwise the boss rules it
+# independently. The spec's "root's vassal" holds only in the first case, so
+# .desc_indep is written true for both. The same opinion and hook; prestige
+# major.
+# Syndicate kind: a text-only break with the syndicate (.desc_syndicate;
+# lore review item 1).
+# From here the Neurofractured ruler content runs on the landed boss.
+
+eotg_aug_kingpin.063 = {
+    type = character_event
+    title = eotg_aug_kingpin.063.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_kp_story.var:eotg_kp_path ?= flag:neighbour }
+                desc = eotg_aug_kingpin.063.desc_indep
+            }
+            desc = eotg_aug_kingpin.063.desc
+        }
+        first_valid = {
+            triggered_desc = {
+                trigger = { exists = scope:eotg_kp_purge_half }
+                desc = eotg_aug_kingpin.063.desc_purge_half
+            }
+        }
+        first_valid = {
+            triggered_desc = {
+                trigger = { eotg_aug_kp_is = { AXIS = kind  VALUE = syndicate } }
+                desc = eotg_aug_kingpin.063.desc_syndicate
+            }
+        }
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_kp = { eotg_aug_pressure_storm = yes } }
+                desc = eotg_aug_kingpin.063.desc_end_storm
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_kp = { eotg_aug_pressure_fracture = yes } }
+                desc = eotg_aug_kingpin.063.desc_end_fracture
+            }
+            desc = eotg_aug_kingpin.063.desc_end_flicker
+        }
+    }
+    theme = realm
+    override_background = { reference = eotg_bg_council }
+
+    trigger = {
+        eotg_aug_kp_has_story = yes
+    }
+
+    left_portrait = {
+        character = root
+        animation = happiness
+    }
+    right_portrait = {
+        character = scope:eotg_kp
+        animation = war_over_win
+    }
+
+    immediate = {
+        hidden_effect = {
+            eotg_aug_kp_save_scopes_effect = yes
+            eotg_aug_kp_leaf_open_effect = yes
+            if = {
+                limit = {
+                    scope:eotg_kp_story.var:eotg_kp_path ?= flag:back_kp
+                    eotg_aug_kp_is = { AXIS = mind  VALUE = purge }
+                }
+                random = {
+                    chance = 30
+                    save_scope_value_as = { name = eotg_kp_purge_half  value = yes }
+                }
+            }
+            # The county the new liege can spare: a non-capital county of the
+            # boss's own demesne
+            if = {
+                limit = { scope:eotg_kp_story.var:eotg_kp_path ?= flag:back_kp }
+                scope:eotg_kp = {
+                    ordered_held_title = {
+                        limit = {
+                            tier = tier_county
+                            NOT = { this = scope:eotg_kp.capital_county }
+                        }
+                        order_by = { value = development_level  multiply = -1 }
+                        save_scope_as = eotg_kp_gift_county
+                    }
+                }
+            }
+        }
+    }
+
+    # a "A seat for a seat. Pay me what I am owed." (single option)
+    option = {
+        name = eotg_aug_kingpin.063.a
+        if = {
+            limit = { scope:eotg_kp_story.var:eotg_kp_path ?= flag:neighbour }
+            add_prestige = major_prestige_value
+            if = {
+                limit = {
+                    NOT = { has_hook_of_type = { target = scope:eotg_kp  type = major_crime_accomplice_hook } }
+                }
+                add_hook = {
+                    type = major_crime_accomplice_hook
+                    target = scope:eotg_kp
+                }
+            }
+            scope:eotg_kp = {
+                if = {
+                    limit = {
+                        NOT = { has_hook_of_type = { target = root  type = major_crime_accomplice_hook } }
+                    }
+                    add_hook = {
+                        type = major_crime_accomplice_hook
+                        target = root
+                    }
+                }
+            }
+        }
+        else = {
+            # The gold: major, x1.5 grandeur, halved by the purge mind's roll
+            if = {
+                limit = { exists = scope:eotg_kp_purge_half }
+                add_gold = {
+                    value = major_gold_value
+                    multiply = 0.5
+                }
+            }
+            else_if = {
+                limit = { eotg_aug_kp_is = { AXIS = mind  VALUE = grandeur } }
+                add_gold = {
+                    value = major_gold_value
+                    multiply = 1.5
+                }
+            }
+            else = {
+                add_gold = major_gold_value
+            }
+            # The county, else a second payment
+            if = {
+                limit = { exists = scope:eotg_kp_gift_county }
+                create_title_and_vassal_change = {
+                    type = granted
+                    save_scope_as = eotg_kp_change
+                    add_claim_on_loss = no
+                }
+                scope:eotg_kp_gift_county = {
+                    change_title_holder = {
+                        holder = root
+                        change = scope:eotg_kp_change
+                    }
+                }
+                resolve_title_and_vassal_change = scope:eotg_kp_change
+            }
+            else = {
+                add_gold = major_gold_value
+            }
+            # The hold: the purge mind keeps a file, everyone else shares one
+            if = {
+                limit = { exists = scope:eotg_kp_purge_half }
+                scope:eotg_kp = {
+                    add_hook = {
+                        type = strong_blackmail_hook
+                        target = root
+                    }
+                }
+            }
+            else = {
+                if = {
+                    limit = {
+                        NOT = { has_hook_of_type = { target = scope:eotg_kp  type = major_crime_accomplice_hook } }
+                    }
+                    add_hook = {
+                        type = major_crime_accomplice_hook
+                        target = scope:eotg_kp
+                    }
+                }
+                scope:eotg_kp = {
+                    if = {
+                        limit = {
+                            NOT = { has_hook_of_type = { target = root  type = major_crime_accomplice_hook } }
+                        }
+                        add_hook = {
+                            type = major_crime_accomplice_hook
+                            target = root
+                        }
+                    }
+                }
+            }
+        }
+        scope:eotg_kp = {
+            add_opinion = {
+                modifier = eotg_opinion_aug_kp_kingmaker
+                target = root
+            }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 10  has_trait = greedy }
+            modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+
+    after = {
+        eotg_aug_kp_end_effect = yes
+    }
+}
+
+
+# ── eotg_aug_kingpin.064 ── L5 Before the Bill Came ──────────────────────────
+# The ruler took the liege's seat and had the partner killed before the bill
+# came.
+# Caller: .036 c (success).
+# The murder secret: vanilla secret_murder (common/secret_types/
+# 00_secret_types.txt:326), added the way vanilla adds murder secrets
+# (add_secret = { type target }, events/activities/chariot_race_activity/
+# chariot_race_ongoing_events.txt:4624-4627). V-K5.
+# Music: mx_cue_murder (event_quality_v1 W3; music/in_game/music.txt:372).
+
+eotg_aug_kingpin.064 = {
+    type = character_event
+    title = eotg_aug_kingpin.064.t
+    desc = {
+        desc = eotg_aug_kingpin.064.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_kp = { eotg_aug_pressure_storm = yes } }
+                desc = eotg_aug_kingpin.064.desc_end_storm
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_kp = { eotg_aug_pressure_fracture = yes } }
+                desc = eotg_aug_kingpin.064.desc_end_fracture
+            }
+            desc = eotg_aug_kingpin.064.desc_end_flicker
+        }
+    }
+    theme = intrigue
+    override_background = { reference = eotg_bg_corridor_night }
+
+    trigger = {
+        eotg_aug_kp_has_story = yes
+    }
+
+    left_portrait = {
+        character = root
+        animation = schadenfreude
+    }
+    right_portrait = {
+        character = scope:eotg_kp
+        animation = fear
+    }
+
+    immediate = {
+        play_music_cue = "mx_cue_murder"
+        hidden_effect = {
+            eotg_aug_kp_save_scopes_effect = yes
+            eotg_aug_kp_leaf_open_effect = yes
+        }
+    }
+
+    # a "No partners. No bill."
+    option = {
+        name = eotg_aug_kingpin.064.a
+        add_secret = {
+            type = secret_murder
+            target = scope:eotg_kp
+        }
+        scope:eotg_kp = {
+            death = {
+                death_reason = death_murder
+                killer = root
+            }
+        }
+        add_dread = 10
+        add_gold = minor_gold_value
+        ai_chance = {
+            base = 30
+            modifier = { add = 10  has_trait = callous }
+            modifier = { add = 10  has_trait = deceitful }
+        }
+    }
+
+    after = {
+        eotg_aug_kp_end_effect = yes
+    }
+}
+
+
+# ── eotg_aug_kingpin.065 ── L6 Sold to the Winner ────────────────────────────
+# The war is lost, and the boss sells the ruler to the winner.
+# Callers: the story's maintenance (M3: lost, white peace, or invalidated;
+#   includes .034 b's turned guns).
+# Vassal (own or back_kp): the boss moves to the old liege's court; the liege
+# takes a strong blackmail hook on the ruler; the boss's fee (gold -medium);
+# exposed (10 years). Independent (neighbour): the boss moves to the rival's
+# court; the rival presses a claim on one of the ruler's non-capital counties
+# (none: the fee, gold -medium). Vanilla's own war-loss effects have already
+# applied. If the opponent is gone, the boss goes back below (the pool).
+
+eotg_aug_kingpin.065 = {
+    type = character_event
+    title = eotg_aug_kingpin.065.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_kp_story.var:eotg_kp_path ?= flag:neighbour }
+                desc = eotg_aug_kingpin.065.desc_indep
+            }
+            desc = eotg_aug_kingpin.065.desc
+        }
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_kp = { eotg_aug_pressure_storm = yes } }
+                desc = eotg_aug_kingpin.065.desc_end_storm
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_kp = { eotg_aug_pressure_fracture = yes } }
+                desc = eotg_aug_kingpin.065.desc_end_fracture
+            }
+            desc = eotg_aug_kingpin.065.desc_end_flicker
+        }
+    }
+    theme = war
+    override_background = { reference = eotg_bg_command_tent }
+
+    trigger = {
+        eotg_aug_kp_has_story = yes
+    }
+
+    left_portrait = {
+        character = root
+        animation = war_over_loss
+    }
+    right_portrait = {
+        character = scope:eotg_kp
+        animation = schadenfreude
+    }
+    lower_right_portrait = {
+        trigger = {
+            exists = scope:eotg_kp_opponent
+            scope:eotg_kp_opponent = { is_alive = yes }
+        }
+        character = scope:eotg_kp_opponent
+    }
+
+    immediate = {
+        hidden_effect = {
+            eotg_aug_kp_save_scopes_effect = yes
+            eotg_aug_kp_leaf_open_effect = yes
+            if = {
+                limit = { scope:eotg_kp_story.var:eotg_kp_path ?= flag:neighbour }
+                random_held_title = {
+                    limit = { eotg_aug_kp_seizable_county = { RULER = root } }
+                    save_scope_as = eotg_kp_county
+                }
+            }
+        }
+    }
+
+    # a "Then I know what [kp] was worth."
+    option = {
+        name = eotg_aug_kingpin.065.a
+        if = {
+            limit = {
+                exists = scope:eotg_kp_opponent
+                scope:eotg_kp_opponent = {
+                    is_alive = yes
+                    NOT = { this = root }
+                }
+            }
+            # The boss goes over to the winner
+            if = {
+                limit = {
+                    scope:eotg_kp = {
+                        is_landed = no
+                        is_imprisoned = no
+                    }
+                }
+                scope:eotg_kp_opponent = { add_courtier = scope:eotg_kp }
+            }
+            if = {
+                limit = { scope:eotg_kp_story.var:eotg_kp_path ?= flag:neighbour }
+                if = {
+                    limit = { exists = scope:eotg_kp_county }
+                    scope:eotg_kp_opponent = { add_pressed_claim = scope:eotg_kp_county }
+                }
+                else = {
+                    remove_short_term_gold = medium_gold_value
+                }
+            }
+            else = {
+                scope:eotg_kp_opponent = {
+                    if = {
+                        limit = {
+                            NOT = { has_hook_of_type = { target = root  type = strong_blackmail_hook } }
+                        }
+                        add_hook = {
+                            type = strong_blackmail_hook
+                            target = root
+                        }
+                    }
+                }
+                remove_short_term_gold = medium_gold_value
+                add_character_modifier = {
+                    modifier = eotg_mod_aug_kp_exposed
+                    years = 10
+                }
+            }
+        }
+        else = {
+            remove_short_term_gold = medium_gold_value
+            add_character_modifier = {
+                modifier = eotg_mod_aug_kp_exposed
+                years = 10
+            }
+            scope:eotg_kp = {
+                if = {
+                    limit = {
+                        is_landed = no
+                        is_imprisoned = no
+                        is_courtier_of = root
+                    }
+                    move_to_pool = yes
+                }
+            }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 10  has_trait = calm }
+            modifier = { add = 10  has_trait = stubborn }
+        }
+    }
+
+    after = {
+        eotg_aug_kp_end_effect = yes
+    }
+}
+
+
+# ── eotg_aug_kingpin.066 ── L7 Every Level Burning ───────────────────────────
+# The civil war spirals: nobody wins, and the lower levels of both realms
+# burn.
+# Callers: the story's maintenance (M4: three years of war, or a purge mind
+#   in Storm; M3: the vassal-seat war lost).
+# .desc while the war still runs (M4), .desc_lost once it is over (M3).
+# a: the war ends in a white peace (end_war, PX effects.log:13682, on the
+# stored war; the ruler's own claimant faction is ended too,
+# eotg_aug_kp_end_claim_effect); the boss dies in the fighting at 50%
+# (toast). b: dread +30, tyranny +20; the war goes on; kp +10. Both: the
+# ruler's capital and the opponent's capital burn (10 years). The story
+# ends; vanilla resolves any war still running. A boss who survives and is
+# still the ruler's unlanded courtier goes back below.
+
+eotg_aug_kingpin.066 = {
+    type = character_event
+    title = eotg_aug_kingpin.066.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = {
+                    NOT = { scope:eotg_kp_war ?= { is_participant = root } }
+                }
+                desc = eotg_aug_kingpin.066.desc_lost
+            }
+            desc = eotg_aug_kingpin.066.desc
+        }
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_kp = { eotg_aug_pressure_storm = yes } }
+                desc = eotg_aug_kingpin.066.desc_end_storm
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_kp = { eotg_aug_pressure_fracture = yes } }
+                desc = eotg_aug_kingpin.066.desc_end_fracture
+            }
+            desc = eotg_aug_kingpin.066.desc_end_flicker
+        }
+    }
+    theme = dread
+    override_background = { reference = eotg_bg_riot }
+    override_effect_2d = { reference = smoke }
+
+    trigger = {
+        eotg_aug_kp_has_story = yes
+    }
+
+    left_portrait = {
+        character = root
+        animation = stress
+    }
+    right_portrait = {
+        character = scope:eotg_kp
+        animation = rage
+    }
+    lower_right_portrait = {
+        trigger = {
+            exists = scope:eotg_kp_opponent
+            scope:eotg_kp_opponent = { is_alive = yes }
+        }
+        character = scope:eotg_kp_opponent
+    }
+
+    immediate = {
+        hidden_effect = {
+            eotg_aug_kp_save_scopes_effect = yes
+            eotg_aug_kp_leaf_open_effect = yes
+            scope:eotg_kp_opponent ?= {
+                if = {
+                    limit = {
+                        is_alive = yes
+                        exists = capital_county
+                    }
+                    capital_county = { save_scope_as = eotg_kp_opponent_capital }
+                }
+            }
+        }
+    }
+
+    # a "End it. Any terms."
+    option = {
+        name = eotg_aug_kingpin.066.a
+        eotg_aug_kp_burn_levels_effect = yes
+        if = {
+            limit = { scope:eotg_kp_war ?= { is_participant = root } }
+            eotg_aug_kp_end_claim_effect = yes
+            if = {
+                limit = { scope:eotg_kp_war ?= { is_participant = root } }
+                scope:eotg_kp_war = { end_war = white_peace }
+            }
+        }
+        random = {
+            chance = 50
+            send_interface_toast = {    # W3
+                type = event_toast_effect_neutral
+                title = eotg_aug_kingpin.066.toast_a_killed
+                left_icon = root
+                right_icon = scope:eotg_kp
+            }
+            scope:eotg_kp = { death = { death_reason = death_battle } }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = craven }
+            modifier = { add = 15  has_trait = compassionate }
+        }
+    }
+
+    # b "Burn it all down." Dread +30; tyranny +20; kp +10; the war goes on.
+    option = {
+        name = eotg_aug_kingpin.066.b
+        eotg_aug_kp_burn_levels_effect = yes
+        add_dread = 30
+        add_tyranny = 20
+        hidden_effect = {
+            scope:eotg_kp = { eotg_add_fracture_risk = { AMOUNT = 10 } }
+        }
+        stress_impact = {
+            compassionate = medium_stress_impact_gain
+            sadistic = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = wrathful }
+            modifier = { add = 15  has_trait = sadistic }
+        }
+    }
+
+    after = {
+        hidden_effect = {
+            scope:eotg_kp = {
+                if = {
+                    limit = {
+                        is_alive = yes
+                        is_landed = no
+                        is_courtier_of = root
+                    }
+                    move_to_pool = yes
+                }
+            }
+        }
+        eotg_aug_kp_end_effect = yes
+    }
+}
+
+
+# ── eotg_aug_kingpin.067 ── L8 The Turn ──────────────────────────────────────
+# Outside a war, the boss sells the ruler. ("Kingpin" never appears in a line
+# a syndicate-kind story can show, spec §7.4.)
+# Callers: the story's tick (T3), .012 c_front, .036 c failure / d, .038 c,
+#   .050 c, .072 b.
+# Mechanics: eotg_aug_kp_turn_effect (vassal / independent / front, halved
+# when forewarned). b pays to soften it; c [vengeful] hunts the boss down
+# (intrigue duel: success, the boss dies; dread +10 either way).
+# Desc: the role line, the front's published files when front, the band.
+
+eotg_aug_kingpin.067 = {
+    type = character_event
+    title = eotg_aug_kingpin.067.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { eotg_aug_kp_root_is_independent = yes }
+                desc = eotg_aug_kingpin.067.desc_indep
+            }
+            desc = eotg_aug_kingpin.067.desc
+        }
+        first_valid = {
+            triggered_desc = {
+                trigger = { eotg_aug_kp_is = { AXIS = kind  VALUE = front } }
+                desc = eotg_aug_kingpin.067.desc_front
+            }
+        }
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_kp = { eotg_aug_pressure_storm = yes } }
+                desc = eotg_aug_kingpin.067.desc_end_storm
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_kp = { eotg_aug_pressure_fracture = yes } }
+                desc = eotg_aug_kingpin.067.desc_end_fracture
+            }
+            desc = eotg_aug_kingpin.067.desc_end_flicker
+        }
+    }
+    theme = intrigue
+    override_background = { reference = eotg_bg_council }
+
+    trigger = {
+        eotg_aug_kp_has_story = yes
+    }
+
+    left_portrait = {
+        character = root
+        animation = shock
+    }
+    right_portrait = {
+        character = scope:eotg_kp
+        animation = schadenfreude
+    }
+    lower_right_portrait = {
+        trigger = { exists = scope:eotg_kp_liege }
+        character = scope:eotg_kp_liege
+    }
+
+    immediate = {
+        hidden_effect = {
+            # Scopes a war chain may have carried in
+            if = { limit = { exists = scope:eotg_kp_faction } clear_saved_scope = eotg_kp_faction }
+            if = { limit = { exists = scope:eotg_kp_rebel } clear_saved_scope = eotg_kp_rebel }
+            eotg_aug_kp_save_scopes_effect = yes
+            eotg_aug_kp_leaf_open_effect = yes
+            if = {
+                limit = { eotg_aug_kp_root_is_vassal = yes }
+                liege = { save_scope_as = eotg_kp_liege }
+            }
+        }
+    }
+
+    # a "Let it land."
+    option = {
+        name = eotg_aug_kingpin.067.a
+        eotg_aug_kp_turn_effect = { SOFTEN = no }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = stubborn }
+            modifier = { add = 10  has_trait = calm }
+        }
+    }
+
+    # b "Pay [kp] to soften it." Gold -major (half when forewarned).
+    option = {
+        name = eotg_aug_kingpin.067.b
+        if = {
+            limit = { scope:eotg_kp_story = { has_variable = eotg_kp_forewarned } }
+            remove_short_term_gold = {
+                value = major_gold_value
+                multiply = 0.5
+            }
+        }
+        else = {
+            remove_short_term_gold = major_gold_value
+        }
+        eotg_aug_kp_turn_effect = { SOFTEN = yes }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = greedy }
+            modifier = { add = 15  has_trait = craven }
+        }
+    }
+
+    # c [vengeful] "Hunt [kp] down." As a, then intrigue against the boss:
+    # success, the boss dies; dread +10 either way.
+    option = {
+        name = eotg_aug_kingpin.067.c
+        trigger = { has_trait = vengeful }
+        trait = vengeful
+        eotg_aug_kp_turn_effect = { SOFTEN = no }
+        add_dread = 10
+        duel = {
+            skill = intrigue
+            target = scope:eotg_kp
+            50 = {
+                desc = eotg_aug_kingpin.067.c.success
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = 3.5
+                    min = -49
+                }
+                send_interface_toast = {    # W3
+                    type = event_toast_effect_good
+                    title = eotg_aug_kingpin.067.toast_c_success
+                    left_icon = root
+                    right_icon = scope:eotg_kp
+                }
+                scope:eotg_kp = {
+                    death = {
+                        death_reason = death_murder
+                        killer = root
+                    }
+                }
+            }
+            50 = {
+                desc = eotg_aug_kingpin.067.c.failure
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = -3.5
+                    min = -49
+                }
+                send_interface_toast = {    # W3
+                    type = event_toast_effect_bad
+                    title = eotg_aug_kingpin.067.toast_c_failure
+                    left_icon = root
+                    right_icon = scope:eotg_kp
+                }
+            }
+        }
+        stress_impact = {
+            vengeful = minor_stress_impact_loss
+            forgiving = medium_stress_impact_gain
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = vengeful }
+            modifier = { add = 10  has_trait = wrathful }
+        }
+    }
+
+    after = {
+        eotg_aug_kp_end_effect = yes
+    }
+}
+
+
 # ── eotg_aug_kingpin.068 ── L9 The Break ─────────────────────────────────────
 # The boss's fracture breaks into a massacre in the lower levels, and at
 # the court if the boss came up to the residence (the victims, when named).
-# Callers: the story's tick (T1, pressure >= 95), .011 a failure in Storm.
-#   Batch B adds .050 c and .072 b.
+# Callers: the story's tick (T1, pressure >= 95), .011 a failure in Storm,
+#   .050 c (a second refusal in Storm), .072 b (Storm, and purge, crew or
+#   hired).
 # immediate: 1-2 victims at court, picked (index rule 7: the implant's
 # violence, not the ruler's choice; FAMILY_FACTOR 0.25), killed by the boss.
 # In collab or kept, every vassal holds the harbouring against the ruler
 # (halved by c through an opinion override).
-# BATCH-B SEAM (kingpin): the war variant (.desc_war; destroy the claimant
-# faction) is written with batch B.
+# War variant (stage war, T1): .desc_war, and every option also ends the
+# ruler's own claimant faction for the claim (eotg_aug_kp_end_claim_effect:
+# its war in a white peace, then destroy_faction). A claim war with the boss
+# as claimant ends by itself when the boss dies or vanishes (vanilla
+# should_invalidate, 00_civil_war.txt:980-991; 00_claim.txt:305-316).
 
 eotg_aug_kingpin.068 = {
     type = character_event
@@ -3141,6 +5541,12 @@ eotg_aug_kingpin.068 = {
                 desc = eotg_aug_kingpin.068.desc_victim
             }
             desc = eotg_aug_kingpin.068.desc_none
+        }
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_kp_story.var:eotg_kp_stage ?= flag:war }
+                desc = eotg_aug_kingpin.068.desc_war
+            }
         }
         first_valid = {
             triggered_desc = {
@@ -3215,6 +5621,10 @@ eotg_aug_kingpin.068 = {
     # dies in the fighting; failure, the boss is gone.
     option = {
         name = eotg_aug_kingpin.068.a
+        if = {
+            limit = { scope:eotg_kp_story.var:eotg_kp_stage ?= flag:war }
+            eotg_aug_kp_end_claim_effect = yes
+        }
         capital_county = {
             add_county_modifier = {
                 modifier = eotg_mod_aug_kp_massacre
@@ -3274,6 +5684,10 @@ eotg_aug_kingpin.068 = {
     # in the sealing.
     option = {
         name = eotg_aug_kingpin.068.b
+        if = {
+            limit = { scope:eotg_kp_story.var:eotg_kp_stage ?= flag:war }
+            eotg_aug_kp_end_claim_effect = yes
+        }
         capital_county = {
             add_county_modifier = {
                 modifier = eotg_mod_aug_kp_massacre
@@ -3311,6 +5725,10 @@ eotg_aug_kingpin.068 = {
         name = eotg_aug_kingpin.068.c
         trigger = { has_trait = compassionate }
         trait = compassionate
+        if = {
+            limit = { scope:eotg_kp_story.var:eotg_kp_stage ?= flag:war }
+            eotg_aug_kp_end_claim_effect = yes
+        }
         capital_county = {
             add_county_modifier = {
                 modifier = eotg_mod_aug_kp_massacre
@@ -3344,6 +5762,22 @@ eotg_aug_kingpin.068 = {
     }
 
     after = {
+        # War variant: a boss who survives (c) and is still the ruler's
+        # claim-path courtier goes back below (on_end leaves a resolving
+        # story's boss where the leaf put them)
+        if = {
+            limit = {
+                scope:eotg_kp_story.var:eotg_kp_stage ?= flag:war
+                scope:eotg_kp = {
+                    is_alive = yes
+                    is_landed = no
+                    is_courtier_of = root
+                }
+            }
+            hidden_effect = {
+                scope:eotg_kp = { move_to_pool = yes }
+            }
+        }
         eotg_aug_kp_end_effect = yes
     }
 }
@@ -3353,17 +5787,31 @@ eotg_aug_kingpin.068 = {
 # The boss becomes the ruler's landed vassal, on a non-capital county from
 # the ruler's demesne (eotg_aug_kp_grant_county_effect). From here the
 # Neurofractured ruler pipeline runs on them.
-# Caller: .013 d. Batch B adds .032 a/b, .036 a and M3.
-# BATCH-B SEAM (kingpin): the .032 / M3 variant where the boss already holds
-# the seat (.desc_held, opinion lines only) is written with batch B; until
-# then the trigger requires a county to grant.
+# Callers: .013 d, .036 a, .032 a (no war) / b, the story's maintenance (M3:
+#   the vassal-seat war over and the seat still the boss's, under the ruler).
+# Held variant (path vassal_seat and the boss holds the target): only the
+# opinion lines and the hook run (spec L10). .desc_held when the seat was
+# kept by force (the war stage, from M3), .desc_decree straight after .032.
 # Syndicate kind: the text breaks with the syndicate (lore review item 1).
 
 eotg_aug_kingpin.069 = {
     type = character_event
     title = eotg_aug_kingpin.069.t
     desc = {
-        desc = eotg_aug_kingpin.069.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = {
+                    exists = scope:eotg_kp_held
+                    scope:eotg_kp_story.var:eotg_kp_stage ?= flag:war
+                }
+                desc = eotg_aug_kingpin.069.desc_held
+            }
+            triggered_desc = {
+                trigger = { exists = scope:eotg_kp_held }
+                desc = eotg_aug_kingpin.069.desc_decree
+            }
+            desc = eotg_aug_kingpin.069.desc
+        }
         first_valid = {
             triggered_desc = {
                 trigger = { scope:eotg_kp = { eotg_aug_pressure_storm = yes } }
@@ -3381,7 +5829,13 @@ eotg_aug_kingpin.069 = {
 
     trigger = {
         eotg_aug_kp_has_story = yes
-        any_held_title = { eotg_aug_kp_seizable_county = { RULER = root } }
+        OR = {
+            any_held_title = { eotg_aug_kp_seizable_county = { RULER = root } }
+            any_owned_story = {
+                story_type = eotg_story_aug_kingpin
+                var:eotg_kp_path ?= flag:vassal_seat
+            }
+        }
     }
 
     left_portrait = {
@@ -3397,10 +5851,20 @@ eotg_aug_kingpin.069 = {
         hidden_effect = {
             eotg_aug_kp_save_scopes_effect = yes
             eotg_aug_kp_leaf_open_effect = yes
-            ordered_held_title = {
-                limit = { eotg_aug_kp_seizable_county = { RULER = root } }
-                order_by = { value = development_level  multiply = -1 }
-                save_scope_as = eotg_kp_county
+            if = {
+                limit = {
+                    scope:eotg_kp_story.var:eotg_kp_path ?= flag:vassal_seat
+                    exists = scope:eotg_kp_target
+                    scope:eotg_kp = { has_title = scope:eotg_kp_target }
+                }
+                save_scope_value_as = { name = eotg_kp_held  value = yes }
+            }
+            else = {
+                ordered_held_title = {
+                    limit = { eotg_aug_kp_seizable_county = { RULER = root } }
+                    order_by = { value = development_level  multiply = -1 }
+                    save_scope_as = eotg_kp_county
+                }
             }
         }
     }
@@ -3408,7 +5872,10 @@ eotg_aug_kingpin.069 = {
     # a "Take it, and keep it quiet."
     option = {
         name = eotg_aug_kingpin.069.a
-        eotg_aug_kp_grant_county_effect = yes
+        if = {
+            limit = { NOT = { exists = scope:eotg_kp_held } }
+            eotg_aug_kp_grant_county_effect = yes
+        }
         every_vassal = {
             limit = { NOT = { this = scope:eotg_kp } }
             add_opinion = {
@@ -3442,7 +5909,7 @@ eotg_aug_kingpin.069 = {
 # ── eotg_aug_kingpin.070 ── L11 Brought Inside ───────────────────────────────
 # The boss becomes the ruler's courtier, on a short lead. The flag goes in
 # on_end, and the non-ruler pipeline takes over.
-# Caller: .013 c. Batch B adds .036 b.
+# Callers: .013 c, .036 b.
 
 eotg_aug_kingpin.070 = {
     type = character_event
@@ -3623,6 +6090,133 @@ eotg_aug_kingpin.071 = {
 
     after = {
         eotg_aug_kp_end_effect = yes
+    }
+}
+
+
+# ── eotg_aug_kingpin.072 ── L13 The Hold Closes ──────────────────────────────
+# The localized crisis: the boss stops asking.
+# Caller: the story's tick (T2: open or collab, leverage 80+, the boss in
+#   Fracture or Storm).
+# Not a leaf in the story's sense: a and c open the kept stage (T7 then runs
+# .050 The Orders), so it sets no leaf guard and does not end the story. b
+# routes to The Break or The Turn.
+# a: stage kept; the ruler kept (open-ended while kept; on_end removes it);
+# the capital in crisis (10 years); the boss holds a strong blackmail hook
+# on the ruler. The boss's implant never acts on the ruler (§7.4): the hold
+# is hooks, money and fear.
+# Desc: the boss's line by mind (§5.2.4), then the band.
+# Signature: the desc reads the band; c moves the pressure.
+
+eotg_aug_kingpin.072 = {
+    type = character_event
+    title = eotg_aug_kingpin.072.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { eotg_aug_kp_is = { AXIS = mind  VALUE = purge } }
+                desc = eotg_aug_kingpin.072.desc_purge
+            }
+            triggered_desc = {
+                trigger = { eotg_aug_kp_is = { AXIS = mind  VALUE = grandeur } }
+                desc = eotg_aug_kingpin.072.desc_grandeur
+            }
+            triggered_desc = {
+                trigger = { eotg_aug_kp_is = { AXIS = mind  VALUE = forecast } }
+                desc = eotg_aug_kingpin.072.desc_forecast
+            }
+            desc = eotg_aug_kingpin.072.desc_cold
+        }
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_kp = { eotg_aug_pressure_storm = yes } }
+                desc = eotg_aug_kingpin.002.desc_band_storm
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_kp = { eotg_aug_pressure_fracture = yes } }
+                desc = eotg_aug_kingpin.002.desc_band_fracture
+            }
+            desc = eotg_aug_kingpin.002.desc_band_flicker
+        }
+    }
+    theme = dread
+    override_background = { reference = eotg_bg_underlevel_night }
+
+    trigger = {
+        eotg_aug_kp_has_story = yes
+    }
+
+    left_portrait = {
+        character = root
+        animation = fear
+    }
+    right_portrait = {
+        character = scope:eotg_kp
+        animation = threatening
+    }
+
+    immediate = {
+        hidden_effect = {
+            eotg_aug_kp_save_scopes_effect = yes
+        }
+    }
+
+    # a "Do as [kp.GetSheHe] says." The kept stage.
+    option = {
+        name = eotg_aug_kingpin.072.a
+        add_internal_flag = dangerous
+        eotg_aug_kp_kept_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = craven }
+            modifier = { add = 10  has_trait = greedy }
+        }
+    }
+
+    # b "No." -> .068 The Break (Storm, and a purge mind, a crew or a hired
+    # crew), else .067 The Turn; 5-15 days.
+    option = {
+        name = eotg_aug_kingpin.072.b
+        custom_tooltip = eotg_aug_kingpin.072.b.tt
+        hidden_effect = {
+            if = {
+                limit = {
+                    scope:eotg_kp = { eotg_aug_pressure_storm = yes }
+                    OR = {
+                        eotg_aug_kp_is = { AXIS = mind  VALUE = purge }
+                        eotg_aug_kp_is = { AXIS = kind  VALUE = crew }
+                        eotg_aug_kp_is = { AXIS = kind  VALUE = hired }
+                    }
+                }
+                trigger_event = { id = eotg_aug_kingpin.068  days = { 5 15 } }
+            }
+            else = {
+                trigger_event = { id = eotg_aug_kingpin.067  days = { 5 15 } }
+            }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = brave }
+            modifier = { add = 15  has_trait = stubborn }
+        }
+    }
+
+    # c [the ruler Neurofractured] "Do what mine already has me doing." As a,
+    # with the ruler's own pressure +10 and the boss's -10.
+    option = {
+        name = eotg_aug_kingpin.072.c
+        trigger = { has_trait = eotg_neurofractured }
+        add_internal_flag = dangerous
+        eotg_aug_kp_kept_effect = yes
+        hidden_effect = {
+            eotg_add_fracture_risk = { AMOUNT = 10 }
+            scope:eotg_kp = { eotg_add_fracture_risk = { AMOUNT = -10 } }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 15  has_trait = eccentric }
+            modifier = { add = 10  has_trait = callous }
+        }
     }
 }
 

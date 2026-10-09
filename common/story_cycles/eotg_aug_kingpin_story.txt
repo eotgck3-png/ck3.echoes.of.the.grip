@@ -1,12 +1,14 @@
 ﻿# -- eotg_aug_kingpin_story.txt -----------------------------------------------
 # eotg_story_aug_kingpin: the Neurofractured Kingpin (docs/specs/
-# cybernetics_v2_kingpin.md §5.4-§5.7). Batch A.
+# cybernetics_v2_kingpin.md §5.4-§5.7). Batches A and B.
 #
 # Created by: eotg_aug_kp_start_effect (eotg_aug_kingpin.001 immediate), the
 #   kingpin passed through root.var:eotg_kp_passthrough (the Patron's
 #   pattern, eotg_story_aug_patron on_setup).
 # Fires: the middle events .004-.009 and .014 (yearly tick T5/T6), the leaves
-#   .062 / .073 (T4) and .068 / .075 (T1), and .040 on the heir
+#   .062 / .073 (T4) and .068 / .075 (T1), .072 (T2), .067 (T3), .050 / .073
+#   (T7), .033 / .034 (T8), .038 (T9), the war resolution .063 / .036 /
+#   .069 / .066 / .065 (maintenance M3), .066 (M4), and .040 on the heir
 #   (on_owner_death). Cooldown authority for every chain stage is the tick
 #   (index §1 rule 5): no kingpin event checks a flag.
 # Ended by: every leaf (.060-.076, eotg_aug_kp_end_effect in `after`), the
@@ -32,12 +34,12 @@
 #   eotg_kp_resolving; batch A additions: eotg_kp_arrangement_on (bare: the
 #   arrangement modifier is held), eotg_kp_hired_guns_on (bare, timed 5
 #   years: mirrors the hired-guns modifier), eotg_kp_guns_inherited (bare:
-#   the heir holds an open-ended copy the maintenance must remove).
-#
-# BATCH-B SEAM (kingpin): T2 (.072), T3 (.067), T7's .050 branch, T8 (war),
-#   T9 (pending), M3 (war resolution) and M4 (the spiral, .066) are marked
-#   below and written with batch B, as is the "imprisoned by the kingpin's
-#   side" exception in M1.
+#   the heir holds an open-ended copy the maintenance must remove); batch B
+#   additions: eotg_kp_war (the claim war, a war scope; read with
+#   `exists`, which turns false when the war ends: vanilla reads stored wars
+#   the same way, common/casus_belli_types/10_tgp_china_wars.txt:2972),
+#   eotg_kp_war_guns_on (bare: the hired crew lent the hired-guns modifier
+#   for the war's span).
 # -----------------------------------------------------------------------------
 
 eotg_story_aug_kingpin = {
@@ -97,6 +99,9 @@ eotg_story_aug_kingpin = {
     # claim path is set outside the claim stages). The owner loses the
     # open-ended modifiers; the county modifiers keep their timers.
     on_end = {
+        # A pressed claim the claim path granted (.030 a/b, .031 a) and nobody
+        # won with does not outlive the story (QA 2026-10-09, fix 3).
+        eotg_aug_kp_drop_claim_effect = yes
         if = {
             limit = {
                 exists = var:eotg_kp
@@ -129,7 +134,10 @@ eotg_story_aug_kingpin = {
         }
         if = {
             limit = {
-                has_variable = eotg_kp_guns_inherited
+                OR = {
+                    has_variable = eotg_kp_guns_inherited
+                    has_variable = eotg_kp_war_guns_on
+                }
                 story_owner = { has_character_modifier = eotg_mod_aug_kp_hired_guns }
             }
             story_owner = { remove_character_modifier = eotg_mod_aug_kp_hired_guns }
@@ -182,14 +190,19 @@ eotg_story_aug_kingpin = {
 
         first_valid = {
             # M1. The owner is no longer landed, or is imprisoned: silent end.
-            # BATCH-B SEAM (kingpin): batch B exempts imprisonment by the
-            # kingpin's side in a war stage.
+            # In the war stage a captured owner does not end the story (spec
+            # M1 "imprisoned by anyone but the kingpin's side": a capture in
+            # the claim war is the war's business, and vanilla's peace
+            # releases them); M3 resolves the war when it ends.
             triggered_effect = {
                 trigger = {
                     story_owner = {
                         OR = {
                             is_landed = no
-                            is_imprisoned = yes
+                            AND = {
+                                is_imprisoned = yes
+                                NOT = { scope:story.var:eotg_kp_stage = flag:war }
+                            }
                         }
                     }
                 }
@@ -276,10 +289,199 @@ eotg_story_aug_kingpin = {
                     }
                 }
             }
-            # BATCH-B SEAM (kingpin): M3 (stage war and the owner no longer at
-            # war with var:eotg_kp_opponent -> the war-resolution table,
-            # .063 / .036 / .069 / .066 / .065) and M4 (war_years >= 3, or
-            # Storm and mind purge, and no eotg_kp_spiral_done -> .066).
+            # M3. The claim war is over for the owner (spec §5.5 M3). Read off
+            # the stored war rather than is_at_war_with the opponent: a war
+            # outlives an opponent who dies mid-war (vanilla war inheritance),
+            # and an heir who did not inherit the war is out of it (treated
+            # as lost, spec §5.4.1). The table, in order:
+            #   the kingpin is dead            -> toast, end (spec "any other
+            #                                     case ... if the kingpin is
+            #                                     dead"; also on a won own path:
+            #                                     nobody is left to name a price)
+            #   back_kp, the kingpin holds it  -> .063 Kingmaker (vassal)
+            #   own, the owner holds it        -> .036 The Partner's Price
+            #   neighbour, the kingpin holds it-> .063 Kingmaker (independent)
+            #   vassal_seat, the seat is still
+            #     the kingpin's, under the owner -> .069 A Seat Under You (held)
+            #   vassal_seat otherwise          -> .066 Every Level Burning (lost)
+            #   anything else                  -> .065 Sold to the Winner
+            # The guard is set here so the next month cannot fire it again
+            # before the leaf opens (the leaves set it too).
+            triggered_effect = {
+                trigger = {
+                    var:eotg_kp_stage = flag:war
+                    NOT = { has_variable = eotg_kp_resolving }
+                    OR = {
+                        NOT = { exists = var:eotg_kp_war }
+                        var:eotg_kp_war = { NOT = { is_participant = scope:story.story_owner } }
+                    }
+                }
+                effect = {
+                    save_scope_as = eotg_kp_story
+                    set_variable = eotg_kp_resolving
+                    set_variable = { name = eotg_kp_resolve_window  value = yes  days = 60 }
+                    if = {
+                        limit = { has_variable = eotg_kp_war_guns_on }
+                        remove_variable = eotg_kp_war_guns_on
+                        story_owner = {
+                            if = {
+                                limit = { has_character_modifier = eotg_mod_aug_kp_hired_guns }
+                                remove_character_modifier = eotg_mod_aug_kp_hired_guns
+                            }
+                        }
+                    }
+                    if = {
+                        limit = {
+                            OR = {
+                                NOT = { exists = var:eotg_kp }
+                                var:eotg_kp = { is_alive = no }
+                            }
+                        }
+                        story_owner = {
+                            send_interface_toast = {
+                                type = event_toast_effect_neutral
+                                title = eotg_aug_kingpin_toast_dead
+                                left_icon = scope:story.story_owner
+                            }
+                        }
+                        end_story = yes
+                    }
+                    else_if = {
+                        limit = {
+                            var:eotg_kp_path ?= flag:back_kp
+                            exists = var:eotg_kp_target
+                            var:eotg_kp_target = { holder ?= scope:story.var:eotg_kp }
+                        }
+                        story_owner = { trigger_event = { id = eotg_aug_kingpin.063  days = { 1 5 } } }
+                    }
+                    else_if = {
+                        limit = {
+                            var:eotg_kp_path ?= flag:own
+                            exists = var:eotg_kp_target
+                            var:eotg_kp_target = { holder ?= scope:story.story_owner }
+                        }
+                        story_owner = { trigger_event = { id = eotg_aug_kingpin.036  days = { 1 5 } } }
+                    }
+                    else_if = {
+                        limit = {
+                            var:eotg_kp_path ?= flag:neighbour
+                            exists = var:eotg_kp_target
+                            var:eotg_kp_target = { holder ?= scope:story.var:eotg_kp }
+                        }
+                        story_owner = { trigger_event = { id = eotg_aug_kingpin.063  days = { 1 5 } } }
+                    }
+                    else_if = {
+                        limit = {
+                            var:eotg_kp_path ?= flag:vassal_seat
+                            exists = var:eotg_kp_target
+                            var:eotg_kp = {
+                                has_title = scope:story.var:eotg_kp_target
+                                is_vassal_or_below_of = scope:story.story_owner
+                            }
+                        }
+                        story_owner = { trigger_event = { id = eotg_aug_kingpin.069  days = { 1 5 } } }
+                    }
+                    else_if = {
+                        limit = { var:eotg_kp_path ?= flag:vassal_seat }
+                        story_owner = { trigger_event = { id = eotg_aug_kingpin.066  days = { 1 5 } } }
+                    }
+                    else = {
+                        story_owner = { trigger_event = { id = eotg_aug_kingpin.065  days = { 1 5 } } }
+                    }
+                }
+            }
+            # M4. The spiral (spec §5.5 M4): three years of war, or a purge
+            # mind in Storm, and once only -> .066 Every Level Burning.
+            triggered_effect = {
+                trigger = {
+                    var:eotg_kp_stage = flag:war
+                    NOT = { has_variable = eotg_kp_resolving }
+                    NOT = { has_variable = eotg_kp_spiral_done }
+                    exists = var:eotg_kp
+                    var:eotg_kp = { is_alive = yes }
+                    OR = {
+                        var:eotg_kp_war_years >= 3
+                        var:eotg_kp = {
+                            eotg_aug_pressure_storm = yes
+                            var:eotg_kp_mind ?= flag:purge
+                        }
+                    }
+                }
+                effect = {
+                    set_variable = eotg_kp_spiral_done
+                    set_variable = eotg_kp_resolving
+                    set_variable = { name = eotg_kp_resolve_window  value = yes  days = 60 }
+                    story_owner = { trigger_event = { id = eotg_aug_kingpin.066  days = { 1 5 } } }
+                }
+            }
+            # The pending faction went to war without .038 (the player
+            # pressed the faction's demand, or vanilla's AI demand fired):
+            # the story follows it into the war stage, so M3 resolves it.
+            # Known gap (accepted): this transition runs no war support
+            # (eotg_aug_kp_war_support_effect) and fires no .039, because the
+            # war started outside the story's events and the watcher has no
+            # event scope to show them in.
+            triggered_effect = {
+                trigger = {
+                    var:eotg_kp_stage = flag:pending
+                    NOT = { has_variable = eotg_kp_resolving }
+                    exists = var:eotg_kp_target
+                    story_owner = {
+                        exists = joined_faction
+                        joined_faction = {
+                            faction_is_type = claimant_faction
+                            special_title ?= scope:story.var:eotg_kp_target
+                            faction_is_at_war = yes
+                        }
+                    }
+                }
+                effect = {
+                    set_variable = { name = eotg_kp_stage  value = flag:war }
+                    set_variable = { name = eotg_kp_war  value = story_owner.joined_faction.faction_war }
+                    set_variable = { name = eotg_kp_war_years  value = 0 }
+                }
+            }
+            # Stuck resolution (QA 2026-10-09, fix 1). M3 / M4 and every leaf
+            # set eotg_kp_resolving and a 60-day timed variable,
+            # eotg_kp_resolve_window (set_variable with days, PX
+            # effects.log). A leaf that opens sets eotg_kp_leaf_seen and ends
+            # the story itself in its `after`. So the story is stuck only if
+            # the window has run out and either no leaf ever opened (its
+            # trigger failed: the kingpin died between M3 and the leaf) or
+            # the kingpin is dead under a node that never reached its leaf
+            # (.036 -> .067 / .069). Then it ends here; on_end does the
+            # clean-up (flag, modifiers, a leftover claim). Timer rather
+            # than "kingpin dead" alone, because .062 / .075 kill the
+            # kingpin in immediate while their window is still open.
+            triggered_effect = {
+                trigger = {
+                    has_variable = eotg_kp_resolving
+                    NOT = { has_variable = eotg_kp_resolve_window }
+                    OR = {
+                        NOT = { has_variable = eotg_kp_leaf_seen }
+                        NOT = { exists = var:eotg_kp }
+                        var:eotg_kp = { is_alive = no }
+                    }
+                }
+                effect = {
+                    if = {
+                        limit = {
+                            OR = {
+                                NOT = { exists = var:eotg_kp }
+                                var:eotg_kp = { is_alive = no }
+                            }
+                        }
+                        story_owner = {
+                            send_interface_toast = {
+                                type = event_toast_effect_neutral
+                                title = eotg_aug_kingpin_toast_dead
+                                left_icon = scope:story.story_owner
+                            }
+                        }
+                    }
+                    end_story = yes
+                }
+            }
         }
     }
 
@@ -291,8 +493,11 @@ eotg_story_aug_kingpin = {
     effect_group = {
         years = 1
 
+        # Not while a resolution is under way (M3 / M4 / a leaf set
+        # eotg_kp_resolving): T1 or T8 must not fire into a war that is
+        # already resolved (QA 2026-10-09, fix 1).
         triggered_effect = {
-            trigger = { always = yes }
+            trigger = { NOT = { has_variable = eotg_kp_resolving } }
             effect = {
                 save_scope_as = eotg_kp_story
                 var:eotg_kp = { save_scope_as = eotg_kp }
@@ -352,11 +557,44 @@ eotg_story_aug_kingpin = {
                         }
                     }
                 }
-                # BATCH-B SEAM (kingpin): T2 (stage collab or open, leverage
-                # >= 80, the kingpin in Fracture or Storm -> .072 The Hold
-                # Closes) and T3 (stage collab, refusals >= 2, 50% x1.25
-                # purge x1.25 grandeur -> .067 The Turn) go here, in this
-                # order, before T4.
+                # T2. The crisis gate: open or collab, leverage 80+, the
+                # kingpin in Fracture or Storm -> .072 The Hold Closes.
+                else_if = {
+                    limit = {
+                        OR = {
+                            var:eotg_kp_stage = flag:collab
+                            var:eotg_kp_stage = flag:open
+                        }
+                        var:eotg_kp_leverage >= 80
+                        var:eotg_kp = {
+                            OR = {
+                                eotg_aug_pressure_fracture = yes
+                                eotg_aug_pressure_storm = yes
+                            }
+                        }
+                    }
+                    story_owner = { trigger_event = { id = eotg_aug_kingpin.072  days = { 1 30 } } }
+                }
+                # T3. Refused twice in the deal: 50% (x1.25 purge, x1.25
+                # grandeur) -> .067 The Turn.
+                else_if = {
+                    limit = {
+                        var:eotg_kp_stage = flag:collab
+                        var:eotg_kp_refusals >= 2
+                    }
+                    random = {
+                        chance = 50
+                        modifier = {
+                            factor = 1.25
+                            eotg_aug_kp_is = { AXIS = mind  VALUE = purge }
+                        }
+                        modifier = {
+                            factor = 1.25
+                            eotg_aug_kp_is = { AXIS = mind  VALUE = grandeur }
+                        }
+                        story_owner = { trigger_event = { id = eotg_aug_kingpin.067  days = { 1 30 } } }
+                    }
+                }
                 # T4. The natural end of a long deal (collab, 6+ years).
                 else_if = {
                     limit = {
@@ -505,18 +743,54 @@ eotg_story_aug_kingpin = {
                     }
                 }
                 # T7. Kept: if leverage has fallen below 40, the ruler has
-                # bought a truce -> .073 A Standing Arrangement.
-                # BATCH-B SEAM (kingpin): otherwise 70% -> .050 The Orders.
+                # bought a truce -> .073 A Standing Arrangement; otherwise
+                # 70% -> .050 The Orders.
                 else_if = {
-                    limit = {
-                        var:eotg_kp_stage = flag:kept
-                        var:eotg_kp_leverage < 40
+                    limit = { var:eotg_kp_stage = flag:kept }
+                    if = {
+                        limit = { var:eotg_kp_leverage < 40 }
+                        story_owner = { trigger_event = { id = eotg_aug_kingpin.073  days = { 1 30 } } }
                     }
-                    story_owner = { trigger_event = { id = eotg_aug_kingpin.073  days = { 1 30 } } }
+                    else = {
+                        random = {
+                            chance = 70
+                            story_owner = { trigger_event = { id = eotg_aug_kingpin.050  days = { 1 30 } } }
+                        }
+                    }
                 }
-                # BATCH-B SEAM (kingpin): T8 (stage war: .033 60 / .034 25
-                # hired with leverage < 30 or purge / nothing 40, AI x3
-                # nothing) and T9 (stage pending -> .038 Now or Never).
+                # T8. The war below (stage war): .033 60; .034 25 (hired,
+                # and leverage under 30 or the purge mind); nothing 40 (x3
+                # for an AI owner, spec §5.7).
+                else_if = {
+                    limit = { var:eotg_kp_stage = flag:war }
+                    random_list = {
+                        60 = {
+                            story_owner = { trigger_event = { id = eotg_aug_kingpin.033  days = { 1 30 } } }
+                        }
+                        25 = {
+                            trigger = {
+                                eotg_aug_kp_is = { AXIS = kind  VALUE = hired }
+                                OR = {
+                                    var:eotg_kp_leverage < 30
+                                    eotg_aug_kp_is = { AXIS = mind  VALUE = purge }
+                                }
+                            }
+                            story_owner = { trigger_event = { id = eotg_aug_kingpin.034  days = { 1 30 } } }
+                        }
+                        40 = {
+                            modifier = {
+                                factor = 3
+                                story_owner = { is_ai = yes }
+                            }
+                        }
+                    }
+                }
+                # T9. Pending (the faction raised, no war yet) -> .038 Now
+                # or Never.
+                else_if = {
+                    limit = { var:eotg_kp_stage = flag:pending }
+                    story_owner = { trigger_event = { id = eotg_aug_kingpin.038  days = { 1 30 } } }
+                }
             }
         }
     }

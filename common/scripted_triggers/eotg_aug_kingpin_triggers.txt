@@ -1,13 +1,13 @@
 ﻿# -- eotg_aug_kingpin_triggers.txt --------------------------------------------
 # Scripted triggers for the Neurofractured Kingpin (docs/specs/
-# cybernetics_v2_kingpin.md §3, §5.1). Batch A. Map-agnostic: no title,
-# province, culture or faith keys; every title comes from a scope.
+# cybernetics_v2_kingpin.md §3, §5.1). Batches A and B. Map-agnostic: no
+# title, province, culture or faith keys; every title comes from a scope.
 #
-# BATCH-B SEAM (kingpin): eotg_aug_kp_root_is_independent,
-# eotg_aug_kp_liege_claim_possible, eotg_aug_kp_neighbour_target and
-# eotg_aug_kp_vassal_seat_target (spec §3) belong to the claim path
-# (.003 b/c/b_indep/c_indep, .030-.032) and are written with batch B, so no
-# trigger here is defined without a reader.
+# Batch B added the claim-path triggers (eotg_aug_kp_root_is_independent,
+# eotg_aug_kp_liege_claim_possible, eotg_aug_kp_neighbour_target,
+# eotg_aug_kp_vassal_seat_target) at the end of the file. War immunity: no
+# claim target is an Unclaimed placeholder (eotg_is_unclaimed_holder /
+# eotg_is_unclaimed_folk; docs/specs/frontier_unclaimed_regions.md §4.3).
 # -----------------------------------------------------------------------------
 
 # Entry eligibility (spec §5.1.1), plus one kingpin at a time and once per
@@ -108,4 +108,104 @@ eotg_aug_kp_informant_candidate = {
 # eotg_aug_kp_save_scopes_effect in events, and at the start of the tick).
 eotg_aug_kp_is = {
     scope:eotg_kp ?= { var:eotg_kp_$AXIS$ ?= flag:$VALUE$ }
+}
+
+# -- The claim path (batch B; spec §5.1.1, §5.8 .003 / .030-.032) -------------
+
+# The root is independent: the fallback claim branches (.031 The Neighbour's
+# Seat, .032 The Vassal's Seat) replace the liege claim (spec §5.1.1).
+# Users: .003 (desc, b_indep, c_indep), .065, .067.
+eotg_aug_kp_root_is_independent = {
+    is_independent_ruler = yes
+}
+
+# A vassal root can raise a claimant faction against the liege for the
+# liege's primary title (.003 b / c -> .030). Mirrors what vanilla checks
+# when the faction is created, so the option is not a dead end:
+# common_can_character_create_trigger (common/scripted_triggers/
+# 00_faction_triggers.txt: adult, no truce with the target, the target holds
+# no strong hook on root and is not allied) and common_character_validity_
+# trigger (the target is the liege, tier above barony). Not already in a
+# faction (.030 creates one). Empire-tier claims stay open (owner ruling Q4).
+# The faction itself is checked at .030 a/b with can_create_faction (it needs
+# var:claiming_title, set in .030's immediate).
+# Users: .003 (desc_vassal, b, c, e_syndicate), .030 (trigger).
+eotg_aug_kp_liege_claim_possible = {
+    eotg_aug_kp_root_is_vassal = yes
+    is_adult = yes
+    is_imprisoned = no
+    highest_held_title_tier > tier_barony
+    NOT = { exists = joined_faction }
+    NOT = { has_truce = liege }
+    NOT = { is_at_war_with = liege }
+    liege = {
+        is_landed = yes
+        exists = primary_title
+        eotg_is_unclaimed_holder = no
+        NOT = { has_strong_hook = root }
+        NOT = { is_allied_to = root }
+    }
+}
+
+# Character scope: a neighbouring independent ruler whose primary title the
+# kingpin can claim with vanilla claim_cb (.031). $RULER$ = the independent
+# root. claim_cb needs a non-titular title (common/casus_belli_types/
+# 00_claim.txt is_allowed_claim_title: is_titular = no). War immunity: never
+# an Unclaimed placeholder. Truces are one-way: the root must not hold one
+# against them (PX triggers.log has_truce).
+# Users: .003 (b_indep), .031 (trigger, immediate).
+eotg_aug_kp_neighbour_target = {
+    is_alive = yes
+    is_independent_ruler = yes
+    NOT = { this = $RULER$ }
+    is_landed = yes
+    highest_held_title_tier >= tier_county
+    exists = primary_title
+    primary_title = { is_titular = no }
+    eotg_is_unclaimed_holder = no
+    eotg_is_unclaimed_folk = no
+    NOT = { is_at_war_with = $RULER$ }
+    NOT = { is_allied_to = $RULER$ }
+    $RULER$ = { NOT = { has_truce = prev } }
+}
+
+# Character scope: a landed direct vassal of $RULER$ whose seat the root can
+# hand to the kingpin by decree (.032): not the ruler's close family or
+# spouse, primary title at least a county and below the ruler's tier, free,
+# not at war with the ruler, never an Unclaimed placeholder.
+# Users: .003 (c_indep), .032 (trigger, immediate).
+eotg_aug_kp_vassal_seat_target = {
+    is_alive = yes
+    is_vassal_of = $RULER$
+    is_landed = yes
+    is_imprisoned = no
+    exists = primary_title
+    primary_title = {
+        tier >= tier_county
+        is_titular = no
+    }
+    highest_held_title_tier < $RULER$.highest_held_title_tier
+    NOT = { is_close_family_of = $RULER$ }
+    NOT = { is_spouse_of = $RULER$ }
+    NOT = { has_character_flag = eotg_flag_aug_kingpin }
+    eotg_is_unclaimed_holder = no
+    eotg_is_unclaimed_folk = no
+    NOT = { is_at_war_with = $RULER$ }
+}
+
+# A claim option of .003 is open for the root: the liege claim for a vassal,
+# or a neighbour's or a vassal's seat for an independent ruler. Root scope.
+# Users: .003 (desc: .desc_independent; e_syndicate yields to the claim
+# options so at most five options show, spec §5.8 .003 "Max 5 visible").
+eotg_aug_kp_claim_open = {
+    OR = {
+        eotg_aug_kp_liege_claim_possible = yes
+        AND = {
+            eotg_aug_kp_root_is_independent = yes
+            OR = {
+                any_neighboring_top_liege_realm_owner = { eotg_aug_kp_neighbour_target = { RULER = root } }
+                any_vassal = { eotg_aug_kp_vassal_seat_target = { RULER = root } }
+            }
+        }
+    }
 }

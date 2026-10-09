@@ -1,12 +1,12 @@
 ﻿# -- eotg_aug_kingpin_modifiers.txt -------------------------------------------
 # Static modifiers for the Neurofractured Kingpin (docs/specs/
-# cybernetics_v2_kingpin.md §3). Batch A: the ones batch A applies or
-# removes. Keys checked in PX modifiers.log (2026-10-06). Values are the
-# spec's first guesses; QA tunes. Icon keys are vanilla ones already used by
-# the mod (eotg_augmentation_modifiers.txt, eotg_frontier_modifiers.txt).
+# cybernetics_v2_kingpin.md §3). Batches A and B. Keys checked in PX
+# modifiers.log (2026-10-06; batch B keys re-checked 2026-10-09). Values are
+# the spec's first guesses; QA tunes. Icon keys are vanilla ones already used
+# by the mod (eotg_augmentation_modifiers.txt, eotg_frontier_modifiers.txt).
 #
-# BATCH-B SEAM (kingpin): eotg_mod_aug_kp_exposed (L6, L8), eotg_mod_aug_kp_crisis
-# (L13) and eotg_mod_aug_kp_burned_levels (L7) are written with batch B.
+# Batch B: eotg_mod_aug_kp_exposed (L6, L8), eotg_mod_aug_kp_crisis (L13) and
+# eotg_mod_aug_kp_burned_levels (L7), at the end of each section.
 # -----------------------------------------------------------------------------
 
 # -- Character modifiers ------------------------------------------------------
@@ -66,6 +66,14 @@ eotg_mod_aug_kp_seized_clinic = {
     domain_tax_mult = 0.05
 }
 
+# L6 Sold to the Winner (.065) and L8 The Turn (.067): the ruler's dealings
+# with the lower levels are known (10 years; 5 when forewarned).
+eotg_mod_aug_kp_exposed = {
+    icon = intrigue_negative
+    vassal_opinion = -10
+    general_opinion = -5
+}
+
 # -- County modifiers ---------------------------------------------------------
 
 # .008 b "Not one credit." (capital, 2 years)
@@ -99,4 +107,20 @@ eotg_mod_aug_kp_massacre = {
     icon = county_modifier_development_negative
     county_opinion_add = -15
     development_growth_factor = -0.2
+}
+
+# L13 The Hold Closes (.072 a / c; capital, 10 years)
+eotg_mod_aug_kp_crisis = {
+    icon = county_modifier_development_negative
+    development_growth_factor = -0.25
+    county_opinion_add = -10
+    levy_reinforcement_rate = -0.2
+}
+
+# L7 Every Level Burning (.066; the ruler's and the opponent's capitals,
+# 10 years)
+eotg_mod_aug_kp_burned_levels = {
+    icon = county_modifier_development_negative
+    development_growth_factor = -0.3
+    levy_size = -0.2
 }
