@@ -66,6 +66,12 @@ class Speech(unittest.TestCase):
         for t in ("Konan's ship.", "I said 'we'.", "No speech here."):
             self.assertFalse(E.SPEECH.search(t), t)
 
+    def test_opens_on_loc_function(self):
+        # B7 review: speech that opens with a [..] call
+        t = 'She looks up. "[ROOT.Char.GetFirstName], sit down."'
+        self.assertTrue(E.SPEECH.search(t), t)
+        self.assertFalse(E.SPEECH.search('The file [x.GetName] is shut.'))
+
 
 def opt(text):
     return E._parse_option("option = " + text)

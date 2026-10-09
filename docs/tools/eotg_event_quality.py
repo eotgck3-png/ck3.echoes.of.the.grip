@@ -99,8 +99,10 @@ def words(t):
     return len(re.findall(r"[A-Za-z']+", t))
 
 
-# evq.py's dialogue detector, unchanged (report caveat: +-5 points)
-SPEECH = re.compile(r'\\"|“|”|(?<=[\s:,])"(?=[A-Z])|(?<![A-Za-z])\'[A-Z][^\']{6,}\'')
+# evq.py's dialogue detector (report caveat: +-5 points). B7 review: the
+# opening-quote lookahead also takes `[`, so speech that opens on a loc
+# function ("[ROOT.Char.GetFirstName], ...") counts.
+SPEECH = re.compile(r'\\"|“|”|(?<=[\s:,])"(?=[A-Z\[])|(?<![A-Za-z])\'[A-Z][^\']{6,}\'')
 
 
 # ------------------------------------------------------------------ voice

@@ -14,6 +14,12 @@
 #   realm, under the realm's own law; discovery is hearsay ("word has
 #   reached you"); no apparatus. Lore R1: "your law" only for an independent
 #   ruler, "the law of your realm" otherwise.
+#
+# event_quality_v1 batch B8 (W5 re-gating, W6 portraits; §13): e re-axed
+# from [just] to a duchy tier gate (AI base 10, counter-trait negatives),
+# just keeping its weight and a stress row there as a response; f (greedy,
+# 6 gates against just 16) is the kept personality gate, paired with its
+# stress row (§13.1 step 5).
 # ─────────────────────────────────────────────────────────────────────────────
 
 namespace = eotg_aug_realm
@@ -82,6 +88,10 @@ eotg_aug_realm.001 = {
 
     # World-state guard
     trigger = {
+        # Seamless exposure (event_quality_v1 §12.5.1 S1, rule (a), event
+        # trigger): the desc and options need a self deliberating; a state
+        # guard re-checked at fire time, not a cooldown (lesson 5 n/a)
+        NOT = { has_trait = eotg_total_integration }
         scope:eotg_contraband_subject ?= {
             is_alive = yes
             is_imprisoned = no
@@ -90,6 +100,18 @@ eotg_aug_realm.001 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = zealous } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = greedy }
+            animation = personality_greedy
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = worry
+        }
         animation = thinking
     }
     right_portrait = {
@@ -189,20 +211,30 @@ eotg_aug_realm.001 = {
         }
     }
 
-    # [just] "The realm's law holds, for everyone." As a, plus prestige.
+    # [duchy+] "The realm's law holds, for everyone." As a, plus prestige.
+    # W5 (event_quality_v1 §13.1 3b): was [just]; it moves prestige, which a
+    # does not, so it cannot fold. Making the arrest a public example of the
+    # law is an act of the seat, so a duchy tier gate, no icon (root is the
+    # subject's liege; any landed liege below duke keeps a). just had no
+    # stress row; it gets one here as a response (§13.1 step 4) and keeps
+    # its AI weight.
     option = {
         name = eotg_aug_realm.001.e
-        trigger = { has_trait = just }
-        trait = just
+        trigger = { highest_held_title_tier >= tier_duchy }
         imprison_character_effect = {
             TARGET = scope:eotg_contraband_subject
             IMPRISONER = root
         }
         add_prestige = minor_prestige_value
+        stress_impact = {
+            just = minor_stress_impact_loss
+        }
         ai_chance = {
-            base = 30
+            base = 10    # B1 lesson 4: tier gates show to every AI duke
             modifier = { add = 30  has_trait = just }
             modifier = { add = 10  has_trait = diligent }
+            modifier = { add = -20  has_trait = arbitrary }
+            modifier = { add = -10  has_trait = compassionate }
         }
     }
 
@@ -222,6 +254,11 @@ eotg_aug_realm.001 = {
             add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
         }
         eotg_aug_realm001_forgive_effect = yes
+        # W5 step 5 (event_quality_v1 §13.1): the kept personality gate,
+        # paired the vanilla way (icon, trigger, stress row)
+        stress_impact = {
+            greedy = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = greedy }

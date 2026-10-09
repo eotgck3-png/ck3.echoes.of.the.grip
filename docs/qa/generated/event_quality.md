@@ -14,15 +14,15 @@ Vanilla source: CK3 1.20.0.4 game files: non-hidden character events (DLC = even
 | Theme set | 100.0% | 100.0% | **100.0%** |
 | `override_background` | 52.2% | 66.3% | **92.8%** |
 | `override_effect_2d` events | 224 | 142 | **21** |
-| Three or more portraits | 20.2% | 30.0% | **13.6%** |
+| Three or more portraits | 20.2% | 30.0% | **14.0%** |
 | Distinct animations | 262 | 242 | **66** |
-| `triggered_animation` per event | 0.32 | 0.46 | **2.06** |
+| `triggered_animation` per event | 0.32 | 0.46 | **2.68** |
 | `outfit_tags` | 2.9% | 2.5% | **0.8%** |
 | `camera` | 8.2% | 13.7% | **0.0%** |
-| Spoken dialogue in the desc | 51.8% | 53.9% | **28.8%** |
-| Voice: first person | 75.7% | 73.1% | **40.9%** |
-| Voice: second person | 0.8% | 0.9% | **33.3%** |
-| Voice: neutral | 20.8% | 18.7% | **25.8%** |
+| Spoken dialogue in the desc | 51.8% | 53.9% | **52.3%** |
+| Voice: first person | 75.7% | 73.1% | **79.2%** |
+| Voice: second person | 0.8% | 0.9% | **2.3%** |
+| Voice: neutral | 20.8% | 18.7% | **18.6%** |
 | Voice: no desc text | 2.8% | 7.3% | **0.0%** |
 | `Custom()` in the desc | 46.0% | 43.3% | **14.0%** |
 | `#EMP` in the desc | 17.4% | 19.9% | **0.0%** |
@@ -31,12 +31,12 @@ Vanilla source: CK3 1.20.0.4 game files: non-hidden character events (DLC = even
 | `random_valid` desc | 3.8% | 2.8% | **0.0%** |
 | `triggered_desc` used | 32.8% | 34.1% | **60.6%** |
 | Median desc words (main key) | 48 | 58 | **45** |
-| Desc words p10 / p90 | 23 / 84 | 29 / 92 | **31 / 59** |
+| Desc words p10 / p90 | 23 / 84 | 29 / 92 | **32 / 60** |
 | Options defined: median, p90 | 2, p90 4 | 3, p90 4 | **5, p90 6** |
-| Options with a trait icon | 3.3% | 1.9% | **20.2%** |
-| Options with a `skill =` icon | 7.6% | 7.9% | **9.0%** |
+| Options with a trait icon | 3.3% | 1.9% | **18.7%** |
+| Options with a `skill =` icon | 7.6% | 7.9% | **9.7%** |
 | `ai_chance` on every option | 53.3% | 75.6% | **97.3%** |
-| Stress on an option | 42.2% | 60.1% | **66.7%** |
+| Stress on an option | 42.2% | 60.1% | **69.3%** |
 | `add_internal_flag` | 1.9% | 3.8% | **14.0%** |
 | Option `flavor =` | 11.9% | 15.7% | **0.0%** |
 | Toasts per event | 0.54 | 0.78 | **0.76** |
@@ -45,57 +45,40 @@ Vanilla source: CK3 1.20.0.4 game files: non-hidden character events (DLC = even
 | Letter events | 665 | 225 | **0** |
 | `window =` set | 684 | 232 | **5** |
 | `after = {}` block | 26.5% | 27.6% | **17.4%** |
-| Events with 2+ personality-gated options (L017) | 74 | 33 | **22** |
+| Events with 2+ personality-gated options (L017) | 74 | 33 | **5** |
 | Events with 3+ personality-gated options | 11 | 6 | **0** |
 
-**Mod option gate axes** (options): personality 202, education/skill 76, tier 34, other trigger 344, ungated 485.
+**Mod option gate axes** (options): personality 185, education/skill 84, tier 42, other trigger 344, ungated 485.
 
 ## Per file (mod)
 
 | File | Events | Background | Dialogue | Voice 1st / 2nd / neutral | Trait icons | Toasts/event | `\n\n` | `#EMP` | `Custom()` | 2+ personality gates |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `events/eotg_augmentation_activities.txt` | 6 | 0.0% | 0.0% | 0.0 / 83.3 / 16.7% | 37.8% | 0.17 | 100.0% | 0.0% | 0.0% | 1 |
-| `events/eotg_augmentation_countdown.txt` | 6 | 83.3% | 0.0% | 0.0 / 100.0 / 0.0% | 40.0% | 0.33 | 50.0% | 0.0% | 0.0% | 4 |
-| `events/eotg_augmentation_endgame.txt` | 11 | 100.0% | 9.1% | 0.0 / 72.7 / 27.3% | 17.6% | 0.45 | 45.5% | 0.0% | 9.1% | 1 |
-| `events/eotg_augmentation_fracture.txt` | 29 | 93.1% | 10.3% | 0.0 / 86.2 / 13.8% | 25.5% | 1.62 | 48.3% | 0.0% | 0.0% | 0 |
-| `events/eotg_augmentation_heir.txt` | 5 | 60.0% | 20.0% | 0.0 / 80.0 / 20.0% | 41.7% | 0.6 | 40.0% | 0.0% | 0.0% | 5 |
+| `events/eotg_augmentation_activities.txt` | 6 | 0.0% | 66.7% | 100.0 / 0.0 / 0.0% | 37.8% | 0.17 | 100.0% | 0.0% | 0.0% | 1 |
+| `events/eotg_augmentation_countdown.txt` | 6 | 83.3% | 50.0% | 100.0 / 0.0 / 0.0% | 24.0% | 0.33 | 50.0% | 0.0% | 0.0% | 0 |
+| `events/eotg_augmentation_endgame.txt` | 11 | 100.0% | 45.5% | 36.4 / 27.3 / 36.4% | 14.7% | 0.45 | 45.5% | 0.0% | 9.1% | 0 |
+| `events/eotg_augmentation_fracture.txt` | 29 | 93.1% | 48.3% | 93.1 / 6.9 / 0.0% | 25.5% | 1.62 | 48.3% | 0.0% | 0.0% | 0 |
+| `events/eotg_augmentation_heir.txt` | 5 | 60.0% | 60.0% | 0.0 / 20.0 / 80.0% | 20.8% | 0.6 | 40.0% | 0.0% | 0.0% | 0 |
 | `events/eotg_augmentation_inherit.txt` | 27 | 85.2% | 63.0% | 77.8 / 0.0 / 22.2% | 15.0% | 0.15 | 25.9% | 0.0% | 7.4% | 0 |
-| `events/eotg_augmentation_initiation.txt` | 20 | 95.0% | 10.0% | 0.0 / 70.0 / 30.0% | 21.7% | 0.9 | 30.0% | 0.0% | 40.0% | 0 |
-| `events/eotg_augmentation_interactions.txt` | 2 | 100.0% | 0.0% | 0.0 / 50.0 / 50.0% | 10.0% | 1.0 | 100.0% | 0.0% | 0.0% | 0 |
+| `events/eotg_augmentation_initiation.txt` | 20 | 95.0% | 60.0% | 90.0 / 0.0 / 10.0% | 21.7% | 0.9 | 30.0% | 0.0% | 40.0% | 0 |
+| `events/eotg_augmentation_interactions.txt` | 2 | 100.0% | 50.0% | 50.0 / 0.0 / 50.0% | 10.0% | 1.0 | 100.0% | 0.0% | 0.0% | 0 |
 | `events/eotg_augmentation_kingpin.txt` | 42 | 100.0% | 42.9% | 76.2 / 0.0 / 23.8% | 7.3% | 0.62 | 81.0% | 0.0% | 23.8% | 0 |
-| `events/eotg_augmentation_nonruler.txt` | 6 | 100.0% | 0.0% | 0.0 / 66.7 / 33.3% | 23.5% | 0.33 | 16.7% | 0.0% | 0.0% | 0 |
-| `events/eotg_augmentation_patron.txt` | 9 | 100.0% | 11.1% | 0.0 / 77.8 / 22.2% | 33.3% | 1.11 | 33.3% | 0.0% | 100.0% | 6 |
-| `events/eotg_augmentation_procedures.txt` | 6 | 100.0% | 0.0% | 0.0 / 50.0 / 50.0% | 8.3% | 0.17 | 100.0% | 0.0% | 0.0% | 0 |
-| `events/eotg_augmentation_realm.txt` | 1 | 100.0% | 0.0% | 0.0 / 100.0 / 0.0% | 33.3% | 0.0 | 100.0% | 0.0% | 0.0% | 1 |
-| `events/eotg_augmentation_retinue.txt` | 5 | 100.0% | 40.0% | 0.0 / 60.0 / 40.0% | 19.2% | 0.0 | 60.0% | 0.0% | 40.0% | 0 |
-| `events/eotg_augmentation_tamper.txt` | 3 | 100.0% | 0.0% | 0.0 / 33.3 / 66.7% | 22.2% | 0.67 | 100.0% | 0.0% | 0.0% | 0 |
+| `events/eotg_augmentation_nonruler.txt` | 6 | 100.0% | 50.0% | 66.7 / 0.0 / 33.3% | 23.5% | 0.33 | 16.7% | 0.0% | 0.0% | 0 |
+| `events/eotg_augmentation_patron.txt` | 9 | 100.0% | 77.8% | 100.0 / 0.0 / 0.0% | 20.5% | 1.11 | 33.3% | 0.0% | 100.0% | 0 |
+| `events/eotg_augmentation_procedures.txt` | 6 | 100.0% | 50.0% | 83.3 / 0.0 / 16.7% | 8.3% | 0.17 | 100.0% | 0.0% | 0.0% | 0 |
+| `events/eotg_augmentation_realm.txt` | 1 | 100.0% | 100.0% | 100.0 / 0.0 / 0.0% | 16.7% | 0.0 | 100.0% | 0.0% | 0.0% | 0 |
+| `events/eotg_augmentation_retinue.txt` | 5 | 100.0% | 80.0% | 60.0 / 0.0 / 40.0% | 19.2% | 0.0 | 60.0% | 0.0% | 40.0% | 0 |
+| `events/eotg_augmentation_tamper.txt` | 3 | 100.0% | 66.7% | 100.0 / 0.0 / 0.0% | 22.2% | 0.67 | 100.0% | 0.0% | 0.0% | 0 |
 | `events/eotg_augmentation_tier1.txt` | 22 | 100.0% | 45.5% | 86.4 / 0.0 / 13.6% | 26.5% | 1.09 | 18.2% | 0.0% | 13.6% | 2 |
 | `events/eotg_augmentation_tier2.txt` | 21 | 90.5% | 47.6% | 71.4 / 0.0 / 28.6% | 21.6% | 1.05 | 14.3% | 0.0% | 9.5% | 0 |
 | `events/eotg_augmentation_tier3.txt` | 24 | 95.8% | 45.8% | 87.5 / 0.0 / 12.5% | 22.0% | 1.21 | 16.7% | 0.0% | 0.0% | 2 |
-| `events/eotg_frontier_events.txt` | 19 | 100.0% | 0.0% | 0.0 / 31.6 / 68.4% | 0.0% | 0.11 | 78.9% | 0.0% | 0.0% | 0 |
+| `events/eotg_frontier_events.txt` | 19 | 100.0% | 52.6% | 73.7 / 0.0 / 26.3% | 0.0% | 0.11 | 78.9% | 0.0% | 0.0% | 0 |
 
-## Events with 2+ personality-gated options (22)
+## Events with 2+ personality-gated options (5)
 
 Feeds eotg_lint L017 and the W5 re-gating batches (§13).
 
 - `eotg_aug_act.004` (events/eotg_augmentation_activities.txt): 2 gated, gregarious, shy
-- `eotg_aug_countdown.001` (events/eotg_augmentation_countdown.txt): 2 gated, ambitious, diligent
-- `eotg_aug_countdown.002` (events/eotg_augmentation_countdown.txt): 2 gated, calm, paranoid
-- `eotg_aug_countdown.003` (events/eotg_augmentation_countdown.txt): 2 gated, honest, stubborn
-- `eotg_aug_countdown.004` (events/eotg_augmentation_countdown.txt): 2 gated, compassionate, sadistic
-- `eotg_aug_end.001` (events/eotg_augmentation_endgame.txt): 2 gated, brave, craven
-- `eotg_aug_heir.001` (events/eotg_augmentation_heir.txt): 2 gated, honest, paranoid
-- `eotg_aug_heir.003` (events/eotg_augmentation_heir.txt): 2 gated, just, wrathful
-- `eotg_aug_heir.004` (events/eotg_augmentation_heir.txt): 2 gated, arrogant, vengeful
-- `eotg_aug_heir.005` (events/eotg_augmentation_heir.txt): 2 gated, callous, compassionate
-- `eotg_aug_heir.007` (events/eotg_augmentation_heir.txt): 2 gated, honest, paranoid
-- `eotg_aug_patron.001` (events/eotg_augmentation_patron.txt): 2 gated, greedy, paranoid
-- `eotg_aug_patron.002` (events/eotg_augmentation_patron.txt): 2 gated, deceitful, honest
-- `eotg_aug_patron.003` (events/eotg_augmentation_patron.txt): 2 gated, diligent, paranoid
-- `eotg_aug_patron.004` (events/eotg_augmentation_patron.txt): 2 gated, just, sadistic
-- `eotg_aug_patron.005` (events/eotg_augmentation_patron.txt): 2 gated, ambitious, compassionate
-- `eotg_aug_patron.006` (events/eotg_augmentation_patron.txt): 2 gated, brave, deceitful
-- `eotg_aug_realm.001` (events/eotg_augmentation_realm.txt): 2 gated, greedy, just
 - `eotg_aug_tier1.008` (events/eotg_augmentation_tier1.txt): 2 gated, gluttonous, temperate
 - `eotg_aug_tier1.009` (events/eotg_augmentation_tier1.txt): 2 gated, chaste, lustful
 - `eotg_aug_tier3.008` (events/eotg_augmentation_tier3.txt): 2 gated, impatient, patient

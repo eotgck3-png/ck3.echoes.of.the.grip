@@ -125,7 +125,19 @@ eotg_aug_tamper.002 = {
     override_background = { reference = eotg_bg_underlevel_night }
 
     left_portrait = {
-        character = scope:owner
+        character = scope:owner    # root: .001 fires this on scope:owner
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = shame
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = nervous
+        }
         animation = schadenfreude
     }
     lower_right_portrait = scope:target
@@ -205,7 +217,19 @@ eotg_aug_tamper.003 = {
     override_background = { reference = eotg_bg_underlevel_night }
 
     left_portrait = {
-        character = scope:owner
+        character = scope:owner    # root: .001 fires this on scope:owner
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = vengeful } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
         animation = dismissal
     }
     lower_right_portrait = scope:target
@@ -308,6 +332,18 @@ eotg_aug_tamper.004 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = vengeful } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = trusting }
+            animation = disbelief
+        }
         animation = paranoia
     }
     right_portrait = {
@@ -463,6 +499,11 @@ eotg_aug_tamper.004 = {
                     }
                 }
             }
+        }
+        # W5 step 5 (event_quality_v1 §13.1): the kept personality gate,
+        # paired the vanilla way (icon, trigger, stress row)
+        stress_impact = {
+            paranoid = minor_stress_impact_loss
         }
         ai_chance = {
             base = 30

@@ -18,6 +18,12 @@
 #   and every stage moves it; no text quantifies it. The register escalates.
 # [voice] desc variants at eotg_aug_voice >= 2 follow index §5.1-2 (the
 #   implant's model of you, internal, a half-second early; never external).
+#
+# event_quality_v1 batch B7 (W5 re-gating, W6 portraits; §13): at most one
+# root personality gate per event; the others re-axed to an education gate
+# (skill icon, education_*_3/_4/_5 AI weights) or a duchy tier gate (no icon,
+# AI base 10 plus counter-trait negatives). The replaced trait keeps its
+# stress row or helper on the same option. No floor exceptions in this file.
 # ─────────────────────────────────────────────────────────────────────────────
 
 namespace = eotg_aug_countdown
@@ -38,6 +44,18 @@ eotg_aug_countdown.001 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = arrogant  has_trait = ambitious } }
+            animation = dismissal
+        }
         animation = worry
     }
 
@@ -97,20 +115,27 @@ eotg_aug_countdown.001 = {
         }
     }
 
-    # [ambitious] "Not now. Not when I am this close."
+    # [duchy+] "Not now. Not when I am this close." W5 (event_quality_v1
+    # §13.1 3b): was [ambitious]; it moves prestige (+50) and risk (+5), so it
+    # cannot fold. Keeping the realm's business ahead of the maintenance
+    # table is a ruler's call on their own calendar, so a duchy tier gate, no
+    # icon. ambitious keeps its stress loss here as a response (§13.1 step
+    # 4); d (diligent, 4 gates against ambitious 7) is the kept personality
+    # gate.
     option = {
         name = eotg_aug_countdown.001.e
-        trigger = { has_trait = ambitious }
-        trait = ambitious
+        trigger = { highest_held_title_tier >= tier_duchy }
         add_prestige = 50
         eotg_add_fracture_risk = { AMOUNT = 5 }
         stress_impact = {
             ambitious = minor_stress_impact_loss
         }
         ai_chance = {
-            base = 30
+            base = 10    # B1 lesson 4: tier gates show to every AI duke
             modifier = { add = 30  has_trait = ambitious }
             modifier = { add = 10  has_trait = arrogant }
+            modifier = { add = -20  has_trait = content }
+            modifier = { add = -10  has_trait = craven }
         }
     }
 }
@@ -120,7 +145,8 @@ eotg_aug_countdown.001 = {
 # Lost Time. Days, not hours. [voice] at voice >= 2: the logs kept the days
 # you did not.
 # Caller: eotg_story_aug_countdown (stage 2).
-# d [paranoid]: the suspect comes from the victim picker (family factor 0.05,
+# d [education_intrigue] (B7 W5; was [paranoid]): the suspect comes from
+# the victim picker (family factor 0.05,
 # Overclocked) and is arrested through vanilla imprison_character_effect
 # (00_prison_effects.txt:1644; QA round 2 M5, as tier2.015.d): house arrest
 # for family, else the dungeon, with tyranny and the family's opinion.
@@ -146,13 +172,23 @@ eotg_aug_countdown.002 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
         animation = shock
     }
 
     immediate = {
         hidden_effect = {
+            # W5 (B7): the picker follows d's gate, which moved from
+            # paranoid to education_intrigue; nothing else reads the suspect.
             if = {
-                limit = { has_trait = paranoid }
+                limit = { has_trait = education_intrigue }
                 eotg_aug_pick_victim_effect = { NAME = eotg_suspect  FAMILY_FACTOR = 0.05 }
             }
         }
@@ -196,14 +232,19 @@ eotg_aug_countdown.002 = {
         }
     }
 
-    # [paranoid] "Someone took them from me."
+    # [education_intrigue] "Someone took them from me." W5
+    # (event_quality_v1 §13.1 3a): was [paranoid]; it imprisons and moves risk
+    # (+8), so it cannot fold. Working out who was near me in the missing
+    # days and naming them is a spymaster's read, so intrigue. paranoid keeps
+    # its relief through the tyranny helper (§13.1 step 4); e (calm, 3 gates,
+    # at the floor) is the kept personality gate.
     option = {
         name = eotg_aug_countdown.002.d
         trigger = {
-            has_trait = paranoid
+            has_trait = education_intrigue
             exists = scope:eotg_suspect
         }
-        trait = paranoid
+        skill = intrigue
         if = {
             limit = { scope:eotg_suspect = { is_imprisoned = no } }
             imprison_character_effect = {
@@ -218,7 +259,10 @@ eotg_aug_countdown.002 = {
         eotg_aug_stress_tyranny_effect = yes
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = paranoid }
+            modifier = { add = 20  has_trait = education_intrigue_3 }
+            modifier = { add = 30  has_trait = education_intrigue_4 }
+            modifier = { add = 30  has_trait = education_intrigue_5 }
+            modifier = { add = 10  has_trait = paranoid }
             modifier = { add = -20  has_trait = just }
         }
     }
@@ -266,6 +310,14 @@ eotg_aug_countdown.003 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = callous } }
+            animation = anger
+        }
         animation = disbelief
     }
 
@@ -304,11 +356,17 @@ eotg_aug_countdown.003 = {
         }
     }
 
-    # [honest] "Ask the court which is true."
+    # [education_diplomacy] "Ask the court which is true." W5
+    # (event_quality_v1 §13.1 3a): was [honest]; it moves prestige (-50) and
+    # risk (-6), so it cannot fold. Drawing the evening's account out of the
+    # people who were there, without making it an interrogation, is a
+    # diplomat's skill, so diplomacy. honest keeps its stress loss here as a
+    # response (§13.1 step 4); e (stubborn, 7 gates against honest 9) is the
+    # kept personality gate.
     option = {
         name = eotg_aug_countdown.003.d
-        trigger = { has_trait = honest }
-        trait = honest
+        trigger = { has_trait = education_diplomacy }
+        skill = diplomacy
         add_prestige = -50
         eotg_add_fracture_risk = { AMOUNT = -6 }
         stress_impact = {
@@ -316,7 +374,10 @@ eotg_aug_countdown.003 = {
         }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = honest }
+            modifier = { add = 20  has_trait = education_diplomacy_3 }
+            modifier = { add = 30  has_trait = education_diplomacy_4 }
+            modifier = { add = 30  has_trait = education_diplomacy_5 }
+            modifier = { add = 10  has_trait = honest }
             modifier = { add = 10  has_trait = humble }
         }
     }
@@ -351,6 +412,18 @@ eotg_aug_countdown.004 = {
     title = eotg_aug_countdown.004.t
     desc = {
         first_valid = {
+            # B7 review: the speaking variant needs a living victim old
+            # enough to speak (the wound in immediate can kill; the picker
+            # can return an infant). .desc stays as the speech-free fallback.
+            triggered_desc = {
+                trigger = {
+                    scope:eotg_victim ?= {
+                        is_alive = yes
+                        age >= 4
+                    }
+                }
+                desc = eotg_aug_countdown.004.desc_asks
+            }
             triggered_desc = {
                 trigger = { exists = scope:eotg_victim }
                 desc = eotg_aug_countdown.004.desc
@@ -372,6 +445,18 @@ eotg_aug_countdown.004 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = crying
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = callous  has_trait = sadistic } }
+            animation = personality_callous
+        }
         animation = rage
     }
     # The wound can kill (increase_wounds_effect): dead-portrait shape as in
@@ -380,7 +465,7 @@ eotg_aug_countdown.004 = {
         trigger = { exists = scope:eotg_victim }
         character = scope:eotg_victim
         triggered_animation = {
-            trigger = { is_alive = no }
+            trigger = { scope:eotg_victim = { is_alive = no } }    # W6: scope named
             animation = dead
         }
         animation = pain
@@ -457,16 +542,22 @@ eotg_aug_countdown.004 = {
         }
     }
 
-    # [compassionate] "Sit with them while they heal."
+    # [education_learning] "Sit with them while they heal." W5
+    # (event_quality_v1 §13.1 3a): was [compassionate]; it moves opinion,
+    # prestige (-25) and risk (-5), so it cannot fold. Tending the wound
+    # myself is a physician's competence, so learning (the medical skill).
+    # compassionate keeps its stress loss here as a response (§13.1 step 4);
+    # d (sadistic, 6 gates against compassionate 14) is the kept personality
+    # gate.
     option = {
         name = eotg_aug_countdown.004.e
         # The wound in immediate can kill; no sitting with the dead.
         trigger = {
-            has_trait = compassionate
+            has_trait = education_learning
             exists = scope:eotg_victim
             scope:eotg_victim = { is_alive = yes }
         }
-        trait = compassionate
+        skill = learning
         scope:eotg_victim = {
             add_opinion = { modifier = eotg_opinion_aug_grateful_patient  target = root  years = 10 }
         }
@@ -477,7 +568,10 @@ eotg_aug_countdown.004 = {
         }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = compassionate }
+            modifier = { add = 20  has_trait = education_learning_3 }
+            modifier = { add = 30  has_trait = education_learning_4 }
+            modifier = { add = 30  has_trait = education_learning_5 }
+            modifier = { add = 20  has_trait = compassionate }
             modifier = { add = 10  has_trait = forgiving }
         }
     }
@@ -501,6 +595,14 @@ eotg_aug_countdown.005 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = arrogant  has_trait = stubborn } }
+            animation = dismissal
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
         animation = sadness
     }
 
@@ -585,6 +687,14 @@ eotg_aug_countdown.006 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = nervous
+        }
         animation = personality_content
     }
 

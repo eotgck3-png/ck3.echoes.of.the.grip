@@ -33,6 +33,18 @@
 # Every event from .002 saves scope:eotg_patron_story and scope:eotg_patron_envoy
 # in immediate. Demand events count up in `after` (every option); .007 and
 # .008 are not demands and do not.
+#
+# event_quality_v1 batch B8 (W5 re-gating, W6 portraits; §13): at most one
+# root personality gate per event; the others re-axed to an education gate
+# (skill icon, education_*_3/_4/_5 AI weights) or a duchy tier gate (no icon,
+# AI base 10 plus counter-trait negatives). The replaced trait keeps its
+# stress row on the same option as a response (§13.1 step 4). Kept gates
+# (thinnest coverage, §13.1 2b): .001 greedy, .002 deceitful, .003 diligent,
+# .004 sadistic, .005 ambitious, .006 deceitful. Spread (step 6): education
+# intrigue / stewardship / martial, tier .003.e / .004.e. .005.d
+# (compassionate, grievance +2 only, as b) is folded into b (§13.1 3c). Portrait
+# triggers run in the portrait character's scope (_events.info:97), so the
+# envoy guards are wrapped in root = { }.
 # ─────────────────────────────────────────────────────────────────────────────
 
 namespace = eotg_aug_patron
@@ -60,6 +72,18 @@ eotg_aug_patron.001 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = greedy }
+            animation = personality_greedy
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = zealous }
+            animation = disapproval
+        }
         animation = thinking
     }
 
@@ -129,19 +153,26 @@ eotg_aug_patron.001 = {
         }
     }
 
-    # [paranoid] "Who are you, really?" Decline.
+    # [education_intrigue] "Who are you, really?" Decline. W5
+    # (event_quality_v1 §13.1 3a): was [paranoid]; it pays the intrigue
+    # lesson, which b does not, so it cannot fold. Seeing through a front
+    # before signing with it is a spymaster's read, so intrigue. paranoid
+    # keeps its stress loss here as a response (§13.1 step 4); greedy (d) is
+    # the kept personality gate (greedy 6 gates against paranoid 14).
     option = {
         name = eotg_aug_patron.001.e
-        trigger = { has_trait = paranoid }
-        trait = paranoid
+        trigger = { has_trait = education_intrigue }
+        skill = intrigue
         add_character_modifier = { modifier = eotg_mod_aug_lesson_intrigue  years = 5 }
         stress_impact = {
             paranoid = minor_stress_impact_loss
         }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = paranoid }
-            modifier = { add = 10  has_trait = craven }
+            modifier = { add = 20  has_trait = education_intrigue_3 }
+            modifier = { add = 30  has_trait = education_intrigue_4 }
+            modifier = { add = 30  has_trait = education_intrigue_5 }
+            modifier = { add = 10  has_trait = paranoid }
         }
     }
 }
@@ -165,12 +196,25 @@ eotg_aug_patron.002 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = stubborn } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = nervous
+        }
         animation = personality_greedy
     }
     right_portrait = {
         # CB-27 M7 pattern (as patron.006): never a dead envoy, or one who
-        # has left court since the tick.
-        trigger = { eotg_aug_patron_envoy_present = yes }
+        # has left court since the tick. W6: scope named (portrait triggers
+        # run in the portrait character's scope).
+        trigger = { root = { eotg_aug_patron_envoy_present = yes } }
         character = scope:eotg_patron_envoy
         animation = steward
     }
@@ -297,14 +341,20 @@ eotg_aug_patron.002 = {
         }
     }
 
-    # [honest] "Ask for honest terms." 50%: half the bill; 50%: offence taken.
+    # [education_stewardship] "Ask for honest terms." 50%: half the bill;
+    # 50%: offence taken. W5 (event_quality_v1 §13.1 3a): was [honest]; it
+    # moves gold or grievance on a roll, so it cannot fold. Taking the invoice
+    # apart line by line and paying what it is worth is a steward's
+    # competence. honest keeps its stress loss here as a response (§13.1
+    # step 4); deceitful (d) is the kept personality gate (deceitful 5 gates
+    # against honest 9).
     option = {
         name = eotg_aug_patron.002.e
         trigger = {
-            has_trait = honest
+            has_trait = education_stewardship
             eotg_aug_patron_can_pay = { BASE = medium_gold_value  MULT = 0.5 }
         }
-        trait = honest
+        skill = stewardship
         random_list = {
             50 = {
                 desc = eotg_aug_patron.002.e.success
@@ -330,8 +380,10 @@ eotg_aug_patron.002 = {
         }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = honest }
-            modifier = { add = 10  has_trait = just }
+            modifier = { add = 20  has_trait = education_stewardship_3 }
+            modifier = { add = 30  has_trait = education_stewardship_4 }
+            modifier = { add = 30  has_trait = education_stewardship_5 }
+            modifier = { add = 10  has_trait = honest }
         }
     }
 
@@ -389,12 +441,25 @@ eotg_aug_patron.003 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = stubborn  has_trait = arrogant } }
+            animation = disapproval
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = trusting }
+            animation = interested
+        }
         animation = thinking
     }
     right_portrait = {
         # CB-27 M7 pattern (as patron.006): never a dead envoy, or one who
-        # has left court since the tick.
-        trigger = { eotg_aug_patron_envoy_present = yes }
+        # has left court since the tick. W6: scope named (portrait triggers
+        # run in the portrait character's scope).
+        trigger = { root = { eotg_aug_patron_envoy_present = yes } }
         character = scope:eotg_patron_envoy
         animation = steward
     }
@@ -480,14 +545,19 @@ eotg_aug_patron.003 = {
         }
     }
 
-    # [paranoid] "Their hands will never touch me."
+    # [duchy+] "Their hands will never touch me." W5 (event_quality_v1 §13.1
+    # 3b): was [paranoid]; it moves risk (+5 / +8) on top of b's grievance,
+    # so it cannot fold. Barring the syndicate's technicians from the seat's
+    # own body is a lord's refusal by right, so a duchy tier gate, no icon.
+    # paranoid keeps its stress loss here as a response (§13.1 step 4);
+    # diligent (d) is the kept personality gate (diligent 4 gates against
+    # paranoid 14).
     option = {
         name = eotg_aug_patron.003.e
         trigger = {
-            has_trait = paranoid
+            highest_held_title_tier >= tier_duchy
             eotg_is_augmented_any = yes
         }
-        trait = paranoid
         eotg_aug_patron_grievance_effect = { AMOUNT = 1 }
         # Balance spec §5.8: the firmware lever scales at Overclocked
         if = {
@@ -501,9 +571,11 @@ eotg_aug_patron.003 = {
             paranoid = minor_stress_impact_loss
         }
         ai_chance = {
-            base = 30
+            base = 10    # B1 lesson 4: tier gates show to every AI duke
             modifier = { add = 30  has_trait = paranoid }
             modifier = { add = 10  has_trait = stubborn }
+            modifier = { add = -20  has_trait = trusting }
+            modifier = { add = -10  has_trait = content }
         }
     }
 
@@ -538,6 +610,18 @@ eotg_aug_patron.004 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = worry
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = sadistic }
+            animation = schadenfreude
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = just }
+            animation = disapproval
+        }
         animation = scheme
     }
     right_portrait = {
@@ -548,8 +632,11 @@ eotg_aug_patron.004 = {
     lower_right_portrait = {
         # CB-27 M7 pattern (as patron.006's right portrait): never a dead
         # envoy, or one who has left court in the 1-30 days since the tick.
-        trigger = { eotg_aug_patron_envoy_present = yes }
+        # W6: scope named (portrait triggers run in the portrait character's
+        # scope); role animation for the one carrying the order.
+        trigger = { root = { eotg_aug_patron_envoy_present = yes } }
         character = scope:eotg_patron_envoy
+        animation = scheme
     }
 
     immediate = {
@@ -662,20 +749,26 @@ eotg_aug_patron.004 = {
         }
     }
 
-    # [just] "Never, and they will hear of your asking."
+    # [duchy+] "Never, and they will hear of your asking." W5
+    # (event_quality_v1 §13.1 3b): was [just]; it moves prestige (+50), which
+    # c does not, so it cannot fold. Refusing in public, in front of the
+    # court, is an act of the seat, so a duchy tier gate, no icon. just keeps
+    # its stress loss here as a response (§13.1 step 4); sadistic (d) is the
+    # kept personality gate (sadistic 6 gates against just 16).
     option = {
         name = eotg_aug_patron.004.e
-        trigger = { has_trait = just }
-        trait = just
+        trigger = { highest_held_title_tier >= tier_duchy }
         add_prestige = 50
         eotg_aug_patron_grievance_effect = { AMOUNT = 2 }
         stress_impact = {
             just = minor_stress_impact_loss
         }
         ai_chance = {
-            base = 30
+            base = 10    # B1 lesson 4: tier gates show to every AI duke
             modifier = { add = 30  has_trait = just }
             modifier = { add = 10  has_trait = brave }
+            modifier = { add = -20  has_trait = arbitrary }
+            modifier = { add = -10  has_trait = craven }
         }
     }
 
@@ -711,6 +804,18 @@ eotg_aug_patron.005 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = crying
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = callous } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = ambitious }
+            animation = personality_bold
+        }
         animation = stress
     }
     right_portrait = {
@@ -720,9 +825,11 @@ eotg_aug_patron.005 = {
     }
     lower_right_portrait = {
         # CB-27 M7 pattern (as patron.006): never a dead envoy, or one who
-        # has left court since the tick.
-        trigger = { eotg_aug_patron_envoy_present = yes }
+        # has left court since the tick. W6: scope named (portrait triggers
+        # run in the portrait character's scope); role animation.
+        trigger = { root = { eotg_aug_patron_envoy_present = yes } }
         character = scope:eotg_patron_envoy
+        animation = steward
     }
 
     immediate = {
@@ -759,14 +866,26 @@ eotg_aug_patron.005 = {
         }
     }
 
-    # "Never."
+    # "Never." / [compassionate] "Not my child." W5 (event_quality_v1 §13.1
+    # 3c, B8 QA): the former option d (compassionate) moved only grievance +2,
+    # the same as b, so it is folded here: its text as a name variant
+    # (vanilla health_events.txt:1141-1148, ep3_admin_events.txt:512-523),
+    # its stress row and its AI weight. b's plain name stays the default.
     option = {
         name = eotg_aug_patron.005.b
+        name = {
+            trigger = { has_trait = compassionate }
+            text = eotg_aug_patron.005.d
+        }
         eotg_aug_patron_grievance_effect = { AMOUNT = 2 }
+        stress_impact = {
+            compassionate = medium_stress_impact_loss
+        }
         ai_chance = {
             base = 40
             modifier = { add = 20  has_trait = stubborn }
             modifier = { add = 10  has_trait = brave }
+            modifier = { add = 30  has_trait = compassionate }
         }
     }
 
@@ -785,22 +904,6 @@ eotg_aug_patron.005 = {
             base = 30
             modifier = { add = 20  has_trait = brave }
             modifier = { add = 10  has_trait = compassionate }
-        }
-    }
-
-    # [compassionate] "Not my child."
-    option = {
-        name = eotg_aug_patron.005.d
-        trigger = { has_trait = compassionate }
-        trait = compassionate
-        eotg_aug_patron_grievance_effect = { AMOUNT = 2 }
-        stress_impact = {
-            compassionate = medium_stress_impact_loss
-        }
-        ai_chance = {
-            base = 30
-            modifier = { add = 30  has_trait = compassionate }
-            modifier = { add = 10  has_trait = forgiving }
         }
     }
 
@@ -897,11 +1000,24 @@ eotg_aug_patron.006 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = vengeful } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
         animation = stress
     }
     right_portrait = {
-        # CB-27 M7: never a dead envoy, or one who has left court.
-        trigger = { eotg_aug_patron_envoy_present = yes }
+        # CB-27 M7: never a dead envoy, or one who has left court. W6: scope
+        # named (portrait triggers run in the portrait character's scope).
+        trigger = { root = { eotg_aug_patron_envoy_present = yes } }
         character = scope:eotg_patron_envoy
         animation = schadenfreude
     }
@@ -1014,15 +1130,21 @@ eotg_aug_patron.006 = {
         }
     }
 
-    # [brave] "Come and take it from me."
+    # [education_martial] "Come and take it from me."
     # CB-27 M7: as c, the envoy must be alive and at court.
+    # W5 (event_quality_v1 §13.1 3a): was [brave]; it moves prestige (+200)
+    # on top of c's betrayal, so it cannot fold. Daring the syndicate to come
+    # in force, with the guard already set, is a commander's read of what
+    # they can send, so martial. brave keeps its stress loss here as a
+    # response (§13.1 step 4); deceitful (d) is the kept personality gate
+    # (deceitful 5 gates against brave 10).
     option = {
         name = eotg_aug_patron.006.e
         trigger = {
-            has_trait = brave
+            has_trait = education_martial
             eotg_aug_patron_envoy_present = yes
         }
-        trait = brave
+        skill = martial
         eotg_aug_patron_betray_effect = yes
         add_prestige = 200
         eotg_aug_stress_murder_effect = yes
@@ -1031,8 +1153,11 @@ eotg_aug_patron.006 = {
         }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = brave }
-            modifier = { add = 10  has_trait = arrogant }
+            modifier = { add = 20  has_trait = education_martial_3 }
+            modifier = { add = 30  has_trait = education_martial_4 }
+            modifier = { add = 30  has_trait = education_martial_5 }
+            modifier = { add = 10  has_trait = brave }
+            modifier = { add = -20  has_trait = craven }
         }
     }
 
@@ -1084,6 +1209,18 @@ eotg_aug_patron.007 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = arrogant  has_trait = stubborn } }
+            animation = dismissal
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = gregarious  has_trait = trusting } }
+            animation = interested
+        }
         animation = thinking
     }
     right_portrait = {
@@ -1206,12 +1343,25 @@ eotg_aug_patron.008 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = stubborn } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = greedy }
+            animation = personality_greedy
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = worry
+        }
         animation = thinking
     }
     right_portrait = {
         # CB-27 M7 pattern (as patron.006): never a dead envoy, or one who
-        # has left court since the tick.
-        trigger = { eotg_aug_patron_envoy_present = yes }
+        # has left court since the tick. W6: scope named (portrait triggers
+        # run in the portrait character's scope).
+        trigger = { root = { eotg_aug_patron_envoy_present = yes } }
         character = scope:eotg_patron_envoy
         animation = steward
     }
@@ -1409,6 +1559,18 @@ eotg_aug_patron.009 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = vengeful } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
         animation = stress
     }
     right_portrait = {

@@ -493,6 +493,26 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Phase G2** (signature resources, rank ladders, events) is outlined in spec §13; new events need the owner's approval.
 - **Owner:** human → orchestrator
 
+### CB-50: Seamless exposure, batch B13 (committed files)
+- **Status:** ready (2026-10-09)
+- **What:** after the P3 first-person conversion, about 120 non-Seamless events can still fire for a Seamless ruler (`eotg_total_integration`) and show first-person text. That breaks §12.1 rule 7. The ruling and per-event audit are in `docs/specs/event_quality_v1.md` §12.5. B7 and B8 take their own items: heir.001/.003/.007 get Seamless branches, and realm.001 gets a guard. The rest is in files that are already committed.
+- **Owner:** eotg-scripter (rule (a): exclude Seamless at the caller), then eotg-lore-keeper and eotg-localizer for the three rule (b) keys
+- **Next step:** one scripter pass over the §12.5 B13 list:
+  - story ticks: heir stage 1, patron end, retinue park;
+  - kingpin start, M1, and .033/.034/.039;
+  - the Sickly Child and nonruler liege limits;
+  - actor gates on examine, tamper and salvage;
+  - the inherit close at the threshold.
+  Then (b) on act.001, act.003 and nr.003; lore words those 3 keys. Lowest priority: Neurofractured guards on 28 fracture events. QA after.
+- **Refs:** `docs/specs/event_quality_v1.md` §12.1 rule 7, §12.5
+
+### CB-51: nr.004.e: the cover-up text against the public effect
+- **Status:** waiting-human (2026-10-09)
+- **What:** option nr.004.e reads as a concealment ("…then write that the hardware did it"). Its effect is public: +20 dread and `death_murder` with the champion recorded as the killer. The tension predates P3 and comes from the original sadistic option.
+- **Owner:** human (design call), then eotg-architect
+- **Next step:** decide one of two fixes. Either the text drops the concealment, or the effect becomes secret: a murder secret instead of public dread.
+- **Refs:** `events/eotg_augmentation_nonruler.txt` nr.004; B9 QA 2026-10-09
+
 ## Tooling and environment
 
 ### CB-18: Game is 1.20.0.3; the tools target older versions

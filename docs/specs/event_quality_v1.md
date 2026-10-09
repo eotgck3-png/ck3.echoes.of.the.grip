@@ -512,6 +512,119 @@ New text written in the meantime follows §12 from the day it is dispatched. Tha
 | 11 | The report's finding 3 recommendation ("keep second person") | superseded | The report's header already says so. No edit. | none |
 | 12 | Memory `feedback_event_voice_house_style.md` | already states R1–R3 (updated by the loc-review session; indexed in MEMORY.md) | No change. Memory `feedback_gemini_writing_briefs.md` has no quote rule. | none |
 
+### 12.5 Seamless exposure (2026-10-09, eotg-architect)
+
+**Problem.** Rule 7 gives a Seamless ruler (`eotg_total_integration`) the log register. After P3, most event text is first person, and some non-Seamless events still reach a Seamless root. Lore review found heir.001/.003/.007, patron.002–.009, realm.001, tamper.002/.003 and int.002. This audit covers every event in `events/eotg_augmentation_*.txt`, kingpin and inherit included: 248 events, read on the working tree.
+
+**Facts the audit rests on.**
+- `eotg_cybernetics`, `eotg_neurofractured` and `eotg_total_integration` are mutual opposites (`common/traits/eotg_augmentation_traits.txt:67,143,179`), and the threshold removes Neurofractured (`eotg_augmentation_effects.txt:1061`). So any gate on a tier trigger or on Neurofractured excludes Seamless.
+- `eotg_is_augmented_any` **includes** Seamless (`eotg_augmentation_triggers.txt:7-13`).
+- A delayed event's `trigger` is re-checked when the event fires. The mod's world-state guards already rely on this (`eotg_aug_kingpin_triggers.txt:34-37`).
+
+#### 12.5.1 Ruling
+- **S1. Default (a): exclude.** Put the exclusion at the **caller** (on_action, story tick, interaction `is_shown`, scheme `allow`/`valid`, scripted effect), as vanilla gates role. Two exceptions put a state guard in the event `trigger` instead:
+  - the event's trigger already carries root's state conditions (realm.001);
+  - the only path is in flight, where the threshold is crossed during a `days =` delay. Re-checking at fire time is the mechanism for that.
+
+  A state guard is not a cooldown, so lesson 5 does not apply. Use (a) wherever the premise needs a self: personal motive, a parent's choice, deliberation, a debt owed by a person.
+- **S2. (b): register variant.** Only for events that belong to the Seamless arc (heir.001/.003/.007), and for the three events that already ship a Seamless option by design (`cybernetics_v2_tier_options.md` rows 1, 5, 9: act.001, act.003, nr.003).
+- **S3. Shape of (b).**
+  - A `triggered_desc = { trigger = { has_trait = eotg_total_integration } desc = <key>.desc_seamless }` goes **first** in `first_valid`. Where the main desc is a bare `desc =`, wrap it in a `first_valid`.
+  - Every appended fragment that is first person gets `NOT = { has_trait = eotg_total_integration }`.
+  - Every option a Seamless root can see either takes a `name = { trigger = { has_trait = eotg_total_integration } text = <key>_seamless }` variant (vanilla `ep3_admin_events.txt:512-523`; the default `name =` stays last) or gets a Seamless guard.
+  - At least one option stays visible. Effects and `ai_chance` don't change.
+- **S4. Stories.** At the story tick, a Seamless owner:
+  - **ends** the patron story, on every tick, and the kingpin story, outside the war stage. `on_end` already does the cleanup (vanilla `story_cycle_take_mandate_of_heaven.txt:172-189`, the landless-end shape these stories already copy);
+  - **parks** the retinue story: a branch that does nothing, so the owner bonus kept by `eotg_aug_total_integration_effect` stays.
+
+  No event replaces these. A Seamless write-off beat would be NEW (§10).
+- **S5. Threshold close.** `eotg_aug_total_integration_effect` closes a live Fracturing Inheritance tree silently with `eotg_aug_inherit_close_effect`, the same close that every `on_trigger_fail` uses.
+- **S6. Going forward.** Every new event that can fire on a ruler states in its spec whether a Seamless root can reach it, and whether that is (a) or (b).
+
+#### 12.5.2 Audit
+| Event | Seamless root? | Path | Register now | Rule |
+|---|---|---|---|---|
+| heir.001 | rare | A Seamless arc starts at stage 3 (`on_actions:1924-1948`). Three hand-backs (`stories:181-217`, −1 each) bring it to stage 0, which fires heir.001 (`stories:220-229`). The event trigger is story-only (`heir.txt:55`). | 1st (B7) | (b) |
+| heir.003 | yes | Stage 2 (`stories:252-268`), reached after one hand-back or in round 2 after heir.007 | 1st (B7) | (b) |
+| heir.007 | yes | Round 2 opens after heir.004 is answered (`stories:~150-178`) | 1st (B7) | (b) |
+| heir.004 | yes | `stories:271-298` | neutral main + `desc_seamless`; first-person fragments and options guarded | compliant (§13.3 fix) |
+| heir.006 | yes | `heir.txt:677` | hidden | none |
+| fracture.005 | rare | Stage 1 after two hand-backs (`stories:231-249`; that branch accepts Seamless) | 1st | (a) caller |
+| fracture.0001–.029, except .005 (28) | rare, in flight | The Neurofractured pulse (`on_actions:1195-1480`) and chained options schedule with `days = { 1 30 }`. `eotg_decision_aug_embrace_cascade` (`decisions:768-801`) can cross the threshold inside that delay. No trigger re-checks Neurofractured. | 1st / NF | (a) event trigger |
+| patron.006 | yes | The first Neurofractured tick sets demand 4 (`stories:598,728`). .006.a keeps the story, so every later tick refires .006 (`stories:644,774`), Seamless included. | 1st, letter (W9) | (a) story |
+| patron.009 | yes | Paper sold (`stories:588,718`), any owner state | 1st | (a) story |
+| patron.002–.005, .007 | rare | Only if the owner goes Neurofractured → Seamless between two ticks (2–4 years); otherwise .006 shadows them | 1st | (a) story |
+| realm.001 | yes | `effects:2965-2981`: player liege, any trait, under Ban | 1st (B8) | (a) event trigger |
+| tamper.002, .003 | yes | Root is the scheme owner; nothing gates the owner (`interactions:1102-1107`, `schemes:44,96`) | 1st (B8) | (a) actor gate |
+| int.001 | yes | `interactions:914-942`: actor ungated | 1st (B8) | (a) actor gate |
+| int.002 | yes | `interactions:1382-1452`: actor ungated | 1st (B8) | (a) actor gate |
+| act.001 | yes | `on_actions:2094-2108`: host in any state, by design | 1st (B9) + `.f` Seamless option | (b) |
+| act.003 | yes | `on_actions:2136-2159`: host, by design | 1st (B9) + `.g` | (b) |
+| nr.003 | yes | `on_actions:1671`: liege = employer, by design | 1st (B9) + `.g` | (b) |
+| nr.001, .002, .004, .005 | yes | `on_actions:1513-1738`: the liege limits test flags and cooldowns, not traits | 1st (B9) | (a) caller |
+| nr.006 | yes | `effects:1575-1584`: the cascading champion's employer | 1st (B9) | (a) caller |
+| init.014, .015 | yes | Sickly Child block `on_actions:414-427` ("the ruler may be augmented or not"); .015 chains from .014 | 1st (B6) | (a) caller |
+| kingpin .001–.038, .050, .060–.076 (40) | yes | `eotg_aug_kp_can_start` (`kingpin_triggers:19-32`) has no trait gate. Augmented rulers weigh ×1.5 (`kingpin_on_actions:25-63`). | 1st (B11) | (a) start + M1 |
+| kingpin.039 | yes | `kingpin_effects:818-829`: root is the player opponent | 1st (B11) | (a) caller |
+| kingpin.040 | rare | Inheritance (`kingpin_story:160-181`) to a Seamless heir | 1st (B11) | (a) via M1 |
+| inherit .001–.024, .027 (25) | rare | The start excludes Seamless (`triggers:691`), but a Neurofractured ruler can cross the threshold mid-tree | 1st (B10) | (a) S5 |
+| retinue .001–.005 | rare | `stories:867-990`. The Neurofractured branch (`:901`) normally ends the programme first. | 1st (B9) | (a) story park |
+| end.010, .011, .040, .041, .042, proc.004 | yes, by design | Threshold and Seamless-only | log | compliant (§13.3 fixes in B7) |
+| inherit.028, tamper.001 | (any) | | hidden | none |
+| tier1/2/3 (67), countdown (6), end.001/.002/.009/.020/.030/.031, init (18 others), proc.001/.002/.003/.005/.020, act.002/.004–.006, heir.005, patron.001/.008, tamper.004, inherit.025/.026 | no | Root gated on a tier trigger, Neurofractured, `augmented_any = no`, `eotg_aug_tamper_target` or an explicit `NOT` Seamless; or root is a successor | n/a | none |
+
+**Counts (248 events):**
+- 60 reachable in ordinary play with a non-log register;
+- 66 rare;
+- 7 compliant by design;
+- 3 hidden;
+- 112 unreachable.
+
+By rule:
+- (b): 6 events (heir ×3; act.001, act.003, nr.003);
+- (a): 120 events, through the gate sites in §12.5.3.
+
+#### 12.5.3 Work list
+**B7 (open; `events/eotg_augmentation_heir.txt` and loc).** The (b) plan, using lore's drafts from the 2026-10-09 lore review, verbatim.
+
+| Event | Scripter | Localizer keys |
+|---|---|---|
+| heir.001 | `desc_seamless` first in `first_valid`; guard `desc_patient` NOT Seamless; name variants on `.a` and `.c`; guard `.b` NOT Seamless (`.d` and `.e` are already closed) | `eotg_aug_heir.001.desc_seamless`, `.a_seamless` "Noted.", `.c_seamless` "Designate [eotg_heir.GetFirstName] as keeper." |
+| heir.003 | `desc_seamless` first; variants on `.a` and `.c`; `.b` and `.e` stay (already imperative) | `.desc_seamless`, `.a_seamless` "Schedule treatment.", `.c_seamless` "Designate [eotg_heir.GetFirstName] as keeper." |
+| heir.007 | `desc_seamless` first (it overrides the executed, dead and displaced variants); variants on `.a` and `.c`; guard `.b` | `.desc_seamless`, `.a_seamless` "Noted.", `.c_seamless` "Designate [eotg_heir.GetFirstName] as keeper." |
+
+That is nine keys. The descs are in the log register, and speech in them may say "you".
+
+**B8 (open; `events/eotg_augmentation_realm.txt`).** Add `NOT = { has_trait = eotg_total_integration }` to realm.001's `trigger`. No loc. The patron, tamper and int fixes sit in committed `common/` files (B13).
+
+**B13 Seamless exposure (follow-up; committed files; after B7/B8 land).** Scripter, in this order:
+1. `common/story_cycles/eotg_augmentation_stories.txt`:
+   - heir branch 3 (`:231-249`): a Seamless owner goes to stage 2 with no event;
+   - patron, both effect_groups (`:560`, `:690`): a Seamless end branch after the landless branch;
+   - retinue (`:867`): a Seamless park branch after the landless branch.
+2. Kingpin:
+   - `eotg_aug_kp_can_start`: add NOT Seamless;
+   - M1 (`kingpin_story:192-211`): a Seamless owner ends the story outside the war stage;
+   - .033 and .034: a NOT Seamless trigger guard (war-stage residue);
+   - the `kingpin_effects:818` opponent limit: NOT Seamless (.039).
+3. `on_actions:414-427` (Sickly Child) and the liege limits of the nr.001/.002/.004/.005 entries: NOT Seamless. The nr.003 entry stays open. `effects:1575-1584`: no nr.006 for a Seamless employer; the cascade itself still runs.
+4. `scope:actor` NOT Seamless in the `is_shown` of examine, start_tamper and salvage. The tamper scheme's `allow` and `valid` get an owner NOT Seamless, which ends a running scheme.
+5. `eotg_aug_total_integration_effect`: if `has_variable = eotg_inh_heir`, run `eotg_aug_inherit_close_effect`.
+6. (b) on act.001, act.003 and nr.003:
+   - `desc_seamless` first;
+   - guard the first-person fragments (act.001 `desc_many`/`_oc`/`_nf`/`_ban(_v)`; act.003 `desc_hot`/`_ban(_v)`/`_license(_v)`);
+   - guard act.001.d ("my rank") and act.003.b ("I see").
+
+   The localizer writes 3 keys (`eotg_aug_act.001.desc_seamless`, `eotg_aug_act.003.desc_seamless`, `eotg_aug_nr.003.desc_seamless`), worded by lore-keeper.
+7. Lowest priority: add `has_trait = eotg_neurofractured` to the trigger of the 28 fracture events. The scripter first confirms that every caller fires on a Neurofractured root.
+
+**DoD.**
+- With `add_trait = eotg_total_integration` on a test ruler, no (a) event fires from the cited paths.
+- Every (b) event shows a Seamless desc and only options with no I/me/my/we outside quotes, with at least one option.
+- Tiger, PX and lint are clean against the known-benign list.
+
+**Deferred and NEW (owner's call):** Seamless beats for the patron write-off, a retinue under a Seamless owner and kingpin under Seamless. These are suggestions only.
+
 ---
 
 ## 13. Re-gating rubric (R2)
@@ -738,3 +851,12 @@ That is 230 events overridden and 19 kept: the 6 activity events plus 13 family,
 - needs-loc: W0d/W0e already in flight with eotg-localizer; the four Seamless shipped-text fixes are queued in batch B7 (§13.3)
 - needs-lore: none open. The W7 addendum (`event_quality_w7_set_pieces.md`) was signed off 2026-10-09 with wording changes, now applied. L-1 and L-2 were answered 2026-10-09.
 - needs-human: CB-44 in-game checks for W0d and W2 (`common/event_backgrounds/` is already in the CLAUDE.md placement list)
+
+### HANDOFF (2026-10-09, §12.5 Seamless exposure)
+- status: done (audit and ruling written; no script or loc touched)
+- next: orchestrator → eotg-scripter + eotg-localizer for the B7 heir items and the B8 realm.001 guard (§12.5.3), inside the open batches; then B13 as a follow-up batch after B7/B8 commit
+- ask: Apply §12.5.3 B7 (heir.001/.003/.007 (b): `desc_seamless` first, option name variants, guards) and B8 (realm.001 trigger guard). Queue B13 items 1–7 against the committed files.
+- files: docs/specs/event_quality_v1.md §12.5
+- needs-loc: B7 9 keys (lore's heir drafts verbatim, from the 2026-10-09 lore review); B13 3 keys (act.001/.003, nr.003 `desc_seamless`)
+- needs-lore: word the 3 B13 descs; routine check that a silent patron/kingpin end and a parked retinue at the threshold are canon-neutral (S4)
+- needs-human: none (Seamless beats for patron/retinue/kingpin are NEW and listed as suggestions only)

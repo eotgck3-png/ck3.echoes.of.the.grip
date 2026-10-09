@@ -27,6 +27,13 @@
 # reads the Seamless residue, eotg_aug_residue). .020 reads the former marker
 # (eotg_aug_former) and c/d lead into an install. All risk moves are hidden;
 # no text quantifies them.
+#
+# event_quality_v1 batch B8 (W5, W6; §13): no event here has two personality
+# gates, so none is re-gated. Spread exception (§13.1 step 6, orchestrator
+# ruling 2026-10-09): the two lifestyle_physician gates (.001.e, .003.e)
+# count as competence gates, and no option is authority-flavoured, so the
+# file has no tier gate. Kept personality gates: .001.f and .020.e zealous,
+# .003.f cynical. W6: trait reactions on root (proc.004 exempt: Seamless).
 # ─────────────────────────────────────────────────────────────────────────────
 
 namespace = eotg_aug_proc
@@ -95,6 +102,18 @@ eotg_aug_proc.001 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = zealous }
+            animation = personality_zealous
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
         animation = worry
     }
     # Guarded (vanilla events/activities/activity_system_events.txt:89-92)
@@ -104,7 +123,7 @@ eotg_aug_proc.001 = {
             NOT = { scope:eotg_proc_surgeon = root }
         }
         character = scope:eotg_proc_surgeon
-        animation = personality_rational
+        animation = physician    # W6: role animation (was personality_rational)
     }
 
     immediate = {
@@ -387,6 +406,18 @@ eotg_aug_proc.002 = {
             }
             animation = pain
         }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = worry
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = content }
+            animation = personality_content
+        }
         animation = personality_rational
     }
 
@@ -548,6 +579,18 @@ eotg_aug_proc.003 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = stubborn } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = zealous }
+            animation = disapproval
+        }
         animation = pain
     }
     right_portrait = {
@@ -556,7 +599,7 @@ eotg_aug_proc.003 = {
             NOT = { scope:eotg_proc_surgeon = root }
         }
         character = scope:eotg_proc_surgeon
-        animation = personality_rational
+        animation = physician    # W6: role animation (was personality_rational)
     }
 
     immediate = {
@@ -741,6 +784,9 @@ eotg_aug_proc.004 = {
         eotg_aug_has_repair_injury = yes
     }
 
+    # W6 exemption (event_quality_v1): root is always Seamless here, and
+    # Seamless ends the self (§12.1 rule 7), so no trait-keyed reaction: a
+    # personality in the face would contradict the register. idle stays.
     left_portrait = {
         character = root
         animation = idle
@@ -808,6 +854,18 @@ eotg_aug_proc.020 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = ambitious  has_trait = cynical } }
+            animation = sadness
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = zealous }
+            animation = personality_zealous
+        }
         animation = thinking
     }
 
@@ -936,6 +994,18 @@ eotg_aug_proc.005 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = nervous
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = greedy }
+            animation = personality_greedy
+        }
         animation = personality_rational
     }
     right_portrait = {
@@ -944,7 +1014,7 @@ eotg_aug_proc.005 = {
             NOT = { scope:eotg_proc_surgeon = root }
         }
         character = scope:eotg_proc_surgeon
-        animation = personality_rational
+        animation = physician    # W6: role animation (was personality_rational)
     }
 
     immediate = {

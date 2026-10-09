@@ -29,6 +29,15 @@
 # the story's eotg_heir_dread, which weights heir.004.
 # Resource: every option moves eotg_fracture_risk on the ruler, except
 # heir.005 (the heir's event), which couples through d (tier change).
+#
+# event_quality_v1 batch B7 (W5 re-gating, W6 portraits; §13): at most one
+# root personality gate per event; the others re-axed to an education gate
+# (skill icon, education_*_3/_4/_5 AI weights) or a duchy tier gate (no icon,
+# AI base 10 plus counter-trait negatives); kept gates paired with a stress
+# row (§13.1 step 5). heir.004's two gates sit on exclusive outcome branches
+# but still count, so ally_b is re-axed. heir.005 is a W7 set piece: its
+# reactions are the W7 addendum's (§6.5) and the witness portrait is W6's;
+# window, effect, widgets and desc text are left to W7.
 # -----------------------------------------------------------------------------
 
 namespace = eotg_aug_heir
@@ -48,6 +57,11 @@ eotg_aug_heir.001 = {
     title = eotg_aug_heir.001.t
     desc = {
         first_valid = {
+            # §12.5 S3 (b): a Seamless owner gets the log register.
+            triggered_desc = {
+                trigger = { has_trait = eotg_total_integration }
+                desc = eotg_aug_heir.001.desc_seamless
+            }
             triggered_desc = {
                 trigger = { eotg_is_aug_tier3 = yes }
                 desc = eotg_aug_heir.001.desc_overclocked
@@ -58,6 +72,8 @@ eotg_aug_heir.001 = {
             trigger = {
                 exists = scope:eotg_heir
                 scope:eotg_heir = { has_character_flag = eotg_flag_aug_child_patient }
+                # §12.5 S3: the fragment says "asking me", so first person
+                NOT = { has_trait = eotg_total_integration }
             }
             desc = eotg_aug_heir.001.desc_patient
         }
@@ -74,6 +90,22 @@ eotg_aug_heir.001 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # §12.5 / rule 7: a Seamless owner stays still
+            trigger = { has_trait = eotg_total_integration }
+            animation = idle
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = arrogant  has_trait = callous } }
+            animation = dismissal
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = sadness
+        }
         animation = worry
     }
     right_portrait = {
@@ -125,6 +157,10 @@ eotg_aug_heir.001 = {
     # "Then learn to keep me, if it comes to that." The keeper flag weighs
     # heir.004 toward ally and lets heir.003.c fall back on it.
     option = {
+        name = {    # §12.5 S3 (b): Seamless register variant
+            trigger = { has_trait = eotg_total_integration }
+            text = eotg_aug_heir.001.c_seamless
+        }
         name = eotg_aug_heir.001.c
         scope:eotg_heir = {
             add_character_flag = eotg_flag_aug_heir_keeper
@@ -139,7 +175,8 @@ eotg_aug_heir.001 = {
         }
     }
 
-    # [honest] "Tell them the truth."
+    # [honest] "Tell them the truth." The one personality gate (honest 9
+    # against paranoid 14); W5 step 5 adds its stress row.
     option = {
         name = eotg_aug_heir.001.d
         trigger = { has_trait = honest }
@@ -150,6 +187,9 @@ eotg_aug_heir.001 = {
         }
         scope:eotg_heir_story = { change_variable = { name = eotg_heir_dread  add = -1 } }
         eotg_add_fracture_risk = { AMOUNT = -3 }
+        stress_impact = {
+            honest = minor_stress_impact_loss    # W5 step 5
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = honest }
@@ -157,11 +197,21 @@ eotg_aug_heir.001 = {
         }
     }
 
-    # [paranoid] "They want the throne."
+    # [education_intrigue] "They want the throne." W5 (event_quality_v1
+    # §13.1 3a): was [paranoid]; it moves the heir's opinion, the story's
+    # dread (+1) and risk (+5), so it cannot fold. Reading an heir's concern
+    # as a move on the seat is a spymaster's read of motive, so intrigue.
+    # paranoid had no stress row; it keeps an AI weight here. d (honest) is
+    # the kept personality gate.
     option = {
         name = eotg_aug_heir.001.e
-        trigger = { has_trait = paranoid }
-        trait = paranoid
+        trigger = {
+            has_trait = education_intrigue
+            # The old personality gate kept a Seamless owner out (no
+            # personality traits); keep that population (§12.1 rule 7).
+            NOT = { has_trait = eotg_total_integration }
+        }
+        skill = intrigue
         scope:eotg_heir = {
             add_opinion = { modifier = eotg_opinion_aug_fear  target = root  years = 10 }
         }
@@ -170,8 +220,12 @@ eotg_aug_heir.001 = {
         eotg_aug_stress_cruelty_effect = yes
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = paranoid }
+            modifier = { add = 20  has_trait = education_intrigue_3 }
+            modifier = { add = 30  has_trait = education_intrigue_4 }
+            modifier = { add = 30  has_trait = education_intrigue_5 }
+            modifier = { add = 20  has_trait = paranoid }
             modifier = { add = 10  has_trait = vengeful }
+            modifier = { add = -20  has_trait = trusting }
         }
     }
 }
@@ -188,6 +242,11 @@ eotg_aug_heir.003 = {
     title = eotg_aug_heir.003.t
     desc = {
         first_valid = {
+            # §12.5 S3 (b): a Seamless owner gets the log register.
+            triggered_desc = {
+                trigger = { has_trait = eotg_total_integration }
+                desc = eotg_aug_heir.003.desc_seamless
+            }
             triggered_desc = {
                 trigger = { scope:eotg_heir_story.var:eotg_round ?= 2 }
                 desc = eotg_aug_heir.003.desc_successor
@@ -208,6 +267,22 @@ eotg_aug_heir.003 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # §12.5 / rule 7: a Seamless owner stays still
+            trigger = { has_trait = eotg_total_integration }
+            animation = idle
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = callous } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
         animation = stress
     }
     right_portrait = {
@@ -230,6 +305,10 @@ eotg_aug_heir.003 = {
     # "I'll seek treatment." The promise halves Excision's cost (Phase 3b,
     # eotg_aug_end.001 / eotg_decision_aug_excision).
     option = {
+        name = {    # §12.5 S3 (b): Seamless register variant
+            trigger = { has_trait = eotg_total_integration }
+            text = eotg_aug_heir.003.a_seamless
+        }
         name = eotg_aug_heir.003.a
         add_character_flag = { flag = eotg_flag_aug_promised_treatment  years = 2 }
         scope:eotg_heir_story = { change_variable = { name = eotg_heir_dread  add = -1 } }
@@ -263,6 +342,10 @@ eotg_aug_heir.003 = {
     # "Then keep me." Regency with the heir at 50 if possible, else the
     # keeper flag.
     option = {
+        name = {    # §12.5 S3 (b): Seamless register variant
+            trigger = { has_trait = eotg_total_integration }
+            text = eotg_aug_heir.003.c_seamless
+        }
         name = eotg_aug_heir.003.c
         if = {
             limit = {
@@ -286,18 +369,29 @@ eotg_aug_heir.003 = {
         }
     }
 
-    # [just] "Then judge me."
+    # [duchy+] "Then judge me." W5 (event_quality_v1 §13.1 3b): was [just];
+    # it moves prestige (-100), the story's dread (-1) and risk (-3), so it
+    # cannot fold. Submitting my own fitness to a hearing is a ruler's
+    # procedure, so a duchy tier gate, no icon (as tier3.006's inquiry, B3).
+    # just had no stress row; it keeps an AI weight here. e (wrathful, 4
+    # gates against just 16) is the kept personality gate.
     option = {
         name = eotg_aug_heir.003.d
-        trigger = { has_trait = just }
-        trait = just
+        trigger = {
+            highest_held_title_tier >= tier_duchy
+            # The old personality gate kept a Seamless owner out (no
+            # personality traits); keep that population (§12.1 rule 7).
+            NOT = { has_trait = eotg_total_integration }
+        }
         add_prestige = -100
         scope:eotg_heir_story = { change_variable = { name = eotg_heir_dread  add = -1 } }
         eotg_add_fracture_risk = { AMOUNT = -3 }
         ai_chance = {
-            base = 30
+            base = 10    # B1 lesson 4: tier gates show to every AI duke
             modifier = { add = 30  has_trait = just }
             modifier = { add = 10  has_trait = honest }
+            modifier = { add = -20  has_trait = arbitrary }
+            modifier = { add = -10  has_trait = arrogant }
         }
     }
 
@@ -399,6 +493,28 @@ eotg_aug_heir.004 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # §12.5 / rule 7: a Seamless owner stays still
+            trigger = { has_trait = eotg_total_integration }
+            animation = idle
+        }
+        # W6 (event_quality_v1). A Seamless owner has no personality traits,
+        # so the trait keys never fire for one; the outcome key is guarded off
+        # Seamless (§12.1 rule 7: the body does not react).
+        triggered_animation = {
+            trigger = {
+                scope:eotg_heir_choice = flag:kill_failed
+                NOT = { has_trait = eotg_total_integration }
+            }
+            animation = shock
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = vengeful } }
+            animation = anger
+        }
         animation = stress
     }
     right_portrait = {
@@ -730,22 +846,31 @@ eotg_aug_heir.004 = {
         }
     }
 
-    # Ally — [arrogant] "I did not ask for this."
+    # Ally — [duchy+] "I did not ask for this." W5 (event_quality_v1 §13.1
+    # 3b): was [arrogant]; it moves the heir's opinion and risk (+5), so it
+    # cannot fold. Refusing a keeper the seat did not ask for is a ruler
+    # standing on their own authority, so a duchy tier gate, no icon.
+    # arrogant had no stress row; it keeps an AI weight here. kill_c
+    # (vengeful, 4 gates against arrogant 6) is the kept personality gate.
     option = {
         name = eotg_aug_heir.004.ally_b
         trigger = {
             scope:eotg_heir_choice = flag:ally
-            has_trait = arrogant
+            highest_held_title_tier >= tier_duchy
+            # The old personality gate kept a Seamless owner out (no
+            # personality traits); keep that population (§12.1 rule 7).
+            NOT = { has_trait = eotg_total_integration }
         }
-        trait = arrogant
         scope:eotg_heir = {
             add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
         }
         eotg_add_fracture_risk = { AMOUNT = 5 }
         ai_chance = {
-            base = 30
+            base = 10    # B1 lesson 4: tier gates show to every AI duke
             modifier = { add = 30  has_trait = arrogant }
             modifier = { add = 10  has_trait = stubborn }
+            modifier = { add = -20  has_trait = humble }
+            modifier = { add = -10  has_trait = trusting }
         }
     }
 
@@ -820,6 +945,9 @@ eotg_aug_heir.004 = {
             death = { death_reason = death_execution  killer = root }
         }
         eotg_aug_stress_murder_effect = yes
+        stress_impact = {
+            vengeful = minor_stress_impact_loss    # W5 step 5: the kept gate's row
+        }
         eotg_add_fracture_risk = { AMOUNT = 15 }
         ai_chance = {
             base = 30
@@ -935,6 +1063,15 @@ eotg_aug_heir.005 = {
 
     left_portrait = {
         character = root
+        # W6 (event_quality_v1), keys per the W7 addendum §6.5
+        triggered_animation = {
+            trigger = { has_trait = callous }
+            animation = personality_callous
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = crying
+        }
         animation = grief
     }
     right_portrait = {
@@ -943,9 +1080,46 @@ eotg_aug_heir.005 = {
         animation = dead
         animate_if_dead = yes
     }
+    # W6 (event_quality_v1 W6: a lower portrait for witnesses): someone of
+    # the household who saw it, picked in immediate (W7 addendum §6.5's
+    # suggestion: the surviving parent, else adult close family). Guarded:
+    # there may be no one. Lower slots are static in the big window, so no
+    # animation (vanilla lower_left_portrait shape:
+    # activity_system_events.txt:94-96). Presentation only; no option reads it.
+    lower_center_portrait = {
+        trigger = { exists = scope:eotg_witness }
+        character = scope:eotg_witness
+    }
 
     immediate = {
         play_music_cue = mx_cue_murder    # W3 (event_quality_v1)
+        hidden_effect = {
+            if = {
+                limit = {
+                    any_parent = {
+                        is_alive = yes
+                        NOT = { this = scope:eotg_parent_ruler }
+                    }
+                }
+                random_parent = {
+                    limit = {
+                        is_alive = yes
+                        NOT = { this = scope:eotg_parent_ruler }
+                    }
+                    save_scope_as = eotg_witness
+                }
+            }
+            else = {
+                random_close_family_member = {
+                    limit = {
+                        is_alive = yes
+                        is_adult = yes
+                        NOT = { this = scope:eotg_parent_ruler }
+                    }
+                    save_scope_as = eotg_witness
+                }
+            }
+        }
     }
 
     # "It was mercy." —
@@ -959,26 +1133,41 @@ eotg_aug_heir.005 = {
         }
     }
 
-    # [compassionate] "It was murder." —
+    # [education_learning] "It was murder." — W5 (event_quality_v1 §13.1
+    # 3a): was [compassionate]. It moves no resource, but folding would remove
+    # an option from a W7 set piece whose option set is fixed (W7 addendum
+    # §1), so it is re-axed: naming the act by what the law and the faith
+    # call it is a learned judgement, so learning. compassionate had no stress
+    # row of its own (the major gain is a base row); it keeps an AI weight
+    # here. c (callous, 8 gates against compassionate 14) is the kept
+    # personality gate.
     option = {
         name = eotg_aug_heir.005.b
-        trigger = { has_trait = compassionate }
-        trait = compassionate
+        trigger = { has_trait = education_learning }
+        skill = learning
         stress_impact = { base = major_stress_impact_gain }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = compassionate }
+            modifier = { add = 20  has_trait = education_learning_3 }
+            modifier = { add = 30  has_trait = education_learning_4 }
+            modifier = { add = 30  has_trait = education_learning_5 }
+            modifier = { add = 20  has_trait = compassionate }
             modifier = { add = 10  has_trait = honest }
+            modifier = { add = -20  has_trait = callous }
         }
     }
 
-    # [callous] "It was necessary." —
+    # [callous] "It was necessary." — The one personality gate; W5 step 5
+    # adds its stress row.
     option = {
         name = eotg_aug_heir.005.c
         trigger = { has_trait = callous }
         trait = callous
         add_prestige = 100
         eotg_aug_stress_murder_effect = yes
+        stress_impact = {
+            callous = minor_stress_impact_loss    # W5 step 5
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = callous }
@@ -1044,6 +1233,11 @@ eotg_aug_heir.007 = {
     title = eotg_aug_heir.007.t
     desc = {
         first_valid = {
+            # §12.5 S3 (b): a Seamless owner gets the log register.
+            triggered_desc = {
+                trigger = { has_trait = eotg_total_integration }
+                desc = eotg_aug_heir.007.desc_seamless
+            }
             triggered_desc = {
                 trigger = { scope:eotg_heir_story.var:eotg_prior_choice ?= flag:executed }
                 desc = eotg_aug_heir.007.desc_executed
@@ -1070,6 +1264,22 @@ eotg_aug_heir.007 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # §12.5 / rule 7: a Seamless owner stays still
+            trigger = { has_trait = eotg_total_integration }
+            animation = idle
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = arrogant  has_trait = callous } }
+            animation = dismissal
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = sadness
+        }
         animation = worry
     }
     right_portrait = {
@@ -1117,6 +1327,10 @@ eotg_aug_heir.007 = {
 
     # "Then you know what I am."
     option = {
+        name = {    # §12.5 S3 (b): Seamless register variant
+            trigger = { has_trait = eotg_total_integration }
+            text = eotg_aug_heir.007.b_seamless
+        }
         name = eotg_aug_heir.007.b
         scope:eotg_heir = {
             add_opinion = { modifier = eotg_opinion_aug_fear  target = root  years = 10 }
@@ -1135,6 +1349,10 @@ eotg_aug_heir.007 = {
     # "Learn from it. Keep me, if it comes to that." The keeper flag weighs
     # heir.004 toward ally and lets heir.003.c fall back on it.
     option = {
+        name = {    # §12.5 S3 (b): Seamless register variant
+            trigger = { has_trait = eotg_total_integration }
+            text = eotg_aug_heir.007.c_seamless
+        }
         name = eotg_aug_heir.007.c
         scope:eotg_heir = {
             add_character_flag = eotg_flag_aug_heir_keeper
@@ -1150,11 +1368,16 @@ eotg_aug_heir.007 = {
         }
     }
 
-    # [honest] "Tell them how it ended." Admitting an execution costs.
+    # [honest] "Tell them how it ended." Admitting an execution costs. The
+    # one personality gate (honest 9 against paranoid 14); W5 step 5 adds its
+    # stress row.
     option = {
         name = eotg_aug_heir.007.d
         trigger = { has_trait = honest }
         trait = honest
+        stress_impact = {
+            honest = minor_stress_impact_loss    # W5 step 5
+        }
         scope:eotg_heir = {
             add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
             add_character_modifier = { modifier = eotg_mod_aug_lesson_learning  years = 5 }
@@ -1172,11 +1395,20 @@ eotg_aug_heir.007 = {
         }
     }
 
-    # [paranoid] "They will try what the last one tried."
+    # [duchy+] "They will try what the last one tried." W5 (event_quality_v1
+    # §13.1 3b): was [paranoid]; it moves the heir's opinion, the story's
+    # dread (+2) and risk (+5), so it cannot fold. Putting the new heir under
+    # watch by right of the seat is authority, so a duchy tier gate, no icon.
+    # paranoid had no stress row; it keeps an AI weight here. d (honest) is
+    # the kept personality gate.
     option = {
         name = eotg_aug_heir.007.e
-        trigger = { has_trait = paranoid }
-        trait = paranoid
+        trigger = {
+            highest_held_title_tier >= tier_duchy
+            # The old personality gate kept a Seamless owner out (no
+            # personality traits); keep that population (§12.1 rule 7).
+            NOT = { has_trait = eotg_total_integration }
+        }
         scope:eotg_heir = {
             add_opinion = { modifier = eotg_opinion_aug_fear  target = root  years = 10 }
         }
@@ -1184,9 +1416,11 @@ eotg_aug_heir.007 = {
         eotg_add_fracture_risk = { AMOUNT = 5 }
         eotg_aug_stress_cruelty_effect = yes
         ai_chance = {
-            base = 30
+            base = 10    # B1 lesson 4: tier gates show to every AI duke
             modifier = { add = 30  has_trait = paranoid }
             modifier = { add = 10  has_trait = vengeful }
+            modifier = { add = -20  has_trait = trusting }
+            modifier = { add = -10  has_trait = compassionate }
         }
     }
 }

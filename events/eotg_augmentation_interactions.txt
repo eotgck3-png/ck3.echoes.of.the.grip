@@ -88,7 +88,19 @@ eotg_aug_int.001 = {
     }
 
     left_portrait = {
-        character = root
+        character = root    # the actor of Have Them Examined
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = worry
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = callous }
+            animation = dismissal
+        }
         animation = personality_rational
     }
     right_portrait = {
@@ -103,6 +115,7 @@ eotg_aug_int.001 = {
             NOT = { scope:eotg_proc_surgeon = scope:eotg_examined }
         }
         character = scope:eotg_proc_surgeon
+        animation = physician    # W6: role animation
     }
 
     immediate = {
@@ -317,7 +330,19 @@ eotg_aug_int.002 = {
     trigger = { is_alive = yes }
 
     left_portrait = {
-        character = root
+        character = root    # the actor of Salvage Implants
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = shame
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = greedy }
+            animation = personality_greedy
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = zealous }
+            animation = disgust
+        }
         animation = personality_callous
     }
     # Shape: vanilla hunt_events.txt:27175-27181
@@ -425,6 +450,11 @@ eotg_aug_int.002 = {
         add_character_modifier = { modifier = eotg_mod_aug_lesson_learning  years = 5 }
         hidden_effect = {
             eotg_add_fracture_risk = { AMOUNT = 2 }
+        }
+        # W5 step 5 (event_quality_v1 §13.1): the kept personality gate,
+        # paired the vanilla way (icon, trigger, stress row)
+        stress_impact = {
+            cynical = minor_stress_impact_loss
         }
         ai_chance = {
             base = 30

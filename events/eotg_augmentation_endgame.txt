@@ -30,6 +30,17 @@
 # (.040-.042) read and move the Seamless resource, eotg_aug_residue (hidden,
 # 0-3, only falls; procedures spec §2), since a Seamless ruler has no risk.
 # Loc register: "self" / "personhood", never "humanity" (index §5.5).
+#
+# event_quality_v1 batch B7 (W5 re-gating, W6 portraits; §13): at most one
+# root personality gate per event (end.001.d re-axed to a duchy tier gate);
+# the kept gates are paired with a stress row for their trait (§13.1 step 5).
+# W6 reactions on root key to personality traits, so the Seamless events
+# (.010, .011, .040-.042) get none: the 36 personality traits are removed at
+# Total Integration (eotg_aug_total_integration_effect), and a still frame is
+# the register (§12.1 rule 7; W7 addendum §6.3 makes the same call for .010).
+# end.002 and end.009 are W7 set pieces: the reactions here are the ones the
+# W7 addendum (§6.2, §6.6) specifies; its new portraits, effects, widgets and
+# music are left to W7.
 # -----------------------------------------------------------------------------
 
 namespace = eotg_aug_end
@@ -85,12 +96,24 @@ eotg_aug_end.001 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = brave }
+            animation = personality_bold
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
         animation = worry
     }
     right_portrait = {
         trigger = { exists = scope:eotg_surgeon }
         character = scope:eotg_surgeon
-        animation = personality_rational
+        animation = physician    # W6: role animation (was personality_rational)
     }
 
     immediate = {
@@ -164,27 +187,45 @@ eotg_aug_end.001 = {
         }
     }
 
-    # [brave] "Awake. I want to watch them take it out." As a; the maimed
+    # [duchy+] "Awake. I want to watch them take it out." As a; the maimed
     # outcome becomes clean, +100 prestige on survival.
     # (Procedures spec §4.7: a, c and d keep the physician at the table,
     # PHYSICIAN = yes, MAIMED_BASE = 30.)
+    # W5 (event_quality_v1 §13.1 3b): was [brave]; it changes the surgery
+    # roll (BRAVE = yes) and prestige, so it cannot fold. Staying awake so
+    # the surgeons work under my eye is a ruler commanding the table, so a
+    # duchy tier gate, no icon (the BRAVE parameter name is unchanged). brave
+    # keeps an AI weight here (it had no stress row); c (craven, 8 gates
+    # against brave 10) is the kept personality gate. Not shown to a landless
+    # abdicated ruler (end.031.c), who still has a and b, plus c if craven
+    # (e is closed to them by eotg_flag_aug_excision_free).
+    # B7 review: as a tier gate d would strictly dominate a for every duke
+    # (BRAVE = yes removes the maimed outcome and adds prestige), so staying
+    # awake costs stress unless root is brave. base + trait rows: vanilla
+    # feast_default_events.txt:13431-13435 (feast_default.6410.b).
     option = {
         name = eotg_aug_end.001.d
         add_internal_flag = dangerous    # W3: the excision can kill root
         trigger = {
-            has_trait = brave
+            highest_held_title_tier >= tier_duchy
             eotg_aug_can_afford_excision = yes
         }
-        trait = brave
         eotg_aug_excision_pay_effect = yes
         custom_tooltip = eotg_aug_end.001.d.tt
         hidden_effect = {
             eotg_aug_excision_surgery_effect = { DEATH_BASE = 15  BRAVE = yes  MAIMED_BASE = 30  PHYSICIAN = yes }
         }
+        stress_impact = {
+            base = medium_stress_impact_gain
+            brave = medium_stress_impact_loss
+            craven = major_stress_impact_gain
+        }
         ai_chance = {
-            base = 30
+            base = 10    # B1 lesson 4: tier gates show to every AI duke
             modifier = { add = 30  has_trait = brave }
             modifier = { add = 10  has_trait = stubborn }
+            modifier = { add = -20  has_trait = craven }
+            modifier = { add = -10  has_trait = content }
         }
     }
 
@@ -240,6 +281,18 @@ eotg_aug_end.002 = {
 
     left_portrait = {
         character = root
+        # W6 (event_quality_v1), keys per the W7 addendum §6.6
+        triggered_animation = {
+            trigger = {
+                exists = scope:eotg_excision_outcome
+                scope:eotg_excision_outcome = flag:maimed
+            }
+            animation = pain
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = content  has_trait = calm } }
+            animation = personality_content
+        }
         animation = sadness
     }
 
@@ -265,12 +318,16 @@ eotg_aug_end.002 = {
         }
     }
 
-    # [zealous] "Quiet. At last."
+    # [zealous] "Quiet. At last." The one personality gate; W5 step 5 adds
+    # its stress row (vanilla pairing, ep2_wedding_events_ewan.txt:3759-3778).
     option = {
         name = eotg_aug_end.002.c
         trigger = { has_trait = zealous }
         trait = zealous
         add_piety = 100
+        stress_impact = {
+            zealous = minor_stress_impact_loss    # W5 step 5
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = zealous }
@@ -309,6 +366,15 @@ eotg_aug_end.009 = {
 
     left_portrait = {
         character = root
+        # W6 (event_quality_v1), keys per the W7 addendum §6.2
+        triggered_animation = {
+            trigger = { has_trait = compassionate }
+            animation = sadness
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = ambitious }
+            animation = ecstasy
+        }
         animation = personality_rational
     }
 
@@ -364,7 +430,8 @@ eotg_aug_end.009 = {
         }
     }
 
-    # [ambitious] "Yes. All of it."
+    # [ambitious] "Yes. All of it." The one personality gate; its stress row
+    # is the embrace helper's ambitious loss (W5 step 5 already met).
     option = {
         name = eotg_aug_end.009.c
         add_internal_flag = dangerous    # W3: hands over the controls; one branch is death
@@ -421,6 +488,8 @@ eotg_aug_end.010 = {
     override_background = { reference = eotg_bg_private_quarters }
     override_effect_2d = { reference = fog }
 
+    # W6: no triggered_animation, on purpose (W7 addendum §6.3): the
+    # personality traits have just been removed, and that absence is the point.
     left_portrait = {
         character = root
         animation = idle
@@ -609,6 +678,18 @@ eotg_aug_end.020 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = arrogant  has_trait = stubborn } }
+            animation = dismissal
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = sadness
+        }
         animation = stress
     }
     right_portrait = {
@@ -768,6 +849,14 @@ eotg_aug_end.030 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = stubborn } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
         animation = sadness
     }
     right_portrait = {
@@ -793,7 +882,8 @@ eotg_aug_end.030 = {
         }
     }
 
-    # [stubborn] "Drag me." The successor takes the dread of it.
+    # [stubborn] "Drag me." The successor takes the dread of it. The one
+    # personality gate; W5 step 5 adds its stress row.
     option = {
         name = eotg_aug_end.030.b
         add_internal_flag = dangerous    # W3: abdication: control passes to the heir
@@ -801,6 +891,9 @@ eotg_aug_end.030 = {
         trait = stubborn
         primary_heir = { add_dread = 20 }
         eotg_aug_abdicate_effect = yes
+        stress_impact = {
+            stubborn = minor_stress_impact_loss    # W5 step 5
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = stubborn }
@@ -834,6 +927,18 @@ eotg_aug_end.031 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = sadness
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = callous }
+            animation = personality_callous
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
         animation = worry
     }
     right_portrait = {
