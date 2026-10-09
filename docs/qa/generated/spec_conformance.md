@@ -298,7 +298,7 @@ None.
 
 - Specced and present: 27
 - Specced, missing from script (2): `eotg_event_quality.py` (loc, l.11), `eotg_lint_loc_conventions.json` (loc, l.139)
-- Referenced only, never defined or set (4): `eotg_lint` (unknown, l.238), `eotg_heir.GetFirstName` (loc, l.476), `eotg_heir.GetSheHe` (loc, l.476), `eotg_heir.GetHerHim` (loc, l.476)
+- Referenced only, never defined or set (4): `eotg_lint` (unknown, l.238), `eotg_heir.GetFirstName` (loc, l.493), `eotg_heir.GetSheHe` (loc, l.493), `eotg_heir.GetHerHim` (loc, l.493)
 - Exempt (0): none
 
 #### `docs/specs/event_quality_w7_set_pieces.md`
