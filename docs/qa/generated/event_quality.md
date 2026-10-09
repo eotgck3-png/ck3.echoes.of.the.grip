@@ -15,13 +15,13 @@ Vanilla source: CK3 1.20.0.4 game files: non-hidden character events (DLC = even
 | `override_background` | 52.2% | 66.3% | **92.8%** |
 | `override_effect_2d` events | 224 | 142 | **21** |
 | Three or more portraits | 20.2% | 30.0% | **12.5%** |
-| Distinct animations | 262 | 242 | **47** |
-| `triggered_animation` per event | 0.32 | 0.46 | **0.09** |
+| Distinct animations | 262 | 242 | **53** |
+| `triggered_animation` per event | 0.32 | 0.46 | **0.23** |
 | `outfit_tags` | 2.9% | 2.5% | **0.0%** |
 | `camera` | 8.2% | 13.7% | **0.0%** |
-| Spoken dialogue in the desc | 51.8% | 53.9% | **8.3%** |
-| Voice: first person | 75.7% | 73.1% | **5.7%** |
-| Voice: second person | 0.8% | 0.9% | **69.3%** |
+| Spoken dialogue in the desc | 51.8% | 53.9% | **12.1%** |
+| Voice: first person | 75.7% | 73.1% | **12.9%** |
+| Voice: second person | 0.8% | 0.9% | **62.1%** |
 | Voice: neutral | 20.8% | 18.7% | **25.0%** |
 | Voice: no desc text | 2.8% | 7.3% | **0.0%** |
 | `Custom()` in the desc | 46.0% | 43.3% | **14.0%** |
@@ -30,11 +30,11 @@ Vanilla source: CK3 1.20.0.4 game files: non-hidden character events (DLC = even
 | `\n\n` in the desc | 82.4% | 86.3% | **46.2%** |
 | `random_valid` desc | 3.8% | 2.8% | **0.0%** |
 | `triggered_desc` used | 32.8% | 34.1% | **60.6%** |
-| Median desc words (main key) | 48 | 58 | **43** |
+| Median desc words (main key) | 48 | 58 | **44** |
 | Desc words p10 / p90 | 23 / 84 | 29 / 92 | **30 / 55** |
 | Options defined: median, p90 | 2, p90 4 | 3, p90 4 | **5, p90 6** |
-| Options with a trait icon | 3.3% | 1.9% | **28.7%** |
-| Options with a `skill =` icon | 7.6% | 7.9% | **2.8%** |
+| Options with a trait icon | 3.3% | 1.9% | **27.7%** |
+| Options with a `skill =` icon | 7.6% | 7.9% | **3.6%** |
 | `ai_chance` on every option | 53.3% | 75.6% | **97.3%** |
 | Stress on an option | 42.2% | 60.1% | **59.8%** |
 | `add_internal_flag` | 1.9% | 3.8% | **12.5%** |
@@ -45,10 +45,10 @@ Vanilla source: CK3 1.20.0.4 game files: non-hidden character events (DLC = even
 | Letter events | 665 | 225 | **0** |
 | `window =` set | 684 | 232 | **5** |
 | `after = {}` block | 26.5% | 27.6% | **17.4%** |
-| Events with 2+ personality-gated options (L017) | 74 | 33 | **115** |
-| Events with 3+ personality-gated options | 11 | 6 | **12** |
+| Events with 2+ personality-gated options (L017) | 74 | 33 | **104** |
+| Events with 3+ personality-gated options | 11 | 6 | **10** |
 
-**Mod option gate axes** (options): personality 308, education/skill 4, tier 0, other trigger 344, ungated 485.
+**Mod option gate axes** (options): personality 295, education/skill 13, tier 4, other trigger 344, ungated 485.
 
 ## Per file (mod)
 
@@ -69,12 +69,12 @@ Vanilla source: CK3 1.20.0.4 game files: non-hidden character events (DLC = even
 | `events/eotg_augmentation_realm.txt` | 1 | 100.0% | 0.0% | 0.0 / 100.0 / 0.0% | 33.3% | 0.0 | 100.0% | 0.0% | 0.0% | 1 |
 | `events/eotg_augmentation_retinue.txt` | 5 | 100.0% | 40.0% | 0.0 / 60.0 / 40.0% | 34.6% | 0.0 | 60.0% | 0.0% | 40.0% | 4 |
 | `events/eotg_augmentation_tamper.txt` | 3 | 100.0% | 0.0% | 0.0 / 33.3 / 66.7% | 22.2% | 0.67 | 100.0% | 0.0% | 0.0% | 0 |
-| `events/eotg_augmentation_tier1.txt` | 22 | 100.0% | 0.0% | 0.0 / 86.4 / 13.6% | 38.2% | 1.09 | 18.2% | 0.0% | 13.6% | 13 |
+| `events/eotg_augmentation_tier1.txt` | 22 | 100.0% | 45.5% | 86.4 / 0.0 / 13.6% | 26.5% | 1.09 | 18.2% | 0.0% | 13.6% | 2 |
 | `events/eotg_augmentation_tier2.txt` | 21 | 90.5% | 0.0% | 0.0 / 76.2 / 23.8% | 37.3% | 1.05 | 14.3% | 0.0% | 9.5% | 16 |
 | `events/eotg_augmentation_tier3.txt` | 24 | 95.8% | 0.0% | 0.0 / 100.0 / 0.0% | 38.5% | 1.21 | 16.7% | 0.0% | 0.0% | 17 |
 | `events/eotg_frontier_events.txt` | 19 | 100.0% | 0.0% | 0.0 / 31.6 / 68.4% | 0.0% | 0.11 | 78.9% | 0.0% | 0.0% | 0 |
 
-## Events with 2+ personality-gated options (115)
+## Events with 2+ personality-gated options (104)
 
 Feeds eotg_lint L017 and the W5 re-gating batches (§13).
 
@@ -147,19 +147,8 @@ Feeds eotg_lint L017 and the W5 re-gating batches (§13).
 - `eotg_aug_retinue.002` (events/eotg_augmentation_retinue.txt): 2 gated, generous, greedy
 - `eotg_aug_retinue.003` (events/eotg_augmentation_retinue.txt): 2 gated, arrogant, paranoid
 - `eotg_aug_retinue.004` (events/eotg_augmentation_retinue.txt): 2 gated, callous, just
-- `eotg_aug_tier1.001` (events/eotg_augmentation_tier1.txt): 2 gated, diligent, lazy
-- `eotg_aug_tier1.002` (events/eotg_augmentation_tier1.txt): 2 gated, ambitious, craven
-- `eotg_aug_tier1.003` (events/eotg_augmentation_tier1.txt): 2 gated, deceitful, honest
-- `eotg_aug_tier1.004` (events/eotg_augmentation_tier1.txt): 2 gated, generous, paranoid
-- `eotg_aug_tier1.005` (events/eotg_augmentation_tier1.txt): 3 gated, gluttonous, gregarious, shy
-- `eotg_aug_tier1.007` (events/eotg_augmentation_tier1.txt): 3 gated, diligent, impatient, lazy
 - `eotg_aug_tier1.008` (events/eotg_augmentation_tier1.txt): 2 gated, gluttonous, temperate
 - `eotg_aug_tier1.009` (events/eotg_augmentation_tier1.txt): 2 gated, chaste, lustful
-- `eotg_aug_tier1.010` (events/eotg_augmentation_tier1.txt): 2 gated, brave, craven
-- `eotg_aug_tier1.011` (events/eotg_augmentation_tier1.txt): 2 gated, gregarious, shy
-- `eotg_aug_tier1.012` (events/eotg_augmentation_tier1.txt): 2 gated, cynical, zealous
-- `eotg_aug_tier1.016` (events/eotg_augmentation_tier1.txt): 2 gated, arrogant, craven
-- `eotg_aug_tier1.018` (events/eotg_augmentation_tier1.txt): 2 gated, callous, generous
 - `eotg_aug_tier2.001` (events/eotg_augmentation_tier2.txt): 2 gated, callous, compassionate
 - `eotg_aug_tier2.002` (events/eotg_augmentation_tier2.txt): 2 gated, compassionate, sadistic
 - `eotg_aug_tier2.003` (events/eotg_augmentation_tier2.txt): 2 gated, ambitious, content

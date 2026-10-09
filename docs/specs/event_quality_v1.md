@@ -451,6 +451,23 @@ New text written in the meantime follows §12 from the day it is dispatched. Tha
 8. **Options** are first person or imperative ("Let them watch.", "I will speak to them myself."), as today.
 9. **Length** keeps the existing band unless the event is a W7 set piece. Break paragraphs at the beat with `\n\n`.
 10. **Unchanged:** Canadian English, no dashes, the register and banned lists, and dynamic terms.
+11. **B1 pilot lessons (2026-10-09)** (eotg-lore-keeper review of B1; binding on B2–B12). Detail in rules 12–14.
+12. **The implant is never an agent.**
+    - *Banned verbs with the implant (or the model, the forecast, the overlay) as subject:* offers, decides, wants, chooses, solves, wins, and insists as an agent.
+    - *Allowed:* flags, logs, forecasts, registers, tracks, clears / fails to clear.
+    - *Canonical agency-adjacent form:* "The forecast ran ahead of me, and my hand moved before I did."
+    - *Ruled exception:* a maintenance or update notice may "insist" only as the user's felt pressure (the notice is pressing on me), never as a will of its own.
+    - Applies to every register, and sharpens rule 7's Neurofractured ban on "giving the implant wants or decisions".
+13. **First person has no escape hatch.** In a first-person event, **every** desc key, including each `desc_*` variant and appended fragment, carries at least one I, me or my.
+    - No agentless passive standing in for root ("the sheet is read", "the mind turns"); name the reader: "I read the sheet".
+    - No second-person leftovers in `desc_*` variants.
+    - Per batch, grep the batch's loc for `\byou\b` outside quoted speech. Short `.success` / `.failure` / `.tt` lines may stay second person under rule 5, but first person is preferred.
+    - Seamless keys stay exempt (rule 7).
+14. **NPC lines** (W4 and any existing speech):
+    - An NPC may voice the belief that the implant is a separate actor **only as a question or an opinion**, **at most once per event**, and the narration never confirms it.
+    - **One spoken line per desc.** The line must not restate what the narration has just said.
+    - Watch two tics: "every eye" / "every pair of eyes", and a tacked-on closing sensory sentence after the speech.
+    - Speech must be true for **every** speaker the scope can resolve to: don't assume prior acquaintance, kinship, rank or gender beyond what the event's trigger guarantees.
 
 ### 12.2 Quote form (R3, RULED): verified in vanilla 1.20.0.3
 - **Form:** an **unescaped** straight double quote inside the loc string: `key:0 "Narration. "Speech," [x.GetSheHe] says."`
@@ -517,11 +534,12 @@ New text written in the meantime follows §12 from the day it is dispatched. Tha
    - (a) **Competence-flavoured** (knowing how: a ledger, a diagnosis, a tactical read, rhetoric) → **education gate**:
      - `trigger = { has_trait = education_<skill> }` and `skill = <skill>`;
      - no `trait =` icon;
-     - `ai_chance` modifiers switch to the education trait.
+     - `ai_chance` modifiers switch to the education trait and cover **every** tier of it: `education_<skill>_3`, `_4` **and `_5`** (1.20 added `_5`; B1 lesson 5).
    - (b) **Authority-flavoured** (commanding, ceremony, adjourning, calling on vassals or levies) → **tier gate**:
      - `trigger = { highest_held_title_tier >= tier_duchy }` for lord-scale actions, `>= tier_kingdom` for realm-scale actions;
      - never gate on `tier_county` alone, which is every landed ruler;
-     - no icon.
+     - no icon;
+     - **AI weight (B1 lesson 4):** a tier gate opens the option to a far larger population than the personality trait did, so lower its `ai_chance` base to **about 10** and add **negative** modifiers for the counter-traits of the trait it replaced (e.g. shy, craven or content against an adjourn-by-right option), so the AI doesn't take it everywhere.
    - (c) **Neither, and no distinct resource move** → **fold.** Retire the option. Its trait survives on the closest situational option as:
      - a `name = { trigger = { has_trait = X } text = … }` variant (vanilla `ep3_admin_events.txt:512-523`);
      - that trait's stress entry;
@@ -534,7 +552,12 @@ New text written in the meantime follows §12 from the day it is dispatched. Tha
    - no single education skill holds more than 50% of a file's education gates;
    - every file with ≥ 5 gated options ends with ≥ 1 education gate and ≥ 1 tier gate.
 7. **Text.** The localizer rewrites the re-axed option's text so it reads as that axis. The key stays the same. Effects don't change, apart from `ai_chance`.
+   - **Check every desc variant (B1 lesson 7).** Read the reframed option against **each** desc the event can show: every `first_valid` / `random_valid` branch, flag-gated descs and alternate paths, not just the main desc. If the option only makes sense after one branch, fix the text or the option's trigger.
 8. **Coverage floor:** no trait's gated count falls below min(its 2026-10-08 count, 3) (§9 item 4).
+9. **Floor exception (B1 lesson 6).** When step 2 (at most one personality gate) and step 8 (the coverage floor) conflict, **step 8 wins**: keep both personality gates and put an `# eotg_lint: allow L017` comment on the event, citing the trait counts that force it (precedent: tier1.008 and tier1.009). List each exception in the batch report.
+10. **Batch close-out (B1 lessons 8–9).**
+    - The batch report lists stress rows **moved** (trait, from option → to option) as well as stress rows **added**.
+    - Regenerate the L017 lint baseline after each batch, so the next batch's L017 count starts from that batch's result.
 
 ### 13.2 Worked example: tier1.005 *Weight of Silence*
 Today it has three personality gates: d [shy], e [gregarious], f [gluttonous, G9].
@@ -548,7 +571,7 @@ After the current cybernetics loc batches (the dynamic-terms ruling applied; CB-
 
 | Batch | Files | 2nd-person keys | Events with 2+ personality gates | Note |
 |---|---|---|---|---|
-| B1 | tier1 | 38 | 13 | Most-seen content. Pilot for the rubric; review before B2. |
+| B1 | tier1 | 38 | 13 | Most-seen content. Pilot for the rubric. **Done 2026-10-09 (pending commit);** lessons folded into §12.1 rules 11–14 and §13.1 steps 3, 7, 9, 10. |
 | B2 | tier2 | 36 | 16 | |
 | B3 | tier3 | 46 | 17 | Seamless keys in scope under §12.1 rule 7 (no first person; exempt from the first-person floor) |
 | B4 | fracture .001–.014 | about 33 | about 11 | Neurofractured keys in scope: full first person, §12.1 rule 7 allowed/banned lists. fracture.004's desc keys are W7's; B4 does only its W5 and W6 work |
@@ -560,6 +583,8 @@ After the current cybernetics loc batches (the dynamic-terms ruling applied; CB-
 | B10 | inherit | 40 | 3 | 19 keys of `'…'` speech, already converted by W0e |
 | B11 | kingpin | 54 | 3 | after CB-46; batch B is already written in the new voice |
 | B12 | frontier | 9 | 0 | Frontier owner; mostly neutral already, so a light pass |
+
+**B1 pilot lessons (2026-10-09).** B1 (tier1) is done, pending commit. B2–B12 follow the lessons from its review, now part of the rubric: implant-agency verbs, a first person in every desc variant with a per-batch `\byou\b` grep, and the NPC-line rules (§12.1 rules 11–14); the tier-gate AI weight, `education_*_5` coverage, the L017 floor exception, the check against every desc variant, moved stress rows in the report, and the L017 baseline regenerated after each batch (§13.1 steps 3, 7, 9, 10). A batch report that doesn't show the grep result, the moved and added stress rows and the regenerated baseline is not complete.
 
 **fracture.022 first-person text (L-2, lore-approved 2026-10-09; eotg-localizer items in batch B5).** `eotg_fracture.022.desc` stays as in §12.3 example 4 (approved); the options are unchanged.
 

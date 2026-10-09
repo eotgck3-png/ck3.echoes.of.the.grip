@@ -49,6 +49,18 @@ eotg_aug_tier1.001 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = eccentric }
+            animation = interested
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = lazy }
+            animation = boredom
+        }
         animation = stress
     }
 
@@ -90,20 +102,24 @@ eotg_aug_tier1.001 = {
         }
     }
 
-    # [diligent] "Log it. Test it. Fix it." - self-calibration: half as long
-    # as b, and free
+    # [education_learning] "Log it. Test it. Fix it." - self-calibration: half
+    # as long as b, and free. W5 (event_quality_v1 §13.1 3a): was [diligent];
+    # running the diagnostics yourself is competence, so learning. diligent
+    # keeps its stress row here as a response (§13.1 step 4).
     option = {
         name = eotg_aug_tier1.001.d
-        trigger = { has_trait = diligent }
-        trait = diligent
+        trigger = { has_trait = education_learning }
+        skill = learning
         add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 1 }
         stress_impact = {
             diligent = minor_stress_impact_loss
         }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = diligent }
-            modifier = { add = 10  has_trait = paranoid }
+            modifier = { add = 20  has_trait = education_learning_3 }
+            modifier = { add = 30  has_trait = education_learning_4 }
+            modifier = { add = 30  has_trait = education_learning_5 }
+            modifier = { add = 10  has_trait = diligent }
         }
     }
 
@@ -161,6 +177,14 @@ eotg_aug_tier1.002 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = zealous }
+            animation = worry
+        }
         animation = personality_bold
     }
 
@@ -315,8 +339,11 @@ eotg_aug_tier1.002 = {
         }
     }
 
-    # [craven] "Is it safe? Tell me it's safe." - as a; .021 opens with the
-    # surgeon's reassurance (flag read by its desc, cleared by .022)
+    # [education_learning] "Is it safe? Tell me it's safe." - as a; .021 opens
+    # with the surgeon's reassurance (flag read by its desc, cleared by .022).
+    # W5 (event_quality_v1 §13.1 3a): was [craven]; questioning the surgeons
+    # until they can answer is a medical read, so learning. craven keeps its
+    # stress row here (§13.1 step 4); ambitious (d) is the kept personality gate.
     option = {
         name = eotg_aug_tier1.002.e
         show_as_unavailable = { eotg_aug_clinic_open = no }
@@ -326,10 +353,10 @@ eotg_aug_tier1.002 = {
                 text = eotg_aug_clinic_closed_tt
                 eotg_aug_clinic_open = yes
             }
-            has_trait = craven
+            has_trait = education_learning
             eotg_aug_can_afford_upgrade = { MULT = 1 }
         }
-        trait = craven
+        skill = learning
         eotg_aug_pay_upgrade_effect = { MULT = 1 }
         save_scope_value_as = { name = eotg_proc_provider  value = flag:clinic }
         hidden_effect = { eotg_aug_record_clinic_effect = yes }    # CB-42: clinic of record
@@ -340,8 +367,10 @@ eotg_aug_tier1.002 = {
         }
         ai_chance = {
             base = 30
-            modifier = { add = 20  has_trait = craven }
-            modifier = { add = 10  has_trait = ambitious }
+            modifier = { add = 20  has_trait = education_learning_3 }
+            modifier = { add = 30  has_trait = education_learning_4 }
+            modifier = { add = 30  has_trait = education_learning_5 }
+            modifier = { add = 10  has_trait = craven }
         }
     }
 
@@ -420,6 +449,14 @@ eotg_aug_tier1.003 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = callous } }
+            animation = anger
+        }
         animation = personality_rational
     }
     right_portrait = {
@@ -507,11 +544,15 @@ eotg_aug_tier1.003 = {
         }
     }
 
-    # [deceitful] "There is nothing to tell." - the vassal is not fooled
+    # [education_intrigue] "There is nothing to tell." - the vassal is not
+    # fooled, but the ruler learns what they came fishing for. W5
+    # (event_quality_v1 §13.1 3a): was [deceitful]; deflecting a question
+    # while reading the asker is an intrigue skill. deceitful keeps its relief
+    # through the lie helper (§13.1 step 4); honest (d) is the kept gate.
     option = {
         name = eotg_aug_tier1.003.e
-        trigger = { has_trait = deceitful }
-        trait = deceitful
+        trigger = { has_trait = education_intrigue }
+        skill = intrigue
         scope:eotg_concerned_vassal = {
             add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
         }
@@ -519,8 +560,10 @@ eotg_aug_tier1.003 = {
         eotg_aug_stress_lie_effect = yes
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = deceitful }
-            modifier = { add = 10  has_trait = paranoid }
+            modifier = { add = 20  has_trait = education_intrigue_3 }
+            modifier = { add = 30  has_trait = education_intrigue_4 }
+            modifier = { add = 30  has_trait = education_intrigue_5 }
+            modifier = { add = 10  has_trait = deceitful }
         }
     }
 }
@@ -539,11 +582,19 @@ eotg_aug_tier1.004 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = callous } }
+            animation = anger
+        }
         animation = personality_bold
     }
     right_portrait = {
         character = scope:eotg_petitioning_knight
-        animation = war_attacker
+        animation = throne_room_bow_1    # W6: role animation (was war_attacker)
     }
 
     trigger = {
@@ -618,6 +669,10 @@ eotg_aug_tier1.004 = {
             eotg_add_fracture_risk = { AMOUNT = 0 }
             add_opinion = { modifier = eotg_opinion_aug_grateful_patient  target = root  years = 10 }
         }
+        # W5 (§13.1 step 5): the kept personality option gets its stress entry
+        stress_impact = {
+            generous = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = generous }
@@ -625,11 +680,14 @@ eotg_aug_tier1.004 = {
         }
     }
 
-    # [paranoid] "Who told you to ask me this?"
+    # [education_intrigue] "Who told you to ask me this?" W5 (event_quality_v1
+    # §13.1 3a): was [paranoid]; questioning the knight for who put them up
+    # to it is a spymaster's work, so intrigue. paranoid keeps its stress row
+    # here (§13.1 step 4); generous (d) is the kept personality gate.
     option = {
         name = eotg_aug_tier1.004.e
-        trigger = { has_trait = paranoid }
-        trait = paranoid
+        trigger = { has_trait = education_intrigue }
+        skill = intrigue
         scope:eotg_petitioning_knight = {
             add_opinion = { modifier = eotg_opinion_aug_fear  target = root  years = 10 }
         }
@@ -639,8 +697,10 @@ eotg_aug_tier1.004 = {
         }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = paranoid }
-            modifier = { add = 10  has_trait = vengeful }
+            modifier = { add = 20  has_trait = education_intrigue_3 }
+            modifier = { add = 30  has_trait = education_intrigue_4 }
+            modifier = { add = 30  has_trait = education_intrigue_5 }
+            modifier = { add = 10  has_trait = paranoid }
         }
     }
 }
@@ -659,6 +719,14 @@ eotg_aug_tier1.005 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = shy  has_trait = craven } }
+            animation = nervous
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
         animation = personality_rational
     }
 
@@ -675,10 +743,14 @@ eotg_aug_tier1.005 = {
         }
     }
 
-    # "Make light of it." — stress relief, minor embarrassment
+    # "Make light of it." — stress relief, minor embarrassment. W5 (§13.2):
+    # the gregarious stress row moved here from e.
     option = {
         name = eotg_aug_tier1.005.b
-        stress_impact = { base = minor_stress_impact_loss }
+        stress_impact = {
+            base = minor_stress_impact_loss
+            gregarious = minor_stress_impact_loss
+        }
         add_prestige = -25
         ai_chance = {
             base = 30
@@ -700,38 +772,41 @@ eotg_aug_tier1.005 = {
         }
     }
 
-    # [shy] "Leave the hall."
+    # [duchy+] "Leave the hall." W5 (event_quality_v1 §13.2, the worked
+    # example): was [shy]; ending the gathering by right is authority, so a
+    # duchy tier gate, no icon. shy keeps its stress loss here as a response.
     option = {
         name = eotg_aug_tier1.005.d
-        trigger = { has_trait = shy }
-        trait = shy
+        trigger = { highest_held_title_tier >= tier_duchy }
         add_prestige = -50
         eotg_add_fracture_risk = { AMOUNT = 2 }
         stress_impact = {
             shy = medium_stress_impact_loss
         }
         ai_chance = {
-            base = 30
+            base = 10    # QA B1: tier gates show to every AI duke
             modifier = { add = 30  has_trait = shy }
             modifier = { add = 10  has_trait = craven }
+            modifier = { add = -20  has_trait = gregarious }
         }
     }
 
-    # [gregarious] "Make it theatre."
+    # [education_diplomacy] "Make it theatre." W5 (§13.2): was [gregarious];
+    # turning the pause into ceremony is rhetoric, so diplomacy. Its stress
+    # row moved to b.
     option = {
         name = eotg_aug_tier1.005.e
-        trigger = { has_trait = gregarious }
-        trait = gregarious
+        trigger = { has_trait = education_diplomacy }
+        skill = diplomacy
         add_prestige = 100
         add_dread = 5
         eotg_add_fracture_risk = { AMOUNT = 5 }
-        stress_impact = {
-            gregarious = minor_stress_impact_loss
-        }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = gregarious }
-            modifier = { add = 10  has_trait = arrogant }
+            modifier = { add = 20  has_trait = education_diplomacy_3 }
+            modifier = { add = 30  has_trait = education_diplomacy_4 }
+            modifier = { add = 30  has_trait = education_diplomacy_5 }
+            modifier = { add = 10  has_trait = gregarious }
         }
     }
 
@@ -770,6 +845,18 @@ eotg_aug_tier1.006 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = callous } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = disbelief
+        }
         animation = war_attacker
     }
 
@@ -831,6 +918,10 @@ eotg_aug_tier1.006 = {
             }
         }
         eotg_add_fracture_risk = { AMOUNT = 6 }
+        # W5 (§13.1 step 5): the kept personality option gets its stress entry
+        stress_impact = {
+            brave = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = brave }
@@ -881,6 +972,18 @@ eotg_aug_tier1.007 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = impatient }
+            animation = dismissal
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = lazy }
+            animation = boredom
+        }
         animation = thinking
     }
 
@@ -940,35 +1043,42 @@ eotg_aug_tier1.007 = {
         }
     }
 
-    # [diligent] "Every week, by the book."
+    # [education_stewardship] "Every week, by the book." W5 (event_quality_v1
+    # §13.1 3a): was [diligent]; a maintenance schedule kept like a ledger is
+    # administration, so stewardship. diligent keeps its stress row here.
     option = {
         name = eotg_aug_tier1.007.d
-        trigger = { has_trait = diligent }
-        trait = diligent
+        trigger = { has_trait = education_stewardship }
+        skill = stewardship
         add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 2 }
         stress_impact = {
             diligent = minor_stress_impact_loss
         }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = diligent }
-            modifier = { add = 10  has_trait = patient }
+            modifier = { add = 20  has_trait = education_stewardship_3 }
+            modifier = { add = 30  has_trait = education_stewardship_4 }
+            modifier = { add = 30  has_trait = education_stewardship_5 }
+            modifier = { add = 10  has_trait = diligent }
         }
     }
 
-    # [lazy] "If it breaks, it'll tell me."
+    # [duchy+] "If it breaks, it'll tell me." W5 (§13.1 3b): was [lazy]; it
+    # moves risk (+5, unlike b's +3 with the neglect helper), so it cannot
+    # fold. Re-axed as authority: the ruler waves the technicians off by
+    # right. lazy keeps its stress loss here; f (impatient, G9) is the kept gate.
     option = {
         name = eotg_aug_tier1.007.e
-        trigger = { has_trait = lazy }
-        trait = lazy
+        trigger = { highest_held_title_tier >= tier_duchy }
         eotg_add_fracture_risk = { AMOUNT = 5 }
         stress_impact = {
             lazy = minor_stress_impact_loss
         }
         ai_chance = {
-            base = 30
+            base = 10    # QA B1: tier gates show to every AI duke
             modifier = { add = 30  has_trait = lazy }
             modifier = { add = 10  has_trait = content }
+            modifier = { add = -20  has_trait = diligent }
         }
     }
 
@@ -996,7 +1106,9 @@ eotg_aug_tier1.007 = {
 # ── eotg_aug_tier1.008 ────────────────────────────────────────────────────────
 # Dulled Palate (A-02). Taste is going.
 # Caller: eotg_on_yearly_aug_tier1_check (Phase 4a branch).
-
+# W5: both personality gates kept. gluttonous and temperate each sit at 3
+# gates, the coverage floor (event_quality_v1 §13.1 2b, §9 item 4).
+# eotg_lint: allow L017 both traits at the coverage floor (gluttonous 3, temperate 3)
 eotg_aug_tier1.008 = {
     type = character_event
     title = eotg_aug_tier1.008.t
@@ -1006,6 +1118,14 @@ eotg_aug_tier1.008 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = gluttonous }
+            animation = sadness
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = temperate  has_trait = content } }
+            animation = personality_content
+        }
         animation = disappointed
     }
 
@@ -1090,7 +1210,9 @@ eotg_aug_tier1.008 = {
 # A Lover's Touch (A-03). The partner finds the seam of the implant.
 # Saved eotg_partner: a lover, else the primary spouse.
 # Caller: eotg_on_yearly_aug_tier1_check (Phase 4a branch).
-
+# W5: both personality gates kept. lustful (3) and chaste (2) are at or
+# under the coverage floor (event_quality_v1 §13.1 2b, §9 item 4).
+# eotg_lint: allow L017 both traits at the coverage floor (lustful 3, chaste 2)
 eotg_aug_tier1.009 = {
     type = character_event
     title = eotg_aug_tier1.009.t
@@ -1107,6 +1229,14 @@ eotg_aug_tier1.009 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = chaste }
+            animation = dismissal
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = shy }
+            animation = nervous
+        }
         animation = flirtation
     }
     right_portrait = {
@@ -1260,6 +1390,14 @@ eotg_aug_tier1.010 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = callous } }
+            animation = anger
+        }
         animation = war_attacker
     }
     right_portrait = {
@@ -1333,11 +1471,14 @@ eotg_aug_tier1.010 = {
         }
     }
 
-    # [brave] "Three at once." - 25%: root is hurt
+    # [education_martial] "Three at once." - 25%: root is hurt. W5
+    # (event_quality_v1 §13.1 3a): was [brave]; setting up a three-on-one
+    # drill is a trained soldier's read, so martial. brave had no stress row
+    # here; its weight stays in ai_chance. craven (e) is the kept gate.
     option = {
         name = eotg_aug_tier1.010.d
-        trigger = { has_trait = brave }
-        trait = brave
+        trigger = { has_trait = education_martial }
+        skill = martial
         add_character_modifier = { modifier = eotg_mod_aug_lesson_prowess  years = 5 }
         add_prestige = 100
         random = {
@@ -1352,8 +1493,10 @@ eotg_aug_tier1.010 = {
         eotg_add_fracture_risk = { AMOUNT = 6 }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = brave }
-            modifier = { add = 10  has_trait = arrogant }
+            modifier = { add = 20  has_trait = education_martial_3 }
+            modifier = { add = 30  has_trait = education_martial_4 }
+            modifier = { add = 30  has_trait = education_martial_5 }
+            modifier = { add = 10  has_trait = brave }
         }
     }
 
@@ -1480,6 +1623,22 @@ eotg_aug_tier1.011 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = callous } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = shy }
+            animation = shame
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = gregarious }
+            animation = laugh
+        }
         animation = stress
     }
 
@@ -1519,19 +1678,23 @@ eotg_aug_tier1.011 = {
         }
     }
 
-    # [shy] "Cover it with cloth from now on."
+    # [duchy+] "Cover it with cloth from now on." W5 (event_quality_v1 §13.1
+    # 3b): was [shy]; it moves prestige (-25, no other option does), so it
+    # cannot fold. Re-axed as authority: the ruler rules that it is covered
+    # in their presence. shy keeps its stress loss here; gregarious (e, the
+    # thinner trait) is the kept gate.
     option = {
         name = eotg_aug_tier1.011.d
-        trigger = { has_trait = shy }
-        trait = shy
+        trigger = { highest_held_title_tier >= tier_duchy }
         add_prestige = -25
         stress_impact = {
             shy = medium_stress_impact_loss
         }
         ai_chance = {
-            base = 30
+            base = 10    # QA B1: tier gates show to every AI duke
             modifier = { add = 30  has_trait = shy }
             modifier = { add = 10  has_trait = craven }
+            modifier = { add = -20  has_trait = gregarious }
         }
     }
 
@@ -1614,6 +1777,10 @@ eotg_aug_tier1.012 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = cynical }
+            animation = eyeroll
+        }
         animation = personality_zealous
     }
     right_portrait = {
@@ -1705,11 +1872,15 @@ eotg_aug_tier1.012 = {
         }
     }
 
-    # [zealous] "Fast and pray for a month."
+    # [education_learning] "Fast and pray for a month." W5 (event_quality_v1
+    # §13.1 3a): was [zealous]; answering the petitioner from doctrine, and
+    # keeping the observance it prescribes, is learned (vanilla's theology is
+    # a learning skill). zealous keeps its stress row here; cynical (e, the
+    # thinner trait) is the kept gate.
     option = {
         name = eotg_aug_tier1.012.d
-        trigger = { has_trait = zealous }
-        trait = zealous
+        trigger = { has_trait = education_learning }
+        skill = learning
         add_piety = 100
         add_character_flag = { flag = eotg_flag_suppress_progression  years = 2 }
         stress_impact = {
@@ -1717,8 +1888,10 @@ eotg_aug_tier1.012 = {
         }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = zealous }
-            modifier = { add = 10  has_trait = temperate }
+            modifier = { add = 20  has_trait = education_learning_3 }
+            modifier = { add = 30  has_trait = education_learning_4 }
+            modifier = { add = 30  has_trait = education_learning_5 }
+            modifier = { add = 20  has_trait = zealous }
         }
     }
 
@@ -1767,6 +1940,10 @@ eotg_aug_tier1.013 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
         animation = sick
     }
 
@@ -1878,6 +2055,10 @@ eotg_aug_tier1.014 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
         animation = pain
     }
 
@@ -2119,12 +2300,20 @@ eotg_aug_tier1.016 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = callous } }
+            animation = anger
+        }
         animation = personality_bold
     }
     right_portrait = {
         trigger = { exists = scope:eotg_challenger }
         character = scope:eotg_challenger
-        animation = anger
+        animation = threatening    # W6: role animation (was anger)
     }
 
     immediate = {
@@ -2264,19 +2453,24 @@ eotg_aug_tier1.016 = {
         }
     }
 
-    # [craven] "Decline with a smile."
+    # [education_diplomacy] "Decline with a smile." W5 (event_quality_v1
+    # §13.1 3a): was [craven]; refusing so gracefully that it costs half of
+    # b's prestige and none of its opinion is rhetoric, so diplomacy. craven
+    # keeps its stress loss here; arrogant (d, the thinner trait) is the kept gate.
     option = {
         name = eotg_aug_tier1.016.e
-        trigger = { has_trait = craven }
-        trait = craven
+        trigger = { has_trait = education_diplomacy }
+        skill = diplomacy
         add_prestige = -50
         stress_impact = {
             craven = minor_stress_impact_loss
         }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = craven }
-            modifier = { add = 10  has_trait = deceitful }
+            modifier = { add = 20  has_trait = education_diplomacy_3 }
+            modifier = { add = 30  has_trait = education_diplomacy_4 }
+            modifier = { add = 30  has_trait = education_diplomacy_5 }
+            modifier = { add = 20  has_trait = craven }
         }
     }
 }
@@ -2501,12 +2695,20 @@ eotg_aug_tier1.018 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = crying
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = callous  has_trait = wrathful } }
+            animation = anger
+        }
         animation = disapproval
     }
     right_portrait = {
         trigger = { exists = scope:eotg_copycat }
         character = scope:eotg_copycat
-        animation = sick
+        animation = beg    # W6: role animation (was sick)
     }
 
     immediate = {
@@ -2683,13 +2885,15 @@ eotg_aug_tier1.018 = {
         }
     }
 
-    # [callous] "Not my problem. Get them out of my hall." - a courtier is sent
+    # [duchy+] "Not my problem. Get them out of my hall." - a courtier is sent
     # away (move_to_pool, vanilla hold_court_events_general.txt:508); a vassal
-    # is frightened instead. Ends the chain.
+    # is frightened instead. Ends the chain. W5 (event_quality_v1 §13.1 3b):
+    # was [callous]; expelling someone from court is authority, so a duchy
+    # tier gate. callous keeps its stress loss here; generous (d, the thinner
+    # trait) is the kept gate.
     option = {
         name = eotg_aug_tier1.018.e
-        trigger = { has_trait = callous }
-        trait = callous
+        trigger = { highest_held_title_tier >= tier_duchy }
         if = {
             limit = { scope:eotg_copycat = { is_courtier_of = root } }
             scope:eotg_copycat = { move_to_pool = yes }
@@ -2704,9 +2908,10 @@ eotg_aug_tier1.018 = {
             callous = minor_stress_impact_loss
         }
         ai_chance = {
-            base = 30
+            base = 10    # QA B1: tier gates show to every AI duke
             modifier = { add = 30  has_trait = callous }
             modifier = { add = 10  has_trait = arrogant }
+            modifier = { add = -20  has_trait = compassionate }
         }
     }
 }
@@ -2891,6 +3096,18 @@ eotg_aug_tier1.020 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = crying
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = eccentric }
+            animation = interested
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = callous }
+            animation = boredom
+        }
         animation = sadness
     }
 
@@ -2997,6 +3214,10 @@ eotg_aug_tier1.021 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
         animation = thinking
     }
 
@@ -3150,6 +3371,10 @@ eotg_aug_tier1.022 = {
                 }
             }
             animation = pain
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = humble }
+            animation = worry
         }
         animation = personality_bold
     }
