@@ -12,7 +12,10 @@ What the generated world is (M1, owner decision 2026-10-08):
         and Unclaimed counties from isles_assignments.csv.
       - France and Spain: every county an independent Unsworn county (one
         pre-generated placeholder each, eotg_unclaimed_folk, the county's 1066
-        culture and rite), except the "pocket" realms listed in the CSV.
+        culture and rite), except the small vanilla realms listed in the CSV and
+        the scope=pocket realms: a duchy or kingdom held whole by one character
+        with vassal counts, all under the row's government (mod governments are
+        replaced by a vanilla stand-in until --mod-governments on).
   * OUTSIDE THE ZONE: the map and titles stay vanilla (nothing removed, so the
     ~600 vanilla files that name titles stay valid), but every county is held by
     one inert "offmap" holder per out-of-zone empire (eotg_test_offmap_government),
@@ -21,7 +24,7 @@ What the generated world is (M1, owner decision 2026-10-08):
     the start), so no courts or rulers load.
 
 Usage (from the repo root):
-    python docs/test_submods/british_isles/tools/gen_history.py [--game <game dir>]
+    python docs/test_submods/british_isles/tools/gen_history.py [--game <game dir>] [--mod-governments on|off]
 
 The script only ever writes inside docs/test_submods/british_isles/ and deletes
 only its own generated output there first.
@@ -44,6 +47,20 @@ ISLES_EMPIRE = 'e_britannia'
 START = (1066, 9, 15)          # the 1066 bookmark date (vanilla bm_group_1066)
 RETIRE_DATE = (1066, 9, 14)    # out-of-zone characters die the day before
 MOVED_DATE = (1066, 9, 13)     # vanilla title blocks ON the start date move here (holders still alive)
+# Mod-government switch (CSV column `government` on scope=pocket rows). 'off' = every
+# government that is not a vanilla key is replaced by the row's `standin` (default
+# DEFAULT_STANDIN), so the sub-mod loads before the main mod defines the government.
+# Flip to 'on' (or pass --mod-governments on) once the scripter reports them built;
+# 'on' refuses to generate if a named government is not defined in vanilla, the main
+# mod or this sub-mod.
+MOD_GOVERNMENTS_DEFAULT = 'off'
+DEFAULT_STANDIN = 'feudal_government'
+# Counties a pocket holder keeps in his own hands, the capital county included
+# (CSV column `demesne` overrides it per row).
+DEFAULT_DEMESNE = 3
+# Vanilla governments a pocket never takes as a vassal count: a bishop made a count
+# under a secular realm is a different test than the one asked for.
+POCKET_SKIP_GOVERNMENTS = ('ecclesiastical_government', 'theocracy_government')
 OFFMAP_GOVERNMENT = 'eotg_test_offmap_government'
 UNSWORN_GOVERNMENT = 'eotg_unclaimed_government'   # main mod
 UNSWORN_TRAIT = 'eotg_unclaimed_folk'               # main mod
@@ -234,10 +251,12 @@ class Vanilla:
         def walk(items, parent):
             for k, v in items:
                 if k and isinstance(v, list) and re.match(r'^[hekdcb]_', k):
-                    t = {'parent': parent, 'province': None, 'landless': False, 'children': []}
+                    t = {'parent': parent, 'province': None, 'landless': False, 'children': [], 'capital': None}
                     for k2, v2 in v:
                         if k2 == 'province':
                             t['province'] = int(v2)
+                        elif k2 == 'capital' and isinstance(v2, str):
+                            t['capital'] = v2
                         elif k2 == 'landless' and v2 == 'yes':
                             t['landless'] = True
                     self.titles[k] = t
@@ -379,11 +398,27 @@ class Vanilla:
         self.culture_names = {c: lists.get(nl, {}) for c, nl in culture_list.items()}
 
     def load_governments(self):
-        self.governments = set()
-        for full, _ in walk_files(self.g, 'common/governments'):
+        """vanilla_governments: the game's own; governments: plus the main mod's and this
+        sub-mod's (a mod government is only valid once one of those defines it)."""
+        def keys(root):
+            out = set()
+            for full, _ in walk_files(root, 'common/governments'):
+                for k, v in parse(read(full)[0]):
+                    if k and isinstance(v, list):
+                        out.add(k)
+            return out
+        self.vanilla_governments = keys(self.g)
+        self.governments = self.vanilla_governments | keys(REPO) | keys(SUB)
+        self.holdings = set()
+        for full, _ in walk_files(self.g, 'common/holdings'):
             for k, v in parse(read(full)[0]):
                 if k and isinstance(v, list):
-                    self.governments.add(k)
+                    self.holdings.add(k)
+        # character -> governments vanilla history gives any title they hold at the start
+        self.char_governments = collections.defaultdict(set)
+        for k, s in self.state.items():
+            if s.get('government'):
+                self.char_governments[s['holder'].strip('"')].add(s['government'])
 
 
 # ------------------------------------------------------------------- the CSV --
@@ -405,8 +440,11 @@ def pick(seq, key):
 
 # ----------------------------------------------------------------- generator --
 class Build:
-    def __init__(self, v, assignments, bookmark_rows):
+    def __init__(self, v, assignments, bookmark_rows, mod_governments=MOD_GOVERNMENTS_DEFAULT):
         self.v = v
+        self.mod_governments = mod_governments
+        self.pockets = {}      # pocket title -> dict (see assign_pockets)
+        self.substituted = []  # (title, csv government, stand-in)
         self.errors = []
         self.notes = []
         self.final = {}        # title -> {'holder','liege','government'} explicit at START
@@ -437,20 +475,24 @@ class Build:
         return self.v.titles[self.v.baronies[county][0]]['province']
 
     # ------------------------------------------------------------ placeholders
-    def unsworn(self, county):
-        cid = 'eotg_test_bi_unsworn_' + county[2:]
+    def local_character(self, cid, kind, county, seed, extra=None):
+        """A generated character with the 1066 culture and rite of `county`'s capital province."""
         if cid not in self.new_chars:
             p = self.v.prov.get(self.capital_province(county), {})
             culture, rite = p.get('culture'), p.get('rite')
             if not culture or not rite:
                 self.errors.append('%s: capital province %s has no 1066 culture/rite' % (county, self.capital_province(county)))
-            female = int(hashlib.sha1(county.encode()).hexdigest(), 16) % 2 == 1
+            female = int(hashlib.sha1(seed.encode()).hexdigest(), 16) % 2 == 1
             names = self.v.culture_names.get(culture, {}).get('female_names' if female else 'male_names', [])
-            age = 25 + int(hashlib.sha1(('age' + county).encode()).hexdigest(), 16) % 26
-            self.new_chars[cid] = {
-                'kind': 'unsworn', 'county': county, 'culture': culture, 'rite': rite, 'female': female,
-                'name': pick(names, county) or 'Unsworn', 'birth': (START[0] - age, 1, 1)}
+            age = 25 + int(hashlib.sha1(('age' + seed).encode()).hexdigest(), 16) % 26
+            self.new_chars[cid] = dict({
+                'kind': kind, 'county': county, 'culture': culture, 'rite': rite, 'female': female,
+                'name': pick(names, seed) or kind.capitalize(), 'birth': (START[0] - age, 1, 1)}, **(extra or {}))
         return cid
+
+    def unsworn(self, county):
+        # seed = the county key, as before the pocket rows existed (names and ages unchanged)
+        return self.local_character('eotg_test_bi_unsworn_' + county[2:], 'unsworn', county, county)
 
     def offmap_holder(self, root, counties):
         cid = 'eotg_test_bi_offmap_' + root
@@ -509,9 +551,13 @@ class Build:
             if self.vanilla_holder(k) != '0':
                 self.final[k] = {'holder': '0', 'liege': None, 'government': None}
 
-        # 2. the CSV
+        # 2. the CSV (pocket rows after every other row, so explicit rows win)
         scoped = []
+        self.scoped = scoped
+        self.explicit = {r['title'] for r in self.assignments if (r.get('scope') or '') != 'pocket'}
         for r in self.assignments:
+            if (r.get('scope') or '') == 'pocket':
+                continue
             t = r['title']
             if t not in v.titles:
                 self.errors.append('CSV: unknown title %s' % t)
@@ -544,12 +590,12 @@ class Build:
             if liege and liege != 'vanilla':
                 entry['liege'] = liege
             if gov:
-                if gov not in v.governments:
-                    self.errors.append('CSV: %s unknown government %s' % (t, gov))
+                gov = self.effective_government(t, r)
+                if gov is None:
                     continue
                 scoped.append((t, gov, r.get('scope', 'holder') or 'holder'))
             self.final[t] = entry
-        self.scoped = scoped
+        self.assign_pockets([r for r in self.assignments if (r.get('scope') or '') == 'pocket'])
 
         # 3. baronies with their own holder in vanilla history: outside the Isles,
         # and inside Unclaimed Isles counties, they follow the county's new holder
@@ -566,6 +612,149 @@ class Build:
         used = {e['holder'] for e in self.final.values()}
         for cid in [x for x in self.new_chars if x not in used]:
             del self.new_chars[cid]
+
+    def effective_government(self, t, r):
+        """The government a CSV row really gets: vanilla keys as written; any other key is a
+        mod government, replaced by the row's stand-in while mod governments are off."""
+        v = self.v
+        gov = r.get('government', '')
+        if gov in v.vanilla_governments:
+            return gov
+        if self.mod_governments == 'off':
+            st = r.get('standin') or DEFAULT_STANDIN
+            if st not in v.vanilla_governments:
+                self.errors.append('CSV: %s stand-in %s is not a vanilla government' % (t, st))
+                return None
+            self.substituted.append((t, gov, st))
+            return st
+        if gov not in v.governments:
+            self.errors.append('CSV: %s government %s is not defined in vanilla, the main mod or this sub-mod '
+                               '(mod governments are on; build it or run with --mod-governments off)' % (t, gov))
+            return None
+        return gov
+
+    def assign_pockets(self, rows):
+        """scope=pocket rows: one character holds the duchy/kingdom `title` and every county
+        de jure under it in the zone (except counties with their own CSV row). He keeps the
+        capital county plus his own vanilla 1066 counties, up to `demesne`; every other county
+        goes to its vanilla 1066 holder as his vassal (liege = the pocket title, as vanilla
+        history writes de facto vassalage), or to a generated count when that holder is dead,
+        a churchman, an Isles ruler, or already landed by another row. Vassals take the
+        pocket's government too, so none of them is an Unsworn placeholder."""
+        v = self.v
+        taken = {e['holder'] for k, e in self.final.items()
+                 if k in self.explicit and e.get('holder') not in (None, '0')}
+        isles_holders = {self.vanilla_holder(k) for k in v.titles if self.zone_of(k) == 'isles'} - {'0'}
+        in_pockets = set()
+
+        def eligible(h):
+            return (h not in ('0', None) and v.alive(h) and h not in taken and h not in isles_holders
+                    and h not in in_pockets and not (v.char_governments.get(h, set()) & set(POCKET_SKIP_GOVERNMENTS)))
+
+        for r in rows:
+            t = r['title']
+            if t not in v.titles or t[:2] not in ('d_', 'k_'):
+                self.errors.append('CSV: pocket %s is not a vanilla duchy or kingdom' % t)
+                continue
+            if self.zone_of(t) != 'mainland':
+                self.errors.append('CSV: pocket %s is not in France or Spain (the Isles keep vanilla rulers)' % t)
+                continue
+            if t in self.pockets:
+                self.errors.append('CSV: pocket %s listed twice' % t)
+                continue
+            if not r.get('government'):
+                self.errors.append('CSV: pocket %s has no government' % t)
+                continue
+            gov = self.effective_government(t, r)
+            if gov is None:
+                continue
+            all_counties = [c for c in v.counties if t in v.ancestors(c) and self.zone_of(c) == 'mainland']
+            counties = [c for c in all_counties if c not in self.explicit]
+            clash = [c for c in counties if any(c in p['counties'] for p in self.pockets.values())]
+            if clash:
+                self.errors.append('CSV: pocket %s overlaps another pocket at %s' % (t, clash))
+                continue
+            if not counties:
+                self.errors.append('CSV: pocket %s has no county left in the zone' % t)
+                continue
+            cap = v.titles[t]['capital']
+            capital = cap if cap in counties else counties[0]
+            try:
+                demesne = int(r.get('demesne') or DEFAULT_DEMESNE)
+            except ValueError:
+                demesne = 0
+            if demesne < 1:
+                self.errors.append('CSV: pocket %s demesne must be a whole number >= 1' % t)
+                continue
+
+            # the holder
+            want = r.get('holder') or 'auto'
+            how = None
+            if want == 'auto':
+                # the title's 1066 holder, then the holders of the titles under it, tier by
+                # tier, the branch with the capital first
+                chain, level = [t], [t]
+                while level:
+                    nxt = []
+                    for x in level:
+                        kids = [k for k in v.titles[x]['children']
+                                if not k.startswith('b_') and self.zone_of(k) == 'mainland']
+                        kids.sort(key=lambda k: 0 if (k == capital or k in v.ancestors(capital)) else 1)
+                        nxt += kids
+                    chain += nxt
+                    level = nxt
+                ruler = next((self.vanilla_holder(x) for x in chain if eligible(self.vanilla_holder(x))), None)
+                if ruler:
+                    how = 'vanilla 1066 holder of %s' % next(x for x in chain if self.vanilla_holder(x) == ruler)
+            elif want == 'generated':
+                ruler = None
+            else:
+                if not eligible(want):
+                    self.errors.append('CSV: pocket %s holder %s is dead, a churchman, an Isles ruler or already '
+                                       'landed by another row' % (t, want))
+                    continue
+                ruler, how = want, 'named in the CSV'
+            if not ruler:
+                ruler = self.local_character('eotg_test_bi_ruler_' + t[2:], 'ruler', capital, 'ruler' + t,
+                                             {'pocket': t})
+                how = 'generated (no eligible 1066 holder)'
+            in_pockets.add(ruler)
+
+            # his demesne, then the vassal counts
+            own = [capital] + [c for c in counties if c != capital and self.vanilla_holder(c) == ruler][:demesne - 1]
+            vassals = {}
+            for c in counties:
+                if c in own:
+                    continue
+                h = self.vanilla_holder(c)
+                if h in vassals.values() or eligible(h):
+                    vassals[c] = h
+                    in_pockets.add(h)
+                else:
+                    vassals[c] = self.local_character('eotg_test_bi_vassal_' + c[2:], 'vassal', c, 'vassal' + c,
+                                                      {'pocket': t})
+            liege = r.get('liege', '')
+            self.final[t] = {'holder': ruler, 'liege': liege if liege not in ('', 'vanilla') else '0',
+                             'government': None}
+            # titles between the pocket and its counties that he held in 1066 stay his
+            for k in v.titles:
+                if (k[:2] in ('d_', 'k_') and k != t and t in v.ancestors(k)
+                        and self.vanilla_holder(k) == ruler):
+                    self.final[k] = {'holder': ruler, 'liege': t, 'government': None}
+            for c in own:
+                self.final[c] = {'holder': ruler, 'liege': t, 'government': None}
+            for c, h in vassals.items():
+                self.final[c] = {'holder': h, 'liege': t, 'government': None}
+            holding = r.get('holding', '')
+            if holding and holding not in v.holdings:
+                self.errors.append('CSV: pocket %s unknown holding %s' % (t, holding))
+                holding = ''
+            self.pockets[t] = {
+                'holder': ruler, 'how': how, 'government': gov, 'csv_government': r['government'],
+                'counties': counties, 'own': own, 'vassals': vassals,
+                'skipped': [c for c in all_counties if c in self.explicit],
+                # the capital holding change belongs to the real government only
+                'holding': holding if gov == r['government'] else ''}
 
     def holder_of(self, k):
         # Every title whose holder changes is in self.final (assign() vacates
@@ -633,9 +822,13 @@ class Build:
             if not targets:
                 self.errors.append('CSV: government %s on %s reaches nobody (scope %s)' % (gov, t, scope))
             for c in targets:
-                if c in self.new_chars:
+                if self.new_chars.get(c, {}).get('kind') in ('unsworn', 'offmap'):
                     continue    # placeholders keep their own government
                 self.gov_of[c] = gov
+        # pockets: the holder and every vassal count take the pocket's government
+        for t, p in self.pockets.items():
+            for c in {p['holder']} | set(p['vassals'].values()):
+                self.gov_of[c] = p['government']
         # write one government line per character, on each title they hold in the zone
         for c, gov in self.gov_of.items():
             for k in self.held.get(c, []):
@@ -796,8 +989,9 @@ class Build:
         # generated characters
         lines = ['# TEST ONLY: EotG Test: British Isles. Generated by tools/gen_history.py; do not edit.',
                  '# Unsworn placeholders (one per Unclaimed county; main mod frontier_unclaimed_regions.md',
-                 '# §5.1 option H, pre-split so no create_character runs at game start) and the offmap holders',
-                 '# (one per empire outside the test zone).',
+                 '# §5.1 option H, pre-split so no create_character runs at game start), the offmap holders',
+                 '# (one per empire outside the test zone), and pocket rulers/vassal counts where no 1066',
+                 '# holder was eligible (isles_assignments.csv, scope=pocket).',
                  '# Bare culture/rite keys, as vanilla 1.20 history writes them (history/characters/*.txt).', '']
         for cid in sorted(self.new_chars):
             c = self.new_chars[cid]
@@ -810,6 +1004,10 @@ class Build:
             if c['kind'] == 'unsworn':
                 lines.append('\ttrait = %s\t# the government\'s can_get_government reads it' % UNSWORN_TRAIT)
                 lines.append('\t# %s' % c['county'])
+            elif c['kind'] in ('ruler', 'vassal'):
+                lines.append('\t# %s of the %s pocket (%s): no eligible 1066 holder, or he is over his demesne' % (
+                    'holder' if c['kind'] == 'ruler' else 'vassal count of ' + c['county'], c['pocket'],
+                    self.pockets[c['pocket']]['csv_government']))
             else:
                 lines.append('\tdisallow_random_traits = yes')
                 lines.append('\t# offmap holder for %s (%d counties)' % (c['root'], c['counties']))
@@ -836,10 +1034,13 @@ class Build:
                     pr = v.prov.get(p)
                     if pr and pr['holding'] not in (None, 'none') and not pr['special']:
                         changes[p] = 'none'
-            if gov in CAPITAL_HOLDING:
+            want = CAPITAL_HOLDING.get(gov)
+            for pt, pk in self.pockets.items():
+                if c in pk['counties'] and pk['holding']:
+                    want = pk['holding']
+            if want:
                 p = self.capital_province(c)
                 pr = v.prov.get(p)
-                want = CAPITAL_HOLDING[gov]
                 if pr and pr['holding'] != want:
                     changes[p] = want
                     self.notes.append('%s: capital province %d holding %s -> %s (%s)' % (c, p, pr['holding'], want, gov))
@@ -1073,14 +1274,19 @@ class Build:
             if z == 'offmap':
                 continue
             h = self.holder_of(c)
-            if h in self.new_chars:
+            kind = self.new_chars.get(h, {}).get('kind')
+            if kind in ('unsworn', 'offmap'):
                 if z == 'mainland':
                     continue
                 what = 'Unclaimed (Unsworn placeholder)'
                 who = h
             else:
                 gov = self.gov_of.get(h) or 'vanilla (%s)' % (self.v.state.get(c, {}).get('government') or 'default')
-                who = '%s %s' % (h, (v.chars.get(h, {}) or {}).get('name') or '')
+                for pt, pk in self.pockets.items():
+                    if c in pk['counties'] and pk['government'] != pk['csv_government']:
+                        gov += ' (stand-in for %s)' % pk['csv_government']
+                name = (v.chars.get(h, {}) or {}).get('name') or self.new_chars.get(h, {}).get('name') or ''
+                who = '%s %s' % (h, name)
                 top, x, seen = h, h, set()
                 while x in self.liege_char and x not in seen:
                     seen.add(x)
@@ -1092,7 +1298,20 @@ class Build:
         md = ['| Zone | Kingdom | County | Holder at 1066.9.15 | Government |', '|---|---|---|---|---|']
         for z, k, c, who, what in rows:
             md.append('| %s | %s | %s | %s | %s |' % (z, k, c, who, what))
-        mainland_unsworn = sum(1 for c in v.counties if self.zone_of(c) == 'mainland' and self.holder_of(c) in self.new_chars)
+        mainland_unsworn = sum(1 for c in v.counties if self.zone_of(c) == 'mainland'
+                               and self.new_chars.get(self.holder_of(c), {}).get('kind') == 'unsworn')
+        if self.pockets:
+            md.append('')
+            md.append('Mod-government pockets (mod governments **%s**):' % self.mod_governments)
+            md.append('')
+            md.append('| Pocket | Holder | How chosen | CSV government | Generated with | Demesne | Vassal counts |')
+            md.append('|---|---|---|---|---|---|---|')
+            for t, p in self.pockets.items():
+                def nm(h):
+                    return '%s %s' % (h, (v.chars.get(h) or self.new_chars.get(h) or {}).get('name') or '')
+                md.append('| %s | %s | %s | %s | %s | %s | %s |' % (
+                    t, nm(p['holder']), p['how'], p['csv_government'], p['government'], ', '.join(p['own']),
+                    '; '.join('%s: %s' % (c, nm(h)) for c, h in p['vassals'].items()) or 'none'))
         md.append('')
         md.append('Every other county of %s (%d) is an independent Unsworn county; every county outside '
                   'the zone (%d) belongs to one of %d offmap holders.' % (
@@ -1144,9 +1363,26 @@ def validate(out):
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     ap.add_argument('--game', default=DEFAULT_GAME)
+    ap.add_argument('--mod-governments', choices=('on', 'off'), default=MOD_GOVERNMENTS_DEFAULT,
+                    help="off (default until the main mod defines them): CSV governments that are not vanilla "
+                         "keys are replaced by the row's standin column (default %s)" % DEFAULT_STANDIN)
     a = ap.parse_args()
     assert os.path.isdir(os.path.join(a.game, 'common/landed_titles')), 'not a CK3 game dir: %s' % a.game
     assert os.path.basename(SUB) == 'british_isles' and os.path.isfile(os.path.join(SUB, 'descriptor.mod'))
+    print('reading vanilla from', a.game)
+    v = Vanilla(a.game)
+    b = Build(v, read_csv(os.path.join(SUB, 'isles_assignments.csv')),
+              read_csv(os.path.join(SUB, 'bookmark_characters.csv')), a.mod_governments)
+    b.assign()
+    b.resolve()
+    b.keep_set()
+    if b.errors:
+        # Nothing written: the installed sub-mod (a junction to this folder) keeps its
+        # last good output and stays loadable.
+        for e in b.errors:
+            print('ERROR:', e)
+        print('NOTHING WRITTEN: the previous generated output is untouched.')
+        sys.exit(1)
     for rel in GENERATED_DIRS:
         p = os.path.join(SUB, rel)
         if os.path.isdir(p):
@@ -1155,14 +1391,6 @@ def main():
         p = os.path.join(SUB, rel)
         if os.path.exists(p):
             os.remove(p)
-
-    print('reading vanilla from', a.game)
-    v = Vanilla(a.game)
-    b = Build(v, read_csv(os.path.join(SUB, 'isles_assignments.csv')),
-              read_csv(os.path.join(SUB, 'bookmark_characters.csv')))
-    b.assign()
-    b.resolve()
-    b.keep_set()
     b.write_titles(SUB)
     b.write_characters(SUB)
     b.write_provinces(SUB)
@@ -1177,7 +1405,19 @@ def main():
     kinds = collections.Counter(x['kind'] for x in b.new_chars.values())
     zone_counts = collections.Counter(b.zone_of(c) for c in v.counties)
     print('counties: isles %d, mainland %d, offmap %d' % (zone_counts['isles'], zone_counts['mainland'], zone_counts['offmap']))
-    print('generated characters: %d Unsworn, %d offmap holders' % (kinds['unsworn'], kinds['offmap']))
+    print('generated characters: %d Unsworn, %d offmap holders, %d pocket rulers, %d pocket vassal counts' % (
+        kinds['unsworn'], kinds['offmap'], kinds['ruler'], kinds['vassal']))
+    print('mod governments:', a.mod_governments)
+    for t, csv_gov, st in b.substituted:
+        print('stand-in: %s gets %s instead of %s (mod governments off)' % (t, st, csv_gov))
+    for t, p in b.pockets.items():
+        def nm(h):
+            return '%s (%s)' % (h, (v.chars.get(h) or b.new_chars.get(h) or {}).get('name'))
+        print('pocket %s [%s]: holder %s, %s; demesne %s' % (t, p['government'], nm(p['holder']), p['how'], p['own']))
+        for c, h in p['vassals'].items():
+            print('    vassal %s: %s' % (c, nm(h)))
+        if p['skipped']:
+            print('    counties left to their own CSV rows:', p['skipped'])
     print('title history: %d files copied (replace_path), %d START blocks, %d titles in eotg_test_bi_titles.txt' % (
         len(v.title_files), sum(1 for k in b.final if b.block_for(k)), b.count_new_title_entries))
     print('characters: %d living kept, %d living retired (%d files overridden)' % (len(b.keep), len(b.retire), b.char_files_written))

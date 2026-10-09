@@ -6,44 +6,66 @@
 #               unsworn  = an Unclaimed county: its own Unsworn placeholder (counties only)
 #               none     = no holder
 #               <id>     = a vanilla history character id, alive at 1066.9.15
-#   liege       blank or vanilla = keep vanilla's; 0 = independent; or a title key
-#   government  blank = no change; or a government key (vanilla or mod)
+#               pocket rows only:
+#               auto      = the title's 1066 holder if eligible, else the 1066 holder of the titles under it
+#                           (tier by tier, the capital's branch first), else a generated character
+#               generated = always a generated eotg_test_bi_ruler_* character (capital county's culture/rite)
+#   liege       blank or vanilla = keep vanilla's; 0 = independent; or a title key (pocket: blank = 0)
+#   government  blank = no change; or a government key (vanilla or mod). A key that is not vanilla is
+#               a MOD government: with mod governments OFF (the default, see README "Mod governments")
+#               the row gets its standin instead, so the sub-mod loads before the main mod defines it.
 #   scope       which characters the government is given to:
 #               holder = this title's holder only
 #               realm  = the holder and everyone below them in the zone at the start
 #               dejure = the holder of every county de jure under this title
+#               pocket = a whole realm (duchy or kingdom, France/Spain only): the holder takes the title
+#                        and EVERY county de jure under it in the zone (no Unsworn left there), except
+#                        counties that have their own row. He keeps the capital county plus his own 1066
+#                        counties up to `demesne`; every other county goes to its 1066 holder as his vassal,
+#                        or to a generated eotg_test_bi_vassal_* count if that holder is dead, a churchman,
+#                        an Isles ruler or landed by another row. Holder and vassals all get `government`.
+#   standin     the vanilla government used while mod governments are off (blank = feudal_government)
+#   demesne     pocket rows: counties the holder keeps, capital included (blank = 3)
+#   holding     pocket rows: capital holding for every county of the pocket (e.g. city_holding), applied
+#               only when the real government is used, not the stand-in (blank = vanilla's)
 #   note        free text, shown nowhere in game
 # Defaults for titles NOT listed here:
 #   the Isles (e_britannia): vanilla 1066 holders, lieges and governments;
 #   France and Spain: every county Unsworn (independent); duchies and kingdoms vacant.
-title,holder,liege,government,scope,note
+title,holder,liege,government,scope,standin,demesne,holding,note
 # --- The Isles: the government mix ---
-k_england,vanilla,,feudal_government,holder,Harold Godwinson (122); his vassals keep vanilla governments (the bishops of Durham and Worcester stay ecclesiastical)
-d_lancaster,vanilla,,feudal_government,holder,PLAYER START (feudal duke with vassals): Edwin of Mercia (5644); also holds d_hereford
-k_scotland,vanilla,,clan_government,realm,Malcolm III (984) and his vassals: clan (clan has no faith or culture gate in 1.20)
-k_ireland,vanilla,,tribal_government,dejure,every Irish county holder tribal; capitals converted to tribal holdings
-d_munster,vanilla,,tribal_government,realm,PLAYER START (tribal): Murchad ua Briain (83355) with his vassal in Ormond
-k_wales,6358,0,administrative_government,realm,ADMIN: Bleddyn ap Cynfyn (6358) given k_wales (not vanilla) so the realm has a duchy tier for its themes
-c_glamorgan,vanilla,0,republic_government,holder,REPUBLIC: Cadwgan ap Meurig (6362) of Morgannwg; also holds c_monmouthshire; capital made a city
-c_cornwall,vanilla,0,ecclesiastical_government,holder,THEOCRACY: Cadoc of Cornwall (161281) independent; capital made a temple
+k_england,vanilla,,feudal_government,holder,,,,Harold Godwinson (122); his vassals keep vanilla governments (the bishops of Durham and Worcester stay ecclesiastical)
+d_lancaster,vanilla,,feudal_government,holder,,,,PLAYER START (feudal duke with vassals): Edwin of Mercia (5644); also holds d_hereford
+k_scotland,vanilla,,clan_government,realm,,,,Malcolm III (984) and his vassals: clan (clan has no faith or culture gate in 1.20)
+k_ireland,vanilla,,tribal_government,dejure,,,,every Irish county holder tribal; capitals converted to tribal holdings
+d_munster,vanilla,,tribal_government,realm,,,,PLAYER START (tribal): Murchad ua Briain (83355) with his vassal in Ormond
+k_wales,6358,0,administrative_government,realm,,,,ADMIN: Bleddyn ap Cynfyn (6358) given k_wales (not vanilla) so the realm has a duchy tier for its themes
+c_glamorgan,vanilla,0,republic_government,holder,,,,REPUBLIC: Cadwgan ap Meurig (6362) of Morgannwg; also holds c_monmouthshire; capital made a city
+c_cornwall,vanilla,0,ecclesiastical_government,holder,,,,THEOCRACY: Cadoc of Cornwall (161281) independent; capital made a temple
 # --- The Isles: Unclaimed counties (Frontier and Raise Your Colours) ---
-c_caithness,unsworn,0,,,highlands; was the Earl of Orkney's (outside the zone)
-c_sutherland,unsworn,0,,,highlands; was the Earl of Orkney's (outside the zone)
-c_ross,unsworn,0,,,highlands; was Moray's
-c_mayo,unsworn,0,,,western Ireland; was Connacht's
+c_caithness,unsworn,0,,,,,,highlands; was the Earl of Orkney's (outside the zone)
+c_sutherland,unsworn,0,,,,,,highlands; was the Earl of Orkney's (outside the zone)
+c_ross,unsworn,0,,,,,,highlands; was Moray's
+c_mayo,unsworn,0,,,,,,western Ireland; was Connacht's
 # --- France and Spain: the small normal-government pockets (everything else is Unsworn) ---
-d_normandy,vanilla,0,feudal_government,holder,FEUDAL DUKE: William of Normandy (140)
-c_rouen,140,0,,,William's pocket
-c_bayeux,140,0,,,William's pocket
-c_alencon,vanilla,0,,,William's pocket (vanilla holder is William)
-d_cordoba,vanilla,0,republic_government,holder,REPUBLIC: the Taifa of Cordoba (20852); vanilla already has it as a republic
-c_cordoba,vanilla,0,,,Cordoba pocket
-c_cabra,vanilla,0,,,Cordoba pocket
-d_toledo,vanilla,0,clan_government,holder,CLAN: the Taifa of Toledo (3924)
-c_toledo,vanilla,0,,,Toledo pocket
-c_calatrava,vanilla,0,,,Toledo pocket
-c_reims,vanilla,0,ecclesiastical_government,holder,THEOCRACY: the Archbishop of Reims (91173); vanilla already ecclesiastical
-c_ipuskoa,vanilla,0,tribal_government,holder,TRIBAL: Gipuzkoa (200164); capital made a tribal holding
-d_barcelona,vanilla,0,feudal_government,holder,FEUDAL COUNT: Ramon Berenguer of Barcelona (110520)
-c_barcelona,vanilla,0,,,Barcelona pocket
-c_girona,vanilla,0,,,Barcelona pocket
+d_normandy,vanilla,0,feudal_government,holder,,,,FEUDAL DUKE: William of Normandy (140)
+c_rouen,140,0,,,,,,William's pocket
+c_bayeux,140,0,,,,,,William's pocket
+c_alencon,vanilla,0,,,,,,William's pocket (vanilla holder is William)
+d_cordoba,vanilla,0,republic_government,holder,,,,REPUBLIC: the Taifa of Cordoba (20852); vanilla already has it as a republic
+c_cordoba,vanilla,0,,,,,,Cordoba pocket
+c_cabra,vanilla,0,,,,,,Cordoba pocket
+d_toledo,vanilla,0,clan_government,holder,,,,CLAN: the Taifa of Toledo (3924)
+c_toledo,vanilla,0,,,,,,Toledo pocket
+c_calatrava,vanilla,0,,,,,,Toledo pocket
+c_reims,vanilla,0,ecclesiastical_government,holder,,,,THEOCRACY: the Archbishop of Reims (91173); vanilla already ecclesiastical
+c_ipuskoa,vanilla,0,tribal_government,holder,,,,TRIBAL: Gipuzkoa (200164); capital made a tribal holding
+d_barcelona,vanilla,0,feudal_government,holder,,,,FEUDAL COUNT: Ramon Berenguer of Barcelona (110520)
+c_barcelona,vanilla,0,,,,,,Barcelona pocket
+c_girona,vanilla,0,,,,,,Barcelona pocket
+# --- France and Spain: mod-government test realms (scope=pocket; owner request 2026-10-08) ---
+# Government keys are the planned ones; the architect may rename them: edit the government column.
+d_valois,40406,0,eotg_pmc_government,pocket,feudal_government,,,PMC: the Paris duchy (vanilla has no d_paris/d_ile_de_france; Paris = c_ile_de_france = capital of d_valois). Holder Raoul of Valois (adult) instead of 14-year-old Philippe I, so the PMC is not under a regency
+k_brittany,auto,0,eotg_corporation_government,pocket,feudal_government,,,CORPORATION: the Kingdom of Brittany (vacant in 1066; Duke Konan II holds d_brittany)
+k_leon,auto,0,eotg_cartel_government,pocket,feudal_government,,,CARTEL: the Kingdom of Leon (Alfonso VI)
+d_provence,auto,0,eotg_gobcorp_government,pocket,feudal_government,,,GOB-CORP: Mediterranean-coast duke (d_provence: most coastline in southern France; Count Bertrand)

@@ -9,8 +9,10 @@ being made. It runs with the main mod's shaders, cybernetics, Frontier and Uncla
   `e_hispania`; it uses `e_france` and `e_spain`.
   - **The Isles** keep vanilla's 1066 rulers, with a mix of governments: feudal, clan, tribal, administrative,
     republic, theocracy and a landless adventurer. Four highland and western counties start **Unclaimed**.
-  - **France and Spain:** 185 counties are independent **Unsworn** counties. Six small vanilla realms remain
-    there as neighbours: feudal, republic, clan, theocracy, tribal and feudal.
+  - **France and Spain:** 161 counties are independent **Unsworn** counties. Six small vanilla realms remain
+    there as neighbours: feudal, republic, clan, theocracy, tribal and feudal. Four whole realms test the
+    **mod governments**: PMC (Paris), Corporation (Brittany), Cartel (León) and Gob-Corp (Provence). Until those
+    governments exist they run on feudal stand-ins; see [Mod governments](#mod-governments).
   - **Outside the zone** the map and titles are vanilla but empty.
     - Every county belongs to one of 35 inert **Off-Map** holders, one per empire, painted near-black.
     - Their non-capital baronies have no holding.
@@ -74,6 +76,59 @@ Connacht.
 - Each has its own pre-made Unsworn placeholder with the county's 1066 culture and rite.
 - `c_sutherland` also starts **Unknown** (Frontier Phase 3a).
 - The Scottish and Irish realms around them can try *Raise Your Colours*.
+
+## Mod-government realms (pockets)
+
+Rows with `scope = pocket` in `isles_assignments.csv` (owner request 2026-10-08). Each is a whole duchy or
+kingdom held by one character, with every county de jure under it in the zone. None of its counties is
+Unsworn. Pick the holders **on the map**: none of them has a vanilla bookmark portrait.
+
+| Test | Title (vanilla 1.20) | Holder | Holds himself | Vassal counts |
+|---|---|---|---|---|
+| PMC | `d_valois`, the Paris duchy | Philippe I (214), 14 years old | Île-de-France, Brie, Beaumont | Herbert of Vermandois (418); Raoul of Valois (40406, Valois and Amiens); Renaud of Clermont (303412) |
+| Corporation | `k_brittany` | Duke Konan II (348), who also keeps `d_brittany` | Vannes, Rennes | Hoël (178, Nantes and Cornouaille); Morvan (10059, Léon); Edouarzh (346, Penthièvre) |
+| Cartel | `k_leon` | Alfonso VI (108500) | León, Benavente, Salamanca | Urraca (108501, Zamora); Rodrigo (108512, Oviedo); Pedru (Pravia); a generated count in Ávila |
+| Gob-Corp | `d_provence` | Count Bertrand (420) | Venaissin (Arles), Provence (Marseille, Toulon) | Jaufret (40802, Forcalquier); a generated count in Nice |
+
+- **Vanilla 1.20 has no `d_paris` or `d_ile_de_france`.** Paris is `b_paris` in `c_ile_de_france`, the capital
+  of `d_valois`, which is de jure under `k_france`.
+- **The coast:** `d_provence` was picked over `d_languedoc`, the only other southern French duchy on the
+  Mediterranean (`d_toulouse` is landlocked). Measured on vanilla `provinces.png`, Provence has 413 sea-edge
+  pixels and 7 coastal baronies, including Marseille, Toulon, Arles and Nice. Languedoc has 187 pixels and 5
+  baronies. Provence was Imperial in 1066 (liege `e_hre`); here it is independent.
+- **How the holder is chosen** (`holder = auto`): the title's 1066 holder if eligible. Otherwise the 1066
+  holders of the titles under it, tier by tier, with the capital's branch first. Otherwise a generated
+  `eotg_test_bi_ruler_*` character with the capital's culture and rite. A holder is not eligible if he is dead,
+  a churchman (ecclesiastical or theocracy title), an Isles ruler, or already landed by another row. You can
+  also write a character id, or `generated`.
+- **Vassals:** the holder keeps the capital county plus his own 1066 counties, up to `demesne` (default 3).
+  - Every other county goes to its 1066 holder, with `liege = <pocket title>`, as vanilla history writes
+    vassalage.
+  - If that holder is not eligible, or is the pocket holder already at his demesne cap, the county gets a
+    generated `eotg_test_bi_vassal_*` count with the county's culture and rite.
+  - The holder and all vassals get the row's government.
+  - De jure duchies in a kingdom stay vacant unless the holder held them in 1066 (Konan keeps `d_brittany`).
+- Counties that have their own CSV row are left to that row.
+
+### Mod governments
+
+The four government keys (`eotg_pmc_government`, `eotg_corporation_government`, `eotg_cartel_government`,
+`eotg_gobcorp_government`) are the planned names and are not defined yet. The generator has a switch:
+
+- **`off` (the default for now):** any CSV government that is not a vanilla key is replaced by the row's
+  `standin` column (blank = `feudal_government`). The sub-mod loads today, and the realms, holders and vassals
+  are already in place. The `holding` column is ignored while a stand-in is used.
+- **`on`:** the CSV governments are written as given. The generator **refuses** (it prints `ERROR` and
+  `NOTHING WRITTEN`, and leaves the installed output untouched) if a key is not defined in vanilla, the main
+  mod's `common/governments/` or this sub-mod's.
+
+To switch on once the scripter reports the governments are built:
+```
+python docs/test_submods/british_isles/tools/gen_history.py --mod-governments on
+```
+To make it permanent, set `MOD_GOVERNMENTS_DEFAULT = 'on'` at the top of `tools/gen_history.py`. If the
+architect renames a government, edit the `government` column of its row. If a government needs a particular
+capital holding (for example `city_holding`), put it in the `holding` column.
 
 ## Assignments (generated)
 
@@ -182,13 +237,46 @@ the bookmark entries. The table below is rewritten by the generator.
 | mainland | k_andalusia | c_toledo | 3924 Yahya | clan_government |
 | mainland | k_aragon | c_barcelona | 110520 Ramon-Berenguer | feudal_government |
 | mainland | k_aragon | c_girona | 110520 Ramon-Berenguer | feudal_government |
+| mainland | k_brittany | c_cornouaille | 178 HoE_l | feudal_government (stand-in for eotg_corporation_government) (vassal of 348 Konan) |
+| mainland | k_brittany | c_french_leon | 10059 Morvan | feudal_government (stand-in for eotg_corporation_government) (vassal of 348 Konan) |
+| mainland | k_brittany | c_nantes | 178 HoE_l | feudal_government (stand-in for eotg_corporation_government) (vassal of 348 Konan) |
+| mainland | k_brittany | c_penthievre | 346 Edouarzh | feudal_government (stand-in for eotg_corporation_government) (vassal of 348 Konan) |
+| mainland | k_brittany | c_rennes | 348 Konan | feudal_government (stand-in for eotg_corporation_government) |
+| mainland | k_brittany | c_vannes | 348 Konan | feudal_government (stand-in for eotg_corporation_government) |
+| mainland | k_burgundy | c_forcalquier | 40802 Jaufret | feudal_government (stand-in for eotg_gobcorp_government) (vassal of 420 Bertrand) |
+| mainland | k_burgundy | c_nice | eotg_test_bi_vassal_nice EufE_mia | feudal_government (stand-in for eotg_gobcorp_government) (vassal of 420 Bertrand) |
+| mainland | k_burgundy | c_provence | 420 Bertrand | feudal_government (stand-in for eotg_gobcorp_government) |
+| mainland | k_burgundy | c_venaissin | 420 Bertrand | feudal_government (stand-in for eotg_gobcorp_government) |
 | mainland | k_france | c_alencon | 140 William | feudal_government |
+| mainland | k_france | c_amiens | 40406 Raoul | feudal_government (stand-in for eotg_pmc_government) |
 | mainland | k_france | c_bayeux | 140 William | feudal_government |
+| mainland | k_france | c_beaumont | 214 Philippe | feudal_government (stand-in for eotg_pmc_government) (vassal of 40406 Raoul) |
+| mainland | k_france | c_brie_francaise | 214 Philippe | feudal_government (stand-in for eotg_pmc_government) (vassal of 40406 Raoul) |
+| mainland | k_france | c_clermont | 303412 Renaud | feudal_government (stand-in for eotg_pmc_government) (vassal of 40406 Raoul) |
+| mainland | k_france | c_ile_de_france | 40406 Raoul | feudal_government (stand-in for eotg_pmc_government) |
 | mainland | k_france | c_reims | 91173 Gervais | ecclesiastical_government |
 | mainland | k_france | c_rouen | 140 William | feudal_government |
+| mainland | k_france | c_valois | 40406 Raoul | feudal_government (stand-in for eotg_pmc_government) |
+| mainland | k_france | c_vermandois | 418 Herbert | feudal_government (stand-in for eotg_pmc_government) (vassal of 40406 Raoul) |
+| mainland | k_leon | c_asturias_de_oviedo | 108512 Rodrigu | feudal_government (stand-in for eotg_cartel_government) (vassal of 108500 Alfonso) |
+| mainland | k_leon | c_avila | eotg_test_bi_vassal_avila Facundu | feudal_government (stand-in for eotg_cartel_government) (vassal of 108500 Alfonso) |
+| mainland | k_leon | c_benavente | 108500 Alfonso | feudal_government (stand-in for eotg_cartel_government) |
+| mainland | k_leon | c_leon | 108500 Alfonso | feudal_government (stand-in for eotg_cartel_government) |
+| mainland | k_leon | c_pravia | asturleonese0078 Pedru | feudal_government (stand-in for eotg_cartel_government) (vassal of 108500 Alfonso) |
+| mainland | k_leon | c_salamanca | 108500 Alfonso | feudal_government (stand-in for eotg_cartel_government) |
+| mainland | k_leon | c_zamora | 108501 Urraca | feudal_government (stand-in for eotg_cartel_government) (vassal of 108500 Alfonso) |
 | mainland | k_navarra | c_ipuskoa | 200164 Beila | tribal_government |
 
-Every other county of e_france, e_spain (185) is an independent Unsworn county; every county outside the zone (3187) belongs to one of 35 offmap holders.
+Mod-government pockets (mod governments **off**):
+
+| Pocket | Holder | How chosen | CSV government | Generated with | Demesne | Vassal counts |
+|---|---|---|---|---|---|---|
+| d_valois | 40406 Raoul | named in the CSV | eotg_pmc_government | feudal_government | c_ile_de_france, c_valois, c_amiens | c_brie_francaise: 214 Philippe; c_vermandois: 418 Herbert; c_beaumont: 214 Philippe; c_clermont: 303412 Renaud |
+| k_brittany | 348 Konan | vanilla 1066 holder of d_brittany | eotg_corporation_government | feudal_government | c_vannes, c_rennes | c_nantes: 178 HoE_l; c_cornouaille: 178 HoE_l; c_french_leon: 10059 Morvan; c_penthievre: 346 Edouarzh |
+| k_leon | 108500 Alfonso | vanilla 1066 holder of k_leon | eotg_cartel_government | feudal_government | c_leon, c_benavente, c_salamanca | c_zamora: 108501 Urraca; c_avila: eotg_test_bi_vassal_avila Facundu; c_asturias_de_oviedo: 108512 Rodrigu; c_pravia: asturleonese0078 Pedru |
+| d_provence | 420 Bertrand | vanilla 1066 holder of d_provence | eotg_gobcorp_government | feudal_government | c_venaissin, c_provence | c_nice: eotg_test_bi_vassal_nice EufE_mia; c_forcalquier: 40802 Jaufret |
+
+Every other county of e_france, e_spain (161) is an independent Unsworn county; every county outside the zone (3187) belongs to one of 35 offmap holders.
 <!-- END GENERATED TABLE -->
 
 ## How it is built (why it loads)
@@ -254,14 +342,18 @@ Every other county of e_france, e_spain (185) is an independent Unsworn county; 
 ## Regenerate
 
 ```
-python docs/test_submods/british_isles/tools/gen_history.py [--game "<CK3>/game"]
+python docs/test_submods/british_isles/tools/gen_history.py [--game "<CK3>/game"] [--mod-governments on|off]
 ```
 
 - It reads vanilla's `common/landed_titles`, `common/religion`, `common/culture`, `common/governments`,
-  `common/bookmarks`, `common/bookmark_portraits`, `history/titles`, `history/characters`, `history/provinces`
-  and `history/wars`, plus the main mod's trigger override.
+  `common/holdings`, `common/bookmarks`, `common/bookmark_portraits`, `history/titles`, `history/characters`,
+  `history/provinces` and `history/wars`. It also reads the main mod's trigger override and the main mod's and
+  this sub-mod's `common/governments/`.
 - It deletes and rewrites only its own output inside this folder.
-- It needs a **repo checkout**, because it reads the main mod's override at `../../../common/scripted_triggers/`.
+- If the CSV has an error (an unknown title, a dead holder, an undefined mod government with
+  `--mod-governments on`), it stops **before** deleting anything. The installed sub-mod keeps its last good
+  output.
+- It needs a **repo checkout**, because it reads the main mod at `../../../common/`.
 - **To move the zone**, edit the one line `ZONE_EMPIRES = [...]` at the top. For example, add `e_germany` for the
   Low Countries; its realms then become Unsworn like France and Spain.
 - **Run it again after every CK3 update.** Every override here is a vanilla snapshot (pitfalls §2).
