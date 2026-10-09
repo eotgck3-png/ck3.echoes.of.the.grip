@@ -30,3 +30,14 @@ File: `localization/english/eotg_frontier_l_english.yml`, `eotg_frontier.*` desc
 - Rule 12: no implant appears in the frontier file, so it does not apply.
 - Terms kept: Region, Frontier, System, backer. No "knight". Canadian spelling (honour, defence).
 - 005: "I should have seen it sooner" (desc_no_founder) and "I sent too many lightly guarded convoys" (desc_danger) put some blame on the ruler. Check against the frontier spec.
+
+## W9: letters (eotg_frontier.003 and .030)
+Both events are `letter_event`s now, so the text is the sender's own letter to the ruler (second person allowed). 2 keys added (`.003.opening`, `.030.opening`), 3 rewritten (`.003.desc`, `.003.desc_replace`, `.030.desc`). Options, tooltips and titles untouched. No time words. Lint 0 against baseline (both L010 cleared), PX 0 diagnostics, duplicate keys 0, BOM present, LF endings.
+
+- eotg_frontier.003.opening: "To [ROOT.Char.GetTitledFirstName],"
+- eotg_frontier.003.desc: "News of the work in [county] has reached me, and I would like to help pay for it: regular shipments of money and supplies, for as long as the Frontier needs the help. The first shipment can leave as soon as you agree.\n\nI ask for no claim on the Region and no say in how it is run, and none comes with my help. If the Frontier succeeds, I will share the credit. If it fails, I will share the loss."
+- eotg_frontier.003.desc_replace: "\n\nI understand the Frontier already has a backer. If you accept my offer, that arrangement ends."
+- eotg_frontier.030.opening: "To [ROOT.Char.GetTitledFirstName], on a matter of business,"
+- eotg_frontier.030.desc: "I have been watching the work in [county], and I offer better terms than [sponsor] does. I can send the first shipment at once, and pay every year after, on the same schedule as [sponsor].\n\nI know that taking my offer ends your arrangement with [sponsor], who will not take it kindly. Neither of us would gain any claim on the Region either way, and neither would have a say in how it is run."
+
+Notes: the .003 letter says "none comes with my help" so it holds for any sender; "as soon as you agree" matches accept_tt (first shipment at once). The .003 letter has no sign-off because desc_replace is appended after it; the sender's portrait names the writer. The .030 opening does not name the current backer. Sender's gender is never referenced.

@@ -673,7 +673,9 @@ def rule_l010(mod, allowlist=None):
     refs = []   # (rel, line, key, what)
     for rel, eid, ev in mod.events():
         for c in ev.value:
-            if c.key in ("title", "desc"):
+            # opening: letter events, bare key or dynamic desc block
+            # (vanilla events/_events.info:141)
+            if c.key in ("title", "desc", "opening"):
                 acc = []
                 _loc_refs_in(c, acc)
                 refs += [(rel, ln, k, "%s %s" % (eid, c.key)) for k, ln in acc]

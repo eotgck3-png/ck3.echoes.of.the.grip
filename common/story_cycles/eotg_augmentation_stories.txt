@@ -621,7 +621,20 @@ eotg_story_aug_patron = {
                     set_variable = { name = eotg_demand  value = 4 }
                     story_owner = {
                         add_character_flag = { flag = eotg_flag_aug_patron_writeoff  days = 60 }
-                        trigger_event = { id = eotg_aug_patron.006  days = { 1 30 } }
+                    }
+                    # W9 (event_quality_v1): with the envoy dead or gone the
+                    # write-off comes as the syndicate's unsigned letter (.010)
+                    if = {
+                        limit = {
+                            var:eotg_envoy ?= {
+                                is_alive = yes
+                                is_courtier_of = scope:story.story_owner
+                            }
+                        }
+                        story_owner = { trigger_event = { id = eotg_aug_patron.006  days = { 1 30 } } }
+                    }
+                    else = {
+                        story_owner = { trigger_event = { id = eotg_aug_patron.010  days = { 1 30 } } }
                     }
                 }
             }
@@ -660,7 +673,21 @@ eotg_story_aug_patron = {
                                 var:eotg_demand >= 4
                             }
                         }
-                        story_owner = { trigger_event = { id = eotg_aug_patron.006  days = { 1 30 } } }
+                        # W9 (event_quality_v1): with the envoy dead or gone
+                        # the Final Demand comes as the syndicate's unsigned
+                        # letter (.010); the presence test of the paper entry
+                        if = {
+                            limit = {
+                                var:eotg_envoy ?= {
+                                    is_alive = yes
+                                    is_courtier_of = scope:story.story_owner
+                                }
+                            }
+                            story_owner = { trigger_event = { id = eotg_aug_patron.006  days = { 1 30 } } }
+                        }
+                        else = {
+                            story_owner = { trigger_event = { id = eotg_aug_patron.010  days = { 1 30 } } }
+                        }
                     }
                     else_if = {
                         limit = {
@@ -764,7 +791,20 @@ eotg_story_aug_patron = {
                     set_variable = { name = eotg_demand  value = 4 }
                     story_owner = {
                         add_character_flag = { flag = eotg_flag_aug_patron_writeoff  days = 60 }
-                        trigger_event = { id = eotg_aug_patron.006  days = { 1 30 } }
+                    }
+                    # W9 (event_quality_v1): with the envoy dead or gone the
+                    # write-off comes as the syndicate's unsigned letter (.010)
+                    if = {
+                        limit = {
+                            var:eotg_envoy ?= {
+                                is_alive = yes
+                                is_courtier_of = scope:story.story_owner
+                            }
+                        }
+                        story_owner = { trigger_event = { id = eotg_aug_patron.006  days = { 1 30 } } }
+                    }
+                    else = {
+                        story_owner = { trigger_event = { id = eotg_aug_patron.010  days = { 1 30 } } }
                     }
                 }
             }
@@ -803,7 +843,21 @@ eotg_story_aug_patron = {
                                 var:eotg_demand >= 4
                             }
                         }
-                        story_owner = { trigger_event = { id = eotg_aug_patron.006  days = { 1 30 } } }
+                        # W9 (event_quality_v1): with the envoy dead or gone
+                        # the Final Demand comes as the syndicate's unsigned
+                        # letter (.010); the presence test of the paper entry
+                        if = {
+                            limit = {
+                                var:eotg_envoy ?= {
+                                    is_alive = yes
+                                    is_courtier_of = scope:story.story_owner
+                                }
+                            }
+                            story_owner = { trigger_event = { id = eotg_aug_patron.006  days = { 1 30 } } }
+                        }
+                        else = {
+                            story_owner = { trigger_event = { id = eotg_aug_patron.010  days = { 1 30 } } }
+                        }
                     }
                     else_if = {
                         limit = {

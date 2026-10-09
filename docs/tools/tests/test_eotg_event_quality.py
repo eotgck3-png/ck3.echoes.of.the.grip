@@ -243,6 +243,20 @@ class SeamlessFirst(unittest.TestCase):
         self.assertEqual(rows["eotg_s.2"]["main_desc_key"], "eotg_s.2.desc_seamless")
         self.assertEqual(rows["eotg_s.2"]["voice"], "neutral")
 
+    def test_letter_window_counts_as_letter(self):
+        # window = anonymous_letter_event on a character_event (_events.info:18)
+        p = os.path.join(self.d, "events", "eotg_l.txt")
+        with open(p, "w", encoding="utf-8", newline="") as fh:
+            fh.write("namespace = eotg_l\n"
+                     "eotg_l.1 = {\n type = character_event\n window = anonymous_letter_event\n"
+                     " desc = eotg_s.1.desc\n option = { name = eotg_l.1.a }\n}\n"
+                     "eotg_l.2 = {\n type = character_event\n window = big_event_window\n"
+                     " desc = eotg_s.1.desc\n option = { name = eotg_l.2.a }\n}\n")
+        rows = {r["id"]: r for r in E.analyze(self.d, E.load_loc(self.d), PERS)}
+        self.assertTrue(rows["eotg_l.1"]["letter"])
+        self.assertFalse(rows["eotg_l.2"]["letter"])
+        self.assertFalse(rows["eotg_s.1"]["letter"])
+
 
 class Traits(unittest.TestCase):
     def test_cached_list(self):

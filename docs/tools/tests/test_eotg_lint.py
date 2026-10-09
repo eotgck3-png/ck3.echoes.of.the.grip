@@ -293,6 +293,22 @@ class L010(LintCase):
             "localization/english/a_l_english.yml": self.LOC,
         }, "L010", allowlist={"vanilla_ok"})
 
+    def test_letter_opening(self):
+        # bare `opening = key` and `opening = { desc = key }` (_events.info:141)
+        res = self.assertHit({
+            "events/e.txt": EV + "eotg_t.1 = { type = letter_event title = eotg_t.1.t "
+                                 "opening = eotg_t.1.op desc = eotg_t.1.desc "
+                                 "option = { name = eotg_t.1.a } }\n"
+                                 "eotg_t.2 = { type = letter_event title = eotg_t.1.t "
+                                 "opening = { first_valid = { triggered_desc = { "
+                                 "trigger = { always = yes } desc = eotg_t.2.op_x } "
+                                 "desc = eotg_t.1.desc } } desc = eotg_t.1.desc "
+                                 "option = { name = eotg_t.1.a } }",
+            "localization/english/a_l_english.yml": self.LOC,
+        }, "L010", count=2)
+        missing = sorted(f.message.split("'")[1] for f in res)
+        self.assertEqual(missing, ["eotg_t.1.op", "eotg_t.2.op_x"])
+
     # CB-42: customizable localization
     CUSTOM = ("eotg_cl_x = {\n type = character\n"
               " text = { trigger = { var:v ?= flag:a } localization_key = eotg_name_a }\n"

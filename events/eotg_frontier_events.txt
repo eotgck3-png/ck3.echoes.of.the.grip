@@ -535,9 +535,24 @@ eotg_frontier.002 = {
 # -- eotg_frontier.003 --------------------------------------------------------
 # An Offer of Backing. scope:eotg_frontier_sponsor offers; the holder (root)
 # decides. Sponsorship gives the backer no claim and no ownership (spec §R).
+# Callers (unchanged): eotg_frontier.010 a/b/c, eotg_frontier_flavor_pick_effect
+#   and eotg_frontier_offer_backing_effect.
+# W9 (event_quality_v1, REWRITE): a letter from the sponsor. Shape: vanilla
+#   letter_event, ep3_decisions_events.txt:1832-1846 (type, opening, sender
+#   with animation, an is_alive guard on the sender in trigger) and
+#   ep3_decisions_events.txt:5269-5279 (sender with triggered_animation).
+#   Sender guarantee: the trigger below already requires the sponsor to exist,
+#   be alive and not be root, so no character_event fallback is needed.
+#   The letter window renders only the sender's portrait
+#   (gui/event_windows/letter_event.gui:253), so B12's left_portrait (root's
+#   paranoid/greedy/arrogant reactions) is dropped and its right_portrait
+#   reactions move onto sender. title, theme and override_background are kept
+#   (W9: only type, sender, opening and the window change); the letter window
+#   ignores the background, as at east_europe_events.txt:999.
 eotg_frontier.003 = {
-    type = character_event
+    type = letter_event
     title = eotg_frontier.003.t
+    opening = { desc = eotg_frontier.003.opening }
     desc = {
         desc = eotg_frontier.003.desc
         triggered_desc = {
@@ -558,23 +573,7 @@ eotg_frontier.003 = {
         NOT = { scope:eotg_frontier_sponsor = root }
     }
 
-    left_portrait = {
-        character = root
-        triggered_animation = {    # W6 (event_quality_v1)
-            trigger = { has_trait = paranoid }
-            animation = paranoia
-        }
-        triggered_animation = {    # W6 (event_quality_v1)
-            trigger = { has_trait = greedy }
-            animation = personality_greedy
-        }
-        triggered_animation = {    # W6 (event_quality_v1)
-            trigger = { has_trait = arrogant }
-            animation = dismissal
-        }
-        animation = personality_rational
-    }
-    right_portrait = {
+    sender = {
         character = scope:eotg_frontier_sponsor
         triggered_animation = {    # W6 (event_quality_v1)
             trigger = { scope:eotg_frontier_sponsor ?= { has_trait = greedy } }
@@ -1516,9 +1515,22 @@ eotg_frontier.021 = {
 # A Rival Backer: someone else offers to back the Frontier on better terms
 # (design §11 "rival sponsor arrives"). Switching costs the old backer's
 # goodwill. Neither backer gains a claim or a say (LAW AT 866).
+# Caller (unchanged): eotg_frontier_flavor_pick_effect, only with
+#   scope:eotg_frontier_rival saved (its random_list entry requires it).
+# W9 (event_quality_v1, REWRITE): a letter from the rival backer. Shape as
+#   .003: vanilla letter_event, ep3_decisions_events.txt:1832-1846 and
+#   :5269-5279. Sender guarantee: the trigger now requires the rival to exist,
+#   be alive and not be root (the ep3 2001 pattern). The only caller always
+#   saves a rival first and fires with no delay, so no reachable path changes;
+#   the immediate's find-a-rival fallback could no longer run under the guard
+#   and was removed. B12's left_portrait (root's reactions) is dropped,
+#   since the letter window renders only the sender
+#   (gui/event_windows/letter_event.gui:253); the right_portrait reactions
+#   move onto sender. title, theme and override_background are kept.
 eotg_frontier.030 = {
-    type = character_event
+    type = letter_event
     title = eotg_frontier.030.t
+    opening = { desc = eotg_frontier.030.opening }
     desc = eotg_frontier.030.desc
     theme = realm
     override_background = { reference = eotg_bg_office }
@@ -1529,26 +1541,13 @@ eotg_frontier.030 = {
             eotg_frontier_is_frontier = yes
             eotg_frontier_has_valid_sponsor = yes
         }
+        # W9 sender guarantee
+        exists = scope:eotg_frontier_rival
+        scope:eotg_frontier_rival = { is_alive = yes }
+        NOT = { scope:eotg_frontier_rival = root }
     }
 
-    left_portrait = {
-        character = root
-        triggered_animation = {    # W6 (event_quality_v1)
-            trigger = { has_trait = greedy }
-            animation = personality_greedy
-        }
-        triggered_animation = {    # W6 (event_quality_v1)
-            trigger = { has_trait = honest }
-            animation = personality_honorable
-        }
-        triggered_animation = {    # W6 (event_quality_v1)
-            trigger = { has_trait = paranoid }
-            animation = paranoia
-        }
-        animation = personality_rational
-    }
-    right_portrait = {
-        trigger = { exists = scope:eotg_frontier_rival }
+    sender = {
         character = scope:eotg_frontier_rival
         triggered_animation = {    # W6 (event_quality_v1)
             trigger = { scope:eotg_frontier_rival ?= { has_trait = greedy } }
@@ -1561,10 +1560,6 @@ eotg_frontier.030 = {
         hidden_effect = {
             scope:eotg_frontier_county = {
                 var:eotg_frontier_sponsor = { save_scope_as = eotg_frontier_sponsor }
-                if = {
-                    limit = { NOT = { exists = scope:eotg_frontier_rival } }
-                    eotg_frontier_find_rival_backer_effect = yes
-                }
             }
         }
     }

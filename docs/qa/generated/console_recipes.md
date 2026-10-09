@@ -23,7 +23,7 @@
 | Neurofractured | `eotg_augmentation_fracture.txt` | 29 | 16 | 11 | 2 |
 | Heir's Arc (story) | `eotg_augmentation_heir.txt` | 6 | 0 | 0 | 6 |
 | Endgames | `eotg_augmentation_endgame.txt` | 11 | 1 | 8 | 2 |
-| Patron (story) | `eotg_augmentation_patron.txt` | 9 | 1 | 0 | 8 |
+| Patron (story) | `eotg_augmentation_patron.txt` | 10 | 1 | 0 | 9 |
 | Iron Retinue (story) | `eotg_augmentation_retinue.txt` | 5 | 0 | 0 | 5 |
 | Non-ruler lifecycle | `eotg_augmentation_nonruler.txt` | 6 | 0 | 0 | 6 |
 | Procedures | `eotg_augmentation_procedures.txt` | 6 | 0 | 3 | 3 |
@@ -34,7 +34,7 @@
 | Augmentation Kingpin | `eotg_augmentation_kingpin.txt` | 42 | 0 | 1 | 41 |
 | Augmentation Realm | `eotg_augmentation_realm.txt` | 1 | 0 | 0 | 1 |
 | Frontier Events | `eotg_frontier_events.txt` | 19 | 1 | 0 | 18 |
-| **Total** | | **267** | **47** | **76** | **144** |
+| **Total** | | **268** | **47** | **76** | **145** |
 
 ## Initiation
 
@@ -228,6 +228,7 @@
 | `eotg_aug_patron.007`<br>A New Envoy | **no**: needs story eotg_story_aug_patron running (created by effect eotg_aug_patron_accept_effect) | `remove_trait eotg_total_integration` | `event eotg_aug_patron.007` | story eotg_story_aug_patron | decision eotg_decision_seek_augmentation → event eotg_aug_init.018 option e → event eotg_aug_patron.001 option a → effect eotg_aug_patron_accept_effect → story eotg_story_aug_patron → this event; then let time run (yearly pulses and stories pace it) |
 | `eotg_aug_patron.008`<br>The Paper | **no**: needs story eotg_story_aug_patron running (created by effect eotg_aug_patron_accept_effect) | must not be augmented (if you are: `effect eotg_aug_remove_all_effect = yes`)<br>`remove_trait eotg_total_integration` | `event eotg_aug_patron.008` | story eotg_story_aug_patron | decision eotg_decision_seek_augmentation → event eotg_aug_init.018 option e → event eotg_aug_patron.001 option a → effect eotg_aug_patron_accept_effect → story eotg_story_aug_patron → this event; then let time run (yearly pulses and stories pace it) |
 | `eotg_aug_patron.009`<br>The Collector | **no**: needs story eotg_story_aug_patron running (created by effect eotg_aug_patron_accept_effect) | `remove_trait eotg_total_integration` | `event eotg_aug_patron.009` | story eotg_story_aug_patron | decision eotg_decision_seek_augmentation → event eotg_aug_init.018 option e → event eotg_aug_patron.001 option a → effect eotg_aug_patron_accept_effect → story eotg_story_aug_patron → this event; then let time run (yearly pulses and stories pace it) |
+| `eotg_aug_patron.010`<br>The Final Account | **no**: needs story eotg_story_aug_patron running (created by effect eotg_aug_patron_accept_effect)<br>needs scope:eotg_patron_envoy, saved by effect eotg_aug_patron_accept_effect | `remove_trait eotg_total_integration` | `event eotg_aug_patron.010` | story eotg_story_aug_patron | decision eotg_decision_seek_augmentation → event eotg_aug_init.018 option e → event eotg_aug_patron.001 option a → effect eotg_aug_patron_accept_effect → story eotg_story_aug_patron → this event; then let time run (yearly pulses and stories pace it) |
 
 ## Iron Retinue (story)
 

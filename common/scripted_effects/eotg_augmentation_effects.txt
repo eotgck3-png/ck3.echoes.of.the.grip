@@ -1428,7 +1428,8 @@ eotg_aug_patron_grievance_effect = {
 # in them, the syndicate sells the paper instead (story variable
 # eotg_paper_sold; the tick then sends the collector, patron.009). The
 # firmware punishment and the paper never stack.
-# Callers: eotg_aug_patron.006 (c, d at 50%, e, f).
+# Callers: eotg_aug_patron.006 (c, d at 50%, e, f), eotg_aug_patron.010 (d at
+# 50%, f; no envoy scope is saved there, so nobody is killed by letter).
 # CB-27 M7: the envoy dies only if alive and still at court
 # (eotg_aug_patron_envoy_present); c and e are gated on the same trigger, and
 # d's failure branch against an absent envoy keeps the retaliation without a
@@ -1456,8 +1457,8 @@ eotg_aug_patron_betray_effect = {
         # Reprisal spec §5.2: none of the syndicate's hardware is left in the
         # owner to stop servicing. The syndicate sells the paper; the story
         # stays alive and its next tick sends the collector (.009).
-        # scope:eotg_patron_story is saved in .006's immediate, the only
-        # caller; the ?= is belt-and-braces.
+        # scope:eotg_patron_story is saved in the immediate of both callers,
+        # .006 and .010 (W9); the ?= is belt-and-braces.
         scope:eotg_patron_story ?= { set_variable = eotg_paper_sold }
         custom_tooltip = eotg_aug_patron_paper_sold_tt
     }

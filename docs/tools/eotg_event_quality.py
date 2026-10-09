@@ -93,6 +93,9 @@ def subblocks(b, name):
     return [block(b, m.start()) for m in re.finditer(r"(?<![\w.])" + name + r"\s*=\s*\{", b)]
 
 
+LETTER_WINDOWS = ("letter_event", "anonymous_letter_event")
+
+
 def words(t):
     t = re.sub(r"\[[^\]]*\]", "X", t)
     t = re.sub(r"#\w+|#!|\n|\$\w+\$", " ", t)
@@ -260,7 +263,10 @@ def analyze_event(eid, b, rel, loc, personality):
     r["messages"] = len(re.findall(r"(?<![\w.])send_interface_message\s*=", b))
     r["music_cues"] = len(re.findall(r"(?<![\w.])play_music_cue\s*=", b))
     r["internal_flags"] = sorted(set(re.findall(r"(?<![\w.])add_internal_flag\s*=\s*(\w+)", b)))
-    r["letter"] = r["type"] == "letter_event"
+    # A letter is the letter type or a letter window: vanilla
+    # events/_events.info:18,23 and gui/event_windows/{anonymous_,}letter_event.gui
+    r["letter"] = (r["type"] == "letter_event"
+                   or (r["window_value"] or "").strip('"') in LETTER_WINDOWS)
     # desc (evq.py)
     dm = re.search(r"(?<![\w.])desc\s*=", b)
     descblk = ""

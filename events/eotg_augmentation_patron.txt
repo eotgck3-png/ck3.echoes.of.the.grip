@@ -13,9 +13,12 @@
 #                                               once per story)
 # eotg_aug_patron.009 — The Collector          (the paper was sold; reprisal
 #                                               spec §5.4)
+# eotg_aug_patron.010 — The Final Account      (.006 as an unsigned letter:
+#                                               the envoy is dead or gone;
+#                                               event_quality_v1 W9)
 #
 # Fires from: .001 from eotg_on_yearly_aug_initiation_check (Patron entry) and
-#   eotg_aug_init.018 (e); .002-.009 from the story eotg_story_aug_patron
+#   eotg_aug_init.018 (e); .002-.010 from the story eotg_story_aug_patron
 #   through its effect_group tick (.009 from the collection entry, both
 #   cadences). Cooldown authority: the story's
 #   effect_group (2-3 years, 3-4 on read terms). No event checks a flag.
@@ -972,10 +975,13 @@ eotg_aug_patron.006 = {
     # Balance spec §5.8: the syndicate's write-off of a Neurofractured owner
     # (eotg_flag_aug_patron_writeoff, 60 days, set by the story tick) comes
     # first and replaces the other two.
-    # CB-27 M7: the three tone descs open with the envoy in the room. The tick
-    # fires .006 before it checks the envoy, so each tone has an _absent
-    # variant for an envoy who is dead or has left court
+    # CB-27 M7: the three tone descs open with the envoy in the room. Each
+    # tone has an _absent variant for an envoy who is dead or has left court
     # (eotg_aug_patron_envoy_present = no): the terms arrive by message.
+    # W9 (event_quality_v1): the tick now sends an absent-envoy owner the
+    # letter .010 instead, so the _absent variants (and option f) are only
+    # the in-flight fallback, for an envoy who dies or leaves in the 1-30
+    # day delay after the tick chose .006.
     desc = {
         first_valid = {
             triggered_desc = {
@@ -1342,6 +1348,10 @@ eotg_aug_patron.007 = {
 # e: the holder's own court (index §5.3; lore review §11: no authority above
 # the polity at 866). Roll shape: patron.002.e (random_list with a desc per
 # branch).
+# W9 (event_quality_v1): checked, stays a character event. The tick fires
+# .008 only while the envoy is alive and at court (the paper entry's
+# var:eotg_envoy test), so the syndicate's hand is in the room, not an
+# unsigned note.
 
 eotg_aug_patron.008 = {
     type = character_event
@@ -1565,6 +1575,9 @@ eotg_aug_patron.008 = {
 # failure the collector's people stop the seizure and the collector stays
 # (lore P5).
 # Every option ends the story (`after`).
+# W9 (event_quality_v1): checked, stays a character event. The desc is not
+# only the debt-sale notice: the collector arrives in person as a guest
+# (add_visiting_courtier) and is a portrait and an option target.
 
 eotg_aug_patron.009 = {
     type = character_event
@@ -1751,6 +1764,172 @@ eotg_aug_patron.009 = {
     after = {
         hidden_effect = {
             scope:eotg_patron_story ?= { end_story = yes }
+        }
+    }
+}
+
+
+# ── eotg_aug_patron.010 ───────────────────────────────────────────────────────
+# The Final Account (event_quality_v1 W9, NEW half, owner-approved Q2
+# 2026-10-09). The Final Demand (.006) as the syndicate's unsigned note, for an
+# owner whose envoy is dead or has left court when the tick comes due: the
+# *_absent variants of .006 split off into a letter, as W9 requires.
+# Caller: eotg_story_aug_patron, both cadences, the write-off entry and the
+#   Final Demand entry, in the branch where var:eotg_envoy is dead or not a
+#   courtier of the owner (the .008 entry's presence test, inverted). The
+#   envoy-present branch still fires .006. .006 keeps its _absent descs and
+#   option f as the in-flight fallback (the envoy dies or leaves in the 1-30
+#   day delay), which is W9's "fallback to character_event".
+# Shape: vanilla anonymous letter, events/dlc/ep3/ep3_contract_events.txt:
+#   8596-8600 (type = character_event, window = anonymous_letter_event, no
+#   sender: _events.info:18, "letter_event, but without sender portrait").
+#   The syndicate signs nothing, so there is no sender character to keep
+#   alive. No `opening`: vanilla uses it only on type = letter_event, so the
+#   salutation is folded into the three desc keys (W9 QA). override_background is ignored by the letter window and kept
+#   for eotg_lint L015 (vanilla keeps one on an anonymous letter too,
+#   seduce_scheme_outcome_events.txt:3352-3357).
+# Mechanics: .006 a, b, d and f, unchanged (keep the two in step). c and e
+#   kill the envoy in person and do not exist here. scope:eotg_patron_envoy is
+#   deliberately not saved, so eotg_aug_patron_envoy_present is always no and
+#   eotg_aug_patron_betray_effect never kills anyone from a letter.
+# Resource: as .006: b pays, a and f move the clause or the throttle, risk
+#   +25 and the Countdown through eotg_aug_patron_betray_effect (or the paper
+#   sold, for an owner with no implants).
+# Seamless (§12.5 S6): (a). The story ends at the tick for a Seamless owner;
+#   the trigger guard covers the threshold crossed in flight.
+
+eotg_aug_patron.010 = {
+    type = character_event
+    window = anonymous_letter_event
+    title = eotg_aug_patron.010.t
+    # Tone order as .006: the write-off flag first, then grievance, then the
+    # settlement fallback.
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { has_character_flag = eotg_flag_aug_patron_writeoff }
+                desc = eotg_aug_patron.010.desc_writeoff
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_patron_story.var:eotg_grievance >= 3 }
+                desc = eotg_aug_patron.010.desc_betrayal
+            }
+            desc = eotg_aug_patron.010.desc_settlement
+        }
+    }
+    theme = intrigue
+    override_background = { reference = eotg_bg_office }
+
+    trigger = {
+        eotg_aug_has_patron = yes
+        # Seamless exposure (event_quality_v1 §12.5 S1 in-flight)
+        NOT = { has_trait = eotg_total_integration }
+    }
+
+    immediate = {
+        hidden_effect = {
+            random_owned_story = {
+                limit = { story_type = eotg_story_aug_patron }
+                save_scope_as = eotg_patron_story
+            }
+            # As .006 (CB-42, seller names §5.4 item 4): the rival syndicate for d
+            remove_variable = eotg_aug_rival_syndicate
+            if = {
+                limit = { exists = scope:eotg_patron_story.var:eotg_syndicate }
+                set_variable = { name = eotg_aug_rival_exclude  value = scope:eotg_patron_story.var:eotg_syndicate }
+            }
+            else = {
+                remove_variable = eotg_aug_rival_exclude
+            }
+            eotg_aug_roll_syndicate_except_effect = { VAR = eotg_aug_rival_syndicate  EXCLUDE = eotg_aug_rival_exclude }
+        }
+    }
+
+    # "Sign over the revenues." (.006 a)
+    option = {
+        name = eotg_aug_patron.006.a
+        if = {
+            limit = { has_character_modifier = eotg_mod_aug_patron_clause }
+            remove_character_modifier = eotg_mod_aug_patron_clause
+        }
+        add_character_modifier = { modifier = eotg_mod_aug_patron_clause_final }
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = content }
+            modifier = { add = 10  has_trait = craven }
+        }
+    }
+
+    # "Buy them out." (.006 b)
+    option = {
+        name = eotg_aug_patron.006.b
+        trigger = { eotg_aug_patron_can_pay = { BASE = major_gold_value  MULT = 2 } }
+        eotg_aug_patron_pay_effect = { BASE = major_gold_value  MULT = 2 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 20  has_trait = diligent }
+            modifier = { add = 10  has_trait = just }
+            modifier = { add = -20  has_trait = greedy }
+        }
+    }
+
+    # [deceitful] "Sell them to a rival syndicate." (.006 d) 50%: a clean exit
+    # and a fee; 50%: as f. No murder stress: there is no envoy to kill.
+    option = {
+        name = eotg_aug_patron.006.d
+        trigger = { has_trait = deceitful }
+        trait = deceitful
+        random_list = {
+            50 = {
+                desc = eotg_aug_patron.006.d.success
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_good
+                    title = eotg_aug_patron.006.toast_d_success
+                    left_icon = root
+                }
+                add_gold = medium_gold_value
+            }
+            50 = {
+                desc = eotg_aug_patron.006.d.failure
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_bad
+                    title = eotg_aug_patron.006.toast_d_failure
+                    left_icon = root
+                }
+                eotg_aug_patron_betray_effect = yes
+            }
+        }
+        eotg_aug_stress_lie_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = deceitful }
+            modifier = { add = 10  has_trait = greedy }
+        }
+    }
+
+    # "Burn the terms. Send no answer." (.006 f) Always shown here: a letter
+    # has no messenger in the room. +50 as .006 f.
+    option = {
+        name = eotg_aug_patron.006.f
+        eotg_aug_patron_betray_effect = yes
+        add_prestige = 50
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = stubborn }
+            modifier = { add = 10  has_trait = arrogant }
+            modifier = { add = -20  has_trait = craven }
+        }
+    }
+
+    # As .006: the story parks (does not end) when the paper was sold
+    after = {
+        hidden_effect = {
+            scope:eotg_patron_story ?= {
+                if = {
+                    limit = { NOT = { has_variable = eotg_paper_sold } }
+                    end_story = yes
+                }
+            }
         }
     }
 }
