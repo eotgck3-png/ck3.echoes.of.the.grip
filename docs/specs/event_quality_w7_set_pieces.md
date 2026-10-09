@@ -120,18 +120,18 @@ Words marked **[new]** in the text drafts are added sentences or clauses, listed
   | d | "Not yet. I am not finished." | stubborn | death 35, Seamless 15, Excision 15, abdication 15, passes 40 (:4656-4708) |
 
   W5 (B5) may re-axe c or d. W7 takes whatever gate B5 leaves; the effects never change.
-- **Threshold fade: not staged here.** Q3 made fracture.027 optional, and W7 recommends **no**. Four of its five outcomes (death, Excision, abdication, it passes) keep a self that is still first person afterwards: fracture.029, end.001 and end.030 all narrate in "I". A fade here would therefore be followed by the "I" returning, which §12.1 rule 7 forbids. fracture.027 stays full Neurofractured first person. Question L-W7-4 asks the lore-keeper to confirm this.
+- **Threshold fade: not staged here.** Q3 made fracture.027 optional, and W7 recommends **no**. Four of its five outcomes (death, Excision, abdication, it passes) keep a self that is still first person afterwards: fracture.029, end.001 and end.030 all narrate in "I". A fade here would therefore be followed by the "I" returning, which §12.1 rule 7 forbids. fracture.027 stays full Neurofractured first person. **L-W7-4 RULED (confirmed).**
 - **Loc keys and drafts:**
 
   | Key | Draft | Voice note |
   |---|---|---|
   | `eotg_fracture.027.desc` | "Everything fires at once. Every sensor, every channel, every forecast the implant has ever run arrives together, and I am standing in the middle of the delivery. The room is a long way off.\n\n**[new]** Someone at the door is saying my name. I hear it three times: once early, once on time, once late. I cannot tell which one I replied to.\n\nThere is very little left between my thoughts and the system, and every second it gets thinner." | Neurofractured, first person. "Hearing one's own words late" and the forecast running ahead are both allowed. The name comes from a person, not from the implant. |
-  | `.desc_premonition` | "\n\nI remember this. It was filed months ago as a forecast and stored as a memory: this room, these hands. The memory stops where the forecast's confidence did, before the ending." | converted and **shortened** (44 to 30 words) so the worst case fits the band; same facts |
+  | `.desc_premonition` | "\n\nI remember this. It was filed months ago as a forecast and stored as a memory: this room, these hands. The memory stops where the forecast's confidence ran out, before the ending." | converted and **shortened** (44 to 31 words) so the worst case fits the band; same facts. Lore polish taken 2026-10-09 |
   | `.desc_voice01` | "\n\nThe thought that arrives half a second early is arriving earlier now: a full second, then three, then too many to follow." | already neutral; unchanged |
   | `.desc_voice2` | "\n\nThe model is running in plain view. Every future it has computed for me scrolls past, each one ranked, and the list is converging." | conversion only |
-  | `.desc_voice3` | **L-W7-2.** Shipped: "There is no "you" and "it" left in the room, only "we", and we are running out of room to be two." Proposed: "\n\nI keep starting sentences with "we". There is less and less room in the word for two." | The shipped line has the narrator itself speak as "we", which edges toward possession framing. The proposal keeps the "we" in the ruler's mouth (rule 6). |
+  | `.desc_voice3` | "\n\nI keep starting sentences with "we". There is less and less room in the word for two." | **L-W7-2 RULED:** the shipped line ("…only "we", and we are running out of room to be two") is possession framing and is replaced. The new line keeps the "we" in the ruler's own mouth (rule 6). |
   | `.desc_voice4` | "\n\nThe terms I agreed to are being exercised all at once. Every permission is live. It is a clean, orderly cascade, and nothing in it is out of bounds. That is what makes it frightening." | conversion only |
-  | `.tt` | **L-W7-3.** Shipped: "The implant decides what happens next." Proposed: "What happens next is no longer mine to choose." | The shipped line gives the implant decisions, which the Neurofractured banned list forbids (parent §12.1 rule 7). Text only; the tooltip still sits on every option. |
+  | `.tt` | "What happens next is no longer mine to choose." | **L-W7-3 RULED.** The shipped line ("The implant decides what happens next.") gave the implant decisions, which the Neurofractured banned list forbids (parent §12.1 rule 7). Text only; the tooltip still sits on every option. |
   | `.a`–`.d`, `.t` | unchanged | |
 
   Rendered length: main 78 words as drafted; with one voice fragment 100 to 113; worst case (premonition + voice4) 143. **The localizer trims the main desc to 72 to 75 words**, so the worst case lands at or under 140.
@@ -165,7 +165,7 @@ Words marked **[new]** in the text drafts are added sentences or clauses, listed
 
   | Key | Draft | Voice note |
   |---|---|---|
-  | `eotg_aug_end.009.desc` | "The terms are plain, **[new]** and I have read them twice. Nothing on the list is hidden. If I hand over the controls, the system runs me.\n\nMy friends will go: it will not remember why they mattered. My temperament will go: it does not need one. My children will become names in a file, **[new]** kept current and never opened. What remains will work, and decide, and be correct. It will not be a self, and nothing in it will mind.\n\nI make this decision once. Afterward there is no one left to make another." | Neurofractured, first person. "Self", never "humanity". No "open" or "through" in the **options** (lore naming rule 7); "opened" here is in the desc and refers to a file. Swap it for "read" if the lore-keeper prefers. |
+  | `eotg_aug_end.009.desc` | "The terms are plain, **[new]** and I have read them twice. Nothing on the list is hidden. If I hand over the controls, the system runs me.\n\nMy friends will go: it will not remember why they mattered. My temperament will go: it does not need one. My children will become names in a file, **[new]** kept current and never read. What remains will work, and decide, and be correct. It will not be a self, and nothing in it will mind.\n\nI make this decision once. Afterwards there is no one left to make another." | Neurofractured, first person. "Self", never "humanity". No "open" or "through" anywhere in it (lore wording 2026-10-09: "never opened" became "never read"; "Afterward" became "Afterwards"). |
   | `.a.seamless` | "Handover complete. No seam found. Next item." | log register |
   | `.c.seamless` | "Handover complete, all of it. No seam found. Next item." | log register |
   | `.a.death`, `.c.death`, `.a.storm`, `.c.storm` | unchanged (already neutral) | |
@@ -191,11 +191,11 @@ Words marked **[new]** in the text drafts are added sentences or clauses, listed
 
   | Key | Draft | Voice note |
   |---|---|---|
-  | `eotg_aug_end.010.desc` | "The static stops. **[new]** I notice it the way I would notice a sound ending. The overlay is steady, the forecasts are clean, and the second pass over my thoughts has nothing left to correct. It is very quiet.\n\n**[new]** I can see the forecast for the next thought. I am reading it. It is accurate.\n\n**[new]** Reading complete. Next item.\n\n**[new]** Standing preferences: none on file. Grievances: none on file. Relations marked friend: closed, filed. Temperament: not required, pruned. Residual habits: three on file, logged for pruning. Pending decisions: three. Resolved: three. Next item." | **The fade.** First person up to "I am reading it." From "Reading complete." on, it is log register: no I, me, my, we or our, no "you", nobody addressed. Every entry ends logged, filed or pruned (procedures_lore ruling (a)). Entries are the mind's own state, never realm records (tech ceiling). "Residual habits: three" mirrors `eotg_aug_residue = 3`, which the effect has just set (`eotg_augmentation_effects.txt:1119`); it is a word, not a displayed number. |
+  | `eotg_aug_end.010.desc` | "The static stops. **[new]** I notice it the way I would notice a sound ending. The overlay is steady, the forecasts are clean, and the second pass over my thoughts has nothing left to correct. It is very quiet.\n\n**[new]** I can see the forecast for the next thought. I am reading it. It is accurate.\n\n**[new]** Reading complete. Next item.\n\n**[new]** Static: none logged. Standing preferences: none on file. Grievances: none on file. Relations marked friend or closer: closed, filed. Temperament: not required, pruned. Residual habits: three on file, logged for pruning. Next item." (final paragraph as amended by the lore-keeper, 2026-10-09) | **The fade.** First person up to "I am reading it." From "Reading complete." on, it is log register: no I, me, my, we or our, no "you", nobody addressed. Every entry ends logged, filed or pruned (procedures_lore ruling (a)). Entries are the mind's own state, never realm records (tech ceiling). "Residual habits: three" mirrors `eotg_aug_residue = 3`, which the effect has just set (`eotg_augmentation_effects.txt:1119`); it is a word, not a displayed number. |
   | `.a`, `.t` | unchanged | bare acknowledgement |
 
   Rendered length: about 92 words.
-- **L-W7-1.** The pinned wording item in `cybernetics_v2.md` §5 rule 8 ("There is no voice now. There is no one left for it to speak to.") is the shipped end.010 ending. W7 recommends **retiring it here**. It names "the voice" and "speak", which brings back the second-speaker frame at the exact moment Q3 says the text is a record, not a speaker. It also follows the log, so the narration would return after the "I" is gone. If the lore-keeper keeps it, it goes **before** "Reading complete." as the last first-person-era line, never after the log.
+- **L-W7-1 RULED: retired.** The pinned wording item in `cybernetics_v2.md` §5 rule 8 ("There is no voice now. There is no one left for it to speak to.") was the shipped end.010 ending. It is removed, and that rule carries a superseded note. It named "the voice" and "speak", which would have brought back the second-speaker frame at the exact moment Q3 says the text is a record. end.010 now ends in the log register.
 - **Art (later fullscreen):** the same private room as the Cascade plate, now perfectly still. The overlay is a single clean column of log lines and nothing else. The figure is seated, and its posture is exact. Grey and flat light. The doorway is empty. The two plates are meant to be read as a before/after pair.
 
 ### 6.4 The Court Massacre: `eotg_fracture.004`
@@ -295,11 +295,11 @@ Words marked **[new]** in the text drafts are added sentences or clauses, listed
 
   | Key | Draft | Voice note |
   |---|---|---|
-  | `eotg_aug_end.002.desc` | "Nothing arrives early. The overlay does not flicker, no forecast files itself, and the next thought is mine alone, slow and unassisted. After the noise, the silence is almost physical. **[new]** The room sounds larger than it did.\n\n**[new]** I reach for an answer out of habit and find only the question. I have to count the steps to the door. I have to wait for a sentence to end before I know how it ends, and every time I wait, I am the one who finishes it.\n\n**[new]** Nobody tells me how long the quiet lasts." | Ordinary first person: root is out of the system. The last line points toward Phantom Static without naming anything arriving. That line is internal and bodily (procedures_lore (c)), with no signal and no "something". |
+  | `eotg_aug_end.002.desc` | "Nothing arrives early. The overlay does not flicker, no forecast files itself, and the next thought is mine alone, slow and unassisted. After the noise, the silence is almost physical. **[new]** The room sounds larger than it did.\n\n**[new]** I reach for an answer out of habit and find only the question. I have to count the steps to the door. I have to wait for a sentence to end before I know how it ends, and every time I wait, I am the one who finishes it.\n\n**[new]** Nobody can tell me how long my reflexes will keep reaching for the overlay." | Ordinary first person: root is out of the system. The last line (lore wording 2026-10-09) points toward Phantom Static without naming anything arriving. That line is internal and bodily (procedures_lore (c)), with no signal and no "something". |
   | `.desc_maimed` | "\n\nThey took more out of me than they were there to take. I will not be what I was, and I will feel the difference every time I move." | "The surgeons" becomes "They", so the line also fits the back-street path. |
   | `.a`–`.c`, `.t` | unchanged | |
 
-  Rendered length: about 94 words; 123 with the maimed fragment.
+  Rendered length: about 99 words; 128 with the maimed fragment.
 - **Art:** stays in the big window. Under W10, a bespoke recovery-room `eotg_bg_*` (dark displays, one window) could replace `eotg_bg_clinic` here.
 
 ### 6.7 Changes to parent §14.2
@@ -337,7 +337,7 @@ The test's pinned set (parent §9 item 2) becomes:
 - `eotg_aug_end.010.desc`
 - `eotg_aug_end.009.a.seamless`, `.c.seamless`
 
-`eotg_fracture.027.*` leaves the set if L-W7-4 is accepted: it is Neurofractured and counts toward the first-person floor. end.010 is a special case, because it contains "I" by design before the log starts. The test checks **only the text after "Reading complete."** for I, me, my, we, our and you.
+`eotg_fracture.027.*` is **out of the set** (L-W7-4 RULED): it is Neurofractured and counts toward the first-person floor. end.010 is a special case, because it contains "I" by design before the log starts. The test checks **only the text after "Reading complete."** for I, me, my, we, our and you.
 
 ---
 
@@ -353,7 +353,7 @@ The test's pinned set (parent §9 item 2) becomes:
    - L012 (banned and register terms) is clean on the 15 keys, including "voice", "answers", "whisper", "prison", "tear", "grip" and "Void", and "the implant decides".
 6. Every portrait that names a saved scope is guarded with `exists`. The `triggered_animation` keys are the verified ones in §6. Tiger shows no unknown-animation or unknown-widget error.
 7. Tiger clean except the CLAUDE.md known-benign list. PX LSP and vocab show no new findings. eotg_lint shows no new findings against the baseline, and `loc_mechanical.py` is clean.
-8. The lore-keeper signs off every **[new]** sentence and rules on L-W7-1 to L-W7-4.
+8. Lore sign-off: done 2026-10-09 (§11). The shipped text matches the §6 drafts as amended.
 9. **In game (CB-44):**
    - each set piece opens in the big window;
    - both double-vision pairs and the heavy-smoke and night-scene widgets render in it;
@@ -395,25 +395,28 @@ The test's pinned set (parent §9 item 2) becomes:
 
 ---
 
-## 11. Lore questions (for eotg-lore-keeper)
+## 11. Lore rulings (eotg-lore-keeper, 2026-10-09: CHANGES REQUIRED, wording only; all applied above)
 
-- **L-W7-1:** retire the pinned end.010 line "There is no voice now. There is no one left for it to speak to." (recommended), or keep it placed before the log (§6.3).
-- **L-W7-2:** fracture.027.desc_voice3. Is the shipped narrator "we" ("we are running out of room to be two") possession framing? If so, adopt the proposed line (§6.1).
-- **L-W7-3:** fracture.027.tt "The implant decides what happens next." gives the implant decisions. Adopt "What happens next is no longer mine to choose." (§6.1).
-- **L-W7-4:** confirm that the threshold fade is **not** staged in fracture.027 (§6.1), and that fracture.027 leaves the scorecard's pinned Seamless set (§7.3).
-- **Every [new] sentence** in §6.1 to §6.6, notably:
-  - the log entries in end.010 (do they stay inside the tech ceiling?);
-  - "granted motor access" in fracture.004;
-  - "Nobody tells me how long the quiet lasts" in end.002, as a Phantom Static foreshadow.
+- **L-W7-1 RULED: retire** the end.010 line "There is no voice now. There is no one left for it to speak to." end.010 now ends in the log register (§6.3). `cybernetics_v2.md` §5 rule 8 carries the superseded note.
+- **L-W7-2 RULED:** the shipped fracture.027.desc_voice3 "we" is possession framing. The new line is adopted (§6.1).
+- **L-W7-3 RULED:** fracture.027.tt becomes "What happens next is no longer mine to choose." (§6.1).
+- **L-W7-4 RULED (confirmed):** there is no fade in fracture.027, and it leaves the pinned Seamless set (§7.3).
+- **Wording amendments applied:**
+  - end.009.desc: "never opened" becomes "never read";
+  - end.010.desc: the final log paragraph is replaced, adding "Static: none logged." and "friend or closer", and dropping the pending/resolved entries;
+  - end.002.desc: the last line becomes "Nobody can tell me how long my reflexes will keep reaching for the overlay."
+- **Optional polish taken:**
+  - fracture.027.desc_premonition: "confidence ran out";
+  - end.009.desc: "Afterwards".
+- **Everything else in §6 is signed off as drafted.**
 
 ---
 
 ### HANDOFF
-- status: done (addendum written; parent W7 section points here)
-- next: eotg-lore-keeper (review), then eotg-scripter (P5, after B4/B5/B7 have landed on these files and W3 has committed)
-- ask (lore-keeper): rule on L-W7-1 to L-W7-4 and sign off, or amend, every **[new]** sentence in §6. Write the rulings into §11 of this file, or return them for the architect to fold in.
-- ask (scripter, after the lore sign-off): apply §6 presentation fields to the six events (window, effect, widgets, music, portraits, the two presentation-only scopes) and §5.1's coordination rules. Change no option effect, trigger, weight or caller. Report any W3 cue you replace.
+- status: done (lore review folded in 2026-10-09; L-W7-1 to L-W7-4 ruled)
+- next: eotg-scripter (P5, after B4/B5/B7 have landed on these files and W3 has committed)
+- ask (scripter): apply §6 presentation fields to the six events (window, effect, widgets, music, portraits, the two presentation-only scopes) and §5.1's coordination rules. Change no option effect, trigger, weight or caller. Report any W3 cue you replace.
 - files: docs/specs/event_quality_w7_set_pieces.md, docs/specs/event_quality_v1.md
 - needs-loc: eotg-localizer writes the 15 keys in §7.1 from the lore-approved drafts, after the scripter (§7.2: these keys are W7's, not B4/B5/B7's)
-- needs-lore: L-W7-1 to L-W7-4 plus the [new] sentences
+- needs-lore: none (signed off 2026-10-09)
 - needs-human: CB-44 in-game checks in §8 item 9; art for §9 when W10 opens

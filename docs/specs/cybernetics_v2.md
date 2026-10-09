@@ -233,7 +233,7 @@ New events go in the existing file for their namespace: `events/eotg_augmentatio
 **8. Localizer-applied wording items** (from the review; behaviour unchanged):
 - zealous "Begone" → "No device speaks for me." (tier3.012.e, fracture.017.e);
 - "answers" → "replies" / "responds";
-- the Seamless voice-5 line is "There is no voice now. There is no one left for it to speak to.";
+- the Seamless voice-5 line is "There is no voice now. There is no one left for it to speak to."; *(Superseded 2026-10-09 by W7 L-W7-1: end.010 now ends in the log register, `event_quality_w7_set_pieces.md` §6.3.)*
 - fracture.010 "the overlay labels your own face";
 - fracture.008 "a designation, not a name";
 - fracture.014's door is drawn by the spatial overlay;
