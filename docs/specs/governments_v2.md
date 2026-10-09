@@ -10,7 +10,7 @@
 
 ## 1. Purpose & gate
 
-These four governments run the mod's commercial and criminal realms: a private military company, a human corporate oligarchy, the goblin-and-ogre trade oligarchy, and a criminal enterprise that has become a state. Normally they are Gate 2 work. **The owner ruled on 2026-10-08 that they are a mod-exclusive exception, like cybernetics.** That means:
+These four governments run the mod's commercial and criminal realms: a private military company, a corporate oligarchy, a trade oligarchy of chartered princes, and a criminal enterprise that has become a state. Normally they are Gate 2 work. **The owner ruled on 2026-10-08 that they are a mod-exclusive exception, like cybernetics.** That means:
 - they are built and tested before Gate 1, on the vanilla-map British Isles test sub-mod (`docs/test_submods/british_isles/`);
 - mod script must not name any title, province, culture, faith or character. The engine decides which ruler holds which government from history data, and that data belongs to the test sub-mod (the cartographer's job, §12).
 
@@ -126,7 +126,7 @@ Every field below is listed in `G/common/governments/_governments.info`, or (`al
 
 ### 5.1 PMC: `eotg_pmc_government`
 
-**Identity.** A military state run as a business: a command hierarchy that sells force. In v1 it is the proto-corporate foundation, standing to the Corporation as tribal stands to feudal, and generic across races (`EOTG_Government_Design_Document_v2.md` §6). Knights are **Operators** (v1 header and loc). Its v1 identity is contracts: income and standing earned outside the realm (robustness plan 0.2). **Canon is thin** (LQ3). The 866 sources show mercenary bands (the Laughing Blades, SETTING LORE body :361) and hired legions (New Cauldron's, in the unreviewed `docs/lore/NATIONS_AT_866_AG.md`), but no named PMC state.
+**Identity.** A military state run as a business: a command hierarchy that sells force. In v1 it is the proto-corporate foundation, standing to the Corporation as tribal stands to feudal, and generic across races (`EOTG_Government_Design_Document_v2.md` §6). Knights are **Operators** (v1 header and loc). Its v1 identity is contracts: income and standing earned outside the realm (robustness plan 0.2). **Lore ruling (2026-10-08): mod-original but plausible.** No PMC state is named at 866. The precedents are the LFTx Systems PMC (851) and the 7th Legion, which "acts sovereign" (lore-keeper's citations). **Never assign the 7th Legion this government.**
 
 **Fields beyond §5.0:**
 ```
@@ -162,7 +162,7 @@ Holdings: the castle shape. Succession: `eotg_pmc_succession_law` (§7.1). Contr
 
 ### 5.2 Corporation: `eotg_corporation_government`
 
-**Identity.** Human corporate oligarchy, polished at the top and cut-throat below: account directors and operations chiefs scheme against each other, and the board above them plays a slow game of influence (v1 design doc §3, §3.2). Its v1 identity is board influence as a spendable political currency. Canon exemplars at 866 include P&D Corporate Space (Board of Directors, in the unreviewed `NATIONS_AT_866_AG.md` :237-246). Helix's 866 structure is **not** a board with a CEO (ERRATA "HELIX CORPORATION"). Government text names no nation (§11).
+**Identity (lore ruling).** A company state run by a board, polished at the top and cut-throat below: branch directors and operations chiefs scheme against each other, and the board above them plays a slow game of influence (v1 design doc §3, §3.2). Its v1 identity is board influence as a spendable political currency. Form precedent only: a council-run company (`Third era Nations.md:856`); **text never names it**. Helix's 866 structure is **not** a board with a CEO (ERRATA "HELIX CORPORATION"). Government text names no nation (§11).
 
 **Fields beyond §5.0:**
 ```
@@ -180,7 +180,7 @@ realm_mask_offset = { 0.0 -0.01 }  realm_mask_scale = { 1 1 }  # republic :90-91
 Holdings: the city shape. Succession: `eotg_corporation_succession_law`. Contracts: `eotg_corporation_vassal`.
 
 **Coupling (G1: none built):**
-- **Cybernetics clinics** (`cybernetics_v2_realm.md`): the augmentation realm laws have no `required_government_flag` (`:198`), so a Corporation can already hold them. G2 candidates: a Corporation discount on the clinic of record; a `flag:front` kingpin weight. **Never name P&D or any 866 implant player** (cybernetics §5.3 never-name list; LQ4).
+- **Cybernetics clinics** (`cybernetics_v2_realm.md`): the augmentation realm laws have no `required_government_flag` (`:198`), so a Corporation can already hold them. G2 candidates: a lower price at a company-owned clinic, for **the ruler's own procedures only**: never for subjects, and never framed as a "programme" or "subsidy" (lore ruling; ERRATA "CYBERNETICS AT 866"). Also a `flag:front` kingpin weight. **Never name P&D or any 866 implant player** (cybernetics §5.3 never-name list; LQ4).
 - **Frontier, "a corporation as a Sponsor"** (`frontier_v3.md` §7): the documented hook (`eotg_frontier_offer_backing_effect`) is how G2 plugs in. Nothing is built in G1.
 - **Unclaimed:** as the PMC.
 
@@ -196,7 +196,7 @@ Holdings: the city shape. Succession: `eotg_corporation_succession_law`. Contrac
 
 ### 5.3 Gob-Corp: `eotg_gobcorp_government`
 
-**Identity.** The goblin-and-ogre trade oligarchy: fifty Trade Princes in factional market competition under a precarious Director-General, where internal politics are as dangerous as external war (v1 design doc §2). Canon at 866: the Gob-Ogre Trade League is under Karim's attack from 851 (REVIEW_866), "corporate oligarchy, 50 Trade Princes, council-led" (`866_bookmark_design.md:48-52`). Whether a Director-General exists at 866 is LQ2. Its v1 identity is vote weight: power is bought and counted.
+**Identity (lore ruling).** Fifty Trade Princes bound by a shared charter, competing for market share, with no single head over them (`Third era Nations.md:2019-2024`; `866_bookmark_design.md:49`). Internal politics are as dangerous as external war (v1 design doc §2). Its v1 identity is vote weight: power is bought and counted. **The desc describes the form without naming any species.** There is no Director-General at 866, so the top rank is **First Prince**, the first among equals (§8).
 
 **Fields beyond §5.0:**
 ```
@@ -205,7 +205,7 @@ character_modifier = {
     monthly_income_mult = 0.1                            # v1
     diplomacy = -1                                       # v1
     levy_size = -0.1
-    mercenary_hire_cost_mult = -0.15                     # the Princes hoard private mercenary armies (unreviewed NATIONS :55; LQ2)
+    men_at_arms_maintenance = -0.1                       # the Princes keep owned corporate armies (Third era Nations.md:2011-2013, 2027-2028); admin :514 uses the same modifier
 }
 ai = { use_legends = yes  arrange_marriage = yes }       # v1 had arrange_marriage; yes is the default (.info:603)
 flags = { eotg_government_is_gobcorp  eotg_government_is_corporate  government_is_settled  government_uses_domain_limit  government_uses_crown_authority }
@@ -224,7 +224,7 @@ Holdings: the city shape. Succession: `eotg_gobcorp_succession_law`. Contracts: 
 
 ### 5.4 Cartel: `eotg_cartel_government`
 
-**Identity.** A criminal enterprise that achieved statehood. Dread is the currency of power, and the top of the organization is always under threat from within (v1 design doc §4). It expands by **tribute, not raids**: it puts independent neighbours on a payment schedule (v1 robustness plan 1.1, 2.2). **Canon correction (LQ1):** v1 named the Slate Syndicate as the exemplar. The Slate Syndicate is post-866 (`Third era Nations.md:1403-1405`; unreviewed NATIONS :720 gives 1400 AG). At 866 the land is the Concrete Cartel's ("Under-Bosses of the Concrete Board", NATIONS :136-145). The Concrete Cartel is on the cybernetics never-name list. The government text names no nation.
+**Identity (lore ruling).** An organized syndicate grown into a state. A council of bosses rules smuggling routes, salvage and black markets through fear, and keeps its neighbours on a payment schedule (`Third era Events.md:147-150`; `Third era Nations.md:1345-1348`). This covers both 866 criminal states without naming either. Dread is the currency of power, and the top is always under threat from within (v1 design doc §4). It expands by **tribute, not raids**: it puts independent neighbours on a payment schedule (v1 robustness plan 1.1, 2.2). **Canon correction (LQ1):** v1 named the Slate Syndicate as the exemplar. The Slate Syndicate is post-866 (`Third era Nations.md:1402-1405`, 1510 AG; `:4668-4671`, 1400 AG). The Concrete Cartel, the 866 criminal state, is on the cybernetics never-name list. The government text names no nation.
 
 **Fields beyond §5.0:**
 ```
@@ -258,7 +258,7 @@ Holdings: the castle shape. Succession: `eotg_cartel_succession_law`. Contracts:
 |---|---|
 | The AI spams tributary offers or over-extends | vanilla interaction AI, unchanged; V-G13 and V-G12 |
 | Faster dread decay makes the AI ruler permanently low-dread and weak | modest +25%; V-G12 |
-| Rank vocabulary ("Underboss", "Boss") clashes with the cybernetics "no mafia vocabulary" rule (B2) | LQ6. The rule binds the kingpin chain; whether it binds this government is for the lore-keeper to rule. |
+| Mafia vocabulary in ranks or desc | **Ruled: B2 binds government loc too.** Ranks are Route Boss / Ringleader / Overboss (§8); the banned list is in §11 |
 
 **V-G items:** V-G1–V-G13, V-G15.
 
@@ -407,18 +407,18 @@ These decisions are test tools and are not reachable in a normal game.
 - **Top rank** (the same, tiers county to empire): `priority = 61`, plus `only_independent = yes`. **The independent ruler gets the top name at any tier.** This is the correction to v1's absolute ladder.
 - No `name_lists` or `heritages`: map-agnostic. Priority 60 beats every vanilla culture entry, which all list vanilla governments anyway.
 
-**Proposed names (all are LQ5, for the lore-keeper to confirm or replace).** Female keys default to the same word unless the lore-keeper supplies a form. If the lore-keeper vetoes a title-rank word, that entry is dropped and the vanilla word shows.
+**Names (lore-reviewed 2026-10-08, with the lore picks applied).** Female keys use the same word, "Trade Prince" included, for both sexes. If a later review vetoes a title-rank word, that entry is dropped and the vanilla word shows.
 
 | | Barony | County | Duchy | Kingdom | Empire | **Top (independent, any tier)** |
 |---|---|---|---|---|---|---|
 | PMC ruler | Post Commander | Contractor | Field Director | Executive Commander | — | **Contractor-General** |
 | PMC title | Garrison | Command | Theatre | Field Army | Company | |
-| Corporation ruler | Site Manager | Account Director | Operations Chief | Regional Director | — | **CEO** |
+| Corporation ruler | Site Manager | Branch Director | Operations Chief | Regional Director | — | **CEO** |
 | Corporation title | Site | Branch | Division | Group | Conglomerate | |
-| Gob-Corp ruler | Works Boss | Trade Prince | Trade Prince | Merchant Lord | — | **Director-General** |
-| Gob-Corp title | Works | Concession | Monopoly | Bloc | League | |
-| Cartel ruler | Den Keeper | Street Lord | Underboss | Boss | — | **Grand Underlord** |
-| Cartel title | Den | Turf | Racket | Outfit | Cartel | |
+| Gob-Corp ruler | Works Boss | Trade Prince | Trade Prince | Trade Magnate | — | **First Prince** |
+| Gob-Corp title | Works | Concession | Monopoly | Bloc | Combine | |
+| Cartel ruler | Den Keeper | Route Boss | Ringleader | Overboss | — | **Grand Underlord** |
+| Cartel title | Den | Turf | Run | Ring | Cartel | |
 
 - Ruler ranks at county to kingdom are v1's role ladder (robustness plan "The role ladder that already exists"). Barony ranks and all title ranks are new proposals.
 - An empire-tier vassal is impossible, so the vassal entry at empire exists only for spouses. It reuses the top word.
@@ -432,7 +432,7 @@ For each of the 4 governments (`<g>` = the full key, e.g. `eotg_pmc_government`)
 
 | Key | Content |
 |---|---|
-| `<g>` | name: "PMC", "Corporation", "Gob-Corp", "Cartel" (LQ2 for "Gob-Corp") |
+| `<g>` | name: "PMC", "Corporation", **"Trade Oligarchy"** (lore pick; PENDING OWNER OQ3, the alternative being "Gob-Corp"), "Cartel" |
 | `<g>_adjective`, `<g>_realm` | |
 | `<g>_desc` | 2–4 sentences: identity plus the G1 mechanics (holdings, contract identity, the Cartel's tributaries). Names no nation (§11). |
 | `<g>_with_icon` | `@government_type_<vanilla>! $<g>$`: reuse a vanilla text icon (unclaimed precedent: `@government_type_herder!`). PMC: mercenary; Corporation: administrative; Gob-Corp: republic; Cartel: clan. The localizer confirms each `@` icon exists. |
@@ -460,9 +460,9 @@ Also:
 KnightCulture = {
     type = character
     text = { trigger = { eotg_gov_knight_realm_is_pmc = yes }         localization_key = eotg_knight_operator }
-    text = { trigger = { eotg_gov_knight_realm_is_corporation = yes } localization_key = eotg_knight_agent }
+    text = { trigger = { eotg_gov_knight_realm_is_corporation = yes } localization_key = eotg_knight_specialist }
     text = { trigger = { eotg_gov_knight_realm_is_gobcorp = yes }     localization_key = eotg_knight_strongarm }
-    text = { trigger = { eotg_gov_knight_realm_is_cartel = yes }      localization_key = eotg_knight_enforcer }
+    text = { trigger = { eotg_gov_knight_realm_is_cartel = yes }      localization_key = eotg_knight_breaker }
     text = { localization_key = knight_default  fallback = yes }      # vanilla "Knight" (00_knight_culture.txt:85-88)
 }
 ```
@@ -492,13 +492,13 @@ KnightCulture = {
 | `eotg_knight_operator_no_tooltip_lowercase_plural_possessive` | "operators'" |
 | `eotg_knight_operator_no_tooltip_lowercase_adjective` | "operator" (vanilla's "champion" pattern, `:70`) |
 
-The other three terms get the same 8 keys: `eotg_knight_agent`, `eotg_knight_strongarm`, `eotg_knight_enforcer`. The terms are owner question OQ1. Apart from the PMC's, they are proposals.
+The other three terms get the same 8 keys: `eotg_knight_specialist`, `eotg_knight_strongarm`, `eotg_knight_breaker`. **PENDING OWNER (OQ1):** these are the lore picks, used as defaults. "Agent" was rejected because it clashes with the vanilla scheme-agent concept. "Enforcer" was rejected because it collides with Blackstar's Enforcer Corps, and "enforcers" would print in the cybernetics retinue lines.
 
 ---
 
 ## 11. Lore constraints
 
-- **Precedence:** ERRATA → dated `docs/lore` entries (to 866) → `866_bookmark_design.md` → SETTING LORE body (`CLAUDE.md` Canon). `docs/lore/NATIONS_AT_866_AG.md` is untracked and unreviewed. It is cited here only as a pointer, never as canon.
+- **Precedence:** ERRATA → dated `docs/lore` entries (to 866) → `866_bookmark_design.md` → SETTING LORE body (`CLAUDE.md` Canon). **`docs/lore/NATIONS_AT_866_AG.md` is non-canon** (lore ruling 2026-10-08). Every fact in this spec is cited to a dated entry instead.
 - **No authority above the polity at 866** (ERRATA "LAW AT 866"). Contracts, tribute and licences are enforced only by the realm that presses them. No government text mentions a galactic court, a League, arbitration, a registry or a licensing body.
 - **Map-agnostic text:** no government description, rank name or knight term names a nation (P&D, Helix, the Gob-Ogre Trade League, the Concrete Cartel, the Slate Syndicate) or a person.
   - This also keeps the cybernetics never-name list (`cybernetics_v2.md:211`) intact, since the list includes P&D and the Concrete Cartel.
@@ -507,6 +507,11 @@ The other three terms get the same 8 keys: `eotg_knight_agent`, `eotg_knight_str
 - **The Slate Syndicate does not exist at 866** (`Third era Nations.md:1403-1405`). v1's Cartel header is wrong for this bookmark (LQ1).
 - **Helix at 866 is not "board and CEO"** (ERRATA "HELIX CORPORATION"). Don't describe the Corporation government as Helix's.
 - **Canadian English** (colour, -ize).
+- **Desc rules (lore ruling):**
+  - Prose says Bastion and Port, or the `[castle|E]` / `[city|E]` concept links. It never says "castle" or "city".
+  - The trade-oligarchy desc describes the form without species.
+  - Any clinic text follows the §5.2 rule: the ruler's own price only, never "programme" or "subsidy".
+- **B2 mafia vocabulary is banned from government loc too:** Don, capo, consigliere, omertà, made man, "the Family", fedora, tommy gun, underboss, outfit, racket.
 
 ---
 
@@ -521,16 +526,17 @@ The other three terms get the same 8 keys: `eotg_knight_agent`, `eotg_knight_str
 | Kingdom of León | **`k_leon`** | `d_leon` (c_leon, c_benavente, c_zamora, c_salamanca, c_avila) + `d_asturias` (c_asturias_de_oviedo, c_pravia) |
 | Gob-Corp, a duke on the Mediterranean coast | **`d_provence`** (recommended) | Coastal counties c_provence (b_toulon, b_marseille) and c_nice; it lies in k_burgundy, **which is in e_france in 1.20**, so inside the test zone. Its holder at 1066 is a single duke (420). The alternative, `d_languedoc` (Montpellier, Béziers, Narbonne), has an inland capital (c_albi) and no single duke in 1066, so it is not recommended. |
 
-**Status (coordinator, 2026-10-08):** the generator already places these, with feudal stand-ins until G1 lands. It has Raoul (40406) on d_valois, **Konan II (348)** on k_brittany, Alfonso VI (108500) on k_leon and Bertrand (420) on d_provence, each with vassal counts on the same government (two of them generated lowborn). All capitals are castles. How that build compares with this spec:
-- **Holders are accepted.** G1 sets no `can_get_government` (§5.0), and history `government =` sets the government directly. Culture (French, Breton, Castilian, Occitan, Asturleonese) and faith (Catholic) are irrelevant: no government reads either.
-- **Lowborn vassals** get a dynasty when landed, because of `rulers_should_have_dynasty = yes`.
-- **Capital holdings:**
-  - PMC and Cartel: a castle is right.
-  - Corporation and Gob-Corp: a castle works, since castle is in `valid_holdings`, so there's no penalty. **Recommended:** set the `holding` column to `city_holding` for the two realms' capital baronies, so the primary holding is tested (V-G17). Without that, V-G17 can't pass.
-- **Brittany:** Konan II **dies 1066.12.11** in vanilla history, three months in. Either keep him, which makes V-G9 (the heir keeps the government) the first thing that happens to the Corporation test ruler, or use the layout below (Hoël, 178, as king; Konan as vassal duke), which tests the same thing without ending the player's start. The cartographer and owner choose. Both are valid G1 tests.
+**Cartographer decisions (recorded 2026-10-08), as built in the generator with feudal stand-ins until G1 lands:**
+- **PMC:** `d_valois`, held by Raoul of Valois (40406).
+- **Corporation:** `k_brittany`, held by **Hoël (178) as king**, with **Konan II (348) as vassal duke of `d_brittany`**. Konan dies 1066.12.11, which tests V-G9.
+- **Cartel:** `k_leon`, held by Alfonso VI (108500).
+- **Gob-Corp:** `d_provence`, held by Bertrand (420).
+- **Vassals:** each realm has vassal counts on the same government, including two generated lowborn counts. These get a dynasty when landed (`rulers_should_have_dynasty = yes`).
+- **Capital baronies:** the Corporation (`k_brittany`) and Gob-Corp (`d_provence`) capital baronies get **`city_holding`**. The PMC and Cartel capitals stay castles.
+- **The holders are accepted by G1.** There is no `can_get_government`, history `government =` sets the government directly, and no government reads culture or faith.
 - **Keys unchanged.**
 
-**Rows (the spec's reference layout).** The cartographer confirms every id is alive at 1066.9.15; the generator validates this.
+**Rows (reference layout; the generator's own rows may differ in vassal detail).** The cartographer confirms every id is alive at 1066.9.15; the generator validates this.
 
 | title | holder | liege | government | scope | note |
 |---|---|---|---|---|---|
@@ -549,7 +555,7 @@ The other three terms get the same 8 keys: `eotg_knight_agent`, `eotg_knight_str
 | `k_leon` | `108500` | `0` | `eotg_cartel_government` | `realm` | **Cartel king: Alfonso VI (b. 1040).** |
 | `d_leon`, `c_leon`, `c_benavente`, `c_salamanca`, `c_avila` | `108500` | | | | domain; `b_leon` a castle |
 | `c_zamora` | `108501` | `k_leon` | | | Urraca (b. 1033) |
-| `d_asturias`, `c_asturias_de_oviedo` | `108512` | `k_leon` | | | Rodrigo as a vassal duke (Underboss) |
+| `d_asturias`, `c_asturias_de_oviedo` | `108512` | `k_leon` | | | Rodrigo as a vassal duke (Ringleader) |
 | `c_pravia` | `asturleonese0078` | `d_asturias` | | | Pedro, a count under the duke: three tiers in one realm |
 | `d_provence`, `c_provence` | `420` | `0` | `eotg_gobcorp_government` | `realm` | **Gob-Corp duke: Bertrand (b. 1047).** The capital barony of `c_provence` (`b_toulon`, listed first) is **made a city**. |
 | `c_venaissin` | `32534` | `d_provence` | | | |
@@ -590,7 +596,7 @@ The other three terms get the same 8 keys: `eotg_knight_agent`, `eotg_knight_str
 | V-G5 | Crown authority laws are listed and passable | yes |
 | V-G6 | Modify Vassal Contract shows the government's 2 trees + 3 rights with loc. The player changes a level; an AI liege changes one over time | yes |
 | V-G7 | An independent ruler shows the top rank ("Contractor-General Raoul"); vassals show tier ranks; titles show the government's rank word | yes |
-| V-G8 | The Knights tab and cybernetics lines using `KnightCulture` say Operator / Agent / Strongarm / Enforcer; William's knights say "Knight" | yes |
+| V-G8 | The Knights tab and cybernetics lines using `KnightCulture` say Operator / Specialist / Strongarm / Breaker; William's knights say "Knight" | yes |
 | V-G9 | Conan II's death (1066.12.11): his heir holds d_brittany **as Corporation**. Also `kill` each top ruler in console: the heir keeps the government and the law | yes |
 | V-G10 | Grant a county to a courtier in each realm; record the new vassal's government (expected: the liege's) | recorded |
 | V-G11 | Leakage: after 50 years, the government map mode shows a mod government only in the four realms and their conquests or grants | yes, else build §5.6 |
@@ -655,35 +661,31 @@ Does vanilla influence work without `mechanic_type = administrative`? Influence 
 
 ---
 
-## 16. Owner questions (kept to what precedent can't settle)
+## 16. Owner questions (PENDING OWNER; the defaults are the lore picks)
 
-- **OQ1, knight terms.** The proposals are PMC **Operator** (v1), Corporation **Agent** (your example), Gob-Corp **Strongarm**, Cartel **Enforcer**, and everyone else **Knight** (vanilla's `knight_default`). Approve, or give replacements. Adjective forms follow vanilla's pattern (the word itself).
-- **OQ2, the PMC test ruler.** Philip I (214), who holds Paris in vanilla, is 14 at the start, so the PMC test would run under a regency. **Recommendation:** Raoul of Valois (40406), 45, as duke holding Paris, with Philip as a vassal count. Proceeding with Raoul unless you say otherwise. The Brittany layout (Hoël as king; Conan II as a vassal duke who dies in December 1066, which tests succession) is proceeding on the same terms.
-- **Settled by precedent, for your information** (no answer needed):
-  - every government is dynastic (`rulers_should_have_dynasty = yes`) and has legitimacy, the Cartel included (v1 had both `no`);
+- **OQ1, knight terms. PENDING OWNER.** Defaults: PMC **Operator**, Corporation **Specialist**, Gob-Corp **Strongarm**, Cartel **Breaker**, and everyone else **Knight** (vanilla `knight_default`). The lore keeper rejected "Agent", which clashes with the scheme-agent concept. It also rejected "Enforcer", which collides with Blackstar's Enforcer Corps and would print "enforcers" in the cybernetics retinue lines. The scripter builds with the defaults. A change touches loc only, plus 3 keys in `eotg_knight_culture.txt`.
+- **OQ3, the trade oligarchy's display name. PENDING OWNER.** Default: **"Trade Oligarchy"** (lore pick). The alternative is "Gob-Corp", the owner's working name. **The keys stay `eotg_gobcorp_*` either way.** Only `eotg_gobcorp_government` and its adjective, realm and filter loc change.
+- **OQ2 is closed:** Raoul for the PMC; Hoël as king with Konan as vassal duke (§12).
+- **Settled by precedent:**
+  - all four are dynastic and have legitimacy;
   - the holdings copy feudal's and republic's;
   - G1 succession is single-heir, and elections come in G2.
 
-## 17. Lore questions (eotg-lore-keeper)
+## 17. Lore rulings (eotg-lore-keeper, 2026-10-08: CHANGES REQUIRED, applied)
 
-- **LQ1:** Confirm that the Slate Syndicate is post-866 and that the 866 cartel-state is the Concrete Cartel. Confirm that the Cartel government's text may describe the form without naming it.
-- **LQ2:** Gob-Corp:
-  - Is "Gob-Corp" a canon name for the government form, or is a different display name wanted (the polity is the Gob-Ogre Trade League)?
-  - Is there a **Director-General** at 866, or only the Council of Fifty Trade Princes (`866_bookmark_design.md:49`, "council-led")? This decides the top rank.
-  - Rule on the "princes hoard mercenaries" modifier, which comes from unreviewed NATIONS :55.
-- **LQ3:** PMC: is a PMC state canon at 866, or is it a mod-original form (acceptable, but recorded as such)? Are "Operator" and the ladder Contractor → Field Director → Executive Commander → Contractor-General acceptable?
-- **LQ4:** Corporation: confirm the ladder Account Director → Operations Chief → Regional Director → CEO, and that government text names no corporation (P&D, Helix, Blackstar, Calix).
-- **LQ5:** All of the §8 rank names, especially the new barony ranks and every title-rank word. Also the female forms of "Lord" ranks (Merchant Lord, Street Lord, Grand Underlord).
-- **LQ6:** Does the cybernetics "no mafia vocabulary" rule (kingpin seller spec B2) bind the Cartel government's ranks (Underboss, Boss, Racket, Outfit)? Does "Cartel" as a title rank collide with the canon syndicate names used by the Patron?
-- **LQ7:** Is `docs/lore/NATIONS_AT_866_AG.md` (untracked) a reviewed source? Until ruled, this spec cites it only as a pointer.
-
----
+- **LQ1:** The Slate Syndicate is post-866 (`Third era Nations.md:1402-1405`, `:4668-4671`). The Cartel's identity is the generic syndicate-state form (§5.4). The text names no 866 state.
+- **LQ2:** There is no single head; the trade oligarchy's top rank is First Prince. The modifier is men-at-arms maintenance, for owned corporate armies (§5.3). The display name is OQ3.
+- **LQ3:** The PMC is mod-original but plausible. Never give the 7th Legion this government.
+- **LQ4:** The Corporation ladder is Branch Director → Operations Chief → Regional Director → CEO. Government text names no corporation.
+- **LQ5:** The §8 table carries the lore picks.
+- **LQ6:** B2 binds government loc (§11 banned list).
+- **LQ7:** `NATIONS_AT_866_AG.md` is non-canon. No fact in this spec rests on it.
 
 ### HANDOFF
 - status: done
-- next: eotg-lore-keeper
-- ask: Review docs/specs/governments_v2.md against canon (LQ1–LQ7: rank names, knight terms, Gob-Corp naming and Director-General, the Slate Syndicate date, mafia vocabulary, NATIONS_AT_866_AG.md status). eotg-scripter then builds Phase G1 (§3–§8, §10), and eotg-localizer writes §9.
+- next: eotg-scripter
+- ask: Build Phase G1 from docs/specs/governments_v2.md (§3–§8, §10): the 4 governments, 4 contract groups with 8 contracts, 4 succession laws plus the on_game_start/on_government_change safety net, 92 flavourization entries with the §8 lore-picked names, the KnightCulture override with the OQ1 defaults (operator, specialist, strongarm, breaker), the knight-realm triggers and 5 debug decisions. No events. Then eotg-localizer writes §9 under the §11 desc rules and B2 ban, and eotg-qa checks the government blocks by hand.
 - files: docs/specs/governments_v2.md
-- needs-loc: §9 (government display and modifier keys ×4, 4 laws × 3, 8 contracts × 11, 92 flavourization keys, 4 knight terms × 8, 5 debug decisions × 4)
-- needs-lore: LQ1–LQ7 (§17)
-- needs-human: OQ1 knight terms and OQ2 the PMC test ruler (§16); in-game V-G1–V-G20 after G1 lands; orchestrator: add the 4 new folders to the CLAUDE.md placement list, copy 4 placeholder government icons, add the KnightCulture pitfalls entry when it ships; cartographer: the §12 rows in isles_assignments.csv, loaded only after the scripter's G1
+- needs-loc: §9 (government keys ×4 with the OQ3 default "Trade Oligarchy", 4 laws × 3, 8 contracts × 11, 92 flavourization keys, 4 knight terms × 8, 5 debug decisions × 4)
+- needs-lore: none (the review is applied; re-review the localizer's descs)
+- needs-human: OQ1 knight terms and OQ3 the trade oligarchy's display name (both default to the lore picks); in-game V-G1–V-G20 after G1 lands. Orchestrator: add the 4 new folders to the CLAUDE.md placement list, copy the 4 placeholder icons, add the KnightCulture pitfalls entry.
