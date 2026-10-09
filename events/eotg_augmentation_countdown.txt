@@ -32,6 +32,7 @@ eotg_aug_countdown.001 = {
     title = eotg_aug_countdown.001.t
     desc = eotg_aug_countdown.001.desc
     theme = mental_health
+    override_background = { reference = eotg_bg_private_quarters }
 
     trigger = { eotg_is_aug_tier3 = yes }
 
@@ -138,6 +139,8 @@ eotg_aug_countdown.002 = {
         }
     }
     theme = mental_health
+    override_background = { reference = eotg_bg_corridor_night }
+    override_effect_2d = { reference = fog }
 
     trigger = { eotg_is_aug_tier3 = yes }
 
@@ -257,6 +260,7 @@ eotg_aug_countdown.003 = {
         }
     }
     theme = mental_health
+    override_background = { reference = eotg_bg_private_quarters }
 
     trigger = { eotg_is_aug_tier3 = yes }
 
@@ -362,6 +366,7 @@ eotg_aug_countdown.004 = {
         }
     }
     theme = dread
+    override_background = { reference = eotg_bg_corridor_night }
 
     trigger = { eotg_is_aug_tier3 = yes }
 
@@ -485,6 +490,7 @@ eotg_aug_countdown.004 = {
 # tier3.020) and fire tier3.020 The Intervention in 30 days.
 # Caller: eotg_story_aug_countdown (stage 5, refused branch).
 
+# eotg_lint: allow L015 W2 keep list (event_quality_v1 §14.2): family/love/friendly scene stays on the theme's room until art
 eotg_aug_countdown.005 = {
     type = character_event
     title = eotg_aug_countdown.005.t
@@ -570,6 +576,7 @@ eotg_aug_countdown.006 = {
     title = eotg_aug_countdown.006.t
     desc = eotg_aug_countdown.006.desc
     theme = mental_health
+    override_background = { reference = eotg_bg_private_quarters }
 
     trigger = {
         NOT = { has_trait = eotg_neurofractured }

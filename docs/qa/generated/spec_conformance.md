@@ -14,8 +14,8 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | Family | Specs | Built | Ids | Present | Referenced only | Missing in built specs |
 |---|---|---|---|---|---|---|
 | `cybernetics` | 1 | 1 | 53 | 53 | 0 | 0 |
-| `cybernetics_v2` | 27 | 27 | 1780 | 1689 | 86 | 5 |
-| `event` | 1 | 0 | 24 | 3 | 4 | 0 |
+| `cybernetics_v2` | 27 | 27 | 1779 | 1688 | 86 | 5 |
+| `event` | 1 | 1 | 33 | 27 | 4 | 2 |
 | `frontier` | 1 | 1 | 92 | 89 | 3 | 0 |
 | `frontier_v1` | 2 | 2 | 159 | 158 | 1 | 0 |
 | `frontier_v2` | 1 | 1 | 109 | 109 | 0 | 0 |
@@ -46,7 +46,7 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | `cybernetics_v2_phase5.md` | yes | 53 | 49 | 3 | 0 | 1 |
 | `cybernetics_v2_phase6.md` | yes | 27 | 26 | 1 | 0 | 0 |
 | `cybernetics_v2_procedures.md` | yes | 146 | 144 | 1 | 0 | 1 |
-| `cybernetics_v2_procedures_lore.md` | yes | 7 | 7 | 0 | 0 | 0 |
+| `cybernetics_v2_procedures_lore.md` | yes | 7 | 6 | 0 | 0 | 1 |
 | `cybernetics_v2_realm.md` | yes | 124 | 119 | 4 | 0 | 1 |
 | `cybernetics_v2_realm_lore.md` | yes | 3 | 3 | 0 | 0 | 0 |
 | `cybernetics_v2_reprisal.md` | yes | 37 | 36 | 1 | 0 | 0 |
@@ -57,7 +57,7 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | `cybernetics_v2_tier_options.md` | yes | 94 | 91 | 1 | 2 | 0 |
 | `cybernetics_v2_tier_options_lore.md` | yes | 8 | 8 | 0 | 0 | 0 |
 | `cybernetics_v2_trait_depth.md` | yes | 42 | 41 | 1 | 0 | 0 |
-| `event_quality_v1.md` | **no** | 24 | 3 | 4 | 17 | 0 |
+| `event_quality_v1.md` | yes | 33 | 27 | 4 | 2 | 0 |
 | `frontier_unclaimed_regions.md` | yes | 95 | 89 | 3 | 0 | 3 |
 | `frontier_v1.md` | yes | 146 | 137 | 1 | 0 | 8 |
 | `frontier_v1_open_questions.md` | yes | 21 | 21 | 0 | 0 | 0 |
@@ -208,10 +208,10 @@ None.
 
 #### `docs/specs/cybernetics_v2_procedures_lore.md`
 
-- Specced and present: 7
+- Specced and present: 6
 - Specced, missing from script (0): none
 - Referenced only, never defined or set (0): none
-- Exempt (0): none
+- Exempt (1): `eotg_aug_heir.004.desc_seamless` (loc, l.20)
 
 #### `docs/specs/cybernetics_v2_realm.md`
 
@@ -293,17 +293,16 @@ None.
 
 ### Built specs: gaps
 
-None.
+#### `docs/specs/event_quality_v1.md`
+
+- Specced and present: 27
+- Specced, missing from script (2): `eotg_event_quality.py` (loc, l.11), `eotg_lint_loc_conventions.json` (loc, l.139)
+- Referenced only, never defined or set (4): `eotg_lint` (unknown, l.238), `eotg_heir.GetFirstName` (loc, l.472), `eotg_heir.GetSheHe` (loc, l.472), `eotg_heir.GetHerHim` (loc, l.472)
+- Exempt (0): none
 
 ### Unbuilt specs (expected gaps)
 
-#### `docs/specs/event_quality_v1.md`
-
-- New events, none in script yet: `eotg_bg_corridor_night`, `eotg_bg_private_quarters`, `eotg_bg_clinic`, `eotg_bg_holding_cell`, `eotg_bg_council`, `eotg_bg_underlevel_night`, `eotg_bg_underlevel_day`, `eotg_bg_office`, `eotg_bg_battlefield`, `eotg_bg_field_camp`, `eotg_bg_command_tent`, `eotg_bg_vault`, `eotg_bg_cavern`, `eotg_bg_barren_world`, `eotg_bg_riot`
-- Specced and present: 3
-- Specced, missing from script (17): `eotg_bg_corridor_night` (event, l.40), `eotg_bg_private_quarters` (event, l.41), `eotg_bg_clinic` (event, l.42), `eotg_bg_holding_cell` (event, l.43), `eotg_bg_council` (event, l.44), `eotg_bg_underlevel_night` (event, l.45), `eotg_bg_underlevel_day` (event, l.46), `eotg_bg_office` (event, l.47), `eotg_bg_battlefield` (event, l.48), `eotg_bg_field_camp` (event, l.49), `eotg_bg_command_tent` (event, l.50), `eotg_bg_vault` (event, l.51), `eotg_bg_cavern` (event, l.52), `eotg_bg_barren_world` (event, l.53), `eotg_bg_riot` (event, l.54), `eotg_lint_loc_conventions.json` (loc, l.136), `eotg_event_quality.py` (loc, l.163)
-- Referenced only, never defined or set (4): `eotg_lint` (unknown, l.235), `eotg_heir.GetFirstName` (loc, l.453), `eotg_heir.GetSheHe` (loc, l.453), `eotg_heir.GetHerHim` (loc, l.453)
-- Exempt (0): none
+None.
 
 
 ## Family `frontier`

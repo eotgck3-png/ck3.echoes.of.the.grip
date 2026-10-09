@@ -57,6 +57,7 @@ eotg_aug_tier3.001 = {
         }
     }
     theme = intrigue
+    override_background = { reference = eotg_bg_council }
 
     left_portrait = {
         character = root
@@ -177,6 +178,7 @@ eotg_aug_tier3.002 = {
     title = eotg_aug_tier3.002.t
     desc = eotg_aug_tier3.002.desc
     theme = mental_health
+    override_background = { reference = eotg_bg_private_quarters }
 
     left_portrait = {
         character = root
@@ -284,6 +286,7 @@ eotg_aug_tier3.003 = {
     title = eotg_aug_tier3.003.t
     desc = eotg_aug_tier3.003.desc
     theme = physical_health
+    override_background = { reference = eotg_bg_private_quarters }
 
     left_portrait = {
         character = root
@@ -398,6 +401,8 @@ eotg_aug_tier3.004 = {
         }
     }
     theme = intrigue
+    override_background = { reference = eotg_bg_private_quarters }
+    override_effect_2d = { reference = fog }
 
     left_portrait = {
         character = root
@@ -533,6 +538,7 @@ eotg_aug_tier3.005 = {
     title = eotg_aug_tier3.005.t
     desc = eotg_aug_tier3.005.desc
     theme = battle
+    override_background = { reference = eotg_bg_battlefield }
 
     trigger = { is_at_war = yes }
 
@@ -627,6 +633,7 @@ eotg_aug_tier3.006 = {
     title = eotg_aug_tier3.006.t
     desc = eotg_aug_tier3.006.desc
     theme = realm
+    override_background = { reference = eotg_bg_council }
 
     trigger = {
         any_vassal = {
@@ -836,6 +843,7 @@ eotg_aug_tier3.007 = {
     title = eotg_aug_tier3.007.t
     desc = eotg_aug_tier3.007.desc
     theme = intrigue
+    override_background = { reference = eotg_bg_corridor_night }
 
     trigger = {
         OR = {
@@ -993,6 +1001,7 @@ eotg_aug_tier3.008 = {
     title = eotg_aug_tier3.008.t
     desc = eotg_aug_tier3.008.desc
     theme = physical_health
+    override_background = { reference = eotg_bg_private_quarters }
 
     left_portrait = {
         character = root
@@ -1103,6 +1112,7 @@ eotg_aug_tier3.009 = {
         }
     }
     theme = realm
+    override_background = { reference = eotg_bg_command_tent }
 
     trigger = {
         any_courtier = {
@@ -1234,6 +1244,8 @@ eotg_aug_tier3.010 = {
     title = eotg_aug_tier3.010.t
     desc = eotg_aug_tier3.010.desc
     theme = physical_health
+    override_background = { reference = eotg_bg_private_quarters }
+    override_effect_2d = { reference = smoke }
 
     left_portrait = {
         character = root
@@ -1346,6 +1358,7 @@ eotg_aug_tier3.011 = {
     title = eotg_aug_tier3.011.t
     desc = eotg_aug_tier3.011.desc
     theme = mental_health
+    override_background = { reference = eotg_bg_council }
 
     left_portrait = {
         character = root
@@ -1454,6 +1467,7 @@ eotg_aug_tier3.012 = {
         }
     }
     theme = mental_health
+    override_background = { reference = eotg_bg_private_quarters }
 
     trigger = {
         OR = {
@@ -1582,6 +1596,7 @@ eotg_aug_tier3.013 = {
         }
     }
     theme = mental_health
+    override_background = { reference = eotg_bg_corridor_night }
 
     left_portrait = {
         character = root
@@ -1724,6 +1739,7 @@ eotg_aug_tier3.014 = {
     title = eotg_aug_tier3.014.t
     desc = eotg_aug_tier3.014.desc
     theme = intrigue
+    override_background = { reference = eotg_bg_office }
 
     trigger = {
         any_courtier = {
@@ -1901,6 +1917,7 @@ eotg_aug_tier3.015 = {
         }
     }
     theme = martial
+    override_background = { reference = eotg_bg_office }
 
     # QA round 2: root re-checked too: a year or two after tier3.007 the
     # ruler may have regressed or cascaded.
@@ -2105,6 +2122,8 @@ eotg_aug_tier3.016 = {
     title = eotg_aug_tier3.016.t
     desc = eotg_aug_tier3.016.desc
     theme = mental_health
+    override_background = { reference = eotg_bg_private_quarters }
+    override_effect_2d = { reference = fog }
 
     trigger = { eotg_is_aug_tier3 = yes }
 
@@ -2242,6 +2261,7 @@ eotg_aug_tier3.017 = {
     title = eotg_aug_tier3.017.t
     desc = eotg_aug_tier3.017.desc
     theme = intrigue
+    override_background = { reference = eotg_bg_corridor_night }
 
     trigger = {
         OR = {
@@ -2534,6 +2554,7 @@ eotg_aug_tier3.018 = {
         }
     }
     theme = intrigue
+    override_background = { reference = eotg_bg_corridor_night }
 
     left_portrait = {
         character = root
@@ -2702,6 +2723,7 @@ eotg_aug_tier3.019 = {
     title = eotg_aug_tier3.019.t
     desc = eotg_aug_tier3.019.desc
     theme = realm
+    override_background = { reference = eotg_bg_council }
 
     trigger = {
         OR = {
@@ -2864,6 +2886,7 @@ eotg_aug_tier3.021 = {
     title = eotg_aug_tier3.021.t
     desc = eotg_aug_tier3.021.desc
     theme = realm
+    override_background = { reference = eotg_bg_command_tent }
 
     # QA round 2: root's tier re-checked (the stage lands 180-360 days on).
     trigger = {
@@ -2967,6 +2990,7 @@ eotg_aug_tier3.021 = {
 # read by the Heir's Arc on_setup and by this event's own on_action branch).
 # Caller: eotg_on_yearly_aug_overclocked_check (Phase 4c branch).
 
+# eotg_lint: allow L015 W2 keep list (event_quality_v1 §14.2): family/love/friendly scene stays on the theme's room until art
 eotg_aug_tier3.020 = {
     type = character_event
     title = eotg_aug_tier3.020.t
@@ -3137,6 +3161,8 @@ eotg_aug_tier3.022 = {
         }
     }
     theme = mental_health
+    override_background = { reference = eotg_bg_clinic }
+    override_effect_2d = { reference = fog }
 
     trigger = { eotg_is_aug_tier3 = yes }
 
@@ -3232,6 +3258,7 @@ eotg_aug_tier3.023 = {
     title = eotg_aug_tier3.023.t
     desc = eotg_aug_tier3.023.desc
     theme = war
+    override_background = { reference = eotg_bg_command_tent }
 
     trigger = { is_at_war = yes }
 
@@ -3373,6 +3400,8 @@ eotg_aug_tier3.024 = {
         }
     }
     theme = battle
+    override_background = { reference = eotg_bg_battlefield }
+    override_effect_2d = { reference = smoke }
 
     # QA round 2: world-state guard mirroring tier3.023's branch (Overclocked,
     # at war); the stage lands 180-270 days on.

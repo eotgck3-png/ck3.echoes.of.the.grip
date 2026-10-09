@@ -1,0 +1,166 @@
+﻿# ── eotg_event_backgrounds.txt ──────────────────────────────────────────────
+# Mod-owned event backgrounds: docs/specs/event_quality_v1.md §14.1 (W2).
+#
+# Each key is one background block copied from the cited vanilla fallback entry in
+# game/common/event_backgrounds/01_event_backgrounds.txt (CK3 1.20.0.3), with no
+# trigger, so it resolves the same way for every culture and government (spec §6,
+# "Deviation, stated"). Shape: game/common/event_backgrounds/_event_backgrounds.info.
+# Events use them as  override_background = { reference = eotg_bg_x }
+# (vanilla form: events/dlc/ep3/ep3_admin_events.txt:436).
+#
+# Every image ships in the base game folder (gfx/interface/illustrations/event_scenes/),
+# not in a DLC folder, so no has_dlc_feature fallback is needed.
+# The ambience strings name castle rooms; they are audio only (spec W2 risk note).
+# The art track (W10) replaces one reference per key.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# eotg_bg_corridor_night: wandering, missing persons, sleepwalking, discoveries, the door, plots
+# from vanilla corridor_night, 01_event_backgrounds.txt:1251
+eotg_bg_corridor_night = {
+	background = {
+		reference = "gfx/interface/illustrations/event_scenes/corridor.dds"
+		environment = "environment_event_corridor"
+		ambience = "event:/SFX/Events/Backgrounds/castle_corridor_night"
+	}
+}
+
+# eotg_bg_private_quarters: waking, sleeplessness, private episodes, mirror, spouse alone
+# from vanilla bedchamber, 01_event_backgrounds.txt:8016
+eotg_bg_private_quarters = {
+	background = {
+		reference = "gfx/interface/illustrations/event_scenes/bedchamber.dds"
+		environment = "environment_event_bedchamber"
+		ambience = "event:/DLC/EP2/SFX/Events/Backgrounds/evn_background_bedroom"
+	}
+}
+
+# eotg_bg_clinic: licensed surgery, physicians, rejection, recovery
+# from vanilla physicians_study, 01_event_backgrounds.txt:8830
+eotg_bg_clinic = {
+	background = {
+		reference = "gfx/interface/illustrations/event_scenes/study_physician.dds"
+		environment = "environment_event_study_physician"
+		ambience = "event:/SFX/Events/Backgrounds/physicians_office_western"
+	}
+}
+
+# eotg_bg_holding_cell: restraints, locked wing, custody, wards
+# from vanilla dungeon, 01_event_backgrounds.txt:3065
+eotg_bg_holding_cell = {
+	background = {
+		reference = "gfx/interface/illustrations/event_scenes/dungeon.dds"
+		environment = "environment_event_dungeon"
+		ambience = "event:/SFX/Events/Backgrounds/dungeon"
+	}
+}
+
+# eotg_bg_council: delegations, warrants, council, succession politics, petitions, audiences
+# from vanilla council_chamber, 01_event_backgrounds.txt:1749
+eotg_bg_council = {
+	background = {
+		reference = "gfx/interface/illustrations/event_scenes/councilchamber.dds"
+		environment = "environment_council"
+		ambience = "event:/SFX/Events/Backgrounds/meetingchamber_western"
+	}
+}
+
+# eotg_bg_underlevel_night: back-street clinics, syndicate, kingpin, couriers, errands
+# from vanilla alley_night, 01_event_backgrounds.txt:299
+eotg_bg_underlevel_night = {
+	background = {
+		reference = "gfx/interface/illustrations/event_scenes/alley.dds"
+		environment = "environment_event_alley"
+		ambience = "event:/SFX/Events/Backgrounds/city_alley_night"
+	}
+}
+
+# eotg_bg_underlevel_day: vendors, contraband, street trade
+# from vanilla alley_day, 01_event_backgrounds.txt:407
+eotg_bg_underlevel_day = {
+	background = {
+		reference = "gfx/interface/illustrations/event_scenes/alley_day.dds"
+		environment = "environment_event_alley_day"
+		ambience = "event:/SFX/Events/Backgrounds/city_alley_day_western"
+	}
+}
+
+# eotg_bg_office: ledgers, contracts, reports, audits, records
+# from vanilla study, 01_event_backgrounds.txt:8232
+eotg_bg_office = {
+	background = {
+		reference = "gfx/interface/illustrations/event_scenes/study.dds"
+		environment = "environment_event_study"
+		ambience = "event:/SFX/Events/Backgrounds/office_workplace"
+	}
+}
+
+# eotg_bg_battlefield: combat, engagements, cascades in the field
+# from vanilla battlefield, 01_event_backgrounds.txt:465
+eotg_bg_battlefield = {
+	background = {
+		reference = "gfx/interface/illustrations/event_scenes/battlefield.dds"
+		environment = "environment_event_battlefield"
+		ambience = "event:/SFX/Events/Backgrounds/battlefield_gloomy"
+	}
+}
+
+# eotg_bg_field_camp: Frontier camps, retinue drill, bouts
+# from vanilla army_camp, 01_event_backgrounds.txt:10031
+eotg_bg_field_camp = {
+	background = {
+		reference = "gfx/interface/illustrations/event_scenes/genericcamp.dds"
+		environment = "environment_event_genericcamp"
+		ambience = "event:/SFX/Events/Backgrounds/camp_generic_day"
+	}
+}
+
+# eotg_bg_command_tent: war councils, campaign orders
+# from vanilla ep3_military_tent (image as used in army_camp), 01_event_backgrounds.txt:451
+eotg_bg_command_tent = {
+	background = {
+		reference = "gfx/interface/illustrations/event_scenes/ep3_military_tent.dds"
+		environment = "environment_ep3_military_tent_interior"
+		ambience = "event:/DLC/EP3/SFX/Events/Event_Images/ep3_evn_eventimage_living_tent_interior"
+	}
+}
+
+# eotg_bg_vault: the quiet room, aftermath of death, ruins
+# from vanilla ce1_catacombs, 01_event_backgrounds.txt:15648
+eotg_bg_vault = {
+	background = {
+		reference = "gfx/interface/illustrations/event_scenes/fp4_catacombs.dds"
+		environment = "environment_ce1_catacombs"
+		ambience = "event:/SFX/Events/Backgrounds/FP4/fp4_condemned_village"
+	}
+}
+
+# eotg_bg_cavern: Frontier finds, seams
+# from vanilla fp3_cave, 01_event_backgrounds.txt:10793
+eotg_bg_cavern = {
+	background = {
+		reference = "gfx/interface/illustrations/event_scenes/fp3_cave.dds"
+		environment = "environment_event_sittingroom"
+		ambience = "event:/SFX/Events/Backgrounds/dungeon"
+	}
+}
+
+# eotg_bg_barren_world: Frontier surveys, supply runs
+# from vanilla drylands, 01_event_backgrounds.txt:3960 (same block at :3351)
+eotg_bg_barren_world = {
+	background = {
+		reference = "gfx/interface/illustrations/event_scenes/drylands.dds"
+		environment = "environment_event_desert"
+		ambience = "event:/DLC/EP2/SFX/Events/Grand_Activities/Hunts/ep2_event_grand_hunt_praire"
+	}
+}
+
+# eotg_bg_riot: crackdowns, regions falling
+# from vanilla burning_building, 01_event_backgrounds.txt:7550
+# On probation (spec W2): if it reads too medieval, swap the events to eotg_bg_underlevel_night + smoke.
+eotg_bg_riot = {
+	background = {
+		reference = "gfx/interface/illustrations/event_scenes/raid_burning.dds"
+		environment = "environment_ep3_constantinople_on_fire"
+		ambience = "event:/DLC/EP3/SFX/Events/Event_Images/ep3_evn_eventimage_rioting_constantinople"
+	}
+}

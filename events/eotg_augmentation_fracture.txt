@@ -55,6 +55,8 @@ eotg_fracture.0001 = {
         }
     }
     theme = battle
+    override_background = { reference = eotg_bg_battlefield }
+    override_effect_2d = { reference = smoke }
 
     left_portrait = {
         character = root
@@ -123,6 +125,8 @@ eotg_fracture.002 = {
         }
     }
     theme = battle
+    override_background = { reference = eotg_bg_battlefield }
+    override_effect_2d = { reference = smoke }
 
     left_portrait = {
         character = root
@@ -356,6 +360,7 @@ eotg_fracture.003 = {
     title = eotg_fracture.003.t
     desc = eotg_fracture.003.desc
     theme = intrigue
+    override_background = { reference = eotg_bg_private_quarters }
 
     left_portrait = {
         character = root
@@ -481,6 +486,8 @@ eotg_fracture.004 = {
         }
     }
     theme = battle
+    override_background = { reference = eotg_bg_council }
+    override_effect_2d = { reference = smoke }
 
     trigger = {
         stress_level >= 2
@@ -646,6 +653,7 @@ eotg_fracture.005 = {
     title = eotg_fracture.005.t
     desc = eotg_fracture.005.desc
     theme = family
+    override_background = { reference = eotg_bg_corridor_night }
 
     trigger = {
         any_owned_story = {
@@ -811,6 +819,7 @@ eotg_fracture.006 = {
         }
     }
     theme = realm
+    override_background = { reference = eotg_bg_council }
 
     trigger = {
         any_vassal = {
@@ -1037,6 +1046,7 @@ eotg_fracture.007 = {
     title = eotg_fracture.007.t
     desc = eotg_fracture.007.desc
     theme = intrigue
+    override_background = { reference = eotg_bg_office }
 
     left_portrait = {
         character = root
@@ -1184,6 +1194,7 @@ eotg_fracture.007 = {
 # Wrong Name. You call the heir (else the spouse) by a dead person's name.
 # Caller: NF on_action, Flicker list.
 
+# eotg_lint: allow L015 W2 keep list (event_quality_v1 §14.2): family/love/friendly scene stays on the theme's room until art
 eotg_fracture.008 = {
     type = character_event
     title = eotg_fracture.008.t
@@ -1400,6 +1411,8 @@ eotg_fracture.009 = {
         }
     }
     theme = mental_health
+    override_background = { reference = eotg_bg_corridor_night }
+    override_effect_2d = { reference = fog }
 
     left_portrait = {
         character = root
@@ -1603,6 +1616,7 @@ eotg_fracture.010 = {
         }
     }
     theme = mental_health
+    override_background = { reference = eotg_bg_private_quarters }
 
     left_portrait = {
         character = root
@@ -1744,6 +1758,7 @@ eotg_fracture.011 = {
         }
     }
     theme = mental_health
+    override_background = { reference = eotg_bg_private_quarters }
 
     trigger = {
         any_courtier = { eotg_aug_victim_candidate = yes }
@@ -1906,6 +1921,7 @@ eotg_fracture.011 = {
 # lover, else the spouse.
 # Caller: NF on_action, Flicker list.
 
+# eotg_lint: allow L015 W2 keep list (event_quality_v1 §14.2): family/love/friendly scene stays on the theme's room until art
 eotg_fracture.012 = {
     type = character_event
     title = eotg_fracture.012.t
@@ -2074,6 +2090,8 @@ eotg_fracture.013 = {
     title = eotg_fracture.013.t
     desc = eotg_fracture.013.desc
     theme = mental_health
+    override_background = { reference = eotg_bg_private_quarters }
+    override_effect_2d = { reference = fog }
 
     left_portrait = {
         character = root
@@ -2164,6 +2182,7 @@ eotg_fracture.014 = {
     title = eotg_fracture.014.t
     desc = eotg_fracture.014.desc
     theme = mental_health
+    override_background = { reference = eotg_bg_corridor_night }
 
     left_portrait = {
         character = root
@@ -2295,6 +2314,7 @@ eotg_fracture.015 = {
         }
     }
     theme = intrigue
+    override_background = { reference = eotg_bg_office }
 
     trigger = {
         any_vassal = { is_alive = yes }
@@ -2455,6 +2475,7 @@ eotg_fracture.016 = {
         }
     }
     theme = dread
+    override_background = { reference = eotg_bg_private_quarters }
 
     left_portrait = {
         character = root
@@ -2719,6 +2740,7 @@ eotg_fracture.017 = {
         }
     }
     theme = mental_health
+    override_background = { reference = eotg_bg_private_quarters }
 
     left_portrait = {
         character = root
@@ -2858,6 +2880,8 @@ eotg_fracture.018 = {
     title = eotg_fracture.018.t
     desc = eotg_fracture.018.desc
     theme = mental_health
+    override_background = { reference = eotg_bg_private_quarters }
+    override_effect_2d = { reference = fog }
 
     left_portrait = {
         character = root
@@ -2968,6 +2992,7 @@ eotg_fracture.019 = {
     title = eotg_fracture.019.t
     desc = eotg_fracture.019.desc
     theme = intrigue
+    override_background = { reference = eotg_bg_office }
 
     trigger = {
         any_courtier = { eotg_aug_victim_candidate = yes }
@@ -3228,6 +3253,7 @@ eotg_fracture.020 = {
         }
     }
     theme = intrigue
+    override_background = { reference = eotg_bg_office }
 
     trigger = {
         has_variable = eotg_aug_accusation_true
@@ -3427,6 +3453,7 @@ eotg_fracture.021 = {
     title = eotg_fracture.021.t
     desc = eotg_fracture.021.desc
     theme = intrigue
+    override_background = { reference = eotg_bg_corridor_night }
 
     trigger = {
         any_courtier = {
@@ -3571,6 +3598,7 @@ eotg_fracture.022 = {
         }
     }
     theme = mental_health
+    override_background = { reference = eotg_bg_council }
 
     trigger = {
         OR = {
@@ -3721,6 +3749,7 @@ eotg_fracture.023 = {
         }
     }
     theme = war
+    override_background = { reference = eotg_bg_command_tent }
 
     left_portrait = {
         character = root
@@ -3894,6 +3923,7 @@ eotg_fracture.024 = {
     title = eotg_fracture.024.t
     desc = eotg_fracture.024.desc
     theme = court
+    override_background = { reference = eotg_bg_council }
 
     trigger = {
         any_courtier = {
@@ -4047,6 +4077,7 @@ eotg_fracture.025 = {
     title = eotg_fracture.025.t
     desc = eotg_fracture.025.desc
     theme = realm
+    override_background = { reference = eotg_bg_council }
 
     trigger = {
         eotg_aug_containment_possible = { RULER = root }
@@ -4253,6 +4284,7 @@ eotg_fracture.026 = {
         }
     }
     theme = mental_health
+    override_background = { reference = eotg_bg_private_quarters }
 
     left_portrait = {
         character = root
@@ -4451,6 +4483,8 @@ eotg_fracture.027 = {
         }
     }
     theme = mental_health
+    override_background = { reference = eotg_bg_private_quarters }
+    override_effect_2d = { reference = smoke }
 
     left_portrait = {
         character = root
@@ -4685,6 +4719,7 @@ eotg_fracture.028 = {
     title = eotg_fracture.028.t
     desc = eotg_fracture.028.desc
     theme = mental_health
+    override_background = { reference = eotg_bg_private_quarters }
 
     left_portrait = {
         character = root
@@ -4728,6 +4763,7 @@ eotg_fracture.029 = {
         }
     }
     theme = mental_health
+    override_background = { reference = eotg_bg_private_quarters }
 
     left_portrait = {
         character = root

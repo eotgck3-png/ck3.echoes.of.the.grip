@@ -42,6 +42,7 @@ namespace = eotg_aug_heir
 # first_valid). A child the machine saved (eotg_flag_aug_child_patient on the
 # heir) adds desc_patient. scope:eotg_heir is saved in immediate.
 
+# eotg_lint: allow L015 W2 keep list (event_quality_v1 §14.2): family/love/friendly scene stays on the theme's room until art
 eotg_aug_heir.001 = {
     type = character_event
     title = eotg_aug_heir.001.t
@@ -195,6 +196,7 @@ eotg_aug_heir.003 = {
         }
     }
     theme = family
+    override_background = { reference = eotg_bg_council }
 
     trigger = {
         any_owned_story = {
@@ -385,6 +387,7 @@ eotg_aug_heir.004 = {
         }
     }
     theme = family
+    override_background = { reference = eotg_bg_council }
 
     trigger = {
         any_owned_story = {
@@ -887,6 +890,7 @@ eotg_aug_heir.005 = {
     title = eotg_aug_heir.005.t
     desc = eotg_aug_heir.005.desc
     theme = death
+    override_background = { reference = eotg_bg_corridor_night }
 
     trigger = {
         exists = scope:eotg_parent_ruler
@@ -993,6 +997,7 @@ eotg_aug_heir.005 = {
 # Seamless owner, by design in eotg_add_fracture_risk) and the story's
 # eotg_heir_dread. No stage change: the tick set stage 2.
 
+# eotg_lint: allow L015 W2 keep list (event_quality_v1 §14.2): family/love/friendly scene stays on the theme's room until art
 eotg_aug_heir.007 = {
     type = character_event
     title = eotg_aug_heir.007.t

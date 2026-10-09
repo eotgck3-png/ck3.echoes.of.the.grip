@@ -54,6 +54,7 @@ eotg_aug_tier2.001 = {
         }
     }
     theme = mental_health
+    override_background = { reference = eotg_bg_council }
 
     left_portrait = {
         character = root
@@ -196,6 +197,7 @@ eotg_aug_tier2.001 = {
 # Children Fear Me
 # Young children in the household recoil from their enhanced parent.
 
+# eotg_lint: allow L015 W2 keep list (event_quality_v1 §14.2): family/love/friendly scene stays on the theme's room until art
 eotg_aug_tier2.002 = {
     type = character_event
     title = eotg_aug_tier2.002.t
@@ -358,6 +360,7 @@ eotg_aug_tier2.003 = {
         }
     }
     theme = physical_health
+    override_background = { reference = eotg_bg_clinic }
 
     # World-state tier guard (mirrors the on_action branch): a regression
     # between roll and firing must not let the upgrade skip a tier.
@@ -607,6 +610,7 @@ eotg_aug_tier2.004 = {
     title = eotg_aug_tier2.004.t
     desc = eotg_aug_tier2.004.desc
     theme = family
+    override_background = { reference = eotg_bg_private_quarters }
 
     trigger = { is_married = yes }
 
@@ -772,6 +776,7 @@ eotg_aug_tier2.005 = {
     title = eotg_aug_tier2.005.t
     desc = eotg_aug_tier2.005.desc
     theme = faith
+    override_background = { reference = eotg_bg_council }
 
     trigger = {
         any_courtier = {
@@ -917,6 +922,7 @@ eotg_aug_tier2.006 = {
     title = eotg_aug_tier2.006.t
     desc = eotg_aug_tier2.006.desc
     theme = mental_health
+    override_background = { reference = eotg_bg_council }
 
     left_portrait = {
         character = root
@@ -1022,6 +1028,7 @@ eotg_aug_tier2.007 = {
     title = eotg_aug_tier2.007.t
     desc = eotg_aug_tier2.007.desc
     theme = stewardship
+    override_background = { reference = eotg_bg_office }
 
     trigger = {
         any_courtier = {
@@ -1140,6 +1147,7 @@ eotg_aug_tier2.008 = {
     title = eotg_aug_tier2.008.t
     desc = eotg_aug_tier2.008.desc
     theme = death
+    override_background = { reference = eotg_bg_vault }
 
     # QA round 2: the desc names [eotg_mourned.GetFirstName], so the
     # variable must still point at someone (a pruned dead character leaves
@@ -1262,6 +1270,7 @@ eotg_aug_tier2.009 = {
     title = eotg_aug_tier2.009.t
     desc = eotg_aug_tier2.009.desc
     theme = learning
+    override_background = { reference = eotg_bg_office }
 
     left_portrait = {
         character = root
@@ -1352,6 +1361,7 @@ eotg_aug_tier2.009 = {
 # a, b and e set eotg_flag_aug_absent_at_birth on the child (thread T3; read
 # by eotg_story_aug_heir_arc on_setup).
 
+# eotg_lint: allow L015 W2 keep list (event_quality_v1 §14.2): family/love/friendly scene stays on the theme's room until art
 eotg_aug_tier2.010 = {
     type = character_event
     title = eotg_aug_tier2.010.t
@@ -1480,6 +1490,7 @@ eotg_aug_tier2.011 = {
     title = eotg_aug_tier2.011.t
     desc = eotg_aug_tier2.011.desc
     theme = stewardship
+    override_background = { reference = eotg_bg_office }
 
     trigger = { is_landed = yes }
 
@@ -1623,6 +1634,7 @@ eotg_aug_tier2.012 = {
         }
     }
     theme = intrigue
+    override_background = { reference = eotg_bg_council }
 
     trigger = {
         cp:councillor_spymaster ?= {
@@ -1806,6 +1818,7 @@ eotg_aug_tier2.021 = {
     title = eotg_aug_tier2.021.t
     desc = eotg_aug_tier2.021.desc
     theme = intrigue
+    override_background = { reference = eotg_bg_office }
 
     trigger = {
         exists = scope:eotg_flagged
@@ -1950,6 +1963,7 @@ eotg_aug_tier2.013 = {
     title = eotg_aug_tier2.013.t
     desc = eotg_aug_tier2.013.desc
     theme = stewardship
+    override_background = { reference = eotg_bg_office }
 
     left_portrait = {
         character = root
@@ -2079,6 +2093,7 @@ eotg_aug_tier2.014 = {
         }
     }
     theme = stewardship
+    override_background = { reference = eotg_bg_underlevel_day }
 
     trigger = { has_trait = eotg_cybernetics }
 
@@ -2170,6 +2185,7 @@ eotg_aug_tier2.015 = {
     title = eotg_aug_tier2.015.t
     desc = eotg_aug_tier2.015.desc
     theme = intrigue
+    override_background = { reference = eotg_bg_corridor_night }
 
     trigger = {
         OR = {
@@ -2332,6 +2348,7 @@ eotg_aug_tier2.016 = {
         }
     }
     theme = intrigue
+    override_background = { reference = eotg_bg_clinic }
 
     trigger = { has_trait = eotg_cybernetics }
 
@@ -2495,6 +2512,7 @@ eotg_aug_tier2.017 = {
     title = eotg_aug_tier2.017.t
     desc = eotg_aug_tier2.017.desc
     theme = marriage
+    override_background = { reference = eotg_bg_private_quarters }
 
     trigger = {
         exists = scope:eotg_aug_spouse
@@ -2619,6 +2637,7 @@ eotg_aug_tier2.018 = {
         }
     }
     theme = marriage
+    override_background = { reference = eotg_bg_private_quarters }
 
     trigger = {
         has_variable = eotg_aug_marriage_strain
@@ -2741,6 +2760,7 @@ eotg_aug_tier2.019 = {
     title = eotg_aug_tier2.019.t
     desc = eotg_aug_tier2.019.desc
     theme = stewardship
+    override_background = { reference = eotg_bg_office }
 
     left_portrait = {
         character = root
@@ -2890,6 +2910,7 @@ eotg_aug_tier2.020 = {
         }
     }
     theme = mental_health
+    override_background = { reference = eotg_bg_private_quarters }
 
     trigger = {
         OR = {

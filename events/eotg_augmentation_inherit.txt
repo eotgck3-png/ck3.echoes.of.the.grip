@@ -110,6 +110,7 @@ eotg_aug_inherit.001 = {
         }
     }
     theme = family
+    override_background = { reference = eotg_bg_office }
 
     trigger = { eotg_aug_inherit_chain_valid = { FULL = yes } }
     on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
@@ -215,6 +216,7 @@ eotg_aug_inherit.001 = {
 # The Conversation. The heir is in the room. Exactly one profile option shows.
 # Caller: .001 (a, d).
 
+# eotg_lint: allow L015 W2 keep list (event_quality_v1 §14.2): family/love/friendly scene stays on the theme's room until art
 eotg_aug_inherit.002 = {
     type = character_event
     title = eotg_aug_inherit.002.t
@@ -426,6 +428,7 @@ eotg_aug_inherit.003 = {
         }
     }
     theme = medicine
+    override_background = { reference = eotg_bg_clinic }
 
     trigger = { eotg_aug_inherit_chain_valid = { FULL = yes } }
     on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
@@ -586,6 +589,7 @@ eotg_aug_inherit.004 = {
         }
     }
     theme = secret
+    override_background = { reference = eotg_bg_corridor_night }
 
     trigger = { eotg_aug_inherit_chain_valid = { FULL = yes } }
     on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
@@ -694,6 +698,7 @@ eotg_aug_inherit.005 = {
         }
     }
     theme = realm
+    override_background = { reference = eotg_bg_council }
 
     trigger = { eotg_aug_inherit_chain_valid = { FULL = yes } }
     on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
@@ -775,6 +780,7 @@ eotg_aug_inherit.005 = {
 # .009.c). The accept desc is true after a roll or a forced pass.
 # Callers: .002 (a, p_rage), .007 (b), .009 (c).
 
+# eotg_lint: allow L015 W2 keep list (event_quality_v1 §14.2): family/love/friendly scene stays on the theme's room until art
 eotg_aug_inherit.006 = {
     type = character_event
     title = eotg_aug_inherit.006.t
@@ -906,6 +912,7 @@ eotg_aug_inherit.006 = {
 # -- eotg_aug_inherit.007 -----------------------------------------------------
 # The Answer. Immediate: the renunciation roll. Callers: .002 (c, p_cold).
 
+# eotg_lint: allow L015 W2 keep list (event_quality_v1 §14.2): family/love/friendly scene stays on the theme's room until art
 eotg_aug_inherit.007 = {
     type = character_event
     title = eotg_aug_inherit.007.t
@@ -1021,6 +1028,7 @@ eotg_aug_inherit.008 = {
     title = eotg_aug_inherit.008.t
     desc = eotg_aug_inherit.008.desc
     theme = dungeon
+    override_background = { reference = eotg_bg_holding_cell }
 
     trigger = { eotg_aug_inherit_chain_valid = { FULL = yes } }
     on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
@@ -1098,6 +1106,7 @@ eotg_aug_inherit.009 = {
         }
     }
     theme = dread
+    override_background = { reference = eotg_bg_corridor_night }
 
     trigger = { eotg_aug_inherit_chain_valid = { FULL = yes } }
     on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
@@ -1272,6 +1281,7 @@ eotg_aug_inherit.010 = {
         }
     }
     theme = medicine
+    override_background = { reference = eotg_bg_clinic }
 
     trigger = { eotg_aug_inherit_chain_valid = { FULL = yes } }
     on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
@@ -1401,6 +1411,7 @@ eotg_aug_inherit.011 = {
     title = eotg_aug_inherit.011.t
     desc = eotg_aug_inherit.011.desc
     theme = secret
+    override_background = { reference = eotg_bg_underlevel_night }
 
     trigger = { eotg_aug_inherit_chain_valid = { FULL = yes } }
     on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
@@ -1480,6 +1491,7 @@ eotg_aug_inherit.012 = {
     title = eotg_aug_inherit.012.t
     desc = eotg_aug_inherit.012.desc
     theme = secret
+    override_background = { reference = eotg_bg_underlevel_night }
 
     trigger = { eotg_aug_inherit_chain_valid = { FULL = yes } }
     on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
@@ -1549,6 +1561,7 @@ eotg_aug_inherit.013 = {
         }
     }
     theme = realm
+    override_background = { reference = eotg_bg_council }
 
     trigger = { eotg_aug_inherit_chain_valid = { FULL = yes } }
     on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
@@ -1717,6 +1730,7 @@ eotg_aug_inherit.014 = {
     title = eotg_aug_inherit.014.t
     desc = eotg_aug_inherit.014.desc
     theme = realm
+    override_background = { reference = eotg_bg_council }
 
     trigger = { eotg_aug_inherit_chain_valid = { FULL = yes } }
     on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
@@ -1785,6 +1799,7 @@ eotg_aug_inherit.015 = {
     title = eotg_aug_inherit.015.t
     desc = eotg_aug_inherit.015.desc
     theme = secret
+    override_background = { reference = eotg_bg_underlevel_night }
 
     trigger = {
         eotg_aug_inherit_chain_valid = { FULL = yes }
@@ -1905,6 +1920,7 @@ eotg_aug_inherit.016 = {
         }
     }
     theme = death
+    override_background = { reference = eotg_bg_office }
 
     trigger = {
         eotg_aug_inherit_chain_valid = { FULL = no }
@@ -2019,6 +2035,8 @@ eotg_aug_inherit.017 = {
         }
     }
     theme = dread
+    override_background = { reference = eotg_bg_corridor_night }
+    override_effect_2d = { reference = smoke }
 
     trigger = { eotg_aug_inherit_chain_valid = { FULL = no } }
     on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
@@ -2130,6 +2148,7 @@ eotg_aug_inherit.018 = {
         }
     }
     theme = dread
+    override_background = { reference = eotg_bg_council }
 
     trigger = {
         eotg_aug_inherit_chain_valid = { FULL = no }
@@ -2217,6 +2236,7 @@ eotg_aug_inherit.019 = {
         }
     }
     theme = death
+    override_background = { reference = eotg_bg_vault }
 
     trigger = { eotg_aug_inherit_chain_valid = { FULL = no } }
     on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
@@ -2309,6 +2329,7 @@ eotg_aug_inherit.020 = {
     title = eotg_aug_inherit.020.t
     desc = eotg_aug_inherit.020.desc
     theme = dread
+    override_background = { reference = eotg_bg_clinic }
 
     trigger = { eotg_aug_inherit_chain_valid = { FULL = yes } }
     on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
@@ -2376,6 +2397,7 @@ eotg_aug_inherit.021 = {
         }
     }
     theme = medicine
+    override_background = { reference = eotg_bg_clinic }
 
     trigger = { has_variable = eotg_inh_heir }
     on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
@@ -2454,6 +2476,7 @@ eotg_aug_inherit.021 = {
 # Callers: .006 (a), .007 (b, after .006), .009 (c, after .006 via .006),
 # .020 (b), .024 (c).
 
+# eotg_lint: allow L015 W2 keep list (event_quality_v1 §14.2): family/love/friendly scene stays on the theme's room until art
 eotg_aug_inherit.022 = {
     type = character_event
     title = eotg_aug_inherit.022.t
@@ -2566,6 +2589,7 @@ eotg_aug_inherit.023 = {
         }
     }
     theme = dungeon
+    override_background = { reference = eotg_bg_holding_cell }
 
     trigger = { eotg_aug_inherit_chain_valid = { FULL = no } }
     on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
@@ -2625,6 +2649,7 @@ eotg_aug_inherit.024 = {
     title = eotg_aug_inherit.024.t
     desc = eotg_aug_inherit.024.desc
     theme = dread
+    override_background = { reference = eotg_bg_council }
 
     trigger = { eotg_aug_inherit_chain_valid = { FULL = no } }
     on_trigger_fail = { eotg_aug_inherit_close_effect = yes }
@@ -2713,6 +2738,7 @@ eotg_aug_inherit.025 = {
         }
     }
     theme = death
+    override_background = { reference = eotg_bg_council }
 
     # is_landed: an heir struck from the line at .013 who then kills the
     # ruler does not take the seat, so there is no Seat to tell.
@@ -2790,6 +2816,7 @@ eotg_aug_inherit.026 = {
         }
     }
     theme = realm
+    override_background = { reference = eotg_bg_council }
 
     trigger = {
         is_alive = yes
@@ -2888,6 +2915,7 @@ eotg_aug_inherit.027 = {
         }
     }
     theme = death
+    override_background = { reference = eotg_bg_vault }
 
     trigger = {
         eotg_aug_inherit_chain_valid = { FULL = no }
