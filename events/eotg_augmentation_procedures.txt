@@ -469,6 +469,11 @@ eotg_aug_proc.002 = {
         random = {
             chance = 25
             add_trait = ill
+            send_interface_toast = {    # W3 (event_quality_v1)
+                type = event_toast_effect_bad
+                title = eotg_aug_proc.002.toast_c_ill
+                left_icon = root
+            }
         }
         eotg_aug_stress_neglect_effect = yes
         ai_chance = {
@@ -617,6 +622,7 @@ eotg_aug_proc.003 = {
     # "The back streets."
     option = {
         name = eotg_aug_proc.003.c
+        # W3: no dangerous flag. A repair cannot kill: the death weight is factor 0 on a repair (eotg_augmentation_effects.txt:2145).
         trigger = {
             eotg_aug_can_afford_procedure = { BASE = medium_gold_value  MULT = eotg_aug_price_mult_backstreet_repair }
         }

@@ -244,6 +244,12 @@ eotg_aug_patron.002 = {
                     multiplier = 2.5
                 }
                 desc = eotg_aug_patron.002.c.success
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_good
+                    title = eotg_aug_patron.002.toast_c_success
+                    left_icon = root
+                    right_icon = scope:eotg_patron_envoy
+                }
                 eotg_aug_patron_pay_effect = { BASE = minor_gold_value  MULT = 1 }
             }
             50 = {
@@ -252,6 +258,12 @@ eotg_aug_patron.002 = {
                     multiplier = -2.5
                 }
                 desc = eotg_aug_patron.002.c.failure
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_bad
+                    title = eotg_aug_patron.002.toast_c_failure
+                    left_icon = root
+                    right_icon = scope:eotg_patron_envoy
+                }
                 eotg_aug_patron_pay_effect = { BASE = major_gold_value  MULT = 1 }
             }
         }
@@ -296,10 +308,20 @@ eotg_aug_patron.002 = {
         random_list = {
             50 = {
                 desc = eotg_aug_patron.002.e.success
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_good
+                    title = eotg_aug_patron.002.toast_e_success
+                    left_icon = root
+                }
                 eotg_aug_patron_pay_effect = { BASE = medium_gold_value  MULT = 0.5 }
             }
             50 = {
                 desc = eotg_aug_patron.002.e.failure
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_bad
+                    title = eotg_aug_patron.002.toast_e_failure
+                    left_icon = root
+                }
                 eotg_aug_patron_grievance_effect = { AMOUNT = 1 }
             }
         }
@@ -960,10 +982,20 @@ eotg_aug_patron.006 = {
         random_list = {
             50 = {
                 desc = eotg_aug_patron.006.d.success
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_good
+                    title = eotg_aug_patron.006.toast_d_success
+                    left_icon = root
+                }
                 add_gold = medium_gold_value
             }
             50 = {
                 desc = eotg_aug_patron.006.d.failure
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_bad
+                    title = eotg_aug_patron.006.toast_d_failure
+                    left_icon = root
+                }
                 # CB-27 M7: the betrayal kills the envoy only if present
                 # (checked before the effect kills them), so the murder
                 # stress follows the same test.
@@ -1300,6 +1332,11 @@ eotg_aug_patron.008 = {
                     stewardship >= 12
                 }
                 desc = eotg_aug_patron.008.e.success
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_good
+                    title = eotg_aug_patron.008.toast_e_success
+                    left_icon = root
+                }
                 add_prestige = 100
                 hidden_effect = {
                     scope:eotg_patron_story ?= { end_story = yes }
@@ -1307,6 +1344,11 @@ eotg_aug_patron.008 = {
             }
             50 = {
                 desc = eotg_aug_patron.008.e.failure
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_bad
+                    title = eotg_aug_patron.008.toast_e_failure
+                    left_icon = root
+                }
                 add_prestige = -100
                 eotg_aug_patron_grievance_effect = { AMOUNT = 1 }
             }
@@ -1482,6 +1524,12 @@ eotg_aug_patron.009 = {
                     prowess >= 12
                 }
                 desc = eotg_aug_patron.009.e.success
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_good
+                    title = eotg_aug_patron.009.toast_e_success
+                    left_icon = root
+                    right_icon = scope:eotg_patron_collector
+                }
                 imprison_character_effect = {
                     TARGET = scope:eotg_patron_collector
                     IMPRISONER = root
@@ -1490,6 +1538,12 @@ eotg_aug_patron.009 = {
             }
             50 = {
                 desc = eotg_aug_patron.009.e.failure
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_bad
+                    title = eotg_aug_patron.009.toast_e_failure
+                    left_icon = root
+                    right_icon = scope:eotg_patron_collector
+                }
                 add_prestige = -50
                 hidden_effect = { eotg_aug_patron_collect_effect = yes }
             }

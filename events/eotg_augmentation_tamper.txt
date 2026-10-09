@@ -390,6 +390,7 @@ eotg_aug_tamper.004 = {
     # "Someone cheaper."
     option = {
         name = eotg_aug_tamper.004.c
+        # W3: no dangerous flag. A repair cannot kill: the death weight is factor 0 on a repair (eotg_augmentation_effects.txt:2145).
         trigger = {
             eotg_aug_can_afford_procedure = { BASE = medium_gold_value  MULT = eotg_aug_price_mult_backstreet_repair }
         }

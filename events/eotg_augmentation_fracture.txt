@@ -187,6 +187,7 @@ eotg_fracture.002 = {
             }
             if = {
                 limit = { exists = scope:eotg_victim_dead }
+                play_music_cue = mx_cue_death    # W3: a cascade death
                 scope:eotg_victim_dead = {
                     death = { death_reason = death_murder  killer = root }
                 }
@@ -275,6 +276,7 @@ eotg_fracture.002 = {
                 has_character_flag = eotg_flag_aug_breach_victim
             }
         }
+        add_internal_flag = dangerous    # W3: executions
         every_courtier = {
             limit = {
                 is_alive = yes
@@ -370,6 +372,7 @@ eotg_fracture.003 = {
     # "End this" -- suicide attempt (40% chance, higher if health is low)
     option = {
         name = eotg_fracture.003.a
+        add_internal_flag = dangerous    # W3: can kill root
         random = {
             chance = 40
             modifier = { add = 20  health < 3 }
@@ -440,6 +443,11 @@ eotg_fracture.003 = {
         random = {
             chance = 20
             increase_wounds_effect = { REASON = whipping }
+            send_interface_toast = {    # W3 (event_quality_v1)
+                type = event_toast_effect_bad
+                title = eotg_fracture.003.toast_f_wounded
+                left_icon = root
+            }
         }
         stress_impact = {
             flagellant = major_stress_impact_loss
@@ -518,6 +526,7 @@ eotg_fracture.004 = {
             eotg_aug_pick_victim_effect = { NAME = eotg_victim_dead  FAMILY_FACTOR = 0.25 }
             if = {
                 limit = { exists = scope:eotg_victim_dead }
+                play_music_cue = mx_cue_death    # W3: a cascade death
                 scope:eotg_victim_dead = {
                     death = { death_reason = death_murder  killer = root }
                 }
@@ -567,6 +576,11 @@ eotg_fracture.004 = {
         random = {
             chance = 30
             add_trait = depressed_1
+            send_interface_toast = {    # W3
+                type = event_toast_effect_bad
+                title = eotg_fracture.004.toast_b_depressed
+                left_icon = root
+            }
         }
         ai_chance = {
             base = 40
@@ -734,6 +748,21 @@ eotg_fracture.005 = {
                 random = {
                     chance = 30
                     add_trait = callous
+                    # W3: the heir learns it (they may be a player); root sees it
+                    send_interface_message = {
+                        type = send_interface_message_bad
+                        title = eotg_fracture.005.msg_c_callous
+                        left_icon = root
+                        right_icon = scope:eotg_watching_heir
+                    }
+                    root = {
+                        send_interface_toast = {
+                            type = event_toast_effect_neutral
+                            title = eotg_fracture.005.toast_c_callous
+                            left_icon = root
+                            right_icon = scope:eotg_watching_heir
+                        }
+                    }
                 }
             }
         }
@@ -776,10 +805,22 @@ eotg_fracture.005 = {
                 scope:eotg_watching_heir = {
                     add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
                 }
+                send_interface_toast = {    # W3
+                    type = event_toast_effect_good
+                    title = eotg_fracture.005.toast_e_believed
+                    left_icon = root
+                    right_icon = scope:eotg_watching_heir
+                }
             }
             50 = {
                 scope:eotg_watching_heir = {
                     add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+                }
+                send_interface_toast = {    # W3
+                    type = event_toast_effect_bad
+                    title = eotg_fracture.005.toast_e_doubted
+                    left_icon = root
+                    right_icon = scope:eotg_watching_heir
                 }
             }
         }
@@ -914,6 +955,7 @@ eotg_fracture.006 = {
     # fires the ultimatum).
     option = {
         name = eotg_fracture.006.c
+        add_internal_flag = dangerous    # W3: hands the decision over
         eotg_add_fracture_risk = { AMOUNT = 20 }
         eotg_aug_stress_cruelty_effect = yes
         hidden_effect = {
@@ -922,6 +964,8 @@ eotg_fracture.006 = {
                     add_dread = 40
                     add_tyranny = 20
                     add_prestige = -100
+                    # W3 QA: the toast follows the jailing; with no free
+                    # Warrant vassal to take, the _free variant fires instead
                     if = {
                         limit = {
                             exists = scope:eotg_warrant_vassal
@@ -931,12 +975,29 @@ eotg_fracture.006 = {
                             TARGET = scope:eotg_warrant_vassal
                             IMPRISONER = root
                         }
+                        send_interface_toast = {    # W3
+                            type = event_toast_effect_bad
+                            title = eotg_fracture.006.toast_c_crushed
+                            left_icon = root
+                        }
+                    }
+                    else = {
+                        send_interface_toast = {    # W3
+                            type = event_toast_effect_bad
+                            title = eotg_fracture.006.toast_c_crushed_free
+                            left_icon = root
+                        }
                     }
                 }
                 50 = {
                     every_targeting_faction = {
                         limit = { NOT = { exists = faction_war } }
                         add_faction_discontent = 100
+                    }
+                    send_interface_toast = {    # W3
+                        type = event_toast_effect_bad
+                        title = eotg_fracture.006.toast_c_factions
+                        left_icon = root
                     }
                 }
             }
@@ -1001,6 +1062,12 @@ eotg_fracture.006 = {
             target = scope:eotg_warrant_vassal
             50 = {
                 desc = eotg_fracture.006.e.win
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_good
+                    title = eotg_fracture.006.toast_e_win
+                    left_icon = root
+                    right_icon = scope:eotg_warrant_vassal
+                }
                 compare_modifier = {
                     value = scope:duel_value
                     multiplier = 2.5
@@ -1016,6 +1083,12 @@ eotg_fracture.006 = {
             }
             50 = {
                 desc = eotg_fracture.006.e.lose
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_bad
+                    title = eotg_fracture.006.toast_e_lose
+                    left_icon = root
+                    right_icon = scope:eotg_warrant_vassal
+                }
                 compare_modifier = {
                     value = scope:duel_value
                     multiplier = -2.5
@@ -1073,6 +1146,11 @@ eotg_fracture.007 = {
                     min = -49
                 }
                 desc = eotg_fracture.007.a.success
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_good
+                    title = eotg_fracture.007.toast_a_success
+                    left_icon = root
+                }
                 add_gold = minor_gold_value
                 hidden_effect = {
                     eotg_add_fracture_risk = { AMOUNT = 10 }
@@ -1085,6 +1163,11 @@ eotg_fracture.007 = {
                     min = -49
                 }
                 desc = eotg_fracture.007.a.failure
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_bad
+                    title = eotg_fracture.007.toast_a_failure
+                    left_icon = root
+                }
                 hidden_effect = {
                     eotg_add_fracture_risk = { AMOUNT = 15 }
                 }
@@ -1461,12 +1544,22 @@ eotg_fracture.009 = {
         random_list = {
             50 = {
                 desc = eotg_fracture.009.a.nothing
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_neutral
+                    title = eotg_fracture.009.toast_a_nothing
+                    left_icon = root
+                }
             }
             30 = {
                 # QA round 2 gold gates: an outcome branch, so the gate is
                 # the branch's own trigger (random_list entries take one).
                 trigger = { gold >= minor_gold_value }
                 desc = eotg_fracture.009.a.signed
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_bad
+                    title = eotg_fracture.009.toast_a_signed
+                    left_icon = root
+                }
                 # Misled: the lost hour already spent the gold; this finds it
                 # (B2 QA, mirrors the wounded branch's guard).
                 if = {
@@ -1477,6 +1570,12 @@ eotg_fracture.009 = {
             20 = {
                 trigger = { exists = scope:eotg_victim }
                 desc = eotg_fracture.009.a.wounded
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_bad
+                    title = eotg_fracture.009.toast_a_wounded
+                    left_icon = root
+                    right_icon = scope:eotg_victim
+                }
                 # Misled: the lost hour already wounded them; this finds it.
                 if = {
                     limit = { NOT = { scope:eotg_misled_outcome ?= flag:wounded } }
@@ -1811,6 +1910,12 @@ eotg_fracture.011 = {
                 scope:eotg_witness = {
                     add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
                 }
+                send_interface_toast = {    # W3
+                    type = event_toast_effect_bad
+                    title = eotg_fracture.011.toast_a_doubted
+                    left_icon = root
+                    right_icon = scope:eotg_witness
+                }
             }
         }
         ai_chance = {
@@ -2114,8 +2219,22 @@ eotg_fracture.013 = {
     option = {
         name = eotg_fracture.013.b
         random_list = {
-            50 = { add_prestige = 100 }
-            50 = { add_prestige = -100 }
+            50 = {
+                add_prestige = 100
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_good
+                    title = eotg_fracture.013.toast_b_right
+                    left_icon = root
+                }
+            }
+            50 = {
+                add_prestige = -100
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_bad
+                    title = eotg_fracture.013.toast_b_wrong
+                    left_icon = root
+                }
+            }
         }
         eotg_add_fracture_risk = { AMOUNT = 5 }
         ai_chance = {
@@ -2146,8 +2265,22 @@ eotg_fracture.013 = {
         }
         trait = eccentric
         random_list = {
-            50 = { add_gold = medium_gold_value }
-            50 = { remove_short_term_gold = medium_gold_value }
+            50 = {
+                add_gold = medium_gold_value
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_good
+                    title = eotg_fracture.013.toast_d_won
+                    left_icon = root
+                }
+            }
+            50 = {
+                remove_short_term_gold = medium_gold_value
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_bad
+                    title = eotg_fracture.013.toast_d_lost
+                    left_icon = root
+                }
+            }
         }
         eotg_add_fracture_risk = { AMOUNT = 5 }
         ai_chance = {
@@ -2209,6 +2342,11 @@ eotg_fracture.014 = {
         random = {
             chance = 30
             increase_wounds_effect = { REASON = fall }
+            send_interface_toast = {    # W3 (event_quality_v1)
+                type = event_toast_effect_bad
+                title = eotg_fracture.014.toast_b_fell
+                left_icon = root
+            }
         }
         eotg_add_fracture_risk = { AMOUNT = 5 }
         ai_chance = {
@@ -2497,6 +2635,7 @@ eotg_fracture.016 = {
                     }
                     40 = {
                         save_scope_value_as = { name = eotg_blood_outcome  value = flag:dead }
+                        play_music_cue = mx_cue_death    # W3: a cascade death
                         scope:eotg_victim = {
                             death = { death_reason = death_murder  killer = root }
                         }
@@ -2750,6 +2889,7 @@ eotg_fracture.017 = {
     # "Grant it." Voice to 4.
     option = {
         name = eotg_fracture.017.a
+        add_internal_flag = dangerous    # W3: hands the implant a standing grant (voice 4)
         eotg_aug_voice_advance_effect = { STAGE = 4 }
         add_character_modifier = { modifier = eotg_mod_aug_lesson_martial  years = 5 }
         add_character_modifier = { modifier = eotg_mod_aug_lesson_intrigue  years = 5 }
@@ -2799,6 +2939,11 @@ eotg_fracture.017 = {
             value = 0
             50 = {
                 desc = eotg_fracture.017.c.partial
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_good
+                    title = eotg_fracture.017.toast_c_partial
+                    left_icon = root
+                }
                 compare_modifier = {
                     value = scope:duel_value
                     multiplier = 3
@@ -2808,6 +2953,11 @@ eotg_fracture.017 = {
             }
             50 = {
                 desc = eotg_fracture.017.c.failed
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_bad
+                    title = eotg_fracture.017.toast_c_failed
+                    left_icon = root
+                }
                 compare_modifier = {
                     value = scope:duel_value
                     multiplier = -3
@@ -2826,6 +2976,7 @@ eotg_fracture.017 = {
     # [ambitious] "What do I get in return?" As a, with more prestige and risk.
     option = {
         name = eotg_fracture.017.d
+        add_internal_flag = dangerous    # W3: hands the implant a standing grant (voice 4)
         trigger = { has_trait = ambitious }
         trait = ambitious
         eotg_aug_voice_advance_effect = { STAGE = 4 }
@@ -2910,6 +3061,11 @@ eotg_fracture.018 = {
         random = {
             chance = 50
             eotg_aug_scramble_personality_effect = yes
+            send_interface_toast = {    # W3 (event_quality_v1)
+                type = event_toast_effect_bad
+                title = eotg_fracture.018.toast_b_slipped
+                left_icon = root
+            }
         }
         stress_impact = { base = medium_stress_impact_gain }
         ai_chance = {
@@ -2941,6 +3097,11 @@ eotg_fracture.018 = {
         random = {
             chance = 20
             eotg_aug_scramble_personality_effect = yes
+            send_interface_toast = {    # W3 (event_quality_v1)
+                type = event_toast_effect_bad
+                title = eotg_fracture.018.toast_d_slipped
+                left_icon = root
+            }
         }
         stress_impact = {
             stubborn = medium_stress_impact_loss
@@ -3105,6 +3266,8 @@ eotg_fracture.019 = {
     # called before the death as vanilla does.
     option = {
         name = eotg_fracture.019.c
+        add_internal_flag = dangerous    # W3: executing on the implant's flag
+        play_music_cue = mx_cue_death    # W3: execution (option cue, as vanilla feast.1502.a)
         add_kinslayer_trait_or_nothing_effect = { VICTIM = scope:eotg_accused }
         scope:eotg_accused = {
             death = { death_reason = death_execution  killer = root }
@@ -3389,6 +3552,12 @@ eotg_fracture.020 = {
                 add_prestige = 100
             }
             eotg_add_fracture_risk = { AMOUNT = 5 }
+            send_interface_toast = {    # W3 (event_quality_v1)
+                type = event_toast_effect_neutral
+                title = eotg_fracture.020.toast_true
+                left_icon = root
+                right_icon = scope:eotg_accused
+            }
         }
         else_if = {
             limit = {
@@ -3398,11 +3567,23 @@ eotg_fracture.020 = {
                 }
             }
             eotg_add_fracture_risk = { AMOUNT = -5 }
+            send_interface_toast = {    # W3 (event_quality_v1)
+                type = event_toast_effect_good
+                title = eotg_fracture.020.toast_false_spared
+                left_icon = root
+                right_icon = scope:eotg_accused
+            }
         }
         else = {
             add_tyranny = 10
             eotg_aug_stress_lie_effect = yes
             eotg_add_fracture_risk = { AMOUNT = 10 }
+            send_interface_toast = {    # W3 (event_quality_v1)
+                type = event_toast_effect_bad
+                title = eotg_fracture.020.toast_false_punished
+                left_icon = root
+                right_icon = scope:eotg_accused
+            }
         }
         hidden_effect = {
             remove_variable = eotg_aug_accusation_true
@@ -3480,6 +3661,7 @@ eotg_fracture.021 = {
                     }
                     50 = {
                         save_scope_value_as = { name = eotg_missing_outcome  value = flag:dead }
+                        play_music_cue = mx_cue_death    # W3: a cascade death
                         scope:eotg_missing = {
                             add_character_flag = { flag = eotg_flag_aug_breach_victim  days = 30 }
                             death = { death_reason = death_murder  killer = root }
@@ -3502,9 +3684,20 @@ eotg_fracture.021 = {
                 scope:eotg_missing = { is_alive = yes }
             }
             add_courtier = scope:eotg_missing
+            send_interface_toast = {    # W3 (event_quality_v1)
+                type = event_toast_effect_good
+                title = eotg_fracture.021.toast_a_found
+                left_icon = root
+                right_icon = scope:eotg_missing
+            }
         }
         else = {
             custom_tooltip = eotg_fracture.021.a.found_dead
+            send_interface_toast = {    # W3 (event_quality_v1)
+                type = event_toast_effect_bad
+                title = eotg_fracture.021.toast_a_dead
+                left_icon = root
+            }
         }
         eotg_add_fracture_risk = { AMOUNT = -3 }
         ai_chance = {
@@ -3971,6 +4164,12 @@ eotg_fracture.024 = {
         random_list = {
             50 = {
                 desc = eotg_fracture.024.b.admit
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_good
+                    title = eotg_fracture.024.toast_b_admit
+                    left_icon = root
+                    right_icon = scope:eotg_changed
+                }
                 scope:eotg_changed = {
                     eotg_add_fracture_risk = { AMOUNT = -10 }
                     add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
@@ -3978,6 +4177,12 @@ eotg_fracture.024 = {
             }
             50 = {
                 desc = eotg_fracture.024.b.deny
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_bad
+                    title = eotg_fracture.024.toast_b_deny
+                    left_icon = root
+                    right_icon = scope:eotg_changed
+                }
                 scope:eotg_changed = {
                     add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
                 }
@@ -4113,6 +4318,7 @@ eotg_fracture.025 = {
     # "Let them."
     option = {
         name = eotg_fracture.025.a
+        add_internal_flag = dangerous    # W3: hands control to a keeper
         show_as_tooltip = {
             eotg_aug_f025_let_them_effect = yes
         }
@@ -4162,6 +4368,12 @@ eotg_fracture.025 = {
                 chance = 30
                 scope:eotg_keeper = { save_scope_as = eotg_warrant_vassal }
                 eotg_aug_raise_warrant_effect = yes
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_bad
+                    title = eotg_fracture.025.toast_b_warrant
+                    left_icon = root
+                    right_icon = scope:eotg_keeper
+                }
             }
         }
         eotg_aug_stress_cruelty_effect = yes
@@ -4207,6 +4419,7 @@ eotg_fracture.025 = {
     # [content] "Take it. Please, take it."
     option = {
         name = eotg_fracture.025.e
+        add_internal_flag = dangerous    # W3: hands control to a keeper
         trigger = { has_trait = content }
         trait = content
         show_as_tooltip = {
@@ -4326,6 +4539,11 @@ eotg_fracture.026 = {
                     min = -49
                 }
                 desc = eotg_fracture.026.a.success
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_good
+                    title = eotg_fracture.026.toast_a_success
+                    left_icon = root
+                }
                 if = {
                     limit = {
                         exists = scope:eotg_keeper
@@ -4348,6 +4566,11 @@ eotg_fracture.026 = {
                     min = -49
                 }
                 desc = eotg_fracture.026.a.failure
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_bad
+                    title = eotg_fracture.026.toast_a_failure
+                    left_icon = root
+                }
                 add_character_modifier = { modifier = eotg_mod_withdrawn_from_court  years = 2 }
                 hidden_effect = {
                     eotg_add_fracture_risk = { AMOUNT = -8 }
@@ -4391,6 +4614,7 @@ eotg_fracture.026 = {
     # "Embrace it." Voice to 4; may later hand over the controls (3b decision).
     option = {
         name = eotg_fracture.026.c
+        add_internal_flag = dangerous    # W3: opens the handover of the controls
         eotg_aug_voice_advance_effect = { STAGE = 4 }
         add_character_flag = eotg_flag_aug_may_embrace
         eotg_add_fracture_risk = { AMOUNT = 20 }
@@ -4494,6 +4718,7 @@ eotg_fracture.027 = {
     # "Let go."  (total integration +15)
     option = {
         name = eotg_fracture.027.a
+        add_internal_flag = dangerous    # W3: the cascade can kill root or end the self
         custom_tooltip = eotg_fracture.027.tt
         hidden_effect = {
             random_list = {
@@ -4501,6 +4726,7 @@ eotg_fracture.027 = {
                 35 = {
                     modifier = { add = 15  stress_level >= 3 }
                     modifier = { add = 10  health < 2 }
+                    play_music_cue = mx_cue_death    # W3: the cascade death
                     eotg_aug_cascade_death_effect = yes
                 }
                 # total integration
@@ -4547,6 +4773,7 @@ eotg_fracture.027 = {
     # "Hold on."  (death +10, passes +30)
     option = {
         name = eotg_fracture.027.b
+        add_internal_flag = dangerous    # W3: the cascade can kill root or end the self
         custom_tooltip = eotg_fracture.027.tt
         hidden_effect = {
             random_list = {
@@ -4554,6 +4781,7 @@ eotg_fracture.027 = {
                 45 = {
                     modifier = { add = 15  stress_level >= 3 }
                     modifier = { add = 10  health < 2 }
+                    play_music_cue = mx_cue_death    # W3: the cascade death
                     eotg_aug_cascade_death_effect = yes
                 }
                 # total integration
@@ -4600,6 +4828,7 @@ eotg_fracture.027 = {
     # [brave] "Fight it."  (total integration -10, passes +40)
     option = {
         name = eotg_fracture.027.c
+        add_internal_flag = dangerous    # W3: the cascade can kill root or end the self
         trigger = { has_trait = brave }
         trait = brave
         custom_tooltip = eotg_fracture.027.tt
@@ -4609,6 +4838,7 @@ eotg_fracture.027 = {
                 35 = {
                     modifier = { add = 15  stress_level >= 3 }
                     modifier = { add = 10  health < 2 }
+                    play_music_cue = mx_cue_death    # W3: the cascade death
                     eotg_aug_cascade_death_effect = yes
                 }
                 # total integration
@@ -4655,6 +4885,7 @@ eotg_fracture.027 = {
     # [stubborn] "Not yet."  (total integration -10, passes +30)
     option = {
         name = eotg_fracture.027.d
+        add_internal_flag = dangerous    # W3: the cascade can kill root or end the self
         trigger = { has_trait = stubborn }
         trait = stubborn
         custom_tooltip = eotg_fracture.027.tt
@@ -4664,6 +4895,7 @@ eotg_fracture.027 = {
                 35 = {
                     modifier = { add = 15  stress_level >= 3 }
                     modifier = { add = 10  health < 2 }
+                    play_music_cue = mx_cue_death    # W3: the cascade death
                     eotg_aug_cascade_death_effect = yes
                 }
                 # total integration
@@ -4728,6 +4960,11 @@ eotg_fracture.028 = {
 
     option = {
         name = eotg_fracture.028.a
+        send_interface_toast = {    # W3 (event_quality_v1)
+            type = event_toast_effect_bad
+            title = eotg_fracture.028.toast
+            left_icon = root
+        }
     }
 }
 
@@ -4835,6 +5072,7 @@ eotg_fracture.029 = {
     # mirror of b.
     option = {
         name = eotg_fracture.029.c
+        add_internal_flag = special    # W3: gated by a rare state (Neurofractured, voice 3+)
         trigger = {
             has_trait = eotg_neurofractured
             has_variable = eotg_aug_voice
@@ -4850,6 +5088,16 @@ eotg_fracture.029 = {
             base = 30
             modifier = { add = 20  has_trait = content }
             modifier = { add = 10  has_trait = craven }
+        }
+    }
+
+    # W3: the cascade passed in immediate; the toast fires once, whichever
+    # option is taken
+    after = {
+        send_interface_toast = {    # W3 (event_quality_v1)
+            type = event_toast_effect_neutral
+            title = eotg_fracture.029.toast
+            left_icon = root
         }
     }
 }

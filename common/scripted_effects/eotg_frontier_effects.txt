@@ -370,6 +370,7 @@ eotg_frontier_milestone_effect = {
         }
         set_variable = { name = eotg_frontier_milestone  value = 1 }
         eotg_frontier_grant_milestone_dev_effect = { LEVEL = 1 }
+        eotg_frontier_milestone_toast_effect = yes
     }
     if = {
         limit = {
@@ -378,6 +379,39 @@ eotg_frontier_milestone_effect = {
         }
         set_variable = { name = eotg_frontier_milestone  value = 2 }
         eotg_frontier_grant_milestone_dev_effect = { LEVEL = 2 }
+        eotg_frontier_milestone_toast_effect = yes
+    }
+}
+
+# event_quality_v1 W3: a Frontier stage change surfaces as a toast to the
+# holder (the stage in words, never the Establishment number). Hidden, as the
+# mod's other after-the-fact toasts (eotg_aug_forget_relation_effect), so an
+# option tooltip that raises Establishment does not render it. COUNTY scope.
+# Vanilla toast-to-holder shape: events/dlc/ep3/ep3_admin_events.txt:653-659.
+# Reads var:eotg_frontier_milestone, just set by the caller.
+# Caller: eotg_frontier_milestone_effect (stages 1 and 2).
+eotg_frontier_milestone_toast_effect = {
+    save_temporary_scope_as = eotg_frontier_milestone_county
+    hidden_effect = {
+        holder ?= {
+            if = {
+                limit = { scope:eotg_frontier_milestone_county = { var:eotg_frontier_milestone >= 2 } }
+                send_interface_toast = {
+                    type = event_toast_effect_good
+                    title = eotg_frontier_toast_milestone_2
+                    left_icon = this
+                    right_icon = scope:eotg_frontier_milestone_county
+                }
+            }
+            else = {
+                send_interface_toast = {
+                    type = event_toast_effect_good
+                    title = eotg_frontier_toast_milestone_1
+                    left_icon = this
+                    right_icon = scope:eotg_frontier_milestone_county
+                }
+            }
+        }
     }
 }
 

@@ -675,6 +675,14 @@ eotg_aug_heir.004 = {
             }
             eotg_aug_stress_tyranny_effect = yes
             eotg_add_fracture_risk = { AMOUNT = 5 }
+            # W3: stays on this option, not in `after`: the toast says the heir
+            # is held, which only this option (the imprisonment) makes true.
+            send_interface_toast = {    # W3 (event_quality_v1)
+                type = event_toast_effect_bad
+                title = eotg_aug_heir.004.toast_kill_failed
+                left_icon = root
+                right_icon = scope:eotg_heir
+            }
         }
         ai_chance = {
             base = 40
@@ -773,6 +781,11 @@ eotg_aug_heir.004 = {
         trigger = { scope:eotg_heir_choice = flag:kill_failed }
         scope:eotg_heir = {
             add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
+            send_interface_message = {    # W3: the heir may be a player
+                type = send_interface_message_good
+                title = eotg_aug_heir.004.msg_kill_forgiven
+                left_icon = root
+            }
         }
         eotg_add_fracture_risk = { AMOUNT = -5 }
         ai_chance = {
@@ -785,6 +798,8 @@ eotg_aug_heir.004 = {
     # Kill, failed — [vengeful] "Execute them."
     option = {
         name = eotg_aug_heir.004.kill_c
+        add_internal_flag = dangerous    # W3: executes the heir
+        play_music_cue = mx_cue_death    # W3: execution (option cue, as vanilla feast.1502.a)
         trigger = {
             scope:eotg_heir_choice = flag:kill_failed
             has_trait = vengeful
@@ -817,7 +832,28 @@ eotg_aug_heir.004 = {
     # option has run. Same shape as eotg_aug_patron.006's `after`
     # (scope ?= { end_story = yes }). Vanilla ends a story from an event's
     # after block: events/dlc/bp2/bp2_yearly_2.txt:3165-3170.
+    # W3: the heir's decision (rolled in immediate) surfaces once, whichever
+    # option is taken. kill_failed's toast stays on the fallback option (it
+    # names the imprisonment); kill_success is silent by design.
     after = {
+        if = {
+            limit = { scope:eotg_heir_choice = flag:ally }
+            send_interface_toast = {    # W3 (event_quality_v1)
+                type = event_toast_effect_good
+                title = eotg_aug_heir.004.toast_ally
+                left_icon = root
+                right_icon = scope:eotg_heir
+            }
+        }
+        else_if = {
+            limit = { scope:eotg_heir_choice = flag:usurp }
+            send_interface_toast = {    # W3 (event_quality_v1)
+                type = event_toast_effect_bad
+                title = eotg_aug_heir.004.toast_usurp
+                left_icon = root
+                right_icon = scope:eotg_heir
+            }
+        }
         hidden_effect = {
             scope:eotg_heir_story ?= {
                 if = {
@@ -908,6 +944,10 @@ eotg_aug_heir.005 = {
         animate_if_dead = yes
     }
 
+    immediate = {
+        play_music_cue = mx_cue_murder    # W3 (event_quality_v1)
+    }
+
     # "It was mercy." —
     option = {
         name = eotg_aug_heir.005.a
@@ -951,6 +991,7 @@ eotg_aug_heir.005 = {
     # Coupling: tier change.
     option = {
         name = eotg_aug_heir.005.d
+        add_internal_flag = special    # W3: once per life: the dead parent's hardware
         trigger = {
             eotg_is_augmented_any = no
             gold >= tiny_gold_value

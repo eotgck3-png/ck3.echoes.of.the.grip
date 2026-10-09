@@ -324,6 +324,12 @@ eotg_aug_inherit.002 = {
             random = {
                 chance = 25
                 increase_wounds_effect = { REASON = attacked }
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_bad
+                    title = eotg_aug_inherit.002.toast_p_rage_hurt
+                    left_icon = root
+                    right_icon = scope:eotg_inh_heir
+                }
             }
         }
         scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = -8 } }
@@ -554,6 +560,13 @@ eotg_aug_inherit.003 = {
         name = eotg_aug_inherit.003.b_ref
         trigger = { exists = scope:eotg_inh_refused }
         eotg_aug_inherit_leaf_exile_effect = { STYLE = plain }
+        scope:eotg_inh_heir ?= {
+            send_interface_message = {    # W3: the heir may be a player
+                type = send_interface_message_bad
+                title = eotg_aug_inherit.003.msg_b_ref
+                left_icon = root
+            }
+        }
         eotg_aug_inherit_close_effect = yes
         ai_chance = {
             base = 30
@@ -838,6 +851,13 @@ eotg_aug_inherit.006 = {
         name = eotg_aug_inherit.006.a
         trigger = { exists = scope:eotg_inh_accepted }
         eotg_aug_inherit_leaf_terms_effect = yes
+        scope:eotg_inh_heir ?= {
+            send_interface_message = {    # W3: the heir may be a player
+                type = send_interface_message
+                title = eotg_aug_inherit.006.msg_a
+                left_icon = root
+            }
+        }
         trigger_event = { id = eotg_aug_inherit.022  days = 365 }
         ai_chance = {
             base = 40
@@ -952,6 +972,13 @@ eotg_aug_inherit.007 = {
         name = eotg_aug_inherit.007.a
         trigger = { exists = scope:eotg_inh_renounced }
         eotg_aug_inherit_leaf_disinherit_effect = { COST = no }
+        scope:eotg_inh_heir ?= {
+            send_interface_message = {    # W3: the heir may be a player
+                type = send_interface_message
+                title = eotg_aug_inherit.007.msg_a
+                left_icon = root
+            }
+        }
         eotg_aug_inherit_close_effect = yes
         ai_chance = {
             base = 40
@@ -969,6 +996,13 @@ eotg_aug_inherit.007 = {
         if = {
             limit = { has_character_flag = eotg_flag_aug_inh_talked }
             eotg_aug_inherit_leaf_terms_effect = yes
+            scope:eotg_inh_heir ?= {
+                send_interface_message = {    # W3: the heir may be a player
+                    type = send_interface_message
+                    title = eotg_aug_inherit.007.msg_b
+                    left_icon = root
+                }
+            }
             trigger_event = { id = eotg_aug_inherit.022  days = 365 }
         }
         else = {
@@ -1242,6 +1276,7 @@ eotg_aug_inherit.009 = {
         trait = callous
         trait = sadistic
         eotg_aug_inherit_leaf_kill_heir_effect = { REASON = murder }
+        add_internal_flag = dangerous    # W3: kills the heir
         eotg_aug_stress_murder_effect = yes
         add_dread = 20
         eotg_aug_inherit_close_effect = yes
@@ -1436,6 +1471,13 @@ eotg_aug_inherit.011 = {
             add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 5 }
         }
         eotg_aug_inherit_leaf_exile_effect = { STYLE = plain }
+        scope:eotg_inh_heir ?= {
+            send_interface_message = {    # W3: the heir may be a player
+                type = send_interface_message_bad
+                title = eotg_aug_inherit.011.msg_a
+                left_icon = root
+            }
+        }
         eotg_aug_inherit_close_effect = yes
         ai_chance = {
             base = 30
@@ -1449,6 +1491,13 @@ eotg_aug_inherit.011 = {
         name = eotg_aug_inherit.011.b
         trigger = { gold >= medium_gold_value }
         eotg_aug_inherit_leaf_exile_effect = { STYLE = credit }
+        scope:eotg_inh_heir ?= {
+            send_interface_message = {    # W3: the heir may be a player
+                type = send_interface_message_bad
+                title = eotg_aug_inherit.011.msg_b
+                left_icon = root
+            }
+        }
         eotg_aug_inherit_close_effect = yes
         ai_chance = {
             base = 30
@@ -1470,6 +1519,13 @@ eotg_aug_inherit.011 = {
         trait = vengeful
         trait = arbitrary
         eotg_aug_inherit_leaf_exile_effect = { STYLE = disinherit }
+        scope:eotg_inh_heir ?= {
+            send_interface_message = {    # W3: the heir may be a player
+                type = send_interface_message_bad
+                title = eotg_aug_inherit.011.msg_c
+                left_icon = root
+            }
+        }
         eotg_aug_inherit_close_effect = yes
         ai_chance = {
             base = 30
@@ -1578,6 +1634,13 @@ eotg_aug_inherit.013 = {
     immediate = {
         eotg_aug_inherit_scopes_effect = yes
         eotg_aug_inherit_leaf_disinherit_effect = { COST = yes }
+        scope:eotg_inh_heir ?= {
+            send_interface_message = {    # W3: the heir may be a player
+                type = send_interface_message_bad
+                title = eotg_aug_inherit.013.msg
+                left_icon = root
+            }
+        }
         hidden_effect = {
             random_list = {
                 40 = {
@@ -1648,6 +1711,13 @@ eotg_aug_inherit.013 = {
         name = eotg_aug_inherit.013.la
         trigger = { var:eotg_inh_reaction ?= flag:leave }
         eotg_aug_inherit_leaf_exile_effect = { STYLE = plain }
+        scope:eotg_inh_heir ?= {
+            send_interface_message = {    # W3: the heir may be a player
+                type = send_interface_message_bad
+                title = eotg_aug_inherit.013.msg_la
+                left_icon = root
+            }
+        }
         eotg_aug_inherit_close_effect = yes
         ai_chance = {
             base = 30
@@ -1709,6 +1779,7 @@ eotg_aug_inherit.013 = {
         }
         trait = callous
         eotg_aug_inherit_leaf_kill_heir_effect = { REASON = murder }
+        add_internal_flag = dangerous    # W3: kills the heir
         eotg_aug_stress_murder_effect = yes
         add_dread = 20
         eotg_aug_inherit_close_effect = yes
@@ -1973,6 +2044,8 @@ eotg_aug_inherit.016 = {
     option = {
         name = eotg_aug_inherit.016.b
         eotg_aug_inherit_leaf_kill_heir_effect = { REASON = execution }
+        add_internal_flag = dangerous    # W3: executes the heir
+        play_music_cue = mx_cue_death    # W3: execution (option cue, as vanilla feast.1502.a)
         eotg_aug_stress_murder_effect = yes
         eotg_aug_inherit_close_effect = yes
         ai_chance = {
@@ -2083,6 +2156,8 @@ eotg_aug_inherit.017 = {
     option = {
         name = eotg_aug_inherit.017.b
         eotg_aug_inherit_leaf_kill_heir_effect = { REASON = guards }
+        add_internal_flag = dangerous    # W3: kills the heir
+        play_music_cue = mx_cue_death    # W3: execution (option cue, as vanilla feast.1502.a)
         eotg_aug_stress_murder_effect = yes
         eotg_aug_inherit_close_effect = yes
         ai_chance = {
@@ -2103,6 +2178,12 @@ eotg_aug_inherit.017 = {
         random = {
             chance = 25
             increase_wounds_effect = { REASON = attacked }
+            send_interface_toast = {    # W3 (event_quality_v1)
+                type = event_toast_effect_bad
+                title = eotg_aug_inherit.017.toast_c_hurt
+                left_icon = root
+                right_icon = scope:eotg_inh_heir
+            }
         }
         stress_impact = { base = medium_stress_impact_gain }
         eotg_aug_inherit_close_effect = yes
@@ -2352,6 +2433,7 @@ eotg_aug_inherit.020 = {
         name = eotg_aug_inherit.020.a
         trigger = { eotg_is_aug_tier3 = yes }
         eotg_aug_inherit_leaf_ruler_cascade_effect = yes
+        add_internal_flag = dangerous    # W3: starts the ruler's own cascade
         eotg_aug_stress_embrace_effect = yes
         eotg_aug_inherit_close_effect = yes
         ai_chance = {
@@ -2365,6 +2447,13 @@ eotg_aug_inherit.020 = {
     option = {
         name = eotg_aug_inherit.020.b
         eotg_aug_inherit_leaf_terms_effect = yes
+        scope:eotg_inh_heir ?= {
+            send_interface_message = {    # W3: the heir may be a player
+                type = send_interface_message
+                title = eotg_aug_inherit.020.msg_b
+                left_icon = root
+            }
+        }
         trigger_event = { id = eotg_aug_inherit.022  days = 365 }
         ai_chance = {
             base = 40
@@ -2671,6 +2760,8 @@ eotg_aug_inherit.024 = {
     option = {
         name = eotg_aug_inherit.024.a
         eotg_aug_inherit_leaf_kill_heir_effect = { REASON = execution }
+        add_internal_flag = dangerous    # W3: executes the heir
+        play_music_cue = mx_cue_death    # W3: execution (option cue, as vanilla feast.1502.a)
         eotg_aug_stress_murder_effect = yes
         eotg_aug_inherit_close_effect = yes
         ai_chance = {
@@ -2700,6 +2791,13 @@ eotg_aug_inherit.024 = {
         trait = forgiving
         scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = -10 } }
         eotg_aug_inherit_leaf_terms_effect = yes
+        scope:eotg_inh_heir ?= {
+            send_interface_message = {    # W3: the heir may be a player
+                type = send_interface_message
+                title = eotg_aug_inherit.024.msg_c
+                left_icon = root
+            }
+        }
         trigger_event = { id = eotg_aug_inherit.022  days = 365 }
         ai_chance = {
             base = 30

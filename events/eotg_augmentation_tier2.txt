@@ -667,6 +667,12 @@ eotg_aug_tier2.004 = {
                     min = -49
                 }
                 desc = eotg_aug_tier2.004.b.success
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_good
+                    title = eotg_aug_tier2.004.toast_b_success
+                    left_icon = root
+                    right_icon = scope:eotg_aug_spouse
+                }
                 scope:eotg_aug_spouse = {
                     add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
                 }
@@ -678,6 +684,12 @@ eotg_aug_tier2.004 = {
                     min = -49
                 }
                 desc = eotg_aug_tier2.004.b.failure
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_bad
+                    title = eotg_aug_tier2.004.toast_b_failure
+                    left_icon = root
+                    right_icon = scope:eotg_aug_spouse
+                }
                 scope:eotg_aug_spouse = {
                     add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 8 }
                 }
@@ -887,6 +899,12 @@ eotg_aug_tier2.005 = {
                     multiplier = 2.5
                 }
                 desc = eotg_aug_tier2.005.e.success
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_good
+                    title = eotg_aug_tier2.005.toast_e_success
+                    left_icon = root
+                    right_icon = scope:eotg_confessor
+                }
                 add_piety = 75
                 scope:eotg_confessor = {
                     add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
@@ -898,6 +916,12 @@ eotg_aug_tier2.005 = {
                     multiplier = -2.5
                 }
                 desc = eotg_aug_tier2.005.e.failure
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_bad
+                    title = eotg_aug_tier2.005.toast_e_failure
+                    left_icon = root
+                    right_icon = scope:eotg_confessor
+                }
                 add_piety = -50
                 scope:eotg_confessor = {
                     add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 8 }
@@ -1545,10 +1569,22 @@ eotg_aug_tier2.011 = {
                     }
                 }
                 desc = eotg_aug_tier2.011.c.success
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_good
+                    title = eotg_aug_tier2.011.toast_c_success
+                    left_icon = root
+                    right_icon = cp:councillor_steward
+                }
                 add_character_modifier = { modifier = eotg_mod_aug_optimised_levies_trimmed  years = 3 }
             }
             50 = {
                 desc = eotg_aug_tier2.011.c.failure
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_neutral
+                    title = eotg_aug_tier2.011.toast_c_failure
+                    left_icon = root
+                    right_icon = cp:councillor_steward
+                }
             }
         }
         ai_chance = {
@@ -1718,6 +1754,12 @@ eotg_aug_tier2.012 = {
                     min = -49
                 }
                 desc = eotg_aug_tier2.012.a.failure
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_bad
+                    title = eotg_aug_tier2.012.toast_a_failure
+                    left_icon = root
+                    right_icon = scope:eotg_flagged
+                }
                 hidden_effect = {
                     eotg_add_fracture_risk = { AMOUNT = 3 }
                 }
@@ -2021,11 +2063,21 @@ eotg_aug_tier2.013 = {
                     }
                 }
                 desc = eotg_aug_tier2.013.c.success
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_good
+                    title = eotg_aug_tier2.013.toast_c_success
+                    left_icon = root
+                }
                 save_scope_value_as = { name = eotg_vendor_return  value = flag:played }
                 trigger_event = { id = eotg_aug_tier2.014  days = { 30 60 } }
             }
             50 = {
                 desc = eotg_aug_tier2.013.c.failure
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_bad
+                    title = eotg_aug_tier2.013.toast_c_failure
+                    left_icon = root
+                }
             }
         }
         eotg_aug_stress_lie_effect = yes
@@ -2235,6 +2287,12 @@ eotg_aug_tier2.015 = {
                     multiplier = 2.5
                 }
                 desc = eotg_aug_tier2.015.a.success
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_good
+                    title = eotg_aug_tier2.015.toast_a_found
+                    left_icon = root
+                    right_icon = scope:eotg_tamperer
+                }
                 save_scope_value_as = { name = eotg_tamper_trace  value = flag:found }
             }
             50 = {
@@ -2243,6 +2301,12 @@ eotg_aug_tier2.015 = {
                     multiplier = -2.5
                 }
                 desc = eotg_aug_tier2.015.a.failure
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_bad
+                    title = eotg_aug_tier2.015.toast_a_lost
+                    left_icon = root
+                    right_icon = scope:eotg_tamperer
+                }
                 save_scope_value_as = { name = eotg_tamper_trace  value = flag:lost }
             }
         }
@@ -2305,6 +2369,12 @@ eotg_aug_tier2.015 = {
                     IMPRISONER = root
                 }
                 save_scope_value_as = { name = eotg_tamper_trace  value = flag:found }
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_good
+                    title = eotg_aug_tier2.015.toast_d_arrested
+                    left_icon = root
+                    right_icon = scope:eotg_tamperer
+                }
             }
         }
         trigger_event = { id = eotg_aug_tier2.016  days = { 20 40 } }
@@ -2427,6 +2497,8 @@ eotg_aug_tier2.016 = {
             scope:eotg_tamper_outcome = flag:culprit
             scope:eotg_tamperer = { is_imprisoned_by = root }
         }
+        add_internal_flag = dangerous    # W3: an execution (as fracture.020)
+        play_music_cue = mx_cue_death    # W3: execution (option cue, as vanilla feast.1502.a)
         scope:eotg_tamperer = {
             add_character_flag = { flag = eotg_flag_aug_breach_victim  days = 30 }
             death = {
@@ -2497,6 +2569,44 @@ eotg_aug_tier2.016 = {
             base = 30
             modifier = { add = 30  has_trait = diligent }
             modifier = { add = 10  has_trait = paranoid }
+        }
+    }
+
+    # W3: the rolled finding (immediate) surfaces once, whichever option is taken.
+    # "Nothing found" names the visible consequence only (the unit is not to
+    # be trusted), never the hidden risk.
+    after = {
+        if = {
+            limit = { scope:eotg_tamper_outcome = flag:culprit }
+            send_interface_toast = {
+                type = event_toast_effect_good
+                title = eotg_aug_tier2.016.toast_culprit
+                left_icon = root
+                right_icon = scope:eotg_tamperer
+            }
+        }
+        else_if = {
+            limit = { scope:eotg_tamper_outcome = flag:malfunction }
+            send_interface_toast = {
+                type = event_toast_effect_bad
+                title = eotg_aug_tier2.016.toast_malfunction
+                left_icon = root
+            }
+        }
+        else_if = {
+            limit = { scope:eotg_tamper_outcome = flag:risk }
+            send_interface_toast = {
+                type = event_toast_effect_bad
+                title = eotg_aug_tier2.016.toast_risk
+                left_icon = root
+            }
+        }
+        else = {
+            send_interface_toast = {
+                type = event_toast_effect_neutral
+                title = eotg_aug_tier2.016.toast_nothing
+                left_icon = root
+            }
         }
     }
 }
@@ -2806,6 +2916,11 @@ eotg_aug_tier2.019 = {
                     }
                 }
                 desc = eotg_aug_tier2.019.c.success
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_good
+                    title = eotg_aug_tier2.019.toast_c_success
+                    left_icon = root
+                }
                 add_gold = {
                     value = medium_gold_value
                     multiply = 0.5
@@ -2813,6 +2928,11 @@ eotg_aug_tier2.019 = {
             }
             50 = {
                 desc = eotg_aug_tier2.019.c.failure
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_neutral
+                    title = eotg_aug_tier2.019.toast_c_failure
+                    left_icon = root
+                }
             }
         }
         ai_chance = {
@@ -2866,12 +2986,22 @@ eotg_aug_tier2.019 = {
         random_list = {
             50 = {
                 desc = eotg_aug_tier2.019.f.success
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_good
+                    title = eotg_aug_tier2.019.toast_f_success
+                    left_icon = root
+                }
                 add_gold = medium_gold_value
                 add_prestige = 50
                 eotg_add_fracture_risk = { AMOUNT = 5 }
             }
             50 = {
                 desc = eotg_aug_tier2.019.f.failure
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_neutral
+                    title = eotg_aug_tier2.019.toast_f_failure
+                    left_icon = root
+                }
             }
         }
         stress_impact = {

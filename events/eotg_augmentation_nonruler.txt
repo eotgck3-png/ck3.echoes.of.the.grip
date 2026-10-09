@@ -71,6 +71,11 @@ eotg_aug_nr.001 = {
         trigger = { gold >= minor_gold_value }
         remove_short_term_gold = minor_gold_value
         scope:eotg_champion = {
+            send_interface_message = {    # W3: the champion may be a player
+                type = send_interface_message_good
+                title = eotg_aug_nr.001.msg_granted
+                left_icon = root
+            }
             eotg_aug_initiate_effect = yes
             eotg_add_fracture_risk = { AMOUNT = 0 }
         }
@@ -85,6 +90,11 @@ eotg_aug_nr.001 = {
     option = {
         name = eotg_aug_nr.001.b
         scope:eotg_champion = {
+            send_interface_message = {    # W3: the champion may be a player
+                type = send_interface_message_bad
+                title = eotg_aug_nr.001.msg_denied
+                left_icon = root
+            }
             add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
         }
         ai_chance = {
@@ -98,6 +108,11 @@ eotg_aug_nr.001 = {
     option = {
         name = eotg_aug_nr.001.c
         scope:eotg_champion = {
+            send_interface_message = {    # W3: the champion may be a player
+                type = send_interface_message
+                title = eotg_aug_nr.001.msg_granted_paid
+                left_icon = root
+            }
             eotg_aug_initiate_effect = yes
             eotg_add_fracture_risk = { AMOUNT = 0 }
             add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
@@ -119,6 +134,11 @@ eotg_aug_nr.001 = {
         trait = generous
         remove_short_term_gold = medium_gold_value
         scope:eotg_champion = {
+            send_interface_message = {    # W3: the champion may be a player
+                type = send_interface_message_good
+                title = eotg_aug_nr.001.msg_granted
+                left_icon = root
+            }
             eotg_aug_initiate_effect = yes
             eotg_add_fracture_risk = { AMOUNT = 0 }
             add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 3 }
@@ -140,6 +160,11 @@ eotg_aug_nr.001 = {
         trigger = { has_trait = paranoid }
         trait = paranoid
         scope:eotg_champion = {
+            send_interface_message = {    # W3: the champion may be a player
+                type = send_interface_message_bad
+                title = eotg_aug_nr.001.msg_suspicious
+                left_icon = root
+            }
             add_opinion = { modifier = eotg_opinion_aug_fear  target = root  years = 10 }
         }
         stress_impact = {
@@ -208,6 +233,11 @@ eotg_aug_nr.002 = {
         trigger = { gold >= minor_gold_value }
         remove_short_term_gold = minor_gold_value
         scope:eotg_champion = {
+            send_interface_message = {    # W3: the champion may be a player
+                type = send_interface_message_good
+                title = eotg_aug_nr.002.msg_a
+                left_icon = root
+            }
             add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
             eotg_add_fracture_risk = { AMOUNT = 3 }
         }
@@ -233,6 +263,11 @@ eotg_aug_nr.002 = {
         name = eotg_aug_nr.002.c
         add_prestige = 50
         scope:eotg_champion = {
+            send_interface_message = {    # W3: the champion may be a player
+                type = send_interface_message
+                title = eotg_aug_nr.002.msg_c
+                left_icon = root
+            }
             eotg_add_fracture_risk = { AMOUNT = 8 }
         }
         ai_chance = {
@@ -320,6 +355,11 @@ eotg_aug_nr.003 = {
         trigger = { gold >= minor_gold_value }
         remove_short_term_gold = minor_gold_value
         scope:eotg_champion = {
+            send_interface_message = {    # W3: the champion may be a player
+                type = send_interface_message_good
+                title = eotg_aug_nr.003.msg_a
+                left_icon = root
+            }
             eotg_add_fracture_risk = { AMOUNT = -10 }
         }
         ai_chance = {
@@ -334,6 +374,11 @@ eotg_aug_nr.003 = {
     option = {
         name = eotg_aug_nr.003.b
         scope:eotg_champion = {
+            send_interface_message = {    # W3: the champion may be a player
+                type = send_interface_message_bad
+                title = eotg_aug_nr.003.msg_b
+                left_icon = root
+            }
             add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 5 }
             eotg_add_fracture_risk = { AMOUNT = -5 }
         }
@@ -432,6 +477,7 @@ eotg_aug_nr.003 = {
     # 2026-10-05).
     option = {
         name = eotg_aug_nr.003.g
+        add_internal_flag = special    # W3: gated by a rare state (Seamless)
         trigger = {
             has_trait = eotg_total_integration
             gold >= minor_gold_value
@@ -578,6 +624,11 @@ eotg_aug_nr.004 = {
         trigger = { gold >= medium_gold_value }
         remove_short_term_gold = medium_gold_value
         scope:eotg_champion = {
+            send_interface_message = {    # W3: the champion may be a player
+                type = send_interface_message
+                title = eotg_aug_nr.004.msg_c
+                left_icon = root
+            }
             eotg_add_fracture_risk = { AMOUNT = -10 }
         }
         eotg_aug_stress_wound_effect = yes
@@ -660,6 +711,11 @@ eotg_aug_nr.004 = {
         trigger = { has_trait = forgiving }
         trait = forgiving
         scope:eotg_champion = {
+            send_interface_message = {    # W3: the champion may be a player
+                type = send_interface_message_good
+                title = eotg_aug_nr.004.msg_f
+                left_icon = root
+            }
             add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
             eotg_add_fracture_risk = { AMOUNT = 5 }
         }
@@ -877,10 +933,26 @@ eotg_aug_nr.006 = {
                     }
                     desc = eotg_aug_nr.006.b.death
                     death = { death_reason = death_treatment }
+                    root = {
+                        send_interface_toast = {    # W3 (event_quality_v1)
+                            type = event_toast_effect_bad
+                            title = eotg_aug_nr.006.toast_b_death
+                            left_icon = root
+                            right_icon = scope:eotg_champion
+                        }
+                    }
                 }
                 70 = {
                     desc = eotg_aug_nr.006.b.survive
                     eotg_aug_remove_all_effect = yes
+                    root = {
+                        send_interface_toast = {    # W3 (event_quality_v1)
+                            type = event_toast_effect_good
+                            title = eotg_aug_nr.006.toast_b_survive
+                            left_icon = root
+                            right_icon = scope:eotg_champion
+                        }
+                    }
                     random = {
                         chance = 30
                         if = {
@@ -903,6 +975,11 @@ eotg_aug_nr.006 = {
     option = {
         name = eotg_aug_nr.006.c
         scope:eotg_champion = {
+            send_interface_message = {    # W3: the champion may be a player
+                type = send_interface_message_good
+                title = eotg_aug_nr.006.msg_c
+                left_icon = root
+            }
             add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }
             eotg_add_fracture_risk = { AMOUNT = 5 }
         }
@@ -918,6 +995,8 @@ eotg_aug_nr.006 = {
     # 00_secret_effects.txt:433, before the death; QA round 2 M4).
     option = {
         name = eotg_aug_nr.006.d
+        add_internal_flag = dangerous    # W3: an execution
+        play_music_cue = mx_cue_death    # W3: execution after the cascade (option cue, as vanilla feast.1502.a)
         add_kinslayer_trait_or_nothing_effect = { VICTIM = scope:eotg_champion }
         scope:eotg_champion = {
             death = {

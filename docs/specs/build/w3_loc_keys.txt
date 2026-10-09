@@ -1,0 +1,364 @@
+# event_quality_v1 W3 (outcome surfacing): loc keys the built script references (eotg-scripter, 2026-10-09).
+# Spec: docs/specs/event_quality_v1.md W3 and §12 (voice, quotes). Owner of the text: eotg-localizer.
+# Target files (UTF-8 with BOM, existing files only): localization/english/eotg_augmentation_l_english.yml,
+#   eotg_aug_inherit_l_english.yml (inherit keys), eotg_frontier_l_english.yml (frontier keys). Each key is
+#   tagged with its file below.
+#
+# What these are. Every key is a TITLE only: a send_interface_toast (to root) or a send_interface_message
+#   (to the other character named in the note). No desc keys: the engine renders the title line alone.
+#   type: good / neutral / bad = event_toast_effect_* (toasts) or send_interface_message[_good|_bad] (messages).
+#   Icons are set in script (left = root unless noted; right = the other party). Do not repeat them in text.
+# Rules for the text (W3 + §12 + cybernetics rendering rules):
+#   - Say what happened, in a short line, the way vanilla toast titles do (e.g. "The Duel Is Won" style, or a
+#     short sentence). Canadian English, no dashes, no hardcoded names: use loc scopes.
+#   - NEVER a number, odds, chance, or the word "risk"; never name fracture risk, residue, Establishment or any
+#     hidden meter. Where a note says "hidden cost/gain", name only the visible symptom (the strain, the scar,
+#     the doubt), never the meter. QA greps these keys against the rendering rules.
+#   - Toasts to root: first person or neutral (§12.1 rules 1 and 5; short outcome lines may use "you" only
+#     where vanilla does). Messages to another character: second person is allowed ("Your liege ...").
+#   - Speech, if any, in unescaped straight double quotes (§12.2); never \" and never '...' speech.
+#   - The cybernetics register binds (cybernetics_v2.md §5: banned list, licensing never named, "self" not
+#     "humanity", no monotheistic invocations, the medieval-leak substitutions, no time-of-day words).
+#     The implant never speaks; it is never a second speaker (§12.1 rule 7).
+#   - Scopes: the event's saved scopes named in each note are available bare in loc, e.g.
+#     [eotg_heir.GetFirstName]; ROOT is the receiver. Never [scope:x...]. If unsure a scope survives into the
+#     toast, write the line without it: the right icon already shows who.
+# Key form: <event_id>.toast_<option>_<outcome>, <event_id>.toast_<outcome> (an outcome rolled in immediate,
+#   surfaced on the resolving option), <event_id>.msg_<...> (messages). Frontier stage toasts follow the file's
+#   existing eotg_frontier_toast_* form (they live in a scripted effect, not an event).
+# Kingpin (events/eotg_augmentation_kingpin.txt) is DEFERRED from this pass (batch B in flight); its W3 keys
+#   will be listed by the Kingpin batch B scripter.
+# Not new: existing toasts kept as they were (eotg_aug_tier2.012.a.success_true/_false, eotg_aug_tier3.014.b.toast_*,
+#   eotg_aug_tier3.006.e.clean/strained, the *.override_tt family, eotg_aug_forget_relation_toast, ...).
+# Total keys: 171 (toasts 147, messages 24)
+
+## eotg_frontier_milestone_toast_effect  (common/scripted_effects/eotg_frontier_effects.txt -> eotg_frontier_l_english.yml)
+eotg_frontier_toast_milestone_2    [TOAST good; left=this right=scope:eotg_frontier_milestone_county]  the Frontier project reached its second stage (the last before completion). Right icon: the Region.
+eotg_frontier_toast_milestone_1    [TOAST good; left=this right=scope:eotg_frontier_milestone_county]  the Frontier project reached its first stage (Establishment passed the first milestone); name the stage in words, never the number. Right icon: the Region (county title).
+
+## eotg_aug_countdown.006  (events/eotg_augmentation_countdown.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_countdown.006.toast    [TOAST good; left=root]  a: the anomalies have stopped; the Countdown is over, for now.
+eotg_aug_countdown.006.toast_b    [TOAST neutral; left=root]  b [paranoid]: the anomalies have stopped, and I do not believe it.
+
+## eotg_aug_end.011  (events/eotg_augmentation_endgame.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_end.011.toast_a_second    [TOAST good; left=root right=scope:eotg_hire_second]  a: a second hire answered the call and joined the emptied court (scope eotg_hire_second).
+
+## eotg_aug_end.020  (events/eotg_augmentation_endgame.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_end.020.msg_warden    [MSG  good; left=root]  MESSAGE to the appointed warden (spouse, heir or chancellor), who may be a player: the ruler has named you warden of the realm (a regency). Second person allowed (message).
+
+## eotg_aug_end.031  (events/eotg_augmentation_endgame.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_end.031.toast_a_success    [TOAST good; left=root right=scope:eotg_old_ruler]  a: the household is run well; the old ruler (eotg_old_ruler) is kept comfortable and steadier.
+eotg_aug_end.031.toast_a_failure    [TOAST neutral; left=root right=scope:eotg_old_ruler]  a: the household is run badly; the old ruler is kept, but not well.
+
+## eotg_fracture.003  (events/eotg_augmentation_fracture.txt -> eotg_augmentation_l_english.yml)
+eotg_fracture.003.toast_f_wounded    [TOAST bad; left=root]  f [flagellant]: the penance drew blood; a self-inflicted wound.
+
+## eotg_fracture.004  (events/eotg_augmentation_fracture.txt -> eotg_augmentation_l_english.yml)
+eotg_fracture.004.toast_b_depressed    [TOAST bad; left=root]  b: the forgetting did not hold; a low, grey weight settles in (gained depressed).
+
+## eotg_fracture.005  (events/eotg_augmentation_fracture.txt -> eotg_augmentation_l_english.yml)
+eotg_fracture.005.msg_c_callous    [MSG  bad; left=root right=scope:eotg_watching_heir]  MESSAGE to the watching heir (eotg_watching_heir): what they saw hardened them (they gained callous). Second person allowed.
+eotg_fracture.005.toast_c_callous    [TOAST neutral; left=root right=scope:eotg_watching_heir]  c: the heir has hardened after what they watched (heir gained callous). Right icon: the heir.
+eotg_fracture.005.toast_e_believed    [TOAST good; left=root right=scope:eotg_watching_heir]  e [deceitful]: the heir believed the seizure story.
+eotg_fracture.005.toast_e_doubted    [TOAST bad; left=root right=scope:eotg_watching_heir]  e [deceitful]: the heir did not believe it.
+
+## eotg_fracture.006  (events/eotg_augmentation_fracture.txt -> eotg_augmentation_l_english.yml)
+eotg_fracture.006.toast_c_crushed    [TOAST bad; left=root]  c "Let the implant decide": it chose to crush the warrant; the vassal who filed it is jailed, dread and tyranny rise.
+eotg_fracture.006.toast_c_factions    [TOAST bad; left=root]  c "Let the implant decide": it pushed the factions to their demand.
+eotg_fracture.006.toast_e_win    [TOAST good; left=root right=scope:eotg_warrant_vassal]  e [gregarious]: the warrant vassal was won over at my table; the factions cool.
+eotg_fracture.006.toast_e_lose    [TOAST bad; left=root right=scope:eotg_warrant_vassal]  e [gregarious]: the dinner went badly; the factions harden.
+
+## eotg_fracture.007  (events/eotg_augmentation_fracture.txt -> eotg_augmentation_l_english.yml)
+eotg_fracture.007.toast_a_success    [TOAST good; left=root]  a: I got the clarity down before it went (gold from it).
+eotg_fracture.007.toast_a_failure    [TOAST bad; left=root]  a: it went before I could write it down.
+
+## eotg_fracture.009  (events/eotg_augmentation_fracture.txt -> eotg_augmentation_l_english.yml)
+eotg_fracture.009.toast_a_nothing    [TOAST neutral; left=root]  a: the search for the lost hours found nothing.
+eotg_fracture.009.toast_a_signed    [TOAST bad; left=root]  a: the lost hours had a cost: something was signed and paid for.
+eotg_fracture.009.toast_a_wounded    [TOAST bad; left=root right=scope:eotg_victim]  a: the lost hours had a victim (eotg_victim was hurt).
+
+## eotg_fracture.011  (events/eotg_augmentation_fracture.txt -> eotg_augmentation_l_english.yml)
+eotg_fracture.011.toast_a_doubted    [TOAST bad; left=root right=scope:eotg_witness]  a "I was rehearsing": the witness (eotg_witness) did not believe me.
+
+## eotg_fracture.013  (events/eotg_augmentation_fracture.txt -> eotg_augmentation_l_english.yml)
+eotg_fracture.013.toast_b_right    [TOAST good; left=root]  b: acting on the premonition paid off; it was right.
+eotg_fracture.013.toast_b_wrong    [TOAST bad; left=root]  b: acting on the premonition was a mistake; it was wrong.
+eotg_fracture.013.toast_d_won    [TOAST good; left=root]  d [eccentric]: the treasury bet on the premonition came good.
+eotg_fracture.013.toast_d_lost    [TOAST bad; left=root]  d [eccentric]: the treasury bet on the premonition was lost.
+
+## eotg_fracture.014  (events/eotg_augmentation_fracture.txt -> eotg_augmentation_l_english.yml)
+eotg_fracture.014.toast_b_fell    [TOAST bad; left=root]  b: I walked into the wall where the overlay drew a door, and fell (wounded).
+
+## eotg_fracture.017  (events/eotg_augmentation_fracture.txt -> eotg_augmentation_l_english.yml)
+eotg_fracture.017.toast_c_partial    [TOAST good; left=root]  c: the negotiation won partial terms (an intrigue lesson).
+eotg_fracture.017.toast_c_failed    [TOAST bad; left=root]  c: the negotiation failed; nothing was won.
+
+## eotg_fracture.018  (events/eotg_augmentation_fracture.txt -> eotg_augmentation_l_english.yml)
+eotg_fracture.018.toast_b_slipped    [TOAST bad; left=root]  b "Hold on to it": it slipped anyway; part of who I was has changed (personality scrambled).
+eotg_fracture.018.toast_d_slipped    [TOAST bad; left=root]  d [stubborn] "No.": it slipped anyway; part of who I was has changed.
+
+## eotg_fracture.020  (events/eotg_augmentation_fracture.txt -> eotg_augmentation_l_english.yml)
+eotg_fracture.020.toast_true    [TOAST neutral; left=root right=scope:eotg_accused]  resolving option: the accusation was true; the implant was right this time. Neutral, ominous. Right icon: the accused.
+eotg_fracture.020.toast_false_spared    [TOAST good; left=root right=scope:eotg_accused]  resolving option: the accusation was false, and I had only watched or spared them; no harm done.
+eotg_fracture.020.toast_false_punished    [TOAST bad; left=root right=scope:eotg_accused]  resolving option: the accusation was false, and I had acted on it; an innocent paid.
+
+## eotg_fracture.021  (events/eotg_augmentation_fracture.txt -> eotg_augmentation_l_english.yml)
+eotg_fracture.021.toast_a_found    [TOAST good; left=root right=scope:eotg_missing]  a: the missing courtier was found alive and brought back (eotg_missing).
+eotg_fracture.021.toast_a_dead    [TOAST bad; left=root]  a: the search found the missing courtier dead.
+
+## eotg_fracture.024  (events/eotg_augmentation_fracture.txt -> eotg_augmentation_l_english.yml)
+eotg_fracture.024.toast_b_admit    [TOAST good; left=root right=scope:eotg_changed]  b: confronted, the changed courtier (eotg_changed) admitted it.
+eotg_fracture.024.toast_b_deny    [TOAST bad; left=root right=scope:eotg_changed]  b: confronted, the changed courtier denied it.
+
+## eotg_fracture.025  (events/eotg_augmentation_fracture.txt -> eotg_augmentation_l_english.yml)
+eotg_fracture.025.toast_b_warrant    [TOAST bad; left=root right=scope:eotg_keeper]  b: the would-be keeper (eotg_keeper) answered by raising a warrant against me.
+
+## eotg_fracture.026  (events/eotg_augmentation_fracture.txt -> eotg_augmentation_l_english.yml)
+eotg_fracture.026.toast_a_success    [TOAST good; left=root]  a "Ask for help": they understood; help was arranged (a regency or a withdrawal).
+eotg_fracture.026.toast_a_failure    [TOAST bad; left=root]  a "Ask for help": I could not make them understand; I withdraw alone.
+
+## eotg_fracture.028  (events/eotg_augmentation_fracture.txt -> eotg_augmentation_l_english.yml)
+eotg_fracture.028.toast    [TOAST bad; left=root]  notification: the implant agreed terms on my behalf, with itself (the override of fracture.017 b/e). Name the visible consequence only.
+
+## eotg_fracture.029  (events/eotg_augmentation_fracture.txt -> eotg_augmentation_l_english.yml)
+eotg_fracture.029.toast    [TOAST neutral; left=root]  notification: the Cascade passed, and left people hurt.
+
+## eotg_aug_heir.004  (events/eotg_augmentation_heir.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_heir.004.toast_ally    [TOAST good; left=root right=scope:eotg_heir]  resolving option: the heir (eotg_heir) chose to stand with me.
+eotg_aug_heir.004.toast_usurp    [TOAST bad; left=root right=scope:eotg_heir]  resolving option: the heir moved to take the seat from me.
+eotg_aug_heir.004.toast_kill_failed    [TOAST bad; left=root right=scope:eotg_heir]  resolving option: the heir tried to kill me, failed, and is held.
+eotg_aug_heir.004.msg_kill_forgiven    [MSG  good; left=root]  MESSAGE to the heir: after the failed attempt, the ruler forgave you. Second person allowed.
+
+## eotg_aug_inherit.002  (events/eotg_augmentation_inherit.txt -> eotg_aug_inherit_l_english.yml)
+eotg_aug_inherit.002.toast_p_rage_hurt    [TOAST bad; left=root right=scope:eotg_inh_heir]  p_rage: sitting with the heir through the rage, I was hurt (right icon: eotg_inh_heir).
+
+## eotg_aug_inherit.003  (events/eotg_augmentation_inherit.txt -> eotg_aug_inherit_l_english.yml)
+eotg_aug_inherit.003.msg_b_ref    [MSG  bad; left=root]  MESSAGE to the heir (eotg_inh_heir): having refused the physicians, you are sent away from court (exile).
+
+## eotg_aug_inherit.006  (events/eotg_augmentation_inherit.txt -> eotg_aug_inherit_l_english.yml)
+eotg_aug_inherit.006.msg_a    [MSG  neutral; left=root]  MESSAGE to the heir: the terms are agreed and bind you (kept terms).
+
+## eotg_aug_inherit.007  (events/eotg_augmentation_inherit.txt -> eotg_aug_inherit_l_english.yml)
+eotg_aug_inherit.007.msg_a    [MSG  neutral; left=root]  MESSAGE to the heir: your renunciation of the succession is accepted.
+eotg_aug_inherit.007.msg_b    [MSG  neutral; left=root]  MESSAGE to the heir: terms are set instead (after you talked).
+
+## eotg_aug_inherit.011  (events/eotg_augmentation_inherit.txt -> eotg_aug_inherit_l_english.yml)
+eotg_aug_inherit.011.msg_a    [MSG  bad; left=root]  MESSAGE to the heir: you are given passage out (exile, plain).
+eotg_aug_inherit.011.msg_b    [MSG  bad; left=root]  MESSAGE to the heir: you are given passage out, with credit to start again (exile, credit).
+eotg_aug_inherit.011.msg_c    [MSG  bad; left=root]  MESSAGE to the heir: you are sent out and struck from the line (exile and disinherit).
+
+## eotg_aug_inherit.013  (events/eotg_augmentation_inherit.txt -> eotg_aug_inherit_l_english.yml)
+eotg_aug_inherit.013.msg    [MSG  bad; left=root]  MESSAGE to the heir: you are struck from the line of succession.
+eotg_aug_inherit.013.msg_la    [MSG  bad; left=root]  MESSAGE to the heir: having walked out, you are let go (exile).
+
+## eotg_aug_inherit.017  (events/eotg_augmentation_inherit.txt -> eotg_aug_inherit_l_english.yml)
+eotg_aug_inherit.017.toast_c_hurt    [TOAST bad; left=root right=scope:eotg_inh_heir]  c [compassionate]: holding the heir through the shaking, I was hurt.
+
+## eotg_aug_inherit.020  (events/eotg_augmentation_inherit.txt -> eotg_aug_inherit_l_english.yml)
+eotg_aug_inherit.020.msg_b    [MSG  neutral; left=root]  MESSAGE to the heir: terms are agreed between two machines (kept terms).
+
+## eotg_aug_inherit.024  (events/eotg_augmentation_inherit.txt -> eotg_aug_inherit_l_english.yml)
+eotg_aug_inherit.024.msg_c    [MSG  neutral; left=root]  MESSAGE to the heir: after the failed attempt, terms are set instead of punishment.
+
+## eotg_aug_init.001  (events/eotg_augmentation_initiation.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_init.001.toast_b_eased    [TOAST good; left=root]  b "Find another way": conventional care eased the wound one step.
+
+## eotg_aug_init.007  (events/eotg_augmentation_initiation.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_init.007.toast_a_success    [TOAST good; left=root]  a: the bridge work went in cleanly; I did everything the surgeons asked.
+eotg_aug_init.007.toast_a_failure    [TOAST bad; left=root]  a: the bridge work went in roughly.
+
+## eotg_aug_init.008  (events/eotg_augmentation_initiation.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_init.008.toast_success    [TOAST good; left=root]  resolving option: the neural bridge took.
+eotg_aug_init.008.toast_partial    [TOAST neutral; left=root]  resolving option: the bridge took only in part.
+eotg_aug_init.008.toast_complication    [TOAST bad; left=root]  resolving option: the bridge brought complications and a wound.
+eotg_aug_init.008.toast_b_success    [TOAST good; left=root]  b "Again. Recalibrate it.": the recalibration worked; the bridge took.
+eotg_aug_init.008.toast_b_failure    [TOAST bad; left=root]  b: the recalibration did not take (hidden cost; name the symptom, never "risk").
+
+## eotg_aug_init.010  (events/eotg_augmentation_initiation.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_init.010.toast_a_success    [TOAST good; left=root]  a: I picked a steady pair of hands in the back streets.
+eotg_aug_init.010.toast_a_failure    [TOAST bad; left=root]  a: I picked badly; the hands were not steady.
+
+## eotg_aug_init.011  (events/eotg_augmentation_initiation.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_init.011.toast_c_ill    [TOAST bad; left=root]  c "Sweat it out": the infection became an illness (gained ill).
+eotg_aug_init.011.toast_f_ill    [TOAST bad; left=root]  f [lazy]: the bandaged infection became an illness (gained ill).
+
+## eotg_aug_init.012  (events/eotg_augmentation_initiation.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_init.012.toast_lost    [TOAST bad; left=root]  resolving option: the body threw the implant out; I am out of the system, and wounded.
+eotg_aug_init.012.toast_saved    [TOAST neutral; left=root]  resolving option: the implant was saved, at a cost (hidden; name the visible state only).
+
+## eotg_aug_init.014  (events/eotg_augmentation_initiation.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_init.014.toast_c_saved    [TOAST good; left=root right=scope:eotg_sick_child]  c: the experimental procedure saved the child (eotg_sick_child).
+eotg_aug_init.014.toast_c_died    [TOAST bad; left=root right=scope:eotg_sick_child]  c: the child died of the treatment.
+
+## eotg_aug_init.016  (events/eotg_augmentation_initiation.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_init.016.toast_d_success    [TOAST good; left=root right=scope:eotg_rival]  d [brave]: I beat my rival (eotg_rival) as I am, without the machine.
+eotg_aug_init.016.toast_d_failure    [TOAST bad; left=root right=scope:eotg_rival]  d [brave]: I lost to my rival, and was hurt.
+
+## eotg_aug_nr.001  (events/eotg_augmentation_nonruler.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_nr.001.msg_granted    [MSG  good; left=root]  MESSAGE to the champion (eotg_champion), who may be a player: your liege granted the implant, at the liege's expense (a, d).
+eotg_aug_nr.001.msg_denied    [MSG  bad; left=root]  MESSAGE to the champion: your liege refused the implant (b) or turned suspicious of you (e).
+eotg_aug_nr.001.msg_granted_paid    [MSG  neutral; left=root]  MESSAGE to the champion: granted, if you pay for it yourself (c).
+
+## eotg_aug_nr.002  (events/eotg_augmentation_nonruler.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_nr.002.msg_a    [MSG  good; left=root]  MESSAGE to the champion: your liege rewarded your new edge.
+eotg_aug_nr.002.msg_c    [MSG  neutral; left=root]  MESSAGE to the champion: you are ordered to the front line, every battle.
+
+## eotg_aug_nr.003  (events/eotg_augmentation_nonruler.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_nr.003.msg_a    [MSG  good; left=root]  MESSAGE to the champion: your liege is paying for your maintenance.
+eotg_aug_nr.003.msg_b    [MSG  bad; left=root]  MESSAGE to the champion: you are relieved of duty.
+
+## eotg_aug_nr.004  (events/eotg_augmentation_nonruler.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_nr.004.msg_c    [MSG  neutral; left=root]  MESSAGE to the champion: after the incident you are restrained and treated.
+eotg_aug_nr.004.msg_f    [MSG  good; left=root]  MESSAGE to the champion: your liege let the incident go.
+
+## eotg_aug_nr.006  (events/eotg_augmentation_nonruler.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_nr.006.toast_b_death    [TOAST bad; left=root right=scope:eotg_champion]  b "Cut it out of them": the champion (eotg_champion) died on the table.
+eotg_aug_nr.006.toast_b_survive    [TOAST good; left=root right=scope:eotg_champion]  b: the champion survived the removal; the hardware is out.
+eotg_aug_nr.006.msg_c    [MSG  good; left=root]  MESSAGE to the broken champion: your liege chose to protect you.
+
+## eotg_aug_patron.002  (events/eotg_augmentation_patron.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_patron.002.toast_c_success    [TOAST good; left=root right=scope:eotg_patron_envoy]  c "Renegotiate": the envoy (eotg_patron_envoy) accepted the smaller payment.
+eotg_aug_patron.002.toast_c_failure    [TOAST bad; left=root right=scope:eotg_patron_envoy]  c: the renegotiation failed; the full bill was paid.
+eotg_aug_patron.002.toast_e_success    [TOAST good; left=root]  e [honest]: honest terms were granted; half the bill.
+eotg_aug_patron.002.toast_e_failure    [TOAST bad; left=root]  e [honest]: the patron took offence (a grievance).
+
+## eotg_aug_patron.006  (events/eotg_augmentation_patron.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_patron.006.toast_d_success    [TOAST good; left=root]  d [deceitful]: the patron was sold to a rival syndicate; a clean exit and a fee.
+eotg_aug_patron.006.toast_d_failure    [TOAST bad; left=root]  d [deceitful]: the sale fell through and became a betrayal.
+
+## eotg_aug_patron.008  (events/eotg_augmentation_patron.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_patron.008.toast_e_success    [TOAST good; left=root]  e [just]: my own court voided the contract; the debt is over.
+eotg_aug_patron.008.toast_e_failure    [TOAST bad; left=root]  e [just]: my court upheld the contract; the patron has a grievance.
+
+## eotg_aug_patron.009  (events/eotg_augmentation_patron.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_patron.009.toast_e_success    [TOAST good; left=root right=scope:eotg_patron_collector]  e [wrathful]: the collector (eotg_patron_collector) and the paper were seized.
+eotg_aug_patron.009.toast_e_failure    [TOAST bad; left=root right=scope:eotg_patron_collector]  e [wrathful]: the seizure was stopped; the collector stays and collects.
+
+## eotg_aug_proc.002  (events/eotg_augmentation_procedures.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_proc.002.toast_c_ill    [TOAST bad; left=root]  c "Sweat it out": the infection became an illness (gained ill).
+
+## eotg_aug_tier1.002  (events/eotg_augmentation_tier1.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_tier1.002.toast_a_success    [TOAST good; left=root]  a: the clinic fitting went cleanly.
+eotg_aug_tier1.002.toast_a_failure    [TOAST neutral; left=root]  a: the fitting went in, but not cleanly.
+
+## eotg_aug_tier1.006  (events/eotg_augmentation_tier1.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_tier1.006.toast_d_wounded    [TOAST bad; left=root]  d [brave] "Again.": I pushed into the next fight and was wounded.
+
+## eotg_aug_tier1.007  (events/eotg_augmentation_tier1.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_tier1.007.toast_c_calibrated    [TOAST good; left=root]  c "Do it myself": the self-calibration worked.
+eotg_aug_tier1.007.toast_c_infected    [TOAST bad; left=root]  c: the self-calibration left an infection.
+
+## eotg_aug_tier1.009  (events/eotg_augmentation_tier1.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_tier1.009.toast_a_admired    [TOAST good; left=root right=scope:eotg_partner]  a: my partner (eotg_partner) touched the implant and was moved by it.
+eotg_aug_tier1.009.toast_a_uneasy    [TOAST bad; left=root right=scope:eotg_partner]  a: my partner touched it and pulled back, uneasy.
+
+## eotg_aug_tier1.010  (events/eotg_augmentation_tier1.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_tier1.010.toast_a_partner_hurt    [TOAST bad; left=root right=scope:eotg_sparring_partner]  a "Let the implant fight": it hurt my sparring partner (eotg_sparring_partner).
+eotg_aug_tier1.010.toast_d_wounded    [TOAST bad; left=root]  d [brave] "Three at once": I was wounded.
+eotg_aug_tier1.010.toast_f_success    [TOAST good; left=root right=scope:eotg_sparring_partner]  f [blademaster]: I beat my sparring partner on my own skill.
+eotg_aug_tier1.010.toast_f_failure    [TOAST bad; left=root right=scope:eotg_sparring_partner]  f [blademaster]: I lost the bout; the challenge will come.
+
+## eotg_aug_tier1.013  (events/eotg_augmentation_tier1.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_tier1.013.toast_b_success    [TOAST good; left=root]  b "Keep working": I worked through the fever.
+eotg_aug_tier1.013.toast_b_failure    [TOAST bad; left=root]  b: the fever got the better of me (hidden cost; name the strain only, never "risk").
+
+## eotg_aug_tier1.015  (events/eotg_augmentation_tier1.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_tier1.015.toast_recovered    [TOAST good; left=root]  resolving option: the body accepted the implant; I recovered.
+eotg_aug_tier1.015.toast_scarred    [TOAST bad; left=root]  resolving option: I recovered, scarred (hidden cost; name the scar only).
+eotg_aug_tier1.015.toast_failed    [TOAST bad; left=root]  resolving option: the implant failed and is out; I am wounded.
+
+## eotg_aug_tier1.016  (events/eotg_augmentation_tier1.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_tier1.016.toast_c_success    [TOAST good; left=scope:eotg_champion right=scope:eotg_challenger]  c "Send my champion": my champion (left icon, eotg_champion) beat the challenger (eotg_challenger).
+eotg_aug_tier1.016.toast_c_failure    [TOAST bad; left=scope:eotg_champion right=scope:eotg_challenger]  c: my champion lost to the challenger.
+
+## eotg_aug_tier1.017  (events/eotg_augmentation_tier1.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_tier1.017.toast_victory    [TOAST good; left=root right=scope:eotg_challenger]  resolving option: I won the bout (eotg_challenger).
+eotg_aug_tier1.017.toast_narrow    [TOAST neutral; left=root right=scope:eotg_challenger]  resolving option: I won, narrowly, and the implant took over to do it. Never a number.
+eotg_aug_tier1.017.toast_defeat    [TOAST bad; left=root right=scope:eotg_challenger]  resolving option: I lost the bout.
+eotg_aug_tier1.017.toast_severe    [TOAST bad; left=root right=scope:eotg_challenger]  resolving option: I lost the bout and was badly hurt.
+
+## eotg_aug_tier1.018  (events/eotg_augmentation_tier1.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_tier1.018.toast_c_success    [TOAST good; left=root right=scope:eotg_copycat]  c "Help them, for a price": the favour stuck; the copycat (eotg_copycat) owes me.
+eotg_aug_tier1.018.toast_c_failure    [TOAST bad; left=root right=scope:eotg_copycat]  c: the copycat saw through it and is uneasy with me.
+
+## eotg_aug_tier2.004  (events/eotg_augmentation_tier2.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_tier2.004.toast_b_success    [TOAST good; left=root right=scope:eotg_aug_spouse]  b "I am the same person": my spouse (eotg_aug_spouse) believed it.
+eotg_aug_tier2.004.toast_b_failure    [TOAST bad; left=root right=scope:eotg_aug_spouse]  b: my spouse saw through it and is disgusted.
+
+## eotg_aug_tier2.005  (events/eotg_augmentation_tier2.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_tier2.005.toast_e_success    [TOAST good; left=root right=scope:eotg_confessor]  e [theologian]: I won the argument with the confessor (eotg_confessor).
+eotg_aug_tier2.005.toast_e_failure    [TOAST bad; left=root right=scope:eotg_confessor]  e [theologian]: I lost the argument with the confessor.
+
+## eotg_aug_tier2.011  (events/eotg_augmentation_tier2.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_tier2.011.toast_c_success    [TOAST good; left=root right=cp:councillor_steward]  c: the steward (right icon) found the arithmetic was cruel and trimmed it.
+eotg_aug_tier2.011.toast_c_failure    [TOAST neutral; left=root right=cp:councillor_steward]  c: the steward found nothing wrong with the arithmetic.
+
+## eotg_aug_tier2.012  (events/eotg_augmentation_tier2.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_tier2.012.toast_a_failure    [TOAST bad; left=root right=scope:eotg_flagged]  a "Investigate quietly": I learned nothing about the spymaster (eotg_flagged). The success toasts already exist (.a.success_true/_false).
+
+## eotg_aug_tier2.013  (events/eotg_augmentation_tier2.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_tier2.013.toast_c_success    [TOAST good; left=root]  c "Play them against each other": it worked; one vendor will come back.
+eotg_aug_tier2.013.toast_c_failure    [TOAST bad; left=root]  c: both vendors saw through it.
+
+## eotg_aug_tier2.015  (events/eotg_augmentation_tier2.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_tier2.015.toast_a_found    [TOAST good; left=root right=scope:eotg_tamperer]  a "Trace it": I found a trail to the tamperer (eotg_tamperer).
+eotg_aug_tier2.015.toast_a_lost    [TOAST bad; left=root right=scope:eotg_tamperer]  a: the trail went cold.
+eotg_aug_tier2.015.toast_d_arrested    [TOAST good; left=root right=scope:eotg_tamperer]  d [paranoid]: the lockdown caught the tamperer; they are arrested.
+
+## eotg_aug_tier2.016  (events/eotg_augmentation_tier2.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_tier2.016.toast_culprit    [TOAST good; left=root right=scope:eotg_tamperer]  resolving option: the culprit is named (eotg_tamperer).
+eotg_aug_tier2.016.toast_malfunction    [TOAST bad; left=root]  resolving option: it was tampering after all; the implant runs badly for a while.
+eotg_aug_tier2.016.toast_risk    [TOAST bad; left=root]  resolving option: the hardware was altered and cannot be restored (hidden cost; describe the symptom, never "risk").
+eotg_aug_tier2.016.toast_nothing    [TOAST neutral; left=root]  resolving option: nothing was found, and the unit can no longer be trusted (hidden cost; name the doubt only).
+
+## eotg_aug_tier2.019  (events/eotg_augmentation_tier2.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_tier2.019.toast_c_success    [TOAST good; left=root]  c "Find a third way": it worked; some of the money comes in.
+eotg_aug_tier2.019.toast_c_failure    [TOAST neutral; left=root]  c: there was no third way.
+eotg_aug_tier2.019.toast_f_success    [TOAST good; left=root]  f [just]: the council approved; the decision is shared.
+eotg_aug_tier2.019.toast_f_failure    [TOAST neutral; left=root]  f [just]: the council refused.
+
+## eotg_aug_tier3.004  (events/eotg_augmentation_tier3.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_tier3.004.toast_a_paranoid    [TOAST bad; left=root]  a "Trust the analysis": I have started to see threats everywhere (gained paranoid).
+
+## eotg_aug_tier3.005  (events/eotg_augmentation_tier3.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_tier3.005.toast_d_wounded    [TOAST bad; left=root]  d [brave] "Lead the charge myself": I was wounded.
+
+## eotg_aug_tier3.007  (events/eotg_augmentation_tier3.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_tier3.007.toast_c_success    [TOAST good; left=root right=scope:eotg_other_machine]  c "Compare calibrations": I learned from the other machine (eotg_other_machine).
+eotg_aug_tier3.007.toast_c_failure    [TOAST bad; left=root right=scope:eotg_other_machine]  c: the other machine learned from me.
+
+## eotg_aug_tier3.008  (events/eotg_augmentation_tier3.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_tier3.008.toast_e_fixed    [TOAST good; left=root]  e [impatient] "Fix it myself, now": the fix held (hidden gain; name the steadiness only).
+eotg_aug_tier3.008.toast_e_burned    [TOAST bad; left=root]  e: the fix went wrong and burned me.
+
+## eotg_aug_tier3.015  (events/eotg_augmentation_tier3.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_tier3.015.toast_c_success    [TOAST good; left=root right=scope:eotg_other_machine]  c "Settle it": I beat the other machine (eotg_other_machine) and hurt them.
+eotg_aug_tier3.015.toast_c_failure    [TOAST bad; left=root right=scope:eotg_other_machine]  c: the other machine beat me and hurt me.
+eotg_aug_tier3.015.toast_e_success    [TOAST good; left=root right=scope:eotg_other_machine]  e [vengeful] "End it": the other machine is dead.
+eotg_aug_tier3.015.toast_e_failure    [TOAST bad; left=root right=scope:eotg_other_machine]  e [vengeful]: the attempt was exposed; they know it was me.
+
+## eotg_aug_tier3.016  (events/eotg_augmentation_tier3.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_tier3.016.toast_c_success    [TOAST good; left=root]  c "Ride it": I rode the bleed and came out sharper.
+eotg_aug_tier3.016.toast_c_failure    [TOAST bad; left=root]  c: the bleed rode me (hidden strain; name the strain only).
+
+## eotg_aug_tier3.017  (events/eotg_augmentation_tier3.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_tier3.017.toast_c_success    [TOAST good; left=root]  c "Investigate in secret": I learned the truth of the plot. Do not say which truth (tier3.018 reveals it).
+eotg_aug_tier3.017.toast_c_failure    [TOAST neutral; left=root]  c: the investigation learned nothing.
+
+## eotg_aug_tier3.019  (events/eotg_augmentation_tier3.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_tier3.019.toast_b_success    [TOAST good; left=root]  b "Keep everything in my own hands": I kept up (a learning lesson).
+eotg_aug_tier3.019.toast_b_failure    [TOAST bad; left=root]  b: I could not keep up; it costs me.
+
+## eotg_aug_tier3.022  (events/eotg_augmentation_tier3.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_tier3.022.toast_cascade    [TOAST bad; left=root]  resolving option: the bleed tipped into an early cascade (Neurofracture begins).
+eotg_aug_tier3.022.toast_scarring    [TOAST bad; left=root]  resolving option: the bleed left a scar and an overheated implant.
+eotg_aug_tier3.022.toast_insight    [TOAST good; left=root]  resolving option: the bleed left insight (lessons).
+
+## eotg_aug_tier3.023  (events/eotg_augmentation_tier3.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_tier3.023.toast_a_success    [TOAST good; left=root]  a "Follow it": I carried the campaign plan out well.
+eotg_aug_tier3.023.toast_a_failure    [TOAST bad; left=root]  a: I carried the plan out badly.
+
+## eotg_aug_tier3.024  (events/eotg_augmentation_tier3.txt -> eotg_augmentation_l_english.yml)
+eotg_aug_tier3.024.toast_decisive    [TOAST good; left=root]  resolving option: the campaign was decisive, as foreseen.
+eotg_aug_tier3.024.toast_overreach    [TOAST bad; left=root]  resolving option: the campaign overreached; I was wounded.
+eotg_aug_tier3.024.toast_inconclusive    [TOAST neutral; left=root]  resolving option: the campaign ended inconclusively.

@@ -241,6 +241,7 @@ eotg_aug_act.001 = {
     # the host recurs and residue only runs 0-3).
     option = {
         name = eotg_aug_act.001.f
+        add_internal_flag = special    # W3: gated by a rare state (Seamless)
         trigger = { has_trait = eotg_total_integration }
         trait = eotg_total_integration
         involved_activity = {
@@ -455,6 +456,7 @@ eotg_aug_act.002 = {
     # rules' tolerance, so there is no "seen" roll.
     option = {
         name = eotg_aug_act.002.g
+        add_internal_flag = special    # W3: gated by a rare state (Neurofractured)
         trigger = {
             has_trait = eotg_neurofractured
             has_variable = eotg_aug_voice
@@ -699,6 +701,7 @@ eotg_aug_act.003 = {
     # pacing ruling, 2026-10-05; a world-state guard, not a cooldown).
     option = {
         name = eotg_aug_act.003.g
+        add_internal_flag = special    # W3: gated by a rare state (Seamless)
         trigger = {
             has_trait = eotg_total_integration
             NOT = { has_trait = just }
@@ -834,6 +837,7 @@ eotg_aug_act.004 = {
     # (internal). The hall reacts as to a.
     option = {
         name = eotg_aug_act.004.f
+        add_internal_flag = special    # W3: gated by a rare state (Neurofractured)
         trigger = {
             has_trait = eotg_neurofractured
             has_variable = eotg_aug_voice

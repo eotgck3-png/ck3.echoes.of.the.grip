@@ -105,6 +105,7 @@ eotg_aug_end.001 = {
     # "Begin."
     option = {
         name = eotg_aug_end.001.a
+        add_internal_flag = dangerous    # W3: the excision can kill root
         trigger = { eotg_aug_can_afford_excision = yes }
         eotg_aug_excision_pay_effect = yes
         custom_tooltip = eotg_aug_end.001.tt
@@ -142,6 +143,7 @@ eotg_aug_end.001 = {
     # [craven] "Put me under. Don't wake me if it goes wrong." As a, death +10.
     option = {
         name = eotg_aug_end.001.c
+        add_internal_flag = dangerous    # W3: the excision can kill root
         trigger = {
             has_trait = craven
             eotg_aug_can_afford_excision = yes
@@ -168,6 +170,7 @@ eotg_aug_end.001 = {
     # PHYSICIAN = yes, MAIMED_BASE = 30.)
     option = {
         name = eotg_aug_end.001.d
+        add_internal_flag = dangerous    # W3: the excision can kill root
         trigger = {
             has_trait = brave
             eotg_aug_can_afford_excision = yes
@@ -193,6 +196,7 @@ eotg_aug_end.001 = {
     # the surgeons are already in the room (the free table).
     option = {
         name = eotg_aug_end.001.e
+        add_internal_flag = dangerous    # W3: the excision can kill root
         trigger = {
             NOT = { has_character_flag = eotg_flag_aug_excision_free }
             eotg_aug_can_afford_procedure = { BASE = major_gold_value  MULT = eotg_aug_price_mult_backstreet_removal }
@@ -311,6 +315,7 @@ eotg_aug_end.009 = {
     # "Yes."
     option = {
         name = eotg_aug_end.009.a
+        add_internal_flag = dangerous    # W3: hands over the controls; one branch is death
         eotg_aug_stress_embrace_effect = yes    # before the roll: one branch is death
         random_list = {
             # Seamless
@@ -329,6 +334,7 @@ eotg_aug_end.009 = {
                 desc = eotg_aug_end.009.a.death
                 modifier = { add = 15  stress_level >= 3 }
                 modifier = { add = 10  health < 2 }
+                play_music_cue = mx_cue_death    # W3: the cascade death
                 eotg_aug_cascade_death_effect = yes
             }
             # A Storm episode: it passes, badly (existing fracture.029)
@@ -361,6 +367,7 @@ eotg_aug_end.009 = {
     # [ambitious] "Yes. All of it."
     option = {
         name = eotg_aug_end.009.c
+        add_internal_flag = dangerous    # W3: hands over the controls; one branch is death
         trigger = { has_trait = ambitious }
         trait = ambitious
         eotg_aug_stress_embrace_effect = yes    # before the roll: one branch is death
@@ -382,6 +389,7 @@ eotg_aug_end.009 = {
                 desc = eotg_aug_end.009.c.death
                 modifier = { add = 15  stress_level >= 3 }
                 modifier = { add = 10  health < 2 }
+                play_music_cue = mx_cue_death    # W3: the cascade death
                 eotg_aug_cascade_death_effect = yes
             }
             # A Storm episode: it passes, badly (existing fracture.029)
@@ -540,6 +548,12 @@ eotg_aug_end.011 = {
                 save_scope_as = eotg_hire_second
             }
             add_courtier = scope:eotg_hire_second
+            send_interface_toast = {    # W3 (event_quality_v1)
+                type = event_toast_effect_good
+                title = eotg_aug_end.011.toast_a_second
+                left_icon = root
+                right_icon = scope:eotg_hire_second
+            }
         }
         ai_chance = {
             base = 40
@@ -646,6 +660,13 @@ eotg_aug_end.020 = {
         name = eotg_aug_end.020.a
         trigger = { exists = scope:eotg_warden_spouse }
         eotg_aug_start_containment_regency_effect = { KEEPER = scope:eotg_warden_spouse  SWING = 50 }
+        scope:eotg_warden_spouse = {
+            send_interface_message = {    # W3: the warden may be a player
+                type = send_interface_message_good
+                title = eotg_aug_end.020.msg_warden
+                left_icon = root
+            }
+        }
         eotg_add_fracture_risk = { AMOUNT = -8 }
         eotg_aug_stress_reject_effect = yes
         ai_chance = {
@@ -660,6 +681,13 @@ eotg_aug_end.020 = {
         name = eotg_aug_end.020.b
         trigger = { exists = scope:eotg_warden_heir }
         eotg_aug_start_containment_regency_effect = { KEEPER = scope:eotg_warden_heir  SWING = 50 }
+        scope:eotg_warden_heir = {
+            send_interface_message = {    # W3: the warden may be a player
+                type = send_interface_message_good
+                title = eotg_aug_end.020.msg_warden
+                left_icon = root
+            }
+        }
         eotg_add_fracture_risk = { AMOUNT = -8 }
         eotg_aug_stress_reject_effect = yes
         ai_chance = {
@@ -674,6 +702,13 @@ eotg_aug_end.020 = {
         name = eotg_aug_end.020.c
         trigger = { exists = scope:eotg_warden_chancellor }
         eotg_aug_start_containment_regency_effect = { KEEPER = scope:eotg_warden_chancellor  SWING = 50 }
+        scope:eotg_warden_chancellor = {
+            send_interface_message = {    # W3: the warden may be a player
+                type = send_interface_message_good
+                title = eotg_aug_end.020.msg_warden
+                left_icon = root
+            }
+        }
         eotg_add_fracture_risk = { AMOUNT = -8 }
         eotg_aug_stress_reject_effect = yes
         ai_chance = {
@@ -686,6 +721,7 @@ eotg_aug_end.020 = {
     # "And give them the crown." Abdication to the primary heir.
     option = {
         name = eotg_aug_end.020.d
+        add_internal_flag = dangerous    # W3: abdication: control passes to the heir
         trigger = { exists = primary_heir }
         # Tooltip sweep: the option otherwise renders an empty tooltip.
         custom_tooltip = eotg_aug_end.020.d.tt
@@ -740,9 +776,14 @@ eotg_aug_end.030 = {
         animation = worry
     }
 
+    immediate = {
+        play_music_cue = mx_cue_prison    # W3 (event_quality_v1)
+    }
+
     # "Go quietly."
     option = {
         name = eotg_aug_end.030.a
+        add_internal_flag = dangerous    # W3: abdication: control passes to the heir
         eotg_aug_abdicate_effect = yes
         eotg_aug_stress_reject_effect = yes
         ai_chance = {
@@ -755,6 +796,7 @@ eotg_aug_end.030 = {
     # [stubborn] "Drag me." The successor takes the dread of it.
     option = {
         name = eotg_aug_end.030.b
+        add_internal_flag = dangerous    # W3: abdication: control passes to the heir
         trigger = { has_trait = stubborn }
         trait = stubborn
         primary_heir = { add_dread = 20 }
@@ -800,6 +842,10 @@ eotg_aug_end.031 = {
         animation = stress
     }
 
+    immediate = {
+        play_music_cue = mx_cue_prison    # W3 (event_quality_v1)
+    }
+
     # "Keep them comfortable." Balance spec §5.6: how well the household is
     # run is a stewardship check (the successor's) against
     # medium_skill_rating (10): the old ruler's risk -10 on success, -3 on
@@ -817,6 +863,12 @@ eotg_aug_end.031 = {
                     min = -49
                 }
                 desc = eotg_aug_end.031.a.success
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_good
+                    title = eotg_aug_end.031.toast_a_success
+                    left_icon = root
+                    right_icon = scope:eotg_old_ruler
+                }
                 hidden_effect = {
                     scope:eotg_old_ruler = {
                         eotg_add_fracture_risk = { AMOUNT = -10 }
@@ -830,6 +882,12 @@ eotg_aug_end.031 = {
                     min = -49
                 }
                 desc = eotg_aug_end.031.a.failure
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_neutral
+                    title = eotg_aug_end.031.toast_a_failure
+                    left_icon = root
+                    right_icon = scope:eotg_old_ruler
+                }
                 hidden_effect = {
                     scope:eotg_old_ruler = {
                         eotg_add_fracture_risk = { AMOUNT = -3 }
@@ -879,6 +937,7 @@ eotg_aug_end.031 = {
     # "End it quietly."
     option = {
         name = eotg_aug_end.031.d
+        add_internal_flag = dangerous    # W3: kills the old ruler
         scope:eotg_old_ruler = {
             death = { death_reason = death_murder  killer = root }
         }

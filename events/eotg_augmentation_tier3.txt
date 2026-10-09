@@ -437,6 +437,11 @@ eotg_aug_tier3.004 = {
             random = {
                 chance = 30
                 add_trait = paranoid
+                send_interface_toast = {    # W3
+                    type = event_toast_effect_bad
+                    title = eotg_aug_tier3.004.toast_a_paranoid
+                    left_icon = root
+                }
             }
         }
         stress_impact = { base = minor_stress_impact_gain }
@@ -596,6 +601,11 @@ eotg_aug_tier3.005 = {
         random = {
             chance = 20
             increase_wounds_effect = { REASON = battle }
+            send_interface_toast = {    # W3
+                type = event_toast_effect_bad
+                title = eotg_aug_tier3.005.toast_d_wounded
+                left_icon = root
+            }
         }
         eotg_add_fracture_risk = { AMOUNT = 10 }
         ai_chance = {
@@ -929,6 +939,12 @@ eotg_aug_tier3.007 = {
                     min = -49
                 }
                 desc = eotg_aug_tier3.007.c.success
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_good
+                    title = eotg_aug_tier3.007.toast_c_success
+                    left_icon = root
+                    right_icon = scope:eotg_other_machine
+                }
                 add_character_modifier = { modifier = eotg_mod_aug_lesson_prowess  years = 5 }
                 scope:eotg_other_machine = {
                     add_character_modifier = { modifier = eotg_mod_aug_lesson_prowess  years = 5 }
@@ -945,6 +961,12 @@ eotg_aug_tier3.007 = {
                     min = -49
                 }
                 desc = eotg_aug_tier3.007.c.failure
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_bad
+                    title = eotg_aug_tier3.007.toast_c_failure
+                    left_icon = root
+                    right_icon = scope:eotg_other_machine
+                }
                 scope:eotg_other_machine = {
                     add_character_modifier = { modifier = eotg_mod_aug_lesson_prowess  years = 5 }
                 }
@@ -1070,10 +1092,20 @@ eotg_aug_tier3.008 = {
         random_list = {
             50 = {
                 eotg_add_fracture_risk = { AMOUNT = -8 }
+                send_interface_toast = {    # W3: names the fix, not the risk
+                    type = event_toast_effect_good
+                    title = eotg_aug_tier3.008.toast_e_fixed
+                    left_icon = root
+                }
             }
             50 = {
                 eotg_add_fracture_risk = { AMOUNT = 10 }
                 increase_wounds_effect = { REASON = burned }
+                send_interface_toast = {    # W3
+                    type = event_toast_effect_bad
+                    title = eotg_aug_tier3.008.toast_e_burned
+                    left_icon = root
+                }
             }
         }
         stress_impact = {
@@ -2037,6 +2069,12 @@ eotg_aug_tier3.015 = {
                     multiplier = 2.5
                 }
                 desc = eotg_aug_tier3.015.c.success
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_good
+                    title = eotg_aug_tier3.015.toast_c_success
+                    left_icon = root
+                    right_icon = scope:eotg_other_machine
+                }
                 add_prestige = 150
                 scope:eotg_other_machine = {
                     increase_wounds_effect = { REASON = duel }
@@ -2048,6 +2086,12 @@ eotg_aug_tier3.015 = {
                     multiplier = -2.5
                 }
                 desc = eotg_aug_tier3.015.c.failure
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_bad
+                    title = eotg_aug_tier3.015.toast_c_failure
+                    left_icon = root
+                    right_icon = scope:eotg_other_machine
+                }
                 increase_wounds_effect = { REASON = duel }
                 scope:eotg_other_machine = { add_prestige = 150 }
             }
@@ -2077,6 +2121,12 @@ eotg_aug_tier3.015 = {
         random_list = {
             40 = {
                 desc = eotg_aug_tier3.015.e.success
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_good
+                    title = eotg_aug_tier3.015.toast_e_success
+                    left_icon = root
+                    right_icon = scope:eotg_other_machine
+                }
                 # QA round 2 M4: a deliberate killing; a family rival makes
                 # a kinslayer (vanilla add_kinslayer_trait_or_nothing_effect,
                 # 00_secret_effects.txt:433), before the death.
@@ -2090,6 +2140,12 @@ eotg_aug_tier3.015 = {
             }
             60 = {
                 desc = eotg_aug_tier3.015.e.failure
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_bad
+                    title = eotg_aug_tier3.015.toast_e_failure
+                    left_icon = root
+                    right_icon = scope:eotg_other_machine
+                }
                 add_prestige = -200
                 scope:eotg_other_machine = {
                     add_opinion = { modifier = eotg_opinion_aug_fear  target = root  years = 10 }
@@ -2193,6 +2249,11 @@ eotg_aug_tier3.016 = {
                     min = -49
                 }
                 desc = eotg_aug_tier3.016.c.success
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_good
+                    title = eotg_aug_tier3.016.toast_c_success
+                    left_icon = root
+                }
                 add_character_modifier = { modifier = eotg_mod_aug_lesson_martial  years = 5 }
                 hidden_effect = {
                     add_character_flag = { flag = eotg_flag_aug_chain_edge  years = 2 }
@@ -2205,6 +2266,11 @@ eotg_aug_tier3.016 = {
                     min = -49
                 }
                 desc = eotg_aug_tier3.016.c.failure
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_bad
+                    title = eotg_aug_tier3.016.toast_c_failure
+                    left_icon = root
+                }
                 hidden_effect = {
                     add_character_flag = { flag = eotg_flag_aug_chain_strain  years = 2 }
                 }
@@ -2344,6 +2410,8 @@ eotg_aug_tier3.017 = {
     option = {
         name = eotg_aug_tier3.017.b
         trigger = { exists = scope:eotg_conspirator }
+        add_internal_flag = dangerous    # W3: executing on the implant's flag
+        play_music_cue = mx_cue_death    # W3: execution (option cue, as vanilla feast.1502.a)
         # Record the conspirator's own vassals before the death passes them
         # on: .018 (false + executed) gives them the falsely-accused opinion
         # and clears the list.
@@ -2396,10 +2464,20 @@ eotg_aug_tier3.017 = {
                     }
                 }
                 desc = eotg_aug_tier3.017.c.success
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_good
+                    title = eotg_aug_tier3.017.toast_c_success
+                    left_icon = root
+                }
                 save_scope_value_as = { name = eotg_plot_learned  value = flag:yes }
             }
             50 = {
                 desc = eotg_aug_tier3.017.c.failure
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_neutral
+                    title = eotg_aug_tier3.017.toast_c_failure
+                    left_icon = root
+                }
                 save_scope_value_as = { name = eotg_plot_learned  value = flag:no }
             }
         }
@@ -2818,6 +2896,11 @@ eotg_aug_tier3.019 = {
                     min = -49
                 }
                 desc = eotg_aug_tier3.019.b.success
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_good
+                    title = eotg_aug_tier3.019.toast_b_success
+                    left_icon = root
+                }
                 add_character_modifier = { modifier = eotg_mod_aug_lesson_learning  years = 5 }
                 hidden_effect = {
                     eotg_add_fracture_risk = { AMOUNT = 2 }
@@ -2830,6 +2913,11 @@ eotg_aug_tier3.019 = {
                     min = -49
                 }
                 desc = eotg_aug_tier3.019.b.failure
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_bad
+                    title = eotg_aug_tier3.019.toast_b_failure
+                    left_icon = root
+                }
                 stress_impact = { base = minor_stress_impact_gain }
                 hidden_effect = {
                     eotg_add_fracture_risk = { AMOUNT = 8 }
@@ -3257,6 +3345,30 @@ eotg_aug_tier3.022 = {
     # "..."
     option = {
         name = eotg_aug_tier3.022.a
+        # W3: the rolled outcome (immediate) surfaces on the resolving option
+        if = {
+            limit = { scope:eotg_bleed_outcome = flag:cascade }
+            send_interface_toast = {
+                type = event_toast_effect_bad
+                title = eotg_aug_tier3.022.toast_cascade
+                left_icon = root
+            }
+        }
+        else_if = {
+            limit = { scope:eotg_bleed_outcome = flag:scarring }
+            send_interface_toast = {
+                type = event_toast_effect_bad
+                title = eotg_aug_tier3.022.toast_scarring
+                left_icon = root
+            }
+        }
+        else = {
+            send_interface_toast = {
+                type = event_toast_effect_good
+                title = eotg_aug_tier3.022.toast_insight
+                left_icon = root
+            }
+        }
         ai_chance = {
             base = 100
             modifier = { add = 10  has_trait = calm }
@@ -3309,6 +3421,11 @@ eotg_aug_tier3.023 = {
                     min = -49
                 }
                 desc = eotg_aug_tier3.023.a.success
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_good
+                    title = eotg_aug_tier3.023.toast_a_success
+                    left_icon = root
+                }
                 hidden_effect = {
                     add_character_flag = { flag = eotg_flag_aug_chain_edge  years = 2 }
                 }
@@ -3320,6 +3437,11 @@ eotg_aug_tier3.023 = {
                     min = -49
                 }
                 desc = eotg_aug_tier3.023.a.failure
+                send_interface_toast = {    # W3 (event_quality_v1)
+                    type = event_toast_effect_bad
+                    title = eotg_aug_tier3.023.toast_a_failure
+                    left_icon = root
+                }
                 hidden_effect = {
                     add_character_flag = { flag = eotg_flag_aug_chain_strain  years = 2 }
                 }
@@ -3515,6 +3637,34 @@ eotg_aug_tier3.024 = {
             base = 50
             modifier = { add = 30  has_trait = arrogant }
             modifier = { add = 10  has_trait = ambitious }
+        }
+    }
+
+    # W3: the rolled outcome (immediate) surfaces once, whichever option is
+    # taken (b is decisive-only; the outcome's effects stay on the options)
+    after = {
+        if = {
+            limit = { scope:eotg_campaign_outcome = flag:decisive }
+            send_interface_toast = {    # W3
+                type = event_toast_effect_good
+                title = eotg_aug_tier3.024.toast_decisive
+                left_icon = root
+            }
+        }
+        else_if = {
+            limit = { scope:eotg_campaign_outcome = flag:overreach }
+            send_interface_toast = {    # W3
+                type = event_toast_effect_bad
+                title = eotg_aug_tier3.024.toast_overreach
+                left_icon = root
+            }
+        }
+        else = {
+            send_interface_toast = {    # W3
+                type = event_toast_effect_neutral
+                title = eotg_aug_tier3.024.toast_inconclusive
+                left_icon = root
+            }
         }
     }
 }
