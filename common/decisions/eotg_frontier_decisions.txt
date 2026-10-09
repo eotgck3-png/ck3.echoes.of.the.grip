@@ -5,9 +5,21 @@
 # (verified against 1.20): ai_check_interval_by_tier with every tier key
 # (0 = never), ai_potential + ai_will_do, custom_description around anything
 # that would otherwise render as a raw variable (eotg_lint L006).
-# Decisions cannot take a Region as a target (spec §8.1), so each picks one:
-# Establish takes the most developed eligible Region; Invest and Abandon the
-# taker's most advanced / most strained Frontier.
+# The player chooses the Region (owner request 2026-10-08; supersedes spec
+# §8.1 "decisions cannot take a Region as a target"). Every decision that
+# picks a Region carries vanilla's county-picker widget, shape copied from
+# pam_decisions.txt:1395-1437 (pam_send_legatine_mission_decision) and
+# :4092-4133 (raise khachkar), ai_select_item from
+# 50_holy_site_decisions.txt:147: gui = "decision_view_widget_select_realm_county"
+# (base game; the mod ships no GUI), controller = select_scope_object,
+# setup_items fills item_list with exactly the Regions that pass the
+# decision's eligibility trigger, is_item_valid re-checks it, default_item
+# and ai_select_item are the old automatic pick (so a player who just
+# confirms, and the AI, behave as before), is_valid_showing_failures_only
+# guards scope:selected_item (pam pattern), and the effect re-saves
+# scope:selected_item as scope:eotg_frontier_county so every downstream
+# event is unchanged. scope:selected_item can be unset while the effect
+# tooltip renders (pam_decisions.txt:5912), hence the `?=` in effects.
 #
 # Confirmed against vanilla 1.20 (verification §3): the held-title iterators
 # with tier = tier_county (V13), the picture decision_realm.dds, and
@@ -46,15 +58,72 @@ eotg_decision_frontier_establish = {
         }
     }
 
-    effect = {
-        ordered_held_title = {
-            limit = {
+    is_valid_showing_failures_only = {
+        custom_description = {
+            text = eotg_decision_frontier_establish_pick_tt
+            scope:selected_item ?= {
                 tier = tier_county
+                holder = root
                 eotg_frontier_can_establish = yes
             }
-            order_by = development_level
-            save_scope_as = eotg_frontier_county
         }
+    }
+
+    # The Region picker (header). Default and AI: the most developed one.
+    widget = {
+        gui = "decision_view_widget_select_realm_county"
+        controller = select_scope_object
+
+        setup_items = {
+            scope:actor = {
+                every_held_title = {
+                    limit = {
+                        tier = tier_county
+                        eotg_frontier_can_establish = yes
+                    }
+                    add_to_list = item_list
+                }
+            }
+        }
+
+        default_item = {
+            scope:actor = {
+                ordered_held_title = {
+                    limit = {
+                        tier = tier_county
+                        eotg_frontier_can_establish = yes
+                    }
+                    order_by = development_level
+                    save_scope_as = selected_item
+                }
+            }
+        }
+
+        is_item_valid = {
+            custom_tooltip = {
+                text = eotg_decision_frontier_establish_pick_tt
+                tier = tier_county
+                holder = scope:actor
+                eotg_frontier_can_establish = yes
+            }
+        }
+
+        ai_select_item = {
+            scope:actor = {
+                ordered_held_title = {
+                    limit = {
+                        tier = tier_county
+                        eotg_frontier_can_establish = yes
+                    }
+                    order_by = development_level
+                    save_scope_as = selected_item
+                }
+            }
+        }
+    }
+
+    effect = {
+        scope:selected_item ?= { save_scope_as = eotg_frontier_county }
         # The founder candidate: the best steward at court, or the taker
         ordered_courtier = {
             limit = {
@@ -130,27 +199,88 @@ eotg_decision_frontier_invest = {
         }
     }
 
+    is_valid_showing_failures_only = {
+        custom_description = {
+            text = eotg_decision_frontier_invest_pick_tt
+            scope:selected_item ?= {
+                tier = tier_county
+                holder = root
+                eotg_frontier_is_frontier = yes
+                NOT = { has_variable = eotg_frontier_invested }
+            }
+        }
+    }
+
     cost = {
         gold = {
             value = eotg_frontier_invest_cost_value
         }
     }
 
-    effect = {
-        ordered_held_title = {
-            limit = {
+    # The Region picker (header). Default and AI: the most advanced Frontier.
+    widget = {
+        gui = "decision_view_widget_select_realm_county"
+        controller = select_scope_object
+
+        setup_items = {
+            scope:actor = {
+                every_held_title = {
+                    limit = {
+                        tier = tier_county
+                        eotg_frontier_is_frontier = yes
+                        NOT = { has_variable = eotg_frontier_invested }
+                    }
+                    add_to_list = item_list
+                }
+            }
+        }
+
+        default_item = {
+            scope:actor = {
+                ordered_held_title = {
+                    limit = {
+                        tier = tier_county
+                        eotg_frontier_is_frontier = yes
+                        NOT = { has_variable = eotg_frontier_invested }
+                    }
+                    order_by = var:eotg_frontier_progress
+                    save_scope_as = selected_item
+                }
+            }
+        }
+
+        is_item_valid = {
+            custom_tooltip = {
+                text = eotg_decision_frontier_invest_pick_tt
                 tier = tier_county
+                holder = scope:actor
                 eotg_frontier_is_frontier = yes
                 NOT = { has_variable = eotg_frontier_invested }
             }
-            order_by = var:eotg_frontier_progress
-            save_scope_as = eotg_frontier_county
         }
+
+        ai_select_item = {
+            scope:actor = {
+                ordered_held_title = {
+                    limit = {
+                        tier = tier_county
+                        eotg_frontier_is_frontier = yes
+                        NOT = { has_variable = eotg_frontier_invested }
+                    }
+                    order_by = var:eotg_frontier_progress
+                    save_scope_as = selected_item
+                }
+            }
+        }
+    }
+
+    effect = {
+        scope:selected_item ?= { save_scope_as = eotg_frontier_county }
         custom_tooltip = eotg_decision_frontier_invest_effect_tt
         # Q4b: say what a finished Frontier is waiting on
         if = {
             limit = {
-                scope:eotg_frontier_county = {
+                scope:eotg_frontier_county ?= {
                     OR = {
                         has_county_modifier = eotg_frontier_mod_waiting_development
                         has_county_modifier = eotg_frontier_mod_waiting_control
@@ -160,7 +290,7 @@ eotg_decision_frontier_invest = {
             custom_tooltip = eotg_decision_frontier_invest_waiting_tt
         }
         hidden_effect = {
-            scope:eotg_frontier_county = {
+            scope:eotg_frontier_county ?= {
                 set_variable = { name = eotg_frontier_invested  value = yes  years = 1 }
                 # Halved with the doubled pacing (verification §4)
                 eotg_frontier_add_progress_effect = { AMOUNT = 5 }
@@ -293,7 +423,7 @@ eotg_decision_frontier_withdraw = {
     }
 }
 
-# Abandon a Frontier (spec §8.3): the most strained one the taker holds.
+# Abandon a Frontier (spec §8.3): one the taker holds, chosen in the widget.
 # Abandoned, never erased: the Region keeps its traces and can be resettled.
 eotg_decision_frontier_abandon = {
     picture = {
@@ -312,24 +442,81 @@ eotg_decision_frontier_abandon = {
         eotg_frontier_holds_frontier = yes
     }
 
-    effect = {
-        ordered_held_title = {
-            limit = {
+    is_valid_showing_failures_only = {
+        custom_description = {
+            text = eotg_decision_frontier_abandon_pick_tt
+            scope:selected_item ?= {
                 tier = tier_county
+                holder = root
                 eotg_frontier_is_frontier = yes
             }
-            order_by = var:eotg_frontier_strain
-            save_scope_as = eotg_frontier_county
         }
+    }
+
+    # The Region picker (header). Default and AI: the most strained Frontier.
+    widget = {
+        gui = "decision_view_widget_select_realm_county"
+        controller = select_scope_object
+
+        setup_items = {
+            scope:actor = {
+                every_held_title = {
+                    limit = {
+                        tier = tier_county
+                        eotg_frontier_is_frontier = yes
+                    }
+                    add_to_list = item_list
+                }
+            }
+        }
+
+        default_item = {
+            scope:actor = {
+                ordered_held_title = {
+                    limit = {
+                        tier = tier_county
+                        eotg_frontier_is_frontier = yes
+                    }
+                    order_by = var:eotg_frontier_strain
+                    save_scope_as = selected_item
+                }
+            }
+        }
+
+        is_item_valid = {
+            custom_tooltip = {
+                text = eotg_decision_frontier_abandon_pick_tt
+                tier = tier_county
+                holder = scope:actor
+                eotg_frontier_is_frontier = yes
+            }
+        }
+
+        ai_select_item = {
+            scope:actor = {
+                ordered_held_title = {
+                    limit = {
+                        tier = tier_county
+                        eotg_frontier_is_frontier = yes
+                    }
+                    order_by = var:eotg_frontier_strain
+                    save_scope_as = selected_item
+                }
+            }
+        }
+    }
+
+    effect = {
+        scope:selected_item ?= { save_scope_as = eotg_frontier_county }
         custom_tooltip = eotg_decision_frontier_abandon_effect_tt
         # Unclaimed Regions (frontier_unclaimed_regions.md §3.6): abandoning a
         # claimed Region gives it up
         if = {
-            limit = { scope:eotg_frontier_county = { eotg_unclaimed_would_release = yes } }
+            limit = { scope:eotg_frontier_county ?= { eotg_unclaimed_would_release = yes } }
             custom_tooltip = eotg_unclaimed_abandon_returns_tt
         }
         hidden_effect = {
-            scope:eotg_frontier_county = {
+            scope:eotg_frontier_county ?= {
                 eotg_frontier_abandon_effect = { FAILED = no }
             }
         }
@@ -472,7 +659,7 @@ eotg_decision_frontier_debug_readout = {
 # == Phase 2 (docs/specs/frontier_v2.md) =====================================
 
 # Survey a Region (spec §8): learn what an Unsettled, Abandoned or Frontier
-# Region is like before or during a project. Picks the most developed Region
+# Region is like before or during a project, in a Region chosen in the widget
 # that can be surveyed; .020 reveals a trait. The 5-year mark is the
 # decision's own gate (not an event cooldown).
 eotg_decision_frontier_survey = {
@@ -492,24 +679,81 @@ eotg_decision_frontier_survey = {
         eotg_frontier_holds_surveyable = yes
     }
 
+    is_valid_showing_failures_only = {
+        custom_description = {
+            text = eotg_decision_frontier_survey_pick_tt
+            scope:selected_item ?= {
+                tier = tier_county
+                holder = root
+                eotg_frontier_can_survey = yes
+            }
+        }
+    }
+
     cost = {
         gold = {
             value = eotg_frontier_survey_cost_value
         }
     }
 
-    effect = {
-        ordered_held_title = {
-            limit = {
+    # The Region picker (header). Default and AI: the most developed one.
+    widget = {
+        gui = "decision_view_widget_select_realm_county"
+        controller = select_scope_object
+
+        setup_items = {
+            scope:actor = {
+                every_held_title = {
+                    limit = {
+                        tier = tier_county
+                        eotg_frontier_can_survey = yes
+                    }
+                    add_to_list = item_list
+                }
+            }
+        }
+
+        default_item = {
+            scope:actor = {
+                ordered_held_title = {
+                    limit = {
+                        tier = tier_county
+                        eotg_frontier_can_survey = yes
+                    }
+                    order_by = development_level
+                    save_scope_as = selected_item
+                }
+            }
+        }
+
+        is_item_valid = {
+            custom_tooltip = {
+                text = eotg_decision_frontier_survey_pick_tt
                 tier = tier_county
+                holder = scope:actor
                 eotg_frontier_can_survey = yes
             }
-            order_by = development_level
-            save_scope_as = eotg_frontier_county
         }
+
+        ai_select_item = {
+            scope:actor = {
+                ordered_held_title = {
+                    limit = {
+                        tier = tier_county
+                        eotg_frontier_can_survey = yes
+                    }
+                    order_by = development_level
+                    save_scope_as = selected_item
+                }
+            }
+        }
+    }
+
+    effect = {
+        scope:selected_item ?= { save_scope_as = eotg_frontier_county }
         custom_tooltip = eotg_decision_frontier_survey_effect_tt
         hidden_effect = {
-            scope:eotg_frontier_county = {
+            scope:eotg_frontier_county ?= {
                 set_variable = { name = eotg_frontier_surveyed  value = yes  years = 5 }
             }
         }
@@ -537,8 +781,8 @@ eotg_decision_frontier_survey = {
     }
 }
 
-# Build Frontier Infrastructure (spec §4): one piece a year, in the most
-# advanced Frontier with room. .021 picks it and charges the cost.
+# Build Frontier Infrastructure (spec §4): one piece a year, in a Frontier
+# with room chosen in the widget. .021 picks the piece and charges the cost.
 eotg_decision_frontier_build = {
     picture = {
         reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
@@ -567,15 +811,73 @@ eotg_decision_frontier_build = {
         }
     }
 
-    effect = {
-        ordered_held_title = {
-            limit = {
+    is_valid_showing_failures_only = {
+        custom_description = {
+            text = eotg_decision_frontier_build_pick_tt
+            scope:selected_item ?= {
                 tier = tier_county
+                holder = root
                 eotg_frontier_infra_room = yes
             }
-            order_by = var:eotg_frontier_progress
-            save_scope_as = eotg_frontier_county
         }
+    }
+
+    # The Region picker (header). Default and AI: the most advanced Frontier
+    # with room.
+    widget = {
+        gui = "decision_view_widget_select_realm_county"
+        controller = select_scope_object
+
+        setup_items = {
+            scope:actor = {
+                every_held_title = {
+                    limit = {
+                        tier = tier_county
+                        eotg_frontier_infra_room = yes
+                    }
+                    add_to_list = item_list
+                }
+            }
+        }
+
+        default_item = {
+            scope:actor = {
+                ordered_held_title = {
+                    limit = {
+                        tier = tier_county
+                        eotg_frontier_infra_room = yes
+                    }
+                    order_by = var:eotg_frontier_progress
+                    save_scope_as = selected_item
+                }
+            }
+        }
+
+        is_item_valid = {
+            custom_tooltip = {
+                text = eotg_decision_frontier_build_pick_tt
+                tier = tier_county
+                holder = scope:actor
+                eotg_frontier_infra_room = yes
+            }
+        }
+
+        ai_select_item = {
+            scope:actor = {
+                ordered_held_title = {
+                    limit = {
+                        tier = tier_county
+                        eotg_frontier_infra_room = yes
+                    }
+                    order_by = var:eotg_frontier_progress
+                    save_scope_as = selected_item
+                }
+            }
+        }
+    }
+
+    effect = {
+        scope:selected_item ?= { save_scope_as = eotg_frontier_county }
         custom_tooltip = eotg_decision_frontier_build_effect_tt
         trigger_event = eotg_frontier.021
     }
@@ -627,18 +929,80 @@ eotg_decision_frontier_explore = {
         eotg_frontier_holds_explorable = yes
     }
 
+    is_valid_showing_failures_only = {
+        custom_description = {
+            text = eotg_decision_frontier_explore_pick_tt
+            scope:selected_item ?= {
+                tier = tier_county
+                eotg_frontier_can_target_expedition = { ACTOR = root }
+            }
+        }
+    }
+
     cost = {
         gold = {
             value = eotg_frontier_explore_cost_value
         }
     }
 
+    # The Region picker (header). The items are the taker's own explorable
+    # Regions plus the explorable Unclaimed Regions within reach, so not only
+    # the realm: the widget's GUI only reads each item's Title (name and
+    # coat of arms), and the realm limit in its header comment is the vanilla
+    # callers' choice, not the widget's. All targeting stays in the one
+    # trigger and the one effect (spec §4.1): items and validity are
+    # eotg_frontier_can_target_expedition; default and AI are
+    # eotg_frontier_pick_expedition_target_effect, the old automatic pick.
+    widget = {
+        gui = "decision_view_widget_select_realm_county"
+        controller = select_scope_object
+
+        setup_items = {
+            scope:actor = {
+                every_held_title = {
+                    limit = {
+                        tier = tier_county
+                        eotg_frontier_can_target_expedition = { ACTOR = scope:actor }
+                    }
+                    add_to_list = item_list
+                }
+            }
+            every_in_global_list = {
+                variable = eotg_unclaimed_counties
+                limit = {
+                    eotg_frontier_can_target_expedition = { ACTOR = scope:actor }
+                }
+                add_to_list = item_list
+            }
+        }
+
+        default_item = {
+            eotg_frontier_pick_expedition_target_effect = { ACTOR = scope:actor }
+            scope:eotg_frontier_county ?= { save_scope_as = selected_item }
+        }
+
+        is_item_valid = {
+            custom_tooltip = {
+                text = eotg_decision_frontier_explore_pick_tt
+                tier = tier_county
+                eotg_frontier_can_target_expedition = { ACTOR = scope:actor }
+            }
+        }
+
+        ai_select_item = {
+            eotg_frontier_pick_expedition_target_effect = { ACTOR = scope:actor }
+            scope:eotg_frontier_county ?= { save_scope_as = selected_item }
+        }
+    }
+
     effect = {
-        # All expedition targeting is in one trigger and one effect (spec §4.1)
-        eotg_frontier_pick_expedition_target_effect = { ACTOR = root }
+        # The Region chosen in the widget; eotg_frontier_can_target_expedition
+        # (spec §4.1) is the only targeting rule, via setup_items and
+        # is_valid_showing_failures_only
+        scope:selected_item ?= { save_scope_as = eotg_frontier_county }
         custom_tooltip = eotg_decision_frontier_explore_effect_tt
         hidden_effect = {
-            scope:eotg_frontier_county = {
+            scope:eotg_frontier_county ?= {
                 set_variable = { name = eotg_frontier_expedition_sent  value = yes  years = 1 }
             }
         }
