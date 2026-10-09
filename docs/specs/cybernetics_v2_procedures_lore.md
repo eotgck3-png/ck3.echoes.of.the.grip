@@ -17,7 +17,7 @@ No never-name violations, no remote-kill, no state programmes. The neutral clini
 - **N4. end.041 `.c.stays`.** Write it from the councillor's perception ("They believe someone asked it"). Narration never says the ruler felt, meant or wanted anything.
 - **N5. heir.004 with a Seamless owner.**
   - Gate `eotg_aug_heir.004.desc_silent` and `eotg_aug_heir.004.desc_premonition` with `NOT = { has_trait = eotg_total_integration }`.
-  - Add the appended `eotg_aug_heir.004.desc_seamless`: "\n\nThey address the chair, not you. They have understood there is no difference left to make."
+  - Add the appended `eotg_aug_heir.004.desc_seamless`: "\n\nThey address the chair, not you. They have understood there is no difference left to make." *(Superseded 2026-10-09 by the first-person register in (c). The shipped line becomes "\n\nThey address the chair. There is no one else in it to address." See event_quality_v1 §13.3, batch B7.)*
   - This is a desc-only change, not a new beat.
 - **Not lore:** `eotg_decision_remove_implants_tooltip` already exists (loc line 1747), so it's a REVISED key, not a new one. That makes ~101 new keys and 4 revised.
 
@@ -28,8 +28,18 @@ No never-name violations, no remote-kill, no state programmes. The neutral clini
   - **Every residue line ends with the thing logged, filed or pruned.**
 - **(b) Titles:** all approved except proc.004, which becomes *A Part Replaced*.
 - **(c) Register.**
-  - *(Pending L-1, 2026-10-08: this register was written for second-person narration. event_quality_v1 §12.1 moves narration to first person; the lore-keeper restates it for first person (§16 L-1). Until then, Seamless keys keep their current voice.)*
-  - **Seamless:** the logging or report voice. Short declaratives, often passive. "You" may be the subject of a bodily action or a decision outcome, never of a feeling. The court may feel things; the ruler may not.
+  - *(Restated for first-person narration by eotg-lore-keeper, L-1, 2026-10-09; owner Q3 ruled the same day. Binding with event_quality_v1 §12.1 rule 7. The 2026-10-04 second-person form is superseded.)*
+  - **Seamless has no first person.** "Seamless ends the self" (SETTING LORE ERRATA :76-77; `cybernetics_v2.md` Q9 :42). In steady state:
+    - narration is neutral and log-like, with no narrating subject: no I, me, my, we or our;
+    - "you" becomes a neutral referent ("the body", "the chair", "the hand", "the [court seat]") or the passive;
+    - lines are short declaratives, and residue lines end logged, filed or pruned (ruling (a));
+    - the court still speaks and feels, and quotes may say "you";
+    - options are imperative or a bare acknowledgement.
+    - Exemplars: `end.042.desc`, `end.040`.
+  - **The threshold fade.** Staged once, at the threshold only: the end.009 Seamless outcome, end.010 and, optionally, fracture.027. The text turns into log entries (timestamps, "logged", "filed", "Next item"). The log never says I or we and never addresses anyone, and the "I" never returns afterwards. Call it the **log register**, never "the implant's voice". Sample: "I can see the forecast for the next thought. I am reading it. Reading complete. Next item."
+  - **Neurofractured** is full first person: a degrading self.
+    - **Allowed:** gaps and missing time; the forecast running ahead (a known sentence end, ready answers with a confidence figure, a forecast filed as memory); hearing one's own words late; overlay text that labels me; motor pre-emption as granted and logged access; unreliable narration set against the log; feelings.
+    - **Banned:** a second speaker (no "it tells me / says / answers", no quoted implant lines, no addressing the implant); "hearing the voice"; possession framing; the Void lexicon and Carrigore; giving the implant wants or decisions.
   - **Tech ceiling:** no upload, backup, copy or transfer of the mind; no datavault or secretariat; the implant is not networked into the treasury or the realm's records; no self-replicating repair.
   - **Phantom Static:** internal and bodily only. No signal arriving, no "someone/something", no whisper or voice. The full §5.2 banned list applies.
 - **(d) Back-street Excision: `PHYSICIAN = no` is upheld.** Option e's text and tooltip never mention the physician.

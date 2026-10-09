@@ -6,6 +6,9 @@
 - **R1 (voice).** The narration mix is about 60% first person (root narrates), about 35% neutral or third person, and about 5% second person (letters, short option and outcome lines).
 - **R2 (trait gates).** Trait depth stays. Gates vary by personality, education (`education_*`, `skill =` icon) and title tier. Don't stack several personality traits on one event. There is no option cap.
 - **R3 (quotes): RULED.** The owner confirmed it on 2026-10-08, relayed by the orchestrator. Dialogue uses vanilla's straight double quotes inside the string, unescaped (§12.2), with `#EMP …#!` for stress. This **reverses** the single-quote house style; §12.4 lists every document that must change.
+- **Q1, Q2, Q3: RULED** 2026-10-09 (owner: "follow recommendations"; relayed by the orchestrator). Q1: the quote conversion runs now. Q2: W7 and the NEW half of W9 are approved. Q3: the Seamless fade is staged once, at the threshold only, as a record and not a speaker. Details in §16.
+- **L-1: ANSWERED** by eotg-lore-keeper 2026-10-09. Seamless has no first person; Neurofractured is full first person. Folded into §8, §12.1 rule 7 and `cybernetics_v2_procedures_lore.md` §(c).
+- **Voice baseline (2026-10-09).** The ported `eotg_event_quality.py` measures **74% second person** on the main desc keys. The report's 52% could not be reproduced and appears to be a hand count. The orchestrator accepts 74% as the "before" figure and keeps this spec's classifier (§15).
 
 **State read:** the working tree on `v2-space-map` at d14188c, plus vanilla 1.20.0.3. Counts marked *(re-measured)* come from this session's scratch scripts on the current tree, not from the report.
 
@@ -146,7 +149,7 @@ There are no new namespaces, events, flags, variables or modifiers. Icons: none.
   - no monotheistic invocations;
   - "self", not "humanity";
   - the medieval-leak substitutions.
-- The **Seamless register** (`cybernetics_v2_procedures_lore.md` §(c)) is written for second person: "'You' may be the subject of a bodily action or a decision outcome, never of a feeling. The court may feel things; the ruler may not." How it carries into first-person narration is **open, so it goes to the lore-keeper** (L-1, §16). Until the ruling, Seamless and Neurofractured desc keys **keep their current voice**, and the batches skip them.
+- The **Seamless and Neurofractured registers** were restated for first-person narration by the lore-keeper (L-1, 2026-10-09) in `cybernetics_v2_procedures_lore.md` §(c), which binds. Seamless has no first person ("Seamless ends the self", SETTING LORE ERRATA :76-77; `cybernetics_v2.md` Q9 :42); Neurofractured is full first person. The working form is §12.1 rule 7. The batches no longer skip these keys.
 - The Kingpin (`cybernetics_v2_kingpin.md` §7.4) and Inheritance (`cybernetics_v2_fracturing_inheritance.md` §7.1) lore wording tables still bind word for word. Only the quote characters change.
 - **No time-of-day words** in cybernetics text (GQF-002; still open project-wide in CB-47). §14 avoids "night" and "day" in mod key *names* for that reason. The images themselves are lighting only.
 - **Backgrounds:**
@@ -162,7 +165,7 @@ There are no new namespaces, events, flags, variables or modifiers. Icons: none.
 
 These are end-state targets, measured by `eotg_event_quality.py` on the 249-event corpus. Each work item also has its own DoD (§11).
 1. **Background:** `override_background` is set on every non-hidden event except the 6 activity events and the 13 "keep" events in §14.2 (230 of 249). Any event added to the keep list later needs a reason in its batch report. Every reference is an `eotg_bg_*` key.
-2. **Voice** (main desc key per event): first person ≥ 50%, second person ≤ 10%, the rest neutral. The aim is about 60/35/5.
+2. **Voice** (main desc key per event): first person ≥ 50%, second person ≤ 10%, the rest neutral. The aim is about 60/35/5. The "before" figure is **74% second person** (the ported scorecard, 2026-10-09). **Seamless keys are exempt from the first-person floor**: they are excluded from the first-person denominator and counted only against the second-person ceiling, so the metric never pushes a writer back to "I" (§12.1 rule 7). A Seamless key is one whose text is gated on `eotg_total_integration` or belongs to the threshold set (end.009 Seamless outcome, end.010, fracture.027); the scorecard takes the list from a pinned set in its tests, not from a regex.
 3. **Dialogue** in ≥ 40% of events, against 8% today. 0 keys with `'…'` speech, and 0 keys with escaped `\"`.
 4. **Gates:** 0 events with 2+ options gated on root's personality traits, except owner-approved lint allows. Each file with ≥ 5 gated options has ≥ 1 education gate and ≥ 1 tier gate. **No personality trait's gated count** in `docs/tools/qa/trait_coverage.py` falls below min(its 2026-10-08 count, 3). Every kept personality option has the full pairing (icon, trigger, stress entry).
 5. **Outcomes:** ≥ 0.5 toasts per event, and ≥ 15 options flagged `dangerous` or `special`.
@@ -201,8 +204,8 @@ The phases run in order. Items inside a phase can run in parallel if they touch 
 | **P2** outcomes and sound | W3 | after P1, or in parallel on other files |
 | **P3** per-file sweep | W1 (voice), W4 (dialogue), W5 (re-gating), W6 (portraits), W0e apply | after the **current cybernetics loc batches**: the dynamic-terms ruling applied, and CB-46 Kingpin batch B localized. Batch order is in §13.3. |
 | **P4** variety | W8 | per file, after that file's P3 batch |
-| **P5** set pieces (NEW) | W7 | owner approval (§16 Q2) |
-| **P6** letters | W9 (REWRITE part; NEW part after approval) | after P3 for the file |
+| **P5** set pieces (NEW, approved 2026-10-09) | W7 | after the architect's W7 addendum; the six events' P3 batch (B4/B5/B7) first |
+| **P6** letters | W9 (REWRITE and NEW parts, both approved 2026-10-09) | after P3 for the file |
 | parked | W10, W11 | §10 |
 
 New text written in the meantime follows §12 from the day it is dispatched. That includes CB-46 batch B, which is drafted against the old rules. Batch B's loc is written in the new voice and quote form, so it never needs a second pass.
@@ -220,7 +223,7 @@ New text written in the meantime follows §12 from the day it is dispatched. Tha
 - **Owner:** orchestrator (tooling session); eotg-qa runs it.
 - **Precedent:** the other generated reports in `docs/tools/qa/README.md`.
 - **DoD:**
-  - On the d14188c tree it reproduces the report's mod column within ±2 points: background 0%, dialogue 8%, voice 0/52 first/second, trait icons 31%, toasts 0.12.
+  - On the d14188c tree it reproduces the report's mod column within ±2 points: background 0%, dialogue 8%, trait icons 31%, toasts 0.12. **Voice is the exception:** the port measures 74% second person, against the report's 52%, which was not reproducible (a hand count). The orchestrator accepted 74% as the "before" figure on 2026-10-09; the classifier stays as §15 defines it.
   - It is committed with the "before" scorecard.
   - It is added to `check_all.py`.
 - **Risk:** the regex-based voice and dialogue detection is ±5 points (report caveat). Pin the classifier in tests so that drift is visible.
@@ -251,6 +254,7 @@ New text written in the meantime follows §12 from the day it is dispatched. Tha
 - **Risk:** this proves the parser behaviour in the mod's own context (PX's parser in particular is unproven) before the mass conversion.
 
 ### W0e: Convert existing single-quoted speech: a separate, scripted, reviewable pass. REWRITE
+- **Status (Q1 RULED 2026-10-09):** run now. eotg-localizer is applying it in order: the W0d pilot, then the 40 AUTO keys, then the 13 REVIEW items by hand.
 - **Scope:** Every mod loc file in `localization/`, using `docs/tools/eotg_quote_convert.py`. Design:
   - **Dry-run by default.** It prints a unified diff per file, an `AUTO` count and a `REVIEW` list, and writes nothing. `--apply` writes. It keeps the BOM, line endings, key, `:0` version and any trailing comment byte for byte.
   - **Parsing.** Value = from the first `"` after `key:N ` to the last `"` before an optional `# comment`. The same greedy rule vanilla's lines need (§12.2).
@@ -285,11 +289,12 @@ New text written in the meantime follows §12 from the day it is dispatched. Tha
 - **Risk:** possessive plurals and single-word mentions. Both are routed to REVIEW by construction. Speech **inside** a `[...]` function argument is never converted.
 
 ### W1: Voice rewrite (report item 1, the text half). REWRITE
-- **Scope:** about 430 second-person desc keys, in batches by event file (§13.3), following the §12.1 rubric. Seamless and Neurofractured keys wait for L-1.
+- **Scope:** about 430 second-person desc keys, in batches by event file (§13.3), following the §12.1 rubric. Seamless and Neurofractured keys are in scope from 2026-10-09 under §12.1 rule 7 (L-1 answered). The threshold keys (end.009 Seamless outcome, end.010, fracture.027) are written with W7, not in their batch.
 - **Owner:** eotg-localizer writes; eotg-lore-keeper reviews each batch; eotg-qa runs the scorecard and loc checks.
 - **Precedent:** vanilla first-person narration ("As I am exploring the grounds…", `tournament_activity_oltner_l_english.yml:11`).
 - **DoD per batch:**
-  - The file's first-person share in the main desc ≥ 50%, and second person ≤ 10% outside letters.
+  - The file's first-person share in the main desc ≥ 50%, and second person ≤ 10% outside letters. **Seamless keys are exempt from the first-person floor** (§9 item 2); they must instead carry no I/me/my/we/our in narration (a batch-report grep).
+  - Neurofractured keys pass the §12.1 rule 7 banned list (no second speaker, no quoted implant lines, no "the voice", no possession framing, no Void lexicon or Carrigore).
   - No banned or register term (L012).
   - L011 pronoun checks pass.
   - The lore-keeper signs off.
@@ -371,7 +376,8 @@ New text written in the meantime follows §12 from the day it is dispatched. Tha
 - **DoD:** §9 item 6. Tiger shows no unknown-animation errors.
 - **Risk:** low. A lower portrait needs its scope to exist, so guard it with `exists`.
 
-### W7: Endgame set pieces. NEW, needs owner approval
+### W7: Endgame set pieces. NEW, APPROVED (Q2 RULED 2026-10-09)
+- **Q3 (RULED 2026-10-09):** the Seamless threshold fade is staged here and nowhere else: the end.009 Seamless outcome, end.010 and, optionally, fracture.027. The text turns into the **log register** (§12.1 rule 7); it is a record, not a speaker.
 - **Scope:** fracture.027 The Cascade, end.009 Hand Over the Controls, end.010 There Is No Static, fracture.004 The Court Massacre, heir.005 What Must Be Done, end.002 Silence. For each:
   - `window = big_event_window` now; fullscreen waits for art (§10);
   - longer text, 90–140 words in 2–3 `\n\n` paragraphs;
@@ -397,7 +403,7 @@ New text written in the meantime follows §12 from the day it is dispatched. Tha
 - **REWRITE:** whole events whose entire content already is a letter.
   - Frontier.003 *An Offer of Backing* and frontier.030 *A Rival Backer* become `type = letter_event` with `sender` = the backer and an `opening`.
   - patron.009 *The Collector* (if its desc is entirely the debt-sale notice; the scripter checks) and patron.008 *The Paper* use `window = anonymous_letter_event` if the sender is the unsigned syndicate.
-- **NEW** (needs approval):
+- **NEW** (APPROVED, Q2 RULED 2026-10-09):
   - patron.006's `*_absent` variant ("A courier brings the final account, sealed") is a desc variant inside a character event. Making it a letter means splitting off a new event.
   - Unsigned syndicate notes as separate beats.
 - **Owner:** eotg-scripter, then eotg-localizer (the `opening` text is in the sender's second-person voice, the R1 5% bucket).
@@ -424,7 +430,20 @@ New text written in the meantime follows §12 from the day it is dispatched. Tha
    - NPC speech inside quotes;
    - short option or outcome lines where vanilla also uses it.
 6. **The model's "we".** First person makes the implant's intrusions sharper: the narrator's "I" against the model's "we" (fracture.022) is the effect that replaces second person's dissociation. Keep every existing "we" line; don't add new ones (that is a beat).
-7. **Seamless and Neurofractured** text keeps its current voice until L-1 is ruled. *Architect recommendation for lore:* the narrator's "I" thins into the logging voice: short declaratives, often passive, with the court still feeling things. The loss of "I" is the payoff.
+7. **Seamless and Neurofractured** (L-1 answered by eotg-lore-keeper 2026-10-09; Q3 RULED; binding source `cybernetics_v2_procedures_lore.md` §(c)).
+   - **Seamless has no first person.** "Seamless ends the self" (SETTING LORE ERRATA :76-77; `cybernetics_v2.md` Q9 :42). In steady state:
+     - narration is neutral and log-like, with no narrating subject: no I, me, my, we or our;
+     - "you" becomes a neutral referent ("the body", "the chair", "the hand", "the [court seat]") or the passive;
+     - lines are short declaratives; residue lines end logged, filed or pruned (procedures_lore ruling (a));
+     - the court still speaks and feels, and quotes may say "you";
+     - options are imperative or a bare acknowledgement.
+     - Exemplars: `end.042.desc`, `end.040`.
+   - **The threshold fade (Q3)** is staged once, at the threshold only: the end.009 Seamless outcome, end.010 and, optionally, fracture.027 (all W7). The text turns into log entries: timestamps, "logged", "filed", "Next item". The log never says I or we and never addresses anyone, and the "I" never returns afterwards. Call it the **log register**, never "the implant's voice". Sample: "I can see the forecast for the next thought. I am reading it. Reading complete. Next item."
+   - **Neurofractured is full first person**: a degrading self.
+     - *Allowed:* gaps and missing time; the forecast running ahead (a known sentence end, ready answers with a confidence figure, a forecast filed as memory); hearing one's own words late; overlay text that labels me; motor pre-emption as granted and logged access; unreliable narration set against the log; feelings.
+     - *Banned:* a second speaker (no "it tells me / says / answers", no quoted implant lines, no addressing the implant); "hearing the voice"; possession framing; the Void lexicon and Carrigore; giving the implant wants or decisions.
+   - **Conflict with rule 6 (open, L-2).** Rule 6 keeps the model's "we" lines (fracture.022); L-1 bans a second speaker in Neurofractured text. Until the lore-keeper rules whether those lines survive, B5 holds fracture.022's "we" lines unchanged and adds none.
+   - **Scorecard:** Seamless keys are exempt from the first-person floor (§9 item 2, W1 DoD).
 8. **Options** are first person or imperative ("Let them watch.", "I will speak to them myself."), as today.
 9. **Length** keeps the existing band unless the event is a W7 set piece. Break paragraphs at the beat with `\n\n`.
 10. **Unchanged:** Canadian English, no dashes, the register and banned lists, and dynamic terms.
@@ -464,7 +483,7 @@ New text written in the meantime follows §12 from the day it is dispatched. Tha
 | 3 | `docs/proposals/gemini_work_queue_2026-10-06.md:21` (the Gemini queue **template**, per memory) | "single quotes for speech; never `\"`" | Rewrite the rule. Add §12.1 voice. | orchestrator |
 | 4 | `docs/proposals/gemini_rewrite_feedback_2026-10-06.md` §3 "In-voice samples" (lines 72-74) | samples written `"'The leads took…'"` | Re-quote the samples in `"…"` form. Add a voice line: "narrate in first person". | orchestrator |
 | 5 | `docs/specs/cybernetics_v2_kingpin.md` §7.4 and `docs/specs/cybernetics_v2_fracturing_inheritance.md` §7.1 (lore wording) | approved lines are given between Markdown `"…"`; **no single-quote mandate found** | Add a one-line note at each section head: "Speech in these lines is rendered with inner `"` (event_quality_v1 §12.2); first person per §12.1." The wording itself is unchanged. | eotg-architect (next pass on those specs) |
-| 6 | `docs/specs/cybernetics_v2_procedures_lore.md` §(c) Seamless register | written for second person | Pending L-1. The lore-keeper restates it for first person. | eotg-lore-keeper → architect |
+| 6 | `docs/specs/cybernetics_v2_procedures_lore.md` §(c) Seamless register | written for second person | **Done 2026-10-09.** Restated for first person per L-1; N5's heir.004 line marked superseded. | eotg-lore-keeper → architect |
 | 7 | `docs/qa/variety_pass_2026-10-07.md:212` (QA checklist "no embedded double quote is used") | treats an inner `"` as a defect | Annotate "superseded 2026-10-08". Future checklists check for "no `\"`, no `'…'` speech". | orchestrator |
 | 8 | `docs/tools/qa/loc_mechanical.py:57-58` | prints `INNERQUOTE` for every unescaped inner `"` | Invert (W0c) | tooling |
 | 9 | eotg_lint | **no rule enforces quotes today** (L013a–d are dashes, spelling, whitespace, `\n\n`) | Add L013e (W0c); document it in `eotg_lint.md` | tooling |
@@ -527,16 +546,28 @@ After the current cybernetics loc batches (the dynamic-terms ruling applied; CB-
 |---|---|---|---|---|
 | B1 | tier1 | 38 | 13 | Most-seen content. Pilot for the rubric; review before B2. |
 | B2 | tier2 | 36 | 16 | |
-| B3 | tier3 | 46 | 17 | Seamless keys wait for L-1 |
-| B4 | fracture .001–.014 | about 33 | about 11 | Neurofractured keys wait for L-1 |
-| B5 | fracture .015–.029 | about 34 | about 11 | |
+| B3 | tier3 | 46 | 17 | Seamless keys in scope under §12.1 rule 7 (no first person; exempt from the first-person floor) |
+| B4 | fracture .001–.014 | about 33 | about 11 | Neurofractured keys in scope: full first person, §12.1 rule 7 allowed/banned lists |
+| B5 | fracture .015–.029 | about 34 | about 11 | fracture.022 "we" lines held for L-2; fracture.027 is W7 |
 | B6 | initiation | 29 | 11 | |
-| B7 | countdown, endgame, heir | 40 | 10 | W7 set pieces stay out until approved |
+| B7 | countdown, endgame, heir | 40 | 10 | W7 set pieces (approved) are written with W7, not here; carries the four Seamless shipped-text fixes below |
 | B8 | patron, procedures, tamper, interactions, realm | 42 | 7 | patron letters are W9 |
 | B9 | retinue, nonruler, activities | 29 | 15 | activities keep their activity backgrounds |
 | B10 | inherit | 40 | 3 | 19 keys of `'…'` speech, already converted by W0e |
 | B11 | kingpin | 54 | 3 | after CB-46; batch B is already written in the new voice |
 | B12 | frontier | 9 | 0 | Frontier owner; mostly neutral already, so a light pass |
+
+**Seamless shipped-text fixes (L-1, 2026-10-09; eotg-localizer items in batch B7).** Existing keys whose shipped text breaks the no-first-person register. Lore-keeper wording, applied as given:
+
+| Key | New text (or replacement) |
+|---|---|
+| `eotg_aug_heir.004.desc_seamless` | "\n\nThey address the chair. There is no one else in it to address." (supersedes procedures_lore N5) |
+| `eotg_aug_end.041.desc_residue_high` | "...the head tilts the way it once did for listening." |
+| `eotg_aug_end.041.desc_residue_low` | "Nothing in the face at the head of the table has moved." |
+| `eotg_aug_end.011.desc`, `.desc_named` | the root reference becomes "the [court seat]" (the dynamic council-seat term per the dynamic-terms ruling) |
+| `eotg_aug_end.011.desc_none` | "...watch the chair." |
+
+The localizer fits the end.041 and end.011 phrases into the existing sentences without adding beats; each residue line still ends logged, filed or pruned (procedures_lore ruling (a)).
 
 ---
 
@@ -650,20 +681,22 @@ That is 230 events overridden and 19 kept: the 6 activity events plus 13 family,
 ---
 
 ## 16. Owner and lore questions (few)
-- **Q1 (owner).** Should W0a/W0e run now, ahead of the voice rewrite? *Recommendation: yes.* The conversion is mechanical and small (40 keys plus REVIEW items), and new text (CB-46) can then be written in the final form.
-- **Q2 (owner, approval of NEW content).**
-  - Approve W7 (the six endgame set pieces: `big_event_window`, 90–140 words, effect and music; fullscreen later with art).
-  - Approve the NEW half of W9: the patron.006 absent-variant letter and the separate unsigned syndicate notes.
-- **Q3 (owner, tone).** At Seamless, should the first-person narrator thin into the logging voice (§12.1 rule 7)? The lore-keeper rules on the register first (L-1). The owner decides only if lore leaves it open.
-- **L-1 (lore-keeper).** Restate the Seamless register (`cybernetics_v2_procedures_lore.md` §(c)) and the Neurofractured text rules for first-person narration. Until then those keys are skipped.
+- **Q1 (owner): RULED 2026-10-09.** Run the quote conversion now. *(Asked: should W0a/W0e run ahead of the voice rewrite? Recommendation was yes.)* eotg-localizer is applying it: the W0d pilot, then the 40 AUTO keys, then the 13 REVIEW items by hand (W0e status line).
+- **Q2 (owner, approval of NEW content): RULED 2026-10-09, approved.**
+  - W7: the six endgame set pieces (`big_event_window` now, 90–140 words, effect and music; fullscreen later with art).
+  - The NEW half of W9: the patron.006 absent-variant letter and the separate unsigned syndicate notes.
+- **Q3 (owner, tone): RULED 2026-10-09.** The Seamless fade is staged **once, at the threshold only** (the end.009 Seamless outcome, end.010, optionally fracture.027), framed as a record (the log register), not a speaker. Steady-state Seamless text has no first person (§12.1 rule 7).
+- **L-1 (lore-keeper): ANSWERED 2026-10-09.** Folded into §12.1 rule 7 and `cybernetics_v2_procedures_lore.md` §(c); the four shipped-text fixes are batch B7 items (§13.3).
+- **L-2 (lore-keeper, new, open).** Rule 6 keeps the model's "we" lines (fracture.022), but L-1 bans a second speaker in Neurofractured text. Do those lines survive, get reworded (to what), or go? Blocks only fracture.022 in B5.
+- **Voice baseline (orchestrator, settled 2026-10-09).** 74% second person from the ported scorecard is the "before" figure; the report's 52% is not reproducible. The classifier in §15 stands.
 
 ---
 
 ### HANDOFF
-- status: done
-- next: orchestrator. Dispatch the W0a doc updates (§12.4), a tooling session for W0b, W0c and W0e (the scorecard, the lint and checker rules, the quote converter with a dry-run diff), then eotg-localizer for the W0d pilot. Send L-1 to eotg-lore-keeper; put Q1–Q3 to the owner.
-- ask: Port `evq.py` into `docs/tools/eotg_event_quality.py` before its scratchpad is cleaned up, then run P0 in the order of §11.
-- files: docs/specs/event_quality_v1.md
-- needs-loc: none yet (W0d pilot key `eotg_aug_heir.003.desc` after tooling)
-- needs-lore: L-1, the Seamless and Neurofractured register in first-person narration
-- needs-human: Q1 (run the quote conversion now), Q2 (approve the W7 set pieces and the NEW half of W9), Q3 (Seamless narrator tone, if lore leaves it open); add `common/event_backgrounds/` to the CLAUDE.md placement list; CB-44 in-game checks for W0d and W2
+- status: done (spec updated with the 2026-10-09 rulings; no open owner questions)
+- next: orchestrator → eotg-scripter for **W2** (backgrounds and 2D effects, §11 P1 and §14). W2 needs no owner input: W0b's "before" scorecard exists and §14 fixes the key set and the event mapping.
+- ask: Create the `eotg_bg_*` background keys in `common/event_backgrounds/` per §14.1 and set `override_background` on the 230 events in §14.2 (keep list of 19 stays); report any class moves in the batch report. Then eotg-qa takes the scorecard before/after and runs Tiger, PX and lint.
+- files: docs/specs/event_quality_v1.md, docs/specs/cybernetics_v2_procedures_lore.md
+- needs-loc: W0d/W0e already in flight with eotg-localizer; the four Seamless shipped-text fixes are queued in batch B7 (§13.3)
+- needs-lore: L-2 (fracture.022 model "we" against the L-1 second-speaker ban); W7 addendum review once written
+- needs-human: CB-44 in-game checks for W0d and W2 (`common/event_backgrounds/` is already in the CLAUDE.md placement list)
