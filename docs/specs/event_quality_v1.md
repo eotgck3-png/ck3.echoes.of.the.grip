@@ -299,7 +299,7 @@ New text written in the meantime follows §12 from the day it is dispatched. Tha
   - L011 pronoun checks pass.
   - The lore-keeper signs off.
 - **Risk:**
-  - Tone loss: second person served the dissociation. §12.1 keeps that effect through "I" against the model's "we".
+  - Tone loss: second person served the dissociation. §12.1 keeps that effect through "I" against the forecast "we" in the ruler's own mouth.
   - Pronoun slips: "you" left in narration. The batch report greps for it.
   - Batches collide with other loc work, so only one batch per loc file is in flight at a time.
 - **Gemini queue (optional):** the drafts are raw material only (memory: GeminiQA was 39% false, and Gemini drifts medieval). If one is used:
@@ -429,7 +429,7 @@ New text written in the meantime follows §12 from the day it is dispatched. Tha
    - letters (the sender to the reader);
    - NPC speech inside quotes;
    - short option or outcome lines where vanilla also uses it.
-6. **The model's "we".** First person makes the implant's intrusions sharper: the narrator's "I" against the model's "we" (fracture.022) is the effect that replaces second person's dissociation. Keep every existing "we" line; don't add new ones (that is a beat).
+6. **The forecast "we".** First person makes the implant's intrusions sharper: the narrator's "I" against the "we" that the forecast puts in the ruler's own mouth (fracture.022) is the effect that replaces second person's dissociation. The "we" is always the ruler's spoken word or an option line, never a line the model says. Keep every existing "we" line; don't add new ones (that is a beat). (L-2, eotg-lore-keeper 2026-10-09.)
 7. **Seamless and Neurofractured** (L-1 answered by eotg-lore-keeper 2026-10-09; Q3 RULED; binding source `cybernetics_v2_procedures_lore.md` §(c)).
    - **Seamless has no first person.** "Seamless ends the self" (SETTING LORE ERRATA :76-77; `cybernetics_v2.md` Q9 :42). In steady state:
      - narration is neutral and log-like, with no narrating subject: no I, me, my, we or our;
@@ -442,7 +442,7 @@ New text written in the meantime follows §12 from the day it is dispatched. Tha
    - **Neurofractured is full first person**: a degrading self.
      - *Allowed:* gaps and missing time; the forecast running ahead (a known sentence end, ready answers with a confidence figure, a forecast filed as memory); hearing one's own words late; overlay text that labels me; motor pre-emption as granted and logged access; unreliable narration set against the log; feelings.
      - *Banned:* a second speaker (no "it tells me / says / answers", no quoted implant lines, no addressing the implant); "hearing the voice"; possession framing; the Void lexicon and Carrigore; giving the implant wants or decisions.
-   - **Conflict with rule 6 (open, L-2).** Rule 6 keeps the model's "we" lines (fracture.022); L-1 bans a second speaker in Neurofractured text. Until the lore-keeper rules whether those lines survive, B5 holds fracture.022's "we" lines unchanged and adds none.
+   - **Rule 6 and the second-speaker ban (L-2, answered 2026-10-09).** fracture.022's "we" lines are the ruler's own speech, so they are not a second speaker. They are kept. B5 converts them to first person like any other key.
    - **Scorecard:** Seamless keys are exempt from the first-person floor (§9 item 2, W1 DoD).
 8. **Options** are first person or imperative ("Let them watch.", "I will speak to them myself."), as today.
 9. **Length** keeps the existing band unless the event is a W7 set piece. Break paragraphs at the beat with `\n\n`.
@@ -548,7 +548,7 @@ After the current cybernetics loc batches (the dynamic-terms ruling applied; CB-
 | B2 | tier2 | 36 | 16 | |
 | B3 | tier3 | 46 | 17 | Seamless keys in scope under §12.1 rule 7 (no first person; exempt from the first-person floor) |
 | B4 | fracture .001–.014 | about 33 | about 11 | Neurofractured keys in scope: full first person, §12.1 rule 7 allowed/banned lists |
-| B5 | fracture .015–.029 | about 34 | about 11 | fracture.022 "we" lines held for L-2; fracture.027 is W7 |
+| B5 | fracture .015–.029 | about 34 | about 11 | L-2 answered 2026-10-09: fracture.022 is in scope, with the lore-approved text below; fracture.027 is W7 |
 | B6 | initiation | 29 | 11 | |
 | B7 | countdown, endgame, heir | 40 | 10 | W7 set pieces (approved) are written with W7, not here; carries the four Seamless shipped-text fixes below |
 | B8 | patron, procedures, tamper, interactions, realm | 42 | 7 | patron letters are W9 |
@@ -556,6 +556,13 @@ After the current cybernetics loc batches (the dynamic-terms ruling applied; CB-
 | B10 | inherit | 40 | 3 | 19 keys of `'…'` speech, already converted by W0e |
 | B11 | kingpin | 54 | 3 | after CB-46; batch B is already written in the new voice |
 | B12 | frontier | 9 | 0 | Frontier owner; mostly neutral already, so a light pass |
+
+**fracture.022 first-person text (L-2, lore-approved 2026-10-09; eotg-localizer items in batch B5).** `eotg_fracture.022.desc` stays as in §12.3 example 4 (approved); the options are unchanged.
+
+| Key | Text |
+|---|---|
+| `eotg_fracture.022.desc_first` | "\n\nThis is the first time I have caught it. The word did not feel like a slip. It felt like the more accurate pronoun, applied half a second before I chose it." |
+| `eotg_fracture.022.desc_known` | "\n\nI saw it coming. The model has been treating my decisions as joint for some time, and I have been letting it. Now the grammar has caught up in public." |
 
 **Seamless shipped-text fixes (L-1, 2026-10-09; eotg-localizer items in batch B7).** Existing keys whose shipped text breaks the no-first-person register. Lore-keeper wording, applied as given:
 
@@ -687,7 +694,7 @@ That is 230 events overridden and 19 kept: the 6 activity events plus 13 family,
   - The NEW half of W9: the patron.006 absent-variant letter and the separate unsigned syndicate notes.
 - **Q3 (owner, tone): RULED 2026-10-09.** The Seamless fade is staged **once, at the threshold only** (the end.009 Seamless outcome, end.010, optionally fracture.027), framed as a record (the log register), not a speaker. Steady-state Seamless text has no first person (§12.1 rule 7).
 - **L-1 (lore-keeper): ANSWERED 2026-10-09.** Folded into §12.1 rule 7 and `cybernetics_v2_procedures_lore.md` §(c); the four shipped-text fixes are batch B7 items (§13.3).
-- **L-2 (lore-keeper, new, open).** Rule 6 keeps the model's "we" lines (fracture.022), but L-1 bans a second speaker in Neurofractured text. Do those lines survive, get reworded (to what), or go? Blocks only fracture.022 in B5.
+- **L-2 (lore-keeper): ANSWERED 2026-10-09.** Keep fracture.022's "we" lines: they are the ruler's own spoken word, not a second speaker. Folded into §12.1 rules 6 and 7; the B5 text is in §13.3. Nothing in B5 is held.
 - **Voice baseline (orchestrator, settled 2026-10-09).** 74% second person from the ported scorecard is the "before" figure; the report's 52% is not reproducible. The classifier in §15 stands.
 
 ---
@@ -698,5 +705,5 @@ That is 230 events overridden and 19 kept: the 6 activity events plus 13 family,
 - ask: Create the `eotg_bg_*` background keys in `common/event_backgrounds/` per §14.1 and set `override_background` on the 230 events in §14.2 (keep list of 19 stays); report any class moves in the batch report. Then eotg-qa takes the scorecard before/after and runs Tiger, PX and lint.
 - files: docs/specs/event_quality_v1.md, docs/specs/cybernetics_v2_procedures_lore.md
 - needs-loc: W0d/W0e already in flight with eotg-localizer; the four Seamless shipped-text fixes are queued in batch B7 (§13.3)
-- needs-lore: L-2 (fracture.022 model "we" against the L-1 second-speaker ban); W7 addendum review once written
+- needs-lore: W7 addendum review once written (L-1 and L-2 answered 2026-10-09)
 - needs-human: CB-44 in-game checks for W0d and W2 (`common/event_backgrounds/` is already in the CLAUDE.md placement list)
