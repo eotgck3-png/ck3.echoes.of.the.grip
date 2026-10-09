@@ -1,0 +1,64 @@
+# event_quality_v1 W3 for the Kingpin, batch A (P3 batch B11): loc keys the built script references
+# (eotg-scripter, 2026-10-09). Script: events/eotg_augmentation_kingpin.txt. Owner of the text: eotg-localizer.
+# Target file (UTF-8 with BOM, existing): localization/english/eotg_aug_kingpin_l_english.yml.
+#   Put them next to each event's option keys, as batch B did (.031/.032/.034/.036/.066/.067 toasts).
+#
+# What these are. Every key is a TOAST TITLE only (send_interface_toast to root). No desc keys.
+#   type good / bad = event_toast_effect_good / _bad. Icons are set in script: left = root, right = the
+#   party named in the note. Do not repeat them in text.
+# Rules for the text: the same as docs/specs/build/w3_loc_keys.txt (header), plus the Kingpin's own:
+#   - Say what happened in a short title line, the way batch B's do ("The Hunt Came Up Empty",
+#     "The Loose Ends Were Tied"). Canadian English, no dashes, no time-of-day words.
+#   - NEVER a number, odds, chance, or "risk"; never name fracture risk, pressure, the band or leverage.
+#   - The word "kingpin" never appears; the organization is named only through the per-kind Custom()
+#     lines, so a title should not name it at all (cybernetics_v2_kingpin.md §5.2.1, §7.3-§7.4).
+#   - The boss's implant never acts and never speaks (§7.4; event_quality_v1 §12.1 rules 7 and 12).
+#   - First person or neutral (§12.1 rules 1 and 5). Scopes: [eotg_kp.GetFirstName] and, for .007,
+#     [eotg_kp_informant.GetFirstName] are saved before the option runs; bare form, never [scope:x].
+#     If in doubt, leave the name out: the right icon already shows who.
+#   - Several of these land a day or a few days before a follow-up event that tells the same story
+#     (noted below). The title must stay true to that event and not pre-empt its text.
+# Key form: <event_id>.toast_<option>_<outcome> (batch B's form).
+
+## eotg_aug_kingpin.005 The Errand, c_blackmail "Use it on [kp] instead." (intrigue duel against the boss)
+eotg_aug_kingpin.005.toast_c_blackmail_success   good  right: eotg_kp   the file turned on the boss; their hold on me loosens (leverage down, evidence gained; name neither)
+eotg_aug_kingpin.005.toast_c_blackmail_failure   bad   right: eotg_kp   the boss saw it coming; their hold tightens
+
+## eotg_aug_kingpin.006 The Episode, c_purge "Sit down. Talk me through it." (diplomacy duel, purge mind)
+eotg_aug_kingpin.006.toast_c_purge_success       good  right: eotg_kp   the boss was talked down (calmer; say only the visible: they settle, they leave quietly)
+eotg_aug_kingpin.006.toast_c_purge_failure       bad   right: eotg_kp   the talk went nowhere; the boss leaves worse than they came (no meter words)
+
+## eotg_aug_kingpin.007 The Informant, b "Turn [informant]." (intrigue duel against the informant)
+eotg_aug_kingpin.007.toast_b_success             good  right: eotg_kp_informant   the informant now reports to me
+eotg_aug_kingpin.007.toast_b_failure             bad   right: eotg_kp_informant   the informant would not turn, and the boss will hear of it
+
+## eotg_aug_kingpin.010 The Arrest, a "Take [kp] alive." (martial duel) and b "Quietly, while [kp] sleeps." (intrigue duel)
+#   success: the boss is taken and held; .013 In Custody follows next day.
+#   failure: the boss slips away; .012 Retaliation follows in 5-15 days (do not name the retaliation).
+eotg_aug_kingpin.010.toast_a_success             good  right: eotg_kp   taken alive (by force)
+eotg_aug_kingpin.010.toast_a_failure             bad   right: eotg_kp   the raid failed; the boss got away
+eotg_aug_kingpin.010.toast_b_success             good  right: eotg_kp   taken quietly
+eotg_aug_kingpin.010.toast_b_failure             bad   right: eotg_kp   the quiet arrest was blown; the boss got away
+#   b is hidden on the audience arrest (from .002 b), so b's lines may say "quietly" freely; a's must also
+#   read true when the boss was standing in the audience chamber (.010.desc_audience).
+
+## eotg_aug_kingpin.011 The Crackdown, a "Every level. Every door." (martial duel against a high rating)
+#   success: the boss is caught and held; .013 follows next day.
+#   failure: the lower levels hold out; The Break (.068) or A Standing Arrangement (.073) follows in 3-10
+#   days, by the hidden band, so the title must fit both (do not hint at which).
+eotg_aug_kingpin.011.toast_a_success             good  right: eotg_kp   the sweep found the boss
+eotg_aug_kingpin.011.toast_a_failure             bad   right: eotg_kp   the sweep came up empty; the lower levels held
+
+## eotg_aug_kingpin.015 The Audit, a "Audit everything." (stewardship duel against the boss's intrigue)
+#   success: the records hold; the boss is arrested; .013 follows in 5 days.
+#   failure: the records do not hold; .012 Retaliation follows in 10-20 days.
+eotg_aug_kingpin.015.toast_a_success             good  right: eotg_kp   the audit found enough to arrest
+eotg_aug_kingpin.015.toast_a_failure             bad   right: eotg_kp   the audit found nothing that holds
+
+## eotg_aug_kingpin.068 The Break, a "Hunt [kp] down. Now." (martial duel)
+#   success: the boss dies in the fighting (death_battle). failure: the boss is gone below for good
+#   (death_vanished; the story ends either way). Both are endings of a massacre: no triumph.
+eotg_aug_kingpin.068.toast_a_success             good  right: eotg_kp   the boss died in the fighting
+eotg_aug_kingpin.068.toast_a_failure             bad   right: eotg_kp   the boss is gone into the lower levels
+
+# Total: 16 toast titles. No send_interface_message keys in this pass.

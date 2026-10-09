@@ -60,6 +60,13 @@
 #   outcomes (W3 form: <ns>.<id>.toast_<option>_<outcome>); dangerous on
 #   options that can wound the ruler or hand over control. Batch B loc is
 #   written in the new voice (§12: first person, vanilla double quotes).
+# Event quality P3 batch B11 (§13; W5 + W6 on all 42, W3 owed on batch A):
+#   root portraits react by trait (triggered_animation, the old animation
+#   the fallback); the boss's portrait reads the Storm band in eight scenes;
+#   .005 c_infiltration (intrigue), .006 b_cold (stewardship) and .008 c
+#   (duchy+) re-axed; kept personality options carry trait, trigger and
+#   stress; toasts on every batch A duel branch; music on .013 (prison),
+#   .060 / .062 / .075 (death) and .068 (murder, when anyone was named).
 #
 # Fires from: .001 from eotg_on_yearly_aug_kingpin_check (cooldown authority,
 #   10 years) and eotg_decision_aug_debug_kingpin; .004-.009, .014, .033,
@@ -164,11 +171,30 @@ eotg_aug_kingpin.001 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = callous } }
+            animation = anger
+        }
         animation = thinking
     }
     right_portrait = {
         character = scope:eotg_kp
         animation = scheme
+    }
+    # W6: the reporter at their post (role animation; the marshal when the
+    # spymaster seat is empty, as in immediate)
+    lower_left_portrait = {
+        trigger = { exists = scope:eotg_kp_reporter }
+        character = scope:eotg_kp_reporter
+        triggered_animation = {
+            trigger = { has_council_position = councillor_marshal }
+            animation = marshal
+        }
+        animation = spymaster
     }
 
     immediate = {
@@ -357,10 +383,22 @@ eotg_aug_kingpin.002 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = callous } }
+            animation = anger
+        }
         animation = personality_rational
     }
     right_portrait = {
         character = scope:eotg_kp
+        triggered_animation = {    # W6: the boss in Storm cannot sit still
+            trigger = { eotg_aug_pressure_storm = yes }
+            animation = paranoia
+        }
         animation = personality_bold
     }
 
@@ -419,6 +457,10 @@ eotg_aug_kingpin.002 = {
         }
         custom_tooltip = eotg_aug_kingpin.002.c.tt
         trigger_event = { id = eotg_aug_kingpin.003  days = 1 }
+        # W5 (§13.1 step 5): the kept personality option gets its stress entry
+        stress_impact = {
+            deceitful = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 20  has_trait = deceitful }
@@ -504,10 +546,22 @@ eotg_aug_kingpin.003 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = greedy }
+            animation = personality_greedy
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = just  has_trait = honest } }
+            animation = disapproval
+        }
         animation = thinking
     }
     right_portrait = {
         character = scope:eotg_kp
+        triggered_animation = {    # W6: the boss in Storm (reads the band)
+            trigger = { eotg_aug_pressure_storm = yes }
+            animation = paranoia
+        }
         animation = scheme
     }
 
@@ -813,10 +867,22 @@ eotg_aug_kingpin.004 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = greedy }
+            animation = personality_greedy
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = just  has_trait = honest } }
+            animation = disapproval
+        }
         animation = thinking
     }
     right_portrait = {
         character = scope:eotg_kp
+        triggered_animation = {    # W6: the boss in Storm (reads the band)
+            trigger = { eotg_aug_pressure_storm = yes }
+            animation = paranoia
+        }
         animation = scheme
     }
 
@@ -987,6 +1053,14 @@ eotg_aug_kingpin.005 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = worry
+        }
         animation = thinking
     }
     right_portrait = {
@@ -1154,6 +1228,12 @@ eotg_aug_kingpin.005 = {
                     multiplier = 3.5
                     min = -49
                 }
+                send_interface_toast = {    # W3
+                    type = event_toast_effect_good
+                    title = eotg_aug_kingpin.005.toast_c_blackmail_success
+                    left_icon = root
+                    right_icon = scope:eotg_kp
+                }
                 eotg_aug_kp_leverage_down_effect = { AMOUNT = 15 }
                 hidden_effect = {
                     scope:eotg_kp_story = { change_variable = { name = eotg_kp_evidence  add = 1 } }
@@ -1165,6 +1245,12 @@ eotg_aug_kingpin.005 = {
                     value = scope:duel_value
                     multiplier = -3.5
                     min = -49
+                }
+                send_interface_toast = {    # W3
+                    type = event_toast_effect_bad
+                    title = eotg_aug_kingpin.005.toast_c_blackmail_failure
+                    left_icon = root
+                    right_icon = scope:eotg_kp
                 }
                 eotg_aug_kp_leverage_up_effect = { AMOUNT = 10 }
                 hidden_effect = {
@@ -1213,20 +1299,20 @@ eotg_aug_kingpin.005 = {
         }
     }
 
-    # c_infiltration [paranoid or schemer] "Give them a post. Watch them."
-    # As a, already unmasked; leverage +5.
+    # c_infiltration [education_intrigue] "Give [lieutenant] a post, and read everything they touch."
+    # As a, already unmasked; leverage +5. W5 (event_quality_v1 §13.1 3a):
+    # was [paranoid or schemer]; seating a plant and running them back is a
+    # spymaster's craft, so intrigue. paranoid stays an AI weight here and on
+    # b; c_bribery [just] is the event's kept personality gate. The method
+    # trigger is unchanged (§5.2 variation).
     option = {
         name = eotg_aug_kingpin.005.c_infiltration
         trigger = {
             eotg_aug_kp_is = { AXIS = method  VALUE = infiltration }
             exists = scope:eotg_kp_lieutenant
-            OR = {
-                has_trait = paranoid
-                has_trait = schemer
-            }
+            has_trait = education_intrigue
         }
-        trait = paranoid
-        trait = schemer
+        skill = intrigue
         add_courtier = scope:eotg_kp_lieutenant
         custom_tooltip = eotg_aug_kingpin.005.c_infiltration.tt
         hidden_effect = {
@@ -1238,8 +1324,11 @@ eotg_aug_kingpin.005 = {
         eotg_aug_kp_leverage_up_effect = { AMOUNT = 5 }
         ai_chance = {
             base = 40
-            modifier = { add = 20  has_trait = paranoid }
-            modifier = { add = 20  has_trait = schemer }
+            modifier = { add = 20  has_trait = education_intrigue_3 }
+            modifier = { add = 30  has_trait = education_intrigue_4 }
+            modifier = { add = 30  has_trait = education_intrigue_5 }
+            modifier = { add = 10  has_trait = paranoid }
+            modifier = { add = 10  has_trait = schemer }
         }
     }
 
@@ -1284,6 +1373,10 @@ eotg_aug_kingpin.005 = {
         trait = just
         add_gold = minor_gold_value
         eotg_aug_kp_refuse_effect = { RISK = 10 }
+        # W5 (§13.1 step 5): the kept personality option gets its stress entry
+        stress_impact = {
+            just = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = just }
@@ -1363,6 +1456,14 @@ eotg_aug_kingpin.006 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = callous } }
+            animation = anger
+        }
         animation = worry
     }
     right_portrait = {
@@ -1446,6 +1547,12 @@ eotg_aug_kingpin.006 = {
                     multiplier = 3.5
                     min = -49
                 }
+                send_interface_toast = {    # W3
+                    type = event_toast_effect_good
+                    title = eotg_aug_kingpin.006.toast_c_purge_success
+                    left_icon = root
+                    right_icon = scope:eotg_kp
+                }
                 eotg_aug_kp_calm_effect = { RISK = 10 }
             }
             50 = {
@@ -1454,6 +1561,12 @@ eotg_aug_kingpin.006 = {
                     value = scope:duel_value
                     multiplier = -3.5
                     min = -49
+                }
+                send_interface_toast = {    # W3
+                    type = event_toast_effect_bad
+                    title = eotg_aug_kingpin.006.toast_c_purge_failure
+                    left_icon = root
+                    right_icon = scope:eotg_kp
                 }
                 hidden_effect = {
                     scope:eotg_kp = { eotg_add_fracture_risk = { AMOUNT = 5 } }
@@ -1597,21 +1710,28 @@ eotg_aug_kingpin.006 = {
         }
     }
 
-    # b_cold [callous] "Send back an invoice of my own." Dread +10; kp -5.
+    # b_cold [education_stewardship] "Send back an invoice of my own." Dread
+    # +10; kp -5. W5 (event_quality_v1 §13.1 3a): was [callous]; answering
+    # the boss's itemized ledger line for line is a steward's craft, so
+    # stewardship (callous stays an AI weight). c_grandeur [arrogant] is the
+    # event's kept personality gate. The mind trigger is unchanged (§5.2).
     option = {
         name = eotg_aug_kingpin.006.b_cold
         trigger = {
             eotg_aug_kp_is = { AXIS = mind  VALUE = cold }
-            has_trait = callous
+            has_trait = education_stewardship
         }
-        trait = callous
+        skill = stewardship
         add_dread = 10
         hidden_effect = {
             scope:eotg_kp = { eotg_add_fracture_risk = { AMOUNT = -5 } }
         }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = callous }
+            modifier = { add = 20  has_trait = education_stewardship_3 }
+            modifier = { add = 30  has_trait = education_stewardship_4 }
+            modifier = { add = 30  has_trait = education_stewardship_5 }
+            modifier = { add = 10  has_trait = callous }
             modifier = { add = 10  has_trait = arrogant }
         }
     }
@@ -1653,6 +1773,14 @@ eotg_aug_kingpin.007 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = vengeful } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = trusting }
+            animation = disbelief
+        }
         animation = paranoia
     }
     right_portrait = {
@@ -1715,6 +1843,12 @@ eotg_aug_kingpin.007 = {
                     multiplier = 3.5
                     min = -49
                 }
+                send_interface_toast = {    # W3
+                    type = event_toast_effect_good
+                    title = eotg_aug_kingpin.007.toast_b_success
+                    left_icon = root
+                    right_icon = scope:eotg_kp_informant
+                }
                 eotg_aug_kp_leverage_down_effect = { AMOUNT = 20 }
                 hidden_effect = {
                     scope:eotg_kp_story = {
@@ -1729,6 +1863,12 @@ eotg_aug_kingpin.007 = {
                     value = scope:duel_value
                     multiplier = -3.5
                     min = -49
+                }
+                send_interface_toast = {    # W3
+                    type = event_toast_effect_bad
+                    title = eotg_aug_kingpin.007.toast_b_failure
+                    left_icon = root
+                    right_icon = scope:eotg_kp_informant
                 }
                 eotg_aug_kp_leverage_up_effect = { AMOUNT = 10 }
                 hidden_effect = {
@@ -1779,10 +1919,22 @@ eotg_aug_kingpin.008 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = callous } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
         animation = disapproval
     }
     right_portrait = {
         character = scope:eotg_kp
+        triggered_animation = {    # W6: the boss in Storm (reads the band)
+            trigger = { eotg_aug_pressure_storm = yes }
+            animation = threatening
+        }
         animation = personality_callous
     }
 
@@ -1830,23 +1982,24 @@ eotg_aug_kingpin.008 = {
         }
     }
 
-    # c [brave or wrathful] "Send the guard into the stacks." -> .011
+    # c [duchy+] "Command the guard into the lower levels." -> .011. W5
+    # (event_quality_v1 §13.1 3b): was [brave or wrathful]; ordering the
+    # guard into the lower levels is a lord's command, so a duchy tier gate,
+    # no icon. The kingpin file's tier gate (§13.1 step 6). brave and
+    # wrathful stay as AI weights; base lowered and counter-traits added
+    # because a tier gate shows to every AI duke (B1 lesson 4).
     option = {
         name = eotg_aug_kingpin.008.c
-        trigger = {
-            OR = {
-                has_trait = brave
-                has_trait = wrathful
-            }
-        }
-        trait = brave
-        trait = wrathful
+        trigger = { highest_held_title_tier >= tier_duchy }
         custom_tooltip = eotg_aug_kingpin.008.c.tt
         trigger_event = { id = eotg_aug_kingpin.011  days = { 5 10 } }
         ai_chance = {
-            base = 30
+            base = 10
             modifier = { add = 20  has_trait = brave }
             modifier = { add = 20  has_trait = wrathful }
+            modifier = { add = -10  has_trait = craven }
+            modifier = { add = -10  has_trait = calm }
+            modifier = { add = -10  has_trait = content }
         }
     }
 }
@@ -1873,6 +2026,14 @@ eotg_aug_kingpin.009 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = ambitious }
+            animation = scheme
+        }
         animation = thinking
     }
     right_portrait = {
@@ -2044,10 +2205,22 @@ eotg_aug_kingpin.010 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = wrathful }
+            animation = anger
+        }
         animation = personality_bold
     }
     right_portrait = {
         character = scope:eotg_kp
+        triggered_animation = {    # W6: the boss in Storm (reads the band)
+            trigger = { eotg_aug_pressure_storm = yes }
+            animation = rage
+        }
         animation = paranoia
     }
 
@@ -2075,6 +2248,12 @@ eotg_aug_kingpin.010 = {
                     add = -10
                     eotg_aug_kp_is = { AXIS = kind  VALUE = hired }
                 }
+                send_interface_toast = {    # W3
+                    type = event_toast_effect_good
+                    title = eotg_aug_kingpin.010.toast_a_success
+                    left_icon = root
+                    right_icon = scope:eotg_kp
+                }
                 imprison_character_effect = {
                     TARGET = scope:eotg_kp
                     IMPRISONER = root
@@ -2088,6 +2267,12 @@ eotg_aug_kingpin.010 = {
                     value = scope:duel_value
                     multiplier = -3.5
                     min = -49
+                }
+                send_interface_toast = {    # W3
+                    type = event_toast_effect_bad
+                    title = eotg_aug_kingpin.010.toast_a_failure
+                    left_icon = root
+                    right_icon = scope:eotg_kp
                 }
                 hidden_effect = {
                     scope:eotg_kp = { eotg_add_fracture_risk = { AMOUNT = 10 } }
@@ -2120,6 +2305,12 @@ eotg_aug_kingpin.010 = {
                     min = -49
                 }
                 modifier = { add = eotg_aug_kp_arrest_value }
+                send_interface_toast = {    # W3
+                    type = event_toast_effect_good
+                    title = eotg_aug_kingpin.010.toast_b_success
+                    left_icon = root
+                    right_icon = scope:eotg_kp
+                }
                 imprison_character_effect = {
                     TARGET = scope:eotg_kp
                     IMPRISONER = root
@@ -2133,6 +2324,12 @@ eotg_aug_kingpin.010 = {
                     value = scope:duel_value
                     multiplier = -3.5
                     min = -49
+                }
+                send_interface_toast = {    # W3
+                    type = event_toast_effect_bad
+                    title = eotg_aug_kingpin.010.toast_b_failure
+                    left_icon = root
+                    right_icon = scope:eotg_kp
                 }
                 hidden_effect = {
                     scope:eotg_kp = { eotg_add_fracture_risk = { AMOUNT = 10 } }
@@ -2185,10 +2382,22 @@ eotg_aug_kingpin.011 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = worry
+        }
         animation = anger
     }
     right_portrait = {
         character = scope:eotg_kp
+        triggered_animation = {    # W6: the boss in Storm (reads the band)
+            trigger = { eotg_aug_pressure_storm = yes }
+            animation = paranoia
+        }
         animation = rage
     }
 
@@ -2218,6 +2427,12 @@ eotg_aug_kingpin.011 = {
                     add = -10
                     eotg_aug_kp_is = { AXIS = kind  VALUE = hired }
                 }
+                send_interface_toast = {    # W3
+                    type = event_toast_effect_good
+                    title = eotg_aug_kingpin.011.toast_a_success
+                    left_icon = root
+                    right_icon = scope:eotg_kp
+                }
                 imprison_character_effect = {
                     TARGET = scope:eotg_kp
                     IMPRISONER = root
@@ -2231,6 +2446,12 @@ eotg_aug_kingpin.011 = {
                     value = scope:duel_value
                     multiplier = -3.5
                     min = -49
+                }
+                send_interface_toast = {    # W3
+                    type = event_toast_effect_bad
+                    title = eotg_aug_kingpin.011.toast_a_failure
+                    left_icon = root
+                    right_icon = scope:eotg_kp
                 }
                 hidden_effect = {
                     scope:eotg_kp = { eotg_add_fracture_risk = { AMOUNT = 5 } }
@@ -2315,9 +2536,18 @@ eotg_aug_kingpin.012 = {
             desc = eotg_aug_kingpin.012.desc_hired
         }
         first_valid = {
+            # The victim can be kin or a child (eotg_aug_pick_victim_effect):
+            # the adult line, then the young fallback (B11 review)
+            triggered_desc = {
+                trigger = {
+                    exists = scope:eotg_kp_victim
+                    scope:eotg_kp_victim = { is_adult = yes }
+                }
+                desc = eotg_aug_kingpin.012.desc_victim
+            }
             triggered_desc = {
                 trigger = { exists = scope:eotg_kp_victim }
-                desc = eotg_aug_kingpin.012.desc_victim
+                desc = eotg_aug_kingpin.012.desc_victim_young
             }
             triggered_desc = {
                 trigger = {
@@ -2351,10 +2581,22 @@ eotg_aug_kingpin.012 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = crying
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
         animation = anger
     }
     right_portrait = {
         character = scope:eotg_kp
+        triggered_animation = {    # W6: the boss in Storm (reads the band)
+            trigger = { eotg_aug_pressure_storm = yes }
+            animation = rage
+        }
         animation = personality_callous
     }
     lower_right_portrait = {
@@ -2525,6 +2767,14 @@ eotg_aug_kingpin.013 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = vengeful } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = worry
+        }
         animation = personality_callous
     }
     right_portrait = {
@@ -2533,6 +2783,7 @@ eotg_aug_kingpin.013 = {
     }
 
     immediate = {
+        play_music_cue = mx_cue_prison    # W3 (event_quality_v1): the boss in my cells
         hidden_effect = {
             eotg_aug_kp_save_scopes_effect = yes
         }
@@ -2648,6 +2899,14 @@ eotg_aug_kingpin.014 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = crying
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = wrathful }
+            animation = anger
+        }
         animation = shock
     }
     right_portrait = {
@@ -2741,10 +3000,22 @@ eotg_aug_kingpin.015 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = greedy }
+            animation = personality_greedy
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = diligent }
+            animation = reading
+        }
         animation = thinking
     }
     right_portrait = {
         character = scope:eotg_kp
+        triggered_animation = {    # W6: the boss in Storm (reads the band)
+            trigger = { eotg_aug_pressure_storm = yes }
+            animation = paranoia
+        }
         animation = worry
     }
 
@@ -2769,6 +3040,12 @@ eotg_aug_kingpin.015 = {
                     min = -49
                 }
                 modifier = { add = eotg_aug_kp_evidence_value }
+                send_interface_toast = {    # W3
+                    type = event_toast_effect_good
+                    title = eotg_aug_kingpin.015.toast_a_success
+                    left_icon = root
+                    right_icon = scope:eotg_kp
+                }
                 imprison_character_effect = {
                     TARGET = scope:eotg_kp
                     IMPRISONER = root
@@ -2782,6 +3059,12 @@ eotg_aug_kingpin.015 = {
                     value = scope:duel_value
                     multiplier = -3.5
                     min = -49
+                }
+                send_interface_toast = {    # W3
+                    type = event_toast_effect_bad
+                    title = eotg_aug_kingpin.015.toast_a_failure
+                    left_icon = root
+                    right_icon = scope:eotg_kp
                 }
                 hidden_effect = {
                     scope:eotg_kp = { eotg_add_fracture_risk = { AMOUNT = 5 } }
@@ -2886,6 +3169,14 @@ eotg_aug_kingpin.030 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = ambitious }
+            animation = scheme
+        }
         animation = war_attacker
     }
     right_portrait = {
@@ -2916,6 +3207,7 @@ eotg_aug_kingpin.030 = {
     # will not let the ruler raise the faction.
     option = {
         name = eotg_aug_kingpin.030.a
+        add_internal_flag = dangerous    # W3: starts a war (orchestrator 2026-10-09)
         trigger = {
             can_create_faction = {
                 type = claimant_faction
@@ -3097,6 +3389,14 @@ eotg_aug_kingpin.031 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = ambitious }
+            animation = ecstasy
+        }
         animation = war_attacker
     }
     right_portrait = {
@@ -3129,6 +3429,7 @@ eotg_aug_kingpin.031 = {
     # a "Declare it." The boss is the claimant, in my court; claim_cb.
     option = {
         name = eotg_aug_kingpin.031.a
+        add_internal_flag = dangerous    # W3: starts a war (orchestrator 2026-10-09)
         if = {
             limit = { NOT = { scope:eotg_kp = { is_courtier_of = root } } }
             add_courtier = scope:eotg_kp
@@ -3269,6 +3570,14 @@ eotg_aug_kingpin.032 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = worry
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = just }
+            animation = disapproval
+        }
         animation = personality_callous
     }
     right_portrait = {
@@ -3298,6 +3607,7 @@ eotg_aug_kingpin.032 = {
     # a "Revoke it by decree."
     option = {
         name = eotg_aug_kingpin.032.a
+        add_internal_flag = dangerous    # W3: starts a war (orchestrator 2026-10-09)
         eotg_aug_kp_seat_transfer_effect = { TYPE = revoked }
         add_tyranny = 40
         scope:eotg_kp_rival = {
@@ -3458,6 +3768,14 @@ eotg_aug_kingpin.033 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = worry
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = callous  has_trait = sadistic } }
+            animation = schadenfreude
+        }
         animation = war_attacker
     }
     right_portrait = {
@@ -3664,16 +3982,18 @@ eotg_aug_kingpin.034 = {
     title = eotg_aug_kingpin.034.t
     desc = {
         desc = eotg_aug_kingpin.034.desc
+        # The boss is away in talks: the .001 reported-observation band lines,
+        # not .002's in-the-room ones (B11 review)
         first_valid = {
             triggered_desc = {
                 trigger = { scope:eotg_kp = { eotg_aug_pressure_storm = yes } }
-                desc = eotg_aug_kingpin.002.desc_band_storm
+                desc = eotg_aug_kingpin.001.desc_band_storm
             }
             triggered_desc = {
                 trigger = { scope:eotg_kp = { eotg_aug_pressure_fracture = yes } }
-                desc = eotg_aug_kingpin.002.desc_band_fracture
+                desc = eotg_aug_kingpin.001.desc_band_fracture
             }
-            desc = eotg_aug_kingpin.002.desc_band_flicker
+            desc = eotg_aug_kingpin.001.desc_band_flicker
         }
     }
     theme = war
@@ -3690,6 +4010,14 @@ eotg_aug_kingpin.034 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = brave }
+            animation = personality_bold
+        }
         animation = anger
     }
     right_portrait = {
@@ -3824,6 +4152,14 @@ eotg_aug_kingpin.036 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = deceitful }
+            animation = scheme
+        }
         animation = personality_rational
     }
     right_portrait = {
@@ -3964,6 +4300,14 @@ eotg_aug_kingpin.038 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = ambitious }
+            animation = scheme
+        }
         animation = thinking
     }
     right_portrait = {
@@ -3999,6 +4343,7 @@ eotg_aug_kingpin.038 = {
     # a "Strike." The faction's war; stage war.
     option = {
         name = eotg_aug_kingpin.038.a
+        add_internal_flag = dangerous    # W3: starts a war (orchestrator 2026-10-09)
         trigger = {
             NOT = { exists = scope:eotg_kp_discovered }
             exists = scope:eotg_kp_faction
@@ -4100,6 +4445,14 @@ eotg_aug_kingpin.039 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = vengeful } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
         animation = war_defender
     }
     right_portrait = {
@@ -4193,6 +4546,14 @@ eotg_aug_kingpin.040 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = wrathful }
+            animation = anger
+        }
         animation = sadness
     }
     right_portrait = {
@@ -4314,10 +4675,22 @@ eotg_aug_kingpin.050 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = vengeful } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
         animation = stress
     }
     right_portrait = {
         character = scope:eotg_kp
+        triggered_animation = {    # W6: the boss in Storm (reads the band)
+            trigger = { eotg_aug_pressure_storm = yes }
+            animation = threatening
+        }
         animation = dismissal
     }
     lower_right_portrait = {
@@ -4466,6 +4839,14 @@ eotg_aug_kingpin.060 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = sadness
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = sadistic }
+            animation = schadenfreude
+        }
         animation = personality_callous
     }
     right_portrait = {
@@ -4474,6 +4855,7 @@ eotg_aug_kingpin.060 = {
     }
 
     immediate = {
+        play_music_cue = mx_cue_death    # W3 (event_quality_v1): the execution
         hidden_effect = {
             eotg_aug_kp_save_scopes_effect = yes
             eotg_aug_kp_leaf_open_effect = yes
@@ -4567,6 +4949,14 @@ eotg_aug_kingpin.061 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = just }
+            animation = personality_honorable
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = sadness
+        }
         animation = personality_rational
     }
     right_portrait = {
@@ -4673,10 +5063,19 @@ eotg_aug_kingpin.062 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = greedy }
+            animation = personality_greedy
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = just  has_trait = honest } }
+            animation = disapproval
+        }
         animation = scheme
     }
 
     immediate = {
+        play_music_cue = mx_cue_death    # W3 (event_quality_v1): the boss's cascade death
         hidden_effect = {
             eotg_aug_kp_save_scopes_effect = yes
             eotg_aug_kp_leaf_open_effect = yes
@@ -4810,6 +5209,14 @@ eotg_aug_kingpin.063 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = greedy }
+            animation = personality_greedy
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
         animation = happiness
     }
     right_portrait = {
@@ -5002,6 +5409,14 @@ eotg_aug_kingpin.064 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = shame
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
         animation = schadenfreude
     }
     right_portrait = {
@@ -5088,6 +5503,14 @@ eotg_aug_kingpin.065 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = vengeful } }
+            animation = rage
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
         animation = war_over_loss
     }
     right_portrait = {
@@ -5245,6 +5668,14 @@ eotg_aug_kingpin.066 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = crying
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = sadistic }
+            animation = schadenfreude
+        }
         animation = stress
     }
     right_portrait = {
@@ -5390,6 +5821,14 @@ eotg_aug_kingpin.067 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = vengeful } }
+            animation = rage
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
         animation = shock
     }
     right_portrait = {
@@ -5569,6 +6008,14 @@ eotg_aug_kingpin.068 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = crying
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = wrathful }
+            animation = rage
+        }
         animation = shock
     }
     right_portrait = {
@@ -5615,6 +6062,11 @@ eotg_aug_kingpin.068 = {
                 }
             }
         }
+        # W3 (event_quality_v1): the murders at court, when anyone was named
+        if = {
+            limit = { exists = scope:eotg_kp_victim }
+            play_music_cue = mx_cue_murder
+        }
     }
 
     # a "Hunt [kp] down. Now." Martial against the boss: success, the boss
@@ -5656,6 +6108,12 @@ eotg_aug_kingpin.068 = {
                     multiplier = 3.5
                     min = -49
                 }
+                send_interface_toast = {    # W3
+                    type = event_toast_effect_good
+                    title = eotg_aug_kingpin.068.toast_a_success
+                    left_icon = root
+                    right_icon = scope:eotg_kp
+                }
                 scope:eotg_kp = {
                     death = {
                         death_reason = death_battle
@@ -5669,6 +6127,12 @@ eotg_aug_kingpin.068 = {
                     value = scope:duel_value
                     multiplier = -3.5
                     min = -49
+                }
+                send_interface_toast = {    # W3
+                    type = event_toast_effect_bad
+                    title = eotg_aug_kingpin.068.toast_a_failure
+                    left_icon = root
+                    right_icon = scope:eotg_kp
                 }
                 scope:eotg_kp = { death = { death_reason = death_vanished } }
             }
@@ -5751,8 +6215,11 @@ eotg_aug_kingpin.068 = {
                 }
             }
         }
+        # W5 (§13.1 step 5): the kept personality option gets its stress
+        # entry; miniscule, so going down there still costs stress
         stress_impact = {
             base = medium_stress_impact_gain
+            compassionate = miniscule_stress_impact_loss
         }
         ai_chance = {
             base = 30
@@ -5840,6 +6307,14 @@ eotg_aug_kingpin.069 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = just  has_trait = honest } }
+            animation = disapproval
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = ambitious }
+            animation = scheme
+        }
         animation = personality_rational
     }
     right_portrait = {
@@ -5937,6 +6412,14 @@ eotg_aug_kingpin.070 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = trusting }
+            animation = happiness
+        }
         animation = scheme
     }
     right_portrait = {
@@ -6003,6 +6486,10 @@ eotg_aug_kingpin.070 = {
                 eotg_add_fracture_risk = { AMOUNT = -10 }
             }
         }
+        # W5 (§13.1 step 5): the kept personality option gets its stress entry
+        stress_impact = {
+            paranoid = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = paranoid }
@@ -6052,6 +6539,14 @@ eotg_aug_kingpin.071 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = vengeful } }
+            animation = rage
+        }
         animation = anger
     }
     right_portrait = {
@@ -6148,6 +6643,14 @@ eotg_aug_kingpin.072 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = vengeful } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
         animation = fear
     }
     right_portrait = {
@@ -6259,6 +6762,14 @@ eotg_aug_kingpin.073 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = vengeful } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = content }
+            animation = personality_content
+        }
         animation = disapproval
     }
     right_portrait = {
@@ -6297,8 +6808,11 @@ eotg_aug_kingpin.073 = {
             modifier = eotg_mod_aug_kp_tribute
             years = 10
         }
+        # W5 (§13.1 step 5): the kept personality option gets its stress
+        # entry; miniscule, so swallowing the tribute still costs stress
         stress_impact = {
             base = minor_stress_impact_gain
+            just = miniscule_stress_impact_loss
         }
         hidden_effect = {
             add_character_flag = eotg_flag_aug_kingpin_grudge
@@ -6358,6 +6872,14 @@ eotg_aug_kingpin.074 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = callous }
+            animation = personality_callous
+        }
         animation = worry
     }
 
@@ -6438,10 +6960,19 @@ eotg_aug_kingpin.075 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = sadness
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = callous }
+            animation = dismissal
+        }
         animation = shock
     }
 
     immediate = {
+        play_music_cue = mx_cue_death    # W3 (event_quality_v1): the boss's cascade death
         hidden_effect = {
             eotg_aug_kp_save_scopes_effect = yes
             eotg_aug_kp_leaf_open_effect = yes
@@ -6514,6 +7045,14 @@ eotg_aug_kingpin.076 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = greedy }
+            animation = personality_greedy
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = just }
+            animation = personality_honorable
+        }
         animation = happiness
     }
     right_portrait = {
