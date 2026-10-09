@@ -477,6 +477,22 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Owner:** owner (the term per government) → eotg-architect → scripter/localizer
 - **Next step:** when the government roster is designed, add a "knight term" column to it.
 
+### CB-49: In-game checks for governments v2 G1 (British Isles test)
+- **Status:** waiting-human (2026-10-08)
+- **What:** `322ec05`. Run V-G1–V-G20 (spec `docs/specs/governments_v2.md` §14) on the British Isles sub-mod, in this priority order:
+  1. error.log has no "preregistered modifier type" lines for any eotg government (including Unsworn and Off-Map), and no `use_great_projects` error;
+  2. Raoul (PMC), Hoël (Corporation), Alfonso (Cartel) and Bertrand (Trade Oligarchy) are playable;
+  3. the knight terms show in the Knights tab and in lowercase, plural and possessive lines (Iron Retinue text);
+  4. the law shows a named heir; Primogeniture is unavailable;
+  5. Konan dies 1066.12.11 and his heir keeps the Corporation;
+  6. the ranks show: Contractor-General, CEO, Operations Chief, Ringleader (Rodrigo);
+  7. city and castle capitals behave;
+  8. Cartel tributary: piety cost, subjugated, lapses on the ruler's death;
+  9. no government leakage over 50 years.
+- **Art:** 4 government icons are vanilla placeholders (`gfx/interface/icons/government_types/README.txt`).
+- **Phase G2** (signature resources, rank ladders, events) is outlined in spec §13; new events need the owner's approval.
+- **Owner:** human → orchestrator
+
 ## Tooling and environment
 
 ### CB-18: Game is 1.20.0.3; the tools target older versions
