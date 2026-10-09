@@ -17,6 +17,11 @@ The design is in §5 (the tree) and §5A (variation). The other sections follow 
 5. **.013.vc has `add_dread = 20`**, matching .009.e (§5.3 .013).
 6. **Excision odds, self table, revised** after a lore-keeper flag. The ruler's own hands are no longer safer than the physician's table: 45 / 30 / 25, or 30 / 30 / 40 with `lifestyle_physician` (§5.4.3). **Applied.** Back-street table also corrected to 50 / 40 / 10 so the column sums to 100 (orchestrator ruling, §5.4.3).
 
+**Build deltas (2026-10-09, event quality B10).** W5 re-gating, folded back into the spec (§5.3 node table):
+7. **.001.e** is gated `highest_held_title_tier >= tier_duchy`, with no icon. AI base 10, −20 compassionate, −20 trusting; callous and paranoid keep +20 each. They are stress responses only, not gates.
+8. **.009.d** is gated `education_martial` with `skill = martial`. AI +20 / +30 / +30 on education_martial_3 / _4 / _5, and brave +10 as a response. The text becomes "Choose the ground. If it comes for me, it meets me there."
+9. **.027.c** gives the `just` stress relief only when there is no leave (`scope:eotg_inh_leave` absent). The scripter is applying this fix now.
+
 ---
 
 ## 1. Purpose & gate
@@ -263,7 +268,7 @@ Delays are in days. "→ Lx" is a leaf. Universal options are lower-case letters
                  ├─ b ──────────────────────────► .003 The Physicians (30–60)
                  ├─ c ──────────────────────────► .004 The Watch (60–120)
                  ├─ d [compassionate] ──────────► .002 (gentle) (3–7)
-                 └─ e [callous|paranoid] ───────► .005 The Council (14–30)
+                 └─ e [duchy+] ─────────────────► .005 The Council (14–30)
 
 .002 The Conversation ─┬─ a ─────────────► .006 The Terms (7–14)
                        ├─ b ─────────────► .003 (coerced) (14–30)
@@ -311,7 +316,7 @@ Delays are in days. "→ Lx" is a leaf. Universal options are lower-case letters
     and shown)    ├─ b guard and wait ───► fire threat (30–90), guarded
                   ├─ c talk down [not talked] ─ success ► .006 (accept forced)
                   │                            └ fail ──► fire threat (7–14)
-                  ├─ d [brave] ─────────► fire threat (14–30), ruler ready
+                  ├─ d [education_martial]► fire threat (14–30), ruler ready
                   └─ e [callous|sadistic] ► L17 (in option)
 
     fire threat:  kill_ruler ► .018 │ massacre ► .017 │ next_two ► .016 │ self ► .019
@@ -373,7 +378,7 @@ Notation:
 | b "Send for the physicians before anyone else." | — | — | .003 | H−3 (the heir is caught early) | 30; +20 diligent, +15 lifestyle_physician |
 | c "Say nothing. Watch [heir]." | — | ruler stress helper `lie` | .004 | H+5 (nobody intervenes) | 20; +20 paranoid, +15 deceitful |
 | d "I'll go to [heir] myself, before the next watch." | compassionate | `eotg_flag_aug_inh_gentle`; the heir gets `reassured` | .002 | H−5 | 30; +30 compassionate, +10 forgiving |
-| e "The succession comes first." | callous OR paranoid | — | .005 | H+5 | 30; +20 callous, +20 paranoid |
+| e "The succession comes first." | `highest_held_title_tier >= tier_duchy` (no icon); callous and paranoid are stress responses only | — | .005 | H+5 | 10; +20 callous, +20 paranoid, −20 compassionate, −20 trusting |
 
 **.002 The Conversation.** The heir is present (right portrait). Desc: four profile variants plus five bond lines.
 
@@ -454,7 +459,7 @@ If refused and the ruler cannot afford a/c/d, a_ref and b_ref still show. The no
 | a "Arrest [heir] before the next watch." | the heir is not imprisoned | arrest roll (§5A.4). Success: ward effect `TYPE = dungeon`. Fail: fire the threat in 1–3 days, with toast `eotg_aug_inherit.009.a_fail_tt`. Stress helper `tyranny`. | ward / threat | H+5 | 30; +20 paranoid, +15 just |
 | b "Double the guard and wait." | — | `guarded`. Fire the threat (30–90). A `self` threat while guarded: a 50% roll, where a pass means the guard finds the heir in time and runs ward `house_arrest`. | threat / ward | H+3 | 30; +20 craven, +10 patient |
 | c "Go to [heir]. Talk [heir_himher] down." | NOT `talked` | talk roll (§5A.4). Success: .006, accept forced. Fail: fire the threat (7–14). | .006 / threat | H−5 | 25; +20 compassionate, +15 gregarious |
-| d "Let it come to me, then." | brave | `eotg_flag_aug_inh_ruler_ready`; fire the threat (14–30). Massacre: one victim fewer. Kill_ruler: .018 odds −20. | threat | H+0 | 30; +30 brave, +10 wrathful |
+| d "Choose the ground. If it comes for me, it meets me there." | `education_martial` (`skill = martial`); brave is a stress response only | `eotg_flag_aug_inh_ruler_ready`; fire the threat (14–30). Massacre: one victim fewer. Kill_ruler: .018 odds −20. | threat | H+0 | 30; +20 education_martial_3, +30 education_martial_4, +30 education_martial_5, +10 brave |
 | e "End it before [heir] does." | callous OR sadistic | **L17**: the heir dies (`death_murder`, `killer = root`). Vanilla `add_kinslayer_trait_or_nothing_effect = { VICTIM = scope:eotg_inh_heir }` runs on root **first**, per the M4 policy. Stress helper `murder`; `add_dread = 20`; close. | — | tier change (death) | 20; +25 callous, +20 sadistic, `factor = 0` compassionate |
 
 **.010 The Table.** The desc gives the odds in words by `eotg_inh_table`, with three variants: the physician's table, a back-street table, your own hands. It also adds one line if `coerced`. Shape: end.001.
@@ -624,7 +629,7 @@ The second becomes the primary heir by vanilla succession. Desc: sanctioned or u
 |---|---|---|
 | a "Let it stand." | sanctioned: no further effect. Unsanctioned: −50 prestige. Close. | 40; +15 callous, +10 content |
 | b "Arrest [second]." | `imprison_character_effect` with `TARGET` the second; close | 30; +20 just, +10 paranoid |
-| c "Execute [second]." | just; kinslayer on root; the second gets `death_execution` with `killer = root`; stress helper `murder`; close | 20; +25 just, +10 vengeful |
+| c "Execute [second]." | just; kinslayer on root; the second gets `death_execution` with `killer = root`; stress helper `murder`; `just` relief (`medium_stress_impact_loss`) only when `scope:eotg_inh_leave` is absent; close | 20; +25 just, +10 vengeful |
 
 ### 5.4 Mechanics that need more than a table row
 

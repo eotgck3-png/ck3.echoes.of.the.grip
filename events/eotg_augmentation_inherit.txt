@@ -117,6 +117,18 @@ eotg_aug_inherit.001 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = callous }
+            animation = dismissal
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = sadness
+        }
         animation = worry
     }
     right_portrait = {
@@ -172,6 +184,8 @@ eotg_aug_inherit.001 = {
     }
 
     # [compassionate] "I'll go to [heir] myself, before the next watch." H-5.
+    # W5 (event_quality_v1 §13.1 step 2c): the kept personality gate; the
+    # text depends on compassion (the gentle flag), e is authority-shaped.
     option = {
         name = eotg_aug_inherit.001.d
         trigger = { has_trait = compassionate }
@@ -182,6 +196,10 @@ eotg_aug_inherit.001 = {
             eotg_add_fracture_risk = { AMOUNT = -5 }
         }
         trigger_event = { id = eotg_aug_inherit.002  days = { 3 7 } }
+        # W5 (§13.1 step 5): the kept personality option gets its stress entry
+        stress_impact = {
+            compassionate = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = compassionate }
@@ -189,24 +207,27 @@ eotg_aug_inherit.001 = {
         }
     }
 
-    # [callous / paranoid] "The succession comes first." H+5. Both trait
-    # icons stacked (vanilla harm_events.txt harm.0551.b).
+    # [duchy+] "The succession comes first." H+5. W5 (event_quality_v1
+    # §13.1 3b): was [callous / paranoid]; putting the line before the
+    # child by convening the council is authority, so a duchy tier gate, no
+    # icon. It moves risk (H+5) and routes to .005, so it cannot fold.
+    # callous and paranoid keep stress rows here as responses (§13.1 step 4);
+    # compassionate (d) is the kept personality gate.
     option = {
         name = eotg_aug_inherit.001.e
-        trigger = {
-            OR = {
-                has_trait = callous
-                has_trait = paranoid
-            }
-        }
-        trait = callous
-        trait = paranoid
+        trigger = { highest_held_title_tier >= tier_duchy }
         scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = 5 } }
         trigger_event = { id = eotg_aug_inherit.005  days = { 14 30 } }
+        stress_impact = {
+            callous = minor_stress_impact_loss
+            paranoid = minor_stress_impact_loss
+        }
         ai_chance = {
-            base = 30
+            base = 10    # B1 lesson 4: tier gates show to every AI duke
             modifier = { add = 20  has_trait = callous }
             modifier = { add = 20  has_trait = paranoid }
+            modifier = { add = -20  has_trait = compassionate }
+            modifier = { add = -20  has_trait = trusting }
         }
     }
 }
@@ -263,10 +284,30 @@ eotg_aug_inherit.002 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = wrathful }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = sadness
+        }
         animation = worry
     }
     right_portrait = {
         character = scope:eotg_inh_heir
+        triggered_animation = {    # W6: the heir as the profile desc shows them
+            trigger = { root = { var:eotg_inh_profile ?= flag:certain } }
+            animation = personality_bold
+        }
+        triggered_animation = {    # W6
+            trigger = { root = { var:eotg_inh_profile ?= flag:cold } }
+            animation = personality_rational
+        }
         animation = stress
     }
 
@@ -397,6 +438,10 @@ eotg_aug_inherit.002 = {
             eotg_add_fracture_risk = { AMOUNT = 10 }
         }
         eotg_aug_inherit_route_pattern_effect = { DAYS_MIN = 14  DAYS_MAX = 30 }
+        # W5 (§13.1 step 5): the kept personality option gets its stress entry
+        stress_impact = {
+            wrathful = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = wrathful }
@@ -441,12 +486,24 @@ eotg_aug_inherit.003 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = lifestyle_physician }
+            animation = interested
+        }
         animation = worry
     }
     right_portrait = {
         trigger = { exists = scope:eotg_inh_surgeon }
         character = scope:eotg_inh_surgeon
-        animation = personality_rational
+        animation = physician    # W6: role animation (was personality_rational)
     }
     lower_right_portrait = {
         trigger = { exists = scope:eotg_inh_heir }
@@ -609,11 +666,23 @@ eotg_aug_inherit.004 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = callous } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = worry
+        }
         animation = paranoia
     }
     right_portrait = {
         trigger = { exists = scope:eotg_inh_watcher }
         character = scope:eotg_inh_watcher
+        triggered_animation = {    # W6: role animation when the watcher is the spymaster
+            trigger = { scope:eotg_inh_watcher = { has_council_position = councillor_spymaster } }
+            animation = spymaster
+        }
         animation = scheme
     }
     lower_right_portrait = {
@@ -687,6 +756,11 @@ eotg_aug_inherit.004 = {
         trait = deceitful
         scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = -3 } }
         trigger_event = { id = eotg_aug_inherit.012  days = { 14 30 } }
+        # W5 (§13.1 step 5): the kept (mixed skill / personality) gate gets
+        # its stress entry
+        stress_impact = {
+            deceitful = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 25  has_trait = deceitful }
@@ -718,6 +792,14 @@ eotg_aug_inherit.005 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = impatient }
+            animation = dismissal
+        }
         animation = thinking
     }
     right_portrait = {
@@ -825,6 +907,18 @@ eotg_aug_inherit.006 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = wrathful }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = sadness
+        }
         animation = worry
     }
     right_portrait = {
@@ -953,6 +1047,14 @@ eotg_aug_inherit.007 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = sadness
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = callous }
+            animation = dismissal
+        }
         animation = worry
     }
     right_portrait = {
@@ -1069,6 +1171,14 @@ eotg_aug_inherit.008 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = callous  has_trait = sadistic } }
+            animation = personality_callous
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = sadness
+        }
         animation = worry
     }
     right_portrait = {
@@ -1147,6 +1257,18 @@ eotg_aug_inherit.009 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = callous } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = worry
+        }
         animation = paranoia
     }
     right_portrait = {
@@ -1245,26 +1367,39 @@ eotg_aug_inherit.009 = {
         }
     }
 
-    # [brave] "Let it come to me, then." Ready: one victim fewer, the attempt
-    # on the ruler less likely to succeed. Reads the band through the
-    # massacre count; no move here.
+    # [education_martial] "Let it come to me, then." Ready: one victim fewer,
+    # the attempt on the ruler less likely to succeed. Reads the band through
+    # the massacre count; no move here. W5 (event_quality_v1 §13.1 3a): was
+    # [brave]; setting the guard and the ground for what is coming is a
+    # tactical read, so martial. It carries a distinct outcome (the ready
+    # flag read by .017 and the attempt odds), so it cannot fold. brave keeps
+    # a stress row here as a response (§13.1 step 4); e (callous / sadistic,
+    # the L17 leaf) is the kept personality gate.
     option = {
         name = eotg_aug_inherit.009.d
-        trigger = { has_trait = brave }
-        trait = brave
+        trigger = { has_trait = education_martial }
+        skill = martial
         add_character_flag = { flag = eotg_flag_aug_inh_ruler_ready  years = 6 }
         custom_tooltip = eotg_aug_inherit.009.d.tt
         hidden_effect = {
             eotg_aug_inherit_fire_threat_effect = { DAYS_MIN = 14  DAYS_MAX = 30 }
         }
+        stress_impact = {
+            brave = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = brave }
-            modifier = { add = 10  has_trait = wrathful }
+            modifier = { add = 20  has_trait = education_martial_3 }
+            modifier = { add = 30  has_trait = education_martial_4 }
+            modifier = { add = 30  has_trait = education_martial_5 }
+            modifier = { add = 10  has_trait = brave }
         }
     }
 
     # [callous / sadistic] "End it before [heir] does." L17, in secret.
+    # W5 (§13.1 step 2c): the kept personality gate (the L17 leaf is the
+    # option's whole point, spec §5A.5). sadistic's relief comes from the
+    # murder helper; callous gets its row inline (step 5).
     option = {
         name = eotg_aug_inherit.009.e
         trigger = {
@@ -1278,6 +1413,9 @@ eotg_aug_inherit.009 = {
         eotg_aug_inherit_leaf_kill_heir_effect = { REASON = murder }
         add_internal_flag = dangerous    # W3: kills the heir
         eotg_aug_stress_murder_effect = yes
+        stress_impact = {
+            callous = minor_stress_impact_loss
+        }
         add_dread = 20
         eotg_aug_inherit_close_effect = yes
         ai_chance = {
@@ -1323,12 +1461,24 @@ eotg_aug_inherit.010 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = brave }
+            animation = personality_bold
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = nervous
+        }
         animation = worry
     }
     right_portrait = {
         trigger = { exists = scope:eotg_inh_surgeon }
         character = scope:eotg_inh_surgeon
-        animation = personality_rational
+        animation = physician    # W6: role animation (was personality_rational)
     }
     lower_right_portrait = {
         trigger = { exists = scope:eotg_inh_heir }
@@ -1413,7 +1563,10 @@ eotg_aug_inherit.010 = {
         else = {
             eotg_aug_inherit_leaf_excise_effect = { TABLE = self }
         }
-        stress_impact = { base = minor_stress_impact_loss }
+        stress_impact = {
+            base = minor_stress_impact_loss
+            compassionate = minor_stress_impact_loss    # W5 (§13.1 step 5): kept gate's own row
+        }
         trigger_event = { id = eotg_aug_inherit.021  days = 3 }
         ai_chance = {
             base = 30
@@ -1453,6 +1606,14 @@ eotg_aug_inherit.011 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = callous  has_trait = vengeful } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = crying
+        }
         animation = sadness
     }
     right_portrait = {
@@ -1527,6 +1688,11 @@ eotg_aug_inherit.011 = {
             }
         }
         eotg_aug_inherit_close_effect = yes
+        # W5 (§13.1 step 5): the kept personality option gets its stress entry
+        stress_impact = {
+            vengeful = minor_stress_impact_loss
+            arbitrary = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 25  has_trait = vengeful }
@@ -1554,6 +1720,14 @@ eotg_aug_inherit.012 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = honest }
+            animation = shame
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = nervous
+        }
         animation = scheme
     }
     right_portrait = {
@@ -1624,10 +1798,26 @@ eotg_aug_inherit.013 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = callous } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = sadness
+        }
         animation = personality_rational
     }
     right_portrait = {
         character = scope:eotg_inh_heir
+        triggered_animation = {    # W6: the heir as the reaction desc shows them
+            trigger = { root = { var:eotg_inh_reaction ?= flag:accept } }
+            animation = sadness
+        }
+        triggered_animation = {    # W6
+            trigger = { root = { var:eotg_inh_reaction ?= flag:leave } }
+            animation = dismissal
+        }
         animation = anger
     }
 
@@ -1783,6 +1973,10 @@ eotg_aug_inherit.013 = {
         eotg_aug_stress_murder_effect = yes
         add_dread = 20
         eotg_aug_inherit_close_effect = yes
+        # W5 (§13.1 step 5): the murder helper has no callous row
+        stress_impact = {
+            callous = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 20
             modifier = { add = 25  has_trait = callous }
@@ -1808,6 +2002,14 @@ eotg_aug_inherit.014 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = humble  has_trait = content } }
+            animation = sadness
+        }
         animation = thinking
     }
     right_portrait = {
@@ -1881,6 +2083,18 @@ eotg_aug_inherit.015 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = just  has_trait = honest } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = ambitious  has_trait = callous } }
+            animation = scheme
+        }
         animation = thinking
     }
     right_portrait = {
@@ -1946,6 +2160,10 @@ eotg_aug_inherit.015 = {
             set_variable = { name = eotg_inh_threat  value = flag:next_two }
         }
         eotg_aug_inherit_route_pattern_effect = { DAYS_MIN = 14  DAYS_MAX = 30 }
+        # W5 (§13.1 step 5): the kept personality option gets its stress entry
+        stress_impact = {
+            just = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = just }
@@ -2011,6 +2229,14 @@ eotg_aug_inherit.016 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = vengeful } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = crying
+        }
         animation = shock
     }
     right_portrait = {
@@ -2116,6 +2342,18 @@ eotg_aug_inherit.017 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = brave }
+            animation = personality_bold
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = wrathful }
+            animation = rage
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = crying
+        }
         animation = fear
     }
     right_portrait = {
@@ -2185,7 +2423,10 @@ eotg_aug_inherit.017 = {
                 right_icon = scope:eotg_inh_heir
             }
         }
-        stress_impact = { base = medium_stress_impact_gain }
+        stress_impact = {
+            base = medium_stress_impact_gain
+            compassionate = minor_stress_impact_loss    # W5 (§13.1 step 5): kept gate's own row
+        }
         eotg_aug_inherit_close_effect = yes
         ai_chance = {
             base = 30
@@ -2239,10 +2480,30 @@ eotg_aug_inherit.018 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = brave }
+            animation = personality_bold
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = wrathful }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = sadness
+        }
         animation = fear
     }
     right_portrait = {
         character = scope:eotg_inh_heir
+        triggered_animation = {    # W6: the favourite comes in tears (desc_favourite)
+            trigger = { root = { var:eotg_inh_bond ?= flag:favourite } }
+            animation = crying
+        }
+        triggered_animation = {    # W6: the dutiful heir at attention (desc_dutiful)
+            trigger = { root = { var:eotg_inh_bond ?= flag:dutiful } }
+            animation = personality_rational
+        }
         animation = rage
     }
 
@@ -2289,6 +2550,10 @@ eotg_aug_inherit.018 = {
         hidden_effect = {
             eotg_aug_inherit_leaf_attempt_effect = { MOD = eotg_aug_inherit_attempt_mod_face  NOTIFY = yes }
         }
+        # W5 (§13.1 step 5): the kept personality option gets its stress entry
+        stress_impact = {
+            brave = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = brave }
@@ -2324,6 +2589,14 @@ eotg_aug_inherit.019 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = callous }
+            animation = dismissal
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = crying
+        }
         animation = grief
     }
     right_portrait = {
@@ -2392,6 +2665,10 @@ eotg_aug_inherit.019 = {
             add_opinion = { modifier = eotg_opinion_aug_disgust  target = root  years = 5 }
         }
         eotg_aug_inherit_close_effect = yes
+        # W5 (§13.1 step 5): the kept personality option gets its stress entry
+        stress_impact = {
+            callous = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 20
             modifier = { add = 30  has_trait = callous }
@@ -2417,6 +2694,14 @@ eotg_aug_inherit.020 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = eccentric }
+            animation = interested
+        }
         animation = personality_bold
     }
     right_portrait = {
@@ -2493,6 +2778,18 @@ eotg_aug_inherit.021 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { var:eotg_inh_table_result ?= flag:dead  has_trait = compassionate }
+            animation = crying
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { var:eotg_inh_table_result ?= flag:dead }
+            animation = grief
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { NOT = { var:eotg_inh_table_result ?= flag:dead }  NOT = { var:eotg_inh_table_result ?= flag:maimed } }
+            animation = happiness
+        }
         animation = worry
     }
     right_portrait = {
@@ -2585,6 +2882,14 @@ eotg_aug_inherit.022 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { scope:eotg_inh_heir ?= { eotg_aug_pressure_flicker = no } }
+            animation = worry
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = impatient }
+            animation = dismissal
+        }
         animation = thinking
     }
     right_portrait = {
@@ -2618,7 +2923,10 @@ eotg_aug_inherit.022 = {
         }
         trait = diligent
         scope:eotg_inh_heir = { eotg_add_fracture_risk = { AMOUNT = -10 } }
-        stress_impact = { base = minor_stress_impact_gain }
+        stress_impact = {
+            base = minor_stress_impact_gain
+            diligent = minor_stress_impact_loss    # W5 (§13.1 step 5): kept gate's own row
+        }
         eotg_aug_inherit_close_effect = yes
         ai_chance = {
             base = 30
@@ -2685,6 +2993,14 @@ eotg_aug_inherit.023 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = callous }
+            animation = dismissal
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
         animation = sadness
     }
     right_portrait = {
@@ -2717,7 +3033,10 @@ eotg_aug_inherit.023 = {
             add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
             eotg_add_fracture_risk = { AMOUNT = -5 }
         }
-        stress_impact = { base = minor_stress_impact_loss }
+        stress_impact = {
+            base = minor_stress_impact_loss
+            compassionate = minor_stress_impact_loss    # W5 (§13.1 step 5): kept gate's own row
+        }
         eotg_aug_inherit_close_effect = yes
         ai_chance = {
             base = 30
@@ -2745,6 +3064,14 @@ eotg_aug_inherit.024 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = vengeful } }
+            animation = rage
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = crying
+        }
         animation = pain
     }
     right_portrait = {
@@ -2799,6 +3126,10 @@ eotg_aug_inherit.024 = {
             }
         }
         trigger_event = { id = eotg_aug_inherit.022  days = 365 }
+        # W5 (§13.1 step 5): the kept personality option gets its stress entry
+        stress_impact = {
+            forgiving = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = forgiving }
@@ -2849,6 +3180,18 @@ eotg_aug_inherit.025 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = sadistic }
+            animation = schadenfreude
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = ambitious  has_trait = arrogant } }
+            animation = personality_bold
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = crying
+        }
         animation = stress
     }
     right_portrait = {
@@ -2923,6 +3266,14 @@ eotg_aug_inherit.026 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = ambitious  has_trait = arrogant } }
+            animation = personality_bold
+        }
         animation = thinking
     }
     right_portrait = {
@@ -3024,10 +3375,26 @@ eotg_aug_inherit.027 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = just  has_trait = vengeful } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = callous }
+            animation = dismissal
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = crying
+        }
         animation = shock
     }
     right_portrait = {
         character = scope:eotg_inh_second
+        triggered_animation = {    # W6: reporting a sanctioned act, waiting to be told it was well done
+            trigger = { exists = scope:eotg_inh_leave }
+            animation = throne_room_bow_1
+        }
         animation = scheme
     }
     lower_right_portrait = {
@@ -3093,6 +3460,18 @@ eotg_aug_inherit.027 = {
         }
         eotg_aug_stress_murder_effect = yes
         eotg_aug_inherit_close_effect = yes
+        # W5 (§13.1 step 5): just's own row. The murder helper gives just a
+        # medium gain; executing the heir's killer under law is the just
+        # ruler's act, so this offsets it to net zero (flagged for QA).
+        # Not under leave: then the second acted on my sanction, so executing
+        # them is no act of justice. Conditional shape per vanilla
+        # pam_interactions_events.txt:2016 (stress_impact inside if/limit).
+        if = {
+            limit = { NOT = { exists = scope:eotg_inh_leave } }
+            stress_impact = {
+                just = medium_stress_impact_loss
+            }
+        }
         ai_chance = {
             base = 20
             modifier = { add = 25  has_trait = just }
