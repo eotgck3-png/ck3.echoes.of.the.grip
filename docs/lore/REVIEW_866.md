@@ -18,6 +18,7 @@
   3. `866_bookmark_design.md`
   4. SETTING LORE body
   5. Undated "Nation in 851" summaries
+- **`NATIONS_AT_866_AG.md` is not a reviewed source** (lore-keeper, 2026-10-08). It came from an external exporter and is untracked. It contradicts ERRATA ORRIN, YU and ERAS, and it invents details (e.g. "Under-Bosses of the Concrete Board"). Treat it as a pointer only, and re-cite any fact from it to a dated entry. The same applies to the other untracked exporter files in `docs/lore/` until they're reviewed.
 
 ## Settled for 866 (high confidence)
 
