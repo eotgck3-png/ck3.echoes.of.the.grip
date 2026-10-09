@@ -132,7 +132,7 @@ There are no new namespaces, events, flags, variables or modifiers. Icons: none.
 | W3 toasts and messages | New `<event_id>.toast*`, `.msg*` | about 120 toasts, about 15 messages (estimate) |
 | W8 variety | New `<desc_key>_v2/_v3` openers; new `eotg_aug_cl_*` text | about 40 events × 2, plus about 30 vocabulary entries |
 | W9 letters | New `<event_id>.opening` | 1 per converted event |
-| W7 set pieces (NEW) | Lengthened desc text on 6 events | after approval |
+| W7 set pieces (NEW, approved) | Existing keys only, text replaced | 15 keys (`event_quality_w7_set_pieces.md` §7.1) |
 
 **`replace/`:** none. No vanilla string needs an override.
 
@@ -165,7 +165,7 @@ There are no new namespaces, events, flags, variables or modifiers. Icons: none.
 
 These are end-state targets, measured by `eotg_event_quality.py` on the 249-event corpus. Each work item also has its own DoD (§11).
 1. **Background:** `override_background` is set on every non-hidden event except the 6 activity events and the 13 "keep" events in §14.2 (230 of 249). Any event added to the keep list later needs a reason in its batch report. Every reference is an `eotg_bg_*` key.
-2. **Voice** (main desc key per event): first person ≥ 50%, second person ≤ 10%, the rest neutral. The aim is about 60/35/5. The "before" figure is **74% second person** (the ported scorecard, 2026-10-09). **Seamless keys are exempt from the first-person floor**: they are excluded from the first-person denominator and counted only against the second-person ceiling, so the metric never pushes a writer back to "I" (§12.1 rule 7). A Seamless key is one whose text is gated on `eotg_total_integration` or belongs to the threshold set (end.009 Seamless outcome, end.010, fracture.027); the scorecard takes the list from a pinned set in its tests, not from a regex.
+2. **Voice** (main desc key per event): first person ≥ 50%, second person ≤ 10%, the rest neutral. The aim is about 60/35/5. The "before" figure is **74% second person** (the ported scorecard, 2026-10-09). **Seamless keys are exempt from the first-person floor**: they are excluded from the first-person denominator and counted only against the second-person ceiling, so the metric never pushes a writer back to "I" (§12.1 rule 7). A Seamless key is one whose text is gated on `eotg_total_integration` or belongs to the threshold set (end.009 Seamless outcome, end.010, fracture.027); the scorecard takes the list from a pinned set in its tests, not from a regex. (W7 addendum §7.3: fracture.027 leaves the set if L-W7-4 is accepted, and end.010 is checked only after "Reading complete.")
 3. **Dialogue** in ≥ 40% of events, against 8% today. 0 keys with `'…'` speech, and 0 keys with escaped `\"`.
 4. **Gates:** 0 events with 2+ options gated on root's personality traits, except owner-approved lint allows. Each file with ≥ 5 gated options has ≥ 1 education gate and ≥ 1 tier gate. **No personality trait's gated count** in `docs/tools/qa/trait_coverage.py` falls below min(its 2026-10-08 count, 3). Every kept personality option has the full pairing (icon, trigger, stress entry).
 5. **Outcomes:** ≥ 0.5 toasts per event, and ≥ 15 options flagged `dangerous` or `special`.
@@ -377,6 +377,10 @@ New text written in the meantime follows §12 from the day it is dispatched. Tha
 - **Risk:** low. A lower portrait needs its scope to exist, so guard it with `exists`.
 
 ### W7: Endgame set pieces. NEW, APPROVED (Q2 RULED 2026-10-09)
+- **Addendum (2026-10-09): [`event_quality_w7_set_pieces.md`](event_quality_w7_set_pieces.md)** binds the per-event detail: window, effect and VFX widgets, music, portraits, beats, unchanged options, the 15 loc keys with drafts, art requests, the W3 coordination rules (§5.1), and lore questions L-W7-1 to L-W7-4. Where it differs from the bullets below, the addendum wins. Notable points:
+  - **fracture.027 does not stage the fade.** Four of its five outcomes keep a first-person self, so the threshold is end.009's Seamless lines plus end.010 (pending L-W7-4).
+  - **The six events' desc keys are W7's,** including fracture.004 (B4), heir.005 and end.002 (B7). Those batches do W5 and W6 only on these events.
+  - **Later fullscreen:** only fracture.027, end.010 and heir.005 are planned for it.
 - **Q3 (RULED 2026-10-09):** the Seamless threshold fade is staged here and nowhere else: the end.009 Seamless outcome, end.010 and, optionally, fracture.027. The text turns into the **log register** (§12.1 rule 7); it is a record, not a speaker.
 - **Scope:** fracture.027 The Cascade, end.009 Hand Over the Controls, end.010 There Is No Static, fracture.004 The Court Massacre, heir.005 What Must Be Done, end.002 Silence. For each:
   - `window = big_event_window` now; fullscreen waits for art (§10);
@@ -547,10 +551,10 @@ After the current cybernetics loc batches (the dynamic-terms ruling applied; CB-
 | B1 | tier1 | 38 | 13 | Most-seen content. Pilot for the rubric; review before B2. |
 | B2 | tier2 | 36 | 16 | |
 | B3 | tier3 | 46 | 17 | Seamless keys in scope under §12.1 rule 7 (no first person; exempt from the first-person floor) |
-| B4 | fracture .001–.014 | about 33 | about 11 | Neurofractured keys in scope: full first person, §12.1 rule 7 allowed/banned lists |
+| B4 | fracture .001–.014 | about 33 | about 11 | Neurofractured keys in scope: full first person, §12.1 rule 7 allowed/banned lists. fracture.004's desc keys are W7's; B4 does only its W5 and W6 work |
 | B5 | fracture .015–.029 | about 34 | about 11 | L-2 answered 2026-10-09: fracture.022 is in scope, with the lore-approved text below; fracture.027 is W7 |
 | B6 | initiation | 29 | 11 | |
-| B7 | countdown, endgame, heir | 40 | 10 | W7 set pieces (approved) are written with W7, not here; carries the four Seamless shipped-text fixes below |
+| B7 | countdown, endgame, heir | 40 | 10 | W7 set pieces (approved) are written with W7, not here: the desc keys of end.002, end.009, end.010 and heir.005 (W5 and W6 still run here). Carries the four Seamless shipped-text fixes below |
 | B8 | patron, procedures, tamper, interactions, realm | 42 | 7 | patron letters are W9 |
 | B9 | retinue, nonruler, activities | 29 | 15 | activities keep their activity backgrounds |
 | B10 | inherit | 40 | 3 | 19 keys of `'…'` speech, already converted by W0e |
@@ -637,6 +641,8 @@ Legend: **CN** corridor_night, **PQ** private_quarters, **CL** clinic, **HC** ho
 - **tier3:** 001 CO · 002 PQ · 003 PQ · 004 PQ+fog · 005 BF · 006 CO · 007 CN · 008 PQ · 009 CT · 010 PQ+smoke · 011 CO · 012 PQ · 013 CN · 014 OF · 015 FC · 016 PQ+fog · 017 CN · 018 CO · 019 CO · 020 keep · 021 CT · 022 CL+fog · 023 CT · 024 BF+smoke
 - **frontier:** 001 CO · 002 OF · 003 OF · 004 CO · 005 FC · 010 CO · 020 BW · 021 FC · 030 OF · 031 CO · 032 OF · 033 FC · 034 BW · 035 CV · 036 CV · 037 VA · 040 UD · 041 CO · 042 FC
 
+W7 later adds effects to three of these events: heir.005 gets fog, end.002 gets legend_glow and end.009 gets fog (W7 addendum §6.7). The background keys don't change.
+
 That is 230 events overridden and 19 kept: the 6 activity events plus 13 family, love and friendly scenes. The 13 non-activity keeps are the whole exception list for §9 item 1.
 
 ---
@@ -705,5 +711,5 @@ That is 230 events overridden and 19 kept: the 6 activity events plus 13 family,
 - ask: Create the `eotg_bg_*` background keys in `common/event_backgrounds/` per §14.1 and set `override_background` on the 230 events in §14.2 (keep list of 19 stays); report any class moves in the batch report. Then eotg-qa takes the scorecard before/after and runs Tiger, PX and lint.
 - files: docs/specs/event_quality_v1.md, docs/specs/cybernetics_v2_procedures_lore.md
 - needs-loc: W0d/W0e already in flight with eotg-localizer; the four Seamless shipped-text fixes are queued in batch B7 (§13.3)
-- needs-lore: W7 addendum review once written (L-1 and L-2 answered 2026-10-09)
+- needs-lore: W7 addendum written 2026-10-09 (`event_quality_w7_set_pieces.md`). It needs review of L-W7-1 to L-W7-4 and of every [new] sentence (L-1 and L-2 answered 2026-10-09).
 - needs-human: CB-44 in-game checks for W0d and W2 (`common/event_backgrounds/` is already in the CLAUDE.md placement list)
