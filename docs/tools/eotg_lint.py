@@ -45,6 +45,7 @@ RULES = {
     "L015": (WARNING, "visible character event without override_background"),
     "L016": (ERROR, "BOM (U+FEFF) anywhere but byte 0: a stacked or mid-file BOM"),
     "L017": (WARNING, "event with 2+ options gated on root personality traits"),
+    "L018": (WARNING, "time-of-day word in eotg_ loc (event_quality_v1 §8)"),
 }
 
 SCRIPT_DIRS = ("common", "events")
@@ -1132,6 +1133,31 @@ def rule_l017(mod, personality=None):
     return out
 
 
+# ------------------------------------------------------------------ L018
+# event_quality_v1 §8 / GQF-002: no time-of-day words in mod text (a galaxy has no shared
+# clock). Whole word, case-insensitive, so "nightmare" / "knight" / "todays" never match.
+TIME_OF_DAY_WORDS = ("dawn", "morning", "mornings", "today", "tonight", "tomorrow", "night",
+                     "nights", "nightly", "overnight", "evening", "evenings", "sunrise",
+                     "sunset", "midnight", "noon", "afternoon")
+TIME_OF_DAY_RE = re.compile(r"\b(%s)\b" % "|".join(TIME_OF_DAY_WORDS), re.I)
+
+
+def rule_l018(mod):
+    """Time-of-day words in eotg_ loc values under localization/english/ (not replace/).
+    [..] functions and $..$ references are stripped first (_visible_text)."""
+    out = []
+    for rel, line, key, value in iter_loc_values(mod):
+        if not rel.startswith("localization/english/") or "/replace/" in rel:
+            continue
+        if not key.startswith("eotg_"):
+            continue
+        words = sorted({m.group(1).lower() for m in TIME_OF_DAY_RE.finditer(_visible_text(value))})
+        if words:
+            out.append(Finding("L018", rel, line, "%s: time-of-day word %s (event_quality_v1 §8)"
+                               % (key, "/".join("'%s'" % w for w in words))))
+    return out
+
+
 # ------------------------------------------------------------------ suppression
 ALLOW_RE = re.compile(r"#\s*eotg_lint:\s*allow\b(.*)$")
 ALLOW_ARGS_RE = re.compile(r"^\s*((?:L\d{3})(?:\s*,\s*L\d{3})*)\s*(.*)$")
@@ -1188,7 +1214,7 @@ RULE_FUNCS = [
     ("L005", rule_l005), ("L006", rule_l006), ("L007", rule_l007), ("L008", rule_l008),
     ("L009", rule_l009), ("L010", rule_l010), ("L011", rule_l011), ("L012", rule_l012),
     ("L013", rule_l013), ("L014", rule_l014), ("L015", rule_l015), ("L016", rule_l016),
-    ("L017", rule_l017),
+    ("L017", rule_l017), ("L018", rule_l018),
 ]
 
 

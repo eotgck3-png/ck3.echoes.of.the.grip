@@ -276,6 +276,9 @@ Every mod text file has at most one UTF-8 BOM (`EF BB BF`), and only at byte 0. 
 ### L017 — stacked personality gates (WARNING)
 An event with two or more options whose `trigger` requires **root** to have a `category = personality` trait (`event_quality_v1` §13, R2). The spec proposed this as L016; it was renumbered because L016 is the BOM rule. *Root only:* a `has_trait` counts when every block between it and the option's `trigger` is a logic block (`OR`, `AND`, `trigger_if`, `limit`, …). Under `NOT`/`NOR` or inside a scope change (`scope:spouse = { … }`, `any_vassal`) it doesn't count. *The trait set* is vanilla's `common/traits/00_traits.txt` `category = personality` (36 traits in 1.20.0.4), cached in `docs/tools/eotg_personality_traits.json` so the lint runs without the game. `python docs/tools/eotg_event_quality.py --vanilla` refreshes it. The gate classifier is shared with the scorecard (`eotg_event_quality.option_gates`). *Exempt* with `# eotg_lint: allow L017 <reason>` on the event line or the line above. On 2026-10-08 the rule reports 115 (the spec estimated 117 ±2), all baselined until the W5 re-gating batches.
 
+### L018 — time-of-day word in mod loc (WARNING)
+An `eotg_` key in `localization/english/` (not `replace/`) whose value contains a time-of-day word: dawn, morning(s), today, tonight, tomorrow, night(s), nightly, overnight, evening(s), sunrise, sunset, midnight, noon, afternoon (`event_quality_v1` §8; list from `docs/proposals/cyber_loc_sweep_gemini_r1.md`). Whole word and case-insensitive, so `knight` / `nightmare` never match. `[..]` functions and `$..$` references are stripped first. *Exempt* with `# eotg_lint: allow L018 <reason>` on the key's line or the line above. Added 2026-10-09 with 4 findings, not baselined.
+
 ## Inline suppression
 To silence one finding, put this on the finding's line or on the line directly before it:
 
