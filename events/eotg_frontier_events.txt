@@ -2314,6 +2314,7 @@ eotg_frontier.040 = {
         save_temporary_scope_value_as = { name = eotg_frontier_fee  value = eotg_frontier_escort_cost_value }
         pay_short_term_gold = { target = scope:eotg_frontier_company  gold = scope:eotg_frontier_fee }
         scope:eotg_frontier_county = {
+            # keep in sync with loc eotg_frontier.040.a_tt ("five years")
             add_county_modifier = { modifier = eotg_frontier_mod_merc_escort  years = 5 }
             eotg_frontier_ease_strain_effect = yes
         }

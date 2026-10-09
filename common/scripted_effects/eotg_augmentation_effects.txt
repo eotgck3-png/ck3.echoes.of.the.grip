@@ -131,6 +131,7 @@ eotg_aug_initiate_effect = {
     if = {
         limit = { eotg_is_augmented_any = no }
         set_variable = { name = eotg_fracture_risk  value = 0 }
+        # keep in sync with loc eotg_decision_aug_pursue_next_stage_desc ("five years") and _settling_tt ("5 years")
         add_character_flag = { flag = eotg_flag_aug_settling  years = 5 }
     }
     add_trait = eotg_cybernetics
@@ -158,6 +159,7 @@ eotg_aug_set_integration_effect = {
             }
         }
         eotg_aug_refresh_synergy_effect = yes
+        # keep in sync with loc eotg_decision_aug_pursue_next_stage_desc ("five years") and _settling_tt ("5 years")
         add_character_flag = { flag = eotg_flag_aug_settling  years = 5 }
     }
 }
