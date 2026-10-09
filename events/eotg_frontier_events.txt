@@ -80,6 +80,18 @@ eotg_frontier.001 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = ambitious  has_trait = arrogant } }
+            animation = personality_bold
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = greedy }
+            animation = personality_greedy
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = lazy }
+            animation = boredom
+        }
         animation = personality_rational
     }
     right_portrait = {
@@ -347,6 +359,18 @@ eotg_frontier.002 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = callous } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = sadness
+        }
         animation = worry
     }
     right_portrait = {
@@ -536,10 +560,26 @@ eotg_frontier.003 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = greedy }
+            animation = personality_greedy
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = arrogant }
+            animation = dismissal
+        }
         animation = personality_rational
     }
     right_portrait = {
         character = scope:eotg_frontier_sponsor
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { scope:eotg_frontier_sponsor ?= { has_trait = greedy } }
+            animation = personality_greedy
+        }
         animation = personality_honorable
     }
 
@@ -668,6 +708,18 @@ eotg_frontier.004 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = arrogant  has_trait = ambitious } }
+            animation = personality_bold
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = greedy }
+            animation = personality_greedy
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = callous }
+            animation = dismissal
+        }
         animation = happiness
     }
     right_portrait = {
@@ -812,6 +864,18 @@ eotg_frontier.005 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = callous } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = sadness
+        }
         animation = stress
     }
 
@@ -1005,6 +1069,14 @@ eotg_frontier.010 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = greedy }
+            animation = personality_greedy
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = ambitious }
+            animation = personality_bold
+        }
         animation = personality_rational
     }
 
@@ -1165,6 +1237,14 @@ eotg_frontier.020 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = diligent }
+            animation = interested
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = lazy }
+            animation = boredom
+        }
         animation = personality_rational
     }
 
@@ -1220,6 +1300,18 @@ eotg_frontier.021 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = greedy }
+            animation = personality_greedy
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = ambitious }
+            animation = personality_bold
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = lazy }
+            animation = boredom
+        }
         animation = personality_rational
     }
 
@@ -1441,11 +1533,27 @@ eotg_frontier.030 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = greedy }
+            animation = personality_greedy
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = honest }
+            animation = personality_honorable
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
         animation = personality_rational
     }
     right_portrait = {
         trigger = { exists = scope:eotg_frontier_rival }
         character = scope:eotg_frontier_rival
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { scope:eotg_frontier_rival ?= { has_trait = greedy } }
+            animation = personality_greedy
+        }
         animation = personality_bold
     }
 
@@ -1536,10 +1644,26 @@ eotg_frontier.031 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = wrathful }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = arrogant }
+            animation = disapproval
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
         animation = personality_rational
     }
     right_portrait = {
         character = scope:eotg_frontier_sponsor
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { scope:eotg_frontier_sponsor ?= { has_trait = wrathful } }
+            animation = anger
+        }
         animation = personality_bold
     }
 
@@ -1642,6 +1766,18 @@ eotg_frontier.032 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = callous } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = stubborn  has_trait = arrogant } }
+            animation = disapproval
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
         animation = worry
     }
     right_portrait = {
@@ -1766,10 +1902,26 @@ eotg_frontier.033 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = callous } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = impatient }
+            animation = eyeroll
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = sadness
+        }
         animation = worry
     }
     right_portrait = {
         character = scope:eotg_frontier_founder
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { scope:eotg_frontier_founder ?= { has_trait = compassionate } }
+            animation = worry
+        }
         animation = anger
     }
 
@@ -1872,6 +2024,18 @@ eotg_frontier.034 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = callous } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = greedy }
+            animation = disappointed
+        }
         animation = worry
     }
 
@@ -1957,6 +2121,14 @@ eotg_frontier.035 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = greedy }
+            animation = personality_greedy
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = diligent }
+            animation = interested
+        }
         animation = personality_rational
     }
 
@@ -2064,6 +2236,14 @@ eotg_frontier.036 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = greedy }
+            animation = personality_greedy
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = patient }
+            animation = personality_rational
+        }
         animation = happiness
     }
 
@@ -2129,6 +2309,18 @@ eotg_frontier.037 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = gregarious }
+            animation = happiness
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = cynical }
+            animation = disbelief
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
         animation = personality_rational
     }
 
@@ -2200,6 +2392,14 @@ eotg_frontier.042 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = diligent }
+            animation = interested
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = lazy }
+            animation = boredom
+        }
         animation = personality_rational
     }
 
@@ -2296,11 +2496,27 @@ eotg_frontier.040 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = arrogant }
+            animation = dismissal
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = greedy }
+            animation = personality_greedy
+        }
         animation = personality_rational
     }
     right_portrait = {
         trigger = { exists = scope:eotg_frontier_company }
         character = scope:eotg_frontier_company
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { scope:eotg_frontier_company ?= { has_trait = greedy } }
+            animation = personality_greedy
+        }
         animation = personality_bold
     }
 
@@ -2408,11 +2624,23 @@ eotg_frontier.041 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = zealous }
+            animation = personality_zealous
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = cynical }
+            animation = personality_cynical
+        }
         animation = personality_rational
     }
     right_portrait = {
         trigger = { exists = scope:eotg_frontier_faith_backer }
         character = scope:eotg_frontier_faith_backer
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { scope:eotg_frontier_faith_backer ?= { has_trait = zealous } }
+            animation = personality_zealous
+        }
         animation = personality_honorable
     }
 
