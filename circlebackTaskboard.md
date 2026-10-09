@@ -494,7 +494,7 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Owner:** human → orchestrator
 
 ### CB-50: Seamless exposure, batch B13 (committed files)
-- **Status:** ready (2026-10-09)
+- **Status:** ready (2026-10-09; B13 shipped in 78f1b87 except item 7, the Neurofractured guards on the 28 fracture events)
 - **What:** after the P3 first-person conversion, about 120 non-Seamless events can still fire for a Seamless ruler (`eotg_total_integration`) and show first-person text. That breaks §12.1 rule 7. The ruling and per-event audit are in `docs/specs/event_quality_v1.md` §12.5. B7 and B8 take their own items: heir.001/.003/.007 get Seamless branches, and realm.001 gets a guard. The rest is in files that are already committed.
 - **Owner:** eotg-scripter (rule (a): exclude Seamless at the caller), then eotg-lore-keeper and eotg-localizer for the three rule (b) keys
 - **Next step:** one scripter pass over the §12.5 B13 list:
