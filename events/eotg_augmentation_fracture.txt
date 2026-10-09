@@ -60,6 +60,21 @@ eotg_fracture.0001 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = {
+                has_trait = compassionate
+                exists = scope:eotg_victim
+            }
+            animation = crying
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = sadistic }
+            animation = schadenfreude
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
         animation = stress
     }
     # Guarded: 60% of cascades hurt no one (vanilla
@@ -110,9 +125,19 @@ eotg_fracture.002 = {
     desc = {
         desc = eotg_fracture.002.desc
         first_valid = {
+            # B4/B5 review: the speaker line needs a victim old enough to
+            # speak; younger victims take the _young fallback (shape of
+            # kingpin .012 desc_victim / desc_victim_young).
+            triggered_desc = {
+                trigger = {
+                    exists = scope:eotg_victim
+                    scope:eotg_victim = { age >= 6 }
+                }
+                desc = eotg_fracture.002.desc_wounded
+            }
             triggered_desc = {
                 trigger = { exists = scope:eotg_victim }
-                desc = eotg_fracture.002.desc_wounded
+                desc = eotg_fracture.002.desc_wounded_young
             }
             triggered_desc = {
                 trigger = { NOT = { exists = scope:eotg_victim_dead } }
@@ -130,6 +155,18 @@ eotg_fracture.002 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = crying
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = sadistic }
+            animation = schadenfreude
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = callous }
+            animation = dismissal
+        }
         animation = stress
     }
     # Guarded (vanilla events/activities/activity_system_events.txt:89-92).
@@ -330,12 +367,17 @@ eotg_fracture.002 = {
         }
     }
 
-    # [compassionate] "Tend them with my own hands."
+    # [education_learning] "Tend them with my own hands."
     # eotg_opinion_aug_grateful_patient (Phase 2), as the spec directs.
+    # W5 (event_quality_v1 §13.1 3a): was [compassionate]; it moves risk (-5),
+    # prestige and the patient's opinion, so it cannot fold. Dressing a wound
+    # properly is a physician's knowledge, so learning. compassionate had no
+    # stress row here; sadistic (d) is the kept personality gate (its
+    # immediate pre-pick of scope:eotg_victim_extra reads the trait).
     option = {
         name = eotg_fracture.002.e
-        trigger = { has_trait = compassionate }
-        trait = compassionate
+        trigger = { has_trait = education_learning }
+        skill = learning
         if = {
             limit = { exists = scope:eotg_victim }
             scope:eotg_victim = {
@@ -346,7 +388,10 @@ eotg_fracture.002 = {
         eotg_add_fracture_risk = { AMOUNT = -5 }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = compassionate }
+            modifier = { add = 20  has_trait = education_learning_3 }
+            modifier = { add = 30  has_trait = education_learning_4 }
+            modifier = { add = 30  has_trait = education_learning_5 }
+            modifier = { add = 10  has_trait = compassionate }
             modifier = { add = 10  has_trait = humble }
         }
     }
@@ -366,6 +411,18 @@ eotg_fracture.003 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = zealous }
+            animation = prayer
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = depressed_1 }
+            animation = grief
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = callous }
+            animation = disgust
+        }
         animation = worry
     }
 
@@ -501,9 +558,30 @@ eotg_fracture.004 = {
         stress_level >= 2
     }
 
+    # W6 portraits; the trait reactions follow the W7 addendum §6.4
+    # (docs/specs/event_quality_w7_set_pieces.md) so W7 need not redo them.
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = wrathful }
+            animation = rage
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = callous }
+            animation = personality_callous
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = shock
+        }
         animation = stress
+    }
+    # W6: the witness (event_quality_v1 §11 W6; scope name per the W7
+    # addendum §3). A courtier neither hurt nor jailed, picked at the end of
+    # immediate; presentation only. Lower portraits are static.
+    lower_center_portrait = {
+        trigger = { exists = scope:eotg_witness }
+        character = scope:eotg_witness
     }
     # Guarded (vanilla events/activities/activity_system_events.txt:89-92).
     # Shows the wounded victim; falls back to the dead one when only that one
@@ -552,6 +630,16 @@ eotg_fracture.004 = {
                 limit = { exists = scope:eotg_victim_dead }
                 scope:eotg_victim_dead = { save_scope_as = eotg_victim_portrait }
             }
+            # W6 witness (presentation only; read by lower_center_portrait)
+            random_courtier = {
+                limit = {
+                    is_alive = yes
+                    is_adult = yes
+                    is_imprisoned = no
+                    NOT = { scope:eotg_victim ?= this }
+                }
+                save_scope_as = eotg_witness
+            }
         }
     }
 
@@ -589,22 +677,29 @@ eotg_fracture.004 = {
         }
     }
 
-    # [zealous] "Bury them with honors." Only when someone died. Balance
-    # spec §5.4: formerly universal; now a zealous option (effects
+    # [education_learning] "Bury them with honors." Only when someone died.
+    # Balance spec §5.4: formerly universal; then a zealous option (effects
     # unchanged), so the Storm-only Massacre has two universal options (a, b).
+    # W5 (event_quality_v1 §13.1 3a): was [zealous]; it moves piety, prestige
+    # and risk (-3), so it cannot fold. Knowing the rites owed to the dead
+    # and performing them correctly is a scholar's learning. zealous had no
+    # stress row here; just (d) is the kept personality gate.
     option = {
         name = eotg_fracture.004.c
         trigger = {
-            has_trait = zealous
+            has_trait = education_learning
             exists = scope:eotg_victim_dead
         }
-        trait = zealous
+        skill = learning
         add_prestige = -100
         add_piety = 50
         eotg_add_fracture_risk = { AMOUNT = -3 }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = zealous }
+            modifier = { add = 20  has_trait = education_learning_3 }
+            modifier = { add = 30  has_trait = education_learning_4 }
+            modifier = { add = 30  has_trait = education_learning_5 }
+            modifier = { add = 10  has_trait = zealous }
             modifier = { add = 10  has_trait = compassionate }
         }
     }
@@ -628,28 +723,34 @@ eotg_fracture.004 = {
         }
     }
 
-    # [callous] "Fill the empty places by the next watch." Only when someone
+    # [duchy+] "Fill the empty places by the next watch." Only when someone
     # was killed or wounded: the same gate as option c's (exists on the
     # victim scopes saved in immediate), widened to either victim.
+    # W5 (event_quality_v1 §13.1 3b): was [callous]; it moves dread and risk
+    # (+5), so it cannot fold. Appointing replacements to the dead men's
+    # posts before the next watch is a lord's authority: a duchy tier gate,
+    # no icon. callous keeps its stress row here as a response (§13.1 step
+    # 4); just (d) is the kept personality gate.
     option = {
         name = eotg_fracture.004.e
         trigger = {
-            has_trait = callous
+            highest_held_title_tier >= tier_duchy
             OR = {
                 exists = scope:eotg_victim_dead
                 exists = scope:eotg_victim
             }
         }
-        trait = callous
         add_dread = 20
         eotg_add_fracture_risk = { AMOUNT = 5 }
         stress_impact = {
             callous = minor_stress_impact_loss
         }
         ai_chance = {
-            base = 30
+            base = 10    # B1 lesson 4: tier gates show to every AI duke
             modifier = { add = 30  has_trait = callous }
             modifier = { add = 10  has_trait = arrogant }
+            modifier = { add = -20  has_trait = compassionate }
+            modifier = { add = -10  has_trait = humble }
         }
     }
 }
@@ -679,11 +780,27 @@ eotg_fracture.005 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = sadness
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = callous }
+            animation = dismissal
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = deceitful }
+            animation = scheme
+        }
         animation = stress
     }
     right_portrait = {
         trigger = { exists = scope:eotg_watching_heir }
         character = scope:eotg_watching_heir
+        triggered_animation = {    # W6: a frightened heir
+            trigger = { scope:eotg_watching_heir = { has_trait = craven } }
+            animation = fear
+        }
         animation = worry
     }
 
@@ -795,11 +912,16 @@ eotg_fracture.005 = {
         }
     }
 
-    # [deceitful] "It was a seizure. Nothing more." -- the heir may believe it
+    # [education_intrigue] "It was a seizure. Nothing more." -- the heir may
+    # believe it. W5 (event_quality_v1 §13.1 3a): was [deceitful]; it moves
+    # the heir's opinion, so it cannot fold. A cover story built from the
+    # symptoms the heir actually saw is an intriguer's craft. deceitful keeps
+    # its relief through the lie helper (§13.1 step 4); honest (d) is the
+    # kept personality gate.
     option = {
         name = eotg_fracture.005.e
-        trigger = { has_trait = deceitful }
-        trait = deceitful
+        trigger = { has_trait = education_intrigue }
+        skill = intrigue
         random_list = {
             50 = {
                 scope:eotg_watching_heir = {
@@ -827,7 +949,10 @@ eotg_fracture.005 = {
         eotg_aug_stress_lie_effect = yes
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = deceitful }
+            modifier = { add = 20  has_trait = education_intrigue_3 }
+            modifier = { add = 30  has_trait = education_intrigue_4 }
+            modifier = { add = 30  has_trait = education_intrigue_5 }
+            modifier = { add = 10  has_trait = deceitful }
             modifier = { add = -20  has_trait = honest }
         }
     }
@@ -871,11 +996,27 @@ eotg_fracture.006 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = arrogant } }
+            animation = rage
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
         animation = stress
     }
     right_portrait = {
         trigger = { exists = scope:eotg_warrant_vassal }
         character = scope:eotg_warrant_vassal
+        triggered_animation = {    # W6: a just filer condemns rather than rages
+            trigger = { scope:eotg_warrant_vassal = { has_trait = just } }
+            animation = disapproval
+        }
         animation = anger
     }
 
@@ -1048,15 +1189,20 @@ eotg_fracture.006 = {
         }
     }
 
-    # [gregarious] "Bring them to my table." Vanilla diplomacy duel
+    # [education_diplomacy] "Bring them to my table." Vanilla diplomacy duel
     # (events/yearly_events/bp1_yearly_james.txt:3730).
+    # W5 (event_quality_v1 §13.1 3a): was [gregarious]; it moves faction
+    # discontent and risk (+3), so it cannot fold. Talking a hostile vassal
+    # round at table is a diplomat's work, and the duel was already rolled
+    # on diplomacy. gregarious had no stress row here (gregarious 4 -> 3,
+    # at the floor); just (d) is the kept personality gate.
     option = {
         name = eotg_fracture.006.e
         trigger = {
-            has_trait = gregarious
+            has_trait = education_diplomacy
             exists = scope:eotg_warrant_vassal
         }
-        trait = gregarious
+        skill = diplomacy
         duel = {
             skill = diplomacy
             target = scope:eotg_warrant_vassal
@@ -1103,7 +1249,10 @@ eotg_fracture.006 = {
         eotg_add_fracture_risk = { AMOUNT = 3 }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = gregarious }
+            modifier = { add = 20  has_trait = education_diplomacy_3 }
+            modifier = { add = 30  has_trait = education_diplomacy_4 }
+            modifier = { add = 30  has_trait = education_diplomacy_5 }
+            modifier = { add = 10  has_trait = gregarious }
             modifier = { add = 10  has_trait = honest }
         }
     }
@@ -1123,6 +1272,18 @@ eotg_fracture.007 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = diligent }
+            animation = writing
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = greedy }
+            animation = personality_greedy
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = content }
+            animation = personality_content
+        }
         animation = personality_rational
     }
 
@@ -1209,17 +1370,23 @@ eotg_fracture.007 = {
         }
     }
 
-    # [greedy] "Sell them."
+    # [education_stewardship] "Sell them." W5 (event_quality_v1 §13.1 3a):
+    # was [greedy]; it moves gold, prestige and risk (+10), so it cannot fold.
+    # Pricing the plans and finding the buyer is a steward's trade. greedy
+    # had no stress row here; generous (e) is the kept personality gate.
     option = {
         name = eotg_fracture.007.d
-        trigger = { has_trait = greedy }
-        trait = greedy
+        trigger = { has_trait = education_stewardship }
+        skill = stewardship
         add_gold = medium_gold_value
         add_prestige = -50
         eotg_add_fracture_risk = { AMOUNT = 10 }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = greedy }
+            modifier = { add = 20  has_trait = education_stewardship_3 }
+            modifier = { add = 30  has_trait = education_stewardship_4 }
+            modifier = { add = 30  has_trait = education_stewardship_5 }
+            modifier = { add = 10  has_trait = greedy }
             modifier = { add = -10  has_trait = generous }
         }
     }
@@ -1237,6 +1404,10 @@ eotg_fracture.007 = {
             add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
         }
         eotg_add_fracture_risk = { AMOUNT = -3 }
+        # W5 (§13.1 step 5): the kept personality option gets its stress entry
+        stress_impact = {
+            generous = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = generous }
@@ -1294,27 +1465,45 @@ eotg_fracture.008 = {
     }
     theme = family
 
+    # B4/B5 review: the heir is named (and answers in .c) only at age 6+;
+    # otherwise the spouse, as the immediate's fallback.
     trigger = {
         OR = {
-            exists = primary_heir
+            primary_heir ?= { age >= 6 }
             is_married = yes
         }
     }
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = crying
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = arrogant }
+            animation = dismissal
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
         animation = stress
     }
     right_portrait = {
         trigger = { exists = scope:eotg_named }
         character = scope:eotg_named
+        triggered_animation = {    # W6: a child hears a dead name
+            trigger = { scope:eotg_named = { is_adult = no } }
+            animation = fear
+        }
         animation = shock
     }
 
     immediate = {
         hidden_effect = {
             if = {
-                limit = { exists = primary_heir }
+                limit = { primary_heir ?= { age >= 6 } }
                 primary_heir = { save_scope_as = eotg_named }
             }
             else_if = {
@@ -1398,11 +1587,15 @@ eotg_fracture.008 = {
         }
     }
 
-    # [compassionate] "Say their real name until it sticks."
+    # [education_diplomacy] "Say their real name until it sticks."
+    # W5 (event_quality_v1 §13.1 3a): was [compassionate]; it moves the named
+    # one's opinion and risk (-5), so it cannot fold. Repairing the moment
+    # with them, word by word, is a diplomat's patience. compassionate had
+    # no stress row here; arrogant (e) is the kept personality gate.
     option = {
         name = eotg_fracture.008.d
-        trigger = { has_trait = compassionate }
-        trait = compassionate
+        trigger = { has_trait = education_diplomacy }
+        skill = diplomacy
         if = {
             limit = { exists = scope:eotg_named }
             scope:eotg_named = {
@@ -1412,7 +1605,10 @@ eotg_fracture.008 = {
         eotg_add_fracture_risk = { AMOUNT = -5 }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = compassionate }
+            modifier = { add = 20  has_trait = education_diplomacy_3 }
+            modifier = { add = 30  has_trait = education_diplomacy_4 }
+            modifier = { add = 30  has_trait = education_diplomacy_5 }
+            modifier = { add = 10  has_trait = compassionate }
             modifier = { add = 10  has_trait = patient }
         }
     }
@@ -1499,6 +1695,18 @@ eotg_fracture.009 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = diligent }
+            animation = pondering
+        }
         animation = worry
     }
 
@@ -1628,6 +1836,10 @@ eotg_fracture.009 = {
         trait = paranoid
         add_character_modifier = { modifier = eotg_mod_withdrawn_from_court  years = 1 }
         eotg_add_fracture_risk = { AMOUNT = -3 }
+        # W5 (§13.1 step 5): the kept personality option gets its stress entry
+        stress_impact = {
+            paranoid = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = paranoid }
@@ -1635,11 +1847,16 @@ eotg_fracture.009 = {
         }
     }
 
-    # [diligent] "Log every minute from now on."
+    # [education_stewardship] "Log every minute from now on."
+    # W5 (event_quality_v1 §13.1 3a): was [diligent]; it moves risk (-6) and
+    # carries the misled reveal, so it cannot fold. Keeping a minute-by-minute
+    # ledger of one's own day is a steward's discipline. diligent keeps its
+    # stress row here as a response (§13.1 step 4); paranoid (d) is the kept
+    # personality gate.
     option = {
         name = eotg_fracture.009.e
-        trigger = { has_trait = diligent }
-        trait = diligent
+        trigger = { has_trait = education_stewardship }
+        skill = stewardship
         eotg_add_fracture_risk = { AMOUNT = -6 }
         eotg_aug_f009_misled_toast_effect = yes
         stress_impact = {
@@ -1647,7 +1864,10 @@ eotg_fracture.009 = {
         }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = diligent }
+            modifier = { add = 20  has_trait = education_stewardship_3 }
+            modifier = { add = 30  has_trait = education_stewardship_4 }
+            modifier = { add = 30  has_trait = education_stewardship_5 }
+            modifier = { add = 10  has_trait = diligent }
             modifier = { add = 10  has_trait = patient }
         }
     }
@@ -1719,6 +1939,18 @@ eotg_fracture.010 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = eccentric }
+            animation = interested
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = zealous }
+            animation = prayer
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
         animation = shock
     }
 
@@ -1757,16 +1989,23 @@ eotg_fracture.010 = {
         }
     }
 
-    # [zealous] "Bless the glass."
+    # [education_learning] "Bless the glass." W5 (event_quality_v1 §13.1
+    # 3a): was [zealous]; it moves piety and risk (-3), so it cannot fold.
+    # Knowing the rite of blessing and saying it correctly over the glass is
+    # learning. zealous had no stress row here; eccentric (e) is the kept
+    # personality gate.
     option = {
         name = eotg_fracture.010.d
-        trigger = { has_trait = zealous }
-        trait = zealous
+        trigger = { has_trait = education_learning }
+        skill = learning
         add_piety = 50
         eotg_add_fracture_risk = { AMOUNT = -3 }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = zealous }
+            modifier = { add = 20  has_trait = education_learning_3 }
+            modifier = { add = 30  has_trait = education_learning_4 }
+            modifier = { add = 30  has_trait = education_learning_5 }
+            modifier = { add = 10  has_trait = zealous }
             modifier = { add = 10  has_trait = humble }
         }
     }
@@ -1846,12 +2085,22 @@ eotg_fracture.011 = {
     desc = {
         desc = eotg_fracture.011.desc
         first_valid = {
+            # B4/B5 review: the witness's spoken line needs a witness aged 6+;
+            # younger witnesses take the _young fallback (kingpin .012 shape).
+            triggered_desc = {
+                trigger = {
+                    exists = scope:eotg_witness
+                    NOT = { exists = scope:eotg_misled }
+                    scope:eotg_witness = { age >= 6 }
+                }
+                desc = eotg_fracture.011.desc_witness
+            }
             triggered_desc = {
                 trigger = {
                     exists = scope:eotg_witness
                     NOT = { exists = scope:eotg_misled }
                 }
-                desc = eotg_fracture.011.desc_witness
+                desc = eotg_fracture.011.desc_witness_young
             }
             desc = eotg_fracture.011.desc_none
         }
@@ -1865,6 +2114,18 @@ eotg_fracture.011 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = shy }
+            animation = shame
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = deceitful }
+            animation = scheme
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = eccentric }
+            animation = interested
+        }
         animation = worry
     }
     right_portrait = {
@@ -1873,6 +2134,10 @@ eotg_fracture.011 = {
             NOT = { exists = scope:eotg_misled }
         }
         character = scope:eotg_witness
+        triggered_animation = {    # W6: role animation when the witness is the court physician
+            trigger = { scope:eotg_witness = { has_court_position = court_physician_court_position } }
+            animation = physician
+        }
         animation = disbelief
     }
 
@@ -1987,20 +2252,28 @@ eotg_fracture.011 = {
         }
     }
 
-    # [deceitful] "You heard nothing." —
+    # [education_intrigue] "You heard nothing." — W5 (event_quality_v1
+    # §13.1 3a): was [deceitful]; it grants the intrigue lesson, so it cannot
+    # fold. Leaning on a witness until they agree they saw nothing is an
+    # intriguer's work. deceitful keeps its relief through the lie helper
+    # (§13.1 step 4); shy (d, protected: 3 gates) is the kept personality
+    # gate.
     option = {
         name = eotg_fracture.011.e
         trigger = {
-            has_trait = deceitful
+            has_trait = education_intrigue
             exists = scope:eotg_witness
             NOT = { exists = scope:eotg_misled }
         }
-        trait = deceitful
+        skill = intrigue
         add_character_modifier = { modifier = eotg_mod_aug_lesson_intrigue  years = 5 }
         eotg_aug_stress_lie_effect = yes
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = deceitful }
+            modifier = { add = 20  has_trait = education_intrigue_3 }
+            modifier = { add = 30  has_trait = education_intrigue_4 }
+            modifier = { add = 30  has_trait = education_intrigue_5 }
+            modifier = { add = 10  has_trait = deceitful }
             modifier = { add = 10  has_trait = arbitrary }
         }
     }
@@ -2043,6 +2316,18 @@ eotg_fracture.012 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = sadness
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = callous }
+            animation = dismissal
+        }
         animation = disbelief
     }
     right_portrait = {
@@ -2154,6 +2439,10 @@ eotg_fracture.012 = {
                 add_opinion = { modifier = eotg_opinion_aug_reassured  target = root  years = 5 }
             }
         }
+        # W5 (§13.1 step 5): the kept personality option gets its stress entry
+        stress_impact = {
+            trusting = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = trusting }
@@ -2161,11 +2450,15 @@ eotg_fracture.012 = {
         }
     }
 
-    # [paranoid] "An impostor."
+    # [education_intrigue] "An impostor." W5 (event_quality_v1 §13.1 3a):
+    # was [paranoid]; it moves the stranger's opinion and risk (+5), so it
+    # cannot fold. Treating the face as a cover and questioning it as one is
+    # a spymaster's reflex. paranoid keeps its relief through the tyranny
+    # helper (§13.1 step 4); trusting (d) is the kept personality gate.
     option = {
         name = eotg_fracture.012.e
-        trigger = { has_trait = paranoid }
-        trait = paranoid
+        trigger = { has_trait = education_intrigue }
+        skill = intrigue
         if = {
             limit = { exists = scope:eotg_stranger }
             scope:eotg_stranger = {
@@ -2176,8 +2469,12 @@ eotg_fracture.012 = {
         eotg_aug_stress_tyranny_effect = yes
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = paranoid }
+            modifier = { add = 20  has_trait = education_intrigue_3 }
+            modifier = { add = 30  has_trait = education_intrigue_4 }
+            modifier = { add = 30  has_trait = education_intrigue_5 }
+            modifier = { add = 10  has_trait = paranoid }
             modifier = { add = 10  has_trait = vengeful }
+            modifier = { add = -20  has_trait = trusting }
         }
     }
 }
@@ -2200,6 +2497,18 @@ eotg_fracture.013 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = eccentric }
+            animation = interested
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = patient }
+            animation = pondering
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
         animation = thinking
     }
 
@@ -2256,14 +2565,19 @@ eotg_fracture.013 = {
         }
     }
 
-    # [eccentric] "Stake the treasury on it."
+    # [education_stewardship] "Stake the treasury on it." W5
+    # (event_quality_v1 §13.1 3a): was [eccentric]; it moves gold and risk
+    # (+5), so it cannot fold. Placing a forecast-backed stake through the
+    # treasury's own instruments is a steward's gamble. eccentric had no
+    # stress row here; patient (e, protected: 3 gates) is the kept
+    # personality gate.
     option = {
         name = eotg_fracture.013.d
         trigger = {
-            has_trait = eccentric
+            has_trait = education_stewardship
             gold >= medium_gold_value    # QA round 2 gold gate (the stake)
         }
-        trait = eccentric
+        skill = stewardship
         random_list = {
             50 = {
                 add_gold = medium_gold_value
@@ -2285,7 +2599,10 @@ eotg_fracture.013 = {
         eotg_add_fracture_risk = { AMOUNT = 5 }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = eccentric }
+            modifier = { add = 20  has_trait = education_stewardship_3 }
+            modifier = { add = 30  has_trait = education_stewardship_4 }
+            modifier = { add = 30  has_trait = education_stewardship_5 }
+            modifier = { add = 10  has_trait = eccentric }
             modifier = { add = -20  has_trait = greedy }
         }
     }
@@ -2296,6 +2613,10 @@ eotg_fracture.013 = {
         trigger = { has_trait = patient }
         trait = patient
         eotg_add_fracture_risk = { AMOUNT = -5 }
+        # W5 (§13.1 step 5): the kept personality option gets its stress entry
+        stress_impact = {
+            patient = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = patient }
@@ -2319,6 +2640,18 @@ eotg_fracture.014 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = stubborn }
+            animation = personality_bold
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = humble }
+            animation = shame
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
         animation = interested
     }
 
@@ -2384,17 +2717,26 @@ eotg_fracture.014 = {
         }
     }
 
-    # [humble] "Then I am wrong. Help me."
+    # [education_learning] "Then I am wrong. Help me." W5 (event_quality_v1
+    # §13.1 3a): was [humble]; it moves prestige and risk (-5) without a's
+    # gold, so it cannot fold. Doubting the instrument and testing the
+    # overlay against the plans of the wall, out loud and with help, is a
+    # scholar's method. humble had no stress row here; stubborn (d) is the
+    # kept personality gate.
     option = {
         name = eotg_fracture.014.e
-        trigger = { has_trait = humble }
-        trait = humble
+        trigger = { has_trait = education_learning }
+        skill = learning
         add_prestige = -50
         eotg_add_fracture_risk = { AMOUNT = -5 }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = humble }
+            modifier = { add = 20  has_trait = education_learning_3 }
+            modifier = { add = 30  has_trait = education_learning_4 }
+            modifier = { add = 30  has_trait = education_learning_5 }
+            modifier = { add = 10  has_trait = humble }
             modifier = { add = 10  has_trait = trusting }
+            modifier = { add = -10  has_trait = arrogant }
         }
     }
 
@@ -2460,6 +2802,18 @@ eotg_fracture.015 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = honest }
+            animation = shame
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = deceitful }
+            animation = scheme
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
         animation = thinking
     }
     right_portrait = {
@@ -2552,11 +2906,16 @@ eotg_fracture.015 = {
         }
     }
 
-    # [honest] "Send it with a note: I don't remember writing this."
+    # [education_diplomacy] "Send it with a note: I don't remember writing
+    # this." W5 (event_quality_v1 §13.1 3a): was [honest]; it moves the
+    # addressee's opinion and risk (-3) on top of b's send, so it cannot
+    # fold. A covering note that disarms whatever the letter says is a
+    # diplomat's craft. honest had no stress row here; deceitful (e) is the
+    # kept personality gate (honest stays the kept gate in .005).
     option = {
         name = eotg_fracture.015.d
-        trigger = { has_trait = honest }
-        trait = honest
+        trigger = { has_trait = education_diplomacy }
+        skill = diplomacy
         # Balance spec §5.4: the true letter goes too, behind the same
         # neutral tooltip; the note's reassurance comes on top.
         custom_tooltip = eotg_fracture.015.b.tt
@@ -2572,8 +2931,12 @@ eotg_fracture.015 = {
         eotg_add_fracture_risk = { AMOUNT = -3 }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = honest }
+            modifier = { add = 20  has_trait = education_diplomacy_3 }
+            modifier = { add = 30  has_trait = education_diplomacy_4 }
+            modifier = { add = 30  has_trait = education_diplomacy_5 }
+            modifier = { add = 10  has_trait = honest }
             modifier = { add = 10  has_trait = humble }
+            modifier = { add = -10  has_trait = deceitful }
         }
     }
 
@@ -2617,6 +2980,21 @@ eotg_fracture.016 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = {
+                has_trait = compassionate
+                exists = scope:eotg_victim
+            }
+            animation = crying
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = callous }
+            animation = dismissal
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = just }
+            animation = shame
+        }
         animation = shock
     }
 
@@ -2771,6 +3149,10 @@ eotg_fracture.016 = {
             eotg_aug_stress_wound_effect = yes
         }
         eotg_add_fracture_risk = { AMOUNT = 5 }
+        # W5 (§13.1 step 5): the kept personality option gets its stress entry
+        stress_impact = {
+            callous = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = callous }
@@ -2778,16 +3160,19 @@ eotg_fracture.016 = {
         }
     }
 
-    # [just] "Pay blood-price to their kin." The victim's close family at
-    # court is reassured.
+    # [duchy+] "Pay blood-price to their kin." The victim's close family at
+    # court is reassured. W5 (event_quality_v1 §13.1 3b): was [just]; it
+    # moves gold, opinion and risk (-5), so it cannot fold. Setting and
+    # paying a blood-price from the seat is a lord's justice: a duchy tier
+    # gate, no icon. just had no own stress row here (the outcome helpers
+    # still charge it); callous (d) is the kept personality gate.
     option = {
         name = eotg_fracture.016.e
         trigger = {
-            has_trait = just
+            highest_held_title_tier >= tier_duchy
             exists = scope:eotg_victim
             gold >= medium_gold_value    # QA round 2 gold gate
         }
-        trait = just
         remove_short_term_gold = medium_gold_value
         scope:eotg_victim = {
             every_close_family_member = {
@@ -2808,9 +3193,12 @@ eotg_fracture.016 = {
         }
         eotg_add_fracture_risk = { AMOUNT = -5 }
         ai_chance = {
-            base = 30
+            base = 10    # B1 lesson 4: tier gates show to every AI duke
             modifier = { add = 30  has_trait = just }
             modifier = { add = 10  has_trait = generous }
+            modifier = { add = -20  has_trait = arbitrary }
+            modifier = { add = -10  has_trait = greedy }
+            modifier = { add = -10  has_trait = callous }
         }
     }
 
@@ -2883,6 +3271,18 @@ eotg_fracture.017 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = ambitious }
+            animation = ecstasy
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = zealous }
+            animation = disgust
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
         animation = thinking
     }
 
@@ -2992,11 +3392,15 @@ eotg_fracture.017 = {
         }
     }
 
-    # [zealous] "No device speaks for me." Hidden: 85 honoured, 15 override.
+    # [duchy+] "No device speaks for me." Hidden: 85 honoured, 15 override.
+    # W5 (event_quality_v1 §13.1 3b): was [zealous]; it moves risk (-8) and
+    # piety, so it cannot fold. Refusing on the sovereign's own standing
+    # that anything speak in the ruler's name is authority: a duchy tier
+    # gate, no icon. zealous keeps its relief through the reject helper
+    # (§13.1 step 4); ambitious (d) is the kept personality gate.
     option = {
         name = eotg_fracture.017.e
-        trigger = { has_trait = zealous }
-        trait = zealous
+        trigger = { highest_held_title_tier >= tier_duchy }
         hidden_effect = {
             random_list = {
                 85 = {
@@ -3013,9 +3417,11 @@ eotg_fracture.017 = {
         }
         eotg_aug_stress_reject_effect = yes
         ai_chance = {
-            base = 30
+            base = 10    # B1 lesson 4: tier gates show to every AI duke
             modifier = { add = 30  has_trait = zealous }
             modifier = { add = 10  has_trait = stubborn }
+            modifier = { add = -20  has_trait = cynical }
+            modifier = { add = -10  has_trait = ambitious }
         }
     }
 }
@@ -3036,6 +3442,18 @@ eotg_fracture.018 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = stubborn }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = fickle }
+            animation = boredom
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
         animation = disbelief
     }
 
@@ -3089,11 +3507,16 @@ eotg_fracture.018 = {
         }
     }
 
-    # [stubborn] "No." —
+    # [education_martial] "No." — W5 (event_quality_v1 §13.1 3a): was
+    # [stubborn]; it carries its own 20% slip and stress row, distinct from
+    # b's 50%, so it cannot fold. Holding a position under fire by drill and
+    # discipline is a soldier's competence. stubborn keeps its stress row
+    # here as a response (§13.1 step 4); fickle (e, protected: 2 gates) is
+    # the kept personality gate.
     option = {
         name = eotg_fracture.018.d
-        trigger = { has_trait = stubborn }
-        trait = stubborn
+        trigger = { has_trait = education_martial }
+        skill = martial
         random = {
             chance = 20
             eotg_aug_scramble_personality_effect = yes
@@ -3108,7 +3531,10 @@ eotg_fracture.018 = {
         }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = stubborn }
+            modifier = { add = 20  has_trait = education_martial_3 }
+            modifier = { add = 30  has_trait = education_martial_4 }
+            modifier = { add = 30  has_trait = education_martial_5 }
+            modifier = { add = 10  has_trait = stubborn }
             modifier = { add = 10  has_trait = brave }
         }
     }
@@ -3161,11 +3587,27 @@ eotg_fracture.019 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = trusting }
+            animation = disbelief
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = wrathful }
+            animation = rage
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = worry
+        }
         animation = paranoia
     }
     right_portrait = {
         trigger = { exists = scope:eotg_accused }
         character = scope:eotg_accused
+        triggered_animation = {    # W6: a craven accused
+            trigger = { scope:eotg_accused = { has_trait = craven } }
+            animation = fear
+        }
         animation = worry
     }
 
@@ -3288,12 +3730,15 @@ eotg_fracture.019 = {
         }
     }
 
-    # [paranoid] "Their family too." The accused and their close family at
-    # root's court.
+    # [duchy+] "Their family too." The accused and their close family at
+    # root's court. W5 (event_quality_v1 §13.1 3b): was [paranoid]; it moves
+    # tyranny, prisoners and risk (+12), so it cannot fold. Ordering a whole
+    # house into the cells is a lord's authority: a duchy tier gate, no icon.
+    # paranoid keeps its relief through the tyranny helper (§13.1 step 4);
+    # trusting (e) is the kept personality gate.
     option = {
         name = eotg_fracture.019.d
-        trigger = { has_trait = paranoid }
-        trait = paranoid
+        trigger = { highest_held_title_tier >= tier_duchy }
         # QA round 2 M5: vanilla imprison_character_effect for the accused and
         # each relative (00_prison_effects.txt:1644). The flat +20 tyranny
         # is the purge of a whole family and stays on top of the wrapper's
@@ -3327,9 +3772,12 @@ eotg_fracture.019 = {
         eotg_aug_stress_tyranny_effect = yes
         eotg_add_fracture_risk = { AMOUNT = 12 }
         ai_chance = {
-            base = 30
+            base = 10    # B1 lesson 4: tier gates show to every AI duke
             modifier = { add = 30  has_trait = paranoid }
             modifier = { add = 10  has_trait = vengeful }
+            modifier = { add = -20  has_trait = trusting }
+            modifier = { add = -20  has_trait = just }
+            modifier = { add = -10  has_trait = compassionate }
         }
     }
 
@@ -3361,6 +3809,10 @@ eotg_fracture.019 = {
             trigger_event = { id = eotg_fracture.020  days = { 90 180 } }
         }
         eotg_aug_stress_reject_effect = yes
+        # W5 (§13.1 step 5): the kept personality option gets its stress entry
+        stress_impact = {
+            trusting = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = trusting }
@@ -3425,6 +3877,25 @@ eotg_fracture.020 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1): an innocent paid for it
+            trigger = {
+                has_trait = compassionate
+                var:eotg_aug_accusation_true = flag:no
+                OR = {
+                    var:eotg_aug_accusation_action = flag:arrested
+                    var:eotg_aug_accusation_action = flag:executed
+                }
+            }
+            animation = grief
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = arrogant }
+            animation = dismissal
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
         animation = thinking
     }
     right_portrait = {
@@ -3646,6 +4117,18 @@ eotg_fracture.021 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = grief
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = callous }
+            animation = dismissal
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
         animation = worry
     }
 
@@ -3802,11 +4285,27 @@ eotg_fracture.022 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = humble }
+            animation = shame
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = arrogant }
+            animation = personality_bold
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
         animation = shock
     }
     right_portrait = {
         trigger = { exists = primary_spouse }
         character = primary_spouse
+        triggered_animation = {    # W6: a compassionate spouse
+            trigger = { root.primary_spouse = { has_trait = compassionate } }
+            animation = sadness
+        }
         animation = worry
     }
 
@@ -3857,19 +4356,27 @@ eotg_fracture.022 = {
         }
     }
 
-    # [arrogant] "We are more than any one ruler."
+    # [duchy+] "We are more than any one ruler." W5 (event_quality_v1 §13.1
+    # 3b): was [arrogant]; it moves prestige (+100) and risk (+10), so it
+    # cannot fold. Claiming the slip as the majestic plural is a ruler's
+    # standing, not a temper: a duchy tier gate, no icon. The option text is
+    # lore-locked (§13.3 L-2, "the options are unchanged") and already
+    # reads as the royal "we". arrogant had no own stress row here; humble
+    # (e) is the kept personality gate.
     option = {
         name = eotg_fracture.022.d
-        trigger = { has_trait = arrogant }
-        trait = arrogant
+        trigger = { highest_held_title_tier >= tier_duchy }
         eotg_aug_voice_advance_effect = { STAGE = 3 }
         add_prestige = 100
         eotg_add_fracture_risk = { AMOUNT = 10 }
         eotg_aug_stress_embrace_effect = yes
         ai_chance = {
-            base = 30
+            base = 10    # B1 lesson 4: tier gates show to every AI duke
             modifier = { add = 30  has_trait = arrogant }
             modifier = { add = 10  has_trait = ambitious }
+            modifier = { add = -20  has_trait = humble }
+            modifier = { add = -10  has_trait = content }
+            modifier = { add = -10  has_trait = shy }
         }
     }
 
@@ -3893,6 +4400,10 @@ eotg_fracture.022 = {
         }
         add_prestige = -100
         eotg_add_fracture_risk = { AMOUNT = -8 }
+        # W5 (§13.1 step 5): the kept personality option gets its stress entry
+        stress_impact = {
+            humble = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = humble }
@@ -3946,6 +4457,18 @@ eotg_fracture.023 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = map_fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = calm }
+            animation = thinking
+        }
+        triggered_animation = {    # W6 (event_quality_v1): the commander's read
+            trigger = { has_trait = education_martial }
+            animation = marshal
+        }
         animation = anger
     }
 
@@ -4038,14 +4561,18 @@ eotg_fracture.023 = {
         }
     }
 
-    # [calm] "Wait for the scouts."
+    # [education_martial] "Wait for the scouts." W5 (event_quality_v1 §13.1
+    # 3a): was [calm]; it moves risk (-6) behind the override roll, so it
+    # cannot fold. Holding the muster until the scouts report is a
+    # commander's discipline. calm had no stress row here (calm 4 -> 3, at
+    # the floor); wrathful (d) is the kept personality gate.
     option = {
         name = eotg_fracture.023.e
         trigger = {
             is_at_war = no    # peace branch only: no scouts to await at war
-            has_trait = calm
+            has_trait = education_martial
         }
-        trait = calm
+        skill = martial
         show_as_tooltip = {
             eotg_add_fracture_risk = { AMOUNT = -6 }
         }
@@ -4069,7 +4596,10 @@ eotg_fracture.023 = {
         }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = calm }
+            modifier = { add = 20  has_trait = education_martial_3 }
+            modifier = { add = 30  has_trait = education_martial_4 }
+            modifier = { add = 30  has_trait = education_martial_5 }
+            modifier = { add = 10  has_trait = calm }
             modifier = { add = 10  has_trait = patient }
         }
     }
@@ -4127,11 +4657,23 @@ eotg_fracture.024 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = sadness
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = trusting }
+            animation = disbelief
+        }
         animation = paranoia
     }
     right_portrait = {
         trigger = { exists = scope:eotg_changed }
         character = scope:eotg_changed
+        triggered_animation = {    # W6: role animation when the changed one is the court physician
+            trigger = { scope:eotg_changed = { has_court_position = court_physician_court_position } }
+            animation = physician
+        }
         animation = personality_rational
     }
 
@@ -4211,11 +4753,16 @@ eotg_fracture.024 = {
         }
     }
 
-    # [compassionate] "Sit with them. You both know what this is."
+    # [education_learning] "Sit with them. You both know what this is."
+    # W5 (event_quality_v1 §13.1 3a): was [compassionate]; it moves the
+    # courtier's risk and opinion behind the override roll, so it cannot
+    # fold. Recognising the symptoms in another implant and talking them
+    # through it is a physician's knowledge. compassionate had no stress row
+    # here; paranoid (e) is the kept personality gate.
     option = {
         name = eotg_fracture.024.d
-        trigger = { has_trait = compassionate }
-        trait = compassionate
+        trigger = { has_trait = education_learning }
+        skill = learning
         show_as_tooltip = {
             eotg_aug_f024_sit_with_effect = yes
         }
@@ -4239,7 +4786,10 @@ eotg_fracture.024 = {
         }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = compassionate }
+            modifier = { add = 20  has_trait = education_learning_3 }
+            modifier = { add = 30  has_trait = education_learning_4 }
+            modifier = { add = 30  has_trait = education_learning_5 }
+            modifier = { add = 10  has_trait = compassionate }
             modifier = { add = 10  has_trait = gregarious }
         }
     }
@@ -4253,6 +4803,10 @@ eotg_fracture.024 = {
             add_opinion = { modifier = eotg_opinion_aug_fear  target = root  years = 10 }
         }
         eotg_add_fracture_risk = { AMOUNT = 8 }
+        # W5 (§13.1 step 5): the kept personality option gets its stress entry
+        stress_impact = {
+            paranoid = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = paranoid }
@@ -4290,11 +4844,27 @@ eotg_fracture.025 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = content }
+            animation = personality_content
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = arrogant  has_trait = ambitious } }
+            animation = anger
+        }
         animation = stress
     }
     right_portrait = {
         trigger = { exists = scope:eotg_keeper }
         character = scope:eotg_keeper
+        triggered_animation = {    # W6: an ambitious keeper
+            trigger = { scope:eotg_keeper = { has_trait = ambitious } }
+            animation = scheme
+        }
         animation = worry
     }
 
@@ -4399,20 +4969,27 @@ eotg_fracture.025 = {
         }
     }
 
-    # [paranoid] "They've planned this for months."
+    # [duchy+] "They've planned this for months." W5 (event_quality_v1
+    # §13.1 3b): was [paranoid]; it holds the keeper (prisoner, family
+    # opinion), so it cannot fold. Ordering one's own guards to take the
+    # keeper into custody is a lord's authority: a duchy tier gate, no icon.
+    # paranoid had no stress row here; content (e, protected: 3 gates) is
+    # the kept personality gate.
     option = {
         name = eotg_fracture.025.d
-        trigger = { has_trait = paranoid }
-        trait = paranoid
+        trigger = { highest_held_title_tier >= tier_duchy }
         # QA round 2 M5: vanilla imprison_character_effect
         # (00_prison_effects.txt:1644): the keeper is a spouse or heir, so
         # the wrapper chooses house arrest, with the family's opinion. Body
         # shared with the a / e override.
         eotg_aug_f025_hold_keeper_effect = yes
         ai_chance = {
-            base = 30
+            base = 10    # B1 lesson 4: tier gates show to every AI duke
             modifier = { add = 30  has_trait = paranoid }
             modifier = { add = 10  has_trait = vengeful }
+            modifier = { add = -20  has_trait = trusting }
+            modifier = { add = -20  has_trait = content }
+            modifier = { add = -10  has_trait = humble }
         }
     }
 
@@ -4501,6 +5078,18 @@ eotg_fracture.026 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = zealous }
+            animation = prayer
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = ambitious  has_trait = cynical } }
+            animation = ecstasy
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
         animation = sadness
     }
 
@@ -4648,6 +5237,10 @@ eotg_fracture.026 = {
         trait = zealous
         add_piety = 200
         eotg_add_fracture_risk = { AMOUNT = -10 }
+        # W5 (§13.1 step 5): the kept personality option gets its stress entry
+        stress_impact = {
+            zealous = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = zealous }
@@ -4710,8 +5303,22 @@ eotg_fracture.027 = {
     override_background = { reference = eotg_bg_private_quarters }
     override_effect_2d = { reference = smoke }
 
+    # W6 trait reactions per the W7 addendum §6.1 (brave → rage, stubborn →
+    # anger, craven → fear); the cascade-witness right portrait is W7's.
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = brave }
+            animation = rage
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = stubborn }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
         animation = pain
     }
 
@@ -4825,12 +5432,17 @@ eotg_fracture.027 = {
         }
     }
 
-    # [brave] "Fight it."  (total integration -10, passes +40)
+    # [education_martial] "Fight it."  (total integration -10, passes +40)
+    # W5 (event_quality_v1 §13.1 3a): was [brave]; its outcome weights
+    # differ from every other stance, so it cannot fold. Fighting the
+    # cascade channel by channel, as a drilled soldier fights a line, is
+    # martial competence. brave had no stress row here; stubborn (d) is the
+    # kept personality gate. Outcome weights unchanged (W7 addendum §6.1).
     option = {
         name = eotg_fracture.027.c
         add_internal_flag = dangerous    # W3: the cascade can kill root or end the self
-        trigger = { has_trait = brave }
-        trait = brave
+        trigger = { has_trait = education_martial }
+        skill = martial
         custom_tooltip = eotg_fracture.027.tt
         hidden_effect = {
             random_list = {
@@ -4877,8 +5489,12 @@ eotg_fracture.027 = {
         }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = brave }
+            modifier = { add = 20  has_trait = education_martial_3 }
+            modifier = { add = 30  has_trait = education_martial_4 }
+            modifier = { add = 30  has_trait = education_martial_5 }
+            modifier = { add = 10  has_trait = brave }
             modifier = { add = 10  has_trait = wrathful }
+            modifier = { add = -10  has_trait = craven }
         }
     }
 
@@ -4932,6 +5548,10 @@ eotg_fracture.027 = {
                 }
             }
         }
+        # W5 (§13.1 step 5): the kept personality option gets its stress entry
+        stress_impact = {
+            stubborn = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = stubborn }
@@ -4955,6 +5575,18 @@ eotg_fracture.028 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = zealous }
+            animation = disgust
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = ambitious }
+            animation = interested
+        }
         animation = disbelief
     }
 
@@ -5004,6 +5636,21 @@ eotg_fracture.029 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = {
+                has_trait = compassionate
+                exists = scope:eotg_victim
+            }
+            animation = crying
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = callous }
+            animation = boredom
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = humble }
+            animation = shame
+        }
         animation = stress
     }
     right_portrait = {
@@ -5059,6 +5706,10 @@ eotg_fracture.029 = {
         trigger = { has_trait = humble }
         trait = humble
         eotg_add_fracture_risk = { AMOUNT = -5 }
+        # W5 (§13.1 step 5): the kept personality option gets its stress entry
+        stress_impact = {
+            humble = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = humble }

@@ -99,11 +99,27 @@ eotg_aug_act.001 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = zealous }
+            animation = personality_zealous
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = cynical }
+            animation = personality_cynical
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
         animation = thinking
     }
     right_portrait = {
         trigger = { exists = scope:eotg_aug_entrant }
         character = scope:eotg_aug_entrant
+        triggered_animation = {    # W6: the Neurofractured entrant (desc_entrant_nf)
+            trigger = { scope:eotg_aug_entrant = { has_trait = eotg_neurofractured } }
+            animation = personality_irrational
+        }
         animation = personality_bold
     }
 
@@ -188,11 +204,15 @@ eotg_aug_act.001 = {
         }
     }
 
-    # [cynical] "Make them the main event."
+    # [duchy+] "Make them the main event." W5 (event_quality_v1 §13.1 3b):
+    # was [cynical]; reordering the host's own tournament around the
+    # augmented is ceremony, so a duchy tier gate, no icon. Entrant risk +5
+    # and the prestige are a distinct move, so it cannot fold. cynical gets
+    # a stress row here as a response (§13.1 step 4; it had none before);
+    # e (zealous) is the kept personality gate.
     option = {
         name = eotg_aug_act.001.d
-        trigger = { has_trait = cynical }
-        trait = cynical
+        trigger = { highest_held_title_tier >= tier_duchy }
         involved_activity = {
             every_attending_character = {
                 limit = { eotg_aug_tournament_entrant = yes }
@@ -207,14 +227,21 @@ eotg_aug_act.001 = {
             }
         }
         add_prestige = minor_prestige_value
+        stress_impact = {
+            cynical = minor_stress_impact_loss    # W5 (§13.1 step 4): response row
+        }
         ai_chance = {
-            base = 30
+            base = 10    # B1 lesson 4: tier gates show to every AI duke
             modifier = { add = 30  has_trait = cynical }
             modifier = { add = 10  has_trait = arrogant }
+            modifier = { add = -20  has_trait = zealous }
+            modifier = { add = -10  has_trait = humble }
         }
     }
 
-    # [zealous] "No one fights with hardware on my field."
+    # [zealous] "No one fights with hardware on my field." W5 (§13.1 step
+    # 2c): the kept personality gate; the piety and the faith-led refusal
+    # are the zealotry. Step 5: stress entry added.
     option = {
         name = eotg_aug_act.001.e
         trigger = { has_trait = zealous }
@@ -226,6 +253,9 @@ eotg_aug_act.001 = {
             }
         }
         add_piety = minor_piety_value
+        stress_impact = {
+            zealous = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = zealous }
@@ -320,6 +350,18 @@ eotg_aug_act.002 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = wrathful }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = deceitful }
+            animation = scheme
+        }
         animation = personality_bold
     }
 
@@ -394,21 +436,35 @@ eotg_aug_act.002 = {
         }
     }
 
-    # [deceitful] "Let them think it's skill." No discovery roll.
+    # [education_intrigue] "Let them think it's skill." No discovery roll.
+    # W5 (event_quality_v1 §13.1 3a): was [deceitful]; running the hardware
+    # where no marshal can read it is concealment craft, so intrigue. Risk +3
+    # with no discovery roll is a distinct move, so it cannot fold. deceitful
+    # gets a stress row here as a response (§13.1 step 4; it had none
+    # before); e (honest) is the kept personality gate.
     option = {
         name = eotg_aug_act.002.d
-        trigger = { has_trait = deceitful }
-        trait = deceitful
+        trigger = { has_trait = education_intrigue }
+        skill = intrigue
         activity_tournament_change_contestant_score_effect = { SCORE = increase_medium }
         hidden_effect = { eotg_add_fracture_risk = { AMOUNT = 3 } }
+        stress_impact = {
+            deceitful = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = deceitful }
+            modifier = { add = 10  has_trait = education_intrigue_3 }
+            modifier = { add = 20  has_trait = education_intrigue_4 }
+            modifier = { add = 20  has_trait = education_intrigue_5 }
+            modifier = { add = 20  has_trait = deceitful }
             modifier = { add = 10  has_trait = ambitious }
+            modifier = { add = -20  has_trait = honest }
         }
     }
 
-    # [honest] "Declare the hardware to the marshal."
+    # [honest] "Declare the hardware to the marshal." W5 (§13.1 step 2c):
+    # the kept personality gate; the text is disclosure. Step 5: stress entry
+    # added.
     option = {
         name = eotg_aug_act.002.e
         trigger = { has_trait = honest }
@@ -420,6 +476,9 @@ eotg_aug_act.002 = {
             }
         }
         add_prestige = minor_prestige_value
+        stress_impact = {
+            honest = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = honest }
@@ -427,15 +486,20 @@ eotg_aug_act.002 = {
         }
     }
 
-    # [wrathful, Overclocked] "Let the reflexes answer." Tier options spec
-    # row 2: the reflex layer runs unthrottled (Overheated); no "seen" roll.
+    # [education_martial, Overclocked] "Let the reflexes answer." Tier
+    # options spec row 2: the reflex layer runs unthrottled (Overheated); no
+    # "seen" roll. W5 (event_quality_v1 §13.1 3a): was [wrathful,
+    # Overclocked]; trusting the combat reflexes in a bout is a fighter's
+    # read, so martial. The Overclocked gate and its eotg_cybernetics icon
+    # stay. Overheated and risk +8 are a distinct move, so it cannot fold.
+    # wrathful keeps its stress row here as a response (§13.1 step 4).
     option = {
         name = eotg_aug_act.002.f
         trigger = {
             eotg_is_aug_tier3 = yes
-            has_trait = wrathful
+            has_trait = education_martial
         }
-        trait = wrathful
+        skill = martial
         trait = eotg_cybernetics
         activity_tournament_change_contestant_score_effect = { SCORE = increase_major }
         add_character_modifier = { modifier = eotg_mod_aug_overheated  years = 1 }
@@ -446,8 +510,12 @@ eotg_aug_act.002 = {
         eotg_aug_stress_embrace_effect = yes
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = wrathful }
+            modifier = { add = 10  has_trait = education_martial_3 }
+            modifier = { add = 20  has_trait = education_martial_4 }
+            modifier = { add = 20  has_trait = education_martial_5 }
+            modifier = { add = 20  has_trait = wrathful }
             modifier = { add = 10  has_trait = brave }
+            modifier = { add = -20  has_trait = calm }
         }
     }
 
@@ -547,16 +615,44 @@ eotg_aug_act.003 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = just }
+            animation = personality_honorable
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = cynical }
+            animation = eyeroll
+        }
         animation = thinking
     }
     right_portrait = {
         trigger = { exists = scope:eotg_aug_accused }
         character = scope:eotg_aug_accused
+        triggered_animation = {    # W6: a hot-running accused (desc_hot)
+            trigger = {
+                scope:eotg_aug_accused = {
+                    OR = {
+                        eotg_is_aug_tier3 = yes
+                        has_trait = eotg_neurofractured
+                    }
+                }
+            }
+            animation = stress
+        }
         animation = worry
     }
     lower_right_portrait = {
         trigger = { exists = scope:eotg_aug_accuser }
         character = scope:eotg_aug_accuser
+        triggered_animation = {    # W6: a rival makes the charge in anger
+            trigger = { scope:eotg_aug_accuser = { has_relation_rival = scope:eotg_aug_accused } }
+            animation = anger
+        }
+        animation = disapproval    # W6: the accuser
     }
 
     immediate = {
@@ -654,13 +750,17 @@ eotg_aug_act.003 = {
     }
 
     # [just] "Hear them both, then rule." As c without the surgeon (the
-    # host's own judgment).
+    # host's own judgment). W5 (§13.1 step 2c): the kept personality gate;
+    # the text is even-handedness. Step 5: stress entry added.
     option = {
         name = eotg_aug_act.003.e
         trigger = { has_trait = just }
         trait = just
         eotg_aug_act003_examine_effect = yes
         add_prestige = minor_prestige_value
+        stress_impact = {
+            just = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = just }
@@ -668,9 +768,14 @@ eotg_aug_act.003 = {
         }
     }
 
-    # [diligent, Enhanced+] "Run the heat readings through the overlay."
-    # Tier options spec row 4: the same verdict as c/e, told by toast; no
-    # surgeon needed. Not for a just host, who has e (never shown together).
+    # [education_learning, Enhanced+] "Run the heat readings through the
+    # overlay." Tier options spec row 4: the same verdict as c/e, told by
+    # toast; no surgeon needed. Not for a just host, who has e (never shown
+    # together). W5 (event_quality_v1 §13.1 3a): was [diligent, Enhanced+];
+    # reading casing heat as evidence is a diagnosis, so learning. The
+    # Enhanced+ gate, its eotg_cybernetics icon and the NOT just guard stay.
+    # Risk +2 is a distinct move, so it cannot fold. diligent keeps its
+    # stress row here as a response (§13.1 step 4).
     option = {
         name = eotg_aug_act.003.f
         trigger = {
@@ -678,10 +783,10 @@ eotg_aug_act.003 = {
                 eotg_is_aug_tier2 = yes
                 eotg_is_aug_tier3 = yes
             }
-            has_trait = diligent
+            has_trait = education_learning
             NOT = { has_trait = just }
         }
-        trait = diligent
+        skill = learning
         trait = eotg_cybernetics
         eotg_aug_act003_examine_effect = yes
         hidden_effect = { eotg_add_fracture_risk = { AMOUNT = 2 } }
@@ -690,8 +795,12 @@ eotg_aug_act.003 = {
         }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = diligent }
+            modifier = { add = 10  has_trait = education_learning_3 }
+            modifier = { add = 20  has_trait = education_learning_4 }
+            modifier = { add = 20  has_trait = education_learning_5 }
+            modifier = { add = 20  has_trait = diligent }
             modifier = { add = 10  has_trait = paranoid }
+            modifier = { add = -10  has_trait = lazy }
         }
     }
 
@@ -731,6 +840,7 @@ eotg_aug_act.003 = {
 # hardware).
 # Caller: eotg_on_feast_aug (player guest or host).
 
+# eotg_lint: allow L017 both traits at the coverage floor (gregarious 3, shy 3)
 eotg_aug_act.004 = {
     type = activity_event
     title = eotg_aug_act.004.t
@@ -761,6 +871,18 @@ eotg_aug_act.004 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = shy }
+            animation = nervous
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = gregarious }
+            animation = toast_goblet
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
         animation = personality_bold
     }
 
@@ -800,7 +922,10 @@ eotg_aug_act.004 = {
         }
     }
 
-    # [gregarious] "Make it the talk of the feast."
+    # [gregarious] "Make it the talk of the feast." W5 (event_quality_v1
+    # §13.1 step 9): kept as a personality gate alongside e (shy). gregarious
+    # stands at 3 gated tree-wide and shy at 3, both at the floor, so neither
+    # can be re-axed. Step 5: stress entry added (it had none).
     option = {
         name = eotg_aug_act.004.d
         trigger = { has_trait = gregarious }
@@ -808,6 +933,9 @@ eotg_aug_act.004 = {
         add_prestige = medium_prestige_value
         hidden_effect = { eotg_add_fracture_risk = { AMOUNT = 4 } }
         eotg_aug_act004_reactions_effect = yes
+        stress_impact = {
+            gregarious = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = gregarious }
@@ -815,7 +943,9 @@ eotg_aug_act.004 = {
         }
     }
 
-    # [shy] "Excuse yourself early." No risk move.
+    # [shy] "Excuse yourself early." No risk move. W5 (§13.1 step 2b): a
+    # kept personality gate; shy is protected (3 gated). Step 5: the reject
+    # helper carries no shy row, so one is added inline.
     option = {
         name = eotg_aug_act.004.e
         trigger = { has_trait = shy }
@@ -825,6 +955,9 @@ eotg_aug_act.004 = {
             multiply = -1
         }
         eotg_aug_stress_reject_effect = yes
+        stress_impact = {
+            shy = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = shy }
@@ -855,16 +988,21 @@ eotg_aug_act.004 = {
         }
     }
 
-    # [trusting, Augmented] "It is only a first fitting. Let them hold it."
-    # Tier options spec row 7: handed round close up, not shown to the hall
-    # (no reactions effect).
+    # [education_learning, Augmented] "It is only a first fitting. Let them
+    # hold it." Tier options spec row 7: handed round close up, not shown to
+    # the hall (no reactions effect). W5 (event_quality_v1 §13.1 3a): was
+    # [trusting, Augmented]; handing the fitting round and explaining how it
+    # seats is a demonstration of the mechanism, so learning. The Augmented
+    # gate and its eotg_cybernetics icon stay. Risk +2 is a distinct move, so
+    # it cannot fold. trusting keeps its stress row here as a response
+    # (§13.1 step 4).
     option = {
         name = eotg_aug_act.004.g
         trigger = {
             eotg_is_aug_tier1 = yes
-            has_trait = trusting
+            has_trait = education_learning
         }
-        trait = trusting
+        skill = learning
         trait = eotg_cybernetics
         add_prestige = minor_prestige_value
         hidden_effect = { eotg_add_fracture_risk = { AMOUNT = 2 } }
@@ -873,8 +1011,12 @@ eotg_aug_act.004 = {
         }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = trusting }
+            modifier = { add = 10  has_trait = education_learning_3 }
+            modifier = { add = 20  has_trait = education_learning_4 }
+            modifier = { add = 20  has_trait = education_learning_5 }
+            modifier = { add = 20  has_trait = trusting }
             modifier = { add = 10  has_trait = gregarious }
+            modifier = { add = -20  has_trait = paranoid }
         }
     }
 }
@@ -916,6 +1058,18 @@ eotg_aug_act.005 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = lifestyle_hunter }
+            animation = survey
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = patient }
+            animation = thinking
+        }
         animation = personality_bold
     }
 
@@ -975,7 +1129,8 @@ eotg_aug_act.005 = {
         }
     }
 
-    # [brave] "Run it down at full output."
+    # [brave] "Run it down at full output." W5: the event's only personality
+    # gate; step 5 stress entry added.
     option = {
         name = eotg_aug_act.005.d
         trigger = { has_trait = brave }
@@ -983,6 +1138,9 @@ eotg_aug_act.005 = {
         hunt_activity_success_change_effect = { CHANGE = increase_major }
         hidden_effect = { eotg_add_fracture_risk = { AMOUNT = 4 } }
         add_character_modifier = { modifier = eotg_mod_aug_lesson_prowess  years = 5 }
+        stress_impact = {
+            brave = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 30  has_trait = brave }
@@ -1037,6 +1195,18 @@ eotg_aug_act.006 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = cynical }
+            animation = personality_cynical
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = zealous }
+            animation = prayer
+        }
+        triggered_animation = {    # W6 (event_quality_v1): the hot desc
+            trigger = { OR = { eotg_is_aug_tier3 = yes  has_trait = eotg_neurofractured } }
+            animation = stress
+        }
         animation = personality_zealous
     }
 
@@ -1088,7 +1258,8 @@ eotg_aug_act.006 = {
         }
     }
 
-    # [zealous] "Keep the full vigil."
+    # [zealous] "Keep the full vigil." W5 (§13.1 step 2c): the kept
+    # personality gate; the vigil is devotion.
     option = {
         name = eotg_aug_act.006.d
         trigger = { has_trait = zealous }
@@ -1104,12 +1275,16 @@ eotg_aug_act.006 = {
         }
     }
 
-    # [cynical] "Leave before the rites." (impatient is a weight only, not a
-    # stress line: trait-depth §5.2 untouched)
+    # [duchy+] "Leave before the rites." (impatient is a weight only, not a
+    # stress line: trait-depth §5.2 untouched) W5 (event_quality_v1 §13.1
+    # 3b): was [cynical]; cutting the pilgrimage short because the realm
+    # calls is leaving by right, so a duchy tier gate, no icon. The piety
+    # loss is distinct from every other option (a/b/d gain, c none), so it
+    # is re-axed, not folded. cynical keeps its stress row here as a
+    # response (§13.1 step 4); d (zealous) is the kept personality gate.
     option = {
         name = eotg_aug_act.006.e
-        trigger = { has_trait = cynical }
-        trait = cynical
+        trigger = { highest_held_title_tier >= tier_duchy }
         add_piety = {
             value = minor_piety_value
             multiply = -1
@@ -1118,9 +1293,11 @@ eotg_aug_act.006 = {
             cynical = minor_stress_impact_loss
         }
         ai_chance = {
-            base = 30
+            base = 10    # B1 lesson 4: tier gates show to every AI duke
             modifier = { add = 30  has_trait = cynical }
             modifier = { add = 10  has_trait = impatient }
+            modifier = { add = -20  has_trait = zealous }
+            modifier = { add = -10  has_trait = humble }
         }
     }
 }

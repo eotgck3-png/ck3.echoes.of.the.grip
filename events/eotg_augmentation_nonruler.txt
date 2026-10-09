@@ -57,11 +57,27 @@ eotg_aug_nr.001 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = greedy }
+            animation = personality_greedy
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = zealous }
+            animation = disapproval
+        }
         animation = thinking
     }
     right_portrait = {
         trigger = { exists = scope:eotg_champion }
         character = scope:eotg_champion
+        triggered_animation = {    # W6: a petitioner who asks low
+            trigger = { scope:eotg_champion = { OR = { has_trait = humble  has_trait = shy } } }
+            animation = throne_room_bow_1
+        }
         animation = personality_bold
     }
 
@@ -124,7 +140,8 @@ eotg_aug_nr.001 = {
         }
     }
 
-    # [generous] "At my expense, and properly."
+    # [generous] "At my expense, and properly." W5 (§13.1 step 2c): the kept
+    # personality gate; the text is open-handedness.
     option = {
         name = eotg_aug_nr.001.d
         trigger = {
@@ -154,11 +171,16 @@ eotg_aug_nr.001 = {
         }
     }
 
-    # [paranoid] "Why do you want to be stronger than me?"
+    # [education_intrigue] "Why do you want to be stronger than me?" W5
+    # (event_quality_v1 §13.1 3a): was [paranoid]; questioning a petitioner
+    # for the motive behind the request is reading people, so intrigue. The
+    # champion's fear opinion (10 years) is distinct from b's unease, so it
+    # is re-axed, not folded. paranoid keeps its stress row here as a
+    # response (§13.1 step 4); d (generous) is the kept personality gate.
     option = {
         name = eotg_aug_nr.001.e
-        trigger = { has_trait = paranoid }
-        trait = paranoid
+        trigger = { has_trait = education_intrigue }
+        skill = intrigue
         scope:eotg_champion = {
             send_interface_message = {    # W3: the champion may be a player
                 type = send_interface_message_bad
@@ -172,8 +194,12 @@ eotg_aug_nr.001 = {
         }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = paranoid }
+            modifier = { add = 10  has_trait = education_intrigue_3 }
+            modifier = { add = 20  has_trait = education_intrigue_4 }
+            modifier = { add = 20  has_trait = education_intrigue_5 }
+            modifier = { add = 20  has_trait = paranoid }
             modifier = { add = 10  has_trait = vengeful }
+            modifier = { add = -20  has_trait = trusting }
         }
     }
 }
@@ -219,11 +245,27 @@ eotg_aug_nr.002 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = ambitious }
+            animation = admiration
+        }
         animation = personality_rational
     }
     right_portrait = {
         trigger = { exists = scope:eotg_champion }
         character = scope:eotg_champion
+        triggered_animation = {    # W6: the champion at Overclocked runs hot
+            trigger = { scope:eotg_champion = { eotg_is_aug_tier3 = yes } }
+            animation = hero_flex
+        }
         animation = war_attacker
     }
 
@@ -277,11 +319,16 @@ eotg_aug_nr.002 = {
         }
     }
 
-    # [ambitious] "I want more of them."
+    # [duchy+] "I want more of them." W5 (event_quality_v1 §13.1 3b): was
+    # [ambitious]; calling for more augmented knights across the court is a
+    # lord's levy, so a duchy tier gate, no icon. Root is the liege, always
+    # a landed ruler here (the on_action requires employer tier >= county),
+    # so the tier gate reads. The want_more flag is a distinct move, so it
+    # cannot fold. ambitious keeps its stress row here as a response
+    # (§13.1 step 4); e (craven) is the kept personality gate.
     option = {
         name = eotg_aug_nr.002.d
-        trigger = { has_trait = ambitious }
-        trait = ambitious
+        trigger = { highest_held_title_tier >= tier_duchy }
         add_character_flag = { flag = eotg_flag_aug_want_more  years = 5 }
         scope:eotg_champion = {
             eotg_add_fracture_risk = { AMOUNT = 3 }
@@ -290,13 +337,16 @@ eotg_aug_nr.002 = {
             ambitious = minor_stress_impact_loss
         }
         ai_chance = {
-            base = 30
+            base = 10    # B1 lesson 4: tier gates show to every AI duke
             modifier = { add = 30  has_trait = ambitious }
             modifier = { add = 10  has_trait = arrogant }
+            modifier = { add = -10  has_trait = content }
+            modifier = { add = -10  has_trait = humble }
         }
     }
 
-    # [craven] "Keep them beside me."
+    # [craven] "Keep them beside me." W5 (§13.1 step 2c): the kept
+    # personality gate; the text is fear for one's own skin.
     option = {
         name = eotg_aug_nr.002.e
         trigger = { has_trait = craven }
@@ -341,11 +391,27 @@ eotg_aug_nr.003 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = sadness
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = callous }
+            animation = dismissal
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
         animation = worry
     }
     right_portrait = {
         trigger = { exists = scope:eotg_champion }
         character = scope:eotg_champion
+        triggered_animation = {    # W6: a proud champion hides the fault badly
+            trigger = { scope:eotg_champion = { OR = { has_trait = arrogant  has_trait = stubborn } } }
+            animation = shame
+        }
         animation = stress
     }
 
@@ -403,7 +469,8 @@ eotg_aug_nr.003 = {
         }
     }
 
-    # [compassionate] "Sit with them."
+    # [compassionate] "Sit with them." W5 (§13.1 step 2c): the kept
+    # personality gate; the text is care.
     option = {
         name = eotg_aug_nr.003.d
         trigger = { has_trait = compassionate }
@@ -422,11 +489,16 @@ eotg_aug_nr.003 = {
         }
     }
 
-    # [callous] "Work them until it breaks."
+    # [education_martial] "Work them until it breaks." W5 (event_quality_v1
+    # §13.1 3a): was [callous]; keeping a faltering soldier on the drill
+    # roster and judging what they can still carry is a commander's read, so
+    # martial. Risk +10 is a distinct move, so it cannot fold. callous keeps
+    # its stress row here as a response (§13.1 step 4); d (compassionate) is
+    # the kept personality gate.
     option = {
         name = eotg_aug_nr.003.e
-        trigger = { has_trait = callous }
-        trait = callous
+        trigger = { has_trait = education_martial }
+        skill = martial
         add_prestige = 25
         scope:eotg_champion = {
             eotg_add_fracture_risk = { AMOUNT = 10 }
@@ -437,8 +509,12 @@ eotg_aug_nr.003 = {
         eotg_aug_stress_cruelty_effect = yes
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = callous }
+            modifier = { add = 10  has_trait = education_martial_3 }
+            modifier = { add = 20  has_trait = education_martial_4 }
+            modifier = { add = 20  has_trait = education_martial_5 }
+            modifier = { add = 20  has_trait = callous }
             modifier = { add = 10  has_trait = ambitious }
+            modifier = { add = -20  has_trait = compassionate }
         }
     }
 
@@ -539,11 +615,27 @@ eotg_aug_nr.004 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = sadistic }
+            animation = schadenfreude
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = callous } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = crying
+        }
         animation = shock
     }
     right_portrait = {
         trigger = { exists = scope:eotg_champion }
         character = scope:eotg_champion
+        triggered_animation = {    # W6: a gentle champion, after the fact
+            trigger = { scope:eotg_champion = { OR = { has_trait = compassionate  has_trait = forgiving } } }
+            animation = shame
+        }
         animation = rage
     }
     lower_right_portrait = {
@@ -639,14 +731,19 @@ eotg_aug_nr.004 = {
         }
     }
 
-    # [just] "A trial." Then as a.
+    # [duchy+] "A trial." Then as a. W5 (event_quality_v1 §13.1 3b): was
+    # [just]; convening a court to try a retainer is jurisdiction, so a
+    # duchy tier gate, no icon. Root is the liege, always landed (the
+    # on_action requires employer tier >= county). Prestige +50 over a is a
+    # distinct move, so it cannot fold. just keeps its stress row here as a
+    # response (§13.1 step 4); f (forgiving, G9 #8) is the kept personality
+    # gate.
     option = {
         name = eotg_aug_nr.004.d
         trigger = {
-            has_trait = just
+            highest_held_title_tier >= tier_duchy
             scope:eotg_champion = { is_imprisoned = no }
         }
-        trait = just
         add_prestige = 50
         imprison_character_effect = {
             TARGET = scope:eotg_champion
@@ -660,18 +757,27 @@ eotg_aug_nr.004 = {
             just = minor_stress_impact_loss
         }
         ai_chance = {
-            base = 30
+            base = 10    # B1 lesson 4: tier gates show to every AI duke
             modifier = { add = 30  has_trait = just }
             modifier = { add = 10  has_trait = honest }
+            modifier = { add = -10  has_trait = arbitrary }
+            modifier = { add = -10  has_trait = forgiving }
         }
     }
 
-    # [sadistic] "Let them finish."
+    # [education_intrigue] "Let them finish." W5 (event_quality_v1 §13.1
+    # 3a): was [sadistic]; standing back and letting the breach be recorded
+    # as the hardware's doing is a cover-up, so intrigue. The victim's death
+    # and dread are a distinct move, so it cannot fold. sadistic keeps its
+    # stress loss here as a response through eotg_aug_stress_murder_effect
+    # (§13.1 step 4). AI: base lowered to 10 with compassionate / just /
+    # forgiving negatives, since an education gate opens a killing to far
+    # more AI lieges than sadistic did (B1 lesson 4, applied by analogy).
     option = {
         name = eotg_aug_nr.004.e
         # Killing: family must be impossible here, not merely unlikely
         trigger = {
-            has_trait = sadistic
+            has_trait = education_intrigue
             exists = scope:eotg_victim
             scope:eotg_victim = {
                 is_alive = yes
@@ -679,7 +785,7 @@ eotg_aug_nr.004 = {
                 NOT = { is_spouse_of = root }
             }
         }
-        trait = sadistic
+        skill = intrigue
         scope:eotg_victim = {
             death = {
                 death_reason = death_murder
@@ -692,11 +798,19 @@ eotg_aug_nr.004 = {
         }
         eotg_aug_stress_murder_effect = yes
         ai_chance = {
-            base = 30
+            base = 10
+            modifier = { add = 10  has_trait = education_intrigue_3 }
+            modifier = { add = 10  has_trait = education_intrigue_4 }
+            modifier = { add = 10  has_trait = education_intrigue_5 }
             modifier = { add = 30  has_trait = sadistic }
             modifier = { add = 10  has_trait = callous }
+            modifier = { add = -20  has_trait = compassionate }
+            modifier = { add = -10  has_trait = just }
+            modifier = { add = -10  has_trait = forgiving }
         }
     }
+
+    # [forgiving] G9 #8, protected (§13.1 step 2a): the kept personality gate.
 
     # [forgiving] "They did not choose this. Let it go." - no prison, no
     # treatment: the champion's risk climbs (+5, as b); a living victim
@@ -767,11 +881,27 @@ eotg_aug_nr.005 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = sadness
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = callous }
+            animation = dismissal
+        }
         animation = worry
     }
     right_portrait = {
         trigger = { exists = scope:eotg_champion }
         character = scope:eotg_champion
+        triggered_animation = {    # W6: the new temper shows (scrambled in immediate)
+            trigger = { scope:eotg_champion = { OR = { has_trait = wrathful  has_trait = vengeful } } }
+            animation = anger
+        }
         animation = personality_irrational
     }
 
@@ -820,7 +950,8 @@ eotg_aug_nr.005 = {
         }
     }
 
-    # [compassionate] "They're still in there."
+    # [compassionate] "They're still in there." W5 (§13.1 step 2c): the kept
+    # personality gate; the text is care.
     option = {
         name = eotg_aug_nr.005.d
         trigger = { has_trait = compassionate }
@@ -839,15 +970,20 @@ eotg_aug_nr.005 = {
         }
     }
 
-    # [paranoid] "Lock them in their rooms." Vanilla imprison_character_effect
+    # [duchy+] "Lock them in their rooms." Vanilla imprison_character_effect
     # (QA round 2 M5): house arrest for family, else the dungeon.
+    # W5 (event_quality_v1 §13.1 3b): was [paranoid]; confinement is an
+    # order given by right, so a duchy tier gate, no icon. Root is the
+    # liege, always landed. The imprisonment is a distinct move, so it
+    # cannot fold. paranoid keeps its stress loss here as a response through
+    # eotg_aug_stress_tyranny_effect (§13.1 step 4); d (compassionate) is the
+    # kept personality gate.
     option = {
         name = eotg_aug_nr.005.e
         trigger = {
-            has_trait = paranoid
+            highest_held_title_tier >= tier_duchy
             scope:eotg_champion = { is_imprisoned = no }
         }
-        trait = paranoid
         imprison_character_effect = {
             TARGET = scope:eotg_champion
             IMPRISONER = root
@@ -857,9 +993,10 @@ eotg_aug_nr.005 = {
         }
         eotg_aug_stress_tyranny_effect = yes
         ai_chance = {
-            base = 30
+            base = 10    # B1 lesson 4: tier gates show to every AI duke
             modifier = { add = 30  has_trait = paranoid }
-            modifier = { add = -20  has_trait = trusting }
+            modifier = { add = -10  has_trait = trusting }
+            modifier = { add = -10  has_trait = compassionate }
         }
     }
 }
@@ -892,11 +1029,27 @@ eotg_aug_nr.006 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = callous } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = crying
+        }
         animation = shock
     }
     right_portrait = {
         trigger = { exists = scope:eotg_champion }
         character = scope:eotg_champion
+        triggered_animation = {    # W6: a cascade that left them hollow, not raging
+            trigger = { scope:eotg_champion = { OR = { has_trait = shy  has_trait = craven } } }
+            animation = personality_irrational
+        }
         animation = rage
     }
 
@@ -1013,7 +1166,8 @@ eotg_aug_nr.006 = {
         }
     }
 
-    # [compassionate] "I'll care for them myself."
+    # [compassionate] "I'll care for them myself." W5 (§13.1 step 2c): the
+    # kept personality gate; the text is care.
     option = {
         name = eotg_aug_nr.006.e
         trigger = { has_trait = compassionate }
@@ -1033,11 +1187,16 @@ eotg_aug_nr.006 = {
         }
     }
 
-    # [callous] "Point them at the enemy."
+    # [education_martial] "Point them at the enemy." W5 (event_quality_v1
+    # §13.1 3a): was [callous]; aiming a broken soldier at the enemy line is
+    # a tactical use, so martial. The martial lesson and risk +10 are a
+    # distinct move, so it cannot fold. callous keeps its stress row here as
+    # a response (§13.1 step 4); e (compassionate) is the kept personality
+    # gate.
     option = {
         name = eotg_aug_nr.006.f
-        trigger = { has_trait = callous }
-        trait = callous
+        trigger = { has_trait = education_martial }
+        skill = martial
         add_character_modifier = { modifier = eotg_mod_aug_lesson_martial  years = 5 }
         scope:eotg_champion = {
             eotg_add_fracture_risk = { AMOUNT = 10 }
@@ -1047,8 +1206,12 @@ eotg_aug_nr.006 = {
         }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = callous }
+            modifier = { add = 10  has_trait = education_martial_3 }
+            modifier = { add = 20  has_trait = education_martial_4 }
+            modifier = { add = 20  has_trait = education_martial_5 }
+            modifier = { add = 20  has_trait = callous }
             modifier = { add = 10  has_trait = ambitious }
+            modifier = { add = -20  has_trait = compassionate }
         }
     }
 }

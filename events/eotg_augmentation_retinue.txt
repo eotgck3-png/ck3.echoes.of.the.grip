@@ -44,11 +44,31 @@ eotg_aug_retinue.001 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = worry
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = greedy }
+            animation = personality_greedy
+        }
         animation = personality_bold
     }
     right_portrait = {
         trigger = { exists = scope:eotg_volunteer }
         character = scope:eotg_volunteer
+        triggered_animation = {    # W6: the volunteer as their nerve shows
+            trigger = { scope:eotg_volunteer = { has_trait = craven } }
+            animation = nervous
+        }
+        triggered_animation = {    # W6
+            trigger = { scope:eotg_volunteer = { has_trait = zealous } }
+            animation = personality_zealous
+        }
         animation = war_attacker
     }
 
@@ -119,15 +139,19 @@ eotg_aug_retinue.001 = {
         }
     }
 
-    # [ambitious] "Them, and the next." Two knights; straight to phase 3.
+    # [duchy+] "Them, and the next." Two knights; straight to phase 3.
+    # W5 (event_quality_v1 §13.1 3b): was [ambitious]; ordering two knights
+    # into the Program at once is a lord's command, so a duchy tier gate, no
+    # icon. Two installs and the phase jump are a distinct move, so it cannot
+    # fold. ambitious keeps its stress row here as a response (§13.1 step 4);
+    # e (compassionate) is the kept personality gate.
     option = {
         name = eotg_aug_retinue.001.d
         trigger = {
-            has_trait = ambitious
+            highest_held_title_tier >= tier_duchy
             exists = scope:eotg_volunteer_b
             gold >= { value = minor_gold_value  multiply = 2 }
         }
-        trait = ambitious
         remove_short_term_gold = { value = minor_gold_value  multiply = 2 }
         scope:eotg_volunteer = { eotg_aug_retinue_install_effect = yes }
         scope:eotg_volunteer_b = { eotg_aug_retinue_install_effect = yes }
@@ -138,13 +162,16 @@ eotg_aug_retinue.001 = {
             ambitious = minor_stress_impact_loss
         }
         ai_chance = {
-            base = 30
+            base = 10    # B1 lesson 4: tier gates show to every AI duke
             modifier = { add = 30  has_trait = ambitious }
             modifier = { add = 10  has_trait = arrogant }
+            modifier = { add = -10  has_trait = content }
+            modifier = { add = -10  has_trait = humble }
         }
     }
 
-    # [compassionate] "Only if they truly want it."
+    # [compassionate] "Only if they truly want it." W5 (§13.1 step 2c): the
+    # kept personality gate; the text is consent, which is compassion.
     option = {
         name = eotg_aug_retinue.001.e
         trigger = {
@@ -199,16 +226,33 @@ eotg_aug_retinue.002 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = greedy }
+            animation = personality_greedy
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = generous }
+            animation = happiness
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
         animation = thinking
     }
     right_portrait = {
         trigger = { exists = scope:eotg_cand_a }
         character = scope:eotg_cand_a
+        triggered_animation = {    # W6: the first candidate asks by rank
+            trigger = { scope:eotg_cand_a = { has_trait = humble } }
+            animation = throne_room_bow_1
+        }
         animation = personality_bold
     }
     lower_right_portrait = {
         trigger = { exists = scope:eotg_cand_b }
         character = scope:eotg_cand_b
+        animation = beg    # W6: the second candidate, asking
     }
 
     immediate = {
@@ -286,14 +330,18 @@ eotg_aug_retinue.002 = {
         }
     }
 
-    # [greedy] "They pay for it themselves."
+    # [education_stewardship] "They pay for it themselves." W5
+    # (event_quality_v1 §13.1 3a): was [greedy]; setting the knights to fund
+    # their own hardware is a ledger, so stewardship. Two free installs are a
+    # distinct move, so it cannot fold. greedy keeps its stress row here as
+    # a response (§13.1 step 4); e (generous) is the kept personality gate.
     option = {
         name = eotg_aug_retinue.002.d
         trigger = {
-            has_trait = greedy
+            has_trait = education_stewardship
             exists = scope:eotg_cand_b
         }
-        trait = greedy
+        skill = stewardship
         scope:eotg_cand_a = {
             eotg_aug_retinue_install_effect = yes
             add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
@@ -307,12 +355,17 @@ eotg_aug_retinue.002 = {
         }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = greedy }
+            modifier = { add = 10  has_trait = education_stewardship_3 }
+            modifier = { add = 20  has_trait = education_stewardship_4 }
+            modifier = { add = 20  has_trait = education_stewardship_5 }
+            modifier = { add = 20  has_trait = greedy }
             modifier = { add = 10  has_trait = arbitrary }
+            modifier = { add = -20  has_trait = generous }
         }
     }
 
-    # [generous] "At my expense, and with care."
+    # [generous] "At my expense, and with care." W5 (§13.1 step 2c): the
+    # kept personality gate; the text is open-handedness.
     option = {
         name = eotg_aug_retinue.002.e
         trigger = {
@@ -376,6 +429,18 @@ eotg_aug_retinue.003 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = arrogant }
+            animation = personality_bold
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = worry
+        }
         animation = marshal
     }
 
@@ -429,7 +494,8 @@ eotg_aug_retinue.003 = {
         }
     }
 
-    # [arrogant] "Parade them past the vassals' gates."
+    # [arrogant] "Parade them past the vassals' gates." W5 (§13.1 step 2c):
+    # the kept personality gate; the display is the arrogance.
     option = {
         name = eotg_aug_retinue.003.d
         trigger = { has_trait = arrogant }
@@ -451,11 +517,15 @@ eotg_aug_retinue.003 = {
         }
     }
 
-    # [paranoid] "And who watches the iron?"
+    # [education_intrigue] "And who watches the iron?" W5 (event_quality_v1
+    # §13.1 3a): was [paranoid]; setting watchers on the retinue is
+    # surveillance craft, so intrigue. It moves every knight's risk (-3) and
+    # opinion, so it cannot fold. paranoid keeps its stress row here as a
+    # response (§13.1 step 4); d (arrogant) is the kept personality gate.
     option = {
         name = eotg_aug_retinue.003.e
-        trigger = { has_trait = paranoid }
-        trait = paranoid
+        trigger = { has_trait = education_intrigue }
+        skill = intrigue
         every_knight = {
             limit = { eotg_aug_is_retinue_knight = yes }
             add_opinion = { modifier = eotg_opinion_aug_fear  target = root  years = 10 }
@@ -466,8 +536,12 @@ eotg_aug_retinue.003 = {
         }
         ai_chance = {
             base = 30
-            modifier = { add = 30  has_trait = paranoid }
+            modifier = { add = 10  has_trait = education_intrigue_3 }
+            modifier = { add = 20  has_trait = education_intrigue_4 }
+            modifier = { add = 20  has_trait = education_intrigue_5 }
+            modifier = { add = 20  has_trait = paranoid }
             modifier = { add = 10  has_trait = vengeful }
+            modifier = { add = -20  has_trait = trusting }
         }
     }
 
@@ -534,11 +608,27 @@ eotg_aug_retinue.004 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = callous } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = just }
+            animation = personality_honorable
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = sadness
+        }
         animation = stress
     }
     right_portrait = {
         trigger = { exists = scope:eotg_resentful }
         character = scope:eotg_resentful
+        triggered_animation = {    # W6: the resentful knight as they carry it
+            trigger = { scope:eotg_resentful = { OR = { has_trait = shy  has_trait = craven } } }
+            animation = disapproval
+        }
         animation = anger
     }
 
@@ -637,7 +727,8 @@ eotg_aug_retinue.004 = {
         }
     }
 
-    # [just] "Equal pay. Equal honour."
+    # [just] "Equal pay. Equal honour." W5 (§13.1 step 2c): the kept
+    # personality gate; the text is fairness.
     option = {
         name = eotg_aug_retinue.004.d
         trigger = {
@@ -664,24 +755,29 @@ eotg_aug_retinue.004 = {
         }
     }
 
-    # [callous] "Replace them."
+    # [duchy+] "Replace them." W5 (event_quality_v1 §13.1 3b): was
+    # [callous]; dismissing a knight from court is command by right, so a
+    # duchy tier gate, no icon. Sending the knight to the pool is a distinct
+    # move, so it cannot fold. callous keeps its stress row here as a
+    # response (§13.1 step 4); d (just) is the kept personality gate.
     option = {
         name = eotg_aug_retinue.004.e
         trigger = {
-            has_trait = callous
+            highest_held_title_tier >= tier_duchy
             exists = scope:eotg_resentful
             scope:eotg_resentful = { is_courtier_of = root }
         }
-        trait = callous
         scope:eotg_resentful = { move_to_pool = yes }
         eotg_aug_stress_cruelty_effect = yes
         stress_impact = {
             callous = minor_stress_impact_loss
         }
         ai_chance = {
-            base = 30
+            base = 10    # B1 lesson 4: tier gates show to every AI duke
             modifier = { add = 30  has_trait = callous }
             modifier = { add = 10  has_trait = arbitrary }
+            modifier = { add = -10  has_trait = compassionate }
+            modifier = { add = -10  has_trait = forgiving }
         }
     }
 
@@ -722,6 +818,18 @@ eotg_aug_retinue.005 = {
 
     left_portrait = {
         character = root
+        triggered_animation = {    # W6 (event_quality_v1): the short-circuit desc
+            trigger = { has_trait = eotg_neurofractured }
+            animation = personality_irrational
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = zealous }
+            animation = personality_zealous
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = ambitious }
+            animation = personality_bold
+        }
         animation = thinking
     }
 
