@@ -453,7 +453,7 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Next step:** fold these into `docs/qa/IN_GAME_SESSION_PLAN.md` before the next sitting.
 
 ### CB-46: Kingpin batch B (claim wars, crisis stage)
-- **Status:** ready (2026-10-08)
+- **Status:** DONE (2026-10-09, `f8d6628`). In-game V-K checks are in the batch B QA report and spec §9.1; fold them into CB-45.
 - **What:** .030–.039, .050, .063–.067 and .072, the war stages, and M3/M4. The seams are marked `BATCH-B SEAM (kingpin)` and are inert. Gemini drafted 80 provisional batch B keys in `docs/proposals/kingpin_text_gemini_r1.md`; treat them as raw material.
 - **Owner:** orchestrator → eotg-scripter, then localizer, lore and QA
 - **Next step:** dispatch once batch A has had an in-game look (CB-45).
