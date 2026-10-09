@@ -456,7 +456,7 @@ Delays are in days unless marked. "→" is `trigger_event` on root, unless a sta
 ```
                               yearly_playable_pulse
                                        |
-                    eotg_on_yearly_aug_kingpin_check (4%, cooldown here)
+                    eotg_on_yearly_aug_kingpin_check (2%, cooldown here)
                                        |
                               .001 Word From Below ─────────────────────────────┐
            ┌─────────────┬────────────┼─────────────────┬──────────────────────┐ │

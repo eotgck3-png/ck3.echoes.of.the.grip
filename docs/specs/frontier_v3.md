@@ -1,6 +1,6 @@
 # Spec: Frontier Systems v3 (Phase 3a: Exploration, Mercenaries, Religious organizations; hooks for Corporations and Trade)
 
-**Author:** cloud agent (architect role), 2026-10-06. **Status: built on branch `claude/frontier-v3-cloud`; NOT merged.** The local session verifies (Tiger, PX, eotg-vanilla-scout on §15, lore) and the owner reviews before anything lands.
+**Author:** cloud agent (architect role), 2026-10-06. **Status: built on branch `claude/frontier-v3-cloud`; merged into v2-space-map (e481957).** The local session verifies (Tiger, PX, eotg-vanilla-scout on §15, lore) and the owner reviews before anything lands.
 
 **Source of intent:** [`docs/design/frontier_systems.md`](../design/frontier_systems.md) §13 (Exploration), §14 (hooks), §15 (future integration), §22 Phase 3. Phases 1 and 2 are [`frontier_v1.md`](frontier_v1.md) and [`frontier_v2.md`](frontier_v2.md); their §R and §V rulings bind. **This phase is additive:** it uses the existing hooks, sponsor effects, data rows and the single yearly roll. Every Phase 1/2 identifier it touches is listed in §3.6 with the reason.
 
