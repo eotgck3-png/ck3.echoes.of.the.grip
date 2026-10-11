@@ -46,6 +46,7 @@ RULES = {
     "L016": (ERROR, "BOM (U+FEFF) anywhere but byte 0: a stacked or mid-file BOM"),
     "L017": (WARNING, "event with 2+ options gated on root personality traits"),
     "L018": (WARNING, "time-of-day word in eotg_ loc (event_quality_v1 §8)"),
+    "L019": (ERROR, "NGovernment.GOVERNMENT_TYPES drift (vanilla 20 / mod governments / sub-mod copy)"),
 }
 
 SCRIPT_DIRS = ("common", "events")
@@ -1160,6 +1161,93 @@ def rule_l018(mod):
     return out
 
 
+# ------------------------------------------------------------------ L019
+# NGovernment.GOVERNMENT_TYPES is an array: the last file to set it REPLACES vanilla's list
+# (vanilla G/common/defines/00_defines.txt:550-573). A government missing from it logs 12
+# "Could not find the preregistered modifier type" errors on load. The mod restates the list
+# and the British Isles test sub-mod restates it again (its zz_ copy loads last), so the two can
+# drift: a key added only to the main file is masked during sub-mod tests (assessment
+# 2026-10-11 G5).
+L019_MAIN = "common/defines/eotg_government_defines.txt"
+L019_SUBMOD = "docs/test_submods/british_isles/common/defines/zz_eotg_test_bi_government_defines.txt"
+# Where to read vanilla's list from; None or unreachable -> the pinned list below.
+L019_GAME = os.environ.get("CK3_GAME_DIR",
+                           "D:/SteamLibrary/steamapps/common/Crusader Kings III/game")
+# Pinned from 1.20.0.3 00_defines.txt:551-572; used only when the game is not reachable.
+L019_VANILLA_PINNED = (
+    "feudal_government", "republic_government", "theocracy_government", "clan_government",
+    "tribal_government", "mercenary_government", "holy_order_government",
+    "monastic_holy_order_government", "administrative_government",
+    "landless_adventurer_government", "nomad_government", "herder_government",
+    "celestial_government", "japan_administrative_government", "japan_feudal_government",
+    "mandala_government", "wanua_government", "meritocratic_government",
+    "steppe_admin_government", "ecclesiastical_government",
+)
+_GOVTYPES_RE = re.compile(r"\bGOVERNMENT_TYPES\s*=\s*\{([^}]*)\}")
+
+
+def parse_government_types(path):
+    """(list of keys, line of GOVERNMENT_TYPES) from a defines file, or (None, 0)."""
+    if not os.path.isfile(path):
+        return None, 0
+    text, _ = pdx_parse.read_text(path)
+    text = re.sub(r"#[^\n]*", "", text)
+    m = _GOVTYPES_RE.search(text)
+    if not m:
+        return None, 0
+    keys = [a or b for a, b in re.findall(r'"([^"]+)"|(?<!\S)([A-Za-z_]\w*)', m.group(1))]
+    return keys, text.count("\n", 0, m.start()) + 1
+
+
+def vanilla_government_types(game=None):
+    """(keys, source) - from the game's 00_defines.txt if reachable, else the pinned list."""
+    game = L019_GAME if game is None else game
+    if game:
+        keys, _ = parse_government_types(os.path.join(game, "common", "defines", "00_defines.txt"))
+        if keys:
+            return keys, "game"
+    return list(L019_VANILLA_PINNED), "pinned"
+
+
+def rule_l019(mod):
+    out = []
+    govs = []   # (rel, line, key)
+    for rel, doc in mod.common_dir("governments"):
+        if not os.path.basename(rel).startswith("eotg_"):
+            continue
+        for n in doc.nodes:
+            if n.is_block and n.key and not n.key.startswith("@"):
+                govs.append((rel, n.line, n.key))
+    main, mline = parse_government_types(os.path.join(mod.root, L019_MAIN))
+    if main is None:
+        if govs:
+            out.append(Finding("L019", L019_MAIN, 1, "no NGovernment.GOVERNMENT_TYPES list, but "
+                               "the mod defines %d government(s)" % len(govs)))
+        return out
+    vanilla, source = vanilla_government_types()
+    sub, sline = parse_government_types(os.path.join(mod.root, L019_SUBMOD))
+    lists = [(L019_MAIN, mline, main)]
+    if sub is None:
+        mod.skipped["L019"].append("sub-mod list not found: " + L019_SUBMOD)
+    else:
+        lists.append((L019_SUBMOD, sline, sub))
+    for rel, line, keys in lists:
+        missing = [k for k in vanilla if k not in keys]
+        if missing:
+            out.append(Finding("L019", rel, line, "GOVERNMENT_TYPES lacks vanilla key(s) %s "
+                               "(vanilla list from %s)" % (", ".join(missing), source)))
+    for rel, line, key in govs:
+        if key not in main:
+            out.append(Finding("L019", rel, line, "government '%s' is not in %s "
+                               "GOVERNMENT_TYPES" % (key, L019_MAIN)))
+    if sub is not None:
+        missing = [k for k in main if k not in sub]
+        if missing:
+            out.append(Finding("L019", L019_SUBMOD, sline, "sub-mod GOVERNMENT_TYPES lacks main-mod "
+                               "key(s) %s" % ", ".join(missing)))
+    return out
+
+
 # ------------------------------------------------------------------ suppression
 ALLOW_RE = re.compile(r"#\s*eotg_lint:\s*allow\b(.*)$")
 ALLOW_ARGS_RE = re.compile(r"^\s*((?:L\d{3})(?:\s*,\s*L\d{3})*)\s*(.*)$")
@@ -1216,7 +1304,7 @@ RULE_FUNCS = [
     ("L005", rule_l005), ("L006", rule_l006), ("L007", rule_l007), ("L008", rule_l008),
     ("L009", rule_l009), ("L010", rule_l010), ("L011", rule_l011), ("L012", rule_l012),
     ("L013", rule_l013), ("L014", rule_l014), ("L015", rule_l015), ("L016", rule_l016),
-    ("L017", rule_l017), ("L018", rule_l018),
+    ("L017", rule_l017), ("L018", rule_l018), ("L019", rule_l019),
 ]
 
 

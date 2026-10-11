@@ -21,6 +21,20 @@ on_government_change = {
     }
 }
 
+# Vanilla G/common/on_action/title_on_actions.txt:229-233
+# root = the new holder; scope:title; scope:previous_holder.
+# Fires for every title transfer (inheritance, usurpation, grant, creation), so
+# it also covers an heir who moves up a tier: such an heir keeps the dead
+# ruler's laws unchecked (G/common/laws/_laws.info:300-303), e.g.
+# confederate_partition_succession_law, whose can_keep is yes outside the
+# Japanese governments (G/common/laws/00_succession_laws.txt:5-14, 71-80).
+# Assessment 2026-10-11 G1.
+on_title_gain = {
+    on_actions = {
+        eotg_gov_on_title_gain
+    }
+}
+
 eotg_gov_on_game_start = {
     effect = {
         every_ruler = {
@@ -44,6 +58,37 @@ eotg_gov_on_government_change = {
     # Realm laws exist only for landed rulers
     trigger = {
         is_landed = yes
+    }
+    effect = {
+        eotg_gov_ensure_succession_law_effect = yes
+    }
+}
+
+# Trigger-gated so it is cheap: on_title_gain fires once per title transfer. Only
+# the four governments' identity flags pass, so the Unsworn
+# (eotg_unclaimed_government) never reaches the effect; the law check here
+# means a ruler who already holds their own law costs one trigger, no effect.
+eotg_gov_on_title_gain = {
+    trigger = {
+        is_landed = yes
+        OR = {
+            AND = {
+                government_has_flag = eotg_government_is_pmc
+                NOT = { has_realm_law = eotg_pmc_succession_law }
+            }
+            AND = {
+                government_has_flag = eotg_government_is_corporation
+                NOT = { has_realm_law = eotg_corporation_succession_law }
+            }
+            AND = {
+                government_has_flag = eotg_government_is_gobcorp
+                NOT = { has_realm_law = eotg_gobcorp_succession_law }
+            }
+            AND = {
+                government_has_flag = eotg_government_is_cartel
+                NOT = { has_realm_law = eotg_cartel_succession_law }
+            }
+        }
     }
     effect = {
         eotg_gov_ensure_succession_law_effect = yes

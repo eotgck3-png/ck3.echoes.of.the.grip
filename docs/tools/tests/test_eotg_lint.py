@@ -869,6 +869,62 @@ class L014Suffixes(LintCase):
         self.assertClean(files, "L014")
 
 
+class L019(LintCase):
+    """GOVERNMENT_TYPES drift (assessment 2026-10-11 G5). The vanilla list is forced to the
+    pinned copy so the test does not depend on the game install."""
+
+    def setUp(self):
+        self._game = L.L019_GAME
+        L.L019_GAME = ""
+        self.addCleanup(setattr, L, "L019_GAME", self._game)
+
+    @staticmethod
+    def defines(keys, comment=""):
+        return ("NGovernment = {\n\tGOVERNMENT_TYPES = {\n" + comment
+                + "".join('\t\t"%s"\n' % k for k in keys) + "\t}\n}\n")
+
+    def files(self, main, sub=None, govs=("eotg_a_government",)):
+        out = {
+            L.L019_MAIN: self.defines(main),
+            "common/governments/eotg_a_government.txt": "".join("%s = { }\n" % g for g in govs),
+        }
+        if sub is not None:
+            out[L.L019_SUBMOD] = self.defines(sub)
+        return out
+
+    def test_clean(self):
+        v = list(L.L019_VANILLA_PINNED)
+        main = v + ["eotg_a_government"]
+        self.assertClean(self.files(main, main + ["eotg_test_x_government"]), "L019")
+
+    def test_comments_ignored(self):
+        v = list(L.L019_VANILLA_PINNED)
+        files = self.files(v + ["eotg_a_government"])
+        files[L.L019_MAIN] = self.defines(v + ["eotg_a_government"],
+                                          comment='\t\t# "eotg_ghost_government"\n')
+        self.assertClean(files, "L019")
+
+    def test_missing_vanilla_key(self):
+        v = [k for k in L.L019_VANILLA_PINNED if k != "wanua_government"]
+        self.assertHit(self.files(v + ["eotg_a_government"]), "L019", "wanua_government", count=1)
+
+    def test_government_not_in_main(self):
+        v = list(L.L019_VANILLA_PINNED)
+        self.assertHit(self.files(v + ["eotg_a_government"],
+                                  govs=("eotg_a_government", "eotg_b_government")),
+                       "L019", "eotg_b_government", count=1)
+
+    def test_submod_lacks_main_key(self):
+        v = list(L.L019_VANILLA_PINNED)
+        self.assertHit(self.files(v + ["eotg_a_government", "eotg_b_government"],
+                                  v + ["eotg_a_government"]),
+                       "L019", "lacks main-mod key(s) eotg_b_government", count=1)
+
+    def test_no_list_with_governments(self):
+        files = {"common/governments/eotg_a_government.txt": "eotg_a_government = { }\n"}
+        self.assertHit(files, "L019", "no NGovernment.GOVERNMENT_TYPES", count=1)
+
+
 class RealRepoBaseline(unittest.TestCase):
     """The committed baseline must cover the current tree (skips outside the repo)."""
 

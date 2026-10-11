@@ -535,7 +535,7 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Refs:** `docs/qa/government_assessment_2026-10-11/shared_infra.md`
 
 ### CB-55: Government fixes ready now (no design needed)
-- **Status:** ready (2026-10-11)
+- **Status:** done (2026-10-11): on_title_gain safety net, laws header, lint L019, comment and citation fixes, Unsworn loc, Turf Levy, README. QA COMMIT. In-game confirmation is part of CB-49 (heir of Konan 348 keeps eotg_corporation_succession_law).
 - **What:** template §9.3 G1/G2/G4/G5 and §9.5:
   - an `on_title_gain` succession safety net (an heir who tiers up keeps an unchecked law, e.g. confederate partition);
   - the laws-header default-law fix;

@@ -15,9 +15,17 @@
 # index 50-53: vanilla's succession_order_laws run 0-34; the mod has no other
 # succession law. Each government's own law is its only valid realm succession
 # law (spec §7.1 assumed vanilla single heir stayed available; it does not).
-# The default-law pick (_laws.info:300-308) puts vanilla partition first in
-# definition order; common/on_action/eotg_government_on_actions.txt is the
-# safety net (§7.2).
+# The default-law pick (_laws.info:305-309) takes, in definition order, the
+# first law whose should_start_with is true or absent. Partition is not the
+# risk: its should_start_with needs government_is_feudal
+# (00_succession_laws.txt:125-135). The real pre-emptors sit before index 50:
+# single_heir_succession_law (index 3), whose should_start_with checks only the
+# historical-access trigger and culture innovation_primogeniture (:289-296), and
+# single_heir_succession_law_youngest (index 5), which has no should_start_with
+# at all (:395+). common/on_action/eotg_government_on_actions.txt is the safety
+# net (§7.2): on_game_start, on_government_change and on_title_gain (the last
+# also covers tier-up inheritance, which copies the dead ruler's laws
+# unchecked, _laws.info:302-303; assessment 2026-10-11 G1/G2).
 # UNVERIFIED-VANILLA (V-G4): the engine skips a default-law candidate whose
 #   can_have fails; if not, the on_game_start net corrects it.
 # -----------------------------------------------------------------------------

@@ -8,11 +8,14 @@
 # never fire for these governments. subject_opinion, ai_liege_desire,
 # ai_subject_desire and score are copied by position from the levy tree. Flags:
 # obligation_high_levies (levy trees) and obligation_high_taxes (tax trees, as
-# feudal_tax_high/_extortionate :71-121) at the high and extortionate levels;
-# vanilla AI and opinion logic read them.
+# feudal_tax_high/_extortionate :71-121) at the high and extortionate levels,
+# matching vanilla. UNVERIFIED-VANILLA: no file under vanilla common/ reads
+# these flags (AI or opinion); the only script reader found is the ep3 event
+# G/events/dlc/ep3/ep3_contract_events.txt:4676,4684. Any engine reader is
+# unconfirmed.
 # Numbers are first-pass balance (§6.2 table); V-G12 is the check.
-# Loc (localizer): <contract>, <contract>_<level>, <contract>_<level>_short,
-# <contract>_<level>_desc (_subject_contracts.info "Text").
+# Loc (localizer): <contract>, <contract>_<level>, <contract>_<level>_short.
+# No <contract>_<level>_desc is needed: vanilla feudal levels define none.
 # -----------------------------------------------------------------------------
 
 # PMC tax tree: low cash

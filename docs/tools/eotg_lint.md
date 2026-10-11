@@ -279,6 +279,15 @@ An event with two or more options whose `trigger` requires **root** to have a `c
 ### L018 — time-of-day word in mod loc (WARNING)
 An `eotg_` key in `localization/english/` (not `replace/`) whose value contains a time-of-day word: dawn, morning(s), today, tonight, tomorrow, night(s), nightly, overnight, evening(s), sunrise, sunset, midnight, noon, afternoon (`event_quality_v1` §8; list from `docs/proposals/cyber_loc_sweep_gemini_r1.md`). Whole word and case-insensitive, so `knight` / `nightmare` never match. `[..]` functions and `$..$` references are stripped first. *Exempt* with `# eotg_lint: allow L018 <reason>` on the key's line or the line above. Added 2026-10-09 with 4 findings, not baselined.
 
+### L019 — `NGovernment.GOVERNMENT_TYPES` drift (ERROR)
+`GOVERNMENT_TYPES` is an array, so the last file to set it **replaces** vanilla's whole list (vanilla `common/defines/00_defines.txt:550-573`). A government missing from it logs 12 "Could not find the preregistered modifier type" errors on load. The mod restates the list in `common/defines/eotg_government_defines.txt`, and the British Isles test sub-mod restates it again in `docs/test_submods/british_isles/common/defines/zz_eotg_test_bi_government_defines.txt`, whose `zz_` copy loads last. Reported:
+- **a vanilla key missing** from either list. The vanilla list is read from the game's `00_defines.txt` (path in `L019_GAME`, overridable with the `CK3_GAME_DIR` environment variable). If the game is not reachable, the 20 keys pinned in the tool (1.20.0.3) are used, and the message says which source it used;
+- **a government defined in `common/governments/eotg_*.txt`** whose key is not in the main list;
+- **a main-list key missing from the sub-mod list.** The sub-mod list may add its own keys (`eotg_test_offmap_government`).
+- **no list at all** while the mod defines governments.
+
+Comments inside the array are ignored. If the sub-mod file is absent (another `--root`), the sub-mod checks are skipped and noted under `skipped` in `--json`. *Why:* a key added only to the main file is masked during sub-mod tests (government assessment 2026-10-11, G5). After a CK3 update adds a vanilla government, the rule fails until both copies (and the pinned list) are re-copied. Added 2026-10-11 with 0 findings.
+
 ## Inline suppression
 To silence one finding, put this on the finding's line or on the line directly before it:
 

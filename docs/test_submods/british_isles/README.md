@@ -11,8 +11,9 @@ being made. It runs with the main mod's shaders, cybernetics, Frontier and Uncla
     republic, theocracy and a landless adventurer. Four highland and western counties start **Unclaimed**.
   - **France and Spain:** 161 counties are independent **Unsworn** counties. Six small vanilla realms remain
     there as neighbours: feudal, republic, clan, theocracy, tribal and feudal. Four whole realms test the
-    **mod governments**: PMC (Paris), Corporation (Brittany), Cartel (León) and Gob-Corp (Provence). Until those
-    governments exist they run on feudal stand-ins; see [Mod governments](#mod-governments).
+    **mod governments**: PMC (Paris), Corporation (Brittany), Cartel (León) and Gob-Corp (Provence). The
+    governments are built in the main mod and the generator writes them by default; see
+    [Testing the governments](#testing-the-governments).
   - **Outside the zone** the map and titles are vanilla but empty.
     - Every county belongs to one of 35 inert **Off-Map** holders, one per empire, painted near-black.
     - Their non-capital baronies have no holding.
@@ -85,10 +86,10 @@ Unsworn. Pick the holders **on the map**: none of them has a vanilla bookmark po
 
 | Test | Title (vanilla 1.20) | Holder | Holds himself | Vassal counts |
 |---|---|---|---|---|
-| PMC | `d_valois`, the Paris duchy | Philippe I (214), 14 years old | Île-de-France, Brie, Beaumont | Herbert of Vermandois (418); Raoul of Valois (40406, Valois and Amiens); Renaud of Clermont (303412) |
-| Corporation | `k_brittany` | Duke Konan II (348), who also keeps `d_brittany` | Vannes, Rennes | Hoël (178, Nantes and Cornouaille); Morvan (10059, Léon); Edouarzh (346, Penthièvre) |
+| PMC | `d_valois`, the Paris duchy | Raoul of Valois (40406), named in the CSV: an adult, so the PMC isn't under a regency | Île-de-France, Valois, Amiens | Philippe I (214, Brie and Beaumont); Herbert of Vermandois (418); Renaud of Clermont (303412) |
+| Corporation | `k_brittany` | King Hoël (178), named in the CSV | Nantes, Cornouaille | **vassal duke** Konan II (348, `d_brittany` + Vannes and Rennes, own CSV rows); Morvan (10059, Léon); Edouarzh (346, Penthièvre) |
 | Cartel | `k_leon` | Alfonso VI (108500) | León, Benavente, Salamanca | Urraca (108501, Zamora); a generated count in Ávila; **vassal duke** Rodrigo (108512, `d_asturias` + Oviedo, own CSV rows) with his vassal count Pedru (Pravia), so the Cartel's duke-tier rank shows |
-| Gob-Corp | `d_provence` | Count Bertrand (420) | Venaissin (Arles), Provence (Marseille, Toulon) | Jaufret (40802, Forcalquier); a generated count in Nice |
+| Trade Oligarchy (Gob-Corp) | `d_provence` | Count Bertrand (420) | Venaissin (Arles), Provence (Marseille, Toulon) | Jaufret (40802, Forcalquier); a generated count in Nice |
 
 - **Vanilla 1.20 has no `d_paris` or `d_ile_de_france`.** Paris is `b_paris` in `c_ile_de_france`, the capital
   of `d_valois`, which is de jure under `k_france`.
@@ -107,28 +108,48 @@ Unsworn. Pick the holders **on the map**: none of them has a vanilla bookmark po
   - If that holder is not eligible, or is the pocket holder already at his demesne cap, the county gets a
     generated `eotg_test_bi_vassal_*` count with the county's culture and rite.
   - The holder and all vassals get the row's government.
-  - De jure duchies in a kingdom stay vacant unless the holder held them in 1066 (Konan keeps `d_brittany`).
+  - De jure duchies in a kingdom stay vacant unless the holder held them in 1066 or have their own CSV row
+    (`d_brittany` for Konan, `d_asturias` for Rodrigo).
 - Counties that have their own CSV row are left to that row.
 
 ### Mod governments
 
 The four government keys (`eotg_pmc_government`, `eotg_corporation_government`, `eotg_cartel_government`,
-`eotg_gobcorp_government`) are the planned names and are not defined yet. The generator has a switch:
+`eotg_gobcorp_government`) are defined in the main mod's `common/governments/`. The generator has a switch,
+`MOD_GOVERNMENTS_DEFAULT` at the top of `tools/gen_history.py`, which is **`on`**:
 
-- **`off` (the default for now):** any CSV government that is not a vanilla key is replaced by the row's
-  `standin` column (blank = `feudal_government`). The sub-mod loads today, and the realms, holders and vassals
-  are already in place. The `holding` column is ignored while a stand-in is used.
-- **`on`:** the CSV governments are written as given. The generator **refuses** (it prints `ERROR` and
+- **`on` (the default):** the CSV governments are written as given, and the `holding` column applies (the
+  Corporation and Gob-Corp capitals become cities). The generator **refuses** (it prints `ERROR` and
   `NOTHING WRITTEN`, and leaves the installed output untouched) if a key is not defined in vanilla, the main
   mod's `common/governments/` or this sub-mod's.
+- **`off`:** any CSV government that is not a vanilla key is replaced by the row's `standin` column (blank =
+  `feudal_government`), and the `holding` column is ignored. Use it only to load the realms without the mod
+  governments:
+  ```
+  python docs/test_submods/british_isles/tools/gen_history.py --mod-governments off
+  ```
 
-To switch on once the scripter reports the governments are built:
-```
-python docs/test_submods/british_isles/tools/gen_history.py --mod-governments on
-```
-To make it permanent, set `MOD_GOVERNMENTS_DEFAULT = 'on'` at the top of `tools/gen_history.py`. If the
-architect renames a government, edit the `government` column of its row. If a government needs a particular
-capital holding (for example `city_holding`), put it in the `holding` column.
+If the architect renames a government, edit the `government` column of its rows (the pocket row and any vassal
+duke row). If a government needs a particular capital holding (for example `city_holding`), put it in the
+`holding` column.
+
+## Testing the governments
+
+Pick these rulers **on the map** after choosing the 1066 bookmark (none has a bookmark portrait). Each holds the
+title below with that government at 1066.9.15, and so do his vassals.
+
+| Government | Pick | Title | Also check |
+|---|---|---|---|
+| PMC (`eotg_pmc_government`) | Raoul of Valois (40406) | `d_valois` (Paris) | Philippe I (214) is his vassal count, not the ruler |
+| Corporation (`eotg_corporation_government`) | Hoël (178) | `k_brittany` | Konan II (348) is his vassal duke of `d_brittany`; pick Konan to test the vassal side. Konan dies 1066.12.11 in vanilla history, so his heir tests succession (T3) |
+| Cartel (`eotg_cartel_government`) | Alfonso VI (108500) | `k_leon` | Rodrigo (108512) is his vassal duke of `d_asturias`, with his own vassal count in Pravia |
+| Trade Oligarchy / Gob-Corp (`eotg_gobcorp_government`) | Bertrand (420) | `d_provence` | Jaufret (40802, Forcalquier) is his vassal count |
+
+- **What to check:** the in-game list T1–T14 in `docs/specs/government_template.md` §5.2. Run with
+  `-debug_mode`.
+- **Where to record results:** CB-49 ("In-game checks for governments v2 G1") on `circlebackTaskboard.md`.
+- If a holder in the generated table below differs from this list, the CSV was edited after this README;
+  the generated table wins.
 
 ## Assignments (generated)
 

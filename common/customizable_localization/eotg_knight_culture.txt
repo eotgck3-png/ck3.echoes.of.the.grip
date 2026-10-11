@@ -5,9 +5,10 @@
 # differently named file so vanilla's file still loads (pitfalls §16 mechanism).
 # KnightCulture is redefined, and vanilla's 7 children (KnightCulturePlural ...
 # KnightCultureAdjectiveNoTooltipLowercase, :91-123) are re-copied verbatim
-# after it so all 8 bind to this parent, not vanilla's (precedent: TFE, workshop
-# 3515718688, TFE_governor_concept_custom_loc.txt:100-103). Each term below
-# needs the 7 suffixed loc keys as well (localizer;
+# after it so all 8 bind to this parent, not vanilla's: each child names its
+# parent by key and adds a suffix (vanilla 00_knight_culture.txt:91-94,
+# `parent = KnightCulture` / `suffix = "_plural"`). Each term below needs 8 loc
+# keys, the base key plus the 7 suffixed ones (localizer;
 # docs/specs/build/governments_g1_loc_keys.txt).
 #
 # Vanilla's culture and faith blocks (:5-83) are NOT copied: they name
@@ -15,7 +16,7 @@
 # script must not name culture or faith keys (owner gate ruling 2026-10-08).
 # Consequence on the vanilla-map test: vanilla-government knights read "Knight"
 # (the CB-48 intent). The landless-adventurer "Champion" block is dropped too.
-# Terms: OQ1 defaults (PENDING OWNER): Operator, Specialist, Strongarm, Brute (Brute: owner ruling 2026-10-08).
+# Terms: OQ1 RULED (owner, 2026-10-08; governments_v2.md §16 OQ1): Operator, Specialist, Strongarm, Brute.
 #
 # UNVERIFIED-VANILLA (V-G1, V-G8): the later definition of a customizable_localization
 #   key replaces the earlier one. Confirm in logs/database_conflicts.log
