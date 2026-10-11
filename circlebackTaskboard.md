@@ -528,7 +528,7 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Refs:** `docs/qa/government_assessment_2026-10-11/`
 
 ### CB-54: Can a human play Unsworn?
-- **Status:** waiting-human (2026-10-11)
+- **Status:** ruled (2026-10-11, owner, frontier_v4 H3): if T14 shows that only a full-file override of `00_rules.txt` would block it, Unsworn stays playable with a warning toast until Gate 1. If a key-level override works, add the GAME_OVER entry. Built in frontier_v4 batch 3 after T14.
 - **What:** Unsworn placeholders are not on vanilla's `is_character_allowed_to_be_player` blacklist (`common/scripted_rules/00_rules.txt:151`), so a human can pick one in the lobby. The result is broken play and probably game over on death. Template §6.2 and §9.3 B1.
 - **Owner:** human (ruling) and in-game test T14, then eotg-scripter
 - **Next step:** run T14, which tests whether a key-level `scripted_rules` override in a separately named file works. If it does, add a GAME_OVER entry. If not, accept the behaviour and record it until Gate 1.
