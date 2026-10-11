@@ -1,6 +1,6 @@
 # Spec: Frontier Systems v4 (amendment: QA rulings A1–A11, Frontier + Unsworn / Unclaimed Regions)
 
-**Author:** eotg-architect, 2026-10-11. **Status:** ruled, not built. The human approved the dispatch on 2026-10-11.
+**Author:** eotg-architect, 2026-10-11. **Status:** ruled, not built. The human approved the dispatch on 2026-10-11. **Owner rulings H1–H3 recorded 2026-10-11** (§13). They touch A1, A2.3, A6 M3 and batches 2–3 only; batch 1 is unchanged.
 **Amends:** [`frontier_v1.md`](frontier_v1.md), [`frontier_v2.md`](frontier_v2.md), [`frontier_v3.md`](frontier_v3.md), [`frontier_unclaimed_regions.md`](frontier_unclaimed_regions.md) (its §D owner decisions still bind), and one line of [`governments_v2.md`](governments_v2.md). Where this spec and an amended spec disagree, **this spec wins**. Each amended spec carries a pointer back here.
 **Input:** [`docs/qa/frontier_unsworn_architect_brief.md`](../qa/frontier_unsworn_architect_brief.md) (cited as *brief Ax*); evidence in [`docs/qa/frontier_unsworn_qa.md`](../qa/frontier_unsworn_qa.md); the government assessment [`docs/qa/government_assessment_2026-10-11/shared_infra.md`](../qa/government_assessment_2026-10-11/shared_infra.md) (B1, G3), [`government_template.md`](government_template.md) §6.2. Intent: [`docs/design/frontier_systems.md`](../design/frontier_systems.md) (read-only; cited as *design §n*).
 **Vanilla:** CK3 **1.20.0.4**, `G` = `D:/SteamLibrary/steamapps/common/Crusader Kings III/game`. I re-checked every vanilla line cited below in this session. Line numbers the brief took from `0abde1d` were re-checked too and still hold.
@@ -11,12 +11,12 @@
 
 | # | Ruling | Batch | Gated on |
 |---|---|---|---|
-| A1 | A completed city or church System goes to a **new local vassal** (the settlers' leader, a factor, or the mission elder) under the holder. The holder keeps it only if their own seat is the same holding type. Castles stay with the holder. | 2 | V8 (DoD only; the rule is written to be correct either way) |
-| A2 | AI: Establish every 24 months at a 25–50 base weight with a 1× gold gate; the map cap scales with Unclaimed space (8 + 1 per 20, max 24); an AI claim needs gold for claim + Establish and no claimed county still waiting; AI Frontiers get silent strain/progress rolls; AI exploring of claimed Unknown space is sped up. The AI-only lapse (UD3) is a **human question** (it reopens owner default UQ11). | 1 | V-U14 decides whether AI claims happen at all (fallback in §A7.3) |
+| A1 | A completed city or church System goes to a **local vassal** under the holder: **the Frontier's founder first** (if not the holder and eligible; §A1 "Founder first"), otherwise a new figure (the settlers' leader, a factor, or the mission elder). The holder keeps it only if their own seat is the same holding type. Castles stay with the holder. Owner-confirmed (H1). | 2 | V8 (DoD only; the rule is written to be correct either way) |
+| A2 | AI: Establish every 24 months at a 25–50 base weight with a 1× gold gate; the map cap scales with Unclaimed space (8 + 1 per 20, max 24); an AI claim needs gold for claim + Establish and no claimed county still waiting; AI Frontiers get silent strain/progress rolls; AI exploring of claimed Unknown space is sped up. The AI-only lapse (UD3) is **declined** (owner, H2): UQ11's "no lapse" stands. | 1 | V-U14 decides whether AI claims happen at all (fallback in §A7.3) |
 | A3 | One flavour roll per ruler per pulse; flavour events fire 1–120 days later. "Funding removes the story" is **accepted**. | 1 | none |
 | A4 | War strain only when the holder leads a war or hostile armies stand in the Region. A new **Appoint a Founder** decision. The AI auto-founder must be an adult, free character. | 1 | none |
 | A5 | **The spec order stands** (d; else b if gold ≥ 2× minor; else a). The AI never picks c. The code moves to it. §6.6(c) is corrected to "switches to Settlement" (code wins). | 1 | none |
-| A6 | M2 = key-level override of `basic_is_valid_for_yearly_events_trigger` only. M3 = a GAME_OVER entry through a key-level override of the scripted rule `is_character_allowed_to_be_player`. A real **pulse probe** replaces the current V-U1 readout, which can't answer the question. | probe: 1; M2/M3: 3 | V-U1a (probe), V-U1b + T14 |
+| A6 | M2 = key-level override of `basic_is_valid_for_yearly_events_trigger` only. M3 = a GAME_OVER entry through a key-level override of the scripted rule `is_character_allowed_to_be_player`. If T14 shows only a full-file override works, Unsworn stays playable with a warning toast until Gate 1 (owner, H3). A real **pulse probe** replaces the current V-U1 readout, which can't answer the question. | probe: 1; M2/M3: 3 | V-U1a (probe), V-U1b + T14 |
 | A7 | The release effect enforces the capital rule itself. Claim and placeholder replacement move every barony the old placeholder held, and the sweep dissolves enclaves. A **Raise Your Colours** decision is added, sharing one cooldown variable with the interaction. `eotg_unclaimed_defender_tt` is built inside the override, mirroring vanilla's herder line. | 1 (7.1–7.2), 2 (7.3–7.4) | V-U9/V-U8/V-U15 (DoD) |
 | A8 | Qualitative bands (pace, time left, strain, and what weighs on it) in the Invest, Build and Abandon tooltips. Sponsor input 6 → **8** pre-pace. The sponsor gets a completion reward (prestige plus the holder's goodwill). | 2 | none |
 | A9 | Frontier says **"strain"**, never "pressure"; "Frontier Legacy" → **"Frontier Roots"**. Recommendation only; ownership of "pressure" goes to the lore-keeper. | loc | needs-lore |
@@ -63,7 +63,7 @@ Unchanged:
 
 ### A1. Settled city and church Systems: a local vassal holds them
 
-**Ruling (option 1, refined).** When a completion creates a **city** (Settlement, Trade) or **church** (Religious) System, it goes to a **local character as the holder's vassal**, unless the holder's own capital barony is already that holding type. Castles (Military) always go to the holder.
+**Ruling (option 1, refined; owner-confirmed 2026-10-11, H1).** When a completion creates a **city** (Settlement, Trade) or **church** (Religious) System, it goes to a **local character as the holder's vassal**, unless the holder's own capital barony is already that holding type. That local character is **the Frontier's founder** when the founder is not the holder and is eligible (below); otherwise a new figure. Castles (Military) always go to the holder.
 
 **Why this test.** No vanilla trigger asks "may this government hold holding type X": no `valid_holdings` reader exists in script, and I grepped `G/common` and `G/events`. The capital test is the government-agnostic proxy:
 - a ruler seated in a city (vanilla republic, the mod's Corporation and Gob-Corp, which are city-primary: `eotg_corporation_government.txt:38`) keeps a Port;
@@ -90,13 +90,57 @@ Castles are valid for every settled government the mod uses, so Military is unch
   - city → `republic_government`, set before the grant (hold_court.8300.a order);
   - church → `theocracy_government`, set after the resolve (hold_court.8320.a order).
   - These are vanilla keys, not map keys. Per-government mod variants (a corporate Port under a Corporation) are deferred (§12 D4-4).
-- **Not the founder.** Owner ruling Q12 (`frontier_v1.md` §R: "the founder and sponsor never own the result by default") stands. Whether a founder who is not the holder should become the Local Ruler instead (design §7, "Local Ruler: House Veyra") reopens Q12, so it goes to the human (§13 H1).
+- **The founder comes first** (owner, H1; design §7, "Local Ruler: House Veyra"). This supersedes Q12's "the founder and sponsor never own the result by default" (`frontier_v1.md` §R) for city and church Systems. The sponsor still never owns the result. See "Founder first" below.
 
 **Correct either way for V8.** After `set_holding_type`, the new barony may be held by the county holder, by nobody, or by someone else (V8 is still open). Both paths run one `create_title_and_vassal_change` from `scope:eotg_frontier_holder` and `change_title_holder` to the chosen character, whoever held it before.
 - The holder path keeps today's "skip if the holder already holds it" check.
 - The vassal path never skips.
 
-**This narrows Q12 for two holding types.** The political owner is still the county holder (the System sits in their realm, under their law). The holder no longer holds those two holding types personally. Confirmation is asked in §13 H1. Batch 2 waits on V8 anyway, so the owner has time.
+**This narrows Q12 for two holding types (owner-confirmed, H1).** The political owner is still the county holder: the System sits in their realm, under their law. The holder no longer holds those two holding types personally.
+
+**Founder first (H1; formerly deferral D4-3).** The founder is already on record. The county variable `var:eotg_frontier_founder` is set by `eotg_frontier_set_founder_effect` (`eotg_frontier_effects.txt:156-158`). `eotg_frontier_complete_effect` copies it to `scope:eotg_frontier_founder` at entry, through `eotg_frontier_save_hook_scopes_effect` (`:47-55`, called at `:756`). The variable itself survives until `eotg_frontier_settle_effect` → `eotg_frontier_clear_project_effect` (`:918-926`), so it can still be read when the holding is granted. No new variable is needed; the founder is read from `var:eotg_frontier_founder` at county scope.
+
+**New** scripted trigger `eotg_frontier_founder_can_rule` (`common/scripted_triggers/eotg_frontier_triggers.txt`; county scope; parameters `HOLDING`, `HOLDER`):
+```
+eotg_frontier_founder_can_rule = {
+    exists = var:eotg_frontier_founder
+    eotg_frontier_has_valid_founder = yes            # alive, adult, not imprisoned, tied to the holder (:65-78)
+    var:eotg_frontier_founder = {
+        NOT = { this = $HOLDER$ }
+        eotg_is_unclaimed_folk = no
+        eotg_is_unclaimed_holder = no
+        OR = {
+            AND = {                                  # a landless courtier of the holder
+                is_landed = no
+                employer ?= $HOLDER$
+            }
+            AND = {                                  # a direct vassal already seated in this holding type
+                is_landed = yes
+                liege ?= $HOLDER$
+                capital_province ?= { has_holding_type = $HOLDING$ }
+            }
+        }
+    }
+}
+```
+
+**Edge cases.** Every case that fails the trigger falls back to the A1 figure; the founder simply isn't the Local Ruler.
+
+| Founder at completion | Result | Why |
+|---|---|---|
+| landless courtier of the holder | **becomes the Local Ruler**; gets `LOCAL_GOVERNMENT` | the vanilla 6060 shape: an existing landless knight is granted the city |
+| the holder | figure (or the holder, if seated in that type) | the ruling says "a founder who is not the holder" |
+| dead | figure | `is_alive` in `eotg_frontier_has_valid_founder` |
+| child or imprisoned | figure | the same validity trigger, as for strain (Q3) |
+| a courtier elsewhere (a vassal's court, another realm, a guest) | figure | vanilla grants only to the granter's own people (6060's `random_knight`, 8300's `random_vassal_or_below`). A grant to another ruler's courtier would pull them across courts without consent |
+| a direct vassal, capital the same holding type | **becomes the Local Ruler**; government unchanged | already a fit ruler for that holding; no "wrong holding type" |
+| a direct vassal, capital a different type | figure | 8300 changes a landed vassal's government only for AI feudal or clan counts (`hold_court_8300_vassal_trigger`, `is_ai = yes # Don't mess with a player's realm`). Recasting a founder's whole domain is a bigger change than this ruling asks for |
+| a sub-vassal, or the holder's liege (the "granted it away" case of Q3) | figure | not the holder's direct vassal. Making the liege a vassal is impossible |
+| an Unsworn placeholder or folk | figure | M1 guards |
+
+- **Culture, faith, dynasty:** the founder keeps their own. That is the point of "House Veyra". A Religious founder of another faith still holds the church. `eotg_frontier_faith_settle_effect` reads the holder's faith as today, so nothing breaks; it's a gameplay consequence and we accept it.
+- **The created figure still appears** when the founder rules (Settlement's leader and Religious's elder are existing completion content). It stays a courtier, as in the no-slot fallback. Trade creates its factor only when no founder rules.
+- **The settled hook** still names the founder through `scope:eotg_frontier_founder`; nothing changes there.
 
 **Script changes** (`common/scripted_effects/eotg_frontier_effects.txt`):
 1. `eotg_frontier_complete_effect`:
@@ -115,17 +159,21 @@ Castles are valid for every settled government the mod uses, so Military is unch
        }
    }
    ```
-   - **true:** `eotg_frontier_grant_local_ruler_effect = { GOVERNMENT = $LOCAL_GOVERNMENT$ }`;
+   - **true:** `eotg_frontier_grant_local_ruler_effect = { HOLDING = $HOLDING$ GOVERNMENT = $LOCAL_GOVERNMENT$ }`;
    - **false:** today's grant to the holder;
    - the no-slot fallback (development +1, control +10) is unchanged, and the figure stays a courtier.
-3. **New** `eotg_frontier_grant_local_ruler_effect` (county scope; `GOVERNMENT`):
-   - if `scope:eotg_frontier_local_ruler` doesn't exist, create one from `eotg_frontier_settler_leader_template` (holder's culture and faith, location the county's `title_province`) and save it;
+3. **New** `eotg_frontier_grant_local_ruler_effect` (county scope; `HOLDING`, `GOVERNMENT`; `build_holding` passes its own `$HOLDING$` through):
+   - **founder first (H1):** if `eotg_frontier_founder_can_rule = { HOLDING = $HOLDING$ HOLDER = scope:eotg_frontier_holder }`, run `var:eotg_frontier_founder = { save_scope_as = eotg_frontier_local_ruler }`, replacing the figure. If the founder `is_landed = no`, also `save_temporary_scope_value_as = { name = eotg_frontier_local_ruler_new value = yes }`;
+   - otherwise, if `scope:eotg_frontier_local_ruler` doesn't exist, create one from `eotg_frontier_settler_leader_template` (holder's culture and faith, location the county's `title_province`) and save it, with `eotg_frontier_local_ruler_new = yes`. A figure saved by `complete_effect` also sets `eotg_frontier_local_ruler_new = yes`;
    - then, from `scope:eotg_frontier_holder`: `create_title_and_vassal_change = { type = granted save_scope_as = eotg_frontier_change add_claim_on_loss = no }`, then `scope:eotg_frontier_new_barony = { change_title_holder = { holder = scope:eotg_frontier_local_ruler change = scope:eotg_frontier_change } }`, then `resolve_title_and_vassal_change`;
-   - set the government in the order given above;
+   - set the government in the order given above, **only if `scope:eotg_frontier_local_ruler_new` exists**. A landed founder keeps their government;
    - save `scope:eotg_frontier_local_ruler` for the hooks and for .004's tooltip.
-4. **.004** gets one custom tooltip, `eotg_frontier.004.local_ruler_tt`, shown only when the Region's type is Settlement, Trade or Religious and the holder's seat is not that holding type. Text: "A local leader will hold the new System as your vassal." Option effects are otherwise unchanged.
+4. **.004** gets one custom tooltip, shown only when the Region's type is Settlement, Trade or Religious and the holder's seat is not that holding type. Use `first_valid` order:
+   - `eotg_frontier.004.local_ruler_founder_tt` when `scope:eotg_frontier_county = { eotg_frontier_founder_can_rule = { HOLDING = <type's holding> HOLDER = root } }`. Text: "[eotg_frontier_founder.GetName] will hold the new System as your vassal." .004 already saves `scope:eotg_frontier_founder` in its `immediate`;
+   - otherwise `eotg_frontier.004.local_ruler_tt`: "A local leader will hold the new System as your vassal."
+   - Option effects are otherwise unchanged.
 
-**Design §7 is delivered** for three of seven types: Founder, Sponsor, Local Ruler and Political Owner are now four different characters.
+**Design §7 is delivered** for three of seven types: Founder, Sponsor, Local Ruler and Political Owner are four roles, and the Founder fills Local Ruler when eligible (H1).
 
 ### A2. AI participation
 
@@ -168,12 +216,9 @@ eotg_frontier_ai_cap_value = {
    NOT = { any_held_title = { tier = tier_county  has_variable = eotg_unclaimed_claimed  eotg_frontier_is_frontier = no } }
    ```
    An AI with a claimed county that isn't yet a Frontier claims nothing more. The owner's cap of 2 claimed-but-unsettled counties (UQ10) stays, and this tightens it.
-3. **UD3, an AI-only lapse after 10 years: specified, not decided.** Owner decision UQ11 accepted the default of no lapse (`frontier_unclaimed_regions.md` §D). Reopening it is the human's call (§13 H2). If approved, it ships in batch 2 as specified in §A2.3-opt below.
+3. **UD3, an AI-only lapse after 10 years: declined (owner, 2026-10-11, H2).** UQ11 stands: there is no lapse (`frontier_unclaimed_regions.md` §D).
 
-**A2.3-opt (only if H2 is approved):**
-- The claim effect sets the county variable `eotg_unclaimed_claim_window` (yes, 10 years) when the actor is AI.
-- The yearly sweep releases (`eotg_unclaimed_release_effect`, so A7.1's capital guard applies) any county that has all of: `eotg_unclaimed_claimed`, no window, `eotg_frontier_is_frontier = no`, an AI holder.
-- It then toasts nobody: AI only. No loc beyond a debug readout count.
+**A2.3-opt: DECLINED (H2). Do not build.** It was a claim window variable (`eotg_unclaimed_claim_window`) plus a sweep release for AI claims older than 10 years with no Frontier. It is removed from batch 2, §4, §5, §6 and §7. If the 50-year observer run misses the backlog band below, raise it with the owner again as a new question. Don't build it on that evidence alone.
 
 **A2.4 AI Frontier life** (`eotg_frontier_event_roll_effect`, AI branch). **Ruling: yes**, silent scripted outcomes, no events.
 - **When:** after the existing AI sponsor and backer paths, an AI holder (not a placeholder) whose Region still has no `eotg_frontier_event_cd` gets a 50% roll. When it passes, set the 3-year `eotg_frontier_event_cd` (the same single authority) and run the new `eotg_frontier_ai_silent_roll_effect`.
@@ -194,7 +239,7 @@ eotg_frontier_ai_cap_value = {
 - **Unclaimed share at year 30:** between **60% and 92%**. Below 60% is a land rush. Above 92% is inert: fewer than about 13 claims.
 - **Settled Regions per decade, decades 2–5:** **4–16.**
 - **At least 1 AI Frontier settled by year 20.** No AI ever holds more than 1 claimed county that isn't a Frontier.
-- Claimed-but-not-Frontier counties older than 10 years: **≤ 25%** of claimed counties at year 30. This is the H2 decision's evidence.
+- Claimed-but-not-Frontier counties older than 10 years: **≤ 25%** of claimed counties at year 30. This is the check on the H2 ruling (no lapse): the 50-year run shows whether A2.3 items 1–2 clear the backlog on their own.
 
 ### A3. Event pacing
 
@@ -304,7 +349,7 @@ V-U1 is split into two parts:
   ```
   Loc keys `EOTG_GAME_OVER_CANNOT_PLAY_UNSWORN` and `NOT_EOTG_GAME_OVER_CANNOT_PLAY_UNSWORN`. The `NOT_` form is engine-derived, per vanilla's pair at `G/localization/english/gui/ingame_main_l_english.yml:83-84`. The pitfalls entry gets a second key.
   - **New folder:** `common/scripted_rules/` must be added to CLAUDE.md's placement list (orchestrator).
-- **If only a full-file override works:** the owner's choice (§13 H3). The recommendation follows `government_template.md` §6.2(b): accept, plus the owner-approved lobby warning (UQ1). That is an additive `on_game_start_after_lobby` → `eotg_unclaimed_on_lobby_check`, with effect `every_player = { limit = { eotg_is_unclaimed_holder = yes } send_interface_toast = { title = eotg_unclaimed_toast_unplayable left_icon = this } }`. `every_player` precedent: `G/common/on_action/game_start.txt:3840`.
+- **If only a full-file override works: ruled (owner, 2026-10-11, H3). Allow it, with a warning.** No full-file copy of `00_rules.txt`. Unsworn stays playable until Gate 1, and the lobby warning (UQ1; `government_template.md` §6.2(b)) is built. That is an additive `on_game_start_after_lobby` → `eotg_unclaimed_on_lobby_check`, with effect `every_player = { limit = { eotg_is_unclaimed_holder = yes } send_interface_toast = { title = eotg_unclaimed_toast_unplayable left_icon = this } }`. `every_player` precedent: `G/common/on_action/game_start.txt:3840`. Revisit at Gate 1. This ruling also settles the government-side twin, CB-54.
 - **Not chosen: swapping the player.** Vanilla can do it (`set_player_character`, `game_start.txt:3796-3799`), but there is no map-agnostic way to choose whom.
 
 **Related ruling (government assessment G3): Unsworn has no succession law. Accepted and recorded.**
@@ -504,12 +549,13 @@ House form `stress_impact = { <trait> = <value> }`. The mod uses the old form un
 
 | Type | Key | System | Ruling |
 |---|---|---|---|
-| scripted effect | `eotg_frontier_grant_local_ruler_effect` | Frontier | A1 |
+| scripted effect | `eotg_frontier_grant_local_ruler_effect` (`HOLDING`, `GOVERNMENT`) | Frontier | A1 (+ founder first, H1) |
 | scripted effect (changed params) | `eotg_frontier_build_holding_effect` (+`LOCAL_RULER`, `LOCAL_GOVERNMENT`) | Frontier | A1 |
 | saved scope | `eotg_frontier_local_ruler` | Frontier | A1 |
+| scripted trigger | `eotg_frontier_founder_can_rule` (county; `HOLDING`, `HOLDER`) | Frontier | A1 founder first (H1) |
+| temporary scope value | `eotg_frontier_local_ruler_new` (set when the Local Ruler was landless, so gets `LOCAL_GOVERNMENT`) | Frontier | A1 founder first (H1) |
 | scripted effect | `eotg_frontier_ai_silent_roll_effect` | Frontier | A2.4 |
 | global variable | `eotg_unclaimed_count` | Unclaimed (set) / Frontier (read) | A2.2 |
-| county variable (optional, H2) | `eotg_unclaimed_claim_window` | Unclaimed | A2.3-opt |
 | temporary list | `eotg_frontier_roll_ready` | Frontier | A3 |
 | scripted effect | `eotg_frontier_roll_chosen_effect` | Frontier | A3 |
 | scripted trigger | `eotg_frontier_war_reaches` | Frontier | A4.1 |
@@ -521,7 +567,7 @@ House form `stress_impact = { <trait> = <value> }`. The mod uses the old form un
 | global variable (debug) | `eotg_unclaimed_debug_pulsed` | Unclaimed | A6 |
 | vanilla key override (cond.) | `basic_is_valid_for_yearly_events_trigger` | Unclaimed | A6 M2 |
 | vanilla scripted-rule override (cond.) | `is_character_allowed_to_be_player` (file `zz_eotg_rules.txt`) | Unclaimed | A6 M3 |
-| on_action (cond., fallback) | `eotg_unclaimed_on_lobby_check` (child of `on_game_start_after_lobby`) | Unclaimed | A6 M3 fallback |
+| on_action (cond. on T14: full-file only) | `eotg_unclaimed_on_lobby_check` (child of `on_game_start_after_lobby`) | Unclaimed | A6 M3 lobby warning (H3) |
 | scripted trigger | `eotg_unclaimed_may_release` | Unclaimed | A7.1 |
 | scripted effect | `eotg_unclaimed_move_baronies_effect` | Unclaimed | A7.2 |
 | scripted effect | `eotg_unclaimed_dissolve_enclave_effect` | Unclaimed | A7.2 (sweep rule d) |
@@ -543,17 +589,17 @@ House form `stress_impact = { <trait> = <value> }`. The mod uses the old form un
 | File | Changes | Owner |
 |---|---|---|
 | `common/scripted_effects/eotg_frontier_effects.txt` | A1, A2.4, A3, A4.3, A8.1, A8.3, A11.1–3 | scripter |
-| `common/scripted_triggers/eotg_frontier_triggers.txt` | A4.1, A4.2 | scripter |
+| `common/scripted_triggers/eotg_frontier_triggers.txt` | A1 (`eotg_frontier_founder_can_rule`, batch 2), A4.1, A4.2 | scripter |
 | `common/script_values/eotg_frontier_values.txt` | A2.2, A4.3, A8.1, A8.2 | scripter |
 | `common/decisions/eotg_frontier_decisions.txt` | A2.1, A2.1b, A4.2, A8.1 calls, debug tick (A3) | scripter |
 | `common/on_action/eotg_frontier_on_actions.txt` | A3 | scripter |
 | `events/eotg_frontier_events.txt` | A1 (.004 tooltip), A5 (.005 `ai_chance`), option depth | scripter |
-| `common/scripted_effects/eotg_unclaimed_effects.txt` | A2.2 count, A2.3-opt, A7.1, A7.2, A7.3 (cooldown and gap in the claim effect) | scripter |
+| `common/scripted_effects/eotg_unclaimed_effects.txt` | A2.2 count, A7.1, A7.2, A7.3 (cooldown and gap in the claim effect) | scripter |
 | `common/scripted_triggers/eotg_unclaimed_triggers.txt` | A2.3, A7.1, A7.3 | scripter |
 | `common/script_values/eotg_unclaimed_values.txt` | A2.3 | scripter |
 | `common/character_interactions/eotg_unclaimed_interactions.txt` | A7.3 (cooldown and gap moved; the V-U14 AI switch) | scripter |
 | `common/decisions/eotg_unclaimed_decisions.txt` | A7.3 | scripter |
-| `common/on_action/eotg_unclaimed_on_actions.txt` | A6 probe; A6 M3 fallback (cond.) | scripter |
+| `common/on_action/eotg_unclaimed_on_actions.txt` | A6 probe; A6 M3 lobby warning (cond. on T14; H3) | scripter |
 | `common/scripted_triggers/eotg_vanilla_overrides_triggers.txt` | A7.4; A6 M2 (cond.) | scripter |
 | `common/scripted_rules/zz_eotg_rules.txt` (**new folder**, cond.) | A6 M3 | scripter; orchestrator adds the folder to CLAUDE.md |
 | `docs/test_submods/frontier_vanilla/` | A7.1 README and the Sardinia list | scripter |
@@ -573,16 +619,16 @@ No `replace_path`. No descriptor change.
 | Appoint a Founder | player decision | county–hegemony (`ai_check_interval_by_tier` all 0) | none (shown only while founderless) |
 | Establish / Explore AI | decisions | county 24, duchy+ 24, barony 0 | the decision interval |
 | Raise Your Colours (decision and interaction) | player; AI per V-U14 | county+ | `eotg_unclaimed_colours_cd` (actor, 5 years) + global `eotg_unclaimed_ai_gap` (AI, 180 days), each set only in `eotg_unclaimed_claim_effect` |
-| Unclaimed count, enclave rule, (opt.) lapse | `yearly_global_pulse` → sweep (unchanged) | none | the sweep's yearly cadence |
+| Unclaimed count, enclave rule | `yearly_global_pulse` → sweep (unchanged) | none | the sweep's yearly cadence |
 | Pulse probe | `random_yearly_playable_pulse` (additive) | debug only | none (counter) |
-| M3 fallback | `on_game_start_after_lobby` (additive) | none | once |
+| M3 lobby warning (if T14 shows full-file only; H3) | `on_game_start_after_lobby` (additive) | none | once |
 
 **Role triggers at every tier:** every decision keeps every tier key. New Frontier entry points exclude placeholders through the existing `eotg_is_unclaimed_folk` / `_holder` guards (M1).
 
 ## 7. Loc surface
 
 **`eotg_frontier_l_english.yml`** (UTF-8 BOM, Canadian English, bare `[x.GetName]`, no numbers for progress or strain, dynamic knight term):
-- A1: `eotg_frontier.004.local_ruler_tt`.
+- A1: `eotg_frontier.004.local_ruler_tt`, `eotg_frontier.004.local_ruler_founder_tt` (names `[eotg_frontier_founder.GetName]`; H1).
 - A4.2: `eotg_decision_frontier_appoint_founder`, `_desc`, `_confirm`, `_pick_tt`, `_effect_tt` (names `[eotg_frontier_candidate.GetName]`).
 - A8.1: `eotg_frontier_band_stalled_tt`, `_pace_slow_tt`, `_pace_steady_tt`, `_pace_fast_tt`, `_time_decade_tt`, `_time_years_tt`, `_time_near_tt`, `_strain_calm_tt`, `_strain_strained_tt`, `_strain_breaking_tt`, and `eotg_frontier_band_cause_{no_founder,low_control,occupied,war,sponsor_lapsed,danger,hardship}_tt`. That is 17 keys, all prefixed `eotg_frontier_band_`.
 - A8.3: `eotg_frontier_toast_backing_settled`.
@@ -593,10 +639,9 @@ No `replace_path`. No descriptor change.
 - A6: `eotg_unclaimed_debug_pulsed_tt` (new), and `eotg_unclaimed_debug_playable_tt` (re-text).
 - A6, conditional:
   - `EOTG_GAME_OVER_CANNOT_PLAY_UNSWORN` and `NOT_EOTG_GAME_OVER_CANNOT_PLAY_UNSWORN`. These are engine-derived forms; flag both for the prefix lint as a deliberate exception;
-  - or `eotg_unclaimed_toast_unplayable`.
+  - or `eotg_unclaimed_toast_unplayable`, if T14 shows only a full-file override works (H3: allowed, with this warning, until Gate 1).
 - A7.3: `eotg_decision_unclaimed_raise_colours` ("Raise Your Colours"), `_desc` (LAW AT 866: "…yours for as long as you can hold it. Nobody else has to agree…", §D), `_confirm`, `_pick_tt`; `eotg_unclaimed_claim_cooldown_tt`.
 - A7.4: `eotg_unclaimed_defender_tt`: "[defender.GetShortUIName] is Unsworn and cannot be attacked", pointing to Raise Your Colours. Shape: vanilla `interactions_l_english.yml:168`.
-- A2.3-opt, only if H2 is approved: the debug readout count line in the existing `eotg_unclaimed_debug_counts_tt`.
 
 **No `replace/` overrides.** No vanilla string changes.
 
@@ -621,6 +666,8 @@ No `replace_path`. No descriptor change.
 |---|---|
 | City granted to a vassal + republic | `G/events/activities/hold_court_activity/hold_court_events_joe.txt:507-521`; `hold_court_events_general.txt:6912-6945` |
 | Church held by a created priest + theocracy | `hold_court_events_joe.txt:1224`, `:1240-1260` |
+| Existing character first, else created; then granted the city (A1 founder first) | `hold_court_events_general.txt:6723-6729` (`hold_court_6060_valid_knight_trigger`: `is_landed = no`, `is_available_ai_adult`), `:6830-6850` (`random_knight`, else `create_character`), `:6914-6945` (grant) |
+| Landed vassal's government changed only for AI (why a landed founder keeps theirs) | `hold_court_events_joe.txt:295-305` (`hold_court_8300_vassal_trigger`, `is_ai = yes`), `:438-492` (picker), `:507-521` (grant) |
 | Feudal holdings and required county holdings | `G/common/governments/00_government_types.txt:18-20` |
 | "Wrong holding type" rule | `G/localization/english/holdings_l_english.yml:36` |
 | `factor = 0` `ai_chance` gates | `G/events/dlc/ep3/ep3_admin_events.txt:130-145` |
@@ -639,7 +686,7 @@ No `replace_path`. No descriptor change.
 | `medium_prestige_value` | `G/common/script_values/00_basic_values.txt:1002` |
 
 **Deviations, each with its reason:**
-- A1's capital-type proxy: no vanilla `valid_holdings` reader exists.
+- A1's capital-type proxy: no vanilla `valid_holdings` reader exists. The same proxy decides whether a landed founder may take the System.
 - A7.3's variable cooldown: one authority shared by two entry points.
 - A6 M2 limited to one key: blast radius.
 
@@ -666,7 +713,7 @@ No `replace_path`. No descriptor change.
 | A4.2 | Kill the founder | Appoint a Founder appears; after use, the founder is valid and no `no_founder` strain accrues next tick |
 | A4.3 | Give an AI holder a child or imprisoned founder (console) | the next tick sets an adult courtier or the holder |
 | A5 | Static: the `ai_chance` factors match §A5 | — |
-| A1 | **V8**, then each of Settlement, Trade and Religious completed under a feudal holder, and Settlement under a Corporation holder (British Isles sub-mod) | feudal: the new barony is held by the local ruler, a vassal of the holder, republic or theocracy; no "wrong holding type" warning on the holder. Corporation: the holder keeps the Port. Military: the holder keeps the castle |
+| A1 | **V8**, then each of Settlement, Trade and Religious completed under a feudal holder, and Settlement under a Corporation holder (British Isles sub-mod) | feudal: the new barony is held by the local ruler, a vassal of the holder, republic or theocracy; no "wrong holding type" warning on the holder. Corporation: the holder keeps the Port. Military: the holder keeps the castle. **Founder first (H1):** with a landless courtier founder, the founder holds it and .004 names them; with the founder killed or imprisoned (console) before completion, the created figure holds it; with the holder as founder, the figure holds it |
 | A2 | **V-U14**, then the 50-year observer run | the §A2 bands |
 | A6 probe → M2 | **V-U1a**: one game year in `-debug_mode` | readout `eotg_unclaimed_debug_pulsed` > 0 ⇒ build M2; after M2, a second run reads 0 |
 | A6 M3 | **V-U1b** (lobby pick), then **T14** | after M3, the pick is refused with the Unsworn GAME_OVER text, and a republic is still refused |
@@ -693,17 +740,17 @@ No `replace_path`. No descriptor change.
 The brief §5 FYI fixes (Back-a-Frontier cooldown, .004.a gold, .004.b prestige values, `change_government` order, the sweep's holder list) ride along: the scripter acts on them directly. Then the localizer (the batch 1 keys in §7), then QA.
 
 **Batch 2: player-facing additions.**
-- A1, built correct-either-way; its DoD waits for V8;
+- A1, including founder first (H1), built correct-either-way; its DoD waits for V8;
 - A8.1–A8.3;
 - A7.3, with the V-U14 AI switch as a conditional sub-item;
-- A7.4;
-- A2.3-opt **only if H2 is approved**.
+- A7.4.
+- (A2.3-opt was declined by the owner (H2) and is not built.)
 
 Then the localizer, then QA.
 
 **Batch 3: conditional on V-U1 / T14.**
 - M2 if V-U1a > 0;
-- M3 in the T14 form, or the fallback toast if H3 says so;
+- M3 in the T14 form. If T14 shows only a full-file override works, build the lobby warning toast instead (`eotg_unclaimed_on_lobby_check`, `eotg_unclaimed_toast_unplayable`); owner ruling H3 keeps Unsworn playable until Gate 1;
 - the G3 follow-up only if the V-U1 sitting shows "Anarchy".
 
 **Batch 4: option depth.** Stress rows and two duels, folded into event_quality B12 (§3, "Option depth").
@@ -714,7 +761,7 @@ Then the localizer, then QA.
 
 - **D4-1 New events, options and beats:** the human's call. See §14.
 - **D4-2 Founder choice beyond auto-pick** (adventurers, dynasty members, merchants; design §5). It needs a candidate picker with character targets, which is new UI work. Proposal in §14.
-- **D4-3 A founder as Local Ruler** (design §7): owner question H1, since it reopens Q12.
+- ~~**D4-3 A founder as Local Ruler**~~: **removed 2026-10-11.** Owner ruling H1 moved it into scope; it is specified in §A1 "Founder first" and built in batch 2.
 - **D4-4 Per-government local-ruler governments:** a corporate Port, a Cartel front. Waits for governments_v2 G2.
 - **D4-5 Theocratic holders and castles:** the A1 proxy gives a theocrat a Military project's castle. Accepted until a theocratic mod government exists.
 - **D4-6 Bands in county-modifier descriptions:** no reliable scope for data functions. Decision tooltips and .002 carry them.
@@ -725,9 +772,12 @@ Then the localizer, then QA.
 
 ## 13. Questions for the human
 
-- **H1 (A1):** City and church Systems from a finished Frontier now go to a new local leader as the holder's vassal, unless the holder is seated in that holding type. That narrows your Q12 ruling ("the holder gets the new holding"). Confirm. Separately: should a founder who is not the holder become that Local Ruler instead (design §7, "House Veyra")?
-- **H2 (A2.3):** You accepted "no lapse" for claimed-but-never-established counties (UQ11). With the v4 AI fixes the backlog should mostly clear on its own. Do you also want **AI-only** claims to lapse back to Unclaimed after 10 years without a Frontier? It's specified and ready; the 50-year run will show whether it's needed.
-- **H3 (A6 M3):** If T14 shows only a full-file override of `00_rules.txt` works, do you accept "playable Unsworn plus a warning toast" until Gate 1 (recommended, `government_template.md` §6.2), or want the full 250-line file copied and re-diffed each patch?
+**Owner rulings, 2026-10-11:**
+- **H1 (A1): a local vassal, founder first. RULED.** A finished Frontier's city or church System goes to a new local leader as the holder's vassal, unless the holder is seated in that holding type. If the Frontier has a founder who is not the holder, that founder becomes the Local Ruler. This confirms the narrowing of Q12 and moves D4-3 into scope (§A1 "Founder first", batch 2; D4-3 removed from §12).
+- **H2 (A2.3): no lapse. RULED.** UQ11 stands. A2.3-opt is declined and removed from batch 2. The 50-year observer run is the check (§A2 verification).
+- **H3 (A6 M3): allow it, with a warning. RULED.** If T14 shows only a full-file override works, Unsworn stays playable with the `eotg_unclaimed_toast_unplayable` lobby warning until Gate 1. No full-file copy. This also resolves the government-side twin, CB-54.
+
+**Still open:**
 - **H4 (§14):** Approve or decline each content proposal below. None is built until you do.
 
 ## 14. Proposals for the human (NOT specified as decided)
@@ -750,6 +800,6 @@ From brief §2. Each needs your approval before any spec.
 - next: eotg-scripter (batch 1), with eotg-lore-keeper on A9 in parallel
 - ask: Build batch 1 of `docs/specs/frontier_v4.md` §11 (A3, A4, A5, A7.1–7.2, A11, the AI items of A2, and the A6 pulse probe), plus the brief §5 FYI fixes. Then hand the batch-1 loc keys to the localizer and the result to QA. Batch 2 follows; batch 3 waits for V-U1a/b and T14.
 - files: docs/specs/frontier_v4.md (new); pointer notes in docs/specs/frontier_v1.md, frontier_v2.md, frontier_v3.md, frontier_unclaimed_regions.md (incl. new §21 coupling record), governments_v2.md
-- needs-loc: §7. Batch 1: `eotg_decision_frontier_appoint_founder` (+`_desc`, `_confirm`, `_pick_tt`, `_effect_tt`), `eotg_unclaimed_debug_pulsed_tt`, re-text of `eotg_unclaimed_debug_playable_tt`. Batch 2: `eotg_frontier.004.local_ruler_tt`, 17 `eotg_frontier_band_*_tt`, `eotg_frontier_toast_backing_settled`, `eotg_decision_unclaimed_raise_colours` (+`_desc`, `_confirm`, `_pick_tt`), `eotg_unclaimed_claim_cooldown_tt`, `eotg_unclaimed_defender_tt`. Batch 3: `EOTG_GAME_OVER_CANNOT_PLAY_UNSWORN` + `NOT_` form, or `eotg_unclaimed_toast_unplayable`. Batch 4: `.032.c_success/_failure`, `.033.c_success/_failure`. A9 re-texts after the lore ruling.
+- needs-loc: §7. Batch 1: `eotg_decision_frontier_appoint_founder` (+`_desc`, `_confirm`, `_pick_tt`, `_effect_tt`), `eotg_unclaimed_debug_pulsed_tt`, re-text of `eotg_unclaimed_debug_playable_tt`. Batch 2: `eotg_frontier.004.local_ruler_tt`, `eotg_frontier.004.local_ruler_founder_tt`, 17 `eotg_frontier_band_*_tt`, `eotg_frontier_toast_backing_settled`, `eotg_decision_unclaimed_raise_colours` (+`_desc`, `_confirm`, `_pick_tt`), `eotg_unclaimed_claim_cooldown_tt`, `eotg_unclaimed_defender_tt`. Batch 3: `EOTG_GAME_OVER_CANNOT_PLAY_UNSWORN` + `NOT_` form, or (full-file-only T14 result, H3) `eotg_unclaimed_toast_unplayable`. Batch 4: `.032.c_success/_failure`, `.033.c_success/_failure`. A9 re-texts after the lore ruling.
 - needs-lore: (1) who owns "pressure" (A9.1, with void_lift_plan_cloud.md §3c); recommendation: no system owns it, Frontier says "strain". (2) "Frontier Roots" for the five legacy modifiers. (3) Whether vanilla "Republic"/"Theocracy" labels on the new local vassals read acceptably at 866 (display only).
-- needs-human: H1 (A1 narrows Q12; founder as Local Ruler?), H2 (AI-only claim lapse, reopens UQ11), H3 (M3 fallback if T14 fails), H4 (§14 content proposals). In-game, in order: link the Frontier test sub-mod (QA H2), V-U1a (pulse probe, after batch 1), V-U1b + T14, V8, V-U14, V-U9/V-U8, V-U15, U2, then the 50-year AI observer run. Orchestrator: add `common/scripted_rules/` to CLAUDE.md placement when M3 is built; add the new override keys to docs/pitfalls.md §16.
+- needs-human: H4 (§14 content proposals). H1–H3 ruled 2026-10-11 (§13). In-game, in order: link the Frontier test sub-mod (QA H2), V-U1a (pulse probe, after batch 1), V-U1b + T14, V8, V-U14, V-U9/V-U8, V-U15, U2, then the 50-year AI observer run. Orchestrator: add `common/scripted_rules/` to CLAUDE.md placement when M3 is built; add the new override keys to docs/pitfalls.md §16.
