@@ -123,15 +123,15 @@ These are shared conditions. Clearing one unblocks every item that names it.
 ## Art
 
 ### CB-04: Seamless trait icon
-- **Status:** waiting-human (2026-10-03)
+- **Status:** done (2026-10-11 inventory: `eotg_total_integration.dds` is in the mod; move to Done on the next board tidy)
 - **What:** `gfx/interface/icons/traits/eotg_total_integration.dds`, for the Seamless (Total Integration) endgame trait. It's 120 × 120, uncompressed 32-bit with alpha, no mipmaps. No vanilla stand-in, because it would look like an existing trait. Tiger shows one expected `missing-file` warning until then.
 - **Blocked by:** B-ART
 - **Owner:** human
 - **Next step:** supply a PNG. The orchestrator converts it, matching the other two trait icons, which have a textured backdrop. **Tone (2026-10-04):** match vanilla trait icons, e.g. blademaster: mean saturation ≈0.32 and brightness ≈0.33 over opaque pixels. The two shipped icons were toned down to this in 43ec7d7, and new icons get the same treatment on conversion. **Size:** the teal backdrop square is 92 px at x 14–105, y 15–106 on the 120 px canvas, matching blademaster (fc86da0).
 - **Refs:** test plan §5
 
-### CB-05: Nine placeholder decision illustrations
-- **Status:** waiting-human (2026-10-03), optional
+### CB-05: Placeholder art (decisions and more)
+- **Status:** waiting-human (2026-10-11), optional. **The full current list is `C:/Users/river/Desktop/EotG_Art_Needed.md`** (17 decision paintings, 15 event backgrounds, law/government blanks, icons, map art), which supersedes the nine listed below. The four law icons and the Unsworn government icon render blank.
 - **What:** these decisions use existing art, marked `PLACEHOLDER` in `common/decisions/eotg_augmentation_decisions.txt`: Seek Augmentation, Remove Implants, Consult a Physician, Augment a Courtier, Accept Restraints, Begin a Sedation Regimen, Appoint a Warden, Hand Over the Controls, Cut It Out. They're 1100 × 440 and stored as DXT1.
 - **Blocked by:** B-ART
 - **Owner:** human
