@@ -679,3 +679,12 @@ Online coverage of all four questions is thin. No wiki page, forum thread or mod
 - needs-loc: none
 - needs-lore: none
 - needs-human: CB-49 in-game checks; T14 (scripted-rule override: key-level vs full file) before the §6.2 Unsworn decision. Owner decisions: (1) settled by default (§3.15: a scaled modifier plus a story-cycle counter, no `gui/`); a `gui/scripted_widgets/` readout and `gui/eotg_texticons.gui` are opt-in and need placement entries; (2) whether the Corporation and Trade Oligarchy accept dynastic single-heir succession until G2 elective laws land; (3) the orchestrator adds the §4 item 9 folders to the CLAUDE.md placement list when first used.
+
+### 8.5 Vassal-contract window and government names (2026-10-11, verified in vanilla)
+- `gui/interaction_modify_vassal_window.gui` hard-codes government names in a few places, and all of them are cosmetic:
+  - background art: `FeudalVassalBackground` at :1381 for `feudal_government`, and `NonFeudalVassalBackground` at :1400 for everything that is not nomad, feudal or administrative. Further name-specific art at :1418-1472;
+  - wording: feudal versus non-feudal text at :572/:576 and :625/:629;
+  - the "obligation only once" note at :914, shown only for feudal or administrative vassals.
+- Which panel section shows is chosen by the contract layout (`HasModifyContractLayout('default' | 'clan' | 'admin' | 'eastern_admin')`, :95-143), not by the government name.
+- **Effect on our governments:** their vassals get the non-feudal background and the generic wording. Negotiation works through the contract group. No override is needed. Only change the window if a custom `modify_contract_layout` is ever introduced; that is a wholesale override of a vanilla GUI file, with the compatibility cost that brings.
+- `government_is_administrative` has **no reader in vanilla `gui/`** (grep, 2026-10-11). The claim that the engine checks that flag for the estate or noble-family UI is UNVERIFIED. It came from an observational source and is not relied on.
