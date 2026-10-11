@@ -688,3 +688,39 @@ Online coverage of all four questions is thin. No wiki page, forum thread or mod
 - Which panel section shows is chosen by the contract layout (`HasModifyContractLayout('default' | 'clan' | 'admin' | 'eastern_admin')`, :95-143), not by the government name.
 - **Effect on our governments:** their vassals get the non-feudal background and the generic wording. Negotiation works through the contract group. No override is needed. Only change the window if a custom `modify_contract_layout` is ever introduced; that is a wholesale override of a vanilla GUI file, with the compatibility cost that brings.
 - `government_is_administrative` has **no reader in vanilla `gui/`** (grep, 2026-10-11). The claim that the engine checks that flag for the estate or noble-family UI is UNVERIFIED. It came from an observational source and is not relied on.
+
+---
+
+## Appendix A. Observational survey of other mods (2026-10-11): NOT A SOURCE
+
+> **Owner rule (2026-10-11):** other mods may be explored to understand techniques. They are **not sources**. Nothing here may be copied, cited as a call site or precedent, or used as content. Anything adopted must first be confirmed in vanilla (file:line) or by an in-game test. This appendix records what was seen so the survey is not repeated. Every line is observational.
+
+**Mods surveyed** (installed Workshop content, `D:/SteamLibrary/steamapps/workshop/content/1158310/`): Elder Kings 2, A Game of Thrones, LotR: Realms in Exile, After the End, After the End: Sci-Fi submod, Godherja, The Fallen Eagle, Warcraft: Guardians of Azeroth Reforged 2, and Dragon Age: Thedas at War. Seven others had no government content (music, map, MAA graphics and patch submods).
+
+### A.1 Things the survey led us to verify in vanilla
+- **The playability gate is script**, at `common/scripted_rules/00_rules.txt:151` (`is_character_allowed_to_be_player`, a flag blacklist). It is now in §1. Two of the surveyed mods add their own `GAME_OVER_CANNOT_PLAY_*` entries there to make a government unplayable.
+- **The vassal-contract window checks government names only for cosmetics** (§8.5). One mod warns that its custom contract layout required editing that window.
+- **Unverified:** that the engine reads `government_is_administrative` for the estate or noble-family UI. Vanilla `gui/` has no reader (§8.5).
+
+### A.2 Patterns observed (observational)
+| Area | What the mods do |
+|---|---|
+| Vanilla government files | Usually re-ship `00_government_types.txt` wholesale with tagged edits (`# <MOD> EDIT`), and put new governments in separate files. |
+| `GOVERNMENT_TYPES` define | Always a full list: the vanilla keys plus the mod's own. Some override all of `00_defines.txt`, others use a small separately named defines file. Submods must re-ship the parent's list, and omissions happen (a key missing from the list). One mod removes vanilla governments from the list rather than deleting their definitions. |
+| `mechanic_type` | Usually omitted on flavour governments. Admin-like governments either declare `administrative` or reproduce the full admin rule set. |
+| Gating | Government flags are preferred. `has_government` still appears for one-offs. Grouping flags cover families of governments (e.g. "uses default perks"). |
+| Signature resources | Mostly reuse engine systems: tax slots (custom `tax_slot_type`), legitimacy (custom legitimacy types), obedience, crown-authority-style cumulative laws with `can_pass = no` that move only through effects, treasury and merit (admin rules only). Scripted resources are character variables (e.g. a 0–100 meter) fed by on_actions. |
+| Showing a resource | HUD or My-Realm progress bars added to **wholesale copies** of `hud.gui` / `window_my_realm.gui`, with visibility from a scripted GUI or a law-group flag; scripted-widget windows opened from a HUD tab; values inside `opinion_of_liege` with `opinion_of_liege_desc`; a texticon plus loc. Three mods use scaled modifiers, and three use story-cycle `basic_counter`s, but for scenario progress, not government resources. |
+| Influence outside admin | **None found.** Every government with influence also has the administrative rule set. Two mods comment that the `government_has_influence` flag is "only for loc". |
+| Non-hereditary succession | Three methods: title laws with `order_of_succession = generate` and a custom pool config; custom `succession_election` files (election type); a placeholder law where an on-death on_action effect picks the heir. One mod tried story-cycle timed re-elections, and the attempt looks abandoned. Appointment succession is used for an imperial government. |
+| Fallback | Fragile. One mod removed fallbacks because the priority order wasn't respected, keeping one for a landless subject; another uses a never-obtainable filler with a very high fallback. |
+| Domicile on a custom government | Three bindings: `domicile_type` alone; `domicile_type` plus the domicile's `allowed_for_character`; the domicile used as the `can_get_government` key. Landless custom governments add `landless_playable` and `sticky_government`. |
+| Switching governments | One mod runs a reset effect before `change_government`: clear title and authority laws, step through feudal, destroy noble-family titles. |
+| Text icons | Most use a separately named `*_texticons.gui`. Five also override vanilla `texticons.gui` wholesale, which is the compatibility trap §3.17 warns against. |
+| GUI | Eight or more mods override `hud.gui` and `window_character.gui` wholesale. Eight use `gui/scripted_widgets/`, mostly for pop-up windows. One redefines vanilla GUI *types* in its own file instead of overriding the whole window, a narrower technique. |
+| Unfinished work seen | TODO `opinion_of_liege` stubs, commented-out barter or landless features, deprecated decisions, and a submod whose defines list lost a key. Evidence of how much upkeep custom governments need. |
+
+### A.3 Ideas worth testing in vanilla (not adopted)
+- **`opinion_of_liege` driven by a script value**, with `opinion_of_liege_desc`, as a no-GUI way to make a government resource *felt* in the vassal opinion breakdown. Vanilla clan already scripts `opinion_of_liege` (§3); confirm the shape there before use.
+- **Authority-style cumulative realm laws that only effects can move**, as a visible tier track for a resource. Confirm the law-group shape in vanilla `00_realm_law_groups.txt` and `00_realm_laws.txt`.
+- **A custom `tax_slot_type`** for a distinct vassal relationship. Vanilla clan's `clan_tax_slot` (`common/tax_slots/types/00_tax_slot_types.txt:3`) is the shape to copy.
