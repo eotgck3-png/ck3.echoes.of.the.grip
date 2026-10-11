@@ -141,24 +141,25 @@ from grass to dark violet (`docs/tools/build_holding_decals.py`).
 
 Small UI icons shown in province tooltips and the terrain map mode.
 
-- **Format:** PNG with alpha, **40×40**
+- **Format:** PNG with alpha, **60×60** (all 20 vanilla terrain icons are 60×60; corrected 2026-10-11)
+- **Shape:** vanilla's are a round painted vignette inside a dark ring, transparent outside the circle
 - **Filenames:** `eotg_terrain_<terrain>.png` using the CK3 terrain keys listed in the table
   above (`plains`, `hills`, `mountains`, `desert`, `desert_mountains`, `oasis`, `jungle`,
   `forest`, `taiga`, `wetlands`, `steppe`, `floodplains`, `drylands`, `terraced_hills`,
   `farmlands`)
-- Must be legible at 40px — strong silhouette, 2–3 tones, no fine detail
+- Must be legible at 60px — strong silhouette, 2–3 tones, no fine detail
 - Subject: the same astrographic idea as the matching texture
 
 ---
 
-## Priority 4 — Battle backgrounds (15 images, lowest priority)
+## Priority 4 — Terrain illustrations (15 images, lowest priority)
 
-Widescreen art behind the battle UI. Vanilla placeholders work fine until these exist.
+Art behind combat and terrain tooltips (vanilla `gfx/interface/illustrations/terrain_types/`). Vanilla placeholders work fine until these exist.
 
-- **Format:** PNG, **1920×540**
+- **Format:** PNG, **1200×600** (23 of vanilla's 25 are 1200×600; corrected 2026-10-11 from 1920×540)
 - One per terrain, same naming basis as the icons
 - These *are* illustrations — perspective, drama and lighting are wanted here, unlike the textures
-- Subject: a fleet engagement in that terrain
+- Subject: a bright, scenic view of that kind of space, **with no people or fleets fighting**. Vanilla's are daylit landscapes, brightness about 0.5–0.67, the brightest illustrations in the game
 
 ---
 
