@@ -18,21 +18,33 @@
 
 ## 1. What "playable" means in practice
 
-A government is playable when a human can pick a ruler of it at game start and keep playing after that ruler dies. Vanilla has **no script-visible "playable" switch** (research 01 §2). Playability comes out of the requirements below, and the label "Is unplayable" is only loc.
+A government is playable when a human can pick a ruler of it at game start and keep playing after that ruler dies.
+
+**Correction (2026-10-11).** The research said there was no script-visible playable switch (research 01 §2). That was wrong. **The gate is the scripted rule `is_character_allowed_to_be_player`** (`V/common/scripted_rules/00_rules.txt:151-249`). It is a **blacklist of government flags**, and each entry fails with a `GAME_OVER_CANNOT_PLAY_*` text (loc in `V/localization/english/gui/ingame_main_l_english.yml:83-89`). Inside `trigger_if = { limit = { scope:will_override_government = no } }` (`:152-155`), so it is skipped entirely when the engine will override the government, it blocks the following:
+- `government_is_republic` (`:157-160`), `government_is_mercenary` (`:162-165`) and `government_is_holy_order` (`:167-170`), always;
+- `government_is_administrative` without the `admin_gov` DLC feature (`:172-180`);
+- ecclesiastical and theocracy without `by_god_alone` (`:182-199`);
+- without `roads_to_power`: landless adventurers, barons, and the catch-all `is_playable_character` (`:201-217`);
+- landless Japanese-government and theocracy rulers without a domicile (`:219-235`, `GAME_OVER_CANNOT_PLAY_ESTATELESS`, unless they hold a `clerical_elector_title`).
+
+Otherwise the catch-all applies (`:237-247`): `is_playable_character = yes`, or a non-ruler who passes `is_valid_for_laampdom`, and in both cases no `declined_become_laamp` flag.
+
+**So a mod government is playable by default** if it carries none of those flags and its rulers pass `is_playable_character` (P4). Republic is unplayable because of the blacklist entry at `:157-160`, **not only** because it lacks dynasty rules. The "Is unplayable" flag labels (P9) are the loc side of the same list.
 
 ### 1.1 Hard requirements
 
 | # | Requirement | What to set | Evidence | Engine-side / unverified |
 |---|---|---|---|---|
-| P1 | **Dynastic rulers**, so the heir is in the player's dynasty and play continues | `government_rules = { rulers_should_have_dynasty = yes  create_cadet_branches = yes }` | Default is `no` (`GI:30-33`). Feudal `GT:7-8`, clan `GT:98`, admin `GT:453`. Every playable landed vanilla government sets it. Republic (`GT:64-70`), mercenary (`GT:329`) and herder (`GT:745`) don't, and all three are labelled unplayable. | The wiki says "non-dynastic governments … are not playable", and a random character inherits [web, research 04 §3]. The game-over-on-heir-outside-dynasty behaviour is engine-side. |
+| P0 | **Not on the playable blacklist**, or deliberately on it | Playable: carry none of `government_is_republic`, `_mercenary`, `_holy_order`. Avoid `_administrative`, `_ecclesiastical`, `_theocracy` and `_landless_adventurer`, which are DLC-conditional. **Unplayable on purpose:** add a `custom_description = { text = "GAME_OVER_CANNOT_PLAY_<X>" NOT = { government_has_flag = eotg_government_is_<gov> } }` entry. | `V/common/scripted_rules/00_rules.txt:151-249` (above) | **Making a government unplayable needs an override of `is_character_allowed_to_be_player`.** The safe form is the same path, `common/scripted_rules/00_rules.txt`, which replaces the whole vanilla file. That is a compatibility cost, and the file must be re-diffed every patch (`docs/pitfalls.md` §2). **UNVERIFIED:** whether a same-key rule in a separately named file (e.g. `zz_eotg_rules.txt`) overrides the key or duplicates it. There is no `_scripted_rules.info` in vanilla or in the skill. Project precedent: a key-level override works for scripted triggers (`docs/pitfalls.md` §16). Check it with `logs/database_conflicts.log` and test T14 before relying on it. |
+| P1 | **Dynastic rulers**, so the heir is in the player's dynasty and play continues | `government_rules = { rulers_should_have_dynasty = yes  create_cadet_branches = yes }` | Default is `no` (`GI:30-33`). Feudal `GT:7-8`, clan `GT:98`, admin `GT:453`. Every playable landed vanilla government sets it. Republic (`GT:64-70`), mercenary (`GT:329`) and herder (`GT:745`) don't. Republic and mercenary are *blocked* by the P0 blacklist (`00_rules.txt:157-165`); the missing dynasty rule is a second reason, not the gate. | The wiki says "non-dynastic governments … are not playable", and a random character inherits [web, research 04 §3]. Whether a dynastic player whose heir falls outside the dynasty gets game over is the engine's succession behaviour, and T3 checks it. |
 | P2 | **Leave `inherit_from_dynastic_government` at its default (`yes`)** unless you are building a full heir channel | don't set it | `GI:164-173`: "Many non-dynastic governments are unplayable, so it prevents game over." Republic, theocracy, ecclesiastical, mercenary and both holy orders set `no`. | **Caveat:** `no` puts the government in the non-dynastic group, whose rulers can't inherit from dynastic ones. Theocracy only became playable in 1.20 after Paradox added designated heirs, clerical succession, a conclave and "Establish a Dynasty" [web, research 04 §3]. **Caveat on `yes` [inferred]:** a ruler of another dynastic government can inherit this government's titles and keep their own government. `use_as_base_on_landed` (P5) only fires on a ruler's *first* title. Expect realms to erode to feudal through cousins, and test it (§5, T4). |
 | P3 | **A valid succession law** for every ruler of the government | own `succession_order_laws` law (§3.5) | Vanilla order laws whitelist government flags (`V/common/scripted_triggers/00_law_triggers.txt:268-280, 343-397, 589-591, 641-670`). A new government qualifies for none of them. | A custom law that never applied fell back to "Agnatic" and the government displayed as "Anarchy" [web, research 04 §4]. |
-| P4 | **`is_playable_character`** must be true for its rulers | a title above barony, or a domicile, or `landless_playable = yes` | `V/common/scripted_triggers/00_available_for_events_triggers.txt:964-980`: `is_ruler`, then a domicile, or `highest_held_title_tier > tier_barony` (landed), or a theocracy-flag government. `landless_playable` (`GI:61-66`) **needs the DLC flag `landless_playable`**. | Whether the engine also keeps a hard-coded unplayable list is **[engine, unverified]**. Research found no script gate for republic or theocracy (research 01 §2 "Not found"). |
+| P4 | **`is_playable_character`** must be true for its rulers | a title above barony, or a domicile, or `landless_playable = yes` | `V/common/scripted_triggers/00_available_for_events_triggers.txt:964-980`: `is_ruler`, then a domicile, or `highest_held_title_tier > tier_barony` (landed), or a theocracy-flag government. `landless_playable` (`GI:61-66`) **needs the DLC flag `landless_playable`**. | `is_playable_character` is the catch-all inside the P0 rule (`00_rules.txt:216, 245`). The blacklist itself is script (P0), not engine. |
 | P5 | **The heir keeps the government** | `use_as_base_on_landed = yes`, `sticky_government = yes` | `GI:73-77`, `GI:148-151`; admin `GT:458, 462`; nomad `GT:642-647`. `use_as_base_on_rank_up` (`GI:79-83`) also spreads it upward to conquerors, so leave it unset unless that is wanted (`governments_v2.md` §5.0). | Test it with a death and a `kill` (§5, T3). |
 | P6 | **A `NGovernment.GOVERNMENT_TYPES` entry** | the mod's define file lists **all 20 vanilla keys verbatim** plus the new key | `V/common/defines/00_defines.txt:550-573`. **An array define replaces vanilla's list, it does not merge** (`docs/pitfalls.md` §2, "Define arrays replace"). The engine pre-registers `<g>_vassal_opinion`, `<g>_opinion`, `<g>_tax/levy_contribution_add/_mult` only for listed governments. Without the entry you get 12 "Could not find the preregistered modifier type" errors. | Two copies must stay in step: `common/defines/eotg_government_defines.txt` and the test sub-mod's `docs/test_submods/british_isles/common/defines/zz_eotg_test_bi_government_defines.txt`. Re-copy the vanilla 20 after every CK3 patch. |
 | P7 | **`can_get_government` and a fallback story** | either a guard (`GI:358-368`) or a recorded decision not to have one, plus a known exit government | `can_get_government` is checked "when landed" (`GI:358-368`). If nothing passes, the `fallback` order is used (`GI:348-356`): feudal 1, clan 2, administrative and celestial 3. Guard shapes: mandala `GT:949-957` (liege-or-independent), monastic holy order `GT:439-443` (title-based). | **The trade-off:** a guard risks an heir failing it at succession and dropping to feudal. No guard risks leakage, meaning the engine hands the government to unrelated newly landed rulers [engine, unverified]. **Never set `fallback` on a mod government**, or it becomes a default for empty counties. `assign_new_government_effect` (`V/common/scripted_effects/00_government_effects.txt:75-199`) does not check playability (comment at `:158`). |
 | P8 | **Reachability: bookmark and ruler designer** | a bookmark `character = { government = <key> }` entry, or a decision path from a reachable government | Bookmarks set `government =` per character (`V/common/bookmarks/bookmarks/00_bookmarks.txt:1196` ecclesiastical). The ruler designer only ever assigns tribal, clan or feudal (`V/common/on_action/ruler_designer.txt:147-161`). The bookmark and designer GUIs branch on government only for display. | Without either, a player reaches the government only by picking its ruler on the map, or through an in-game adoption decision. Whether the bookmark screen remaps an "unplayable" government at start (Herder → Nomadic, [web]) is **[engine, unverified]**. Test it (§5, T1). |
-| P9 | **Never carry an "unplayable" identity flag** | omit `government_is_republic`, `government_is_mercenary`, `government_is_holy_order`, `government_is_herder` | Their loc labels read "Is unplayable" (`V/localization/english/government_l_english.yml:272, 280, 281, 285`). | The label is cosmetic, but it misleads players and agents. |
+| P9 | **Never carry an "unplayable" identity flag** | omit `government_is_republic`, `government_is_mercenary`, `government_is_holy_order`, `government_is_herder` | Their loc labels read "Is unplayable" (`V/localization/english/government_l_english.yml:272, 280, 281, 285`). Republic, mercenary and holy order are the P0 blacklist entries. | `government_is_herder` carries the label but **is not on the P0 blacklist**. Whatever keeps herders off the player list lies elsewhere [unverified]. Don't carry it either. |
 | P10 | **DLC independence** | don't rely on rules that need a DLC flag | `landless_playable` (`GI:64`) and `mechanic_type = administrative` (`GI:330`, `admin_gov`) are DLC-gated. Vanilla DLC governments gate `can_get_government` on `has_*_dlc_trigger` (`GT:301, 669, 1228`). | A player without the DLC loses the mechanic silently [inferred]. |
 
 ### 1.2 What playability does *not* require
@@ -207,7 +219,7 @@ Title succession laws list feudal, clan and tribal (`V/common/laws/01_title_succ
 ### 3.6 Holdings and buildings
 - **Min:** copy a vanilla shape verbatim.
   - **Castle shape:** feudal `GT:18-20`.
-  - **City shape:** republic `GT:65-67`. **A playable city-primary government is untested in vanilla** (republic is unplayable). Check it in game (V-G17).
+  - **City shape:** republic `GT:65-67`. **A playable city-primary government is untested in vanilla** (republic is blocked by the P0 blacklist). Check it in game (V-G17).
   - Never invent a mixed combination. v1's castle-primary plus city-valid appears nowhere in vanilla.
 - Holding types: `V/common/holdings/00_holdings.txt` (castle `:2`, tribal `:55`, city `:84`).
 - **Buildings** are gated by triggers inside each building, not by a government field:
@@ -341,6 +353,7 @@ Title succession laws list feudal, clan and tribal (`V/common/laws/01_title_succ
 | `<g>_obligations`, `<g>_vassals_label` | contract UI |
 | `<g>_vassal_opinion`, `<g>_opinion`, `<g>_tax_contribution_add`, `<g>_tax_contribution_mult`, `<g>_levy_contribution_add`, `<g>_levy_contribution_mult` | **engine-generated modifier names** (exist only with P6) |
 | flag labels `<flag>` | only if a flag is shown in tooltips (vanilla `:272-285`) |
+| `GAME_OVER_CANNOT_PLAY_<X>`, `NOT_GAME_OVER_CANNOT_PLAY_<X>` | **only for a deliberately unplayable government** (P0). Shape: `V/localization/english/gui/ingame_main_l_english.yml:83-84` (`"Cannot play [republics\|E]"`, and the `NOT_` key as `"$GAME_OVER_CANNOT_PLAY_REPUBLIC$"`). The key itself carries no `eotg_` prefix by vanilla convention; use `<X>` = `EOTG_<GOV>`. |
 | `opinion_of_liege_desc` text | if §3.1 sets it |
 | per law: `<law>`, `<law>_subname`, `<law>_effects` | shape `succession_laws_l_english.yml:14-16` |
 | per contract group: `<grp>`, `<grp>_desc` | |
@@ -428,11 +441,12 @@ Covered by P6. Add the key to **both** define files in the same commit, and re-d
 5. The identity flag is read by at least one trigger. No `has_government` in mod script. No title, culture or faith keys (`grep`).
 6. The loc file has exactly one BOM and no `[scope:`, and every §3.16 key is defined once across the tree, `replace/` included.
 7. Every own law, contract level and decision has `ai_will_do`.
+8. **The playable blacklist:** `grep -n "government_is_" common/governments/eotg_<gov>_government.txt` shows none of the P0 flags outside comments. A government meant to be unplayable has its `GAME_OVER_CANNOT_PLAY_*` entry and its two loc keys.
 
 ### 5.2 In game (human, `-debug_mode`, British Isles sub-mod)
 | ID | Check | Pass |
 |---|---|---|
-| T1 | **Bookmark or map start.** The ruler can be picked and played; the lobby doesn't say "Is unplayable"; the start doesn't remap the government. | yes |
+| T1 | **Bookmark or map start.** The ruler can be picked and played. No `GAME_OVER_CANNOT_PLAY_*` tooltip appears and the lobby doesn't say "Is unplayable". The start doesn't remap the government. | yes |
 | T2 | **Load.** error.log has nothing from the new files: no "preregistered modifier type", no "Unexpected token". `database_conflicts.log` shows only the intended key overrides (`KnightCulture`, any `pitfalls.md` §16 trigger). | yes |
 | T3 | **Succession across a death.** `kill` the ruler. The heir is in the dynasty, keeps the government, has the own succession law, and play continues. Repeat with a female or minor heir under the vanilla gender law. | yes |
 | T4 | **Erosion.** Give a title of this government to a landed feudal relative (`kill` the ruler with that relative as heir) and record the government of the result. | recorded |
@@ -444,6 +458,7 @@ Covered by P6. Add the key to **both** define files in the same commit, and re-d
 | T10 | **Save compatibility.** Save in year 1, load the save after a no-op rebuild, and confirm the government, law and resource survive. After any change to the government definition, record whether old saves load. | yes / recorded |
 | T11 | **Influence on a non-admin government** (only if Q2 picks influence). Give a test government `government_has_influence`, no administrative `mechanic_type`, and a `monthly_influence = 1` modifier. After 3 months, record: (a) the top bar (expected absent, `hud.gui:7025`); (b) the character-window influence row; (c) the influence value in the character debug view; (d) whether `change_influence` and `influence >= X` work and an influence-cost interaction is usable; (e) error.log. | Recorded. Influence is usable only if (b)–(d) pass. |
 | T12 | **Custom text icon.** Ship `gui/eotg_texticons.gui` with one `government_type_eotg_<gov>` block and use it in `<g>_with_icon`. It renders in the character window and in a tooltip; vanilla `@gold_icon!` and `@government_type_feudal!` still render; error.log has no texticon line. | yes |
+| T14 | **Unplayable on purpose** (only if P0 adds an entry). Try to pick a ruler of the government: the pick is refused with the `GAME_OVER_CANNOT_PLAY_<X>` text. `database_conflicts.log` shows which file won `is_character_allowed_to_be_player`, which settles the same-key-in-another-file question. Every vanilla blacklist entry still applies: a republic is still refused. | yes |
 | T13 | **Resource display and domicile** (where used). The scaled modifier shows the live value and moves when the change effect runs, and the story-cycle `basic_counter` matches it. If a domicile is used: the window opens in the Western frame with the type's icon and illustration, and the domicile shows a line of succession after the holder dies. | yes |
 
 ---
@@ -454,6 +469,7 @@ Sources: the files under `common/` (line numbers below), `governments_v2.md`, an
 
 | Requirement | PMC | Corporation | Cartel | Gob-Corp (Trade Oligarchy) |
 |---|---|---|---|---|
+| P0 not on the playable blacklist (`V/common/scripted_rules/00_rules.txt:151-249`) | met: the only vanilla flag is `government_is_settled` (`pmc:58`) | met (`corp:58`; `government_is_republic` appears only in a comment, `:14`) | met (`cartel:68`) | met (`gobcorp:59`; republic only in a comment, `:15`) |
 | P1 dynastic rules | met, `eotg_pmc_government.txt:24-25` | met, `eotg_corporation_government.txt:25-26` | met, `eotg_cartel_government.txt:35-36` | met, `eotg_gobcorp_government.txt:25-26` |
 | P2 `inherit_from_dynastic_government` default | met (unset) | met (unset) | met (unset) | met (unset) |
 | P3 valid succession law | met (untested V-G4), `common/laws/eotg_government_succession_laws.txt:25` | met (untested), `:57` | met (untested), `:121` | met (untested), `:89` |
@@ -519,6 +535,15 @@ All four are **playable reskins of feudal** by this template's definition. The G
 - the whole in-game V-G list (CB-49) is still unrun, so every "met" for P3, P5 and T1 is unproven;
 - no resource display exists yet. The §3.15 default (a scaled modifier plus a story-cycle counter) needs no GUI, so G2 P1 can start without a GUI decision.
 
+### 6.2 Gap outside the four: Unsworn (`eotg_unclaimed_government`) is playable
+- **Finding.** Unsworn carries `eotg_government_is_unclaimed` and `cannot_be_vassal_or_liege` (`common/governments/eotg_unclaimed_government.txt:77-83`), and neither is on the P0 blacklist. Each placeholder holds a county, so it passes `is_playable_character` (`V/common/scripted_triggers/00_available_for_events_triggers.txt:964-980`). **A player can therefore pick an Unsworn placeholder.**
+- **Why it matters.** It has `rulers_should_have_dynasty = no` and `inherit_from_dynastic_government = no` (`:35-38`). It is a passive stand-in, "not a ruler" (`:3-4`), with no council, no buildings and `monthly_income_mult = -10`. Playing one is a dead end, and its death likely ends the game, because the heir is non-dynastic [inferred].
+- **Options:**
+  - (a) **Add a GAME_OVER entry.** Override `is_character_allowed_to_be_player` with `custom_description = { text = "GAME_OVER_CANNOT_PLAY_EOTG_UNCLAIMED" NOT = { government_has_flag = eotg_government_is_unclaimed } }`, plus two loc keys (§3.16). Cost: a full-file override of `common/scripted_rules/00_rules.txt` (P0), or an UNVERIFIED key-level override in a separate file.
+  - (b) **Accept it.** Record it as known behaviour and rely on the map lens showing these counties as unclaimed.
+- **Recommendation: (a), after T14 settles whether a key-level override in `zz_eotg_rules.txt` works.** If it does, the cost is one small file. If only the full-file override works, take (b) until Gate 1 and record it on the taskboard. Re-copying a 250-line rules file each patch is not worth it for a test-map edge case.
+- **Owner:** architect (here) → scripter → QA (T14). Unsworn's spec is `docs/specs/frontier_unclaimed_regions.md`.
+
 ---
 
 ## 7. Fill-in template (copy into `docs/specs/<gov>.md`)
@@ -530,6 +555,7 @@ Gate: <2 by default | mod-exclusive exemption granted by owner on <date>>   Bloc
 
 ## 0. Kind of build (§2 rule)
 [ ] Playable reskin (verb = conquer and inherit)   [ ] Distinct government (verb differs; complete Q1-Q7)
+Playable? (§1 P0)  [ ] yes: no blacklisted flag   [ ] no, on purpose: GAME_OVER_CANNOT_PLAY_<X> entry + override of 00_rules.txt (T14)
 
 ## 1. Purpose & gate
 One paragraph. Fiction in one sentence; who holds it at 866 (cite dated lore, never NATIONS_AT_866_AG.md).
@@ -652,4 +678,4 @@ Online coverage of all four questions is thin. No wiki page, forum thread or mod
 - files: docs/specs/government_template.md
 - needs-loc: none
 - needs-lore: none
-- needs-human: CB-49 in-game checks. Owner decisions: (1) settled by default (§3.15: a scaled modifier plus a story-cycle counter, no `gui/`); a `gui/scripted_widgets/` readout and `gui/eotg_texticons.gui` are opt-in and need placement entries; (2) whether the Corporation and Trade Oligarchy accept dynastic single-heir succession until G2 elective laws land; (3) the orchestrator adds the §4 item 9 folders to the CLAUDE.md placement list when first used.
+- needs-human: CB-49 in-game checks; T14 (scripted-rule override: key-level vs full file) before the §6.2 Unsworn decision. Owner decisions: (1) settled by default (§3.15: a scaled modifier plus a story-cycle counter, no `gui/`); a `gui/scripted_widgets/` readout and `gui/eotg_texticons.gui` are opt-in and need placement entries; (2) whether the Corporation and Trade Oligarchy accept dynastic single-heir succession until G2 elective laws land; (3) the orchestrator adds the §4 item 9 folders to the CLAUDE.md placement list when first used.
