@@ -64,13 +64,13 @@ Every post-1.13 government has one, usually walled off from gold (research 04 §
 | Option | What you get | Cost and risk | Evidence |
 |---|---|---|---|
 | **Piety, prestige, dread** (universal) | Already in the UI, AI-aware, with level tables; costs use `piety =` / `prestige =` | Not distinct. Every ruler has it. It works as the resource only if the government changes how it is *gained or spent* (modifiers, costs, `currency_levels_cap`). | `currency_levels_cap` (`GI:568-579`) can only lower the caps for piety, prestige, influence and merit. Mandala sets piety 8 (`GT:1087`). |
-| **Influence** | Existing UI and effects (`change_influence`, cost key `influence =`, modifiers `monthly_influence(_mult)`) | It is switched on by the capability flag `government_has_influence` (interactions 78, activities 58, great projects 27, buildings 16 hits). Its gain rates are coded for admin (`V/common/defines/00_defines.txt:318-320`). **Whether it accrues without `mechanic_type = administrative` is [engine, unverified]** (the `governments_v2.md` §14.5 probe). | research 02 §0, §6 |
+| **Influence** | Existing UI and effects (`change_influence`, cost key `influence =`, modifiers `monthly_influence(_mult)`) | It is switched on by the capability flag `government_has_influence` (interactions 78, activities 58, great projects 27, buildings 16 hits). Its gain rates are coded for admin (`V/common/defines/00_defines.txt:318-320`). **Every vanilla government with the flag is `mechanic_type = administrative`, and the top-bar widget is gated on the mechanic, not the flag** (`V/gui/hud.gui:7025`). A non-admin government with the flag would show influence in the character window and ledger only. Gain through `monthly_influence` is likely; spending and admin features are unknown (§8.1, test T11). | research 02 §0, §6; §8.1 |
 | **Merit, treasury, obedience** | Engine currencies with UI | Turning on `merit = yes`, `treasury = yes` (`GI:112-125`) or `obedience = yes` (`GI:137-141`) brings in the administrative stack: budgets, salary laws, `replace_gold_cost_by_treasury`. Vanilla uses them only with `mechanic_type = administrative` or nomad. [inferred] Expect half-working UI without the rest of the stack. | research 03 §6-7, §9 |
-| **Herd, provisions** | Engine currencies | **They exist only inside a domicile** with `herd = yes` / `provisions = yes`, and are changed by `domicile = { change_herd / change_provisions }` (`V/common/scripted_effects/00_faction_effects.txt:1125-1126`, `00_activity_effects.txt:2814-2815`). That means a domicile (§3.10) and its hard-coded GUI. | research 03 §1, §3 |
+| **Herd, provisions** | Engine currencies | **They exist only inside a domicile** with `herd = yes` / `provisions = yes`, and are changed by `domicile = { change_herd / change_provisions }` (`V/common/scripted_effects/00_faction_effects.txt:1125-1126`, `00_activity_effects.txt:2814-2815`). That means a domicile (§3.9). | research 03 §1, §3 |
 | **Radiance** | — | **Closed.** It uses the rule `radiance = yes` plus `mandala_radiance_value`, marked "USED IN CODE, DO NOT RENAME" (`V/common/script_values/tgp_mandala_values.txt:485`). It can't be re-pointed. | research 03 §4 |
-| **Scripted pseudo-currency** (variable plus script value) | Full design freedom; map-agnostic; no DLC | **No UI, tooltips, caps or level tables come with it.** It needs a display surface (§3.17), clamping in one change effect, and an AI that reads it in `ai_will_do`. The mod ships **no `gui/` and no `common/scripted_guis/`** today. Project precedent: Void Corruption's variable shown through band modifiers (memory, "Void Corruption system"). | research 03 §10 |
+| **Scripted pseudo-currency** (variable plus script value) | Full design freedom; map-agnostic; no DLC | **No caps or level tables come with it.** It needs clamping in one change effect and an AI that reads it in `ai_will_do`. **Display needs no GUI file:** a scaled character modifier shows the live value in the character window and its tooltip (`V/common/modifiers/00_court_position_modifiers.txt:138-141`), and a visible story cycle shows it as a `basic_counter` (§3.15, §8.4). | research 03 §10; §8.4 |
 
-**Recommendation, the project default:** use a scripted variable with band modifiers for display, unless an engine currency's meaning genuinely matches. Prove any engine currency with a debug-decision probe before designing on it.
+**Recommendation, the project default:** a **scripted pseudo-currency shown through a scaled character modifier plus a story-cycle `basic_counter`**, with no `gui/` files (§3.15). Pick an engine currency only if its meaning genuinely matches, and prove it with a debug-decision probe first (influence: T11).
 
 ### Q3. What is the vassal relationship?
 Paradox gives every distinct government a distinct vassal model (research 04 §2):
@@ -112,7 +112,7 @@ Also decide `opinion_of_liege` (`GI:516-530`), which is a per-government opinion
 State how the AI gains the resource, how it spends it, and how it avoids bankruptcy and law churn. There is no per-government AI folder (research 02 §7).
 
 ### Q7. Where does the player see it (the UI surface)?
-List every screen where the government shows. Free surfaces (§3.17): the name, icon, map colour, laws, contract window and rank names. Anything else, such as resource display or a government tab, is new GUI work. The mod ships none today, so it needs an owner decision.
+List every screen where the government shows. Free surfaces (§3.15): the name, icon, map colour, laws, contract window and rank names. **The resource display defaults to the no-GUI path**: a scaled modifier plus a story-cycle counter (§3.15). A persistent HUD readout is the opt-in upgrade through `gui/scripted_widgets/`. A government tab or a `hud.gui` change is new GUI work and needs an owner decision.
 
 ---
 
@@ -131,11 +131,11 @@ Each item lists what to supply, the path, the vanilla precedent, and the **minim
 | `vassal_contract_group` | key into `common/subject_contracts/groups/` | own group (§3.3) | same | feudal `GT:22` |
 | `royal_court` | **Closed enum:** none, any, top_liege, landed (`GI:447-455`) | `any` | — | feudal `GT:14` |
 | `main_administrative_tier`, `min_appointment_tier`, `minimum_provincial_maa_tier`, `title_maa_setup` | **Closed enums.** Admin only (`GI:463-486`). | unset | admin mechanic only | admin `GT:455-470` |
-| `house_unity`, `tax_slot_type`, `domicile_type` | keys into their databases (§3.10-3.13) | unset | as designed | clan `GT:95-185`; `GI:500-513` |
+| `house_unity`, `tax_slot_type`, `domicile_type` | keys into their databases (§3.9, §3.12) | unset | as designed | clan `GT:95-185`; `GI:500-513` |
 | `currency_levels_cap` | **Closed keys:** piety, prestige, influence, merit; can only lower (`GI:568-579`) | unset | if the resource is one of the four | mandala `GT:1087`, celestial `GT:911` |
-| `character_modifier`, `top_liege_character_modifier` | generic modifiers only (`GI:721-733`) | §3.15 | §3.15 | tribal `GT:213-228`, admin `GT:490-520` |
+| `character_modifier`, `top_liege_character_modifier` | generic modifiers only (`GI:721-733`) | §3.13 | §3.13 | tribal `GT:213-228`, admin `GT:490-520` |
 | `opinion_of_liege` (+ `_desc`), `opinion_of_suzerain`, `opinion_of_overlord` | script value | unset | the vassal model's opinion hook | `GI:516-566`; clan uses `opinion_of_liege` (research 02 §6) |
-| `ai = { }`, `grant_vassal_ai_will_do`, `possible_grant_vassal_governments`, `ai_ruler_desired_*`, `ai_can_reassign_council_positions` | `ai` keys **closed** (`GI:593-634`; **`use_great_projects` rejected by the 1.20 parser**) | §3.16 | §3.16 | feudal `GT:24-26, 40-43` |
+| `ai = { }`, `grant_vassal_ai_will_do`, `possible_grant_vassal_governments`, `ai_ruler_desired_*`, `ai_can_reassign_council_positions` | `ai` keys **closed** (`GI:593-634`; **`use_great_projects` rejected by the 1.20 parser**) | §3.14 | §3.14 | feudal `GT:24-26, 40-43` |
 | `can_get_government`, `fallback`, `can_move_realm_capital` | trigger, int, trigger | §1 P7 | §1 P7 | `GI:348-380` |
 | `court_generate_commanders`, `court_generate_spouses` (rule), `generated_character_template`, `supply_limit_mult_for_others`, `prestige_opinion_override`, `compatible_government_type_succession`, `blocked_subject_courts`, `max_dread` | various | unset | only with a stated reason | `GI:402-461, 581-586`; `max_dread` nomad `GT:665` (vanilla-only field) |
 | `primary_heritages`, `preferred_religions` | culture/religion keys | **never** (project: map-agnostic, §4) | — | clan `GT:95-185` |
@@ -164,7 +164,7 @@ Vanilla's own comment says "use flags instead of has_government for moddability"
 | `government_can_raid_rule` | raiding (tribal; v1 rejected it for the Cartel) | — |
 | `cannot_be_vassal_or_liege` | fences the ruler out of all subject relations (mercenary `GT:344`, adventurer `GT:619`, Unclaimed) | — |
 
-Flags read by the GUI are a fixed set (§3.17). A new mod flag gets no GUI.
+Flags read by the GUI are a fixed set (§3.15). A new mod flag gets no GUI.
 
 ### 3.3 The contract group and contracts
 **Paths:** `common/subject_contracts/groups/eotg_<…>_contract_groups.txt`, `common/subject_contracts/contracts/eotg_<…>_obligations.txt`. **Spec:** `V/common/subject_contracts/contracts/_subject_contracts.info`.
@@ -179,7 +179,7 @@ Flags read by the GUI are a fixed set (§3.17). A new mod flag gets no GUI.
   - Per-government tax and levy modifiers (`<g>_government_tax_contribution_*`) are code-generated only for governments in `GOVERNMENT_TYPES` (P6). Vanilla declares feudal's and clan's in `V/common/modifier_definition_formats/00_government_definitions.txt:5-36, 142-176`.
   - The modify-contract interactions show for any government except admin and nomad (`V/common/character_interactions/00_modifiy_vassal_contract.txt:15-24, 327-337`).
   - **Tributary contracts are picked by the suzerain's government in a hard-coded branch list.** A mod government falls to the final `else`, `tributary_subjugated` (`V/common/scripted_effects/00_interaction_effects.txt:2981-2986`; `subject_contract_groups.txt:103-115`, `suzerain_heir_succession = no`). An own tributary group needs a key-level override of that effect (see `docs/pitfalls.md` §16 for the procedure).
-- **Loc:** group `<grp>`, `<grp>_desc`; each contract; each level `<level>` and `<level>_short` (§3.18).
+- **Loc:** group `<grp>`, `<grp>_desc`; each contract; each level `<level>` and `<level>_short` (§3.16).
 
 ### 3.4 Realm law groups
 - **Min:** reuse the crown-authority group through `government_uses_crown_authority` (§3.2).
@@ -247,7 +247,14 @@ Title succession laws list feudal, clan and tribal (`V/common/laws/01_title_succ
 - **Path:** `common/domiciles/types/` and `common/domiciles/buildings/` (not yet in the CLAUDE.md placement list). Field `domicile_type` (`GI:508-513`).
 - Vanilla types: camp (`00_domicile_types.txt:1`), estate (`:1032`), yurt (`:1955`), east_asian_estate (`:2101`), japanese_manor (`10_tgp_japan_domicile_types.txt:1`).
 - **Open:** the type key, slots and buildings. **Closed:** the resource booleans (only `herd`, `provisions`, `culture_and_faith`).
-- **Hard-coded GUI:** `gui/window_domicile.gui:283-558` tests the government type **by name** (celestial, meritocratic, nomad, japan_*). A new government's domicile may render in a default or broken layout **[engine, unverified]**. Ask eotg-vanilla-scout and test in game before committing.
+- **GUI (answered, §8.3):** `gui/window_domicile.gui` tests the government **by name** only to pick the Asian or Western art set:
+  - frame `:283/:295`;
+  - header `:377/:445`;
+  - the other pairs `:549/:558`, `:646/:654`, `:2119/:2127`.
+
+  **An unlisted government falls into the Western branch** and takes its icon, illustration and name from its domicile type, so the window doesn't break. A mod government with `mechanic_type = nomad` gets mixed chrome, because `:283` checks the mechanic while `:377+` check the name. The Asian frame would need a `window_domicile.gui` override, so don't aim for it.
+- **Pitfall:** when a domicile is created by `create_nomad_title`, its line of succession is reported to appear for a custom government only if the government has `uses_county_fertility = yes` (forum bug report, §8.3). Test succession in any created domicile (T13).
+- A new domicile type needs its own `icon`, `illustration` and `map_pin_texture` (shape: camp, `00_domicile_types.txt:1`; spec `_domicile_types.info`).
 - Recommend a domicile only when the core verb is "move" or "estate" (Q1), or when herd or provisions is the chosen currency.
 
 ### 3.10 Situation (optional)
@@ -262,11 +269,11 @@ Title succession laws list feudal, clan and tribal (`V/common/laws/01_title_succ
   - a character variable `eotg_<gov>_<resource>`, set on every ruler of the government at every tier;
   - **one** change effect, `eotg_<gov>_change_<resource>_effect`, that clamps the value (no other code writes it);
   - a script value for derived numbers;
-  - band modifiers or a customizable loc for display (§3.17);
+  - display through the §3.15 default: a scaled character modifier plus a story-cycle `basic_counter`;
   - `ai_will_do` terms that read it;
   - initialization in `eotg_gov_on_game_start` and `on_government_change`;
   - teardown on exit.
-- **Min:** the variable, the change effect, the init and teardown hooks, and one display surface.
+- **Min:** the variable, the change effect, the init and teardown hooks, and the scaled modifier (display layer 1, §3.15).
 - **Full:** at least two sources and two sinks the player chooses between, a level or band ladder, and a read in a contract or law.
 
 ### 3.12 House unity, tax slots and house aspirations (only if used)
@@ -300,17 +307,28 @@ Title succession laws list feudal, clan and tribal (`V/common/laws/01_title_succ
   - the map-mode colour (`color`, `realm_mask_*`);
   - the law window;
   - the contract modify window, through `modify_contract_layout` or the default;
-  - rank names (flavourization, §3.19);
+  - rank names (flavourization, §3.18);
   - modifiers in the character window (research 02 §8).
 - **Not free:**
   - `HasGovernmentFlag` branches in GUI read only vanilla flags (`government_has_influence`, `_has_treasury`, `_is_tribal`, `_is_theocracy`, `_is_ecclesiastical`, `_is_herder`, `_is_mandala`);
   - `IsAdministrativeRuler` drives the admin-only windows (`window_government_administration.gui`, `window_admin_vassal_detail.gui`, `window_title_appointment.gui`, `window_treasury_budget_change.gui`);
-  - `window_domicile.gui:283-558` branches by government name;
-  - a scripted resource needs a `scripted_gui` plus a `.gui` widget, or a display workaround.
-- **The mod ships no `gui/` folder and no `common/scripted_guis/`.** Adding either is an owner decision and a new placement-table entry.
-- **Workarounds without GUI:**
-  - band modifiers whose names carry the band (Void Corruption precedent);
-  - the value printed in decision and event desc loc through `GetVariable`. Confirm the exact loc function with eotg-vanilla-scout [inferred].
+  - `window_domicile.gui` branches by government name, cosmetically (§3.9);
+  - the top-bar influence widget keys on `HasMechanic('administrative')` (`V/gui/hud.gui:7025`);
+  - radiance's HUD button binds to engine data (`Character.GetRadianceBreakdown`, `V/gui/hud.gui:3507-3540`), not to a script value, so it isn't a pattern to copy.
+- **Displaying a scripted resource: the ladder, least invasive first.** Use as many layers as the design needs, from the top down.
+  - **The default is layers 1 + 4, with no `gui/` files.** This settles the "the mod ships no `gui/` folder" question with a default.
+  - Layer 5 is the opt-in upgrade and needs an owner decision.
+
+| # | Layer | How | Precedent | Cost |
+|---|---|---|---|---|
+| 1 | **Scaled character modifier** (default) | A static modifier, added on entry, carrying `scale = { value = <script value> desc = <loc> display_mode = scaled }`. The character window's modifier row and its tooltip show the live value. | `V/common/modifiers/00_court_position_modifiers.txt:138-141`, `00_diarchy_modifiers.txt:159` | None beyond one modifier, one script value and one icon (modifier art, 60 × 60). |
+| 2 | **Loc that prints the value** | `[GetPlayer.MakeScope.Var('eotg_<gov>_<res>').GetValue\|0]` or `[Character.MakeScope.Var(...)]` in decision descs and tooltips. A decision whose desc shows the value and its thresholds works as a pseudo-panel. `ScriptValue` in loc is global only (`EmptyScope.ScriptValue`). | `V/localization/english/activities/coronation_activity_l_english.yml:675-677, 705`; `modifiers/modifiers_l_english.yml:1368` | None |
+| 3 | **Customizable loc bands** | Text per band ("Strong", "Shaky") in `common/customizable_localization/`, read from the variable | Already in this mod's placement table | None |
+| 4 | **Visible story cycle with a `basic_counter`** (default) | One `visible = yes` story per ruler of the government, with `visualization = { basic_counter = { variable … min max label } }`. **The variable must live on the story scope**, so either the change effect writes the story's copy or the story is the sole owner of the value. | `_story_cycles.info:23, 58-110`; `V/common/story_cycles/book_translation_story_cycle.txt:2, 10-14`. This mod's `common/story_cycles/eotg_aug_kingpin_story.txt:46-55` already uses `visible`, `icon`, `background` and `visualization`. | Low. Tiger reports the 1.20 story fields, which are known benign (CLAUDE.md). |
+| 5 | **`gui/scripted_widgets/`** (opt-in) | A text file mapping `gui/eotg_<x>.gui = eotg_<widget>`. The engine creates the widget at map load without editing any vanilla `.gui`, and "multiple mods can load their own widgets". Pair it with a `common/scripted_guis/` entry for visibility (the government gate). | `V/gui/scripted_widgets/_scripted_widgets.info`; wiki https://ck3.paradoxwikis.com/Interface | Medium: new `gui/` and `scripted_guis/` placement entries, widget art, and a risk of overlapping the outliner. |
+| 6 | **`hud.gui` / `window_character.gui` override** (last resort) | Override the file or inject a type | Wiki Interface page | High: a wholesale override of vanilla UI, re-diffed every patch (`docs/pitfalls.md` §2) |
+
+- Vanilla `scripted_gui` examples are only visibility and validity gates (`V/common/scripted_guis/pam_scripted_guis.txt:2-8`). None shows a value, so layer 5 is new ground for this project.
 
 ### 3.16 Loc keys (full list)
 **Path:** `localization/english/eotg_<gov>_l_english.yml`, UTF-8 with exactly one BOM, Canadian English, bare `[x.GetName]`. Key shapes copy `V/localization/english/government_l_english.yml` (feudal `:2-7`).
@@ -327,9 +345,9 @@ Title succession laws list feudal, clan and tribal (`V/common/laws/01_title_succ
 | per law: `<law>`, `<law>_subname`, `<law>_effects` | shape `succession_laws_l_english.yml:14-16` |
 | per contract group: `<grp>`, `<grp>_desc` | |
 | per contract: `<contract>`; per level `<level>`, `<level>_short` | shape `feudal_government_levies` |
-| flavourization keys (§3.19) | one per entry |
+| flavourization keys (§3.18) | one per entry |
 | knight term keys (§3.21) | 8 per term |
-| decisions, interactions, resource band modifiers, events | `_t`/`_desc`/`_a` per project convention; `eotg_<ns>_NNNN_*` |
+| decisions, interactions, the scaled resource modifier (`<mod>`, `<mod>_desc`, the `scale.desc` key), the story-cycle counter label, events | `_t`/`_desc`/`_a` per project convention; `eotg_<ns>_NNNN_*` |
 
 **Icon:**
 - `gfx/interface/icons/government_types/<g>.dds`, 70 × 70 with transparency;
@@ -340,7 +358,13 @@ Title succession laws list feudal, clan and tribal (`V/common/laws/01_title_succ
 ### 3.17 Text icons
 - Vanilla defines them in `gui/texticons.gui` (admin `:4647`) as `government_type_<x>`.
 - **Min:** reuse a vanilla text icon in `<g>_with_icon` (precedent: `@government_type_herder!` for Unclaimed). Confirm the icon key exists.
-- **Full:** an own `government_type_eotg_<gov>` text icon. Per the art check the same 70 × 70 image serves. It needs a mod `.gui` file, and whether a mod can add text icons without overriding vanilla's `texticons.gui` is **[inferred, ask eotg-vanilla-scout]**. Never `replace_path` `gui/`.
+- **Full (answered, §8.2):** an own text icon in **the mod's own `gui/eotg_texticons.gui`**, holding only `texticon = { }` blocks.
+  - Vanilla already splits text icons across several files (`texticons.gui`, `texticons_legitimacy.gui`, `texticons_religion.gui`), so the engine merges them.
+  - **Never name a mod file `texticons.gui`.** The same path replaces vanilla's whole file.
+  - Copy the shape of `V/gui/texticons.gui:4704-4711`:
+    `texticon = { icon = government_type_eotg_<gov> iconsize = { texture = "gfx/interface/icons/government_types/eotg_<gov>_government.dds" size = { 28 28 } offset = { 0 6 } fontsize = 16 } }`
+  - `<g>_with_icon` then uses `@government_type_eotg_<gov>!`. Per the art check, the same 70 × 70 image serves.
+  - `gui/` needs a placement-table entry. Never `replace_path` `gui/`. Confirm in game (T12).
 
 ### 3.18 Flavourization
 - **Path:** `common/flavorization/eotg_<…>_flavorization.txt`. **Shape:** `V/common/flavorization/00_title_holders.txt` (`count_feudal_male` `:8518-8525`, `county_feudal` `:8534-8539`, republic `top_liege = no` `:3415-3426`, admin `priority = 50` `:10419-10428`). Field spec: skill `reference/common/flavorization/_flavourization.info`.
@@ -418,6 +442,9 @@ Covered by P6. Add the key to **both** define files in the same commit, and re-d
 | T8 | **50-year AI health.** No ruler without a valid succession law, no permanent bankruptcy, no law churn. The resource stays inside its clamp and moves both ways. | yes |
 | T9 | **Surfaces.** Rank names (independent top rank at any tier), the knight term in the Knights tab and in lowercase, plural and possessive lines, the map colour, the icon, the text icon, and the resource display. | yes |
 | T10 | **Save compatibility.** Save in year 1, load the save after a no-op rebuild, and confirm the government, law and resource survive. After any change to the government definition, record whether old saves load. | yes / recorded |
+| T11 | **Influence on a non-admin government** (only if Q2 picks influence). Give a test government `government_has_influence`, no administrative `mechanic_type`, and a `monthly_influence = 1` modifier. After 3 months, record: (a) the top bar (expected absent, `hud.gui:7025`); (b) the character-window influence row; (c) the influence value in the character debug view; (d) whether `change_influence` and `influence >= X` work and an influence-cost interaction is usable; (e) error.log. | Recorded. Influence is usable only if (b)–(d) pass. |
+| T12 | **Custom text icon.** Ship `gui/eotg_texticons.gui` with one `government_type_eotg_<gov>` block and use it in `<g>_with_icon`. It renders in the character window and in a tooltip; vanilla `@gold_icon!` and `@government_type_feudal!` still render; error.log has no texticon line. | yes |
+| T13 | **Resource display and domicile** (where used). The scaled modifier shows the live value and moves when the change effect runs, and the story-cycle `basic_counter` matches it. If a domicile is used: the window opens in the Western frame with the type's icon and illustration, and the domicile shows a line of succession after the holder dies. | yes |
 
 ---
 
@@ -471,7 +498,7 @@ All four are **playable reskins of feudal** by this template's definition. The G
 
 **Corporation**
 1. **Succession contradicts the fiction.** A board-run state passes by single-heir inheritance. Recommendation: the G2 P2 elective title law, with electors limited to the ruler's dynasty and house (P1-safe), and board influence as vote weight.
-2. **No resource.** Run the influence probe (`governments_v2.md` §14.5) first. If influence accrues without the admin mechanic, it gives UI for free; if not, use a scripted variable with band modifiers.
+2. **No resource.** Influence on a non-admin government gets no top-bar widget (§8.1), so it isn't "UI for free". Recommendation: the scripted `eotg_corp_board_influence` with the §3.15 default display. Run T11 only if the owner still wants vanilla influence.
 3. **No core verb or decisions** ("deals"). Recommendation: one vassal-tier and one top-tier decision that move `eotg_corp_board_influence`.
 4. The city-primary shape is unverified (V-G17).
 
@@ -490,7 +517,7 @@ All four are **playable reskins of feudal** by this template's definition. The G
 **Cross-cutting:**
 - none of the four has entry or exit decisions, `grant_vassal_ai_will_do`, `opinion_of_liege` or real art;
 - the whole in-game V-G list (CB-49) is still unrun, so every "met" for P3, P5 and T1 is unproven;
-- the mod has no GUI surface for any scripted resource. Decide on band modifiers versus a `scripted_gui` before G2 P1.
+- no resource display exists yet. The §3.15 default (a scaled modifier plus a story-cycle counter) needs no GUI, so G2 P1 can start without a GUI decision.
 
 ---
 
@@ -510,12 +537,14 @@ One paragraph. Fiction in one sentence; who holds it at 866 (cite dated lore, ne
 ## 2. Design answers
 Q1 core verb:            "A ruler of X spends their time ___ to get ___."
 Q2 signature resource:   key ______  type [scripted var | piety | prestige | dread | influence* | other*]  range __
-                         sources: 1.__ 2.__   sinks: 1.__ 2.__   display surface: ______   (*probe first)
+                         sources: 1.__ 2.__   sinks: 1.__ 2.__   (*probe first: influence = T11)
+                         display (§3.15 ladder): [x] 1 scaled modifier  [x] 4 story-cycle basic_counter  [ ] 2 loc  [ ] 3 bands  [ ] 5 scripted_widget*  (*owner decision)
 Q3 vassal model:         [feudal-shaped trees | resource-reading obligation | tributaries | other]  opinion_of_liege? __
 Q4 succession:           [own single heir | own partition | elective (electors: __) ]  fits fiction? __
 Q5 entry:  ______  exit: ______  forced exit (land loss / tier drop / conquest): ______  resource on exit: ______
 Q6 AI:     gains resource by __; spends by __; grant weight __; bankruptcy guard __
-Q7 UI:     free surfaces used: __ ; new GUI needed? [no | yes, owner decision ref __]
+Q7 UI:     free surfaces used: __ ; text icon: [borrowed @government_type___! | own in gui/eotg_texticons.gui]
+           new GUI beyond the default? [no | scripted_widget, owner decision ref __]
 
 ## 3. Identifier table
 | Type | Key | Owner |
@@ -527,6 +556,7 @@ Q7 UI:     free surfaces used: __ ; new GUI needed? [no | yes, owner decision re
 | succession law(s) | eotg_<gov>_succession_law | scripter |
 | law group (opt.) | eotg_<gov>_<axis> | scripter |
 | resource variable / change effect | eotg_<gov>_<res> / eotg_<gov>_change_<res>_effect | scripter |
+| resource display | modifier eotg_<gov>_<res>_display (scaled) + script value eotg_<gov>_<res>_value; story cycle eotg_<gov>_<res>_story (basic_counter) | scripter / localizer / human art (modifier icon) |
 | role triggers | eotg_<gov>_role_top, _county, _duchy, _kingdom | scripter |
 | knight trigger / term | eotg_gov_knight_realm_is_<gov> / eotg_knight_<term> (owner ruling) | scripter / localizer |
 | flavourization | eotg_<tier>_<gov>, eotg_<gov>_<tier>_<gender>, eotg_<gov>_top_<tier>_<gender> | scripter / localizer |
@@ -550,7 +580,7 @@ GOVERNMENT_TYPES: both define files.
 ## 9. Lore constraints   (canon facts, names banned, Canadian English, B2 list if criminal)
 
 ## 10. Definition of done
-Static §5.1 items 1-7.  In game T1-T10 with expected results.  Resource moves in >= N events/decisions.
+Static §5.1 items 1-7.  In game T1-T10 (+ T11-T13 where used) with expected results.  Resource moves in >= N events/decisions.
 Gap table row for this government (§6 columns) all "met" or "deferred with reason".
 
 ## 11. Deferred   (item | why | trigger to revisit)
@@ -561,11 +591,65 @@ Gap table row for this government (§6 columns) all "met" or "deferred with reas
 
 ---
 
+## 8. Engine questions: answers (2026-10-11)
+
+Sources:
+- `govresearch/05_engine_questions_web.md` (web);
+- `govresearch/06_engine_questions_files.md` (vanilla files).
+
+Online coverage of all four questions is thin. No wiki page, forum thread or mod repo addresses them directly, so the vanilla files are the main evidence. Confidence levels: **confirmed** (read in vanilla files), **likely** (strong indirect evidence), **unknown** (needs the in-game test named).
+
+### 8.1 Does influence work on a government without `mechanic_type = administrative`?
+| Part | Answer | Confidence | Evidence |
+|---|---|---|---|
+| Vanilla precedent | None. All five governments with `government_has_influence` are `mechanic_type = administrative`. | confirmed | `GT:530` (admin, mechanic `:550`), `:884` (celestial, `:824`), `:1199` (steppe_admin, `:1132`), `:1329` (meritocratic, `:1265`), `JT:72` (japan_administrative, `:21`). Mandala and japan_feudal have no influence flag (`GT:1069-1081`, `JT:156-165`). |
+| Top-bar (HUD) widget | **Hidden.** It is gated on the mechanic, not the flag. | confirmed | `V/gui/hud.gui:7022-7025`: `visible = "[GetPlayer.GetGovernment.HasMechanic( 'administrative' )]"` |
+| Character window, ledger | Shown. These are gated on the flag. | confirmed | `V/gui/window_character.gui:5570, 5576`; `V/gui/window_ledger.gui:6621` (`HasGovernmentFlag( 'government_has_influence' )`) |
+| Script checks | They work. About 60 interaction, CB and activity uses read the flag; buildings use `parameter = government_has_influence`. | confirmed (they read the flag) | `V/common/buildings/00_standard_economy_buildings.txt:3453` onward |
+| Monthly gain through `monthly_influence` | Probably accrues. It is a generic modifier (`V/common/modifiers/00_artifact_modifiers.txt:197`). | likely | research 05 §1 |
+| Spending; admin features (governorships, influence-cost interactions, influence AI) | Not known. | unknown | Web sources treat influence as admin-only: https://gamerant.com/ck3-roads-to-power-use-administrative-government-type-guide/, https://ck3.paradoxwikis.com/Meritocratic. No mod found doing it; the nearest is the Way of Crowns changelog (excerpt), https://steamcommunity.com/sharedfiles/filedetails/changelog/2975514448 |
+
+**Consequence for the template:** influence is not "UI for free". A non-admin government loses the top-bar readout, and restoring it means a `hud.gui` override. Q2 therefore defaults to a scripted currency. **The settling test is T11.**
+
+### 8.2 Can the mod add its own government text icons?
+- **Answer:** yes, in **the mod's own `gui/eotg_texticons.gui`**, holding only `texticon = { }` blocks. **Never name a file `texticons.gui`**: the same path replaces vanilla's whole file.
+- **Confidence: likely.** The vanilla evidence is strong, but no mod file was seen online.
+- **Evidence:**
+  - Vanilla spreads identical `texticon` blocks across six files (`gui/texticons.gui`, `texticons_legitimacy.gui`, `texticons_religion.gui`, `gui/shared/texticons_religion.gui`, `texticons_trigger.gui`, `texticons_ui.gui`), which implies the engine merges them.
+  - Shape to copy: `V/gui/texticons.gui:4704-4711` (`government_type_herder`, size `{ 28 28 }`, offset `{ 0 6 }`, fontsize 16). It is used as `@government_type_herder!` (`V/localization/english/government_l_english.yml:761`).
+  - There is no `common/` mechanism and no `_texticons.info`.
+  - Web: https://ck3.paradoxwikis.com/Localization (the `@icon!` syntax). A texticon frame-count mismatch logs an error at startup (excerpt): https://steamcommunity.com/sharedfiles/filedetails/comments/2785112407
+- **Settling test:** T12.
+
+### 8.3 How does `window_domicile.gui` handle a government it doesn't name?
+- **Answer:** it falls back to the **Western** frame, header and controls. The name branches only pick the Asian or Western art set. Icon, illustration and name come from the domicile type (`Domicile.GetType.GetIcon` `:66`, `GetIllustration` `:876`, `GetName` `:722`).
+- **Confidence: confirmed** by reading vanilla; not yet seen in game.
+- **Evidence:**
+  - `V/gui/window_domicile.gui`: frame `:283/:295`, header `:377/:445`, control pairs `:549/:558`, `:646/:654`, `:2119/:2127`.
+  - Each branch has a `Not(Or(...))` complement, so a frame is always visible.
+  - Mixed chrome for a mod government with `mechanic_type = nomad`: `:283` uses `IsNomad`, while `:377+` use `IsType('nomad_government')`.
+  - Domicile assets are picked by type (Roads to Power modding dev diary, excerpt): https://admin-forum.paradoxplaza.com/forum/developer-diary/dev-diary-156-modding-achievements.1702728
+- **Pitfall (likely):** a domicile created by `create_nomad_title` reportedly gets a line of succession only when the custom government has `uses_county_fertility = yes` (forum bug report, excerpt): https://admin-forum.paradoxplaza.com/forum/threads/the-create_nomad_title-effect-fails-to-create-a-domicile-line-of-succession-with-government-types-other-than-nomad_government.1889778
+- **Settling test:** T13 (domicile part).
+
+### 8.4 How can a scripted resource be shown without a custom GUI?
+- **Answer:** the §3.15 ladder. The default is a **scaled character modifier** plus a **visible story cycle with a `basic_counter`**. `gui/scripted_widgets/` is the opt-in upgrade, and a `hud.gui` override is the last resort.
+- **Confidence: confirmed** for each mechanism (vanilla precedent). No consensus online on what mods do. How prominently a story cycle displays is unknown, and T13 settles it.
+- **Evidence:**
+  - Scaled modifier: `V/common/modifiers/00_court_position_modifiers.txt:138-141`, `00_diarchy_modifiers.txt:159`.
+  - Loc reading a variable: `coronation_activity_l_english.yml:675-677, 705`. Global `ScriptValue`: `modifiers_l_english.yml:1368`. No vanilla modifier or trait desc prints a per-character numeric variable; the numeric cases are decision and trigger tooltips.
+  - Story cycle: `_story_cycles.info:23, 58-110`; `book_translation_story_cycle.txt:2, 10-14`. The variable lives on the story scope. Mod precedent: `common/story_cycles/eotg_aug_kingpin_story.txt:46-55`.
+  - Scripted widgets: `V/gui/scripted_widgets/_scripted_widgets.info` ("multiple mods can load their own widgets") and https://ck3.paradoxwikis.com/Interface. Overlap risk with other widgets (excerpt): https://steamcommunity.com/workshop/filedetails/discussion/2829316015/3838801919855095394
+  - Radiance can't be copied: its HUD binds to engine data (`V/gui/hud.gui:3507-3540`), and `mandala_radiance_value` is "USED IN CODE" (`tgp_mandala_values.txt:483-485`).
+- **Decision recorded by this template:** the "the mod ships no `gui/` folder" owner question has a default answer (layers 1 + 4, no `gui/`). Adding `gui/` (text icons, scripted widgets) is opt-in per government and needs a placement-table entry.
+
+---
+
 ### HANDOFF
 - status: done
-- next: none (orchestrator). The template is reference material. For G2 of the four governments, the next step is an eotg-vanilla-scout probe of the two open engine questions (influence without `mechanic_type = administrative`; whether a mod can add government text icons and how `window_domicile.gui` handles an unknown government), then an architect G2 spec.
+- next: none (orchestrator). The template is reference material. The engine questions are answered in §8, and the remaining unknowns are in-game tests T11–T13. Next for the four governments: an architect G2 spec built on the §3.15 default display.
 - ask: Record `docs/specs/government_template.md` as the required starting point for any new government spec. Run CB-49 (V-G1–V-G20) before G2 builds on the four.
 - files: docs/specs/government_template.md
 - needs-loc: none
 - needs-lore: none
-- needs-human: CB-49 in-game checks. Owner decisions: (1) a GUI surface for scripted resources (`gui/` + `scripted_guis/`) versus band modifiers; (2) whether the Corporation and Trade Oligarchy accept dynastic single-heir succession until G2 elective laws land; (3) the orchestrator adds the §4 item 9 folders to the CLAUDE.md placement list when first used.
+- needs-human: CB-49 in-game checks. Owner decisions: (1) settled by default (§3.15: a scaled modifier plus a story-cycle counter, no `gui/`); a `gui/scripted_widgets/` readout and `gui/eotg_texticons.gui` are opt-in and need placement entries; (2) whether the Corporation and Trade Oligarchy accept dynastic single-heir succession until G2 elective laws land; (3) the orchestrator adds the §4 item 9 folders to the CLAUDE.md placement list when first used.
