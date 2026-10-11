@@ -54,7 +54,7 @@ Known benign (Tiger predates the 1.19 religion folder rename): ~48 faith/religio
 - **`scope:target seems to be landed title`** (about 21 `warning(scopes)` in `eotg_augmentation_schemes.txt`, 2026-10-09). This appears in some Tiger runs and not others, and also on unmodified HEAD. It is Tiger's nondeterministic scope inference.
 - **`missing-item` on the `eotg_aug_policy_*` laws.** Tiger can't parse the 1.20 law-group split.
 - **The same law-split noise on the government succession laws** (`eotg_government_succession_laws.txt`, 2026-10-11): unknown-field / duplicate-item / exact-duplicate / missing-loc on `potential`, `can_have` and similar, plus `missing-item` "law not defined" in `eotg_government_effects.txt`.
-- **`allow_accolades` as an unknown field** in the government files. Vanilla uses it (`00_government_types.txt:11`), but it is missing from `.info`.
+- **`allow_accolades` as an unknown field** in the government files, including `eotg_unclaimed_government.txt`. Vanilla uses it (`00_government_types.txt:11`), but it is missing from `.info`.
 - ~~PX vocab `use_great_projects`~~ is NOT benign (2026-10-08). The 1.20 parser rejects it ("Unexpected token" in error.log) even though `_governments.info:630` documents it, so the field was removed. Lesson: a field that appears only in `.info` and in no vanilla file is not proof the game accepts it.
 - **Errors from the kinslayer path** (`add_kinslayer_trait_or_nothing_effect` → `00_secret_effects` / `00_religious_triggers`): `knows_doctrine` / `add_known_doctrine` (about 14), `rite` / `rite_has_parameter` (about 28), and strict-scopes warnings that `check_rite` / `check_rite_liege` are unset. Vanilla sets those scopes itself with `save_temporary_scope_as` (`00_religious_triggers.txt:389,397`).
 

@@ -8,6 +8,8 @@
 
 **Written without game files, Tiger or PX** (`docs/cloud_agent_prompt.md` §1). Engine facts carry a confidence (§1); anything not shown by the mod's own verified script is marked `# UNVERIFIED-VANILLA` in script and listed in §15.
 
+**Amended by [`frontier_v4.md`](frontier_v4.md) (2026-10-11):** the holy-order and faith pending variables are read with `?=` and fall through to the lapse branch (A11.2); the mercenary escort also lowers .034's weight (A11.3); the explore decision's AI is faster for claimed Unknown space (A2.1b). Where they disagree, v4 wins.
+
 **Size (as built):** 3 new events (.040, .041, .042; the cap was 6), 2 decisions (1 player, 1 debug), 3 county modifiers, 1 new integration hook, about 50 loc keys (51 after round 2). No gfx, no GUI, no story cycles.
 
 ---

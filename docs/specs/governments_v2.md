@@ -22,6 +22,8 @@ The work runs in two phases:
 
 ---
 
+> **Cross-reference (2026-10-11):** a finished Frontier's city or church System goes to a new local vassal unless the Region's holder is seated in that holding type ([`frontier_v4.md`](frontier_v4.md) A1). Corporation and Gob-Corp holders (city-primary) keep a new Port; PMC and Cartel holders (castle-primary) get a local vassal. Per-government local-ruler governments wait for G2 (v4 D4-4).
+
 ## 2. Signature resource
 
 **G1 has no flavour events**, so the rule that every flavour event moves the resource (invariant 5) has nothing to apply to yet. The resources are fixed here so that G2 content is built against them from its first event (v1 lesson 6). None of them is built in G1.

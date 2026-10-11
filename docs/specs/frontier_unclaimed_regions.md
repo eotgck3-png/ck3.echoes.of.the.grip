@@ -2,6 +2,8 @@
 
 **Author:** eotg-architect, 2026-10-06. **Status: design approved by the owner 2026-10-06 (see §D). Batches 1 and 2 built on branch `claude/frontier-unclaimed-cloud` (cloud, static, unvalidated); merged into v2-space-map (e356020). Build notes and deviations: §20.** Owner decision 2026-10-06, "Option B": Unsettled space has **no ruler**. The engine still needs a holder for every county, so each unclaimed county is held by a **passive placeholder**, which stands for the scattered people living there and is not a ruler. A ruler must **claim** the county before Establishing a Frontier there. An abandoned Frontier goes back to unclaimed. Unclaimed space is hard on armies passing through. Impassable or void provinces that are not counties stay scenery.
 
+**Amended by [`frontier_v4.md`](frontier_v4.md) (2026-10-11):** the release effect enforces UQ5 itself (A7.1); claim and placeholder replacement move every barony the old placeholder held, and the sweep dissolves enclaves (A7.2); a Raise Your Colours decision shares one cooldown variable with the interaction, which loses its `cooldown` field (A7.3); `eotg_unclaimed_defender_tt` is built inside the override (A7.4); AI claim gating and the `eotg_unclaimed_count` global (A2); V-U1 split into V-U1a (pulse probe) and V-U1b (lobby, with T14), and M2/M3 re-specified (A6). The §D owner decisions still bind; reopening UQ11 (lapse) is asked of the owner in v4 §13 H2. Coupling with Frontier is recorded in §21 below.
+
 **Supersedes:** [`frontier_v1.md`](frontier_v1.md) §2.3 option (a), *for unclaimed counties only*. Phase 1's owned-county Unsettled path (`eotg_frontier_mark_unsettled_effect` on a county someone already holds) stays as it is, as a separate case (§6.3).
 
 **Inputs:** the research in [`research/unclaimed_regions_vanilla_2026-10-06.md`](research/unclaimed_regions_vanilla_2026-10-06.md) (cited as *R§n*); [`docs/design/frontier_systems.md`](../design/frontier_systems.md) §3, §12, §13; [`frontier_v1.md`](frontier_v1.md) §R, §V, §2.5, §4; [`frontier_v2.md`](frontier_v2.md) §V; Phase 3a on `origin/claude/frontier-v3-cloud:docs/specs/frontier_v3.md` (unmerged). Vanilla is 1.20.0.3, `G` = the game root. I re-checked every vanilla citation below against the installed files during this session. Where I went beyond the research, the line says **(new)**.
@@ -602,6 +604,17 @@ Batch 1 and Batch 2 are built on `claude/frontier-unclaimed-cloud` (from Frontie
 10. **Placeholders and Phase 3a hooks:** an expedition to an Unclaimed Region fires `eotg_frontier_on_explored` with root = the placeholder, because Frontier hooks fire on the county holder. Listeners must not assume a real ruler there.
 11. **Test map:** c_aphion_seam and c_helios_shoal start unclaimed. They are adjacent, between them they border both big realms, and neither is anyone's only county. c_aphion_seam was listed among the development-10 counties for cybernetics §1c, but no ruler's gate read it.
 12. **eotg_lint:** a `governments` loc naming convention (`{key}`, `_adjective`, `_realm`, `_desc`, `_with_icon`), marked unverified, so L014 sees the government's loc.
+
+---
+
+## 21. Coupling with Frontier (accepted; [`frontier_v4.md`](frontier_v4.md) A10, 2026-10-11)
+
+Frontier's core reads Unclaimed in 17 places (`eotg_frontier_triggers.txt:41, 271-272, 288`; `eotg_frontier_effects.txt:691, 1715, 1795-1812`; `eotg_frontier_decisions.txt:515-516, 928, 971`; `eotg_frontier_on_actions.txt:32, 64`; `events/eotg_frontier_events.txt:907-908`), so Frontier does not load without the Unclaimed files. **This coupling is accepted:**
+- the owner made Unclaimed Frontier's "Option B" (2026-10-06), so the two ship as one feature;
+- re-routing through Unclaimed-defined seam triggers would still be a hard load dependency, so it would buy nothing;
+- design §2.1's list does not name Unclaimed, and its "custom claims system" line is met because Raise Your Colours leaves no CK3 claim (§D).
+
+**Rule from v4 on:** new Frontier → Unclaimed reads use variables and global variables only (`eotg_unclaimed_claimed`, `eotg_unclaimed_county`, `eotg_unclaimed_count`, the list `eotg_unclaimed_counties`), which degrade to "absent" if Unclaimed is removed. They never call Unclaimed's scripted triggers or effects. Unclaimed → Frontier calls are unrestricted (§1).
 
 ---
 

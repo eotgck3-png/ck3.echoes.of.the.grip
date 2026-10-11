@@ -2,6 +2,7 @@
 
 **Author:** cloud agent (architect role), 2026-10-04. **Status: owner rulings applied (2026-10-04, §R). Phase 1 is being built on the remaining defaults.** The questions still open are listed in [`frontier_v1_open_questions.md`](frontier_v1_open_questions.md).
 **Source of intent:** [`docs/design/frontier_systems.md`](../design/frontier_systems.md) (the owner's brief, cited below as *design §n*). This spec records the implementation decisions; the brief is not edited.
+**Amended by [`frontier_v4.md`](frontier_v4.md) (2026-10-11):** completion holdings (A1), AI weights and cap (A2), one flavour roll per ruler and delayed events (A3), war strain and the founder gap (A4), the .005 AI order (A5), legibility and sponsor value (A8), abandon development (A11). Where they disagree, v4 wins.
 **Taskboard:** CB-37. **Gate:** 3 (Systems), built as a **mod-exclusive system against the vanilla/temporary map** (`docs/agent_workflow.md` §5 rule 2). It is not blocked by Gate 1, and it is map-agnostic (§1).
 **Written without game files.** This was a cloud session with no vanilla 1.20 files, no Tiger and no PX. Every engine claim carries a confidence and a source in §0. Anything not confirmed by the mod's own verified v2 script is **UNVERIFIED-VANILLA** and appears in §16, "Verification list for the local session".
 
@@ -532,10 +533,10 @@ After that the county is a normal county. No Frontier code reads it again. Futur
 **`eotg_frontier.005` *The Frontier Falters*** offers (contextual, design §12 "a failed project may"):
 - **(a) Abandon:** `eotg_frontier_abandon_effect = { CAUSE = failed }`.
 - **(b) Continue under a new founder:** costs `minor_gold_value`; strain → 4; progress × 0.5; the founder is replaced by the best candidate.
-- **(c) Scale back to Settlement:** strain → 4; progress × 0.5; the type re-picked from the ones eligible. Shown only if another type is eligible.
+- **(c) Scale back to Settlement:** strain → 4; progress × 0.5; the type **switches to Settlement** (as built, §B5; the earlier "re-picked from the ones eligible" was stale, corrected by [`frontier_v4.md`](frontier_v4.md) A5). Shown when the type is not already Settlement.
 - **(d) Hand it to the sponsor's care:** only with a living sponsor who can pay twice; strain → 2; the sponsor pays a double payment. Design §12: "transfer sponsorship".
 
-**AI resolution, no event:** (d) if possible; else (b) if gold ≥ 2 × minor; else (a).
+**AI resolution, no event:** (d) if possible; else (b) if gold ≥ 2 × minor; else (a). The AI never picks (c). **Confirmed as intended by [`frontier_v4.md`](frontier_v4.md) A5**; the script's flat weights move to this order with `factor = 0` gates.
 
 **Abandonment** (`eotg_frontier_abandon_effect`, from .005, the Abandon decision or the debug flow):
 - `state = flag:abandoned`, `attempts +1`.

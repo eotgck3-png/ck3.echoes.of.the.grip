@@ -6,6 +6,8 @@
 
 **Written without game files.** As in Phase 1: no vanilla 1.20 files, no Tiger, no PX. Engine facts carry a confidence and a source (§1). Anything not used by the mod's own verified script is marked `# UNVERIFIED-VANILLA` in script and listed in §15.
 
+**Amended by [`frontier_v4.md`](frontier_v4.md) (2026-10-11):** the flavour roll (one per ruler per pulse, events delayed 1–120 days, A3); .034's weight also drops for a Garrison Post or escort (A11.3); the settlement legacies are renamed "Frontier Roots" in text, pending lore (A9); AI holders get silent rolls, partly closing D2-3 (A2.4); option depth for .031–.034 (stress rows and two duels). Where they disagree, v4 wins.
+
 **Size (as built):**
 - **Events:** 9 new (.020, .021, .030–.036). Seven are flavor events that share Phase 1's one roll and its 3-year cooldown, so a project still sees about the same number of prompts (§9.1).
 - **Decisions:** 2 new (Survey a Region, Build Frontier Infrastructure).
