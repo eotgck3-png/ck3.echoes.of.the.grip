@@ -21,6 +21,20 @@ So **3 of the 5 counties become Unclaimed**. The engine picks each judge's capit
 for Gobleno), so check the map on the first start (in-game check U2): each judge still holds one county. If c_tortoli is
 Gobleno's capital it stays his, still Unknown (owned-Unknown exploration).
 
+**What to look at for frontier_v4 batch 2 (2026-10-11).** Each row is a §10 check; the spec has the pass conditions.
+- **A1, Local Ruler (needs V8 first).** A Corsican count is normally feudal, seated in a castle. Finish a Settlement, Trade or
+  Religious Frontier there (the debug tick decision, plus console `add_county_modifier` or progress as the frontier test
+  plan does). The new System should go to a vassal of yours: the founder when they are your landless courtier (.004
+  names them), else the settlers' leader, a new factor (Trade) or the mission elder, with a republic or theocracy
+  government. A Military Frontier's castle stays yours. Repeat with the founder killed, imprisoned, or yourself as
+  founder: the created figure should hold it.
+- **A7.3, Raise Your Colours as a decision.** From a Corsican count: the decision should list exactly the Unclaimed
+  Sardinian Regions in reach, default to the most developed, and after one claim block a second for 5 years on both
+  the decision and the character interaction.
+- **A7.4.** Declare war on a Sardinian Unsworn holder: the CB list should say why you can't (`eotg_unclaimed_defender_tt`).
+- **A8.** Hover Invest, Build and Abandon on a Corsican Frontier: pace, time and strain lines in words, with no digits;
+  a cause line once strain is high.
+
 Install: the game's `Documents/Paradox Interactive/Crusader Kings III/mod/eotg_test_frontier_vanilla` is a **directory
 junction** to this folder (2026-10-11), so edits here are live. Do not copy the folder. To recreate the link (cmd):
 `mklink /J "<mod folder>\eotg_test_frontier_vanilla" "<repo>\docs\test_submods\frontier_vanilla"`, with

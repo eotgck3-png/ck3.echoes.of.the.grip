@@ -659,8 +659,9 @@ eotg_unclaimed_debug_readout_effect = {
 }
 
 # == Raise Your Colours (spec §8.3; Batch 2) ===================================
-# CHARACTER scope (the actor). $TARGET$: the Unclaimed county. The
-# interaction's on_accept. Pays gold and prestige, then moves the county (and
+# CHARACTER scope (the actor). $TARGET$: the Unclaimed county. Called by the
+# interaction's on_accept and the Raise Your Colours decision (frontier_v4.md
+# A7.3). Pays gold and prestige, then moves the county (and
 # its capital barony, V-U5) to the actor: type granted, no claim left behind
 # (the MPO creation pattern, R§5; under LAW AT 866 a claim is asserted under
 # the claimant's own law, not won from anyone). The bookkeeping runs from
@@ -702,6 +703,26 @@ eotg_unclaimed_claim_effect = {
     }
     resolve_title_and_vassal_change = scope:eotg_unclaimed_change
     scope:eotg_unclaimed_old_holder ?= { eotg_unclaimed_vanish_effect = yes }
+    # frontier_v4.md A7.3: THE cooldown authority for both paths (decision and
+    # interaction), set here and nowhere else; both read it through
+    # eotg_unclaimed_colours_ready. Hidden: the readers explain it.
+    hidden_effect = {
+        set_variable = {
+            name = eotg_unclaimed_colours_cd
+            value = yes
+            years = 5
+        }
+        # The worldwide AI throttle (spec §8.4), moved here from the
+        # interaction's on_accept so every path throttles
+        if = {
+            limit = { is_ai = yes }
+            set_global_variable = {
+                name = eotg_unclaimed_ai_gap
+                value = yes
+                days = eotg_unclaimed_ai_gap_days_value
+            }
+        }
+    }
 }
 
 # == Frontier hook listeners (spec §6; Batch 2) ================================

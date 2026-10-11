@@ -174,11 +174,14 @@ eotg_frontier_founder_bonus_value = {
     }
 }
 
+# frontier_v4.md A8.2: 8 pre-pace (was 6), +4 a year after the x0.5 pace.
+# Sponsored Settlement about 8.1 years, sponsored Research about 9.8: every
+# type in the owner's 8-10 band (not +10, which takes Settlement under it)
 eotg_frontier_sponsor_bonus_value = {
     value = 0
     if = {
         limit = { has_variable = eotg_frontier_sponsor_paid }
-        value = 6
+        value = 8
     }
 }
 
@@ -216,6 +219,21 @@ eotg_frontier_yearly_gain_value = {
 
 eotg_frontier_pace_value = {
     value = 0.5
+}
+
+# frontier_v4.md A8.1: years until Establishment reaches Settled at this
+# year's pace (county scope; a Frontier only). Read ONLY to choose a worded
+# band in eotg_frontier_legibility_tooltip_effect; never printed (frontier_v1
+# §R: players see consequences, never numbers). A gain under 1 counts as 1
+# here; the stalled band suppresses the time line anyway.
+eotg_frontier_years_left_value = {
+    value = 100
+    subtract = var:eotg_frontier_progress
+    divide = {
+        value = eotg_frontier_yearly_gain_value
+        min = 1
+    }
+    min = 0
 }
 
 # Strain at which the project falters (.005). Doubled with the pacing (0-4

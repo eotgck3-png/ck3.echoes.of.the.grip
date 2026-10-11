@@ -638,8 +638,12 @@ eotg_frontier.003 = {
 }
 
 # -- eotg_frontier.004 --------------------------------------------------------
-# No Longer a Frontier: completion. The new System always goes to the current
-# holder (ruling Q12); the options only decide how the founder is rewarded.
+# No Longer a Frontier: completion. Fired by eotg_frontier_tick_effect (step 4,
+# completion met). Who holds the new System follows frontier_v4.md A1 (owner
+# H1): a city or church goes to a Local Ruler as your vassal, the founder
+# first, unless your own seat is that holding type; a castle is yours. The
+# options only decide how the founder is rewarded; each shows the Local Ruler
+# line (eotg_frontier_local_ruler_tooltip_effect).
 eotg_frontier.004 = {
     type = character_event
     title = eotg_frontier.004.t
@@ -766,6 +770,8 @@ eotg_frontier.004 = {
         save_temporary_scope_value_as = { name = eotg_frontier_purse  value = minor_gold_value }
         remove_short_term_gold = scope:eotg_frontier_purse
         scope:eotg_frontier_founder = { add_gold = scope:eotg_frontier_purse }
+        # A1: before the completion runs, while the Region is still a Frontier
+        eotg_frontier_local_ruler_tooltip_effect = yes
         scope:eotg_frontier_county = { eotg_frontier_complete_effect = yes }
         custom_tooltip = eotg_frontier.004.complete_tt
         ai_chance = {
@@ -789,6 +795,8 @@ eotg_frontier.004 = {
         # (00_basic_values.txt:1000-1001)
         scope:eotg_frontier_founder = { add_prestige = minor_prestige_value }
         add_prestige = miniscule_prestige_value
+        # A1: before the completion runs, while the Region is still a Frontier
+        eotg_frontier_local_ruler_tooltip_effect = yes
         scope:eotg_frontier_county = { eotg_frontier_complete_effect = yes }
         custom_tooltip = eotg_frontier.004.complete_tt
         ai_chance = {
@@ -803,6 +811,8 @@ eotg_frontier.004 = {
         scope:eotg_frontier_county = {
             if = {
                 limit = { eotg_frontier_is_frontier = yes }
+                # A1: before the completion runs, while the Region is still a Frontier
+                eotg_frontier_local_ruler_tooltip_effect = yes
                 eotg_frontier_complete_effect = yes
                 custom_tooltip = eotg_frontier.004.complete_tt
             }

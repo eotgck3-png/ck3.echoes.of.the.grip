@@ -107,6 +107,8 @@ eotg_frontier_founder_can_rule = {
     eotg_frontier_has_valid_founder = yes            # alive, adult, not imprisoned, tied to the holder (:65-78)
     var:eotg_frontier_founder = {
         NOT = { this = $HOLDER$ }
+        NOT = { is_primary_heir_of = $HOLDER$ }        # orchestrator ruling 2026-10-11 (batch 2 QA 3)
+        NOT = { $HOLDER$ = { primary_spouse ?= prev } }
         eotg_is_unclaimed_folk = no
         eotg_is_unclaimed_holder = no
         OR = {
@@ -132,6 +134,7 @@ eotg_frontier_founder_can_rule = {
 | the holder | figure (or the holder, if seated in that type) | the ruling says "a founder who is not the holder" |
 | dead | figure | `is_alive` in `eotg_frontier_has_valid_founder` |
 | child or imprisoned | figure | the same validity trigger, as for strain (Q3) |
+| the holder's primary spouse or primary heir | figure | orchestrator ruling 2026-10-11 (batch 2 QA finding 3): otherwise the heir or spouse leaves court to become a city or church vassal. Vanilla form: `is_primary_heir_of` (`G/common/activities/activity_types/coronation.txt:3297`), `primary_spouse ?=` |
 | a courtier elsewhere (a vassal's court, another realm, a guest) | figure | vanilla grants only to the granter's own people (6060's `random_knight`, 8300's `random_vassal_or_below`). A grant to another ruler's courtier would pull them across courts without consent |
 | a direct vassal, capital the same holding type | **becomes the Local Ruler**; government unchanged | already a fit ruler for that holding; no "wrong holding type" |
 | a direct vassal, capital a different type | figure | 8300 changes a landed vassal's government only for AI feudal or clan counts (`hold_court_8300_vassal_trigger`, `is_ai = yes # Don't mess with a player's realm`). Recasting a founder's whole domain is a bigger change than this ruling asks for |
@@ -149,7 +152,7 @@ eotg_frontier_founder_can_rule = {
    - the row calls become:
      - Settlement and Trade: `eotg_frontier_build_holding_effect = { HOLDING = city_holding LOCAL_RULER = yes LOCAL_GOVERNMENT = republic_government }`;
      - Religious: `HOLDING = church_holding LOCAL_RULER = yes LOCAL_GOVERNMENT = theocracy_government`;
-     - Military: `HOLDING = castle_holding LOCAL_RULER = no LOCAL_GOVERNMENT = none`.
+     - Military: `HOLDING = castle_holding LOCAL_RULER = no LOCAL_GOVERNMENT = feudal_government`. **Build deviation (batch 2, 2026-10-11):** the spec first said `none`, but Tiger rejects an undefined government key in that slot. With `LOCAL_RULER = no` the grant branch never runs, so the value has no effect.
 2. `eotg_frontier_build_holding_effect` (`HOLDING`, `LOCAL_RULER`, `LOCAL_GOVERNMENT`): after the barony is saved, branch on:
    ```
    limit = {

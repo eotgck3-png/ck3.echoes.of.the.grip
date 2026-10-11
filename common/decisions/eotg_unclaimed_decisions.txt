@@ -1,8 +1,171 @@
 ﻿# -- eotg_unclaimed_decisions.txt ---------------------------------------------
 # Unclaimed Regions (docs/specs/frontier_unclaimed_regions.md §3.5, §12):
-# debug decisions only (debug_only = yes). Shape as
-# eotg_decision_frontier_debug_mark_unknown (eotg_frontier_decisions.txt).
+# Raise Your Colours (frontier_v4.md A7.3), then the debug decisions
+# (debug_only = yes; shape as eotg_decision_frontier_debug_mark_unknown in
+# eotg_frontier_decisions.txt).
 # -----------------------------------------------------------------------------
+
+# Raise Your Colours (frontier_v4.md A7.3): the claim interaction as a
+# decision, with a Region picker, so a claim does not depend on finding the
+# placeholder's portrait. Same reach, cost and effect as the interaction
+# (eotg_unclaimed_claim_interaction); the interaction is kept.
+# One cooldown for both paths: the actor variable eotg_unclaimed_colours_cd,
+# set only in eotg_unclaimed_claim_effect, read through
+# eotg_unclaimed_colours_ready (a vanilla decision `cooldown` would be per
+# path; 00_cultural_tradition_decisions.txt:141). Gold and prestige are paid
+# inside the effect, as the interaction does (no `cost` block).
+# Widget precedent: the expedition picker (eotg_frontier_decisions.txt,
+# eotg_decision_frontier_explore), which already lists in-reach Unclaimed
+# Regions; vanilla pam_decisions.txt:1395, 50_holy_site_decisions.txt:147.
+# LAW AT 866: the text never says a claim is filed, registered, recognized,
+# licensed or chartered, or that others must respect it.
+eotg_decision_unclaimed_raise_colours = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    # AI: OFF while V-U14 is open or passes (the interaction's AI is the live
+    # path). V-U14 FAILS: county 36, duchy and above 24 here, ai_potential
+    # below becomes { eotg_unclaimed_ai_may_claim = yes }, and the
+    # interaction's ai_frequency_by_tier goes to 0. Exactly one AI path live.
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0      # V-U14 FAILS: 36
+        duchy = 0       # V-U14 FAILS: 24
+        kingdom = 0     # V-U14 FAILS: 24
+        empire = 0      # V-U14 FAILS: 24
+        hegemony = 0    # V-U14 FAILS: 24
+    }
+
+    is_shown = {
+        eotg_unclaimed_can_claim = yes
+        any_in_global_list = {
+            variable = eotg_unclaimed_counties
+            eotg_unclaimed_in_reach = { ACTOR = root }
+        }
+    }
+
+    is_valid = {
+        custom_description = {
+            text = eotg_unclaimed_claim_cooldown_tt
+            eotg_unclaimed_colours_ready = yes
+        }
+        custom_description = {
+            text = eotg_unclaimed_claim_gold_tt
+            gold >= eotg_unclaimed_claim_gold_value
+        }
+        custom_description = {
+            text = eotg_unclaimed_claim_prestige_tt
+            prestige >= eotg_unclaimed_claim_prestige_value
+        }
+    }
+
+    is_valid_showing_failures_only = {
+        custom_description = {
+            text = eotg_decision_unclaimed_raise_colours_pick_tt
+            scope:selected_item ?= {
+                tier = tier_county
+                eotg_unclaimed_is_unclaimed = yes
+                holder ?= { eotg_is_unclaimed_holder = yes }
+                eotg_unclaimed_in_reach = { ACTOR = root }
+            }
+        }
+    }
+
+    # The Region picker. Items: the Unclaimed Regions within reach. Default
+    # and AI: the most developed.
+    widget = {
+        gui = "decision_view_widget_select_realm_county"
+        controller = select_scope_object
+
+        setup_items = {
+            every_in_global_list = {
+                variable = eotg_unclaimed_counties
+                limit = {
+                    holder ?= { eotg_is_unclaimed_holder = yes }
+                    eotg_unclaimed_in_reach = { ACTOR = scope:actor }
+                }
+                add_to_list = item_list
+            }
+        }
+
+        # UNVERIFIED-VANILLA: ordered_in_global_list with limit and order_by
+        # (as eotg_frontier_pick_expedition_target_effect; the mod verified
+        # any_in_global_list only)
+        default_item = {
+            ordered_in_global_list = {
+                variable = eotg_unclaimed_counties
+                limit = {
+                    holder ?= { eotg_is_unclaimed_holder = yes }
+                    eotg_unclaimed_in_reach = { ACTOR = scope:actor }
+                }
+                order_by = development_level
+                save_scope_as = selected_item
+            }
+        }
+
+        is_item_valid = {
+            custom_tooltip = {
+                text = eotg_decision_unclaimed_raise_colours_pick_tt
+                tier = tier_county
+                eotg_unclaimed_is_unclaimed = yes
+                holder ?= { eotg_is_unclaimed_holder = yes }
+                eotg_unclaimed_in_reach = { ACTOR = scope:actor }
+            }
+        }
+
+        ai_select_item = {
+            ordered_in_global_list = {
+                variable = eotg_unclaimed_counties
+                limit = {
+                    holder ?= { eotg_is_unclaimed_holder = yes }
+                    eotg_unclaimed_in_reach = { ACTOR = scope:actor }
+                }
+                order_by = development_level
+                save_scope_as = selected_item
+            }
+        }
+    }
+
+    effect = {
+        scope:selected_item ?= { save_scope_as = eotg_unclaimed_target }
+        if = {
+            limit = { exists = scope:eotg_unclaimed_target }
+            custom_tooltip = eotg_unclaimed_claim_effect_tt
+            custom_tooltip = eotg_unclaimed_claim_returns_tt
+            # Sets the shared cooldown and, for the AI, the worldwide gap
+            eotg_unclaimed_claim_effect = { TARGET = scope:eotg_unclaimed_target }
+        }
+    }
+
+    ai_potential = {
+        always = no     # V-U14 FAILS: eotg_unclaimed_ai_may_claim = yes
+    }
+    # As the interaction's (frontier_unclaimed_regions.md §8.4); live only
+    # once ai_potential is switched on
+    ai_will_do = {
+        base = 10
+        modifier = {
+            add = 10
+            has_trait = ambitious
+        }
+        modifier = {
+            add = 10
+            stewardship >= 12
+        }
+        modifier = {
+            add = -10
+            has_trait = content
+        }
+        modifier = {
+            add = -10
+            has_trait = lazy
+        }
+        modifier = {
+            factor = 0
+            is_at_war = yes
+        }
+    }
+}
 
 # Releases the taker's least-developed held county that is not their capital
 # (spec §11.3). Every release goes through eotg_unclaimed_release_effect.

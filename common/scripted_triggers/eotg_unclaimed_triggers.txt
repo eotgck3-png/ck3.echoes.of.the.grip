@@ -73,9 +73,17 @@ eotg_unclaimed_can_claim = {
     eotg_is_unclaimed_folk = no
 }
 
+# Character: the actor's Raise Your Colours cooldown has run out
+# (frontier_v4.md A7.3). The variable eotg_unclaimed_colours_cd (5 years) is
+# the one authority for the decision and the interaction alike, set only in
+# eotg_unclaimed_claim_effect.
+eotg_unclaimed_colours_ready = {
+    NOT = { has_variable = eotg_unclaimed_colours_cd }
+}
+
 # Character (an AI actor): the AI throttle (spec §8.4). Not a cooldown: the
-# interaction's own `cooldown` is the per-actor one; eotg_unclaimed_ai_gap is
-# the worldwide one, set only in the interaction's on_accept.
+# per-actor one is eotg_unclaimed_colours_ready; eotg_unclaimed_ai_gap is
+# the worldwide one, set only in eotg_unclaimed_claim_effect.
 # UNVERIFIED-VANILLA: domain_size / domain_limit compared as values.
 eotg_unclaimed_ai_may_claim = {
     is_at_war = no

@@ -1,0 +1,77 @@
+# Frontier v4 batch 2: loc keys the built script references (eotg-scripter, 2026-10-11).
+# Spec: docs/specs/frontier_v4.md §7 (batch-2 rows) and §8 (lore constraints).
+# Rules: UTF-8 with exactly one BOM, Canadian English, bare [x.GetName] (never [scope:x]),
+#   Region = county, System = barony, no numbers for progress or strain (frontier_v1.md §R),
+#   no "filed/registered/recognized/licensed/chartered" (LAW AT 866), no "mayor/bishop/charter/village",
+#   don't borrow vanilla's "Grant charter" (hold_court.8300.a), dynamic knight term.
+# Text after '=>' is the intended English (a guide; the localizer owns wording). The parenthesis after
+#   it says what the text must convey, true to the script.
+# Total keys: 27 new (26 in §7, 1 beyond it: the decision's _tooltip), plus 1 existing key to review.
+
+## localization/english/eotg_frontier_l_english.yml
+
+## A1: .004's Local Ruler line (eotg_frontier_local_ruler_tooltip_effect, called in .004 options a, b, c).
+## Shown only when a city (Settlement, Trade) or church (Religious) System will be built (a free slot
+## exists) and the holder's own seat is not that holding type. Not shown for Military (the castle is
+## the holder's), Mining, Research or Administrative (no new System), or when the holder keeps it.
+eotg_frontier.004.local_ruler_founder_tt => [eotg_frontier_founder.GetName] will hold the new System as your vassal. (The founder rules it under your law, keeping their own house, culture and faith. A landless founder takes a republic (city) or theocracy (church) government; a founder who is already your vassal keeps theirs. Scope eotg_frontier_founder is saved in .004's immediate.)
+eotg_frontier.004.local_ruler_tt => A local leader will hold the new System as your vassal. (Who it is depends on the type: the settlers' leader (Settlement), a new factor (Trade) or the mission elder (Religious). They take a republic or theocracy government and rule under your law. Don't name them: the factor does not exist yet when the tooltip shows.)
+
+## A8.1: the worded bands (eotg_frontier_legibility_tooltip_effect) on the Invest, Build and Abandon
+## decisions. Words only: never a number, a percentage or "N years". Each is one line in a list of up
+## to four (pace, time, strain, cause), so keep them short and parallel.
+## Pace line: the Region's yearly Establishment gain.
+eotg_frontier_band_stalled_tt => The work has stalled: nothing is moving it forward. (Gain under 1 a year. The time line is suppressed, so this line must stand alone and imply "no end in sight".)
+eotg_frontier_band_pace_slow_tt => The work goes slowly. (Gain low: below the typical unaided project.)
+eotg_frontier_band_pace_steady_tt => The work goes at a steady pace. (A typical project with no backer.)
+eotg_frontier_band_pace_fast_tt => The work goes quickly. (Typically a sponsored project.)
+## Time line: how much work remains at this pace. Not shown when stalled, or once the work is done (the
+## existing waiting line, below, takes its place).
+eotg_frontier_band_time_decade_tt => About a decade of work remains. (8 or more years at this pace; "about a decade" is a phrase, never "8 years".)
+eotg_frontier_band_time_years_tt => Some years of work remain. (3 to 7 years at this pace.)
+eotg_frontier_band_time_near_tt => The work is nearly done. (Under 3 years at this pace.)
+## Strain line (.002's bands: 4 and 6; .005 "the Frontier falters" fires at 8).
+eotg_frontier_band_strain_calm_tt => The settlers are holding up. (Low strain.)
+eotg_frontier_band_strain_strained_tt => The settlers are under strain. (Middling strain; nothing fails yet.)
+eotg_frontier_band_strain_breaking_tt => The settlers are near breaking point; the project could falter. (High strain, close to the failure event.)
+## Cause line: what weighs on it most recently (var:eotg_frontier_last_cause), shown only with the
+## strained or breaking line. Say the cause, not a remedy the script doesn't offer.
+eotg_frontier_band_cause_no_founder_tt => Nobody is leading the work. (The founder is dead, a child, imprisoned or gone from your realm; Appoint a Founder fixes it.)
+eotg_frontier_band_cause_low_control_tt => Your hold on the Region is weak. (Low county control.)
+eotg_frontier_band_cause_occupied_tt => The Region is occupied. (An enemy holds its capital.)
+eotg_frontier_band_cause_war_tt => War has reached the Region. (A war you lead, or hostile armies in the Region; since batch 1 a distant ally's war does not count.)
+eotg_frontier_band_cause_sponsor_lapsed_tt => The backer's money has stopped. (The sponsor withdrew, died or could not pay.)
+eotg_frontier_band_cause_danger_tt => Raiders and worse prey on a weakly held Region. (Dangerous trait, control below the project's floor, no Garrison Post, escort or Military project.)
+eotg_frontier_band_cause_hardship_tt => Hard choices have worn the settlers down. (Strain from event options and hard years.)
+
+## A8.3: toast to the sponsor when the Frontier they backed settles (eotg_frontier_reward_sponsor_effect).
+## Toast title only (no desc). Left icon: the sponsor; right icon: the Region. Scope eotg_frontier_county
+## is saved. The sponsor gets medium prestige; the holder thinks better of them (opinion, 10 years).
+eotg_frontier_toast_backing_settled => Your Backing Paid Off: [eotg_frontier_county.GetName] Is Settled (Convey: the Frontier you sponsored is settled, your name gains weight and its holder is grateful. Don't name the holder: it is a temporary scope.)
+
+## EXISTING KEY, review only: eotg_decision_frontier_invest_waiting_tt now also shows on Build and Abandon
+## (A8.1's time line when the work is done but a development or control floor is unmet). Its text says
+## "more money will not hurry that", which reads as Invest-only. Suggest a neutral re-text, e.g.
+## "This Frontier's work is done. It is waiting on the Region's development or your hold on it."
+
+## localization/english/eotg_unclaimed_l_english.yml
+
+## A7.3: the Raise Your Colours decision (eotg_decision_unclaimed_raise_colours,
+## common/decisions/eotg_unclaimed_decisions.txt). The four decision keys follow the frontier file's
+## decisions (name, _desc, _tooltip, _confirm). Same claim as the interaction: costs gold and prestige,
+## the Region becomes the taker's, no CK3 claim is left behind. The existing interaction keys
+## (eotg_unclaimed_claim_gold_tt, _prestige_tt, _effect_tt, _returns_tt) are reused unchanged.
+eotg_decision_unclaimed_raise_colours => Raise Your Colours
+eotg_decision_unclaimed_raise_colours_desc => An unclaimed Region lies within reach. Raise your colours over it and it is yours, for as long as you can hold it. Nobody else has to agree. (LAW AT 866, spec §D; never "claim filed/recognized".)
+# NEW beyond §7: decisions in this mod carry _tooltip (Tiger and PX ask for it)
+eotg_decision_unclaimed_raise_colours_tooltip => Take an unclaimed Region within reach under your flag.
+eotg_decision_unclaimed_raise_colours_confirm => Raise the colours
+eotg_decision_unclaimed_raise_colours_pick_tt => The chosen Region is unclaimed and within your reach (picker validity line; shape of eotg_decision_frontier_explore_pick_tt. Reach = it borders your lands or lies within reach of your capital, as eotg_unclaimed_claim_reach_tt.)
+## A7.3: the shared cooldown line (decision is_valid and interaction is_valid_showing_failures_only).
+## Written as the condition that must hold. The 5 years is a cooldown, not progress or strain, so a number is allowed.
+eotg_unclaimed_claim_cooldown_tt => You have not raised your colours over a Region in the last five years (One cooldown for the decision and the interaction alike: a claim by either blocks both.)
+
+## A7.4: the blocked-war line in the CB list (eotg_vanilla_overrides_triggers.txt, herders_and_tributary_constraints).
+## Mirrors vanilla's is_a_herder_defender_tt (interactions_l_english.yml:168). The scope is `defender`
+## (bare, as vanilla's). Points to Raise Your Colours, which exists as a decision and an interaction.
+eotg_unclaimed_defender_tt => [defender.GetShortUIName] is Unsworn and cannot be attacked.\nTo take their Region, use #V Raise Your Colours#!, as a decision or from their character.

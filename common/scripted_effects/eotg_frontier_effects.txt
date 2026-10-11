@@ -41,6 +41,57 @@ eotg_frontier_start_tooltip_effect = {
     }
 }
 
+# frontier_v4.md A1 item 4: .004's line on who will hold the new System, shown
+# only when the vassal path will run (a city or church type, a free slot, and
+# the holder's seat not that holding type; the same tests as
+# eotg_frontier_build_holding_effect). Founder first (H1): names the founder
+# when eotg_frontier_founder_can_rule allows it. One helper for .004's three
+# completing options (a, b, c), so the line is stated once. Any scope; root is
+# .004's root (the holder); reads scope:eotg_frontier_county.
+eotg_frontier_local_ruler_tooltip_effect = {
+    scope:eotg_frontier_county = {
+        if = {
+            limit = {
+                eotg_frontier_is_frontier = yes
+                any_county_province = {
+                    has_holding = no
+                    barony_cannot_construct_holding = no
+                }
+                OR = {
+                    var:eotg_frontier_type ?= flag:settlement
+                    var:eotg_frontier_type ?= flag:trade
+                }
+                root = { capital_province ?= { NOT = { has_holding_type = city_holding } } }
+            }
+            if = {
+                limit = { eotg_frontier_founder_can_rule = { HOLDING = city_holding  HOLDER = root } }
+                custom_tooltip = eotg_frontier.004.local_ruler_founder_tt
+            }
+            else = {
+                custom_tooltip = eotg_frontier.004.local_ruler_tt
+            }
+        }
+        else_if = {
+            limit = {
+                eotg_frontier_is_frontier = yes
+                any_county_province = {
+                    has_holding = no
+                    barony_cannot_construct_holding = no
+                }
+                var:eotg_frontier_type ?= flag:religious
+                root = { capital_province ?= { NOT = { has_holding_type = church_holding } } }
+            }
+            if = {
+                limit = { eotg_frontier_founder_can_rule = { HOLDING = church_holding  HOLDER = root } }
+                custom_tooltip = eotg_frontier.004.local_ruler_founder_tt
+            }
+            else = {
+                custom_tooltip = eotg_frontier.004.local_ruler_tt
+            }
+        }
+    }
+}
+
 # == Hooks (spec §7) ===========================================================
 # Saves the hook scopes from the county's own variables; clears a scope whose
 # variable is absent so no earlier Region's founder or sponsor leaks in (Q2).
@@ -505,6 +556,115 @@ eotg_frontier_ease_strain_effect = {
     clamp_variable = { name = eotg_frontier_strain  min = 0  max = 8 }
 }
 
+# == Legibility (frontier_v4.md A8.1) ==========================================
+# Worded bands for the Invest, Build and Abandon decisions: the pace, the time
+# left, the strain, and (strain 4 or more) what weighs on it. COUNTY scope (the
+# picked Region). Thresholds read the hidden values; every key prints words
+# only, never a number (frontier_v1.md §R). custom_tooltip lines inside
+# if/else_if, so only the true branch renders: the mod's verified pattern
+# (eotg_decision_frontier_invest, the waiting tooltip). Not in county modifier
+# descriptions (§12 D4-6).
+# Pace bands on the post-pace eotg_frontier_yearly_gain_value (G): under 1
+# stalled (no time line), under 6 slow, under 9 steady, else fast. A typical
+# bare project (G about 7) reads steady, a sponsored one (10-12) fast.
+# Time bands on eotg_frontier_years_left_value: 8 or more a decade, 3 or more
+# years, else near. Strain bands are .002's (4 and 6).
+eotg_frontier_legibility_tooltip_effect = {
+    if = {
+        limit = { eotg_frontier_is_frontier = yes }
+        # Pace and time
+        if = {
+            # Establishment is complete: the existing waiting line says what
+            # it waits on (a floor unmet). No pace or time line: neither is
+            # what holds it back, and a pace line would contradict the
+            # waiting line. With no floor unmet, completion is on its way.
+            limit = { var:eotg_frontier_progress >= 100 }
+            if = {
+                limit = {
+                    OR = {
+                        has_county_modifier = eotg_frontier_mod_waiting_development
+                        has_county_modifier = eotg_frontier_mod_waiting_control
+                    }
+                }
+                custom_tooltip = eotg_decision_frontier_invest_waiting_tt
+            }
+        }
+        else_if = {
+            limit = { eotg_frontier_yearly_gain_value < 1 }
+            custom_tooltip = eotg_frontier_band_stalled_tt
+        }
+        else = {
+            if = {
+                limit = { eotg_frontier_yearly_gain_value < 6 }
+                custom_tooltip = eotg_frontier_band_pace_slow_tt
+            }
+            else_if = {
+                limit = { eotg_frontier_yearly_gain_value < 9 }
+                custom_tooltip = eotg_frontier_band_pace_steady_tt
+            }
+            else = {
+                custom_tooltip = eotg_frontier_band_pace_fast_tt
+            }
+            if = {
+                limit = { eotg_frontier_years_left_value >= 8 }
+                custom_tooltip = eotg_frontier_band_time_decade_tt
+            }
+            else_if = {
+                limit = { eotg_frontier_years_left_value >= 3 }
+                custom_tooltip = eotg_frontier_band_time_years_tt
+            }
+            else = {
+                custom_tooltip = eotg_frontier_band_time_near_tt
+            }
+        }
+        # Strain
+        if = {
+            limit = { var:eotg_frontier_strain >= 6 }
+            custom_tooltip = eotg_frontier_band_strain_breaking_tt
+        }
+        else_if = {
+            limit = { var:eotg_frontier_strain >= 4 }
+            custom_tooltip = eotg_frontier_band_strain_strained_tt
+        }
+        else = {
+            custom_tooltip = eotg_frontier_band_strain_calm_tt
+        }
+        # What weighs on it: the latest cause (the seven CAUSE values of
+        # eotg_frontier_add_strain_effect), only when strain is 4 or more
+        if = {
+            limit = { var:eotg_frontier_strain >= 4 }
+            if = {
+                limit = { var:eotg_frontier_last_cause ?= flag:no_founder }
+                custom_tooltip = eotg_frontier_band_cause_no_founder_tt
+            }
+            else_if = {
+                limit = { var:eotg_frontier_last_cause ?= flag:low_control }
+                custom_tooltip = eotg_frontier_band_cause_low_control_tt
+            }
+            else_if = {
+                limit = { var:eotg_frontier_last_cause ?= flag:occupied }
+                custom_tooltip = eotg_frontier_band_cause_occupied_tt
+            }
+            else_if = {
+                limit = { var:eotg_frontier_last_cause ?= flag:war }
+                custom_tooltip = eotg_frontier_band_cause_war_tt
+            }
+            else_if = {
+                limit = { var:eotg_frontier_last_cause ?= flag:sponsor_lapsed }
+                custom_tooltip = eotg_frontier_band_cause_sponsor_lapsed_tt
+            }
+            else_if = {
+                limit = { var:eotg_frontier_last_cause ?= flag:danger }
+                custom_tooltip = eotg_frontier_band_cause_danger_tt
+            }
+            else_if = {
+                limit = { var:eotg_frontier_last_cause ?= flag:hardship }
+                custom_tooltip = eotg_frontier_band_cause_hardship_tt
+            }
+        }
+    }
+}
+
 # == The yearly tick (spec §6.1) ===============================================
 # Called only by eotg_on_yearly_frontier_tick, which owns the cooldown (the
 # calendar-year marker eotg_frontier_tick_year), and by the debug tick.
@@ -881,25 +1041,47 @@ eotg_frontier_find_sponsor_candidate_effect = {
 }
 
 # == Completion → Settled (spec §5.3, §6.5) ===================================
-# The new System always goes to the current holder (ruling Q12). Guarded
-# (Q-B1): does nothing unless the Region is still a Frontier. The
-# development_changed hook fires only where development actually changed (Q8).
+# Who holds the new System (frontier_v4.md A1, owner H1; narrows ruling Q12):
+# a castle (Military) always goes to the holder; a city (Settlement, Trade) or
+# a church (Religious) goes to a LOCAL RULER as the holder's vassal, unless the
+# holder's own seat is already that holding type. The Local Ruler is the
+# Frontier's founder when eotg_frontier_founder_can_rule allows it, else the
+# type's figure (the settlers' leader, a new factor, the mission elder). The
+# political owner is still the holder: the System sits in their realm, under
+# their law (LAW AT 866). Guarded (Q-B1): does nothing unless the Region is
+# still a Frontier. The development_changed hook fires only where development
+# actually changed (Q8). scope:eotg_frontier_local_ruler is left saved only
+# when a Local Ruler was actually granted the System (for the hooks).
 eotg_frontier_complete_effect = {
     if = {
         limit = { eotg_frontier_is_frontier = yes }
         eotg_frontier_save_hook_scopes_effect = yes
         holder = { save_temporary_scope_as = eotg_frontier_holder }
+        # frontier_v4.md A1: no earlier completion's Local Ruler leaks in (Q2)
+        clear_saved_scope = eotg_frontier_local_ruler
         # development_changed fires once below, not once per row (verification 5)
         save_temporary_scope_value_as = { name = eotg_frontier_settling  value = yes }
         if = {
             limit = { var:eotg_frontier_type ?= flag:settlement }
-            eotg_frontier_build_holding_effect = { HOLDING = city_holding }
-            eotg_frontier_raise_dev_effect = { AMOUNT = 1 }
+            # A1: the figure first, so it can be the Local Ruler
             eotg_frontier_create_leader_effect = yes
+            scope:eotg_frontier_leader = { save_scope_as = eotg_frontier_local_ruler }
+            eotg_frontier_build_holding_effect = {
+                HOLDING = city_holding
+                LOCAL_RULER = yes
+                LOCAL_GOVERNMENT = republic_government
+            }
+            eotg_frontier_raise_dev_effect = { AMOUNT = 1 }
         }
         else_if = {
             limit = { var:eotg_frontier_type ?= flag:trade }
-            eotg_frontier_build_holding_effect = { HOLDING = city_holding }
+            # A1: the factor is created only if the vassal path runs and the
+            # founder does not rule (eotg_frontier_grant_local_ruler_effect)
+            eotg_frontier_build_holding_effect = {
+                HOLDING = city_holding
+                LOCAL_RULER = yes
+                LOCAL_GOVERNMENT = republic_government
+            }
             eotg_frontier_raise_dev_effect = { AMOUNT = 1 }
         }
         else_if = {
@@ -908,15 +1090,29 @@ eotg_frontier_complete_effect = {
         }
         else_if = {
             limit = { var:eotg_frontier_type ?= flag:military }
-            eotg_frontier_build_holding_effect = { HOLDING = castle_holding }
+            # A1: castles always go to the holder. LOCAL_GOVERNMENT is unused
+            # here (LOCAL_RULER = no), but the never-run vassal branch is
+            # still parsed, so it must name a real government (spec §A1 wrote
+            # `none`; Tiger: "government type none not defined")
+            eotg_frontier_build_holding_effect = {
+                HOLDING = castle_holding
+                LOCAL_RULER = no
+                LOCAL_GOVERNMENT = feudal_government
+            }
             change_county_control = 15
             eotg_frontier_create_figure_effect = { TEMPLATE = eotg_frontier_commander_template }
         }
         else_if = {
             limit = { var:eotg_frontier_type ?= flag:religious }
-            eotg_frontier_build_holding_effect = { HOLDING = church_holding }
-            eotg_frontier_raise_dev_effect = { AMOUNT = 1 }
+            # A1: the mission elder first, so it can be the Local Ruler
             eotg_frontier_create_figure_effect = { TEMPLATE = eotg_frontier_elder_template }
+            scope:eotg_frontier_figure = { save_scope_as = eotg_frontier_local_ruler }
+            eotg_frontier_build_holding_effect = {
+                HOLDING = church_holding
+                LOCAL_RULER = yes
+                LOCAL_GOVERNMENT = theocracy_government
+            }
+            eotg_frontier_raise_dev_effect = { AMOUNT = 1 }
             # Phase 3a (frontier_v3.md §6): the mission ties into the faith
             eotg_frontier_faith_settle_effect = yes
         }
@@ -940,6 +1136,8 @@ eotg_frontier_complete_effect = {
             limit = { exists = scope:eotg_frontier_dev_moved }
             eotg_frontier_fire_hook_effect = { HOOK = eotg_frontier_on_development_changed }
         }
+        # frontier_v4.md A8.3: before the settle, which drops the sponsor
+        eotg_frontier_reward_sponsor_effect = yes
         eotg_frontier_settle_effect = yes
     }
 }
@@ -959,6 +1157,42 @@ eotg_frontier_raise_dev_effect = {
     }
 }
 
+# frontier_v4.md A8.3: the sponsor of a Frontier that settles gets prestige
+# (medium_prestige_value, 00_basic_values.txt:1002) and the holder's goodwill
+# (the shared eotg_frontier_opinion_pleased, 10 years), and a toast. COUNTY
+# scope; called by eotg_frontier_complete_effect before the settle drops the
+# sponsor. Reads scope:eotg_frontier_holder and scope:eotg_frontier_county.
+# Not a share of the Region's modifier: a county modifier cannot be split to
+# a non-holder (§A8.3).
+eotg_frontier_reward_sponsor_effect = {
+    if = {
+        limit = {
+            eotg_frontier_has_valid_sponsor = yes
+            NOT = { var:eotg_frontier_sponsor = scope:eotg_frontier_holder }
+        }
+        var:eotg_frontier_sponsor = {
+            save_temporary_scope_as = eotg_frontier_rewarded_sponsor
+            add_prestige = medium_prestige_value
+        }
+        scope:eotg_frontier_holder = {
+            add_opinion = {
+                modifier = eotg_frontier_opinion_pleased
+                target = scope:eotg_frontier_rewarded_sponsor
+                years = 10
+            }
+        }
+        # right_icon = a county title: vanilla
+        # councillor_spouse_stewardship_events.txt:164
+        scope:eotg_frontier_rewarded_sponsor = {
+            send_interface_toast = {
+                title = eotg_frontier_toast_backing_settled
+                left_icon = scope:eotg_frontier_rewarded_sponsor
+                right_icon = scope:eotg_frontier_county
+            }
+        }
+    }
+}
+
 # A new System in an open slot of the Region; else development and control
 # (owner ruling: never block the feature on holding creation).
 # Vanilla picks empty slots with has_holding = no AND
@@ -967,8 +1201,17 @@ eotg_frontier_raise_dev_effect = {
 # and the pick always agree and the fallback runs when no slot qualifies.
 # The grant runs at CHARACTER scope, as vanilla does
 # (hold_court_events_general.txt:6873-6890).
+# frontier_v4.md A1: $LOCAL_RULER$ = yes (city, church) sends the System to a
+# Local Ruler as the holder's vassal (eotg_frontier_grant_local_ruler_effect)
+# unless the holder's own seat is already $HOLDING$; $LOCAL_GOVERNMENT$ is the
+# vanilla government a landless Local Ruler takes. $LOCAL_RULER$ = no
+# (castle): the holder, as before ($LOCAL_GOVERNMENT$ unused). The capital
+# test is the government-agnostic proxy: no vanilla trigger reads a
+# government's valid holdings (§A1).
 # TEST-IN-GAME (V8): whether set_holding_type creates the barony holder, and
-# who it is; the grant below only acts when the holder is not already ours.
+# who it is. Correct either way: both paths run one change from the holder to
+# the chosen character, whoever held it before. The holder path skips when
+# the holder already holds it; the vassal path never skips.
 eotg_frontier_build_holding_effect = {
     clear_saved_scope = eotg_frontier_new_barony
     if = {
@@ -987,10 +1230,27 @@ eotg_frontier_build_holding_effect = {
             barony = { save_temporary_scope_as = eotg_frontier_new_barony }
         }
         if = {
+            # The vassal path (A1). Shape: eotg_frontier_abandon_effect's
+            # always = $FAILED$
+            limit = {
+                exists = scope:eotg_frontier_new_barony
+                always = $LOCAL_RULER$
+                scope:eotg_frontier_holder = {
+                    capital_province ?= { NOT = { has_holding_type = $HOLDING$ } }
+                }
+            }
+            eotg_frontier_grant_local_ruler_effect = {
+                HOLDING = $HOLDING$
+                GOVERNMENT = $LOCAL_GOVERNMENT$
+            }
+        }
+        else_if = {
+            # The holder path: the holder keeps it, no Local Ruler
             limit = {
                 exists = scope:eotg_frontier_new_barony
                 NOT = { scope:eotg_frontier_new_barony = { holder ?= scope:eotg_frontier_holder } }
             }
+            clear_saved_scope = eotg_frontier_local_ruler
             scope:eotg_frontier_holder = {
                 create_title_and_vassal_change = {
                     type = created
@@ -1006,10 +1266,101 @@ eotg_frontier_build_holding_effect = {
                 resolve_title_and_vassal_change = scope:eotg_frontier_change
             }
         }
+        else = {
+            # The holder already holds it: no Local Ruler either
+            clear_saved_scope = eotg_frontier_local_ruler
+        }
     }
     else = {
+        # No slot (unchanged): development and control; a created figure
+        # stays a courtier
+        clear_saved_scope = eotg_frontier_local_ruler
         eotg_frontier_raise_dev_effect = { AMOUNT = 1 }
         change_county_control = 10
+    }
+}
+
+# frontier_v4.md A1 (owner H1): the new city or church System goes to a Local
+# Ruler as the holder's vassal. COUNTY scope; called only by the vassal path
+# of eotg_frontier_build_holding_effect, with scope:eotg_frontier_holder,
+# scope:eotg_frontier_county and scope:eotg_frontier_new_barony saved.
+# $HOLDING$: city_holding or church_holding. $GOVERNMENT$: the vanilla
+# government a LANDLESS Local Ruler takes (republic_government,
+# theocracy_government; per-government variants deferred, §12 D4-4).
+# Who rules, in order:
+#   1. the founder, if eotg_frontier_founder_can_rule (the §A1 edge-case
+#      table: a landless courtier of the holder, or a direct vassal already
+#      seated in this holding type; never the holder, a courtier elsewhere,
+#      the dead, a child, a prisoner, a sub-vassal or liege, or an Unsworn).
+#      The founder keeps their own culture, faith and dynasty (design §7,
+#      "House Veyra"); the type's figure, if any, stays a courtier;
+#   2. else the type's figure saved by eotg_frontier_complete_effect (the
+#      settlers' leader, the mission elder);
+#   3. else (Trade) a new factor from eotg_frontier_settler_leader_template,
+#      the holder's culture and faith by scope, as every Frontier figure.
+# Grant: vanilla hold_court.8300.a (hold_court_events_joe.txt:507-521) and
+# hold_court.6060.b (hold_court_events_general.txt:6912-6945): one granted
+# change from the holder, change_title_holder, resolve. The government
+# changes only for a Local Ruler who was landless before the grant (a landed
+# founder keeps theirs; vanilla recasts a landed vassal's government only for
+# the AI, hold_court_events_joe.txt:295-305): a city's before the grant
+# (8300.a order), a church's after the resolve (8320.a order, :1240-1260).
+eotg_frontier_grant_local_ruler_effect = {
+    if = {
+        limit = {
+            eotg_frontier_founder_can_rule = {
+                HOLDING = $HOLDING$
+                HOLDER = scope:eotg_frontier_holder
+            }
+        }
+        var:eotg_frontier_founder = { save_scope_as = eotg_frontier_local_ruler }
+    }
+    else_if = {
+        limit = { NOT = { exists = scope:eotg_frontier_local_ruler } }
+        scope:eotg_frontier_holder = {
+            create_character = {
+                template = eotg_frontier_settler_leader_template
+                location = scope:eotg_frontier_county.title_province
+                culture = scope:eotg_frontier_holder.culture
+                faith = scope:eotg_frontier_holder.faith
+                save_scope_as = eotg_frontier_local_ruler
+            }
+            add_courtier = scope:eotg_frontier_local_ruler
+        }
+    }
+    # Landless before the grant (the figure, the factor, a landless founder):
+    # takes $GOVERNMENT$
+    if = {
+        limit = { scope:eotg_frontier_local_ruler = { is_landed = no } }
+        save_temporary_scope_value_as = { name = eotg_frontier_local_ruler_new  value = yes }
+    }
+    if = {
+        limit = {
+            exists = scope:eotg_frontier_local_ruler_new
+            scope:eotg_frontier_new_barony.title_province = { has_holding_type = city_holding }
+        }
+        scope:eotg_frontier_local_ruler = { change_government = $GOVERNMENT$ }
+    }
+    scope:eotg_frontier_holder = {
+        create_title_and_vassal_change = {
+            type = granted
+            save_scope_as = eotg_frontier_change
+            add_claim_on_loss = no
+        }
+        scope:eotg_frontier_new_barony = {
+            change_title_holder = {
+                holder = scope:eotg_frontier_local_ruler
+                change = scope:eotg_frontier_change
+            }
+        }
+        resolve_title_and_vassal_change = scope:eotg_frontier_change
+    }
+    if = {
+        limit = {
+            exists = scope:eotg_frontier_local_ruler_new
+            NOT = { scope:eotg_frontier_new_barony.title_province = { has_holding_type = city_holding } }
+        }
+        scope:eotg_frontier_local_ruler = { change_government = $GOVERNMENT$ }
     }
 }
 

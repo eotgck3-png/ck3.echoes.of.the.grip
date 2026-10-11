@@ -294,18 +294,10 @@ eotg_decision_frontier_invest = {
     effect = {
         scope:selected_item ?= { save_scope_as = eotg_frontier_county }
         custom_tooltip = eotg_decision_frontier_invest_effect_tt
-        # Q4b: say what a finished Frontier is waiting on
-        if = {
-            limit = {
-                scope:eotg_frontier_county ?= {
-                    OR = {
-                        has_county_modifier = eotg_frontier_mod_waiting_development
-                        has_county_modifier = eotg_frontier_mod_waiting_control
-                    }
-                }
-            }
-            custom_tooltip = eotg_decision_frontier_invest_waiting_tt
-        }
+        # frontier_v4.md A8.1: the worded bands (pace, time, strain, cause).
+        # Q4b's waiting line (what a finished Frontier is waiting on) is now
+        # the bands' time line, so it is not repeated here
+        scope:eotg_frontier_county ?= { eotg_frontier_legibility_tooltip_effect = yes }
         hidden_effect = {
             scope:eotg_frontier_county ?= {
                 set_variable = { name = eotg_frontier_invested  value = yes  years = 1 }
@@ -530,6 +522,8 @@ eotg_decision_frontier_abandon = {
     effect = {
         scope:selected_item ?= { save_scope_as = eotg_frontier_county }
         custom_tooltip = eotg_decision_frontier_abandon_effect_tt
+        # frontier_v4.md A8.1: the worded bands, so the choice is informed
+        scope:eotg_frontier_county ?= { eotg_frontier_legibility_tooltip_effect = yes }
         # Unclaimed Regions (frontier_unclaimed_regions.md §3.6): abandoning a
         # claimed Region gives it up
         if = {
@@ -1037,6 +1031,8 @@ eotg_decision_frontier_build = {
     effect = {
         scope:selected_item ?= { save_scope_as = eotg_frontier_county }
         custom_tooltip = eotg_decision_frontier_build_effect_tt
+        # frontier_v4.md A8.1: the worded bands
+        scope:eotg_frontier_county ?= { eotg_frontier_legibility_tooltip_effect = yes }
         trigger_event = eotg_frontier.021
     }
 

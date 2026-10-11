@@ -77,6 +77,55 @@ eotg_frontier_has_valid_founder = {
     }
 }
 
+# frontier_v4.md A1 "Founder first" (owner H1): the Frontier's founder may be
+# the Local Ruler of the new $HOLDING$ System under $HOLDER$. COUNTY scope.
+# $HOLDING$: city_holding or church_holding. $HOLDER$: the county holder
+# (scope:eotg_frontier_holder in the grant; root in .004's tooltip). The
+# founder is read from var:eotg_frontier_founder, which survives until the
+# settle clears the project. Every case that fails falls back to the type's
+# figure (§A1 edge-case table):
+#   - the holder, dead, a child or a prisoner: no (validity, as for strain);
+#   - a courtier elsewhere (a vassal's court, another realm, a guest): no;
+#     vanilla grants only to the granter's own people (hold_court 6060's
+#     random_knight, 8300's random_vassal_or_below);
+#   - a direct vassal seated in a different holding type, a sub-vassal, or
+#     the holder's liege: no (vanilla recasts a landed vassal's government
+#     only for the AI, hold_court_events_joe.txt:295-305);
+#   - an Unsworn placeholder or folk: no (M1 guards).
+# Yes: a landless courtier of the holder (vanilla 6060: a landless knight is
+# granted the city, hold_court_events_general.txt:6723-6729), or a direct
+# vassal already seated in $HOLDING$ (keeps their government).
+eotg_frontier_founder_can_rule = {
+    exists = var:eotg_frontier_founder
+    eotg_frontier_has_valid_founder = yes            # alive, adult, free, tied to the holder
+    var:eotg_frontier_founder = {
+        NOT = { this = $HOLDER$ }
+        # Orchestrator ruling, 2026-10-11 (batch 2 QA finding 3): never the
+        # holder's spouse or primary heir, who would otherwise become a city or
+        # church vassal (the heir pulled off to govern a System). They fall back
+        # to the type's figure, as every other excluded case. Forms per spec
+        # §A1: is_primary_heir_of (vanilla coronation.txt:3297); primary_spouse
+        # ?= (vanilla 00_marriage_interaction_effects.txt:48), false with no
+        # spouse. `prev` is the founder: the scope this block is in, one step
+        # before $HOLDER$
+        NOT = { is_primary_heir_of = $HOLDER$ }
+        NOT = { $HOLDER$ = { primary_spouse ?= prev } }
+        eotg_is_unclaimed_folk = no
+        eotg_is_unclaimed_holder = no
+        OR = {
+            AND = {                                  # a landless courtier of the holder
+                is_landed = no
+                employer ?= $HOLDER$
+            }
+            AND = {                                  # a direct vassal already seated in this holding type
+                is_landed = yes
+                liege ?= $HOLDER$
+                capital_province ?= { has_holding_type = $HOLDING$ }
+            }
+        }
+    }
+}
+
 # A sponsor that can still back the project (spec §4.2, §4.3)
 eotg_frontier_has_valid_sponsor = {
     exists = var:eotg_frontier_sponsor
