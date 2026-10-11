@@ -427,7 +427,7 @@ Covered by P6. Add the key to **both** define files in the same commit, and re-d
 7. **Signature resource rule.** No flavour event ships that neither moves nor reads the resource (invariant 5, v1 lesson). New events need owner approval (memory, "event expansion").
 8. **Lore.** Precedence ERRATA → dated `docs/lore` → `866_bookmark_design.md` → SETTING LORE body. `NATIONS_AT_866_AG.md` is non-canon. Government text names no nation or person. Apply the B2 banned-vocabulary list where relevant. Canadian English.
 9. **Placement.** Folders this template names that are **not** yet in the CLAUDE.md placement list (`common/domiciles/`, `common/house_unities/`, `common/tax_slots/`, `common/house_aspirations/`, `common/situation/`, `common/succession_election/`, `common/men_at_arms_types/`, `common/scripted_guis/`, `gui/`) need an orchestrator entry before first use. Never `replace_path` any of them.
-10. **Save compatibility.** Treat any change to a shipped government's key, flags, contract group or laws as save-breaking [web, research 04 §4: Elder Kings 2]. Note it in the commit and taskboard.
+10. **Save compatibility.** Treat any change to a shipped government's key, flags, contract group or laws as save-breaking (project practice; other mods are observational only and are not cited, owner rule 2026-10-11). Note it in the commit and taskboard.
 
 ---
 
