@@ -689,6 +689,106 @@ Online coverage of all four questions is thin. No wiki page, forum thread or mod
 - **Effect on our governments:** their vassals get the non-feudal background and the generic wording. Negotiation works through the contract group. No override is needed. Only change the window if a custom `modify_contract_layout` is ever introduced; that is a wholesale override of a vanilla GUI file, with the compatibility cost that brings.
 - `government_is_administrative` has **no reader in vanilla `gui/`** (grep, 2026-10-11). The claim that the engine checks that flag for the estate or noble-family UI is UNVERIFIED. It came from an observational source and is not relied on.
 
+## 9. Assessment of our governments against this standard (2026-10-11)
+
+Five read-only eotg-qa reviews ran in parallel against §1–§8: one per government and one for the shared layer, which includes Unsworn. The full reports, with every file:line, are in `docs/qa/government_assessment_2026-10-11/`: `pmc.md`, `corporation.md`, `cartel.md`, `gobcorp.md` and `shared_infra.md`.
+
+The static tools were clean:
+- PX LSP: only the known-benign `building_walls_*` warnings.
+- px_vocab: 0 findings.
+- eotg_lint: 0 new findings.
+- Tiger: every finding in a government file is benign. The two new benign families are now listed in CLAUDE.md.
+
+### 9.1 Verdicts
+| Government | Playable reskin (G1 scope) | Distinct government (§2) | Closest it gets to distinct |
+|---|---|---|---|
+| PMC | **PASS (pending in-game)** | **FAIL**: no verb, no resource (`eotg_pmc_standing` has 0 references), no entry or exit | military modifiers, the Operators term |
+| Corporation | **PASS (pending in-game)** | **FAIL**: no resource (`eotg_corp_board_influence` unbuilt); single heir contradicts "run by a board" | city-primary holdings, its contract numbers |
+| Cartel | **PASS (pending in-game)** | **PARTIAL**: vanilla Offer Tributary Status works, but dread and tribute never interact | `ask_for_tribute`, dread ±25% |
+| Trade Oligarchy | **PASS (pending in-game)** | **FAIL**: no resource (`eotg_gobcorp_market_share` unbuilt); single heir contradicts "no single head" | city-primary holdings, its own ranks |
+| Shared layer | **PASS (pending in-game)** | n/a | n/a |
+| Unsworn | **FAIL sign-off**: a human can play it (B1) | n/a (placeholder) | n/a |
+
+**What all four already meet:**
+- Statically, every §1 hard requirement:
+  - P0: the blacklist (no blocked flag).
+  - P1/P2: dynastic rulers.
+  - P3: an own succession law plus a safety net.
+  - P5: sticky, and base-on-landed.
+  - P6: `GOVERNMENT_TYPES`, diffed exactly against vanilla's 20.
+- Every §3.1 field has a vanilla `.txt` call site; none is `.info`-only.
+- Loc is complete: one BOM, no `[scope:`, all §3.16 keys.
+- Flavourization: 92 entries.
+- Knight terms: 4 terms plus a fallback, with child entries matching vanilla.
+
+**None of the playability verdicts is proven yet:** CB-49's in-game checks have not run.
+
+### 9.2 Findings common to all four
+1. **No signature resource** (Q2, §3.11). The spec reserves one per government, but none is built. The Cartel's dread has no source or sink of its own. Vanilla treats a negative `dread_decay_mult` as the bonus, so the Cartel's +25% decay is a penalty.
+2. **No core verb** (Q1, §3.8). Apart from vanilla tribute for the Cartel, there are only debug decisions.
+3. **No way in or out** (Q5). There are no adoption or exit decisions.
+4. **The vassal model is feudal-shaped** (Q3). The trees have new numbers, but there is no `opinion_of_liege` and no `top_liege_character_modifier`.
+5. **AI and grants are thin** (§3.14). `grant_vassal_ai_will_do` and `possible_grant_vassal_governments` are absent. Feudal grants theocracy and ecclesiastical (`00_government_types.txt:40`).
+6. **Succession versus fiction** (Q4). Three governments use oldest-child single heir under names that imply something else:
+
+   | Government | Law name | Fiction it contradicts |
+   |---|---|---|
+   | Corporation | "Executive Succession" | a board |
+   | Trade Oligarchy | "Charter Succession" | "no single head" |
+   | Cartel | "Council Succession" | "a council of bosses" |
+
+   The PMC's "Command Succession" description says rank is earned by results. These need an owner ruling: accept them as G1 debt and rename, or build elective laws.
+7. **Placeholder art.** Each icon is byte-identical to a vanilla one (mercenary, administrative, clan, republic), and the text icons borrow vanilla's.
+8. **Reachability** (P8). They can only be picked on the map: there is no bookmark entry and no ruler-designer route.
+
+### 9.3 Shared-layer and Unsworn findings
+- **B1 (blocks Unsworn sign-off).** A human can pick an Unsworn placeholder in the lobby, because it is not on the §1 blacklist. It gets -1000% income and no wars. On death its counties go to new placeholders, so this is probably game over (inferred). The fix is the §6.2 decision: add a GAME_OVER entry if T14 shows a key-level `scripted_rules` override works, or accept the behaviour and record it.
+- **G1, the inheritance gap.** The succession safety net only runs on `on_game_start` and `on_government_change`. An heir who tiers up takes the dead ruler's laws unchecked (`_laws.info:300-303`). For example, a PMC count who inherits a confederate-partition realm keeps that law for good, because its `can_keep` is always yes outside Japanese governments (`00_succession_laws.txt:5-14, 71-80`). Fix: an additive `on_title_gain` check that calls `eotg_gov_ensure_succession_law_effect`.
+- **G2.** The laws-file header names the wrong default-law risk. The real risks are vanilla single heir at index 3 and youngest at index 5, both ahead of our index 50 (`00_succession_laws.txt:290-297, 395+`).
+- **G3.** Unsworn has no succession law. The engine default applies and then fails `can_keep`, which may show "Anarchy".
+- **G4.** Unsworn is missing `_filter_option`, `_filter_option_desc` and `_vassals_label` loc. Vanilla herder has all three.
+- **G5.** Nothing keeps the main mod's and the test sub-mod's `GOVERNMENT_TYPES` copies in sync. Add a lint rule that compares the two with each other and with vanilla's 20.
+- **Leakage risk (Corporation, Trade Oligarchy; inferred).** Both are city-primary with no `can_get_government`, like vanilla republic. If the engine assigns a government by primary holding, city baronies elsewhere could turn Corporation. T7 must count city baronies outside the seeded realms. A guard is drafted in `governments_v2.md` §5.6.
+- **The test sub-mod README is stale.** It names Konan as Brittany's holder (it should be Hoël) and Philippe (it should be Raoul), says the keys are "not defined yet", and quotes the old generator default.
+
+### 9.4 Corrections to this template found by the review
+- §3.6 says "castle primary with city valid appears nowhere in vanilla". That is **wrong**: administrative (`00_government_types.txt:482-483`), celestial (`:832-833`) and steppe_admin (`:1137-1138`) all have it.
+- Cartel spec §5.4 omits that tribute runs through `mandala_embrace_tributary_effect`, which also fires `char_interaction.0362` and `consume_all_criminal_reasons_effect`.
+
+### 9.5 Small fixes (no design needed)
+- **Comments that cite other mods,** which breaks the owner rule in Appendix A: `common/defines/eotg_government_defines.txt:11` and `common/customizable_localization/eotg_knight_culture.txt:8-9`. Replace them with vanilla citations.
+- **Stale comments:**
+  - "PENDING OWNER" at `eotg_knight_culture.txt:18` (OQ1 was ruled 2026-10-08).
+  - "7 loc keys" should be 8.
+  - The obligations header claims `_desc` keys are required.
+  - The laws-file header has the wrong risk (G2).
+- **`has_government = feudal_government`** at `common/decisions/eotg_government_debug_decisions.txt:155`. Use `government_has_flag = government_is_feudal` (§5.1.5).
+- **Loc collisions:**
+  - Cartel "Territory Tribute" / "Massive Tribute" names a levy obligation, which collides with real tributaries. Suggest "Turf Levy".
+  - Trade Oligarchy "trade bloc" collides with its "Bloc" kingdom rank.
+  - The Cartel's empire rank "Cartel" is the same word as the government's name.
+- **Possible tuning (architect):**
+  - Trade Oligarchy `diplomacy = -1` works against its bargaining fiction.
+  - Feudal's `may_elevate_co_monarch` was dropped without a recorded reason.
+  - The PMC lacks feudal's grant field.
+
+### 9.6 Recommended order
+1. **Run CB-49 first.** Every playability verdict rests on it:
+   - T1–T3, T5, T7 (counting city baronies), T14 (picking Unsworn), and the tier-up law test for G1;
+   - V-G4, V-G9, V-G10, V-G11, V-G13 and V-G17.
+2. **Close the inheritance gap** (the G1 `on_title_gain` net) and fix the §9.5 small items. Both are mechanical and safe to do now.
+3. **Owner rulings:**
+   - succession versus fiction (§9.2 item 6): elective laws, or accept and rename;
+   - Unsworn playability (B1);
+   - CB-51 and CB-52, already open.
+4. **G2 design pass, one government at a time,** starting with each signature resource:
+   - a clamped change effect, init and teardown, and the §3.15 default display (scaled modifier plus story-cycle counter);
+   - then one top-tier and one vassal-tier decision that move the resource;
+   - an entry decision and an exit decision;
+   - the AI and grant fields.
+
+   Start with the Cartel, which has the most vanilla machinery to bind to: couple dread to tribute.
+
 ---
 
 ## Appendix A. Observational survey of other mods (2026-10-11): NOT A SOURCE
