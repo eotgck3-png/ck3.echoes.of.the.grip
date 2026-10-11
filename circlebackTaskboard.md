@@ -520,6 +520,36 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Next step:** choose one: (a) regained traits are surface behaviour, and the per-option guards are enough (current state); or (b) make the strip permanent in script, using trait opposites or an on_action re-strip.
 - **Refs:** B13 lore review 2026-10-09; `docs/specs/event_quality_v1.md` §12.5
 
+### CB-53: Government succession vs fiction
+- **Status:** waiting-human (2026-10-11)
+- **What:** Corporation ("run by a board"), Trade Oligarchy ("no single head") and Cartel ("a council of bosses") all use oldest-child single heir, under names that imply otherwise ("Executive", "Charter" and "Council" Succession). The PMC's "Command Succession" claims rank is earned. Found by the 2026-10-11 assessment, `docs/specs/government_template.md` §9.2 item 6.
+- **Owner:** human, then eotg-architect
+- **Next step:** choose one: (a) accept single heir as G1 debt and rename the laws to match; (b) build elective title laws (electors limited to dynasty/house so play continues) in the G2 pass.
+- **Refs:** `docs/qa/government_assessment_2026-10-11/`
+
+### CB-54: Can a human play Unsworn?
+- **Status:** waiting-human (2026-10-11)
+- **What:** Unsworn placeholders are not on vanilla's `is_character_allowed_to_be_player` blacklist (`common/scripted_rules/00_rules.txt:151`), so a human can pick one in the lobby. The result is broken play and probably game over on death. Template §6.2 and §9.3 B1.
+- **Owner:** human (ruling) and in-game test T14, then eotg-scripter
+- **Next step:** run T14, which tests whether a key-level `scripted_rules` override in a separately named file works. If it does, add a GAME_OVER entry. If not, accept the behaviour and record it until Gate 1.
+- **Refs:** `docs/qa/government_assessment_2026-10-11/shared_infra.md`
+
+### CB-55: Government fixes ready now (no design needed)
+- **Status:** ready (2026-10-11)
+- **What:** template §9.3 G1/G2/G4/G5 and §9.5:
+  - an `on_title_gain` succession safety net (an heir who tiers up keeps an unchecked law, e.g. confederate partition);
+  - the laws-header default-law fix;
+  - Unsworn's missing loc keys;
+  - a lint rule keeping both `GOVERNMENT_TYPES` copies in sync with each other and with vanilla's 20;
+  - removing the other-mod citations from the comments in `eotg_government_defines.txt:11` and `eotg_knight_culture.txt:8-9`;
+  - stale comments;
+  - the `has_government` in the debug decision;
+  - the Cartel "Turf Levy" loc rename;
+  - the test sub-mod README.
+- **Owner:** eotg-scripter, eotg-localizer and eotg-cartographer, then eotg-qa
+- **Next step:** one scripter pass and one localizer pass, then QA.
+- **Refs:** template §9.3, §9.5
+
 ## Tooling and environment
 
 ### CB-18: Game is 1.20.0.3; the tools target older versions
