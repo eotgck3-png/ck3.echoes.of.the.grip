@@ -88,7 +88,33 @@ eotg_unclaimed_ai_may_claim = {
             count >= eotg_unclaimed_ai_hold_cap_value
         }
     }
+    # frontier_v4.md A2.3 (2): nothing claimed is still waiting to become a
+    # Frontier (tightens the owner's cap of 2, UQ10)
+    NOT = {
+        any_held_title = {
+            tier = tier_county
+            has_variable = eotg_unclaimed_claimed
+            eotg_frontier_is_frontier = no
+        }
+    }
     NOT = { has_global_variable = eotg_unclaimed_ai_gap }
+}
+
+# County: may be released at all (frontier_v4.md A7.1; owner UQ5). A real
+# ruler's capital Region never is, whoever calls. A seed being split (flag
+# eotg_unclaimed_splitting) and placeholders (folk, or the government) are not
+# real rulers, so game start, death replacement and adoption are unaffected.
+# Read by eotg_unclaimed_release_effect (its whole body) and
+# eotg_unclaimed_would_release: the one statement of UQ5.
+eotg_unclaimed_may_release = {
+    NOT = {
+        holder ?= {
+            eotg_is_unclaimed_folk = no
+            eotg_is_unclaimed_holder = no
+            NOT = { has_character_flag = eotg_unclaimed_splitting }
+        }
+        this = holder.capital_county
+    }
 }
 
 # County: abandoning its Frontier would give it back to unclaimed space
@@ -99,5 +125,6 @@ eotg_unclaimed_would_release = {
     has_variable = eotg_unclaimed_claimed
     eotg_unclaimed_is_unclaimed = no
     exists = holder
-    NOT = { this = holder.capital_county }
+    # frontier_v4.md A7.1: the capital rule, stated once
+    eotg_unclaimed_may_release = yes
 }

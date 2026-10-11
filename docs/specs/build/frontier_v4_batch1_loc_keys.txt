@@ -1,0 +1,31 @@
+# Frontier v4 batch 1: loc keys the built script references (eotg-scripter, 2026-10-11).
+# Spec: docs/specs/frontier_v4.md §7 (batch-1 rows) and §8 (lore constraints).
+# Rules: UTF-8 with exactly one BOM, Canadian English, bare [x.GetName] (never [scope:x]),
+#   Region = county, System = barony, no numbers for progress or strain (frontier_v1.md §R),
+#   no "filed/registered/recognized/licensed/chartered" (LAW AT 866), dynamic knight term.
+# Text after '=>' is the intended English (a guide; the localizer owns wording).
+# Total keys: 9 (7 new, 1 new beyond the spec, 1 re-text)
+
+## localization/english/eotg_frontier_l_english.yml
+## A4.2 Appoint a Founder (eotg_decision_frontier_appoint_founder, common/decisions/eotg_frontier_decisions.txt)
+## The four decision keys follow the file's existing decisions (name, _desc, _tooltip, _confirm).
+eotg_decision_frontier_appoint_founder => Appoint a Founder
+eotg_decision_frontier_appoint_founder_desc => One of your Frontiers has nobody leading the work; name someone.
+eotg_decision_frontier_appoint_founder_tooltip => Name a new founder for a Frontier that has none. (spec §7 does not list _tooltip; added to match the file's other decisions)
+eotg_decision_frontier_appoint_founder_confirm => Name them
+eotg_decision_frontier_appoint_founder_pick_tt => The chosen Region is your Frontier, and nobody leads its work (picker validity line; shape of eotg_decision_frontier_invest_pick_tt)
+eotg_decision_frontier_appoint_founder_effect_tt => [eotg_frontier_candidate.GetName] will lead the work in [eotg_frontier_county.GetName]. (scopes saved in the effect: eotg_frontier_candidate, eotg_frontier_county)
+# NEW beyond §7: is_valid line when neither the taker nor any courtier could lead (both child or imprisoned)
+eotg_decision_frontier_appoint_founder_candidate_tt => You, or someone at your court, must be an adult and free to lead the work
+
+## localization/english/eotg_unclaimed_l_english.yml
+## A6 pulse probe (debug readout, eotg_unclaimed_debug_readout_effect). Debug-only: numbers allowed.
+## The count is copied to the reader's character variable eotg_unclaimed_debug_pulses (shape of the
+## existing eotg_unclaimed_debug_counts_tt, which reads eotg_unclaimed_debug_reader.MakeScope.Var(...)).
+eotg_unclaimed_debug_pulsed_tt => PROBE (V-U1a): vanilla's random yearly event pool reached an Unsworn holder [eotg_unclaimed_debug_reader.MakeScope.Var('eotg_unclaimed_debug_pulses').GetValue|0] times this session (0 expected; above 0 = build M2).
+## RE-TEXT (existing key): it reports only the scripted is_playable_character check
+eotg_unclaimed_debug_playable_tt => PROBE: an Unsworn holder passes the scripted is_playable_character check (expected yes; not proof of lobby play, spec V-U1b).
+
+## Not batch 1 (do not write yet): .004.local_ruler_tt, the 17 eotg_frontier_band_*_tt, toast_backing_settled,
+## Raise Your Colours decision keys, eotg_unclaimed_claim_cooldown_tt, eotg_unclaimed_defender_tt (batch 2);
+## A9 re-texts wait on the lore-keeper.

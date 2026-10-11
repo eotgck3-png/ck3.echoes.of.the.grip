@@ -354,7 +354,11 @@ eotg_frontier.002 = {
 
     trigger = {
         exists = scope:eotg_frontier_county
-        scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        scope:eotg_frontier_county = {
+            # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
+            holder ?= root
+            eotg_frontier_is_frontier = yes
+        }
     }
 
     left_portrait = {
@@ -568,7 +572,11 @@ eotg_frontier.003 = {
     trigger = {
         exists = scope:eotg_frontier_county
         exists = scope:eotg_frontier_sponsor
-        scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        scope:eotg_frontier_county = {
+            # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
+            holder ?= root
+            eotg_frontier_is_frontier = yes
+        }
         scope:eotg_frontier_sponsor = { is_alive = yes }
         NOT = { scope:eotg_frontier_sponsor = root }
     }
@@ -753,8 +761,11 @@ eotg_frontier.004 = {
             NOT = { scope:eotg_frontier_founder = root }
             gold >= minor_gold_value
         }
-        remove_short_term_gold = minor_gold_value
-        scope:eotg_frontier_founder = { add_gold = minor_gold_value }
+        # QA (frontier_unsworn_architect_brief.md §5): the purse is valued at
+        # the payer's scale and the founder receives exactly that
+        save_temporary_scope_value_as = { name = eotg_frontier_purse  value = minor_gold_value }
+        remove_short_term_gold = scope:eotg_frontier_purse
+        scope:eotg_frontier_founder = { add_gold = scope:eotg_frontier_purse }
         scope:eotg_frontier_county = { eotg_frontier_complete_effect = yes }
         custom_tooltip = eotg_frontier.004.complete_tt
         ai_chance = {
@@ -774,8 +785,10 @@ eotg_frontier.004 = {
             }
             NOT = { scope:eotg_frontier_founder = root }
         }
-        scope:eotg_frontier_founder = { add_prestige = 100 }
-        add_prestige = 25
+        # QA (brief §5): vanilla script values, not literals
+        # (00_basic_values.txt:1000-1001)
+        scope:eotg_frontier_founder = { add_prestige = minor_prestige_value }
+        add_prestige = miniscule_prestige_value
         scope:eotg_frontier_county = { eotg_frontier_complete_effect = yes }
         custom_tooltip = eotg_frontier.004.complete_tt
         ai_chance = {
@@ -879,6 +892,9 @@ eotg_frontier.005 = {
     }
 
     immediate = {
+        # frontier_v4 QA F2: the tick's A4.3 founder pick must not leak in
+        # (clear_saved_scope: vanilla pam_ecumenical_council_events.txt:311)
+        clear_saved_scope = eotg_frontier_candidate
         hidden_effect = {
             ordered_courtier = {
                 limit = {
@@ -911,8 +927,30 @@ eotg_frontier.005 = {
             eotg_frontier_abandon_effect = { FAILED = yes }
         }
         custom_tooltip = eotg_frontier.005.abandon_tt
+        # frontier_v4.md A5 (spec §6.6 order: d, else b if gold >= 2x minor,
+        # else a). factor = 0 gates: vanilla ep3_admin_events.txt:130-145
         ai_chance = {
             base = 10
+            modifier = {
+                factor = 0
+                scope:eotg_frontier_county = {
+                    eotg_frontier_has_valid_sponsor = yes
+                    var:eotg_frontier_sponsor = {
+                        gold >= {
+                            value = eotg_frontier_sponsor_payment_value
+                            multiply = 2
+                        }
+                    }
+                }
+            }
+            modifier = {
+                factor = 0
+                exists = scope:eotg_frontier_candidate
+                gold >= {
+                    value = minor_gold_value
+                    multiply = 2
+                }
+            }
         }
     }
 
@@ -933,8 +971,29 @@ eotg_frontier.005 = {
             eotg_frontier_restart_effect = yes
         }
         custom_tooltip = eotg_frontier.005.restart_tt
+        # frontier_v4.md A5: only when the backer cannot carry it, and only
+        # with gold to spare (2x minor)
         ai_chance = {
             base = 50
+            modifier = {
+                factor = 0
+                scope:eotg_frontier_county = {
+                    eotg_frontier_has_valid_sponsor = yes
+                    var:eotg_frontier_sponsor = {
+                        gold >= {
+                            value = eotg_frontier_sponsor_payment_value
+                            multiply = 2
+                        }
+                    }
+                }
+            }
+            modifier = {
+                factor = 0
+                gold < {
+                    value = minor_gold_value
+                    multiply = 2
+                }
+            }
         }
     }
 
@@ -953,8 +1012,10 @@ eotg_frontier.005 = {
             eotg_frontier_restart_effect = yes
         }
         custom_tooltip = eotg_frontier.005.restart_tt
+        # frontier_v4.md A5: the AI never scales back (it would discard the
+        # type it chose for its traits)
         ai_chance = {
-            base = 20
+            base = 0
         }
     }
 
@@ -1538,6 +1599,8 @@ eotg_frontier.030 = {
     trigger = {
         exists = scope:eotg_frontier_county
         scope:eotg_frontier_county = {
+            # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
+            holder ?= root
             eotg_frontier_is_frontier = yes
             eotg_frontier_has_valid_sponsor = yes
         }
@@ -1631,6 +1694,8 @@ eotg_frontier.031 = {
     trigger = {
         exists = scope:eotg_frontier_county
         scope:eotg_frontier_county = {
+            # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
+            holder ?= root
             eotg_frontier_is_frontier = yes
             eotg_frontier_has_valid_sponsor = yes
             NOT = { var:eotg_frontier_sponsor = root }
@@ -1756,7 +1821,11 @@ eotg_frontier.032 = {
 
     trigger = {
         exists = scope:eotg_frontier_county
-        scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        scope:eotg_frontier_county = {
+            # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
+            holder ?= root
+            eotg_frontier_is_frontier = yes
+        }
     }
 
     left_portrait = {
@@ -1889,6 +1958,8 @@ eotg_frontier.033 = {
     trigger = {
         exists = scope:eotg_frontier_county
         scope:eotg_frontier_county = {
+            # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
+            holder ?= root
             eotg_frontier_is_frontier = yes
             eotg_frontier_has_valid_founder = yes
             NOT = { var:eotg_frontier_founder = root }
@@ -2014,7 +2085,11 @@ eotg_frontier.034 = {
 
     trigger = {
         exists = scope:eotg_frontier_county
-        scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        scope:eotg_frontier_county = {
+            # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
+            holder ?= root
+            eotg_frontier_is_frontier = yes
+        }
     }
 
     left_portrait = {
@@ -2109,6 +2184,8 @@ eotg_frontier.035 = {
     trigger = {
         exists = scope:eotg_frontier_county
         scope:eotg_frontier_county = {
+            # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
+            holder ?= root
             eotg_frontier_is_frontier = yes
             eotg_frontier_trait_room = yes
         }
@@ -2223,6 +2300,8 @@ eotg_frontier.036 = {
     trigger = {
         exists = scope:eotg_frontier_county
         scope:eotg_frontier_county = {
+            # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
+            holder ?= root
             eotg_frontier_is_frontier = yes
             eotg_frontier_trait_room = yes
             NOT = { has_county_modifier = eotg_frontier_trait_rich_resources }
@@ -2481,6 +2560,8 @@ eotg_frontier.040 = {
     trigger = {
         exists = scope:eotg_frontier_county
         scope:eotg_frontier_county = {
+            # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
+            holder ?= root
             eotg_frontier_is_frontier = yes
             OR = {
                 var:eotg_frontier_type ?= flag:military
@@ -2612,6 +2693,8 @@ eotg_frontier.041 = {
     trigger = {
         exists = scope:eotg_frontier_county
         scope:eotg_frontier_county = {
+            # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
+            holder ?= root
             eotg_frontier_is_frontier = yes
             var:eotg_frontier_type ?= flag:religious
         }

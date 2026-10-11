@@ -29,8 +29,10 @@ eotg_unclaimed_ai_hold_cap_value = {
     value = 2
 }
 
-# The AI's gold floor before claiming: three claims' worth (spec §8.4)
+# The AI's gold floor before claiming (frontier_v4.md A2.3 (1)): the claim
+# plus the Establish that follows it, so a claim is never a dead end. Read in
+# the actor's scope (Unclaimed may read Frontier, frontier_unclaimed_regions.md §1).
 eotg_unclaimed_ai_gold_floor_value = {
     value = eotg_unclaimed_claim_gold_value
-    multiply = 3
+    add = eotg_frontier_establish_cost_value
 }

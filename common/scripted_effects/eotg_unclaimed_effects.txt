@@ -32,70 +32,167 @@
 # is_target_in_global_variable_list / add_to_global_variable_list /
 # remove_list_global_variable: UNVERIFIED-VANILLA for the first (the other
 # two are the mod's own verified Frontier list, eotg_frontier_active).
+# frontier_v4.md A7.1: the capital rule (UQ5) is enforced HERE, whoever
+# calls: a real ruler's capital Region is never released
+# (eotg_unclaimed_may_release; seeds and placeholders are not "real").
 eotg_unclaimed_release_effect = {
-    save_scope_as = eotg_unclaimed_target
-    clear_saved_scope = eotg_unclaimed_old_holder
-    # The real ruler it was taken from, for the hook (not a placeholder)
-    holder ?= {
-        if = {
-            limit = { eotg_is_unclaimed_folk = no }
-            save_scope_as = eotg_unclaimed_old_holder
-        }
-    }
     if = {
-        limit = {
-            holder ?= {
-                eotg_is_unclaimed_folk = yes
-                NOT = { has_character_flag = eotg_unclaimed_splitting }
-                NOT = {
-                    any_held_title = {
-                        tier = tier_county
-                        count >= 2
+        limit = { eotg_unclaimed_may_release = yes }
+        save_scope_as = eotg_unclaimed_target
+        clear_saved_scope = eotg_unclaimed_old_holder
+        # The real ruler it was taken from, for the hook (not a placeholder)
+        holder ?= {
+            if = {
+                limit = { eotg_is_unclaimed_folk = no }
+                save_scope_as = eotg_unclaimed_old_holder
+            }
+        }
+        if = {
+            limit = {
+                holder ?= {
+                    eotg_is_unclaimed_folk = yes
+                    NOT = { has_character_flag = eotg_unclaimed_splitting }
+                    NOT = {
+                        any_held_title = {
+                            tier = tier_county
+                            count >= 2
+                        }
                     }
                 }
             }
+            holder = {
+                save_scope_as = eotg_unclaimed_new_holder
+                if = {
+                    limit = { eotg_is_unclaimed_holder = no }
+                    change_government = eotg_unclaimed_government
+                }
+                eotg_unclaimed_track_holder_effect = yes
+            }
         }
-        holder = {
-            save_scope_as = eotg_unclaimed_new_holder
+        else = {
+            eotg_unclaimed_create_holder_effect = yes
+        }
+        if = {
+            limit = { NOT = { has_variable = eotg_unclaimed_county } }
+            set_variable = { name = eotg_unclaimed_county  value = yes }
+        }
+        if = {
+            limit = {
+                NOT = {
+                    is_target_in_global_variable_list = {
+                        name = eotg_unclaimed_counties
+                        target = this
+                    }
+                }
+            }
+            add_to_global_variable_list = { name = eotg_unclaimed_counties  target = this }
+        }
+        # Phase 1: Unsettled (it does nothing to an Abandoned county, which stays
+        # resettlable with its traces; frontier_v1.md §2.3)
+        eotg_frontier_mark_unsettled_effect = yes
+        eotg_unclaimed_set_neutral_colour_effect = yes
+        if = {
+            limit = { NOT = { has_county_modifier = eotg_unclaimed_mod_unclaimed } }
+            add_county_modifier = eotg_unclaimed_mod_unclaimed
+        }
+        if = {
+            limit = { has_variable = eotg_unclaimed_claimed }
+            remove_variable = eotg_unclaimed_claimed
+        }
+        scope:eotg_unclaimed_new_holder ?= {
+            trigger_event = { on_action = eotg_unclaimed_on_released }
+        }
+    }
+}
+
+# frontier_v4.md A7.2: every barony of this county held by $OLD$ goes to $NEW$
+# inside the already open title change $CHANGE$. COUNTY scope. Callers:
+# eotg_unclaimed_claim_effect (OLD = the placeholder) and
+# eotg_unclaimed_create_holder_effect (OLD = a previous placeholder).
+eotg_unclaimed_move_baronies_effect = {
+    every_county_province = {
+        barony = {
             if = {
-                limit = { eotg_is_unclaimed_holder = no }
-                change_government = eotg_unclaimed_government
+                limit = { holder ?= $OLD$ }
+                change_title_holder = {
+                    holder = $NEW$
+                    change = $CHANGE$
+                }
             }
         }
     }
-    else = {
-        eotg_unclaimed_create_holder_effect = yes
-    }
-    if = {
-        limit = { NOT = { has_variable = eotg_unclaimed_county } }
-        set_variable = { name = eotg_unclaimed_county  value = yes }
-    }
+}
+
+# The record of Unsworn holders (QA brief §5: the yearly sweep walks this
+# global list instead of every_living_character). CHARACTER scope. Added on
+# every path that makes or adopts a placeholder; removed by
+# eotg_unclaimed_vanish_effect, a placeholder's on_death, and the sweep
+# (dead entries).
+eotg_unclaimed_track_holder_effect = {
     if = {
         limit = {
             NOT = {
                 is_target_in_global_variable_list = {
-                    name = eotg_unclaimed_counties
+                    name = eotg_unclaimed_holders
                     target = this
                 }
             }
         }
-        add_to_global_variable_list = { name = eotg_unclaimed_counties  target = this }
+        add_to_global_variable_list = { name = eotg_unclaimed_holders  target = this }
     }
-    # Phase 1: Unsettled (it does nothing to an Abandoned county, which stays
-    # resettlable with its traces; frontier_v1.md §2.3)
-    eotg_frontier_mark_unsettled_effect = yes
-    eotg_unclaimed_set_neutral_colour_effect = yes
+}
+
+eotg_unclaimed_untrack_holder_effect = {
     if = {
-        limit = { NOT = { has_county_modifier = eotg_unclaimed_mod_unclaimed } }
-        add_county_modifier = eotg_unclaimed_mod_unclaimed
+        limit = {
+            is_target_in_global_variable_list = {
+                name = eotg_unclaimed_holders
+                target = this
+            }
+        }
+        remove_list_global_variable = { name = eotg_unclaimed_holders  target = this }
     }
-    if = {
-        limit = { has_variable = eotg_unclaimed_claimed }
-        remove_variable = eotg_unclaimed_claimed
+}
+
+# frontier_v4.md A7.2, sweep rule (d): an Unsworn holder that holds no
+# Unclaimed Region is an enclave. Each barony it holds goes to that barony's
+# county holder (granted, no claim left; the shape of the claim effect), then
+# it vanishes (vanish acts only once it holds nothing). CHARACTER scope (the
+# placeholder). title_province.county: vanilla 00_interaction_effects.txt:5102.
+# Caller: eotg_unclaimed_sweep_effect.
+eotg_unclaimed_dissolve_enclave_effect = {
+    save_scope_as = eotg_unclaimed_enclave
+    every_held_title = {
+        limit = { tier = tier_barony }
+        add_to_temporary_list = eotg_unclaimed_enclave_baronies
     }
-    scope:eotg_unclaimed_new_holder ?= {
-        trigger_event = { on_action = eotg_unclaimed_on_released }
+    every_in_list = {
+        list = eotg_unclaimed_enclave_baronies
+        # The list may already hold an earlier enclave's baronies this sweep
+        limit = { holder ?= scope:eotg_unclaimed_enclave }
+        save_scope_as = eotg_unclaimed_enclave_barony
+        title_province.county = {
+            holder ?= {
+                if = {
+                    limit = { NOT = { this = scope:eotg_unclaimed_enclave } }
+                    save_scope_as = eotg_unclaimed_enclave_receiver
+                    create_title_and_vassal_change = {
+                        type = granted
+                        save_scope_as = eotg_unclaimed_change
+                        add_claim_on_loss = no
+                    }
+                    scope:eotg_unclaimed_enclave_barony = {
+                        change_title_holder = {
+                            holder = scope:eotg_unclaimed_enclave_receiver
+                            change = scope:eotg_unclaimed_change
+                        }
+                    }
+                    resolve_title_and_vassal_change = scope:eotg_unclaimed_change
+                }
+            }
+        }
     }
+    scope:eotg_unclaimed_enclave = { eotg_unclaimed_vanish_effect = yes }
 }
 
 # Creates a placeholder and gives it the county (spec §4.6). COUNTY scope.
@@ -137,23 +234,42 @@ eotg_unclaimed_create_holder_effect = {
                 holder = scope:eotg_unclaimed_new_holder
                 change = scope:eotg_unclaimed_change
             }
-            title_province = {
-                barony = {
-                    if = {
-                        limit = {
-                            exists = scope:eotg_unclaimed_previous
-                            holder ?= scope:eotg_unclaimed_previous
+            # frontier_v4.md A7.2: replacing a PLACEHOLDER (death replacement,
+            # adoption, or a game-start seed): every barony it held here moves.
+            # Replacing a real ruler (§6.1, unchanged): only the capital barony.
+            if = {
+                limit = {
+                    scope:eotg_unclaimed_previous ?= {
+                        OR = {
+                            eotg_is_unclaimed_folk = yes
+                            eotg_is_unclaimed_holder = yes
                         }
-                        change_title_holder = {
-                            holder = scope:eotg_unclaimed_new_holder
-                            change = scope:eotg_unclaimed_change
+                    }
+                }
+                eotg_unclaimed_move_baronies_effect = {
+                    OLD = scope:eotg_unclaimed_previous
+                    NEW = scope:eotg_unclaimed_new_holder
+                    CHANGE = scope:eotg_unclaimed_change
+                }
+            }
+            else = {
+                title_province = {
+                    barony = {
+                        if = {
+                            limit = {
+                                exists = scope:eotg_unclaimed_previous
+                                holder ?= scope:eotg_unclaimed_previous
+                            }
+                            change_title_holder = {
+                                holder = scope:eotg_unclaimed_new_holder
+                                change = scope:eotg_unclaimed_change
+                            }
                         }
                     }
                 }
             }
         }
         resolve_title_and_vassal_change = scope:eotg_unclaimed_change
-        change_government = eotg_unclaimed_government
         # The independence guard (MPO): a placeholder is never anyone's vassal
         if = {
             limit = { is_independent_ruler = no }
@@ -167,6 +283,11 @@ eotg_unclaimed_create_holder_effect = {
             }
             resolve_title_and_vassal_change = scope:eotg_unclaimed_change
         }
+        # QA (brief §5): the government after independence, so the
+        # placeholder government (no vassal contract group) is never set on
+        # a vassal (no "no contract" lines in error.log)
+        change_government = eotg_unclaimed_government
+        eotg_unclaimed_track_holder_effect = yes
     }
 }
 
@@ -227,6 +348,7 @@ eotg_unclaimed_vanish_effect = {
             }
             is_landed = no
         }
+        eotg_unclaimed_untrack_holder_effect = yes
         death = { death_reason = death_vanished }
     }
 }
@@ -247,6 +369,7 @@ eotg_unclaimed_on_holder_death_effect = {
         list = eotg_unclaimed_orphans
         eotg_unclaimed_create_holder_effect = yes
     }
+    eotg_unclaimed_untrack_holder_effect = yes
 }
 
 # == Game start (spec §5.1, owner UQ3) ========================================
@@ -288,10 +411,27 @@ eotg_unclaimed_game_start_effect = {
         list = eotg_unclaimed_seeds
         # vanish first: the flag is what lets a trait-less seed be vanished
         eotg_unclaimed_vanish_effect = yes
+        # A seed still holding land elsewhere KEEPS eotg_unclaimed_splitting
+        # (frontier_v4 QA F4): it holds no Unclaimed Region, so the flag
+        # changes no release, and it is what lets the sweep's rule (d) vanish
+        # a trait-less seed once its baronies are dissolved
         if = {
             limit = { is_alive = yes }
-            remove_character_flag = eotg_unclaimed_splitting
+            eotg_unclaimed_track_holder_effect = yes
         }
+    }
+    # frontier_v4.md A2.2: the Unclaimed count Frontier's AI cap reads
+    eotg_unclaimed_recount_effect = yes
+}
+
+# frontier_v4.md A2.2: global eotg_unclaimed_count = the size of
+# eotg_unclaimed_counties (the readout's counting shape). No root. Callers:
+# eotg_unclaimed_game_start_effect (after the split), eotg_unclaimed_sweep_effect.
+eotg_unclaimed_recount_effect = {
+    set_global_variable = { name = eotg_unclaimed_count  value = 0 }
+    every_in_global_list = {
+        variable = eotg_unclaimed_counties
+        change_global_variable = { name = eotg_unclaimed_count  add = 1 }
     }
 }
 
@@ -302,9 +442,28 @@ eotg_unclaimed_game_start_effect = {
 #  (a) a listed county whose holder is not a placeholder: a folk holder is
 #      adopted (the §5.3 fallback); a real one gets the claim bookkeeping;
 #  (b) a listed county without the variable: dropped from the list;
-#  (c) a living placeholder with no land: vanished.
+#  (c) a living placeholder with no land: vanished;
+#  (d) frontier_v4.md A7.2: an Unsworn holder holding no Unclaimed Region (an
+#      enclave): its baronies go to their county holders, then it vanishes.
+# (c) and (d) walk the holder list eotg_unclaimed_holders (QA brief §5), not
+# every living character. Then the Unclaimed count is refreshed (A2.2).
 eotg_unclaimed_sweep_effect = {
     set_global_variable = { name = eotg_unclaimed_sweep_fixed  value = 0 }
+    # frontier_v4 QA F3: one-time backfill of the holder list for saves made
+    # before it existed; never repeats (global flag)
+    if = {
+        limit = { NOT = { has_global_variable = eotg_unclaimed_holders_backfilled } }
+        every_living_character = {
+            limit = {
+                OR = {
+                    eotg_is_unclaimed_folk = yes
+                    eotg_is_unclaimed_holder = yes
+                }
+            }
+            eotg_unclaimed_track_holder_effect = yes
+        }
+        set_global_variable = { name = eotg_unclaimed_holders_backfilled  value = yes }
+    }
     every_in_global_list = {
         variable = eotg_unclaimed_counties
         if = {
@@ -328,7 +487,10 @@ eotg_unclaimed_sweep_effect = {
         change_global_variable = { name = eotg_unclaimed_sweep_fixed  add = 1 }
         if = {
             limit = { holder = { eotg_is_unclaimed_folk = yes } }
-            holder = { change_government = eotg_unclaimed_government }
+            holder = {
+                change_government = eotg_unclaimed_government
+                eotg_unclaimed_track_holder_effect = yes
+            }
         }
         else = {
             save_scope_as = eotg_unclaimed_stray
@@ -341,14 +503,60 @@ eotg_unclaimed_sweep_effect = {
             }
         }
     }
-    every_living_character = {
-        limit = {
-            eotg_is_unclaimed_folk = yes
-            is_landed = no
+    every_in_global_list = {
+        variable = eotg_unclaimed_holders
+        if = {
+            # died naturally, or no longer one of ours: drop the entry
+            limit = {
+                OR = {
+                    is_alive = no
+                    AND = {
+                        eotg_is_unclaimed_folk = no
+                        eotg_is_unclaimed_holder = no
+                        NOT = { has_character_flag = eotg_unclaimed_splitting }
+                    }
+                }
+            }
+            add_to_temporary_list = eotg_unclaimed_gone
         }
+        else_if = {
+            limit = { is_landed = no }
+            add_to_temporary_list = eotg_unclaimed_landless
+        }
+        else_if = {
+            limit = {
+                NOT = {
+                    any_held_title = {
+                        tier = tier_county
+                        eotg_unclaimed_is_unclaimed = yes
+                    }
+                }
+            }
+            add_to_temporary_list = eotg_unclaimed_enclaves
+        }
+    }
+    every_in_list = {
+        list = eotg_unclaimed_gone
+        eotg_unclaimed_untrack_holder_effect = yes
+    }
+    # (c)
+    every_in_list = {
+        list = eotg_unclaimed_landless
         change_global_variable = { name = eotg_unclaimed_sweep_fixed  add = 1 }
         eotg_unclaimed_vanish_effect = yes
+        # one that cannot be vanished (a trait-less former seed) is dropped
+        if = {
+            limit = { is_alive = yes }
+            eotg_unclaimed_untrack_holder_effect = yes
+        }
     }
+    # (d)
+    every_in_list = {
+        list = eotg_unclaimed_enclaves
+        change_global_variable = { name = eotg_unclaimed_sweep_fixed  add = 1 }
+        eotg_unclaimed_dissolve_enclave_effect = yes
+    }
+    eotg_unclaimed_recount_effect = yes
 }
 
 # == Map colour (spec §7) =====================================================
@@ -374,7 +582,10 @@ eotg_unclaimed_set_claimed_colour_effect = {
 
 # == The playability probe (spec §12 V-U1, V-U3) ==============================
 # CHARACTER scope (the debug decision's taker). Toasts:
-#  - whether a placeholder passes is_playable_character (decides M2 and M3);
+#  - whether a placeholder passes is_playable_character. frontier_v4.md A6:
+#    that is a vanilla SCRIPTED trigger (00_available_for_events_triggers.txt:
+#    964-980) any county holder passes, so "yes" is expected and is not proof
+#    of lobby play (V-U1b); the pulse count below answers V-U1a;
 #  - how many counties are Unclaimed, how many Unsworn live, and what the last
 #    yearly sweep had to fix (0 expected).
 eotg_unclaimed_debug_readout_effect = {
@@ -423,6 +634,28 @@ eotg_unclaimed_debug_readout_effect = {
         title = eotg_unclaimed_debug_counts_tt
         left_icon = root
     }
+    # frontier_v4.md A6 (V-U1a): how often vanilla's random yearly pool
+    # reached a placeholder (eotg_unclaimed_debug_pulse_probe). Above 0 after
+    # a game year in -debug_mode = placeholders get vanilla yearly events.
+    set_variable = { name = eotg_unclaimed_debug_pulses  value = 0  days = 30 }
+    if = {
+        limit = { has_global_variable = eotg_unclaimed_debug_pulsed }
+        set_variable = { name = eotg_unclaimed_debug_pulses  value = global_var:eotg_unclaimed_debug_pulsed  days = 30 }
+    }
+    send_interface_toast = {
+        title = eotg_unclaimed_debug_pulsed_tt
+        left_icon = root
+    }
+    # frontier_v4 QA: the size of the holder list, to compare with "Unsworn alive"
+    set_variable = { name = eotg_unclaimed_debug_tracked  value = 0  days = 30 }
+    every_in_global_list = {
+        variable = eotg_unclaimed_holders
+        root = { change_variable = { name = eotg_unclaimed_debug_tracked  add = 1 } }
+    }
+    send_interface_toast = {
+        title = eotg_unclaimed_debug_tracked_tt
+        left_icon = root
+    }
 }
 
 # == Raise Your Colours (spec §8.3; Batch 2) ===================================
@@ -456,18 +689,14 @@ eotg_unclaimed_claim_effect = {
             holder = scope:eotg_unclaimed_claimant
             change = scope:eotg_unclaimed_change
         }
-        title_province = {
-            barony = {
-                if = {
-                    limit = {
-                        exists = scope:eotg_unclaimed_old_holder
-                        holder ?= scope:eotg_unclaimed_old_holder
-                    }
-                    change_title_holder = {
-                        holder = scope:eotg_unclaimed_claimant
-                        change = scope:eotg_unclaimed_change
-                    }
-                }
+        # frontier_v4.md A7.2: every barony the placeholder held here moves,
+        # not only the capital one (no enclave is left behind)
+        if = {
+            limit = { exists = scope:eotg_unclaimed_old_holder }
+            eotg_unclaimed_move_baronies_effect = {
+                OLD = scope:eotg_unclaimed_old_holder
+                NEW = scope:eotg_unclaimed_claimant
+                CHANGE = scope:eotg_unclaimed_change
             }
         }
     }

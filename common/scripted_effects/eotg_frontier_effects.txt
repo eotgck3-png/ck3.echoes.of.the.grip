@@ -425,6 +425,12 @@ eotg_frontier_grant_milestone_dev_effect = {
         }
         set_variable = { name = eotg_frontier_dev_granted  value = $LEVEL$ }
         change_development_level = 1
+        # frontier_v4.md A11.1: what THIS attempt granted (0-2), for Abandon
+        if = {
+            limit = { NOT = { has_variable = eotg_frontier_dev_granted_now } }
+            set_variable = { name = eotg_frontier_dev_granted_now  value = 0 }
+        }
+        change_variable = { name = eotg_frontier_dev_granted_now  add = 1 }
         eotg_frontier_fire_hook_effect = { HOOK = eotg_frontier_on_development_changed }
     }
 }
@@ -510,12 +516,23 @@ eotg_frontier_tick_effect = {
     # 1. The named strain causes
     if = {
         limit = { eotg_frontier_has_valid_founder = no }
-        eotg_frontier_add_strain_effect = { CAUSE = no_founder }
-        # An AI holder takes the project on itself (spec §4.1); a player
-        # chooses in eotg_frontier.002's Without a Founder variant.
+        # frontier_v4.md A4.3: an AI holder names the best adult, free courtier
+        # (or itself, if adult, free and at least as skilled); a child or
+        # imprisoned holder is never set (it would never count as valid).
+        # Otherwise strain accrues, and the AI's Abandon weight eventually
+        # acts. A player names one with Appoint a Founder (A4.2) or in
+        # eotg_frontier.002's Without a Founder variant.
+        clear_saved_scope = eotg_frontier_candidate
         if = {
             limit = { holder = { is_ai = yes } }
-            eotg_frontier_set_founder_effect = { FOUNDER = scope:eotg_frontier_holder }
+            eotg_frontier_pick_founder_effect = yes
+        }
+        if = {
+            limit = { exists = scope:eotg_frontier_candidate }
+            eotg_frontier_set_founder_effect = { FOUNDER = scope:eotg_frontier_candidate }
+        }
+        else = {
+            eotg_frontier_add_strain_effect = { CAUSE = no_founder }
         }
     }
     if = {
@@ -528,11 +545,9 @@ eotg_frontier_tick_effect = {
         eotg_frontier_add_strain_effect = { CAUSE = occupied }
     }
     if = {
-        # Phase 2 (§6.1): a Military project is built for war
-        limit = {
-            holder = { is_at_war = yes }
-            eotg_frontier_war_strains = yes
-        }
+        # Phase 2 (§6.1): a Military project is built for war. frontier_v4.md
+        # A4.1: only a war the holder leads, or hostile armies in the Region
+        limit = { eotg_frontier_war_reaches = yes }
         eotg_frontier_add_strain_effect = { CAUSE = war }
     }
     # Phase 2 (§5.2): a Dangerous Region, weakly held and unguarded
@@ -572,10 +587,66 @@ eotg_frontier_tick_effect = {
         holder = { trigger_event = eotg_frontier.005 }
     }
     else_if = {
-        # Cooldown authority for flavor events: set here and nowhere else;
-        # no event trigger reads it (CLAUDE.md invariant 4, lesson 5).
+        # Cooldown authority for flavor events: set in the roll and nowhere
+        # else; no event trigger reads it (CLAUDE.md invariant 4, lesson 5).
+        # frontier_v4.md A3: the Region only joins the ruler's roll list here;
+        # the caller rolls once per ruler per pulse, after its loop
+        # (eotg_on_yearly_frontier_tick, eotg_decision_frontier_debug_tick).
         limit = { NOT = { has_variable = eotg_frontier_event_cd } }
-        eotg_frontier_event_roll_effect = yes
+        add_to_temporary_list = eotg_frontier_roll_ready
+    }
+}
+
+# frontier_v4.md A3: the one Region of a ruler's roll list that rolls this
+# pulse. COUNTY scope. Callers: eotg_on_yearly_frontier_tick and
+# eotg_decision_frontier_debug_tick, through random_in_list (vanilla
+# 00_ai_conqueror_effects.txt:289).
+eotg_frontier_roll_chosen_effect = {
+    save_scope_as = eotg_frontier_county
+    holder = { save_temporary_scope_as = eotg_frontier_holder }
+    eotg_frontier_event_roll_effect = yes
+}
+
+# frontier_v4.md A4.2, A4.3: the founder a Region would get. COUNTY scope.
+# Saves scope:eotg_frontier_candidate, or clears it: the holder's adult,
+# unimprisoned courtier with the highest eotg_frontier_type_skill_value; the
+# holder instead, if adult, free and at least as skilled; else none.
+# Precedent: the Establish decision's own pick (eotg_frontier_decisions.txt,
+# eotg_decision_frontier_establish effect).
+eotg_frontier_pick_founder_effect = {
+    save_scope_as = eotg_frontier_county
+    clear_saved_scope = eotg_frontier_candidate
+    holder = {
+        ordered_courtier = {
+            limit = {
+                is_adult = yes
+                is_imprisoned = no
+            }
+            order_by = eotg_frontier_type_skill_value
+            save_scope_as = eotg_frontier_candidate
+        }
+        if = {
+            limit = {
+                is_adult = yes
+                is_imprisoned = no
+            }
+            if = {
+                limit = { NOT = { exists = scope:eotg_frontier_candidate } }
+                save_scope_as = eotg_frontier_candidate
+            }
+            else = {
+                scope:eotg_frontier_candidate = {
+                    save_temporary_scope_value_as = {
+                        name = eotg_frontier_candidate_skill
+                        value = eotg_frontier_type_skill_value
+                    }
+                }
+                if = {
+                    limit = { eotg_frontier_type_skill_value >= scope:eotg_frontier_candidate_skill }
+                    save_scope_as = eotg_frontier_candidate
+                }
+            }
+        }
     }
 }
 
@@ -638,7 +709,12 @@ eotg_frontier_sponsor_pay_effect = {
 # The flavor roll. Sets the 3-year cooldown (owner decision) when an event
 # (or an AI-to-AI offer) actually happens. Player holders get the founderless
 # .002, else an event from the Phase 2 pool (eotg_frontier_flavor_pick_effect);
-# AI holders get only the scripted AI-to-AI sponsor offer (spec §6.1, §8.4).
+# AI holders get the scripted AI-to-AI sponsor offer (spec §6.1, §8.4), and
+# then (frontier_v4.md A2.4) a silent progress/strain roll.
+# Called only by eotg_frontier_roll_chosen_effect (frontier_v4.md A3: one
+# Region per ruler per pulse). Flavour events fire 1-120 days later (A3;
+# vanilla court_yearly_events.txt:1880-1888); every flavour event re-checks
+# the Region's state in its trigger and options (verification Q-B1).
 eotg_frontier_event_roll_effect = {
     eotg_frontier_find_sponsor_candidate_effect = yes
     if = {
@@ -647,7 +723,7 @@ eotg_frontier_event_roll_effect = {
             # A founderless Frontier gets its variant of .002 first
             limit = { eotg_frontier_has_valid_founder = no }
             set_variable = { name = eotg_frontier_event_cd  value = yes  years = 3 }
-            holder = { trigger_event = eotg_frontier.002 }
+            holder = { trigger_event = { id = eotg_frontier.002  days = { 1 120 } } }
         }
         else = {
             # Phase 2 (frontier_v2.md §9.1): the same frequency as Phase 1 (an
@@ -718,6 +794,64 @@ eotg_frontier_event_roll_effect = {
                     eotg_frontier_add_progress_effect = { AMOUNT = 3 }
                 }
             }
+        }
+    }
+    # frontier_v4.md A2.4: an AI Frontier's life, in script with no event.
+    # After the sponsor and backer paths, under the same single cooldown
+    # authority (eotg_frontier_event_cd, set here only when the roll passes).
+    # The placeholder exclusion reads the government flag, not an Unclaimed
+    # trigger (A10: new Frontier -> Unclaimed reads degrade to "absent").
+    if = {
+        limit = {
+            holder = {
+                is_ai = yes
+                NOT = { government_has_flag = eotg_government_is_unclaimed }
+            }
+            NOT = { has_variable = eotg_frontier_event_cd }
+        }
+        random = {
+            chance = 50
+            set_variable = { name = eotg_frontier_event_cd  value = yes  years = 3 }
+            eotg_frontier_ai_silent_roll_effect = yes
+        }
+    }
+}
+
+# frontier_v4.md A2.4: what an AI Frontier's year brings, in place of the
+# player's event pool. COUNTY scope. Every branch moves the signature
+# resource (progress) or its strain (spec §2, invariant 5). The mod's
+# verified random_list shape (eotg_frontier_flavor_pick_effect). Expected
+# drift about +0.2 strain per roll. Caller: eotg_frontier_event_roll_effect.
+eotg_frontier_ai_silent_roll_effect = {
+    random_list = {
+        35 = {
+            modifier = {
+                add = 10
+                has_county_modifier = eotg_frontier_trait_hostile
+                NOT = { has_county_modifier = eotg_frontier_infra_orbital_station }
+            }
+            modifier = {
+                add = 10
+                has_county_modifier = eotg_frontier_trait_dangerous
+                NOT = { has_county_modifier = eotg_frontier_infra_garrison_post }
+                NOT = { has_county_modifier = eotg_frontier_mod_merc_escort }
+            }
+            eotg_frontier_add_strain_effect = { CAUSE = hardship }
+        }
+        35 = {
+            modifier = { add = 10  has_county_modifier = eotg_frontier_trait_rich_resources }
+            eotg_frontier_add_progress_effect = { AMOUNT = 3 }
+        }
+        15 = {
+            modifier = {
+                add = 5
+                has_county_modifier = eotg_frontier_trait_remote
+                NOT = { has_county_modifier = eotg_frontier_infra_navigation_beacon }
+            }
+            eotg_frontier_add_progress_effect = { AMOUNT = -3 }
+        }
+        15 = {
+            eotg_frontier_ease_strain_effect = yes
         }
     }
 }
@@ -940,6 +1074,11 @@ eotg_frontier_clear_project_effect = {
         limit = { has_variable = eotg_frontier_invested }
         remove_variable = eotg_frontier_invested
     }
+    # frontier_v4.md A11.1
+    if = {
+        limit = { has_variable = eotg_frontier_dev_granted_now }
+        remove_variable = eotg_frontier_dev_granted_now
+    }
     eotg_frontier_clear_pending_heir_effect = yes
 }
 
@@ -961,10 +1100,20 @@ eotg_frontier_abandon_effect = {
             set_variable = { name = eotg_frontier_attempts  value = 0 }
         }
         change_variable = { name = eotg_frontier_attempts  add = 1 }
-        # Lose infrastructure built during the attempt (Q5: kept)
+        # Lose infrastructure built during the attempt (Q5: kept).
+        # frontier_v4.md A11.1: only when THIS attempt granted development,
+        # and the lost step can be re-earned by a later attempt (at most +2
+        # net over any number of attempts: no farming, no drain)
         if = {
-            limit = { var:eotg_frontier_milestone >= 1 }
+            limit = {
+                has_variable = eotg_frontier_dev_granted_now
+                var:eotg_frontier_dev_granted_now >= 1
+            }
             change_development_level = -1
+            if = {
+                limit = { has_variable = eotg_frontier_dev_granted }
+                change_variable = { name = eotg_frontier_dev_granted  add = -1 }
+            }
         }
         # Phase 2 (frontier_v2.md §4.2): what was built is lost; what was
         # learned (the traits) stays. Expansion B2 (§B2): the next expedition
@@ -1361,7 +1510,7 @@ eotg_frontier_flavor_pick_effect = {
     random_list = {
         20 = {
             modifier = { add = 10  has_county_modifier = eotg_frontier_trait_hostile }
-            holder = { trigger_event = eotg_frontier.002 }
+            holder = { trigger_event = { id = eotg_frontier.002  days = { 1 120 } } }
         }
         20 = {
             trigger = {
@@ -1369,7 +1518,7 @@ eotg_frontier_flavor_pick_effect = {
                 exists = scope:eotg_frontier_sponsor_candidate
             }
             scope:eotg_frontier_sponsor_candidate = { save_scope_as = eotg_frontier_sponsor }
-            holder = { trigger_event = eotg_frontier.003 }
+            holder = { trigger_event = { id = eotg_frontier.003  days = { 1 120 } } }
         }
         10 = {
             trigger = {
@@ -1377,19 +1526,19 @@ eotg_frontier_flavor_pick_effect = {
                 exists = scope:eotg_frontier_rival
             }
             modifier = { add = 10  has_county_modifier = eotg_frontier_trait_trade_route }
-            holder = { trigger_event = eotg_frontier.030 }
+            holder = { trigger_event = { id = eotg_frontier.030  days = { 1 120 } } }
         }
         10 = {
             trigger = {
                 eotg_frontier_has_valid_sponsor = yes
                 NOT = { var:eotg_frontier_sponsor = holder }
             }
-            holder = { trigger_event = eotg_frontier.031 }
+            holder = { trigger_event = { id = eotg_frontier.031  days = { 1 120 } } }
         }
         10 = {
             trigger = { var:eotg_frontier_progress >= 33 }
             modifier = { add = 10  has_county_modifier = eotg_frontier_trait_strategic }
-            holder = { trigger_event = eotg_frontier.032 }
+            holder = { trigger_event = { id = eotg_frontier.032  days = { 1 120 } } }
         }
         10 = {
             trigger = {
@@ -1397,7 +1546,7 @@ eotg_frontier_flavor_pick_effect = {
                 NOT = { holder = var:eotg_frontier_founder }
             }
             modifier = { add = 5  has_county_modifier = eotg_frontier_trait_habitable }
-            holder = { trigger_event = eotg_frontier.033 }
+            holder = { trigger_event = { id = eotg_frontier.033  days = { 1 120 } } }
         }
         5 = {
             modifier = { add = 10  has_county_modifier = eotg_frontier_trait_remote }
@@ -1407,13 +1556,25 @@ eotg_frontier_flavor_pick_effect = {
                 has_county_modifier = eotg_frontier_trait_remote
                 has_county_modifier = eotg_frontier_infra_navigation_beacon
             }
-            holder = { trigger_event = eotg_frontier.034 }
+            # frontier_v4.md A11.3: a Garrison Post or a hired escort counters
+            # danger as the beacon counters remoteness (floor stays 5)
+            modifier = {
+                add = -5
+                has_county_modifier = eotg_frontier_trait_dangerous
+                has_county_modifier = eotg_frontier_infra_garrison_post
+            }
+            modifier = {
+                add = -5
+                has_county_modifier = eotg_frontier_trait_dangerous
+                has_county_modifier = eotg_frontier_mod_merc_escort
+            }
+            holder = { trigger_event = { id = eotg_frontier.034  days = { 1 120 } } }
         }
         10 = {
             trigger = { eotg_frontier_trait_room = yes }
             modifier = { add = 10  var:eotg_frontier_type ?= flag:research }
             modifier = { add = 10  has_county_modifier = eotg_frontier_trait_anomalous }
-            holder = { trigger_event = eotg_frontier.035 }
+            holder = { trigger_event = { id = eotg_frontier.035  days = { 1 120 } } }
         }
         10 = {
             trigger = {
@@ -1421,7 +1582,7 @@ eotg_frontier_flavor_pick_effect = {
                 NOT = { has_county_modifier = eotg_frontier_trait_rich_resources }
             }
             modifier = { add = 10  var:eotg_frontier_type ?= flag:mining }
-            holder = { trigger_event = eotg_frontier.036 }
+            holder = { trigger_event = { id = eotg_frontier.036  days = { 1 120 } } }
         }
         # Phase 3a (frontier_v3.md §5): a mercenary company offers its guns,
         # only where .040 (a) or (b) can apply: a Military project with no
@@ -1441,7 +1602,7 @@ eotg_frontier_flavor_pick_effect = {
                     }
                 }
             }
-            holder = { trigger_event = eotg_frontier.040 }
+            holder = { trigger_event = { id = eotg_frontier.040  days = { 1 120 } } }
         }
         # Phase 3a (frontier_v3.md §6): the faith offers its support
         10 = {
@@ -1449,7 +1610,7 @@ eotg_frontier_flavor_pick_effect = {
                 var:eotg_frontier_type ?= flag:religious
                 exists = scope:eotg_frontier_faith_backer
             }
-            holder = { trigger_event = eotg_frontier.041 }
+            holder = { trigger_event = { id = eotg_frontier.041  days = { 1 120 } } }
         }
     }
 }
@@ -1628,15 +1789,18 @@ eotg_frontier_resolve_faith_successor_effect = {
     clear_saved_scope = eotg_frontier_successor
     clear_saved_scope = eotg_frontier_kept_faith
     clear_saved_scope = eotg_frontier_kept_order
+    # frontier_v4.md A11.2: `?=` on both, so a disbanded order (or a gone
+    # faith) leaves scope:eotg_frontier_successor unset and the lapse branch
+    # below runs
     if = {
         limit = { has_variable = eotg_frontier_pending_faith }
-        var:eotg_frontier_pending_faith = {
+        var:eotg_frontier_pending_faith ?= {
             save_temporary_scope_as = eotg_frontier_kept_faith
             religious_head ?= { save_temporary_scope_as = eotg_frontier_successor }
         }
     }
     else = {
-        var:eotg_frontier_pending_order = {
+        var:eotg_frontier_pending_order ?= {
             save_temporary_scope_as = eotg_frontier_kept_order
             leader ?= { save_temporary_scope_as = eotg_frontier_successor }
         }

@@ -215,6 +215,27 @@ eotg_frontier_war_strains = {
     NOT = { var:eotg_frontier_type ?= flag:military }
 }
 
+# frontier_v4.md A4.1: a war reaches the Region only if the holder leads it,
+# or hostile armies stand in the Region; a distant ally's call does not.
+# Occupation stays its own cause. COUNTY scope; reads scope:eotg_frontier_holder
+# (saved by the tick at entry). Precedents: any_character_war /
+# is_war_leader (00_war.txt:718-724), any_army_in_location
+# (yearly_on_actions.txt:1896-1898), army_owner (army_on_actions.txt:651-653).
+eotg_frontier_war_reaches = {
+    eotg_frontier_war_strains = yes
+    scope:eotg_frontier_holder = { is_at_war = yes }
+    OR = {
+        scope:eotg_frontier_holder = {
+            any_character_war = { is_war_leader = prev }
+        }
+        any_county_province = {
+            any_army_in_location = {
+                army_owner ?= { is_at_war_with = scope:eotg_frontier_holder }
+            }
+        }
+    }
+}
+
 # -- Character scope -----------------------------------------------------------
 eotg_frontier_holds_surveyable = {
     any_held_title = {
@@ -227,6 +248,16 @@ eotg_frontier_holds_buildable = {
     any_held_title = {
         tier = tier_county
         eotg_frontier_infra_room = yes
+    }
+}
+
+# frontier_v4.md A4.2: holds a Frontier with no valid founder (shows Appoint
+# a Founder)
+eotg_frontier_holds_founderless = {
+    any_held_title = {
+        tier = tier_county
+        eotg_frontier_is_frontier = yes
+        eotg_frontier_has_valid_founder = no
     }
 }
 

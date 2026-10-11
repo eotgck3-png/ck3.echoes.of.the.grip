@@ -35,8 +35,10 @@
  eotg_decision_unclaimed_debug_readout_tooltip:0 "Testing only: show the Unclaimed Regions probe."
  eotg_decision_unclaimed_debug_readout_confirm:0 "Show it"
  eotg_unclaimed_debug_none_tt:0 "No Unsworn holder was found anywhere."
- eotg_unclaimed_debug_playable_tt:0 "PROBE: an Unsworn holder IS playable. Report this (spec V-U1: mitigations M2 and M3 are needed)."
+ eotg_unclaimed_debug_playable_tt:0 "PROBE: an Unsworn holder passes the scripted is_playable_character check. Expected: yes. This is not proof that a player could take the character in a lobby."
  eotg_unclaimed_debug_unplayable_tt:0 "PROBE: an Unsworn holder is NOT playable (spec V-U1)."
+ eotg_unclaimed_debug_pulsed_tt:0 "PROBE: vanilla's random yearly event pool has reached an Unsworn holder [eotg_unclaimed_debug_reader.MakeScope.Var('eotg_unclaimed_debug_pulses').GetValue|0] times since this counter started. Above zero means Unsworn holders need shielding from yearly events."
+ eotg_unclaimed_debug_tracked_tt:0 "PROBE: [eotg_unclaimed_debug_reader.MakeScope.Var('eotg_unclaimed_debug_tracked').GetValue|0] Unsworn holders are tracked. Compare this with the Unsworn alive count; a mismatch means the tracking list has drifted."
  eotg_unclaimed_debug_counts_tt:0 "Unclaimed Regions: [eotg_unclaimed_debug_reader.MakeScope.Var('eotg_unclaimed_debug_counties').GetValue|0]. Unsworn alive: [eotg_unclaimed_debug_reader.MakeScope.Var('eotg_unclaimed_debug_folk').GetValue|0]. Fixed by the last yearly sweep: [eotg_unclaimed_debug_reader.MakeScope.Var('eotg_unclaimed_debug_fixed').GetValue|0] (0 expected)."
 
  # -- Raise Your Colours (Batch 2) --
@@ -44,8 +46,8 @@
  eotg_unclaimed_claim_interaction_desc:0 "Pay for the crews, the guns and the flag, and this Region is yours for as long as you can hold it. Nobody else has to agree, and nobody is obliged to respect it."
  eotg_unclaimed_claim_reach_tt:0 "The Region borders your lands, or lies within reach of your capital"
  eotg_unclaimed_claim_gold_tt:0 "You can pay for the crews, the guns and the flag"
- eotg_unclaimed_claim_prestige_tt:0 "Your name carries enough weight to make it stick"
- eotg_unclaimed_claim_effect_tt:0 "The Region becomes yours. The Unsworn living there go on as before. You may now Establish a Frontier here."
+ eotg_unclaimed_claim_prestige_tt:0 "Your name carries enough weight for crews to sail under your flag"
+ eotg_unclaimed_claim_effect_tt:0 "The Region becomes yours. The Unsworn living there go on as before. You may Establish a Frontier here once the Region has been explored."
  eotg_unclaimed_claim_returns_tt:0 "If a Frontier here is ever abandoned, the Region is given up and becomes unclaimed again, unless it is your capital Region."
 
  # -- Release on abandonment (Batch 2) --

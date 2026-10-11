@@ -33,13 +33,14 @@ eotg_decision_frontier_establish = {
     picture = {
         reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
     }
+    # frontier_v4.md A2.1: every 24 months at every tier (was 60/48)
     ai_check_interval_by_tier = {
         barony = 0
-        county = 60
-        duchy = 48
-        kingdom = 48
-        empire = 48
-        hegemony = 48
+        county = 24
+        duchy = 24
+        kingdom = 24
+        empire = 24
+        hegemony = 24
     }
 
     is_shown = {
@@ -152,8 +153,19 @@ eotg_decision_frontier_establish = {
         eotg_frontier_ai_room = yes
         is_at_war = no
     }
+    # frontier_v4.md A2.1: base 25; +25 for a Region the AI paid to claim (a
+    # variable read, the A10 seam rule); a 1x gold gate, halved below 2x.
+    # Conditional factor-0 shape: vanilla ep3_admin_events.txt:130-145.
     ai_will_do = {
-        base = 10
+        base = 25
+        modifier = {
+            add = 25
+            any_held_title = {
+                tier = tier_county
+                eotg_frontier_can_establish = yes
+                has_variable = eotg_unclaimed_claimed
+            }
+        }
         modifier = { add = 10  stewardship >= 12 }
         modifier = { add = 10  has_trait = ambitious }
         modifier = { add = 5  has_trait = diligent }
@@ -161,6 +173,11 @@ eotg_decision_frontier_establish = {
         modifier = { add = -10  has_trait = content }
         modifier = {
             factor = 0
+            gold < eotg_frontier_establish_cost_value
+        }
+        modifier = {
+            factor = 0.5
+            gold >= eotg_frontier_establish_cost_value
             gold < {
                 value = eotg_frontier_establish_cost_value
                 multiply = 2
@@ -333,6 +350,10 @@ eotg_decision_frontier_sponsor = {
         empire = 36
         hegemony = 36
     }
+
+    # QA F3 (frontier_unsworn_architect_brief.md §5): a refused offer is not
+    # a free re-roll. Vanilla decision cooldown: 00_cultural_tradition_decisions.txt:141
+    cooldown = { years = 1 }
 
     # any_in_global_list over title scopes: confirmed (verification V2)
     is_shown = {
@@ -538,6 +559,138 @@ eotg_decision_frontier_abandon = {
     }
 }
 
+# Appoint a Founder (frontier_v4.md A4.2): a Frontier with no valid founder
+# gets one now, picked by eotg_frontier_pick_founder_effect (the best adult,
+# free courtier for the project type, or the taker). No cost; no cooldown: the
+# decision disappears once the Region has a valid founder. Players only: the
+# AI names its founder in the yearly tick (A4.3).
+eotg_decision_frontier_appoint_founder = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 0
+        kingdom = 0
+        empire = 0
+        hegemony = 0
+    }
+
+    is_shown = {
+        eotg_frontier_holds_founderless = yes
+    }
+
+    is_valid = {
+        # Someone who could lead: the taker, or an adult, free courtier
+        custom_description = {
+            text = eotg_decision_frontier_appoint_founder_candidate_tt
+            OR = {
+                AND = {
+                    is_adult = yes
+                    is_imprisoned = no
+                }
+                any_courtier = {
+                    is_adult = yes
+                    is_imprisoned = no
+                }
+            }
+        }
+    }
+
+    is_valid_showing_failures_only = {
+        custom_description = {
+            text = eotg_decision_frontier_appoint_founder_pick_tt
+            scope:selected_item ?= {
+                tier = tier_county
+                holder = root
+                eotg_frontier_is_frontier = yes
+                eotg_frontier_has_valid_founder = no
+            }
+        }
+    }
+
+    # The Region picker (header; vanilla pam_decisions.txt:1395,
+    # 50_holy_site_decisions.txt:147). Items: the taker's founderless
+    # Frontiers. Default: the most strained.
+    widget = {
+        gui = "decision_view_widget_select_realm_county"
+        controller = select_scope_object
+
+        setup_items = {
+            scope:actor = {
+                every_held_title = {
+                    limit = {
+                        tier = tier_county
+                        eotg_frontier_is_frontier = yes
+                        eotg_frontier_has_valid_founder = no
+                    }
+                    add_to_list = item_list
+                }
+            }
+        }
+
+        default_item = {
+            scope:actor = {
+                ordered_held_title = {
+                    limit = {
+                        tier = tier_county
+                        eotg_frontier_is_frontier = yes
+                        eotg_frontier_has_valid_founder = no
+                    }
+                    order_by = var:eotg_frontier_strain
+                    save_scope_as = selected_item
+                }
+            }
+        }
+
+        is_item_valid = {
+            custom_tooltip = {
+                text = eotg_decision_frontier_appoint_founder_pick_tt
+                tier = tier_county
+                holder = scope:actor
+                eotg_frontier_is_frontier = yes
+                eotg_frontier_has_valid_founder = no
+            }
+        }
+
+        ai_select_item = {
+            scope:actor = {
+                ordered_held_title = {
+                    limit = {
+                        tier = tier_county
+                        eotg_frontier_is_frontier = yes
+                        eotg_frontier_has_valid_founder = no
+                    }
+                    order_by = var:eotg_frontier_strain
+                    save_scope_as = selected_item
+                }
+            }
+        }
+    }
+
+    effect = {
+        scope:selected_item ?= { save_scope_as = eotg_frontier_county }
+        scope:eotg_frontier_county ?= { eotg_frontier_pick_founder_effect = yes }
+        if = {
+            limit = { exists = scope:eotg_frontier_candidate }
+            custom_tooltip = eotg_decision_frontier_appoint_founder_effect_tt
+            hidden_effect = {
+                scope:eotg_frontier_county ?= {
+                    eotg_frontier_set_founder_effect = { FOUNDER = scope:eotg_frontier_candidate }
+                }
+            }
+        }
+    }
+
+    ai_potential = {
+        always = no
+    }
+    ai_will_do = {
+        base = 0
+    }
+}
+
 # -- Debug only (spec §8.5) ----------------------------------------------------
 # Marks the taker's capital Region Unsettled so the whole loop can be tested
 # on the vanilla map. Any other Region: the console line in
@@ -612,6 +765,11 @@ eotg_decision_frontier_debug_tick = {
                 eotg_frontier_is_frontier = yes
             }
             eotg_frontier_tick_effect = yes
+        }
+        # frontier_v4.md A3: the same one roll per ruler as the yearly tick
+        random_in_list = {
+            list = eotg_frontier_roll_ready
+            eotg_frontier_roll_chosen_effect = yes
         }
     }
 
@@ -914,13 +1072,15 @@ eotg_decision_frontier_explore = {
     picture = {
         reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
     }
+    # frontier_v4.md A2.1b: every 24 months at every tier (was 60/48), so a
+    # claimed Unknown Region is explored in time to be established
     ai_check_interval_by_tier = {
         barony = 0
-        county = 60
-        duchy = 48
-        kingdom = 48
-        empire = 48
-        hegemony = 48
+        county = 24
+        duchy = 24
+        kingdom = 24
+        empire = 24
+        hegemony = 24
     }
 
     is_shown = {
@@ -1019,6 +1179,19 @@ eotg_decision_frontier_explore = {
     ai_will_do = {
         base = 10
         modifier = { add = 10  learning >= 12 }
+        # frontier_v4.md A2.1b: a Region the AI paid to claim that is still
+        # unexplored (a variable read, the A10 seam rule)
+        modifier = {
+            add = 40
+            any_held_title = {
+                tier = tier_county
+                has_variable = eotg_unclaimed_claimed
+                OR = {
+                    eotg_frontier_is_unknown = yes
+                    eotg_frontier_is_partial = yes
+                }
+            }
+        }
     }
 }
 

@@ -227,8 +227,43 @@ eotg_frontier_strain_fail_value = {
 }
 
 # -- AI throttle ----------------------------------------------------------------
+# frontier_v4.md A2.2: 8, plus 1 per 20 Unclaimed Regions, at most 24. Reads
+# the global variable eotg_unclaimed_count only (A10 seam rule): without
+# Unclaimed Regions it is absent and the cap is 8.
 eotg_frontier_ai_cap_value = {
     value = 8
+    if = {
+        limit = { has_global_variable = eotg_unclaimed_count }
+        add = {
+            value = global_var:eotg_unclaimed_count
+            divide = 20
+            floor = yes
+        }
+    }
+    max = 24
+}
+
+# frontier_v4.md A4.3: the skill a founder brings to the Region's project
+# type, the same mapping as eotg_frontier_founder_bonus_value: martial for
+# Military, learning for Religious and Research, stewardship otherwise.
+# CHARACTER scope (the would-be founder); reads scope:eotg_frontier_county.
+eotg_frontier_type_skill_value = {
+    value = stewardship
+    if = {
+        limit = { scope:eotg_frontier_county ?= { var:eotg_frontier_type ?= flag:military } }
+        value = martial
+    }
+    else_if = {
+        limit = {
+            scope:eotg_frontier_county ?= {
+                OR = {
+                    var:eotg_frontier_type ?= flag:religious
+                    var:eotg_frontier_type ?= flag:research
+                }
+            }
+        }
+        value = learning
+    }
 }
 
 # == Phase 2 (docs/specs/frontier_v2.md) =====================================

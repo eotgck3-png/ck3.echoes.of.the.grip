@@ -44,6 +44,14 @@ eotg_on_yearly_frontier_tick = {
             set_variable = { name = eotg_frontier_tick_year  value = current_year }
             eotg_frontier_tick_effect = yes
         }
+        # frontier_v4.md A3: ONE flavour roll per ruler per pulse, among the
+        # Regions the tick put on the list (no cooldown on them); the per-
+        # county eotg_frontier_event_cd stays the roll's own authority.
+        # random_in_list: vanilla 00_ai_conqueror_effects.txt:289
+        random_in_list = {
+            list = eotg_frontier_roll_ready
+            eotg_frontier_roll_chosen_effect = yes
+        }
     }
 }
 

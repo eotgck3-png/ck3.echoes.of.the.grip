@@ -49,6 +49,7 @@ eotg_unclaimed_on_title_gain = {
                 eotg_is_unclaimed_holder = no
             }
             change_government = eotg_unclaimed_government
+            eotg_unclaimed_track_holder_effect = yes
         }
         else_if = {
             limit = { eotg_is_unclaimed_folk = no }
@@ -91,6 +92,33 @@ yearly_global_pulse = {
 eotg_unclaimed_on_yearly_sweep = {
     effect = {
         eotg_unclaimed_sweep_effect = yes
+    }
+}
+
+# -- The pulse probe (frontier_v4.md A6, V-U1a; debug tooling, no gating) ----
+# Vanilla's random yearly event pool (yearly_on_actions.txt:3018-3021) is
+# gated by basic_is_valid_for_yearly_events_trigger; the parent's trigger
+# gates this child too, so a count above 0 after one game year in
+# -debug_mode means placeholders get vanilla yearly events (then build M2).
+# The debug readout toasts the count. debug_only as a trigger:
+# game_start.txt:7288.
+random_yearly_playable_pulse = {
+    on_actions = {
+        eotg_unclaimed_debug_pulse_probe
+    }
+}
+
+eotg_unclaimed_debug_pulse_probe = {
+    trigger = {
+        debug_only = yes
+        eotg_is_unclaimed_holder = yes
+    }
+    effect = {
+        if = {
+            limit = { NOT = { has_global_variable = eotg_unclaimed_debug_pulsed } }
+            set_global_variable = { name = eotg_unclaimed_debug_pulsed  value = 0 }
+        }
+        change_global_variable = { name = eotg_unclaimed_debug_pulsed  add = 1 }
     }
 }
 
