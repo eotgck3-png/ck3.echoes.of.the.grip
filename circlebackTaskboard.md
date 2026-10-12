@@ -550,6 +550,14 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Next step:** one scripter pass and one localizer pass, then QA.
 - **Refs:** template §9.3, §9.5
 
+### CB-56: Building names still read as vanilla
+- **Status:** parked (2026-10-12)
+- **What:** frontier_v5 #5 places vanilla buildings when a Frontier completes: Hospices, Guild Halls, Barracks, temple, and Chapel (Monasteries line). The v2 mod has no building reskin loc yet, so they show vanilla names. All of those names are acceptable at 866 (lore ruling, 2026-10-12). v1's reskin targets are listed in `OLD PROJECT VERSION/docs/localization_crusade.md` (e.g. Monasteries → "Meditation Retreats").
+- **Trigger to revisit:** the localization reflavour pass (Gate 4), or sooner if a placed building's name reads wrong in game.
+- **Owner:** eotg-localizer, with eotg-lore-keeper
+- **Next step:** port the v1 building reskins as `localization/english/replace/` overrides. Keep one definition per key across the tree.
+- **Refs:** `docs/specs/frontier_v5.md` §3.5
+
 ## Tooling and environment
 
 ### CB-18: Game is 1.20.0.3; the tools target older versions
