@@ -1169,6 +1169,9 @@ eotg_frontier_complete_effect = {
             eotg_frontier_raise_dev_effect = { AMOUNT = 1 }
             eotg_frontier_create_figure_effect = { TEMPLATE = eotg_frontier_official_template }
         }
+        # frontier_v5.md §3.5 (#5): a vanilla building in the new System,
+        # after the holding exists and before the settle rewards
+        eotg_frontier_completion_building_effect = yes
         # Phase 2 (frontier_v2.md §7): traits and infrastructure become results
         eotg_frontier_settle_rewards_effect = yes
         if = {
@@ -1178,6 +1181,100 @@ eotg_frontier_complete_effect = {
         # frontier_v4.md A8.3: before the settle, which drops the sponsor
         eotg_frontier_reward_sponsor_effect = yes
         eotg_frontier_settle_effect = yes
+    }
+}
+
+# frontier_v5.md §3.5 (#5): one level-01 vanilla building per completion.
+# COUNTY scope; called by eotg_frontier_complete_effect after the type's
+# eotg_frontier_build_holding_effect and before
+# eotg_frontier_settle_rewards_effect. The holding types read
+# scope:eotg_frontier_new_barony, which build_holding leaves unset in its
+# no-slot branch, so nothing is placed there (the development and control
+# fallback stands). Research builds no holding and uses the county's
+# title_province. Mining and Administrative get no building.
+# Keys (vanilla 1.20): hospices_01 00_common_buildings.txt:3, guild_halls_01
+# 00_city_buildings.txt:2273, barracks_01
+# 00_standard_military_buildings.txt:4107, monastic_schools_01
+# 00_temple_buildings.txt:4144. scriptorium_01 is not used (legends DLC).
+# The building lands in the Local Ruler's holding when A1 granted one.
+eotg_frontier_completion_building_effect = {
+    if = {
+        limit = { exists = scope:eotg_frontier_new_barony }
+        if = {
+            limit = { var:eotg_frontier_type ?= flag:settlement }
+            scope:eotg_frontier_new_barony.title_province = {
+                eotg_frontier_place_building_effect = { BUILDING = hospices_01 }
+            }
+        }
+        else_if = {
+            limit = { var:eotg_frontier_type ?= flag:trade }
+            scope:eotg_frontier_new_barony.title_province = {
+                eotg_frontier_place_building_effect = { BUILDING = guild_halls_01 }
+            }
+        }
+        else_if = {
+            limit = { var:eotg_frontier_type ?= flag:military }
+            scope:eotg_frontier_new_barony.title_province = {
+                # The trigger is empty in 1.20.0.4 (its OR is commented out);
+                # kept so a patch that restores it is honoured
+                if = {
+                    limit = { building_barracks_requirement_terrain = yes }
+                    eotg_frontier_place_building_effect = { BUILDING = barracks_01 }
+                }
+                else = {
+                    eotg_frontier_place_building_effect = { BUILDING = hospices_01 }
+                }
+            }
+        }
+        else_if = {
+            limit = { var:eotg_frontier_type ?= flag:religious }
+            scope:eotg_frontier_new_barony.title_province = {
+                if = {
+                    limit = { has_holding_type = church_holding }
+                    eotg_frontier_place_building_effect = { BUILDING = monastic_schools_01 }
+                }
+                else = {
+                    eotg_frontier_place_building_effect = { BUILDING = hospices_01 }
+                }
+            }
+        }
+    }
+    if = {
+        # Research builds no holding, so scope:eotg_frontier_new_barony plays
+        # no part
+        limit = { var:eotg_frontier_type ?= flag:research }
+        title_province = {
+            if = {
+                limit = { has_holding_type = church_holding }
+                eotg_frontier_place_building_effect = { BUILDING = monastic_schools_01 }
+            }
+            else = {
+                eotg_frontier_place_building_effect = { BUILDING = hospices_01 }
+            }
+        }
+    }
+}
+
+# frontier_v5.md §3.5 (#5): PROVINCE scope. Vanilla upgrade_farm_building
+# shape (01_building_upgrade_effects.txt:7-22): with no free slot, add the
+# stacking extra_building_slot modifier (00_province_modifiers.txt:173),
+# then the building. No holding, no building.
+eotg_frontier_place_building_effect = {
+    if = {
+        limit = {
+            has_holding = yes
+            NOT = { has_building_or_higher = $BUILDING$ }
+            free_building_slots = 0
+        }
+        add_province_modifier = extra_building_slot
+        add_building = $BUILDING$
+    }
+    else_if = {
+        limit = {
+            has_holding = yes
+            NOT = { has_building_or_higher = $BUILDING$ }
+        }
+        add_building = $BUILDING$
     }
 }
 

@@ -346,12 +346,12 @@ Weights and triggers are in §3.4.2. "S" = strain, "P" = progress. Every option'
   - `else_if = { limit = { NOT = { has_building_or_higher = $BUILDING$ } }  add_building = $BUILDING$ }`;
   - plus `has_holding = yes` in both limits (no holding means no building).
 - **New scripted effect** `eotg_frontier_completion_building_effect`, COUNTY scope, called in `eotg_frontier_complete_effect` **after** each type's `eotg_frontier_build_holding_effect` and **before** `eotg_frontier_settle_rewards_effect`:
-  - `if = { limit = { exists = scope:eotg_frontier_new_barony } … }` for the holding types. The **no-slot branch** of `build_holding` (`:1274-1280`) leaves `scope:eotg_frontier_new_barony` unset, so nothing is placed: the existing fallback (development and control) stands.
+  - `if = { limit = { exists = scope:eotg_frontier_new_barony } … }` for the holding types. The **no-slot branch** of `build_holding` (the `else` after the slot branch, which sets the scope at `:1366` after clearing it at `:1352`) leaves `scope:eotg_frontier_new_barony` unset, so nothing is placed: the existing fallback (development and control) stands.
   - Research uses `title_province` directly.
 - The building goes into the **Local Ruler's** holding when A1 grants it (city or church). That is intended: the System is theirs, under the holder.
 - **Tooltip:** the effect's own `add_building` line shows in .004's option tooltips, since `eotg_frontier_complete_effect` is not hidden there. No new loc key is needed for the effect.
 
-**Untested in game (V-B1, V-B2 in §10):** whether `add_building` bypasses `can_construct`, and whether a building whose `is_enabled` fails sits inert.
+**Untested in game (V-B1 to V-B4 in §10):** whether `add_building` bypasses `can_construct`, and whether a building whose `is_enabled` fails sits inert.
 
 **Names:** the v2 mod has no building reskin loc, so placed buildings read with vanilla names. "Hospices", "Guild Halls" and "Barracks" are acceptable placeholders (orchestrator, 2026-10-12). `monastic_schools_01` **stays** (eotg-lore-keeper, 2026-10-12): at level 01 vanilla displays it as **"Chapel" (Monasteries line)**; "Monastic Schools" is the level-03 name (`G/localization/english/buildings_l_english.yml:500,502,508`). "Chapel" is an acceptable placeholder. Future reskin target for the line: **"Meditation Retreats"** (`OLD PROJECT VERSION/docs/localization_crusade.md:121`), done in the localizer's reskin pass (D5-4), not in this spec.
 
@@ -518,6 +518,8 @@ No `replace_path`, no descriptor change, no new folder.
 | R1 cause | Take .054.d at strain 7, then tick | .005 shows `desc_dispute`; the Abandon tooltip shows the dispute cause line |
 | #5 (**V-B1**) | Complete Settlement, Trade, Military and Religious under a feudal holder; Research with a church capital and without one | each new System holds its building at level 01; no error.log line; Mining and Administrative place nothing |
 | #5 (**V-B2**) | Fill a Region's slots (console) before completion | `extra_building_slot` is added and the building placed; whether a building whose `can_construct` is unmet sits inert is recorded either way |
+| #5 (**V-B3**) | Hover .004's completion options for each holding type | record whether the building line shows (QA 5D: `scope:eotg_frontier_new_barony` may be unset at preview, so only Research may show it); acceptable either way, note it |
+| #5 (**V-B4**) | Complete a Trade Frontier | `guild_halls_01` is present once the new city has `city_01` |
 
 ## 11. Build batches (scripter takes them in order, after v4 batches 1, 2 and 4)
 
@@ -539,7 +541,7 @@ Then the localizer (5A keys), then QA.
 
 Close-out as 5B. Then the localizer, then **eotg-lore-keeper reviews the 5C loc** against §8 before QA.
 
-**Batch 5D: #5 buildings.** The two building effects and the call in `eotg_frontier_complete_effect`. QA runs V-B1 and V-B2. The building name is ruled (§3.5).
+**Batch 5D: #5 buildings.** The two building effects and the call in `eotg_frontier_complete_effect`. QA passed statically (2026-10-12); V-B1 to V-B4 are in-game. The building name is ruled (§3.5).
 
 5A must come first, because 5C's tooltips reuse .002/.005 keys. 5B and 5D are independent of each other.
 
@@ -566,4 +568,4 @@ None. H4 is ruled. The needs-lore items in §8 go to eotg-lore-keeper.
 - files: docs/specs/frontier_v5.md (new); docs/specs/frontier_v4.md (§13/§14 H4 ruled, header, D4-1/D4-9, handoff)
 - needs-loc: §7. 5A: `eotg_frontier.005.e`, `.005.lead_tt`, `eotg_frontier_research_fascination_tt`. 5B: 14 option names + 9 tooltips. 5C: 7 × (t, desc, variants, a–d) + 18 tooltips + `eotg_frontier.005.desc_dispute` + `eotg_frontier_band_cause_dispute_tt`.
 - needs-lore: items 1–3 ruled 2026-10-12 (§8): Chapel (Monasteries line) stays, fascination accepted with CB-36 dependency, "rite" plain text only. Remaining: a review of the 5C loc against §8.
-- needs-human: none. In game after the build: #6, #4, R1 and V-B1/V-B2 (§10).
+- needs-human: none. In game after the build: #6, #4, R1 and V-B1 to V-B4 (§10).
