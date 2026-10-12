@@ -20,7 +20,7 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | `frontier_v1` | 2 | 2 | 159 | 158 | 1 | 0 |
 | `frontier_v2` | 1 | 1 | 109 | 109 | 0 | 0 |
 | `frontier_v3` | 1 | 1 | 79 | 79 | 0 | 0 |
-| `frontier_v4` | 1 | 1 | 142 | 133 | 3 | 6 |
+| `frontier_v4` | 1 | 1 | 142 | 134 | 3 | 5 |
 | `glossary` | 1 | 0 | 1 | 0 | 0 | 0 |
 | `government` | 1 | 1 | 9 | 5 | 1 | 3 |
 | `governments_v2` | 1 | 1 | 65 | 48 | 5 | 12 |
@@ -66,7 +66,7 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | `frontier_v1_open_questions.md` | yes | 21 | 21 | 0 | 0 | 0 |
 | `frontier_v2.md` | yes | 109 | 109 | 0 | 0 | 0 |
 | `frontier_v3.md` | yes | 80 | 79 | 0 | 0 | 1 |
-| `frontier_v4.md` | yes | 142 | 133 | 3 | 6 | 0 |
+| `frontier_v4.md` | yes | 142 | 134 | 3 | 5 | 0 |
 | `glossary_proposal_cloud.md` | **no** | 1 | 0 | 0 | 1 | 0 |
 | `government_template.md` | yes | 9 | 5 | 1 | 3 | 0 |
 | `governments_v2.md` | yes | 68 | 48 | 5 | 12 | 3 |
@@ -395,8 +395,8 @@ None.
 
 #### `docs/specs/frontier_v4.md`
 
-- Specced and present: 133
-- Specced, missing from script (6): `eotg_unclaimed_claim_window` (unknown, l.224), `eotg_frontier.0xx` (loc, l.258), `eotg_unclaimed_on_lobby_check` (on_action, l.355), `eotg_unclaimed_toast_unplayable` (unknown, l.355), `eotg_cartel_defiance_pressure` (unknown, l.482), `eotg_frontier.032.c_success` (loc, l.638)
+- Specced and present: 134
+- Specced, missing from script (5): `eotg_unclaimed_claim_window` (unknown, l.224), `eotg_frontier.0xx` (loc, l.258), `eotg_unclaimed_on_lobby_check` (on_action, l.355), `eotg_unclaimed_toast_unplayable` (unknown, l.355), `eotg_cartel_defiance_pressure` (unknown, l.482)
 - Referenced only, never defined or set (3): `eotg_frontier_roll_ready` (unknown, l.255), `eotg_frontier_founder.GetName` (loc, l.634), `eotg_frontier_candidate.GetName` (loc, l.635)
 - Exempt (0): none
 

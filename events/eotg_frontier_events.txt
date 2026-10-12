@@ -937,6 +937,14 @@ eotg_frontier.005 = {
             eotg_frontier_abandon_effect = { FAILED = yes }
         }
         custom_tooltip = eotg_frontier.005.abandon_tt
+        # frontier_v4.md §3 Option depth (batch 4): response rows on an
+        # ungated option (event_quality_v1 §13.1 step 4), so no trait icon
+        stress_impact = {
+            compassionate = medium_stress_impact_gain
+            diligent = minor_stress_impact_gain
+            stubborn = minor_stress_impact_gain
+            lazy = minor_stress_impact_loss
+        }
         # frontier_v4.md A5 (spec §6.6 order: d, else b if gold >= 2x minor,
         # else a). factor = 0 gates: vanilla ep3_admin_events.txt:130-145
         ai_chance = {
@@ -1803,6 +1811,12 @@ eotg_frontier.031 = {
                 custom_tooltip = eotg_frontier.031.a_tt
             }
         }
+        # frontier_v4.md §3 Option depth (batch 4): response rows on an
+        # ungated option (event_quality_v1 §13.1 step 4), so no trait icon
+        stress_impact = {
+            humble = minor_stress_impact_gain
+            arrogant = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 20  has_trait = arrogant }
@@ -1925,8 +1939,31 @@ eotg_frontier.032 = {
             diplomacy >= decent_skill_rating
             scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
         }
-        scope:eotg_frontier_county = { eotg_frontier_ease_strain_effect = yes }
-        custom_tooltip = eotg_frontier.002.ease_tt
+        # frontier_v4.md §3 Option depth (batch 4): outcome roll. The diplomacy gate stays.
+        # Shape copied from vanilla court.6041.b
+        # (G/events/yearly_events/court_yearly_events.txt:1245-1281): duel with
+        # skill and value, a desc per branch, compare_modifier on scope:duel_value.
+        # Success eases strain as the option always did; failure changes nothing.
+        duel = {
+            skill = diplomacy
+            value = average_skill_rating
+            60 = {
+                desc = eotg_frontier.032.c_success
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = 2
+                }
+                scope:eotg_frontier_county = { eotg_frontier_ease_strain_effect = yes }
+                custom_tooltip = eotg_frontier.002.ease_tt
+            }
+            40 = {
+                desc = eotg_frontier.032.c_failure
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = -2
+                }
+            }
+        }
         ai_chance = {
             base = 30
         }
@@ -1947,6 +1984,13 @@ eotg_frontier.032 = {
             scope:eotg_frontier_overlord = {
                 add_opinion = { modifier = eotg_frontier_opinion_slighted  target = root  years = 10 }
             }
+        }
+        # frontier_v4.md §3 Option depth (batch 4): response rows on an
+        # ungated option (event_quality_v1 §13.1 step 4), so no trait icon
+        stress_impact = {
+            generous = minor_stress_impact_gain
+            compassionate = minor_stress_impact_gain
+            stubborn = minor_stress_impact_loss
         }
         ai_chance = {
             base = 20
@@ -2026,6 +2070,12 @@ eotg_frontier.033 = {
             eotg_frontier_add_strain_effect = { CAUSE = hardship }
         }
         custom_tooltip = eotg_frontier.002.push_tt
+        # frontier_v4.md §3 Option depth (batch 4): response rows on an
+        # ungated option (event_quality_v1 §13.1 step 4), so no trait icon
+        stress_impact = {
+            compassionate = medium_stress_impact_gain
+            callous = minor_stress_impact_loss
+        }
         ai_chance = {
             base = 30
             modifier = { add = 20  has_trait = ambitious }
@@ -2040,8 +2090,31 @@ eotg_frontier.033 = {
             scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
         }
         remove_short_term_gold = minor_gold_value
-        scope:eotg_frontier_county = { eotg_frontier_ease_strain_effect = yes }
-        custom_tooltip = eotg_frontier.002.ease_tt
+        # frontier_v4.md §3 Option depth (batch 4): outcome roll. The gold is spent either way.
+        # Shape copied from vanilla court.6041.b
+        # (G/events/yearly_events/court_yearly_events.txt:1245-1281): duel with
+        # skill and value, a desc per branch, compare_modifier on scope:duel_value.
+        # Success eases strain as the option always did; failure changes nothing.
+        duel = {
+            skill = diplomacy
+            value = average_skill_rating
+            60 = {
+                desc = eotg_frontier.033.c_success
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = 2
+                }
+                scope:eotg_frontier_county = { eotg_frontier_ease_strain_effect = yes }
+                custom_tooltip = eotg_frontier.002.ease_tt
+            }
+            40 = {
+                desc = eotg_frontier.033.c_failure
+                compare_modifier = {
+                    value = scope:duel_value
+                    multiplier = -2
+                }
+            }
+        }
         ai_chance = {
             base = 20
         }
@@ -2063,6 +2136,12 @@ eotg_frontier.033 = {
             scope:eotg_frontier_founder = {
                 add_opinion = { modifier = eotg_frontier_opinion_slighted  target = root  years = 10 }
             }
+        }
+        # frontier_v4.md §3 Option depth (batch 4): response rows on an
+        # ungated option (event_quality_v1 §13.1 step 4), so no trait icon
+        stress_impact = {
+            ambitious = minor_stress_impact_gain
+            compassionate = minor_stress_impact_loss
         }
         ai_chance = {
             base = 30
@@ -2165,6 +2244,11 @@ eotg_frontier.034 = {
                 eotg_frontier_add_strain_effect = { CAUSE = hardship }
                 custom_tooltip = eotg_frontier.034.b_tt
             }
+        }
+        # frontier_v4.md §3 Option depth (batch 4): response row on an
+        # ungated option (event_quality_v1 §13.1 step 4), so no trait icon
+        stress_impact = {
+            compassionate = minor_stress_impact_gain
         }
         ai_chance = {
             base = 20

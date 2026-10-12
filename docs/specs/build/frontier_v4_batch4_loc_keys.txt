@@ -1,0 +1,38 @@
+# Frontier v4 batch 4 (option depth): loc keys the built script references (eotg-scripter, 2026-10-11).
+# Spec: docs/specs/frontier_v4.md §3 "Option depth" and §7 (option-depth row); event_quality_v1 §12 (voice).
+# Rules: UTF-8 with exactly one BOM, Canadian English, bare [x.GetName] (never [scope:x]),
+#   Region = county, System = barony, no numbers for progress or strain (frontier_v1.md §R),
+#   speech in vanilla double quotes, time-neutral Frontier text, no named factions, no Void.
+# Shape: each key is a duel branch `desc` (vanilla court.6041.b.success / .failure,
+#   G/localization/english/event_localization/court_events/court_events_claudia_l_english.yml:101-102):
+#   one short clause, no closing full stop, shown in the option tooltip after the engine's
+#   "N% chance" line and above that branch's effects. Do not state a percentage or a strain amount.
+# Text after '=>' is the intended English (a guide; the localizer owns wording). The parenthesis says
+#   what the text must convey, true to the script.
+# Total keys: 4 new. 0 existing keys changed; 2 existing keys to review (end of file).
+
+## localization/english/eotg_frontier_l_english.yml
+
+## eotg_frontier.032 "Terms Demanded", option c "Talk them round." (gated on diplomacy >= decent).
+## A diplomacy duel against average_skill_rating; 60/40 base, +-2 per point of the difference.
+## The scope eotg_frontier_overlord exists on the liege path (option name .032.c_liege) and not on
+## the settlers path (.032.c). Both branch keys show on both paths, so they must read for either
+## audience: say "them", or branch the wording with a Custom loc only if the localizer wants it
+## (the script does not split the key).
+eotg_frontier.032.c_success => They come round, and the demand is dropped (Success: strain on the Frontier eases by one step, exactly as the option always did. The ease_tt line "The strain on the Frontier eases." prints under this branch, so do not repeat it.)
+eotg_frontier.032.c_failure => They hear me out, and the demand stands (Failure: nothing changes. No strain is added, no opinion moves, nothing is paid. Must not imply a penalty, a slight or a later consequence.)
+
+## eotg_frontier.033 "A Quarrel in the Camps", option c "I will settle this myself, and pay what it takes."
+## Not skill-gated. The gold (minor_gold_value) is removed before the roll, on both branches. A
+## diplomacy duel against average_skill_rating; 60/40 base, +-2 per point of the difference.
+## Scope eotg_frontier_founder (saved in immediate) and eotg_frontier_county are available.
+eotg_frontier.033.c_success => The camps settle, and the work goes on (Success: strain on the Frontier eases by one step, as before. The ease_tt line prints under this branch.)
+eotg_frontier.033.c_failure => The money is spent, and the quarrel goes on (Failure: no strain change, and the gold is still gone. Must not say the work slows or the founder is slighted: neither happens.)
+
+## Existing keys to review (no change required by the script; flag only)
+## eotg_frontier.033.c "I will settle this myself, and pay what it takes." "pay what it takes" now reads
+##   slightly as a promise of success; the outcome is a roll. Optional softening is the localizer's call.
+## eotg_frontier.002.ease_tt is unchanged and now prints only inside the success branch of .032.c / .033.c.
+##
+## Stress rows added in this batch (.005.a, .031.a, .032.b, .033.a, .033.b, .034.b) need no loc: the
+## engine prints trait stress lines itself.
