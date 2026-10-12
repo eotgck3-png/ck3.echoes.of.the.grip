@@ -1040,6 +1040,37 @@ eotg_frontier_find_sponsor_candidate_effect = {
     }
 }
 
+# == Research completion: fascination (frontier_v5.md §3.2, #4) ================
+# COUNTY scope; needs scope:eotg_frontier_holder (saved by
+# eotg_frontier_complete_effect). Advances whatever innovation the HOLDER's
+# culture is currently fascinated by (names nothing, so map-agnostic); with
+# no fascination, learning lifestyle XP instead. Shape: vanilla Cathedral
+# contribution (G/common/great_projects/types/01_pam_projects.txt:617-632).
+# The amount is read in the county (the culture scope cannot see county
+# modifiers) and carried as a temporary scope value, the .004.a purse pattern.
+# Fires once per completed project; restarts pay nothing (spec §3.2 farming
+# check). Lore ruling 2026-10-12: no guard against the self-repair innovation.
+eotg_frontier_research_fascination_effect = {
+    save_temporary_scope_value_as = {
+        name = eotg_frontier_fascination
+        value = eotg_frontier_research_fascination_value
+    }
+    scope:eotg_frontier_holder = {
+        if = {
+            limit = {
+                culture = { culture_has_any_fascination = yes }
+            }
+            custom_tooltip = {
+                text = eotg_frontier_research_fascination_tt
+                culture = { add_fascination_progress = scope:eotg_frontier_fascination }
+            }
+        }
+        else = {
+            add_learning_lifestyle_xp = major_lifestyle_xp
+        }
+    }
+}
+
 # == Completion → Settled (spec §5.3, §6.5) ===================================
 # Who holds the new System (frontier_v4.md A1, owner H1; narrows ruling Q12):
 # a castle (Military) always goes to the holder; a city (Settlement, Trade) or
@@ -1123,6 +1154,8 @@ eotg_frontier_complete_effect = {
                 limit = { eotg_frontier_has_valid_founder = yes }
                 var:eotg_frontier_founder = { add_learning_skill = 1 }
             }
+            # frontier_v5.md §3.2 (#4): the holder's culture's fascination
+            eotg_frontier_research_fascination_effect = yes
         }
         else_if = {
             limit = { var:eotg_frontier_type ?= flag:administrative }

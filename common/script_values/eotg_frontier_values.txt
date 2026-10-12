@@ -564,3 +564,24 @@ eotg_frontier_trade_network_value = {
         add = var:eotg_frontier_trade_network_bonus
     }
 }
+
+# -- Research completion: fascination (frontier_v5.md §3.2, #4) ---------------
+# COUNTY scope. Percent of the fascinated innovation (vanilla loc renders it
+# as a percent: effects_l_english.yml:1869, 1877). 10 for a decades-long
+# project (twice one Cathedral contribution, 01_pam_projects.txt:627), +5 when
+# the Region holds a Research Facility, Ancient Ruins or Anomalous (the
+# eotg_frontier_mod_legacy_learning condition minus the type check). Read by
+# eotg_frontier_research_fascination_effect.
+eotg_frontier_research_fascination_value = {
+    value = 10
+    if = {
+        limit = {
+            OR = {
+                has_county_modifier = eotg_frontier_infra_research_facility
+                has_county_modifier = eotg_frontier_trait_ancient_ruins
+                has_county_modifier = eotg_frontier_trait_anomalous
+            }
+        }
+        add = 5
+    }
+}

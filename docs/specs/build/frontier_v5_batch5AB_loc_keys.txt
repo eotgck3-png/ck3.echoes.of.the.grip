@@ -1,0 +1,182 @@
+frontier_v5 batches 5A and 5B: loc keys for eotg-localizer
+==========================================================
+
+Source: docs/specs/frontier_v5.md §3.1 (#6), §3.2 (#4), §3.3 (#2), §7.
+Script: events/eotg_frontier_events.txt; common/scripted_effects/eotg_frontier_effects.txt
+(eotg_frontier_research_fascination_effect). eotg-scripter, 2026-10-12, uncommitted.
+File: localization/english/eotg_frontier_l_english.yml (UTF-8 BOM, Canadian English,
+bare [x.GetName], no dashes, no numbers for progress or strain, options first person
+or imperative per event_quality_v1 §12.1 rule 8). Glossary: Region (county), System
+(barony), Frontier, backer, strain. Never "pressure", "charter", "mayor", "bishop",
+"village". Never hard-code "knight".
+
+Hidden-value rule: progress and strain are words only, never numbers.
+
+----------------------------------------------------------------------
+5A: #6 (.005 "Lead it yourself") and #4 (fascination)
+----------------------------------------------------------------------
+
+eotg_frontier.005.e
+  Option name. Intent: "Lead it myself." Shown when the Frontier has failed
+  (strain at the failure point), the founder is someone other than me, and I am
+  an adult and free. Available in every .005 cause variant (no_founder,
+  low_control, occupied, war, sponsor_lapsed, danger, hardship); read it against
+  each desc. Effect truths: I become the founder; half the work stands; strain
+  drops to the middle (not gone); I take stress (my own time).
+
+eotg_frontier.005.lead_tt
+  Tooltip. Must convey: I take charge of the venture myself, half the work
+  stands, and the strain eases. MUST NOT say the System will be mine: under A1
+  a city or church System still goes to a Local Ruler (the founder cannot be
+  the holder), so promise nothing about who holds it. The stress cost shows as
+  vanilla effect text; do not restate it.
+
+eotg_frontier_research_fascination_tt
+  custom_tooltip text wrapping add_fascination_progress (holder's culture).
+  Shape: vanilla cathedral_fascination_progress_tt
+  (pam_great_project_types_l_english.yml:130): "Your [culture|E] gains ...
+  progress towards its current [cultural_fascination|E]". Shown only when the
+  holder's culture has a fascination. The amount VARIES (10, or 15 when the
+  Region has a Research Facility, Ancient Ruins or Anomalous), so do NOT
+  hard-code "5%" or any single number. Either say it in words ("gains
+  progress towards") or, if you can verify a working dynamic form for a
+  temporary scope value (scope:eotg_frontier_fascination), use that; the spec
+  allows a percent here because fascination is not a Frontier hidden value.
+  The context is a completed Research Frontier (shown in .004 option tooltips).
+  The no-fascination fallback is vanilla lifestyle XP text; no key needed.
+
+----------------------------------------------------------------------
+5B: #2 trait-gated options (14 names, 9 tooltips)
+----------------------------------------------------------------------
+
+Personality options show the vanilla trait icon; education and tier options
+show none, so the text must read as competence (education) or authority
+(tier) on its own.
+
+.002 (desc variants: low/mid/high strain, each with optional hostile/remote/
+dangerous paragraph; g and h need a valid founder, so never Without a Founder)
+
+eotg_frontier.002.g   [patient]
+  "Slow the work and wait the year out." Strain eases a little; the work
+  loses a little ground.
+eotg_frontier.002.g_tt
+  Must convey both halves: the strain eases, and the work slips back
+  somewhat. No numbers.
+eotg_frontier.002.h   [education_stewardship]
+  "Recut the ration ledger." Costs a trifling sum (tiny gold, shown by
+  vanilla); strain eases. Reuses eotg_frontier.002.ease_tt.
+
+.003 (letter from the prospective backer; desc plus optional desc_replace
+when a backer already exists)
+
+eotg_frontier.003.c   [education_intrigue]
+  "Accept, once I know what they would rather keep quiet." Same as .003.a
+  (they become the backer, the first shipment arrives) plus strain eases.
+  Must read sensibly whether or not desc_replace shows (an old backer is
+  replaced in that case). Root's reply to a letter: first person. Reuses
+  .003.accept_tt and .002.ease_tt (both shown).
+
+.005 (all cause variants)
+
+eotg_frontier.005.f   [duchy or above; prestige cost]
+  "Order my vassals' crews in." Authority, not competence. Costs prestige
+  (vanilla text).
+eotg_frontier.005.f_tt
+  Must convey: crews from my vassals take up the work, the strain falls
+  well back from the breaking point (to a moderate level, not to nothing),
+  and none of the work is lost. No numbers.
+
+.030 (letter from the rival backer; one desc)
+
+eotg_frontier.030.c   [education_diplomacy]
+  "Let each backer hear what the other offered." I keep my current backer.
+eotg_frontier.030.c_tt
+  Must convey: [eotg_frontier_sponsor.GetName] stays my backer and is
+  pleased; the strain eases; the work moves forward a little. The rival
+  gains nothing. No claim or say for anyone (LAW AT 866).
+
+.031 (one desc)
+
+eotg_frontier.031.d   [deceitful]
+  "Promise them a say, and let the promise lapse." Backer pleased; work
+  moves forward a little. Reuses eotg_frontier.031.no_say_tt (the backer
+  gains no claim and no say), which stays true: the promise is empty.
+
+.032 (desc_settlers only: e requires no liege overlord)
+
+eotg_frontier.032.e   [duchy or above]
+  "Remind them whose Region this is." Authority. Dread gain shows as vanilla
+  text.
+eotg_frontier.032.e_tt
+  Must convey: the settlers back down, the strain eases, but the work loses
+  a little ground. No numbers.
+
+.033 (one desc; the founder and settlers quarrel)
+
+eotg_frontier.033.d   [impatient]
+  "Both camps work double shifts until it is done." Reuses
+  eotg_frontier.002.push_tt (faster work, settlers pay for it). True: large
+  progress gain, strain rises (hardship).
+
+.034 (desc plus optional Dangerous or Remote paragraph; check both)
+
+eotg_frontier.034.d   [education_martial]
+  "Send an armed party to recover what can be saved." Competence.
+eotg_frontier.034.d_tt
+  Must convey: part of the lost run is recovered; the work loses only a
+  little ground and the settlers are spared any extra strain. Must fit a
+  Dangerous Region (hostiles) and a Remote one (distance). No numbers.
+eotg_frontier.034.e   [temperate]
+  "Cut every ration, mine first."
+eotg_frontier.034.e_tt
+  Must convey: the work keeps its pace (no ground lost), but the strain on
+  the settlers rises. No numbers.
+
+.035 (ruins variant only: d requires flag:ruins)
+
+eotg_frontier.035.d   [education_learning]
+  "Catalogue it before anyone touches it." Reuses eotg_frontier.035.a_tt per
+  spec. WARNING: the current .035.a_tt text says the work "loses some
+  ground, unless the Frontier is a research venture". On .035.d the work
+  GAINS a little on a non-research Frontier (+1) and more on a research one
+  (+4). The reused tooltip is false on the non-research path. Localizer:
+  either rephrase .035.a_tt so it does not state a direction for
+  non-research (it must stay true for .035.a, which does lose ground), or
+  request a new key eotg_frontier.035.d_tt from the scripter (one-line swap).
+
+.036 (one desc)
+
+eotg_frontier.036.c   [content]
+  "Take what the crews need, and leave the rest."
+eotg_frontier.036.c_tt
+  Must convey: the work moves forward a little and the strain eases; the
+  seam is not surveyed, so the Region gains no Rich Resources trait. No
+  numbers.
+
+.040 (desc or desc_military; d requires a company; never desc_none)
+
+eotg_frontier.040.d   [education_martial]
+  "Drill the settlers and hold it ourselves." Competence. Must fit both the
+  Dangerous (escort offer) and Military-no-backer (backing offer) variants.
+eotg_frontier.040.d_tt
+  Must convey: no fee to the company and no escort; the strain eases; the
+  drilling costs the work a little ground. The captain gains nothing. No
+  numbers.
+
+.041 (desc_head or desc_order; d requires a backer, so never desc_none)
+
+eotg_frontier.041.d   [zealous]
+  "Lead the first rite there myself." Piety gain shows as vanilla text.
+  needs-lore 3 (spec §8): whether "rite" collides with the 1.20 rite system
+  word is open; use "rite" only if the lore-keeper clears it, else e.g.
+  "service".
+eotg_frontier.041.d_tt
+  Must convey: the strain eases and the work moves forward a little. The
+  backer gains no claim and no say (may be restated). No faith or god named.
+  No numbers.
+
+Reused, unchanged: eotg_frontier.002.ease_tt, .002.push_tt, .003.accept_tt,
+.031.no_say_tt, .035.a_tt (see the .035.d warning).
+
+Total new keys: 5A 3 (.005.e, .005.lead_tt, eotg_frontier_research_fascination_tt);
+5B 23 (14 option names, 9 tooltips).

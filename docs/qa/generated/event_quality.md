@@ -33,13 +33,13 @@ Vanilla source: CK3 1.20.0.4 game files: non-hidden character events (DLC = even
 | Median desc words (main key) | 48 | 58 | **45** |
 | Desc words p10 / p90 | 23 / 84 | 29 / 92 | **32 / 61** |
 | Options defined: median, p90 | 2, p90 4 | 3, p90 4 | **5, p90 6** |
-| Options with a trait icon | 3.3% | 1.9% | **18.7%** |
-| Options with a `skill =` icon | 7.6% | 7.9% | **9.7%** |
+| Options with a trait icon | 3.3% | 1.9% | **19.0%** |
+| Options with a `skill =` icon | 7.6% | 7.9% | **10.1%** |
 | `ai_chance` on every option | 53.3% | 75.6% | **97.4%** |
-| Stress on an option | 42.2% | 60.1% | **69.1%** |
+| Stress on an option | 42.2% | 60.1% | **72.1%** |
 | `add_internal_flag` | 1.9% | 3.8% | **14.0%** |
 | Option `flavor =` | 11.9% | 15.7% | **0.0%** |
-| Toasts per event | 0.54 | 0.78 | **0.76** |
+| Toasts per event | 0.54 | 0.78 | **0.77** |
 | `send_interface_message` | 223 | 59 | **28** |
 | `play_music_cue` | 774 | 201 | **35** |
 | Letter events | 665 | 225 | **3** |
@@ -48,7 +48,7 @@ Vanilla source: CK3 1.20.0.4 game files: non-hidden character events (DLC = even
 | Events with 2+ personality-gated options (L017) | 74 | 33 | **5** |
 | Events with 3+ personality-gated options | 11 | 6 | **0** |
 
-**Mod option gate axes** (options): personality 186, education/skill 84, tier 42, other trigger 346, ungated 486.
+**Mod option gate axes** (options): personality 192, education/skill 90, tier 44, other trigger 347, ungated 486.
 
 ## Per file (mod)
 
@@ -72,7 +72,7 @@ Vanilla source: CK3 1.20.0.4 game files: non-hidden character events (DLC = even
 | `events/eotg_augmentation_tier1.txt` | 22 | 100.0% | 45.5% | 86.4 / 0.0 / 13.6% | 26.5% | 1.09 | 18.2% | 0.0% | 13.6% | 2 |
 | `events/eotg_augmentation_tier2.txt` | 21 | 90.5% | 47.6% | 71.4 / 0.0 / 28.6% | 21.6% | 1.05 | 14.3% | 0.0% | 9.5% | 0 |
 | `events/eotg_augmentation_tier3.txt` | 24 | 95.8% | 45.8% | 87.5 / 0.0 / 12.5% | 22.0% | 1.21 | 16.7% | 0.0% | 0.0% | 2 |
-| `events/eotg_frontier_events.txt` | 19 | 100.0% | 42.1% | 63.2 / 0.0 / 36.8% | 0.0% | 0.11 | 68.4% | 0.0% | 0.0% | 0 |
+| `events/eotg_frontier_events.txt` | 19 | 100.0% | 42.1% | 63.2 / 0.0 / 36.8% | 7.0% | 0.16 | 68.4% | 0.0% | 0.0% | 0 |
 
 ## Events with 2+ personality-gated options (5)
 
