@@ -1,6 +1,6 @@
 # Spec: Frontier Systems v4 (amendment: QA rulings A1–A11, Frontier + Unsworn / Unclaimed Regions)
 
-**Author:** eotg-architect, 2026-10-11. **Status:** ruled, not built. The human approved the dispatch on 2026-10-11. **Owner rulings H1–H3 recorded 2026-10-11** (§13). They touch A1, A2.3, A6 M3 and batches 2–3 only; batch 1 is unchanged.
+**Author:** eotg-architect, 2026-10-11. **Status:** ruled, not built. The human approved the dispatch on 2026-10-11. **Owner rulings H1–H3 recorded 2026-10-11** (§13). They touch A1, A2.3, A6 M3 and batches 2–3 only; batch 1 is unchanged. **H4 ruled 2026-10-12** (§13); the approved content is specified in [`frontier_v5.md`](frontier_v5.md), which amends §A5 (the .005 AI order gains option e) and D4-9.
 **Amends:** [`frontier_v1.md`](frontier_v1.md), [`frontier_v2.md`](frontier_v2.md), [`frontier_v3.md`](frontier_v3.md), [`frontier_unclaimed_regions.md`](frontier_unclaimed_regions.md) (its §D owner decisions still bind), and one line of [`governments_v2.md`](governments_v2.md). Where this spec and an amended spec disagree, **this spec wins**. Each amended spec carries a pointer back here.
 **Input:** [`docs/qa/frontier_unsworn_architect_brief.md`](../qa/frontier_unsworn_architect_brief.md) (cited as *brief Ax*); evidence in [`docs/qa/frontier_unsworn_qa.md`](../qa/frontier_unsworn_qa.md); the government assessment [`docs/qa/government_assessment_2026-10-11/shared_infra.md`](../qa/government_assessment_2026-10-11/shared_infra.md) (B1, G3), [`government_template.md`](government_template.md) §6.2. Intent: [`docs/design/frontier_systems.md`](../design/frontier_systems.md) (read-only; cited as *design §n*).
 **Vanilla:** CK3 **1.20.0.4**, `G` = `D:/SteamLibrary/steamapps/common/Crusader Kings III/game`. I re-checked every vanilla line cited below in this session. Line numbers the brief took from `0abde1d` were re-checked too and still hold.
@@ -762,7 +762,7 @@ Then the localizer, then QA.
 
 ## 12. Deferred
 
-- **D4-1 New events, options and beats:** the human's call. See §14.
+- **D4-1 New events, options and beats:** the human's call. See §14. H4 (2026-10-12) approved the items now in `frontier_v5.md`; anything beyond them stays the human's call.
 - **D4-2 Founder choice beyond auto-pick** (adventurers, dynasty members, merchants; design §5). It needs a candidate picker with character targets, which is new UI work. Proposal in §14.
 - ~~**D4-3 A founder as Local Ruler**~~: **removed 2026-10-11.** Owner ruling H1 moved it into scope; it is specified in §A1 "Founder first" and built in batch 2.
 - **D4-4 Per-government local-ruler governments:** a corporate Port, a Cartel front. Waits for governments_v2 G2.
@@ -770,7 +770,7 @@ Then the localizer, then QA.
 - **D4-6 Bands in county-modifier descriptions:** no reliable scope for data functions. Decision tooltips and .002 carry them.
 - **D4-7 AI flavour events** (`frontier_v2.md` D2-3): silent rolls only for now.
 - **D4-8 The cost of the explore and Raise Your Colours pickers** on the real map: both scan every Unclaimed county with a distance test. Re-measure after Gate 1 (QA §3).
-- **D4-9 Research output** (technology or innovation) and **vanilla buildings on completion:** these are proposals (§14), not fixes.
+- ~~**D4-9 Research output** (technology or innovation) and **vanilla buildings on completion**~~: **moved into scope 2026-10-12** (H4): `frontier_v5.md` §4 and §7.
 - **D4-10 Narrow yearly-event triggers in M2:** added only if vanilla-scout finds an ungated path (A6).
 
 ## 13. Questions for the human
@@ -780,12 +780,20 @@ Then the localizer, then QA.
 - **H2 (A2.3): no lapse. RULED.** UQ11 stands. A2.3-opt is declined and removed from batch 2. The 50-year observer run is the check (§A2 verification).
 - **H3 (A6 M3): allow it, with a warning. RULED.** If T14 shows only a full-file override works, Unsworn stays playable with the `eotg_unclaimed_toast_unplayable` lobby warning until Gate 1. No full-file copy. This also resolves the government-side twin, CB-54.
 
-**Still open:**
-- **H4 (§14):** Approve or decline each content proposal below. None is built until you do.
+**Owner ruling, 2026-10-12:**
+- **H4 (§14): RULED per proposal.** Specified in [`frontier_v5.md`](frontier_v5.md), which amends this spec for the items below.
+  - **#6** "Lead it yourself" on .005: **approved** (v5 §3).
+  - **#4** Research yields cultural innovation progress: **approved** (v5 §4).
+  - **#2** Trait-gated options: **approved**, as personality, education and tier variants under event_quality §12/§13 (v5 §5).
+  - **#1** New events: **approved in two rounds.** Round 1 (negative and political: disease, hostile inhabitants, collapse, shortage, the founder disputes ownership, a religious dispute, cultural tension) is specified in v5 §6 from the lore-keeper's constraints. Round 2 (positive: population growth, a skilled settler, an infrastructure breakthrough, a trade route) waits for its own spec (v5 §9, D5-1).
+  - **#5** Vanilla buildings on completion: **approved after the vanilla-scout and lore check passed** (v5 §7).
+  - **#3** Founder choice picker: **deferred.** It stays D4-2 (§12).
 
-## 14. Proposals for the human (NOT specified as decided)
+No H-items remain open in this spec.
 
-From brief §2. Each needs your approval before any spec.
+## 14. Proposals for the human (ruled 2026-10-12, H4; see §13)
+
+From brief §2. **Ruled:** #1 approved in two rounds (round 1 in `frontier_v5.md` §6, round 2 pending), #2, #4, #5 and #6 approved (`frontier_v5.md`), #3 deferred (D4-2). The list is kept as the record of what was proposed.
 1. **New events for design §11's gaps:**
    - **Positive:** population growth, a skilled settler, an infrastructure breakthrough, a trade route.
    - **Negative:** disease, hostile inhabitants, collapse, shortage. Raiders today exist only as .002 description lines.
@@ -805,4 +813,4 @@ From brief §2. Each needs your approval before any spec.
 - files: docs/specs/frontier_v4.md (new); pointer notes in docs/specs/frontier_v1.md, frontier_v2.md, frontier_v3.md, frontier_unclaimed_regions.md (incl. new §21 coupling record), governments_v2.md
 - needs-loc: §7. Batch 1: `eotg_decision_frontier_appoint_founder` (+`_desc`, `_confirm`, `_pick_tt`, `_effect_tt`), `eotg_unclaimed_debug_pulsed_tt`, re-text of `eotg_unclaimed_debug_playable_tt`. Batch 2: `eotg_frontier.004.local_ruler_tt`, `eotg_frontier.004.local_ruler_founder_tt`, 17 `eotg_frontier_band_*_tt`, `eotg_frontier_toast_backing_settled`, `eotg_decision_unclaimed_raise_colours` (+`_desc`, `_confirm`, `_pick_tt`), `eotg_unclaimed_claim_cooldown_tt`, `eotg_unclaimed_defender_tt`. Batch 3: `EOTG_GAME_OVER_CANNOT_PLAY_UNSWORN` + `NOT_` form, or (full-file-only T14 result, H3) `eotg_unclaimed_toast_unplayable`. Batch 4: `.032.c_success/_failure`, `.033.c_success/_failure`. A9 re-texts after the lore ruling.
 - needs-lore: (1) who owns "pressure" (A9.1, with void_lift_plan_cloud.md §3c); recommendation: no system owns it, Frontier says "strain". (2) "Frontier Roots" for the five legacy modifiers. (3) Whether vanilla "Republic"/"Theocracy" labels on the new local vassals read acceptably at 866 (display only).
-- needs-human: H4 (§14 content proposals). H1–H3 ruled 2026-10-11 (§13). In-game, in order: link the Frontier test sub-mod (QA H2), V-U1a (pulse probe, after batch 1), V-U1b + T14, V8, V-U14, V-U9/V-U8, V-U15, U2, then the 50-year AI observer run. Orchestrator: add `common/scripted_rules/` to CLAUDE.md placement when M3 is built; add the new override keys to docs/pitfalls.md §16.
+- needs-human: none open. H1–H3 ruled 2026-10-11, H4 ruled 2026-10-12 (§13; built through `frontier_v5.md`). In-game, in order: link the Frontier test sub-mod (QA H2), V-U1a (pulse probe, after batch 1), V-U1b + T14, V8, V-U14, V-U9/V-U8, V-U15, U2, then the 50-year AI observer run. Orchestrator: add `common/scripted_rules/` to CLAUDE.md placement when M3 is built; add the new override keys to docs/pitfalls.md §16.
