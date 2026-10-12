@@ -10,45 +10,45 @@ Vanilla source: CK3 1.20.0.4 game files: non-hidden character events (DLC = even
 
 | Feature | Vanilla, all | Vanilla, DLC | **Mod** |
 |---|---|---|---|
-| Events (non-hidden) | 6631 | 2242 | **265** |
+| Events (non-hidden) | 6631 | 2242 | **272** |
 | Theme set | 100.0% | 100.0% | **100.0%** |
-| `override_background` | 52.2% | 66.3% | **92.8%** |
+| `override_background` | 52.2% | 66.3% | **93.0%** |
 | `override_effect_2d` events | 224 | 142 | **24** |
-| Three or more portraits | 20.2% | 30.0% | **14.0%** |
-| Distinct animations | 262 | 242 | **66** |
-| `triggered_animation` per event | 0.32 | 0.46 | **2.65** |
-| `outfit_tags` | 2.9% | 2.5% | **0.8%** |
+| Three or more portraits | 20.2% | 30.0% | **13.6%** |
+| Distinct animations | 262 | 242 | **68** |
+| `triggered_animation` per event | 0.32 | 0.46 | **2.66** |
+| `outfit_tags` | 2.9% | 2.5% | **0.7%** |
 | `camera` | 8.2% | 13.7% | **0.0%** |
-| Spoken dialogue in the desc | 51.8% | 53.9% | **51.3%** |
-| Voice: first person | 75.7% | 73.1% | **81.5%** |
+| Spoken dialogue in the desc | 51.8% | 53.9% | **51.8%** |
+| Voice: first person | 75.7% | 73.1% | **81.6%** |
 | Voice: second person | 0.8% | 0.9% | **0.4%** |
-| Voice: neutral | 20.8% | 18.7% | **18.1%** |
+| Voice: neutral | 20.8% | 18.7% | **18.0%** |
 | Voice: no desc text | 2.8% | 7.3% | **0.0%** |
-| `Custom()` in the desc | 46.0% | 43.3% | **14.0%** |
+| `Custom()` in the desc | 46.0% | 43.3% | **13.6%** |
 | `#EMP` in the desc | 17.4% | 19.9% | **0.0%** |
 | Any `#` formatting in the desc | 19.1% | 23.1% | **0.0%** |
-| `\n\n` in the desc | 82.4% | 86.3% | **46.8%** |
+| `\n\n` in the desc | 82.4% | 86.3% | **48.2%** |
 | `random_valid` desc | 3.8% | 2.8% | **0.0%** |
-| `triggered_desc` used | 32.8% | 34.1% | **60.8%** |
+| `triggered_desc` used | 32.8% | 34.1% | **61.8%** |
 | Median desc words (main key) | 48 | 58 | **45** |
 | Desc words p10 / p90 | 23 / 84 | 29 / 92 | **32 / 61** |
 | Options defined: median, p90 | 2, p90 4 | 3, p90 4 | **5, p90 6** |
-| Options with a trait icon | 3.3% | 1.9% | **19.0%** |
-| Options with a `skill =` icon | 7.6% | 7.9% | **10.1%** |
+| Options with a trait icon | 3.3% | 1.9% | **19.1%** |
+| Options with a `skill =` icon | 7.6% | 7.9% | **10.2%** |
 | `ai_chance` on every option | 53.3% | 75.6% | **97.4%** |
-| Stress on an option | 42.2% | 60.1% | **72.1%** |
-| `add_internal_flag` | 1.9% | 3.8% | **14.0%** |
+| Stress on an option | 42.2% | 60.1% | **72.8%** |
+| `add_internal_flag` | 1.9% | 3.8% | **13.6%** |
 | Option `flavor =` | 11.9% | 15.7% | **0.0%** |
-| Toasts per event | 0.54 | 0.78 | **0.77** |
+| Toasts per event | 0.54 | 0.78 | **0.75** |
 | `send_interface_message` | 223 | 59 | **28** |
 | `play_music_cue` | 774 | 201 | **35** |
 | Letter events | 665 | 225 | **3** |
 | `window =` set | 684 | 232 | **12** |
-| `after = {}` block | 26.5% | 27.6% | **17.7%** |
+| `after = {}` block | 26.5% | 27.6% | **17.3%** |
 | Events with 2+ personality-gated options (L017) | 74 | 33 | **5** |
 | Events with 3+ personality-gated options | 11 | 6 | **0** |
 
-**Mod option gate axes** (options): personality 192, education/skill 90, tier 44, other trigger 347, ungated 486.
+**Mod option gate axes** (options): personality 198, education/skill 94, tier 45, other trigger 356, ungated 493.
 
 ## Per file (mod)
 
@@ -72,7 +72,7 @@ Vanilla source: CK3 1.20.0.4 game files: non-hidden character events (DLC = even
 | `events/eotg_augmentation_tier1.txt` | 22 | 100.0% | 45.5% | 86.4 / 0.0 / 13.6% | 26.5% | 1.09 | 18.2% | 0.0% | 13.6% | 2 |
 | `events/eotg_augmentation_tier2.txt` | 21 | 90.5% | 47.6% | 71.4 / 0.0 / 28.6% | 21.6% | 1.05 | 14.3% | 0.0% | 9.5% | 0 |
 | `events/eotg_augmentation_tier3.txt` | 24 | 95.8% | 45.8% | 87.5 / 0.0 / 12.5% | 22.0% | 1.21 | 16.7% | 0.0% | 0.0% | 2 |
-| `events/eotg_frontier_events.txt` | 19 | 100.0% | 42.1% | 63.2 / 0.0 / 36.8% | 7.0% | 0.16 | 68.4% | 0.0% | 0.0% | 0 |
+| `events/eotg_frontier_events.txt` | 26 | 100.0% | 50.0% | 69.2 / 0.0 / 30.8% | 10.6% | 0.12 | 76.9% | 0.0% | 0.0% | 0 |
 
 ## Events with 2+ personality-gated options (5)
 

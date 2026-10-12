@@ -132,6 +132,34 @@ eotg_frontier_has_valid_sponsor = {
     var:eotg_frontier_sponsor = { is_alive = yes }
 }
 
+# frontier_v5.md §3.4.2 (round 1): the settlers do not share one faith.
+# COUNTY scope. True when the Region's faith differs from its holder's, or a
+# valid founder's faith differs from the Region's. Map-agnostic: compares
+# scopes and never names a faith. `prev` is the county, one step up from the
+# founder (the eotg_frontier_has_valid_founder pattern). Read by the flavour
+# roll's .055 entry and repeated in .055's trigger (world state, so a
+# conversion during the delay voids the event).
+eotg_frontier_faiths_differ = {
+    OR = {
+        NOT = { faith = holder.faith }
+        AND = {
+            eotg_frontier_has_valid_founder = yes
+            var:eotg_frontier_founder = { NOT = { faith = prev.faith } }
+        }
+    }
+}
+
+# frontier_v5.md §3.4.2 (round 1): the same, for culture (.056). COUNTY scope.
+eotg_frontier_cultures_differ = {
+    OR = {
+        NOT = { culture = holder.culture }
+        AND = {
+            eotg_frontier_has_valid_founder = yes
+            var:eotg_frontier_founder = { NOT = { culture = prev.culture } }
+        }
+    }
+}
+
 # Establishment has reached Settled, and the type's floors are met (spec §5.2;
 # the development floor is relative, Q4)
 eotg_frontier_completion_met = {

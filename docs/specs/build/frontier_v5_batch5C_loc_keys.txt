@@ -1,0 +1,338 @@
+frontier_v5 batch 5C: loc keys for eotg-localizer
+=================================================
+
+Source: docs/specs/frontier_v5.md §3.4 (#1 round 1), §7 (5C), §8 (lore constraints).
+Script: events/eotg_frontier_events.txt (.050-.056 at the end of the file; .005
+desc_dispute); common/scripted_effects/eotg_frontier_effects.txt (cause chain).
+eotg-scripter, 2026-10-12, uncommitted.
+File: localization/english/eotg_frontier_l_english.yml (UTF-8 BOM, Canadian
+English, bare [x.GetName], no dashes, no numbers for progress or strain).
+
+Voice (event_quality_v1 §12.1): main desc first person, present tense. Every
+desc_* variant is an appended fragment ("\n\n..."), neutral or third person, and
+still carries at least one I, me or my (rule 13). At most one NPC line per desc,
+in unescaped straight double quotes (§12.2), true for every character the scope
+can resolve to (rule 14). Options are first person or imperative (rule 8).
+Short .tt lines may use the existing .002.ease_tt / .002.push_tt register.
+
+Glossary: Region (county), System (barony), Frontier, backer, strain, settlers,
+crews, berths. Never "pressure", "charter", "mayor", "bishop", "village".
+Never hard-code "knight" (use Custom('KnightCulture...') if soldiers must be
+named; "soldiers" is fine).
+
+Banned in all round-1 text (spec §8, §10 item 5): plague, pestilence, miasma,
+buboes, leeches, human, humanity, charter, Void, Orrin, Orro (as fact),
+tribunal, arbiter, court (as an outside court), League, Archive, implant
+rejection, self-repairing machinery, any named faith, god, culture, species
+or group (Laughing Blades, Carrigore, Black Wyrms). Never [rite|E].
+
+Hidden-value rule: progress and strain are words only, never numbers.
+
+Lore voice samples (spec §3.4.3, from eotg-lore-keeper; use as the register
+anchor, not necessarily verbatim):
+  .050 "The scrubbers on the lower decks failed a month ago, and now the coughing has spread to every berth."
+  .051 "The families who were here first have stopped trading with us, and last night they cut the beacon's power line."
+  .052 "Half the habitat ring has lost pressure, and the crews say the frame itself is cracking."
+  .053 "We are patching seals with seals we already patched once."
+  .054 "[eotg_frontier_founder.GetName] says the Systems were built with [eotg_frontier_founder.GetHerHis] sweat, not my coin."
+  .055 "The settlers will not share a chapel with the crews who came with the second convoy."
+  .056 "The newcomers keep their own berths, their own songs and their own grudges."
+(Note: "lost pressure" in .052 is a physical fact about the habitat and is fine;
+the glossary ban on "pressure" is for the strain value.)
+
+Reused keys (already defined; no new text): eotg_frontier.002.ease_tt,
+eotg_frontier.002.push_tt.
+
+Scopes available in every round-1 event: root (the holder), the Region as
+eotg_frontier_county ([eotg_frontier_county.GetName]), and, when the Region
+has a founder, eotg_frontier_founder (saved in immediate; may be root in
+.050-.053 and .055-.056, never root in .054). Do not use the founder scope in
+.050-.053, .055 or .056 text: it may be absent or be root.
+
+----------------------------------------------------------------------
+Shared: the new strain cause "dispute"
+----------------------------------------------------------------------
+
+eotg_frontier.005.desc_dispute
+  Appended to .005 (The Frontier Falters; strain at the failure point) when
+  the latest strain came from a dispute (.054.d, .055.d, .056.d). Shape and
+  length of the siblings (.005.desc_hardship, .005.desc_danger): starts
+  "\n\n", first person, past tense. Must convey: the settlers' quarrels over
+  who owns, worships or bunks where wore the venture down; the split was
+  never mended. No outside authority, no faith or culture named.
+
+eotg_frontier_band_cause_dispute_tt
+  One line in the Invest/Build/Abandon legibility tooltip, shown only when
+  strain is high and the latest cause is a dispute. Sibling register:
+  "Hard choices have worn the settlers down." / "Raiders and worse prey on a
+  weakly held Region." Must convey: quarrels among the settlers are dividing
+  the work. Neutral or second person, as the siblings are (the existing
+  band lines use "Your" once).
+
+----------------------------------------------------------------------
+eotg_frontier.050 Sickness in the Berths (bg clinic; strain cause hardship)
+----------------------------------------------------------------------
+Path: the yearly flavour roll, any running Frontier of mine. Lore §8 item 1:
+habitat sickness (bad air from failing scrubbers, fouled recycled water,
+radiation) or a fever in crowded berths. Use: sickness, fever, scrubbers,
+quarantine berth, medic.
+
+eotg_frontier.050.t
+  Title. Intent: "Sickness in the Berths".
+eotg_frontier.050.desc
+  First person, present. Sickness is spreading through the settlers' berths
+  from failing life support. Voice sample .050.
+eotg_frontier.050.desc_hostile
+  Shown when the Region is Hostile. Appended fragment: the Region's air (or
+  radiation) is part of the cause; the Region itself is working against us.
+  Carries I/me/my.
+eotg_frontier.050.a  [gold]
+  "Seal a quarantine berth and pay the medics." Costs gold; the work slows a
+  little.
+eotg_frontier.050.a_tt
+  The sick are isolated and treated, and the work slows while they recover.
+  No number.
+eotg_frontier.050.b  [education_learning; no icon, skill icon only]
+  "Trace it to the scrubbers myself." Must read as competence (knowing how to
+  find the fault). Uses .002.ease_tt.
+eotg_frontier.050.c  [ungated]
+  "Keep the crews working." The work moves faster and the settlers suffer for
+  it. Uses .002.push_tt. Stress: compassionate gain, callous loss.
+
+----------------------------------------------------------------------
+eotg_frontier.051 The Ones Who Were Here First (bg field camp; cause danger)
+----------------------------------------------------------------------
+Path: the yearly roll, any running Frontier. Lore §8 item 2: the people
+already living in the Region ("a few hardy families"), or raiders working out
+of it. No named group, no species, no native species.
+
+eotg_frontier.051.t
+  Title. Intent: "The Ones Who Were Here First".
+eotg_frontier.051.desc
+  First person, present. Those already in the Region have turned on the camp:
+  trade stopped, sabotage. Voice sample .051.
+eotg_frontier.051.desc_dangerous
+  Shown when the Region is known to be Dangerous. Appended fragment: I knew
+  the Region was dangerous, and this is part of it. Carries I/me/my.
+eotg_frontier.051.a  [gold]
+  "Trade with them, not orders." Costs gold. Uses .002.ease_tt.
+eotg_frontier.051.b  [forgiving; trait icon]
+  "Forget the cut line; offer them berths in the camp." (No semicolon if the
+  house style prefers; no dash.)
+eotg_frontier.051.b_tt
+  They are taken in rather than driven off: the strain eases and the camp
+  gains hands. Words only.
+eotg_frontier.051.c  [duchy or above; no icon; costs prestige]
+  "Send my own soldiers to hold the line." Must read as authority. Never
+  "knights".
+eotg_frontier.051.c_tt
+  My own soldiers guard the camp: the strain eases and the work goes on
+  safely. Words only.
+eotg_frontier.051.d  [ungated]
+  "Guard the line and keep building." Uses .002.push_tt. Stress: wrathful
+  loss, compassionate gain.
+
+----------------------------------------------------------------------
+eotg_frontier.052 The Frame Is Cracking (bg field camp; cause hardship)
+----------------------------------------------------------------------
+Path: the yearly roll, a Frontier with some work done (progress at least a
+fifth). Lore §8 item 3: structural failure (seals giving, a section losing
+pressure, the frame cracking, a station going dark). NO self-repairing
+machinery, no ecological collapse.
+
+eotg_frontier.052.t
+  Title. Intent: "The Frame Is Cracking".
+eotg_frontier.052.desc
+  First person, present. A section of the habitat is failing. Voice sample
+  .052.
+eotg_frontier.052.desc_late
+  Shown when the Frontier is well advanced (two thirds or more). Appended
+  fragment: the oldest sections, built fastest at the start, are the ones
+  giving way. Carries I/me/my.
+eotg_frontier.052.a  [Region check only]
+  "Evacuate the section and rebuild it right."
+eotg_frontier.052.a_tt
+  Shared by a and b. The section is rebuilt properly: real work is lost, but
+  the settlers feel safer (strain eases). Words only.
+eotg_frontier.052.b  [diligent; trait icon]
+  "I will walk the frame with the crews myself." Less work lost than a. Uses
+  .052.a_tt.
+eotg_frontier.052.c  [education_stewardship; no icon]
+  "Salvage the frame and reroute the crews." Competence (managing materials
+  and crews).
+eotg_frontier.052.c_tt
+  Most of the frame is saved: a little work is lost, nothing else. Words only.
+eotg_frontier.052.d  [ungated]
+  "Shore it up and keep the crews inside." Uses .002.push_tt. Stress:
+  compassionate gain (medium), callous loss.
+
+----------------------------------------------------------------------
+eotg_frontier.053 Patched Seals (bg barren world; cause hardship)
+----------------------------------------------------------------------
+Path: the yearly roll, any running Frontier. Lore §8 item 4: air, water, ice,
+spare parts or fuel ("ore, ice and volatiles").
+
+eotg_frontier.053.t
+  Title. Intent: "Patched Seals".
+eotg_frontier.053.desc
+  First person, present. Supplies are running short. Voice sample .053 (the
+  "we" is the settlers' plural, not a forecast "we").
+eotg_frontier.053.desc_remote
+  Shown when the Region is Remote. Appended fragment: the next supply run is
+  far off. Carries I/me/my.
+eotg_frontier.053.a  [gold, twice the minor sum]
+  "Buy what we lack, whatever it costs."
+eotg_frontier.053.a_tt
+  Bought at a steep price: the strain eases and the work goes on. Words only.
+eotg_frontier.053.b  [a backer who can pay]
+  "Our backer covers it." Same intent as .034.c. Uses .002.ease_tt. The
+  backer gains no say (LAW AT 866).
+eotg_frontier.053.c  [generous; trait icon; costs gold]
+  "Open my own stores to the crews."
+eotg_frontier.053.c_tt
+  My own stores carry them through: the strain eases and the work goes on.
+  Words only.
+eotg_frontier.053.d  [ungated]
+  "Ration it."
+eotg_frontier.053.d_tt
+  Rationing: the settlers go short (strain), and the Region has a hard year.
+  Do not restate the modifier's numbers; "for the next two years" is a time
+  fact and allowed if wanted. Stress: gluttonous gain, temperate loss.
+
+----------------------------------------------------------------------
+eotg_frontier.054 Whose Systems Are These? (bg council; cause dispute)
+----------------------------------------------------------------------
+Path: the yearly roll; the Frontier has a valid founder who is NOT me, and the
+work is at least half done. Right portrait: the founder. Lore §8 item 5 and
+LAW AT 866: the founder (possibly a Local Ruler, my vassal) presses for more
+under MY law. No court, arbiter, tribunal or outside authority.
+
+eotg_frontier.054.t
+  Title. Intent: "Whose Systems Are These?"
+eotg_frontier.054.desc
+  First person, present. The founder argues that the work, and so the
+  Systems, are theirs. The desc's ONE NPC line is the founder's (voice sample
+  .054; use [eotg_frontier_founder.GetName], GetSheHe, GetHerHis). True for
+  any founder: assume no kinship, rank or gender beyond "my founder".
+eotg_frontier.054.desc_ruler
+  Shown when the founder already stands to hold the new System as Local
+  Ruler under me (a city or church project; A1 founder first). Appended
+  fragment: under my own arrangement they would already govern it, under me;
+  this is about how much more. Carries I/me/my. No promise of ownership.
+eotg_frontier.054.a  [founder is landless; Settlement, Trade or Religious project]
+  "The System will be theirs to hold, under me."
+eotg_frontier.054.a_tt
+  CONDITIONAL (spec text constraint): the founder is pleased and the strain
+  eases; the System will be [eotg_frontier_founder.GetHerHis] to hold under
+  me "if [eotg_frontier_founder.GetSheHe] still leads it when the work is
+  done". Must NOT promise it outright.
+eotg_frontier.054.b  [gold]
+  "A purse, and back to work."
+eotg_frontier.054.b_tt
+  The founder is paid and pleased, and the work picks up. Words only (the
+  gold amount shows as vanilla effect text).
+eotg_frontier.054.c  [arbitrary; trait icon]
+  "What I gave, I can give to another."
+eotg_frontier.054.c_tt
+  The founder resents it, but the settlers fall in line (strain eases).
+  Dread shows as vanilla effect text.
+eotg_frontier.054.d  [ungated]
+  "The coin was mine, and so is the Region."
+eotg_frontier.054.d_tt
+  The founder resents it and the quarrel festers: strain grows from the
+  dispute. Stress: humble gain, arrogant loss.
+
+----------------------------------------------------------------------
+eotg_frontier.055 Two Chapels (bg council; cause dispute)
+----------------------------------------------------------------------
+Path: the yearly roll, when the settlers do not share one faith: the Region's
+faith differs from mine, or a valid founder's faith differs from the
+Region's. Lore §8 item 6: scoped faiths only, never a name; zeal is rising.
+No gods, no Orrin cults, no Void. "Chapel" is the word.
+
+eotg_frontier.055.t
+  Title. Intent: "Two Chapels".
+eotg_frontier.055.desc
+  First person, present. Settlers of different faiths will not share a
+  chapel. Voice sample .055.
+eotg_frontier.055.desc_founder
+  Shown (first) when the founder's faith differs from the settlers'. Appended
+  fragment: the one leading the work does not share the settlers' faith.
+  Third person about the founder is fine, but do NOT use the founder scope
+  ([eotg_frontier_founder...]) here unless guarded; plain "the founder" is
+  safe. Carries I/me/my.
+eotg_frontier.055.desc_county
+  Shown otherwise (the Region's faith differs from mine). Appended fragment:
+  the settlers keep a faith that is not mine. Carries I/me/my. May use
+  [eotg_frontier_county.GetName]. No faith names, no [faith|E] links needed.
+eotg_frontier.055.a  [Region check only]
+  "One chapel, shared by rota."
+eotg_frontier.055.a_tt
+  The settlers share by turns: tempers cool (strain eases), but the work
+  slows a little. Words only.
+eotg_frontier.055.b  [education_learning; no icon]
+  "Hear both sides and write the rota myself." Competence (learning,
+  theology). Uses .002.ease_tt.
+eotg_frontier.055.c  [cynical; trait icon; costs gold]
+  "Build two chapels and end the argument."
+eotg_frontier.055.c_tt
+  Two chapels end the quarrel: the strain eases markedly. Words only.
+eotg_frontier.055.d  [ungated]
+  "My faith keeps the chapel."
+eotg_frontier.055.d_tt
+  My faith holds the chapel; the others resent it and the dispute adds to
+  the strain. Piety shows as vanilla effect text. Stress: zealous loss,
+  compassionate gain.
+
+----------------------------------------------------------------------
+eotg_frontier.056 Their Own Berths (bg field camp; cause dispute)
+----------------------------------------------------------------------
+Path: the yearly roll, when the settlers do not share one culture: the
+Region's culture differs from mine, or a valid founder's culture differs from
+the Region's. Lore §8 item 7: settler cultures persist; the Exodus brings
+newcomers but the event does not name it. No species, no "human", no culture
+names. Changes no culture.
+
+eotg_frontier.056.t
+  Title. Intent: "Their Own Berths".
+eotg_frontier.056.desc
+  First person, present. Settler groups keep apart. Voice sample .056.
+eotg_frontier.056.desc_founder
+  Shown (first) when the founder's culture differs from the settlers'.
+  Appended fragment: the one leading the work is not of the settlers' people.
+  Same founder-scope caution as .055.desc_founder. Carries I/me/my.
+eotg_frontier.056.desc_county
+  Shown otherwise (the Region's culture differs from mine). Appended
+  fragment: the settlers are not my people, and they keep to themselves.
+  Carries I/me/my.
+eotg_frontier.056.a  [Region check only]
+  "Let them keep their own berths."
+eotg_frontier.056.a_tt
+  Apart, they quarrel less (strain eases), but the work slows a little.
+eotg_frontier.056.b  [education_diplomacy; no icon]
+  "Find the words both camps will hear." Competence (diplomacy). Uses
+  .002.ease_tt.
+eotg_frontier.056.c  [just; trait icon]
+  "One rule for every berth, enforced the same."
+eotg_frontier.056.c_tt
+  The same rule for all: the strain eases and the work goes on. Words only.
+eotg_frontier.056.d  [ungated]
+  "One roster, one berth list, starting now."
+eotg_frontier.056.d_tt
+  The work moves faster, but the forced mixing breeds a dispute that adds to
+  the strain. Stress: compassionate gain, stubborn loss.
+
+----------------------------------------------------------------------
+Count
+----------------------------------------------------------------------
+New keys: 70 = 7 titles + 7 descs + 9 desc variants + 27 option names
++ 19 tooltips (.050.a, .051.b, .051.c, .052.a, .052.c, .053.a, .053.c, .053.d,
+.054.a, .054.b, .054.c, .054.d, .055.a, .055.c, .055.d, .056.a, .056.c, .056.d,
+plus eotg_frontier_band_cause_dispute_tt) + eotg_frontier.005.desc_dispute.
+Tiger reports 71 missing-localization findings because .052.a_tt is
+referenced twice (options a and b).
+Note: spec §7 says 28 option names; .050 has three options (a-c) per §3.4.3,
+so it is 27.
+After writing: run the \byou\b grep over the new desc keys (only quoted speech
+may match), and the §10 item 5 banned-word grep. eotg-lore-keeper reviews the
+5C loc against §8 before QA.

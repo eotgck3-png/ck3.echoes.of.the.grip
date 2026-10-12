@@ -543,7 +543,8 @@ eotg_frontier_update_tier_modifier_effect = {
 # from 0-4 when the owner doubled the pacing, so failure stays proportionate
 # to a project twice as long). Every point has a named cause (spec §6.3):
 # no_founder, low_control, occupied, war, sponsor_lapsed, and hardship (an
-# event choice).
+# event choice). Phase 2 added danger; frontier_v5.md §3.4.1 adds dispute
+# (the political round-1 events .054-.056).
 eotg_frontier_add_strain_effect = {
     change_variable = { name = eotg_frontier_strain  add = 1 }
     clamp_variable = { name = eotg_frontier_strain  min = 0  max = 8 }
@@ -629,7 +630,7 @@ eotg_frontier_legibility_tooltip_effect = {
         else = {
             custom_tooltip = eotg_frontier_band_strain_calm_tt
         }
-        # What weighs on it: the latest cause (the seven CAUSE values of
+        # What weighs on it: the latest cause (the eight CAUSE values of
         # eotg_frontier_add_strain_effect), only when strain is 4 or more
         if = {
             limit = { var:eotg_frontier_strain >= 4 }
@@ -656,6 +657,11 @@ eotg_frontier_legibility_tooltip_effect = {
             else_if = {
                 limit = { var:eotg_frontier_last_cause ?= flag:danger }
                 custom_tooltip = eotg_frontier_band_cause_danger_tt
+            }
+            # frontier_v5.md §3.4.1: the political round-1 events (.054-.056)
+            else_if = {
+                limit = { var:eotg_frontier_last_cause ?= flag:dispute }
+                custom_tooltip = eotg_frontier_band_cause_dispute_tt
             }
             else_if = {
                 limit = { var:eotg_frontier_last_cause ?= flag:hardship }
@@ -1871,6 +1877,7 @@ eotg_frontier_create_figure_effect = {
 # Called by eotg_frontier_event_roll_effect for player holders, once the 50%
 # "an event comes this year" roll has passed. Weights read the traits and the
 # infrastructure. .002 is always eligible, so something always fires.
+# frontier_v5.md §3.4.2 adds the round-1 events .050-.056 (end of the list).
 eotg_frontier_flavor_pick_effect = {
     eotg_frontier_find_rival_backer_effect = yes
     # Phase 3a (frontier_v3.md §5): a captain is looked for only where .040 can
@@ -1995,6 +2002,78 @@ eotg_frontier_flavor_pick_effect = {
                 exists = scope:eotg_frontier_faith_backer
             }
             holder = { trigger_event = { id = eotg_frontier.041  days = { 1 120 } } }
+        }
+        # frontier_v5.md §3.4.2 (#1 round 1, owner 2026-10-12). Cooldown
+        # authority stays in the roll (eotg_frontier_event_cd and the one-roll-
+        # per-ruler list, v4 A3); no event trigger reads either. Each event
+        # repeats its eligibility as world state in its own trigger.
+        # .050 Sickness in the Berths
+        10 = {
+            modifier = {
+                add = 10
+                has_county_modifier = eotg_frontier_trait_hostile
+                NOT = { has_county_modifier = eotg_frontier_infra_orbital_station }
+            }
+            modifier = { add = 5  var:eotg_frontier_progress >= 33 }
+            holder = { trigger_event = { id = eotg_frontier.050  days = { 1 120 } } }
+        }
+        # .051 The Ones Who Were Here First (A11.3 counter pattern; floor 5)
+        5 = {
+            modifier = { add = 10  has_county_modifier = eotg_frontier_trait_dangerous }
+            modifier = {
+                add = -5
+                has_county_modifier = eotg_frontier_trait_dangerous
+                has_county_modifier = eotg_frontier_infra_garrison_post
+            }
+            modifier = {
+                add = -5
+                has_county_modifier = eotg_frontier_trait_dangerous
+                has_county_modifier = eotg_frontier_mod_merc_escort
+            }
+            holder = { trigger_event = { id = eotg_frontier.051  days = { 1 120 } } }
+        }
+        # .052 The Frame Is Cracking: something to collapse
+        5 = {
+            trigger = { var:eotg_frontier_progress >= 20 }
+            modifier = { add = 5  var:eotg_frontier_progress >= 66 }
+            modifier = {
+                add = 5
+                has_county_modifier = eotg_frontier_trait_hostile
+                NOT = { has_county_modifier = eotg_frontier_infra_orbital_station }
+            }
+            holder = { trigger_event = { id = eotg_frontier.052  days = { 1 120 } } }
+        }
+        # .053 Patched Seals
+        10 = {
+            modifier = { add = 10  has_county_modifier = eotg_frontier_trait_remote }
+            modifier = {
+                add = -5
+                has_county_modifier = eotg_frontier_trait_remote
+                has_county_modifier = eotg_frontier_infra_navigation_beacon
+            }
+            modifier = { add = 5  NOT = { exists = var:eotg_frontier_sponsor } }
+            holder = { trigger_event = { id = eotg_frontier.053  days = { 1 120 } } }
+        }
+        # .054 Whose Systems Are These? (the founder presses a vassal's claim)
+        10 = {
+            trigger = {
+                eotg_frontier_has_valid_founder = yes
+                NOT = { holder = var:eotg_frontier_founder }
+                var:eotg_frontier_progress >= 50
+            }
+            holder = { trigger_event = { id = eotg_frontier.054  days = { 1 120 } } }
+        }
+        # .055 Two Chapels
+        10 = {
+            trigger = { eotg_frontier_faiths_differ = yes }
+            modifier = { add = 10  var:eotg_frontier_type ?= flag:religious }
+            holder = { trigger_event = { id = eotg_frontier.055  days = { 1 120 } } }
+        }
+        # .056 Their Own Berths
+        10 = {
+            trigger = { eotg_frontier_cultures_differ = yes }
+            modifier = { add = 5  var:eotg_frontier_type ?= flag:settlement }
+            holder = { trigger_event = { id = eotg_frontier.056  days = { 1 120 } } }
         }
     }
 }

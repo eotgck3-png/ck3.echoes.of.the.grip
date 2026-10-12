@@ -21,7 +21,7 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | `frontier_v2` | 1 | 1 | 109 | 109 | 0 | 0 |
 | `frontier_v3` | 1 | 1 | 79 | 79 | 0 | 0 |
 | `frontier_v4` | 1 | 1 | 142 | 134 | 3 | 5 |
-| `frontier_v5` | 1 | 1 | 85 | 70 | 4 | 11 |
+| `frontier_v5` | 1 | 1 | 85 | 76 | 4 | 5 |
 | `glossary` | 1 | 0 | 1 | 0 | 0 | 0 |
 | `government` | 1 | 1 | 9 | 5 | 1 | 3 |
 | `governments_v2` | 1 | 1 | 65 | 48 | 5 | 12 |
@@ -68,7 +68,7 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | `frontier_v2.md` | yes | 109 | 109 | 0 | 0 | 0 |
 | `frontier_v3.md` | yes | 80 | 79 | 0 | 0 | 1 |
 | `frontier_v4.md` | yes | 142 | 134 | 3 | 5 | 0 |
-| `frontier_v5.md` | yes | 85 | 70 | 4 | 11 | 0 |
+| `frontier_v5.md` | yes | 85 | 76 | 4 | 5 | 0 |
 | `glossary_proposal_cloud.md` | **no** | 1 | 0 | 0 | 1 | 0 |
 | `government_template.md` | yes | 9 | 5 | 1 | 3 | 0 |
 | `governments_v2.md` | yes | 68 | 48 | 5 | 12 | 3 |
@@ -413,8 +413,8 @@ None.
 
 #### `docs/specs/frontier_v5.md`
 
-- Specced and present: 70
-- Specced, missing from script (11): `eotg_frontier_band_cause_dispute_tt` (loc, l.201), `eotg_frontier.005.desc_dispute` (loc, l.202), `eotg_frontier.05x` (loc, l.209), `eotg_frontier_faiths_differ` (trigger, l.218), `eotg_frontier_cultures_differ` (trigger, l.219), `eotg_frontier_place_building_effect` (effect, l.344), `eotg_frontier_completion_building_effect` (effect, l.348), `eotg_frontier.050` (event, l.366), `eotg_frontier.056` (event, l.366), `eotg_frontier.05x.t` (loc, l.420), `eotg_event_quality.py` (loc, l.494)
+- Specced and present: 76
+- Specced, missing from script (5): `eotg_frontier.05x` (loc, l.209), `eotg_frontier_place_building_effect` (effect, l.344), `eotg_frontier_completion_building_effect` (effect, l.348), `eotg_frontier.05x.t` (loc, l.420), `eotg_event_quality.py` (loc, l.494)
 - Referenced only, never defined or set (4): `eotg_frontier_holder.culture` (loc, l.115), `eotg_frontier_new_barony.title_province` (loc, l.330), `eotg_lint` (unknown, l.494), `eotg_frontier_roll_ready` (unknown, l.504)
 - Exempt (0): none
 

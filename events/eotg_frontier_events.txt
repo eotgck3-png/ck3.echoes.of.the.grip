@@ -15,6 +15,7 @@
 #   .020  eotg_decision_frontier_survey
 #   .021  eotg_decision_frontier_build
 #   .030-.036  eotg_frontier_flavor_pick_effect (the same yearly roll)
+#   .050-.056  eotg_frontier_flavor_pick_effect (frontier_v5.md §3.4, round 1)
 # Event triggers are world-state guards only; the flavor cooldown
 # (eotg_frontier_event_cd) lives in the tick and is never read here.
 # Root is always a character (the Region's holder, or the decision taker);
@@ -970,6 +971,11 @@ eotg_frontier.005 = {
             triggered_desc = {
                 trigger = { scope:eotg_frontier_county = { var:eotg_frontier_last_cause ?= flag:danger } }
                 desc = eotg_frontier.005.desc_danger
+            }
+            # frontier_v5.md §3.4.1: the political round-1 events (.054-.056)
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_county = { var:eotg_frontier_last_cause ?= flag:dispute } }
+                desc = eotg_frontier.005.desc_dispute
             }
             desc = eotg_frontier.005.desc_hardship
         }
@@ -3345,6 +3351,1096 @@ eotg_frontier.041 = {
         ai_chance = {
             base = 10
             modifier = { add = 20  has_trait = cynical }
+        }
+    }
+}
+
+# =============================================================================
+# Round-1 events (docs/specs/frontier_v5.md §3.4; owner H4, approved
+# 2026-10-12). Fired by:
+#   .050-.056  eotg_frontier_flavor_pick_effect (the same single yearly roll,
+#              delay 1-120 days; cooldown authority stays in the roll)
+# Every option moves strain or progress (spec §2). Triggers are world state
+# only and re-check holder ?= root (frontier_v4 QA F1). Gates per
+# event_quality_v1 §13: at most one personality gate per event, paired with its
+# icon and stress row; education gates carry skill = and the _3/_4/_5 AI
+# tiers; the tier gate has no icon, AI base 10 and counter-trait negatives;
+# ungated options carry response stress rows. The last option is ungated and
+# guards its own effects (qa_noopt). No faith, culture, title or character is
+# named (map-agnostic; lore constraints §8).
+# =============================================================================
+
+# -- eotg_frontier.050 --------------------------------------------------------
+# Sickness in the Berths (disease). Habitat sickness: fouled recycled water,
+# failing scrubbers, or a fever in crowded berths. Strain cause: hardship.
+# Caller: eotg_frontier_flavor_pick_effect.
+eotg_frontier.050 = {
+    type = character_event
+    title = eotg_frontier.050.t
+    desc = {
+        desc = eotg_frontier.050.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_county = { has_county_modifier = eotg_frontier_trait_hostile } }
+                desc = eotg_frontier.050.desc_hostile
+            }
+        }
+    }
+    theme = realm
+    override_background = { reference = eotg_bg_clinic }
+
+    trigger = {
+        exists = scope:eotg_frontier_county
+        scope:eotg_frontier_county = {
+            # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
+            holder ?= root
+            eotg_frontier_is_frontier = yes
+        }
+    }
+
+    left_portrait = {
+        character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = sadness
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = callous }
+            animation = dismissal
+        }
+        animation = worry
+    }
+
+    immediate = {
+        hidden_effect = {
+            clear_saved_scope = eotg_frontier_founder
+            scope:eotg_frontier_county = {
+                if = {
+                    limit = { exists = var:eotg_frontier_founder }
+                    var:eotg_frontier_founder = { save_scope_as = eotg_frontier_founder }
+                }
+            }
+        }
+    }
+
+    # "Seal a quarantine berth and pay the medics."
+    option = {
+        name = eotg_frontier.050.a
+        trigger = {
+            gold >= minor_gold_value
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        remove_short_term_gold = minor_gold_value
+        scope:eotg_frontier_county = { eotg_frontier_add_progress_effect = { AMOUNT = -1 } }
+        custom_tooltip = eotg_frontier.050.a_tt
+        ai_chance = {
+            base = 40
+            modifier = { add = -20  has_trait = greedy }
+        }
+    }
+
+    # [education_learning] "Trace it to the scrubbers myself." Education gate,
+    # no icon (§13.1 step 3a).
+    option = {
+        name = eotg_frontier.050.b
+        trigger = {
+            has_trait = education_learning
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        skill = learning
+        scope:eotg_frontier_county = { eotg_frontier_ease_strain_effect = yes }
+        custom_tooltip = eotg_frontier.002.ease_tt
+        ai_chance = {
+            base = 30
+            modifier = { add = 10  has_trait = education_learning_3 }
+            modifier = { add = 20  has_trait = education_learning_4 }
+            modifier = { add = 20  has_trait = education_learning_5 }
+        }
+    }
+
+    # "Keep the crews working." Ungated.
+    option = {
+        name = eotg_frontier.050.c
+        scope:eotg_frontier_county = {
+            if = {
+                limit = { eotg_frontier_is_frontier = yes }
+                eotg_frontier_add_progress_effect = { AMOUNT = 2 }
+                eotg_frontier_add_strain_effect = { CAUSE = hardship }
+                custom_tooltip = eotg_frontier.002.push_tt
+            }
+        }
+        # Response rows on an ungated option (§13.1 step 4), so no trait icon
+        stress_impact = {
+            compassionate = medium_stress_impact_gain
+            callous = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 20
+        }
+    }
+}
+
+# -- eotg_frontier.051 --------------------------------------------------------
+# The Ones Who Were Here First (hostile inhabitants). The people already living
+# in the Region, or raiders working out of it, turn on the camp. No named group
+# and no species. Strain cause: danger.
+# Caller: eotg_frontier_flavor_pick_effect.
+eotg_frontier.051 = {
+    type = character_event
+    title = eotg_frontier.051.t
+    desc = {
+        desc = eotg_frontier.051.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_county = { has_county_modifier = eotg_frontier_trait_dangerous } }
+                desc = eotg_frontier.051.desc_dangerous
+            }
+        }
+    }
+    theme = realm
+    override_background = { reference = eotg_bg_field_camp }
+
+    trigger = {
+        exists = scope:eotg_frontier_county
+        scope:eotg_frontier_county = {
+            # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
+            holder ?= root
+            eotg_frontier_is_frontier = yes
+        }
+    }
+
+    left_portrait = {
+        character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = vengeful } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = craven }
+            animation = fear
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = forgiving }
+            animation = personality_forgiving
+        }
+        animation = worry
+    }
+
+    immediate = {
+        hidden_effect = {
+            clear_saved_scope = eotg_frontier_founder
+            scope:eotg_frontier_county = {
+                if = {
+                    limit = { exists = var:eotg_frontier_founder }
+                    var:eotg_frontier_founder = { save_scope_as = eotg_frontier_founder }
+                }
+            }
+        }
+    }
+
+    # "Trade with them, not orders."
+    option = {
+        name = eotg_frontier.051.a
+        trigger = {
+            gold >= minor_gold_value
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        remove_short_term_gold = minor_gold_value
+        scope:eotg_frontier_county = { eotg_frontier_ease_strain_effect = yes }
+        custom_tooltip = eotg_frontier.002.ease_tt
+        ai_chance = {
+            base = 30
+        }
+    }
+
+    # [forgiving] "Forget the cut line; offer them berths in the camp." The
+    # event's one personality gate, paired the vanilla way.
+    option = {
+        name = eotg_frontier.051.b
+        trigger = {
+            has_trait = forgiving
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        trait = forgiving
+        scope:eotg_frontier_county = {
+            eotg_frontier_ease_strain_effect = yes
+            eotg_frontier_add_progress_effect = { AMOUNT = 1 }
+        }
+        custom_tooltip = eotg_frontier.051.b_tt
+        stress_impact = {
+            forgiving = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+        }
+    }
+
+    # [duchy or above] "Send my own soldiers to hold the line." Tier gate, no
+    # icon; AI base 10 with counter-trait negatives (§13.1 step 3b).
+    option = {
+        name = eotg_frontier.051.c
+        trigger = {
+            highest_held_title_tier >= tier_duchy
+            prestige >= minor_prestige_value
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        add_prestige = {
+            value = minor_prestige_value
+            multiply = -1
+        }
+        scope:eotg_frontier_county = {
+            eotg_frontier_ease_strain_effect = yes
+            eotg_frontier_add_progress_effect = { AMOUNT = 1 }
+        }
+        custom_tooltip = eotg_frontier.051.c_tt
+        ai_chance = {
+            base = 10
+            modifier = { add = -10  has_trait = craven }
+            modifier = { add = -10  has_trait = content }
+            modifier = { add = -10  has_trait = shy }
+        }
+    }
+
+    # "Guard the line and keep building." Ungated.
+    option = {
+        name = eotg_frontier.051.d
+        scope:eotg_frontier_county = {
+            if = {
+                limit = { eotg_frontier_is_frontier = yes }
+                eotg_frontier_add_progress_effect = { AMOUNT = 2 }
+                eotg_frontier_add_strain_effect = { CAUSE = danger }
+                custom_tooltip = eotg_frontier.002.push_tt
+            }
+        }
+        # Response rows on an ungated option (§13.1 step 4), so no trait icon
+        stress_impact = {
+            wrathful = minor_stress_impact_loss
+            compassionate = minor_stress_impact_gain
+        }
+        ai_chance = {
+            base = 20
+        }
+    }
+}
+
+# -- eotg_frontier.052 --------------------------------------------------------
+# The Frame Is Cracking (collapse). Structural failure: seals giving, a section
+# losing pressure, the frame cracking. Never self-repairing machinery (lore §8
+# item 3). Strain cause: hardship.
+# Caller: eotg_frontier_flavor_pick_effect (progress 20 or more).
+eotg_frontier.052 = {
+    type = character_event
+    title = eotg_frontier.052.t
+    desc = {
+        desc = eotg_frontier.052.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_county = { var:eotg_frontier_progress >= 66 } }
+                desc = eotg_frontier.052.desc_late
+            }
+        }
+    }
+    theme = realm
+    override_background = { reference = eotg_bg_field_camp }
+
+    trigger = {
+        exists = scope:eotg_frontier_county
+        scope:eotg_frontier_county = {
+            # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
+            holder ?= root
+            eotg_frontier_is_frontier = yes
+            var:eotg_frontier_progress >= 20
+        }
+    }
+
+    left_portrait = {
+        character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = sadness
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = wrathful  has_trait = impatient } }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = diligent }
+            animation = personality_rational
+        }
+        animation = shock
+    }
+
+    immediate = {
+        hidden_effect = {
+            clear_saved_scope = eotg_frontier_founder
+            scope:eotg_frontier_county = {
+                if = {
+                    limit = { exists = var:eotg_frontier_founder }
+                    var:eotg_frontier_founder = { save_scope_as = eotg_frontier_founder }
+                }
+            }
+        }
+    }
+
+    # "Evacuate the section and rebuild it right."
+    option = {
+        name = eotg_frontier.052.a
+        trigger = {
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        scope:eotg_frontier_county = {
+            eotg_frontier_add_progress_effect = { AMOUNT = -4 }
+            eotg_frontier_ease_strain_effect = yes
+        }
+        custom_tooltip = eotg_frontier.052.a_tt
+        ai_chance = {
+            base = 30
+        }
+    }
+
+    # [diligent] "I will walk the frame with the crews myself." The event's one
+    # personality gate, paired the vanilla way.
+    option = {
+        name = eotg_frontier.052.b
+        trigger = {
+            has_trait = diligent
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        trait = diligent
+        scope:eotg_frontier_county = {
+            eotg_frontier_add_progress_effect = { AMOUNT = -2 }
+            eotg_frontier_ease_strain_effect = yes
+        }
+        custom_tooltip = eotg_frontier.052.a_tt
+        stress_impact = {
+            diligent = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+        }
+    }
+
+    # [education_stewardship] "Salvage the frame and reroute the crews."
+    # Education gate, no icon (§13.1 step 3a).
+    option = {
+        name = eotg_frontier.052.c
+        trigger = {
+            has_trait = education_stewardship
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        skill = stewardship
+        scope:eotg_frontier_county = { eotg_frontier_add_progress_effect = { AMOUNT = -1 } }
+        custom_tooltip = eotg_frontier.052.c_tt
+        ai_chance = {
+            base = 30
+            modifier = { add = 10  has_trait = education_stewardship_3 }
+            modifier = { add = 20  has_trait = education_stewardship_4 }
+            modifier = { add = 20  has_trait = education_stewardship_5 }
+        }
+    }
+
+    # "Shore it up and keep the crews inside." Ungated.
+    option = {
+        name = eotg_frontier.052.d
+        scope:eotg_frontier_county = {
+            if = {
+                limit = { eotg_frontier_is_frontier = yes }
+                eotg_frontier_add_progress_effect = { AMOUNT = 1 }
+                eotg_frontier_add_strain_effect = { CAUSE = hardship }
+                custom_tooltip = eotg_frontier.002.push_tt
+            }
+        }
+        # Response rows on an ungated option (§13.1 step 4), so no trait icon
+        stress_impact = {
+            compassionate = medium_stress_impact_gain
+            callous = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 20
+        }
+    }
+}
+
+# -- eotg_frontier.053 --------------------------------------------------------
+# Patched Seals (shortage): air, water, ice, spare parts or fuel running short.
+# Strain cause: hardship.
+# Caller: eotg_frontier_flavor_pick_effect.
+eotg_frontier.053 = {
+    type = character_event
+    title = eotg_frontier.053.t
+    desc = {
+        desc = eotg_frontier.053.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_county = { has_county_modifier = eotg_frontier_trait_remote } }
+                desc = eotg_frontier.053.desc_remote
+            }
+        }
+    }
+    theme = realm
+    override_background = { reference = eotg_bg_barren_world }
+
+    trigger = {
+        exists = scope:eotg_frontier_county
+        scope:eotg_frontier_county = {
+            # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
+            holder ?= root
+            eotg_frontier_is_frontier = yes
+        }
+    }
+
+    left_portrait = {
+        character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = greedy }
+            animation = personality_greedy
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = generous }
+            animation = personality_compassionate
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        animation = worry
+    }
+
+    immediate = {
+        hidden_effect = {
+            clear_saved_scope = eotg_frontier_founder
+            scope:eotg_frontier_county = {
+                if = {
+                    limit = { exists = var:eotg_frontier_founder }
+                    var:eotg_frontier_founder = { save_scope_as = eotg_frontier_founder }
+                }
+            }
+        }
+    }
+
+    # "Buy what we lack, whatever it costs."
+    option = {
+        name = eotg_frontier.053.a
+        trigger = {
+            gold >= {
+                value = minor_gold_value
+                multiply = 2
+            }
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        remove_short_term_gold = {
+            value = minor_gold_value
+            multiply = 2
+        }
+        scope:eotg_frontier_county = {
+            eotg_frontier_ease_strain_effect = yes
+            eotg_frontier_add_progress_effect = { AMOUNT = 1 }
+        }
+        custom_tooltip = eotg_frontier.053.a_tt
+        ai_chance = {
+            base = 30
+            modifier = { add = -20  has_trait = greedy }
+        }
+    }
+
+    # (a backer who can pay) "Our backer covers it." Shape: .034.c.
+    option = {
+        name = eotg_frontier.053.b
+        trigger = {
+            scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
+                eotg_frontier_has_valid_sponsor = yes
+                var:eotg_frontier_sponsor = { gold >= eotg_frontier_sponsor_payment_value }
+            }
+        }
+        scope:eotg_frontier_county = {
+            var:eotg_frontier_sponsor = {
+                remove_short_term_gold = eotg_frontier_sponsor_payment_value
+            }
+            eotg_frontier_ease_strain_effect = yes
+        }
+        custom_tooltip = eotg_frontier.002.ease_tt
+        ai_chance = {
+            base = 40
+        }
+    }
+
+    # [generous] "Open my own stores to the crews." The event's one
+    # personality gate, paired the vanilla way.
+    option = {
+        name = eotg_frontier.053.c
+        trigger = {
+            has_trait = generous
+            gold >= minor_gold_value
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        trait = generous
+        remove_short_term_gold = minor_gold_value
+        scope:eotg_frontier_county = {
+            eotg_frontier_ease_strain_effect = yes
+            eotg_frontier_add_progress_effect = { AMOUNT = 1 }
+        }
+        custom_tooltip = eotg_frontier.053.c_tt
+        stress_impact = {
+            generous = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+        }
+    }
+
+    # "Ration it." Ungated. The hard-year modifier as .002 applies it.
+    option = {
+        name = eotg_frontier.053.d
+        scope:eotg_frontier_county = {
+            if = {
+                limit = { eotg_frontier_is_frontier = yes }
+                eotg_frontier_add_strain_effect = { CAUSE = hardship }
+                add_county_modifier = { modifier = eotg_frontier_mod_hard_year  years = 2 }
+                custom_tooltip = eotg_frontier.053.d_tt
+            }
+        }
+        # Response rows on an ungated option (§13.1 step 4), so no trait icon
+        stress_impact = {
+            gluttonous = minor_stress_impact_gain
+            temperate = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 20
+        }
+    }
+}
+
+# -- eotg_frontier.054 --------------------------------------------------------
+# Whose Systems Are These? The founder presses for more. Under H1 the founder
+# may be a Local Ruler, a vassal; the holder stays the political owner, and
+# the claim is argued under the holder's own law. No court, arbiter or outside
+# authority exists (LAW AT 866; lore §8 item 5). Strain cause: dispute.
+# Caller: eotg_frontier_flavor_pick_effect (a valid founder who is not the
+# holder; progress 50 or more).
+eotg_frontier.054 = {
+    type = character_event
+    title = eotg_frontier.054.t
+    desc = {
+        desc = eotg_frontier.054.desc
+        first_valid = {
+            # The founder already stands to hold the System under A1 (the
+            # conditions of eotg_frontier_local_ruler_tooltip_effect's founder line)
+            triggered_desc = {
+                trigger = {
+                    scope:eotg_frontier_county = {
+                        any_county_province = {
+                            has_holding = no
+                            barony_cannot_construct_holding = no
+                        }
+                        OR = {
+                            AND = {
+                                OR = {
+                                    var:eotg_frontier_type ?= flag:settlement
+                                    var:eotg_frontier_type ?= flag:trade
+                                }
+                                root = { capital_province ?= { NOT = { has_holding_type = city_holding } } }
+                                eotg_frontier_founder_can_rule = { HOLDING = city_holding  HOLDER = root }
+                            }
+                            AND = {
+                                var:eotg_frontier_type ?= flag:religious
+                                root = { capital_province ?= { NOT = { has_holding_type = church_holding } } }
+                                eotg_frontier_founder_can_rule = { HOLDING = church_holding  HOLDER = root }
+                            }
+                        }
+                    }
+                }
+                desc = eotg_frontier.054.desc_ruler
+            }
+        }
+    }
+    theme = realm
+    override_background = { reference = eotg_bg_council }
+
+    trigger = {
+        exists = scope:eotg_frontier_county
+        scope:eotg_frontier_county = {
+            # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
+            holder ?= root
+            eotg_frontier_is_frontier = yes
+            eotg_frontier_has_valid_founder = yes
+            NOT = { var:eotg_frontier_founder = root }
+            var:eotg_frontier_progress >= 50
+        }
+    }
+
+    left_portrait = {
+        character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = arrogant  has_trait = stubborn } }
+            animation = disapproval
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = wrathful }
+            animation = anger
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        animation = personality_rational
+    }
+    # The founder speaks the desc's one NPC line
+    right_portrait = {
+        character = scope:eotg_frontier_founder
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { scope:eotg_frontier_founder ?= { OR = { has_trait = ambitious  has_trait = arrogant } } }
+            animation = personality_bold
+        }
+        animation = anger
+    }
+
+    immediate = {
+        hidden_effect = {
+            clear_saved_scope = eotg_frontier_founder
+            scope:eotg_frontier_county = {
+                if = {
+                    limit = { exists = var:eotg_frontier_founder }
+                    var:eotg_frontier_founder = { save_scope_as = eotg_frontier_founder }
+                }
+            }
+        }
+    }
+
+    # (a landless founder whom A1 would seat) "The System will be theirs to
+    # hold, under me." QA 5C fix 1: gated on the same conditions as
+    # desc_ruler (those of eotg_frontier_local_ruler_tooltip_effect's founder
+    # line: a free slot, root's seat not that holding type, and
+    # eotg_frontier_founder_can_rule, which excludes heir, spouse and other
+    # courts), so it shows only when A1 would grant the founder the System.
+    # Still a promise: A1 decides at completion, so the tooltip is
+    # conditional (spec §3.4.3 text constraint).
+    option = {
+        name = eotg_frontier.054.a
+        trigger = {
+            scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
+                any_county_province = {
+                    has_holding = no
+                    barony_cannot_construct_holding = no
+                }
+                OR = {
+                    AND = {
+                        OR = {
+                            var:eotg_frontier_type ?= flag:settlement
+                            var:eotg_frontier_type ?= flag:trade
+                        }
+                        root = { capital_province ?= { NOT = { has_holding_type = city_holding } } }
+                        eotg_frontier_founder_can_rule = { HOLDING = city_holding  HOLDER = root }
+                    }
+                    AND = {
+                        var:eotg_frontier_type ?= flag:religious
+                        root = { capital_province ?= { NOT = { has_holding_type = church_holding } } }
+                        eotg_frontier_founder_can_rule = { HOLDING = church_holding  HOLDER = root }
+                    }
+                }
+            }
+            scope:eotg_frontier_founder = { is_landed = no }
+        }
+        scope:eotg_frontier_founder = {
+            add_opinion = { modifier = eotg_frontier_opinion_pleased  target = root  years = 10 }
+        }
+        scope:eotg_frontier_county = { eotg_frontier_ease_strain_effect = yes }
+        custom_tooltip = eotg_frontier.054.a_tt
+        ai_chance = {
+            base = 30
+        }
+    }
+
+    # "A purse, and back to work." The purse pattern of .004.a: valued at the
+    # payer's scale, and the founder receives exactly that.
+    option = {
+        name = eotg_frontier.054.b
+        trigger = {
+            gold >= minor_gold_value
+            scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
+                eotg_frontier_has_valid_founder = yes
+            }
+        }
+        save_temporary_scope_value_as = { name = eotg_frontier_purse  value = minor_gold_value }
+        remove_short_term_gold = scope:eotg_frontier_purse
+        scope:eotg_frontier_founder = {
+            add_gold = scope:eotg_frontier_purse
+            add_opinion = { modifier = eotg_frontier_opinion_pleased  target = root  years = 10 }
+        }
+        scope:eotg_frontier_county = { eotg_frontier_add_progress_effect = { AMOUNT = 2 } }
+        custom_tooltip = eotg_frontier.054.b_tt
+        ai_chance = {
+            base = 30
+            modifier = { add = -20  has_trait = greedy }
+        }
+    }
+
+    # [arbitrary] "What I gave, I can give to another." The event's one
+    # personality gate, paired the vanilla way.
+    option = {
+        name = eotg_frontier.054.c
+        trigger = {
+            has_trait = arbitrary
+            scope:eotg_frontier_county = {
+                eotg_frontier_is_frontier = yes
+                eotg_frontier_has_valid_founder = yes
+            }
+        }
+        trait = arbitrary
+        scope:eotg_frontier_founder = {
+            add_opinion = { modifier = eotg_frontier_opinion_slighted  target = root  years = 10 }
+        }
+        add_dread = minor_dread_gain
+        scope:eotg_frontier_county = { eotg_frontier_ease_strain_effect = yes }
+        custom_tooltip = eotg_frontier.054.c_tt
+        stress_impact = {
+            arbitrary = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+        }
+    }
+
+    # "The coin was mine, and so is the Region." Ungated.
+    option = {
+        name = eotg_frontier.054.d
+        # QA 5C fix 4: everything inside the Frontier guard (the .055.d shape)
+        if = {
+            limit = { scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes } }
+            scope:eotg_frontier_county = { eotg_frontier_add_strain_effect = { CAUSE = dispute } }
+            if = {
+                limit = { scope:eotg_frontier_founder ?= { is_alive = yes } }
+                scope:eotg_frontier_founder = {
+                    add_opinion = { modifier = eotg_frontier_opinion_slighted  target = root  years = 10 }
+                }
+            }
+            custom_tooltip = eotg_frontier.054.d_tt
+        }
+        # Response rows on an ungated option (§13.1 step 4), so no trait icon
+        stress_impact = {
+            humble = minor_stress_impact_gain
+            arrogant = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 20
+        }
+    }
+}
+
+# -- eotg_frontier.055 --------------------------------------------------------
+# Two Chapels (religious dispute): settlers of different faiths will not share
+# a chapel. Scoped faiths only; nothing is named (lore §8 item 6). Strain
+# cause: dispute.
+# Caller: eotg_frontier_flavor_pick_effect (eotg_frontier_faiths_differ).
+eotg_frontier.055 = {
+    type = character_event
+    title = eotg_frontier.055.t
+    desc = {
+        desc = eotg_frontier.055.desc
+        first_valid = {
+            # The founder's faith differs from the settlers' (the Region's)
+            triggered_desc = {
+                trigger = {
+                    scope:eotg_frontier_county = {
+                        eotg_frontier_has_valid_founder = yes
+                        # QA 5C fix 3: not when I am the founder (falls to desc_county)
+                        NOT = { var:eotg_frontier_founder = root }
+                        var:eotg_frontier_founder = { NOT = { faith = prev.faith } }
+                    }
+                }
+                desc = eotg_frontier.055.desc_founder
+            }
+            # The Region's faith differs from mine
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_county = { NOT = { faith = root.faith } } }
+                desc = eotg_frontier.055.desc_county
+            }
+        }
+    }
+    theme = realm
+    override_background = { reference = eotg_bg_council }
+
+    trigger = {
+        exists = scope:eotg_frontier_county
+        scope:eotg_frontier_county = {
+            # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
+            holder ?= root
+            eotg_frontier_is_frontier = yes
+            # World state, not a cooldown: a conversion during the delay voids it
+            eotg_frontier_faiths_differ = yes
+        }
+    }
+
+    left_portrait = {
+        character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = zealous }
+            animation = personality_zealous
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = cynical }
+            animation = personality_cynical
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = impatient }
+            animation = eyeroll
+        }
+        animation = personality_rational
+    }
+
+    immediate = {
+        hidden_effect = {
+            clear_saved_scope = eotg_frontier_founder
+            scope:eotg_frontier_county = {
+                if = {
+                    limit = { exists = var:eotg_frontier_founder }
+                    var:eotg_frontier_founder = { save_scope_as = eotg_frontier_founder }
+                }
+            }
+        }
+    }
+
+    # "One chapel, shared by rota."
+    option = {
+        name = eotg_frontier.055.a
+        trigger = {
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        scope:eotg_frontier_county = {
+            eotg_frontier_ease_strain_effect = yes
+            eotg_frontier_add_progress_effect = { AMOUNT = -1 }
+        }
+        custom_tooltip = eotg_frontier.055.a_tt
+        ai_chance = {
+            base = 30
+        }
+    }
+
+    # [education_learning] "Hear both sides and write the rota myself."
+    # Education gate, no icon (§13.1 step 3a).
+    option = {
+        name = eotg_frontier.055.b
+        trigger = {
+            has_trait = education_learning
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        skill = learning
+        scope:eotg_frontier_county = {
+            eotg_frontier_ease_strain_effect = yes
+            eotg_frontier_add_progress_effect = { AMOUNT = 1 }
+        }
+        custom_tooltip = eotg_frontier.055.b_tt    # QA 5C fix 2: also +1 progress
+        ai_chance = {
+            base = 30
+            modifier = { add = 10  has_trait = education_learning_3 }
+            modifier = { add = 20  has_trait = education_learning_4 }
+            modifier = { add = 20  has_trait = education_learning_5 }
+        }
+    }
+
+    # [cynical] "Build two chapels and end the argument." The event's one
+    # personality gate, paired the vanilla way. Strain -2.
+    option = {
+        name = eotg_frontier.055.c
+        trigger = {
+            has_trait = cynical
+            gold >= minor_gold_value
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        trait = cynical
+        remove_short_term_gold = minor_gold_value
+        scope:eotg_frontier_county = {
+            eotg_frontier_ease_strain_effect = yes
+            eotg_frontier_ease_strain_effect = yes
+        }
+        custom_tooltip = eotg_frontier.055.c_tt
+        stress_impact = {
+            cynical = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+        }
+    }
+
+    # "My faith keeps the chapel." Ungated; the piety sits inside the guard so
+    # a passed moment grants nothing.
+    option = {
+        name = eotg_frontier.055.d
+        if = {
+            limit = { scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes } }
+            add_piety = minor_piety_value
+            scope:eotg_frontier_county = { eotg_frontier_add_strain_effect = { CAUSE = dispute } }
+            custom_tooltip = eotg_frontier.055.d_tt
+        }
+        # Response rows on an ungated option (§13.1 step 4), so no trait icon
+        stress_impact = {
+            zealous = minor_stress_impact_loss
+            compassionate = minor_stress_impact_gain
+        }
+        ai_chance = {
+            base = 20
+            modifier = { add = 20  has_trait = zealous }
+        }
+    }
+}
+
+# -- eotg_frontier.056 --------------------------------------------------------
+# Their Own Berths (cultural tension): settler groups keep apart. Scoped
+# cultures only; no species and no "human" (lore §8 item 7). Changes no
+# culture; long-term drift stays vanilla's. Strain cause: dispute.
+# Caller: eotg_frontier_flavor_pick_effect (eotg_frontier_cultures_differ).
+eotg_frontier.056 = {
+    type = character_event
+    title = eotg_frontier.056.t
+    desc = {
+        desc = eotg_frontier.056.desc
+        first_valid = {
+            # The founder's culture differs from the settlers' (the Region's)
+            triggered_desc = {
+                trigger = {
+                    scope:eotg_frontier_county = {
+                        eotg_frontier_has_valid_founder = yes
+                        # QA 5C fix 3: not when I am the founder (falls to desc_county)
+                        NOT = { var:eotg_frontier_founder = root }
+                        var:eotg_frontier_founder = { NOT = { culture = prev.culture } }
+                    }
+                }
+                desc = eotg_frontier.056.desc_founder
+            }
+            # The Region's culture differs from mine
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_county = { NOT = { culture = root.culture } } }
+                desc = eotg_frontier.056.desc_county
+            }
+        }
+    }
+    theme = realm
+    override_background = { reference = eotg_bg_field_camp }
+
+    trigger = {
+        exists = scope:eotg_frontier_county
+        scope:eotg_frontier_county = {
+            # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
+            holder ?= root
+            eotg_frontier_is_frontier = yes
+            # World state, not a cooldown
+            eotg_frontier_cultures_differ = yes
+        }
+    }
+
+    left_portrait = {
+        character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { OR = { has_trait = stubborn  has_trait = arrogant } }
+            animation = disapproval
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = compassionate }
+            animation = worry
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = just }
+            animation = personality_honorable
+        }
+        animation = personality_rational
+    }
+
+    immediate = {
+        hidden_effect = {
+            clear_saved_scope = eotg_frontier_founder
+            scope:eotg_frontier_county = {
+                if = {
+                    limit = { exists = var:eotg_frontier_founder }
+                    var:eotg_frontier_founder = { save_scope_as = eotg_frontier_founder }
+                }
+            }
+        }
+    }
+
+    # "Let them keep their own berths."
+    option = {
+        name = eotg_frontier.056.a
+        trigger = {
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        scope:eotg_frontier_county = {
+            eotg_frontier_ease_strain_effect = yes
+            eotg_frontier_add_progress_effect = { AMOUNT = -1 }
+        }
+        custom_tooltip = eotg_frontier.056.a_tt
+        ai_chance = {
+            base = 30
+        }
+    }
+
+    # [education_diplomacy] "Find the words both camps will hear." Education
+    # gate, no icon (§13.1 step 3a).
+    option = {
+        name = eotg_frontier.056.b
+        trigger = {
+            has_trait = education_diplomacy
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        skill = diplomacy
+        scope:eotg_frontier_county = {
+            eotg_frontier_ease_strain_effect = yes
+            eotg_frontier_add_progress_effect = { AMOUNT = 1 }
+        }
+        custom_tooltip = eotg_frontier.056.b_tt    # QA 5C fix 2: also +1 progress
+        ai_chance = {
+            base = 30
+            modifier = { add = 10  has_trait = education_diplomacy_3 }
+            modifier = { add = 20  has_trait = education_diplomacy_4 }
+            modifier = { add = 20  has_trait = education_diplomacy_5 }
+        }
+    }
+
+    # [just] "One rule for every berth, enforced the same." The event's one
+    # personality gate, paired the vanilla way.
+    option = {
+        name = eotg_frontier.056.c
+        trigger = {
+            has_trait = just
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        trait = just
+        scope:eotg_frontier_county = {
+            eotg_frontier_ease_strain_effect = yes
+            eotg_frontier_add_progress_effect = { AMOUNT = 1 }
+        }
+        custom_tooltip = eotg_frontier.056.c_tt
+        stress_impact = {
+            just = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+        }
+    }
+
+    # "One roster, one berth list, starting now." Ungated.
+    option = {
+        name = eotg_frontier.056.d
+        scope:eotg_frontier_county = {
+            if = {
+                limit = { eotg_frontier_is_frontier = yes }
+                eotg_frontier_add_progress_effect = { AMOUNT = 2 }
+                eotg_frontier_add_strain_effect = { CAUSE = dispute }
+                custom_tooltip = eotg_frontier.056.d_tt
+            }
+        }
+        # Response rows on an ungated option (§13.1 step 4), so no trait icon
+        stress_impact = {
+            compassionate = minor_stress_impact_gain
+            stubborn = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 20
         }
     }
 }
