@@ -114,6 +114,8 @@ A Research Frontier runs for decades, can fail, and pays out once. **Amount: 10*
 - **Call site:** the `flag:research` branch of `eotg_frontier_complete_effect` (`eotg_frontier_effects.txt:1118-1125`), after the founder's `add_learning_skill`. That effect runs for player and AI completions alike (.004 fires for every holder, `:743`), so AI research Frontiers advance their cultures too.
 - **Whose culture:** the **holder's** (`scope:eotg_frontier_holder.culture`), never the county's and never the founder's. The holder paid for it.
 
+**Dependency: CB-36** (taskboard; lore ruling 2026-10-12). #4 has no script guard against advancing `eotg_innovation_self_repairing_machinery`; its era gate (`culture_era_early_medieval`, `eotg_innovations.txt:29`; AI ×0 below it, `:39-48`) is what keeps it ahead of the 866 cultures, and that holds only while they start tribal. If CB-36 moves the 866 cultures into the early medieval era, CB-36 must re-point the gate (as `eotg_innovations.txt:15-17` already says); #4 needs no change.
+
 **Farming check.** Completion ends the Frontier (`eotg_frontier_settle_effect`), so the reward fires once per completed project. Restart (.005.b/e) keeps the project and pays nothing. There are no milestone payouts, by design: abandon-and-restart around a milestone would farm them, which is the v1 Q5 problem.
 
 ### 3.3 #2: Trait-gated options (event_quality §13.1 steps 1–10)
@@ -351,7 +353,7 @@ Weights and triggers are in §3.4.2. "S" = strain, "P" = progress. Every option'
 
 **Untested in game (V-B1, V-B2 in §10):** whether `add_building` bypasses `can_construct`, and whether a building whose `is_enabled` fails sits inert.
 
-**Names:** the v2 mod has no building reskin loc, so placed buildings read with vanilla names. "Hospices", "Guild Halls" and "Barracks" are acceptable placeholders (orchestrator, 2026-10-12). **"Monastic Schools" is not on that list**, so it goes to eotg-lore-keeper (§8 needs-lore 1). If the lore-keeper rules it wrong, the fix is a one-line swap of Religious and Research to `hospices_01`, not a `replace/` reskin in this spec.
+**Names:** the v2 mod has no building reskin loc, so placed buildings read with vanilla names. "Hospices", "Guild Halls" and "Barracks" are acceptable placeholders (orchestrator, 2026-10-12). `monastic_schools_01` **stays** (eotg-lore-keeper, 2026-10-12): at level 01 vanilla displays it as **"Chapel" (Monasteries line)**; "Monastic Schools" is the level-03 name (`G/localization/english/buildings_l_english.yml:500,502,508`). "Chapel" is an acceptable placeholder. Future reskin target for the line: **"Meditation Retreats"** (`OLD PROJECT VERSION/docs/localization_crusade.md:121`), done in the localizer's reskin pass (D5-4), not in this spec.
 
 ---
 
@@ -422,7 +424,9 @@ No `replace_path`, no descriptor change, no new folder.
   - `eotg_frontier_band_cause_dispute_tt`.
 - **5D:** none. The `add_building` line is vanilla effect loc.
 
-**No `replace/`.** Follow-up for the localizer, not this spec: a building reskin set (Hospices, Guild Halls, Barracks, Monastic Schools) under the one-definition rule, once the lore-keeper rules on names (§8).
+**No `replace/`.** Follow-up for the localizer, not this spec: a building reskin set (Hospices, Guild Halls, Barracks, and Chapel (Monasteries line) → "Meditation Retreats") under the one-definition rule (§8, D5-4).
+
+**"rite" (.041.d, lore ruling 2026-10-12):** acceptable as plain lowercase text. It must **never** be linked as `[rite|E]` (that would point at the 1.20 rite concept). QA greps the new loc for `rite|E`.
 
 **Glossary:** Region (county), System (barony), Frontier, backer, strain, Unsworn, Unclaimed Region. Never "pressure" (v4 A9), "charter", "mayor", "bishop" or "village".
 
@@ -450,12 +454,13 @@ No `replace_path`, no descriptor change, no new folder.
 7. **Separate berths:** settler cultures persist, and vanilla handles the long term (`frontier_systems.md:625-645`). The Exodus is bringing refugees (`REVIEW_866.md:31`).
    - *Banned:* naming species, "human".
 
-**#4:** fascination progress is generic culture advancement. **Lore note:** if a culture is fascinated by the mod's `eotg_innovation_self_repairing_machinery`, a Research Frontier speeds it. That innovation is already era-gated one era up, with vanilla's ahead-of-time cost (`common/culture/innovations/eotg_innovations.txt:8-14`). Self-repair is canon for 975, but the era gate governs the timing, and #4 only adds percent points. No script guard is specified. **Flag 2** below asks the lore-keeper to confirm this.
+**#4 (lore ruling 2026-10-12: accepted, no guard):** fascination progress is generic culture advancement. If a culture is fascinated by the mod's `eotg_innovation_self_repairing_machinery`, a Research Frontier speeds it, and that is allowed. The ERRATA (SETTING LORE:64-70) makes self-repair researchable before 975; 975 is when the Gnomes reached it, not a floor. The innovation's own gate governs timing: `culture_era = culture_era_early_medieval` (`common/culture/innovations/eotg_innovations.txt:29`), AI ×0 below that era (`:39-48`). **Dependency: CB-36** (§3.2). The event-text ban in round-1 item 3 stays: no self-repairing machinery in Frontier event text.
 
-**Needs-lore (none blocks a build batch):**
-1. Does the vanilla name "Monastic Schools" read acceptably as a placeholder for Religious and Research completions (§3.5)? If not, swap to `hospices_01`.
-2. Fascination progress reaching `eotg_innovation_self_repairing_machinery` ahead of 975 through a Research Frontier: acceptable under the era gate?
-3. The .041.d text "lead the first rite": does "rite" collide with the 1.20 rite system's player-facing word? (Display only.)
+**Lore questions raised by this spec:**
+**Ruled by eotg-lore-keeper, 2026-10-12** (none open):
+1. `monastic_schools_01` stays; its level-01 display name is "Chapel" (Monasteries line), an acceptable placeholder; reskin target "Meditation Retreats" (§3.5, D5-4).
+2. Fascination reaching self-repairing machinery: accepted, no guard; depends on CB-36 (§3.2).
+3. "rite" in .041.d: acceptable as plain lowercase text, never `[rite|E]` (§7).
 
 ## 9. Vanilla precedent (re-checked at 1.20.0.4 this session)
 
@@ -534,7 +539,7 @@ Then the localizer (5A keys), then QA.
 
 Close-out as 5B. Then the localizer, then **eotg-lore-keeper reviews the 5C loc** against §8 before QA.
 
-**Batch 5D: #5 buildings.** The two building effects and the call in `eotg_frontier_complete_effect`. QA runs V-B1 and V-B2. Lore-keeper needs-lore 1 can land before or after; the swap is one line.
+**Batch 5D: #5 buildings.** The two building effects and the call in `eotg_frontier_complete_effect`. QA runs V-B1 and V-B2. The building name is ruled (§3.5).
 
 5A must come first, because 5C's tooltips reuse .002/.005 keys. 5B and 5D are independent of each other.
 
@@ -556,9 +561,9 @@ None. H4 is ruled. The needs-lore items in §8 go to eotg-lore-keeper.
 
 ### HANDOFF
 - status: done
-- next: eotg-scripter (batch 5A), then 5B, 5C, 5D in order; eotg-lore-keeper on §8 needs-lore 1–3 in parallel
+- next: eotg-scripter (batch 5A), then 5B, 5C, 5D in order; eotg-lore-keeper reviews the 5C loc (§8 items 1–3 are ruled)
 - ask: Build batch 5A of `docs/specs/frontier_v5.md` §11 (.005.e, the .002.e adult/free fix, the A5 AI amendment, and #4's fascination reward). Hand the 5A loc keys to the localizer and the result to QA. 5B (14 gated options), 5C (events .050–.056 and the `dispute` cause) and 5D (completion buildings) follow, each closed out per event_quality §13.1 step 10 where it applies.
 - files: docs/specs/frontier_v5.md (new); docs/specs/frontier_v4.md (§13/§14 H4 ruled, header, D4-1/D4-9, handoff)
 - needs-loc: §7. 5A: `eotg_frontier.005.e`, `.005.lead_tt`, `eotg_frontier_research_fascination_tt`. 5B: 14 option names + 9 tooltips. 5C: 7 × (t, desc, variants, a–d) + 18 tooltips + `eotg_frontier.005.desc_dispute` + `eotg_frontier_band_cause_dispute_tt`.
-- needs-lore: (1) "Monastic Schools" as a placeholder name; (2) fascination progress reaching self-repairing machinery ahead of 975; (3) "rite" in .041.d. Then a review of the 5C loc against §8.
+- needs-lore: items 1–3 ruled 2026-10-12 (§8): Chapel (Monasteries line) stays, fascination accepted with CB-36 dependency, "rite" plain text only. Remaining: a review of the 5C loc against §8.
 - needs-human: none. In game after the build: #6, #4, R1 and V-B1/V-B2 (§10).
