@@ -43,7 +43,7 @@
 # hands. eotg_aug_offer_install_effect mirrors init.018's three paths.
 eotg_aug_offer_augmentation_interaction = {
     category = interaction_category_friendly
-    icon = icon_personal          # placeholder (spec §3.1, art debt)
+    icon = eotg_aug_offer_augmentation_interaction
     interface_priority = 40
     desc = eotg_aug_offer_augmentation_interaction_desc
     notification_text = eotg_aug_offer_augmentation_interaction_notification
@@ -452,7 +452,7 @@ eotg_aug_offer_augmentation_interaction = {
 # crime line is G7's Augmentation Edict hook, spec §10).
 eotg_aug_demand_removal_interaction = {
     category = interaction_category_vassal
-    icon = demand_obedience       # placeholder (spec §3.1, art debt)
+    icon = eotg_aug_demand_removal_interaction
     popup_on_receive = yes
     pause_on_receive = yes
     # Realm spec §4.3: warn before sending when refusing would be a crime
@@ -896,10 +896,8 @@ eotg_aug_demand_removal_interaction = {
 # actor follow-up event (vanilla 06_ep3_interactions.txt:4461-4464, :4613).
 eotg_aug_examine_interaction = {
     category = interaction_category_friendly
-    # Placeholder: the spec's `learning` has no file under
-    # gfx/interface/icons/character_interactions/; `plague` is the nearest
-    # medical icon there (art debt, spec §3.1).
-    icon = plague
+    # Mod art, gfx/interface/icons/character_interactions/ (2026-10-12).
+    icon = eotg_aug_examine_interaction
     desc = eotg_aug_examine_interaction_desc
 
     # Actor-only state (_character_interactions.info:570-573)
@@ -1073,7 +1071,7 @@ eotg_aug_examine_interaction = {
 # for the AI. The agent-package flags keep vanilla's names (spec §3.1: local
 # to this interaction; vanilla loc for the labels).
 eotg_aug_start_tamper_interaction = {
-    icon = icon_scheme_steal_back_artifact    # placeholder (spec §3.1, art debt)
+    icon = eotg_aug_start_tamper_interaction
     interface_priority = 70
     category = interaction_category_hostile
 
@@ -1377,7 +1375,7 @@ eotg_aug_start_tamper_interaction = {
 # eotg_aug_int.002 to the actor. The prisoner stays imprisoned.
 eotg_aug_salvage_interaction = {
     interface_priority = 30
-    icon = blind                  # placeholder (spec §3.1, art debt)
+    icon = eotg_aug_salvage_interaction
     category = interaction_category_prison
     desc = eotg_aug_salvage_interaction_desc
 
@@ -1544,8 +1542,8 @@ eotg_aug_salvage_interaction = {
 # borrowed technician).
 eotg_aug_borrow_technician_interaction = {
     category = interaction_category_friendly
-    # Placeholder (the spec's `learning` has no file; as Examine)
-    icon = plague
+    # Mod art, gfx/interface/icons/character_interactions/ (2026-10-12).
+    icon = eotg_aug_borrow_technician_interaction
     desc = eotg_aug_borrow_technician_interaction_desc
     notification_text = eotg_aug_borrow_technician_interaction_notification
 

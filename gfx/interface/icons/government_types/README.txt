@@ -1,8 +1,10 @@
-PLACEHOLDER ICONS (art debt, human): copies of vanilla CK3 1.20 government icons,
-named for the mod's governments (engine convention: <government key>.dds).
-Governments v2 Phase G1, docs/specs/governments_v2.md §3.1, §15.
-  eotg_pmc_government.dds          <- vanilla mercenary_government.dds
-  eotg_corporation_government.dds  <- vanilla administrative_government.dds
-  eotg_gobcorp_government.dds      <- vanilla republic_government.dds
-  eotg_cartel_government.dds       <- vanilla clan_government.dds
-Replace with real art; keep the file names.
+Government icons (engine convention: <government key>.dds), 70x70 BGRA with mips.
+Converted 2026-10-12 by docs/tools/convert_art.py (profile government, tone-matched to
+vanilla: brightness 0.40, saturation capped at 0.29, caption specks removed); jobs in
+docs/specs/build/art_integration_2026-10-12.csv.
+  eotg_unclaimed_government.dds    <- EotG_Government_Icon_PNGs/sheet3_09.png (hard-hat; provisional)
+  eotg_pmc_government.dds          <- sheet3_07.png (combat helmet)
+  eotg_corporation_government.dds  <- sheet2_06.png (tower-spire band)
+  eotg_gobcorp_government.dds      <- sheet3_05.png (merchant's hat)
+  eotg_cartel_government.dds       <- sheet1_05.png (clasped hood; 2 px speck erased)
+Keep the file names: the engine finds them by government key.

@@ -3,14 +3,14 @@
 # §3.1, §6.2). One modifier per Frontier stage is all the player sees; the
 # Establishment and strain numbers stay hidden (spec §R).
 #
-# County modifiers and the icon keys county_modifier_development_positive /
-# _negative and county_modifier_control_positive / _negative: confirmed
-# (verification V4, V18). Tiger reports no unknown modifier key here.
+# County modifiers (verification V4, V18). Each icon is the mod's own file,
+# gfx/interface/icons/modifiers/<modifier key>.dds (2026-10-12): green with
+# an up badge for good, red with a down badge for bad, as vanilla.
 # -----------------------------------------------------------------------------
 
 # A Region with no recognized settlement yet: Systems remain open
 eotg_frontier_mod_unsettled = {
-    icon = county_modifier_development_negative
+    icon = eotg_frontier_mod_unsettled
     tax_mult = -0.5
     levy_size = -0.5
     monthly_county_control_growth_factor = -0.25
@@ -24,7 +24,7 @@ eotg_frontier_mod_unsettled = {
 
 # Frontier, early stage (Establishment 0-32)
 eotg_frontier_mod_outpost = {
-    icon = county_modifier_development_negative
+    icon = eotg_frontier_mod_outpost
     tax_mult = -0.5
     levy_size = -0.5
     monthly_county_control_growth_factor = -0.1
@@ -32,14 +32,14 @@ eotg_frontier_mod_outpost = {
 
 # Frontier, middle stage (33-65)
 eotg_frontier_mod_foothold = {
-    icon = county_modifier_development_positive
+    icon = eotg_frontier_mod_foothold
     tax_mult = -0.25
     levy_size = -0.25
 }
 
 # Frontier, late stage (66-99)
 eotg_frontier_mod_established = {
-    icon = county_modifier_development_positive
+    icon = eotg_frontier_mod_established
     tax_mult = -0.1
     development_growth_factor = 0.1
 }
@@ -47,17 +47,17 @@ eotg_frontier_mod_established = {
 # Full Establishment, but a completion floor is unmet: says what completion is
 # waiting on (verification Q4b). No effect beyond the outpost-level lines.
 eotg_frontier_mod_waiting_development = {
-    icon = county_modifier_development_negative
+    icon = eotg_frontier_mod_waiting_development
     tax_mult = -0.1
 }
 eotg_frontier_mod_waiting_control = {
-    icon = county_modifier_control_negative
+    icon = eotg_frontier_mod_waiting_control
     tax_mult = -0.1
 }
 
 # Ten years after a project completes (spec §5.3; one shared modifier, Q6)
 eotg_frontier_mod_new_settlement = {
-    icon = county_modifier_development_positive
+    icon = eotg_frontier_mod_new_settlement
     development_growth_factor = 0.2
     tax_mult = 0.05
     monthly_county_control_growth_add = 0.1
@@ -65,14 +65,14 @@ eotg_frontier_mod_new_settlement = {
 
 # Ten years after a project is abandoned: what the attempt left behind
 eotg_frontier_mod_abandoned_works = {
-    icon = county_modifier_development_negative
+    icon = eotg_frontier_mod_abandoned_works
     tax_mult = -0.05
 }
 
 # Two years after .002 option b ("push through") in a lean year (lore S1:
 # "a year" is time- and planet-neutral; "season" was not)
 eotg_frontier_mod_hard_year = {
-    icon = county_modifier_control_negative
+    icon = eotg_frontier_mod_hard_year
     monthly_county_control_growth_factor = -0.1
 }
 
@@ -86,44 +86,44 @@ eotg_frontier_mod_hard_year = {
 # removed when the Region settles (eotg_frontier_settle_rewards_effect). Their
 # real weight is in the script values; the line here is the display.
 eotg_frontier_trait_rich_resources = {
-    icon = county_modifier_development_positive
+    icon = eotg_frontier_trait_rich_resources
     tax_mult = 0.05
 }
 eotg_frontier_trait_trade_route = {
-    icon = county_modifier_development_positive
+    icon = eotg_frontier_trait_trade_route
     tax_mult = 0.05
 }
 eotg_frontier_trait_strategic = {
-    icon = county_modifier_control_positive
+    icon = eotg_frontier_trait_strategic
     levy_size = 0.05
 }
 eotg_frontier_trait_habitable = {
-    icon = county_modifier_development_positive
+    icon = eotg_frontier_trait_habitable
     development_growth_factor = 0.05
 }
 eotg_frontier_trait_ancient_ruins = {
-    icon = county_modifier_development_positive
+    icon = eotg_frontier_trait_ancient_ruins
     development_growth_factor = 0.05
 }
 eotg_frontier_trait_ancient_infrastructure = {
-    icon = county_modifier_development_positive
+    icon = eotg_frontier_trait_ancient_infrastructure
     tax_mult = 0.05
 }
 eotg_frontier_trait_anomalous = {
-    icon = county_modifier_control_negative
+    icon = eotg_frontier_trait_anomalous
     monthly_county_control_growth_factor = -0.05
 }
 eotg_frontier_trait_hostile = {
-    icon = county_modifier_development_negative
+    icon = eotg_frontier_trait_hostile
     monthly_county_control_growth_factor = -0.1
     development_growth_factor = -0.05
 }
 eotg_frontier_trait_remote = {
-    icon = county_modifier_control_negative
+    icon = eotg_frontier_trait_remote
     monthly_county_control_growth_factor = -0.1
 }
 eotg_frontier_trait_dangerous = {
-    icon = county_modifier_control_negative
+    icon = eotg_frontier_trait_dangerous
     levy_size = -0.05
     monthly_county_control_growth_factor = -0.05
 }
@@ -131,62 +131,62 @@ eotg_frontier_trait_dangerous = {
 # -- Frontier infrastructure (spec §4): what the project has built. Removed
 # and converted into results on settling; lost on abandonment.
 eotg_frontier_infra_habitat = {
-    icon = county_modifier_development_positive
+    icon = eotg_frontier_infra_habitat
     development_growth_factor = 0.05
 }
 eotg_frontier_infra_orbital_station = {
-    icon = county_modifier_control_positive
+    icon = eotg_frontier_infra_orbital_station
     monthly_county_control_growth_factor = 0.05
 }
 eotg_frontier_infra_navigation_beacon = {
-    icon = county_modifier_control_positive
+    icon = eotg_frontier_infra_navigation_beacon
     monthly_county_control_growth_factor = 0.05
 }
 eotg_frontier_infra_trade_station = {
-    icon = county_modifier_development_positive
+    icon = eotg_frontier_infra_trade_station
     tax_mult = 0.05
 }
 eotg_frontier_infra_mining_complex = {
-    icon = county_modifier_development_positive
+    icon = eotg_frontier_infra_mining_complex
     tax_mult = 0.05
 }
 eotg_frontier_infra_research_facility = {
-    icon = county_modifier_development_positive
+    icon = eotg_frontier_infra_research_facility
     development_growth_factor = 0.05
 }
 eotg_frontier_infra_mission = {
-    icon = county_modifier_control_positive
+    icon = eotg_frontier_infra_mission
     monthly_county_control_growth_factor = 0.05
 }
 eotg_frontier_infra_garrison_post = {
-    icon = county_modifier_control_positive
+    icon = eotg_frontier_infra_garrison_post
     levy_size = 0.05
 }
 
 # -- Settlement legacies (spec §7): 25 years after settling, from the type,
 # the traits and the infrastructure.
 eotg_frontier_mod_legacy_trade = {
-    icon = county_modifier_development_positive
+    icon = eotg_frontier_mod_legacy_trade
     tax_mult = 0.1
 }
 eotg_frontier_mod_legacy_industry = {
-    icon = county_modifier_development_positive
+    icon = eotg_frontier_mod_legacy_industry
     tax_mult = 0.1
     development_growth_factor = 0.05
 }
 eotg_frontier_mod_legacy_defence = {
-    icon = county_modifier_control_positive
+    icon = eotg_frontier_mod_legacy_defence
     levy_size = 0.15
     monthly_county_control_growth_add = 0.1
 }
 eotg_frontier_mod_legacy_learning = {
-    icon = county_modifier_development_positive
+    icon = eotg_frontier_mod_legacy_learning
     development_growth_factor = 0.15
 }
 # county_opinion_add in a static county modifier: confirmed against vanilla
 # 1.20.0.3 (frontier_v2 local verification, spec §15 item 2)
 eotg_frontier_mod_legacy_faith = {
-    icon = county_modifier_control_positive
+    icon = eotg_frontier_mod_legacy_faith
     county_opinion_add = 5
     monthly_county_control_growth_factor = 0.1
 }
@@ -194,7 +194,7 @@ eotg_frontier_mod_legacy_faith = {
 # .032: terms granted to the settlers, 10 years. Lighter dues, a steadier camp.
 # county_opinion_add: confirmed (as above)
 eotg_frontier_mod_concessions = {
-    icon = county_modifier_control_positive
+    icon = eotg_frontier_mod_concessions
     tax_mult = -0.15
     county_opinion_add = 5
 }
@@ -203,11 +203,11 @@ eotg_frontier_mod_concessions = {
 # -- Exploration (spec §4): the display of eotg_frontier_explored. Absent =
 # Known, so neither modifier is on an ordinary Region.
 eotg_frontier_mod_unknown = {
-    icon = county_modifier_development_negative
+    icon = eotg_frontier_mod_unknown
     monthly_county_control_growth_factor = -0.05
 }
 eotg_frontier_mod_partial = {
-    icon = county_modifier_development_negative
+    icon = eotg_frontier_mod_partial
     monthly_county_control_growth_factor = -0.02
 }
 
@@ -215,6 +215,6 @@ eotg_frontier_mod_partial = {
 # Dangerous adds no strain (eotg_frontier_danger_strains). Removed with the
 # project (eotg_frontier_clear_infra_effect).
 eotg_frontier_mod_merc_escort = {
-    icon = county_modifier_control_positive
+    icon = eotg_frontier_mod_merc_escort
     levy_size = 0.05
 }
