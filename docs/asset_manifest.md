@@ -1,5 +1,11 @@
 # Asset manifest — Echoes of the Grip (space map)
 
+> **Superseded for terrain (2026-10-15).** The per-terrain tiling textures described below
+> are no longer used. One shared source image bakes into three structure textures for every
+> terrain, and terrains are told apart in-shader. Do not commission art from this file — see
+> `docs/map_terrains_and_shaders.md`. The quality limits and the measured reasoning here are
+> still correct and still worth reading.
+
 A handoff spec for producing art assets. Self-contained: you do not need the design history.
 
 **Project:** a Crusader Kings III total conversion that renders the map as deep space. Land is

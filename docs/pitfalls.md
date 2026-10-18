@@ -49,11 +49,58 @@ fix and get a test instrument.
 | `border_selected_realm*` / `hovered_realm*` / `my_top_realm` / `selection_highlight` | selection and hover |
 | `border_war*` / `civil_war` / `struggle*` / `epidemic` / `migrate*` | situational overlays |
 
-Tuning the gameplay set changes nothing on the selection screen, and vice versa. This has been
-"fixed" at least five times (`f7a94a8`, `69b1f5f`, `4b35668`, `89ed1f9`, and 2026-10-01), each
-pass touching only the set that was visible at the time.
+Tuning the gameplay set changes nothing on the selection screen, and vice versa.
 
-**Confirm.** Identify the screen from the UI in the screenshot. "Random Character", "Open For
+**FIXED AT SOURCE, 2026-10-18 — `HALO_MAX = 0.12` in `build_space_textures.py`.** `border()` clamps
+every entry, so no texture can blow out again. Band widths now run 8–16px of 86; before the cap,
+**21 of 35 were 40px or wider and four were at 64px** — 74% of the texture.
+
+This entry previously said "find out which screen first", and that advice is what made it recur.
+It told you how to *diagnose* the offending set, so each of six passes (`f7a94a8`, `69b1f5f`,
+`4b35668`, `89ed1f9`, 2026-10-01, 2026-10-04) correctly identified one set, cut it, and left the
+other twenty loaded for the next screen someone looked at. **A note that documents a diagnosis
+does not prevent a recurrence; only a cap at the point of generation does.**
+
+Raising `HALO_MAX` is a decision about every border on the map, not about the one you are looking
+at. That is deliberate.
+
+**There are TWO border systems and they behave oppositely. Establish which one you are looking
+at before touching anything** (verified in the shader source 2026-10-18):
+
+| | border meshes | gradient province overlay |
+|---|---|---|
+| drawn by | vanilla `pdxborder.shader` (we do **not** override it) | our `pdxterrain.shader`, via `bordercolor.fxh` |
+| colour | **the texture's own** — `Diffuse = PdxTex2D(BorderTexture, ...)`. `Border_Color` is declared once in a material block and referenced by **no** pixel shader | **the realm's** — `BilinearColorSample(..., ProvinceColorTexture)` |
+| width | the texture — ours, capped by `HALO_MAX` | engine `GB_*` constants, **not moddable** (§11) |
+| our lever | `build_space_textures.py` | the blend at the `lerp(Diffuse, BorderColor, ...)` call sites |
+
+So: **a pink band is the overlay, not a mesh.** No mesh can be a colour its texture isn't, and
+when the bands looked magenta not one wide texture was pink — they were gold, teal, red, blue and
+green. Hunting for a pink texture is a dead end.
+
+An earlier version of this entry said "the engine tints borders by realm colour" without that
+split. That is true of the overlay and false of the meshes, and stated flatly it sends you to the
+wrong system — the same error the entry exists to prevent.
+
+**Confirm it is a border at all, FIRST.** Three systems draw coloured bands over the map and all
+three look adjacent on screen. Two cheap tells settle it before you touch anything:
+
+- **Does it cross open sea?** The terrain province overlay cannot — it only draws on terrain. The
+  border meshes and the stellar-wind lanes both can.
+- **Is there a thin bright line down the middle of the band?** Then it is a **lane**, not a border:
+  that is the gold core of `river_surface.shader` with its halo around it.
+
+Colour is decisive too. **Border mesh colour comes purely from the texture** — `Diffuse =
+PdxTex2D(BorderTexture, ...)`, and `ColorMult` is only a highlight scalar off `_UserId`, nothing to
+do with realm colour. So a band can never be a colour no border texture holds. When bands looked
+magenta, every wide texture was gold, teal, red, blue or green — and the answer was lanes.
+
+2026-10-18: this cost three rounds. The report said "borders", so borders were investigated and
+fixed twice — the halo cap and the colour cap were both real bugs — while the thing on screen was
+`EOTG_WIDEN` in the lane vertex shader stretching the ribbon 2.5x in world space, which spreads on
+screen as you zoom in. **The word in the bug report is what the user sees, not a diagnosis.**
+
+**Confirm the screen next.** Identify it from the UI in the screenshot. "Random Character", "Open For
 Multiplayer", "Click to select" ⇒ character selection ⇒ `realm_explorer_*`, **not** the realm
 borders.
 
@@ -64,6 +111,9 @@ borders.
   pass; the core carries legibility, the halo is what becomes a slab at maximum zoom.
 - Several border types draw **simultaneously** at close zoom (see `zoom_min`/`zoom_max` in
   vanilla `gfx/map/borders/settings.txt`), so thickness stacks.
+- **Check all 35, not the one you suspect.** Measuring every texture's alpha profile takes one
+  script and is how the 21 wide ones were found; inspecting the suspected set is how they were
+  missed five times running.
 
 ---
 
@@ -291,13 +341,41 @@ pattern fails fast instead of being backgrounded.
 
 ---
 
-## 11. Not everything is tunable
+## 11. The gradient border IS tunable, but not from defines
 
-`GB_EdgeWidth`, `GB_GradientWidth`, `GB_GradientAlphaInside/Outside`, `GB_EdgeAlpha`,
-`GB_PreLightingBlend` appear **only as usage** in `jomini_province_overlays.fxh`, never as a
-declaration, and no settings file backs them. The gradient province overlay is engine-controlled
-and **cannot be configured from a mod** — the only lever is recomputing the border from
-`CalcDistanceFieldValue` in our own shader. Do not go looking for the settings file again.
+**Corrected 2026-10-08.** This entry used to say the `GB_*` values could not be configured from a
+mod. That was wrong. `GB_EdgeWidth`, `GB_GradientWidth`, `GB_GradientAlphaInside/Outside`,
+`GB_GradientColorMul`, `GB_EdgeAlpha`, `GB_EdgeColorMul`, `GB_EdgeSmoothness` and
+`GB_Pre/PostLightingBlend` are declared in the engine-internal `jomini/gradient_border_constants.fxh`,
+which is not shipped (like `cw/pdxterrain.fxh`). The engine fills them from the
+**`gradient_parameters = { zoom_step = … }` blocks in vanilla `gfx/map/map_modes/map_modes.txt`**,
+per map mode and per zoom step. The `@hollow_*` / `@filled_*` variables sit at lines 10-102 of that file.
+There is nothing in `NGraphics`/`NBorder`. The only border-gradient define is
+`ENABLE_GRADIENT_BORDERS_SHORELINE`. The searches that missed this looked in `common/defines`
+and `gfx/FX`, never in `gfx/map/map_modes`.
+
+What the values mean (`jomini_province_overlays.fxh:100-120`):
+- The distance field is 0 on a colour boundary and rises inward. "Outside" means AT the border
+  and "inside" means the interior, which is the opposite of what the names suggest.
+- The **Realms** mode is *hollow* below zoom step 9: inside alpha 0, outside 1, gradient width 0.01,
+  colour mult 0.3, edge 0.015, pre/post blend 0.2/0.3. From step 9 it is *filled*.
+- The boundaries are wherever the map mode's **colours** change. So the field gives top-realm
+  borders in Realms and duchy borders in De Jure Duchies. There is one field per mode, never two tiers at once.
+
+**Still prefer the shader.** Changing `map_modes.txt` needs a full copy of a 6,239-line vanilla
+file, because the `@` variables are file-local. That copy goes stale on every patch (§2). The inner
+border glow (`EotgInnerGlow`, `EOTG_GLOW_*` in `pdxterrain.shader`) recomputes from
+`CalcDistanceFieldValue` + `BilinearColorSample` instead, so it does not depend on `GB_*` at all.
+
+**Latent quirk in our high-spec path.** In `PixelShader`, the `TERRAIN_FLAT_MAP_LERP` branch calls
+`GetBorderColorAndBlendGameLerp` again and **overwrites `BorderPre/PostLightingBlend` with raw
+vanilla values**. So `EOTG_BORDER_SHARPEN` and `EOTG_POLITICAL_OPACITY` only reach the pre-lighting
+tint and the full-overlay test. They do not reach the post-lighting realm colour. `PixelShaderLowSpec`
+has the same code, but `PdxTerrainLowSpec` does not define `TERRAIN_FLAT_MAP_LERP`. So **low spec
+does get the sharpen and the opacity, and high spec does not**. The two paths show realm colour at
+different strengths. Vanilla's code has the same shape and is harmless there, since vanilla never edits
+the values in between. Fixing it would change the current look, so it has been left alone. If a change
+to either define seems to do nothing to the realm colour, this is why.
 
 ## 12. Script that loads cleanly but never runs: a hook name from `.info` prose
 

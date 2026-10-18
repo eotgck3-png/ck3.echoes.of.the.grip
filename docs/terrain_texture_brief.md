@@ -1,5 +1,11 @@
 # Terrain texture brief — regeneration round 2
 
+> **Superseded for terrain (2026-10-15).** The per-terrain tiling textures described below
+> are no longer used. One shared source image bakes into three structure textures for every
+> terrain, and terrains are told apart in-shader. Do not commission art from this file — see
+> `docs/map_terrains_and_shaders.md`. The quality limits and the measured reasoning here are
+> still correct and still worth reading.
+
 A spec for generating the 26 terrain textures for a Crusader Kings III total conversion whose map
 is deep space. Self-contained: no prior context needed.
 

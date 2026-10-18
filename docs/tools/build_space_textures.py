@@ -76,7 +76,21 @@ CRIMSON = hx("#E0325A"); TEAL = hx("#2FB8B0"); EMERALD = hx("#2E9C6A"); SAPPH = 
 BORDER_W, BORDER_H = 85, 86
 
 
+# HARD CAP on halo, applied inside border() so no spec entry can exceed it.
+#
+# Border WIDTH is engine geometry and cannot be changed; the halo is the only lever, and it is
+# what becomes a slab on screen when zoomed in. This has been "fixed" six times, each time by
+# cutting only the set that happened to be visible — realm, then high-frequency, then explorer —
+# while the rest stayed wide. When this cap went in, 21 of 35 textures still had bands of 40px or
+# more out of 86, some at 64px (74% of the texture). The engine tints borders by REALM colour, so
+# a wide texture plus a saturated realm reads as a neon slab regardless of the colour authored here.
+#
+# Per-entry halos below are kept as authored intent and clamped here. Raising this is a decision
+# about the whole map, not about one border — which is the point.
+HALO_MAX = 0.12
+
 def border(color, core=0.06, halo=0.35, strength=1.0, dash=None, core_col=None, size=None):
+    halo = min(halo, HALO_MAX)
     w, h = (size, size) if size else (BORDER_W, BORDER_H)
     cc = core_col or tuple(min(255, int(c * 0.45 + 255 * 0.55)) for c in color)
     y = (np.arange(h) + 0.5) / h

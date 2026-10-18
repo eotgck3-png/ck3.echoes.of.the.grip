@@ -1,4 +1,4 @@
-# MOD(eotg) Stellar Rivers - full-file override of game/gfx/FX/river_surface.shader (CK3 1.19.0.6)
+﻿# MOD(eotg) Stellar Rivers - full-file override of game/gfx/FX/river_surface.shader (CK3 1.19.0.6)
 # Rivers are drawn as self-illuminated "stellar wind" energy lanes instead of water:
 #   - a custom vertex shader widens the river ribbon so there is room for a soft glow halo
 #   - additive blending so the lane adds light to the terrain instead of painting a strip on it
@@ -11,6 +11,7 @@ Includes = {
 	"jomini/jomini_fog_of_war.fxh"
 	"standardfuncsgfx.fxh"
 	"cw/pdxterrain.fxh"
+	"cw/camera.fxh"          # MOD(eotg) GetZoomedInZoomedOutFactor
 	"shadow_tint.fxh"
 	"clouds.fxh"
 }
@@ -94,6 +95,14 @@ PixelShader =
 			#define EOTG_HUE_WISP_OFFSET   0.30f  // wisps sit this far along the palette from the halo
 			#define EOTG_INTENSITY         1.0f   // overall brightness (additive, so 1.0 is already strong)
 			#define EOTG_HALO_TIGHTNESS    3.0f   // higher = halo hugs the centre more (gaussian falloff)
+			// The ribbon is widened EOTG_WIDEN (2.5x) in WORLD space by the vertex shader, so its span
+			// grows on screen as the camera comes in: right at mid zoom, a slab at full zoom. The glow
+			// was reading as wide violet bands with the gold lane down the middle. Tighten the falloff
+			// as we zoom in so the halo keeps roughly its screen width instead of tracking the mesh.
+			// GetZoomedInZoomedOutFactor() is LOW when zoomed in.
+			#define EOTG_HALO_TIGHTNESS_IN 14.0f  // falloff at full zoom-in
+			#define EOTG_HALO_ZOOM_LO      0.08f
+			#define EOTG_HALO_ZOOM_HI      0.35f
 			#define EOTG_CORE_TIGHTNESS    45.0f  // higher = thinner centre line
 			#define EOTG_ALONG_SCALE       1.0f   // multiplier on the along-river coordinate; if streaks are microscopic try 0.1, if giant try 10
 			#define EOTG_FLOW_SPEED        30.0f  // how fast streaks travel downstream (units of along-scale per second)
@@ -169,7 +178,9 @@ PixelShader =
 				float d      = abs( across - 0.5f ) * 2.0f;   // 0 at centre line, 1 at the outer glow edge
 
 				// --- Shape --------------------------------------------------------------
-				float halo = EotgGauss( d, EOTG_HALO_TIGHTNESS );
+				float haloTight = lerp( EOTG_HALO_TIGHTNESS_IN, EOTG_HALO_TIGHTNESS,   // MOD(eotg)
+					smoothstep( EOTG_HALO_ZOOM_LO, EOTG_HALO_ZOOM_HI, GetZoomedInZoomedOutFactor() ) );
+				float halo = EotgGauss( d, haloTight );
 				float core = EotgGauss( d, EOTG_CORE_TIGHTNESS );
 
 				// Slow turbulence breathing through the halo so it is not a flat gradient

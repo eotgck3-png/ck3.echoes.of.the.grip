@@ -488,6 +488,39 @@ PixelShader =
 		// sub-pixel - which is why the borders bloomed into wide pink bands only at max zoom.
 		// Raising the alpha to a power keeps the core of the border and discards the tail.
 		#define EOTG_BORDER_SHARPEN    2.6f
+		// Realm colours are authored against vanilla's LIT terrain, where lerping toward them is a
+		// wash. On near-black unlit terrain the same lerp makes the realm colour BE the pixel: at a
+		// 0.17 blend, vanilla goes 0.50 -> 0.55 and we go 0.046 -> 0.171. That is why a saturated
+		// realm reads as neon. Width is engine-side (GB_GradientWidth, see pitfalls 11) and cannot
+		// be touched, so cap the COLOUR instead: no realm can be more saturated or brighter than
+		// this, whatever the engine hands us.
+		#define EOTG_BORDER_DESAT      0.45f   // pull toward its own luminance
+		#define EOTG_BORDER_MAX_LUM    0.55f   // cap on the brightest channel
+		// The overlay's WIDTH is engine-side and cannot be reduced (GB_GradientWidth, pitfalls 11).
+		// It is a fixed span in world units, so zooming in scales it across more and more screen:
+		// readable at mid zoom, a slab at full zoom. Since what you want at full zoom is terrain
+		// detail rather than a realm wash, fade the overlay down as the camera comes in. Not to
+		// zero - realm boundaries still need to be legible - just out of the way.
+		// GetZoomedInZoomedOutFactor() is LOW when zoomed in (the fine star layer keys off the same
+		// signal at 0.22/0.58).
+		#define EOTG_BORDER_ZOOM_LO    0.10f   // at or below this, overlay sits at _MIN
+		#define EOTG_BORDER_ZOOM_HI    0.42f   // at or above this, full strength
+		#define EOTG_BORDER_ZOOM_MIN   0.30f
+
+		// Inner border glow (2026-10-08). The hollow realm look leaves almost no realm colour on
+		// the map: vanilla's hollow gradient is 0.01 wide at 0.3x colour and 30% blend, its full-
+		// colour edge band sits under the border meshes, and the sharpen above crushes the
+		// pre-lighting tint to ~1%. So neighbouring realms were told apart only by mesh lines of
+		// one colour. This adds a soft glow of each region's OWN map-mode colour on its own side
+		// of every colour boundary - one realm's glow on one side, its neighbour's on the other.
+		// Units are the engine's border distance field (map_modes.txt gradient_width scale): 0 on
+		// the border line, rising inward. Vanilla's hollow edge is 0.015, its gradient 0.01 more.
+		// It follows whatever the map mode colours by: top realms in Realms, duchies in De Jure
+		// Duchies, and so on. Look-only: it reads no title, province or colour from script.
+		#define EOTG_GLOW_ON          1
+		#define EOTG_GLOW_WIDTH       0.05f   // how far inward the glow reaches. 0.03 thin, 0.08 broad
+		#define EOTG_GLOW_STRENGTH    0.30f   // added light at the border line. 0.15 faint, 0.5 bright
+		#define EOTG_GLOW_FALLOFF     2.0f    // 1 = linear ramp, 2-3 = hugs the line, tail fades out
 
 		// Topographic contours over the whole map - a tactical-display cue rather than a terrain
 		// effect, so it is global and does not belong to any one material.
@@ -1689,6 +1722,17 @@ PixelShader =
 		}
 
 		// Replace the greyscale structure with the terrain's own colour.
+		// Tame a realm colour so it cannot neon against unlit terrain. Desaturate, then scale the
+		// whole colour down if any channel is over the cap - scaling rather than clamping per
+		// channel, so the hue is preserved and a bright realm stays recognisably itself.
+		float3 EotgTameBorder( float3 c )
+		{
+			float lum = dot( c, float3( 0.2126f, 0.7152f, 0.0722f ) );
+			c = lerp( c, vec3( lum ), EOTG_BORDER_DESAT );
+			float peak = max( max( c.r, c.g ), c.b );
+			return ( peak > EOTG_BORDER_MAX_LUM ) ? c * ( EOTG_BORDER_MAX_LUM / peak ) : c;
+		}
+
 		float3 EotgApplyTerrain( float3 Diffuse, float3 Tint, float StructureAmount,
 			float ModMultiplier, float2 xz, float breakup )
 		{
@@ -1705,6 +1749,24 @@ PixelShader =
 			return Tint * structured * EOTG_TERRAIN_LEVEL * ModMultiplier;
 		}
 		// ----------------------------------------------------------------------------------
+
+		// MOD(eotg) inner border glow, ADDED as light so it never darkens the stars under it.
+		// Same distance field and primary colour vanilla's CalcPrimaryProvinceOverlay reads
+		// (jomini/jomini_province_overlays.fxh), but independent of the map mode's gradient
+		// parameters and of EOTG_BORDER_SHARPEN. Primary.a is 0 where a map mode leaves a
+		// province uncoloured (sea, wasteland, terrain mode), so those get no glow.
+		float3 EotgInnerGlow( float2 MapCoords )
+		{
+			#if EOTG_GLOW_ON
+				float Dist = CalcDistanceFieldValue( MapCoords );
+				float4 Primary = BilinearColorSample( MapCoords, IndirectionMapSize,
+					InvIndirectionMapSize, ProvinceColorIndirectionTexture, ProvinceColorTexture );
+				float Ramp = pow( 1.0f - saturate( Dist / EOTG_GLOW_WIDTH ), EOTG_GLOW_FALLOFF );
+				return Primary.rgb * ( Primary.a * Ramp * EOTG_GLOW_STRENGTH );
+			#else
+				return vec3( 0.0f );
+			#endif
+		}
 
 	]]
 
@@ -1753,10 +1815,25 @@ PixelShader =
 					#else
 						float EotgPolFade = EOTG_POLITICAL_OPACITY;
 					#endif
+					// MOD(eotg) and fade it as the camera comes in. Folded into EotgPolFade so it
+					// lands BEFORE FullColorOverlayFactor, for the reason above: a thinned overlay
+					// that still took the opaque-skip would blend against unshaded terrain.
+					EotgPolFade *= lerp( EOTG_BORDER_ZOOM_MIN, 1.0f,
+						smoothstep( EOTG_BORDER_ZOOM_LO, EOTG_BORDER_ZOOM_HI,
+							GetZoomedInZoomedOutFactor() ) );
 					BorderPreLightingBlend  = pow( saturate( BorderPreLightingBlend  ),
 						EOTG_BORDER_SHARPEN ) * EotgPolFade;   // MOD(eotg) drop the gradient's tail
 					BorderPostLightingBlend = pow( saturate( BorderPostLightingBlend ),
 						EOTG_BORDER_SHARPEN ) * EotgPolFade;
+
+					// MOD(eotg) and cap the colour itself. Unwound as the paper map comes in, for
+					// the same reason EotgPolFade is: at flat-map zoom there is no terrain left to
+					// read through, so borders should go back to full vanilla strength there.
+					#ifdef TERRAIN_FLAT_MAP_LERP
+						BorderColor = lerp( EotgTameBorder( BorderColor ), BorderColor, FlatMapLerp );
+					#else
+						BorderColor = EotgTameBorder( BorderColor );
+					#endif
 
 					FullColorOverlayFactor = BorderPreLightingBlend + BorderPostLightingBlend;
 					FullColorOverlayFactor *= _FullyColorOverlayHeightBlend * _EnabledTerrainCulling;
@@ -1965,6 +2042,7 @@ PixelShader =
 				 	float NdotL = saturate( dot( MaterialProps._Normal, LightingProps._ToLightDir ) ) + 1e-5;
 					BorderColor *= lerp( max( _WaterZoomedInZoomedOutFactor - 0.4f, 0.4f ), 1.0f, NdotL );
 					FinalColor.rgb = lerp( FinalColor.rgb, BorderColor, BorderPostLightingBlend );
+					FinalColor.rgb += EotgInnerGlow( ColorMapCoords );   // MOD(eotg) inner border glow; fog of war and the paper fade still apply below
 					ApplyHighlightColor( FinalColor.rgb, HighlightColor, 0.25f );
 					ApplyDiseaseDiffuse( FinalColor, ColorMapCoords );
 					ApplyLegendDiffuse( FinalColor, ColorMapCoords );
@@ -2036,10 +2114,25 @@ PixelShader =
 					#else
 						float EotgPolFade = EOTG_POLITICAL_OPACITY;
 					#endif
+					// MOD(eotg) and fade it as the camera comes in. Folded into EotgPolFade so it
+					// lands BEFORE FullColorOverlayFactor, for the reason above: a thinned overlay
+					// that still took the opaque-skip would blend against unshaded terrain.
+					EotgPolFade *= lerp( EOTG_BORDER_ZOOM_MIN, 1.0f,
+						smoothstep( EOTG_BORDER_ZOOM_LO, EOTG_BORDER_ZOOM_HI,
+							GetZoomedInZoomedOutFactor() ) );
 					BorderPreLightingBlend  = pow( saturate( BorderPreLightingBlend  ),
 						EOTG_BORDER_SHARPEN ) * EotgPolFade;   // MOD(eotg) drop the gradient's tail
 					BorderPostLightingBlend = pow( saturate( BorderPostLightingBlend ),
 						EOTG_BORDER_SHARPEN ) * EotgPolFade;
+
+					// MOD(eotg) and cap the colour itself. Unwound as the paper map comes in, for
+					// the same reason EotgPolFade is: at flat-map zoom there is no terrain left to
+					// read through, so borders should go back to full vanilla strength there.
+					#ifdef TERRAIN_FLAT_MAP_LERP
+						BorderColor = lerp( EotgTameBorder( BorderColor ), BorderColor, FlatMapLerp );
+					#else
+						BorderColor = EotgTameBorder( BorderColor );
+					#endif
 
 					FullColorOverlayFactor = BorderPreLightingBlend + BorderPostLightingBlend;
 					FullColorOverlayFactor *= _FullyColorOverlayHeightBlend * _EnabledTerrainCulling;
@@ -2171,6 +2264,10 @@ PixelShader =
 							* ( EOTG_CONTOUR_OPACITY * EotgFlatFade );
 					#endif
 				}
+				#ifdef TERRAIN_COLOR_OVERLAY
+					// MOD(eotg) inner border glow, before fog of war as in PixelShader
+					FinalColor.rgb += EotgInnerGlow( ColorMapCoords );
+				#endif
 				#ifndef UNDERWATER
 					if( !IsFullyColorOverlay )
 					{
