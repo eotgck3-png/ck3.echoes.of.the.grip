@@ -558,6 +558,30 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Next step:** port the v1 building reskins as `localization/english/replace/` overrides. Keep one definition per key across the tree.
 - **Refs:** `docs/specs/frontier_v5.md` §3.5
 
+### CB-57: Cartel G2 spec: owner questions
+- **Status:** waiting-human (2026-10-18)
+- **What:** `docs/specs/governments_v2_g2_cartel.md` (architect, cites at 1.20.1.1). Dread stays the resource and is coupled to tribute both ways: a Cartel-only "Put on the Schedule" interaction with its own contract group, a dread floor per payer, payers walk off at low dread, decay sign fixed. Two decisions (Tighten the Schedule, Lean on the Locals), entry and exit decisions, grant fields. Batches C1 to C5; proposed events E1 to E5 sit outside the build list.
+- **Owner questions (spec §12, architect recommendation in brackets):**
+  1. Remove vanilla `ask_for_tribute` for Cartels, so "Put on the Schedule" is the one tribute verb? [yes]
+  2. Payers pass to the heir, reversing G1's lapse at death? [yes]
+  3. A visible story (dread counter plus the schedule modifier), the mod's second? [yes]
+  4. May the AI adopt the Cartel? [not yet; after the V-G11 leakage check]
+  5. `max_dread = 150` for the Cartel? [not yet]
+  6. Approve the first-pass numbers in §2.5 and §4 to §6?
+  7. Which of events E1 to E5 (§11), if any?
+- **Owner:** human, then orchestrator → eotg-scripter (C1 first)
+- **Next step:** answer the questions. C1 (resource core) is buildable now but includes the story cycle (Q3), so it waits for the answers.
+- **Refs:** template §9.2, §9.6; CB-49 (the V-C tests run alongside it); CB-53 (payer inheritance follows `primary_heir`)
+
+### CB-58: Fabricators at 866?
+- **Status:** waiting-human (2026-10-18)
+- **What:** canon is silent on fabricators or printers. Frontier v5 round 2 (.059, infrastructure breakthrough) bans them for now: parts are made and fitted by hand (lore-keeper option A, orchestrator ruling).
+- **Owner:** human (canon ruling), then eotg-lore-keeper
+- **Next step:** keep the ban, or allow simple feedstock fabrication. If allowed, the localizer can widen .059's text.
+- **Refs:** `docs/specs/frontier_v5.md` §3.6
+
+---
+
 ## Tooling and environment
 
 ### CB-18: Game is 1.20.0.3; the tools target older versions
