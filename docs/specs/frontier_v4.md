@@ -3,7 +3,7 @@
 **Author:** eotg-architect, 2026-10-11. **Status:** ruled, not built. The human approved the dispatch on 2026-10-11. **Owner rulings H1–H3 recorded 2026-10-11** (§13). They touch A1, A2.3, A6 M3 and batches 2–3 only; batch 1 is unchanged. **H4 ruled 2026-10-12** (§13); the approved content is specified in [`frontier_v5.md`](frontier_v5.md), which amends §A5 (the .005 AI order gains option e) and D4-9.
 **Amends:** [`frontier_v1.md`](frontier_v1.md), [`frontier_v2.md`](frontier_v2.md), [`frontier_v3.md`](frontier_v3.md), [`frontier_unclaimed_regions.md`](frontier_unclaimed_regions.md) (its §D owner decisions still bind), and one line of [`governments_v2.md`](governments_v2.md). Where this spec and an amended spec disagree, **this spec wins**. Each amended spec carries a pointer back here.
 **Input:** [`docs/qa/frontier_unsworn_architect_brief.md`](../qa/frontier_unsworn_architect_brief.md) (cited as *brief Ax*); evidence in [`docs/qa/frontier_unsworn_qa.md`](../qa/frontier_unsworn_qa.md); the government assessment [`docs/qa/government_assessment_2026-10-11/shared_infra.md`](../qa/government_assessment_2026-10-11/shared_infra.md) (B1, G3), [`government_template.md`](government_template.md) §6.2. Intent: [`docs/design/frontier_systems.md`](../design/frontier_systems.md) (read-only; cited as *design §n*).
-**Vanilla:** CK3 **1.20.0.4**, `G` = `D:/SteamLibrary/steamapps/common/Crusader Kings III/game`. I re-checked every vanilla line cited below in this session. Line numbers the brief took from `0abde1d` were re-checked too and still hold.
+**Vanilla:** CK3 **1.20.0.4**, `G` = `D:/SteamLibrary/steamapps/common/Crusader Kings III/game`. I re-checked every vanilla line cited below in this session. **Patch note (2026-10-18): the game is now 1.20.1.1. Every batch-3 citation (A6 probe/M2/M3, §9 yearly-gate, blacklist, player-swap and `debug_only` rows, §10 test 6) was re-checked against 1.20.1.1; other citations still date from 1.20.0.4.** Line numbers the brief took from `0abde1d` were re-checked too and still hold.
 
 ---
 
@@ -318,32 +318,32 @@ The tick's AI line becomes: if an AI holder and `eotg_frontier_pick_founder_effe
 
 ### A6. Unsworn playability (conditional; batch 3, plus a probe in batch 1)
 
-**New fact (static, this session).** `is_playable_character` is a **vanilla scripted trigger**, not an engine trigger (`G/common/scripted_triggers/00_available_for_events_triggers.txt:964-980`: `is_ruler`, and landed above barony). A placeholder holds a county, so **it always passes**. The current probe (`eotg_unclaimed_debug_readout_effect`, which toasts on `is_playable_character`) therefore always reports "playable" and **cannot answer V-U1**.
+**New fact (static, this session).** `is_playable_character` is a **vanilla scripted trigger**, not an engine trigger (`G/common/scripted_triggers/00_available_for_events_triggers.txt:964-983` at 1.20.1.1: `is_ruler`, and landed above barony). A placeholder holds a county, so **it always passes**. The current probe (`eotg_unclaimed_debug_readout_effect`, which toasts on `is_playable_character`) therefore always reports "playable" and **cannot answer V-U1**.
 
 V-U1 is split into two parts:
-- **V-U1a:** does the engine fire `random_yearly_playable_pulse` for a placeholder? That pulse is vanilla's random yearly-event pool, gated by `basic_is_valid_for_yearly_events_trigger` (`G/common/on_action/yearly_on_actions.txt:3018-3021`).
+- **V-U1a:** does the engine fire `random_yearly_playable_pulse` for a placeholder? That pulse is vanilla's random yearly-event pool, gated by `basic_is_valid_for_yearly_events_trigger` (`G/common/on_action/yearly_on_actions.txt:3033-3036` at 1.20.1.1).
 - **V-U1b:** can a placeholder be picked in the lobby? The government assessment found it is not on the vanilla blacklist (`shared_infra.md` B1; CB-54).
 
 **Batch 1 probe (debug tooling, no gating):**
 - `random_yearly_playable_pulse = { on_actions = { eotg_unclaimed_debug_pulse_probe } }` in `common/on_action/eotg_unclaimed_on_actions.txt`. The child's trigger is `{ debug_only = yes eotg_is_unclaimed_holder = yes }`, and its effect adds 1 to the global `eotg_unclaimed_debug_pulsed`, setting it first if absent.
-- `debug_only` in an on_action: `G/common/on_action/game_start.txt:7288`.
+- `debug_only` in an on_action: `G/common/on_action/game_start.txt:7341` (1.20.1.1).
 - The parent's trigger gates its children, so a count above 0 after one game year in `-debug_mode` means placeholders get vanilla yearly events.
 - The readout toasts the count (`eotg_unclaimed_debug_pulsed_tt`). `eotg_unclaimed_debug_playable_tt` is re-texted to say it reports only the scripted check, "expected yes; not proof of lobby play".
 
 **M2 (build if V-U1a > 0).** Key-level override of `basic_is_valid_for_yearly_events_trigger` in `common/scripted_triggers/eotg_vanilla_overrides_triggers.txt`:
-- a **byte-exact copy** of `00_available_for_events_triggers.txt:802-816` at 1.20.0.4, plus one first-child line `NOT = { government_has_flag = eotg_government_is_unclaimed }   # EOTG`;
+- a **byte-exact copy** of `00_available_for_events_triggers.txt:802-816` at **1.20.1.1** (re-checked 2026-10-18: same lines, same 15-line body as 1.20.0.4), plus one first-child line `NOT = { government_has_flag = eotg_government_is_unclaimed }   # EOTG`;
 - the pitfalls §16 procedure;
 - the file header lists the new key and version;
 - `database_conflicts.log` must show `Overriding entry 'basic_is_valid_for_yearly_events_trigger'`.
 
 **Scope: only this key.**
-- **It is the gate of the random yearly pool** (`yearly_on_actions.txt:3020`), struggle pulses (`struggle_on_actions.txt:12`) and one combat path (`combat_on_actions.txt:609`).
+- **It is the gate of the random yearly pool** (`yearly_on_actions.txt:3035`), struggle pulses (`struggle_on_actions.txt:12`) and one combat path (`combat_on_actions.txt:609`).
 - **Not `is_valid_for_narrow_yearly_events` / `_adult`** (`:819`, `:838`): these are used inside 13 event files whose events are reached through pulses this key already gates. The scripter confirms with eotg-vanilla-scout that none of the 13 is fired from an ungated pulse. If one is, add that key to the same override, using the same procedure.
 - **Not `is_playable_character`** (752 references): it is far too broad, and vanilla's herders pass it too, so vanilla never relies on it to exclude scenery.
 - **Residual, accepted:** the effects inside the other playable pulses (`yearly_playable_pulse`, the three- and five-year pulses) are gated by government flags or tier, and placeholders have no realm to act on.
 
-**M3 (build if V-U1b says pickable; form chosen by T14).** The vanilla mechanism that makes republics, mercenaries and holy orders unplayable is the scripted rule `is_character_allowed_to_be_player` (`G/common/scripted_rules/00_rules.txt:151-249`). A post-lobby toast cannot stop play; this rule can.
-- **If T14 shows a key-level override in a separately named file works:** new file `common/scripted_rules/zz_eotg_rules.txt`, a byte-exact copy of the rule at 1.20.0.4 plus one entry inside the `scope:will_override_government = no` branch, beside the republic and mercenary entries:
+**M3 (build if V-U1b says pickable; form chosen by T14).** The vanilla mechanism that makes republics, mercenaries and holy orders unplayable is the scripted rule `is_character_allowed_to_be_player` (`G/common/scripted_rules/00_rules.txt:170-269` at 1.20.1.1; it was `:151-249` at 1.20.0.4). A post-lobby toast cannot stop play; this rule can.
+- **If T14 shows a key-level override in a separately named file works:** new file `common/scripted_rules/zz_eotg_rules.txt`, a byte-exact copy of the rule at **1.20.1.1** (`00_rules.txt:170-269`, 100 lines) plus one entry inside the `scope:will_override_government = no` branch (`:171-174`), placed directly after the holy-order entry (`:186-189`) and before the admin `trigger_if` (`:191`), beside the republic and mercenary entries (`:176-184`). **Patch check (2026-10-18):** the +19 shift comes from content added above the rule; the rule itself is 100 lines against 99 before, and its structure is what this spec assumed (same branch, same three unconditional entries, then the DLC-conditional admin / theocracy / adventurer blocks and the `is_playable_character` catch-all at `:235`). Placement of our entry does not change. The 1.20.0.4 body is not on disk, so the scripter copies from the installed 1.20.1.1 file, never from an earlier note:
   ```
   custom_description = {
       text = "EOTG_GAME_OVER_CANNOT_PLAY_UNSWORN"
@@ -352,8 +352,8 @@ V-U1 is split into two parts:
   ```
   Loc keys `EOTG_GAME_OVER_CANNOT_PLAY_UNSWORN` and `NOT_EOTG_GAME_OVER_CANNOT_PLAY_UNSWORN`. The `NOT_` form is engine-derived, per vanilla's pair at `G/localization/english/gui/ingame_main_l_english.yml:83-84`. The pitfalls entry gets a second key.
   - **New folder:** `common/scripted_rules/` must be added to CLAUDE.md's placement list (orchestrator).
-- **If only a full-file override works: ruled (owner, 2026-10-11, H3). Allow it, with a warning.** No full-file copy of `00_rules.txt`. Unsworn stays playable until Gate 1, and the lobby warning (UQ1; `government_template.md` §6.2(b)) is built. That is an additive `on_game_start_after_lobby` → `eotg_unclaimed_on_lobby_check`, with effect `every_player = { limit = { eotg_is_unclaimed_holder = yes } send_interface_toast = { title = eotg_unclaimed_toast_unplayable left_icon = this } }`. `every_player` precedent: `G/common/on_action/game_start.txt:3840`. Revisit at Gate 1. This ruling also settles the government-side twin, CB-54.
-- **Not chosen: swapping the player.** Vanilla can do it (`set_player_character`, `game_start.txt:3796-3799`), but there is no map-agnostic way to choose whom.
+- **If only a full-file override works: ruled (owner, 2026-10-11, H3). Allow it, with a warning.** No full-file copy of `00_rules.txt`. Unsworn stays playable until Gate 1, and the lobby warning (UQ1; `government_template.md` §6.2(b)) is built. That is an additive `on_game_start_after_lobby` → `eotg_unclaimed_on_lobby_check`, with effect `every_player = { limit = { eotg_is_unclaimed_holder = yes } send_interface_toast = { title = eotg_unclaimed_toast_unplayable left_icon = this } }`. `every_player` precedent: `G/common/on_action/game_start.txt:3883` (1.20.1.1). Revisit at Gate 1. This ruling also settles the government-side twin, CB-54.
+- **Not chosen: swapping the player.** Vanilla can do it (`set_player_character`, `game_start.txt:3839-3842`), but there is no map-agnostic way to choose whom.
 
 **Related ruling (government assessment G3): Unsworn has no succession law. Accepted and recorded.**
 - **Why:** succession is scripted (`on_death` replaces the placeholder before death; `frontier_unclaimed_regions.md` §5.3), so any engine default is cosmetic.
@@ -663,7 +663,7 @@ No `replace_path`. No descriptor change.
   2. "Frontier Roots" (A9.2).
   3. The A1 vassals show vanilla government names ("Republic", "Theocracy") in their character windows. Does that read acceptably at 866, or is a reflavour of those labels a Gate-4 item for the localizer? A display question only; it doesn't block the build.
 
-## 9. Vanilla precedent (summary, all re-checked at 1.20.0.4)
+## 9. Vanilla precedent (summary, re-checked at 1.20.0.4; batch-3 rows re-checked at 1.20.1.1 on 2026-10-18)
 
 | Change | Vanilla file:line |
 |---|---|
@@ -679,10 +679,10 @@ No `replace_path`. No descriptor change.
 | War leader / armies in a location / army owner | `G/common/character_interactions/00_war.txt:718-724`; `G/common/on_action/yearly_on_actions.txt:1896-1898`; `G/common/on_action/army_on_actions.txt:651-653` |
 | County-picker widget | `G/common/decisions/dlc_decisions/pam/pam_decisions.txt:1334, 1395`; `G/common/decisions/50_holy_site_decisions.txt:119, 147` |
 | Decision cooldown (why not used) | `G/common/decisions/00_cultural_tradition_decisions.txt:141` |
-| Yearly-event gate | `G/common/scripted_triggers/00_available_for_events_triggers.txt:802-816`; `is_playable_character` `:964-980`; `G/common/on_action/yearly_on_actions.txt:3018-3021` |
-| Playable blacklist | `G/common/scripted_rules/00_rules.txt:151-249`; loc pair `G/localization/english/gui/ingame_main_l_english.yml:83-84` |
-| Player swap (not used) / `every_player` | `G/common/on_action/game_start.txt:3796-3799`, `:3840` |
-| `debug_only` in an on_action | `G/common/on_action/game_start.txt:7288` |
+| Yearly-event gate | `G/common/scripted_triggers/00_available_for_events_triggers.txt:802-816`; `is_playable_character` `:964-983`; `G/common/on_action/yearly_on_actions.txt:3033-3036` |
+| Playable blacklist | `G/common/scripted_rules/00_rules.txt:170-269`; loc pair `G/localization/english/gui/ingame_main_l_english.yml:83-84` |
+| Player swap (not used) / `every_player` | `G/common/on_action/game_start.txt:3839-3842`, `:3883` |
+| `debug_only` in an on_action | `G/common/on_action/game_start.txt:7341` |
 | Herder defender tooltip | `G/common/scripted_triggers/00_war_and_peace_triggers.txt:1144-1152`; `G/localization/english/interactions_l_english.yml:168` |
 | `duel` outcome roll | `G/events/yearly_events/court_yearly_events.txt:1240-1281` |
 | Stress forms | `G/events/dlc/ep3/ep3_admin_events.txt:125-133` (1.20 form); the old `stress_impact` is still in 32 vanilla event files |
@@ -705,7 +705,7 @@ No `replace_path`. No descriptor change.
    - no event `trigger = { }` reads `eotg_frontier_event_cd`, `eotg_frontier_roll_ready`, `eotg_unclaimed_colours_cd` or `eotg_unclaimed_ai_gap`;
    - no loc key in §7 contains `Var('eotg_frontier_progress'` or `Var('eotg_frontier_strain'` (the debug readout keys excepted).
 5. `eotg_frontier_progress` or `_strain` is moved in every branch of `eotg_frontier_ai_silent_roll_effect`. Every flavour event still moves or reads one of them.
-6. Override files: `database_conflicts.log` lists exactly the overridden keys, which in batch 3 may add `basic_is_valid_for_yearly_events_trigger` and `is_character_allowed_to_be_player`. Each body diffs against vanilla 1.20.0.4 with only the `# EOTG` lines different.
+6. Override files: `database_conflicts.log` lists exactly the overridden keys, which in batch 3 may add `basic_is_valid_for_yearly_events_trigger` and `is_character_allowed_to_be_player`. Each body diffs against vanilla **1.20.1.1** (or the installed version at build time, re-checked) with only the `# EOTG` lines different.
 
 **In game, and which check gates which item:**
 
