@@ -169,9 +169,7 @@ eotg_aug_roll_syndicate_effect = {
 eotg_aug_roll_syndicate_except_effect = {
     if = {
         limit = {
-            OR = {
-                NOT = { var:$EXCLUDE$ ?= flag:eotg_aug_syn_pill_mob }
-            }
+            NOT = { var:$EXCLUDE$ ?= flag:eotg_aug_syn_pill_mob }
         }
         random_list = {
             1 = {

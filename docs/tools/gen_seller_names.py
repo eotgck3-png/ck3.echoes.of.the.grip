@@ -262,9 +262,15 @@ def render_rolls(lists):
             # S3-2: never hand random_list a list whose every entry is excluded
             # (a single-entry list whose only name is var:$EXCLUDE$). Unrolled,
             # the variable stays unset and the custom loc falls back.
-            out += ["    if = {", "        limit = {", "            OR = {"]
-            out += ["                NOT = { var:$EXCLUDE$ ?= %s }" % f for f in flags]
-            out += ["            }", "        }"]
+            out += ["    if = {", "        limit = {"]
+            if len(flags) == 1:
+                # A one-item OR is redundant (Tiger flags it); same behaviour.
+                out.append("            NOT = { var:$EXCLUDE$ ?= %s }" % flags[0])
+            else:
+                out.append("            OR = {")
+                out += ["                NOT = { var:$EXCLUDE$ ?= %s }" % f for f in flags]
+                out.append("            }")
+            out.append("        }")
             pad = "        "
         out.append(pad + "random_list = {")
         for flag in flags:
