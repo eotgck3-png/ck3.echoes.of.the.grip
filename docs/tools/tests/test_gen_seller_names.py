@@ -224,7 +224,8 @@ class Outputs(unittest.TestCase):
             # S3-2: the guard sits before random_list, so an all-excluded list never reaches it
             guard = block.split("random_list")[0]
             self.assertIn("if = {", guard)
-            self.assertIn("OR = {", guard)
+            # one flag: no OR wrapper (a single-item OR is redundant; Tiger flags it)
+            self.assertNotIn("OR = {", guard)
             self.assertIn("NOT = { var:$EXCLUDE$ ?= flag:eotg_aug_syn_pill_mob }", guard)
 
     def test_every_except_roll_is_guarded_and_plain_rolls_are_not(self):
@@ -235,7 +236,10 @@ class Outputs(unittest.TestCase):
             for key, _sec, exclude in G.ROLLS:
                 body = rolls.split(key + " = {")[1].split("\n}\n")[0]
                 guard = body.split("random_list")[0]
-                self.assertEqual("OR = {" in guard, bool(exclude), key)
+                self.assertEqual("if = {" in guard, bool(exclude), key)
+                if exclude:
+                    # OR wraps the NOT lines only when there are two or more
+                    self.assertEqual("OR = {" in guard, body.count("1 = {") > 1, key)
                 if exclude:
                     self.assertEqual(guard.count("NOT = { var:$EXCLUDE$"), body.count("1 = {"), key)
             self.assertEqual(rolls.count("{"), rolls.count("}"))
