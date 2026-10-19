@@ -580,6 +580,13 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Next step:** keep the ban, or allow simple feedstock fabrication. If allowed, the localizer can widen .059's text.
 - **Refs:** `docs/specs/frontier_v5.md` §3.6
 
+### CB-59: Frontier Seamless residue in decision-fired events
+- **Status:** waiting-human (2026-10-18)
+- **What:** batch 5E guards the Frontier roll and the 22 pool events against Seamless holders, and gives .004/.005 Seamless register variants (orchestrator ruling under event_quality_v1 §12.5 rule (b)). Still first person for a Seamless player: .001, .010, .020, .021, .037 and .042, which are decision-fired or chained.
+- **Owner:** human, then eotg-architect
+- **Next step:** choose: hide them from Seamless players (decision `is_shown`), or give them rule (b) variants (new loc). Also confirm or reverse the .004/.005 ruling.
+- **Refs:** `docs/specs/frontier_v5.md` §3.7, §13 Q2 (D5-7)
+
 ---
 
 ## Tooling and environment

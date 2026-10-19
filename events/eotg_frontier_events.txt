@@ -16,6 +16,7 @@
 #   .021  eotg_decision_frontier_build
 #   .030-.036  eotg_frontier_flavor_pick_effect (the same yearly roll)
 #   .050-.056  eotg_frontier_flavor_pick_effect (frontier_v5.md §3.4, round 1)
+#   .057-.060  eotg_frontier_flavor_pick_effect (frontier_v5.md §3.6, round 2)
 # Event triggers are world-state guards only; the flavor cooldown
 # (eotg_frontier_event_cd) lives in the tick and is never read here.
 # Root is always a character (the Region's holder, or the decision taker);
@@ -354,6 +355,8 @@ eotg_frontier.002 = {
     override_background = { reference = eotg_bg_office }
 
     trigger = {
+        # frontier_v5.md §3.7 in-flight guard: a state guard, not a cooldown
+        eotg_frontier_can_hear_flavor = yes
         exists = scope:eotg_frontier_county
         scope:eotg_frontier_county = {
             # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
@@ -627,6 +630,8 @@ eotg_frontier.003 = {
     override_background = { reference = eotg_bg_office }
 
     trigger = {
+        # frontier_v5.md §3.7 in-flight guard: a state guard, not a cooldown
+        eotg_frontier_can_hear_flavor = yes
         exists = scope:eotg_frontier_county
         exists = scope:eotg_frontier_sponsor
         scope:eotg_frontier_county = {
@@ -750,7 +755,19 @@ eotg_frontier.004 = {
     type = character_event
     title = eotg_frontier.004.t
     desc = {
-        desc = eotg_frontier.004.desc
+        # Seamless register (event_quality_v1 §12.5 S3 rule (b); orchestrator
+        # ruling for frontier_v5 §3.7 / D5-7): .004 is structural and must
+        # fire, so the roll guard cannot cover it. The log register first.
+        # The fragments below are third person and stay for every reader;
+        # options a-c are neutral imperatives, so they need no variant.
+        first_valid = {
+            triggered_desc = {
+                # Seamless; through the Frontier's one trait read (§10.7 V-R2g)
+                trigger = { eotg_frontier_can_hear_flavor = no }
+                desc = eotg_frontier.004.desc_seamless
+            }
+            desc = eotg_frontier.004.desc
+        }
         first_valid = {
             triggered_desc = {
                 trigger = { scope:eotg_frontier_county = { var:eotg_frontier_type ?= flag:settlement } }
@@ -945,8 +962,75 @@ eotg_frontier.005 = {
     type = character_event
     title = eotg_frontier.005.t
     desc = {
-        desc = eotg_frontier.005.desc
+        # Seamless register (event_quality_v1 §12.5 S3 rule (b); orchestrator
+        # ruling for frontier_v5 §3.7 / D5-7): .005 is structural and must
+        # fire, so the roll guard cannot cover it. The log register first,
+        # read through the Frontier's one trait check (§10.7 V-R2g).
         first_valid = {
+            triggered_desc = {
+                trigger = { eotg_frontier_can_hear_flavor = no }
+                desc = eotg_frontier.005.desc_seamless
+            }
+            desc = eotg_frontier.005.desc
+        }
+        # The cause line (spec §6.3: failure names its cause). Every default
+        # line is first person, so a Seamless reader gets a log-register twin
+        # of each, ahead of the defaults; the Seamless hardship line is the
+        # Seamless fallback, so no first-person line can reach that reader.
+        first_valid = {
+            triggered_desc = {
+                trigger = {
+                    eotg_frontier_can_hear_flavor = no
+                    scope:eotg_frontier_county = { var:eotg_frontier_last_cause ?= flag:no_founder }
+                }
+                desc = eotg_frontier.005.desc_no_founder_seamless
+            }
+            triggered_desc = {
+                trigger = {
+                    eotg_frontier_can_hear_flavor = no
+                    scope:eotg_frontier_county = { var:eotg_frontier_last_cause ?= flag:low_control }
+                }
+                desc = eotg_frontier.005.desc_low_control_seamless
+            }
+            triggered_desc = {
+                trigger = {
+                    eotg_frontier_can_hear_flavor = no
+                    scope:eotg_frontier_county = { var:eotg_frontier_last_cause ?= flag:occupied }
+                }
+                desc = eotg_frontier.005.desc_occupied_seamless
+            }
+            triggered_desc = {
+                trigger = {
+                    eotg_frontier_can_hear_flavor = no
+                    scope:eotg_frontier_county = { var:eotg_frontier_last_cause ?= flag:war }
+                }
+                desc = eotg_frontier.005.desc_war_seamless
+            }
+            triggered_desc = {
+                trigger = {
+                    eotg_frontier_can_hear_flavor = no
+                    scope:eotg_frontier_county = { var:eotg_frontier_last_cause ?= flag:sponsor_lapsed }
+                }
+                desc = eotg_frontier.005.desc_sponsor_lapsed_seamless
+            }
+            triggered_desc = {
+                trigger = {
+                    eotg_frontier_can_hear_flavor = no
+                    scope:eotg_frontier_county = { var:eotg_frontier_last_cause ?= flag:danger }
+                }
+                desc = eotg_frontier.005.desc_danger_seamless
+            }
+            triggered_desc = {
+                trigger = {
+                    eotg_frontier_can_hear_flavor = no
+                    scope:eotg_frontier_county = { var:eotg_frontier_last_cause ?= flag:dispute }
+                }
+                desc = eotg_frontier.005.desc_dispute_seamless
+            }
+            triggered_desc = {
+                trigger = { eotg_frontier_can_hear_flavor = no }
+                desc = eotg_frontier.005.desc_hardship_seamless
+            }
             triggered_desc = {
                 trigger = { scope:eotg_frontier_county = { var:eotg_frontier_last_cause ?= flag:no_founder } }
                 desc = eotg_frontier.005.desc_no_founder
@@ -1129,6 +1213,10 @@ eotg_frontier.005 = {
     # System still goes to the created figure (eotg_frontier_founder_can_rule
     # fails for the holder), so the tooltip must not promise it to root.
     option = {
+        name = {    # §12.5 S3 (b): Seamless register variant ("Lead it myself")
+            trigger = { eotg_frontier_can_hear_flavor = no }
+            text = eotg_frontier.005.e_seamless
+        }
         name = eotg_frontier.005.e
         trigger = {
             is_adult = yes
@@ -1144,7 +1232,14 @@ eotg_frontier.005 = {
             eotg_frontier_restart_effect = yes
         }
         add_stress = minor_stress_gain
-        custom_tooltip = eotg_frontier.005.lead_tt
+        # §12.5 S3 (b): the tooltip is first person too
+        if = {
+            limit = { eotg_frontier_can_hear_flavor = no }
+            custom_tooltip = eotg_frontier.005.lead_tt_seamless
+        }
+        else = {
+            custom_tooltip = eotg_frontier.005.lead_tt
+        }
         # Response rows on an ungated option (event_quality_v1 §13.1 step 4),
         # so no trait icon
         stress_impact = {
@@ -1212,6 +1307,10 @@ eotg_frontier.005 = {
 
     # (a sponsor who can pay double) "Lean on the backer."
     option = {
+        name = {    # §12.5 S3 (b): Seamless register variant ("our backer")
+            trigger = { eotg_frontier_can_hear_flavor = no }
+            text = eotg_frontier.005.d_seamless
+        }
         name = eotg_frontier.005.d
         trigger = {
             scope:eotg_frontier_county = {
@@ -1246,6 +1345,10 @@ eotg_frontier.005 = {
     # step 3b). Three eases take strain from the failure point to 5;
     # progress is unchanged.
     option = {
+        name = {    # §12.5 S3 (b): Seamless register variant ("my vassals' crews")
+            trigger = { eotg_frontier_can_hear_flavor = no }
+            text = eotg_frontier.005.f_seamless
+        }
         name = eotg_frontier.005.f
         trigger = {
             highest_held_title_tier >= tier_duchy
@@ -1264,7 +1367,14 @@ eotg_frontier.005 = {
             eotg_frontier_ease_strain_effect = yes
             eotg_frontier_ease_strain_effect = yes
         }
-        custom_tooltip = eotg_frontier.005.f_tt
+        # §12.5 S3 (b): the tooltip is first person too
+        if = {
+            limit = { eotg_frontier_can_hear_flavor = no }
+            custom_tooltip = eotg_frontier.005.f_tt_seamless
+        }
+        else = {
+            custom_tooltip = eotg_frontier.005.f_tt
+        }
         # v4 A5 order holds (QA, 2026-10-12): the same two factor = 0 gates
         # as .005.a, so f never outbids d or b
         ai_chance = {
@@ -1842,6 +1952,8 @@ eotg_frontier.030 = {
     override_background = { reference = eotg_bg_office }
 
     trigger = {
+        # frontier_v5.md §3.7 in-flight guard: a state guard, not a cooldown
+        eotg_frontier_can_hear_flavor = yes
         exists = scope:eotg_frontier_county
         scope:eotg_frontier_county = {
             # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
@@ -1967,6 +2079,8 @@ eotg_frontier.031 = {
     override_background = { reference = eotg_bg_council }
 
     trigger = {
+        # frontier_v5.md §3.7 in-flight guard: a state guard, not a cooldown
+        eotg_frontier_can_hear_flavor = yes
         exists = scope:eotg_frontier_county
         scope:eotg_frontier_county = {
             # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
@@ -2124,6 +2238,8 @@ eotg_frontier.032 = {
     override_background = { reference = eotg_bg_office }
 
     trigger = {
+        # frontier_v5.md §3.7 in-flight guard: a state guard, not a cooldown
+        eotg_frontier_can_hear_flavor = yes
         exists = scope:eotg_frontier_county
         scope:eotg_frontier_county = {
             # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
@@ -2314,6 +2430,8 @@ eotg_frontier.033 = {
     override_background = { reference = eotg_bg_field_camp }
 
     trigger = {
+        # frontier_v5.md §3.7 in-flight guard: a state guard, not a cooldown
+        eotg_frontier_can_hear_flavor = yes
         exists = scope:eotg_frontier_county
         scope:eotg_frontier_county = {
             # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
@@ -2500,6 +2618,8 @@ eotg_frontier.034 = {
     override_background = { reference = eotg_bg_barren_world }
 
     trigger = {
+        # frontier_v5.md §3.7 in-flight guard: a state guard, not a cooldown
+        eotg_frontier_can_hear_flavor = yes
         exists = scope:eotg_frontier_county
         scope:eotg_frontier_county = {
             # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
@@ -2643,6 +2763,8 @@ eotg_frontier.035 = {
     override_background = { reference = eotg_bg_cavern }
 
     trigger = {
+        # frontier_v5.md §3.7 in-flight guard: a state guard, not a cooldown
+        eotg_frontier_can_hear_flavor = yes
         exists = scope:eotg_frontier_county
         scope:eotg_frontier_county = {
             # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
@@ -2794,6 +2916,8 @@ eotg_frontier.036 = {
     override_background = { reference = eotg_bg_cavern }
 
     trigger = {
+        # frontier_v5.md §3.7 in-flight guard: a state guard, not a cooldown
+        eotg_frontier_can_hear_flavor = yes
         exists = scope:eotg_frontier_county
         scope:eotg_frontier_county = {
             # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
@@ -3077,6 +3201,8 @@ eotg_frontier.040 = {
     override_background = { reference = eotg_bg_underlevel_day }
 
     trigger = {
+        # frontier_v5.md §3.7 in-flight guard: a state guard, not a cooldown
+        eotg_frontier_can_hear_flavor = yes
         exists = scope:eotg_frontier_county
         scope:eotg_frontier_county = {
             # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
@@ -3243,6 +3369,8 @@ eotg_frontier.041 = {
     override_background = { reference = eotg_bg_council }
 
     trigger = {
+        # frontier_v5.md §3.7 in-flight guard: a state guard, not a cooldown
+        eotg_frontier_can_hear_flavor = yes
         exists = scope:eotg_frontier_county
         scope:eotg_frontier_county = {
             # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
@@ -3390,6 +3518,8 @@ eotg_frontier.050 = {
     override_background = { reference = eotg_bg_clinic }
 
     trigger = {
+        # frontier_v5.md §3.7 in-flight guard: a state guard, not a cooldown
+        eotg_frontier_can_hear_flavor = yes
         exists = scope:eotg_frontier_county
         scope:eotg_frontier_county = {
             # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
@@ -3505,6 +3635,8 @@ eotg_frontier.051 = {
     override_background = { reference = eotg_bg_field_camp }
 
     trigger = {
+        # frontier_v5.md §3.7 in-flight guard: a state guard, not a cooldown
+        eotg_frontier_can_hear_flavor = yes
         exists = scope:eotg_frontier_county
         scope:eotg_frontier_county = {
             # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
@@ -3648,6 +3780,8 @@ eotg_frontier.052 = {
     override_background = { reference = eotg_bg_field_camp }
 
     trigger = {
+        # frontier_v5.md §3.7 in-flight guard: a state guard, not a cooldown
+        eotg_frontier_can_hear_flavor = yes
         exists = scope:eotg_frontier_county
         scope:eotg_frontier_county = {
             # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
@@ -3785,6 +3919,8 @@ eotg_frontier.053 = {
     override_background = { reference = eotg_bg_barren_world }
 
     trigger = {
+        # frontier_v5.md §3.7 in-flight guard: a state guard, not a cooldown
+        eotg_frontier_can_hear_flavor = yes
         exists = scope:eotg_frontier_county
         scope:eotg_frontier_county = {
             # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
@@ -3962,6 +4098,8 @@ eotg_frontier.054 = {
     override_background = { reference = eotg_bg_council }
 
     trigger = {
+        # frontier_v5.md §3.7 in-flight guard: a state guard, not a cooldown
+        eotg_frontier_can_hear_flavor = yes
         exists = scope:eotg_frontier_county
         scope:eotg_frontier_county = {
             # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
@@ -4167,6 +4305,8 @@ eotg_frontier.055 = {
     override_background = { reference = eotg_bg_council }
 
     trigger = {
+        # frontier_v5.md §3.7 in-flight guard: a state guard, not a cooldown
+        eotg_frontier_can_hear_flavor = yes
         exists = scope:eotg_frontier_county
         scope:eotg_frontier_county = {
             # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
@@ -4324,6 +4464,8 @@ eotg_frontier.056 = {
     override_background = { reference = eotg_bg_field_camp }
 
     trigger = {
+        # frontier_v5.md §3.7 in-flight guard: a state guard, not a cooldown
+        eotg_frontier_can_hear_flavor = yes
         exists = scope:eotg_frontier_county
         scope:eotg_frontier_county = {
             # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
@@ -4438,6 +4580,660 @@ eotg_frontier.056 = {
         stress_impact = {
             compassionate = minor_stress_impact_gain
             stubborn = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 20
+        }
+    }
+}
+
+# =============================================================================
+# Round-2 events (docs/specs/frontier_v5.md §3.6; owner H4, approved
+# 2026-10-12, specified 2026-10-18). Four positive events. Fired by:
+#   .057-.060  eotg_frontier_flavor_pick_effect (the same single yearly roll,
+#              delay 1-120 days; cooldown authority stays in the roll)
+# Everything in the round-1 header holds. Round 2 adds: a Seamless root never
+# reaches these events (§3.7 rule (a): the roll excludes them and each trigger
+# re-checks eotg_frontier_can_hear_flavor at fire time); the default animation
+# is positive, with W6 dismissal/paranoia for greedy and paranoid rulers; each
+# ungated exit is a smaller gain, a gain paid for in strain, or coin. No
+# innovation, fascination or culture effect in any option (§3.6.1).
+# =============================================================================
+
+# -- eotg_frontier.057 --------------------------------------------------------
+# Berths Filling (population growth). Families stay, berths fill, the first
+# children are born in the Region. Not the Exodus by name, no farmland (lore
+# §8 round 2 item 1). The one strain gain (.057.d) is hardship (crowding).
+# Caller: eotg_frontier_flavor_pick_effect (progress 20 or more, strain 3 or
+# less).
+eotg_frontier.057 = {
+    type = character_event
+    title = eotg_frontier.057.t
+    desc = {
+        desc = eotg_frontier.057.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_county = { has_county_modifier = eotg_frontier_trait_habitable } }
+                desc = eotg_frontier.057.desc_habitable
+            }
+        }
+    }
+    theme = realm
+    override_background = { reference = eotg_bg_field_camp }
+
+    trigger = {
+        # frontier_v5.md §3.7 in-flight guard: a state guard, not a cooldown
+        eotg_frontier_can_hear_flavor = yes
+        exists = scope:eotg_frontier_county
+        scope:eotg_frontier_county = {
+            # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
+            holder ?= root
+            eotg_frontier_is_frontier = yes
+            var:eotg_frontier_progress >= 20
+            var:eotg_frontier_strain <= 3
+        }
+    }
+
+    left_portrait = {
+        character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = greedy }
+            animation = dismissal
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        animation = happiness
+    }
+
+    immediate = {
+        hidden_effect = {
+            clear_saved_scope = eotg_frontier_founder
+            scope:eotg_frontier_county = {
+                if = {
+                    limit = { exists = var:eotg_frontier_founder }
+                    var:eotg_frontier_founder = { save_scope_as = eotg_frontier_founder }
+                }
+            }
+        }
+    }
+
+    # "Open new berths before the next convoy docks."
+    option = {
+        name = eotg_frontier.057.a
+        trigger = {
+            gold >= minor_gold_value
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        remove_short_term_gold = minor_gold_value
+        scope:eotg_frontier_county = { eotg_frontier_add_progress_effect = { AMOUNT = 3 } }
+        custom_tooltip = eotg_frontier.057.a_tt
+        ai_chance = {
+            base = 40
+            modifier = { add = -20  has_trait = greedy }
+        }
+    }
+
+    # [gregarious] "I go down to the berths and greet the new families
+    # myself." The event's one personality gate, paired the vanilla way.
+    option = {
+        name = eotg_frontier.057.b
+        trigger = {
+            has_trait = gregarious
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        trait = gregarious
+        scope:eotg_frontier_county = {
+            eotg_frontier_add_progress_effect = { AMOUNT = 2 }
+            eotg_frontier_ease_strain_effect = yes
+        }
+        custom_tooltip = eotg_frontier.057.b_tt
+        stress_impact = {
+            gregarious = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+        }
+    }
+
+    # [education_diplomacy] "Settle who berths where before anyone quarrels
+    # over it." Education gate, no icon (§13.1 step 3a).
+    option = {
+        name = eotg_frontier.057.c
+        trigger = {
+            has_trait = education_diplomacy
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        skill = diplomacy
+        scope:eotg_frontier_county = {
+            eotg_frontier_ease_strain_effect = yes
+            eotg_frontier_add_progress_effect = { AMOUNT = 1 }
+        }
+        custom_tooltip = eotg_frontier.057.c_tt
+        ai_chance = {
+            base = 30
+            modifier = { add = 10  has_trait = education_diplomacy_3 }
+            modifier = { add = 20  has_trait = education_diplomacy_4 }
+            modifier = { add = 20  has_trait = education_diplomacy_5 }
+        }
+    }
+
+    # "Let them come, and fit them in where they fit." Ungated; the gain is
+    # paid for in crowding strain.
+    option = {
+        name = eotg_frontier.057.d
+        scope:eotg_frontier_county = {
+            if = {
+                limit = { eotg_frontier_is_frontier = yes }
+                eotg_frontier_add_progress_effect = { AMOUNT = 2 }
+                eotg_frontier_add_strain_effect = { CAUSE = hardship }
+                custom_tooltip = eotg_frontier.057.d_tt
+            }
+        }
+        # Response rows on an ungated option (§13.1 step 4), so no trait icon
+        stress_impact = {
+            compassionate = minor_stress_impact_gain
+            ambitious = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 20
+        }
+    }
+}
+
+# -- eotg_frontier.058 --------------------------------------------------------
+# A Pair of Steady Hands (a skilled settler). A generated settler offers paid
+# work: an engineer, a surveyor or medic, or a pilot, keyed to education. The
+# .040 deal: the work is paid for, and the Region stays mine; the settler
+# gains no claim, say or title. Not a canon figure; no cybernetics trait
+# (lore §8 round 2 item 2). Created in immediate and removed in after if not
+# hired: vanilla court.4750 (court_events_general.txt:3299-3304, :3446-3462).
+# Caller: eotg_frontier_flavor_pick_effect.
+eotg_frontier.058 = {
+    type = character_event
+    title = eotg_frontier.058.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_settler ?= { has_trait = education_stewardship } }
+                desc = eotg_frontier.058.desc_engineer
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_settler ?= { has_trait = education_learning } }
+                desc = eotg_frontier.058.desc_surveyor
+            }
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_settler ?= { has_trait = education_martial } }
+                desc = eotg_frontier.058.desc_pilot
+            }
+            desc = eotg_frontier.058.desc
+        }
+    }
+    theme = realm
+    override_background = { reference = eotg_bg_office }
+
+    trigger = {
+        # frontier_v5.md §3.7 in-flight guard: a state guard, not a cooldown
+        eotg_frontier_can_hear_flavor = yes
+        exists = scope:eotg_frontier_county
+        scope:eotg_frontier_county = {
+            # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
+            holder ?= root
+            eotg_frontier_is_frontier = yes
+        }
+    }
+
+    left_portrait = {
+        character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = greedy }
+            animation = dismissal
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        animation = personality_rational
+    }
+    # The settler is offered, and speaks the desc's one NPC line
+    right_portrait = {
+        trigger = { exists = scope:eotg_frontier_settler }
+        character = scope:eotg_frontier_settler
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { scope:eotg_frontier_settler ?= { has_trait = stubborn } }
+            animation = personality_bold
+        }
+        animation = personality_rational
+    }
+
+    immediate = {
+        hidden_effect = {
+            clear_saved_scope = eotg_frontier_founder
+            scope:eotg_frontier_county = {
+                if = {
+                    limit = { exists = var:eotg_frontier_founder }
+                    var:eotg_frontier_founder = { save_scope_as = eotg_frontier_founder }
+                }
+            }
+            # The holder's culture and faith by scope, as
+            # eotg_frontier_create_figure_effect (map-agnostic)
+            create_character = {
+                template = eotg_frontier_skilled_settler_template
+                location = scope:eotg_frontier_county.title_province
+                culture = root.culture
+                faith = root.faith
+                save_scope_as = eotg_frontier_settler
+            }
+        }
+    }
+
+    # "Sign them on at a fair wage." The fee goes to the settler (the .040.a
+    # pattern: fixed once, in the payer's scope).
+    option = {
+        name = eotg_frontier.058.a
+        trigger = {
+            exists = scope:eotg_frontier_settler
+            gold >= minor_gold_value
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        save_temporary_scope_value_as = { name = eotg_frontier_fee  value = minor_gold_value }
+        pay_short_term_gold = { target = scope:eotg_frontier_settler  gold = scope:eotg_frontier_fee }
+        add_courtier = scope:eotg_frontier_settler
+        scope:eotg_frontier_county = { eotg_frontier_add_progress_effect = { AMOUNT = 3 } }
+        custom_tooltip = eotg_frontier.058.a_tt
+        ai_chance = {
+            base = 40
+            modifier = { add = -20  has_trait = greedy }
+        }
+    }
+
+    # [lazy] "Put them over the crews, and rest easier." The event's one
+    # personality gate, paired the vanilla way.
+    option = {
+        name = eotg_frontier.058.b
+        trigger = {
+            has_trait = lazy
+            exists = scope:eotg_frontier_settler
+            gold >= tiny_gold_value
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        trait = lazy
+        save_temporary_scope_value_as = { name = eotg_frontier_fee  value = tiny_gold_value }
+        pay_short_term_gold = { target = scope:eotg_frontier_settler  gold = scope:eotg_frontier_fee }
+        add_courtier = scope:eotg_frontier_settler
+        scope:eotg_frontier_county = {
+            eotg_frontier_ease_strain_effect = yes
+            eotg_frontier_add_progress_effect = { AMOUNT = 1 }
+        }
+        custom_tooltip = eotg_frontier.058.b_tt
+        stress_impact = {
+            lazy = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+        }
+    }
+
+    # [education_intrigue] "Learn what they would rather not say, and hire
+    # them for less." Education gate, no icon (§13.1 step 3a); the settler
+    # resents it (the .054.c opinion shape).
+    option = {
+        name = eotg_frontier.058.c
+        trigger = {
+            has_trait = education_intrigue
+            exists = scope:eotg_frontier_settler
+            gold >= tiny_gold_value
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        skill = intrigue
+        save_temporary_scope_value_as = { name = eotg_frontier_fee  value = tiny_gold_value }
+        pay_short_term_gold = { target = scope:eotg_frontier_settler  gold = scope:eotg_frontier_fee }
+        add_courtier = scope:eotg_frontier_settler
+        scope:eotg_frontier_settler = {
+            add_opinion = { modifier = eotg_frontier_opinion_slighted  target = root  years = 10 }
+        }
+        scope:eotg_frontier_county = { eotg_frontier_add_progress_effect = { AMOUNT = 3 } }
+        custom_tooltip = eotg_frontier.058.c_tt
+        ai_chance = {
+            base = 30
+            modifier = { add = 10  has_trait = education_intrigue_3 }
+            modifier = { add = 20  has_trait = education_intrigue_4 }
+            modifier = { add = 20  has_trait = education_intrigue_5 }
+        }
+    }
+
+    # "Let them work for the crews, not for me." Ungated; not hired, so the
+    # after block removes the settler.
+    option = {
+        name = eotg_frontier.058.d
+        scope:eotg_frontier_county = {
+            if = {
+                limit = { eotg_frontier_is_frontier = yes }
+                eotg_frontier_add_progress_effect = { AMOUNT = 1 }
+                custom_tooltip = eotg_frontier.058.d_tt
+            }
+        }
+        # Response rows on an ungated option (§13.1 step 4), so no trait icon
+        stress_impact = {
+            paranoid = minor_stress_impact_loss
+            trusting = minor_stress_impact_gain
+        }
+        ai_chance = {
+            base = 20
+        }
+    }
+
+    # An unhired settler leaves no stray character (vanilla court.4750's
+    # after: silent_disappearance_effect, 00_death_management_effects.txt:20)
+    after = {
+        if = {
+            limit = {
+                scope:eotg_frontier_settler ?= {
+                    is_alive = yes
+                    NOT = { is_courtier_of = root }
+                }
+            }
+            scope:eotg_frontier_settler = { silent_disappearance_effect = yes }
+        }
+    }
+}
+
+# -- eotg_frontier.059 --------------------------------------------------------
+# Older Than Any Record (an infrastructure breakthrough). The crews recover a
+# technique from old salvage: scrubbers, a sounder frame, a water-reclamation
+# fix, made and fitted by hand. Never self-repairing or self-replicating
+# machinery, colony AI, terraforming, new drives, fabricators or printers, and
+# never grants the self-repairing machinery advance (lore §8 round 2 item 3).
+# Caller: eotg_frontier_flavor_pick_effect (progress 20 or more).
+eotg_frontier.059 = {
+    type = character_event
+    title = eotg_frontier.059.t
+    desc = {
+        desc = eotg_frontier.059.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = {
+                    scope:eotg_frontier_county = {
+                        OR = {
+                            has_county_modifier = eotg_frontier_trait_ancient_ruins
+                            has_county_modifier = eotg_frontier_trait_ancient_infrastructure
+                        }
+                    }
+                }
+                desc = eotg_frontier.059.desc_ruins
+            }
+        }
+    }
+    theme = realm
+    override_background = { reference = eotg_bg_cavern }
+
+    trigger = {
+        # frontier_v5.md §3.7 in-flight guard: a state guard, not a cooldown
+        eotg_frontier_can_hear_flavor = yes
+        exists = scope:eotg_frontier_county
+        scope:eotg_frontier_county = {
+            # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
+            holder ?= root
+            eotg_frontier_is_frontier = yes
+            var:eotg_frontier_progress >= 20
+        }
+    }
+
+    left_portrait = {
+        character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = greedy }
+            animation = dismissal
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        animation = personality_rational
+    }
+
+    immediate = {
+        hidden_effect = {
+            clear_saved_scope = eotg_frontier_founder
+            scope:eotg_frontier_county = {
+                if = {
+                    limit = { exists = var:eotg_frontier_founder }
+                    var:eotg_frontier_founder = { save_scope_as = eotg_frontier_founder }
+                }
+            }
+        }
+    }
+
+    # "Fit it in every section, whatever it costs."
+    option = {
+        name = eotg_frontier.059.a
+        trigger = {
+            gold >= minor_gold_value
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        remove_short_term_gold = minor_gold_value
+        scope:eotg_frontier_county = { eotg_frontier_add_progress_effect = { AMOUNT = 3 } }
+        custom_tooltip = eotg_frontier.059.a_tt
+        ai_chance = {
+            base = 40
+            modifier = { add = -20  has_trait = greedy }
+        }
+    }
+
+    # [calm] "Test it on one section, then the rest." The event's one
+    # personality gate, paired the vanilla way.
+    option = {
+        name = eotg_frontier.059.b
+        trigger = {
+            has_trait = calm
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        trait = calm
+        scope:eotg_frontier_county = {
+            eotg_frontier_ease_strain_effect = yes
+            eotg_frontier_add_progress_effect = { AMOUNT = 2 }
+        }
+        custom_tooltip = eotg_frontier.059.b_tt
+        stress_impact = {
+            calm = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+        }
+    }
+
+    # [education_stewardship] "Write it into every crew's work orders."
+    # Education gate, no icon (§13.1 step 3a).
+    option = {
+        name = eotg_frontier.059.c
+        trigger = {
+            has_trait = education_stewardship
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        skill = stewardship
+        scope:eotg_frontier_county = { eotg_frontier_add_progress_effect = { AMOUNT = 4 } }
+        custom_tooltip = eotg_frontier.059.c_tt
+        ai_chance = {
+            base = 30
+            modifier = { add = 10  has_trait = education_stewardship_3 }
+            modifier = { add = 20  has_trait = education_stewardship_4 }
+            modifier = { add = 20  has_trait = education_stewardship_5 }
+        }
+    }
+
+    # "Fit it where it is needed most, and keep the crews moving." Ungated;
+    # the smaller gain.
+    option = {
+        name = eotg_frontier.059.d
+        scope:eotg_frontier_county = {
+            if = {
+                limit = { eotg_frontier_is_frontier = yes }
+                eotg_frontier_add_progress_effect = { AMOUNT = 2 }
+                custom_tooltip = eotg_frontier.059.d_tt
+            }
+        }
+        # Response rows on an ungated option (§13.1 step 4), so no trait icon
+        stress_impact = {
+            diligent = minor_stress_impact_loss
+            lazy = minor_stress_impact_gain
+        }
+        ai_chance = {
+            base = 20
+        }
+    }
+}
+
+# -- eotg_frontier.060 --------------------------------------------------------
+# Ships That Stop (a trade route opens). Independent captains who used to pass
+# through now dock; raiding is real and routes shift, but nothing is named.
+# Any deal is a personal bargain under the holder's own law: no League,
+# market, protected lane or treaty (lore §8 round 2 item 4; LAW AT 866).
+# Caller: eotg_frontier_flavor_pick_effect (progress 33 or more).
+eotg_frontier.060 = {
+    type = character_event
+    title = eotg_frontier.060.t
+    desc = {
+        desc = eotg_frontier.060.desc
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_frontier_county = { has_county_modifier = eotg_frontier_trait_trade_route } }
+                desc = eotg_frontier.060.desc_route
+            }
+        }
+    }
+    theme = realm
+    override_background = { reference = eotg_bg_underlevel_day }
+
+    trigger = {
+        # frontier_v5.md §3.7 in-flight guard: a state guard, not a cooldown
+        eotg_frontier_can_hear_flavor = yes
+        exists = scope:eotg_frontier_county
+        scope:eotg_frontier_county = {
+            # frontier_v4 QA F1: still this ruler's Region after the 1-120 day delay
+            holder ?= root
+            eotg_frontier_is_frontier = yes
+            var:eotg_frontier_progress >= 33
+        }
+    }
+
+    left_portrait = {
+        character = root
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = greedy }
+            animation = dismissal
+        }
+        triggered_animation = {    # W6 (event_quality_v1)
+            trigger = { has_trait = paranoid }
+            animation = paranoia
+        }
+        animation = happiness
+    }
+
+    immediate = {
+        hidden_effect = {
+            clear_saved_scope = eotg_frontier_founder
+            scope:eotg_frontier_county = {
+                if = {
+                    limit = { exists = var:eotg_frontier_founder }
+                    var:eotg_frontier_founder = { save_scope_as = eotg_frontier_founder }
+                }
+            }
+        }
+    }
+
+    # "Build them proper berths and a beacon to find them by." Adds the
+    # trade-route trait only if it is missing and there is room (it fires the
+    # discovery hook); the tooltip shows only when the route is new.
+    option = {
+        name = eotg_frontier.060.a
+        trigger = {
+            gold >= minor_gold_value
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        remove_short_term_gold = minor_gold_value
+        scope:eotg_frontier_county = {
+            # The same conditions as eotg_frontier_add_trait_effect, read
+            # before it runs
+            if = {
+                limit = {
+                    NOT = { has_county_modifier = eotg_frontier_trait_trade_route }
+                    eotg_frontier_trait_room = yes
+                }
+                custom_tooltip = eotg_frontier.060.a_tt
+            }
+            eotg_frontier_add_trait_effect = { TRAIT = eotg_frontier_trait_trade_route  FLAG = trade_route }
+            eotg_frontier_add_progress_effect = { AMOUNT = 2 }
+            # QA 5E: the progress is always shown, route new or not
+            custom_tooltip = eotg_frontier.060.a_progress_tt
+        }
+        ai_chance = {
+            base = 40
+            modifier = { add = -20  has_trait = greedy }
+        }
+    }
+
+    # [gluttonous] "A proper meal for every captain who docks." The event's
+    # one personality gate, paired the vanilla way.
+    option = {
+        name = eotg_frontier.060.b
+        trigger = {
+            has_trait = gluttonous
+            gold >= tiny_gold_value
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        trait = gluttonous
+        remove_short_term_gold = tiny_gold_value
+        scope:eotg_frontier_county = {
+            eotg_frontier_add_progress_effect = { AMOUNT = 2 }
+            eotg_frontier_ease_strain_effect = yes
+        }
+        custom_tooltip = eotg_frontier.060.b_tt
+        stress_impact = {
+            gluttonous = minor_stress_impact_loss
+        }
+        ai_chance = {
+            base = 30
+        }
+    }
+
+    # [duchy or above] "They trade under my law, and whoever raids them
+    # answers to me." Tier gate, no icon; AI base 10 with counter-trait
+    # negatives (§13.1 step 3b). The protection is my own word and law.
+    option = {
+        name = eotg_frontier.060.c
+        trigger = {
+            highest_held_title_tier >= tier_duchy
+            scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes }
+        }
+        add_prestige = minor_prestige_gain
+        scope:eotg_frontier_county = {
+            eotg_frontier_add_progress_effect = { AMOUNT = 2 }
+            eotg_frontier_ease_strain_effect = yes
+        }
+        custom_tooltip = eotg_frontier.060.c_tt
+        ai_chance = {
+            base = 10
+            modifier = { add = -10  has_trait = shy }
+            modifier = { add = -10  has_trait = content }
+            modifier = { add = -10  has_trait = craven }
+        }
+    }
+
+    # "Let them dock, and take a berth fee from each." Ungated; coin rather
+    # than progress.
+    option = {
+        name = eotg_frontier.060.d
+        if = {
+            limit = { scope:eotg_frontier_county = { eotg_frontier_is_frontier = yes } }
+            add_gold = tiny_gold_value
+            scope:eotg_frontier_county = { eotg_frontier_add_progress_effect = { AMOUNT = 1 } }
+            custom_tooltip = eotg_frontier.060.d_tt
+        }
+        # Response rows on an ungated option (§13.1 step 4), so no trait icon
+        stress_impact = {
+            greedy = minor_stress_impact_loss
+            generous = minor_stress_impact_gain
         }
         ai_chance = {
             base = 20

@@ -96,3 +96,34 @@ eotg_frontier_official_template = {
     random_traits = yes
     stewardship = { 9 14 }
 }
+
+# == frontier_v5.md §3.6.3 (batch 5E): the skilled settler of .058 ============
+# Shaped like eotg_frontier_settler_leader_template above and vanilla
+# poet_template (01_ep1_character_templates.txt:1158-1170); weighted trait
+# lists as vanilla 00_hold_court_character_templates.txt:338-343. Culture and
+# faith come from the caller (.058's immediate), by scope. The education
+# picks the desc archetype: stewardship engineer, learning surveyor, martial
+# pilot. Caller: eotg_frontier.058 (immediate).
+eotg_frontier_skilled_settler_template = {
+    age = { 22 50 }
+    gender_female_chance = 50
+    random_traits_list = {
+        count = 1
+        diligent = {}
+        patient = {}
+        stubborn = {}
+        calm = {}
+    }
+    random_traits_list = {
+        count = 1
+        education_stewardship_2 = { weight = { base = 20 } }
+        education_stewardship_3 = { weight = { base = 20 } }
+        education_learning_2 = { weight = { base = 20 } }
+        education_learning_3 = { weight = { base = 20 } }
+        education_martial_2 = { weight = { base = 20 } }
+    }
+    random_traits = yes
+    stewardship = { 6 12 }
+    learning = { 6 12 }
+    martial = { 6 12 }
+}

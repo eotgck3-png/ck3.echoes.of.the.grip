@@ -688,9 +688,19 @@ eotg_frontier_tick_effect = {
         # Otherwise strain accrues, and the AI's Abandon weight eventually
         # acts. A player names one with Appoint a Founder (A4.2) or in
         # eotg_frontier.002's Without a Founder variant.
+        # frontier_v5.md §3.7 step 3: a Seamless player never sees .002's
+        # Without a Founder variant, so the founder is auto-picked for them as
+        # for the AI (Appoint a Founder still works for them).
         clear_saved_scope = eotg_frontier_candidate
         if = {
-            limit = { holder = { is_ai = yes } }
+            limit = {
+                holder = {
+                    OR = {
+                        is_ai = yes
+                        eotg_frontier_can_hear_flavor = no
+                    }
+                }
+            }
             eotg_frontier_pick_founder_effect = yes
         }
         if = {
@@ -884,7 +894,14 @@ eotg_frontier_sponsor_pay_effect = {
 eotg_frontier_event_roll_effect = {
     eotg_frontier_find_sponsor_candidate_effect = yes
     if = {
-        limit = { holder = { is_ai = no } }
+        # frontier_v5.md §3.7: a Seamless player is excluded from the
+        # first-person pool at the caller (event_quality_v1.md §12.5.1 S1)
+        limit = {
+            holder = {
+                is_ai = no
+                eotg_frontier_can_hear_flavor = yes
+            }
+        }
         if = {
             # A founderless Frontier gets its variant of .002 first
             limit = { eotg_frontier_has_valid_founder = no }
@@ -899,6 +916,18 @@ eotg_frontier_event_roll_effect = {
                 set_variable = { name = eotg_frontier_event_cd  value = yes  years = 3 }
                 eotg_frontier_flavor_pick_effect = yes
             }
+        }
+    }
+    # frontier_v5.md §3.7: a Seamless player's Frontier lives through the
+    # silent roll AI Frontiers use (v4 A2.4). Before the AI-to-AI sponsor
+    # offer, so a player never has a backer set silently. The same single
+    # cooldown, set only when the roll passes.
+    else_if = {
+        limit = { holder = { is_ai = no } }
+        random = {
+            chance = 50
+            set_variable = { name = eotg_frontier_event_cd  value = yes  years = 3 }
+            eotg_frontier_ai_silent_roll_effect = yes
         }
     }
     else_if = {
@@ -1974,7 +2003,8 @@ eotg_frontier_create_figure_effect = {
 # Called by eotg_frontier_event_roll_effect for player holders, once the 50%
 # "an event comes this year" roll has passed. Weights read the traits and the
 # infrastructure. .002 is always eligible, so something always fires.
-# frontier_v5.md §3.4.2 adds the round-1 events .050-.056 (end of the list).
+# frontier_v5.md §3.4.2 adds the round-1 events .050-.056 and §3.6.2 the
+# round-2 events .057-.060 (end of the list).
 eotg_frontier_flavor_pick_effect = {
     eotg_frontier_find_rival_backer_effect = yes
     # Phase 3a (frontier_v3.md §5): a captain is looked for only where .040 can
@@ -2171,6 +2201,48 @@ eotg_frontier_flavor_pick_effect = {
             trigger = { eotg_frontier_cultures_differ = yes }
             modifier = { add = 5  var:eotg_frontier_type ?= flag:settlement }
             holder = { trigger_event = { id = eotg_frontier.056  days = { 1 120 } } }
+        }
+        # frontier_v5.md §3.6.2 (#1 round 2, owner H4): four positive events.
+        # Cooldown authority stays in the roll; each event repeats its
+        # eligibility as world state in its own trigger.
+        # .057 Berths Filling: a camp worth staying in
+        10 = {
+            trigger = {
+                var:eotg_frontier_progress >= 20
+                var:eotg_frontier_strain <= 3
+            }
+            modifier = { add = 10  has_county_modifier = eotg_frontier_trait_habitable }
+            modifier = { add = 5  has_county_modifier = eotg_frontier_infra_habitat }
+            modifier = { add = 5  var:eotg_frontier_type ?= flag:settlement }
+            holder = { trigger_event = { id = eotg_frontier.057  days = { 1 120 } } }
+        }
+        # .058 A Pair of Steady Hands: where skills are scarcest
+        10 = {
+            modifier = { add = 5  has_county_modifier = eotg_frontier_trait_hostile }
+            modifier = { add = 5  has_county_modifier = eotg_frontier_trait_remote }
+            holder = { trigger_event = { id = eotg_frontier.058  days = { 1 120 } } }
+        }
+        # .059 Older Than Any Record: something built to improve
+        5 = {
+            trigger = { var:eotg_frontier_progress >= 20 }
+            modifier = {
+                add = 10
+                OR = {
+                    has_county_modifier = eotg_frontier_trait_ancient_ruins
+                    has_county_modifier = eotg_frontier_trait_ancient_infrastructure
+                }
+            }
+            modifier = { add = 5  var:eotg_frontier_type ?= flag:research }
+            modifier = { add = 5  has_county_modifier = eotg_frontier_infra_research_facility }
+            holder = { trigger_event = { id = eotg_frontier.059  days = { 1 120 } } }
+        }
+        # .060 Ships That Stop: berths for a ship to stop at
+        5 = {
+            trigger = { var:eotg_frontier_progress >= 33 }
+            modifier = { add = 15  has_county_modifier = eotg_frontier_trait_trade_route }
+            modifier = { add = 5  has_county_modifier = eotg_frontier_infra_trade_station }
+            modifier = { add = 5  var:eotg_frontier_type ?= flag:trade }
+            holder = { trigger_event = { id = eotg_frontier.060  days = { 1 120 } } }
         }
     }
 }

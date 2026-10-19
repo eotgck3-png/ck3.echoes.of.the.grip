@@ -1,0 +1,106 @@
+frontier_v5 batch 5E: loc keys for eotg-localizer
+=================================================
+
+Source: docs/specs/frontier_v5.md §3.6 (round-2 events), §3.7 (Seamless guard),
+§7 (5E), §8 round 2 (lore constraints, binding), plus the orchestrator ruling
+(event_quality_v1 §12.5 rule (b)) for Seamless register variants on .004/.005.
+Script: events/eotg_frontier_events.txt. eotg-scripter, 2026-10-18, uncommitted.
+File: localization/english/eotg_frontier_l_english.yml (UTF-8 BOM, Canadian
+English, bare [x.GetName], never [scope:...], no dashes, no numbers for progress
+or strain, unescaped double quotes for speech, at most one NPC line per desc).
+Glossary: Region (county), System (barony), Frontier, backer, strain. Never
+"pressure", "charter", "mayor", "bishop", "village". Round-2 banned words: see
+spec §8 round 2 and §10.7 V-R2f.
+
+Hidden-value rule: progress and strain are words only, never numbers.
+
+----------------------------------------------------------------------
+A. Round-2 events .057-.060 (spec §3.6.3; voice lines there are suggestions)
+----------------------------------------------------------------------
+Main desc first person, present tense; every desc variant carries I/me/my.
+Variants are appended fragments ("\n\n...") unless noted.
+
+eotg_frontier.057.t               Berths Filling
+eotg_frontier.057.desc            families staying, berths full, first children born in the Region, newcomers on later convoys
+eotg_frontier.057.desc_habitable  appended; Region is Habitable: some have stopped sealing their doors at night
+eotg_frontier.057.a               open new berths before the next convoy docks (costs minor gold; progress up)
+eotg_frontier.057.a_tt
+eotg_frontier.057.b               [gregarious] I go down and greet the new families myself (progress up, strain eases)
+eotg_frontier.057.b_tt
+eotg_frontier.057.c               [education_diplomacy] settle who berths where before anyone quarrels (strain eases, small progress)
+eotg_frontier.057.c_tt
+eotg_frontier.057.d               ungated: let them come, fit them in where they fit (progress up, strain rises: crowding)
+eotg_frontier.057.d_tt
+
+eotg_frontier.058.t               A Pair of Steady Hands
+eotg_frontier.058.desc            FALLBACK (first_valid, not appended): a skilled settler offers paid work
+eotg_frontier.058.desc_engineer   REPLACES desc when settler has education_stewardship: habitat or life-support engineer, or frame welder/salvager
+eotg_frontier.058.desc_surveyor   REPLACES desc when education_learning: survey geologist, or medic
+eotg_frontier.058.desc_pilot      REPLACES desc when education_martial: a pilot who knows the approaches
+eotg_frontier.058.a               sign [eotg_frontier_settler.GetHerHim] on at a fair wage (minor gold paid to the settler; progress up)
+eotg_frontier.058.a_tt            must say: the work is paid for, and the Region stays mine (no claim, say or title)
+eotg_frontier.058.b               [lazy] put [eotg_frontier_settler.GetHerHim] over the crews and rest easier (tiny gold fee; strain eases; small progress)
+eotg_frontier.058.b_tt            same deal line as a_tt
+eotg_frontier.058.c               [education_intrigue] learn what [eotg_frontier_settler.GetSheHe] would rather not say, hire for less (tiny fee; settler resents me; progress up)
+eotg_frontier.058.c_tt            same deal line as a_tt; plus the resentment
+eotg_frontier.058.d               ungated: let [eotg_frontier_settler.GetHerHim] work for the crews, not for me (not hired; small progress)
+eotg_frontier.058.d_tt            the settler moves on (removed silently after the event)
+  .058 text uses bare [eotg_frontier_settler.GetName] / .GetSheHe / .GetHerHim / .GetHerHis.
+
+eotg_frontier.059.t               Older Than Any Record
+eotg_frontier.059.desc            a technique recovered from salvage "older than any record"; made and fitted by hand
+eotg_frontier.059.desc_ruins      appended; Region has ancient ruins or ancient infrastructure: the salvage came from the Region's own ruins
+eotg_frontier.059.a               fit it in every section, whatever it costs (minor gold; progress up)
+eotg_frontier.059.a_tt
+eotg_frontier.059.b               [calm] test it on one section, then the rest (strain eases; progress up)
+eotg_frontier.059.b_tt
+eotg_frontier.059.c               [education_stewardship] write it into every crew's work orders (progress up, the most)
+eotg_frontier.059.c_tt
+eotg_frontier.059.d               ungated: fit it where needed most, keep the crews moving (progress up, smaller)
+eotg_frontier.059.d_tt
+
+eotg_frontier.060.t               Ships That Stop
+eotg_frontier.060.desc            independent captains who used to pass through now stop; raiding real, never named
+eotg_frontier.060.desc_route      appended; Region already has the trade-route trait: the ships I knew passed through have started to dock
+eotg_frontier.060.a               build proper berths and a beacon to find them by (minor gold; progress up; may add the trade-route trait)
+eotg_frontier.060.a_tt            SHOWN ONLY when the route is new (trait missing and room): the route is marked on the captains' charts
+eotg_frontier.060.b               [gluttonous] a proper meal for every captain who docks (tiny gold; progress up; strain eases)
+eotg_frontier.060.b_tt
+eotg_frontier.060.c               [duchy+] they trade under my law, and whoever raids them answers to me (prestige gain; progress up; strain eases)
+eotg_frontier.060.c_tt            my own law and personal word only: no protected lanes, treaty or authority above me
+eotg_frontier.060.d               ungated: let them dock and take a berth fee from each (tiny gold gained; small progress)
+eotg_frontier.060.d_tt
+
+----------------------------------------------------------------------
+B. Seamless register variants on .004 and .005 (orchestrator ruling,
+   event_quality_v1 §12.5 S3 rule (b); log register, no I/me/my; shape as
+   eotg_aug_heir.001.desc_seamless / eotg_aug_nr.003.desc_seamless)
+----------------------------------------------------------------------
+Shown only to a ruler with eotg_total_integration. Mechanics unchanged.
+
+eotg_frontier.004.desc_seamless   REPLACES .004.desc (completion). The appended type and legacy fragments (.004.desc_settlement ... .004.desc_hard_won) still follow it, so it must read into them.
+eotg_frontier.005.desc_seamless   REPLACES .005.desc (failure). One cause fragment below follows it.
+
+Cause fragments (appended "\n\n..."; each REPLACES its first-person twin for a Seamless reader; failure must still name its cause, frontier_v1 §6.3):
+eotg_frontier.005.desc_no_founder_seamless       twin of .005.desc_no_founder
+eotg_frontier.005.desc_low_control_seamless      twin of .005.desc_low_control
+eotg_frontier.005.desc_occupied_seamless         twin of .005.desc_occupied
+eotg_frontier.005.desc_war_seamless              twin of .005.desc_war
+eotg_frontier.005.desc_sponsor_lapsed_seamless   twin of .005.desc_sponsor_lapsed
+eotg_frontier.005.desc_danger_seamless           twin of .005.desc_danger
+eotg_frontier.005.desc_dispute_seamless          twin of .005.desc_dispute
+eotg_frontier.005.desc_hardship_seamless         twin of .005.desc_hardship (also the Seamless fallback)
+
+Option names (name = { trigger text } variant; default name stays for everyone else):
+eotg_frontier.005.d_seamless      twin of .005.d ("Call on our backer ...")
+eotg_frontier.005.e_seamless      twin of .005.e ("Lead it myself.")
+eotg_frontier.005.f_seamless      twin of .005.f ("Order my vassals' crews in.")
+
+Tooltips (shown instead of the default for a Seamless root):
+eotg_frontier.005.lead_tt_seamless   twin of .005.lead_tt; same must-not as lead_tt (never promise the System to root)
+eotg_frontier.005.f_tt_seamless      twin of .005.f_tt
+
+Not varied (already neutral/imperative): .004.a-.c, .004.complete_tt,
+.005.a-.c, .005.abandon_tt, .005.restart_tt, .005.sponsor_tt, option_passed.
+
+Count: section A 46 keys; section B 15 keys; total 61 (matches Tiger's 61 missing-loc lines). The §3.7 guard needs no loc.

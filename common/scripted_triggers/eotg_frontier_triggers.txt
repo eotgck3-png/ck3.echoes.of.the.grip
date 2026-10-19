@@ -170,6 +170,19 @@ eotg_frontier_completion_met = {
 }
 
 # -- Character scope -----------------------------------------------------------
+# frontier_v5.md §3.7 (batch 5E): may this ruler be sent the Frontier's
+# first-person flavour pool? A Seamless ruler (eotg_total_integration) takes
+# the log register (event_quality_v1.md §12.5 rule 7), so the roll excludes
+# them at the caller (§12.5.1 S1, rule (a)) and routes them to the silent
+# roll; the pool events re-check it at fire time (in-flight guard). The one
+# Frontier reference to the cybernetics trait lives here, so the coupling is
+# one line. Read by eotg_frontier_event_roll_effect, eotg_frontier_tick_effect
+# and the trigger of every pool event (.002, .003, .030-.036, .040, .041,
+# .050-.060).
+eotg_frontier_can_hear_flavor = {
+    NOT = { has_trait = eotg_total_integration }
+}
+
 # any_held_title with tier = tier_county: confirmed (verification V13).
 eotg_frontier_holds_frontier = {
     any_held_title = {

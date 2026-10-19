@@ -21,10 +21,10 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | `frontier_v2` | 1 | 1 | 109 | 109 | 0 | 0 |
 | `frontier_v3` | 1 | 1 | 79 | 79 | 0 | 0 |
 | `frontier_v4` | 1 | 1 | 142 | 134 | 3 | 5 |
-| `frontier_v5` | 1 | 1 | 85 | 78 | 4 | 3 |
+| `frontier_v5` | 1 | 1 | 109 | 100 | 6 | 3 |
 | `glossary` | 1 | 0 | 1 | 0 | 0 | 0 |
 | `government` | 1 | 1 | 9 | 5 | 1 | 3 |
-| `governments_v2` | 1 | 1 | 65 | 48 | 5 | 12 |
+| `governments_v2` | 2 | 1 | 123 | 50 | 6 | 12 |
 | `loc` | 1 | 1 | 95 | 85 | 10 | 0 |
 | `void` | 1 | 0 | 86 | 0 | 0 | 0 |
 
@@ -68,10 +68,11 @@ A spec is **built** when any of its new events exists (the events in its "New" i
 | `frontier_v2.md` | yes | 109 | 109 | 0 | 0 | 0 |
 | `frontier_v3.md` | yes | 80 | 79 | 0 | 0 | 1 |
 | `frontier_v4.md` | yes | 142 | 134 | 3 | 5 | 0 |
-| `frontier_v5.md` | yes | 85 | 78 | 4 | 3 | 0 |
+| `frontier_v5.md` | yes | 109 | 100 | 6 | 3 | 0 |
 | `glossary_proposal_cloud.md` | **no** | 1 | 0 | 0 | 1 | 0 |
 | `government_template.md` | yes | 9 | 5 | 1 | 3 | 0 |
 | `governments_v2.md` | yes | 68 | 48 | 5 | 12 | 3 |
+| `governments_v2_g2_cartel.md` | **no** | 58 | 2 | 1 | 55 | 0 |
 | `loc_dynamic_terms_ruling.md` | yes | 95 | 85 | 10 | 0 | 0 |
 | `void_lift_plan_cloud.md` | **no** | 86 | 0 | 0 | 86 | 0 |
 
@@ -413,9 +414,9 @@ None.
 
 #### `docs/specs/frontier_v5.md`
 
-- Specced and present: 78
-- Specced, missing from script (3): `eotg_frontier.05x` (loc, l.209), `eotg_frontier.05x.t` (loc, l.420), `eotg_event_quality.py` (loc, l.494)
-- Referenced only, never defined or set (4): `eotg_frontier_holder.culture` (loc, l.115), `eotg_frontier_new_barony.title_province` (loc, l.330), `eotg_lint` (unknown, l.494), `eotg_frontier_roll_ready` (unknown, l.504)
+- Specced and present: 100
+- Specced, missing from script (3): `eotg_frontier.05x` (loc, l.213), `eotg_frontier.05x.t` (loc, l.584), `eotg_event_quality.py` (loc, l.686)
+- Referenced only, never defined or set (6): `eotg_frontier_holder.culture` (loc, l.119), `eotg_frontier_new_barony.title_province` (loc, l.334), `eotg_frontier_county.title_province` (loc, l.417), `eotg_frontier_settler.GetName` (loc, l.594), `eotg_lint` (unknown, l.686), `eotg_frontier_roll_ready` (unknown, l.696)
 - Exempt (0): none
 
 ### Unbuilt specs (expected gaps)
@@ -470,7 +471,14 @@ None.
 
 ### Unbuilt specs (expected gaps)
 
-None.
+#### `docs/specs/governments_v2_g2_cartel.md`
+
+- New events, none in script yet: `eotg_cartel_flavor.0005`
+- Specced and present: 2
+- Specced, missing from script (55): `eotg_cartel_change_dread_effect` (effect, l.53), `eotg_cartel_dread_clamped_value` (script value, l.54), `eotg_cartel_dread_amount` (variable, l.54), `eotg_cartel_payer_count_value` (script value, l.55), `eotg_cartel_tributary` (unknown, l.55), `eotg_cartel_schedule_scale` (variable, l.56), `eotg_cartel_refresh_schedule_effect` (effect, l.56), `eotg_cartel_schedule_scale_value` (script value, l.57), `eotg_cartel_succession_grace` (variable, l.58), `eotg_cartel_dread_shown` (variable, l.59), `eotg_cartel_schedule_modifier` (modifier, l.87), `eotg_cartel_init_effect` (effect, l.102), `eotg_story_cartel_schedule` (story, l.102), `eotg_cartel_on_game_start` (on_action, l.102), `eotg_cartel_on_government_change` (on_action, l.102), `eotg_cartel_on_title_gain` (on_action, l.102), `eotg_cartel_teardown_effect` (effect, l.104), `eotg_story_cartel_schedule_dread_label` (story, l.128), `eotg_story_cartel_schedule_info` (story, l.130), `eotg_cartel_sync_story_effect` (effect, l.131), `eotg_cartel` (unknown, l.138), `eotg_cartel_put_on_schedule_interaction` (interaction, l.146), `eotg_cartel_compel` (flag, l.147), `eotg_decision_cartel_tighten_schedule` (decision, l.148), `eotg_decision_cartel_lean_on_locals` (decision, l.149), `eotg_decision_cartel_adopt` (decision, l.150), `eotg_decision_cartel_go_legitimate` (decision, l.151), `eotg_cartel_role_top` (trigger, l.152), `eotg_cartel_role_county` (trigger, l.152), `eotg_cartel_role_vassal` (trigger, l.152), `eotg_cartel_walk_off_effect` (effect, l.153), `eotg_cartel_start_schedule_effect` (effect, l.153), `eotg_cartel_schedule_cost_value` (script value, l.154), `eotg_cartel_tighten_cost_value` (script value, l.154), `eotg_cartel_exit_legitimacy_value` (script value, l.154), `eotg_cartel_leaned_on_modifier` (modifier, l.156), `eotg_refused_protection_opinion` (opinion, l.157), `eotg_compelled_to_pay_opinion` (opinion, l.158), `eotg_schedule_tightened_opinion` (opinion, l.159), `eotg_cartel_on_death` (on_action, l.163), `eotg_cartel_compel_option` (unknown, l.254), `eotg_cartel_compel_tt` (loc, l.255), `eotg_cartel_schedule_toast` (unknown, l.256), `eotg_cartel_walk_off_toast` (unknown, l.282), `eotg_cartel_put_on_schedule_notification` (unknown, l.378), `eotg_cartel_schedule_dread_tt` (loc, l.378), `eotg_cartel_schedule_refused_tt` (loc, l.378), `eotg_cartel_schedule_toast_desc` (loc, l.378), `eotg_cartel_walk_off_toast_desc` (loc, l.379), `eotg_decision_cartel_tighten_schedule_dread_tt` (loc, l.380), `eotg_decision_cartel_adopt_dread_tt` (loc, l.380), `eotg_decision_cartel_go_legitimate_effect_tt` (loc, l.380), `eotg_cartel_schedule_scale_desc` (loc, l.381), `eotg_cartel_tributary_desc` (loc, l.383), `eotg_cartel_flavor.0005` (event, l.415)
+- Referenced only, never defined or set (1): `eotg_government_is_cartel` (unknown, l.104)
+- Exempt (0): none
+- Suffix shorthand that matches no key (14, not counted): l.152: `eotg_cartel_role_county` + `_duchy`; l.152: `eotg_cartel_role_county` + `_kingdom`; l.239: `eotg_cartel_tributary` + `_desc`; l.378: `eotg_cartel_put_on_schedule_interaction` + `_desc`; l.380: `eotg_decision_cartel_tighten_schedule_dread_tt` + `_payers_tt`; l.381: `eotg_cartel_schedule_modifier` + `_desc`; l.381: `eotg_cartel_leaned_on_modifier` + `_desc`; l.384: `eotg_story_cartel_schedule` + `_info`; l.384: `eotg_story_cartel_schedule` + `_dread_label`; l.384: `eotg_story_cartel_schedule` + `_min_label`; l.384: `eotg_story_cartel_schedule` + `_max_label`; l.384: `eotg_story_cartel_schedule` + `_tt`; l.407: `eotg_cartel` + `_desc`; l.407: `eotg_cartel` + `_a`
 
 
 ## Family `loc`
