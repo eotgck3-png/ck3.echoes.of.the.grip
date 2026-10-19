@@ -569,6 +569,7 @@ These are shared conditions. Clearing one unblocks every item that names it.
   5. `max_dread = 150` for the Cartel? [not yet]
   6. Approve the first-pass numbers in §2.5 and §4 to §6?
   7. Which of events E1 to E5 (§11), if any?
+  8. (Added 2026-10-18, investigation X2.) The kingpin chain has no government gate, and its dread beats would feed Cartel tribute retention once C2 lands. Gate it, tilt its weights, or accept? Decide before C2.
 - **Owner:** human, then orchestrator → eotg-scripter (C1 first)
 - **Next step:** answer the questions. C1 (resource core) is buildable now but includes the story cycle (Q3), so it waits for the answers.
 - **Refs:** template §9.2, §9.6; CB-49 (the V-C tests run alongside it); CB-53 (payer inheritance follows `primary_heir`)
@@ -586,6 +587,13 @@ These are shared conditions. Clearing one unblocks every item that names it.
 - **Owner:** human, then eotg-architect
 - **Next step:** choose: hide them from Seamless players (decision `is_shown`), or give them rule (b) variants (new loc). Also confirm or reverse the .004/.005 ruling.
 - **Refs:** `docs/specs/frontier_v5.md` §3.7, §13 Q2 (D5-7)
+
+### CB-60: System investigation follow-ups (2026-10-18)
+- **Status:** waiting-human (2026-10-18)
+- **What:** `docs/qa/system_investigation_2026-10-18/REPORT.md`. About 40 gaps, no crashes. §1 lists 18 mechanical fixes. The ones the play-test would hit are C1 (imprisoned rulers get cybernetics events), C2 (delayed tier events don't re-check the tier) and S3 (the AI flips its augmentation law every 10 years). §2 lists rulings, headed by S1 (HIGH: the Ban doesn't cover retainer or knight installs). §3 lists in-game checks. §5 ranks vanilla integrations: decision alerts and game concepts first.
+- **Also recorded here:** frontier_v4 D4-4 (Local Rulers always get vanilla republic or theocracy under a mod-government liege) is report item F8/X6.
+- **Owner:** human (go-ahead for fix batch I1; P1 feudal-flag call; which integrations), then eotg-scripter / eotg-architect
+- **Next step:** on the go-ahead, run fix batch I1 (§1) with the scripter, then QA. Run the architect ruling pass on §2 in parallel.
 
 ---
 
