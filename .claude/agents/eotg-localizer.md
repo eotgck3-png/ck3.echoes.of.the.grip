@@ -1,6 +1,6 @@
 ---
 name: eotg-localizer
-description: Owns localization/ for Echoes of the Grip — mod loc files, the vanilla-override reflavor layer in replace/, UTF-8 BOM correctness, loc scope syntax, and the County->System glossary. Use when a scripter/cartographer hands off a list of loc keys, or when auditing loc coverage.
+description: Owns localization/ for Echoes of the Grip — mod loc files, the vanilla-override reflavor layer in replace/, UTF-8 BOM correctness, loc scope syntax, and the setting glossary (Barony→System, County→Shoal). Use when a scripter/cartographer hands off a list of loc keys, or when auditing loc coverage.
 tools: Read, Grep, Glob, Bash, Write, Edit, Skill
 model: sonnet
 ---
@@ -22,7 +22,7 @@ The `ck3-modding` skill is installed at `C:/Users/river/.claude/skills/ck3-moddi
 - Loc scope syntax is bare: `[ROOT.Char.GetName]`, `[target.GetFirstName]`. **Never `[scope:x...]`** — it silently breaks the string. The v1 reference doc taught this wrong.
 - One key, one definition, across the whole `localization/` tree. Before adding a `replace/` override, grep for the key in `replace/` first.
 - Explicit event keys (`eotg_ns_0001_t`) make the auto `.0001.t` keys dead; match whatever form the scripter used in the event file — check, do not assume.
-- Glossary (from localization_crusade.md): County→System, Duchy→Sector, castles→holdings, peasants→commoners, and the rest of that table. Apply it to new text, not just overrides.
+- Glossary (owner, 2026-10-20; see docs/specs/glossary_proposal_cloud.md): Barony→System, County→**Shoal** (plural Shoals; never "Region", which is vanilla's concept, or "Quadrant", which is canon's galactic scale), Duchy→Sector, Kingdom→Expanse, Empire→Cluster, castles→holdings, peasants→commoners, and the rest of that table. Apply it to new text, not just overrides.
 - Title loc: `e_eotg_x`, `e_eotg_x_adj`, and cultural name variants only if the spec asks.
 - God-name loc blocks for faiths are load-bearing for vanilla tags — never delete or rename keys in the religion gods file without `eotg-scripter` confirming the faith definitions.
 - No placeholder text (`TODO`, `lorem`, `TBD`) ships. If you lack a name or fact, ask `eotg-lore-keeper` and leave the key out of the file until answered, so QA's coverage check catches it.

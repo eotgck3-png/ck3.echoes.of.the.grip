@@ -1,5 +1,7 @@
 # Glossary proposal: medieval UI terms, tier words and terrain words (CB-08)
 
+> **Ruling 2026-10-20 (owner):** the county tier is **Shoal** (plural Shoals, "a Shoal"), replacing Region everywhere in player text, including fixed names (Unclaimed Shoals, Frontier Shoal, Survey a Shoal), with vanilla's county UI overridden in `localization/english/replace/eotg_county_term_l_english.yml`. Region clashed with vanilla's own Region concept. Quadrant was rejected because canon uses it at galactic scale (the Four Quadrants). The lore-keeper's candidate review is recorded in the orchestrator session. References to "Region" below are historical.
+
 > **Orchestrator note (2026-10-04):** written before the canon precedence ruling. The dated `docs/lore/` entries now outrank the SETTING LORE body (see `docs/lore/REVIEW_866.md`). Re-check canon claims here against that digest before acting on them. This is a proposal, not a ruling.
 
 
@@ -31,7 +33,7 @@
 | Vanilla | Mod term |
 |---|---|
 | Barony | System |
-| County | Region |
+| County | **Shoal** (owner, 2026-10-20; was Region) |
 | Duchy | Sector |
 | Kingdom | Expanse |
 | Empire | Cluster |
