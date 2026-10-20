@@ -247,6 +247,10 @@ eotg_frontier_set_sponsor_effect = {
         }
     }
     set_variable = { name = eotg_frontier_sponsor  value = $SPONSOR$ }
+    # I2c (investigation rulings 2026-10-18 §6.3): the holder who accepted the
+    # backing. eotg_frontier_check_sponsor_effect lapses it if the Shoal
+    # changes hands while that holder lives, and moves it to an heir otherwise
+    set_variable = { name = eotg_frontier_sponsor_holder  value = holder }
     $SPONSOR$ = {
         set_variable = { name = eotg_frontier_sponsoring  value = scope:eotg_frontier_county }
         # Phase 3a (frontier_v3.md §6, Q3-5): every sponsorship starts without a
@@ -285,6 +289,10 @@ eotg_frontier_drop_sponsor_effect = {
             }
         }
         remove_variable = eotg_frontier_sponsor
+    }
+    if = {
+        limit = { has_variable = eotg_frontier_sponsor_holder }    # I2c
+        remove_variable = eotg_frontier_sponsor_holder
     }
     if = {
         limit = { has_variable = eotg_frontier_sponsor_paid }
@@ -365,6 +373,8 @@ eotg_frontier_resolve_pending_heir_effect = {
                     is_alive = yes
                     eotg_frontier_can_sponsor = yes
                     NOT = { this = scope:eotg_frontier_holder }
+                    # I2c QA: never installed and lapsed in the same tick
+                    NOT = { is_at_war_with = scope:eotg_frontier_holder }
                 }
             }
             var:eotg_frontier_pending_heir = { save_temporary_scope_as = eotg_frontier_heir_sponsor }
@@ -874,6 +884,14 @@ eotg_frontier_pick_founder_effect = {
 # the fallback): the backing has lapsed (spec §4.2). A sponsor who has become
 # the Region's holder (inherited or was given it) is dropped with no strain:
 # the sponsor and the holder are never collapsed (spec §R).
+# I2c (investigation rulings 2026-10-18 §6.3, F2), after those two: (a) the
+# holder record is backfilled (saves from before I2c) or passes to the new
+# holder when the one who accepted has died (inheritance); (b) otherwise the
+# backing lapses when eotg_frontier_has_valid_sponsor fails (sponsor
+# imprisoned, no longer a landed count or above, or at war with the holder)
+# or the Shoal changed hands while its old holder lives (conquest,
+# revocation, a grant away). The lapse reuses the dead-sponsor branch's
+# strain and toast. This tick is the only cadence: no event re-checks it.
 eotg_frontier_check_sponsor_effect = {
     if = {
         limit = {
@@ -896,6 +914,40 @@ eotg_frontier_check_sponsor_effect = {
             var:eotg_frontier_sponsor = { this = scope:eotg_frontier_holder }
         }
         eotg_frontier_clear_sponsor_effect = yes
+    }
+    # (a) backfill or inheritance: the record follows the Shoal to the heir
+    else_if = {
+        limit = {
+            exists = var:eotg_frontier_sponsor
+            # no record (a pre-I2c save), or its holder has died (or is gone
+            # from the save)
+            NOT = { var:eotg_frontier_sponsor_holder ?= { is_alive = yes } }
+        }
+        set_variable = { name = eotg_frontier_sponsor_holder  value = holder }
+    }
+    # (b) the terms are broken: the backing lapses. A separate `if`, not an
+    # else_if on (a), so an heir who inherits at war with the sponsor lapses
+    # this tick rather than sitting a silent unpaid year
+    if = {
+        limit = {
+            exists = var:eotg_frontier_sponsor
+            OR = {
+                eotg_frontier_has_valid_sponsor = no
+                AND = {
+                    NOT = { holder = var:eotg_frontier_sponsor_holder }
+                    var:eotg_frontier_sponsor_holder ?= { is_alive = yes }
+                }
+            }
+        }
+        var:eotg_frontier_sponsor = { save_temporary_scope_as = eotg_frontier_lapsed_sponsor }
+        eotg_frontier_clear_sponsor_effect = yes
+        eotg_frontier_add_strain_effect = { CAUSE = sponsor_lapsed }
+        holder = {
+            send_interface_toast = {
+                title = eotg_frontier_toast_sponsor_lapsed
+                left_icon = scope:eotg_frontier_lapsed_sponsor
+            }
+        }
     }
 }
 
@@ -985,6 +1037,8 @@ eotg_frontier_event_roll_effect = {
                 limit = {
                     holder = {
                         opinion = { target = scope:eotg_frontier_sponsor_candidate  value >= 0 }
+                        # I2c QA: as .010 and .003, never a backer at war with the holder
+                        NOT = { is_at_war_with = scope:eotg_frontier_sponsor_candidate }
                     }
                 }
                 set_variable = { name = eotg_frontier_event_cd  value = yes  years = 3 }
@@ -2521,6 +2575,9 @@ eotg_frontier_resolve_faith_successor_effect = {
             scope:eotg_frontier_successor = {
                 eotg_frontier_can_back = yes
                 NOT = { this = scope:eotg_frontier_holder }
+                # I2c QA: the validity check_sponsor applies the same tick
+                is_imprisoned = no
+                NOT = { is_at_war_with = scope:eotg_frontier_holder }
             }
         }
         eotg_frontier_set_sponsor_effect = { SPONSOR = scope:eotg_frontier_successor }

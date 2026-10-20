@@ -490,7 +490,7 @@ A tier-3 child (via an inherited title) keeps their tier. This rule only stops f
 ### 6.1 Rules
 
 A sponsorship is an arrangement between a **sponsor** and **the holder who accepted it**. It lapses (strain cause `sponsor_lapsed`, the existing toast to the holder) when any of these hold at the Region's yearly tick:
-1. The sponsor is **imprisoned**, or **no longer a landed count or above**.
+1. The sponsor is **imprisoned**, or **no longer a landed count or above**. *Amended 2026-10-20 (orchestrator ruling, I2c QA S1):* backers who may hold no county are exempt from the landed test: a company captain (`eotg_frontier_is_company_captain`), a holy order's leader (`eotg_frontier_backs_for_order`) and a head of faith (`eotg_frontier_backs_for_faith`). Imprisonment and war with the holder still apply to every backer. An heir or faith successor who would fail at once (at war with the holder, or imprisoned) is not installed, and the AI-to-AI offer skips a liege at war with the holder.
 2. The sponsor is **at war with the holder**.
 3. **The holder changed, and the old holder is still alive** (conquest, revocation, grant away). If the old holder died (inheritance), the arrangement passes to the new holder and the record updates.
 4. (Existing.) The sponsor died, or became the holder.
@@ -527,6 +527,7 @@ A sponsorship is an arrangement between a **sponsor** and **the holder who accep
 - **V-IR19:** C conquers the county. At the next tick the sponsorship lapses.
 - **V-IR20:** B dies and B's heir inherits. The sponsorship continues, and `eotg_frontier_sponsor_holder` is the heir.
 - **V-IR21:** A is imprisoned: lapse. `.010` for an at-war ruler lists none of the enemy's Frontiers.
+- **V-IR21b** (added 2026-10-20): a mercenary-backed Military Frontier survives its first tick (no lapse toast, payment made).
 
 ---
 

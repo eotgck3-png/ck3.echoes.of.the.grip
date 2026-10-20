@@ -140,10 +140,37 @@ eotg_frontier_founder_can_rule = {
     }
 }
 
-# A sponsor that can still back the project (spec §4.2, §4.3)
+# A sponsor that can still back the project (spec §4.2, §4.3). COUNTY scope.
+# Investigation rulings 2026-10-18 §6 (I2c, F2): also free, still a landed
+# count or above, and not at war with the holder. Every reader (the payment,
+# the completion reward, the event triggers) agrees through this one trigger.
+# Precedent: war voids a backing (vanilla 01_pam_projects.txt:5551-5561);
+# imprisonment voids action (befriend_scheme.txt:50-57). `prev` is the
+# county, one step up from the holder (the eotg_frontier_faiths_differ form).
+# A holder change is not tested here: eotg_frontier_check_sponsor_effect
+# reads var:eotg_frontier_sponsor_holder at the yearly tick.
 eotg_frontier_has_valid_sponsor = {
     exists = var:eotg_frontier_sponsor
-    var:eotg_frontier_sponsor = { is_alive = yes }
+    var:eotg_frontier_sponsor = {
+        is_alive = yes
+        is_imprisoned = no
+        # Orchestrator ruling 2026-10-20 (I2c QA S1): a backer who may hold no
+        # county (eotg_frontier_can_back: a company captain, a holy order's
+        # leader, a head of faith without land) is exempt from the landed test.
+        # The faith and order ties are the variables
+        # eotg_frontier_set_faith_backer_effect sets for those found by
+        # eotg_frontier_find_faith_backer_effect
+        OR = {
+            eotg_frontier_is_company_captain = yes
+            has_variable = eotg_frontier_backs_for_order
+            has_variable = eotg_frontier_backs_for_faith
+            AND = {
+                is_landed = yes
+                highest_held_title_tier >= tier_county
+            }
+        }
+    }
+    holder ?= { NOT = { is_at_war_with = prev.var:eotg_frontier_sponsor } }
 }
 
 # frontier_v5.md §3.4.2 (round 1): the settlers do not share one faith.
@@ -252,6 +279,7 @@ eotg_frontier_is_sponsor = {
 # sponsors none yet. Read in the would-be sponsor's scope.
 eotg_frontier_can_sponsor = {
     is_landed = yes
+    is_imprisoned = no                               # I2c (investigation rulings §6.3)
     highest_held_title_tier >= tier_county
     gold >= {
         value = eotg_frontier_sponsor_payment_value

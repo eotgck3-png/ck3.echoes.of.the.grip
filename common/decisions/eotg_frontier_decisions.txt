@@ -364,6 +364,8 @@ eotg_decision_frontier_sponsor = {
             # Fix I1b F7: only Regions whose holder .003 can reach, so a
             # blocked offer never spends the cooldown below (as .010's picks)
             holder ?= { eotg_frontier_can_receive_offer = yes }
+            # I2c (investigation rulings §6.3): as .010, never an enemy's Shoal
+            holder ?= { NOT = { is_at_war_with = root } }
         }
     }
 

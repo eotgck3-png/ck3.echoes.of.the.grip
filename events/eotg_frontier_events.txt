@@ -693,6 +693,9 @@ eotg_frontier.003 = {
         }
         scope:eotg_frontier_sponsor = { is_alive = yes }
         NOT = { scope:eotg_frontier_sponsor = root }
+        # I2c (investigation rulings §6.3): world state, so a war begun during
+        # the delay voids the offer
+        NOT = { is_at_war_with = scope:eotg_frontier_sponsor }
     }
 
     sender = {
@@ -1596,6 +1599,7 @@ eotg_frontier.010 = {
                     NOT = { holder = root }
                     NOT = { exists = var:eotg_frontier_sponsor }
                     holder ?= { eotg_frontier_can_receive_offer = yes }    # fix I1b F7
+                    holder ?= { NOT = { is_at_war_with = root } }    # I2c: never an enemy's Shoal
                 }
                 order_by = var:eotg_frontier_progress
                 save_scope_as = eotg_frontier_offer_1
@@ -1606,6 +1610,7 @@ eotg_frontier.010 = {
                     NOT = { holder = root }
                     NOT = { exists = var:eotg_frontier_sponsor }
                     holder ?= { eotg_frontier_can_receive_offer = yes }    # fix I1b F7
+                    holder ?= { NOT = { is_at_war_with = root } }    # I2c: never an enemy's Shoal
                     NOT = { this = scope:eotg_frontier_offer_1 }
                 }
                 order_by = var:eotg_frontier_progress
@@ -1617,6 +1622,7 @@ eotg_frontier.010 = {
                     NOT = { holder = root }
                     NOT = { exists = var:eotg_frontier_sponsor }
                     holder ?= { eotg_frontier_can_receive_offer = yes }    # fix I1b F7
+                    holder ?= { NOT = { is_at_war_with = root } }    # I2c: never an enemy's Shoal
                     NOT = { this = scope:eotg_frontier_offer_1 }
                     NOT = { this = scope:eotg_frontier_offer_2 }
                 }
