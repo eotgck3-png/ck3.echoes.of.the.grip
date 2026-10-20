@@ -6,6 +6,39 @@ Full report: [`docs/qa/system_investigation_2026-10-18/REPORT.md`](docs/qa/syste
 
 ---
 
+## Status 2026-10-20: picked up
+
+**Owner rulings:**
+
+| Item | Ruling |
+|---|---|
+| 1. Fix batch I1 | Go |
+| 2. Kingpin under a Cartel (X2) | **Make it rarer** |
+| 3. Feudal flag (P1) | **Keep distinct** |
+| 4. Integrations | Alerts and encyclopedia pages first; memories and game rules specced |
+| 5. Architect ruling pass | Go |
+| Holding tiers | **Keep the brief, no D** (closed) |
+| CB-59 | **Seamless text variants** for .001/.010/.020/.021/.037/.042 |
+| CB-57 | **Accept all** (C1 building) |
+| CB-58 | **Simple fabricators allowed** |
+| CB-53 | **Build elective laws** |
+| CB-52 | **Regained traits are surface** (closed) |
+
+**In progress:**
+- fix batches I1a (cybernetics) and I1b (Frontier and governments);
+- the §2 rulings spec (+X2, P1);
+- integration specs v1 (alerts, concepts) and v2 (memories, game rules);
+- the in-game plan update;
+- Cartel C1;
+- the elective-succession spec;
+- the fabrication lore pass.
+
+**Queued:**
+- CB-59 variants (after I1b frees the Frontier events file).
+
+**Still open:**
+- CB-51 (nr.004.e cover-up text vs public effect).
+
 ## Where we stopped: the system investigation (2026-10-18)
 
 Six read-only reviews found about **40 gaps**. None of them crashes the game or breaks an invariant.

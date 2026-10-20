@@ -418,6 +418,8 @@ Owner rule: every new event, option or beat needs approval. None of these is in 
 
 ## 12. Owner questions
 
+**Ruled 2026-10-20 (owner):** OQ1 to OQ6 are accepted as recommended (remove `ask_for_tribute` in C2; payers pass to the heir; the story is visible; no AI adoption yet; no `max_dread` change yet; the first-pass numbers are approved). OQ7: no events approved yet; E1 to E5 stay proposals. Investigation X2: the kingpin chain is **made rarer** for Cartel rulers, not blocked (spec in `investigation_rulings_2026-10-18.md`). CB-53: **elective succession** will be built (`governments_v2_g2_succession.md`).
+
 - **OQ1, remove `ask_for_tribute` (recommended: yes).** It drops vanilla "Embrace as Tributary" for Cartels: the piety cost, the "devout tributaries" notification and the tributarization map mode. "Put on the Schedule" becomes the one tribute verb. If the answer is no, Cartels show both buttons, and V-C7 changes to "both present".
 - **OQ2, payers pass to the heir (recommended: yes).** The own group has `suzerain_heir_succession = yes`, and the dread walk-off (§5.4) replaces the G1 rule that tribute lapses at every death. This reverses G1's accepted "the tribute lapses" behaviour (`governments_v2.md` §5.4). It also interacts with CB-53: if a takeover succession lands, payers follow whoever becomes the primary heir.
 - **OQ3, a visible story (recommended: yes).** It would be the mod's second visible story (`basic_counter` of dread plus the schedule modifier). The alternative is the modifier alone, with the story kept as an invisible ticker.

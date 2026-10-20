@@ -8,6 +8,10 @@
 
 ---
 
+## Owner decision (2026-10-20)
+
+**Declined.** The owner keeps the governing brief (7 meshes, no modelled tiers) and does not want option D either. No revision is needed unless the owner reopens this.
+
 ## Summary
 
 Thank you for the proposal. The core engine premise is correct: each holding level has its own `assets` block, vanilla swaps meshes per level, and the mod already owns every level, so wiring tiers in is cheap. Three problems block it as written:

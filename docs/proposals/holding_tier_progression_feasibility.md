@@ -9,6 +9,10 @@ Review of [`holding_tier_progression_proposal.md`](holding_tier_progression_prop
 
 G = `D:/SteamLibrary/steamapps/common/Crusader Kings III/game`.
 
+## Owner decision (2026-10-20)
+
+**Keep the brief; no option D.** No modelled tiers and no zoom-fade change. The holding level stays in the 2D county window. This closes the proposal unless the owner reopens it.
+
 ## Verdict
 
 **Technically feasible, but not recommended as written.**
