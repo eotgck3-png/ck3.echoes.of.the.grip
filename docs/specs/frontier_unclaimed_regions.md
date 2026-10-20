@@ -1,4 +1,6 @@
-# Spec: Unclaimed Regions (Frontier, "Option B")
+# Spec: Unclaimed Shoals (Frontier, "Option B")
+
+Term update 2026-10-20: player-facing county term is Shoal (was Region).
 
 **Author:** eotg-architect, 2026-10-06. **Status: design approved by the owner 2026-10-06 (see §D). Batches 1 and 2 built on branch `claude/frontier-unclaimed-cloud` (cloud, static, unvalidated); merged into v2-space-map (e356020). Build notes and deviations: §20.** Owner decision 2026-10-06, "Option B": Unsettled space has **no ruler**. The engine still needs a holder for every county, so each unclaimed county is held by a **passive placeholder**, which stands for the scattered people living there and is not a ruler. A ruler must **claim** the county before Establishing a Frontier there. An abandoned Frontier goes back to unclaimed. Unclaimed space is hard on armies passing through. Impassable or void provinces that are not counties stay scenery.
 
@@ -31,12 +33,12 @@ The owner accepted every orchestrator recommendation ("follow your recommendatio
 - **UQ9, names (lore).** Placeholders keep random names from their culture (real people, not "nobodies"). A fixed
   pattern, if one is ever needed, is "the Unsworn of [county]".
 - **Names (lore-keeper, UL2 and UL3):**
-  - the status and modifier is **"Unclaimed Region"**;
+  - the status and modifier is **"Unclaimed Shoal"**;
   - the people and trait `eotg_unclaimed_folk` are **"the Unsworn"**;
   - **Government name (owner, 2026-10-08):** `eotg_unclaimed_government` and its `_adjective` are both
     **"Unsworn"**, after vanilla's Herder/Pastureland pattern: the people and their government are Unsworn. The
-    realm and map label (`_realm`) and the status stay **"Unclaimed Region"**. The `_desc` opens: "No ruler holds
-    this Region, and the Unsworn who live here want none."
+    realm and map label (`_realm`) and the status stay **"Unclaimed Shoal"**. The `_desc` opens: "No ruler holds
+    this Shoal, and the Unsworn who live here want none."
     Rejected names, with the lore-keeper's reasons:
     - "Drifter": the Drift Wars and the Hollow Drift are canon, and "drifter peoples" are cultures.
     - "Unbound": the Codex Unbound.
@@ -46,14 +48,14 @@ The owner accepted every orchestrator recommendation ("follow your recommendatio
     This closes **UL2**.
   - the interaction is **"Raise Your Colours"**, not "Stake a Claim". CK3's [claim|E] concept means a claim
     pressed in war, and this interaction leaves none. The keys can stay `eotg_unclaimed_*`.
-  - Interaction description: "Pay for the crews, the guns and the flag, and this Region is yours for as long as
+  - Interaction description: "Pay for the crews, the guns and the flag, and this Shoal is yours for as long as
     you can hold it. Nobody else has to agree, and nobody is obliged to respect it."
 - **UL1, culture and faith.** Placeholders copy the county's culture and faith by scope (no neutral culture).
   The cartographer picks real drifter peoples from the briefs (e.g. Uvreki, Tangentine). Which counties start
   unclaimed is a vault question; never guess it.
 - **Text rules (ERRATA LAW AT 866):**
   - never say a claim is filed, registered, recognized, licensed or chartered, or that others must respect it;
-  - write "Region" (a county), not "system", for the claimed unit;
+  - write "Shoal" (a county), not "system", for the claimed unit;
   - keep "Council" and "Frontier Guard" out of this system's text;
   - don't present unclaimed space as where the Titan Exodus lands;
   - the Myr is a war zone at 866, not empty land.
@@ -98,7 +100,7 @@ All identifiers are new and carry the `eotg_` prefix. There are **no landed titl
 | trait | `eotg_unclaimed_folk` | blockers: marriage, children, inheritance (§5.4); it also marks a placeholder that has lost its land |
 | character template | `eotg_unclaimed_holder_template` | §5.2; also the government's `generated_character_template` |
 | history character | `eotg_unclaimed_seed` | **cartographer**, one per map (§5.1, §10). It is not in mod script; script finds it by government. |
-| county modifier | `eotg_unclaimed_mod_unclaimed` | "Unclaimed Region": display and explanation; the fallback attrition line (§7) |
+| county modifier | `eotg_unclaimed_mod_unclaimed` | "Unclaimed Shoal": display and explanation; the fallback attrition line (§7) |
 | title variable | `eotg_unclaimed_county` | **signature** (§2) |
 | title variable | `eotg_unclaimed_claimed` | came from unclaimed; cleared on Settled or on release (§6) |
 | global variable list | `eotg_unclaimed_counties` | every Unclaimed county; the sweep and the readout iterate it |
@@ -160,7 +162,7 @@ All identifiers are new and carry the `eotg_` prefix. There are **no landed titl
 |---|---|---|
 | `eotg_frontier_can_establish` | add `NOT = { has_variable = eotg_unclaimed_county }` | defence in depth: placeholders can't take decisions anyway, but the rule is "gate on role at every tier" |
 | `eotg_frontier_mod_unsettled` | add `supply_limit_mult = -0.25` (**owner question UQ7**) | owned Unsettled counties also slow armies (§7.3) |
-| `eotg_decision_frontier_abandon`, `eotg_frontier.005` option (a) | add a custom tooltip `eotg_unclaimed_abandon_returns_tt`, shown only when the Region has `eotg_unclaimed_claimed` | the player must see that abandoning gives the Region up |
+| `eotg_decision_frontier_abandon`, `eotg_frontier.005` option (a) | add a custom tooltip `eotg_unclaimed_abandon_returns_tt`, shown only when the Shoal has `eotg_unclaimed_claimed` | the player must see that abandoning gives the Shoal up |
 
 Nothing else in Phases 1–3a changes. The release and settle logic attaches to the existing **hooks**, as design §14 intends.
 
@@ -311,7 +313,7 @@ The creation pattern is `G/common/scripted_effects/09_dlc_mpo_scripted_effects.t
 ### 6.1 An abandoned Frontier returns to Unclaimed
 - **This attaches to Phase 1's hook, not to Phase 1's code.** `eotg_frontier_on_abandoned` already fires from `eotg_frontier_abandon_effect`, with root the holder and `scope:eotg_frontier_county` set (`frontier_v1.md` §7). `eotg_unclaimed_on_frontier_abandoned` listens to it.
 - **Effect:** if the county has `eotg_unclaimed_claimed` **and is not the holder's capital county**, run `eotg_unclaimed_release_effect`. The county keeps its Abandoned state and traces (attempts, `abandoned_works`, the salvage record, revealed traits), so it is resettlable after the next claim (design §3.4). Then toast the former holder (`eotg_unclaimed_toast_released`).
-- **The capital exception (recommended, UQ5):** releasing a capital would leave a one-county ruler landless. A capital Region stays with its holder, Abandoned, as in Phase 1.
+- **The capital exception (recommended, UQ5):** releasing a capital would leave a one-county ruler landless. A capital Shoal stays with its holder, Abandoned, as in Phase 1.
 - **Baronies:** only the county title and its capital barony move (V-U5). Any other barony in the county that someone holds stays with them.
 - **Failed and voluntary abandonment** behave the same (UQ5).
 - **Dependency:** V12 in Phase 1 (scopes reach custom on_actions). If it fails, Phase 1's fallback (empty scripted effects that get overridden) applies, and this listener becomes a one-line call at the end of `eotg_frontier_abandon_effect` (a Phase 1 edit, recorded in §3.6).
@@ -369,9 +371,9 @@ It stays with its claimant, Unsettled, with no time limit. A lapse after N years
   - (a) **adjacency:** `$ACTOR$ = { any_sub_realm_county = { any_neighboring_county = { this = <target> } } }`. This is the MPO precedent's own test (`09_mpo_interactions.txt`, the `is_valid_showing_failures_only` of the interaction at :7426);
   - (b) **distance:** `"$ACTOR$.capital_province.squared_distance(<target>.title_province)" <= eotg_unclaimed_reach_value`. The syntax precedent is `00_fp3_interactions.txt:918`. This reaches across void or sea lanes on a space map.
 - **Not in Batch 2:** landless adventurers (vanilla lets them claim from their domicile), and a fleet or travel requirement. Both are UD1 and UQ4.
-- **Unknown Regions (Phase 3a): claimable** (recommended, UQ6).
-  - Phase 3a's **Send an Expedition** is a holder's decision, so if Unknown blocked claiming, nobody could ever explore an unclaimed Unknown Region.
-  - The claimant explores after claiming, and Phase 3a's own gate still stops Establish until the Region is explored.
+- **Unknown Shoals (Phase 3a): claimable** (recommended, UQ6).
+  - Phase 3a's **Send an Expedition** is a holder's decision, so if Unknown blocked claiming, nobody could ever explore an unclaimed Unknown Shoal.
+  - The claimant explores after claiming, and Phase 3a's own gate still stops Establish until the Shoal is explored.
   - This needs no change to Phase 3a and no read of its variable, so it works whether or not 3a is merged.
 
 ### 8.3 Cost, cooldown, transfer
@@ -416,7 +418,7 @@ It stays with its claimant, Unsettled, with no time limit. A lapse after N years
 | `on_title_gain` | vanilla, additive | new holder | `scope:title = { has_variable = eotg_unclaimed_county }` | §8.5 |
 | `on_death` | vanilla, additive | dying character | `eotg_is_unclaimed_holder = yes` | §5.3 |
 | `yearly_global_pulse` | vanilla, additive | none | — | `eotg_unclaimed_sweep_effect` |
-| `eotg_frontier_on_abandoned` | Frontier hook, additive | the Region's holder | `scope:eotg_frontier_county = { has_variable = eotg_unclaimed_claimed }` | §6.1 |
+| `eotg_frontier_on_abandoned` | Frontier hook, additive | the Shoal's holder | `scope:eotg_frontier_county = { has_variable = eotg_unclaimed_claimed }` | §6.1 |
 | `eotg_frontier_on_settled` | Frontier hook, additive | the holder | same | §6.2 |
 | `on_game_start_after_lobby` | vanilla, additive, **only if V-U1 says playable** | none | `every_player` with `eotg_is_unclaimed_holder` | M3 toast |
 
@@ -451,7 +453,7 @@ It stays with its claimant, Unsettled, with no time limit. A lapse after N years
 ## 11. Test setups (both are sub-mods in `docs/`, never shipped)
 
 ### 11.1 The vanilla sub-mod (Corsica and Sardinia), `docs/test_submods/frontier_vanilla/` (scripter; vanilla title keys are allowed there)
-- **Sardinia** (`c_cagliari`, `c_arborea`, `c_gallura`, `c_logudoro`, `c_tortoli`): `eotg_unclaimed_release_effect = yes` instead of marking Unsettled. That gives five Unclaimed Regions, neutral grey, held by placeholders. Their 867 holders become unlanded; note this in the README.
+- **Sardinia** (`c_cagliari`, `c_arborea`, `c_gallura`, `c_logudoro`, `c_tortoli`): `eotg_unclaimed_release_effect = yes` instead of marking Unsettled. That gives five Unclaimed Shoals, neutral grey, held by placeholders. Their 867 holders become unlanded; note this in the README.
 - **Corsica** (`c_ajaccio`, `c_bastia`, `c_vecchio`): unchanged, owned Unsettled. That tests §6.3, and gives a neighbour across the strait who can claim Sardinia (reach (a) or (b)).
 - **This needs no landed_titles change.** The release sets the colour at runtime, which also tests V-U6.
 
@@ -505,7 +507,7 @@ It stays with its claimant, Unsettled, with no time limit. A lapse after N years
 ---
 
 ## 14. Loc surface (`localization/english/eotg_unclaimed_l_english.yml`; UTF-8 with exactly one BOM, Canadian English, bare `[x.GetName]`)
-- **Government:** `eotg_unclaimed_government` ("Unsworn"), `_adjective` ("Unsworn"), `_realm` ("Unclaimed Region"), `_desc` (opens "No ruler holds this Region, and the Unsworn who live here want none."; §D), `_with_icon`. The icon is vanilla `@government_type_herder!` until art arrives. Also the flag line `eotg_government_is_unclaimed` (it shows in the government tooltip, as vanilla's flag lines do, `government_l_english.yml:272-285`).
+- **Government:** `eotg_unclaimed_government` ("Unsworn"), `_adjective` ("Unsworn"), `_realm` ("Unclaimed Shoal"), `_desc` (opens "No ruler holds this Shoal, and the Unsworn who live here want none."; §D), `_with_icon`. The icon is vanilla `@government_type_herder!` until art arrives. Also the flag line `eotg_government_is_unclaimed` (it shows in the government tooltip, as vanilla's flag lines do, `government_l_english.yml:272-285`).
 - **Trait:** `trait_eotg_unclaimed_folk`, `trait_eotg_unclaimed_folk_desc`.
 - **Modifier:** `eotg_unclaimed_mod_unclaimed`, `eotg_unclaimed_mod_unclaimed_desc`.
 - **Interaction:**
@@ -518,7 +520,7 @@ It stays with its claimant, Unsettled, with no time limit. A lapse after N years
 - **No `replace/` overrides needed.**
   - The placeholder still shows the vanilla rank "Count". Renaming the rank per government is deferred (UD7).
   - The overridden trigger's tooltip key `is_a_herder_defender_tt` stays vanilla text ("herders can't fight"). The localizer can add our own `custom_tooltip` key inside the override (`eotg_unclaimed_defender_tt`), since we own that copy. Not built: the override ships inert until the local session pastes vanilla's body (§20).
-- **Glossary:** county = **Region**. Use "unclaimed" and "claim". **Never** "charter", "registry", "wasteland" (it's lived in), "peasants", "human" (multi-species), or any named faction.
+- **Glossary:** county = **Shoal**. Use "unclaimed" and "claim". **Never** "charter", "registry", "wasteland" (it's lived in), "peasants", "human" (multi-species), or any named faction.
 
 ---
 
@@ -526,7 +528,7 @@ It stays with its claimant, Unsettled, with no time limit. A lapse after N years
 - **LAW AT 866** (`docs/lore/REVIEW_866.md`, draft errata): there is no authority above the polity. **A claim is asserted under the claimant's own law and recognized by no one else.** No text may imply a registry, a grant from above, or a recognized title to empty space. That is why the transfer type is `granted` and the wording is "stake a claim".
 - **Who lives there:** the placeholder is "the scattered people" (owner). Frontier §R allows Exodus arrivals and their descendants (ongoing since 131 AG), prospectors and isolated communities. Text stays time-neutral, as in all of Frontier (`frontier_v1.md` §V).
 - **Culture and faith** come from the county by scope. **UL1:** is it canon-safe that unclaimed space carries a culture and faith (the province's) at 866, or should the briefs mark some unclaimed space as mixed?
-- **UL2 (closed 2026-10-08, §D):** the player-facing term. Status and realm label "Unclaimed Region"; government, adjective and people "Unsworn".
+- **UL2 (closed 2026-10-08, §D):** the player-facing term. Status and realm label "Unclaimed Shoal"; government, adjective and people "Unsworn".
 - **UL3:** the interaction name ("Stake a Claim").
 
 ---
@@ -549,7 +551,7 @@ It stays with its claimant, Unsettled, with no time limit. A lapse after N years
 
 ## 17. Deferred
 - **UD1:** claiming by landless adventurers, and a fleet or travel requirement for distant claims. Needs a fleet or travel design and the adventurer question.
-- **UD2:** surveying or exploring an unclaimed Region **before** claiming it. Phase 2's Survey and Phase 3a's Expedition are holder-only; widening them is a later Frontier phase.
+- **UD2:** surveying or exploring an unclaimed Shoal **before** claiming it. Phase 2's Survey and Phase 3a's Expedition are holder-only; widening them is a later Frontier phase.
 - **UD3:** an unestablished claim lapsing back to unclaimed after N years (UQ11).
 - **UD4:** a custom "camp" holding for unclaimed capitals (Phase 1 option 2.3b; needs gfx).
 - **UD5:** a second seed for "unclaimed and Unknown" at start (needs Phase 3a merged).
@@ -561,7 +563,7 @@ It stays with its claimant, Unsettled, with no time limit. A lapse after N years
 - A **government icon** `government_type_eotg_unclaimed` (text icon and government UI); until then the herder icon.
 - A **trait icon** for `eotg_unclaimed_folk` (it is hidden from the designer, but shows on the character).
 - An **interaction icon** for Stake a Claim; until then a vanilla interaction icon chosen by the scripter.
-- A **county-modifier icon** for Unclaimed Region; until then a vanilla `county_modifier_*` icon.
+- A **county-modifier icon** for Unclaimed Shoal; until then a vanilla `county_modifier_*` icon.
 - Optional: a generic **coat of arms** for unclaimed counties.
 
 ---
@@ -571,8 +573,8 @@ It stays with its claimant, Unsettled, with no time limit. A lapse after N years
 - **UQ2: war immunity.** Own flag plus one key-level trigger override (recommended), or reuse `government_is_herder` and live with vanilla's "Retrieve Land" interaction as an unthrottled second claim path for the AI?
 - **UQ3: authoring.** One history seed split at game start (recommended), or hand-authored history characters per county? (S) accepts both.
 - **UQ4: reach.** Adjacency **or** within `squared_distance_medium` of the claimant's capital? Should landless adventurers ever claim?
-- **UQ5: release rules.** Should a capital Region stay with its holder when abandoned (recommended)? Should failed and voluntary abandonment both release?
-- **UQ6: Unknown Regions claimable** before exploring (recommended), at the same cost?
+- **UQ5: release rules.** Should a capital Shoal stay with its holder when abandoned (recommended)? Should failed and voluntary abandonment both release?
+- **UQ6: Unknown Shoals claimable** before exploring (recommended), at the same cost?
 - **UQ7: attrition.** −0.5 on unclaimed space (the government knob); should owned Unsettled counties also get −0.25 (symmetric, but softened for defenders by the own-realm supply bonus)?
 - **UQ8: the neutral colour.** `{ 88 92 100 }`, or your pick in game.
 - **UQ9: placeholder names.** Random names from the county's culture (recommended), or one fixed name for every placeholder?
@@ -587,7 +589,7 @@ Batch 1 and Batch 2 are built on `claude/frontier-unclaimed-cloud` (from Frontie
 **Deviations from this spec, and why:**
 1. **The `herders_and_tributary_constraints` override ships INERT** (`common/scripted_triggers/eotg_vanilla_overrides_triggers.txt`, commented out). The cloud session has no game files, and a key-level override must be a verbatim copy; a reconstruction would silently change 17 CB groups. The file carries the frame, the two `# EOTG` lines and the paste steps. **Until the local session pastes vanilla's body, there is no war immunity (V-U2 fails by design).** `eotg_unclaimed_defender_tt` waits with it (not built).
 2. **M2 and M3 are not built** (`basic_is_valid_for_yearly_events_trigger` override, `eotg_unclaimed_toast_unplayable`): §4.5 makes both conditional on V-U1. The probe (`eotg_decision_unclaimed_debug_readout`) answers it. **M1 is built** (the pulse guards, §9.2).
-3. **Expedition targeting is widened now** (owner instruction for this build; this spec's UD2 had left it for a later phase). `eotg_frontier_can_target_expedition` and `eotg_frontier_pick_expedition_target_effect` (`frontier_v3.md` §4.1) also allow an explorable Unclaimed Region within the actor's reach (`eotg_unclaimed_in_reach`), after the actor's own Regions. Survey stays holder-only.
+3. **Expedition targeting is widened now** (owner instruction for this build; this spec's UD2 had left it for a later phase). `eotg_frontier_can_target_expedition` and `eotg_frontier_pick_expedition_target_effect` (`frontier_v3.md` §4.1) also allow an explorable Unclaimed Shoal within the actor's reach (`eotg_unclaimed_in_reach`), after the actor's own Shoals. Survey stays holder-only.
 4. **The capital barony is moved explicitly** with the county, when the old county holder held it (creation and claim). If V-U5 shows the engine already does this, the extra move is a no-op.
 5. **A history placeholder holding exactly one county is adopted**, not replaced (§5.1 "(S) also accepts (H)'s output"). A seed being split carries the character flag `eotg_unclaimed_splitting`, so it is never adopted; every county it held gets its own placeholder.
 6. **The seed must carry the trait `eotg_unclaimed_folk`** in its history (added to §10 step 2's needs): `can_get_government` reads it, and without it history's `government =` may fall back.
@@ -599,9 +601,9 @@ Batch 1 and Batch 2 are built on `claude/frontier-unclaimed-cloud` (from Frontie
    - the character flag `eotg_unclaimed_splitting`;
    - the global variable `eotg_unclaimed_sweep_fixed` (what the last sweep fixed; the readout shows it);
    - the saved scopes `eotg_unclaimed_previous`, `_former`, `_stray`, `_stray_holder`, `_probe` and `_debug_reader`.
-8. **Names:** the trait shows as "Unsworn" (one person; the people are "the Unsworn"). The government and its adjective are "Unsworn"; its realm label stays "Unclaimed Region" (§D, owner 2026-10-08). The interaction is "Raise Your Colours" (§D), and its key stays `eotg_unclaimed_claim_interaction`.
+8. **Names:** the trait shows as "Unsworn" (one person; the people are "the Unsworn"). The government and its adjective are "Unsworn"; its realm label stays "Unclaimed Shoal" (§D, owner 2026-10-08). The interaction is "Raise Your Colours" (§D), and its key stays `eotg_unclaimed_claim_interaction`.
 9. **Interaction category:** `interaction_category_diplomacy` (UNVERIFIED-VANILLA). The icon is the mod's existing placeholder `icon_personal`.
-10. **Placeholders and Phase 3a hooks:** an expedition to an Unclaimed Region fires `eotg_frontier_on_explored` with root = the placeholder, because Frontier hooks fire on the county holder. Listeners must not assume a real ruler there.
+10. **Placeholders and Phase 3a hooks:** an expedition to an Unclaimed Shoal fires `eotg_frontier_on_explored` with root = the placeholder, because Frontier hooks fire on the county holder. Listeners must not assume a real ruler there.
 11. **Test map:** c_aphion_seam and c_helios_shoal start unclaimed. They are adjacent, between them they border both big realms, and neither is anyone's only county. c_aphion_seam was listed among the development-10 counties for cybernetics §1c, but no ruler's gate read it.
 12. **eotg_lint:** a `governments` loc naming convention (`{key}`, `_adjective`, `_realm`, `_desc`, `_with_icon`), marked unverified, so L014 sees the government's loc.
 

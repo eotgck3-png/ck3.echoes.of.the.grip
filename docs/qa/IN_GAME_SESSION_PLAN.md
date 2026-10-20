@@ -1,5 +1,7 @@
 # In-game session plan (all pending checks, one place)
 
+Term update 2026-10-20: player-facing county term is Shoal (was Region).
+
 **For:** the owner, testing with `-debug_mode`. **Written:** 2026-10-06, against `v2-space-map` at `e481957` (Frontier Phase 3a merged) plus the tools branch `claude/test-session-cloud`.
 *(Changed 2026-10-20: added the in-game checks of the system investigation (SI §3: E-12, E-13, C10-6, C10-7, FX-1 to FX-3, V-U16, G-1 to G-3), the Frontier v5 checks (F5 §10: F-P5, F5-0 to F5-16), a fourth sitting on the British Isles playset for the governments, and §H, the holding-marker checks, which run only if a tier or zoom option is approved.)*
 
@@ -61,7 +63,7 @@ Overlapping checks are merged, and each says where it came from, so a failure ca
 - **Before you start, ask the orchestrator "is the tree clean?"** The game runs the repo working tree through the junction (HTT §1). Restart the game after any commit; script and loc load at startup.
 
 ### 0.3 Recommended start (playset A)
-**1066 bookmark → Giovanni Obertenghi, Count of Ajaccio and Vecchio** (southern Corsica). *(Changed 2026-10-06: the sub-mod now releases Sardinia as unclaimed, so Giovanni of Cagliari would start landless. Giovanni holds two owned Unsettled Regions, and Vecchio faces Sardinia across the strait, which suits the Unclaimed checks. His capital is probably below development 10, so cybernetics offers stay on the test map, as sitting 2 already plans.)*
+**1066 bookmark → Giovanni Obertenghi, Count of Ajaccio and Vecchio** (southern Corsica). *(Changed 2026-10-06: the sub-mod now releases Sardinia as unclaimed, so Giovanni of Cagliari would start landless. Giovanni holds two owned Unsettled Shoals, and Vecchio faces Sardinia across the strait, which suits the Unclaimed checks. His capital is probably below development 10, so cybernetics offers stay on the test map, as sitting 2 already plans.)*
 
 What the sub-mod does on a new game (it only runs on a **new** game, never on a loaded save):
 - marks 8 counties Unsettled:
@@ -70,10 +72,10 @@ What the sub-mod does on a new game (it only runs on a **new** game, never on a 
 - marks **`c_vecchio` and `c_tortoli` Unknown** as well.
 
 **Do this first, then save as `S0_start`:**
-- [ ] **0-1** Hover `c_cagliari`: it shows `Unsettled Region`. Hover `c_tortoli`: `Unsettled Region` and `Unexplored Region`. *src: F3 intro; sub-mod README*
+- [ ] **0-1** Hover `c_cagliari`: it shows `Unsettled Shoal`. Hover `c_tortoli`: `Unsettled Shoal` and `Unexplored Shoal`. *src: F3 intro; sub-mod README*
 - Note your own character id, and the ids of the holders of `c_arborea` and `c_tortoli`. Hover a character to see its id. You'll need these for grants and backers.
 
-**If you hold only one county** (you need a second Region to grant away in E-1 and F1-4.5): give yourself a neighbouring one from the console. Neither line below is verified in game, so if both error, play a ruler with two or more counties:
+**If you hold only one county** (you need a second Shoal to grant away in E-1 and F1-4.5): give yourself a neighbouring one from the console. Neither line below is verified in game, so if both error, play a ruler with two or more counties:
 - `effect title:c_arborea = { change_title_holder = { holder = root } }`, or
 - the vanilla debug command for titles (type `help` and look for a title-granting command).
 
@@ -81,7 +83,7 @@ What the sub-mod does on a new game (it only runs on a **new** game, never on a 
 - Open the console with the key below Esc.
 - Commands act on **your** character unless an id is given.
 - The command to switch which character you play is **not verified**. `play <id>` may work; otherwise `help` lists it. You need it to move between rulers in one save.
-- For a Region other than your capital, `title:<c_key>` replaces `capital_county` in every Frontier line.
+- For a Shoal other than your capital, `title:<c_key>` replaces `capital_county` in every Frontier line.
 - **"Run the debug year"** means **(Debug) Run the Frontier Year**. It runs one Frontier tick at once, with no waiting.
 - **"Let N years pass"** means speed 5, unpaused, for N in-game years. Yearly checks fire on each ruler's **own** date, so allow a little over N.
 
@@ -93,36 +95,36 @@ These decide whether the architecture holds. **If any E-check fails, stop and se
 
 ### E1 Frontier state survives save, reload and a holder change
 - [ ] **E-1** *src: F1 §0.1 (V1), CB-37*
-  1. Your capital is already Unsettled. Take **Establish a Frontier** → *An Opportunity Here* → any type. The Region shows `Frontier: Outpost`.
+  1. Your capital is already Unsettled. Take **Establish a Frontier** → *An Opportunity Here* → any type. The Shoal shows `Frontier: Outpost`.
   2. **(Debug) Frontier Readout**: note progress and strain.
   3. **Save, quit to menu, reload.** Still `Frontier: Outpost`, and the Readout shows the same numbers.
   4. **Kill the founder first.** Get their id (hover), then `kill <id>`, or `effect = { character:<id> = { death = { death_reason = death_murder } } }`.
-  5. Grant **a non-capital Frontier Region** to a vassal with Grant Title. For that, Establish on your second county from 0.3 instead, with `title:<c_key>` in the console lines. The stage modifier stays on the Region.
+  5. Grant **a non-capital Frontier Shoal** to a vassal with Grant Title. For that, Establish on your second county from 0.3 instead, with `title:<c_key>` in the console lines. The stage modifier stays on the Shoal.
   6. Let the year turn (the vassal is the holder now). The Frontier is still there, and strain rose by 1 (No Founder).
   - **Expect:** steps 3–6 keep the Frontier. **Founder rule:** repeat step 5 *without* step 4, and no strain is added.
 - [ ] **E-2** County **modifiers** survive save and reload and a holder change. *src: F2 §0.1*
   1. `effect title:<c_key> = { add_county_modifier = eotg_frontier_trait_remote }` on a running Frontier.
   2. Take **Build Frontier Infrastructure** once.
-  3. Save and reload, then grant the Region away and back. Both modifiers are still there.
+  3. Save and reload, then grant the Shoal away and back. Both modifiers are still there.
   4. Run the debug year: the Readout's progress still counts them. Remote without a Beacon gains about 1 a year less.
 - [ ] **E-3** The exploration variable persists. *src: F3 §0.1 (spec §15 item 7)*
-  1. `effect title:c_tortoli = { eotg_frontier_mark_unknown_effect = yes }`. It is already Unknown on this save, so just hover it: `Unexplored Region`.
+  1. `effect title:c_tortoli = { eotg_frontier_mark_unknown_effect = yes }`. It is already Unknown on this save, so just hover it: `Unexplored Shoal`.
   2. Save and reload: still there.
   3. If you hold `c_tortoli`, grant it away and back; otherwise skip this step. Still there.
 
 ### E2 A holding appears in an empty slot
 - [ ] **E-4** *src: F1 §0.2 (V8)*
-  1. On a Region with a free holding slot (most Sardinian counties have one), establish a **Settlement**, **Trade**, **Military** or **Religious** Frontier.
+  1. On a Shoal with a free holding slot (most Sardinian counties have one), establish a **Settlement**, **Trade**, **Military** or **Religious** Frontier.
   2. Force completion: `effect title:<c_key> = { set_variable = { name = eotg_frontier_progress value = 100 } }`, then run the debug year. If it says *Waiting on Development* or *Control*:
      - `effect title:<c_key> = { change_development_level = 3 }`, or
      - `effect title:<c_key> = { change_county_control = 100 }`,
      then run the debug year again.
-  - **Expect:** *No Longer a Frontier*, then a new Port, Bastion or Sanctum in a free slot, **held by the Region's holder, never the founder**. If no holding appears: +1 development and +10 control instead. **Report which.**
+  - **Expect:** *No Longer a Frontier*, then a new Port, Bastion or Sanctum in a free slot, **held by the Shoal's holder, never the founder**. If no holding appears: +1 development and +10 control instead. **Report which.**
 - [ ] **E-12** **ENGINE: does `set_holding_type` create the barony holder?** Run it with E-4, on a **Military** Frontier (a castle has no Local Ruler, so the holder path runs alone). *src: SI V8 (`eotg_frontier_effects.txt:1376`)*
   1. Before forcing completion, hover the empty barony you expect to fill: note that it has no holder.
   2. Force completion as in E-4.
   3. Hover the new Bastion's barony: who holds it?
-  - **Expect:** the Region's holder, with no second title-change line in the history and no `error.log` line with `eotg_frontier_build_holding` or `change_title_holder`. Either engine answer is correct (the effect handles both), so **report who held the barony and whether a stray character was created** to hold it.
+  - **Expect:** the Shoal's holder, with no second title-change line in the history and no `error.log` line with `eotg_frontier_build_holding` or `change_title_holder`. Either engine answer is correct (the effect handles both), so **report who held the barony and whether a stray character was created** to hold it.
 
 ### E3 Hooks receive their scopes
 - [ ] **E-5** *src: F1 §0.3 (V12), F2 §6, F3 §1.4*
@@ -131,7 +133,7 @@ These decide whether the architecture holds. **If any E-check fails, stop and se
 
 ### E4 `clamp_variable` holds progress and strain in range
 - [ ] **E-6** *src: F2 §0.2*
-  - Event `.035` gives +4 progress, `.036` +1 strain, `.034` −3 progress. To fire one on a Region: `effect title:<c_key> = { save_scope_as = eotg_frontier_county holder = { trigger_event = eotg_frontier.035 } }`.
+  - Event `.035` gives +4 progress, `.036` +1 strain, `.034` −3 progress. To fire one on a Shoal: `effect title:<c_key> = { save_scope_as = eotg_frontier_county holder = { trigger_event = eotg_frontier.035 } }`.
   1. `effect title:<c_key> = { set_variable = { name = eotg_frontier_progress value = 98 } }` → fire .035 → **Strip it for parts** → the Readout shows **100**, not 102.
   2. Strain to 8, fire .036 → **Work it now** → strain **8**, not 9.
   3. Progress to 1, fire .034 → **Make do** → progress **0**, not −2.
@@ -407,7 +409,7 @@ These decide whether the architecture holds. **If any E-check fails, stop and se
   - act.002, act.004 and nr.003 fit **five options without scrolling** (CB-34 G9 7, CB-43).
   - A just-Enhanced host sees act.003 **e, not f** (CB-43).
 - [ ] **C10-6** **Unsworn holders never pass the Ban or Favour law.** *src: SI X7*
-  - Setup: on playset B, `c_aphion_seam` and `c_helios_shoal` start unclaimed (§U). Take **(Debug) Unclaimed Regions Readout**, and hover each county's holder for their id.
+  - Setup: on playset B, `c_aphion_seam` and `c_helios_shoal` start unclaimed (§U). Take **(Debug) Unclaimed Shoals Readout**, and hover each county's holder for their id.
   - Let 10 years pass, then open each Unsworn holder's realm laws.
   - **Expect:** the Augmentation group still reads **Tolerate** (`eotg_aug_policy_tolerate`); never Ban or Favour. If one changed, note which and when, and send the `error.log` lines with `eotg_aug_policy`.
 - [ ] **C10-7** **The law of a realm that breaks free.** *src: SI S8 (design note: realm splits reset to Tolerate)*
@@ -483,21 +485,21 @@ These decide whether the architecture holds. **If any E-check fails, stop and se
 ---
 ## Sitting 3: Frontier, Phase 1 → 2 → 3a → v5 (playset A, Giovanni; about 4½ hours)
 
-Start from **`S0_start`**, not from S1: E-checks left Regions in odd states.
+Start from **`S0_start`**, not from S1: E-checks left Shoals in odd states.
 
-**Reading the Regions** (hover the county): *src: F1 intro*
+**Reading the Shoals** (hover the county): *src: F1 intro*
 - the stages:
-  - `Unsettled Region`;
+  - `Unsettled Shoal`;
   - `Frontier: Outpost` / `Foothold` / `Nearly Settled`;
   - `Frontier: Waiting on Development` / `Waiting on Control`;
   - `New Settlement`;
   - `Abandoned Works`;
 - Phase 2 traits and infrastructure as county modifiers;
-- the Phase 3a exploration modifiers, `Unexplored Region` and `Partly Explored Region`.
+- the Phase 3a exploration modifiers, `Unexplored Shoal` and `Partly Explored Shoal`.
 
 **The hidden numbers:** **(Debug) Frontier Readout**.
 
-**Fire any Frontier event on one Region:**
+**Fire any Frontier event on one Shoal:**
 ```
 effect title:<c_key> = { save_scope_as = eotg_frontier_county  holder = { trigger_event = eotg_frontier.0NN } }
 ```
@@ -506,22 +508,22 @@ effect title:<c_key> = { save_scope_as = eotg_frontier_county  holder = { trigge
 Already covered in sitting 1, so don't repeat them here: F1 §0 (E-1, E-4, E-5), F2 §0 (E-2, E-6) and F3 §0 (E-3, E-7, E-8, E-9).
 
 ### F-P1 Phase 1 (F1 §1–§6; CB-37)
-- [ ] **F1-1** Start every type (7). Mark a fresh Region, Establish, and pick that option in .001. *src: F1 §1*
-  - **Mark a Region:** `effect title:<c_key> = { eotg_frontier_mark_unsettled_effect = yes }`. Sardinia's Regions are already marked.
-  - **One Region at a time:** finish or abandon a Region before marking the next.
+- [ ] **F1-1** Start every type (7). Mark a fresh Shoal, Establish, and pick that option in .001. *src: F1 §1*
+  - **Mark a Shoal:** `effect title:<c_key> = { eotg_frontier_mark_unsettled_effect = yes }`. Sardinia's Shoals are already marked.
+  - **One Shoal at a time:** finish or abandon a Shoal before marking the next.
   - The **founder** is a courtier who out-stewards you; otherwise "you looked over the surveys yourself".
-  - **Administrative** shows only if you are a duke or above, or the Region isn't your capital.
+  - **Administrative** shows only if you are a duke or above, or the Shoal isn't your capital.
   - **"Not now"** costs nothing.
-  - The cost (medium gold) is taken when a type is picked. The Region shows `Frontier: Outpost`.
+  - The cost (medium gold) is taken when a type is picked. The Shoal shows `Frontier: Outpost`.
   - **Double-start guard:** take Establish twice before answering. The second event's type options are hidden.
 - [ ] **F1-2** Progress: run the debug year several times. *src: F1 §2.1*
   - About 6–13 progress a year.
-  - Outpost → Foothold → Nearly Settled, with development at the first two stage changes, **once per Region ever**.
-  - A resettled Region gets no milestone development again.
+  - Outpost → Foothold → Nearly Settled, with development at the first two stage changes, **once per Shoal ever**.
+  - A resettled Shoal gets no milestone development again.
 - [ ] **F1-3** Completion (force it as in E-4). *src: F1 §2.2–2.5*
   - The development floor is never above the start development plus the milestone development still to come.
   - *No Longer a Frontier* has the type's line. The founder options (pay them well, honour them) show only when you aren't the founder.
-  - Afterwards, `New Settlement`: no Frontier decision for the Region, and Establish isn't offered again.
+  - Afterwards, `New Settlement`: no Frontier decision for the Shoal, and Establish isn't offered again.
   - **Settlement** adds a settlers' leader to your court; **Research** gives the founder +1 learning; **Administrative** sets control to 100.
 - [ ] **F1-4** Strain, one point per cause per yearly tick (Readout); a year with none removes one. The causes: *src: F1 §3.1*
   - **War;**
@@ -539,7 +541,7 @@ Already covered in sitting 1, so don't repeat them here: F1 §0 (E-1, E-4, E-5),
 - [ ] **F1-6** Founder gone (no death event): clear the cooldown, then run the debug year → *The Frontier Without a Founder*. *src: F1 §4.1*
   - It offers: appoint a courtier, lead it yourself, let them manage, and "Push through".
   - Strain builds until someone is appointed.
-  - **Every event's ungated fallback:** an event left open after the Region stopped being a Frontier does nothing, and "The moment has passed" shows.
+  - **Every event's ungated fallback:** an event left open after the Shoal stopped being a Frontier does nothing, and "The moment has passed" shows.
 - [ ] **F1-7** **A backer offers** (AI → you). *src: F1 §4.2*
   - Be a vassal with a rich liege (`effect liege = { add_gold = 3000 }`), or have an ally with gold.
   - Clear the cooldown and run the debug year a few times → *An Offer of Backing*: the backer shares the credit if it succeeds and the loss if it fails. Accepting gives a little progress, and they pay yearly.
@@ -549,16 +551,16 @@ Already covered in sitting 1, so don't repeat them here: F1 §0 (E-1, E-4, E-5),
   2. **Back a Frontier** → *Whom to Back* shows its stage in words → the AI answers.
   3. **Withdraw Your Backing** then appears and works.
 - [ ] **F1-9** **The backer dies.** Kill the sponsor → nothing shows at the moment of death. At the next debug year: *src: F1 §4.4*
-  - if the heir is alive, landed, has gold, backs nothing and doesn't hold the Region → the heir carries the backing, with a toast;
+  - if the heir is alive, landed, has gold, backs nothing and doesn't hold the Shoal → the heir carries the backing, with a toast;
   - otherwise the backing lapses (toast, strain +1);
-  - if the heir holds the Region: no backer and **no** strain;
-  - if the sponsor becomes the holder (grant them the Region): the backing ends with no strain.
+  - if the heir holds the Shoal: no backer and **no** strain;
+  - if the sponsor becomes the holder (grant them the Shoal): the backing ends with no strain.
 - [ ] **F1-10** **Exactly one tick per calendar year.** *src: F1 §4.5*
   1. Note progress.
-  2. Grant the Region away mid-year.
+  2. Grant the Shoal away mid-year.
   3. Let the year turn **in natural time** (the debug year ignores this marker).
   4. Re-grant it and read again: one year's gain, not two.
-- [ ] **F1-11** The AI: mark several AI Regions, then let **10+ years** pass at speed 5. *src: F1 §5*
+- [ ] **F1-11** The AI: mark several AI Shoals, then let **10+ years** pass at speed 5. *src: F1 §5*
   - At most 8 active Frontiers, and no AI ruler with more than one.
   - Some start, and some complete or are abandoned (slowly).
   - AI backers appear now and then.
@@ -566,15 +568,15 @@ Already covered in sitting 1, so don't repeat them here: F1 §0 (E-1, E-4, E-5),
 **Save `S3_p1`.**
 
 ### F-P2 Phase 2 (F2 §1–§9)
-- [ ] **F2-1** **Survey reveals a trait.** On an Unsettled Region, take **Survey a Region** → *Survey Report* names the trait, and the Region shows it. *src: F2 §1.1*
+- [ ] **F2-1** **Survey reveals a trait.** On an Unsettled Shoal, take **Survey a Shoal** → *Survey Report* names the trait, and the Shoal shows it. *src: F2 §1.1*
   - **File the report** → Establish there: the Readout starts at 5 (+10 per earlier abandonment).
   - **Send them deeper** (gold) → a second trait, never a third.
-  - No Survey of that Region again for 5 years, or once it has two traits.
-- [ ] **F2-2** Establishing a fresh, never-surveyed Region reveals one trait, with a toast. A Region never has both `Habitable` and `Hostile Environment`. *src: F2 §1.2–1.3*
+  - No Survey of that Shoal again for 5 years, or once it has two traits.
+- [ ] **F2-2** Establishing a fresh, never-surveyed Shoal reveals one trait, with a toast. A Shoal never has both `Habitable` and `Hostile Environment`. *src: F2 §1.2–1.3*
 - [ ] **F2-3** Trait effects (give one with `effect title:<c_key> = { add_county_modifier = eotg_frontier_trait_<x> }`, then Readout and the debug year): *src: F2 §1.5*
   - **Rich Resources + Mining:** about +1.5 a year. **Hostile** or **Remote:** about −1.
   - **Strategic Location:** control floor +10. **Remote:** −10. **Ancient Infrastructure:** development floor −1.
-  - **Dangerous:** below the control floor, +strain each year (.005 names "The Region was never safe..."). A Garrison Post or a Military project stops it.
+  - **Dangerous:** below the control floor, +strain each year (.005 names "The Shoal was never safe..."). A Garrison Post or a Military project stops it.
   - **Hostile Environment:** a quiet year no longer eases strain. An Orbital Station restores that.
 - [ ] **F2-4** Abandoning keeps the traits. *src: F2 §1.6*
 - [ ] **F2-5** **Build Frontier Infrastructure.** *src: F2 §2*
@@ -586,7 +588,7 @@ Already covered in sitting 1, so don't repeat them here: F1 §0 (E-1, E-4, E-5),
     - **Mission** for Religious;
     - **Garrison Post** for Military, Strategic Location, or Dangerous.
   - The cost (medium gold) is paid on the pick.
-  - One build a year per Region; one piece before Foothold, two from Foothold (`… eotg_frontier_progress value = 40`).
+  - One build a year per Shoal; one piece before Foothold, two from Foothold (`… eotg_frontier_progress value = 40`).
   - Speed: about +0.5 a year per piece, +1.5 for a fitting one.
   - Abandoning loses the infrastructure and keeps the traits.
 - [ ] **F2-6** Types. *src: F2 §3*
@@ -597,29 +599,29 @@ Already covered in sitting 1, so don't repeat them here: F1 §0 (E-1, E-4, E-5),
   - **Military ignores war:** no War strain.
   - **Administrative's Low Control line is 50:** at control 45 it strains, and a Settlement doesn't.
   - **The inputs:** Settlement at control 60+, Trade with a paying backer, Mining at high development, a high-martial Military holder, a pious Religious holder, and a high-stewardship Administrative holder each gain a little more.
-- [ ] **F2-7** Settling (give the Region a trait and two pieces of infrastructure first). After *No Longer a Frontier*: *src: F2 §4*
+- [ ] **F2-7** Settling (give the Shoal a trait and two pieces of infrastructure first). After *No Longer a Frontier*: *src: F2 §4*
   - every `eotg_frontier_trait_*` and `_infra_*` modifier is gone;
   - the matching legacy shows for 25 years;
   - extra development (at most +3), and +10 control from an Orbital Station;
-  - the type's figure: Military, a commander; Religious, a mission elder; Administrative, a Region official; Settlement, the settlers' leader. Each has your culture and faith.
-- [ ] **F2-8** The events (fire each with the line above, on a Region that meets its conditions): *src: F2 §5*
+  - the type's figure: Military, a commander; Religious, a mission elder; Administrative, a Shoal official; Settlement, the settlers' leader. Each has your culture and faith.
+- [ ] **F2-8** The events (fire each with the line above, on a Shoal that meets its conditions): *src: F2 §5*
 
   | Event | Needs | Check |
   |---|---|---|
   | .030 *A Rival Backer* | a backer, and a liege or ally who could back | **Take the new terms:** the old backer's opinion drops ("Dropped as a Frontier's Backer"), with a toast. **Keep faith:** opinion up, strain −1 |
-  | .031 *The Backer Wants a Say* | a backer who is not you | no option gives a say, and each tooltip says so. **The Region is mine:** opinion down, strain +1 |
+  | .031 *The Backer Wants a Say* | a backer who is not you | no option gives a say, and each tooltip says so. **The Shoal is mine:** opinion down, strain +1 |
   | .032 *Terms Demanded* | Foothold+ | as a vassal count: the liege variant (*Talk him round* / *Talk her round*). As an independent ruler: the settlers' variant → `Settlers' Terms` for 10 years |
   | .033 *A Quarrel in the Camps* | a founder who is not you | **Back the founder:** progress +3, strain +1. **Side with the settlers:** strain −1, progress −2, and the founder resents it |
   | .034 *A Supply Run Lost* | — | the desc adds a line for Remote or Dangerous |
   | .035 *What the Crews Found* | trait room | no known ruins → ruins → `Ancient Ruins`. Known ruins → a derelict → `Ancient Infrastructure`. **Strip it:** +4, no trait |
   | .036 *A Rich Seam* | trait room, no Rich Resources | **Survey it:** `Rich Resources`, +2. **Work it now:** +4, strain +1 |
 
-  - Every event has an always-clickable option, including on a Region that's no longer a Frontier.
+  - Every event has an always-clickable option, including on a Shoal that's no longer a Frontier.
 - [ ] **F2-9** Natural frequency: leave one Frontier **15 years** with no console. About 3 flavour events, never two within 3 years. *src: F2 §5; F3 §5*
   - Some may be *Guns for Hire* or *A Faithful Offer* (F3).
 - [ ] **F2-10** Expansion B. *src: F2 §9*
-  - **B1:** an uncountered Hostile, Remote or Dangerous Region adds a line to *A Hard Year*. *No Longer a Frontier* adds lines for two pieces of infrastructure, studied ruins or anomalies, or a hard Region.
-  - **B3:** .035 → **Study them properly** → *What the Ruins Held* 1–2 years later, if the Region is still a Frontier. Both options raise progress, and sharing gives prestige.
+  - **B1:** an uncountered Hostile, Remote or Dangerous Shoal adds a line to *A Hard Year*. *No Longer a Frontier* adds lines for two pieces of infrastructure, studied ruins or anomalies, or a hard Shoal.
+  - **B3:** .035 → **Study them properly** → *What the Ruins Held* 1–2 years later, if the Shoal is still a Frontier. Both options raise progress, and sharing gives prestige.
   - **B2 salvage:** build, abandon, Establish again → *An Opportunity Here* mentions what's standing, and +5 progress per piece left behind (on top of the 10 per attempt).
 - [ ] **F2-11** The AI, over 10+ years: some AI surveys, infrastructure (more where it counters a bad trait), traits on AI Frontiers, and AI completions. Still at most 8 active. *src: F2 §7*
 
@@ -628,16 +630,16 @@ Already covered in sitting 1, so don't repeat them here: F1 §0 (E-1, E-4, E-5),
 ### F-P3a Phase 3a (F3 §1–§5)
 - [ ] **F3-1** **Unknown blocks** Establish and Survey (`c_tortoli` is Unknown). Neither decision offers it. *src: F3 §1.1*
 - [ ] **F3-2** **Send an Expedition** (minor gold) → *The Expedition Returns*. *src: F3 §1.2*
-  - The Region is now `Partly Explored Region` with **one trait**.
-  - The decision is unavailable for that Region for a year.
+  - The Shoal is now `Partly Explored Shoal` with **one trait**.
+  - The decision is unavailable for that Shoal for a year.
   - Partial allows Establish and Survey.
 - [ ] **F3-3** Again (next year, or `effect title:c_tortoli = { remove_variable = eotg_frontier_expedition_sent }`) → fully charted: `Partly Explored` is gone, and a second trait if there was room. *src: F3 §1.3*
   - **File the charts** at Known: the next project starts 5 ahead.
   - **Send them straight back out** (from Partial, with gold): Known in one report.
 - [ ] **F3-4** **Filing on a running Frontier** (round 2): Unknown → explore once → Establish → explore again → **File the charts** gives **+2 progress now**, not survey data. *src: F3 §1.5*
 - [ ] **F3-5** **Settling clears exploration** (round 2). *src: F3 §1.6*
-  - Establish in a **Partial** Region and force completion → `Partly Explored Region` is gone, and Send an Expedition doesn't offer it.
-  - A Region marked only Unsettled behaves exactly as in Phase 2 (F3 §1.7).
+  - Establish in a **Partial** Shoal and force completion → `Partly Explored Shoal` is gone, and Send an Expedition doesn't offer it.
+  - A Shoal marked only Unsettled behaves exactly as in Phase 2 (F3 §1.7).
 - [ ] **F3-6** **Escort** (Dangerous, not Military): *src: F3 §2.1, §2.4*
   1. A Settlement Frontier with `eotg_frontier_trait_dangerous`, and control −100 → the debug year adds Danger strain.
   2. Fire .040 → **Hire them to guard the convoys**: your gold drops by the fee, and **the captain's gold rises by the same amount** (hover them before and after); `Mercenary Escort`; strain −1; no more Danger strain.
@@ -666,16 +668,16 @@ Already covered in sitting 1, so don't repeat them here: F1 §0 (E-1, E-4, E-5),
 
 ### F-X Edge cases from the system investigation (SI §3)
 - [ ] **FX-1** **War strain on a vassal's Frontier before occupation.** *src: SI F1 (spec A4.1; `eotg_frontier_triggers.txt:314-327`)*
-  1. Grant a running Frontier Region to a vassal (as in E-1 step 5).
-  2. Go to war (any claim CB on a neighbour). Pause when an enemy army **stands in** the vassal's Region but has **not yet occupied** it.
+  1. Grant a running Frontier Shoal to a vassal (as in E-1 step 5).
+  2. Go to war (any claim CB on a neighbour). Pause when an enemy army **stands in** the vassal's Shoal but has **not yet occupied** it.
   3. Clear the cooldown, then run the debug year; read the Readout.
   - **Expect (spec A4.1):** strain +1 with cause **War**. The investigation found it only starts once the county is occupied, so this is expected to **FAIL** until SI F1 is fixed. Report what you saw.
 - [ ] **FX-2** **A Religious completion under a male-only clergy.** Giovanni is Catholic, whose clergy are male. *src: SI F3*
-  1. A **Religious** Frontier on a Region with a free slot, with **you** as the founder (so the mission elder becomes the Local Ruler). Save.
+  1. A **Religious** Frontier on a Shoal with a free slot, with **you** as the founder (so the mission elder becomes the Local Ruler). Save.
   2. Force completion as in E-4. Hover the new Sanctum's holder: note the gender.
   3. Reload and repeat 4 to 6 times.
   - **Expect:** the theocrat is **male every time**, and `error.log` has no line about the clergy, the grant or `eotg_frontier_grant_local_ruler`. The templates are a flat 50% female today, so a female theocrat is the known FAIL. Report the count (e.g. "3 of 6 female").
-- [ ] **FX-3** **Completion while the Region is occupied.** *src: SI F6*
+- [ ] **FX-3** **Completion while the Shoal is occupied.** *src: SI F6*
   1. A Settlement or Military Frontier at progress 100 (`effect title:<c_key> = { set_variable = { name = eotg_frontier_progress value = 100 } }`), with control and development met.
   2. Let an enemy army occupy the county in a war (as in FX-1). Then run the debug year.
   - **Expect:** no `error.log` line. **Report** whether the Frontier completed or waited, whether a holding appeared mid-war, who holds it, and whether the occupier ended up holding anything.
@@ -706,15 +708,15 @@ Every round-1 and round-2 event (.050–.060) has its setup lines in REC, under 
   | .052 *The Frame Is Cracking* | progress 20+ | progress below 20 |
   | .053 *Patched Seals* | any Frontier; `eotg_frontier_trait_remote` makes it likelier | — |
   | .054 *Whose Systems Are These?* | a valid founder who is not you; progress 50+ | you are the founder, or progress below 50 |
-  | .055 *Two Chapels* | `effect title:<c_key> = { set_county_faith = faith:orthodox }` (the Region's faith differs from yours) | Region, holder and founder all share one faith |
+  | .055 *Two Chapels* | `effect title:<c_key> = { set_county_faith = faith:orthodox }` (the Shoal's faith differs from yours) | Shoal, holder and founder all share one faith |
   | .056 *Their Own Berths* | `effect title:<c_key> = { set_county_culture = culture:greek }` | all share one culture |
-  - **The holder re-check:** run the debug year until an event is pending, then move the Region to someone else before it fires (`effect title:<c_key> = { change_title_holder = { holder = character:<id> } }`). The event never arrives.
+  - **The holder re-check:** run the debug year until an event is pending, then move the Shoal to someone else before it fires (`effect title:<c_key> = { change_title_holder = { holder = character:<id> } }`). The event never arrives.
 - [ ] **F5-5** **The `dispute` strain cause.** Take **.054.d** at strain 7, then run the debug year. *src: F5 §10 "R1 cause"*
   - **Expect:** .005 shows the dispute line (`desc_dispute`), and **Abandon a Frontier**'s tooltip shows the dispute cause.
-- [ ] **F5-6** **V-B1: buildings on completion.** As Giovanni (feudal), force completion of a **Settlement**, **Trade**, **Military** and **Religious** Frontier, each on a Region with a free slot; then **Research** twice: once on a Region whose capital barony is a church (`effect title:<c_key>.title_province = { set_holding_type = church_holding }` first, on a non-capital Region) and once without. *src: F5 §10 V-B1; F5 §3.5*
+- [ ] **F5-6** **V-B1: buildings on completion.** As Giovanni (feudal), force completion of a **Settlement**, **Trade**, **Military** and **Religious** Frontier, each on a Shoal with a free slot; then **Research** twice: once on a Shoal whose capital barony is a church (`effect title:<c_key>.title_province = { set_holding_type = church_holding }` first, on a non-capital Shoal) and once without. *src: F5 §10 V-B1; F5 §3.5*
   - **Expect:** each new System holds its building at level 01 (Settlement: Hospices; Trade: Guild Halls; Military: Barracks; Religious: Chapel; Research: Chapel with a church capital, else Hospices). No `error.log` line.
   - **Mining** and **Administrative** place nothing.
-- [ ] **F5-7** **V-B2: a full Region.** Before completing a **Research** Frontier, fill the capital barony's building slots from the console until the county view shows none empty (`effect title:<c_key>.title_province = { add_building = <key> }` with, in turn, `curtain_walls_01`, `military_camps_01`, `farm_estates_01`, `pastures_01`; if one errors, use another from the county view). Then force completion. *src: F5 §10 V-B2*
+- [ ] **F5-7** **V-B2: a full Shoal.** Before completing a **Research** Frontier, fill the capital barony's building slots from the console until the county view shows none empty (`effect title:<c_key>.title_province = { add_building = <key> }` with, in turn, `curtain_walls_01`, `military_camps_01`, `farm_estates_01`, `pastures_01`; if one errors, use another from the county view). Then force completion. *src: F5 §10 V-B2*
   - **Expect:** a slot is added (`extra_building_slot`) and the building placed.
   - **Record either way** whether a building whose requirements aren't met sits inert (greyed in the county view).
 - [ ] **F5-8** **V-B3: the completion preview.** On *No Longer a Frontier* (.004), hover each option's tooltip, once for each holding type. *src: F5 §10 V-B3*
@@ -735,8 +737,8 @@ Every round-1 and round-2 event (.050–.060) has its setup lines in REC, under 
 - [ ] **F5-12** **V-R2-3: .058's desc matches the settler's education.** Fire it several times. *src: F5 §10 V-R2-3*
   - **Expect:** a stewardship settler reads as an engineer, a learning one as a surveyor, a martial one as a pilot.
 - [ ] **F5-13** **V-R2-4: .060.a adds the trade route once.** *src: F5 §10 V-R2-4*
-  1. On a Region **without** `eotg_frontier_trait_trade_route` and with trait room, take .060.a. **Expect:** the trait is added, and the discovery hook fires once (one toast or log line).
-  2. Again on a Region that **has** it. **Expect:** no trait change, and the tooltip says so.
+  1. On a Shoal **without** `eotg_frontier_trait_trade_route` and with trait room, take .060.a. **Expect:** the trait is added, and the discovery hook fires once (one toast or log line).
+  2. Again on a Shoal that **has** it. **Expect:** no trait change, and the tooltip says so.
 - [ ] **F5-14** **V-R2-5: a Seamless ruler hears no Frontier events.** `add_trait eotg_total_integration` on Giovanni with a running Frontier, then run the debug year a dozen times (clearing the cooldown each time). *src: F5 §10 V-R2-5; F5 §3.7*
   - **Expect:** no pool event fires (.002, .003, .030–.036, .040, .041, .050–.060). Progress and strain still move (a silent roll), and a founderless Frontier gets a founder picked for it.
 - [ ] **F5-15** **V-R2-6: the in-flight guard.** Without the trait, run the debug year until a pool event is pending, then `add_trait eotg_total_integration` before it fires. **Expect:** the event does not fire. *src: F5 §10 V-R2-6*
@@ -753,11 +755,11 @@ Every round-1 and round-2 event (.050–.060) has its setup lines in REC, under 
 
 ---
 
-## §U Unclaimed Regions (merged 2026-10-06, e356020)
+## §U Unclaimed Shoals (merged 2026-10-06, e356020)
 Spec: `docs/specs/frontier_unclaimed_regions.md` (§D owner decisions). Source of this list: `docs/handoffs/cloud_2026-10-06_frontier-unclaimed.md`.
 **Do V-U1 in sitting 1**, as an engine check: it decides whether mitigations M2 and M3 must be built. The rest can follow sitting 3, as Giovanni on Corsica.
-Setup: `-debug_mode`. **Test map:** c_aphion_seam and c_helios_shoal start unclaimed. **Vanilla map:** load the sub-mod, and Sardinia's 5 counties are released at start. Corsica stays owned-Unsettled. Anywhere: **(Debug) Release a Region to the Unsworn**, or `effect title:<c_key> = { eotg_unclaimed_release_effect = yes }`.
-1. **V-U1 Playability:** take **(Debug) Unclaimed Regions Readout**. The first toast says "IS playable" or "is NOT playable". Also try picking an Unsworn holder in the lobby's free pick. **This decides M2 and M3**, which are not built.
+Setup: `-debug_mode`. **Test map:** c_aphion_seam and c_helios_shoal start unclaimed. **Vanilla map:** load the sub-mod, and Sardinia's 5 counties are released at start. Corsica stays owned-Unsettled. Anywhere: **(Debug) Release a Shoal to the Unsworn**, or `effect title:<c_key> = { eotg_unclaimed_release_effect = yes }`.
+1. **V-U1 Playability:** take **(Debug) Unclaimed Shoals Readout**. The first toast says "IS playable" or "is NOT playable". Also try picking an Unsworn holder in the lobby's free pick. **This decides M2 and M3**, which are not built.
 2. **V-U2 War immunity:** the override is **live** (merged 2026-10-06; pitfalls §16). Check:
    - `logs/database_conflicts.log` lists `Overriding entry 'herders_and_tributary_constraints'` from `eotg_vanilla_overrides_triggers.txt`;
    - an ordinary claim CB is still offered against a normal ruler (proves the attacker line did not block everything);
@@ -768,7 +770,7 @@ Setup: `-debug_mode`. **Test map:** c_aphion_seam and c_helios_shoal start uncla
    - the seed `eotg_unclaimed_seed` gets `eotg_unclaimed_government` from title history (it carries the trait, which `can_get_government` needs);
    - at start each county has its own Unsworn holder, with the county's culture and faith;
    - the seed is gone;
-   - the readout counts 2 Regions and 2 Unsworn.
+   - the readout counts 2 Shoals and 2 Unsworn.
 5. **V-U5 Capital barony:** the script now moves it explicitly when the old holder held it. Check that the placeholder (or the claimant) holds the capital barony, and that nothing errors if the engine had already moved it.
 6. **V-U6 Colour:**
    - released counties turn slate `{ 88 92 100 }`; on the test map the history colour is already slate;
@@ -776,28 +778,28 @@ Setup: `-debug_mode`. **Test map:** c_aphion_seam and c_helios_shoal start uncla
    - both survive save and reload.
 7. **V-U7 Vanish:** after a claim the old placeholder is gone, with no death notification to players. The readout's "Unsworn alive" drops by one.
 8. **V-U8 Death:** kill a placeholder (`effect character:<id> = { death = { death_reason = death_natural_causes } }`). The county passes to a new Unsworn holder at once (`on_death`), or by the next 1 January (the sweep). The readout's "fixed by the last yearly sweep" is 0 if `on_death` worked.
-9. **V-U9 Catch-all:** `effect title:<unclaimed c_key> = { change_title_holder = { holder = character:<your id> } }` from the console. The county loses `Unclaimed Region`, recolours, and you get the "colours now fly" toast.
+9. **V-U9 Catch-all:** `effect title:<unclaimed c_key> = { change_title_holder = { holder = character:<your id> } }` from the console. The county loses `Unclaimed Shoal`, recolours, and you get the "colours now fly" toast.
 10. **V-U10 Government gate:** placeholders get the government, and no ordinary count ever ends up with it (observer run).
 11. **V-U11 Trait blockers:** marriage interactions refuse an Unsworn holder, and holding the county is unaffected.
-12. **V-U12 Realm name:** does "Unclaimed Region" (`eotg_unclaimed_government_realm`) show on the map or in the realm name?
+12. **V-U12 Realm name:** does "Unclaimed Shoal" (`eotg_unclaimed_government_realm`) show on the map or in the realm name?
 13. **V-U13 Persistence:** `eotg_unclaimed_county`, `eotg_unclaimed_claimed`, the list (readout count) and the colours survive save and reload.
 14. **V-U14 AI targets:**
     - in a 20-year observer run, AI rulers next to placeholders claim with *Raise Your Colours*;
     - at most about 2 a year worldwide (the 180-day gap);
-    - no AI holds more than 2 claimed, unsettled Regions.
+    - no AI holds more than 2 claimed, unsettled Shoals.
 15. **V-U15 Abandon:**
-    - claim a Sardinian Region from Corsica, mark nothing (it's already Unsettled), Establish, then abandon. The decision and .005 (a) show "Abandoning the Frontier gives it up"; the Region goes back to grey, Unclaimed and Abandoned, keeping its traces, and a toast says so;
+    - claim a Sardinian Shoal from Corsica, mark nothing (it's already Unsettled), Establish, then abandon. The decision and .005 (a) show "Abandoning the Frontier gives it up"; the Shoal goes back to grey, Unclaimed and Abandoned, keeping its traces, and a toast says so;
     - a Corsican (owned, never claimed) abandonment stays with its holder;
-    - a claimed **capital** Region stays, Abandoned.
+    - a claimed **capital** Shoal stays, Abandoned.
 16. **V-U16 Nomad migration (rare; only if you own *Khans of the Steppe* and a nomad realm can reach an Unsworn county):** vanilla's `migration` CB group skips `herders_and_tributary_constraints`, so a nomad might migrate into an Unsworn county. In a 20-year observer run, or by playing a nomad next to one, look for a migration war against an Unsworn holder. **Expect:** none. If one happens, report the attacker and the county. *src: SI M1*
 
 **New checks for this build:**
 - **Raise Your Colours:**
-  - it shows only on Unsworn holders whose Region is unclaimed;
+  - it shows only on Unsworn holders whose Shoal is unclaimed;
   - it greys out with the reasons in words (reach, gold, standing);
   - it charges minor gold and minor prestige on accept, with a 5-year cooldown per actor;
-  - *Establish a Frontier* becomes available for that Region.
-- **Expedition to unclaimed space:** mark a Sardinian Region Unknown (c_tortoli already is). From Corsica, **Send an Expedition** offers it if it is in reach: own Regions first, then unclaimed. Filing the charts at Known gives the Region survey data for whoever claims it.
+  - *Establish a Frontier* becomes available for that Shoal.
+- **Expedition to unclaimed space:** mark a Sardinian Shoal Unknown (c_tortoli already is). From Corsica, **Send an Expedition** offers it if it is in reach: own Shoals first, then unclaimed. Filing the charts at Known gives the Shoal survey data for whoever claims it.
 - **Placeholders stay out of mod content:** no cybernetics or Frontier events or offers ever reach an Unsworn character (`error.log` lines with `eotg_is_unclaimed`).
 - **.040 on a Military Frontier:** the desc offers only money behind the venture, with no convoy guards.
 

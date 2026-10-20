@@ -1,5 +1,7 @@
 # Spec: Frontier Systems v1 (Phase 1 core)
 
+Term update 2026-10-20: player-facing county term is Shoal (was Region).
+
 **Author:** cloud agent (architect role), 2026-10-04. **Status: owner rulings applied (2026-10-04, §R). Phase 1 is being built on the remaining defaults.** The questions still open are listed in [`frontier_v1_open_questions.md`](frontier_v1_open_questions.md).
 **Source of intent:** [`docs/design/frontier_systems.md`](../design/frontier_systems.md) (the owner's brief, cited below as *design §n*). This spec records the implementation decisions; the brief is not edited.
 **Amended by [`frontier_v4.md`](frontier_v4.md) (2026-10-11):** completion holdings (A1), AI weights and cap (A2), one flavour roll per ruler and delayed events (A3), war strain and the founder gap (A4), the .005 AI order (A5), legibility and sponsor value (A8), abandon development (A11). Where they disagree, v4 wins.
@@ -38,19 +40,19 @@ From [`frontier_v1_verification.md`](frontier_v1_verification.md) (local lore, Q
   - **Flavor cooldown 3 years (owner decision, follow-up):** `years = 3` in `eotg_frontier_event_roll_effect`. Expect about **4–5 flavor events per typical project** (10–16 years, one roll at most every 3 years). That is the ceiling; with the roll's 50% "nothing" weight a project often sees fewer.
 - **One record of active Frontiers (Q-B1):**
   - `eotg_frontier_active_count` is superseded (removed). `eotg_frontier_ai_room` reads `any_in_global_list = { variable = eotg_frontier_active count >= cap }`.
-  - Every .001–.005 option that changes a Region re-checks its state. Start, complete, abandon and restart are guarded by a state `limit`.
-  - .002, .004 and .005 carry a "The moment has passed" option, shown only when the Region has left the Frontier state.
+  - Every .001–.005 option that changes a Shoal re-checks its state. Start, complete, abandon and restart are guarded by a state `limit`.
+  - .002, .004 and .005 carry a "The moment has passed" option, shown only when the Shoal has left the Frontier state.
 - **Founder validity (Q3, orchestrator ruling):** alive, adult and free, plus one of:
   - is the holder;
   - is in the holder's realm (employer, or vassal or below);
   - **the holder is vassal or below of the founder.**
 - **Relative development floor (Q4):** the floor is `min(type floor, eotg_frontier_dev_reachable)`.
-  - `eotg_frontier_dev_reachable` = starting development + the milestone development this Region has not yet been granted, recorded at start.
+  - `eotg_frontier_dev_reachable` = starting development + the milestone development this Shoal has not yet been granted, recorded at start.
   - At full Establishment with a floor unmet, the stage modifier becomes `eotg_frontier_mod_waiting_development` / `_waiting_control`. The Invest tooltip says so too.
-- **Milestone development once per Region, ever (Q5):** permanent history `eotg_frontier_dev_granted` (0–2). Abandon keeps its −1.
+- **Milestone development once per Shoal, ever (Q5):** permanent history `eotg_frontier_dev_granted` (0–2). Abandon keeps its −1.
 - **Tick (Q9):** a calendar-year marker, `eotg_frontier_tick_year = current_year`, replaces the 300-day `eotg_frontier_ticked` (superseded). That gives exactly one tick per in-game year.
-- **Sponsor death (E2; orchestrator ruling, follow-up):** an additive `on_death` → `eotg_frontier_on_sponsor_death` records the dying sponsor's `primary_heir` on the Region as `eotg_frontier_pending_heir` (and the dead backer as `eotg_frontier_pending_from`) and clears the sponsor. Vanilla reads `primary_heir` of the dying only there, but the heir has usually not inherited yet, so `eotg_frontier_can_sponsor` would fail. The Region's **next yearly tick** (`eotg_frontier_resolve_pending_heir_effect`) makes the heir the sponsor if they are alive, can sponsor (which includes backing nothing else) and are not the holder, firing `sponsor_changed`; otherwise the backing lapses (Sponsor Lapse, strain +1). A backer found in between wins with no lapse; an heir who now holds the Region is dropped with no strain. The pending variables are removed either way, and when the project ends.
-- **Sponsor never the holder (§R rule):** `eotg_frontier_check_sponsor_effect` drops a sponsor who has become the holder (inherited or was given the Region), with no strain.
+- **Sponsor death (E2; orchestrator ruling, follow-up):** an additive `on_death` → `eotg_frontier_on_sponsor_death` records the dying sponsor's `primary_heir` on the Shoal as `eotg_frontier_pending_heir` (and the dead backer as `eotg_frontier_pending_from`) and clears the sponsor. Vanilla reads `primary_heir` of the dying only there, but the heir has usually not inherited yet, so `eotg_frontier_can_sponsor` would fail. The Shoal's **next yearly tick** (`eotg_frontier_resolve_pending_heir_effect`) makes the heir the sponsor if they are alive, can sponsor (which includes backing nothing else) and are not the holder, firing `sponsor_changed`; otherwise the backing lapses (Sponsor Lapse, strain +1). A backer found in between wins with no lapse; an heir who now holds the Shoal is dropped with no strain. The pending variables are removed either way, and when the project ends.
+- **Sponsor never the holder (§R rule):** `eotg_frontier_check_sponsor_effect` drops a sponsor who has become the holder (inherited or was given the Shoal), with no strain.
 - **Holding build (E1):** both the check and the pick need `has_holding = no` and `barony_cannot_construct_holding = no`. The grant runs at character scope.
 - **Hooks (Q8):**
   - `progressed` fires only on a real gain;
@@ -70,15 +72,15 @@ From [`frontier_v1_verification.md`](frontier_v1_verification.md) (local lore, Q
 ## R. Owner rulings (2026-10-04): these override anything below
 
 - **Terminology (Q1).** Follow the glossary:
-  - **Region** = the county. A **Frontier Region** is a county in the Frontier state.
+  - **Shoal** = the county. A **Frontier Shoal** is a county in the Frontier state.
   - **System** = a barony or holding, so a new holding is a **new System**.
-  - **Frontier** = the Region's developmental state. A **Frontier Project** is an attempt to establish something in the Region.
+  - **Frontier** = the Shoal's developmental state. A **Frontier Project** is an attempt to establish something in the Shoal.
   - **Player text shows the fiction, never the implementation:** "Systems remain open for settlement here", never "empty holding slot".
 - **Events (Q2).** 6 core events: .001–.005 and .010. **The founder-death event (.006) is cut.**
   - A founder who becomes **invalid** (dead, imprisoned, a child, or otherwise unable) is just the strain cause **No Founder**, detected by the yearly tick.
   - The player replaces the founder through a variant of .002, *The Frontier Without a Founder* (§9). It is the same event id, so the count stays at 6.
 - **The new holding (Q12)** always goes to the **current county holder**, the political owner. **The founder and sponsor never own the result by default.** The founder's reward is prestige, gold or recognition (the .004 options), never the holding.
-- **The architectural rule.** The **Region** owns the Frontier state. The **current county holder** owns the Region politically. The **Founder** starts the project. The **Sponsor** supports it. These are four distinct things and are never collapsed. There is no Greater Drift dependency; later systems consume Frontier through the Sponsor input and the hooks.
+- **The architectural rule.** The **Shoal** owns the Frontier state. The **current county holder** owns the Shoal politically. The **Founder** starts the project. The **Sponsor** supports it. These are four distinct things and are never collapsed. There is no Greater Drift dependency; later systems consume Frontier through the Sponsor input and the hooks.
 - **Engine fallbacks are binding.**
   - **County-title variables (V1).** Use them if they work and persist (test plan: mark, start, save and reload, change the holder, kill the founder). Otherwise use the **story-cycle fallback**. **The state never moves onto the founder.**
   - **Holding creation (V8).** If it isn't reliable, every type uses the development/control fallback. It does not block the feature.
@@ -90,7 +92,7 @@ From [`frontier_v1_verification.md`](frontier_v1_verification.md) (local lore, Q
 - **AI:** a cap of 8 active frontiers on the map, at most 1 per ruler. As specified; tune later.
 - **Lore (§15 answered).**
   - **Exodus settlers are allowed.** REVIEW_866 dates the Exodus from 131 AG and has it ongoing at 866, so "Exodus arrivals" and "Exodus descendants" are both canon-safe.
-  - **Older ruins, derelict stations and lost colonies are encouraged**, especially in Research text. Ruins do not mean the Region was politically settled.
+  - **Older ruins, derelict stations and lost colonies are encouraged**, especially in Research text. Ruins do not mean the Shoal was politically settled.
   - **Avoid "charter"** where it implies an authority above the polity. Prefer foundation, establishment, expedition, venture, outpost, grant.
   - **No named factions.**
   - **No Void** in Research text.
@@ -111,9 +113,9 @@ These are small simplifications made while building. Each keeps the architecture
 1. **`eotg_frontier_mark_unsettled_effect` takes no `DEV_LOSS`.** A parameter that subtracts development has no safe text form when it is 0. The cartographer lowers development separately when the real map lands (D3).
 2. **`eotg_frontier_abandon_effect` takes `FAILED = yes|no`, not `CAUSE`.** The cause is already recorded in `eotg_frontier_last_cause`.
 3. **Type eligibility:** one shared trigger, `eotg_frontier_can_establish`, plus `eotg_frontier_admin_eligible` for Administrative. A `$TYPE$` switch would need identifier substitution (V14). The data rows (rate, floors, results) are if/else_if chains on `var:eotg_frontier_type` (the mod's verified shape), not `switch`.
-4. **.001** has one option per type plus "Not now". The founder is the decision's candidate (the best steward at court, or the taker). The "lead it yourself" and "another Region" re-fires were cut to keep .001 simple.
+4. **.001** has one option per type plus "Not now". The founder is the decision's candidate (the best steward at court, or the taker). The "lead it yourself" and "another Shoal" re-fires were cut to keep .001 simple.
 5. **.005 option c** "Scale it back" switches the type to Settlement (the generic type) rather than re-opening the type pick.
-6. **The sponsor carries one back-reference variable,** `eotg_frontier_sponsoring` (the Region). That makes "is this character a sponsor?" correct in any scope; a global-list search would read `root` wrongly from another character's scope. It is written only by the set/clear sponsor effects. **The Frontier state itself stays on the Region.**
+6. **The sponsor carries one back-reference variable,** `eotg_frontier_sponsoring` (the Shoal). That makes "is this character a sponsor?" correct in any scope; a global-list search would read `root` wrongly from another character's scope. It is written only by the set/clear sponsor effects. **The Frontier state itself stays on the Shoal.**
 7. **(Superseded by §V, Q-B1: the counter is gone; the cap reads the list.)** The AI-cap count was a global variable, `eotg_frontier_active_count`. The global list `eotg_frontier_active` is used only for iteration (Sponsor, .010).
 8. **The decision picture** uses one vanilla illustration path (UNVERIFIED). This system adds no gfx.
 9. **Completion and failure events go to AI holders too,** who choose by `ai_chance`. That is fewer code paths than a separate AI resolution. .002 goes to players only; AI-to-AI sponsor offers resolve in script.
@@ -179,11 +181,11 @@ Every M and L fact is in §16.
 
 ## 2. Unit, state storage, and what "Unsettled" means
 
-### 2.1 The unit: the county, which players see as a Region
+### 2.1 The unit: the county, which players see as a Shoal
 
-**The unit is the county (`c_` title), and players see it as a Region** (ruling Q1, following the glossary in `OLD PROJECT VERSION/docs/localization_crusade.md`).
+**The unit is the county (`c_` title), and players see it as a Shoal** (ruling Q1, following the glossary in `OLD PROJECT VERSION/docs/localization_crusade.md`).
 - **Why the county:** **development** and **county control**, the two CK3 values the design wants progress driven by (design §8), live on the county.
-- **Settling:** a Frontier Region is settled **System by System**. Its free barony slots are the Systems still open to settlement, and a completed project establishes one of them as a new holding (§5.3).
+- **Settling:** a Frontier Shoal is settled **System by System**. Its free barony slots are the Systems still open to settlement, and a completed project establishes one of them as a new holding (§5.3).
 - **Player text** never mentions slots or holdings counts (§R).
 
 ### 2.2 Where the Frontier state lives: options
@@ -230,7 +232,7 @@ The engine needs every county to have a holder and a capital holding (E11). So U
 | `eotg_frontier_sponsor_paid` | yes, timed 360 days | Set by a successful sponsor payment this year. Read by the tick. |
 | `eotg_frontier_milestone` | 0 / 1 / 2 | Which development milestones have been paid out (§6.2). |
 | `eotg_frontier_pending_heir` / `eotg_frontier_pending_from` | character, between a sponsor's death and the next tick | The heir hand-off (§V, E2 ruling); removed by that tick or when the project ends. |
-| `eotg_frontier_tick_year` | the calendar year of the last tick | **Cooldown authority for the yearly tick** (§V, Q9): exactly one tick per in-game year, whoever holds the Region (§6.1). |
+| `eotg_frontier_tick_year` | the calendar year of the last tick | **Cooldown authority for the yearly tick** (§V, Q9): exactly one tick per in-game year, whoever holds the Shoal (§6.1). |
 | `eotg_frontier_event_cd` | yes, timed 3 years (owner) | **Cooldown authority for flavor events**, set only in the tick's event roll (§6.4). |
 | `eotg_frontier_attempts` | integer, permanent | Times a project here has ended in abandonment (a persistent trace, design §3.4). |
 | ~~`eotg_frontier_former_type`~~ | superseded (dropped 2026-10-05) | Was: what the last failed project was. Nothing read it, so error.log reported it as set but never used. |
@@ -238,7 +240,7 @@ The engine needs every county to have a holder and a capital holding (E11). So U
 | `eotg_frontier_last_cause` | `flag:no_founder` / `flag:low_control` / `flag:occupied` / `flag:war` / `flag:sponsor_lapsed` / `flag:events` | The latest strain cause. Read by .005's desc (§6.3). |
 | `eotg_frontier_invested` | yes, timed 1 year | Limits Invest to once a year per county (§8.2). |
 | `eotg_frontier_dev_reachable` | development | Q4: the development this project can still reach (§V). |
-| `eotg_frontier_dev_granted` | 0–2, permanent | Q5: milestone development already granted to this Region (§V). |
+| `eotg_frontier_dev_granted` | 0–2, permanent | Q5: milestone development already granted to this Shoal (§V). |
 | `eotg_frontier_debug_dev` / `_debug_control` / `_debug_floor_dev` / `_debug_floor_control` | timed 30 days | the debug readout's numbers (§V). |
 | `eotg_frontier_tick_strained` | yes, timed 1 day | Set by any strain this tick; a quiet tick (none set) eases strain by 1. |
 
@@ -271,15 +273,15 @@ County scope unless noted.
 |---|---|
 | `eotg_frontier_save_hook_scopes_effect` | saves `scope:eotg_frontier_county`, `_founder` and `_sponsor` from the county's variables |
 | `eotg_frontier_fire_hook_effect` (`HOOK`) | saves the hook scopes, then `holder = { trigger_event = { on_action = $HOOK$ } }` |
-| `eotg_frontier_mark_unsettled_effect` | **the only entry point**: state `unsettled` plus the modifier (an Abandoned Region keeps its state) |
+| `eotg_frontier_mark_unsettled_effect` | **the only entry point**: state `unsettled` plus the modifier (an Abandoned Shoal keeps its state) |
 | `eotg_frontier_start_effect` (`TYPE`, `FOUNDER`) | → frontier: variables, the resettle head start, list, counter, stage modifier; the started hook |
 | `eotg_frontier_unlist_effect` | out of the active list (the one record; §V) |
 | `eotg_frontier_trigger_hook_effect` (`HOOK`) | fires a hook with the scopes as saved (§V, Q8) |
 | `eotg_frontier_start_tooltip_effect` | character: .001's start tooltip, in the right person (lore I1) |
-| `eotg_frontier_on_sponsor_death_effect` | character (dying): records `pending_heir` / `pending_from` on the Region, clears the sponsor (§V, E2) |
+| `eotg_frontier_on_sponsor_death_effect` | character (dying): records `pending_heir` / `pending_from` on the Shoal, clears the sponsor (§V, E2) |
 | `eotg_frontier_resolve_pending_heir_effect` | county, in the tick: the heir becomes the sponsor, or the backing lapses (§V) |
 | `eotg_frontier_clear_pending_heir_effect` | removes the pending hand-off variables |
-| `eotg_frontier_grant_milestone_dev_effect` (`LEVEL`) | +1 development once per Region, ever (§V, Q5) |
+| `eotg_frontier_grant_milestone_dev_effect` (`LEVEL`) | +1 development once per Shoal, ever (§V, Q5) |
 | `eotg_frontier_raise_dev_effect` (`AMOUNT`) | result development, with the development_changed hook (Q8) |
 | `eotg_frontier_debug_readout_effect` | character: the debug readout toasts (§V) |
 | `eotg_frontier_set_founder_effect` (`FOUNDER`) | sets the founder |
@@ -309,15 +311,15 @@ County scope unless noted.
 |---|---|---|
 | `eotg_frontier_is_unsettled` / `_is_frontier` / `_is_abandoned` | county | the state flag |
 | `eotg_frontier_can_establish` | county | unsettled or abandoned, and the capital is not occupied |
-| `eotg_frontier_admin_eligible` | county | can establish, and the holder is a duke or above or this is not their capital Region |
+| `eotg_frontier_admin_eligible` | county | can establish, and the holder is a duke or above or this is not their capital Shoal |
 | `eotg_frontier_has_valid_founder` | county | the founder is alive, adult, free, and the holder or in the holder's realm |
 | `eotg_frontier_has_valid_sponsor` | county | the sponsor exists and is alive |
 | `eotg_frontier_completion_met` | county | Establishment ≥ 100, and the type's development and control floors |
-| `eotg_frontier_holds_frontier` / `_holds_establishable` | character | holds such a Region |
+| `eotg_frontier_holds_frontier` / `_holds_establishable` | character | holds such a Shoal |
 | `eotg_frontier_is_sponsor` | character | has the back-reference `eotg_frontier_sponsoring` |
 | `eotg_frontier_can_sponsor` | character | landed, count+, gold ≥ 2 payments, sponsors none |
 | `eotg_frontier_ai_would_sponsor` | character | AI, can sponsor, gold ≥ 4 payments (§V) |
-| `eotg_frontier_ai_room` | global | fewer than `eotg_frontier_ai_cap_value` Regions in the active list (§V) |
+| `eotg_frontier_ai_room` | global | fewer than `eotg_frontier_ai_cap_value` Shoals in the active list (§V) |
 
 ### 3.4 Script values (`common/script_values/eotg_frontier_values.txt`)
 | Key | Value |
@@ -372,7 +374,7 @@ They are three separate things, stored separately.
 - They supply the skill input (§6.2): the type's skill (§5.1).
 
 ### 4.1 Founder validity (ruling Q2: no founder-death event)
-The yearly tick (`eotg_frontier_tick_effect`, step 1) tests `eotg_frontier_has_valid_founder` on the Region.
+The yearly tick (`eotg_frontier_tick_effect`, step 1) tests `eotg_frontier_has_valid_founder` on the Shoal.
 - **An invalid founder** (dead, imprisoned, a child, or gone from the holder's realm) gives strain +1 with cause `no_founder`, every tick until replaced.
 - **A player holder** replaces the founder in the .002 variant *The Frontier Without a Founder*, which the event roll takes ahead of the ordinary complication while the founder is invalid.
 - **An AI holder** replaces the founder in the tick: their best candidate (the holder or a courtier, by the type's skill).
@@ -380,8 +382,8 @@ The yearly tick (`eotg_frontier_tick_effect`, step 1) tests `eotg_frontier_has_v
 
 ### 4.2 Sponsor validity and change
 **In the tick:**
-- **A dead sponsor** (§V, E2): `on_death` (`eotg_frontier_on_sponsor_death`) stores their `primary_heir` as `eotg_frontier_pending_heir` and clears the sponsor (`…_on_sponsor_changed`). At the Region's next tick the heir becomes the sponsor when alive, able to sponsor and not the holder: fire `…_on_sponsor_changed` with `scope:eotg_frontier_old_sponsor`, and toast the holder.
-- **Otherwise** strain +1 with cause `sponsor_lapsed` (no lapse if a new backer was found meanwhile, or if the heir now holds the Region).
+- **A dead sponsor** (§V, E2): `on_death` (`eotg_frontier_on_sponsor_death`) stores their `primary_heir` as `eotg_frontier_pending_heir` and clears the sponsor (`…_on_sponsor_changed`). At the Shoal's next tick the heir becomes the sponsor when alive, able to sponsor and not the holder: fire `…_on_sponsor_changed` with `scope:eotg_frontier_old_sponsor`, and toast the holder.
+- **Otherwise** strain +1 with cause `sponsor_lapsed` (no lapse if a new backer was found meanwhile, or if the heir now holds the Shoal).
 - **A sponsor who becomes the holder** is dropped with no strain: sponsor and holder are never collapsed (§R).
 
 **The sponsor-change flow** (design §6–7):
@@ -583,7 +585,7 @@ All eight are custom on_actions, defined **empty** in `eotg_frontier_on_actions.
   - Picks the founder candidate: the taker, or their courtier or knight with the highest **stewardship** when that beats the taker's own (`scope:eotg_frontier_candidate`). .001 can switch it to "lead it yourself".
   - Fires `eotg_frontier.001`.
 - **Alternative (option 8b):** a character interaction with title targeting (`target_type = title`, as vanilla's grant and revoke title interactions) would let the player click the exact county. Its 1.20 shape is UNVERIFIED (§16 V16). Keep 8a for Phase 1.
-- **Amended 2026-10-08 (built and committed): decisions *can* take a Region as a target.** The premise above, that a decision cannot let the player choose the county, is superseded. Vanilla's county-picker widget does it inside a decision: `widget = { gui = "decision_view_widget_select_realm_county"  controller = select_scope_object ... default_item = { ... } }` (`G/common/decisions/dlc_decisions/pam/pam_decisions.txt:1334-1460`; the same controller with a holy-site list at `G/common/decisions/50_holy_site_decisions.txt:119-169`). Establish, Invest and Abandon (and Survey, Build and Send an Expedition from v2/v3) now use it in `common/decisions/eotg_frontier_decisions.txt`. **The default item is the old automatic pick** described here and in §8.2–8.3, so a player who doesn't touch the picker gets the old behaviour; **the AI is unchanged** (it takes the default). Option 8b (a title-targeting interaction) is no longer needed.
+- **Amended 2026-10-08 (built and committed): decisions *can* take a Shoal as a target.** The premise above, that a decision cannot let the player choose the county, is superseded. Vanilla's county-picker widget does it inside a decision: `widget = { gui = "decision_view_widget_select_realm_county"  controller = select_scope_object ... default_item = { ... } }` (`G/common/decisions/dlc_decisions/pam/pam_decisions.txt:1334-1460`; the same controller with a holy-site list at `G/common/decisions/50_holy_site_decisions.txt:119-169`). Establish, Invest and Abandon (and Survey, Build and Send an Expedition from v2/v3) now use it in `common/decisions/eotg_frontier_decisions.txt`. **The default item is the old automatic pick** described here and in §8.2–8.3, so a player who doesn't touch the picker gets the old behaviour; **the AI is unchanged** (it takes the default). Option 8b (a title-targeting interaction) is no longer needed.
 
 ### 8.2 Invest: `eotg_decision_frontier_invest`
 - **Shown** to a holder of a frontier. **Cost:** `eotg_frontier_invest_cost_value`.
@@ -634,7 +636,7 @@ Every event moves or reads Establishment (progress) or its pressure (strain), as
 | ID | Title (draft) | Fired by | Root | Options | Couples |
 |---|---|---|---|---|---|
 | `.001` | *An Opportunity Here* (start) | `eotg_decision_frontier_establish` | the taker; `scope:eotg_frontier_county`, `scope:eotg_frontier_candidate` | One option per **type** (7; the Administrative option also needs `eotg_frontier_admin_eligible`), each starting the project with the candidate as founder. **"Not now"** refunds the cost. | **sets** progress (0, or the trace bonus); the start hook |
-| `.002` | *A Hard Year* (complication) / *The Frontier Without a Founder* (variant) | tick event roll (player holders) | the holder; `scope:eotg_frontier_county` | **Complication:** **(a)** "Ship in supplies": `minor_gold_value`, strain −1. **(b)** "Push through": progress +8, strain +1 (cause `hardship`). **(c)** [has a sponsor] "Call on the backer": the sponsor makes one extra payment, strain −1. **Without a Founder** (the founder is invalid): **(d)** "Appoint [eotg_frontier_candidate.GetName]": founder = the best candidate. **(e)** "Lead it yourself": founder = root. **(f)** "Let them manage alone": no founder; strain stays. **(b) is ungated** (2026-10-05, error.log qa_noopt), so the variant offers it too; its effects run only while the Region is a Frontier. In .004, **(c)** "The work is its own reward" is likewise ungated. The desc varies by strain band (0–1, 2, 3+). | moves strain or progress; sets the founder |
+| `.002` | *A Hard Year* (complication) / *The Frontier Without a Founder* (variant) | tick event roll (player holders) | the holder; `scope:eotg_frontier_county` | **Complication:** **(a)** "Ship in supplies": `minor_gold_value`, strain −1. **(b)** "Push through": progress +8, strain +1 (cause `hardship`). **(c)** [has a sponsor] "Call on the backer": the sponsor makes one extra payment, strain −1. **Without a Founder** (the founder is invalid): **(d)** "Appoint [eotg_frontier_candidate.GetName]": founder = the best candidate. **(e)** "Lead it yourself": founder = root. **(f)** "Let them manage alone": no founder; strain stays. **(b) is ungated** (2026-10-05, error.log qa_noopt), so the variant offers it too; its effects run only while the Shoal is a Frontier. In .004, **(c)** "The work is its own reward" is likewise ungated. The desc varies by strain band (0–1, 2, 3+). | moves strain or progress; sets the founder |
 | `.003` | *An Offer of Backing* (sponsor offer) | tick event roll (an AI candidate offers to a player holder), or `.010` (a player offers to any holder) | the holder; `scope:eotg_frontier_sponsor` = the offerer; `scope:eotg_frontier_county` | **(a)** Accept: set the sponsor; progress +5 (the first shipment). **(b)** Refuse. AI chance: by opinion of the offerer. | sets the sponsor; moves progress |
 | `.004` | *No Longer a Frontier* (completion) | tick resolve | the holder | The new System stays with the holder (§R). The options reward the founder (ruling Q12): **(a)** "A purse for [founder]": the holder pays `minor_gold_value`, which goes to the founder. **(b)** "Honor them publicly": the founder gains prestige, the holder a little. **(c)** "The work is its own reward": nothing. **(a)** and **(b)** are shown only when the founder is valid and is not the holder. Every option runs completion → settled. Desc variant per type. | completes Establishment (progress → Settled) |
 | `.005` | *The Frontier Falters* (failure) | tick resolve (strain 8) | the holder | §6.6 a–d. The desc names `eotg_frontier_last_cause`. | resets or ends progress; strain |
@@ -645,7 +647,7 @@ Every event moves or reads Establishment (progress) or its pressure (strain), as
 **AI holders** get .001, .004, .005 and .003 (from player offers), and pick by `ai_chance`. They never get .002, and never get .003 from AI offers, which resolve in script.
 
 ## 10. Loc surface (`localization/english/eotg_frontier_l_english.yml`), as built: 118 keys
-UTF-8 with BOM, bare `[x.GetName]`, gendered pronouns for single characters, ~~US English~~ Canadian English (supersedes US spelling: owner ruling 2026-10-04, loc commit 4168bb8), no em dashes. Glossary words (ruling Q1): **Region** (county), **System** (barony or holding), **Port**, **Bastion**, **Sanctum**.
+UTF-8 with BOM, bare `[x.GetName]`, gendered pronouns for single characters, ~~US English~~ Canadian English (supersedes US spelling: owner ruling 2026-10-04, loc commit 4168bb8), no em dashes. Glossary words (ruling Q1): **Shoal** (county), **System** (barony or holding), **Port**, **Bastion**, **Sanctum**.
 - **Events:**
   - `.001`–`.005` and `.010`: `.t`, `.desc`, option keys `.a`–`.h`;
   - variants: `.001.desc_resettle`; `.002.t_no_founder`; `.002.desc_low/_mid/_high/_no_founder`; `.003.desc_replace`; `.004.desc_<type>` ×7; `.005.desc_<cause>` ×6;

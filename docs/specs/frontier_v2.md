@@ -1,5 +1,7 @@
 # Spec: Frontier Systems v2 (Phase 2 content)
 
+Term update 2026-10-20: player-facing county term is Shoal (was Region).
+
 **Author:** cloud agent (architect role), 2026-10-05. **Status: built on branch `claude/frontier-v2-cloud`; NOT merged.** The owner asked that nothing lands until the local session verifies it (Tiger, PX, a vanilla check of the engine claims in §15, a lore pass) and the owner reviews it.
 
 **Source of intent:** [`docs/design/frontier_systems.md`](../design/frontier_systems.md) §4, §9–§13 and §22 Phase 2 (cited as *design §n*). Phase 1 is [`frontier_v1.md`](frontier_v1.md); its rulings (§R), verification fixes (§V) and the owner decisions in [`frontier_v1_verification.md`](frontier_v1_verification.md) §4 all still bind. This spec only adds.
@@ -10,7 +12,7 @@
 
 **Size (as built):**
 - **Events:** 9 new (.020, .021, .030–.036). Seven are flavor events that share Phase 1's one roll and its 3-year cooldown, so a project still sees about the same number of prompts (§9.1).
-- **Decisions:** 2 new (Survey a Region, Build Frontier Infrastructure).
+- **Decisions:** 2 new (Survey a Shoal, Build Frontier Infrastructure).
 - **Modifiers:** 24 new county modifiers: 10 traits, 8 infrastructure, 5 settlement legacies, 1 concessions.
 - **Opinion modifiers:** 3. **Character templates:** 3. **Hooks:** 2 new integration on_actions.
 - **No** buildings, holding types, gfx, story cycles or GUI.
@@ -22,11 +24,11 @@
 **Verification:** Tiger, PX and eotg_lint clean on every Frontier file; lore CLEAR; vanilla 1.20.0.3 confirmed §15 items 1, 2, 3, 5 and 6 (markers dropped in script). Item 4 is an in-game test (`frontier_v2_test_plan.md` §0.1). Fixes applied:
 1. **.032 (LAW AT 866):** the settlers ask only for lighter dues; the "say in how the work is shared out" line is gone, so granting their terms never grants a say.
 2. **.032 (c) "Talk them round":** two triggered `name` blocks. The liege variant reads "Talk [eotg_frontier_overlord.GetHerHim] round." (key `eotg_frontier.032.c_liege`; gendered pronoun ruling).
-3. **.037 trigger** also requires `holder = root` on the Region, so a study report never reaches someone who no longer holds it.
+3. **.037 trigger** also requires `holder = root` on the Shoal, so a study report never reaches someone who no longer holds it.
 4. **Dangerous (design):** the Danger strain cause applies while control is below the **project's own completion control floor** (`eotg_frontier_min_control_value`, which already includes the trait adjustments), not a fixed 60. A Dangerous project that meets its floor is no longer on a clock. The rows in §3.3 and §5.2 are updated.
 5. **One `development_changed` per completion:** inside `eotg_frontier_complete_effect` (marked by the temporary `scope:eotg_frontier_settling`), `eotg_frontier_raise_dev_effect` only records that development moved (`scope:eotg_frontier_dev_moved`). The completion fires the hook once, after the type row and the settle rewards. Outside a completion it fires as before.
 6. **Start order:** the first expedition's trait reveal (and `eotg_frontier_on_discovery`) now runs after the founder is set, so the discovery hook carries `scope:eotg_frontier_founder`.
-7. **Loc:** `.021.c_tt` "in a remote Region"; "yet" dropped from the Anomalous lines; "a single shift" in `.035.desc_derelict`; "Abandoned" capitalized in the Survey tooltip.
+7. **Loc:** `.021.c_tt` "in a remote Shoal"; "yet" dropped from the Anomalous lines; "a single shift" in `.035.desc_derelict`; "Abandoned" capitalized in the Survey tooltip.
 
 **Owner decisions (§16), all keep the build as it is:** Q2-1 traits are removed on settling; Q2-2 infrastructure costs medium gold; Q2-3 about 30% of reveals are bad news; Q2-4 Military and Religious keep their prestige and piety start costs; Q2-5 Terms Demanded keeps its liege variant; Q2-6 all three completion courtiers stay.
 
@@ -38,7 +40,7 @@ Everything in Phase 1 §R and §V, plus:
 - **Map-agnostic.** No title, province, culture, faith or character keys. Traits and infrastructure are county modifiers on whatever county the state variables are on. It works on the vanilla map through the debug decisions and on the test map.
 - **Time-neutral text.** Nothing era-specific: no Exodus, no dates, no named powers. Ruins are "older than any record", never dated.
 - **Loc:** Canadian English (L013b), gendered pronouns for single scoped characters, no em dashes, exactly one BOM (L016), bare `[x.GetName]`.
-- **Glossary:** a county is a **Region**, a holding a **System**. No "charter", no named factions, no Void, nothing from the cybernetics never-name list (`cybernetics_v2.md` §5), no "humanity"/"human" (multi-species), no medieval leaks (masons, palace, horses).
+- **Glossary:** a county is a **Shoal**, a holding a **System**. No "charter", no named factions, no Void, nothing from the cybernetics never-name list (`cybernetics_v2.md` §5), no "humanity"/"human" (multi-species), no medieval leaks (masons, palace, horses).
 - **Tech ceiling (CYBERNETICS AT 866):** stations, beacons and complexes are built and kept running by hand. Nothing repairs itself, nothing is remote-controlled, no state programme pays for anything.
 - **LAW AT 866:** no authority above the polity. A sponsor gets no claim and no say (.031 is about exactly that).
 - **Invariant 5:** every new event reads or moves progress or strain. **qa_noopt:** every event has at least one option with no trigger.
@@ -72,11 +74,11 @@ Confidence: **H** = used by the mod's verified script; **M** = skill reference o
 
 | Key | Kind | Meaning |
 |---|---|---|
-| traits (§5) | county modifiers `eotg_frontier_trait_*` | **The Region's known nature.** Present = known. They stay through abandonment (resource knowledge, design §3.4) and are converted into results and removed when the Region settles. |
+| traits (§5) | county modifiers `eotg_frontier_trait_*` | **The Shoal's known nature.** Present = known. They stay through abandonment (resource knowledge, design §3.4) and are converted into results and removed when the Shoal settles. |
 | infrastructure (§4) | county modifiers `eotg_frontier_infra_*` | **What the project has built.** Removed and converted into results on settling; lost on abandonment. |
 | `eotg_frontier_surveyed` | variable, yes, timed 5 years | A survey ran here recently (Survey's own gate; not an event cooldown). |
 | `eotg_frontier_survey_data` | variable, yes | Survey results on file: the next project starts `eotg_frontier_survey_bonus_value` ahead. Consumed by `eotg_frontier_start_effect`. |
-| `eotg_frontier_built` | variable, yes, timed 1 year | Infrastructure was built here this year (one build a year per Region). |
+| `eotg_frontier_built` | variable, yes, timed 1 year | Infrastructure was built here this year (one build a year per Shoal). |
 | `flag:danger` | value of `eotg_frontier_last_cause` | The new strain cause from the Dangerous trait (§5.3). |
 
 Saved scopes: `eotg_frontier_discovered` (a flag value: the trait just revealed, for the discovery hook and .020's desc), `eotg_frontier_infrastructure` (a flag value: what was just built, for its hook), `eotg_frontier_found` (.035's flag value: ruins or a derelict), `eotg_frontier_rival` (.030), `eotg_frontier_overlord` (.032, the holder's liege), `eotg_frontier_figure` (a created local figure); internal: `eotg_frontier_toast_target`.
@@ -122,7 +124,7 @@ Saved scopes: `eotg_frontier_discovered` (a flag value: the trait just revealed,
 ### 3.2 Scripted effects (county scope unless noted)
 | Type | Key | Does |
 |---|---|---|
-| scripted effect | `eotg_frontier_reveal_trait_effect` | rolls one trait the Region doesn't have (weighted, exclusive pairs respected) and adds it; **the public discovery entry point** for a future Exploration system (§8) |
+| scripted effect | `eotg_frontier_reveal_trait_effect` | rolls one trait the Shoal doesn't have (weighted, exclusive pairs respected) and adds it; **the public discovery entry point** for a future Exploration system (§8) |
 | scripted effect | `eotg_frontier_add_trait_effect` | (`TRAIT`, `FLAG`) adds that trait if there is room; saves `scope:eotg_frontier_discovered`; fires `eotg_frontier_on_discovery` |
 | scripted effect | `eotg_frontier_add_infra_effect` | (`INFRA`, `FLAG`) adds that infrastructure, marks the year, fires `eotg_frontier_on_infrastructure_built` |
 | scripted effect | `eotg_frontier_clear_infra_effect` | removes every infrastructure modifier (abandonment, settling) |
@@ -140,7 +142,7 @@ Saved scopes: `eotg_frontier_discovered` (a flag value: the trait just revealed,
 | scripted trigger | `eotg_frontier_trait_room` | county: fewer known traits than `eotg_frontier_trait_max_value` |
 | scripted trigger | `eotg_frontier_infra_room` | county: a Frontier with fewer infrastructure than its slots, and none built this year |
 | scripted trigger | `eotg_frontier_can_survey` | county: Unsettled, Frontier or Abandoned; trait room; not surveyed in the last 5 years |
-| scripted trigger | `eotg_frontier_holds_surveyable` | character: holds such a Region |
+| scripted trigger | `eotg_frontier_holds_surveyable` | character: holds such a Shoal |
 | scripted trigger | `eotg_frontier_holds_buildable` | character: holds a Frontier with infrastructure room |
 | scripted trigger | `eotg_frontier_danger_strains` | county: Dangerous, control below the project's own control floor (§V 4), no Garrison Post, not a Military project |
 | scripted trigger | `eotg_frontier_quiet_eases` | county: a quiet year may ease strain (not Hostile, or an Orbital Station) |
@@ -149,7 +151,7 @@ Saved scopes: `eotg_frontier_discovered` (a flag value: the trait just revealed,
 ### 3.4 Script values
 | Type | Key | Value |
 |---|---|---|
-| script value | `eotg_frontier_trait_count_value` | known traits on the Region |
+| script value | `eotg_frontier_trait_count_value` | known traits on the Shoal |
 | script value | `eotg_frontier_trait_max_value` | 2 |
 | script value | `eotg_frontier_infra_count_value` | infrastructure built |
 | script value | `eotg_frontier_infra_slots_value` | 1, or 2 from Foothold (progress ≥ 33) |
@@ -165,7 +167,7 @@ Saved scopes: `eotg_frontier_discovered` (a flag value: the trait just revealed,
 ### 3.5 Decisions, hooks, events
 | Type | Key | Notes |
 |---|---|---|
-| decision | `eotg_decision_frontier_survey` | Survey a Region → .020 (§8) |
+| decision | `eotg_decision_frontier_survey` | Survey a Shoal → .020 (§8) |
 | decision | `eotg_decision_frontier_build` | Build Frontier Infrastructure → .021 (§4) |
 | on_action | `eotg_frontier_on_discovery` | integration hook: a trait was revealed (§8) |
 | on_action | `eotg_frontier_on_infrastructure_built` | integration hook: infrastructure was built |
@@ -198,9 +200,9 @@ Saved scopes: `eotg_frontier_discovered` (a flag value: the trait just revealed,
 ## 4. Frontier infrastructure (design §9)
 
 ### 4.1 Building it
-- **Decision `eotg_decision_frontier_build`:** shown to a holder of a Frontier with room (`eotg_frontier_holds_buildable`). It picks the most advanced such Region and fires .021, *What to Build*, which charges `eotg_frontier_infra_cost_value` in the option chosen (as .001 does).
-  - **Amended 2026-10-08 (built and committed):** the player chooses the Region with vanilla's county-picker widget (`decision_view_widget_select_realm_county`, `controller = select_scope_object`; `G/common/decisions/dlc_decisions/pam/pam_decisions.txt:1334-1460`, `G/common/decisions/50_holy_site_decisions.txt:119-169`). The "most advanced" pick is the **default item**; the AI is unchanged. See `frontier_v1.md` §8.1.
-- **Slots:** 1 from the start, 2 from Foothold (progress ≥ 33). One build a year per Region (`eotg_frontier_built`).
+- **Decision `eotg_decision_frontier_build`:** shown to a holder of a Frontier with room (`eotg_frontier_holds_buildable`). It picks the most advanced such Shoal and fires .021, *What to Build*, which charges `eotg_frontier_infra_cost_value` in the option chosen (as .001 does).
+  - **Amended 2026-10-08 (built and committed):** the player chooses the Shoal with vanilla's county-picker widget (`decision_view_widget_select_realm_county`, `controller = select_scope_object`; `G/common/decisions/dlc_decisions/pam/pam_decisions.txt:1334-1460`, `G/common/decisions/50_holy_site_decisions.txt:119-169`). The "most advanced" pick is the **default item**; the AI is unchanged. See `frontier_v1.md` §8.1.
+- **Slots:** 1 from the start, 2 from Foothold (progress ≥ 33). One build a year per Shoal (`eotg_frontier_built`).
 - **Not every Frontier needs it** (design §9): nothing requires infrastructure.
 
 ### 4.2 The set: data rows
@@ -226,7 +228,7 @@ Each infrastructure is a county modifier with one small line (the display) plus 
 ## 5. Frontier traits (design §10)
 
 ### 5.1 The set
-Lightweight Region traits, as county modifiers with one small line each. A Region holds at most **2** (`eotg_frontier_trait_max_value`). Habitable and Hostile Environment exclude each other.
+Lightweight Shoal traits, as county modifiers with one small line each. A Shoal holds at most **2** (`eotg_frontier_trait_max_value`). Habitable and Hostile Environment exclude each other.
 
 | Trait | Kind | Display line |
 |---|---|---|
@@ -258,11 +260,11 @@ Lightweight Region traits, as county modifiers with one small line each. A Regio
 Strain is still never a roll (§R): Danger is a named, counterable condition read by the tick, and .005 names it.
 
 ### 5.3 Where traits come from
-1. **Establish:** a Region with no known trait reveals one when its project starts ("the first expedition learns the place").
+1. **Establish:** a Shoal with no known trait reveals one when its project starts ("the first expedition learns the place").
 2. **Survey** (§8): reveals one, or two if the player pays to go deeper.
 3. **Events:** .035 (ruins or a derelict) and .036 (a rich seam) can add one mid-project.
 
-`eotg_frontier_reveal_trait_effect` rolls among the traits the Region lacks, all equally weighted (10 each), so about 60% of reveals are good news and 30% bad. Negative traits are real costs, but each one has a counter, and Remote eases a requirement.
+`eotg_frontier_reveal_trait_effect` rolls among the traits the Shoal lacks, all equally weighted (10 each), so about 60% of reveals are good news and 30% bad. Negative traits are real costs, but each one has a counter, and Remote eases a requirement.
 
 ---
 
@@ -279,9 +281,9 @@ Still one engine and one set of rows keyed on `var:eotg_frontier_type` (Phase 1 
 | Military | **minor prestige** (`minor_prestige_value`) | 2 / 70 | **war adds no strain** |
 | Religious | **minor piety** (`minor_piety_value`) | 2 / 50 | — |
 | Research | someone at court who can read the surveys: the founder candidate or you with learning ≥ `decent_skill_rating` | 3 / 50 | — |
-| Administrative | duke or above, or not the capital Region (Phase 1) | 3 / 80 | **Low Control strain below 50** (not 40) |
+| Administrative | duke or above, or not the capital Shoal (Phase 1) | 3 / 80 | **Low Control strain below 50** (not 40) |
 
-Traits adjust the floors (§5.2); the development floor stays capped by what the Region can still reach (Phase 1 Q4).
+Traits adjust the floors (§5.2); the development floor stays capped by what the Shoal can still reach (Phase 1 Q4).
 
 ### 6.2 Inputs: `eotg_frontier_type_input_value` (pre-pace)
 | Type | Input | Normal CK3 source |
@@ -317,7 +319,7 @@ Traits adjust the floors (§5.2); the development floor stays capped by what the
 | Military | Bastion, +15 control | **a garrison commander** (courtier, martial) |
 | Religious | Sanctum, +1 development | **a mission elder** (courtier, learning); faith legacy |
 | Research | +2 development, founder learning +1 | learning legacy |
-| Administrative | control 100, +1 development | **a Region official** (courtier, stewardship) |
+| Administrative | control 100, +1 development | **a Shoal official** (courtier, stewardship) |
 
 **Traits and infrastructure** (`eotg_frontier_settle_rewards_effect`, one row each, §4.2 and §5.2). A legacy is added once even if several sources grant it. Then every trait and infrastructure modifier is removed: normal CK3 takes over (design §2.3).
 
@@ -334,8 +336,8 @@ Traits adjust the floors (§5.2); the development floor stays capped by what the
 
 ## 8. Discoveries (design §13)
 
-- **Decision `eotg_decision_frontier_survey`** (Survey a Region): cost `eotg_frontier_survey_cost_value`. Shown to a holder of a Region that `eotg_frontier_can_survey`: Unsettled, Abandoned or a Frontier, with trait room, not surveyed in 5 years. It picks the most developed such Region, marks it surveyed and fires .020.
-  - **Amended 2026-10-08 (built and committed):** the Region is chosen with the same county-picker widget as Build (§4.1 note; `frontier_v1.md` §8.1). The "most developed" pick is the **default item**; the AI is unchanged.
+- **Decision `eotg_decision_frontier_survey`** (Survey a Shoal): cost `eotg_frontier_survey_cost_value`. Shown to a holder of a Shoal that `eotg_frontier_can_survey`: Unsettled, Abandoned or a Frontier, with trait room, not surveyed in 5 years. It picks the most developed such Shoal, marks it surveyed and fires .020.
+  - **Amended 2026-10-08 (built and committed):** the Shoal is chosen with the same county-picker widget as Build (§4.1 note; `frontier_v1.md` §8.1). The "most developed" pick is the **default item**; the AI is unchanged.
 - **.020 *Survey Report*** reveals a trait in `immediate`; the desc names it.
   - **(a) "File the report."** Before a project, the survey data gives the next project a head start (`eotg_frontier_survey_bonus_value`); during one, progress +2. Ungated.
   - **(b) "Send them deeper."** Costs the survey cost again: a second trait (if there is room), plus (a)'s result.
@@ -348,26 +350,26 @@ Traits adjust the floors (§5.2); the development floor stays capped by what the
 ### 9.1 The budget, and the one roll
 Phase 1's roll was: 30 .002, 20 .003, 50 nothing, at most every 3 years. Phase 2 keeps the **same frequency** and widens the pool:
 - **Players:** the founderless .002 variant still comes first. Otherwise a 50% chance that an event comes at all; if it does, `eotg_frontier_flavor_pick_effect` picks one from the pool by weight, and only then is the 3-year cooldown set.
-- **Pool weights:** .002 20 (+10 Hostile); .003 20 (no backer, a candidate exists); .030 10 (+10 Valuable Trade Route; a backer and a rival exist); .031 10 (a backer); .032 10 (+10 Strategic; from Foothold); .033 10 (+5 Habitable; a founder who is not the holder); .034 5 (+10 Remote, +10 Dangerous, −5 when a Navigation Beacon serves a Remote Region, so it never reaches 0); .035 10 (+10 Research or Anomalous; trait room); .036 10 (+10 Mining; trait room; no Rich Resources yet).
+- **Pool weights:** .002 20 (+10 Hostile); .003 20 (no backer, a candidate exists); .030 10 (+10 Valuable Trade Route; a backer and a rival exist); .031 10 (a backer); .032 10 (+10 Strategic; from Foothold); .033 10 (+5 Habitable; a founder who is not the holder); .034 5 (+10 Remote, +10 Dangerous, −5 when a Navigation Beacon serves a Remote Shoal, so it never reaches 0); .035 10 (+10 Research or Anomalous; trait room); .036 10 (+10 Mining; trait room; no Rich Resources yet).
 - **Result:** a typical 13-year project sees about 3 flavor events, plus .001 and .004: **about 5 Frontier prompts in total**, inside the 4–6 budget. Survey (.020) and Build (.021) are player-initiated pick events, not prompts.
 - **AI holders** still get no flavor events (Phase 1). Traits, infrastructure and type inputs apply to them all the same.
 
 ### 9.2 The new events
-Root is the Region's holder (or the decision taker); the Region is `scope:eotg_frontier_county`. Every option that changes the Region re-checks its state; the last option of each flavor event has no trigger and guards its own effects.
+Root is the Shoal's holder (or the decision taker); the Shoal is `scope:eotg_frontier_county`. Every option that changes the Shoal re-checks its state; the last option of each flavor event has no trigger and guards its own effects.
 
 | ID | Title | Fired by | Options (ungated one in **bold**) | Couples |
 |---|---|---|---|---|
 | `eotg_frontier.020` | *Survey Report* | Survey decision | **(a) file it**; (b) send them deeper (gold) | progress +2, or survey data (head start) |
-| `eotg_frontier.021` | *What to Build* | Build decision | one per infrastructure the Region is offered (gold); **(i) not now** | infrastructure → yearly progress input |
+| `eotg_frontier.021` | *What to Build* | Build decision | one per infrastructure the Shoal is offered (gold); **(i) not now** | infrastructure → yearly progress input |
 | `eotg_frontier.030` | *A Rival Backer* | roll | (a) take the new terms: the rival backs it, progress +3, the old backer is slighted; **(b) keep faith: the backer is pleased, strain −1** | progress / strain |
-| `eotg_frontier.031` | *The Backer Wants a Say* | roll | (b) honour them publicly (prestige to them, progress +2); (c) a share of the first returns (gold, strain −1); **(a) the Region is yours: no say; the backer is slighted, strain +1** | progress / strain |
+| `eotg_frontier.031` | *The Backer Wants a Say* | roll | (b) honour them publicly (prestige to them, progress +2); (c) a share of the first returns (gold, strain −1); **(a) the Shoal is yours: no say; the backer is slighted, strain +1** | progress / strain |
 | `eotg_frontier.032` | *Terms Demanded* | roll | the settlers ask for lighter dues, or (if you have one) your liege asks for a share: (a) grant the settlers' terms (concessions modifier, strain −1) or (d) pay the liege's share (gold, strain −1); (c) talk them round (diplomacy); **(b) refuse: strain +1** (liege slighted) | strain |
 | `eotg_frontier.033` | *A Quarrel in the Camps* | roll | (a) back the founder (progress +3, strain +1); (c) settle it yourself (gold, strain −1); **(b) side with the settlers (strain −1, progress −2, founder slighted)** | progress / strain |
 | `eotg_frontier.034` | *A Supply Run Lost* | roll | (a) replace it (gold); (c) the backer covers it (by arrangement); **(b) make do: progress −3, strain +1** | progress / strain |
 | `eotg_frontier.035` | *What the Crews Found* | roll | ruins or a derelict station: (a) study or restore it (trait Ancient Ruins or Ancient Infrastructure; progress −2, or +3 for Research); **(b) strip it for parts: progress +4** | progress; a trait |
 | `eotg_frontier.036` | *A Rich Seam* | roll | (a) survey it properly (gold): trait Rich Resources, progress +2; **(b) work it now: progress +4, strain +1** | progress / strain; a trait |
 
-**LAW AT 866 in .031:** the backer asks for a say in how the Region is run. No option gives one. Their money buys them what it always bought (a part in the venture's success), and the options are about how to keep them content without it.
+**LAW AT 866 in .031:** the backer asks for a say in how the Shoal is run. No option gives one. Their money buys them what it always bought (a part in the venture's success), and the options are about how to keep them content without it.
 
 **.032's "local ruler":** a Frontier's holder already rules it, so the demand comes either from the people on the ground (the settlers, everywhere) or, when the holder is a vassal, from their own liege. That is a relationship inside the realm, which LAW AT 866 allows.
 
@@ -389,7 +391,7 @@ Two new empty integration on_actions, fired like Phase 1's:
 ## 11. Player and AI entry points
 | Decision | AI interval | ai_potential | ai_will_do |
 |---|---|---|---|
-| Survey a Region | county 60, duchy+ 48 (barony 0) | holds a surveyable Region; gold ≥ 3 × survey cost | base 5; +10 Unsettled (not yet a Frontier); +5 learning ≥ 12 |
+| Survey a Shoal | county 60, duchy+ 48 (barony 0) | holds a surveyable Shoal; gold ≥ 3 × survey cost | base 5; +10 Unsettled (not yet a Frontier); +5 learning ≥ 12 |
 | Build Frontier Infrastructure | all tiers 24 (barony 0) | holds a buildable Frontier; gold ≥ 2 × infrastructure cost | base 15; +10 strain ≥ 4; −10 greedy |
 
 .021's AI chances favour the infrastructure that fits the type, then the one that counters a known negative trait.
@@ -402,7 +404,7 @@ Two new empty integration on_actions, fired like Phase 1's:
 ## 13. Definition of done (Phase 2)
 1. eotg_lint: 0 findings in Frontier files (incl. L013b, L016). check_all passes. spec_conformance: frontier_v2 shows 0 missing ids.
 2. Every new event is fired by something, has an ungated option, and reads or moves progress or strain.
-3. On the test map, through `frontier_v2_test_plan.md`: each trait can be revealed by Survey, Establish and the two discovery events; each infrastructure can be built where offered; each type's requirement and input behaves as §6; a settled Region gets the §7 results and loses its trait and infrastructure modifiers; an abandoned one keeps its traits and loses its infrastructure.
+3. On the test map, through `frontier_v2_test_plan.md`: each trait can be revealed by Survey, Establish and the two discovery events; each infrastructure can be built where offered; each type's requirement and input behaves as §6; a settled Shoal gets the §7 results and loses its trait and infrastructure modifiers; an abandoned one keeps its traits and loses its infrastructure.
 4. Pacing (§6.4) is unchanged for an unaided project; no project sees more than about 6 prompts.
 
 ## 14. Deferrals
@@ -415,12 +417,12 @@ Two new empty integration on_actions, fired like Phase 1's:
 1. **(F6)** `piety_level >= n` as a character trigger (marked `# UNVERIFIED-VANILLA` in `eotg_frontier_type_input_value`).
 2. **(F7)** `county_opinion_add` inside a static county modifier (`eotg_frontier_mod_legacy_faith`, `eotg_frontier_mod_concessions`; marked).
 3. **(F8)** `add_county_modifier = $TRAIT$` and `has_county_modifier = $TRAIT$` with a whole-token parameter. Phase 1's `HOOK = $HOOK$` and `flag:$TYPE$` are the precedent (H), so this is low risk; listed for completeness.
-4. In-game (TEST-IN-GAME): a county modifier added to an Unsettled Region survives a holder change (as V1 did for variables).
+4. In-game (TEST-IN-GAME): a county modifier added to an Unsettled Shoal survives a holder change (as V1 did for variables).
 5. **(F10)** A script value on the **left** of a trigger comparison (`eotg_frontier_trait_count_value < eotg_frontier_trait_max_value`, `eotg_frontier_reward_dev_value > 0`, `eotg_frontier_infra_count_value < eotg_frontier_infra_slots_value`). Phase 1 only used script values on the right (marked in `eotg_frontier_triggers.txt`). Fallback if it fails: `calc_true_if`, or move the count into a variable.
 6. **(F11)** `change_development_level = eotg_frontier_reward_dev_value` (a script value as the amount; marked).
 
 ## 16. Questions for the owner (**all answered 2026-10-05: keep as built; see §V**)
-- **Q2-1. Traits after settling:** removed (as built, "the Frontier is temporary"), with their value paid out as results. Or should they stay on the Region as permanent descriptors?
+- **Q2-1. Traits after settling:** removed (as built, "the Frontier is temporary"), with their value paid out as results. Or should they stay on the Shoal as permanent descriptors?
 - **Q2-2. Infrastructure cost:** `medium_gold_value` each, at most two. Too cheap, too dear?
 - **Q2-3. Negative traits:** a reveal is about 30% bad news. Keep that, or weight reveals toward good news?
 - **Q2-4. Type costs:** Military costs minor prestige and Religious minor piety to start. Keep, or make them gold like the rest?
@@ -434,11 +436,11 @@ Built after A passed lint, check_all and spec_conformance. Each subsection is on
 
 ### B1. Phase 1 events react to traits (loc and descs only)
 - **.002 *A Hard Year*** (the complication, not the founderless variant) gets one more line for the worst uncountered trait: Hostile Environment without an Orbital Station, Remote without a Navigation Beacon, or Dangerous without a Garrison Post.
-- **.004 *No Longer a Frontier*** gets one line for what the project leaves behind: two pieces of infrastructure; ruins or anomalies studied; or a Region that was hard to settle.
+- **.004 *No Longer a Frontier*** gets one line for what the project leaves behind: two pieces of infrastructure; ruins or anomalies studied; or a Shoal that was hard to settle.
 - New loc: `eotg_frontier.002.desc_hostile`, `.002.desc_remote`, `.002.desc_dangerous`, `.004.desc_built_much`, `.004.desc_studied`, `.004.desc_hard_won`. No mechanics change.
 
-### B2. Salvage: resettling an abandoned Region's infrastructure (design §3.4 "abandoned infrastructure")
-- **On abandonment**, a Region that had infrastructure records how many pieces it lost in `eotg_frontier_salvage` (title variable, kept until the next start; the latest abandonment wins).
+### B2. Salvage: resettling an abandoned Shoal's infrastructure (design §3.4 "abandoned infrastructure")
+- **On abandonment**, a Shoal that had infrastructure records how many pieces it lost in `eotg_frontier_salvage` (title variable, kept until the next start; the latest abandonment wins).
 - **On the next start**, the project begins `eotg_frontier_salvage_bonus_value` ahead (5 per piece, at most 10), on top of Phase 1's trace bonus and any survey data. The variable is consumed.
 - **.001** gets a line when salvage is waiting: `eotg_frontier.001.desc_salvage`.
 - Pacing: at most +10 once per resettlement; it makes a failed, well-built project less of a total loss without making abandonment profitable (the infrastructure itself cost two medium gold payments).
@@ -450,7 +452,7 @@ Built after A passed lint, check_all and spec_conformance. Each subsection is on
 
 ### B3. A discovery follow-up: *What the Ruins Held*
 - **.035 (a) "Study them properly"** now also fires **.037** one to two years later (`trigger_event` with `days = { 365 730 }`, from the option, so `scope:eotg_frontier_county` travels with it).
-- **.037** (if the Region is still a Frontier; otherwise its trigger fails and nothing shows): **(a)** share the findings: a little prestige, progress +2; **(b, ungated)** keep them for the crews: progress +5.
+- **.037** (if the Shoal is still a Frontier; otherwise its trigger fails and nothing shows): **(a)** share the findings: a little prestige, progress +2; **(b, ungated)** keep them for the crews: progress +5.
 - **Budget:** fired only by a choice the player made, at most once per study, so ordinary projects see no extra prompt.
 
 | Type | Key | Notes |

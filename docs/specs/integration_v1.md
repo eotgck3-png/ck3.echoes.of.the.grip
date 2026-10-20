@@ -1,5 +1,7 @@
 # Spec: Vanilla integration v1 — top-bar alerts and game concepts
 
+Term update 2026-10-20: player-facing county term is Shoal (was Region).
+
 **Author:** eotg-architect, 2026-10-20. **Source:** `docs/qa/system_investigation_2026-10-18/REPORT.md` §5 ranks 1 and 2, approved by the owner.
 **Game:** CK3 1.20.1.1. `G` = `D:/SteamLibrary/steamapps/common/Crusader Kings III/game`. Every shape below is cited as `file:line` in `G`.
 **Status:** spec only. Nothing here is built.
@@ -16,7 +18,7 @@ Players can't find the mod's systems. The decisions sit in the generic list, not
 **Gate.** This is Gate 4 (presentation) work, but only for systems that are already built and exempt from the Gate 1 block:
 - cybernetics (exempt 2026-10-02);
 - the four governments (exempt 2026-10-08);
-- Frontier and Unclaimed Regions (built against the temporary map).
+- Frontier and Unclaimed Shoals (built against the temporary map).
 
 Every trigger used here is a character, county-variable or trait read. Nothing names a title, province, culture or faith, so the work survives the map swap. **Not blocked**, as long as the orchestrator accepts that Frontier and Unclaimed alerts sit under the same exemption as the systems they describe. **Orchestrator: confirm this on the gate board.**
 
@@ -81,9 +83,9 @@ The title-view click is `00_title_actions.txt:62-68`, and the combined loc keys 
 - `texture` is optional. With none, there is no icon (`:30-31`).
 - Links can take two forms: `[key|E]`, or `[Concept('key','Custom Text')|E]` (`:64-66`). The mod already uses the `Concept(...)` form for knights.
 
-**E8. Vanilla already has a `region` concept** ("Region", a geographical area: `00_game_concepts.txt:2414-2416`; `game_concepts_l_english.yml:1479-1481`). The mod calls a County a "Region" (glossary, `OLD PROJECT VERSION/docs/localization_crusade.md:15-27`). Two consequences:
-- **Never** link `[region|E]` for a mod Region. Link the county concept with display text: `[Concept('county','Region')|E]`.
-- When CB-08's `replace/` renames `game_concept_county` to "Region", the encyclopedia will show two "Region" entries. CB-08 must also re-word `game_concept_region`. **That needs a human decision, recorded on the taskboard (§11).**
+**E8. Vanilla already has a `region` concept** ("Region", a geographical area: `00_game_concepts.txt:2414-2416`; `game_concepts_l_english.yml:1479-1481`). The mod calls a County a "Shoal" (owner 2026-10-20; the v1 glossary said "Region", `OLD PROJECT VERSION/docs/localization_crusade.md:15-27`). Two consequences:
+- **Never** link `[region|E]` for a mod Shoal. Link the county concept with display text: `[Concept('county','Shoal')|E]`.
+- When CB-08's `replace/` renames `game_concept_county` to "Shoal", it no longer shares a name with vanilla's "Region" entry, so the re-wording of `game_concept_region` (below, §11) may be moot. **Confirm with the owner.**
 
 ---
 
@@ -124,7 +126,7 @@ File: `common/important_actions/eotg_important_actions.txt` (new folder). Vanill
 | `eotg_action_aug_calibration_lapsed` | `alert` | `action_take_decision` | no | no | 100 | `has_trait = eotg_cybernetics`, `NOT = { has_character_modifier = eotg_mod_implant_calibrated }`, `can_execute_decision = eotg_decision_maintenance_protocol`, and `NOT = { is_important_decision = eotg_decision_maintenance_protocol }` (no duplicate if the player toggled it) | calibration is re-applied by Maintenance or Consult the Physician, or the trait is lost | none | `decision:eotg_decision_maintenance_protocol = { open_view_data = decision_detail }` |
 
 **Spam budget:**
-- Breaking and founderless are each one combined, expandable entry, however many Regions qualify. They are dangerous, so they sort above normal alerts, and both mean a Frontier may fail.
+- Breaking and founderless are each one combined, expandable entry, however many Shoals qualify. They are dangerous, so they sort above normal alerts, and both mean a Frontier may fail.
 - Calibration shows at most once per lapse, about every 3 to 7 years per augmented ruler (`eotg_augmentation_decisions.txt:171-240`, modifier 3 or 5 years), and clears when acted on.
 - No alert fires for a Frontier the player only **backs** (sponsor): it isn't theirs to fix.
 - `soundeffect` is omitted, so the default define is used (`_important_actions.info:26`).
@@ -183,9 +185,9 @@ File: `common/game_concepts/eotg_game_concepts.txt` (new folder). No `texture` (
 | `eotg_local_ruler` | `eotg_frontier` | `eotg_local_rulers` | Local Ruler(s) | no |
 | `eotg_frontier_sponsor` | `eotg_frontier` | `eotg_backer` `eotg_backers` | Backer(s) (the loc's word; the decision is "Back a Frontier", `eotg_frontier_l_english.yml:18`) | **yes** (no claim, no say) |
 | `eotg_frontier_project` | `eotg_frontier` | `eotg_frontier_projects` | Frontier Project(s): the seven types | no |
-| `eotg_unsettled_region` | `eotg_frontier` | `eotg_unsettled_regions` | Unsettled Region(s) | no |
+| `eotg_unsettled_region` | `eotg_frontier` | `eotg_unsettled_regions` | Unsettled Shoal(s) | no |
 | `eotg_region_charts` | `eotg_frontier` | — | name taken by the localizer from the Explore and `.042` loc (Unknown / Partial / Known) | no |
-| `eotg_unclaimed_region` | — | `eotg_unclaimed_regions` | Unclaimed Region(s) | **yes** (LAW AT 866: no filing, registration or recognition) |
+| `eotg_unclaimed_region` | — | `eotg_unclaimed_regions` | Unclaimed Shoal(s) | **yes** (LAW AT 866: no filing, registration or recognition) |
 | `eotg_unsworn` | `eotg_unclaimed_region` | — | `$trait_eotg_unclaimed_folk$` | **yes** |
 | `eotg_pmc` | `government` (vanilla, `00_game_concepts.txt:516`) | — | `$eotg_pmc_government$` | **yes** |
 | `eotg_corporation` | `government` | — | `$eotg_corporation_government$` | **yes** |
@@ -214,20 +216,20 @@ Notes on the table:
 - `eotg_seamless`: a complete integration with nothing left in the person that argues back. Says that text reads differently for them. **Lore-sensitive.**
 - `eotg_aug_policy`: the four positions, set by the top ruler for the realm (`eotg_aug_policy_set_by_liege_tt`). **No authority above the realm.**
 - `eotg_implant_technician`: a court position; cheaper and safer procedures; can be lent.
-- `eotg_frontier`: a project to settle a Region that is Unsettled or abandoned; held by the Region's holder; ends in a new holding or in failure.
+- `eotg_frontier`: a project to settle a Shoal that is Unsettled or abandoned; held by the Shoal's holder; ends in a new holding or in failure.
 - `eotg_frontier_progress`: grows yearly from investment, infrastructure and events; bands such as Foothold unlock infrastructure slots.
 - `eotg_frontier_strain`: the settlers' hardship. It rises with no founder, war, danger and quarrels. At breaking point the Frontier can fail.
 - `eotg_frontier_founder`: leads the work. Without one, strain climbs. Appointed by decision.
 - `eotg_local_ruler`: on completion, a founder may be given the new holding as its ruler (`frontier_v4.md` "Founder first").
-- `eotg_frontier_sponsor`: another ruler pays toward the work. **No claim and no say over the Region.**
+- `eotg_frontier_sponsor`: another ruler pays toward the work. **No claim and no say over the Shoal.**
 - `eotg_frontier_project`: the seven types (Settlement, Trade, Mining, Military, Religious, Research, Administrative), chosen at establishment.
-- `eotg_unsettled_region`: a Region whose Systems were never properly settled; where a Frontier can start.
-- `eotg_region_charts`: Unknown, Partial or Known; expeditions chart a Region; charts give a later Frontier a head start.
-- `eotg_unclaimed_region`: a Region no ruler holds, kept by a placeholder; it can be claimed with Raise Your Colours at a cost in gold and prestige; it costs attackers attrition. **No filing, registration or recognition.**
-- `eotg_unsworn`: the scattered people of an Unclaimed Region; no court and no oath.
+- `eotg_unsettled_region`: a Shoal whose Systems were never properly settled; where a Frontier can start.
+- `eotg_region_charts`: Unknown, Partial or Known; expeditions chart a Shoal; charts give a later Frontier a head start.
+- `eotg_unclaimed_region`: a Shoal no ruler holds, kept by a placeholder; it can be claimed with Raise Your Colours at a cost in gold and prestige; it costs attackers attrition. **No filing, registration or recognition.**
+- `eotg_unsworn`: the scattered people of an Unclaimed Shoal; no court and no oath.
 - Governments: one paragraph each, drawn from the existing `eotg_*_government_desc` keys. The concept desc may simply be `$eotg_pmc_government_desc$` and so on, the cheapest option with one source.
 
-Inside descs, link a Region with `[Concept('county','Region')|E]` (E8), never `[region|E]`.
+Inside descs, link a Shoal with `[Concept('county','Shoal')|E]` (E8), never `[region|E]`.
 
 ---
 
@@ -291,16 +293,16 @@ That makes 42 keys: 8 + 10 + 10 + 10 + 4. The previous 22 is superseded. In per-
 **Voice:**
 - Alerts are UI voice (vanilla's), not character voice, so there are no `_seamless` variants. A Seamless voice for alerts is deferred (§10).
 - Canadian English throughout (colour, favour, -ize).
-- Glossary terms throughout: **Shoal** (the county tier, owner 2026-10-20; it replaces "Region"), System, Sector, Port, Bastion.
+- Glossary terms throughout: **Shoal** (the county tier, owner 2026-10-20; it replaces "Shoal"), System, Sector, Port, Bastion.
 - Never "County".
 
 **`replace/` flags (CB-08, not this spec):**
-- `game_concept_county` → "Region";
+- `game_concept_county` → "Shoal";
 - `game_concept_region` needs a new name (E8).
 
 ## 9. Lore constraints
 
-- **LAW AT 866** (SETTING LORE ERRATA): no authority above the realm. Nothing is filed, registered, licensed, recognized or chartered by any outside body. This binds the Augmentation, Augmentation Law, Unclaimed Region, Backer and government concept descs.
+- **LAW AT 866** (SETTING LORE ERRATA): no authority above the realm. Nothing is filed, registered, licensed, recognized or chartered by any outside body. This binds the Augmentation, Augmentation Law, Unclaimed Shoal, Backer and government concept descs.
 - **Never-name lists** (`docs/specs/cybernetics_v2.md` §5.2-5.3, extended in `docs/lore/REVIEW_866.md:38-39`): no Blackstar, P&D, Calix, Pill Mob, Concrete Cartel, Trauma Team and so on in concept text. No state augmentation programmes, and no remote-kill implants.
 - **866 AG:** there is no Galactic League, so concept text must never imply a galaxy-wide order.
 - **Fracture risk stays hidden** (§2).
@@ -346,7 +348,7 @@ That makes 42 keys: 8 + 10 + 10 + 10 + 4. The previous 22 is superseded. In per-
 **Syntax:**
 - `[eotg_frontier|E]` when the display text equals the concept name.
 - `[Concept('eotg_frontier','Frontiers')|E]` when it doesn't (plural, case, inflection), unless an alias already covers it.
-- `[Concept('county','Region')|E]` for Region, until CB-08 lands.
+- `[Concept('county','Shoal')|E]` for Shoal, until CB-08 lands.
 
 **Priority targets** (non-event lines mentioning the term, counted 2026-10-20 across `localization/english/*.yml`):
 
@@ -357,7 +359,7 @@ That makes 42 keys: 8 + 10 + 10 + 10 + 4. The previous 22 is superseded. In per-
 | Unsworn | 20 |
 | strain | 19 |
 | Trade Oligarchy | 15 |
-| Unclaimed Region | 14 |
+| Unclaimed Shoal | 14 |
 | Unsettled | 10 |
 | Overclocked | 10 |
 | founder | 8 |
@@ -398,10 +400,10 @@ The localizer lists every converted key in its handoff.
      - make two Frontiers founderless: the group shows 2;
      - appoint a founder: that entry clears;
      - the Appoint a Founder decision alert never also appears.
-   - d. Raise a Frontier's strain to 6 or more (debug tick or event options): the "breaking" group appears, and clicking opens the Region's title view. At 5, it's gone.
+   - d. Raise a Frontier's strain to 6 or more (debug tick or event options): the "breaking" group appears, and clicking opens the Shoal's title view. At 5, it's gone.
    - e. An augmented ruler with `eotg_mod_implant_calibrated` removed and Maintenance off cooldown sees the calibration alert. Taking Maintenance clears it. Toggling Maintenance "important" in the decision UI replaces it with the vanilla decision alert, never both.
    - f. No debug decision ever alerts.
-   - g. The encyclopedia lists Augmentation, Frontier and Unclaimed Region with their children. The four governments appear under vanilla Government. Hovering `[eotg_frontier_strain|E]` in any converted string shows the tooltip with "Frontier" as the parent.
+   - g. The encyclopedia lists Augmentation, Frontier and Unclaimed Shoal with their children. The four governments appear under vanilla Government. Hovering `[eotg_frontier_strain|E]` in any converted string shows the tooltip with "Frontier" as the parent.
 7. **AI:** the `ai_will_do` and `ai_potential` of every touched decision are byte-identical before and after (diff check).
 
 ## 14. Verification items (eotg-vanilla-scout, before INT1a merges)
@@ -418,7 +420,7 @@ The localizer lists every converted key in its handoff.
 - ask: Build INT1a (§4.1 decision edits, §4.2 `common/important_actions/eotg_important_actions.txt`, the `eotg_frontier_strain_is_breaking` trigger and its two call sites) and INT2a (§4.3 `common/game_concepts/eotg_game_concepts.txt`) from `docs/specs/integration_v1.md`, after eotg-vanilla-scout clears V1-V3 (§14).
 - files: docs/specs/integration_v1.md
 - needs-loc: 22 action keys (§8) after INT1a; 60 concept keys (§8) after INT2a and lore review; INT3 linking pass (§12) after INT2 passes QA
-- needs-lore: review the 12 lore-flagged concept rows and content notes in §4.3 (Augmentation, Neurofractured, Seamless, Augmentation Law, Frontier, Backer, Unclaimed Region, Unsworn, PMC, Corporation, Cartel, Trade Oligarchy) against LAW AT 866 and the never-name lists
+- needs-lore: review the 12 lore-flagged concept rows and content notes in §4.3 (Augmentation, Neurofractured, Seamless, Augmentation Law, Frontier, Backer, Unclaimed Shoal, Unsworn, PMC, Corporation, Cartel, Trade Oligarchy) against LAW AT 866 and the never-name lists
 - needs-human: (1) confirm Establish and Raise Your Colours in the vanilla `major` decision block (big buttons, top of list); (2) the CB-08 rename of vanilla `game_concept_region` to avoid two "Region" encyclopedia entries; (3) the orchestrator adds `common/important_actions/` and `common/game_concepts/` to the CLAUDE.md placement table
 
 ### HANDOFF (eotg-scripter, INT1 Frontier/Unclaimed side, 2026-10-20)

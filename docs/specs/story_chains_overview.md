@@ -1,5 +1,7 @@
 # Story chains: a reader's guide
 
+Term update 2026-10-20: player-facing county term is Shoal (was Region).
+
 **For:** the owner. This is a plain-language guide to every long, branching story in the mod, not a build spec.
 **Written by:** eotg-architect, 2026-10-09, from the script and loc on `v2-space-map` (commit 1012c3e). Where the script and a spec disagree, this guide follows the script and says so. Unbuilt parts come from the specs and are marked **not built**.
 
@@ -197,7 +199,7 @@ flowchart TD
     AUD -->|fails| RET
     RET -->|a fight| CR["The Crackdown (.011)"]
     RET -->|b talk| OF
-    RET -->|c crew| L12["L12 The Region Falls (.071)"]
+    RET -->|c crew| L12["L12 The Shoal Falls (.071)"]
     RET -->|c hired| L14["L14 A Standing Arrangement (.073)"]
     CR -->|success| CUS
     CR -->|failure, boss in Storm| L9["L9 The Break (.068)"]
@@ -210,7 +212,7 @@ flowchart TD
 ```
 
 The rest, in words:
-- **Stage "open"** (you left it): each year, 60% **Bodies on the Docks (.014)** (send the guard, bring them in to talk, or ignore it again; a crew boss in Storm may then seize a Region), 20% **The Lieutenant (.009)**, 20% nothing.
+- **Stage "open"** (you left it): each year, 60% **Bodies on the Docks (.014)** (send the guard, bring them in to talk, or ignore it again; a crew boss in Storm may then seize a Shoal), 20% **The Lieutenant (.009)**, 20% nothing.
 - **Stage "collaboration"** (you made a deal): at most one event a year from the **middle pool**, picked by profile:
   - **The Ledger (.004):** your share of the takings (syndicate or bribery).
   - **The Errand (.005):** by method: let a named courtier be killed, keep a blackmail file, seat their person at your court, or wave a cargo through. You can refuse, or arrest the ones sent.
@@ -219,7 +221,7 @@ The rest, in words:
   - **The Protection Bill (.008):** pay, refuse (arson in your capital), or send the guard in.
   - **The Lieutenant (.009):** a lieutenant offers to sell out the boss: use it (leads to the arrest), warn the boss (the lieutenant dies), or ignore it.
   Taking money and running errands deepens their hold; refusals, turning their people and gathering evidence loosen it. After 6 years the deal ends on its own: **The Trade Is Yours** if their hold is light and they are a syndicate or front (or in Storm), else **A Standing Arrangement**.
-- **In Custody (.013):** **a** execute now (L1), **b** public trial (L2), **c** bring them inside your court (L11), **d** give them a Region (L10), **e** [front] seize the clinic (L17), **f** [syndicate] hand them to the syndicate (L15).
+- **In Custody (.013):** **a** execute now (L1), **b** public trial (L2), **c** bring them inside your court (L11), **d** give them a Shoal (L10), **e** [front] seize the clinic (L17), **f** [syndicate] hand them to the syndicate (L15).
 - **Not built (batch B):** the claim path from The Offer (back the boss's claim on your liege's title, or your own claim with their guns; for independent rulers, a neighbour's seat or a vassal's seat); The Claim (.030), The Neighbour's Seat (.031), The Vassal's Seat (.032), The War Below (.033), Turned Guns (.034), The Partner's Price (.036), Now or Never (.038), Word From the Docks (.039, tells a player liege); The Hold Closes (.072, when their hold reaches "They own the room"); The Orders (.050, the "kept" crisis stage); The Turn (.067, when you refuse twice); and the front's "let them publish" option at Retaliation.
 
 ### Outcomes (17 leaves, plus quiet ends)
@@ -236,7 +238,7 @@ The rest, in words:
 | L9 | The Break (.068) | Boss reaches 95 risk; failed crackdown in Storm | Massacre in the lower levels (1 to 2 named dead, capital scarred 10 years); you hunt the boss, seal the levels, or go down yourself. If you were in league with them, vassals resent it. | yes |
 | L10 | A Seat Under You (.069) | Custody d | The boss becomes your landed vassal (a non-capital county); vassals dislike it. The Neurofractured ruler events now run on them. | yes |
 | L11 | Brought Inside (.070) | Custody c | The boss becomes your courtier on a short lead; you get a hook and fewer hostile schemes succeed. | yes |
-| L12 | The Region Falls (.071) | Crew only: Retaliation c; Bodies on the Docks ignored in Storm | The crew holds a county as an independent ruler; you keep a pressed claim to take it back. | yes |
+| L12 | The Shoal Falls (.071) | Crew only: Retaliation c; Bodies on the Docks ignored in Storm | The crew holds a county as an independent ruler; you keep a pressed claim to take it back. | yes |
 | L13 | The Hold Closes (.072) | Their hold reaches "They own the room" | The localized crisis: you obey, and The Orders follow yearly. | **not built** |
 | L14 | A Standing Arrangement (.073) | Long deal; failed crackdown; hired crew bought out | You pay tribute (tax down 10 years); the streets stay quiet. [just] option plants a grudge for later. | yes |
 | L15 | The Syndicate Settles It (.074) | Patron's envoy asked (.001 d); Custody f | The syndicate removes its own boss; you owe the Patron one more demand. | yes (needs a Patron) |
@@ -476,19 +478,19 @@ These branch, but each is a short sequence inside one event pool. All are built,
 ## 9. The Frontier lifecycle
 
 ### Premise
-Much of the galaxy is open: Regions no one rules, Regions held but never properly settled, and the ruins of earlier attempts. A ruler can send an expedition to chart a Region, raise their colours over an unclaimed one, and fund a **Frontier Project** to settle it: settlers, a trading post, a mine, a garrison, a mission, a research station or an administrative foundation. The project takes 10 to 16 years (8 to 10 with a backer) and ends in normal CK3 terms: a new System (holding), development, control, a local figure, a lasting legacy modifier. If strain builds (no founder, low control, occupation, war, a lapsed backer, hardship), it falters and may be abandoned, leaving ruins a later attempt can build on. People establishing themselves in a vast, partly developed galaxy: no central colonial authority, and backers gain no claim and no say.
+Much of the galaxy is open: Shoals no one rules, Shoals held but never properly settled, and the ruins of earlier attempts. A ruler can send an expedition to chart a Shoal, raise their colours over an unclaimed one, and fund a **Frontier Project** to settle it: settlers, a trading post, a mine, a garrison, a mission, a research station or an administrative foundation. The project takes 10 to 16 years (8 to 10 with a backer) and ends in normal CK3 terms: a new System (holding), development, control, a local figure, a lasting legacy modifier. If strain builds (no founder, low control, occupation, war, a lapsed backer, hardship), it falters and may be abandoned, leaving ruins a later attempt can build on. People establishing themselves in a vast, partly developed galaxy: no central colonial authority, and backers gain no claim and no say.
 
 ### How it starts
-- **Raise Your Colours** (a character interaction on an Unclaimed Region within reach): pay for crews, guns and a flag, and the Region is yours, owned but still Unsettled. Unclaimed Regions are held by placeholder "Unsworn" characters who can't be warred on, and armies there suffer attrition.
-- **Send an Expedition** (decision; Unknown or partly explored Regions, yours or Unclaimed in reach; once a year per Region) → **The Expedition Returns (.042)**: Unknown → Partly explored → Known, a trait revealed each step. Unknown Regions can't be settled or surveyed.
-- **Survey a Region** (decision; every 5 years per Region) → **Survey Report (.020)**: reveals a trait; filing it gives a head start.
-- **Establish a Frontier** (decision; you hold an Unsettled or Abandoned Region, you can pay, you are at peace) → **An Opportunity Here (.001)**: pick the project type, or "Not now" (refund). The founder is your best courtier for the type, or you.
+- **Raise Your Colours** (a character interaction on an Unclaimed Shoal within reach): pay for crews, guns and a flag, and the Shoal is yours, owned but still Unsettled. Unclaimed Shoals are held by placeholder "Unsworn" characters who can't be warred on, and armies there suffer attrition.
+- **Send an Expedition** (decision; Unknown or partly explored Shoals, yours or Unclaimed in reach; once a year per Shoal) → **The Expedition Returns (.042)**: Unknown → Partly explored → Known, a trait revealed each step. Unknown Shoals can't be settled or surveyed.
+- **Survey a Shoal** (decision; every 5 years per Shoal) → **Survey Report (.020)**: reveals a trait; filing it gives a head start.
+- **Establish a Frontier** (decision; you hold an Unsettled or Abandoned Shoal, you can pay, you are at peace) → **An Opportunity Here (.001)**: pick the project type, or "Not now" (refund). The founder is your best courtier for the type, or you.
 - **AI:** at most 8 active Frontiers on the map, 1 per ruler.
-- **Debug decisions:** "(Debug) Mark Capital Region Unsettled", "(Debug) Mark Capital Region Unknown", "(Debug) Run the Frontier Year", "(Debug) Frontier Readout" (shows the hidden progress, strain and floors), "(Debug) Release a Region to the Unsworn", "(Debug) Unclaimed Regions Readout".
+- **Debug decisions:** "(Debug) Mark Capital Shoal Unsettled", "(Debug) Mark Capital Shoal Unknown", "(Debug) Run the Frontier Year", "(Debug) Frontier Readout" (shows the hidden progress, strain and floors), "(Debug) Release a Shoal to the Unsworn", "(Debug) Unclaimed Shoals Readout".
 
 ### Variation
 - **Project type** (7): Settlement, Trade, Mining, Military, Religious, Research, Administrative. Each has its own skill, completion floors and result.
-- **Region traits** revealed by surveys, expeditions and events: habitable, trade route, rich resources, dangerous, strategic, ancient ruins, ancient infrastructure, anomalous, hostile, remote. They change speed, strain, rewards and which events come.
+- **Shoal traits** revealed by surveys, expeditions and events: habitable, trade route, rich resources, dangerous, strategic, ancient ruins, ancient infrastructure, anomalous, hostile, remote. They change speed, strain, rewards and which events come.
 - **Infrastructure** (Build Frontier Infrastructure → **What to Build, .021**): habitat, orbital station, navigation beacon, trade station, mining complex, research facility, mission, garrison post.
 - **Backers:** another ruler (Back a Frontier → **Whom to Back, .010** → the holder answers in **An Offer of Backing, .003**), a mercenary captain (**Guns for Hire, .040**, Military or Dangerous projects), or your head of faith or a holy order (**A Faithful Offer, .041**, Religious projects). A backer pays yearly; when they die, the backing passes to their heir (or the faith's next head), else lapses.
 - **Founder:** must be valid (alive, adult, free, in your realm); an invalid founder adds strain until replaced.
@@ -496,21 +498,21 @@ Much of the galaxy is open: Regions no one rules, Regions held but never properl
 ### Flow
 ```mermaid
 flowchart TD
-    U["Unclaimed Region"] -->|Raise Your Colours| OWN["Owned, Unsettled"]
-    UK["Unknown Region"] -->|Send an Expedition, .042| OWN
+    U["Unclaimed Shoal"] -->|Raise Your Colours| OWN["Owned, Unsettled"]
+    UK["Unknown Shoal"] -->|Send an Expedition, .042| OWN
     OWN -->|Establish a Frontier, .001| F["Frontier: Outpost, then Foothold, then Established"]
-    AB["Abandoned Region"] -->|Establish again, with a head start| F
+    AB["Abandoned Shoal"] -->|Establish again, with a head start| F
     F -->|yearly tick| F
     F -->|progress full and floors met| DONE["No Longer a Frontier (.004)"]
     F -->|strain reaches the limit| FAIL["The Frontier Falters (.005)"]
     F -->|Abandon a Frontier decision| AB
     FAIL -->|a let it go| AB
     FAIL -->|b new founder, c scale back, d backer's care| F
-    DONE --> SET["Settled: a normal Region"]
+    DONE --> SET["Settled: a normal Shoal"]
     AB -.->|if it came from Unclaimed| U
 ```
 
-- **Each year** (the holder's yearly tick): strain +1 per cause (no founder, control below 40, occupied, at war, backer lapsed) or −1 in a quiet year; progress grows (founder skill, type, traits, infrastructure, backer, investment); at a third and two thirds of the way the Region gains +1 development (once per Region, ever), and the stage modifier steps up.
+- **Each year** (the holder's yearly tick): strain +1 per cause (no founder, control below 40, occupied, at war, backer lapsed) or −1 in a quiet year; progress grows (founder skill, type, traits, infrastructure, backer, investment); at a third and two thirds of the way the Shoal gains +1 development (once per Shoal, ever), and the stage modifier steps up.
 - **Flavour roll** (player holders only; 50% chance, at most every 3 years; about 3 per project):
   - **A Hard Year (.002):** supplies, push through, call on the backer. Its variant, *The Frontier Without a Founder*, comes first whenever the founder is gone: appoint someone, lead it yourself, or let them manage.
   - **An Offer of Backing (.003):** an AI ruler offers to back you.
@@ -526,14 +528,14 @@ flowchart TD
 ### Outcomes
 | Ending | How | What happens |
 |---|---|---|
-| Settled | Progress full and the type's development and control floors met → .004 | The type's result (below), then legacy modifiers from traits and infrastructure (25 years), and a "new settlement" modifier (10 years). The holder keeps everything. The founder can be paid or honoured publicly. The Region becomes normal. |
-| Settled, by type | | Settlement: port, +1 development, the settlers' leader. Trade: port, +1 development, trade legacy. Mining: +2 development, industry legacy. Military: bastion, +15 control, a garrison commander. Religious: sanctum, +1 development, a mission elder, faith legacy, piety and fervour. Research: +2 development, founder learning +1, learning legacy. Administrative: control 100, +1 development, a Region official. |
-| Abandoned | .005 a; the Abandon decision | Ruins remain (10-year modifier), −1 development if a milestone was reached, a head start for the next attempt. A Region that came from Unclaimed space is released back to the Unsworn. |
+| Settled | Progress full and the type's development and control floors met → .004 | The type's result (below), then legacy modifiers from traits and infrastructure (25 years), and a "new settlement" modifier (10 years). The holder keeps everything. The founder can be paid or honoured publicly. The Shoal becomes normal. |
+| Settled, by type | | Settlement: port, +1 development, the settlers' leader. Trade: port, +1 development, trade legacy. Mining: +2 development, industry legacy. Military: bastion, +15 control, a garrison commander. Religious: sanctum, +1 development, a mission elder, faith legacy, piety and fervour. Research: +2 development, founder learning +1, learning legacy. Administrative: control 100, +1 development, a Shoal official. |
+| Abandoned | .005 a; the Abandon decision | Ruins remain (10-year modifier), −1 development if a milestone was reached, a head start for the next attempt. A Shoal that came from Unclaimed space is released back to the Unsworn. |
 | Restarted | .005 b, c, d | Progress halved and strain reset partway; a new founder, a plain settlement, or the backer pays double. |
 | Waiting | Progress full, a floor not met | The stage shows "waiting on development" or "waiting on control" until you meet it. |
 
 ### Status
-**Built and merged:** Phase 1 (ef514e8), Phase 2, Phase 3a (exploration, mercenaries, faith backers; e481957) and Unclaimed Regions batches 1 and 2 (e356020), with the county picker on every decision (683a3bc). Some in-game findings have already been fixed (toast lengths, 2d3d6bc), but the formal checks are pending: CB-37 (Frontier test plan, section 0 first) and the §U Unclaimed block in `docs/qa/IN_GAME_SESSION_PLAN.md` (CB-44). **Not built:** a founder-death event (cut by ruling), mercenary founders, the corporation and trade-network systems (hooks only), and Frontier flavour events for AI holders.
+**Built and merged:** Phase 1 (ef514e8), Phase 2, Phase 3a (exploration, mercenaries, faith backers; e481957) and Unclaimed Shoals batches 1 and 2 (e356020), with the county picker on every decision (683a3bc). Some in-game findings have already been fixed (toast lengths, 2d3d6bc), but the formal checks are pending: CB-37 (Frontier test plan, section 0 first) and the §U Unclaimed block in `docs/qa/IN_GAME_SESSION_PLAN.md` (CB-44). **Not built:** a founder-death event (cut by ruling), mercenary founders, the corporation and trade-network systems (hooks only), and Frontier flavour events for AI holders.
 
 ---
 

@@ -1,4 +1,6 @@
-# Spec: Frontier Systems v4 (amendment: QA rulings A1–A11, Frontier + Unsworn / Unclaimed Regions)
+# Spec: Frontier Systems v4 (amendment: QA rulings A1–A11, Frontier + Unsworn / Unclaimed Shoals)
+
+Term update 2026-10-20: player-facing county term is Shoal (was Region).
 
 **Author:** eotg-architect, 2026-10-11. **Status:** ruled, not built. The human approved the dispatch on 2026-10-11. **Owner rulings H1–H3 recorded 2026-10-11** (§13). They touch A1, A2.3, A6 M3 and batches 2–3 only; batch 1 is unchanged. **H4 ruled 2026-10-12** (§13); the approved content is specified in [`frontier_v5.md`](frontier_v5.md), which amends §A5 (the .005 AI order gains option e) and D4-9.
 **Amends:** [`frontier_v1.md`](frontier_v1.md), [`frontier_v2.md`](frontier_v2.md), [`frontier_v3.md`](frontier_v3.md), [`frontier_unclaimed_regions.md`](frontier_unclaimed_regions.md) (its §D owner decisions still bind), and one line of [`governments_v2.md`](governments_v2.md). Where this spec and an amended spec disagree, **this spec wins**. Each amended spec carries a pointer back here.
@@ -14,7 +16,7 @@
 | A1 | A completed city or church System goes to a **local vassal** under the holder: **the Frontier's founder first** (if not the holder and eligible; §A1 "Founder first"), otherwise a new figure (the settlers' leader, a factor, or the mission elder). The holder keeps it only if their own seat is the same holding type. Castles stay with the holder. Owner-confirmed (H1). | 2 | V8 (DoD only; the rule is written to be correct either way) |
 | A2 | AI: Establish every 24 months at a 25–50 base weight with a 1× gold gate; the map cap scales with Unclaimed space (8 + 1 per 20, max 24); an AI claim needs gold for claim + Establish and no claimed county still waiting; AI Frontiers get silent strain/progress rolls; AI exploring of claimed Unknown space is sped up. The AI-only lapse (UD3) is **declined** (owner, H2): UQ11's "no lapse" stands. | 1 | V-U14 decides whether AI claims happen at all (fallback in §A7.3) |
 | A3 | One flavour roll per ruler per pulse; flavour events fire 1–120 days later. "Funding removes the story" is **accepted**. | 1 | none |
-| A4 | War strain only when the holder leads a war or hostile armies stand in the Region. A new **Appoint a Founder** decision. The AI auto-founder must be an adult, free character. | 1 | none |
+| A4 | War strain only when the holder leads a war or hostile armies stand in the Shoal. A new **Appoint a Founder** decision. The AI auto-founder must be an adult, free character. | 1 | none |
 | A5 | **The spec order stands** (d; else b if gold ≥ 2× minor; else a). The AI never picks c. The code moves to it. §6.6(c) is corrected to "switches to Settlement" (code wins). | 1 | none |
 | A6 | M2 = key-level override of `basic_is_valid_for_yearly_events_trigger` only. M3 = a GAME_OVER entry through a key-level override of the scripted rule `is_character_allowed_to_be_player`. If T14 shows only a full-file override works, Unsworn stays playable with a warning toast until Gate 1 (owner, H3). A real **pulse probe** replaces the current V-U1 readout, which can't answer the question. | probe: 1; M2/M3: 3 | V-U1a (probe), V-U1b + T14 |
 | A7 | The release effect enforces the capital rule itself. Claim and placeholder replacement move every barony the old placeholder held, and the sweep dissolves enclaves. A **Raise Your Colours** decision is added, sharing one cooldown variable with the interaction. `eotg_unclaimed_defender_tt` is built inside the override, mirroring vanilla's herder line. | 1 (7.1–7.2), 2 (7.3–7.4) | V-U9/V-U8/V-U15 (DoD) |
@@ -28,7 +30,7 @@
 
 ## 1. Purpose & gate
 
-This amendment fixes what the 2026-10-11 QA found in Frontier Systems and the Unsworn / Unclaimed Regions layer. Nothing here is a new system:
+This amendment fixes what the 2026-10-11 QA found in Frontier Systems and the Unsworn / Unclaimed Shoals layer. Nothing here is a new system:
 - dead completion holdings;
 - near-inert AI;
 - event bursts;
@@ -171,7 +173,7 @@ eotg_frontier_founder_can_rule = {
    - then, from `scope:eotg_frontier_holder`: `create_title_and_vassal_change = { type = granted save_scope_as = eotg_frontier_change add_claim_on_loss = no }`, then `scope:eotg_frontier_new_barony = { change_title_holder = { holder = scope:eotg_frontier_local_ruler change = scope:eotg_frontier_change } }`, then `resolve_title_and_vassal_change`;
    - set the government in the order given above, **only if `scope:eotg_frontier_local_ruler_new` exists**. A landed founder keeps their government;
    - save `scope:eotg_frontier_local_ruler` for the hooks and for .004's tooltip.
-4. **.004** gets one custom tooltip, shown only when the Region's type is Settlement, Trade or Religious and the holder's seat is not that holding type. Use `first_valid` order:
+4. **.004** gets one custom tooltip, shown only when the Shoal's type is Settlement, Trade or Religious and the holder's seat is not that holding type. Use `first_valid` order:
    - `eotg_frontier.004.local_ruler_founder_tt` when `scope:eotg_frontier_county = { eotg_frontier_founder_can_rule = { HOLDING = <type's holding> HOLDER = root } }`. Text: "[eotg_frontier_founder.GetName] will hold the new System as your vassal." .004 already saves `scope:eotg_frontier_founder` in its `immediate`;
    - otherwise `eotg_frontier.004.local_ruler_tt`: "A local leader will hold the new System as your vassal."
    - Option effects are otherwise unchanged.
@@ -224,7 +226,7 @@ eotg_frontier_ai_cap_value = {
 **A2.3-opt: DECLINED (H2). Do not build.** It was a claim window variable (`eotg_unclaimed_claim_window`) plus a sweep release for AI claims older than 10 years with no Frontier. It is removed from batch 2, §4, §5, §6 and §7. If the 50-year observer run misses the backlog band below, raise it with the owner again as a new question. Don't build it on that evidence alone.
 
 **A2.4 AI Frontier life** (`eotg_frontier_event_roll_effect`, AI branch). **Ruling: yes**, silent scripted outcomes, no events.
-- **When:** after the existing AI sponsor and backer paths, an AI holder (not a placeholder) whose Region still has no `eotg_frontier_event_cd` gets a 50% roll. When it passes, set the 3-year `eotg_frontier_event_cd` (the same single authority) and run the new `eotg_frontier_ai_silent_roll_effect`.
+- **When:** after the existing AI sponsor and backer paths, an AI holder (not a placeholder) whose Shoal still has no `eotg_frontier_event_cd` gets a 50% roll. When it passes, set the 3-year `eotg_frontier_event_cd` (the same single authority) and run the new `eotg_frontier_ai_silent_roll_effect`.
 - **The pool** (a `random_list`, the mod's verified shape, `frontier_v2.md` F2):
 
 | Weight | Outcome | Modifiers |
@@ -240,14 +242,14 @@ eotg_frontier_ai_cap_value = {
 
 **Verification (50-year observer run, British Isles test sub-mod, 161 Unsworn counties; needs V-U14):**
 - **Unclaimed share at year 30:** between **60% and 92%**. Below 60% is a land rush. Above 92% is inert: fewer than about 13 claims.
-- **Settled Regions per decade, decades 2–5:** **4–16.**
+- **Settled Shoals per decade, decades 2–5:** **4–16.**
 - **At least 1 AI Frontier settled by year 20.** No AI ever holds more than 1 claimed county that isn't a Frontier.
 - Claimed-but-not-Frontier counties older than 10 years: **≤ 25%** of claimed counties at year 30. This is the check on the H2 ruling (no lapse): the 50-year run shows whether A2.3 items 1–2 clear the backlog on their own.
 
 ### A3. Event pacing
 
 **Ruling:**
-- **One flavour roll per ruler per pulse**, chosen at random among that ruler's eligible Regions.
+- **One flavour roll per ruler per pulse**, chosen at random among that ruler's eligible Shoals.
 - **Every flavour event fires with `days = { 1 120 }`.** Precedent for the delay: `G/events/yearly_events/court_yearly_events.txt:1880-1888` (`trigger_event = { id = … days = { 50 100 } }`); the mod already delays .037 the same way (`frontier_v2.md` §B3), and saved scopes travel with it.
 - **Not delayed:** completion (.004) and failure (.005) stay immediate.
 
@@ -255,7 +257,7 @@ eotg_frontier_ai_cap_value = {
 1. `eotg_frontier_tick_effect` step 4: the final `else_if` (roll) branch becomes `add_to_temporary_list = eotg_frontier_roll_ready`. It no longer calls the roll.
 2. `eotg_on_yearly_frontier_tick` (`common/on_action/eotg_frontier_on_actions.txt`): after the `every_held_title` loop, add `random_in_list = { list = eotg_frontier_roll_ready eotg_frontier_roll_chosen_effect = yes }`. Precedent: `G/common/scripted_effects/00_ai_conqueror_effects.txt:289`.
 3. **New** `eotg_frontier_roll_chosen_effect` (county): `save_scope_as = eotg_frontier_county`, `holder = { save_temporary_scope_as = eotg_frontier_holder }`, `eotg_frontier_event_roll_effect = yes`.
-4. In `eotg_frontier_flavor_pick_effect` and the founderless `.002` in the roll, every `holder = { trigger_event = eotg_frontier.0xx }` becomes `holder = { trigger_event = { id = eotg_frontier.0xx days = { 1 120 } } }`. Every flavour event already re-checks the Region's state in its trigger and options (verification Q-B1), so a delay is safe.
+4. In `eotg_frontier_flavor_pick_effect` and the founderless `.002` in the roll, every `holder = { trigger_event = eotg_frontier.0xx }` becomes `holder = { trigger_event = { id = eotg_frontier.0xx days = { 1 120 } } }`. Every flavour event already re-checks the Shoal's state in its trigger and options (verification Q-B1), so a delay is safe.
 5. **The debug tick decision** does the same `random_in_list` after its own loop.
 
 **"Funding removes the story": accepted.** A funded project is shorter, so it sees fewer rolls (about 1.5 against 3.0). The owner's 4–6 prompt budget (`frontier_v2.md` §9.1) is a ceiling, not a floor, and vanilla's yearly pools are per character-year, not per venture (`G/common/on_action/yearly_on_actions.txt:3018`). A funded project also draws the backer events (.003, .030, .031), so it isn't silent. Revisit only if playtesting says the funded path feels empty.
@@ -281,7 +283,7 @@ eotg_frontier_war_reaches = {
   - `G/common/character_interactions/00_war.txt:718-724` (`any_character_war = { is_war_leader = root }`);
   - `G/common/on_action/yearly_on_actions.txt:1896-1898` (`location ?= { any_army_in_location = { … } }`);
   - `G/common/on_action/army_on_actions.txt:651-653` (`army_owner`).
-- **Loc:** `.005.desc_war` text may stay; it already describes the war reaching the Region.
+- **Loc:** `.005.desc_war` text may stay; it already describes the war reaching the Shoal.
 
 **A4.2 Founder gap: a new decision `eotg_decision_frontier_appoint_founder` ("Appoint a Founder").**
 - **Shown:** `eotg_frontier_holds_founderless = yes` (new character trigger: holds a Frontier whose `eotg_frontier_has_valid_founder = no`).
@@ -474,7 +476,7 @@ custom_tooltip = {
 - the holder gets `add_opinion = { modifier = eotg_frontier_opinion_pleased target = <sponsor> years = 10 }`, an existing shared modifier with no government prefix;
 - the sponsor gets a toast `eotg_frontier_toast_backing_settled` (left icon the sponsor, right icon the county).
 
-**Not chosen:** a share of the Region's 25-year modifier. County modifiers can't be split to a non-holder, and a new character modifier would be new art and loc for little gain.
+**Not chosen:** a share of the Shoal's 25-year modifier. County modifiers can't be split to a non-holder, and a new character modifier would be new art and loc for little gain.
 
 ### A9. Vocabulary (recommendation; needs-lore)
 
@@ -648,7 +650,7 @@ No `replace_path`. No descriptor change.
 
 **No `replace/` overrides.** No vanilla string changes.
 
-**Glossary check (localizer):** Region = county, System = barony. No "mayor", "bishop", "charter" or "village" in mod text. Vanilla's own government labels on the new vassals are a lore note (§8).
+**Glossary check (localizer):** Shoal = county, System = barony. No "mayor", "bishop", "charter" or "village" in mod text. Vanilla's own government labels on the new vassals are a lore note (§8).
 
 ## 8. Lore constraints
 
@@ -712,7 +714,7 @@ No `replace_path`. No descriptor change.
 | Item | Check | Pass |
 |---|---|---|
 | A3 | Hold 3+ Frontiers; run the debug tick 5 times | never more than 1 flavour event per ruler per tick; events land on different days |
-| A4.1 | Join an ally's distant war (not leader, no army in the Region); tick 3× | no `war` strain. As war leader: +1 per tick |
+| A4.1 | Join an ally's distant war (not leader, no army in the Shoal); tick 3× | no `war` strain. As war leader: +1 per tick |
 | A4.2 | Kill the founder | Appoint a Founder appears; after use, the founder is valid and no `no_founder` strain accrues next tick |
 | A4.3 | Give an AI holder a child or imprisoned founder (console) | the next tick sets an adult courtier or the holder |
 | A5 | Static: the `ai_chance` factors match §A5 | — |
@@ -722,7 +724,7 @@ No `replace_path`. No descriptor change.
 | A6 M3 | **V-U1b** (lobby pick), then **T14** | after M3, the pick is refused with the Unsworn GAME_OVER text, and a republic is still refused |
 | A7.1 | **U2**: the Frontier sub-mod start | no Sardinian judge is landless; the debug release on a capital does nothing |
 | A7.2 | Give a placeholder a second barony (console); claim it | the claimant holds both; a stray placeholder baron is dissolved by the next sweep (readout "fixed" ≥ 1) |
-| A7.3 | Use the decision | lists exactly the in-reach Unclaimed Regions; a second claim within 5 years is blocked on both paths |
+| A7.3 | Use the decision | lists exactly the in-reach Unclaimed Shoals; a second claim within 5 years is blocked on both paths |
 | A7.4 | Declare war on an Unsworn holder | the CB list shows `eotg_unclaimed_defender_tt` |
 | A7 (other) | **V-U9 / V-U8 / V-U15** as in `frontier_unclaimed_regions.md` §12 | — |
 | A8 | Hover Invest, Build, Abandon | three band lines in words; no digits for progress or strain |

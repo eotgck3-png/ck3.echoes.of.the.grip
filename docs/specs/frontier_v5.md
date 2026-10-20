@@ -1,5 +1,7 @@
 # Spec: Frontier Systems v5 (owner ruling H4: approved content)
 
+Term update 2026-10-20: player-facing county term is Shoal (was Region).
+
 **Author:** eotg-architect, 2026-10-12; round 2 (§3.6, §3.7, batch 5E) added 2026-10-18. **Status:** ruled; 5A–5D built, 5E specified, not built.
 **Ruling:** owner H4, 2026-10-12, recorded in [`frontier_v4.md`](frontier_v4.md) §13/§14.
 **Amends:** [`frontier_v4.md`](frontier_v4.md) §A5 (the .005 AI order gains option e) and §12 (D4-9 moves into scope). Where they disagree, **this spec wins**. Everything else in v1–v4 and [`frontier_unclaimed_regions.md`](frontier_unclaimed_regions.md) still binds.
@@ -108,7 +110,7 @@ The tribute mission falls back the same way: fascination progress when no innova
 | "Invest!" in a dynastic-cycle event (one option) | 2.5 | `G/events/dlc/tgp/tgp_dynastic_cycle_flavor_events.txt:818` |
 | Architect bonus | 5 | `G/events/dlc/tgp/tgp_movement_events.txt:511` |
 
-A Research Frontier runs for decades, can fail, and pays out once. **Amount: 10** (twice a single great-project contribution), **+5** when the Region holds a Research Facility, Ancient Ruins or Anomalous (the existing `eotg_frontier_mod_legacy_learning` condition minus the type check, `eotg_frontier_effects.txt:1798-1808`). That is 15 at most, three vanilla contributions. The fallback (no fascination) is `add_learning_lifestyle_xp = major_lifestyle_xp` (300, `G/common/script_values/00_lifestyle_values.txt:9`), the Cathedral's fallback with the research skill swapped in.
+A Research Frontier runs for decades, can fail, and pays out once. **Amount: 10** (twice a single great-project contribution), **+5** when the Shoal holds a Research Facility, Ancient Ruins or Anomalous (the existing `eotg_frontier_mod_legacy_learning` condition minus the type check, `eotg_frontier_effects.txt:1798-1808`). That is 15 at most, three vanilla contributions. The fallback (no fascination) is `add_learning_lifestyle_xp = major_lifestyle_xp` (300, `G/common/script_values/00_lifestyle_values.txt:9`), the Cathedral's fallback with the research skill swapped in.
 
 **Script.**
 - **New script value** `eotg_frontier_research_fascination_value` (COUNTY scope): `value = 10`, then `if = { limit = { OR = { has_county_modifier = eotg_frontier_infra_research_facility  has_county_modifier = eotg_frontier_trait_ancient_ruins  has_county_modifier = eotg_frontier_trait_anomalous } } add = 5 }`.
@@ -139,7 +141,7 @@ Fourteen personality traits appear, in `ai_chance` and animations only. The batc
 
 These stay ungated, which the spread rule (step 6) allows.
 
-**The new options** (letters continue each event's sequence; every trigger also repeats the event's Region-state check, as the sibling options do):
+**The new options** (letters continue each event's sequence; every trigger also repeats the event's Shoal-state check, as the sibling options do):
 
 | Option | Axis and gate | Text intent (localizer writes) | Effects | Stress (step 5) | AI |
 |---|---|---|---|---|---|
@@ -149,7 +151,7 @@ These stay ungated, which the spread rule (step 6) allows.
 | `.005.f` | **tier** `highest_held_title_tier >= tier_duchy`; `prestige >= medium_prestige_value`; strain at failure | Order my vassals' crews in | `add_prestige = { value = medium_prestige_value multiply = -1 }` (`G/common/script_values/00_basic_values.txt:1002`); strain −3 (three ease calls; 8 → 5); progress unchanged; `custom_tooltip = eotg_frontier.005.f_tt` | — | base 10; −10 each for `shy`, `content`, `craven` (§13.1 step 3b) |
 | `.030.c` | **education** `education_diplomacy`, `skill = diplomacy`; valid sponsor; rival exists | Let each backer hear what the other offered | keep the current backer; current backer `add_opinion eotg_frontier_opinion_pleased` (10 years); strain −1; progress +2; `custom_tooltip = eotg_frontier.030.c_tt` | — | base 30; +10/+20/+20 by tier |
 | `.031.d` | **personality** `deceitful` | Promise them a say, and let the promise lapse | progress +2; sponsor pleased (10 years); `custom_tooltip = eotg_frontier.031.no_say_tt` (existing: the backer gains no say) | `deceitful = minor_stress_impact_loss` | base 20 |
-| `.032.e` | **tier** `highest_held_title_tier >= tier_duchy`; settlers variant only (`NOT = { exists = scope:eotg_frontier_overlord }`) | Remind them whose Region this is | strain −1; progress −1; `add_dread = minor_dread_gain` (`00_basic_values.txt:731`); `custom_tooltip = eotg_frontier.032.e_tt` | — | base 10; −10 each for `shy`, `content`, `craven` |
+| `.032.e` | **tier** `highest_held_title_tier >= tier_duchy`; settlers variant only (`NOT = { exists = scope:eotg_frontier_overlord }`) | Remind them whose Shoal this is | strain −1; progress −1; `add_dread = minor_dread_gain` (`00_basic_values.txt:731`); `custom_tooltip = eotg_frontier.032.e_tt` | — | base 10; −10 each for `shy`, `content`, `craven` |
 | `.033.d` | **personality** `impatient` | Both camps work double shifts until it is done | progress +5; strain +1 (`CAUSE = hardship`); `eotg_frontier.002.push_tt` | `impatient = minor_stress_impact_loss` | base 30 |
 | `.034.d` | **education** `education_martial`, `skill = martial` | Send an armed party to recover what can be saved | progress −1; no strain; `custom_tooltip = eotg_frontier.034.d_tt` | — | base 30; +10/+20/+20 by tier |
 | `.034.e` | **personality** `temperate` | Cut every ration, mine first | strain +1 (`hardship`); progress unchanged; `custom_tooltip = eotg_frontier.034.e_tt` | `temperate = minor_stress_impact_loss` | base 30 |
@@ -236,7 +238,7 @@ Weights and triggers are in §3.4.2. "S" = strain, "P" = progress. Every option'
 
 **eotg_frontier.050: Sickness in the Berths** (disease; `eotg_bg_clinic`)
 - **desc:** habitat sickness: fouled recycled water, bad air from failing scrubbers, or a fever in crowded berths.
-  - `desc_hostile`: the Region is Hostile, and the air itself is part of it.
+  - `desc_hostile`: the Shoal is Hostile, and the air itself is part of it.
   - Voice line (lore): "The scrubbers on the lower decks failed a month ago, and now the coughing has spread to every berth."
 
 | Opt | Gate | Intent | Effects | Stress | AI |
@@ -246,8 +248,8 @@ Weights and triggers are in §3.4.2. "S" = strain, "P" = progress. Every option'
 | c | ungated (guarded) | Keep the crews working | P +2; S +1 `hardship`; `.002.push_tt` | `compassionate = medium_stress_impact_gain`; `callous = minor_stress_impact_loss` | 20 |
 
 **eotg_frontier.051: The Ones Who Were Here First** (hostile inhabitants; `eotg_bg_field_camp`)
-- **desc:** the people already living in the Region (a few hardy families, or raiders working out of it) have turned on the camp. No named group and no species.
-  - `desc_dangerous`: the Region was known to be Dangerous.
+- **desc:** the people already living in the Shoal (a few hardy families, or raiders working out of it) have turned on the camp. No named group and no species.
+  - `desc_dangerous`: the Shoal was known to be Dangerous.
   - Voice line (lore): "The families who were here first have stopped trading with us, and last night they cut the beacon's power line."
 
 | Opt | Gate | Intent | Effects | Stress | AI |
@@ -264,14 +266,14 @@ Weights and triggers are in §3.4.2. "S" = strain, "P" = progress. Every option'
 
 | Opt | Gate | Intent | Effects | Stress | AI |
 |---|---|---|---|---|---|
-| a | — (Region check only) | Evacuate the section and rebuild it right | P −4; S −1; `.052.a_tt` | — | 30 |
+| a | — (Shoal check only) | Evacuate the section and rebuild it right | P −4; S −1; `.052.a_tt` | — | 30 |
 | b | personality `diligent` | I will walk the frame with the crews myself | P −2; S −1; `.052.a_tt` | `diligent = minor_stress_impact_loss` | 30 |
 | c | education `education_stewardship` | Salvage the frame and reroute the crews | P −1; `.052.c_tt` | — | 30 + tiers |
 | d | ungated (guarded) | Shore it up and keep the crews inside | P +1; S +1 `hardship`; `.002.push_tt` | `compassionate = medium_stress_impact_gain`; `callous = minor_stress_impact_loss` | 20 |
 
 **eotg_frontier.053: Patched Seals** (shortage; `eotg_bg_barren_world`)
 - **desc:** air, water, ice, spare parts or fuel running short.
-  - `desc_remote`: the Region is Remote, and the next run is far off.
+  - `desc_remote`: the Shoal is Remote, and the next run is far off.
   - Voice line (lore): "We are patching seals with seals we already patched once."
 
 | Opt | Gate | Intent | Effects | Stress | AI |
@@ -291,14 +293,14 @@ Weights and triggers are in §3.4.2. "S" = strain, "P" = progress. Every option'
 | a | founder `is_landed = no`; `var:eotg_frontier_type` is settlement, trade or religious | The System will be theirs to hold, under me | founder `eotg_frontier_opinion_pleased` (10 years); S −1; `.054.a_tt` (conditional: if they still lead it at completion; A1 founder first) | — | 30 |
 | b | `gold >= minor_gold_value` | A purse, and back to work | purse to the founder (the .004.a pattern, `:770-772`); founder pleased; P +2; `.054.b_tt` | — | 30, −20 greedy |
 | c | personality `arbitrary` | What I gave, I can give to another | founder `eotg_frontier_opinion_slighted` (10 years); `add_dread = minor_dread_gain`; S −1; `.054.c_tt` | `arbitrary = minor_stress_impact_loss` | 30 |
-| d | ungated (guarded) | The coin was mine, and so is the Region | founder slighted (if alive); S +1 `dispute`; `.054.d_tt` | `humble = minor_stress_impact_gain`; `arrogant = minor_stress_impact_loss` | 20 |
+| d | ungated (guarded) | The coin was mine, and so is the Shoal | founder slighted (if alive); S +1 `dispute`; `.054.d_tt` | `humble = minor_stress_impact_gain`; `arrogant = minor_stress_impact_loss` | 20 |
 
 **Text constraint (a):** the tooltip must not promise the System outright. If the founder is invalid at completion, A1 gives it to the created figure, so the line is conditional ("if [eotg_frontier_founder.GetSheHe] still leads it when the work is done").
 
 **eotg_frontier.055: Two Chapels** (religious dispute; `eotg_bg_council`, because `temple*` backgrounds are rejected in §14.1)
 - **desc:** settlers of different faiths will not share a chapel. Scoped faiths only, and never a name. Zeal is rising.
   - `desc_founder`: the founder's faith differs from the settlers'.
-  - `desc_county`: the Region's faith differs from mine.
+  - `desc_county`: the Shoal's faith differs from mine.
   - Voice line (lore): "The settlers will not share a chapel with the crews who came with the second convoy."
 
 | Opt | Gate | Intent | Effects | Stress | AI |
@@ -311,7 +313,7 @@ Weights and triggers are in §3.4.2. "S" = strain, "P" = progress. Every option'
 **eotg_frontier.056: Their Own Berths** (cultural tension; `eotg_bg_field_camp`)
 - **desc:** settler groups keep apart: their own berths, songs and grudges. No species and no "human". The Exodus brings newcomers, but the event does not name it.
   - `desc_founder`: the founder's culture differs from the settlers'.
-  - `desc_county`: the Region's culture differs from mine.
+  - `desc_county`: the Shoal's culture differs from mine.
   - Voice line (lore): "The newcomers keep their own berths, their own songs and their own grudges."
 
 | Opt | Gate | Intent | Effects | Stress | AI |
@@ -402,8 +404,8 @@ There are four new entries at the end of `eotg_frontier_flavor_pick_effect`'s `r
 "S" = strain and "P" = progress, as in §3.4.3. The localizer writes the text from the intent and the §8 round-2 constraints. Voice lines below are the architect's **suggestions** for the localizer and lore-keeper, not canon text.
 
 **eotg_frontier.057: Berths Filling** (population growth; `eotg_bg_field_camp`)
-- **desc:** the families are staying. The berths are full, the first children born in the Region are crying in them, and newcomers keep arriving on later convoys. There is no Exodus by name, no refugees from a named war and no farmland.
-  - `desc_habitable` (Region has `eotg_frontier_trait_habitable`): some of them have stopped sealing their doors at night.
+- **desc:** the families are staying. The berths are full, the first children born in the Shoal are crying in them, and newcomers keep arriving on later convoys. There is no Exodus by name, no refugees from a named war and no farmland.
+  - `desc_habitable` (Shoal has `eotg_frontier_trait_habitable`): some of them have stopped sealing their doors at night.
   - Suggested voice line (a crew chief, one line): "Three births this month, and nobody on the last convoy has asked for passage home."
 
 | Opt | Gate | Intent | Effects | Stress | AI |
@@ -424,7 +426,7 @@ There are four new entries at the end of `eotg_frontier_flavor_pick_effect`'s `r
 
   The settler is not a canon figure, not Titan-touched or arcane, not a veteran of a named war and not sent by a corporation. The text may mention clinic-fitted hardware if it reads as bought and paid for. **No cybernetics trait is added** to the settler, so the event depends on cybernetics only through §3.7's one trigger.
   - Suggested voice line (the settler): "I have kept worse air than this breathing. Pay me fairly and I will keep yours."
-- **Deal (the .040 pattern, lore):** the work is paid for, and the Region stays mine. The settler gains no claim, no say and no title. Each hiring tooltip says so.
+- **Deal (the .040 pattern, lore):** the work is paid for, and the Shoal stays mine. The settler gains no claim, no say and no title. Each hiring tooltip says so.
 
 | Opt | Gate | Intent | Effects | Stress | AI |
 |---|---|---|---|---|---|
@@ -443,7 +445,7 @@ There are four new entries at the end of `eotg_frontier_flavor_pick_effect`'s `r
 **eotg_frontier.059: Older Than Any Record** (an infrastructure breakthrough; `eotg_bg_cavern`)
 - **desc:** the crews recover a technique from salvage "older than any record": a scrubber design that holds, a sounder frame that reads true, or a fix for water reclamation. The parts are made and fitted by hand.
   - **Banned:** self-repairing or self-replicating machinery, colony AI, terraforming, new drives, fabricators or printers (orchestrator ruling, pending the owner).
-  - `desc_ruins` (Region has `eotg_frontier_trait_ancient_ruins` or `eotg_frontier_trait_ancient_infrastructure`): the salvage came out of the Region's own ruins.
+  - `desc_ruins` (Shoal has `eotg_frontier_trait_ancient_ruins` or `eotg_frontier_trait_ancient_infrastructure`): the salvage came out of the Shoal's own ruins.
   - Suggested voice line (a fitter): "Whoever built this knew more about air than we do. I can copy it. I cannot tell you why it works."
 
 | Opt | Gate | Intent | Effects | Stress | AI |
@@ -457,7 +459,7 @@ There are four new entries at the end of `eotg_frontier_flavor_pick_effect`'s `r
 - **desc:** independent captains who used to pass through now stop. This matches the trade-route trait's own text (`localization/english/eotg_frontier_l_english.yml:170-171`). Raiding is real and routes shift around trouble, but the trouble is not named.
   - **Banned:** the League, a galactic market, protected lanes, treaty bodies, tariff unions, Thorum or the Trade Federation, hyperlanes or jump gates.
   - Any deal is a personal bargain, enforced by my own law.
-  - `desc_route` (Region already has `eotg_frontier_trait_trade_route`): the ships I knew passed through have started to dock.
+  - `desc_route` (Shoal already has `eotg_frontier_trait_trade_route`): the ships I knew passed through have started to dock.
   - Suggested voice line (a captain): "The old run is too hot this year. Yours is quiet, and your berths are honest."
 
 | Opt | Gate | Intent | Effects | Stress | AI |
@@ -590,7 +592,7 @@ No `replace_path`, no descriptor change, no new folder.
 - **5E (§3.6):**
   - titles and descs: `eotg_frontier.057.t`, `.057.desc`, `.057.desc_habitable`; `.058.t`, `.058.desc`, `.058.desc_engineer`, `.058.desc_surveyor`, `.058.desc_pilot`; `.059.t`, `.059.desc`, `.059.desc_ruins`; `.060.t`, `.060.desc`, `.060.desc_route`;
   - options `.057.a`–`.d`, `.058.a`–`.d`, `.059.a`–`.d`, `.060.a`–`.d` (16);
-  - tooltips (16): `.057.a_tt`–`.d_tt`, `.058.a_tt`–`.d_tt`, `.059.a_tt`–`.d_tt`, `.060.a_tt`–`.d_tt`. The .058 hiring tooltips (a, b, c) say the work is paid for and the Region stays mine. `.060.a_tt` is conditional on the route being new. `.060.c_tt` describes my own law and personal word.
+  - tooltips (16): `.057.a_tt`–`.d_tt`, `.058.a_tt`–`.d_tt`, `.059.a_tt`–`.d_tt`, `.060.a_tt`–`.d_tt`. The .058 hiring tooltips (a, b, c) say the work is paid for and the Shoal stays mine. `.060.a_tt` is conditional on the route being new. `.060.c_tt` describes my own law and personal word.
   - .058 text uses `[eotg_frontier_settler.GetName]`, `.GetSheHe`, `.GetHerHim` and `.GetHerHis` (bare, never `scope:`).
   - The §3.7 guard needs no loc.
 
@@ -598,7 +600,7 @@ No `replace_path`, no descriptor change, no new folder.
 
 **"rite" (.041.d, lore ruling 2026-10-12):** acceptable as plain lowercase text. It must **never** be linked as `[rite|E]` (that would point at the 1.20 rite concept). QA greps the new loc for `rite|E`.
 
-**Glossary:** Region (county), System (barony), Frontier, backer, strain, Unsworn, Unclaimed Region. Never "pressure" (v4 A9), "charter", "mayor", "bishop" or "village".
+**Glossary:** Shoal (county), System (barony), Frontier, backer, strain, Unsworn, Unclaimed Shoal. Never "pressure" (v4 A9), "charter", "mayor", "bishop" or "village".
 
 ## 8. Lore constraints
 
@@ -627,10 +629,10 @@ No `replace_path`, no descriptor change, no new folder.
 **Round 2, from the eotg-lore-keeper (2026-10-18), binding on §3.6:**
 - **All of the standing rules above still apply.** Nothing exists above the polity. The text is time-neutral: no Exodus, dates or named powers. No Void, "charter", "human" or "humanity", species names, or the cybernetics never-name words.
 - **Register:** first person, present tense. Every desc variant carries I, me or my. At most one NPC line, in double quotes. Canadian English. No dashes.
-- **Words to use:** Region, System, settlers, crews, berths, stations, supply runs, convoys, survey, beacon, port of call.
+- **Words to use:** Shoal, System, settlers, crews, berths, stations, supply runs, convoys, survey, beacon, port of call.
 - **Banned words:** village, manor, peasants, serfs, barony, castle, masons, palace, horses, cart, caravan, guild, harvest, season, tithe, market town, "holding slot", gears, cogs, clockwork, steam, brass, automaton.
-1. **Population growth (.057):** families stay, berths fill, the first children are born in the Region, and newcomers arrive on later convoys. Not the Exodus by name, not refugees from a named war, not farmland.
-2. **Skilled settler (.058):** the archetypes are a habitat or life-support engineer, a survey geologist, a pilot who knows the approaches, a medic, and a frame welder or salvager. Clinic-fitted hardware is acceptable if it reads as bought and paid for. Not a canon figure, not Titan-touched or arcane, not a veteran of a named war, not sent by a corporation. The deal follows the .040 pattern: the work is paid for, and the Region stays mine. A generated settler uses a vanilla-shaped template (§3.6.3, vanilla cited).
+1. **Population growth (.057):** families stay, berths fill, the first children are born in the Shoal, and newcomers arrive on later convoys. Not the Exodus by name, not refugees from a named war, not farmland.
+2. **Skilled settler (.058):** the archetypes are a habitat or life-support engineer, a survey geologist, a pilot who knows the approaches, a medic, and a frame welder or salvager. Clinic-fitted hardware is acceptable if it reads as bought and paid for. Not a canon figure, not Titan-touched or arcane, not a veteran of a named war, not sent by a corporation. The deal follows the .040 pattern: the work is paid for, and the Shoal stays mine. A generated settler uses a vanilla-shaped template (§3.6.3, vanilla cited).
 3. **Infrastructure breakthrough (.059):** scrubbers, a sounder frame, a water-reclamation fix, or a technique recovered from salvage "older than any record"; parts made and fitted by hand.
    - *Banned:* self-repairing or self-replicating machinery, colony AI, terraforming, new drives, fabricators or printers. The last two are an orchestrator ruling, pending the owner (§13).
    - It must **not** grant `eotg_innovation_self_repairing_machinery`.
@@ -718,13 +720,13 @@ No `replace_path`, no descriptor change, no new folder.
 | R1 | Debug tick with each event's condition set (console traits, faith or culture swaps) | each fires within 120 days, only when eligible; `holder ?= root` voids it after a console title transfer |
 | R1 cause | Take .054.d at strain 7, then tick | .005 shows `desc_dispute`; the Abandon tooltip shows the dispute cause line |
 | #5 (**V-B1**) | Complete Settlement, Trade, Military and Religious under a feudal holder; Research with a church capital and without one | each new System holds its building at level 01; no error.log line; Mining and Administrative place nothing |
-| #5 (**V-B2**) | Fill a Region's slots (console) before completion | `extra_building_slot` is added and the building placed; whether a building whose `can_construct` is unmet sits inert is recorded either way |
+| #5 (**V-B2**) | Fill a Shoal's slots (console) before completion | `extra_building_slot` is added and the building placed; whether a building whose `can_construct` is unmet sits inert is recorded either way |
 | #5 (**V-B3**) | Hover .004's completion options for each holding type | record whether the building line shows (QA 5D: `scope:eotg_frontier_new_barony` may be unset at preview, so only Research may show it); acceptable either way, note it |
 | #5 (**V-B4**) | Complete a Trade Frontier | `guild_halls_01` is present once the new city has `city_01` |
 | R2 (**V-R2-1**) | Debug tick with each round-2 condition set (progress and strain by console, Habitable, ruins, trade-route traits) | each of .057–.060 fires within 120 days, only when eligible; .057 never at strain 4+; .059 and .057 never below progress 20; .060 never below 33 |
 | R2 (**V-R2-2**) | .058: take each of a–d, then check the character list | a, b and c: the settler is my courtier, the fee went to them (a: minor, b and c: tiny), c leaves them slighted; d: the settler is dead by disappearance (`after`), with no stray unlanded character; no error.log line |
 | R2 (**V-R2-3**) | .058 with a settler of each education | the desc variant matches (engineer, surveyor, pilot) |
-| R2 (**V-R2-4**) | .060.a on a Region without the trade-route trait and with trait room; then again on one that has it | the trait is added and the discovery hook fires once; second time no trait change, and the tooltip says so |
+| R2 (**V-R2-4**) | .060.a on a Shoal without the trade-route trait and with trait room; then again on one that has it | the trait is added and the discovery hook fires once; second time no trait change, and the tooltip says so |
 | §3.7 (**V-R2-5**) | `add_trait = eotg_total_integration` on a player holder with a Frontier; debug-tick a dozen times | no Frontier pool event (.002, .003, .030–.036, .040, .041, .050–.060) fires; progress and strain still move (silent roll); a founderless Frontier gets a founder auto-picked |
 | §3.7 (**V-R2-6**) | Queue a pool event (debug tick until one is pending), then add the trait before it fires | the event does not fire (in-flight guard) |
 | §3.7 (**V-R2-7**) | Remove the trait again | pool events resume on the next eligible roll |
@@ -767,7 +769,7 @@ Close-out as 5B (§13.1 step 10: report the four added stress rows, regenerate t
 - **D5-7 Seamless residue** (§3.7): .001, .010, .020, .021, .037 and .042 still show first-person text to a Seamless player. They are decision-fired or chained, and need an `is_shown` review; that is the owner's call (§13 Q2). .004 and .005 got rule (b) register variants in batch 5E (orchestrator ruling, 2026-10-18).
 - **Round-2 suggestions (owner's call; not specified, not to be built):**
   - a .058 option that makes the settler the Frontier's founder when none is valid (a fifth option on an approved event);
-  - a follow-up in which the .057 children come of age in the Region (a new beat);
+  - a follow-up in which the .057 children come of age in the Shoal (a new beat);
   - a .060 follow-up when the route's captains are raided (a new beat);
   - .059 recording the recovered technique as county history for the legacy roll (new state).
 - **D4-2 Founder choice picker** (#3): deferred by the owner, unchanged.
