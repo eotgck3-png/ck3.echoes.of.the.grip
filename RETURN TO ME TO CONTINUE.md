@@ -54,6 +54,18 @@ Six read-only reviews found about **40 gaps**. None of them crashes the game or 
 4. **Integrations:** which ones do you want? *Recommended: start with top-bar alerts and encyclopedia pages.*
 5. **Architect ruling pass on report §2:** go ahead in parallel with the fix batch? *Recommended: yes.*
 
+## Also waiting: holding tier progression (2026-10-20)
+
+The verdict is in [`docs/proposals/holding_tier_progression_feasibility.md`](docs/proposals/holding_tier_progression_feasibility.md). It is feasible but not recommended as written:
+- 3D holdings vanish at zoom step 9 of 35, so tiers can't read from far out.
+- The proposal conflicts with the governing brief's rule of 7 meshes and no modelled tiers.
+- It has several factual errors.
+
+**Decisions:**
+- **Keep the brief, or amend it?**
+- **Test option D?** One file that keeps all markers visible further out.
+- **If you want tiers:** option B, size-only tiers.
+
 ## Older decisions still open (the taskboard has details)
 
 | Item | Question |
