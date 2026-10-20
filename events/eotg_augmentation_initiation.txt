@@ -3258,6 +3258,10 @@ eotg_aug_init.018 = {
 # Choosing the Volunteer, the retainer decision hub
 # Caller: eotg_decision_augment_retainer.
 # Resource: a/b/c/d install on the chosen retainer (tier change, risk 0).
+# Investigation rulings 2026-10-18 (I2a): every install goes through the
+# procedure roll with root as the sponsor (eotg_aug_sponsored_install_effect;
+# the provider is derived, the price unchanged); AI weights fall under a Ban
+# (R-A4: a-d x0.5, e +30).
 # Candidate picks are non-violent (a knight or courtier to honour), each
 # followed by save_scope_as; never the victim picker.
 # Desc: the base text, then one line per candidate actually found (each
@@ -3353,6 +3357,7 @@ eotg_aug_init.020 = {
             base = 40
             modifier = { add = 20  has_trait = ambitious }
             modifier = { add = 10  has_trait = brave }
+            modifier = { factor = 0.5  eotg_aug_under_policy = { LAW = ban } }    # R-A4
         }
     }
 
@@ -3370,6 +3375,7 @@ eotg_aug_init.020 = {
             base = 20
             modifier = { add = 10  has_trait = arbitrary }
             modifier = { add = 10  has_trait = generous }
+            modifier = { factor = 0.5  eotg_aug_under_policy = { LAW = ban } }    # R-A4
         }
     }
 
@@ -3387,6 +3393,7 @@ eotg_aug_init.020 = {
             base = 20
             modifier = { add = 10  has_trait = eccentric }
             modifier = { add = 10  has_trait = generous }
+            modifier = { factor = 0.5  eotg_aug_under_policy = { LAW = ban } }    # R-A4
         }
     }
 
@@ -3405,6 +3412,9 @@ eotg_aug_init.020 = {
             eotg_aug_initiate_effect = yes
             eotg_add_fracture_risk = { AMOUNT = 0 }
             add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+            # Investigation rulings 2026-10-18 §4.5 (5): through the roll,
+            # root as the sponsor (as eotg_aug_retainer_install_effect)
+            eotg_aug_sponsored_install_effect = { SPONSOR = root }
         }
         save_scope_value_as = { name = eotg_retainer_installed  value = flag:knight }
         eotg_aug_stress_cruelty_effect = yes
@@ -3417,6 +3427,7 @@ eotg_aug_init.020 = {
             base = 30
             modifier = { add = 30  has_trait = callous }
             modifier = { add = 10  has_trait = greedy }
+            modifier = { factor = 0.5  eotg_aug_under_policy = { LAW = ban } }    # R-A4
         }
     }
 
@@ -3427,6 +3438,7 @@ eotg_aug_init.020 = {
             base = 10
             modifier = { add = 20  has_trait = compassionate }
             modifier = { add = 10  has_trait = content }
+            modifier = { add = 30  eotg_aug_under_policy = { LAW = ban } }    # R-A4
         }
     }
 

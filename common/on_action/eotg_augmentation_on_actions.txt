@@ -38,6 +38,9 @@
 #   eotg_flag_aug_intervention_refused — not a cooldown: tier3.020's 2-year
 #     "refused" state (T3), read here so the Intervention does not repeat
 #     while it holds
+#   eotg_flag_aug_intervention_cd — The Intervention (tier3.020), 2 years
+#     whatever the answer, set here and in eotg_story_aug_countdown branch 7b
+#     (investigation rulings 2026-10-18 §5.2, C3)
 #   eotg_flag_aug_backalley_retry — not a cooldown: a one-shot pass that lets
 #     init.010 fire past eotg_flag_aug_event_cooldown (set by init.012.b)
 #   eotg_flag_aug_repair_cooldown — repair offers (proc.003 / .004), 3 years,
@@ -159,7 +162,35 @@ on_game_start_after_lobby = {
     }
 }
 
+# Vanilla hook, extended additively only (invariant 4): vanilla's own
+# on_leave_court has a top-level effect (game/common/on_action/
+# court_maintenance_on_actions.txt:34-38; root = the character,
+# scope:old_employer; fires before on_join_court, not on death).
+# Investigation rulings 2026-10-18 §5.7 (C10).
+on_leave_court = {
+    on_actions = {
+        eotg_on_leave_court_aug
+    }
+}
+
 # ── Custom on_actions ─────────────────────────────────────────────────────────
+
+# Iron Retinue membership is per court (investigation rulings 2026-10-18
+# §5.7, C10): eotg_flag_aug_iron_retinue and eotg_flag_aug_retinue_permanent
+# mean "in this court's Program", so a knight who leaves the court leaves it.
+# No event fires, so no cooldown is involved. Caller: on_leave_court.
+eotg_on_leave_court_aug = {
+    trigger = {
+        OR = {
+            has_character_flag = eotg_flag_aug_iron_retinue
+            has_character_flag = eotg_flag_aug_retinue_permanent
+        }
+    }
+    effect = {
+        remove_character_flag = eotg_flag_aug_iron_retinue
+        remove_character_flag = eotg_flag_aug_retinue_permanent
+    }
+}
 
 # Initiation checks — offer augmentation to eligible rulers.
 # One weighted random_list per pulse, the same shape as the tier checks below
@@ -1178,6 +1209,10 @@ eotg_on_yearly_aug_overclocked_check = {
                     }
                     # The Intervention (thread T3 seed). The refused flag is
                     # tier3.020's 2-year state; only this branch reads it.
+                    # Investigation rulings 2026-10-18 §5.2 (C3): at most once
+                    # per 2 years whatever the answer. eotg_flag_aug_intervention_cd
+                    # is set here and in eotg_story_aug_countdown branch 7b
+                    # only; tier3.020's trigger reads neither flag.
                     30 = {
                         trigger = {
                             has_variable = eotg_fracture_risk
@@ -1187,7 +1222,9 @@ eotg_on_yearly_aug_overclocked_check = {
                                 primary_heir ?= { is_adult = yes }
                             }
                             NOT = { has_character_flag = eotg_flag_aug_intervention_refused }
+                            NOT = { has_character_flag = eotg_flag_aug_intervention_cd }
                         }
+                        add_character_flag = { flag = eotg_flag_aug_intervention_cd  years = 2 }
                         add_character_flag = { flag = eotg_flag_oc_event_cooldown  months = 11 }
                         trigger_event = { id = eotg_aug_tier3.020  days = { 1 20 } }
                     }
@@ -1603,6 +1640,12 @@ eotg_on_yearly_aug_nonruler_check = {
                     add = 3
                     scope:eotg_nr_liege = { has_character_flag = eotg_flag_aug_want_more }
                 }
+                # Investigation rulings 2026-10-18 §4.1 R-A4: halved under a
+                # Ban in the liege's realm (realm spec §3.3 precedent)
+                modifier = {
+                    factor = 0.5
+                    scope:eotg_nr_liege = { eotg_aug_under_policy = { LAW = ban } }
+                }
                 scope:eotg_nr_liege = {
                     add_character_flag = { flag = eotg_flag_aug_nr_cooldown  years = 1 }
                 }
@@ -1625,12 +1668,16 @@ eotg_on_yearly_aug_nonruler_check = {
             # (final QA: fired here, so it only ever reports a real
             # progression). The liege cooldown is set here and step 5 is
             # skipped for this character this year.
+            # Investigation rulings 2026-10-18 §5.6 (C9): non-rulers honour
+            # the settling floor (eotg_flag_aug_settling, set on everyone by
+            # eotg_aug_initiate_effect / eotg_aug_set_integration_effect).
             if = {
                 limit = {
                     OR = {
                         eotg_is_aug_tier1 = yes
                         eotg_is_aug_tier2 = yes
                     }
+                    NOT = { has_character_flag = eotg_flag_aug_settling }
                 }
                 random = {
                     chance = eotg_aug_nr_progress_chance
@@ -1685,9 +1732,14 @@ eotg_on_yearly_aug_nonruler_check = {
                     save_scope_value_as = { name = eotg_nr_cascaded  value = yes }
                 }
             }
-            # 4. Drift once fractured
+            # 4. Drift once fractured. Investigation rulings 2026-10-18 §5.4
+            # (C6): an abdicated ruler is held in restraints, the end state,
+            # so their risk freezes at its value at abdication.
             else_if = {
-                limit = { has_trait = eotg_neurofractured }
+                limit = {
+                    has_trait = eotg_neurofractured
+                    NOT = { has_character_flag = eotg_flag_aug_abdicated }
+                }
                 eotg_add_fracture_risk = { AMOUNT = 6 }
             }
 

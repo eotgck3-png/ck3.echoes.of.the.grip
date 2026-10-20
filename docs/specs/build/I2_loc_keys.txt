@@ -1,0 +1,96 @@
+I2a / I2b / I2d (+ CB-51, S11): new and reworded loc keys
+================================================================================
+
+Source: docs/specs/investigation_rulings_2026-10-18.md §4.6, §5.8, §7.3; owner
+additions 2026-10-20 (CB-51 nr.004 open/cover-up split; S11 Examine
+notification). eotg-scripter, 2026-10-20, uncommitted.
+File: localization/english/eotg_augmentation_l_english.yml (UTF-8 BOM,
+Canadian English, bare [x.GetName], never [scope:...]).
+
+Lore (spec §11): LAW AT 866 / Q1: the answerable party's own liege acts,
+inside the realm, no apparatus; discovery is hearsay. Evidence is physical, in
+a body (I5/I6): never a log, scan, signal or record. The grep
+`authorit|warrant|magistrat|inspector|registry|permit|regulat` must be empty on
+every key below. Kingpin: the rival boss is unnamed and never a canon
+syndicate (LQ6: no Blackstar, Shadow Markets, Black Contracts, Blackline,
+P&D, Calix, the Pill Mob, the Concrete Cartel). Route all of them to
+eotg-lore-keeper.
+
+----------------------------------------------------------------------
+I2a: the secret type (common/secret_types/eotg_augmentation_secrets.txt)
+----------------------------------------------------------------------
+eotg_secret_illegal_augmentation               Name. Suggested: "Unlawful Implant Work".
+eotg_secret_illegal_augmentation_desc          One key for both cases. With a target (the owner ordered work on
+                                               someone): vanilla data context [TARGET_CHARACTER.GetShortUIName]
+                                               (secrets_l_english.yml:48, 107). Without a target (the owner's own
+                                               body): the targetless shape of secret_deviant_desc (:37). Short
+                                               ("Had unlawful implant work done ..."). Localizer checks in game that
+                                               the target form renders when the target is set.
+eotg_secret_illegal_augmentation_tooltip_desc  [CHARACTER.GetShortUINameNoFormat|U] form, as vanilla
+                                               secret_embezzler_tooltip_desc (:76): this character had implant
+                                               work done outside the law of their realm.
+eotg_secret_illegal_augmentation_type_desc     As vanilla :94 (secret_embezzler_type_desc): "This character ...".
+
+----------------------------------------------------------------------
+I2a: Contraband Hardware (events/eotg_augmentation_realm.txt, realm.001)
+----------------------------------------------------------------------
+eotg_aug_realm.001.desc_ordered   "\n\n" fragment (same leading break as the other realm.001 lines).
+                                  First person (the liege). Word has reached me that
+                                  [eotg_contraband_subject.GetFirstName] HAD implant work done on someone at
+                                  [eotg_contraband_subject.GetHerHis] court, outside the law; they ordered it,
+                                  they did not receive it. Hearsay, no apparatus.
+
+eotg_aug_realm.001.desc_opener_ordered   Main opener (no leading break), shown INSTEAD of
+                                  eotg_aug_realm.001.desc when the subject is unaugmented (they ordered the
+                                  work): [eotg_contraband_subject.GetFirstName] has ordered implant work done
+                                  on someone at [eotg_contraband_subject.GetHerHis] court. desc_ordered then
+                                  follows as a fragment; localizer keeps the two from repeating each other.
+                                  Option b already requires has_trait = eotg_cybernetics, so it hides here;
+                                  a (arrest) and d are ungated.
+
+----------------------------------------------------------------------
+I2b: S2 presence (common/character_interactions/eotg_augmentation_interactions.txt)
+----------------------------------------------------------------------
+eotg_aug_patient_present_tt       custom_description line on the physician send options (Offer, Demand
+                                  Removal) and Examine. Positive phrasing, as its neighbour
+                                  eotg_aug_send_physician_valid_tt: [recipient.GetFirstName] is at your court
+                                  (a courtier, a guest, or your prisoner).
+NOT_eotg_aug_patient_present_tt   The failing form, as the existing NOT_eotg_aug_send_physician_valid_tt:
+                                  e.g. "[recipient.GetFirstName] is not at your court". Not the vanilla
+                                  COURTIER_OR_GUEST key (ours also admits prisoners).
+
+----------------------------------------------------------------------
+S11: Have Them Examined notification
+----------------------------------------------------------------------
+eotg_aug_examine_interaction_notification   The recipient's view, as the other three notifications in the
+                                            file (e.g. eotg_aug_demand_removal_interaction_notification):
+                                            "[actor.GetName] wants [actor.GetHerHis] physician to look over your
+                                            hardware." Physical, hands-on; no scan.
+
+----------------------------------------------------------------------
+I2d: Word From Below (events/eotg_augmentation_kingpin.txt, kingpin.001)
+----------------------------------------------------------------------
+eotg_aug_kingpin.001.desc_rival_boss   The FIRST desc line under a Cartel ruler, before the reporter line.
+                                       No leading break; END it with a double line break (backslash-n twice), because .desc_reporter and
+                                       .desc_none (eotg_aug_kingpin_l_english.yml:10-11) start without one.
+                                       File: eotg_aug_kingpin_l_english.yml. One line: someone has set up on
+                                       my ground and does not pay me. Unnamed rival boss; not a canon
+                                       syndicate (LQ6).
+
+----------------------------------------------------------------------
+CB-51: The Champion's Mistake (events/eotg_augmentation_nonruler.txt, nr.004)
+----------------------------------------------------------------------
+eotg_aug_nr.004.e   REWORDED (key unchanged). The OPEN version: the liege lets the champion finish
+                    [eotg_victim.GetFirstName] and lets everyone see it was by the liege's leave. An act
+                    of intimidation (effects: +20 dread, the champion recorded as killer). Must NOT read as
+                    concealment: drop "write that the hardware did it". Gate unchanged
+                    (education_intrigue, skill icon intrigue). Old text: "Stand back while
+                    [eotg_champion.GetSheHe] finishes [eotg_victim.GetFirstName], then write that the
+                    hardware did it."
+eotg_aug_nr.004.g   NEW. The COVER-UP version: the liege stands back while the champion finishes
+                    [eotg_victim.GetFirstName], then lets it be said the hardware did it (or that nobody
+                    knows who). Effect: no dread; the death's killer is hidden and the LIEGE holds a murder
+                    secret about [eotg_victim.GetFirstName]. Gate: intrigue 15+ (skill icon intrigue).
+                    First person, one sentence, same register as e. Check against .desc (the victim exists;
+                    "everyone who saw it" means the cover-up implies silencing or persuading witnesses, so
+                    the text should not claim nobody saw).

@@ -1662,7 +1662,8 @@
  eotg_aug_nr.004.b:0 "Pay for the harm."
  eotg_aug_nr.004.c:0 "Pay for [eotg_champion.GetHerHis] treatment."
  eotg_aug_nr.004.d:0 "Try [eotg_champion.GetHerHim] in a court under my own authority."
- eotg_aug_nr.004.e:0 "Stand back while [eotg_champion.GetSheHe] finishes [eotg_victim.GetFirstName], then write that the hardware did it."
+ eotg_aug_nr.004.e:0 "Let [eotg_champion.GetHerHim] finish [eotg_victim.GetFirstName], and let everyone see that I allowed it."
+ eotg_aug_nr.004.g:0 "Let [eotg_champion.GetHerHim] finish [eotg_victim.GetFirstName], and see to it that the witnesses blame the hardware."
 
  # eotg_aug_nr.005 The Familiar Change
  eotg_aug_nr.005.t:0 "The Familiar Change"
@@ -1922,6 +1923,7 @@
  eotg_aug_demand_removal_interaction:0 "Demand Implant Removal"
  eotg_aug_demand_removal_interaction_desc:0 "Order [recipient.GetHerHim] to have every implant taken out. You pay, and you choose whose hands do it."
  eotg_aug_demand_removal_interaction_notification:0 "[actor.GetName] demands that your implants come out."
+ eotg_aug_examine_interaction_notification:0 "[actor.GetName] wants [actor.GetHerHis] physician to look over your implants, by hand."
  eotg_aug_examine_interaction:0 "Have Them Examined"
  eotg_aug_examine_interaction_desc:0 "Have your physician look over [recipient.GetHerHis] hardware and report what is found."
  eotg_aug_start_tamper_interaction:0 "Tamper with Implants"
@@ -1937,6 +1939,8 @@
  eotg_aug_send_rough:0 "Whoever is at hand"
  eotg_aug_send_rough_tt:0 "It costs nothing, and no one takes care with what else comes out."
  eotg_aug_send_one_provider_tt:0 "Exactly one choice of hands is selected"
+ eotg_aug_patient_present_tt:0 "[recipient.GetFirstName] is at your court, as a courtier, a guest or your prisoner"
+ NOT_eotg_aug_patient_present_tt:0 "[recipient.GetFirstName] is not at your court"
  eotg_aug_send_physician_valid_tt:0 "You have a physician or implant technician to hand who is not the patient"
  eotg_aug_send_salvage_physician_tt:0 "Your own surgeon does the cutting, with care for what else is there."
  eotg_aug_start_tamper_approved_tt:0 "You can start a scheme to tamper with [recipient.GetName]'s implants."
@@ -2185,6 +2189,8 @@
  eotg_aug_act.006.e:0 "Cut the pilgrimage short. The realm calls."
  eotg_aug_realm.001.t:0 "Contraband Hardware"
  eotg_aug_realm.001.desc:0 "Word has reached me, and a courtier says it quietly: "It is [eotg_contraband_subject.GetName]. [eotg_contraband_subject.GetSheHe|U] has had implant work done that the realm's law does not allow.""
+ eotg_aug_realm.001.desc_opener_ordered:0 "Word has reached me, and a courtier says it quietly: "[eotg_contraband_subject.GetFirstName] has ordered implant work done on someone at [eotg_contraband_subject.GetHerHis] court.""
+ eotg_aug_realm.001.desc_ordered:0 "\n\nNo implant went into [eotg_contraband_subject.GetHerHis] own body. The order was [eotg_contraband_subject.GetHerHis], and so is the answer for it."
  eotg_aug_realm.001.desc_ban:0 "\n\nMy law prohibits augmentation, and [eotg_contraband_subject.GetSheHe] lives under it."
  eotg_aug_realm.001.desc_ban_v:0 "\n\nThe realm I hold my lands under prohibits augmentation, and [eotg_contraband_subject.GetSheHe] lives under it."
  eotg_aug_realm.001.desc_license:0 "\n\nMy law allows implant work by sanctioned hands only. These hands were not."
@@ -2426,3 +2432,9 @@
  eotg_aug_tier3.024.toast_decisive:0 "The Campaign Is Decisive"
  eotg_aug_tier3.024.toast_overreach:0 "The Campaign Overreaches, and Wounds"
  eotg_aug_tier3.024.toast_inconclusive:0 "The Campaign Ends Inconclusively"
+
+ # I2a secret type
+ eotg_secret_illegal_augmentation:0 "Unlawful Implant Work"
+ eotg_secret_illegal_augmentation_desc:0 "Underwent or ordered implant work outside the realm's law"
+ eotg_secret_illegal_augmentation_tooltip_desc:0 "[CHARACTER.GetShortUINameNoFormat|U] underwent or ordered implant work outside the law of [CHARACTER.GetHerHis] realm"
+ eotg_secret_illegal_augmentation_type_desc:0 "This character underwent or ordered implant work outside the law of their realm"

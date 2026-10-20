@@ -42,6 +42,8 @@
 #   eotg_prior_choice  flag:ally / usurp / kill_failed / kill_success /
 #                    executed: what round 1's heir.004 came to (heir.004,
 #                    its kill_c)
+#   eotg_paused_ticks  ticks spent with a landless owner (cumulative); the
+#                    arc is spent at 3 (investigation rulings 2026-10-18 §5.5)
 # ─────────────────────────────────────────────────────────────────────────────
 
 eotg_story_aug_heir_arc = {
@@ -76,20 +78,35 @@ eotg_story_aug_heir_arc = {
         chance = 70
 
         first_valid = {
-            # QA round 2: a ruler-only arc ends when its owner is deposed or
-            # landless (end.030's abdication, a lost war). Vanilla precedent:
-            # story_cycle_take_mandate_of_heaven.txt:172-189 (story_owner
-            # is_landed = no -> end_story).
-            # QA round 2 follow-up: the arc is spent (eotg_flag_aug_heir_arc_done,
-            # read by the arc-start guards in the on_actions), so a ruler who
-            # regains land does not restart it.
+            # Investigation rulings 2026-10-18 §5.5 (C7), replacing the QA
+            # round 2 "landless ends it" branch: a landless owner PAUSES the
+            # arc. It is spent (eotg_flag_aug_heir_arc_done, read by the
+            # arc-start guards in the on_actions) only on abdication
+            # (end.030), or after 3 paused ticks (about 6 years). The counter
+            # is cumulative across landless stints, which bounds pausing.
+            # Vanilla: the end shape is story_cycle_take_mandate_of_heaven.txt:
+            # 172-189; the wait shape (a branch with no stage change) is
+            # ep3_story_cycle_admin_eunuch.txt:145-182.
+            triggered_effect = {
+                trigger = {
+                    story_owner = { has_character_flag = eotg_flag_aug_abdicated }
+                }
+                effect = {
+                    story_owner = { add_character_flag = eotg_flag_aug_heir_arc_done }
+                    end_story = yes
+                }
+            }
             triggered_effect = {
                 trigger = {
                     story_owner = { is_landed = no }
                 }
                 effect = {
-                    story_owner = { add_character_flag = eotg_flag_aug_heir_arc_done }
-                    end_story = yes
+                    change_variable = { name = eotg_paused_ticks  add = 1 }    # starts absent = 0
+                    if = {
+                        limit = { var:eotg_paused_ticks >= 3 }
+                        story_owner = { add_character_flag = eotg_flag_aug_heir_arc_done }
+                        end_story = yes
+                    }
                 }
             }
 
@@ -468,6 +485,10 @@ eotg_story_aug_countdown = {
                 }
             }
             # 7b. After Violence: someone intervenes (Phase 4c tier3.020)
+            # Investigation rulings 2026-10-18 §5.2 (C3): the 2-year
+            # Intervention cooldown, shared with the Overclocked pulse entry
+            # (the only other place it is set). While it holds, stage 4 holds
+            # and the next tick retries.
             triggered_effect = {
                 trigger = {
                     var:eotg_last_stage = 4
@@ -476,11 +497,13 @@ eotg_story_aug_countdown = {
                             exists = primary_spouse
                             primary_heir ?= { is_adult = yes }
                         }
+                        NOT = { has_character_flag = eotg_flag_aug_intervention_cd }
                     }
                 }
                 effect = {
                     set_variable = { name = eotg_last_stage  value = 5 }
                     story_owner = {
+                        add_character_flag = { flag = eotg_flag_aug_intervention_cd  years = 2 }
                         trigger_event = { id = eotg_aug_tier3.020  days = { 1 20 } }
                     }
                 }
@@ -934,7 +957,8 @@ eotg_story_aug_patron = {
 # Knights the Program touches carry eotg_flag_aug_iron_retinue (permanent);
 # .005.a adds eotg_flag_aug_retinue_permanent. Both are Phase 6 hooks: the
 # non-ruler lifecycle reads them for weights only (index §4 T4). The owner's
-# death ends the story; the knights keep their flags and implants.
+# death ends the story; the knights keep their implants but lose both flags
+# (membership is per court, investigation rulings 2026-10-18 §5.7).
 # Story variable: eotg_phase 1-5 (spec: phase).
 eotg_story_aug_retinue = {
     on_setup = {
@@ -968,7 +992,18 @@ eotg_story_aug_retinue = {
     on_end = {
     }
 
+    # Investigation rulings 2026-10-18 §5.7 (C10): membership is per court,
+    # and the heir never ran the Program, so the owner's knights lose both
+    # flags (knights who leave the court lose them in eotg_on_leave_court_aug).
+    # G-check V-IR17: whether every_knight still lists them here.
     on_owner_death = {
+        story_owner = {
+            every_knight = {
+                limit = { eotg_aug_is_retinue_knight = yes }
+                remove_character_flag = eotg_flag_aug_iron_retinue
+                remove_character_flag = eotg_flag_aug_retinue_permanent
+            }
+        }
         end_story = yes
     }
 

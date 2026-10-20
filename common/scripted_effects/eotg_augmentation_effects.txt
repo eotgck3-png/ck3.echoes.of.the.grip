@@ -728,10 +728,54 @@ eotg_aug_child_install_effect = {
 # Run on the chosen retainer: install at risk 0 and gratitude toward root.
 # Callers: eotg_aug_init.020 (a, b, c). The callous option (d) writes its own
 # block with unease instead of gratitude.
+# Investigation rulings 2026-10-18 §4.5 (5): the install goes through the
+# procedure roll with root as the sponsor (last in the block, so nothing
+# runs on a retainer who died on the table).
 eotg_aug_retainer_install_effect = {
     eotg_aug_initiate_effect = yes
     eotg_add_fracture_risk = { AMOUNT = 0 }
     add_opinion = { modifier = eotg_opinion_aug_grateful_patient  target = root  years = 10 }
+    eotg_aug_sponsored_install_effect = { SPONSOR = root }
+}
+
+# A sponsored install through the shared roll (investigation rulings
+# 2026-10-18 §4.5 (5), R-A1). Patient scope; run after
+# eotg_aug_initiate_effect. Records $SPONSOR$ (var:eotg_aug_sponsor, 2 years:
+# the longest reveal delay, init.011 at 180-540 days on the back-street
+# Offer) for eotg_aug_save_answerable_effect. The provider is derived, never
+# chosen, so no option is added: a clinic if the patient's realm allows one
+# (eotg_aug_clinic_open), else the sponsor's own surgeon for this patient
+# (eotg_aug_has_surgeon_for), else the back streets. The price on each
+# calling option is unchanged. Outcomes go through eotg_aug_procedure_effect
+# (applied silently, or revealed by the existing init.011).
+# Callers: eotg_aug_retainer_install_effect (init.020 a-c), init.020 (d),
+# eotg_aug_nr.001 (a, c, d), eotg_aug_retinue_install_effect.
+eotg_aug_sponsored_install_effect = {
+    save_temporary_scope_as = eotg_aug_sponsored_patient
+    hidden_effect = {
+        set_variable = { name = eotg_aug_sponsor  value = $SPONSOR$  years = 2 }
+    }
+    custom_tooltip = eotg_aug_proc.install_tt
+    if = {
+        limit = { eotg_aug_clinic_open = yes }
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = scope:eotg_aug_sponsored_patient  PROVIDER = clinic  PROCEDURE = install  SURGEON = scope:eotg_aug_sponsored_patient }
+        }
+    }
+    else_if = {
+        limit = {
+            $SPONSOR$ = { eotg_aug_has_surgeon_for = { PATIENT = scope:eotg_aug_sponsored_patient } }
+        }
+        hidden_effect = {
+            $SPONSOR$ = { eotg_aug_save_surgeon_effect = yes }
+            eotg_aug_procedure_effect = { PATIENT = scope:eotg_aug_sponsored_patient  PROVIDER = physician  PROCEDURE = install  SURGEON = scope:eotg_proc_surgeon }
+        }
+    }
+    else = {
+        hidden_effect = {
+            eotg_aug_procedure_effect = { PATIENT = scope:eotg_aug_sponsored_patient  PROVIDER = backstreet  PROCEDURE = install  SURGEON = scope:eotg_aug_sponsored_patient }
+        }
+    }
 }
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -1282,6 +1326,11 @@ eotg_aug_abdicate_effect = {
     }
     depose = yes
     add_character_modifier = { modifier = eotg_mod_aug_restrained }
+    # Investigation rulings 2026-10-18 §5.4 (C6): Into Restraints is the end
+    # state. The flag matches the permanent modifier, so every restraint
+    # reader treats them as restrained if they ever hold land again; the
+    # non-ruler pulse freezes their drift (step 4 reads eotg_flag_aug_abdicated).
+    add_character_flag = eotg_flag_aug_restrained
     add_character_flag = eotg_flag_aug_abdicated
     scope:eotg_successor = {
         trigger_event = { id = eotg_aug_end.031  days = 30 }
@@ -1341,9 +1390,12 @@ eotg_aug_pay_upgrade_effect = {
 # Start it: Overclocked and none running. Callers:
 # eotg_on_yearly_aug_overclocked_check (risk >= 50, or >= 40 with the hidden
 # flaw; the caller checks risk), eotg_aug_patron_betray_effect.
+# Investigation rulings 2026-10-18 §5.6 (C8): never for a child (one place
+# covers every caller).
 eotg_aug_try_start_countdown_effect = {
     if = {
         limit = {
+            is_adult = yes
             eotg_is_aug_tier3 = yes
             eotg_aug_has_countdown = no
         }
@@ -1502,11 +1554,14 @@ eotg_aug_patron_collect_effect = {
 # ── The Iron Retinue (§3) ───────────────────────────────────────────────────
 # Install on a knight through the Program: tier change, risk variable created
 # at 0, and the Program flag (thread T4; Phase 6 weights by it).
-# Callers: eotg_aug_retinue.001-.004 install options.
+# Callers: eotg_aug_retinue.001-.004 install options (knight scope, root =
+# the ruler). Investigation rulings 2026-10-18 §4.5 (5): through the roll,
+# root as the sponsor.
 eotg_aug_retinue_install_effect = {
     eotg_aug_initiate_effect = yes
     eotg_add_fracture_risk = { AMOUNT = 0 }
     add_character_flag = eotg_flag_aug_iron_retinue
+    eotg_aug_sponsored_install_effect = { SPONSOR = root }
 }
 
 # Start the Program (passthrough as above). The phase follows the court
@@ -2220,6 +2275,19 @@ eotg_aug_procedure_roll_effect = {
                 remove_character_flag = eotg_flag_aug_sabotaged
             }
         }
+        # Investigation rulings 2026-10-18 §4.5 (4), R-A3: unlawful work that
+        # was not discovered (and did not kill) leaves a secret on whoever
+        # answers for it. Covers every roll caller. The discovered outcome
+        # keeps its public path (eotg_aug_contraband_effect at the reveal).
+        if = {
+            limit = {
+                NOT = { scope:eotg_proc_kind = flag:removal }
+                NOT = { scope:eotg_proc_outcome = flag:discovered }
+                NOT = { scope:eotg_proc_outcome = flag:death }
+                eotg_aug_is_contraband = yes
+            }
+            hidden_effect = { eotg_aug_give_illegal_work_secret_effect = yes }
+        }
         if = {
             limit = { scope:eotg_proc_outcome = flag:death }
             death = { death_reason = death_treatment }
@@ -2386,6 +2454,8 @@ eotg_aug_procedure_apply_effect = {
 # .019 (a, d). Interactions spec: eotg_aug_offer_install_effect,
 # eotg_aug_demand_removal_effect, eotg_aug_salvage_effect, eotg_aug_int.001
 # (b), eotg_aug_int.002 (b), eotg_aug_tamper.004 (a, b, c).
+# Investigation rulings 2026-10-18 (S1): eotg_aug_sponsored_install_effect
+# (init.020 a-d, nr.001 a/c/d, the Iron Retinue installs).
 eotg_aug_procedure_effect = {
     eotg_aug_procedure_roll_effect = { PATIENT = $PATIENT$  PROVIDER = $PROVIDER$  PROCEDURE = $PROCEDURE$  SURGEON = $SURGEON$ }
     if = {
@@ -2606,8 +2676,14 @@ eotg_aug_offer_install_effect = {
             eotg_aug_pay_procedure_effect = { BASE = minor_gold_value  MULT = 1 }
         }
     }
-    # 2. Install, and restore one loss
+    # 2. Install, and restore one loss. Investigation rulings 2026-10-18
+    # §4.5 (6): the actor is recorded as the sponsor before the roll, so the
+    # answerable party is derived (R-A2; a liege never prosecutes their own
+    # gift, S4).
     scope:recipient = {
+        hidden_effect = {
+            set_variable = { name = eotg_aug_sponsor  value = scope:actor  years = 2 }
+        }
         eotg_aug_initiate_effect = yes
         if = {
             limit = { eotg_has_physical_loss = yes }
@@ -2973,23 +3049,100 @@ eotg_aug_examine_treat_effect = {
 # set here and only here; realm.001 never reads it.
 # Spec deviation: no PROVIDER parameter; eotg_aug_is_contraband reads the
 # roll's scope:eotg_proc_provider.
+# Investigation rulings 2026-10-18 §4.5 (2), R-A2 (S4): the crime falls on
+# the ANSWERABLE party (eotg_aug_save_answerable_effect: the sponsor when
+# they are the patient's liege or above, else the patient), and their own
+# liege gains it. A liege never prosecutes their own gift; an independent
+# sponsor is never a criminal (Q1.4). scope:eotg_contraband_subject is the
+# answerable party (realm.001 reads it; desc_ordered when they ordered the
+# work rather than received it). The sponsor record is spent here.
 eotg_aug_contraband_effect = {
     if = {
-        limit = {
-            eotg_aug_is_contraband = yes
-            is_independent_ruler = no
-            exists = liege
-        }
-        save_scope_as = eotg_contraband_subject
-        reverse_add_opinion = { target = liege  modifier = eotg_opinion_aug_contraband }
-        liege = {
+        limit = { eotg_aug_is_contraband = yes }
+        eotg_aug_save_answerable_effect = yes
+        scope:eotg_aug_answerable = {
             if = {
                 limit = {
-                    is_ai = no
-                    NOT = { has_character_flag = eotg_flag_aug_contraband_cd }
+                    is_independent_ruler = no
+                    exists = liege
                 }
-                add_character_flag = { flag = eotg_flag_aug_contraband_cd  years = 1 }
-                trigger_event = { id = eotg_aug_realm.001  days = { 3 10 } }
+                save_scope_as = eotg_contraband_subject
+                reverse_add_opinion = { target = liege  modifier = eotg_opinion_aug_contraband }
+                liege = {
+                    if = {
+                        limit = {
+                            is_ai = no
+                            NOT = { has_character_flag = eotg_flag_aug_contraband_cd }
+                        }
+                        add_character_flag = { flag = eotg_flag_aug_contraband_cd  years = 1 }
+                        trigger_event = { id = eotg_aug_realm.001  days = { 3 10 } }
+                    }
+                }
+            }
+        }
+    }
+    if = {
+        limit = { has_variable = eotg_aug_sponsor }
+        hidden_effect = { remove_variable = eotg_aug_sponsor }
+    }
+}
+
+# Who answers for this patient's work (investigation rulings 2026-10-18
+# §4.5 (1), R-A2). Patient scope; saves scope:eotg_aug_answerable (temporary):
+# the sponsor recorded by the install path (var:eotg_aug_sponsor, 2 years)
+# when alive and the patient's liege or above, else the patient. A foreign
+# sponsor is never answerable (Q1.5).
+# Callers: eotg_aug_contraband_effect, eotg_aug_give_illegal_work_secret_effect.
+eotg_aug_save_answerable_effect = {
+    save_temporary_scope_as = eotg_aug_answerable
+    if = {
+        limit = {
+            var:eotg_aug_sponsor ?= { is_alive = yes }
+            target_is_liege_or_above = var:eotg_aug_sponsor
+        }
+        var:eotg_aug_sponsor = { save_temporary_scope_as = eotg_aug_answerable }
+    }
+}
+
+# Undiscovered unlawful work leaves a secret (investigation rulings
+# 2026-10-18 §4.5 (3), R-A3). Patient scope. The answerable party, if they
+# have a liege to answer to, gains eotg_secret_illegal_augmentation (target =
+# the patient, unless they are the patient). One per answerable party: a
+# sponsor with several augmented knights carries one secret naming the first
+# (vanilla give_or_update_embezzler_secret_effect, 00_secret_effects.txt:
+# 500-545, without the update). Back-street work under a License marks the
+# secret eotg_aug_unlicensed (read by eotg_aug_illegal_work_is_criminal).
+# The only add_secret of this type (vanilla NOTE, 00_secret_types.txt:8).
+# Caller: eotg_aug_procedure_roll_effect.
+eotg_aug_give_illegal_work_secret_effect = {
+    save_temporary_scope_as = eotg_aug_illegal_patient
+    eotg_aug_save_answerable_effect = yes
+    scope:eotg_aug_answerable = {
+        if = {
+            limit = {
+                is_independent_ruler = no
+                exists = liege
+                NOT = { any_secret = { type = eotg_secret_illegal_augmentation } }
+            }
+            if = {
+                limit = { this = scope:eotg_aug_illegal_patient }
+                add_secret = { type = eotg_secret_illegal_augmentation }
+            }
+            else = {
+                add_secret = {
+                    type = eotg_secret_illegal_augmentation
+                    target = scope:eotg_aug_illegal_patient
+                }
+            }
+            if = {
+                limit = {
+                    scope:eotg_proc_provider ?= flag:backstreet
+                    eotg_aug_under_policy = { LAW = license }
+                }
+                random_secret = {
+                    type = eotg_secret_illegal_augmentation
+                    set_variable = { name = eotg_aug_unlicensed  value = yes }
+                }
             }
         }
     }
@@ -3181,15 +3334,20 @@ eotg_aug_record_clinic_effect = {
 # is set; it is read only in eotg_aug_inherit_can_start (lesson 5).
 # Callers: eotg_on_yearly_aug_inherit_check, eotg_aug_nr_cascade_effect.
 # Fires eotg_aug_inherit.001 (player ruler) or eotg_aug_inherit.028 (AI).
+# Investigation rulings 2026-10-18 §5.3 (C4): a clean slate first, so stale
+# eotg_inh_* state from an expired tree never leaks; the lock variable
+# eotg_inh_heir itself carries the 6-year timeout (timed variable shape:
+# vanilla story_cycle_party_baron.txt:116-120). The retired safety flag
+# eotg_flag_aug_inh_active was written but never read.
 eotg_aug_inherit_start_effect = {
+    eotg_aug_inherit_close_effect = yes
     save_scope_as = eotg_inh_ruler
     add_character_flag = { flag = eotg_flag_aug_inh_cooldown  years = 3 }
-    add_character_flag = { flag = eotg_flag_aug_inh_active  years = 6 }
     primary_heir = {
         add_character_flag = eotg_flag_aug_inh_seen
         save_scope_as = eotg_inh_heir
     }
-    set_variable = { name = eotg_inh_heir  value = scope:eotg_inh_heir }
+    set_variable = { name = eotg_inh_heir  value = scope:eotg_inh_heir  years = 6 }
     set_variable = { name = eotg_inh_source  value = flag:$SOURCE$ }
 
     # The profile (§5A.1): how the Neurofracture shows. Weights from the
@@ -3401,7 +3559,6 @@ eotg_aug_inherit_close_effect = {
     remove_variable = eotg_inh_dead_count
     remove_variable = eotg_inh_force
     remove_variable = eotg_inh_force_leaf
-    remove_character_flag = eotg_flag_aug_inh_active
     remove_character_flag = eotg_flag_aug_inh_coerced
     remove_character_flag = eotg_flag_aug_inh_gentle
     remove_character_flag = eotg_flag_aug_inh_guarded

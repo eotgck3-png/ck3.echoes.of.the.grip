@@ -147,11 +147,20 @@ eotg_aug_offer_augmentation_interaction = {
         # failures-only trigger). Realm spec §3.2: any surgeon of the actor's
         # (physician or Implant Technician, own or borrowed) who is not the
         # recipient.
+        # Investigation rulings 2026-10-18 §5.1 (S2): the actor's own hands
+        # need the patient at the actor's court and available (vanilla
+        # 06_ep3_interactions.txt:4461-4476). Clinic and back streets stay
+        # remote.
         is_valid = {
             custom_description = {
                 text = eotg_aug_send_physician_valid_tt
                 scope:actor = { eotg_aug_has_surgeon_for = { PATIENT = scope:recipient } }
             }
+            custom_description = {
+                text = eotg_aug_patient_present_tt
+                scope:recipient = { eotg_aug_patient_at_court_of = { ACTOR = scope:actor } }
+            }
+            scope:recipient = { is_available = yes }
         }
     }
     send_option = {
@@ -562,11 +571,20 @@ eotg_aug_demand_removal_interaction = {
         # failures-only trigger). Realm spec §3.2: any surgeon of the actor's
         # (physician or Implant Technician, own or borrowed) who is not the
         # recipient.
+        # Investigation rulings 2026-10-18 §5.1 (S2): the actor's own hands
+        # need the patient at the actor's court and available (vanilla
+        # 06_ep3_interactions.txt:4461-4476). Clinic and back streets stay
+        # remote.
         is_valid = {
             custom_description = {
                 text = eotg_aug_send_physician_valid_tt
                 scope:actor = { eotg_aug_has_surgeon_for = { PATIENT = scope:recipient } }
             }
+            custom_description = {
+                text = eotg_aug_patient_present_tt
+                scope:recipient = { eotg_aug_patient_at_court_of = { ACTOR = scope:actor } }
+            }
+            scope:recipient = { is_available = yes }
         }
     }
     send_option = {
@@ -899,6 +917,9 @@ eotg_aug_examine_interaction = {
     # Mod art, gfx/interface/icons/character_interactions/ (2026-10-12).
     icon = eotg_aug_examine_interaction
     desc = eotg_aug_examine_interaction_desc
+    # S11 (investigation 2026-10-18): the recipient's view, as the other
+    # three interactions in this file
+    notification_text = eotg_aug_examine_interaction_notification
 
     # Actor-only state (_character_interactions.info:570-573)
     is_available = {
@@ -920,6 +941,25 @@ eotg_aug_examine_interaction = {
                 eotg_aug_in_charge_of = { ACTOR = scope:actor }
                 is_imprisoned_by = scope:actor
             }
+        }
+    }
+
+    # Investigation rulings 2026-10-18 §5.1 (S2): the patient in the actor's
+    # hands (vanilla 06_ep3_interactions.txt:4461-4476: courtier or guest who
+    # is_available). A prisoner is exempt from is_available: a dungeon is local.
+    is_valid_showing_failures_only = {
+        scope:recipient = {
+            custom_description = {
+                text = eotg_aug_patient_present_tt
+                eotg_aug_patient_at_court_of = { ACTOR = scope:actor }
+            }
+        }
+        trigger_if = {
+            limit = { scope:recipient = { is_imprisoned_by = scope:actor } }
+            always = yes
+        }
+        trigger_else = {
+            scope:recipient = { is_available = yes }
         }
     }
 
@@ -954,7 +994,7 @@ eotg_aug_examine_interaction = {
         }
     }
 
-    # Vassals, spouses and family at other courts (spec §4.3 table)
+    # Guests (spec §4.3 table; S2: the patient must be at the actor's court)
     ai_accept = {
         base = 25
         opinion_modifier = {

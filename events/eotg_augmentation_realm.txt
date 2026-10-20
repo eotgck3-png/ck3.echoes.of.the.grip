@@ -35,7 +35,15 @@ eotg_aug_realm.001 = {
     type = character_event
     title = eotg_aug_realm.001.t
     desc = {
-        desc = eotg_aug_realm.001.desc
+        # I2 lore pre-review: the subject who ORDERED the work on someone at
+        # their court (unaugmented themself) gets their own opener
+        first_valid = {
+            triggered_desc = {
+                trigger = { scope:eotg_contraband_subject = { eotg_is_augmented_any = no } }
+                desc = eotg_aug_realm.001.desc_opener_ordered
+            }
+            desc = eotg_aug_realm.001.desc
+        }
         first_valid = {
             triggered_desc = {
                 trigger = {
@@ -77,6 +85,13 @@ eotg_aug_realm.001 = {
                 trigger = { scope:eotg_contraband_subject = { eotg_is_aug_tier1 = yes } }
                 desc = eotg_aug_realm.001.desc_aug
             }
+        }
+        # Investigation rulings 2026-10-18 §4.5 (7): the subject ordered the
+        # work on someone at their court rather than received it (they are
+        # the answerable sponsor, R-A2), so no tier line above matched
+        triggered_desc = {
+            trigger = { scope:eotg_contraband_subject = { eotg_is_augmented_any = no } }
+            desc = eotg_aug_realm.001.desc_ordered
         }
         triggered_desc = {
             trigger = { scope:eotg_contraband_subject = { is_courtier_of = root } }

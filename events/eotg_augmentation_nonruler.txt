@@ -35,6 +35,10 @@ namespace = eotg_aug_nr
 # ── eotg_aug_nr.001 ───────────────────────────────────────────────────────────
 # The Champion Volunteers (NR-01). An unaugmented knight asks for the
 # implant. Caller: eotg_on_yearly_aug_nonruler_check (step 1).
+# Investigation rulings 2026-10-18 (I2a): a, c and d install through the
+# procedure roll with root as the sponsor (in c the knight pays, but the
+# liege granted it); the provider is derived. AI weights fall under a Ban
+# (R-A4: a, c, d x0.5; b +30).
 
 eotg_aug_nr.001 = {
     type = character_event
@@ -94,11 +98,16 @@ eotg_aug_nr.001 = {
             }
             eotg_aug_initiate_effect = yes
             eotg_add_fracture_risk = { AMOUNT = 0 }
+            # Investigation rulings 2026-10-18 §4.5 (5): through the roll,
+            # root (the liege) as the sponsor; last, so nothing runs on a
+            # knight who died on the table
+            eotg_aug_sponsored_install_effect = { SPONSOR = root }
         }
         ai_chance = {
             base = 40
             modifier = { add = 20  has_trait = ambitious }
             modifier = { add = 10  has_trait = brave }
+            modifier = { factor = 0.5  eotg_aug_under_policy = { LAW = ban } }    # R-A4
         }
     }
 
@@ -117,6 +126,7 @@ eotg_aug_nr.001 = {
             base = 30
             modifier = { add = 20  has_trait = zealous }
             modifier = { add = 10  has_trait = content }
+            modifier = { add = 30  eotg_aug_under_policy = { LAW = ban } }    # R-A4
         }
     }
 
@@ -132,11 +142,16 @@ eotg_aug_nr.001 = {
             eotg_aug_initiate_effect = yes
             eotg_add_fracture_risk = { AMOUNT = 0 }
             add_opinion = { modifier = eotg_opinion_aug_unease  target = root  years = 5 }
+            # Investigation rulings 2026-10-18 §4.5 (5): through the roll,
+            # root (the liege) as the sponsor; last, so nothing runs on a
+            # knight who died on the table
+            eotg_aug_sponsored_install_effect = { SPONSOR = root }
         }
         ai_chance = {
             base = 30
             modifier = { add = 20  has_trait = greedy }
             modifier = { add = 10  has_trait = arbitrary }
+            modifier = { factor = 0.5  eotg_aug_under_policy = { LAW = ban } }    # R-A4
         }
     }
 
@@ -160,6 +175,10 @@ eotg_aug_nr.001 = {
             eotg_add_fracture_risk = { AMOUNT = 0 }
             add_character_modifier = { modifier = eotg_mod_implant_calibrated  years = 3 }
             add_opinion = { modifier = eotg_opinion_aug_grateful_patient  target = root  years = 10 }
+            # Investigation rulings 2026-10-18 §4.5 (5): through the roll,
+            # root (the liege) as the sponsor; last, so nothing runs on a
+            # knight who died on the table
+            eotg_aug_sponsored_install_effect = { SPONSOR = root }
         }
         stress_impact = {
             generous = minor_stress_impact_loss
@@ -168,6 +187,7 @@ eotg_aug_nr.001 = {
             base = 30
             modifier = { add = 30  has_trait = generous }
             modifier = { add = 10  has_trait = compassionate }
+            modifier = { factor = 0.5  eotg_aug_under_policy = { LAW = ban } }    # R-A4
         }
     }
 
@@ -593,7 +613,9 @@ eotg_aug_nr.003 = {
 # (attacked) and flagged. No victim (desc_none, "a door, a bulkhead,
 # themselves"): the champion gets wounded_1 if unwounded.
 # a-d carry the wound helper for the liege (their champion, their
-# responsibility). e: the victim is killed by the champion.
+# responsibility). e: the victim is killed by the champion, openly.
+# g (CB-51, owner 2026-10-20): the same killing covered up, a murder secret
+# on the liege instead of public dread.
 # Imprisonment: vanilla imprison_character_effect (00_prison_effects.txt:1644;
 # QA round 2 M5), which picks house arrest or the dungeon and charges
 # tyranny and family opinion like every other arrest in the system.
@@ -779,13 +801,17 @@ eotg_aug_nr.004 = {
     }
 
     # [education_intrigue] "Let them finish." W5 (event_quality_v1 §13.1
-    # 3a): was [sadistic]; standing back and letting the breach be recorded
-    # as the hardware's doing is a cover-up, so intrigue. The victim's death
-    # and dread are a distinct move, so it cannot fold. sadistic keeps its
-    # stress loss here as a response through eotg_aug_stress_murder_effect
-    # (§13.1 step 4). AI: base lowered to 10 with compassionate / just /
-    # forgiving negatives, since an education gate opens a killing to far
-    # more AI lieges than sadistic did (B1 lesson 4, applied by analogy).
+    # 3a): was [sadistic]. The victim's death and dread are a distinct move,
+    # so it cannot fold. sadistic keeps its stress loss here as a response
+    # through eotg_aug_stress_murder_effect (§13.1 step 4). AI: base lowered
+    # to 10 with compassionate / just / forgiving negatives, since an
+    # education gate opens a killing to far more AI lieges than sadistic did
+    # (B1 lesson 4, applied by analogy).
+    # CB-51 (owner 2026-10-20): the OPEN version. It keeps its gate and its
+    # public effect (+20 dread, death_murder with the champion as the
+    # killer); the text now reads as an open act of intimidation, the
+    # intrigue lifestyle's dread line (vanilla 00_intrigue_3_intimidation_
+    # tree_perks.txt), not a concealment. The cover-up is g.
     option = {
         name = eotg_aug_nr.004.e
         # Killing: family must be impossible here, not merely unlikely
@@ -818,6 +844,56 @@ eotg_aug_nr.004 = {
             modifier = { add = 30  has_trait = sadistic }
             modifier = { add = 10  has_trait = callous }
             modifier = { add = -20  has_trait = compassionate }
+            modifier = { add = -10  has_trait = just }
+            modifier = { add = -10  has_trait = forgiving }
+        }
+    }
+
+    # [intrigue 15] "Let them finish, and let it be said the hardware did
+    # it." CB-51 (owner 2026-10-20): the cover-up version of e. No public
+    # dread: the victim dies by vanilla unknown_murder_effect
+    # (common/scripted_effects/00_murder_effects.txt:219-288: the death with
+    # the killer hidden, then a secret_murder on the murderer targeting the
+    # victim; used by events/activities/feast_activity/
+    # feast_default_events_laurence.txt:111-115). The liege who chose it is
+    # the murderer of record and holds the secret (the chooser answers,
+    # investigation rulings 2026-10-18 R-A2), so the cover-up can be found,
+    # blackmailed and exposed through vanilla. Gate: a skill threshold, not a
+    # second personality gate (§13.1 step 2: f is the one) and not a second
+    # education_intrigue gate (e has it); high_skill_rating (15, vanilla
+    # 00_basic_values.txt:476) with skill = intrigue. The signature move is
+    # the champion's risk (+5, as e).
+    option = {
+        name = eotg_aug_nr.004.g
+        # Killing: family must be impossible here, not merely unlikely (as e)
+        trigger = {
+            intrigue >= high_skill_rating
+            exists = scope:eotg_victim
+            scope:eotg_victim = {
+                is_alive = yes
+                NOT = { is_close_family_of = root }
+                NOT = { is_spouse_of = root }
+            }
+        }
+        skill = intrigue
+        unknown_murder_effect = {
+            VICTIM = scope:eotg_victim
+            MURDERER = root
+            REASON = death_murder
+        }
+        scope:eotg_champion = {
+            eotg_add_fracture_risk = { AMOUNT = 5 }
+        }
+        eotg_aug_stress_murder_effect = yes
+        eotg_aug_stress_lie_effect = yes
+        ai_chance = {
+            base = 10
+            modifier = { add = 20  has_trait = deceitful }
+            modifier = { add = 10  has_trait = sadistic }
+            modifier = { add = 10  has_trait = callous }
+            modifier = { add = 10  intrigue >= very_high_skill_rating }
+            modifier = { add = -20  has_trait = compassionate }
+            modifier = { add = -20  has_trait = honest }
             modifier = { add = -10  has_trait = just }
             modifier = { add = -10  has_trait = forgiving }
         }

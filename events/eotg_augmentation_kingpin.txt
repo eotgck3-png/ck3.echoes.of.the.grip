@@ -106,6 +106,15 @@ eotg_aug_kingpin.001 = {
     type = character_event
     title = eotg_aug_kingpin.001.t
     desc = {
+        # Investigation rulings 2026-10-18 §7.1 (X2): under a Cartel ruler a
+        # framing line first, a rival boss on the ruler's own ground. The
+        # rival stays unnamed and is never a canon syndicate (LQ6).
+        first_valid = {
+            triggered_desc = {
+                trigger = { government_has_flag = eotg_government_is_cartel }
+                desc = eotg_aug_kingpin.001.desc_rival_boss
+            }
+        }
         first_valid = {
             triggered_desc = {
                 trigger = { exists = scope:eotg_kp_reporter }

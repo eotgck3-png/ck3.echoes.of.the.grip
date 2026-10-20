@@ -21,7 +21,7 @@ yearly_playable_pulse = {
 # Fires eotg_aug_kingpin.001 Word From Below. Owner ruling Q3 (2026-10-06):
 # 2% a year at base (was 4%), x2 with a Patron, x1.5 augmented, x1.5 under
 # a Ban, x1.5 with illegal implants, x1.25 with an augmented courtier or
-# vassal, x0.25 for the AI. Once per life (eotg_flag_aug_had_kingpin, read
+# vassal, x0.25 for the AI, x0.5 under a Cartel ruler (X2). Once per life (eotg_flag_aug_had_kingpin, read
 # by eotg_aug_kp_can_start) and the 10-year cooldown cap it.
 eotg_on_yearly_aug_kingpin_check = {
     trigger = {
@@ -58,6 +58,16 @@ eotg_on_yearly_aug_kingpin_check = {
                 modifier = {
                     factor = 0.25
                     is_ai = yes
+                }
+                # Investigation rulings 2026-10-18 §7 (X2, owner 2026-10-20):
+                # under a Cartel ruler the chain starts at half the rate (a
+                # rival boss moving in on the ruler's own ground). The
+                # government flag, never a government key; vanilla flag-test
+                # shape: common/scripted_rules/01_grant_title_rules.txt:39-42.
+                # Stacks with the x1.5 under a Ban above.
+                modifier = {
+                    factor = 0.5
+                    government_has_flag = eotg_government_is_cartel
                 }
                 add_character_flag = { flag = eotg_flag_aug_kingpin_cooldown  years = 10 }
                 trigger_event = { id = eotg_aug_kingpin.001  days = { 1 30 } }
