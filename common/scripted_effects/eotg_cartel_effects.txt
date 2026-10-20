@@ -1,0 +1,114 @@
+﻿# -- eotg_cartel_effects.txt --------------------------------------------------
+# Governments v2, Phase G2, Cartel batch C1 (docs/specs/governments_v2_g2_cartel.md
+# §2.2-§2.6, §3.1). All character scope.
+#
+# AUTHORITY (spec §2.2, §13 item 3): eotg_cartel_change_dread_effect is the ONLY
+# place Cartel content calls add_dread. Vanilla content and other mod systems
+# still write dread directly; the rule covers Cartel files only.
+# eotg_cartel_refresh_schedule_effect is the only writer of
+# var:eotg_cartel_schedule_scale. eotg_cartel_sync_story_effect is the only
+# writer of the story's display mirror eotg_cartel_dread_shown (on_setup
+# seeds it once, see eotg_cartel_story.txt).
+#
+# The walk-off and start-schedule effects come with batch C2.
+# -----------------------------------------------------------------------------
+
+# Change dread by $AMOUNT$ (a number, a script value, or a { } block).
+# Callers gate spends in is_valid (dread >= cost); this effect never checks
+# affordability (spec §2.3, vanilla's literal-gated dread option,
+# G/common/character_interactions/00_tributary_interactions.txt:5598-5604).
+# Gains are multiplied by the engine (dread_gain_mult); the clamp works on the
+# pre-multiplier amount and the engine re-clamps at the cap (accepted, §2.3).
+# save_scope_value_as form: G/common/scripted_effects/
+# 00_administrative_effects.txt:101-104.
+eotg_cartel_change_dread_effect = {
+    save_scope_value_as = {
+        name = eotg_cartel_dread_amount
+        value = $AMOUNT$
+    }
+    add_dread = eotg_cartel_dread_clamped_value
+    # Refresh the story counter now, not at the monthly tick
+    eotg_cartel_sync_story_effect = yes
+}
+
+# Copy the owner's dread onto the schedule story's display variable (spec
+# §2.7 layer 4). Display only: no script reads eotg_cartel_dread_shown as the
+# resource. Story lookup form: eotg_augmentation_effects.txt:1044-1047;
+# `.dread` as a value: G/common/character_interactions/
+# 09_mpo_interactions.txt:4392.
+eotg_cartel_sync_story_effect = {
+    save_temporary_scope_as = eotg_cartel_sync_owner
+    random_owned_story = {
+        limit = { story_type = eotg_story_cartel_schedule }
+        set_variable = {
+            name = eotg_cartel_dread_shown
+            value = scope:eotg_cartel_sync_owner.dread
+        }
+    }
+}
+
+# Rewrite the baseline mirror: min(4 x payers, 40) (spec §2.2, OQ6 numbers
+# approved 2026-10-20). The schedule modifier scales by it.
+eotg_cartel_refresh_schedule_effect = {
+    set_variable = {
+        name = eotg_cartel_schedule_scale
+        value = {
+            value = eotg_cartel_payer_count_value
+            multiply = 4
+            max = 40
+        }
+    }
+}
+
+# Idempotent setup (spec §2.6). Called from eotg_cartel_on_game_start,
+# eotg_cartel_on_government_change (new government is Cartel) and
+# eotg_cartel_on_title_gain (Cartel with no story: heirs, newly landed
+# courtiers via use_as_base_on_landed). Modifier added without duration as
+# G/common/on_action/travel_on_actions.txt:1432.
+eotg_cartel_init_effect = {
+    if = {
+        limit = {
+            NOT = {
+                any_owned_story = { story_type = eotg_story_cartel_schedule }
+            }
+        }
+        create_story = eotg_story_cartel_schedule
+    }
+    if = {
+        limit = {
+            NOT = { has_character_modifier = eotg_cartel_schedule_modifier }
+        }
+        add_character_modifier = eotg_cartel_schedule_modifier
+    }
+    eotg_cartel_refresh_schedule_effect = yes
+    eotg_cartel_sync_story_effect = yes
+}
+
+# Undo eotg_cartel_init_effect (spec §2.6). Does NOT touch dread (a universal
+# currency: the fear lingers). Payers are ended by the exit decision (C4) and
+# by the contract group's validity check (C2). Called from
+# eotg_cartel_on_government_change (Cartel -> other) and the story's monthly
+# tick when the owner is no longer a landed Cartel ruler.
+eotg_cartel_teardown_effect = {
+    if = {
+        limit = {
+            any_owned_story = { story_type = eotg_story_cartel_schedule }
+        }
+        random_owned_story = {
+            limit = { story_type = eotg_story_cartel_schedule }
+            end_story = yes
+        }
+    }
+    if = {
+        limit = { has_character_modifier = eotg_cartel_schedule_modifier }
+        remove_character_modifier = eotg_cartel_schedule_modifier
+    }
+    if = {
+        limit = { has_variable = eotg_cartel_schedule_scale }
+        remove_variable = eotg_cartel_schedule_scale
+    }
+    if = {
+        limit = { has_variable = eotg_cartel_succession_grace }
+        remove_variable = eotg_cartel_succession_grace
+    }
+}

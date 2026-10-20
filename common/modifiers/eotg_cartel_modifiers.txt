@@ -1,0 +1,24 @@
+﻿# -- eotg_cartel_modifiers.txt ------------------------------------------------
+# Governments v2, Phase G2, Cartel (docs/specs/governments_v2_g2_cartel.md §2.7,
+# §3.1). Batch C1: the schedule modifier. eotg_cartel_leaned_on_modifier is C3.
+# -----------------------------------------------------------------------------
+
+# Display layer 1 (spec §2.7): +1 dread baseline scaled by
+# eotg_cartel_schedule_scale_value (= min(4 x payers, 40), written only by
+# eotg_cartel_refresh_schedule_effect), so the character window reads
+# "+N Dread baseline". Added without duration by eotg_cartel_init_effect,
+# removed by eotg_cartel_teardown_effect and the story's on_end.
+# Shape: prepare_travels_character_modifier
+# (G/common/modifiers/00_court_position_modifiers.txt:133-142); icon as
+# G/common/modifiers/00_activity_wedding_modifiers.txt; dread_baseline_add as
+# :136 there.
+eotg_cartel_schedule_modifier = {
+    icon = dread_positive
+    dread_baseline_add = 1
+
+    scale = {
+        value = eotg_cartel_schedule_scale_value
+        desc = eotg_cartel_schedule_scale_desc
+        display_mode = scaled
+    }
+}

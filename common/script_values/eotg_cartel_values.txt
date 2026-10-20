@@ -1,0 +1,50 @@
+﻿# -- eotg_cartel_values.txt ---------------------------------------------------
+# Governments v2, Phase G2, Cartel batch C1 (docs/specs/governments_v2_g2_cartel.md
+# §2.2, §3.1). All character scope. Magnitudes and thresholds are vanilla
+# (miniscule..massive_dread_gain/_loss, low/medium/high_dread:
+# G/common/script_values/00_basic_values.txt:725-734, 993-995).
+# The C2-C4 values (schedule cost, tighten cost, exit legitimacy) come with
+# their batches.
+# -----------------------------------------------------------------------------
+
+# The real change eotg_cartel_change_dread_effect applies: the requested
+# amount (scope:eotg_cartel_dread_amount) clamped so the result stays inside
+# [0, 100], i.e. the change is clamped to [-dread, 100 - dread], and the
+# tooltip shows the change that actually happens (spec §2.2).
+# 100 = MAX_DREAD (G/common/defines/00_defines.txt:120); the Cartel does not
+# set max_dread (OQ5, owner 2026-10-20: no change yet). `add = dread` on a
+# character is vanilla (G/common/on_action/dlc/mpo/mpo_on_actions_2.txt:440).
+eotg_cartel_dread_clamped_value = {
+    value = scope:eotg_cartel_dread_amount
+    add = dread             # now: the resulting dread
+    min = 0
+    max = 100
+    subtract = dread        # back to a change
+}
+
+# Payers on the Cartel schedule (spec §2.2): every tributary in the
+# eotg_cartel_tributary contract group.
+# C1 STUB: the contract group is batch C2 (spec §10), and a trigger naming an
+# undefined group would log an error at load (V-C1). Until C2 this is 0, so
+# the schedule modifier reads +0 (V-C2) and the death grace never fires.
+# C2 replaces the body with:
+#   every_tributary = {
+#       limit = { has_subject_contract_group = eotg_cartel_tributary }
+#       add = 1
+#   }
+eotg_cartel_payer_count_value = {
+    value = 0
+}
+
+# The schedule modifier's scale (spec §2.7): var:eotg_cartel_schedule_scale,
+# 0 when unset. Shape: prepare_travels_modifier_value
+# (G/common/script_values/00_court_position_values.txt:2602-2611).
+eotg_cartel_schedule_scale_value = {
+    value = 0
+    if = {
+        limit = {
+            has_variable = eotg_cartel_schedule_scale
+        }
+        value = var:eotg_cartel_schedule_scale
+    }
+}

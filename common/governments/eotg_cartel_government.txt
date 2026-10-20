@@ -56,7 +56,13 @@ eotg_cartel_government = {
         intrigue = 2                        # v1
         diplomacy = -2                      # v1
         dread_gain_mult = 0.25
-        dread_decay_mult = 0.25             # the common form (v1 used dread_decay_add)
+        # G2 C1 sign fix (docs/specs/governments_v2_g2_cartel.md §2.4): a
+        # NEGATIVE decay mult is the bonus (slower fade), as vanilla
+        # champion aptitude -0.02..-0.3 (00_court_positions.txt:6850-6870) and
+        # tradition_ruling_caste -0.3 (00_realm_traditions.txt:2260, 2279).
+        # G1's +0.25 made dread fade faster. 0.5/month (00_defines.txt:122)
+        # becomes 0.375/month. Value change only: not save-breaking.
+        dread_decay_mult = -0.25
     }
 
     ai = {

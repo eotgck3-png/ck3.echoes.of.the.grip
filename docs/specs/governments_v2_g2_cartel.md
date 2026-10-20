@@ -446,7 +446,7 @@ Owner rule: every new event, option or beat needs approval. None of these is in 
 | ID | Check | Pass |
 |---|---|---|
 | V-C1 | error.log shows nothing from the new files. The story, group, interaction, decisions and modifiers load. | yes |
-| V-C2 | Alfonso (k_leon) has `eotg_cartel_schedule_modifier` (+0 with no payers) and a visible "Payment Schedule" story whose counter equals his dread within a month. Rodrigo and Pedru have the story only if they are independent (they are not), so expect none. | yes |
+| V-C2 | Alfonso (k_leon) has `eotg_cartel_schedule_modifier` (+0 with no payers) and a visible "Payment Schedule" story whose counter equals his dread within a month. Rodrigo and Pedru (landed Cartel vassals) **also have the story** (QA C1, 2026-10-20: §2.6 gives it to every landed Cartel ruler; a top-only story would be lost on independence without a title gain, since vanilla has no general on-independence hook). | yes |
 | V-C3 | `add_dread 50` on Alfonso and on a feudal ruler. After 12 months the Cartel's dread has fallen less (about 4.5 against 6). | yes |
 | V-C4 | Put on the Schedule is shown against an adjacent independent ruler (the Spain pockets, `governments_v2.md` §12) and not against a vassal, an Unsworn placeholder or a ruler in Alfonso's bloc. The dread cost appears in the tooltip. On acceptance: the payer is in `eotg_cartel_tributary` at low taxes; dread falls by the cost; the modifier shows +4; and tributary land counts towards title creation (`count_tributaries_for_title_requirements`). | yes |
 | V-C5 | At dread ≥ 80, the compel option auto-accepts, costs 10 more and gives the payer −20 "compelled" opinion. | yes |

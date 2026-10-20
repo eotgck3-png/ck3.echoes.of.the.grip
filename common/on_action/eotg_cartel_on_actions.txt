@@ -1,0 +1,113 @@
+﻿# -- eotg_cartel_on_actions.txt -----------------------------------------------
+# Governments v2, Phase G2, Cartel batch C1 (docs/specs/governments_v2_g2_cartel.md
+# §2.6, §6.3). Sets up and tears down the schedule story and modifier, and
+# sets the succession grace on a dying Cartel ruler's heir.
+# Vanilla hooks are extended ADDITIVELY only (CLAUDE.md invariant 4):
+# `on_actions = { }` lists, never a top-level effect/trigger on a vanilla
+# hook. No cooldown is involved; no event is fired. Kept apart from
+# eotg_government_on_actions.txt (G1 law net) so the batches stay separable.
+# -----------------------------------------------------------------------------
+
+# Vanilla G/common/on_action/game_start.txt:2 (after history is applied)
+on_game_start = {
+    on_actions = {
+        eotg_cartel_on_game_start
+    }
+}
+
+# Vanilla G/common/on_action/game_start.txt:2553: ruler-designer characters
+# exist only after the lobby (precedent eotg_government_on_actions.txt:15-25).
+# eotg_cartel_init_effect is idempotent, so running twice is harmless.
+on_game_start_after_lobby = {
+    on_actions = {
+        eotg_cartel_on_game_start
+    }
+}
+
+# Vanilla G/common/on_action/government_on_actions.txt:4
+# root = the character who changed government; scope:old_government.
+on_government_change = {
+    on_actions = {
+        eotg_cartel_on_government_change
+    }
+}
+
+# Vanilla G/common/on_action/title_on_actions.txt:229-233
+# root = the new holder; scope:title; scope:previous_holder.
+on_title_gain = {
+    on_actions = {
+        eotg_cartel_on_title_gain
+    }
+}
+
+# Vanilla G/common/on_action/death.txt:1-7: root is about to die.
+on_death = {
+    on_actions = {
+        eotg_cartel_on_death
+    }
+}
+
+eotg_cartel_on_game_start = {
+    effect = {
+        every_ruler = {
+            limit = { eotg_cartel_is_landed_cartel = yes }
+            eotg_cartel_init_effect = yes
+        }
+    }
+}
+
+# Into the Cartel: init. Out of it: teardown (spec §2.6). The flag test on a
+# government-type scope is vanilla (G/common/scripted_rules/
+# 01_grant_title_rules.txt:39-42; G/common/on_action/government_on_actions.txt:101).
+eotg_cartel_on_government_change = {
+    effect = {
+        if = {
+            limit = { eotg_cartel_is_landed_cartel = yes }
+            eotg_cartel_init_effect = yes
+        }
+        else_if = {
+            limit = {
+                NOT = { government_has_flag = eotg_government_is_cartel }
+                scope:old_government = {
+                    government_type_has_flag = eotg_government_is_cartel
+                }
+            }
+            eotg_cartel_teardown_effect = yes
+        }
+    }
+}
+
+# Catches heirs (the dead ruler's story ended in on_owner_death) and newly
+# landed courtiers. Trigger-gated so it is cheap: on_title_gain fires once per
+# title transfer, and a Cartel who already holds the story costs one trigger.
+eotg_cartel_on_title_gain = {
+    trigger = {
+        eotg_cartel_is_landed_cartel = yes
+        NOT = {
+            any_owned_story = { story_type = eotg_story_cartel_schedule }
+        }
+    }
+    effect = {
+        eotg_cartel_init_effect = yes
+    }
+}
+
+# Succession grace (spec §2.2, §6.3; OQ2, owner 2026-10-20): the primary heir
+# of a Cartel ruler with payers gets 3 years in which the walk-off (C2) is
+# skipped. The variable expires on its own; a non-Cartel heir simply never
+# reads it. Inert until C2 fills eotg_cartel_payer_count_value.
+eotg_cartel_on_death = {
+    trigger = {
+        government_has_flag = eotg_government_is_cartel
+        exists = primary_heir
+        eotg_cartel_payer_count_value > 0
+    }
+    effect = {
+        primary_heir = {
+            set_variable = {
+                name = eotg_cartel_succession_grace
+                years = 3
+            }
+        }
+    }
+}

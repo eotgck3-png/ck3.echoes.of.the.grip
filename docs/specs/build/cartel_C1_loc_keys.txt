@@ -1,0 +1,17 @@
+# Cartel G2 batch C1 (resource core), 2026-10-20
+# Spec: docs/specs/governments_v2_g2_cartel.md §2.7, §9. Target file:
+# localization/english/eotg_cartel_l_english.yml (UTF-8 with one BOM, bare [x.GetName]).
+# Voice: §8 (no B2 mafia vocabulary, no nation names, Canadian English).
+
+# Modifier (common/modifiers/eotg_cartel_modifiers.txt)
+eotg_cartel_schedule_modifier          # name: "The Payment Schedule" family; shows "+N Dread baseline"
+eotg_cartel_schedule_modifier_desc     # payers on the schedule hold the fear up
+eotg_cartel_schedule_scale_desc        # scale line: 4 per payer, up to 40
+
+# Story (common/story_cycles/eotg_cartel_story.txt)
+eotg_story_cartel_schedule             # story name: "The Payment Schedule"
+eotg_story_cartel_schedule_info        # custom_string_key: thresholds 20 keeps payers, 40 entry, 80 compels
+eotg_story_cartel_schedule_dread_label # counter label (dread)
+eotg_story_cartel_schedule_min_label   # counter min label (0)
+eotg_story_cartel_schedule_max_label   # counter max label (100)
+eotg_story_cartel_schedule_tt          # counter tooltip; MUST state the counter can lag actual dread by up to a month

@@ -1,0 +1,60 @@
+﻿# -- eotg_cartel_triggers.txt -------------------------------------------------
+# Governments v2, Phase G2, Cartel batch C1 (docs/specs/governments_v2_g2_cartel.md
+# §3.1; role ladder per docs/specs/governments_v2.md §14.2).
+#
+# The role ladder is RELATIVE: the top is the independent Cartel ruler at any
+# tier; the vassal roles match by highest_held_title_tier (vanilla form,
+# G/common/activities/activity_types/feast.txt:32). Identity is read through
+# the government flag, never has_government (spec §13 item 5).
+# Map-agnostic: no title, culture, faith or character key.
+#
+# Readers: C1 builds none of the role-gated content (decisions C3/C4, the
+# interaction C2); these are the gates those batches use (spec §4, §5.2, §6).
+# -----------------------------------------------------------------------------
+
+# The boss: a landed, independent Cartel ruler at any tier
+eotg_cartel_role_top = {
+    is_landed = yes
+    government_has_flag = eotg_government_is_cartel
+    is_independent_ruler = yes
+}
+
+# Cartel vassal whose highest title is a county
+eotg_cartel_role_county = {
+    is_landed = yes
+    government_has_flag = eotg_government_is_cartel
+    is_independent_ruler = no
+    highest_held_title_tier = tier_county
+}
+
+# Cartel vassal whose highest title is a duchy
+eotg_cartel_role_duchy = {
+    is_landed = yes
+    government_has_flag = eotg_government_is_cartel
+    is_independent_ruler = no
+    highest_held_title_tier = tier_duchy
+}
+
+# Cartel vassal whose highest title is a kingdom
+eotg_cartel_role_kingdom = {
+    is_landed = yes
+    government_has_flag = eotg_government_is_cartel
+    is_independent_ruler = no
+    highest_held_title_tier = tier_kingdom
+}
+
+# Any Cartel vassal tier (the Gate 2 every-tier rule, v1 lesson 4)
+eotg_cartel_role_vassal = {
+    OR = {
+        eotg_cartel_role_county = yes
+        eotg_cartel_role_duchy = yes
+        eotg_cartel_role_kingdom = yes
+    }
+}
+
+# A landed Cartel ruler of any rank: who holds the schedule story (spec §2.6,
+# §3.2 monthly tick (a)). Read by the on_actions and the story tick.
+eotg_cartel_is_landed_cartel = {
+    is_landed = yes
+    government_has_flag = eotg_government_is_cartel
+}
