@@ -1,6 +1,6 @@
 ﻿# -- eotg_cartel_modifiers.txt ------------------------------------------------
 # Governments v2, Phase G2, Cartel (docs/specs/governments_v2_g2_cartel.md §2.7,
-# §3.1). Batch C1: the schedule modifier. eotg_cartel_leaned_on_modifier is C3.
+# §3.1). Batch C1: the schedule modifier. Batch C3: eotg_cartel_leaned_on_modifier.
 # -----------------------------------------------------------------------------
 
 # Display layer 1 (spec §2.7): +1 dread baseline scaled by
@@ -21,4 +21,16 @@ eotg_cartel_schedule_modifier = {
         desc = eotg_cartel_schedule_scale_desc
         display_mode = scaled
     }
+}
+
+# County modifier (spec §3.1, §4.2): the Shoal a Cartel vassal leaned on.
+# Unhappier, but paying more. Applied for 5 years to the taker's capital
+# county by eotg_decision_cartel_lean_on_locals (eotg_cartel_decisions.txt).
+# Shape: guarded_irrigated_oasis_modifier (opinion -10 with tax_mult 0.1,
+# G/common/modifiers/00_county_modifiers.txt:94-101); icon as the
+# county_opinion_add penalties there.
+eotg_cartel_leaned_on_modifier = {
+    icon = county_modifier_opinion_mixed
+    county_opinion_add = -15
+    tax_mult = 0.1
 }

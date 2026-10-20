@@ -3,8 +3,11 @@
 # §2.2, §3.1). All character scope. Magnitudes and thresholds are vanilla
 # (miniscule..massive_dread_gain/_loss, low/medium/high_dread:
 # G/common/script_values/00_basic_values.txt:725-734, 993-995).
-# C2 adds eotg_cartel_schedule_cost_value. The C3-C4 values (tighten cost,
-# exit legitimacy) come with their batches.
+# C2 adds eotg_cartel_schedule_cost_value; C3 the tighten cost; C4 the exit
+# legitimacy and dread-loss values.
+# AMOUNT RULE (QA C2, 2026-10-20): eotg_cartel_change_dread_effect takes a
+# number or a NAMED value. An inline { } block as a scripted-effect argument
+# is rejected (Tiger error(macro)), so every spend has a named *_spend_value.
 # -----------------------------------------------------------------------------
 
 # The real change eotg_cartel_change_dread_effect applies: the requested
@@ -82,4 +85,54 @@ eotg_cartel_schedule_cost_value = {
 eotg_cartel_schedule_spend_value = {
     value = eotg_cartel_schedule_cost_value
     multiply = -1
+}
+
+# Payers still at low taxes (default_tributary_taxes level 1): what Tighten
+# the Schedule can raise (spec §4.1). Trigger form on a tributary:
+# G/common/character_interactions/00_tributary_interactions.txt:5367-5375;
+# levels per G/common/subject_contracts/contracts/default_tributary.txt:1-58.
+eotg_cartel_low_payer_count_value = {
+    value = 0
+    every_tributary = {
+        limit = {
+            has_subject_contract_group = eotg_cartel_tributary
+            vassal_contract_obligation_level:default_tributary_taxes = 1
+        }
+        add = 1
+    }
+}
+
+# Dread price of Tighten the Schedule (spec §4.1, OQ6 approved 2026-10-20):
+# 5 per low payer, min 10, max 40. Read by the decision's is_valid and
+# ai_will_do, and (negated) by eotg_cartel_tighten_spend_value.
+eotg_cartel_tighten_cost_value = {
+    value = eotg_cartel_low_payer_count_value
+    multiply = 5
+    min = 10
+    max = 40
+}
+
+# The same price as a negative change for eotg_cartel_change_dread_effect
+# (AMOUNT rule above). Read before the payers are raised, so the low count
+# is still the one the player saw. Tighten effect only.
+eotg_cartel_tighten_spend_value = {
+    value = eotg_cartel_tighten_cost_value
+    multiply = -1
+}
+
+# Go Legitimate (spec §6.2): dread converts to legitimacy at 2 per point,
+# capped at major_legitimacy_gain (200,
+# G/common/script_values/00_legitimacy_values.txt:174). Read before the
+# dread is halved (the decision effect pays legitimacy first).
+eotg_cartel_exit_legitimacy_value = {
+    value = dread
+    multiply = 2
+    max = major_legitimacy_gain
+}
+
+# Go Legitimate's dread loss: half the current dread, as a negative change
+# (spec §6.2 step 2; AMOUNT rule above). Exit effect only.
+eotg_cartel_exit_dread_loss_value = {
+    value = dread
+    multiply = -0.5
 }

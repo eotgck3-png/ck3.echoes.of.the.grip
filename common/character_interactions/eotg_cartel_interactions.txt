@@ -151,16 +151,21 @@ eotg_cartel_put_on_schedule_interaction = {
         scope:actor = {
             # A threat that is called costs fear
             eotg_cartel_change_dread_effect = { AMOUNT = miniscule_dread_loss }
-            # Vanilla "Demand Tributary Response: Refused" letter
-            # (G/events/interaction_events/character_interaction_events.txt:2920).
-            # It reads scope:puppet_or_actor (:2937); set it if the engine has
-            # not, as vanilla blackmail_interaction_effect does
-            # (G/common/scripted_effects/00_interaction_effects.txt:27-30).
-            if = {
-                limit = { NOT = { exists = scope:puppet_or_actor } }
-                save_scope_as = puppet_or_actor
+            # Refusal toast, same shape as on_accept (QA C2, 2026-10-20). It
+            # replaces vanilla letter char_interaction.0363, which showed
+            # vanilla tributary_demanded_opinion and
+            # demand_tributary_interaction_cooldown_tt instead of the
+            # eotg_refused_protection_opinion (3 years) applied above.
+            # Toast shape: 00_tributary_interactions.txt:2176-2183.
+            hidden_effect = {
+                send_interface_toast = {
+                    type = event_toast_effect_bad
+                    title = eotg_cartel_schedule_refused_toast
+                    left_icon = scope:actor
+                    right_icon = scope:recipient
+                    custom_tooltip = eotg_cartel_schedule_refused_toast_desc
+                }
             }
-            trigger_event = char_interaction.0363
         }
     }
 

@@ -54,6 +54,17 @@ eotg_cartel_government = {
 
     vassal_contract_group = eotg_cartel_vassal # §6; feudal :22
 
+    # G2 C4 (docs/specs/governments_v2_g2_cartel.md §7): the feudal list,
+    # verbatim (G/common/governments/00_government_types.txt:40; same at admin
+    # :553, celestial :915, meritocratic :1354). is_grant_government_shown
+    # offers only the faith's own theocratic type
+    # (G/common/scripted_rules/01_grant_title_rules.txt:37-46), so no faith
+    # key is needed. feudal_government is deliberately NOT listed (it would
+    # be an erosion path out of the Cartel). grant_vassal_ai_will_do is not
+    # set: no government lists the Cartel as a grant type, so it would be
+    # dead (spec §7; default 0, _governments.info:738-756).
+    possible_grant_vassal_governments = { theocracy_government ecclesiastical_government }
+
     character_modifier = {
         intrigue = 2                        # v1
         diplomacy = -2                      # v1

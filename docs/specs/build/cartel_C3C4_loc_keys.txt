@@ -1,0 +1,50 @@
+# Cartel G2, batches C3 (decisions) and C4 (transitions), plus the C2 QA fix, 2026-10-20
+# Spec: docs/specs/governments_v2_g2_cartel.md §4, §5.2, §6, §9. Target file:
+# localization/english/eotg_cartel_l_english.yml (UTF-8 with BOM, bare [x.GetName]).
+# Script: common/decisions/eotg_cartel_decisions.txt,
+# common/modifiers/eotg_cartel_modifiers.txt,
+# common/character_interactions/eotg_cartel_interactions.txt (refusal toast).
+# Voice: vanilla UI voice. Canadian English. Lore §8: generic syndicate-state;
+# "protection", "payment schedule", "payers" fine; B2 mafia words banned (no
+# "racket", Don, capo, the Family...). No court, registry or League. Prose says
+# Bastion / Port ([castle|E] / [city|E]); the county term is Shoal.
+# Decision scope in loc: root is the taker ([ROOT.Char.GetName] or plain "you").
+# Vanilla keys REUSED (do not redefine): not_changed_government_recently_tt.
+# Vanilla event char_interaction.0363 is NO LONGER used (replaced by the refusal toast).
+
+## C2 QA fix: refusal toast (2 keys) -- interaction scopes [actor.GetName], [recipient.GetName]
+eotg_cartel_schedule_refused_toast                   # toast title to the actor: "Protection Refused"
+eotg_cartel_schedule_refused_toast_desc              # body: [recipient.GetName] refused your protection. The called bluff costs you [dread|E]; they will not hear the offer again for 3 years.
+
+## Tighten the Schedule (top tier) -- 7 keys
+eotg_decision_cartel_tighten_schedule                # name: "Tighten the Schedule"
+eotg_decision_cartel_tighten_schedule_desc           # raise every low-tax payer on your schedule to high taxes; costs [dread|E], and they will resent it
+eotg_decision_cartel_tighten_schedule_tooltip        # list hover: squeeze your payers harder, at a price in fear
+eotg_decision_cartel_tighten_schedule_confirm        # button: "Raise the payments"
+eotg_decision_cartel_tighten_schedule_payers_tt      # requirement: at least one payer on your schedule is still at low taxes
+eotg_decision_cartel_tighten_schedule_dread_tt       # requirement: enough [dread|E] (5 per low-tax payer, at least 10, at most 40)
+eotg_decision_cartel_tighten_schedule_effect_tt      # effect line: every low-tax payer on your schedule now pays high taxes
+
+## Lean on the Locals (vassal tiers) -- 4 keys
+eotg_decision_cartel_lean_on_locals                  # name: "Lean on the Locals"
+eotg_decision_cartel_lean_on_locals_desc             # squeeze your capital Shoal for money and fear: gain [dread|E]; the Shoal pays more and likes you less for 5 years; a Cartel liege hears of it and is feared a little more too
+eotg_decision_cartel_lean_on_locals_tooltip          # list hover: remind your own Shoal who it pays
+eotg_decision_cartel_lean_on_locals_confirm          # button: "Make an example"
+
+## Run the Realm as a Cartel (entry) -- 5 keys
+eotg_decision_cartel_adopt                           # name: "Run the Realm as a Cartel"
+eotg_decision_cartel_adopt_desc                      # you are already feared; rule openly through fear and keep your neighbours on a payment schedule. Only you change: your vassals keep their governments, but land you grant from now on is run the Cartel way
+eotg_decision_cartel_adopt_tooltip                   # list hover: turn your realm's fear into a government
+eotg_decision_cartel_adopt_confirm                   # button: "Run it as a Cartel"
+eotg_decision_cartel_adopt_dread_tt                  # requirement: at least 40 [dread|E]
+
+## Go Legitimate (exit) -- 5 keys
+eotg_decision_cartel_go_legitimate                   # name: "Go Legitimate"
+eotg_decision_cartel_go_legitimate_desc              # leave the Cartel behind: become Feudal; your fear turns into [legitimacy|E] (2 per point of dread, at most 200) and half of it fades
+eotg_decision_cartel_go_legitimate_tooltip           # list hover: trade fear for standing
+eotg_decision_cartel_go_legitimate_confirm           # button: "Go straight"
+eotg_decision_cartel_go_legitimate_effect_tt         # effect line: every payer on your schedule is released, and your Cartel vassals become Feudal with you
+
+## County modifier -- 2 keys
+eotg_cartel_leaned_on_modifier                       # name: "Leaned On"
+eotg_cartel_leaned_on_modifier_desc                  # this Shoal was squeezed by its holder: it pays more and resents it

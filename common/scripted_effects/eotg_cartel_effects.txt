@@ -11,10 +11,15 @@
 # seeds it once, see eotg_cartel_story.txt).
 #
 # Batch C2 adds eotg_cartel_start_schedule_effect (interaction on_accept) and
-# eotg_cartel_walk_off_effect (story yearly tick).
+# eotg_cartel_walk_off_effect (story yearly tick). C3/C4 callers of the change
+# effect: eotg_cartel_decisions.txt (Tighten, Lean, Go Legitimate).
 # -----------------------------------------------------------------------------
 
-# Change dread by $AMOUNT$ (a number, a script value, or a { } block).
+# Change dread by $AMOUNT$: a number or a NAMED script value. Not an inline
+# { } block: a block as a scripted-effect argument is rejected (Tiger
+# error(macro); QA C2, 2026-10-20). Negative spends therefore have named
+# values (eotg_cartel_schedule_spend_value, eotg_cartel_tighten_spend_value,
+# eotg_cartel_exit_dread_loss_value in eotg_cartel_values.txt).
 # Callers gate spends in is_valid (dread >= cost); this effect never checks
 # affordability (spec §2.3, vanilla's literal-gated dread option,
 # G/common/character_interactions/00_tributary_interactions.txt:5598-5604).
@@ -86,7 +91,8 @@ eotg_cartel_init_effect = {
 }
 
 # Undo eotg_cartel_init_effect (spec §2.6). Does NOT touch dread (a universal
-# currency: the fear lingers). Payers are ended by the exit decision (C4) and
+# currency: the fear lingers). Payers are ended by the exit decision
+# (eotg_decision_cartel_go_legitimate) and
 # by the contract group's validity check (eotg_cartel_tributary
 # is_valid_tributary_contract, eotg_cartel_contract_groups.txt). Called from
 # eotg_cartel_on_government_change (Cartel -> other) and the story's monthly

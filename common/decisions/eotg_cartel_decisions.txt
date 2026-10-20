@@ -1,0 +1,418 @@
+﻿# -- eotg_cartel_decisions.txt ------------------------------------------------
+# Governments v2, Phase G2, Cartel (docs/specs/governments_v2_g2_cartel.md
+# §4, §6, §7).
+#   Batch C3: eotg_decision_cartel_tighten_schedule (top tier, a dread sink)
+#             and eotg_decision_cartel_lean_on_locals (vassal tiers, a dread
+#             source).
+#   Batch C4: eotg_decision_cartel_adopt (entry) and
+#             eotg_decision_cartel_go_legitimate (exit).
+#
+# Signature resource: dread. Every decision here reads dread (is_valid or
+# ai_will_do) and moves it ONLY through eotg_cartel_change_dread_effect
+# (spec §2.2, §13 item 3); the adopt decision reads it and leaves it alone.
+# Dread is not a decision `cost` key (_decisions.info:258-265), so spends are
+# gated in is_valid and paid in `effect`.
+# AMOUNT is always a number or a named value (eotg_cartel_values.txt), never
+# an inline { } block (Tiger error(macro); QA C2, 2026-10-20).
+# Cooldowns: each decision's own `cooldown` (or vanilla's
+# changed_government_recently for the two transitions) is the only
+# authority; nothing re-checks it.
+# Role gates: the 4-tier ladder in eotg_cartel_triggers.txt, never
+# has_government or is_independent_ruler alone.
+#
+# Shape: estate_governor_patrols_decision (G/common/decisions/dlc_decisions/
+# ep_3/06_ep3_admin_decisions.txt:170-290) for C3; convert_to_mandala_
+# government_decision and mandala_adopt_clan_government_decision
+# (G/common/decisions/dlc_decisions/tgp/tgp_east_asia_decisions.txt:57-245,
+# 523-587) and convert_whole_realm_to_feudalism_decision
+# (G/common/decisions/80_major_decisions.txt:348-470) and the liege-to-vassal
+# conversion loop of convert_clan_to_feudalism_through_liege_decision (same
+# file :216-232) for C4.
+# Loc keys use the engine defaults: <key>, <key>_desc, <key>_tooltip,
+# <key>_confirm (_decisions.info selection_tooltip / desc / confirm_text).
+# Map-agnostic: no title, culture, faith or character key.
+# -----------------------------------------------------------------------------
+
+# Tighten the Schedule (spec §4.1). The top raises every low-tax payer to
+# high taxes for a dread price of 5 per low payer (10-40). Each raised payer
+# takes eotg_schedule_tightened_opinion (-15) on top of the contract's own
+# -25: the risk loop (unhappy payers use vanilla cease_paying_tribute).
+eotg_decision_cartel_tighten_schedule = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    desc = eotg_decision_cartel_tighten_schedule_desc
+    selection_tooltip = eotg_decision_cartel_tighten_schedule_tooltip
+    confirm_text = eotg_decision_cartel_tighten_schedule_confirm
+
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 60
+        duchy = 36
+        kingdom = 36
+        empire = 36
+        hegemony = 36
+    }
+
+    # The only cadence authority for Tighten (spec §4.1)
+    cooldown = { years = 5 }
+
+    is_shown = {
+        eotg_cartel_role_top = yes
+        any_tributary = { has_subject_contract_group = eotg_cartel_tributary }
+    }
+
+    is_valid = {
+        custom_tooltip = {
+            text = eotg_decision_cartel_tighten_schedule_payers_tt
+            any_tributary = {
+                has_subject_contract_group = eotg_cartel_tributary
+                vassal_contract_obligation_level:default_tributary_taxes = 1 # 00_tributary_interactions.txt:5367-5375
+            }
+        }
+        custom_tooltip = {
+            text = eotg_decision_cartel_tighten_schedule_dread_tt
+            dread >= eotg_cartel_tighten_cost_value
+        }
+    }
+
+    effect = {
+        # Pay first: the spend value counts the low payers before they rise
+        eotg_cartel_change_dread_effect = { AMOUNT = eotg_cartel_tighten_spend_value }
+        custom_tooltip = eotg_decision_cartel_tighten_schedule_effect_tt
+        save_scope_as = eotg_cartel_suzerain
+        every_tributary = {
+            limit = {
+                has_subject_contract_group = eotg_cartel_tributary
+                vassal_contract_obligation_level:default_tributary_taxes = 1
+            }
+            # Effect form and error-suppression guard:
+            # G/common/scripted_effects/00_interaction_effects.txt:2990-3003
+            if = {
+                limit = { is_tributary = yes }
+                hidden_effect = {
+                    tributary_contract_set_obligation_level = { type = default_tributary_taxes level = 2 }
+                }
+            }
+            add_opinion = {
+                modifier = eotg_schedule_tightened_opinion
+                target = scope:eotg_cartel_suzerain
+            }
+        }
+        eotg_cartel_refresh_schedule_effect = yes
+    }
+
+    ai_potential = {
+        eotg_cartel_role_top = yes
+    }
+
+    ai_will_do = {
+        base = 0
+        modifier = { # Keeps a reserve above the entry line after the spend
+            add = 20
+            dread >= {
+                value = eotg_cartel_tighten_cost_value
+                add = medium_dread
+            }
+        }
+        modifier = {
+            add = 10
+            has_trait = greedy
+        }
+        modifier = {
+            add = -10
+            has_trait = compassionate
+        }
+        modifier = { # Never spend into the walk-off (spec §7)
+            factor = 0
+            dread < {
+                value = eotg_cartel_tighten_cost_value
+                add = low_dread
+            }
+        }
+    }
+}
+
+# Lean on the Locals (spec §4.2). A Cartel vassal at any tier squeezes its
+# capital Shoal: +20 dread (medium_dread_gain), the Shoal takes
+# eotg_cartel_leaned_on_modifier for 5 years, and a Cartel liege hears of it
+# (+5, miniscule_dread_gain: "word travels up").
+eotg_decision_cartel_lean_on_locals = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    desc = eotg_decision_cartel_lean_on_locals_desc
+    selection_tooltip = eotg_decision_cartel_lean_on_locals_tooltip
+    confirm_text = eotg_decision_cartel_lean_on_locals_confirm
+
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 60
+        duchy = 48
+        kingdom = 48
+        empire = 0
+        hegemony = 0
+    }
+
+    # The only cadence authority for Lean (spec §4.2)
+    cooldown = { years = 5 }
+
+    is_shown = {
+        eotg_cartel_role_vassal = yes # county, duchy and kingdom vassals (v1 lesson 4)
+    }
+
+    is_valid = {
+        exists = capital_county
+        is_at_war = no
+    }
+
+    effect = {
+        eotg_cartel_change_dread_effect = { AMOUNT = medium_dread_gain }
+        capital_county = {
+            add_county_modifier = {
+                modifier = eotg_cartel_leaned_on_modifier
+                years = 5
+            }
+        }
+        if = {
+            limit = {
+                liege ?= { government_has_flag = eotg_government_is_cartel }
+            }
+            liege = {
+                eotg_cartel_change_dread_effect = { AMOUNT = miniscule_dread_gain }
+            }
+        }
+    }
+
+    ai_potential = {
+        eotg_cartel_role_vassal = yes
+        NOT = { has_trait = compassionate }
+    }
+
+    ai_will_do = {
+        base = 10
+        modifier = { # Fear is running out
+            add = 20
+            dread < low_dread
+        }
+        modifier = {
+            add = 15
+            has_trait = sadistic
+        }
+        modifier = {
+            add = 15
+            has_trait = callous
+        }
+        modifier = {
+            add = 15
+            has_trait = arbitrary
+        }
+        modifier = {
+            add = -30
+            has_trait = just
+        }
+        modifier = { # Feared enough already
+            factor = 0
+            dread >= high_dread
+        }
+    }
+}
+
+# Run the Realm as a Cartel (spec §6.1). Entry: an independent feudal or
+# clan ruler who is already feared turns their own government Cartel.
+# ONLY THE RULER CONVERTS: vassals keep their governments; grants made
+# afterwards become Cartel through use_as_base_on_landed
+# (_governments.info:73-77). on_government_change then runs the G1 law net
+# and eotg_cartel_init_effect (eotg_cartel_on_actions.txt).
+# AI: OFF (OQ4, owner 2026-10-20: no AI adoption until V-G11 has run).
+eotg_decision_cartel_adopt = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    decision_group_type = major # as convert_to_mandala_government_decision
+    desc = eotg_decision_cartel_adopt_desc
+    selection_tooltip = eotg_decision_cartel_adopt_tooltip
+    confirm_text = eotg_decision_cartel_adopt_confirm
+
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 72
+        duchy = 72
+        kingdom = 72
+        empire = 72
+        hegemony = 72
+    }
+
+    is_shown = {
+        is_landed = yes
+        highest_held_title_tier > tier_barony
+        is_independent_ruler = yes
+        OR = { # vanilla flags, template §4.3
+            government_has_flag = government_is_feudal
+            government_has_flag = government_is_clan
+        }
+        NOR = {
+            government_has_flag = eotg_government_is_cartel
+            government_has_flag = eotg_government_is_pmc
+            government_has_flag = eotg_government_is_corporation
+            government_has_flag = eotg_government_is_gobcorp
+            government_has_flag = eotg_government_is_unclaimed
+        }
+    }
+
+    is_valid = {
+        # Reads the resource: you are already feared
+        custom_tooltip = {
+            text = eotg_decision_cartel_adopt_dread_tt
+            dread >= medium_dread
+        }
+    }
+
+    is_valid_showing_failures_only = {
+        custom_tooltip = { # vanilla key, tgp_east_asia_decisions.txt:129-130
+            text = not_changed_government_recently_tt
+            NOT = { has_variable = changed_government_recently }
+        }
+        is_at_war = no
+        is_tributary = no
+    }
+
+    cost = {
+        prestige = 200 # convert_whole_realm_to_feudalism_decision literal (80_major_decisions.txt:438)
+    }
+
+    effect = {
+        # Vanilla guard variable, not ours (set as
+        # G/common/scripted_effects/tgp_mandala_scripted_effects.txt:1643-1646)
+        set_variable = {
+            name = changed_government_recently
+            years = 5
+        }
+        change_government = eotg_cartel_government
+    }
+
+    ai_potential = {
+        always = no # OQ4: player-only until V-G11 (leakage) has run
+    }
+
+    # Kept for when OQ4 allows AI adoption (spec §6.1)
+    ai_will_do = {
+        base = 0
+        modifier = {
+            add = 10
+            dread >= high_dread
+        }
+        modifier = {
+            add = 10
+            has_trait = sadistic
+        }
+        modifier = {
+            add = 10
+            has_trait = callous
+        }
+        modifier = {
+            factor = 0
+            primary_title.tier > tier_duchy
+        }
+    }
+}
+
+# Go Legitimate (spec §6.2). Exit: dread converts to legitimacy (the herd ->
+# treasury refund pattern, nomad_convert_herds_to_treasury_or_gold_special_
+# troops_effect, G/common/scripted_effects/10_dlc_tgp_scripted_effects.txt
+# :3869), half the dread is lost, the schedule is released, Cartel vassals
+# go feudal with the ruler. Teardown then runs through on_government_change
+# (spec §2.6). The Cartel has legitimacy = yes, so add_legitimacy is valid.
+eotg_decision_cartel_go_legitimate = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    decision_group_type = major # as mandala_adopt_clan_government_decision
+    desc = eotg_decision_cartel_go_legitimate_desc
+    selection_tooltip = eotg_decision_cartel_go_legitimate_tooltip
+    confirm_text = eotg_decision_cartel_go_legitimate_confirm
+
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 120
+        duchy = 120
+        kingdom = 120
+        empire = 120
+        hegemony = 120
+    }
+
+    is_shown = {
+        eotg_cartel_role_top = yes
+    }
+
+    is_valid_showing_failures_only = {
+        custom_tooltip = { # vanilla key, tgp_east_asia_decisions.txt:129-130
+            text = not_changed_government_recently_tt
+            NOT = { has_variable = changed_government_recently }
+        }
+        is_at_war = no
+    }
+
+    cost = {
+        prestige = medium_prestige_value # 150, 00_basic_values.txt:1002
+    }
+
+    effect = {
+        # (1) Legitimacy first: the value reads dread before it is halved
+        add_legitimacy = eotg_cartel_exit_legitimacy_value
+        # (2) Half the fear goes
+        eotg_cartel_change_dread_effect = { AMOUNT = eotg_cartel_exit_dread_loss_value }
+        # (3)-(4) shown as one line
+        custom_tooltip = eotg_decision_cartel_go_legitimate_effect_tt
+        hidden_effect = {
+            # (3) The schedule belongs to the Cartel. The group's
+            # is_valid_tributary_contract would also end it; doing it here
+            # makes it immediate.
+            every_tributary = {
+                limit = { has_subject_contract_group = eotg_cartel_tributary }
+                end_tributary = yes # 00_tributary_interactions.txt:2104
+            }
+            # (4) No orphan Cartel vassals under a feudal liege
+            # (shape: 80_major_decisions.txt:223-226, convert_clan_to_feudalism_through_liege). feudal_government is
+            # an effect target only, not a trigger dependency (template §4.3).
+            every_vassal_or_below = {
+                limit = { government_has_flag = eotg_government_is_cartel }
+                change_government = feudal_government
+            }
+        }
+        # (5) Vanilla guard variable (tgp_mandala_scripted_effects.txt:1643-1646)
+        set_variable = {
+            name = changed_government_recently
+            years = 5
+        }
+        # (6)
+        change_government = feudal_government
+    }
+
+    ai_potential = {
+        eotg_cartel_role_top = yes
+        dread < low_dread
+        NOT = {
+            any_tributary = { has_subject_contract_group = eotg_cartel_tributary }
+        }
+    }
+
+    ai_will_do = {
+        base = 0
+        modifier = {
+            add = 10
+            has_trait = just
+        }
+        modifier = {
+            add = 10
+            has_trait = honest
+        }
+        modifier = { # A feared boss below you: not the moment to go straight
+            factor = 0
+            any_vassal_or_below = {
+                eotg_cartel_role_vassal = yes
+                dread >= high_dread
+            }
+        }
+    }
+}
