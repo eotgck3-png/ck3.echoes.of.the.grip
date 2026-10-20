@@ -106,6 +106,7 @@ eotg_aug_tamper = {
         scope:target = {
             is_alive = yes
             is_imprisoned = no
+            is_hostage = no    # I1a S6: abduct_scheme.txt:61
             exists = location
             in_diplomatic_range = scope:owner
             eotg_aug_tamper_target = yes
@@ -323,6 +324,20 @@ eotg_aug_tamper = {
                 }
             }
         }
+        # I1a S6: abduct_scheme.txt:278-316's branches, one chain. Seamless
+        # first, so it does not read as "removed".
+        else_if = {
+            limit = {
+                scope:target = { has_trait = eotg_total_integration }
+            }
+            scope:owner = {
+                send_interface_toast = {
+                    title = eotg_aug_tamper_invalidated_title
+                    custom_tooltip = eotg_aug_tamper_invalidated_seamless
+                    left_icon = scope:target
+                }
+            }
+        }
         else_if = {
             limit = {
                 scope:target = { eotg_aug_tamper_target = no }
@@ -335,11 +350,51 @@ eotg_aug_tamper = {
                 }
             }
         }
-
-        if = {
+        # Imprisoned by the schemer (abduct_scheme.txt:287-302, a toast here:
+        # the mod has no message type of its own)
+        else_if = {
             limit = {
                 scope:target = {
-                    is_alive = yes
+                    is_imprisoned = yes
+                    imprisoner = scope:owner
+                }
+            }
+            scope:owner = {
+                send_interface_toast = {
+                    title = eotg_aug_tamper_invalidated_title
+                    custom_tooltip = eotg_aug_tamper_invalidated_i_imprisoned
+                    left_icon = scope:target
+                }
+            }
+        }
+        # Imprisoned by someone else (abduct_scheme.txt:303-316; vanilla loc)
+        else_if = {
+            limit = {
+                scope:target = {
+                    is_imprisoned = yes
+                    imprisoner != scope:owner
+                }
+            }
+            scope:target.imprisoner = {
+                save_scope_as = other_imprisoner
+            }
+            scope:owner = {
+                send_interface_toast = {
+                    title = eotg_aug_tamper_invalidated_title
+                    left_icon = scope:target
+                    right_icon = scope:other_imprisoner
+                    custom_description_no_bullet = {
+                        subject = scope:other_imprisoner
+                        object = scope:target
+                        text = scheme_target_imprisoned_by_other
+                    }
+                }
+            }
+        }
+        # A hostage invalidates the scheme silently, as in abduct.
+        else_if = {
+            limit = {
+                scope:target = {
                     NOT = { in_diplomatic_range = scope:owner }
                 }
             }

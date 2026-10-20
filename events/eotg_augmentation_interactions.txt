@@ -80,10 +80,37 @@ eotg_aug_int.001 = {
 
     # World-state guard: the examined is still alive and still has hardware
     # to examine (not left, not Seamless)
+    # I1a S10: and the surgeon saved by the interaction (eotg_aug_save_surgeon_effect
+    # in the actor's scope) can still report after the 3-10 day delay: the
+    # actor themself, someone still in the actor's employ (technician,
+    # physician), or the borrowed technician the actor still holds.
     trigger = {
         scope:eotg_examined ?= {
             is_alive = yes
             eotg_aug_tamper_target = yes
+        }
+        exists = scope:eotg_proc_surgeon
+        OR = {
+            scope:eotg_proc_surgeon = root
+            scope:eotg_proc_surgeon = {
+                is_alive = yes
+                employer ?= { this = root }
+            }
+            AND = {
+                eotg_aug_borrowed_technician_valid = yes
+                var:eotg_aug_borrowed_technician ?= scope:eotg_proc_surgeon
+            }
+        }
+    }
+
+    # I1a S10: say why no report came (vanilla toast shape, as
+    # eotg_aug_examine_interaction's on_decline)
+    on_trigger_fail = {
+        send_interface_toast = {
+            type = event_toast_effect_neutral
+            title = eotg_aug_int.001.toast_fail
+            left_icon = scope:eotg_examined
+            custom_tooltip = eotg_aug_int.001.toast_fail_desc
         }
     }
 

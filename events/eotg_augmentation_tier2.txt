@@ -238,7 +238,10 @@ eotg_aug_tier2.002 = {
         animation = personality_bold
     }
 
-    trigger = { any_child = { is_alive = yes  age < 16 } }
+    trigger = {
+        eotg_is_aug_tier2 = yes    # I1a C2: the tier can change in the delay (cascade, removal, downgrade); world-state guard, not a cooldown
+        any_child = { is_alive = yes  age < 16 }
+    }
 
     # "They will understand strength"
     option = {
@@ -664,7 +667,10 @@ eotg_aug_tier2.004 = {
     theme = family
     override_background = { reference = eotg_bg_private_quarters }
 
-    trigger = { is_married = yes }
+    trigger = {
+        eotg_is_aug_tier2 = yes    # I1a C2: the tier can change in the delay (cascade, removal, downgrade); world-state guard, not a cooldown
+        is_married = yes
+    }
 
     left_portrait = {
         character = root
@@ -858,6 +864,7 @@ eotg_aug_tier2.005 = {
     override_background = { reference = eotg_bg_council }
 
     trigger = {
+        eotg_is_aug_tier2 = yes    # I1a C2: the tier can change in the delay (cascade, removal, downgrade); world-state guard, not a cooldown
         any_courtier = {
             is_alive = yes
             has_trait = zealous
@@ -1152,6 +1159,7 @@ eotg_aug_tier2.007 = {
     override_background = { reference = eotg_bg_office }
 
     trigger = {
+        eotg_is_aug_tier2 = yes    # I1a C2: the tier can change in the delay (cascade, removal, downgrade); world-state guard, not a cooldown
         any_courtier = {
             is_alive = yes
             is_adult = yes
@@ -1671,7 +1679,10 @@ eotg_aug_tier2.011 = {
     theme = stewardship
     override_background = { reference = eotg_bg_office }
 
-    trigger = { is_landed = yes }
+    trigger = {
+        eotg_is_aug_tier2 = yes    # I1a C2: the tier can change in the delay (cascade, removal, downgrade); world-state guard, not a cooldown
+        is_landed = yes
+    }
 
     left_portrait = {
         character = root
@@ -1842,6 +1853,7 @@ eotg_aug_tier2.012 = {
     override_background = { reference = eotg_bg_council }
 
     trigger = {
+        eotg_is_aug_tier2 = yes    # I1a C2: the tier can change in the delay (cascade, removal, downgrade); world-state guard, not a cooldown
         cp:councillor_spymaster ?= {
             is_alive = yes
             NOT = { this = root }
@@ -2460,6 +2472,7 @@ eotg_aug_tier2.015 = {
     override_background = { reference = eotg_bg_corridor_night }
 
     trigger = {
+        eotg_is_aug_tier2 = yes    # I1a C2: the tier can change in the delay (cascade, removal, downgrade); world-state guard, not a cooldown
         OR = {
             any_relation = { type = rival }
             any_courtier = { eotg_aug_victim_candidate = yes }

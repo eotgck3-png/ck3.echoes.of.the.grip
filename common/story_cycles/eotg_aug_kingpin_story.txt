@@ -166,6 +166,9 @@ eotg_story_aug_kingpin = {
                 NOT = { has_variable = eotg_kp_resolving }
                 NOT = { story_owner.player_heir = var:eotg_kp }
                 story_owner.player_heir = {
+                    # I1a S5: starting the story needs an adult; so does
+                    # inheriting it (a child heir ends it, the else below)
+                    is_adult = yes
                     NOT = { any_owned_story = { story_type = eotg_story_aug_kingpin } }
                     # Seamless exposure (§12.5 B13 item 2): .040 is first
                     # person and fires before M1's monthly check could end

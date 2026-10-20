@@ -173,7 +173,7 @@ eotg_aug_act.001 = {
             }
         }
         scope:eotg_aug_entrant ?= {
-            add_opinion = { modifier = eotg_opinion_aug_admiration  target = root }
+            add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }    # I1a S12: as the Unease beside it
         }
         if = {
             limit = { eotg_aug_under_policy = { LAW = ban } }
@@ -495,7 +495,7 @@ eotg_aug_act.002 = {
         involved_activity.activity_host ?= {
             if = {
                 limit = { NOT = { this = root } }
-                add_opinion = { modifier = eotg_opinion_aug_admiration  target = root }
+                add_opinion = { modifier = eotg_opinion_aug_admiration  target = root  years = 5 }    # I1a S12: as the Unease beside it
             }
         }
         add_prestige = minor_prestige_value

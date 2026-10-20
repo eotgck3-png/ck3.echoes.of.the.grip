@@ -1,0 +1,26 @@
+# Fix batch I1a (cybernetics): loc keys the script references (eotg-scripter, 2026-10-20).
+# Source: docs/qa/system_investigation_2026-10-18/REPORT.md §1 rows S10, S6.
+# Rules: UTF-8 with exactly one BOM, Canadian English, bare [x.GetName] (never [scope:x]),
+#   no numbers for risk, dynamic knight term.
+# Text after '=>' is the intended English (a guide; the localizer owns wording).
+# Total keys: 4 new, 1 suggested re-text
+
+## localization/english/eotg_augmentation_l_english.yml
+## S10: eotg_aug_int.001 on_trigger_fail toast (events/eotg_augmentation_interactions.txt).
+## Fires when, after the 3-10 day delay, the examined character died / lost or integrated
+## the hardware, OR the surgeon (scope:eotg_proc_surgeon) died or left the actor's service.
+## Saved scopes available: eotg_examined, eotg_proc_surgeon (may be dead).
+eotg_aug_int.001.toast_fail => No Report Comes
+eotg_aug_int.001.toast_fail_desc => The examination of [eotg_examined.GetName] came to nothing: the one who was to look, or the one to be looked at, is no longer within reach.
+
+## S6: eotg_aug_tamper on_invalidated (common/schemes/scheme_types/eotg_augmentation_schemes.txt).
+## Same toast title as the existing branches (eotg_aug_tamper_invalidated_title). Scope: target, owner.
+eotg_aug_tamper_invalidated_seamless => [target.GetName] has gone Seamless. No one can find where the hardware ends and the body begins, so there is nothing for the agents to open.
+eotg_aug_tamper_invalidated_i_imprisoned => [target.GetName] is in your cells now. Whatever you want done to [target.GetHerHis] hardware, you no longer need agents for it.
+
+## Suggested re-text (existing key): Seamless now has its own branch, so "removed" covers only
+## a target who left the system.
+eotg_aug_tamper_invalidated_removed => [target.GetName]'s implants are gone. There is nothing left to tamper with.
+
+## Reused vanilla keys (no new loc): scheme_target_imprisoned_by_other (imprisoned by someone else),
+## scheme_target_not_in_diplomatic_range (unchanged).

@@ -12,6 +12,19 @@ eotg_is_augmented_any = {
     }
 }
 
+# I1a C1 (system investigation 2026-10-18): the character can be shown a
+# yearly cybernetics event or story beat. The vanilla yearly-event filter's
+# imprisoned/incapable half (common/scripted_triggers/
+# 00_available_for_events_triggers.txt:802-810, is_available_quick). Gates
+# the event branches only: risk accrual, drift and the cascade run anyway
+# (the hardware wears whether or not its owner is in a cell).
+# Users: the yearly aug pulses in eotg_augmentation_on_actions.txt, the
+# Countdown and Heir's Arc effect_groups.
+eotg_aug_available_for_pulse_events = {
+    is_imprisoned = no
+    is_incapable = no
+}
+
 # Tier tests on the eotg_cybernetics track (XP is only ever 0 / 50 / 100).
 # Tier 1 = Augmented (XP 0)
 eotg_is_aug_tier1 = {

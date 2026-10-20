@@ -12,6 +12,13 @@
 # and cynical, glory hound and belligerent by ambitious, parochial by content
 # (common/vassal_stances/00_vassal_stances.txt:172, 334, 510, 996), so no
 # faith is named.
+# AI scoring (I1a S3, system investigation 2026-10-18): every law scores
+# itself absolutely, held or not, as vanilla's mandala decrees do
+# (00_realm_laws.txt:2576-2645). A held law keeps its own score, so the AI
+# only moves when another law beats it. Tolerate is the floor (1); a law whose
+# holder no longer fits scores 0 and loses to it. The scores never tie where
+# two can both apply: Ban needs the unaugmented, License and Favor the
+# non-zealous; License 5 < Favor 7 for a ruler who fits both.
 # What each law does to procedures, offers and crimes is script-read through
 # eotg_aug_under_policy (the only reader of the group outside the laws' own
 # ai_will_do). The laws carry no gold, clinic or price effect: Favor is
@@ -73,7 +80,6 @@ eotg_aug_policy_ban = {
         value = 0
         if = {
             limit = {
-                NOT = { has_realm_law = eotg_aug_policy_ban }
                 eotg_is_augmented_any = no
                 has_trait = zealous
                 NOT = { has_trait = cynical }
@@ -128,7 +134,6 @@ eotg_aug_policy_license = {
         value = 0
         if = {
             limit = {
-                NOT = { has_realm_law = eotg_aug_policy_license }
                 NOT = { has_trait = zealous }
                 OR = {
                     has_trait = diligent
@@ -170,41 +175,14 @@ eotg_aug_policy_tolerate = {
         }
     }
 
-    # Reverting: a Ban held by someone augmented or cynical, a Favor held by
-    # someone zealous or unaugmented, a License held by someone neither
-    # diligent nor just
+    # The floor (I1a S3): always 1, so a Ban, License or Favor whose holder
+    # no longer fits it (its own score 0) reverts here: a Ban held by someone
+    # augmented or cynical, a Favor held by someone zealous, unaugmented or
+    # neither ambitious nor cynical, a License held by someone zealous,
+    # neither diligent nor just, or with no augmented self or vassals. (Was:
+    # License reverted only on the diligent/just test, at a score of 3.)
     ai_will_do = {
-        value = 0
-        if = {
-            limit = {
-                has_realm_law = eotg_aug_policy_ban
-                OR = {
-                    eotg_is_augmented_any = yes
-                    has_trait = cynical
-                }
-            }
-            value = 10
-        }
-        else_if = {
-            limit = {
-                has_realm_law = eotg_aug_policy_favor
-                OR = {
-                    has_trait = zealous
-                    eotg_is_augmented_any = no
-                }
-            }
-            value = 10
-        }
-        else_if = {
-            limit = {
-                has_realm_law = eotg_aug_policy_license
-                NOR = {
-                    has_trait = diligent
-                    has_trait = just
-                }
-            }
-            value = 3
-        }
+        value = 1
     }
 }
 
@@ -245,7 +223,6 @@ eotg_aug_policy_favor = {
         value = 0
         if = {
             limit = {
-                NOT = { has_realm_law = eotg_aug_policy_favor }
                 NOT = { has_trait = zealous }
                 eotg_is_augmented_any = yes
                 OR = {
@@ -253,7 +230,8 @@ eotg_aug_policy_favor = {
                     has_trait = cynical
                 }
             }
-            value = 5
+            # 7, not 5: above License for a ruler who fits both (I1a S3)
+            value = 7
         }
     }
 }

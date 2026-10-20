@@ -851,11 +851,17 @@ eotg_decision_aug_excision = {
         }
     }
 
-    # The cost is charged in eotg_aug_end.001 (a, c, d); this mirrors it.
+    # The cost is charged in eotg_aug_end.001 (a, c, d, e); this mirrors it.
+    # I1a C11: the cheapest table counts, so the back streets (end.001.e,
+    # x0.4) keep the decision open to a ruler who can afford only them.
     is_valid = {
-        eotg_aug_can_afford_excision = yes
+        OR = {
+            eotg_aug_can_afford_excision = yes
+            eotg_aug_can_afford_procedure = { BASE = major_gold_value  MULT = eotg_aug_price_mult_backstreet_removal }
+        }
     }
 
+    # "Not today" (end.001.b) gives the cooldown back (I1a C11)
     cooldown = { years = 5 }
 
     effect = {

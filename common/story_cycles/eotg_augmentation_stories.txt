@@ -115,6 +115,17 @@ eotg_story_aug_heir_arc = {
                 }
             }
 
+            # 0a. I1a C1: an imprisoned or incapable owner is shown no beat;
+            # the arc holds its stage (and its round-2 reprise and hand-off)
+            # until the owner is free. The ends above still run.
+            triggered_effect = {
+                trigger = {
+                    story_owner = { eotg_aug_available_for_pulse_events = no }
+                }
+                effect = {
+                }
+            }
+
             # 0b. Dormant (stage 5): round 1's heir.004 has been answered
             # (new beats §5.1 step 2). Matches every dormant tick, so a dormant
             # story never falls through to branch 1. When the primary heir is
@@ -339,6 +350,17 @@ eotg_story_aug_countdown = {
         months = { 3 5 }
 
         first_valid = {
+            # 0. I1a C1: an imprisoned or incapable owner is shown no beat,
+            # The Quiet included; the stages wait. Risk keeps accruing in the
+            # Overclocked pulse, so a stage may be skipped (stages can skip).
+            # The cascade still ends the story (eotg_aug_end_countdown_effect).
+            triggered_effect = {
+                trigger = {
+                    story_owner = { eotg_aug_available_for_pulse_events = no }
+                }
+                effect = {
+                }
+            }
             # 1. No longer Overclocked (regressed, removed): The Quiet
             triggered_effect = {
                 trigger = {

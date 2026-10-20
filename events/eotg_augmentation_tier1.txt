@@ -466,6 +466,7 @@ eotg_aug_tier1.003 = {
 
     # World-state guard only; the one-time flag is owned by the on_action.
     trigger = {
+        eotg_is_aug_tier1 = yes    # I1a C2: the tier can change in the delay (cascade, removal, downgrade); world-state guard, not a cooldown
         any_vassal = { is_alive = yes }
     }
 
@@ -598,6 +599,7 @@ eotg_aug_tier1.004 = {
     }
 
     trigger = {
+        eotg_is_aug_tier1 = yes    # I1a C2: the tier can change in the delay (cascade, removal, downgrade); world-state guard, not a cooldown
         any_knight = { is_alive = yes  eotg_is_augmented_any = no }
     }
 
@@ -841,7 +843,10 @@ eotg_aug_tier1.006 = {
     theme = battle
     override_background = { reference = eotg_bg_battlefield }
 
-    trigger = { is_at_war = yes }
+    trigger = {
+        eotg_is_aug_tier1 = yes    # I1a C2: the tier can change in the delay (cascade, removal, downgrade); world-state guard, not a cooldown
+        is_at_war = yes
+    }
 
     left_portrait = {
         character = root
@@ -1221,6 +1226,7 @@ eotg_aug_tier1.009 = {
     override_background = { reference = eotg_bg_private_quarters }
 
     trigger = {
+        eotg_is_aug_tier1 = yes    # I1a C2: the tier can change in the delay (cascade, removal, downgrade); world-state guard, not a cooldown
         OR = {
             is_married = yes
             any_relation = { type = lover }
@@ -1382,6 +1388,7 @@ eotg_aug_tier1.010 = {
     override_background = { reference = eotg_bg_field_camp }
 
     trigger = {
+        eotg_is_aug_tier1 = yes    # I1a C2: the tier can change in the delay (cascade, removal, downgrade); world-state guard, not a cooldown
         any_knight = {
             is_alive = yes
             NOT = { this = root }
@@ -1763,6 +1770,7 @@ eotg_aug_tier1.012 = {
     override_background = { reference = eotg_bg_council }
 
     trigger = {
+        eotg_is_aug_tier1 = yes    # I1a C2: the tier can change in the delay (cascade, removal, downgrade); world-state guard, not a cooldown
         OR = {
             has_trait = zealous
             any_courtier = {
