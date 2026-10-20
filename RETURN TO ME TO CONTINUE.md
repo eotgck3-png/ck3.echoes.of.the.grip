@@ -24,23 +24,32 @@ Full report: [`docs/qa/system_investigation_2026-10-18/REPORT.md`](docs/qa/syste
 | CB-53 | **Build elective laws** |
 | CB-52 | **Regained traits are surface** (closed) |
 
-**In progress:**
-- fix batches I1a (cybernetics) and I1b (Frontier and governments);
-- the §2 rulings spec (+X2, P1);
-- integration specs v1 (alerts, concepts) and v2 (memories, game rules);
-- the in-game plan update;
-- Cartel C1;
-- the elective-succession spec;
-- the fabrication lore pass.
+**DONE 2026-10-20 (all committed and pushed, QA and lore passed; nothing tested in game yet):**
 
-**Queued:**
-- CB-59 variants (after I1b frees the Frontier events file).
+| Item | Commits |
+|---|---|
+| Fix batches I1a and I1b | 170de01, 7866c66 |
+| Design rulings I2a/I2b/I2d, CB-51 (both versions, gated), S11 | 99aea16 |
+| I2 follow-ups (I2f) | 94c01af |
+| I2c sponsorship lapse | 023492e |
+| CB-59 Seamless variants and CB-58 printers | 7866c66 |
+| Cartel G2 C1 to C5 | 9292c06, d7a052a, 95ea754, 34325c5; C5 full-system review DONE |
+| Elective succession (CB-53) | e04660b |
+| Region → **Shoal**, loc and vanilla UI | 2a6fad2, c2c947d |
+| Region → Shoal, specs and test plan | 46fa4b8 |
+| Integrations: Frontier alerts, encyclopedia, memories and game rules, cybernetics alert | 20ebad9, b8044c3, ccc5d69, ffe965e |
+| Lint conventions for convention-named loc | 1876510, 0ecc292 |
 
-**More rulings (2026-10-20):**
-- Election: candidates are limited to the dynasty.
-- Fabricators can print weapons and hull plate.
-- CB-51: both versions, each gated (being built).
-- Player-facing "Region" (county) becomes **"Quadrant"** (sweep being planned).
+**What's left waits on you:** the in-game test sitting.
+- `docs/qa/IN_GAME_SESSION_PLAN.md`, which has the investigation checks;
+- Cartel V-C1 to V-C20 and V-IR23;
+- elective succession V-SU0 to V-SU14 (V-SU1: does a realm-law election work at all?);
+- alerts 6a to 6f;
+- memories and rules T-M and T-R;
+- V-IR checks;
+- markers CB-61.
+
+**Optional:** paste the SIMPLE FABRICATION errata line into SETTING LORE. It is on the taskboard at CB-58, and now also allows weapons and hull plate.
 
 ## Where we stopped: the system investigation (2026-10-18)
 
