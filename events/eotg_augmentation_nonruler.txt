@@ -876,10 +876,16 @@ eotg_aug_nr.004 = {
             }
         }
         skill = intrigue
+        # I2f (2026-10-20): the record blames the hardware, so the death
+        # reason is an accident, not a murder; the murder secret keeps the
+        # truth. Not eotg_death_cascade (the mod's only death reason): it
+        # reads "died in a neural cascade", the decedent's own implants, and
+        # the victim need not be augmented. Vanilla death_accident ("died in
+        # an accident", 00_event_deaths.txt) is the hardware-blind record.
         unknown_murder_effect = {
             VICTIM = scope:eotg_victim
             MURDERER = root
-            REASON = death_murder
+            REASON = death_accident
         }
         scope:eotg_champion = {
             eotg_add_fracture_risk = { AMOUNT = 5 }

@@ -36,10 +36,16 @@ eotg_aug_realm.001 = {
     title = eotg_aug_realm.001.t
     desc = {
         # I2 lore pre-review: the subject who ORDERED the work on someone at
-        # their court (unaugmented themself) gets their own opener
+        # their court gets their own opener. I2f (2026-10-20): read from who
+        # answers (eotg_aug_contraband_effect: the answerable sponsor is not
+        # the patient), not from the subject's own tier, so an augmented
+        # sponsor still gets it.
         first_valid = {
             triggered_desc = {
-                trigger = { scope:eotg_contraband_subject = { eotg_is_augmented_any = no } }
+                trigger = {
+                    exists = scope:eotg_contraband_patient
+                    NOT = { scope:eotg_contraband_subject = scope:eotg_contraband_patient }
+                }
                 desc = eotg_aug_realm.001.desc_opener_ordered
             }
             desc = eotg_aug_realm.001.desc
@@ -68,7 +74,16 @@ eotg_aug_realm.001 = {
                 desc = eotg_aug_realm.001.desc_license_v
             }
         }
+        # I2f: the tier lines describe work in the subject's own body, so they
+        # are skipped when the subject ordered it (ordered test as the opener)
         first_valid = {
+            triggered_desc = {
+                trigger = {
+                    exists = scope:eotg_contraband_patient
+                    NOT = { scope:eotg_contraband_subject = scope:eotg_contraband_patient }
+                }
+                desc = eotg_aug_realm.001.desc_ordered
+            }
             triggered_desc = {
                 trigger = { scope:eotg_contraband_subject = { has_trait = eotg_neurofractured } }
                 desc = eotg_aug_realm.001.desc_nf
@@ -86,13 +101,11 @@ eotg_aug_realm.001 = {
                 desc = eotg_aug_realm.001.desc_aug
             }
         }
-        # Investigation rulings 2026-10-18 §4.5 (7): the subject ordered the
-        # work on someone at their court rather than received it (they are
-        # the answerable sponsor, R-A2), so no tier line above matched
-        triggered_desc = {
-            trigger = { scope:eotg_contraband_subject = { eotg_is_augmented_any = no } }
-            desc = eotg_aug_realm.001.desc_ordered
-        }
+        # Investigation rulings 2026-10-18 §4.5 (7): desc_ordered, for the
+        # subject who ordered the work on someone at their court rather than
+        # received it (the answerable sponsor, R-A2), is now the first entry
+        # of the tier first_valid above (I2f), keyed on the order, not on the
+        # subject's own tier.
         triggered_desc = {
             trigger = { scope:eotg_contraband_subject = { is_courtier_of = root } }
             desc = eotg_aug_realm.001.desc_courtier

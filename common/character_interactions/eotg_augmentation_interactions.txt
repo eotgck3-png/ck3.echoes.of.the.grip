@@ -160,7 +160,15 @@ eotg_aug_offer_augmentation_interaction = {
                 text = eotg_aug_patient_present_tt
                 scope:recipient = { eotg_aug_patient_at_court_of = { ACTOR = scope:actor } }
             }
-            scope:recipient = { is_available = yes }
+            # I2f (2026-10-20): a prisoner is exempt from is_available, as in
+            # Examine below (a dungeon is local; spec 5.1).
+            trigger_if = {
+                limit = { scope:recipient = { is_imprisoned_by = scope:actor } }
+                always = yes
+            }
+            trigger_else = {
+                scope:recipient = { is_available = yes }
+            }
         }
     }
     send_option = {
@@ -584,7 +592,15 @@ eotg_aug_demand_removal_interaction = {
                 text = eotg_aug_patient_present_tt
                 scope:recipient = { eotg_aug_patient_at_court_of = { ACTOR = scope:actor } }
             }
-            scope:recipient = { is_available = yes }
+            # I2f (2026-10-20): a prisoner is exempt from is_available, as in
+            # Examine below (a dungeon is local; spec 5.1).
+            trigger_if = {
+                limit = { scope:recipient = { is_imprisoned_by = scope:actor } }
+                always = yes
+            }
+            trigger_else = {
+                scope:recipient = { is_available = yes }
+            }
         }
     }
     send_option = {

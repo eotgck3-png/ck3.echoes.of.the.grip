@@ -762,8 +762,13 @@ eotg_aug_sponsored_install_effect = {
             eotg_aug_procedure_effect = { PATIENT = scope:eotg_aug_sponsored_patient  PROVIDER = clinic  PROCEDURE = install  SURGEON = scope:eotg_aug_sponsored_patient }
         }
     }
+    # I2f (2026-10-20): the sponsor's own hands need the patient present, the
+    # same rule as Send for Your Physician (S2; lore I6, physical and local):
+    # at the sponsor's court as courtier, guest or prisoner. Otherwise the
+    # back streets, per the I2a auto-pick order.
     else_if = {
         limit = {
+            eotg_aug_patient_at_court_of = { ACTOR = $SPONSOR$ }
             $SPONSOR$ = { eotg_aug_has_surgeon_for = { PATIENT = scope:eotg_aug_sponsored_patient } }
         }
         hidden_effect = {
@@ -2044,6 +2049,19 @@ eotg_aug_procedure_roll_effect = {
     $SURGEON$ = { save_scope_as = eotg_proc_surgeon }
     save_scope_value_as = { name = eotg_proc_provider  value = flag:$PROVIDER$ }
     save_scope_value_as = { name = eotg_proc_kind  value = flag:$PROCEDURE$ }
+    # I2f (2026-10-20): var:eotg_aug_sponsor belongs only to the roll whose
+    # sponsored path set it (that path saves the patient as the temporary
+    # scope eotg_aug_sponsored_patient). Any other roll on this patient drops
+    # a leftover first, so a self-sought roll never reads an old sponsor.
+    $PATIENT$ = {
+        if = {
+            limit = {
+                has_variable = eotg_aug_sponsor
+                NOT = { scope:eotg_aug_sponsored_patient ?= this }
+            }
+            hidden_effect = { remove_variable = eotg_aug_sponsor }
+        }
+    }
     $PATIENT$ = {
         random_list = {
             # Clean
@@ -2287,6 +2305,16 @@ eotg_aug_procedure_roll_effect = {
                 eotg_aug_is_contraband = yes
             }
             hidden_effect = { eotg_aug_give_illegal_work_secret_effect = yes }
+        }
+        # I2f (2026-10-20): the sponsor record is spent by this roll. Only a
+        # discovered outcome keeps it, for its reveal
+        # (eotg_aug_contraband_effect spends it there).
+        if = {
+            limit = {
+                has_variable = eotg_aug_sponsor
+                NOT = { scope:eotg_proc_outcome = flag:discovered }
+            }
+            hidden_effect = { remove_variable = eotg_aug_sponsor }
         }
         if = {
             limit = { scope:eotg_proc_outcome = flag:death }
@@ -2681,6 +2709,8 @@ eotg_aug_offer_install_effect = {
     # answerable party is derived (R-A2; a liege never prosecutes their own
     # gift, S4).
     scope:recipient = {
+        # I2f: marks this roll as the sponsored one (eotg_aug_procedure_roll_effect)
+        save_temporary_scope_as = eotg_aug_sponsored_patient
         hidden_effect = {
             set_variable = { name = eotg_aug_sponsor  value = scope:actor  years = 2 }
         }
@@ -3059,6 +3089,10 @@ eotg_aug_examine_treat_effect = {
 eotg_aug_contraband_effect = {
     if = {
         limit = { eotg_aug_is_contraband = yes }
+        # I2f (2026-10-20): realm.001 picks its ordered opener by whether the
+        # answerable party is someone other than this patient (they ordered
+        # the work), read from this saved scope.
+        save_scope_as = eotg_contraband_patient
         eotg_aug_save_answerable_effect = yes
         scope:eotg_aug_answerable = {
             if = {
@@ -3348,6 +3382,10 @@ eotg_aug_inherit_start_effect = {
         save_scope_as = eotg_inh_heir
     }
     set_variable = { name = eotg_inh_heir  value = scope:eotg_inh_heir  years = 6 }
+    # I2f (2026-10-20): an untimed record of the same heir, so the close can
+    # clear eotg_flag_aug_inh_marked (6 years, set mid-tree) even after the
+    # lock variable above has expired. One variable, no iteration.
+    set_variable = { name = eotg_inh_last_heir  value = scope:eotg_inh_heir }
     set_variable = { name = eotg_inh_source  value = flag:$SOURCE$ }
 
     # The profile (§5A.1): how the Neurofracture shows. Weights from the
@@ -3546,6 +3584,13 @@ eotg_aug_inherit_close_effect = {
     if = {
         limit = { has_variable = eotg_inh_heir }
         var:eotg_inh_heir = { remove_character_flag = eotg_flag_aug_inh_marked }
+    }
+    # I2f (2026-10-20): the old heir found through the untimed record when
+    # the lock has expired (the clean-slate close in the start effect).
+    if = {
+        limit = { has_variable = eotg_inh_last_heir }
+        var:eotg_inh_last_heir ?= { remove_character_flag = eotg_flag_aug_inh_marked }
+        remove_variable = eotg_inh_last_heir
     }
     remove_variable = eotg_inh_heir
     remove_variable = eotg_inh_profile
