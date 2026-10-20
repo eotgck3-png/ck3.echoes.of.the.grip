@@ -1,0 +1,81 @@
+# Integration v1, batch INT2 (game concepts), 2026-10-20
+# Spec: docs/specs/integration_v1.md §4.3, §8, §9. Target file (new):
+# localization/english/eotg_game_concepts_l_english.yml (UTF-8 with BOM, bare [x.GetName]).
+# Script: common/game_concepts/eotg_game_concepts.txt (22 concepts, 16 aliases).
+# 22 names + 22 descs + 16 alias names = 60 keys.
+# Aliases need ONLY game_concept_<alias> (they share the original's _desc); never write an alias _desc.
+# Canadian English. County tier is SHOAL (owner 2026-10-20): display text says Shoal even where the
+# key says "region". Link the county tier as [county|E] / [Concept('county','Shoals')|E] (vanilla
+# county concept now displays "Shoal"); NEVER [region|E]. Never "County", never "Region".
+# Lore (spec §9, binding): LAW AT 866, nothing filed/registered/licensed/recognized/chartered by any
+# outside body; no Galactic League or galaxy-wide order; never-name lists (cybernetics_v2.md §5.2-5.3,
+# REVIEW_866.md:38-39); never surface fracture risk, the pressure band, XP or any number; never "knight".
+# Where a $key$ reuse is given, write the value exactly as shown (one source, invariant 6).
+
+## Augmentation
+game_concept_eotg_augmentation               # "Augmentation"
+game_concept_eotg_augmentation_desc          # elective cybernetic implants; fitted by clinics, physicians, back-street fitters; progress along [eotg_aug_integration|E]; costs: stress, wear, risk of fracture (named, never quantified); realm law can ban, license, tolerate or favour it ([eotg_aug_policy|E]); [eotg_implant_technician|E]
+game_concept_eotg_implant                    # alias: "Implant"
+game_concept_eotg_implants                   # alias: "Implants"
+game_concept_eotg_aug_integration            # "Integration"
+game_concept_eotg_aug_integration_desc       # one trait with a track; stages Augmented, Enhanced, Overclocked; up a stage by decision or offer, down by a procedure; NO XP numbers
+game_concept_eotg_aug_stage                  # alias: "Stage"
+game_concept_eotg_aug_stages                 # alias: "Stages"
+game_concept_eotg_overclocked                # "$trait_eotg_cybernetics_3$"
+game_concept_eotg_overclocked_desc           # the top stage; strongest benefits, heaviest wear; maintenance matters
+game_concept_eotg_neurofractured             # "$trait_eotg_neurofractured$"
+game_concept_eotg_neurofractured_desc        # a fracture: the person and the machine no longer agree; Excision exists; NEVER imply a cure rate
+game_concept_eotg_seamless                   # "$trait_eotg_total_integration$"
+game_concept_eotg_seamless_desc              # MUST (lore-keeper 2026-10-20), verbatim: "Integration is complete. The machine's forecast and the person no longer differ, and no self remains apart from it. Seamless ends the self; it does not copy or store it. Events address a Seamless character as a log, never as 'I'."
+game_concept_eotg_aug_policy                 # "Augmentation Law"
+game_concept_eotg_aug_policy_desc            # four positions, set by the top ruler for the whole realm; no authority above the realm
+game_concept_eotg_aug_policies               # alias: "Augmentation Laws"
+game_concept_eotg_implant_technician         # "$eotg_aug_implant_technician_court_position$"
+game_concept_eotg_implant_technician_desc    # a court position; cheaper and safer procedures; can be lent
+game_concept_eotg_implant_technicians        # alias: plural, e.g. "Implant Technicians"
+
+## Frontier
+game_concept_eotg_frontier                   # "Frontier"
+game_concept_eotg_frontier_desc              # a project to settle a [county|E] that is Unsettled or abandoned; held by that Shoal's holder; ends in a new holding or in failure
+game_concept_eotg_frontiers                  # alias: "Frontiers"
+game_concept_eotg_frontier_progress          # "Frontier Progress"
+game_concept_eotg_frontier_progress_desc     # grows yearly from investment, infrastructure and events; bands such as Foothold unlock infrastructure slots
+game_concept_eotg_frontier_strain            # "Strain"
+game_concept_eotg_frontier_strain_desc       # the settlers' hardship; rises with no founder, war, danger, quarrels; at breaking point the Frontier can fail (no numbers)
+game_concept_eotg_strain                     # alias: "Strain"
+game_concept_eotg_frontier_founder           # "Founder"
+game_concept_eotg_frontier_founder_desc      # leads the work; without one, strain climbs; appointed by decision
+game_concept_eotg_founder                    # alias: "Founder"
+game_concept_eotg_founders                   # alias: "Founders"
+game_concept_eotg_local_ruler                # "Local Ruler"
+game_concept_eotg_local_ruler_desc           # on completion a founder may be given the new holding to rule
+game_concept_eotg_local_rulers               # alias: "Local Rulers"
+game_concept_eotg_frontier_sponsor           # "Backer"
+game_concept_eotg_frontier_sponsor_desc      # another ruler pays toward the work; NO claim and NO say over the Shoal
+game_concept_eotg_backer                     # alias: "Backer"
+game_concept_eotg_backers                    # alias: "Backers"
+game_concept_eotg_frontier_project           # "Frontier Project"
+game_concept_eotg_frontier_project_desc      # seven types (Settlement, Trade, Mining, Military, Religious, Research, Administrative), chosen at establishment
+game_concept_eotg_frontier_projects          # alias: "Frontier Projects"
+game_concept_eotg_unsettled_region           # "Unsettled Shoal"
+game_concept_eotg_unsettled_region_desc      # a Shoal whose Systems were never properly settled; where a Frontier can start
+game_concept_eotg_unsettled_shoals           # alias: "Unsettled Shoals"
+game_concept_eotg_region_charts              # name from the Explore / .042 loc, e.g. "Shoal Charts"
+game_concept_eotg_region_charts_desc         # Unknown, Partial or Known; expeditions chart a Shoal; charts give a later Frontier a head start
+
+## Unclaimed Shoals
+game_concept_eotg_unclaimed_region           # "Unclaimed Shoal"
+game_concept_eotg_unclaimed_region_desc      # a Shoal no ruler holds, kept by a placeholder; claimed with Raise Your Colours at a cost in gold and prestige; costs attackers attrition; NO filing, registration or recognition
+game_concept_eotg_unclaimed_shoals           # alias: "Unclaimed Shoals"
+game_concept_eotg_unsworn                    # "$trait_eotg_unclaimed_folk$"
+game_concept_eotg_unsworn_desc               # the scattered people of an Unclaimed Shoal; no court and no oath
+
+## Governments (parent: vanilla government)
+game_concept_eotg_pmc                        # "$eotg_pmc_government$"
+game_concept_eotg_pmc_desc                   # "$eotg_pmc_government_desc$" (cheapest, one source)
+game_concept_eotg_corporation                # "$eotg_corporation_government$"
+game_concept_eotg_corporation_desc           # "$eotg_corporation_government_desc$"
+game_concept_eotg_cartel                     # "$eotg_cartel_government$"
+game_concept_eotg_cartel_desc                # "$eotg_cartel_government_desc$"
+game_concept_eotg_trade_oligarchy            # "$eotg_gobcorp_government$"
+game_concept_eotg_trade_oligarchy_desc       # "$eotg_gobcorp_government_desc$"

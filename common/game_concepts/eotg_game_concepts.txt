@@ -1,0 +1,165 @@
+﻿# Echoes of the Grip - game concepts (encyclopedia + [key|E] links)
+# Spec: docs/specs/integration_v1.md §4.3 (batch INT2a). Shape: vanilla
+# common/game_concepts/_game_concepts.info:1-66 and 06_ce1_game_concepts.txt:1-22
+# (parent first, then children with parent = and alias = { }).
+# Loc: game_concept_<key> / game_concept_<key>_desc in
+# localization/english/eotg_game_concepts_l_english.yml (eotg-localizer, INT2c).
+# Aliases need only game_concept_<alias>; they share the original's desc.
+#
+# No textures yet (spec §10). When art lands, each concept gets
+#   texture = "gfx/interface/icons/eotg_concepts/<concept_key>.dds"
+# at the marked line.
+#
+# County term is Shoal (owner 2026-10-20). Keys fixed by the spec keep "region"
+# (eotg_unsettled_region, eotg_region_charts, eotg_unclaimed_region); their aliases
+# and display text are Shoal. Link the county tier via vanilla `county` (now shown
+# as "Shoal"), never vanilla `region`.
+#
+# Collision check 2026-10-20: no vanilla concept key or alias starts with eotg_.
+
+##############################
+# Augmentation
+##############################
+
+eotg_augmentation = {
+	# texture = (art pending)
+	alias = { eotg_implant eotg_implants }
+}
+
+eotg_aug_integration = {
+	# texture = (art pending)
+	parent = eotg_augmentation
+	alias = { eotg_aug_stage eotg_aug_stages }
+}
+
+# Name reuses $trait_eotg_cybernetics_3$
+eotg_overclocked = {
+	# texture = (art pending)
+	parent = eotg_augmentation
+}
+
+# Name reuses $trait_eotg_neurofractured$
+eotg_neurofractured = {
+	# texture = (art pending)
+	parent = eotg_augmentation
+}
+
+# Concept key differs from script: the trait is eotg_total_integration.
+# Name reuses $trait_eotg_total_integration$
+eotg_seamless = {
+	# texture = (art pending)
+	parent = eotg_augmentation
+}
+
+eotg_aug_policy = {
+	# texture = (art pending)
+	parent = eotg_augmentation
+	alias = { eotg_aug_policies }
+}
+
+# Name reuses $eotg_aug_implant_technician_court_position$
+eotg_implant_technician = {
+	# texture = (art pending)
+	parent = eotg_augmentation
+	alias = { eotg_implant_technicians }
+}
+
+##############################
+# Frontier
+##############################
+
+eotg_frontier = {
+	# texture = (art pending)
+	alias = { eotg_frontiers }
+}
+
+eotg_frontier_progress = {
+	# texture = (art pending)
+	parent = eotg_frontier
+}
+
+eotg_frontier_strain = {
+	# texture = (art pending)
+	parent = eotg_frontier
+	alias = { eotg_strain }
+}
+
+eotg_frontier_founder = {
+	# texture = (art pending)
+	parent = eotg_frontier
+	alias = { eotg_founder eotg_founders }
+}
+
+eotg_local_ruler = {
+	# texture = (art pending)
+	parent = eotg_frontier
+	alias = { eotg_local_rulers }
+}
+
+# Displayed as "Backer" (the decision is "Back a Frontier").
+eotg_frontier_sponsor = {
+	# texture = (art pending)
+	parent = eotg_frontier
+	alias = { eotg_backer eotg_backers }
+}
+
+eotg_frontier_project = {
+	# texture = (art pending)
+	parent = eotg_frontier
+	alias = { eotg_frontier_projects }
+}
+
+# Displayed as "Unsettled Shoal"; key fixed by spec.
+eotg_unsettled_region = {
+	# texture = (art pending)
+	parent = eotg_frontier
+	alias = { eotg_unsettled_shoals }
+}
+
+# Shoal charts (Unknown / Partial / Known); key fixed by spec.
+eotg_region_charts = {
+	# texture = (art pending)
+	parent = eotg_frontier
+}
+
+##############################
+# Unclaimed Shoals
+##############################
+
+# Displayed as "Unclaimed Shoal"; key fixed by spec.
+eotg_unclaimed_region = {
+	# texture = (art pending)
+	alias = { eotg_unclaimed_shoals }
+}
+
+# Name reuses $trait_eotg_unclaimed_folk$
+eotg_unsworn = {
+	# texture = (art pending)
+	parent = eotg_unclaimed_region
+}
+
+##############################
+# Governments: under vanilla `government` (00_game_concepts.txt:516), no mod parent.
+# Names reuse $eotg_<x>_government$; descs may be $eotg_<x>_government_desc$.
+##############################
+
+eotg_pmc = {
+	# texture = (art pending; candidate gfx/interface/icons/government_types/)
+	parent = government
+}
+
+eotg_corporation = {
+	# texture = (art pending)
+	parent = government
+}
+
+eotg_cartel = {
+	# texture = (art pending)
+	parent = government
+}
+
+# Concept key differs from script: the government is eotg_gobcorp_government.
+eotg_trade_oligarchy = {
+	# texture = (art pending)
+	parent = government
+}
