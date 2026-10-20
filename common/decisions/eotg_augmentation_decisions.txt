@@ -177,6 +177,14 @@ eotg_decision_maintenance_protocol = {
     # reference/common/decisions/_decisions.info:121; vanilla
     # common/decisions/00_holy_order_decisions.txt:287).
     selection_tooltip = eotg_decision_maintenance_protocol_selection_tt
+    # Alert filter (integration_v1.md §4.1): narrows only. The decision is in
+    # the default group, so this matters only if the player toggles it
+    # important (spec E1; _decisions.info:277). The default nudge is the
+    # custom action eotg_action_aug_calibration_lapsed (§4.2), which steps
+    # aside once the decision is important, so the two never stack.
+    should_create_alert = {
+        NOT = { has_character_modifier = eotg_mod_implant_calibrated }
+    }
     ai_check_interval_by_tier = {
         barony = 0
         county = 12
@@ -429,6 +437,11 @@ eotg_decision_consult_physician = {
     # reference/common/decisions/_decisions.info:121; vanilla
     # common/decisions/00_holy_order_decisions.txt:287).
     selection_tooltip = eotg_decision_consult_physician_selection_tt
+    # Alert filter as Maintenance Protocol (integration_v1.md §4.1): only if
+    # the player toggles this decision important.
+    should_create_alert = {
+        NOT = { has_character_modifier = eotg_mod_implant_calibrated }
+    }
     ai_check_interval_by_tier = {
         barony = 0
         county = 12

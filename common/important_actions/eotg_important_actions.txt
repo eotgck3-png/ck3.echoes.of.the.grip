@@ -1,8 +1,8 @@
 ﻿# -- eotg_important_actions.txt ----------------------------------------------
-# Top-bar alerts for Frontier and Unclaimed Regions
+# Top-bar alerts for Frontier, Unclaimed Regions and cybernetics
 # (docs/specs/integration_v1.md §4.2, batch INT1). Evaluated by the engine for the player character only
 # (_important_actions.info:13); no on_action, no AI effect (spec E6, §6).
-# Each alert READS the Frontier's signature resource and never moves it
+# Each alert READS its system's signature resource and never moves it
 # (spec §2). Every action sets `icon` to a vanilla alert icon by name
 # (gfx/interface/icons/alerts/<name>.dds; _important_actions.info:7, spec E5).
 #
@@ -22,8 +22,8 @@
 # qualify; only Regions the player HOLDS (a backer is never alerted); the
 # entry clears as soon as the condition clears. No soundeffect (default).
 #
-# Deferred: eotg_action_aug_calibration_lapsed (spec §4.2 row 3) waits for the
-# cybernetics files to be free; it belongs at the end of this file.
+# Cybernetics: eotg_action_aug_calibration_lapsed (spec §4.2 row 5), at the
+# end of this file; the one action here that uses the "can execute" test.
 # -----------------------------------------------------------------------------
 
 # A Frontier at breaking strain (strain in the breaking band, 6+). Gone when
@@ -157,5 +157,46 @@ eotg_action_unclaimed_colours_ready = {
 
     effect = {
         decision:eotg_decision_unclaimed_raise_colours = { open_view_data = decision_detail }
+    }
+}
+
+# Decision nudge: an augmented ruler's calibration has lapsed (spec §4.2 row 5).
+# Shape exactly action_pam_decision_confession (pam_actions.txt:686-706),
+# including the engine's "can execute" test: Maintenance Protocol has no
+# picker, so the test is sound here (spec E1a, test 6 b3), and it carries the
+# decision's own 3-year cooldown, so this alert never reads or sets a
+# cooldown of its own (spec §6). Steps aside when the player has toggled the
+# decision (or Consult the Physician) important, so the vanilla decision alert
+# (filtered by each decision's should_create_alert) never shows alongside it. The decision is
+# passed as a decision: scope, the form vanilla's own test takes
+# (00_action_take_decision_or_interaction.txt:12; spec V1 fallback).
+# Signature resource (spec §2): reads eotg_mod_implant_calibrated, never moves
+# it. Any ruler tier (spec §6). Gone when Maintenance or Consult the Physician
+# re-applies calibration, the cooldown blocks Maintenance, or the trait is lost.
+eotg_action_aug_calibration_lapsed = {
+    type = alert
+    icon = action_take_decision
+    is_dangerous = no
+    combine_into_one = no
+    priority = 100
+
+    check_create_action = {
+        if = {
+            limit = {
+                has_trait = eotg_cybernetics
+                NOT = { has_character_modifier = eotg_mod_implant_calibrated }
+                can_execute_decision = eotg_decision_maintenance_protocol
+                NOT = { is_important_decision = decision:eotg_decision_maintenance_protocol }
+                NOT = { is_important_decision = decision:eotg_decision_consult_physician }
+            }
+            try_create_important_action = {
+                important_action_type = eotg_action_aug_calibration_lapsed
+                actor = root
+            }
+        }
+    }
+
+    effect = {
+        decision:eotg_decision_maintenance_protocol = { open_view_data = decision_detail }
     }
 }

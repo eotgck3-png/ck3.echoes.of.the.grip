@@ -75,3 +75,25 @@ eotg_action_unclaimed_colours_ready_combined_group_label          # parity only:
 eotg_action_unclaimed_colours_ready_combined_group_name           # parity only: "Raise Your Colours"
 eotg_action_unclaimed_colours_ready_combined_group_description    # parity only: an Unclaimed Shoal lies within your reach
 eotg_action_unclaimed_colours_ready_combined_unimportant          # parity only: you cannot raise your colours right now
+
+# == Cybernetics side (spec §4.2 row 5, §8), 2026-10-20 ========================
+# Supersedes the "Deferred: eotg_action_aug_calibration_lapsed (4 keys)" note at
+# the top: written with all 10 suffixes for lint parity (spec §8 lists 4; the
+# lint convention docs/tools/eotg_lint_loc_conventions.json wants 10). Single
+# instance (combine_into_one = no), no `unimportant` block, so the _combined_*
+# and _unimportant keys never show at runtime. No title scope; the ruler is the
+# player. Voice: vanilla decision-alert tone (important_actions_l_english.yml:
+# 1479-1482). Glossary: the trait is "Augmented"/augmentation; never name
+# fracture risk or any number. The modifier's player name is "Calibrated Systems".
+
+## eotg_action_aug_calibration_lapsed (10 keys)
+eotg_action_aug_calibration_lapsed                               # name: "Decision Available: Maintenance Protocol"
+eotg_action_aug_calibration_lapsed_label                         # short label: "Implants Uncalibrated"
+eotg_action_aug_calibration_lapsed_desc                          # your implants have drifted out of calibration; run the Maintenance Protocol (or consult a physician) to restore it
+eotg_action_aug_calibration_lapsed_click                         # click: open the Maintenance Protocol decision
+eotg_action_aug_calibration_lapsed_combined_label                # parity only: "Implants Uncalibrated"
+eotg_action_aug_calibration_lapsed_unimportant                   # parity only: your implants cannot be recalibrated right now
+eotg_action_aug_calibration_lapsed_combined_group_label          # parity only: "Implants Uncalibrated"
+eotg_action_aug_calibration_lapsed_combined_group_name           # parity only: "Implants Uncalibrated"
+eotg_action_aug_calibration_lapsed_combined_group_description    # parity only: your implants have drifted out of calibration
+eotg_action_aug_calibration_lapsed_combined_unimportant          # parity only: your implants cannot be recalibrated right now
