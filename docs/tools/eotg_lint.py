@@ -1005,8 +1005,10 @@ def load_conventions(path=CONVENTIONS_FILE):
 def _convention_keys(doc, spec):
     """(name, patterns) pairs one common/ file implies for L014.
 
-    Top-level objects take spec["patterns"]. Three optional spec fields cover names the
+    Top-level objects take spec["patterns"]. Four optional spec fields cover names the
     engine reads below the top level:
+      "children": [...]             every block directly inside each top-level object,
+                except blocks named in "nested"/"bare" (game rule settings);
       "nested": {"<block>": [...]}  every block directly inside a block named <block>
                 (subject contract obligation_levels: <level>, <level>_short);
       "values": {"<field>": [...]}  every value of a field named <field>
@@ -1014,10 +1016,13 @@ def _convention_keys(doc, spec):
       "bare": {"<block>": [...]}    every bare list item inside a block named <block>
                 (game concept alias = { a b }: game_concept_a, game_concept_a_desc).
     """
+    nested, values, bare = spec.get("nested", {}), spec.get("values", {}), spec.get("bare", {})
     for n in doc.nodes:
         if n.is_block and n.key and not n.key.startswith("@"):
             yield n.key, spec["patterns"]
-    nested, values, bare = spec.get("nested", {}), spec.get("values", {}), spec.get("bare", {})
+            for c in n.children if "children" in spec else ():
+                if c.is_block and c.key and c.key not in nested and c.key not in bare:
+                    yield c.key, spec["children"]
     if not (nested or values or bare):
         return
     for n, _ in pdx_parse.walk(doc.nodes):

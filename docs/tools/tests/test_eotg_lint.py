@@ -644,6 +644,18 @@ class L014(LintCase):
             "common/game_concepts/g.txt": "eotg_gc = { family = { eotg_other } }"}),
             "L014", "'game_concept_eotg_other' is defined", count=1)
 
+    def test_children_convention(self):
+        # game rule settings are blocks directly inside the rule; categories are bare items
+        rule = {"common/game_rules/r.txt":
+                "eotg_rule = { default = eotg_on categories = { eotg_cat } eotg_on = { } }"}
+        self.assertClean(self.files(
+            "rule_eotg_rule", "setting_eotg_on", "setting_eotg_on_desc",
+            "game_rule_category_eotg_cat", **rule), "L014")
+        # a block two levels down is not a setting
+        self.assertHit(self.files("setting_eotg_deep", **{
+            "common/game_rules/r.txt": "eotg_rule = { eotg_on = { eotg_deep = { } } }"}),
+            "L014", "'setting_eotg_deep' is defined", count=1)
+
     def test_not_key_exempt_when_base_used(self):
         # NOT_<key> is read by the engine when custom_description <key> fails;
         # it counts as used whenever its base key is referenced in script

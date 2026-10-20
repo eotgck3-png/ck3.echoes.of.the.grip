@@ -237,6 +237,29 @@
    },
    "verified": true,
    "source": "vanilla 1.20 _game_concepts.info:4-16; game_concepts_l_english.yml:269-273 (county, counties); ce1_epidemics_l_english.yml:6-10"
+  },
+  "game_rules": {
+   "patterns": [
+    "rule_{key}"
+   ],
+   "children": [
+    "setting_{key}",
+    "setting_{key}_desc"
+   ],
+   "bare": {
+    "categories": [
+     "game_rule_category_{key}"
+    ]
+   },
+   "verified": true,
+   "source": "vanilla _game_rules.info:18-21; game_rules_l_english.yml:67,246-250; game_rule_category_<c> confirmed at game_rules_l_english.yml:52,62-65"
+  },
+  "character_memory_types": {
+   "patterns": [
+    "{key}"
+   ],
+   "verified": true,
+   "source": "_character_memories.info (GetName returns memory_key); desc keys are script literals"
   }
  },
  "loc_reference_regexes": [
