@@ -36,8 +36,11 @@ Full report: [`docs/qa/system_investigation_2026-10-18/REPORT.md`](docs/qa/syste
 **Queued:**
 - CB-59 variants (after I1b frees the Frontier events file).
 
-**Still open:**
-- CB-51 (nr.004.e cover-up text vs public effect).
+**More rulings (2026-10-20):**
+- Election: candidates are limited to the dynasty.
+- Fabricators can print weapons and hull plate.
+- CB-51: both versions, each gated (being built).
+- Player-facing "Region" (county) becomes **"Quadrant"** (sweep being planned).
 
 ## Where we stopped: the system investigation (2026-10-18)
 
