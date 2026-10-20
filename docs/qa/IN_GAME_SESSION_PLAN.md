@@ -1,11 +1,13 @@
 # In-game session plan (all pending checks, one place)
 
 **For:** the owner, testing with `-debug_mode`. **Written:** 2026-10-06, against `v2-space-map` at `e481957` (Frontier Phase 3a merged) plus the tools branch `claude/test-session-cloud`.
+*(Changed 2026-10-20: added the in-game checks of the system investigation (SI §3: E-12, E-13, C10-6, C10-7, FX-1 to FX-3, V-U16, G-1 to G-3), the Frontier v5 checks (F5 §10: F-P5, F5-0 to F5-16), a fourth sitting on the British Isles playset for the governments, and §H, the holding-marker checks, which run only if a tier or zoom option is approved.)*
 
-This plan gathers every check still waiting for a human into **three sittings**:
+This plan gathers every check still waiting for a human into **four sittings**:
 1. engine checks first;
 2. then cybernetics;
-3. then Frontier, Phase 1 → 2 → 3a.
+3. then Frontier, Phase 1 → 2 → 3a → v5;
+4. then the mod governments (British Isles).
 
 Overlapping checks are merged, and each says where it came from, so a failure can be routed. It replaces nothing: the source files keep their detail, and this is the order to run them in.
 
@@ -23,6 +25,10 @@ Overlapping checks are merged, and each says where it came from, so a failure ca
 | **REC** | `docs/qa/generated/console_recipes.md` (per-event setup lines) |
 | **HTT** | `docs/qa/HOW_TO_TEST_IN_GAME.md` |
 | **PROC / INT / REALM / REP / SELF / TOPT** | `docs/specs/cybernetics_v2_{procedures,interactions,realm,reprisal,self_repair,tier_options}.md` §9 (CB-35, CB-38, CB-39, CB-40, CB-41, CB-43) |
+| **F5** | `docs/specs/frontier_v5.md` §10 (Definition of done) |
+| **SI** | `docs/qa/system_investigation_2026-10-18/REPORT.md` §3 (item ids F1, X3, … as in the report) |
+| **HTF** | `docs/proposals/holding_tier_progression_feasibility.md` §6 |
+| **BIR** | `docs/test_submods/british_isles/README.md` |
 
 **How to use it:**
 - Tick `[ ]` → `[x]` as you go, or write **FAIL** and the check id (e.g. `E-3 FAIL`).
@@ -40,6 +46,9 @@ Overlapping checks are merged, and each says where it came from, so a failure ca
 |---|---|---|
 | **A: vanilla map** | **Echoes of the Grip**, then **EotG Test: Frontier on Corsica and Sardinia** | sittings 1 and 3 (Frontier), and cybernetics if you prefer the vanilla map |
 | **B: test map** | **Echoes of the Grip**, then **EotG Test Map** | cybernetics (sitting 2): built for it (`docs/test_map/README.md` "Cybernetics") |
+| **C: British Isles** | **Echoes of the Grip**, then **EotG Test: British Isles** | the mod governments (sitting 4) |
+
+- Install the British Isles sub-mod as its README says (BIR "Install"): **run `python docs/test_submods/british_isles/tools/gen_history.py` first** (it must end with `OK`), then copy the folder and write the `.mod` file. Never load it with the test map or the Corsica/Sardinia sub-mod.
 
 - Install the Corsica/Sardinia sub-mod as its README says (`docs/test_submods/frontier_vanilla/README.md`). Install the test map with `python docs/test_map/install.py --out "<…>/mod/eotg_test_map"`, and **re-run it after any change in `docs/test_map/`**.
 - **Never** load the test map and the Corsica/Sardinia sub-mod together: the test map replaces the vanilla map.
@@ -109,6 +118,11 @@ These decide whether the architecture holds. **If any E-check fails, stop and se
      - `effect title:<c_key> = { change_county_control = 100 }`,
      then run the debug year again.
   - **Expect:** *No Longer a Frontier*, then a new Port, Bastion or Sanctum in a free slot, **held by the Region's holder, never the founder**. If no holding appears: +1 development and +10 control instead. **Report which.**
+- [ ] **E-12** **ENGINE: does `set_holding_type` create the barony holder?** Run it with E-4, on a **Military** Frontier (a castle has no Local Ruler, so the holder path runs alone). *src: SI V8 (`eotg_frontier_effects.txt:1376`)*
+  1. Before forcing completion, hover the empty barony you expect to fill: note that it has no holder.
+  2. Force completion as in E-4.
+  3. Hover the new Bastion's barony: who holds it?
+  - **Expect:** the Region's holder, with no second title-change line in the history and no `error.log` line with `eotg_frontier_build_holding` or `change_title_holder`. Either engine answer is correct (the effect handles both), so **report who held the barony and whether a stray character was created** to hold it.
 
 ### E3 Hooks receive their scopes
 - [ ] **E-5** *src: F1 §0.3 (V12), F2 §6, F3 §1.4*
@@ -138,6 +152,12 @@ These decide whether the architecture holds. **If any E-check fails, stop and se
 - [ ] **E-11** Wounds and `on_trait_gained`. *src: CB-35 Engine Q1, PROC §4.9*
   - As an Enhanced ruler, push a wound to rank 3 (repeated `effect increase_wounds_effect = { REASON = attacked }`).
   - Report: does **proc.003** come within 30 days? If not, proc.003 misses wound-ranked injuries, and the scripter needs to know.
+- [ ] **E-13** **ENGINE: do the per-level `ai_*` values in the trait's track apply?** *src: SI T1 (`common/traits/eotg_augmentation_traits.txt:34-60`)*
+  1. Pick an unaugmented AI courtier. In debug mode, hover their portrait and note the AI values the debug block lists (energy, honour, zeal).
+  2. `effect character:<id> = { eotg_aug_initiate_effect = yes }` → note again.
+  3. `effect character:<id> = { add_trait_xp = { trait = eotg_cybernetics value = 50 } }` → note again; then `… value = 100` → note again.
+  - **Expect**, against step 1: Augmented energy +2, zeal −1, honour −1; Enhanced energy +3, zeal −2, honour −1; Overclocked energy +4, zeal −3, honour −2.
+  - If the values stay at the Augmented line at every stage, the track's `ai_*` lines are ignored. **Report the numbers** either way. If the debug block shows no AI values, say so.
 
 **Save as `S1_engine_done`** (playset A).
 
@@ -386,6 +406,15 @@ These decide whether the architecture holds. **If any E-check fails, stop and se
   - **ENGINE (a):** the child on_actions under vanilla activity hooks fire, and the parent's trigger gates them.
   - act.002, act.004 and nr.003 fit **five options without scrolling** (CB-34 G9 7, CB-43).
   - A just-Enhanced host sees act.003 **e, not f** (CB-43).
+- [ ] **C10-6** **Unsworn holders never pass the Ban or Favour law.** *src: SI X7*
+  - Setup: on playset B, `c_aphion_seam` and `c_helios_shoal` start unclaimed (§U). Take **(Debug) Unclaimed Regions Readout**, and hover each county's holder for their id.
+  - Let 10 years pass, then open each Unsworn holder's realm laws.
+  - **Expect:** the Augmentation group still reads **Tolerate** (`eotg_aug_policy_tolerate`); never Ban or Favour. If one changed, note which and when, and send the `error.log` lines with `eotg_aug_policy`.
+- [ ] **C10-7** **The law of a realm that breaks free.** *src: SI S8 (design note: realm splits reset to Tolerate)*
+  1. As Aurelian, pass the **Ban**. Save.
+  2. Free one of his dukes: use vanilla's release-from-vassalage interaction on him, or let an independence faction win.
+  3. Open the freed duke's realm laws.
+  - **Expect (current design):** the new independent ruler has **Tolerate**, not the Ban, and the C10-1 liege-lock tooltip is gone from his law screen. **Report which law he has**: the architect rules whether the reset stays.
 
 ### C11 Self-repair (CB-41; SELF §9 item 9)
 - [ ] **C11-1** The culture window lists **Self-Repairing Machinery** in the civic group, early medieval column, with its custom line. *src: SELF §9*
@@ -452,7 +481,7 @@ These decide whether the architecture holds. **If any E-check fails, stop and se
 **Save as `S2_done`.**
 
 ---
-## Sitting 3: Frontier, Phase 1 → 2 → 3a (playset A, Giovanni; about 3 hours)
+## Sitting 3: Frontier, Phase 1 → 2 → 3a → v5 (playset A, Giovanni; about 4½ hours)
 
 Start from **`S0_start`**, not from S1: E-checks left Regions in odd states.
 
@@ -633,6 +662,86 @@ Already covered in sitting 1, so don't repeat them here: F1 §0 (E-1, E-4, E-5),
   - **Corporation-style offer:** `effect title:<c_key> = { eotg_frontier_offer_backing_effect = { SPONSOR = character:<landed count id> } }` → *An Offer of Backing* names them.
 - [ ] **F3-11** **AI, Q3-4** (with F2-11's 10+ years): AI Military and Religious Frontiers sometimes gain a company or faith backer, with no event. *src: F3 §2.6*
 
+**Save `S3_p3a`.**
+
+### F-X Edge cases from the system investigation (SI §3)
+- [ ] **FX-1** **War strain on a vassal's Frontier before occupation.** *src: SI F1 (spec A4.1; `eotg_frontier_triggers.txt:314-327`)*
+  1. Grant a running Frontier Region to a vassal (as in E-1 step 5).
+  2. Go to war (any claim CB on a neighbour). Pause when an enemy army **stands in** the vassal's Region but has **not yet occupied** it.
+  3. Clear the cooldown, then run the debug year; read the Readout.
+  - **Expect (spec A4.1):** strain +1 with cause **War**. The investigation found it only starts once the county is occupied, so this is expected to **FAIL** until SI F1 is fixed. Report what you saw.
+- [ ] **FX-2** **A Religious completion under a male-only clergy.** Giovanni is Catholic, whose clergy are male. *src: SI F3*
+  1. A **Religious** Frontier on a Region with a free slot, with **you** as the founder (so the mission elder becomes the Local Ruler). Save.
+  2. Force completion as in E-4. Hover the new Sanctum's holder: note the gender.
+  3. Reload and repeat 4 to 6 times.
+  - **Expect:** the theocrat is **male every time**, and `error.log` has no line about the clergy, the grant or `eotg_frontier_grant_local_ruler`. The templates are a flat 50% female today, so a female theocrat is the known FAIL. Report the count (e.g. "3 of 6 female").
+- [ ] **FX-3** **Completion while the Region is occupied.** *src: SI F6*
+  1. A Settlement or Military Frontier at progress 100 (`effect title:<c_key> = { set_variable = { name = eotg_frontier_progress value = 100 } }`), with control and development met.
+  2. Let an enemy army occupy the county in a war (as in FX-1). Then run the debug year.
+  - **Expect:** no `error.log` line. **Report** whether the Frontier completed or waited, whether a holding appeared mid-war, who holds it, and whether the occupier ended up holding anything.
+
+### F-P5 Frontier v5 (F5 §10; start from `S3_p2` or `S3_p3a`)
+Every round-1 and round-2 event (.050–.060) has its setup lines in REC, under *Frontier Events*. They don't fire cold: each needs `scope:eotg_frontier_county`, so use the "fire any Frontier event" line above, or let the debug year roll them. To make the roll reach an event faster, clear the cooldown before each debug year.
+- [ ] **F5-0** **Before the sitting, ask the orchestrator whether QA passed F5 §10's static checks**: V-R2a (30/30 events reachable), V-R2b (every .057–.060 option moves progress or strain), V-R2c (16 personality, 13 education and 4 tier gates), V-R2d (no cooldown in triggers), V-R2e (no innovation in .057–.060), V-R2f (the round-2 banned-word and loc greps), V-R2g (the Seamless guard is one trigger, read in all its places), V-R2h (no `title:` / `province:` / `culture:` / `faith:` / `character:` in the changed files), and the #6 AI `ai_chance` check. These are read-only checks, not in-game ones: just record the answer. *src: F5 §10.7, §10 "#6 AI"*
+- [ ] **F5-1** **.005 "Lead it yourself" (option e).** *src: F5 §10 #6; F5 §3.1*
+  1. A Frontier whose founder is **someone else**: `effect title:<c_key> = { set_variable = { name = eotg_frontier_strain value = 8 } }`, then run the debug year → *The Frontier Falters*.
+  2. Take **e**.
+  - **Expect:** you are now the founder (Readout); progress is halved; strain is **4**; a minor stress gain; .005 does **not** fire again on the next debug year.
+  - Option **e** is **absent** when you are already the founder. As a **child ruler** (switch to one, 0.4, and give them a Frontier), it is not shown either.
+- [ ] **F5-2** **A Research completion advances the culture's fascination.** *src: F5 §10 #4; F5 §3.2*
+  1. Open the culture window and note the current fascination and its progress. (If your culture has none and you are its head, pick one.)
+  2. A **Research** Frontier with `effect title:<c_key> = { add_county_modifier = eotg_frontier_trait_anomalous }`. Force completion as in E-4.
+  - **Expect:** the fascination advances by **15** points (10, +5 for Anomalous). A second Research completion with no Research Facility, Ancient Ruins or Anomalous gives **10**.
+  - **Without a fascination:** learning lifestyle XP instead (about 300). Test it if any ruler at hand has a culture with no fascination; otherwise record "not tested".
+- [ ] **F5-3** **The 14 trait-gated options** (F5 §3.3's table: .002.g/h, .003.c, .005.f, .030.c, .031.d, .032.e, .033.d, .034.d/e, .035.d, .036.c, .040.d, .041.d). *src: F5 §10 #2*
+  - For each, fire the event (REC) once **with** the gate (`add_trait <trait>`, or an education trait such as `add_trait education_martial_3`; for tier gates, a duke or above) and once **without** (`remove_trait`).
+  - **Expect:** shown only with the gate. Personality options show the trait icon and apply their stress; education and tier options show **no** icon.
+- [ ] **F5-4** **The seven round-1 events reach the player only when eligible.** *src: F5 §10 R1; F5 §3.4.2*
+  - Set the condition, then run the debug year (clearing the cooldown) until the event comes. It should come **within 120 days** of the roll.
+
+  | Event | Set up | Never when |
+  |---|---|---|
+  | .050 *Sickness in the Berths* | any Frontier; `add_county_modifier = eotg_frontier_trait_hostile` makes it likelier | — |
+  | .051 *The Ones Who Were Here First* | any Frontier; `eotg_frontier_trait_dangerous` makes it likelier | — |
+  | .052 *The Frame Is Cracking* | progress 20+ | progress below 20 |
+  | .053 *Patched Seals* | any Frontier; `eotg_frontier_trait_remote` makes it likelier | — |
+  | .054 *Whose Systems Are These?* | a valid founder who is not you; progress 50+ | you are the founder, or progress below 50 |
+  | .055 *Two Chapels* | `effect title:<c_key> = { set_county_faith = faith:orthodox }` (the Region's faith differs from yours) | Region, holder and founder all share one faith |
+  | .056 *Their Own Berths* | `effect title:<c_key> = { set_county_culture = culture:greek }` | all share one culture |
+  - **The holder re-check:** run the debug year until an event is pending, then move the Region to someone else before it fires (`effect title:<c_key> = { change_title_holder = { holder = character:<id> } }`). The event never arrives.
+- [ ] **F5-5** **The `dispute` strain cause.** Take **.054.d** at strain 7, then run the debug year. *src: F5 §10 "R1 cause"*
+  - **Expect:** .005 shows the dispute line (`desc_dispute`), and **Abandon a Frontier**'s tooltip shows the dispute cause.
+- [ ] **F5-6** **V-B1: buildings on completion.** As Giovanni (feudal), force completion of a **Settlement**, **Trade**, **Military** and **Religious** Frontier, each on a Region with a free slot; then **Research** twice: once on a Region whose capital barony is a church (`effect title:<c_key>.title_province = { set_holding_type = church_holding }` first, on a non-capital Region) and once without. *src: F5 §10 V-B1; F5 §3.5*
+  - **Expect:** each new System holds its building at level 01 (Settlement: Hospices; Trade: Guild Halls; Military: Barracks; Religious: Chapel; Research: Chapel with a church capital, else Hospices). No `error.log` line.
+  - **Mining** and **Administrative** place nothing.
+- [ ] **F5-7** **V-B2: a full Region.** Before completing a **Research** Frontier, fill the capital barony's building slots from the console until the county view shows none empty (`effect title:<c_key>.title_province = { add_building = <key> }` with, in turn, `curtain_walls_01`, `military_camps_01`, `farm_estates_01`, `pastures_01`; if one errors, use another from the county view). Then force completion. *src: F5 §10 V-B2*
+  - **Expect:** a slot is added (`extra_building_slot`) and the building placed.
+  - **Record either way** whether a building whose requirements aren't met sits inert (greyed in the county view).
+- [ ] **F5-8** **V-B3: the completion preview.** On *No Longer a Frontier* (.004), hover each option's tooltip, once for each holding type. *src: F5 §10 V-B3*
+  - **Record** whether the building line shows. Only Research may show it (the new barony may be unset at preview). Acceptable either way.
+- [ ] **F5-9** **V-B4: Trade.** Complete a **Trade** Frontier. **Expect:** `guild_halls_01` is present once the new city has `city_01`. *src: F5 §10 V-B4*
+- [ ] **F5-10** **V-R2-1: the four round-2 events reach the player only when eligible.** As F5-4. *src: F5 §10 V-R2-1; F5 §3.6.2*
+
+  | Event | Set up | Never when |
+  |---|---|---|
+  | .057 *Berths Filling* | progress 20+, strain 3 or less; `eotg_frontier_trait_habitable` makes it likelier | strain 4+, or progress below 20 |
+  | .058 *A Pair of Steady Hands* | any Frontier; Hostile or Remote makes it likelier | — |
+  | .059 *Older Than Any Record* | progress 20+; `eotg_frontier_trait_ancient_ruins` makes it likelier | progress below 20 |
+  | .060 *Ships That Stop* | progress 33+; `eotg_frontier_trait_trade_route` makes it likelier | progress below 33 |
+- [ ] **F5-11** **V-R2-2: .058's four outcomes.** Take each of a–d (reload between), then check the character list. *src: F5 §10 V-R2-2*
+  - **a, b, c:** the settler is now your courtier, and the fee went to them (a: minor gold; b and c: tiny). After **c**, they are slighted.
+  - **d:** the settler is gone (dead by disappearance), with no stray unlanded character left behind.
+  - No `error.log` line.
+- [ ] **F5-12** **V-R2-3: .058's desc matches the settler's education.** Fire it several times. *src: F5 §10 V-R2-3*
+  - **Expect:** a stewardship settler reads as an engineer, a learning one as a surveyor, a martial one as a pilot.
+- [ ] **F5-13** **V-R2-4: .060.a adds the trade route once.** *src: F5 §10 V-R2-4*
+  1. On a Region **without** `eotg_frontier_trait_trade_route` and with trait room, take .060.a. **Expect:** the trait is added, and the discovery hook fires once (one toast or log line).
+  2. Again on a Region that **has** it. **Expect:** no trait change, and the tooltip says so.
+- [ ] **F5-14** **V-R2-5: a Seamless ruler hears no Frontier events.** `add_trait eotg_total_integration` on Giovanni with a running Frontier, then run the debug year a dozen times (clearing the cooldown each time). *src: F5 §10 V-R2-5; F5 §3.7*
+  - **Expect:** no pool event fires (.002, .003, .030–.036, .040, .041, .050–.060). Progress and strain still move (a silent roll), and a founderless Frontier gets a founder picked for it.
+- [ ] **F5-15** **V-R2-6: the in-flight guard.** Without the trait, run the debug year until a pool event is pending, then `add_trait eotg_total_integration` before it fires. **Expect:** the event does not fire. *src: F5 §10 V-R2-6*
+- [ ] **F5-16** **V-R2-7: back again.** `remove_trait eotg_total_integration`. **Expect:** pool events resume at the next eligible roll. *src: F5 §10 V-R2-7*
+
 ### F-T Throughout Frontier
 - [ ] **F-T1** **No number** in any Frontier tooltip or desc; the debug Readout is the exception. *src: F1 §6; F2 §8; F3 §5*
 - [ ] **F-T2** No player text says "barony", "holding slot", "county", "charter", "season", a faction, an era or the Void. Canadian spelling (colour, honour, defence, travelled). *src: F1 §6; F2 §8; F3 §5*
@@ -680,6 +789,7 @@ Setup: `-debug_mode`. **Test map:** c_aphion_seam and c_helios_shoal start uncla
     - claim a Sardinian Region from Corsica, mark nothing (it's already Unsettled), Establish, then abandon. The decision and .005 (a) show "Abandoning the Frontier gives it up"; the Region goes back to grey, Unclaimed and Abandoned, keeping its traces, and a toast says so;
     - a Corsican (owned, never claimed) abandonment stays with its holder;
     - a claimed **capital** Region stays, Abandoned.
+16. **V-U16 Nomad migration (rare; only if you own *Khans of the Steppe* and a nomad realm can reach an Unsworn county):** vanilla's `migration` CB group skips `herders_and_tributary_constraints`, so a nomad might migrate into an Unsworn county. In a 20-year observer run, or by playing a nomad next to one, look for a migration war against an Unsworn holder. **Expect:** none. If one happens, report the attacker and the county. *src: SI M1*
 
 **New checks for this build:**
 - **Raise Your Colours:**
@@ -690,6 +800,43 @@ Setup: `-debug_mode`. **Test map:** c_aphion_seam and c_helios_shoal start uncla
 - **Expedition to unclaimed space:** mark a Sardinian Region Unknown (c_tortoli already is). From Corsica, **Send an Expedition** offers it if it is in reach: own Regions first, then unclaimed. Filing the charts at Known gives the Region survey data for whoever claims it.
 - **Placeholders stay out of mod content:** no cybernetics or Frontier events or offers ever reach an Unsworn character (`error.log` lines with `eotg_is_unclaimed`).
 - **.040 on a Military Frontier:** the desc offers only money behind the venture, with no convoy guards.
+
+---
+
+## Sitting 4: the mod governments (playset C, British Isles; about 1 hour)
+
+**Start:** the vanilla **1066** bookmark, then pick the ruler **on the map** (none of the mod-government holders has a bookmark portrait; BIR "Testing the governments"). The sub-mod's setup runs only on a new game. Save as `S4_start` after picking. The full government list (T1–T14 in `docs/specs/government_template.md` §5.2) is recorded on CB-49; the checks below are the ones from other sources.
+
+### G1 Succession, Local Rulers and adventurers
+- [ ] **G-1** **The ruler designer over a PMC ruler.** *src: SI X3 (`common/on_action/eotg_government_on_actions.txt:10-14`)*
+  1. In the lobby, pick **Raoul of Valois (40406)**, `d_valois`, and open the **ruler designer** on him. Change anything, then start.
+  2. Unpause, then open his realm laws.
+  - **Expect:** his succession law is **`eotg_pmc_succession_law`** (the PMC's own). The setup runs before the lobby, so the designed character may start without it: that is the suspected FAIL. **Report the law shown.**
+- [ ] **G-2** **A Local Ruler under a mod-government liege.** *src: SI F8 (frontier_v4 D4-4, deferred)*
+  1. As Raoul (PMC), mark a county of his with a free slot Unsettled (`effect title:<c_key> = { eotg_frontier_mark_unsettled_effect = yes }`), Establish a **Settlement** Frontier with **you** as the founder, and force completion as in E-4.
+  2. Hover the new Local Ruler: note the **government**. Open the vassal contract with them.
+  3. Repeat with a **Religious** Frontier.
+  - **Expect (known, deferred):** vanilla **republic** (Settlement) and **theocracy** (Religious), not a PMC variant. The contract window opens with readable obligations and no blank or pink text, and `error.log` has no line with `eotg_frontier_grant_local_ruler` or the contract. **Report** the government and the obligations shown.
+  - If time allows, repeat once under Hoël (178, Corporation) and Alfonso VI (108500, Cartel).
+- [ ] **G-3** **Cybernetics tier events on a landless adventurer.** *src: SI X4*
+  1. Play **Hereward the Wake (90028)**, `d_laamp_wake` (bookmark), a landless adventurer with a camp.
+  2. `effect eotg_aug_initiate_effect = yes`, then fire a few Augmented events with their REC setup (e.g. `event eotg_aug_tier1.005`, `event eotg_aug_tier1.007`), then `effect add_trait_xp = { trait = eotg_cybernetics value = 50 }` and `event eotg_aug_tier2.001`.
+  3. Let 2–3 years pass for the natural pulse.
+  - **Expect:** the events fire and read right for a camp: no blank names, "your seat" doesn't name a holding he hasn't got, and no option requires a capital or vassals he can't have. The decisions (Maintenance, Pursue the Next Stage) show sensible requirement lines. No `error.log` line from `eotg_aug` events. **Report** any event that reads wrong, with its id.
+
+**Save as `S4_done`.**
+
+---
+
+## §H Holding markers (**not applicable: the owner declined tiers and option D on 2026-10-20; kept for reference only, skip**)
+Run these **only if the owner approves** option B (scale-only tiers) or D (markers visible further out) from `docs/proposals/holding_tier_progression_feasibility.md` §4, and the orchestrator says it is built. Until then, skip the section. Playset A, Giovanni, any save. *src: HTF §6*
+
+**Upgrade a holding by console:** `effect capital_province = { add_building = castle_02 }`, then `castle_03`, then `castle_04` (on a city or church holding: `city_02…04`, `temple_02…04`).
+- [ ] **H-1** **Each tier swaps on upgrade** (option B). After each `add_building`, zoom in on the holding. **Expect:** the marker changes to the next tier's size or model at once, for castle, city and temple. *src: HTF §6*
+- [ ] **H-2** **The largest tier fits the construction cage** (option B). On a top-level holding, start any building from the county view. **Expect:** the construction cage encloses the marker, with nothing poking through. *src: HTF §6 (feasibility §3 item 6)*
+- [ ] **H-3** **Labels aren't clipped** (options B and D). Zoom in on two neighbouring holdings, one at the top tier. **Expect:** the holding names and banners are readable, not cut off or overlapping the marker. *src: HTF §6*
+- [ ] **H-4** **The fade on the space map** (option D). Zoom out one step at a time from fully in. **Expect:** markers stay visible to about step 13–15 (vanilla stops at 9), fade out cleanly on the space-map shaders, and mid-zoom isn't cluttered. Screenshot steps 9, 12 and 15. *src: HTF §6; feasibility §4 D*
+- [ ] **H-5** **The mod's holding icons** (`gfx/interface/icons/icon_holding_*.dds`) replace vanilla's everywhere those files are used: the map banners, the county view and the holding tooltips. **Report** any place they look wrong or out of place, so the owner can confirm the replacement is intended. *src: HTF §6 "Icon filenames"*
 
 ---
 
@@ -706,7 +853,7 @@ After each sitting, send the orchestrator:
      - Git Bash: `grep -n "eotg" error.log`
      - PowerShell: `Select-String -Path error.log -Pattern "eotg"`
    - Or simply send the whole file.
-4. **Engine answers in words**, whatever the outcome: E-4 (which holding, or the fallback), E-8 and E-9 (who was found), E-11, C5-4 (the regency), C7-7 ENGINE a/b, C9-4/C9-5 ENGINE, C10 ENGINE a/c/g/h, C11 ENGINE a/d, F3-8.
+4. **Engine answers in words**, whatever the outcome: E-4 (which holding, or the fallback), E-8 and E-9 (who was found), E-11, C5-4 (the regency), C7-7 ENGINE a/b, C9-4/C9-5 ENGINE, C10 ENGINE a/c/g/h, C11 ENGINE a/d, F3-8; and since 2026-10-20: E-12 (who held the barony), E-13 (the AI values), C10-7 (the freed realm's law), FX-1 to FX-3, F5-2 (the fascination numbers), F5-7 and F5-8 (V-B2, V-B3), G-1 (the law shown), G-2 (the Local Ruler's government).
 5. **Optional:** the save you were in when something failed, and for C13 the observer reports.
 
 **Known noise to ignore in error.log** (CLAUDE.md "Validation"):
