@@ -1,64 +1,64 @@
 ﻿l_english:
- # Unclaimed Regions (docs/specs/frontier_unclaimed_regions.md §14). County = Region.
+ # Unclaimed Shoals (docs/specs/frontier_unclaimed_regions.md §14). County = Shoal.
  # Never: charter, registry, recognized, licensed, wasteland, peasants, human, a named faction.
 
  # -- Government (icon: the vanilla herder icon until art lands, spec §18) --
  eotg_unclaimed_government:0 "Unsworn"
  eotg_unclaimed_government_adjective:0 "Unsworn"
- eotg_unclaimed_government_realm:0 "Unclaimed Region"
- eotg_unclaimed_government_desc:0 "No ruler holds this Region, and the Unsworn who live here want none. The people scattered across its Systems keep no court, swear no oath and raise no armies. Whoever is willing to pay for the crews, the guns and the flag can make it theirs."
+ eotg_unclaimed_government_realm:0 "Unclaimed Shoal"
+ eotg_unclaimed_government_desc:0 "No ruler holds this Shoal, and the Unsworn who live here want none. The people scattered across its Systems keep no court, swear no oath and raise no armies. Whoever is willing to pay for the crews, the guns and the flag can make it theirs."
  eotg_unclaimed_government_with_icon:0 "@government_type_herder! Unsworn"
  eotg_unclaimed_government_filter_option:0 "Unsworn"
  eotg_unclaimed_government_filter_option_desc:0 "Only show characters with an Unsworn [government|E]"
  eotg_unclaimed_government_vassals_label:0 "Unsworn [obligations|E] cannot be adjusted"
- eotg_government_is_unclaimed:0 "Is not a ruler: the scattered people of an Unclaimed Region"
+ eotg_government_is_unclaimed:0 "Is not a ruler: the scattered people of an Unclaimed Shoal"
 
  # -- Trait --
  trait_eotg_unclaimed_folk:0 "Unsworn"
- trait_eotg_unclaimed_folk_desc:0 "One of the Unsworn, the scattered people of a Region that no ruler has claimed. No court, no oath, and nothing handed down."
+ trait_eotg_unclaimed_folk_desc:0 "One of the Unsworn, the scattered people of a Shoal that no ruler has claimed. No court, no oath, and nothing handed down."
 
  # -- County modifier --
- eotg_unclaimed_mod_unclaimed:0 "Unclaimed Region"
- eotg_unclaimed_mod_unclaimed_desc:0 "No ruler holds this Region. The Unsworn who live here answer to no one, and an army passing through finds little to live on."
+ eotg_unclaimed_mod_unclaimed:0 "Unclaimed Shoal"
+ eotg_unclaimed_mod_unclaimed_desc:0 "No ruler holds this Shoal. The Unsworn who live here answer to no one, and an army passing through finds little to live on."
 
  # -- Toasts --
- eotg_unclaimed_toast_claimed:0 "Your colours fly over a new Region, for as long as you can hold it."
+ eotg_unclaimed_toast_claimed:0 "Your colours fly over a new Shoal, for as long as you can hold it."
 
  # -- Debug decisions (testing only) --
- eotg_decision_unclaimed_debug_release:0 "(Debug) Release a Region to the Unsworn"
- eotg_decision_unclaimed_debug_release_desc:0 "Testing only. Gives up your least developed Region that is not your capital. It becomes an Unclaimed Region."
- eotg_decision_unclaimed_debug_release_tooltip:0 "Testing only: release one of your Regions as an Unclaimed Region."
+ eotg_decision_unclaimed_debug_release:0 "(Debug) Release a Shoal to the Unsworn"
+ eotg_decision_unclaimed_debug_release_desc:0 "Testing only. Gives up your least developed Shoal that is not your capital. It becomes an Unclaimed Shoal."
+ eotg_decision_unclaimed_debug_release_tooltip:0 "Testing only: release one of your Shoals as an Unclaimed Shoal."
  eotg_decision_unclaimed_debug_release_confirm:0 "Release it"
- eotg_decision_unclaimed_debug_release_valid_tt:0 "You hold a Region that is not your capital and is not already unclaimed"
- eotg_decision_unclaimed_debug_readout:0 "(Debug) Unclaimed Regions Readout"
- eotg_decision_unclaimed_debug_readout_desc:0 "Testing only. Checks whether the Unsworn can be played, and counts the Unclaimed Regions."
- eotg_decision_unclaimed_debug_readout_tooltip:0 "Testing only: show the Unclaimed Regions probe."
+ eotg_decision_unclaimed_debug_release_valid_tt:0 "You hold a Shoal that is not your capital and is not already unclaimed"
+ eotg_decision_unclaimed_debug_readout:0 "(Debug) Unclaimed Shoals Readout"
+ eotg_decision_unclaimed_debug_readout_desc:0 "Testing only. Checks whether the Unsworn can be played, and counts the Unclaimed Shoals."
+ eotg_decision_unclaimed_debug_readout_tooltip:0 "Testing only: show the Unclaimed Shoals probe."
  eotg_decision_unclaimed_debug_readout_confirm:0 "Show it"
  eotg_unclaimed_debug_none_tt:0 "No Unsworn holder was found anywhere."
  eotg_unclaimed_debug_playable_tt:0 "PROBE: an Unsworn holder passes the scripted is_playable_character check. Expected: yes. This is not proof that a player could take the character in a lobby."
  eotg_unclaimed_debug_unplayable_tt:0 "PROBE: an Unsworn holder is NOT playable (spec V-U1)."
  eotg_unclaimed_debug_pulsed_tt:0 "PROBE: vanilla's random yearly event pool has reached an Unsworn holder [eotg_unclaimed_debug_reader.MakeScope.Var('eotg_unclaimed_debug_pulses').GetValue|0] times since this counter started. Above zero means Unsworn holders need shielding from yearly events."
  eotg_unclaimed_debug_tracked_tt:0 "PROBE: [eotg_unclaimed_debug_reader.MakeScope.Var('eotg_unclaimed_debug_tracked').GetValue|0] Unsworn holders are tracked. Compare this with the Unsworn alive count; a mismatch means the tracking list has drifted."
- eotg_unclaimed_debug_counts_tt:0 "Unclaimed Regions: [eotg_unclaimed_debug_reader.MakeScope.Var('eotg_unclaimed_debug_counties').GetValue|0]. Unsworn alive: [eotg_unclaimed_debug_reader.MakeScope.Var('eotg_unclaimed_debug_folk').GetValue|0]. Fixed by the last yearly sweep: [eotg_unclaimed_debug_reader.MakeScope.Var('eotg_unclaimed_debug_fixed').GetValue|0] (0 expected)."
+ eotg_unclaimed_debug_counts_tt:0 "Unclaimed Shoals: [eotg_unclaimed_debug_reader.MakeScope.Var('eotg_unclaimed_debug_counties').GetValue|0]. Unsworn alive: [eotg_unclaimed_debug_reader.MakeScope.Var('eotg_unclaimed_debug_folk').GetValue|0]. Fixed by the last yearly sweep: [eotg_unclaimed_debug_reader.MakeScope.Var('eotg_unclaimed_debug_fixed').GetValue|0] (0 expected)."
 
  # -- Raise Your Colours (Batch 2) --
  eotg_unclaimed_claim_interaction:0 "Raise Your Colours"
- eotg_unclaimed_claim_interaction_desc:0 "Pay for the crews, the guns and the flag, and this Region is yours for as long as you can hold it. Nobody else has to agree, and nobody is obliged to respect it."
- eotg_unclaimed_claim_reach_tt:0 "The Region borders your lands, or lies within reach of your capital"
+ eotg_unclaimed_claim_interaction_desc:0 "Pay for the crews, the guns and the flag, and this Shoal is yours for as long as you can hold it. Nobody else has to agree, and nobody is obliged to respect it."
+ eotg_unclaimed_claim_reach_tt:0 "The Shoal borders your lands, or lies within reach of your capital"
  eotg_unclaimed_claim_gold_tt:0 "You can pay for the crews, the guns and the flag"
  eotg_unclaimed_claim_prestige_tt:0 "Your name carries enough weight for crews to sail under your flag"
- eotg_unclaimed_claim_effect_tt:0 "The Region becomes yours. The Unsworn living there go on as before. You may Establish a Frontier here once the Region has been explored."
- eotg_unclaimed_claim_returns_tt:0 "If a Frontier here is ever abandoned, the Region is given up and becomes unclaimed again, unless it is your capital Region."
+ eotg_unclaimed_claim_effect_tt:0 "The Shoal becomes yours. The Unsworn living there go on as before. You may Establish a Frontier here once the Shoal has been explored."
+ eotg_unclaimed_claim_returns_tt:0 "If a Frontier here is ever abandoned, the Shoal is given up and becomes unclaimed again, unless it is your capital Shoal."
 
  # -- Release on abandonment (Batch 2) --
- eotg_unclaimed_toast_released:0 "A Region you had claimed is unclaimed again."
- eotg_unclaimed_abandon_returns_tt:0 "This Region came out of unclaimed space. Abandoning the Frontier gives it up: it becomes unclaimed again."
+ eotg_unclaimed_toast_released:0 "A Shoal you had claimed is unclaimed again."
+ eotg_unclaimed_abandon_returns_tt:0 "This Shoal came out of unclaimed space. Abandoning the Frontier gives it up: it becomes unclaimed again."
 
  # -- Batch 2 (frontier_v4.md A7.3, A7.4): the Raise Your Colours decision, cooldown line, blocked-war line --
  eotg_decision_unclaimed_raise_colours:0 "Raise Your Colours"
- eotg_decision_unclaimed_raise_colours_desc:0 "An Unclaimed Region lies within reach. Raise your colours over it and it is yours, for as long as you can hold it. Nobody else has to agree."
- eotg_decision_unclaimed_raise_colours_tooltip:0 "Take an Unclaimed Region within reach under your flag."
+ eotg_decision_unclaimed_raise_colours_desc:0 "An Unclaimed Shoal lies within reach. Raise your colours over it and it is yours, for as long as you can hold it. Nobody else has to agree."
+ eotg_decision_unclaimed_raise_colours_tooltip:0 "Take an Unclaimed Shoal within reach under your flag."
  eotg_decision_unclaimed_raise_colours_confirm:0 "Raise the colours"
- eotg_decision_unclaimed_raise_colours_pick_tt:0 "The chosen Region is an Unclaimed Region, and it borders your lands or lies within reach of your capital"
- eotg_unclaimed_claim_cooldown_tt:0 "You have not raised your colours over a Region in the last five years"
- eotg_unclaimed_defender_tt:0 "[defender.GetShortUIName] is Unsworn and cannot be attacked.\nTo take [defender.GetHerHis] Region, use #V Raise Your Colours#!, as a decision or as an interaction with [defender.GetHerHim]."
+ eotg_decision_unclaimed_raise_colours_pick_tt:0 "The chosen Shoal is an Unclaimed Shoal, and it borders your lands or lies within reach of your capital"
+ eotg_unclaimed_claim_cooldown_tt:0 "You have not raised your colours over a Shoal in the last five years"
+ eotg_unclaimed_defender_tt:0 "[defender.GetShortUIName] is Unsworn and cannot be attacked.\nTo take [defender.GetHerHis] Shoal, use #V Raise Your Colours#!, as a decision or as an interaction with [defender.GetHerHim]."
