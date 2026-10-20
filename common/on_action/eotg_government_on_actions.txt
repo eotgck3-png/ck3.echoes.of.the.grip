@@ -13,6 +13,17 @@ on_game_start = {
     }
 }
 
+# Vanilla G/common/on_action/game_start.txt ("called once the host exits the
+# lobby"). Fix I1b X3: a ruler-designer character exists only after the lobby,
+# so the same setup runs again here (as cybernetics does,
+# eotg_augmentation_on_actions.txt:153-160). Running it twice is harmless:
+# eotg_gov_ensure_succession_law_effect adds a law only when it is missing.
+on_game_start_after_lobby = {
+    on_actions = {
+        eotg_gov_on_game_start
+    }
+}
+
 # Vanilla G/common/on_action/government_on_actions.txt:4
 # root = the character who changed government; scope:old_government.
 on_government_change = {

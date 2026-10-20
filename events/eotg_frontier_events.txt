@@ -39,9 +39,33 @@ eotg_frontier.001 = {
     type = character_event
     title = eotg_frontier.001.t
     desc = {
-        desc = eotg_frontier.001.desc
+        # CB-59 (owner, 2026-10-20; event_quality_v1 §12.5 S3 rule (b), as
+        # batch 5E did for .004/.005): .001 is decision-fired (frontier_v5
+        # §3.7 D5-7), so a Seamless player can open it. The log register
+        # first, through the Frontier's one trait read (§10.7 V-R2g). Every
+        # fragment below is first person, so each has a Seamless twin; options
+        # a-h are neutral imperatives and need no variant.
+        first_valid = {
+            triggered_desc = {
+                trigger = { eotg_frontier_can_hear_flavor = no }
+                desc = eotg_frontier.001.desc_seamless
+            }
+            desc = eotg_frontier.001.desc
+        }
         # Lore I1: never tell the player about themselves in the third person
         first_valid = {
+            triggered_desc = {
+                trigger = {
+                    eotg_frontier_can_hear_flavor = no
+                    exists = scope:eotg_frontier_candidate
+                    NOT = { scope:eotg_frontier_candidate = root }
+                }
+                desc = eotg_frontier.001.desc_other_seamless
+            }
+            triggered_desc = {
+                trigger = { eotg_frontier_can_hear_flavor = no }
+                desc = eotg_frontier.001.desc_self_seamless
+            }
             triggered_desc = {
                 trigger = {
                     exists = scope:eotg_frontier_candidate
@@ -55,29 +79,55 @@ eotg_frontier.001 = {
             trigger = {
                 scope:eotg_frontier_county = { eotg_frontier_is_abandoned = yes }
             }
-            desc = eotg_frontier.001.desc_resettle
+            desc = {
+                first_valid = {
+                    triggered_desc = {
+                        trigger = { eotg_frontier_can_hear_flavor = no }
+                        desc = eotg_frontier.001.desc_resettle_seamless
+                    }
+                    desc = eotg_frontier.001.desc_resettle
+                }
+            }
         }
         # Expansion B2 (frontier_v2.md §B2)
         triggered_desc = {
             trigger = {
                 scope:eotg_frontier_county = { has_variable = eotg_frontier_salvage }
             }
-            desc = eotg_frontier.001.desc_salvage
+            desc = {
+                first_valid = {
+                    triggered_desc = {
+                        trigger = { eotg_frontier_can_hear_flavor = no }
+                        desc = eotg_frontier.001.desc_salvage_seamless
+                    }
+                    desc = eotg_frontier.001.desc_salvage
+                }
+            }
         }
         # Phase 2 (frontier_v2.md §9.3): what is already known shapes the choice
         triggered_desc = {
             trigger = {
                 scope:eotg_frontier_county = { eotg_frontier_trait_count_value >= 1 }
             }
-            desc = eotg_frontier.001.desc_known
+            desc = {
+                first_valid = {
+                    triggered_desc = {
+                        trigger = { eotg_frontier_can_hear_flavor = no }
+                        desc = eotg_frontier.001.desc_known_seamless
+                    }
+                    desc = eotg_frontier.001.desc_known
+                }
+            }
         }
     }
     theme = realm
     override_background = { reference = eotg_bg_council }
 
+    # Fix I1b F4: house rule `holder ?= root` (as .003), here and in every
+    # paying option, so a Region lost while the window is open costs nothing
     trigger = {
         exists = scope:eotg_frontier_county
-        scope:eotg_frontier_county = { eotg_frontier_can_establish = yes }
+        scope:eotg_frontier_county = { holder ?= root  eotg_frontier_can_establish = yes }
     }
 
     left_portrait = {
@@ -110,7 +160,7 @@ eotg_frontier.001 = {
         name = eotg_frontier.001.a
         trigger = {
             gold >= eotg_frontier_establish_cost_value
-            scope:eotg_frontier_county = { eotg_frontier_can_establish = yes }
+            scope:eotg_frontier_county = { holder ?= root  eotg_frontier_can_establish = yes }
         }
         remove_short_term_gold = eotg_frontier_establish_cost_value
         scope:eotg_frontier_county = {
@@ -128,7 +178,7 @@ eotg_frontier.001 = {
         name = eotg_frontier.001.b
         trigger = {
             gold >= eotg_frontier_establish_cost_value
-            scope:eotg_frontier_county = { eotg_frontier_can_establish = yes }
+            scope:eotg_frontier_county = { holder ?= root  eotg_frontier_can_establish = yes }
         }
         remove_short_term_gold = eotg_frontier_establish_cost_value
         scope:eotg_frontier_county = {
@@ -147,7 +197,7 @@ eotg_frontier.001 = {
         name = eotg_frontier.001.c
         trigger = {
             gold >= eotg_frontier_establish_cost_value
-            scope:eotg_frontier_county = { eotg_frontier_can_establish = yes }
+            scope:eotg_frontier_county = { holder ?= root  eotg_frontier_can_establish = yes }
         }
         remove_short_term_gold = eotg_frontier_establish_cost_value
         scope:eotg_frontier_county = {
@@ -167,7 +217,7 @@ eotg_frontier.001 = {
         trigger = {
             gold >= eotg_frontier_establish_cost_value
             prestige >= minor_prestige_value
-            scope:eotg_frontier_county = { eotg_frontier_can_establish = yes }
+            scope:eotg_frontier_county = { holder ?= root  eotg_frontier_can_establish = yes }
         }
         remove_short_term_gold = eotg_frontier_establish_cost_value
         add_prestige = {
@@ -201,7 +251,7 @@ eotg_frontier.001 = {
         trigger = {
             gold >= eotg_frontier_establish_cost_value
             piety >= minor_piety_value
-            scope:eotg_frontier_county = { eotg_frontier_can_establish = yes }
+            scope:eotg_frontier_county = { holder ?= root  eotg_frontier_can_establish = yes }
         }
         remove_short_term_gold = eotg_frontier_establish_cost_value
         add_piety = {
@@ -228,7 +278,7 @@ eotg_frontier.001 = {
                 learning >= decent_skill_rating
                 scope:eotg_frontier_candidate ?= { learning >= decent_skill_rating }
             }
-            scope:eotg_frontier_county = { eotg_frontier_can_establish = yes }
+            scope:eotg_frontier_county = { holder ?= root  eotg_frontier_can_establish = yes }
         }
         remove_short_term_gold = eotg_frontier_establish_cost_value
         scope:eotg_frontier_county = {
@@ -255,7 +305,7 @@ eotg_frontier.001 = {
         name = eotg_frontier.001.g
         trigger = {
             gold >= eotg_frontier_establish_cost_value
-            scope:eotg_frontier_county = { eotg_frontier_admin_eligible = yes }
+            scope:eotg_frontier_county = { holder ?= root  eotg_frontier_admin_eligible = yes }
         }
         remove_short_term_gold = eotg_frontier_establish_cost_value
         scope:eotg_frontier_county = {
@@ -630,8 +680,10 @@ eotg_frontier.003 = {
     override_background = { reference = eotg_bg_office }
 
     trigger = {
-        # frontier_v5.md §3.7 in-flight guard: a state guard, not a cooldown
-        eotg_frontier_can_hear_flavor = yes
+        # frontier_v5.md §3.7 in-flight guard: a state guard, not a cooldown.
+        # Fix I1b F7: players only (rule 7 is about text a player reads); an
+        # AI holder still gets the offer
+        eotg_frontier_can_receive_offer = yes
         exists = scope:eotg_frontier_county
         exists = scope:eotg_frontier_sponsor
         scope:eotg_frontier_county = {
@@ -831,9 +883,16 @@ eotg_frontier.004 = {
     theme = realm
     override_background = { reference = eotg_bg_council }
 
+    # Fix I1b F5: house rule `holder ?= root` (as .003), here and in every
+    # completing option, so a Region lost while the window is open never
+    # completes for the old holder. The tick fires this at the current
+    # holder, so the real holder still gets it
     trigger = {
         exists = scope:eotg_frontier_county
-        scope:eotg_frontier_county = { eotg_frontier_completion_met = yes }
+        scope:eotg_frontier_county = {
+            holder ?= root
+            eotg_frontier_completion_met = yes
+        }
     }
 
     left_portrait = {
@@ -878,6 +937,7 @@ eotg_frontier.004 = {
         name = eotg_frontier.004.a
         trigger = {
             scope:eotg_frontier_county = {
+                holder ?= root
                 eotg_frontier_is_frontier = yes
                 eotg_frontier_has_valid_founder = yes
             }
@@ -905,6 +965,7 @@ eotg_frontier.004 = {
         name = eotg_frontier.004.b
         trigger = {
             scope:eotg_frontier_county = {
+                holder ?= root
                 eotg_frontier_is_frontier = yes
                 eotg_frontier_has_valid_founder = yes
             }
@@ -929,7 +990,10 @@ eotg_frontier.004 = {
         name = eotg_frontier.004.c
         scope:eotg_frontier_county = {
             if = {
-                limit = { eotg_frontier_is_frontier = yes }
+                limit = {
+                    holder ?= root
+                    eotg_frontier_is_frontier = yes
+                }
                 # A1: before the completion runs, while the Region is still a Frontier
                 eotg_frontier_local_ruler_tooltip_effect = yes
                 eotg_frontier_complete_effect = yes
@@ -946,7 +1010,15 @@ eotg_frontier.004 = {
     option = {
         name = eotg_frontier.option_passed
         trigger = {
-            scope:eotg_frontier_county = { eotg_frontier_is_frontier = no }
+            # Fix I1b F5: or it is no longer this ruler's Region
+            scope:eotg_frontier_county = {
+                NOT = {
+                    AND = {
+                        holder ?= root
+                        eotg_frontier_is_frontier = yes
+                    }
+                }
+            }
         }
         ai_chance = {
             base = 100
@@ -1067,9 +1139,13 @@ eotg_frontier.005 = {
     theme = realm
     override_background = { reference = eotg_bg_field_camp }
 
+    # Fix I1b F5: house rule `holder ?= root` (as .003), here and in every
+    # option that acts, so a Region lost while the window is open never
+    # charges the old holder. The tick fires this at the current holder
     trigger = {
         exists = scope:eotg_frontier_county
         scope:eotg_frontier_county = {
+            holder ?= root
             eotg_frontier_is_frontier = yes
             var:eotg_frontier_strain >= eotg_frontier_strain_fail_value
         }
@@ -1114,6 +1190,7 @@ eotg_frontier.005 = {
         name = eotg_frontier.005.a
         trigger = {
             scope:eotg_frontier_county = {
+                holder ?= root
                 eotg_frontier_is_frontier = yes
                 var:eotg_frontier_strain >= eotg_frontier_strain_fail_value
             }
@@ -1168,6 +1245,7 @@ eotg_frontier.005 = {
         name = eotg_frontier.005.b
         trigger = {
             scope:eotg_frontier_county = {
+                holder ?= root
                 eotg_frontier_is_frontier = yes
                 var:eotg_frontier_strain >= eotg_frontier_strain_fail_value
             }
@@ -1222,6 +1300,7 @@ eotg_frontier.005 = {
             is_adult = yes
             is_imprisoned = no
             scope:eotg_frontier_county = {
+                holder ?= root
                 eotg_frontier_is_frontier = yes
                 var:eotg_frontier_strain >= eotg_frontier_strain_fail_value
                 NOT = { var:eotg_frontier_founder ?= root }
@@ -1288,6 +1367,7 @@ eotg_frontier.005 = {
         name = eotg_frontier.005.c
         trigger = {
             scope:eotg_frontier_county = {
+                holder ?= root
                 eotg_frontier_is_frontier = yes
                 var:eotg_frontier_strain >= eotg_frontier_strain_fail_value
                 NOT = { var:eotg_frontier_type ?= flag:settlement }
@@ -1314,6 +1394,7 @@ eotg_frontier.005 = {
         name = eotg_frontier.005.d
         trigger = {
             scope:eotg_frontier_county = {
+                holder ?= root
                 eotg_frontier_is_frontier = yes
                 var:eotg_frontier_strain >= eotg_frontier_strain_fail_value
                 eotg_frontier_has_valid_sponsor = yes
@@ -1354,6 +1435,7 @@ eotg_frontier.005 = {
             highest_held_title_tier >= tier_duchy
             prestige >= medium_prestige_value
             scope:eotg_frontier_county = {
+                holder ?= root
                 eotg_frontier_is_frontier = yes
                 var:eotg_frontier_strain >= eotg_frontier_strain_fail_value
             }
@@ -1409,10 +1491,12 @@ eotg_frontier.005 = {
     option = {
         name = eotg_frontier.option_passed
         trigger = {
-            # Resolved already (another .005 ran, or a restart lowered the strain)
+            # Resolved already (another .005 ran, or a restart lowered the
+            # strain), or no longer this ruler's Region (fix I1b F5)
             scope:eotg_frontier_county = {
                 NOT = {
                     AND = {
+                        holder ?= root
                         eotg_frontier_is_frontier = yes
                         var:eotg_frontier_strain >= eotg_frontier_strain_fail_value
                     }
@@ -1435,7 +1519,16 @@ eotg_frontier.010 = {
     title = eotg_frontier.010.t
     # Each offer's stage, in words (verification Q7)
     desc = {
-        desc = eotg_frontier.010.desc
+        # CB-59 (owner, 2026-10-20; event_quality_v1 §12.5 S3 rule (b)):
+        # decision-fired (frontier_v5 §3.7 D5-7). The log register first; the
+        # offer lines below are neutral and stay for every reader.
+        first_valid = {
+            triggered_desc = {
+                trigger = { eotg_frontier_can_hear_flavor = no }
+                desc = eotg_frontier.010.desc_seamless
+            }
+            desc = eotg_frontier.010.desc
+        }
         first_valid = {
             triggered_desc = {
                 trigger = { scope:eotg_frontier_offer_1 ?= { var:eotg_frontier_progress >= 66 } }
@@ -1502,6 +1595,7 @@ eotg_frontier.010 = {
                 limit = {
                     NOT = { holder = root }
                     NOT = { exists = var:eotg_frontier_sponsor }
+                    holder ?= { eotg_frontier_can_receive_offer = yes }    # fix I1b F7
                 }
                 order_by = var:eotg_frontier_progress
                 save_scope_as = eotg_frontier_offer_1
@@ -1511,6 +1605,7 @@ eotg_frontier.010 = {
                 limit = {
                     NOT = { holder = root }
                     NOT = { exists = var:eotg_frontier_sponsor }
+                    holder ?= { eotg_frontier_can_receive_offer = yes }    # fix I1b F7
                     NOT = { this = scope:eotg_frontier_offer_1 }
                 }
                 order_by = var:eotg_frontier_progress
@@ -1521,6 +1616,7 @@ eotg_frontier.010 = {
                 limit = {
                     NOT = { holder = root }
                     NOT = { exists = var:eotg_frontier_sponsor }
+                    holder ?= { eotg_frontier_can_receive_offer = yes }    # fix I1b F7
                     NOT = { this = scope:eotg_frontier_offer_1 }
                     NOT = { this = scope:eotg_frontier_offer_2 }
                 }
@@ -1538,7 +1634,14 @@ eotg_frontier.010 = {
             save_scope_as = eotg_frontier_county
             holder = { trigger_event = eotg_frontier.003 }
         }
-        custom_tooltip = eotg_frontier.010.offer_tt
+        # CB-59: the tooltip addresses the reader, so it has a log twin
+        if = {
+            limit = { eotg_frontier_can_hear_flavor = no }
+            custom_tooltip = eotg_frontier.010.offer_tt_seamless
+        }
+        else = {
+            custom_tooltip = eotg_frontier.010.offer_tt
+        }
         ai_chance = {
             base = 30
         }
@@ -1552,7 +1655,14 @@ eotg_frontier.010 = {
             save_scope_as = eotg_frontier_county
             holder = { trigger_event = eotg_frontier.003 }
         }
-        custom_tooltip = eotg_frontier.010.offer_tt
+        # CB-59: the tooltip addresses the reader, so it has a log twin
+        if = {
+            limit = { eotg_frontier_can_hear_flavor = no }
+            custom_tooltip = eotg_frontier.010.offer_tt_seamless
+        }
+        else = {
+            custom_tooltip = eotg_frontier.010.offer_tt
+        }
         ai_chance = {
             base = 20
         }
@@ -1566,13 +1676,24 @@ eotg_frontier.010 = {
             save_scope_as = eotg_frontier_county
             holder = { trigger_event = eotg_frontier.003 }
         }
-        custom_tooltip = eotg_frontier.010.offer_tt
+        # CB-59: the tooltip addresses the reader, so it has a log twin
+        if = {
+            limit = { eotg_frontier_can_hear_flavor = no }
+            custom_tooltip = eotg_frontier.010.offer_tt_seamless
+        }
+        else = {
+            custom_tooltip = eotg_frontier.010.offer_tt
+        }
         ai_chance = {
             base = 10
         }
     }
 
     option = {
+        name = {    # CB-59: "On second thought" is a self deliberating
+            trigger = { eotg_frontier_can_hear_flavor = no }
+            text = eotg_frontier.010.d_seamless
+        }
         name = eotg_frontier.010.d
         ai_chance = {
             base = 5
@@ -1598,7 +1719,16 @@ eotg_frontier.020 = {
     type = character_event
     title = eotg_frontier.020.t
     desc = {
-        desc = eotg_frontier.020.desc
+        # CB-59 (owner, 2026-10-20; event_quality_v1 §12.5 S3 rule (b)):
+        # decision-fired (frontier_v5 §3.7 D5-7). The log register first; the
+        # finding lines below are third person and stay for every reader.
+        first_valid = {
+            triggered_desc = {
+                trigger = { eotg_frontier_can_hear_flavor = no }
+                desc = eotg_frontier.020.desc_seamless
+            }
+            desc = eotg_frontier.020.desc
+        }
         first_valid = {
             triggered_desc = {
                 trigger = { scope:eotg_frontier_discovered ?= flag:rich_resources }
@@ -1705,7 +1835,18 @@ eotg_frontier.020 = {
 eotg_frontier.021 = {
     type = character_event
     title = eotg_frontier.021.t
-    desc = eotg_frontier.021.desc
+    # CB-59 (owner, 2026-10-20; event_quality_v1 §12.5 S3 rule (b)):
+    # decision-fired (frontier_v5 §3.7 D5-7). The log register first; options
+    # a-i are neutral and need no variant.
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { eotg_frontier_can_hear_flavor = no }
+                desc = eotg_frontier.021.desc_seamless
+            }
+            desc = eotg_frontier.021.desc
+        }
+    }
     theme = realm
     override_background = { reference = eotg_bg_field_camp }
 
@@ -3012,7 +3153,18 @@ eotg_frontier.036 = {
 eotg_frontier.037 = {
     type = character_event
     title = eotg_frontier.037.t
-    desc = eotg_frontier.037.desc
+    # CB-59 (owner, 2026-10-20; event_quality_v1 §12.5 S3 rule (b)): chained
+    # from .035.a (frontier_v5 §3.7 D5-7), which a Seamless player can have
+    # chosen before the threshold. The log register first.
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { eotg_frontier_can_hear_flavor = no }
+                desc = eotg_frontier.037.desc_seamless
+            }
+            desc = eotg_frontier.037.desc
+        }
+    }
     theme = realm
     override_background = { reference = eotg_bg_vault }
 
@@ -3049,7 +3201,14 @@ eotg_frontier.037 = {
         }
         add_prestige = minor_prestige_value
         scope:eotg_frontier_county = { eotg_frontier_add_progress_effect = { AMOUNT = 2 } }
-        custom_tooltip = eotg_frontier.037.a_tt
+        # CB-59: "brings you some renown" addresses the reader
+        if = {
+            limit = { eotg_frontier_can_hear_flavor = no }
+            custom_tooltip = eotg_frontier.037.a_tt_seamless
+        }
+        else = {
+            custom_tooltip = eotg_frontier.037.a_tt
+        }
         ai_chance = {
             base = 30
             modifier = { add = 20  has_trait = gregarious }
@@ -3087,7 +3246,16 @@ eotg_frontier.042 = {
     type = character_event
     title = eotg_frontier.042.t
     desc = {
-        desc = eotg_frontier.042.desc
+        # CB-59 (owner, 2026-10-20; event_quality_v1 §12.5 S3 rule (b)):
+        # decision-fired (frontier_v5 §3.7 D5-7). The log register first; the
+        # chart lines below are third person and stay for every reader.
+        first_valid = {
+            triggered_desc = {
+                trigger = { eotg_frontier_can_hear_flavor = no }
+                desc = eotg_frontier.042.desc_seamless
+            }
+            desc = eotg_frontier.042.desc
+        }
         first_valid = {
             triggered_desc = {
                 trigger = { scope:eotg_frontier_exploration ?= flag:known }

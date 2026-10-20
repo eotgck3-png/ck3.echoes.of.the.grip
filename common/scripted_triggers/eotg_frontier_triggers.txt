@@ -112,6 +112,20 @@ eotg_frontier_founder_can_rule = {
         NOT = { $HOLDER$ = { primary_spouse ?= prev } }
         eotg_is_unclaimed_folk = no
         eotg_is_unclaimed_holder = no
+        # Fix I1b F3: the vanilla grant gender checks. A church goes through
+        # can_be_granted_theocratic_titles_by (the granter's clergy gender;
+        # 00_scripted_triggers.txt:368-384), anything else through
+        # can_be_granted_titles_by (the faith's ruling gender, or the realm
+        # gender law under an administrative government; :305-366). A founder
+        # who fails falls back to the type's figure, as every excluded case.
+        # Parameter comparison by flag: vanilla 00_animal_effects.txt:1678.
+        trigger_if = {
+            limit = { flag:$HOLDING$ = flag:church_holding }
+            can_be_granted_theocratic_titles_by = { RULER = $HOLDER$ }
+        }
+        trigger_else = {
+            can_be_granted_titles_by = { RULER = $HOLDER$ }
+        }
         OR = {
             AND = {                                  # a landless courtier of the holder
                 is_landed = no
@@ -177,10 +191,22 @@ eotg_frontier_completion_met = {
 # roll; the pool events re-check it at fire time (in-flight guard). The one
 # Frontier reference to the cybernetics trait lives here, so the coupling is
 # one line. Read by eotg_frontier_event_roll_effect, eotg_frontier_tick_effect
-# and the trigger of every pool event (.002, .003, .030-.036, .040, .041,
+# and the trigger of every pool event (.002, .030-.036, .040, .041,
 # .050-.060).
 eotg_frontier_can_hear_flavor = {
     NOT = { has_trait = eotg_total_integration }
+}
+
+# Fix I1b F7: may this holder be sent a backing offer (.003)? Rule 7 is about
+# text a player reads, so the Seamless guard binds players only; an AI holder
+# always hears the offer. Read by .003's trigger, and by the Sponsor decision
+# and .010's picks, so a sponsor never spends the decision's cooldown on an
+# offer .003 would drop. Character scope.
+eotg_frontier_can_receive_offer = {
+    OR = {
+        is_ai = yes
+        eotg_frontier_can_hear_flavor = yes
+    }
 }
 
 # any_held_title with tier = tier_county: confirmed (verification V13).
@@ -311,16 +337,31 @@ eotg_frontier_war_strains = {
 # (saved by the tick at entry). Precedents: any_character_war /
 # is_war_leader (00_war.txt:718-724), any_army_in_location
 # (yearly_on_actions.txt:1896-1898), army_owner (army_on_actions.txt:651-653).
+# Fix I1b F1: a vassal's Region is also reached by its top liege's war. The
+# war state and the hostile army's owner are tested against the top liege as
+# well as the holder, as vanilla tells a liege's war from one's own
+# (governance_on_actions.txt:1038-1039: `liege = { is_at_war = yes }` beside
+# `is_at_war = no`). Leading the war stays the holder's own test (A4.1: a
+# distant call does not reach the Region; only armies in it do). For an
+# independent holder, top_liege is the holder, so nothing changes.
 eotg_frontier_war_reaches = {
     eotg_frontier_war_strains = yes
-    scope:eotg_frontier_holder = { is_at_war = yes }
+    OR = {
+        scope:eotg_frontier_holder = { is_at_war = yes }
+        scope:eotg_frontier_holder.top_liege = { is_at_war = yes }
+    }
     OR = {
         scope:eotg_frontier_holder = {
             any_character_war = { is_war_leader = prev }
         }
         any_county_province = {
             any_army_in_location = {
-                army_owner ?= { is_at_war_with = scope:eotg_frontier_holder }
+                army_owner ?= {
+                    OR = {
+                        is_at_war_with = scope:eotg_frontier_holder
+                        is_at_war_with = scope:eotg_frontier_holder.top_liege
+                    }
+                }
             }
         }
     }
@@ -428,7 +469,12 @@ eotg_frontier_can_back = {
 }
 
 # Leads a mercenary company. Character scope. government_is_mercenary:
-# confirmed against vanilla 1.20 (spec frontier_v3.md §15 item 1).
+# confirmed against vanilla 1.20 (spec frontier_v3.md §15 item 1). Fix I1b X5:
+# a PMC sells force too; its identity flag is eotg_government_is_pmc
+# (common/governments/eotg_pmc_government.txt, flags block).
 eotg_frontier_is_company_captain = {
-    government_has_flag = government_is_mercenary
+    OR = {
+        government_has_flag = government_is_mercenary
+        government_has_flag = eotg_government_is_pmc
+    }
 }

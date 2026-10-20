@@ -32,7 +32,16 @@
 # .001 option tooltip, in the right person (lore I1). CHARACTER scope (the
 # event's root); reads scope:eotg_frontier_candidate.
 eotg_frontier_start_tooltip_effect = {
+    # CB-59 (event_quality_v1 §12.5 S3 rule (b)): start_self_tt addresses
+    # the reader ("with you leading"), so a Seamless root gets the log twin
     if = {
+        limit = {
+            scope:eotg_frontier_candidate ?= root
+            eotg_frontier_can_hear_flavor = no
+        }
+        custom_tooltip = eotg_frontier.001.start_self_tt_seamless
+    }
+    else_if = {
         limit = { scope:eotg_frontier_candidate ?= root }
         custom_tooltip = eotg_frontier.001.start_self_tt
     }

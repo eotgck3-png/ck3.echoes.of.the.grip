@@ -585,3 +585,29 @@ eotg_frontier_research_fascination_value = {
         add = 5
     }
 }
+
+# -- Local Ruler gender (fix I1b F3) -------------------------------------------
+# Chance 0-100 that a secular Local Ruler (the settlers' leader or the Trade
+# factor, granted a city System) is female. Root is the Region's holder (the
+# granter; root of eotg_frontier.004, the only caller of the completion).
+# The realm's gender law first: vanilla reads male_only_law / female_only_law
+# for a created candidate (01_dynamic_values.txt:1116-1126, in
+# random_theocratic_ruler_chance_for_female) and for a grant
+# (00_scripted_triggers.txt:332-354, can_be_granted_titles_by). Otherwise the
+# faith's dominant gender, the value vanilla's secular templates use
+# (00_court_position_templates.txt:77, root_faith_dominant_gender_female_chance),
+# which keeps the figure inside can_be_granted_titles_by's faith check
+# (00_scripted_triggers.txt:305-331).
+eotg_frontier_secular_ruler_female_chance_value = {
+    if = {
+        limit = { root = { has_realm_law = male_only_law } }
+        value = 0
+    }
+    else_if = {
+        limit = { root = { has_realm_law = female_only_law } }
+        value = 100
+    }
+    else = {
+        value = root_faith_dominant_gender_female_chance
+    }
+}

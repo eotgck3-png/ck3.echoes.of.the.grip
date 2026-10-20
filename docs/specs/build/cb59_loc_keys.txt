@@ -1,0 +1,65 @@
+CB-59: Seamless register variants for Frontier .001, .010, .020, .021, .037, .042
+================================================================================
+
+Source: owner ruling CB-59 (2026-10-20); docs/specs/frontier_v5.md §3.7 (D5-7),
+§13 Q2; docs/specs/event_quality_v1.md §12.5 S3 rule (b) and §12.1 rule 7 (the
+log register). Same pattern as batch 5E (.004/.005,
+docs/specs/build/frontier_v5_batch5E_loc_keys.txt).
+Script: events/eotg_frontier_events.txt and
+common/scripted_effects/eotg_frontier_effects.txt (start tooltip helper).
+eotg-scripter, 2026-10-20, uncommitted.
+File: localization/english/eotg_frontier_l_english.yml (UTF-8 BOM, Canadian
+English, bare [x.GetName], never [scope:...], no dashes, no numbers for
+progress or strain).
+
+Register (binding, §12.1 rule 7): log entries. Never I, me, my, we, our, and
+never you or your. "Logged", "filed", "Next item" style. Not "the implant's
+voice", no second speaker. Each key is shown INSTEAD of its default twin (not
+in addition), to a Seamless (eotg_total_integration) reader only. Keep the
+default's facts and any [..GetName] it carries; change only the register.
+Fragments keep the leading "\n\n" of their default twin.
+
+----------------------------------------------------------------------
+.001 An Opportunity Here (decision-fired)
+----------------------------------------------------------------------
+eotg_frontier.001.desc_seamless          main; twin of .001.desc: [eotg_frontier_county.GetName] unsettled, surveys open, Systems open (rock, ice, a few hardy families, unanswered signals). Logged.
+eotg_frontier.001.desc_other_seamless    "\n\n" fragment; twin of .desc_other: [eotg_frontier_candidate.GetFirstName] has reviewed the surveys and judges it feasible; offers to lead the first project. One NPC quote is allowed (the NPC may say "I"); the narration may not.
+eotg_frontier.001.desc_self_seamless     "\n\n" fragment; twin of .desc_self: surveys reviewed by the ruler; feasible. Open item: which project first.
+eotg_frontier.001.desc_resettle_seamless "\n\n" fragment; twin of .desc_resettle: not the first attempt; an earlier expedition's stations and records are on file; the venture does not start from nothing.
+eotg_frontier.001.desc_salvage_seamless  "\n\n" fragment; twin of .desc_salvage: some of the last attempt's structures still stand; stripped and patched, they give the expedition a start.
+eotg_frontier.001.desc_known_seamless    "\n\n" fragment; twin of .desc_known: earlier surveys already on file about the place; the choice should reflect them.
+eotg_frontier.001.start_self_tt_seamless tooltip; twin of .start_self_tt ("with you leading the work"): [eotg_frontier_county.GetName] becomes a Frontier; the ruler leads the work (no "you").
+
+----------------------------------------------------------------------
+.010 Whom to Back (decision-fired)
+----------------------------------------------------------------------
+eotg_frontier.010.desc_seamless          main; twin of .010.desc: other rulers are settling open Regions; some need a backer; the chosen Region's holder decides whether to accept the money. Candidates listed below.
+eotg_frontier.010.offer_tt_seamless      tooltip; twin of .offer_tt ("Your offer..."): the offer is sent to the Region's holder.
+eotg_frontier.010.d_seamless             option; twin of .010.d ("On second thought, none of them."): none of them, without deliberation (e.g. "None. Next item.").
+
+----------------------------------------------------------------------
+.020 Survey Report (decision-fired)
+----------------------------------------------------------------------
+eotg_frontier.020.desc_seamless          main; twin of .020.desc: survey team returned from [eotg_frontier_county.GetName] with charts and samples; report logged. (The default is third person already; this is the log register only. The finding fragments stay shared.)
+
+----------------------------------------------------------------------
+.021 What to Build (decision-fired)
+----------------------------------------------------------------------
+eotg_frontier.021.desc_seamless          main; twin of .021.desc: the crews in [eotg_frontier_county.GetName] have filed a long list of needs; funds cover one item this year; one to be selected.
+
+----------------------------------------------------------------------
+.037 What the Ruins Held (chained from .035.a)
+----------------------------------------------------------------------
+eotg_frontier.037.desc_seamless          main; twin of .037.desc: the study of the ruins in [eotg_frontier_county.GetName] is complete; builders unidentified; findings read: they knew how to make things last out here, and some old methods still work.
+eotg_frontier.037.a_tt_seamless          tooltip; twin of .037.a_tt ("brings you some renown"): the findings bring the ruler some renown and draw skilled people to the Frontier.
+
+----------------------------------------------------------------------
+.042 The Expedition Returns (decision-fired)
+----------------------------------------------------------------------
+eotg_frontier.042.desc_seamless          main; twin of .042.desc: expedition to [eotg_frontier_county.GetName] returned, low on fuel; charts logged. (Default is third person already; log register only. Fragments stay shared.)
+
+Not varied (neutral already, no I/we/you): all option names of .001, .020,
+.021, .037, .042 and .010.a-c; every .010 offer fragment; every .020 and .042
+finding fragment; all other tooltips of these events.
+
+Total: 15 keys.

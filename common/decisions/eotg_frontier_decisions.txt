@@ -354,6 +354,9 @@ eotg_decision_frontier_sponsor = {
             variable = eotg_frontier_active
             NOT = { holder = root }
             NOT = { exists = var:eotg_frontier_sponsor }
+            # Fix I1b F7: only Regions whose holder .003 can reach, so a
+            # blocked offer never spends the cooldown below (as .010's picks)
+            holder ?= { eotg_frontier_can_receive_offer = yes }
         }
     }
 
