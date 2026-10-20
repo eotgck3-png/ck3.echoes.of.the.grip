@@ -133,6 +133,13 @@ eotg_aug_initiate_effect = {
         set_variable = { name = eotg_fracture_risk  value = 0 }
         # keep in sync with loc eotg_decision_aug_pursue_next_stage_desc ("five years") and _settling_tt ("5 years")
         add_character_flag = { flag = eotg_flag_aug_settling  years = 5 }
+        # INT4 M1 (integration_v2.md §5.3): the first implants, once. Not
+        # for someone who has been out of the system (eotg_aug_former is
+        # set on every exit and never cleared), so a re-initiation adds none.
+        if = {
+            limit = { NOT = { has_variable = eotg_aug_former } }
+            create_character_memory = { type = eotg_aug_initiated_memory }
+        }
     }
     add_trait = eotg_cybernetics
     eotg_aug_refresh_synergy_effect = yes
@@ -151,6 +158,16 @@ eotg_aug_initiate_effect = {
 eotg_aug_set_integration_effect = {
     if = {
         limit = { has_trait = eotg_cybernetics }
+        # INT4 M2 (integration_v2.md §5.3): note whether this call starts
+        # below Overclocked. Saved on every call (yes or no), so an earlier
+        # call in the same chain never leaks into this one.
+        if = {
+            limit = { eotg_is_aug_tier3 = no }
+            save_temporary_scope_value_as = { name = eotg_mem_below_oc  value = yes }
+        }
+        else = {
+            save_temporary_scope_value_as = { name = eotg_mem_below_oc  value = no }
+        }
         add_trait_xp = {
             trait = eotg_cybernetics
             value = {
@@ -159,6 +176,14 @@ eotg_aug_set_integration_effect = {
             }
         }
         eotg_aug_refresh_synergy_effect = yes
+        # INT4 M2: Enhanced -> Overclocked only; a regression never passes
+        if = {
+            limit = {
+                scope:eotg_mem_below_oc = yes
+                eotg_is_aug_tier3 = yes
+            }
+            create_character_memory = { type = eotg_aug_overclocked_memory }
+        }
         # keep in sync with loc eotg_decision_aug_pursue_next_stage_desc ("five years") and _settling_tt ("5 years")
         add_character_flag = { flag = eotg_flag_aug_settling  years = 5 }
     }
@@ -289,6 +314,8 @@ eotg_add_fracture_risk = {
 eotg_trigger_neurofracture = {
     if = { limit = { has_trait = eotg_cybernetics }  remove_trait = eotg_cybernetics }    # discards the track XP
     add_trait = eotg_neurofractured
+    # INT4 M3 (integration_v2.md §5.3)
+    create_character_memory = { type = eotg_aug_cascade_memory }
     eotg_apply_neurofracture_distortion = yes
     set_variable = { name = eotg_fracture_risk  value = 0 }
     # Open the Neurofractured cooldown here so eotg_on_yearly_aug_neurofractured_check,
@@ -1078,6 +1105,8 @@ eotg_aug_cascade_death_effect = {
 # recovery and the scar; the Heir's Arc has nothing left to watch.
 # Caller: eotg_aug_excision_surgery_effect (both survival branches).
 eotg_aug_excision_effect = {
+    # INT4 M5 (integration_v2.md §5.3): the survivor
+    create_character_memory = { type = eotg_aug_excised_memory }
     eotg_aug_remove_all_effect = yes
     # Procedures spec §3.2 (G3): overrides remove-all's flag:removed
     hidden_effect = {
@@ -1109,6 +1138,8 @@ eotg_aug_excision_effect = {
 eotg_aug_total_integration_effect = {
     if = { limit = { has_trait = eotg_neurofractured }  remove_trait = eotg_neurofractured }
     add_trait = eotg_total_integration
+    # INT4 M4 (integration_v2.md §5.3)
+    create_character_memory = { type = eotg_aug_seamless_memory }
     # The self goes
     if = { limit = { has_trait = brave }  remove_trait = brave }
     if = { limit = { has_trait = craven }  remove_trait = craven }
@@ -1337,7 +1368,17 @@ eotg_aug_abdicate_effect = {
     # non-ruler pulse freezes their drift (step 4 reads eotg_flag_aug_abdicated).
     add_character_flag = eotg_flag_aug_restrained
     add_character_flag = eotg_flag_aug_abdicated
+    # INT4 M6 (integration_v2.md §5.3): the old ruler
+    create_character_memory = {
+        type = eotg_aug_restrained_memory
+        participants = { eotg_successor = scope:eotg_successor }
+    }
     scope:eotg_successor = {
+        # INT4 M7: the successor
+        create_character_memory = {
+            type = eotg_aug_locked_wing_memory
+            participants = { eotg_predecessor = scope:eotg_old_ruler }
+        }
         trigger_event = { id = eotg_aug_end.031  days = 30 }
     }
 }

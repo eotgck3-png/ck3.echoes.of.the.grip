@@ -217,8 +217,26 @@ eotg_frontier_yearly_gain_value = {
     min = 0
 }
 
+# INT5 (integration_v2.md §6.3): Frontier difficulty scales the pace for
+# player-held Shoals only (vanilla has_game_rule in a script value:
+# common/script_values/00_basic_values.txt:1875-1896). The legibility bands
+# read the post-pace gain, so their words stay accurate.
 eotg_frontier_pace_value = {
     value = 0.5
+    if = {
+        limit = {
+            has_game_rule = eotg_frontier_difficulty_easy
+            holder ?= { is_ai = no }
+        }
+        value = 0.65
+    }
+    else_if = {
+        limit = {
+            has_game_rule = eotg_frontier_difficulty_hard
+            holder ?= { is_ai = no }
+        }
+        value = 0.4
+    }
 }
 
 # frontier_v4.md A8.1: years until Establishment reaches Settled at this

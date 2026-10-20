@@ -863,3 +863,14 @@ eotg_aug_inherit_can_abdicate = {
     primary_heir ?= scope:eotg_inh_heir
     scope:eotg_inh_heir = { is_imprisoned = no }
 }
+
+# INT5 (docs/specs/integration_v2.md §6.3): the cybernetics event frequency
+# rule is not Off. Gates the yearly cybernetics flavour pools beside each
+# eotg_aug_available_for_pulse_events in eotg_augmentation_on_actions.txt,
+# plus the triggers of eotg_on_birth_aug_parent_check and the six activity
+# hooks. NOT used on the terminal step (eotg_fracture.027), risk accrual,
+# drift, the Countdown, the Heir's Arc or the cascade: installed hardware
+# still wears under Off. Never read in an event trigger (invariant 4).
+eotg_aug_flavour_rule_allows = {
+    NOT = { has_game_rule = eotg_aug_events_off }
+}

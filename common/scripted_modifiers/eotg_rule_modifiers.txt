@@ -1,0 +1,41 @@
+﻿# -- eotg_rule_modifiers.txt ---------------------------------------------------
+# INT5 (docs/specs/integration_v2.md §6.3): game-rule weights for the yearly
+# cybernetics pools. Used ONLY on a "nothing this year" row of a random_list
+# in common/on_action/eotg_augmentation_on_actions.txt, so cooldown authority
+# stays in the on_action (invariant 4) and no event trigger reads a rule.
+# Shapes: vanilla common/on_action/dlc/tgp/tgp_natural_disaster_on_actions.txt:15-21
+# (a rule-keyed modifier on the no-event row) and
+# common/scripted_modifiers/00_faction_modifiers.txt:1004-1036 (has_game_rule
+# in a scripted modifier); invocation per _scripted_modifiers.info.
+# A larger nothing weight means fewer events.
+# -----------------------------------------------------------------------------
+
+# eotg_aug_event_frequency low / high. Callers: the ten nothing rows (the
+# initiation lists x2, tier 1, tier 2, Overclocked, the three Neurofractured
+# bands, the non-ruler liege pool, Seamless).
+eotg_aug_rule_frequency_modifier = {
+	modifier = {
+		factor = 2
+		has_game_rule = eotg_aug_events_low
+	}
+	modifier = {
+		factor = 0.5
+		has_game_rule = eotg_aug_events_high
+	}
+}
+
+# eotg_aug_ai_uptake low / high, AI only. Callers: the two initiation nothing
+# rows in eotg_on_yearly_aug_initiation_check. The decision's ai_will_do
+# takes the inverse inline (eotg_decision_seek_augmentation).
+eotg_aug_rule_ai_uptake_modifier = {
+	modifier = {
+		factor = 3
+		is_ai = yes
+		has_game_rule = eotg_aug_ai_uptake_low
+	}
+	modifier = {
+		factor = 0.5
+		is_ai = yes
+		has_game_rule = eotg_aug_ai_uptake_high
+	}
+}

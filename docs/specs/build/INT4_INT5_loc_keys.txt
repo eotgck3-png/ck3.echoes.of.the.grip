@@ -1,0 +1,125 @@
+# INT4 / INT5 loc keys for eotg-localizer (docs/specs/integration_v2.md §6.5, §7)
+# Scripter, 2026-10-20. Final English per the lore rulings of 2026-10-20.
+# Files: localization/english/eotg_memories_l_english.yml (INT4, 61 keys) and
+#        localization/english/eotg_game_rules_l_english.yml (INT5, 24 keys).
+# UTF-8 with BOM; bare [x.GetName], never scope:. Canadian English.
+# Memory rules (_character_memories.info:5-12): the name has no perspective;
+# every _desc is a lower-case, past-tense clause that can follow "when"
+# (vanilla splices GetDescription into its own sentences). No numbers.
+# The region is [ROOT.Var('eotg_region').Title.GetName] (ROOT = the memory;
+# shape: vanilla memories_l_english.yml:659; GetName as the Frontier loc uses
+# for the county everywhere).
+# The _seamless variants (lore TAKE: first_valid is allowed in memory descs,
+# vanilla character_memories_1.txt:5-39) render when the owner is now
+# Seamless: neutral passive wording.
+# Key order: <type>_desc[_second_perspective|_third_perspective][_variant],
+# as vanilla relative_died_desc_second_perspective_1_known_killer.
+
+## INT4: memories (61)
+
+eotg_aug_initiated_memory: "had first implants fitted"
+eotg_aug_initiated_memory_desc: "I had my first implants fitted"
+eotg_aug_initiated_memory_desc_second_perspective: "you had your first implants fitted"
+eotg_aug_initiated_memory_desc_third_perspective: "[owner.GetName] had [owner.GetHerHis] first implants fitted"
+eotg_aug_initiated_memory_desc_seamless: "the first implants were fitted"
+eotg_aug_initiated_memory_desc_second_perspective_seamless: "the first implants were fitted"
+eotg_aug_initiated_memory_desc_third_perspective_seamless: "the first implants were fitted to [owner.GetName]"
+
+eotg_aug_overclocked_memory: "ran the implants past their rating"
+eotg_aug_overclocked_memory_desc: "I let the implants run past their rating"
+eotg_aug_overclocked_memory_desc_second_perspective: "you let the implants run past their rating"
+eotg_aug_overclocked_memory_desc_third_perspective: "[owner.GetName] let the implants run past their rating"
+eotg_aug_overclocked_memory_desc_seamless: "the implants were run past their rating"
+eotg_aug_overclocked_memory_desc_second_perspective_seamless: "the implants were run past their rating"
+eotg_aug_overclocked_memory_desc_third_perspective_seamless: "the implants in [owner.GetName] were run past their rating"
+
+eotg_aug_cascade_memory: "went through the Neural Cascade"
+eotg_aug_cascade_memory_desc: "I went through the Neural Cascade"
+eotg_aug_cascade_memory_desc_second_perspective: "you went through the Neural Cascade"
+eotg_aug_cascade_memory_desc_third_perspective: "[owner.GetName] went through the Neural Cascade"
+# _seamless (QA 2026-10-20): INTENT text, passive and neutral; the localizer writes the final English
+eotg_aug_cascade_memory_desc_seamless: "the Neural Cascade passed through, and the seam closed after it"
+eotg_aug_cascade_memory_desc_second_perspective_seamless: "the Neural Cascade passed through, and the seam closed after it"
+eotg_aug_cascade_memory_desc_third_perspective_seamless: "the Neural Cascade passed through [owner.GetName], and the seam closed after it"
+
+# Seamless: neutral, non-first-person in all three perspectives (lore ruling, §12.1 rule 7)
+eotg_aug_seamless_memory: "the seam closed"
+eotg_aug_seamless_memory_desc: "the controls were handed over, and the seam closed"
+eotg_aug_seamless_memory_desc_second_perspective: "the controls were handed over, and the seam closed"
+eotg_aug_seamless_memory_desc_third_perspective: "[owner.GetName]'s controls were handed over, and the seam closed"
+
+eotg_aug_excised_memory: "had the implants cut out"
+eotg_aug_excised_memory_desc: "I had the implants cut out of me"
+eotg_aug_excised_memory_desc_second_perspective: "you had the implants cut out of you"
+eotg_aug_excised_memory_desc_third_perspective: "[owner.GetName] had the implants cut out of [owner.GetHerHim]"
+eotg_aug_excised_memory_desc_seamless: "the implants were cut out"
+eotg_aug_excised_memory_desc_second_perspective_seamless: "the implants were cut out"
+eotg_aug_excised_memory_desc_third_perspective_seamless: "the implants were cut out of [owner.GetName]"
+
+# "throne" is banned (lore ruling)
+eotg_aug_restrained_memory: "went into restraints"
+eotg_aug_restrained_memory_desc: "I yielded my seat to [eotg_successor.GetFirstName] and went into restraints"
+eotg_aug_restrained_memory_desc_second_perspective: "you yielded your seat to [eotg_successor.GetFirstName] and went into restraints"
+eotg_aug_restrained_memory_desc_third_perspective: "[owner.GetName] yielded [owner.GetHerHis] seat to [eotg_successor.GetFirstName] and went into restraints"
+
+eotg_aug_locked_wing_memory: "took the seat while the old ruler lived on"
+eotg_aug_locked_wing_memory_desc: "I took the seat while [eotg_predecessor.GetFirstName] lived on in the locked wing"
+eotg_aug_locked_wing_memory_desc_second_perspective: "you took the seat while [eotg_predecessor.GetFirstName] lived on in the locked wing"
+eotg_aug_locked_wing_memory_desc_third_perspective: "[owner.GetName] took the seat while [eotg_predecessor.GetFirstName] lived on in the locked wing"
+
+# Frontier: "Frontier", never "expedition" or "venture"; a Shoal never becomes a System
+eotg_frontier_founded_memory: "founded a Frontier"
+eotg_frontier_founded_memory_desc_self: "I founded a Frontier in [ROOT.Var('eotg_region').Title.GetName]"
+eotg_frontier_founded_memory_desc_sent: "I sent [eotg_founder.GetFirstName] to found a Frontier in [ROOT.Var('eotg_region').Title.GetName]"
+eotg_frontier_founded_memory_desc_second_perspective_self: "you founded a Frontier in [ROOT.Var('eotg_region').Title.GetName]"
+eotg_frontier_founded_memory_desc_second_perspective_sent: "you sent [eotg_founder.GetFirstName] to found a Frontier in [ROOT.Var('eotg_region').Title.GetName]"
+eotg_frontier_founded_memory_desc_third_perspective_self: "[owner.GetName] founded a Frontier in [ROOT.Var('eotg_region').Title.GetName]"
+eotg_frontier_founded_memory_desc_third_perspective_sent: "[owner.GetName] sent [eotg_founder.GetFirstName] to found a Frontier in [ROOT.Var('eotg_region').Title.GetName]"
+
+eotg_frontier_settled_memory: "saw a new System settled"
+eotg_frontier_settled_memory_desc_self: "I saw a new System settled in [ROOT.Var('eotg_region').Title.GetName]"
+eotg_frontier_settled_memory_desc_sent: "[eotg_founder.GetFirstName] and I saw a new System settled in [ROOT.Var('eotg_region').Title.GetName]"
+eotg_frontier_settled_memory_desc_second_perspective_self: "you saw a new System settled in [ROOT.Var('eotg_region').Title.GetName]"
+eotg_frontier_settled_memory_desc_second_perspective_sent: "you and [eotg_founder.GetFirstName] saw a new System settled in [ROOT.Var('eotg_region').Title.GetName]"
+eotg_frontier_settled_memory_desc_third_perspective_self: "[owner.GetName] saw a new System settled in [ROOT.Var('eotg_region').Title.GetName]"
+eotg_frontier_settled_memory_desc_third_perspective_sent: "[owner.GetName] and [eotg_founder.GetFirstName] saw a new System settled in [ROOT.Var('eotg_region').Title.GetName]"
+
+eotg_frontier_abandoned_memory: "lost a Frontier"
+eotg_frontier_abandoned_memory_desc_failed: "I watched the Frontier in [ROOT.Var('eotg_region').Title.GetName] fail"
+eotg_frontier_abandoned_memory_desc_chosen: "I gave up the Frontier in [ROOT.Var('eotg_region').Title.GetName]"
+eotg_frontier_abandoned_memory_desc_second_perspective_failed: "you watched the Frontier in [ROOT.Var('eotg_region').Title.GetName] fail"
+eotg_frontier_abandoned_memory_desc_second_perspective_chosen: "you gave up the Frontier in [ROOT.Var('eotg_region').Title.GetName]"
+eotg_frontier_abandoned_memory_desc_third_perspective_failed: "[owner.GetName] watched the Frontier in [ROOT.Var('eotg_region').Title.GetName] fail"
+eotg_frontier_abandoned_memory_desc_third_perspective_chosen: "[owner.GetName] gave up the Frontier in [ROOT.Var('eotg_region').Title.GetName]"
+
+## INT5: game rules (24)
+# Style: vanilla game_rules_l_english.yml:246-256 (#high name#!, the default
+# plain; one-sentence desc). Relative words, no numbers.
+
+game_rule_category_eotg: "Echoes of the Grip"
+
+rule_eotg_aug_event_frequency: "Cybernetics Events"
+setting_eotg_aug_events_normal: "Normal"
+setting_eotg_aug_events_normal_desc: "Cybernetics flavour events come at the usual pace."
+setting_eotg_aug_events_low: "#high Low#!"
+setting_eotg_aug_events_low_desc: "Cybernetics flavour events come less often."
+setting_eotg_aug_events_high: "#high High#!"
+setting_eotg_aug_events_high_desc: "Cybernetics flavour events come more often."
+setting_eotg_aug_events_off: "#high Off#!"
+setting_eotg_aug_events_off_desc: "No yearly cybernetics flavour events. Installed hardware still wears, and the Cascade can still come."
+
+rule_eotg_aug_ai_uptake: "AI Augmentation Uptake"
+setting_eotg_aug_ai_uptake_normal: "Normal"
+setting_eotg_aug_ai_uptake_normal_desc: "AI characters seek implants at the usual rate."
+setting_eotg_aug_ai_uptake_low: "#high Low#!"
+setting_eotg_aug_ai_uptake_low_desc: "AI characters seek implants much less often."
+setting_eotg_aug_ai_uptake_high: "#high High#!"
+setting_eotg_aug_ai_uptake_high_desc: "AI characters seek implants more often."
+
+rule_eotg_frontier_difficulty: "Frontier Difficulty"
+setting_eotg_frontier_difficulty_normal: "Normal"
+setting_eotg_frontier_difficulty_normal_desc: "Frontiers in player-held Shoals are established at the usual pace."
+setting_eotg_frontier_difficulty_easy: "#high Easy#!"
+setting_eotg_frontier_difficulty_easy_desc: "Frontiers in player-held Shoals are established faster, and quiet years ease their strain more. AI Frontiers are unchanged."
+setting_eotg_frontier_difficulty_hard: "#high Hard#!"
+setting_eotg_frontier_difficulty_hard_desc: "Frontiers in player-held Shoals are established more slowly, and quiet years ease their strain less. AI Frontiers are unchanged."

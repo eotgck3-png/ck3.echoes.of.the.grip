@@ -1,0 +1,355 @@
+﻿# -- eotg_memories.txt ---------------------------------------------------------
+# INT4 (docs/specs/integration_v2.md §5): character memories for the biggest
+# cybernetics and Frontier beats. Shape: vanilla
+# common/character_memory_types/character_memories_filippa_events.txt:526-537;
+# triggered variants: character_memories_1.txt:5-39 (first_valid ->
+# triggered_desc). Root = the memory, scope:owner = its owner
+# (_character_memories.info:15-17).
+# Every type is created in exactly one scripted effect (spec §5.3, M1-M10);
+# no event creates a memory directly.
+# Categories mix the free eotg_* strings with vanilla ones (spec §5.1) so
+# vanilla's memory readers (feast toasts: positive and not private; coronation
+# rewards: major / family) can pick them up. `private` keeps the cascade,
+# Seamless, excision and restraints out of public toasts.
+# Duration: vanilla script value memory_default_duration
+# (common/script_values/00_memory_values.txt:1).
+# Icons: vanilla gfx/interface/icons/memory_types/ (bespoke art deferred, §10).
+# Loc: docs/specs/build/INT4_INT5_loc_keys.txt. Every _desc is a lower-case,
+# past-tense clause that can follow "when" (.info:5-12): vanilla splices
+# GetDescription into its own sentences.
+# Lore ruling 2026-10-20: an owner who is now Seamless reads the cybernetics
+# memories in neutral passive wording (the _seamless variants); the Seamless
+# memory itself is neutral in all three perspectives.
+# -----------------------------------------------------------------------------
+
+# ── Cybernetics ─────────────────────────────────────────────────────────────
+
+# M1. Created by eotg_aug_initiate_effect, only when the character was not
+# augmented before (a knight re-initiated while augmented gets no second one).
+eotg_aug_initiated_memory = {
+	categories = { eotg_cybernetics major }
+	icon = "icon_wounded.dds"
+
+	description = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { scope:owner = { has_trait = eotg_total_integration } }
+				desc = eotg_aug_initiated_memory_desc_seamless
+			}
+			desc = eotg_aug_initiated_memory_desc
+		}
+	}
+
+	second_perspective_description = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { scope:owner = { has_trait = eotg_total_integration } }
+				desc = eotg_aug_initiated_memory_desc_second_perspective_seamless
+			}
+			desc = eotg_aug_initiated_memory_desc_second_perspective
+		}
+	}
+
+	third_perspective_description = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { scope:owner = { has_trait = eotg_total_integration } }
+				desc = eotg_aug_initiated_memory_desc_third_perspective_seamless
+			}
+			desc = eotg_aug_initiated_memory_desc_third_perspective
+		}
+	}
+
+	duration = { years = memory_default_duration }
+}
+
+# M2. Created by eotg_aug_set_integration_effect when the XP set carries the
+# character from below Overclocked to Overclocked (Enhanced -> Overclocked).
+# A regression never passes the test.
+eotg_aug_overclocked_memory = {
+	categories = { eotg_cybernetics }
+	icon = "martial.dds"
+
+	description = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { scope:owner = { has_trait = eotg_total_integration } }
+				desc = eotg_aug_overclocked_memory_desc_seamless
+			}
+			desc = eotg_aug_overclocked_memory_desc
+		}
+	}
+
+	second_perspective_description = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { scope:owner = { has_trait = eotg_total_integration } }
+				desc = eotg_aug_overclocked_memory_desc_second_perspective_seamless
+			}
+			desc = eotg_aug_overclocked_memory_desc_second_perspective
+		}
+	}
+
+	third_perspective_description = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { scope:owner = { has_trait = eotg_total_integration } }
+				desc = eotg_aug_overclocked_memory_desc_third_perspective_seamless
+			}
+			desc = eotg_aug_overclocked_memory_desc_third_perspective
+		}
+	}
+
+	duration = { years = memory_default_duration }
+}
+
+# M3. Created by eotg_trigger_neurofracture (eotg_fracture_risk reached the
+# cascade).
+eotg_aug_cascade_memory = {
+	categories = { eotg_cybernetics negative major private }
+	icon = "intimidation.dds"
+
+	description = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { scope:owner = { has_trait = eotg_total_integration } }
+				desc = eotg_aug_cascade_memory_desc_seamless
+			}
+			desc = eotg_aug_cascade_memory_desc
+		}
+	}
+
+	second_perspective_description = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { scope:owner = { has_trait = eotg_total_integration } }
+				desc = eotg_aug_cascade_memory_desc_second_perspective_seamless
+			}
+			desc = eotg_aug_cascade_memory_desc_second_perspective
+		}
+	}
+
+	third_perspective_description = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { scope:owner = { has_trait = eotg_total_integration } }
+				desc = eotg_aug_cascade_memory_desc_third_perspective_seamless
+			}
+			desc = eotg_aug_cascade_memory_desc_third_perspective
+		}
+	}
+
+	duration = { years = memory_default_duration }
+}
+
+# M4. Created by eotg_aug_total_integration_effect (Total Integration; the
+# eotg_aug_residue resource starts). Neutral wording in every perspective
+# (lore ruling 2026-10-20, §12.1 rule 7): no second voice, no lament.
+eotg_aug_seamless_memory = {
+	categories = { eotg_cybernetics major private }
+	icon = "_default.dds"
+
+	description = { desc = eotg_aug_seamless_memory_desc }
+
+	second_perspective_description = { desc = eotg_aug_seamless_memory_desc_second_perspective }
+
+	third_perspective_description = { desc = eotg_aug_seamless_memory_desc_third_perspective }
+
+	duration = { years = memory_default_duration }
+}
+
+# M5. Created by eotg_aug_excision_effect (the survivor of an excision).
+eotg_aug_excised_memory = {
+	categories = { eotg_cybernetics negative private }
+	icon = "icon_wounded.dds"
+
+	description = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { scope:owner = { has_trait = eotg_total_integration } }
+				desc = eotg_aug_excised_memory_desc_seamless
+			}
+			desc = eotg_aug_excised_memory_desc
+		}
+	}
+
+	second_perspective_description = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { scope:owner = { has_trait = eotg_total_integration } }
+				desc = eotg_aug_excised_memory_desc_second_perspective_seamless
+			}
+			desc = eotg_aug_excised_memory_desc_second_perspective
+		}
+	}
+
+	third_perspective_description = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { scope:owner = { has_trait = eotg_total_integration } }
+				desc = eotg_aug_excised_memory_desc_third_perspective_seamless
+			}
+			desc = eotg_aug_excised_memory_desc_third_perspective
+		}
+	}
+
+	duration = { years = memory_default_duration }
+}
+
+# M6. Created by eotg_aug_abdicate_effect on the old ruler (Into Restraints).
+eotg_aug_restrained_memory = {
+	categories = { eotg_cybernetics negative title private }
+	icon = "prison.dds"
+
+	description = { desc = eotg_aug_restrained_memory_desc }
+
+	second_perspective_description = { desc = eotg_aug_restrained_memory_desc_second_perspective }
+
+	third_perspective_description = { desc = eotg_aug_restrained_memory_desc_third_perspective }
+
+	participants = { eotg_successor }
+	duration = { years = memory_default_duration }
+}
+
+# M7. Created by eotg_aug_abdicate_effect on the successor (the locked wing).
+eotg_aug_locked_wing_memory = {
+	categories = { eotg_cybernetics title family }
+	icon = "succession_chaotic.dds"
+
+	description = { desc = eotg_aug_locked_wing_memory_desc }
+
+	second_perspective_description = { desc = eotg_aug_locked_wing_memory_desc_second_perspective }
+
+	third_perspective_description = { desc = eotg_aug_locked_wing_memory_desc_third_perspective }
+
+	participants = { eotg_predecessor }
+	duration = { years = memory_default_duration }
+}
+
+# ── Frontier ────────────────────────────────────────────────────────────────
+# The holder owns the Shoal politically (LAW AT 866), so the memory goes to
+# the holder. eotg_founder is always passed: the holder passes itself when
+# there is no founder or it is the founder, and the _self variant renders
+# (spec §5.1; a dead participant is valid, character_memories_1.txt:41).
+# eotg_region is a memory variable holding the county title (variables are
+# for non-character references, .info:38-41); set by the caller on
+# scope:new_memory (vanilla events/decisions_events/ep4_decision_events.txt:49-61).
+
+# M8. Created by eotg_frontier_start_effect (the Frontier state starts).
+eotg_frontier_founded_memory = {
+	categories = { eotg_frontier positive }
+	icon = "great_project_memory.dds"
+
+	description = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { memory_participant:eotg_founder = scope:owner }
+				desc = eotg_frontier_founded_memory_desc_self
+			}
+			desc = eotg_frontier_founded_memory_desc_sent
+		}
+	}
+
+	second_perspective_description = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { memory_participant:eotg_founder = scope:owner }
+				desc = eotg_frontier_founded_memory_desc_second_perspective_self
+			}
+			desc = eotg_frontier_founded_memory_desc_second_perspective_sent
+		}
+	}
+
+	third_perspective_description = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { memory_participant:eotg_founder = scope:owner }
+				desc = eotg_frontier_founded_memory_desc_third_perspective_self
+			}
+			desc = eotg_frontier_founded_memory_desc_third_perspective_sent
+		}
+	}
+
+	participants = { eotg_founder }
+	duration = { years = memory_default_duration }
+}
+
+# M9. Created by eotg_frontier_complete_effect (eotg_frontier_progress
+# reached 100; the Shoal is settled and a new System stands in it).
+eotg_frontier_settled_memory = {
+	categories = { eotg_frontier positive major }
+	icon = "monument.dds"
+
+	description = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { memory_participant:eotg_founder = scope:owner }
+				desc = eotg_frontier_settled_memory_desc_self
+			}
+			desc = eotg_frontier_settled_memory_desc_sent
+		}
+	}
+
+	second_perspective_description = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { memory_participant:eotg_founder = scope:owner }
+				desc = eotg_frontier_settled_memory_desc_second_perspective_self
+			}
+			desc = eotg_frontier_settled_memory_desc_second_perspective_sent
+		}
+	}
+
+	third_perspective_description = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { memory_participant:eotg_founder = scope:owner }
+				desc = eotg_frontier_settled_memory_desc_third_perspective_self
+			}
+			desc = eotg_frontier_settled_memory_desc_third_perspective_sent
+		}
+	}
+
+	participants = { eotg_founder }
+	duration = { years = memory_default_duration }
+}
+
+# M10. Created by eotg_frontier_abandon_effect (eotg_frontier_strain reached
+# failure, or a chosen abandonment). eotg_failed is set on the memory when
+# $FAILED$ = yes.
+eotg_frontier_abandoned_memory = {
+	categories = { eotg_frontier negative }
+	icon = "war_ended_negative.dds"
+
+	description = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { has_variable = eotg_failed }
+				desc = eotg_frontier_abandoned_memory_desc_failed
+			}
+			desc = eotg_frontier_abandoned_memory_desc_chosen
+		}
+	}
+
+	second_perspective_description = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { has_variable = eotg_failed }
+				desc = eotg_frontier_abandoned_memory_desc_second_perspective_failed
+			}
+			desc = eotg_frontier_abandoned_memory_desc_second_perspective_chosen
+		}
+	}
+
+	third_perspective_description = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { has_variable = eotg_failed }
+				desc = eotg_frontier_abandoned_memory_desc_third_perspective_failed
+			}
+			desc = eotg_frontier_abandoned_memory_desc_third_perspective_chosen
+		}
+	}
+
+	duration = { years = memory_default_duration }
+}

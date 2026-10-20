@@ -346,6 +346,11 @@ eotg_decision_seek_augmentation = {
         modifier = { factor = 0  has_trait = zealous }
         # Realm spec §3.3
         modifier = { factor = 0.5  eotg_aug_under_policy = { LAW = ban } }
+        # INT5 (integration_v2.md §6.3): AI augmentation uptake, the inverse
+        # of the initiation nothing rows (eotg_aug_rule_ai_uptake_modifier).
+        # ai_will_do only runs for the AI.
+        modifier = { factor = 0.33  has_game_rule = eotg_aug_ai_uptake_low }
+        modifier = { factor = 2  has_game_rule = eotg_aug_ai_uptake_high }
     }
 }
 

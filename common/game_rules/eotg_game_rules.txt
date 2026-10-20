@@ -1,0 +1,73 @@
+﻿# -- eotg_game_rules.txt -------------------------------------------------------
+# INT5 (docs/specs/integration_v2.md §6): three lobby rules that script reads
+# with has_game_rule. Shape: vanilla conquerors_frequency
+# (common/game_rules/00_game_rules.txt:130-175): categories, default, empty
+# setting blocks. Script-read rules carry no apply_modifier or flag (vanilla
+# natural_disaster_earthquakes, 00_game_rules.txt:1620-1632). No
+# blocks_achievements: achievements are already off in a total conversion.
+# The category `eotg` is a data-driven dropdown entry (gui/game_rules.gui:103).
+# SETTING KEYS ARE PERMANENT once shipped (spec §6.4): has_game_rule reads
+# them, and a renamed key silently goes false in old saves. Retune the numbers
+# at the read sites instead.
+# Read sites (never in an event trigger, invariant 4):
+#   eotg_aug_event_frequency: common/scripted_modifiers/eotg_rule_modifiers.txt
+#     (nothing rows) and eotg_aug_flavour_rule_allows
+#     (common/scripted_triggers/eotg_augmentation_triggers.txt), both used in
+#     common/on_action/eotg_augmentation_on_actions.txt
+#   eotg_aug_ai_uptake: eotg_aug_rule_ai_uptake_modifier (initiation nothing
+#     rows) and eotg_decision_seek_augmentation's ai_will_do
+#   eotg_frontier_difficulty: eotg_frontier_pace_value
+#     (common/script_values/eotg_frontier_values.txt) and the quiet-year ease
+#     in eotg_frontier_tick_effect (common/scripted_effects/eotg_frontier_effects.txt)
+# -----------------------------------------------------------------------------
+
+# Cybernetics event frequency. Off stops the yearly cybernetics flavour pools
+# only: risk accrual, drift, the terminal step (eotg_fracture.027), the
+# Countdown, the Heir's Arc and the cascade all still run.
+eotg_aug_event_frequency = {
+	categories = {
+		eotg flavor
+	}
+
+	default = eotg_aug_events_normal
+
+	eotg_aug_events_normal = {}
+
+	eotg_aug_events_low = {}
+
+	eotg_aug_events_high = {}
+
+	eotg_aug_events_off = {}
+}
+
+# How readily AI characters take implants.
+eotg_aug_ai_uptake = {
+	categories = {
+		eotg ai
+	}
+
+	default = eotg_aug_ai_uptake_normal
+
+	eotg_aug_ai_uptake_normal = {}
+
+	eotg_aug_ai_uptake_low = {}
+
+	eotg_aug_ai_uptake_high = {}
+}
+
+# Frontier difficulty, player-held Shoals only (as vanilla `difficulty` splits
+# player from ai, 00_game_rules.txt:1-30). Scales the yearly Establishment
+# pace and the quiet-year strain ease; the failure threshold is unchanged.
+eotg_frontier_difficulty = {
+	categories = {
+		eotg difficulty
+	}
+
+	default = eotg_frontier_difficulty_normal
+
+	eotg_frontier_difficulty_normal = {}
+
+	eotg_frontier_difficulty_easy = {}
+
+	eotg_frontier_difficulty_hard = {}
+}

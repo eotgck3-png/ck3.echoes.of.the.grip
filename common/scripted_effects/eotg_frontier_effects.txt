@@ -192,6 +192,19 @@ eotg_frontier_start_effect = {
             remove_variable = eotg_frontier_survey_data
         }
         eotg_frontier_set_founder_effect = { FOUNDER = $FOUNDER$ }
+        # INT4 M8 (integration_v2.md §5.3): the holder remembers founding it
+        # (LAW AT 866: the holder owns the Shoal). $FOUNDER$ is always a
+        # character; when it is the holder the memory's _self variant renders.
+        save_temporary_scope_as = eotg_mem_region
+        holder = {
+            create_character_memory = {
+                type = eotg_frontier_founded_memory
+                participants = { eotg_founder = $FOUNDER$ }
+            }
+            scope:new_memory = {
+                set_variable = { name = eotg_region  value = scope:eotg_mem_region }
+            }
+        }
         # Phase 2 (§5.3): a Region nobody has learned anything about reveals a
         # trait to its first expedition. After the founder is set, so the
         # discovery hook carries scope:eotg_frontier_founder (verification 6)
@@ -756,7 +769,29 @@ eotg_frontier_tick_effect = {
     }
     else_if = {
         limit = { eotg_frontier_quiet_eases = yes }
-        eotg_frontier_ease_strain_effect = yes
+        # INT5 (integration_v2.md §6.3): Frontier difficulty, player-held
+        # Shoals only (the AI stays as tuned). Easy eases twice; hard eases
+        # half the quiet years. The failure threshold is untouched.
+        if = {
+            limit = {
+                has_game_rule = eotg_frontier_difficulty_hard
+                scope:eotg_frontier_holder = { is_ai = no }
+            }
+            random = {
+                chance = 50
+                eotg_frontier_ease_strain_effect = yes
+            }
+        }
+        else = {
+            eotg_frontier_ease_strain_effect = yes
+            if = {
+                limit = {
+                    has_game_rule = eotg_frontier_difficulty_easy
+                    scope:eotg_frontier_holder = { is_ai = no }
+                }
+                eotg_frontier_ease_strain_effect = yes
+            }
+        }
     }
 
     # 3. Establishment gained this year
@@ -1216,6 +1251,26 @@ eotg_frontier_complete_effect = {
             limit = { exists = scope:eotg_frontier_dev_moved }
             eotg_frontier_fire_hook_effect = { HOOK = eotg_frontier_on_development_changed }
         }
+        # INT4 M9 (integration_v2.md §5.3): the holder remembers the
+        # settling, while the founder scope is still live. No founder: the
+        # holder passes itself (the _self variant).
+        save_temporary_scope_as = eotg_mem_region
+        if = {
+            limit = { exists = scope:eotg_frontier_founder }
+            scope:eotg_frontier_founder = { save_temporary_scope_as = eotg_mem_founder }
+        }
+        else = {
+            scope:eotg_frontier_holder = { save_temporary_scope_as = eotg_mem_founder }
+        }
+        scope:eotg_frontier_holder = {
+            create_character_memory = {
+                type = eotg_frontier_settled_memory
+                participants = { eotg_founder = scope:eotg_mem_founder }
+            }
+            scope:new_memory = {
+                set_variable = { name = eotg_region  value = scope:eotg_mem_region }
+            }
+        }
         # frontier_v4.md A8.3: before the settle, which drops the sponsor
         eotg_frontier_reward_sponsor_effect = yes
         eotg_frontier_settle_effect = yes
@@ -1614,6 +1669,20 @@ eotg_frontier_abandon_effect = {
     if = {
         limit = { eotg_frontier_is_frontier = yes }
         eotg_frontier_save_hook_scopes_effect = yes
+        # INT4 M10 (integration_v2.md §5.3): the holder remembers it, before
+        # any clear and before the Unclaimed release in the
+        # eotg_frontier_on_abandoned hook
+        save_temporary_scope_as = eotg_mem_region
+        holder = {
+            create_character_memory = { type = eotg_frontier_abandoned_memory }
+            scope:new_memory = {
+                set_variable = { name = eotg_region  value = scope:eotg_mem_region }
+                if = {
+                    limit = { always = $FAILED$ }
+                    set_variable = eotg_failed
+                }
+            }
+        }
         if = {
             limit = { always = $FAILED$ }
             eotg_frontier_trigger_hook_effect = { HOOK = eotg_frontier_on_project_failed }
