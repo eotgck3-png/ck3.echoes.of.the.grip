@@ -20,21 +20,21 @@ Vanilla source: CK3 1.20.0.4 game files: non-hidden character events (DLC = even
 | `outfit_tags` | 2.9% | 2.5% | **0.7%** |
 | `camera` | 8.2% | 13.7% | **0.0%** |
 | Spoken dialogue in the desc | 51.8% | 53.9% | **51.4%** |
-| Voice: first person | 75.7% | 73.1% | **81.5%** |
+| Voice: first person | 75.7% | 73.1% | **80.1%** |
 | Voice: second person | 0.8% | 0.9% | **0.4%** |
-| Voice: neutral | 20.8% | 18.7% | **18.1%** |
+| Voice: neutral | 20.8% | 18.7% | **19.6%** |
 | Voice: no desc text | 2.8% | 7.3% | **0.0%** |
 | `Custom()` in the desc | 46.0% | 43.3% | **13.4%** |
 | `#EMP` in the desc | 17.4% | 19.9% | **0.0%** |
 | Any `#` formatting in the desc | 19.1% | 23.1% | **0.0%** |
 | `\n\n` in the desc | 82.4% | 86.3% | **48.6%** |
 | `random_valid` desc | 3.8% | 2.8% | **0.0%** |
-| `triggered_desc` used | 32.8% | 34.1% | **62.3%** |
+| `triggered_desc` used | 32.8% | 34.1% | **63.0%** |
 | Median desc words (main key) | 48 | 58 | **45** |
 | Desc words p10 / p90 | 23 / 84 | 29 / 92 | **32 / 62** |
 | Options defined: median, p90 | 2, p90 4 | 3, p90 4 | **5, p90 6** |
 | Options with a trait icon | 3.3% | 1.9% | **19.1%** |
-| Options with a `skill =` icon | 7.6% | 7.9% | **10.3%** |
+| Options with a `skill =` icon | 7.6% | 7.9% | **10.4%** |
 | `ai_chance` on every option | 53.3% | 75.6% | **97.5%** |
 | Stress on an option | 42.2% | 60.1% | **73.2%** |
 | `add_internal_flag` | 1.9% | 3.8% | **13.4%** |
@@ -48,7 +48,7 @@ Vanilla source: CK3 1.20.0.4 game files: non-hidden character events (DLC = even
 | Events with 2+ personality-gated options (L017) | 74 | 33 | **5** |
 | Events with 3+ personality-gated options | 11 | 6 | **0** |
 
-**Mod option gate axes** (options): personality 202, education/skill 97, tier 46, other trigger 360, ungated 497.
+**Mod option gate axes** (options): personality 202, education/skill 98, tier 46, other trigger 360, ungated 497.
 
 ## Per file (mod)
 
@@ -61,9 +61,9 @@ Vanilla source: CK3 1.20.0.4 game files: non-hidden character events (DLC = even
 | `events/eotg_augmentation_heir.txt` | 5 | 60.0% | 60.0% | 80.0 / 0.0 / 20.0% | 20.8% | 0.6 | 60.0% | 0.0% | 0.0% | 0 |
 | `events/eotg_augmentation_inherit.txt` | 27 | 85.2% | 63.0% | 77.8 / 0.0 / 22.2% | 15.0% | 0.15 | 25.9% | 0.0% | 7.4% | 0 |
 | `events/eotg_augmentation_initiation.txt` | 20 | 95.0% | 60.0% | 90.0 / 0.0 / 10.0% | 21.7% | 0.9 | 30.0% | 0.0% | 40.0% | 0 |
-| `events/eotg_augmentation_interactions.txt` | 2 | 100.0% | 50.0% | 50.0 / 0.0 / 50.0% | 10.0% | 1.0 | 100.0% | 0.0% | 0.0% | 0 |
+| `events/eotg_augmentation_interactions.txt` | 2 | 100.0% | 50.0% | 50.0 / 0.0 / 50.0% | 10.0% | 1.5 | 100.0% | 0.0% | 0.0% | 0 |
 | `events/eotg_augmentation_kingpin.txt` | 42 | 100.0% | 42.9% | 76.2 / 0.0 / 23.8% | 7.3% | 0.62 | 81.0% | 0.0% | 23.8% | 0 |
-| `events/eotg_augmentation_nonruler.txt` | 6 | 100.0% | 50.0% | 66.7 / 0.0 / 33.3% | 23.5% | 0.33 | 16.7% | 0.0% | 0.0% | 0 |
+| `events/eotg_augmentation_nonruler.txt` | 6 | 100.0% | 50.0% | 66.7 / 0.0 / 33.3% | 22.9% | 0.33 | 16.7% | 0.0% | 0.0% | 0 |
 | `events/eotg_augmentation_patron.txt` | 10 | 100.0% | 70.0% | 90.0 / 10.0 / 0.0% | 20.8% | 1.2 | 40.0% | 0.0% | 90.0% | 0 |
 | `events/eotg_augmentation_procedures.txt` | 6 | 100.0% | 50.0% | 83.3 / 0.0 / 16.7% | 8.3% | 0.17 | 100.0% | 0.0% | 0.0% | 0 |
 | `events/eotg_augmentation_realm.txt` | 1 | 100.0% | 100.0% | 100.0 / 0.0 / 0.0% | 16.7% | 0.0 | 100.0% | 0.0% | 0.0% | 0 |
@@ -72,7 +72,7 @@ Vanilla source: CK3 1.20.0.4 game files: non-hidden character events (DLC = even
 | `events/eotg_augmentation_tier1.txt` | 22 | 100.0% | 45.5% | 86.4 / 0.0 / 13.6% | 26.5% | 1.09 | 18.2% | 0.0% | 13.6% | 2 |
 | `events/eotg_augmentation_tier2.txt` | 21 | 90.5% | 47.6% | 71.4 / 0.0 / 28.6% | 21.6% | 1.05 | 14.3% | 0.0% | 9.5% | 0 |
 | `events/eotg_augmentation_tier3.txt` | 24 | 95.8% | 45.8% | 87.5 / 0.0 / 12.5% | 22.0% | 1.21 | 16.7% | 0.0% | 0.0% | 2 |
-| `events/eotg_frontier_events.txt` | 30 | 100.0% | 46.7% | 70.0 / 0.0 / 30.0% | 12.4% | 0.1 | 76.7% | 0.0% | 0.0% | 0 |
+| `events/eotg_frontier_events.txt` | 30 | 100.0% | 46.7% | 56.7 / 0.0 / 43.3% | 12.4% | 0.1 | 76.7% | 0.0% | 0.0% | 0 |
 
 ## Events with 2+ personality-gated options (5)
 
