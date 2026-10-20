@@ -18,16 +18,19 @@
 #
 # Tiger 1.17 and PX don't validate 1.20 government fields: QA checks this block
 # BY HAND against _governments.info and the cited vanilla lines (§13 item 2).
-# UNVERIFIED-VANILLA (V-G13): ask_for_tribute on a government with no
-#   mechanic_type enables offer_tributary_status_interaction
-#   (00_tributary_interactions.txt:4456-4480 reads only government_allows).
-#   Tributaries become tributary_subjugated: the Cartel is not a nomad,
-#   steppe_admin or other named suzerain, so start_tributary_interaction_effect
-#   falls through to its final else (G/common/scripted_effects/
-#   00_interaction_effects.txt:2981-2985). That group has
-#   suzerain_heir_succession = no (subject_contract_groups.txt:103-106), so the
-#   tribute lapses on the ruler's death, and Offer Tributary Status costs piety
-#   (00_tributary_interactions.txt:4533-4536).
+# G2 C2 (docs/specs/governments_v2_g2_cartel.md §5.3, OQ1 owner 2026-10-20):
+#   the government_rules entry that allows asking for tribute is REMOVED
+#   (spec §13 item 6: the token must not appear here). It only enabled
+#   vanilla Embrace as Tributary
+#   (00_tributary_interactions.txt:4464, piety cost, "devout tributaries"
+#   notification) and the tributarization map mode (_governments.info
+#   :260-266). The Cartel's one tribute verb is now
+#   eotg_cartel_put_on_schedule_interaction (eotg_cartel_interactions.txt),
+#   gated on the government flag; start_tributary does not need the rule.
+#   count_tributaries_for_title_requirements stays (V-C4).
+#   SAVE COMPATIBILITY (spec §10): G1 payers made through Embrace stay in
+#   vanilla tributary_subjugated and lapse at death as before; new payers
+#   go to eotg_cartel_tributary (eotg_cartel_contract_groups.txt).
 # -----------------------------------------------------------------------------
 
 eotg_cartel_government = {
@@ -39,7 +42,6 @@ eotg_cartel_government = {
         allow_accolades = yes               # feudal :11
         use_as_base_on_landed = yes         # admin :458; .info:73-77
         sticky_government = yes             # admin :462; .info:148-151
-        ask_for_tribute = yes               # mandala :934; .info:264-270
         count_tributaries_for_title_requirements = yes # mandala :938; .info:284-292
     }
 

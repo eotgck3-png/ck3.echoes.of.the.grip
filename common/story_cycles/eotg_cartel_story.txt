@@ -7,7 +7,8 @@
 #   this story's monthly tick when the owner is no longer a landed Cartel
 #   ruler), or on_owner_death (the heir gets a fresh story through
 #   eotg_cartel_on_title_gain).
-# Fires: no event (spec §11: E1-E5 are not approved).
+# Fires: no event (spec §11: E1-E5 are not approved). Calls
+#   eotg_cartel_walk_off_effect from the yearly effect_group (batch C2).
 #
 # VISIBLE (OQ3, owner 2026-10-20): the mod's second visible story, after the
 # kingpin. It shows a basic_counter of dread mirrored on the story
@@ -22,8 +23,8 @@
 #
 # Story variables: eotg_cartel_dread_shown (display only; never read as the
 # resource).
-# C1 has the monthly tick only. The yearly walk-off effect_group (spec §3.2,
-# the walk-off's single cadence authority) comes with batch C2.
+# Two ticks: monthly (C1, self-heal and refresh) and yearly (C2, the dread
+# walk-off; spec §3.2, the walk-off's single cadence authority).
 # -----------------------------------------------------------------------------
 
 eotg_story_cartel_schedule = {
@@ -105,6 +106,29 @@ eotg_story_cartel_schedule = {
                         eotg_cartel_sync_story_effect = yes
                     }
                 }
+            }
+        }
+    }
+
+    # Yearly tick (spec §3.2, §5.4): the dread walk-off. THIS is the
+    # walk-off's only cadence authority (invariant 4, v1 lesson 5): the
+    # effect itself checks nothing. At most one payer leaves a year, and
+    # none while the heir's succession grace (eotg_cartel_on_death, 3 years)
+    # runs. low_dread = 20 (G/common/script_values/00_basic_values.txt:993).
+    effect_group = {
+        years = 1
+        trigger = {
+            story_owner = {
+                eotg_cartel_role_top = yes
+                eotg_cartel_payer_count_value > 0
+                dread < low_dread
+                NOT = { has_variable = eotg_cartel_succession_grace }
+            }
+        }
+        triggered_effect = {
+            trigger = { always = yes }
+            effect = {
+                story_owner = { eotg_cartel_walk_off_effect = yes }
             }
         }
     }

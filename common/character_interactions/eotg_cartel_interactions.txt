@@ -1,0 +1,329 @@
+﻿# -- eotg_cartel_interactions.txt ---------------------------------------------
+# Governments v2, Phase G2, Cartel batch C2 (docs/specs/governments_v2_g2_cartel.md
+# §5.2, §5.3). The Cartel's one tribute verb.
+#
+# eotg_cartel_put_on_schedule_interaction: "Put on the Schedule". An
+# independent Cartel ruler spends DREAD (the signature resource) to put an
+# independent neighbour on the Cartel tributary group eotg_cartel_tributary.
+#
+# Shape: vanilla offer_tributary_status_interaction (G/common/
+# character_interactions/00_tributary_interactions.txt:4456-4735) for
+# targeting and AI; reassert_tributary_interaction (:5305) for the dread
+# send option (:5598-5604) and auto-accept (:5925-5952); the neighbour test
+# from demand_tributary_interaction (:888-890).
+# Dread is paid in on_accept through eotg_cartel_change_dread_effect, never
+# with `cost` (dread is not a cost key, and `cost` is charged on send).
+# Cooldown: the refusal opinion eotg_refused_protection_opinion (3 years) is
+# the only re-ask gate, read in is_valid (the vanilla pattern of
+# tributary_request_denied_opinion, offer :4507-4514).
+# Map-agnostic: no title, culture, faith or character key.
+# -----------------------------------------------------------------------------
+
+eotg_cartel_put_on_schedule_interaction = {
+    category = interaction_category_diplomacy   # demand_tributary :851
+    common_interaction = yes
+    icon = icon_demand_tribute                  # G/gfx/interface/icons/character_interactions/icon_demand_tribute.dds
+    desc = eotg_cartel_put_on_schedule_interaction_desc
+
+    # Replaces the vanilla government_allows gate (offer :4463-4470; the rule
+    # is removed from the Cartel, OQ1)
+    is_available = {
+        government_has_flag = eotg_government_is_cartel
+        is_landed = yes
+        is_independent_ruler = yes
+    }
+
+    is_shown = {
+        scope:actor = {
+            NOT = {
+                this = scope:recipient
+                top_suzerain ?= scope:recipient.top_suzerain # not already in the same suzerain bloc (offer :4474-4477)
+            }
+            # Neighbours only (demand_tributary :888-890)
+            any_land_neighboring_realm_with_tributaries_owner = {
+                this = scope:recipient
+            }
+        }
+        scope:recipient = {
+            this != scope:actor
+            is_independent_ruler = yes
+            is_landed = yes
+            is_tributary = no
+            highest_held_title_tier >= tier_county      # demand_tributary :900
+            highest_held_title_tier < tier_hegemony     # offer :4528 (hegemons bow to none)
+            NOR = {
+                government_has_flag = cannot_be_vassal_or_liege # excludes the Unsworn placeholders (V-C18)
+                government_has_flag = government_is_holy_order  # demand_tributary :906 (not in spec §5.2; vanilla parity)
+            }
+        }
+    }
+
+    is_valid_showing_failures_only = {
+        scope:actor = {
+            NOT = { has_truce = scope:recipient }
+            is_physically_able = yes
+            custom_tooltip = {
+                text = offer_tributary_status_interaction_cant_use_tributaries_tt # vanilla key (offer :4492-4495)
+                can_have_tributaries_trigger = yes  # crown authority >= 1 (mpo_scripted_triggers.txt:912-916)
+            }
+            custom_tooltip = {
+                text = eotg_cartel_schedule_dread_tt
+                dread >= eotg_cartel_schedule_cost_value
+            }
+        }
+        scope:recipient = {
+            custom_tooltip = {
+                text = eotg_cartel_schedule_refused_tt
+                NOT = {
+                    has_opinion_modifier = {
+                        modifier = eotg_refused_protection_opinion
+                        target = scope:actor
+                    }
+                }
+            }
+        }
+    }
+
+    greeting = negative
+    notification_text = eotg_cartel_put_on_schedule_notification
+
+    # Compel: dread forces the deal (reassert :5598-5604). Costs +10 dread
+    # (eotg_cartel_schedule_cost_value) and leaves the payer resentful.
+    send_option = {
+        flag = eotg_cartel_compel
+        localization = eotg_cartel_compel_option
+        is_valid = {
+            scope:actor = { dread >= high_dread }
+        }
+    }
+
+    # reassert :5925-5952 (its dread case, without the switch)
+    auto_accept = {
+        custom_description = {
+            text = eotg_cartel_compel_tt
+            subject = scope:actor
+            object = scope:recipient
+            scope:eotg_cartel_compel = yes
+        }
+    }
+
+    on_accept = {
+        # Pay first: the cost value reads scope:eotg_cartel_compel and the
+        # recipient's tier, both unchanged by the schedule
+        scope:actor = {
+            # A named negative value, not an inline { } block: a block as a
+            # scripted-effect argument is rejected (Tiger error(macro)).
+            eotg_cartel_change_dread_effect = { AMOUNT = eotg_cartel_schedule_spend_value }
+        }
+        eotg_cartel_start_schedule_effect = yes
+        if = {
+            limit = { scope:eotg_cartel_compel = yes }
+            scope:recipient = {
+                add_opinion = {
+                    modifier = eotg_compelled_to_pay_opinion
+                    target = scope:actor
+                }
+            }
+        }
+        # Replaces vanilla letter 0362, whose tooltip shows the subjugated
+        # terms (spec §5.3). Toast shape :2176-2183.
+        scope:actor = {
+            hidden_effect = {
+                send_interface_toast = {
+                    type = event_toast_effect_good
+                    title = eotg_cartel_schedule_toast
+                    left_icon = scope:actor
+                    right_icon = scope:recipient
+                    custom_tooltip = eotg_cartel_schedule_toast_desc
+                }
+            }
+        }
+    }
+
+    on_decline = {
+        scope:recipient = {
+            add_opinion = {
+                modifier = eotg_refused_protection_opinion # also the 3-year re-ask cooldown
+                target = scope:actor
+                years = 3
+            }
+        }
+        scope:actor = {
+            # A threat that is called costs fear
+            eotg_cartel_change_dread_effect = { AMOUNT = miniscule_dread_loss }
+            # Vanilla "Demand Tributary Response: Refused" letter
+            # (G/events/interaction_events/character_interaction_events.txt:2920).
+            # It reads scope:puppet_or_actor (:2937); set it if the engine has
+            # not, as vanilla blackmail_interaction_effect does
+            # (G/common/scripted_effects/00_interaction_effects.txt:27-30).
+            if = {
+                limit = { NOT = { exists = scope:puppet_or_actor } }
+                save_scope_as = puppet_or_actor
+            }
+            trigger_event = char_interaction.0363
+        }
+    }
+
+    ai_targets = {
+        ai_recipients = neighboring_rulers_including_tributary_borders # offer :4656-4658
+    }
+
+    ai_frequency_by_tier = {    # offer :4660-4667
+        barony = 0
+        county = 24
+        duchy = 12
+        kingdom = 12
+        empire = 12
+        hegemony = 12
+    }
+
+    force_notification = yes
+
+    # Root = actor. Shape: offer :4672-4735, with the piety and remoteness
+    # terms replaced by dread (spec §5.2).
+    ai_will_do = {
+        base = 0
+
+        modifier = {
+            add = {
+                add = scope:recipient.gold
+                divide = 10
+                max = 100
+            }
+            desc = accumulated_wealth_reason
+        }
+
+        ai_military_threat_modifier = { SENDER = scope:actor RECEIVER = scope:recipient MULTIPLIER = -1 }
+
+        modifier = { # Rarely aim more than one tier up (offer)
+            trigger = {
+                "scope:recipient.tier_difference(scope:actor)" > 1
+            }
+            add = -20
+        }
+
+        modifier = { # Feared enough to lean on them
+            trigger = {
+                scope:actor.dread >= high_dread
+            }
+            add = 25
+        }
+
+        modifier = { # Never tributarize a larger realm (offer)
+            trigger = {
+                scope:actor.realm_size < scope:recipient.realm_size
+            }
+            factor = 0
+        }
+
+        modifier = { # Never spend into the walk-off: keep low_dread in reserve
+            trigger = {
+                scope:actor.dread < {
+                    value = eotg_cartel_schedule_cost_value
+                    add = low_dread
+                }
+            }
+            factor = 0
+        }
+    }
+
+    ai_min_reply_days = 5
+    ai_max_reply_days = 10
+
+    # Root = recipient. Spec §5.2; vanilla lines per term.
+    ai_accept = {
+        base = -25
+
+        ai_military_threat_modifier = { SENDER = scope:recipient RECEIVER = scope:actor MULTIPLIER = 1 } # offer :4872
+
+        modifier = { # Intimidated (vanilla dread levels, :3844-3863)
+            add = 25
+            scope:recipient = {
+                has_dread_level_towards = {
+                    target = scope:actor
+                    level = 1
+                }
+            }
+            desc = INTIMIDATED_REASON
+        }
+
+        modifier = { # Cowed
+            add = 50
+            scope:recipient = {
+                has_dread_level_towards = {
+                    target = scope:actor
+                    level = 2
+                }
+            }
+            desc = COWED_REASON
+        }
+
+        modifier = { # offer :4746-4750
+            scope:recipient = { is_confederation_member = yes }
+            add = -50
+            desc = recipient_is_in_a_confederation
+        }
+
+        modifier = { # offer boldness term
+            NOT = { ai_boldness = 0 }
+            add = {
+                value = ai_boldness
+                multiply = -1
+                divide = 4
+            }
+            desc = TRIBUTARY_BOLDNESS_REASON
+        }
+
+        modifier = { # offer greed term
+            ai_greed > 0
+            add = {
+                value = ai_greed
+                multiply = -1
+                divide = 4
+            }
+            desc = TRIBUTARY_GREED_REASON
+        }
+
+        modifier = { # offer rivalry term (-30 there; -10 here, spec §5.2)
+            desc = embrace_tributarization_interaction_aibehavior_rival_tt
+            trigger = {
+                scope:recipient = {
+                    has_relation_rival = scope:actor
+                    NOT = { has_relation_nemesis = scope:actor }
+                }
+            }
+            add = -10
+        }
+
+        modifier = { # offer nemesis term
+            desc = embrace_tributarization_interaction_aibehavior_nemesis_tt
+            trigger = {
+                scope:recipient = {
+                    has_relation_nemesis = scope:actor
+                }
+            }
+            add = -100
+        }
+
+        modifier = { # -25 per tier above the actor (offer uses -50)
+            desc = tributary_interaction_aibehavior_recipient_tier_tt
+            trigger = {
+                scope:recipient = {
+                    highest_held_title_tier > scope:actor.highest_held_title_tier
+                }
+            }
+            add = {
+                value = scope:recipient.highest_held_title_tier
+                subtract = scope:actor.highest_held_title_tier
+                multiply = -25
+            }
+        }
+
+        opinion_modifier = { # Opinion factor (vanilla :3865-3871)
+            who = scope:recipient
+            opinion_target = scope:actor
+            multiplier = 1.0
+            desc = AI_OPINION_REASON
+        }
+    }
+}

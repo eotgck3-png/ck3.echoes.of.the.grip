@@ -10,7 +10,8 @@
 # writer of the story's display mirror eotg_cartel_dread_shown (on_setup
 # seeds it once, see eotg_cartel_story.txt).
 #
-# The walk-off and start-schedule effects come with batch C2.
+# Batch C2 adds eotg_cartel_start_schedule_effect (interaction on_accept) and
+# eotg_cartel_walk_off_effect (story yearly tick).
 # -----------------------------------------------------------------------------
 
 # Change dread by $AMOUNT$ (a number, a script value, or a { } block).
@@ -86,7 +87,8 @@ eotg_cartel_init_effect = {
 
 # Undo eotg_cartel_init_effect (spec §2.6). Does NOT touch dread (a universal
 # currency: the fear lingers). Payers are ended by the exit decision (C4) and
-# by the contract group's validity check (C2). Called from
+# by the contract group's validity check (eotg_cartel_tributary
+# is_valid_tributary_contract, eotg_cartel_contract_groups.txt). Called from
 # eotg_cartel_on_government_change (Cartel -> other) and the story's monthly
 # tick when the owner is no longer a landed Cartel ruler.
 eotg_cartel_teardown_effect = {
@@ -111,4 +113,82 @@ eotg_cartel_teardown_effect = {
         limit = { has_variable = eotg_cartel_succession_grace }
         remove_variable = eotg_cartel_succession_grace
     }
+}
+
+# Put the recipient on the Cartel schedule (spec §5.3). Interaction scope:
+# scope:actor = the suzerain, scope:recipient = the new payer; called from
+# eotg_cartel_put_on_schedule_interaction on_accept.
+# Copies only the pieces of vanilla start_tributary_interaction_effect it
+# needs: start_tributary (form G/common/scripted_effects/
+# 00_interaction_effects.txt:2982-2985) with the OWN group, the low-obligation
+# branch (:2988-2995, always low so Tighten (C3) has something to raise),
+# its tooltips (:2996-2997, :3010-3011), then the vanilla truces (:3016).
+# Deliberately NOT called (spec §5.3): mandala_embrace_tributary_effect
+# (gratitude opinion, letter 0362 with subjugated-terms tooltip) and
+# consume_all_criminal_reasons_effect (a Cartel does not forgive when paid).
+eotg_cartel_start_schedule_effect = {
+    scope:recipient = {
+        start_tributary = {
+            contract_group = eotg_cartel_tributary
+            suzerain = scope:actor
+        }
+        if = {
+            limit = { is_tributary = yes } # suppress error logging (vanilla :2990)
+            hidden_effect = {
+                tributary_contract_set_obligation_level = { type = default_tributary_taxes level = 1 }
+                tributary_contract_set_obligation_level = { type = default_tributary_prestige level = 0 }
+            }
+        }
+        custom_tooltip = low_subjugated_tribute_taxes
+        custom_tooltip = none_subjugated_tribute_prestige
+        custom_tooltip = suzerain_guarantee
+        custom_tooltip = no_tributary_war_obligations
+        # A tributary leaves its confederation, as vanilla Embrace does
+        # (00_tributary_interactions.txt:4630-4639)
+        if = {
+            limit = {
+                is_confederation_member = yes
+                confederation ?= { is_house_based = no }
+            }
+            confederation = { remove_confederation_member = scope:recipient }
+        }
+    }
+    setup_tributary_truces_effect = { SUZERAIN = scope:actor TRIBUTARY = scope:recipient }
+    scope:actor = { eotg_cartel_refresh_schedule_effect = yes }
+}
+
+# The dread walk-off (spec §5.4). Character scope: the schedule's owner.
+# Called ONLY from eotg_story_cartel_schedule's yearly effect_group, which is
+# the walk-off's single cadence authority (invariant 4); this effect checks no
+# cooldown and no threshold. One payer leaves, weighted towards the lowest
+# opinion of the owner (101 - opinion keeps every weight >= 1; opinion form
+# G/common/decisions/00_dynasty_decisions.txt:259). end_tributary is vanilla
+# (00_tributary_interactions.txt:2104); toast shape :2176-2183.
+eotg_cartel_walk_off_effect = {
+    save_scope_as = eotg_cartel_suzerain
+    random_tributary = {
+        limit = { has_subject_contract_group = eotg_cartel_tributary }
+        weight = {
+            base = 1
+            modifier = {
+                add = {
+                    value = 100
+                    subtract = "opinion(scope:eotg_cartel_suzerain)"
+                }
+            }
+        }
+        save_scope_as = eotg_cartel_walker
+        end_tributary = yes
+    }
+    if = {
+        limit = { exists = scope:eotg_cartel_walker }
+        send_interface_toast = {
+            type = event_toast_effect_bad
+            title = eotg_cartel_walk_off_toast
+            left_icon = scope:eotg_cartel_walker
+            right_icon = scope:eotg_cartel_suzerain
+            custom_tooltip = eotg_cartel_walk_off_toast_desc
+        }
+    }
+    eotg_cartel_refresh_schedule_effect = yes
 }

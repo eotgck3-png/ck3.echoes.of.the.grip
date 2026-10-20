@@ -93,9 +93,11 @@ eotg_cartel_on_title_gain = {
 }
 
 # Succession grace (spec §2.2, §6.3; OQ2, owner 2026-10-20): the primary heir
-# of a Cartel ruler with payers gets 3 years in which the walk-off (C2) is
+# of a Cartel ruler with payers gets 3 years in which the walk-off is
 # skipped. The variable expires on its own; a non-Cartel heir simply never
-# reads it. Inert until C2 fills eotg_cartel_payer_count_value.
+# reads it. Active from C2: eotg_cartel_payer_count_value now counts the
+# eotg_cartel_tributary payers, which pass to this heir
+# (suzerain_heir_succession = yes, eotg_cartel_contract_groups.txt).
 eotg_cartel_on_death = {
     trigger = {
         government_has_flag = eotg_government_is_cartel

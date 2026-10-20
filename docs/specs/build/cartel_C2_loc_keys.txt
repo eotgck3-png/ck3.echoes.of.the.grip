@@ -1,0 +1,42 @@
+# Cartel G2, batch C2 (tribute), 2026-10-20
+# Spec: docs/specs/governments_v2_g2_cartel.md §5, §9. Target file:
+# localization/english/eotg_cartel_l_english.yml (UTF-8 with BOM, bare [x.GetName]).
+# Script: common/character_interactions/eotg_cartel_interactions.txt,
+# common/subject_contracts/groups/eotg_cartel_contract_groups.txt,
+# common/opinion_modifiers/eotg_cartel_opinions.txt,
+# common/scripted_effects/eotg_cartel_effects.txt (walk-off toast).
+# Voice: vanilla UI voice. Canadian English. Lore §8: generic syndicate-state;
+# "protection", "payment schedule", "payers" are fine; B2 mafia words banned
+# (no "racket", Don, capo, the Family...). No court, registry or League.
+# Interaction scopes in loc: [actor.GetName], [recipient.GetName].
+# Vanilla keys REUSED (do not redefine): offer_tributary_status_interaction_cant_use_tributaries_tt,
+# low_subjugated_tribute_taxes, none_subjugated_tribute_prestige, suzerain_guarantee,
+# no_tributary_war_obligations, INTIMIDATED_REASON, COWED_REASON,
+# recipient_is_in_a_confederation, TRIBUTARY_BOLDNESS_REASON, TRIBUTARY_GREED_REASON,
+# embrace_tributarization_interaction_aibehavior_rival_tt / _nemesis_tt,
+# tributary_interaction_aibehavior_recipient_tier_tt, AI_OPINION_REASON,
+# accumulated_wealth_reason; event char_interaction.0363 (refusal letter).
+
+## Interaction (9 keys)
+eotg_cartel_put_on_schedule_interaction              # name: "Put on the Schedule"
+eotg_cartel_put_on_schedule_interaction_desc         # spend [dread|E] to make [recipient.GetName] a [tributary|E] on a low-tax payment schedule
+eotg_cartel_put_on_schedule_notification             # letter text the recipient gets: [actor.GetName] offers "protection" for regular payments
+eotg_cartel_compel_option                            # send option label: "Compel with [dread|E]" (needs dread >= 80; auto-accept; +10 dread cost)
+eotg_cartel_compel_tt                                # auto-accept reason: "[actor.GetShortUIName] compels [recipient.GetShortUIName] through [dread|E]"
+eotg_cartel_schedule_dread_tt                        # is_valid failure: not enough dread (county 10 / duchy 15 / kingdom 25 / empire 35, +10 to compel)
+eotg_cartel_schedule_refused_tt                      # is_valid failure: [recipient.GetName] refused recently (3-year cooldown)
+eotg_cartel_schedule_toast                           # toast title to the actor on acceptance: "A New Payer"
+eotg_cartel_schedule_toast_desc                      # toast body: [recipient.GetName] is now on your payment schedule
+
+## Walk-off toast (2 keys) -- scopes: eotg_cartel_walker (the payer), eotg_cartel_suzerain (the owner)
+eotg_cartel_walk_off_toast                           # toast title: "A Payer Walks"
+eotg_cartel_walk_off_toast_desc                      # body: [eotg_cartel_walker.GetName] no longer fears you enough to pay and has left your schedule
+
+## Opinion modifiers (3 keys, shared names: no government wording needed)
+eotg_refused_protection_opinion                      # "Refused My Protection" (-20, decays over 3 years)
+eotg_compelled_to_pay_opinion                        # "Compelled to Pay" (-20, slow decay)
+eotg_schedule_tightened_opinion                      # "Raised My Payments" (-15, decays over 5 years; used from C3)
+
+## Contract group (2 keys, matching the G1 groups' loc shape)
+eotg_cartel_tributary                                # "Payment Schedule"
+eotg_cartel_tributary_desc                           # a payer to a Cartel; the arrangement holds only while the Cartel is feared, and passes to its heir

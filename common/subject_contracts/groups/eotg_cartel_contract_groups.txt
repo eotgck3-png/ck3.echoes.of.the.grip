@@ -1,0 +1,56 @@
+﻿# -- eotg_cartel_contract_groups.txt ------------------------------------------
+# Governments v2, Phase G2, Cartel batch C2 (docs/specs/governments_v2_g2_cartel.md
+# §5.1). The Cartel's own tributary group: "the payment schedule".
+# Kept in its own file (not appended to eotg_government_contract_groups.txt,
+# spec §3.1) so the Cartel batches stay separable from the G1 vassal groups.
+#
+# Started only by eotg_cartel_start_schedule_effect (Put on the Schedule,
+# eotg_cartel_interactions.txt). It bypasses mandala_embrace_tributary_effect
+# / start_tributary_interaction_effect, whose final else would force vanilla
+# tributary_subjugated (spec §5.3; G/common/scripted_effects/
+# 00_interaction_effects.txt:2981-3011).
+#
+# SAVE COMPATIBILITY (spec §10, template §4.10): payers made in G1 through
+# vanilla Embrace stay in tributary_subjugated (suzerain_heir_succession = no)
+# and lapse at the suzerain's death as before. No migration: they are not
+# counted by eotg_cartel_payer_count_value and are not walked off.
+#
+# Hand-checked against G/common/subject_contracts/groups/
+# _subject_contract_groups.info:22-55 (every tributary field) and vanilla
+# tributary_subjugated / tributary_celestial (subject_contract_groups.txt
+# :103-118, :157-171). Tiger 1.17 does not know the 1.20 tributary fields.
+# -----------------------------------------------------------------------------
+
+eotg_cartel_tributary = {
+    is_tributary = yes
+
+    # ROOT = the payer, scope:suzerain (.info:30-34). The schedule ends if the
+    # suzerain stops being a Cartel (exit decision C4, conquest, any other
+    # government change). Shape: tributary_celestial :166-171.
+    is_valid_tributary_contract = {
+        scope:suzerain = { government_has_flag = eotg_government_is_cartel }
+    }
+
+    # Payers never break free by themselves (tributary_subjugated :105); they
+    # leave through the dread walk-off (eotg_cartel_walk_off_effect) or
+    # vanilla cease_paying_tribute_interaction.
+    tributary_can_break_free = { always = no }
+
+    # OQ2 (owner 2026-10-20): the schedule passes to the suzerain's primary
+    # heir (.info:51-55); a payer's heir keeps paying (celestial :163).
+    suzerain_heir_succession = yes
+    tributary_heir_succession = yes
+
+    suzerain_line_type = line_suzerain          # .info:38-43
+    tributary_line_type = line_tributary
+    should_show_as_suzerain_realm_name = no     # tributary_subjugated :109
+    should_show_as_suzerain_realm_color = yes   # tributary_subjugated :110
+
+    # The four vanilla contracts of tributary_subjugated (:112-117)
+    contracts = {
+        default_tributary_taxes
+        default_tributary_prestige
+        suzerain_war_participation_guarantee
+        tributary_war_participation_obligation
+    }
+}

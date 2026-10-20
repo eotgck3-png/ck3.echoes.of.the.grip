@@ -3,8 +3,8 @@
 # §2.2, §3.1). All character scope. Magnitudes and thresholds are vanilla
 # (miniscule..massive_dread_gain/_loss, low/medium/high_dread:
 # G/common/script_values/00_basic_values.txt:725-734, 993-995).
-# The C2-C4 values (schedule cost, tighten cost, exit legitimacy) come with
-# their batches.
+# C2 adds eotg_cartel_schedule_cost_value. The C3-C4 values (tighten cost,
+# exit legitimacy) come with their batches.
 # -----------------------------------------------------------------------------
 
 # The real change eotg_cartel_change_dread_effect applies: the requested
@@ -23,17 +23,18 @@ eotg_cartel_dread_clamped_value = {
 }
 
 # Payers on the Cartel schedule (spec §2.2): every tributary in the
-# eotg_cartel_tributary contract group.
-# C1 STUB: the contract group is batch C2 (spec §10), and a trigger naming an
-# undefined group would log an error at load (V-C1). Until C2 this is 0, so
-# the schedule modifier reads +0 (V-C2) and the death grace never fires.
-# C2 replaces the body with:
-#   every_tributary = {
-#       limit = { has_subject_contract_group = eotg_cartel_tributary }
-#       add = 1
-#   }
+# eotg_cartel_tributary contract group (batch C2; the C1 stub returned 0).
+# Shape: every_tributary in a value, G/common/script_values/
+# 09_mpo_values.txt:2210-2214; has_subject_contract_group on the tributary,
+# G/common/character_interactions/00_tributary_interactions.txt:5367-5375.
+# G1 payers in vanilla tributary_subjugated are not counted (save compat,
+# spec §4.10 note: they stay in that group and lapse at death as before).
 eotg_cartel_payer_count_value = {
     value = 0
+    every_tributary = {
+        limit = { has_subject_contract_group = eotg_cartel_tributary }
+        add = 1
+    }
 }
 
 # The schedule modifier's scale (spec §2.7): var:eotg_cartel_schedule_scale,
@@ -47,4 +48,38 @@ eotg_cartel_schedule_scale_value = {
         }
         value = var:eotg_cartel_schedule_scale
     }
+}
+
+# Dread price of Put on the Schedule (spec §5.2, OQ6 numbers approved
+# 2026-10-20): by the recipient's highest held tier, county 10, duchy 15,
+# kingdom 25, empire 35 (hegemons are not valid targets); +10 under the
+# compel send option. Scopes: scope:recipient, scope:eotg_cartel_compel (the
+# interaction; `?=` because the AI evaluates every option combination,
+# _character_interactions.info:611). Read by the interaction's is_valid,
+# on_accept (through eotg_cartel_change_dread_effect) and ai_will_do.
+eotg_cartel_schedule_cost_value = {
+    value = 10
+    if = {
+        limit = { scope:recipient.highest_held_title_tier = tier_duchy }
+        value = 15
+    }
+    else_if = {
+        limit = { scope:recipient.highest_held_title_tier = tier_kingdom }
+        value = 25
+    }
+    else_if = {
+        limit = { scope:recipient.highest_held_title_tier >= tier_empire }
+        value = 35
+    }
+    if = {
+        limit = { scope:eotg_cartel_compel ?= yes }
+        add = 10
+    }
+}
+
+# The same price as a negative change, for eotg_cartel_change_dread_effect
+# (AMOUNT takes a value name, not an inline block). Interaction on_accept only.
+eotg_cartel_schedule_spend_value = {
+    value = eotg_cartel_schedule_cost_value
+    multiply = -1
 }
