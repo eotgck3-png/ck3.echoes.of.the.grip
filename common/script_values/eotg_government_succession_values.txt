@@ -1,0 +1,93 @@
+﻿# -- eotg_government_succession_values.txt ------------------------------------
+# Governments v2, G2 succession, batch SU1 (docs/specs/governments_v2_g2_succession.md
+# §5). Read only from common/succession_election/eotg_government_elections.txt.
+# Scopes are the election's (G/common/succession_election/_succession_election.info):
+# root = the elector; scope:holder, scope:title; in candidate_score also
+# scope:candidate and scope:holder_candidate.
+# -----------------------------------------------------------------------------
+
+# Corporation electors' priority (spec §5.1), used with electors max = 7 to
+# pick the board. Root = elector. The holder is always seated, as the Emperor
+# in princely_elective (G/common/succession_election/01_princely_elective.txt:92-97).
+eotg_corporation_su_board_priority_value = {
+    value = 0
+    if = {
+        limit = { this = scope:holder }
+        add = 200
+    }
+    if = {
+        limit = { is_councillor_of = scope:holder }  # G/common/activities/activity_types/chariot_race.txt:1112
+        add = 50
+    }
+    if = {
+        limit = { is_powerful_vassal_of = scope:holder }  # G/common/activities/intents/shared_intents.txt:458
+        add = 30
+    }
+    add = {
+        value = highest_held_title_tier
+        multiply = 5
+    }
+}
+
+# Corporation AI vote (spec §5.1): administration and dealing.
+# (stewardship + diplomacy) x 1.5 + intrigue x 0.5, capped at 60. Root = elector.
+eotg_corporation_su_candidate_skill_value = {
+    value = scope:candidate.stewardship
+    add = scope:candidate.diplomacy
+    multiply = 1.5
+    add = {
+        value = scope:candidate.intrigue
+        multiply = 0.5
+    }
+    max = 60
+}
+
+# Trade Oligarchy electors' priority (spec §5.2): the wealth sort for max = 9.
+# The holder (First Prince) 1000; every other elector their gold, clamped 0-999.
+eotg_gobcorp_su_prince_priority_value = {
+    value = 0
+    if = {
+        limit = { this = scope:holder }
+        add = 1000
+    }
+    else = {
+        add = {
+            value = gold
+            min = 0
+            max = 999
+        }
+    }
+}
+
+# Trade Oligarchy AI vote (spec §5.2): stewardship x 2 (cap 40) plus
+# gold / 25 (cap 20, floor 0 so debt does not subtract). Root = elector.
+eotg_gobcorp_su_candidate_wealth_value = {
+    value = 0
+    add = {
+        value = scope:candidate.stewardship
+        multiply = 2
+        max = 40
+    }
+    add = {
+        value = scope:candidate.gold
+        divide = 25
+        min = 0
+        max = 20
+    }
+}
+
+# Cartel AI vote (spec §5.3): dread / 3 (cap 30) plus prowess x 1.5 (cap 30).
+# `scope:actor.dread` as a value is vanilla (G/common/character_interactions/09_mpo_interactions.txt:4392).
+eotg_cartel_su_candidate_menace_value = {
+    value = 0
+    add = {
+        value = scope:candidate.dread
+        divide = 3
+        max = 30
+    }
+    add = {
+        value = scope:candidate.prowess
+        multiply = 1.5
+        max = 30
+    }
+}

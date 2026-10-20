@@ -1,0 +1,61 @@
+# Governments v2, G2 succession batch SU1 (elective succession), 2026-10-20
+# Spec: docs/specs/governments_v2_g2_succession.md §9. Target file:
+# localization/english/eotg_government_l_english.yml (UTF-8 with one BOM, bare [x.GetName]).
+# Voice: §9-§10 (Canadian English; B2 ban list; no nation names: no Helix, P&D,
+# Gob-Ogre Trade League, Concrete Cartel; Trade Oligarchy text species-neutral;
+# top ranks: First Prince (Trade Oligarchy), Overboss (Cartel); no "shareholders",
+# "stock" or share markets (LQ-SU1); no authority above the polity certifies votes).
+# Concept links as vanilla: [title_heir|E], [elector|E], [dynasty|E], [designated_heir|E].
+# One definition per key: the §9.1 keys already exist in eotg_government_l_english.yml:
+# EDIT them in place, do not add duplicates. No replace/ overrides.
+
+## §9.1 Law text, EDIT existing keys
+eotg_corporation_succession_law            # KEEP "Executive Succession" (no edit)
+eotg_corporation_succession_law_subname    # was "Oldest Child Inherits"; draft "Board Election"
+eotg_corporation_succession_law_effects    # was single-heir text; vanilla-shaped line (succession_laws_l_english.yml:78): the ruler and the board (councillors and powerful vassals, up to seven electors in all) nominate a [title_heir|E] from among the ruler's [dynasty|E]; votes favour skill in stewardship and diplomacy
+eotg_gobcorp_succession_law                # KEEP "Charter Succession" (no edit)
+eotg_gobcorp_succession_law_subname        # was "Oldest Child Inherits"; draft "Weighted by Wealth"
+eotg_gobcorp_succession_law_effects        # was single-heir text; the First Prince and the richest Princes (up to nine electors) nominate a [title_heir|E] from the [dynasty|E]; wealth adds voting power; votes favour stewardship and a full treasury
+eotg_cartel_succession_law                 # KEEP "Council Succession" (no edit)
+eotg_cartel_succession_law_subname         # was "Oldest Child Inherits"; draft "The Bosses Decide"
+eotg_cartel_succession_law_effects         # was single-heir text; the Overboss and every boss above the rank of baron (or on the council) nominate a [title_heir|E] from the [dynasty|E]; [dread|E] adds voting power, and intimidated bosses follow the Overboss's pick
+eotg_pmc_succession_law_subname            # was "Oldest Child Inherits"; draft "Chain of Command"
+eotg_pmc_succession_law_effects            # keep the single-heir text; ADD that with enough crown authority the commander may name any child as successor ([designated_heir|E])
+eotg_pmc_government_desc                   # only change: "...and rank is earned by results in the field." -> "...and contractors earn their rank by results in the field."
+
+## §9.2 New keys: election window (shape: succession_laws_l_english.yml:86-99)
+eotg_corporation_elective_candidates           # short label: e.g. "The Ruler's Dynasty"
+eotg_corporation_elective_candidates_tooltip   # a valid candidate is a member of the ruler's [dynasty|E], unlanded or of the same government, in the realm, not barred (disinherited etc.); if no dynasty member qualifies, same-government direct vassals stand instead
+eotg_corporation_elective_electors             # short label: e.g. "Ruler and the Board"
+eotg_corporation_elective_electors_tooltip     # an [elector|E] is the ruler or a direct vassal who is a councillor or powerful vassal; at most seven, the ruler always included, councillors first, then powerful vassals, then higher rank
+eotg_gobcorp_elective_candidates               # short label: e.g. "The Ruler's Dynasty"
+eotg_gobcorp_elective_candidates_tooltip       # same candidate rule as the Corporation (dynasty; fallback same-government direct vassals)
+eotg_gobcorp_elective_electors                 # short label: e.g. "First Prince and the Richest Princes"
+eotg_gobcorp_elective_electors_tooltip         # an [elector|E] is the First Prince or a direct vassal with gold; at most nine, the richest first
+eotg_cartel_elective_candidates                # short label: e.g. "The Ruler's Dynasty"
+eotg_cartel_elective_candidates_tooltip        # same candidate rule as the Corporation (dynasty; fallback same-government direct vassals)
+eotg_cartel_elective_electors                  # short label: e.g. "Overboss and the Bosses"
+eotg_cartel_elective_electors_tooltip          # an [elector|E] is the Overboss or a direct vassal of county rank or above, or on the council; no limit on number
+
+## §9.2 Vote strength descs, form "<label>: $VALUE|=+0$" (elective_succession_l_english.yml:123)
+eotg_gov_su_vote_chair             # the current ruler (shared by all three)
+eotg_corporation_su_vote_board     # seat on the board (councillor of the ruler)
+eotg_gobcorp_su_vote_wealth_1      # wealthy (100+ gold)
+eotg_gobcorp_su_vote_wealth_2      # very wealthy (300+ gold)
+eotg_gobcorp_su_vote_wealth_3      # vastly wealthy (1000+ gold)
+eotg_cartel_su_vote_dread_1        # feared ([dread|E] 20+)
+eotg_cartel_su_vote_dread_2        # much feared ([dread|E] 40+)
+eotg_cartel_su_vote_dread_3        # terrifying ([dread|E] 80+)
+
+## §9.2 Candidate score descs (AI vote reasons; same $VALUE|=+0$ form)
+eotg_corporation_su_score_skill    # candidate's stewardship, diplomacy and intrigue
+eotg_gobcorp_su_score_wealth       # candidate's stewardship and wealth
+eotg_cartel_su_score_follow_fear   # intimidated by the Overboss: follows his pick (fires once per dread level, same key)
+eotg_cartel_su_score_menace        # candidate's dread and prowess
+eotg_gov_su_score_minor            # candidate is a child (shared)
+
+## Reused vanilla keys, NO override
+# tooltip_feudal_vote_strength_powerful_vassal, tooltip_feudal_vote_strength_king_tier,
+# tooltip_feudal_vote_strength_duke_tier, and the vanilla voting-pattern descs.
+## Character-set keys (eotg_*_electors_*, eotg_*_candidates_*): write none unless
+## error.log or PX reports them missing (V-SU0).

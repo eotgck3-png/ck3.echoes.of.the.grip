@@ -47,3 +47,129 @@ eotg_gov_knight_realm_is_cartel = {
     }
 }
 
+
+# -----------------------------------------------------------------------------
+# G2 succession, batch SU1 (docs/specs/governments_v2_g2_succession.md §5).
+# Callers: common/succession_election/eotg_government_elections.txt. Every one
+# runs inside an election, where the engine sets scope:holder
+# (G/common/succession_election/_succession_election.info); none may re-save it.
+# -----------------------------------------------------------------------------
+
+# Candidate filter shared by the three elections (spec §5.0, template P1).
+# Root = candidate. Shape: feudal_elective_potential_landless_dynastic_candidate_trigger
+# (G/common/scripted_triggers/00_elective_triggers.txt:239-265), with two
+# deviations: the grandchild block (:267-325) is omitted (the whole house may
+# stand), and a landed candidate must share the holder's government (:160-164)
+# so the vote cannot turn the realm feudal and drop the law via can_keep.
+eotg_gov_su_dynastic_candidate_trigger = {
+    save_temporary_scope_as = potential_candidate  # 00_elective_triggers.txt:239-240
+    exists = dynasty
+    dynasty = scope:holder.dynasty  # owner ruling 2026-10-20: candidates by dynasty
+    OR = {
+        is_ruler = no  # unlanded: takes the government on landing (governments_v2.md §5.0)
+        has_same_government = scope:holder
+    }
+    OR = {  # in the realm, unlanded, or the title is independent (:241-258)
+        is_ruler = no
+        any_liege_or_above = { this = scope:holder }
+        scope:holder = { top_liege = this }
+    }
+    NOT = {  # :259-265
+        any_heir_title = {
+            holder ?= { has_unelectable_government_trigger = yes }
+        }
+    }
+    has_unelectable_trait_trigger = no       # 00_elective_triggers.txt:16-29
+    has_unelectable_government_trigger = no  # :31-38
+    eotg_gov_su_law_eligible_trigger = yes   # so an engine-filtered member falls through to the fallback
+}
+
+# Mirror of the engine's own candidate filters (_succession_election.info: "the
+# gender and faith laws are taken into account"), so a character our triggers
+# accept is never removed afterwards. Root = candidate.
+# Without it a dynasty of only women under male_only_law would pass
+# eotg_gov_su_holder_has_dynastic_candidate_trigger, block the fallback, and
+# leave the engine with zero candidates (QA SU1/SU2, 2026-10-20).
+# Gender: the realm gender law, read on the holder as
+# G/common/scripted_triggers/00_auto_character_triggers.txt:14-27 (vanilla's
+# elective form reads it on scope:title, 00_elective_triggers.txt:116-126; the
+# holder form keeps every title of the realm election identical, spec §3.2).
+# Faith: the succession_faith / succession_rel_head realm laws, whose
+# succession block sets faith = same_faith (G/common/laws/00_succession_laws.txt:2441-2490).
+eotg_gov_su_law_eligible_trigger = {
+    trigger_if = {
+        limit = { scope:holder = { has_realm_law = male_only_law } }
+        is_male = yes
+    }
+    trigger_else_if = {
+        limit = { scope:holder = { has_realm_law = female_only_law } }
+        is_female = yes
+    }
+    trigger_if = {
+        limit = {
+            scope:holder = {
+                OR = {
+                    has_realm_law = same_faith_only_law
+                    has_realm_law = same_faith_theocratic_succession_law
+                    has_realm_law = same_faith_succession_law
+                }
+            }
+        }
+        faith = scope:holder.faith
+    }
+}
+
+# Root = holder. Only ever called as scope:holder = { ... } from the fallback
+# trigger below, inside an election (engine-set scope:holder).
+eotg_gov_su_holder_has_dynastic_candidate_trigger = {
+    dynasty ?= {
+        any_dynasty_member = {
+            this != scope:holder
+            eotg_gov_su_dynastic_candidate_trigger = yes
+        }
+    }
+}
+
+# Fallback candidates (spec §5.0): same-government direct vassals, only when the
+# dynasty has no valid member. Root = candidate. Cheap checks first; the
+# dynasty scan last (spec §5.0 "Cost").
+# KNOWN GAP (no vanilla-shaped last resort; V-SU9 records it in game): with no
+# valid dynasty member AND no eligible same-government direct vassal the
+# candidate list is empty. There is no primary-heir set type (.info list), and
+# primary_heir under an election is the vote leader itself, so it cannot serve.
+eotg_gov_su_fallback_candidate_trigger = {
+    is_vassal_of = scope:holder
+    has_same_government = scope:holder
+    has_unelectable_trait_trigger = no
+    has_unelectable_government_trigger = no
+    eotg_gov_su_law_eligible_trigger = yes
+    scope:holder = { eotg_gov_su_holder_has_dynastic_candidate_trigger = no }
+}
+
+# Corporation electors (spec §5.1): the board. Root = elector.
+# Not the holder_council_members set type: it has no vanilla call site.
+eotg_corporation_su_board_member_trigger = {
+    is_vassal_of = scope:holder
+    OR = {
+        is_councillor_of = scope:holder      # G/common/activities/activity_types/chariot_race.txt:1112
+        is_powerful_vassal_of = scope:holder # G/common/activities/intents/shared_intents.txt:458
+    }
+}
+
+# Trade Oligarchy electors (spec §5.2): any prince with money; the richest
+# are kept by eotg_gobcorp_su_prince_priority_value with max = 9. Root = elector.
+eotg_gobcorp_su_prince_trigger = {
+    is_vassal_of = scope:holder
+    gold > 0
+}
+
+# Cartel electors (spec §5.3): every boss above the rank of baron, or on the
+# council. Root = elector. Barons excluded as in Tanistry
+# (G/localization/english/succession_laws_l_english.yml:78).
+eotg_cartel_su_boss_trigger = {
+    is_vassal_of = scope:holder
+    OR = {
+        highest_held_title_tier >= tier_county
+        is_councillor_of = scope:holder
+    }
+}

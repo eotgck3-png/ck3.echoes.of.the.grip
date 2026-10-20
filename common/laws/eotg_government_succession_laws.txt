@@ -4,6 +4,13 @@
 # by law_group_type (1.20 splits groups from laws), so the vanilla group file is
 # not touched.
 #
+# G2 succession (SU1, docs/specs/governments_v2_g2_succession.md §6): three of
+# the four laws are elective. The Corporation, Trade Oligarchy and Cartel laws
+# keep their keys and use order_of_succession = election with their own
+# election_type (common/succession_election/eotg_government_elections.txt);
+# candidates come from the ruler's dynasty. The PMC law stays single heir
+# (spec §11). The default-law notes below apply to all four unchanged.
+#
 # Why the mod needs them: every vanilla realm succession law is unavailable or
 # unsafe here (partition needs feudal/clan, 00_law_triggers.txt:271-283; city
 # succession needs republic :592-594; appointment/acclamation need the admin
@@ -11,7 +18,8 @@
 # feudal/clan/admin/japan_feudal government :374-411, which none of the four
 # is, so vanilla single heir is never valid for them).
 #
-# Shape: single_heir_succession_law (G/common/laws/00_succession_laws.txt:249-347).
+# Shape (PMC): single_heir_succession_law (G/common/laws/00_succession_laws.txt:249-347);
+# the elective three: theocratic_elective_succession_law (:727-765).
 # index 50-53: vanilla's succession_order_laws run 0-34; the mod has no other
 # succession law. Each government's own law is its only valid realm succession
 # law (spec §7.1 assumed vanilla single heir stayed available; it does not).
@@ -74,13 +82,20 @@ eotg_corporation_succession_law = {
     }
     should_start_with = { government_has_flag = eotg_government_is_corporation }
 
+    # Elective (G2 succession SU1, docs/specs/governments_v2_g2_succession.md §6).
+    # Shape: theocratic_elective_succession_law (G/common/laws/00_succession_laws.txt:727-765),
+    # a realm law in succession_order_laws using election. _laws.info:366-385
+    # lists election as "Title only"; vanilla contradicts it, vanilla wins.
+    # traversal_order / rank / title_division are invalid with election
+    # (_laws.info:220-226) and are dropped. Fallback if V-SU1 fails: spec §3.3
+    # (not built).
+    can_title_have = { always = yes }  # :737-739; title-level resolution of a realm election
     succession = {
-        order_of_succession = inheritance
-        traversal_order = children
-        rank = oldest
-        title_division = single_heir
+        order_of_succession = election  # :741
+        election_type = eotg_corporation_elective  # :742; common/succession_election/eotg_government_elections.txt
     }
-    flag = advanced_succession_law  # single_heir :303
+    flag = elective_succession_law  # :746 (was advanced_succession_law)
+    title_allegiance_opinion = 10   # :747; _laws.info:140-144
 
     pass_cost = {
         prestige = change_succession_law_prestige_cost
@@ -106,13 +121,20 @@ eotg_gobcorp_succession_law = {
     }
     should_start_with = { government_has_flag = eotg_government_is_gobcorp }
 
+    # Elective (G2 succession SU1, docs/specs/governments_v2_g2_succession.md §6).
+    # Shape: theocratic_elective_succession_law (G/common/laws/00_succession_laws.txt:727-765),
+    # a realm law in succession_order_laws using election. _laws.info:366-385
+    # lists election as "Title only"; vanilla contradicts it, vanilla wins.
+    # traversal_order / rank / title_division are invalid with election
+    # (_laws.info:220-226) and are dropped. Fallback if V-SU1 fails: spec §3.3
+    # (not built).
+    can_title_have = { always = yes }  # :737-739; title-level resolution of a realm election
     succession = {
-        order_of_succession = inheritance
-        traversal_order = children
-        rank = oldest
-        title_division = single_heir
+        order_of_succession = election  # :741
+        election_type = eotg_gobcorp_elective  # :742; common/succession_election/eotg_government_elections.txt
     }
-    flag = advanced_succession_law  # single_heir :303
+    flag = elective_succession_law  # :746 (was advanced_succession_law)
+    title_allegiance_opinion = 10   # :747; _laws.info:140-144
 
     pass_cost = {
         prestige = change_succession_law_prestige_cost
@@ -138,13 +160,20 @@ eotg_cartel_succession_law = {
     }
     should_start_with = { government_has_flag = eotg_government_is_cartel }
 
+    # Elective (G2 succession SU1, docs/specs/governments_v2_g2_succession.md §6).
+    # Shape: theocratic_elective_succession_law (G/common/laws/00_succession_laws.txt:727-765),
+    # a realm law in succession_order_laws using election. _laws.info:366-385
+    # lists election as "Title only"; vanilla contradicts it, vanilla wins.
+    # traversal_order / rank / title_division are invalid with election
+    # (_laws.info:220-226) and are dropped. Fallback if V-SU1 fails: spec §3.3
+    # (not built).
+    can_title_have = { always = yes }  # :737-739; title-level resolution of a realm election
     succession = {
-        order_of_succession = inheritance
-        traversal_order = children
-        rank = oldest
-        title_division = single_heir
+        order_of_succession = election  # :741
+        election_type = eotg_cartel_elective  # :742; common/succession_election/eotg_government_elections.txt
     }
-    flag = advanced_succession_law  # single_heir :303
+    flag = elective_succession_law  # :746 (was advanced_succession_law)
+    title_allegiance_opinion = 10   # :747; _laws.info:140-144
 
     pass_cost = {
         prestige = change_succession_law_prestige_cost

@@ -1,0 +1,289 @@
+﻿# -- eotg_government_elections.txt -------------------------------------------
+# Governments v2, G2 succession, batch SU1 (docs/specs/governments_v2_g2_succession.md
+# §5). One election per elective government law; the key is the law's
+# election_type (common/laws/eotg_government_succession_laws.txt).
+# Shape: G/common/succession_election/02_gaelic_elective.txt:9-123 (dynasty-only
+# candidates :113-121); electors max/priority: 01_princely_elective.txt:62-150;
+# fields: _succession_election.info.
+# Scopes: root = elector; scope:candidate, scope:title, scope:holder,
+# scope:holder_candidate (gaelic :1-7). Nothing here reads scope:title, so every
+# title of a realm-law election elects the same person (spec §3.2).
+# Owner rulings 2026-10-20: candidates only are limited to the ruling family,
+# by dynasty; electors are unrestricted.
+# V-SU1 (unverified outside PAM): a realm-law election is shown and resolved
+#   like theocratic_elective (G/common/laws/00_succession_laws.txt:727-765).
+#   FALLBACK if V-SU1/V-SU2 fail (spec §3.3; NOT built): first, a realm-law
+#   appointment (meritocratic_*/celestial_*, G/common/succession_appointment/),
+#   owner to re-rule (OQ3); second, a title-law election
+#   (feudal_elective_succession_law, 01_title_succession_laws.txt:2-34) with a
+#   title-law back-fill in the safety net. The architect writes the addendum.
+# AI vote patterns reused from G/common/scripted_modifiers/
+#   00_elective_successions_scripted_modifiers.txt (spec §5.4); the
+#   _circumstances_* and _prestige_piety_ patterns are deliberately not used.
+# -----------------------------------------------------------------------------
+
+# Corporation (spec §5.1): the chair and up to six directors, councillors or
+# powerful vassals, seat the next chief from the house.
+eotg_corporation_elective = {
+    elector_vote_strength = {
+        base = 1
+        modifier = {  # gaelic :12-16
+            desc = eotg_gov_su_vote_chair
+            add = 1
+            this = scope:holder
+        }
+        modifier = {  # board-influence hook (spec §2): the Corporation G2 pass reads eotg_corp_board_influence here
+            desc = eotg_corporation_su_vote_board
+            add = 1
+            this != scope:holder
+            is_councillor_of = scope:holder
+        }
+        modifier = {  # 00_feudal_elective.txt:35-49, without the military-strength bonus
+            desc = tooltip_feudal_vote_strength_powerful_vassal
+            add = 1
+            this != scope:holder
+            is_powerful_vassal = yes
+            liege = scope:holder
+        }
+        modifier = {  # 00_feudal_elective.txt:25-29
+            desc = tooltip_feudal_vote_strength_king_tier
+            add = 2
+            highest_held_title_tier = 4
+        }
+        modifier = {  # 00_feudal_elective.txt:30-34
+            desc = tooltip_feudal_vote_strength_duke_tier
+            add = 1
+            highest_held_title_tier = 3
+        }
+    }
+
+    electors = {
+        max = 7  # the chair plus six directors; princely :63
+        character_sets = {
+            eotg_corporation_electors_holder = {
+                type = holder
+            }
+            eotg_corporation_electors_board = {
+                type = holder_direct_vassals
+                limit = { eotg_corporation_su_board_member_trigger = yes }
+            }
+        }
+        # MTTH priority at the electors level, as 01_princely_elective.txt:92;
+        # vanilla uses priority_value only inside a set (00_pam_clerical_elective.txt:53).
+        # Trigger-less modifier with add = { value = ... }: princely :113-171.
+        priority = {
+            base = 0
+            modifier = {
+                add = { value = eotg_corporation_su_board_priority_value }
+            }
+        }
+    }
+
+    candidate_score = {
+        base = 0
+        elector_self_voting_pattern_feudal_elective_modifier = yes    # :1
+        holder_voting_pattern_feudal_elective_modifier = yes          # :188
+        elector_voting_pattern_traits_feudal_elective_modifier = yes  # :929
+        elector_voting_pattern_opinion_feudal_elective_modifier = yes # :2199
+        modifier = {
+            desc = eotg_corporation_su_score_skill
+            add = eotg_corporation_su_candidate_skill_value
+        }
+        modifier = {
+            desc = eotg_gov_su_score_minor
+            add = -40
+            scope:candidate = { is_adult = no }
+        }
+    }
+
+    # Spec §5.0. candidate_policy defaults to include_all_candidates (.info).
+    candidates = {
+        character_sets = {
+            eotg_corporation_candidates_dynasty = {  # gaelic :115-120
+                type = holder_dynasty
+                limit = { eotg_gov_su_dynastic_candidate_trigger = yes }
+            }
+            # Only when the dynasty has no valid member (spec §5.0).
+            eotg_corporation_candidates_fallback = {
+                type = holder_direct_vassals  # 09_confederation_elective.txt:122
+                limit = { eotg_gov_su_fallback_candidate_trigger = yes }
+            }
+        }
+    }
+}
+
+# Trade Oligarchy (spec §5.2): the First Prince and the eight richest Princes.
+eotg_gobcorp_elective = {
+    elector_vote_strength = {
+        base = 1
+        modifier = {  # gaelic :12-16
+            desc = eotg_gov_su_vote_chair
+            add = 1
+            this = scope:holder
+        }
+        # Market-share hook (spec §2): the Trade Oligarchy G2 pass replaces
+        # these gold reads with var:eotg_gobcorp_market_share bands.
+        modifier = {
+            desc = eotg_gobcorp_su_vote_wealth_1
+            add = 1
+            gold >= 100
+        }
+        modifier = {
+            desc = eotg_gobcorp_su_vote_wealth_2
+            add = 1
+            gold >= 300
+        }
+        modifier = {
+            desc = eotg_gobcorp_su_vote_wealth_3
+            add = 1
+            gold >= 1000
+        }
+    }
+
+    electors = {
+        max = 9  # princely :63
+        character_sets = {
+            eotg_gobcorp_electors_holder = {
+                type = holder
+            }
+            eotg_gobcorp_electors_princes = {
+                type = holder_direct_vassals
+                limit = { eotg_gobcorp_su_prince_trigger = yes }
+            }
+        }
+        priority = {  # the wealth sort; MTTH form as 01_princely_elective.txt:92
+            base = 0
+            modifier = {
+                add = { value = eotg_gobcorp_su_prince_priority_value }
+            }
+        }
+    }
+
+    candidate_score = {
+        base = 0
+        elector_self_voting_pattern_feudal_elective_modifier = yes    # :1
+        holder_voting_pattern_feudal_elective_modifier = yes          # :188
+        elector_voting_pattern_traits_feudal_elective_modifier = yes  # :929
+        elector_voting_pattern_opinion_feudal_elective_modifier = yes # :2199
+        modifier = {
+            desc = eotg_gobcorp_su_score_wealth
+            add = eotg_gobcorp_su_candidate_wealth_value
+        }
+        modifier = {
+            desc = eotg_gov_su_score_minor
+            add = -40
+            scope:candidate = { is_adult = no }
+        }
+    }
+
+    # Spec §5.0. candidate_policy defaults to include_all_candidates (.info).
+    candidates = {
+        character_sets = {
+            eotg_gobcorp_candidates_dynasty = {  # gaelic :115-120
+                type = holder_dynasty
+                limit = { eotg_gov_su_dynastic_candidate_trigger = yes }
+            }
+            # Only when the dynasty has no valid member (spec §5.0).
+            eotg_gobcorp_candidates_fallback = {
+                type = holder_direct_vassals  # 09_confederation_elective.txt:122
+                limit = { eotg_gov_su_fallback_candidate_trigger = yes }
+            }
+        }
+    }
+}
+
+# Cartel (spec §5.3): every boss votes, weighted by dread (the signature
+# resource). Thresholds low/medium/high_dread: G/common/script_values/00_basic_values.txt:993-995.
+eotg_cartel_elective = {
+    elector_vote_strength = {
+        base = 1
+        modifier = {  # gaelic :12-16
+            desc = eotg_gov_su_vote_chair
+            add = 1
+            this = scope:holder
+        }
+        modifier = {
+            desc = eotg_cartel_su_vote_dread_1
+            add = 1
+            dread >= low_dread
+        }
+        modifier = {
+            desc = eotg_cartel_su_vote_dread_2
+            add = 1
+            dread >= medium_dread
+        }
+        modifier = {
+            desc = eotg_cartel_su_vote_dread_3
+            add = 1
+            dread >= high_dread
+        }
+    }
+
+    electors = {  # no max: every boss votes
+        character_sets = {
+            eotg_cartel_electors_holder = {
+                type = holder
+            }
+            eotg_cartel_electors_bosses = {
+                type = holder_direct_vassals
+                limit = { eotg_cartel_su_boss_trigger = yes }
+            }
+        }
+    }
+
+    candidate_score = {
+        base = 0
+        elector_self_voting_pattern_feudal_elective_modifier = yes    # :1
+        holder_voting_pattern_feudal_elective_modifier = yes          # :188
+        elector_voting_pattern_traits_feudal_elective_modifier = yes  # :929
+        elector_voting_pattern_opinion_feudal_elective_modifier = yes # :2199
+        # The dread-succession link: intimidated bosses follow the Overboss's
+        # pick. has_dread_level_towards shape: 00_tributary_interactions.txt:3847-3863.
+        modifier = {
+            desc = eotg_cartel_su_score_follow_fear
+            add = 30
+            this != scope:holder
+            exists = scope:holder_candidate
+            scope:candidate = scope:holder_candidate
+            has_dread_level_towards = {
+                target = scope:holder
+                level = 1
+            }
+        }
+        modifier = {
+            desc = eotg_cartel_su_score_follow_fear
+            add = 30
+            this != scope:holder
+            exists = scope:holder_candidate
+            scope:candidate = scope:holder_candidate
+            has_dread_level_towards = {
+                target = scope:holder
+                level = 2
+            }
+        }
+        modifier = {
+            desc = eotg_cartel_su_score_menace
+            add = eotg_cartel_su_candidate_menace_value
+        }
+        modifier = {
+            desc = eotg_gov_su_score_minor
+            add = -40
+            scope:candidate = { is_adult = no }
+        }
+    }
+
+    # Spec §5.0. candidate_policy defaults to include_all_candidates (.info).
+    candidates = {
+        character_sets = {
+            eotg_cartel_candidates_dynasty = {  # gaelic :115-120
+                type = holder_dynasty
+                limit = { eotg_gov_su_dynastic_candidate_trigger = yes }
+            }
+            # Only when the dynasty has no valid member (spec §5.0).
+            eotg_cartel_candidates_fallback = {
+                type = holder_direct_vassals  # 09_confederation_elective.txt:122
+                limit = { eotg_gov_su_fallback_candidate_trigger = yes }
+            }
+        }
+    }
+}
