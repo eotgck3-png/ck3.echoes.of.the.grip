@@ -1,4 +1,4 @@
-"""Build the province marker as ONE mesh with TWO materials: a stone pedestal and a glowing emblem.
+"""Build the province markers: one mesh per holding type, each a plinth, an emblem and a beam.
 
 A CK3 .mesh may hold several `mesh` blocks under a single shape, each with its own vertices and
 its own material. The .asset addresses them by position - `index = 0`, `index = 1` - and gives
@@ -8,12 +8,14 @@ That is what lets one model light two ways. Both slots run the same effect, beca
 also carries PDX_MESH_SNAP_VERTICES_TO_TERRAIN and a part that did not snap would sit at sea
 level while the rest of the model stood on the ground. The difference between stone and glow is
 therefore made in the TEXTURE, not the shader: EOTG_MARKER multiplies its emissive and rim by
-Properties.r, so the pedestal (r = 0, i.e. plain noproperties.dds) lights as ordinary stone and
-the emblem (r = 1) glows.
+Properties.r. The plinth's mask is 1 only on its trim lines, so the body lights as plain metal
+while the trims glow (build_marker_assets.py), and the emblem's mask is 1 everywhere.
 
-Geometry:
+Geometry, the same in all seven meshes except the emblem:
   index 0  the pedestal, lathed by make_marker_obj.py
-  index 1  the supplied emblem, scaled and lifted to float just above the pedestal's top
+  index 1  that holding type's emblem (eotg_marker_<type>.obj, from blender_marker_emblems.py),
+           scaled and lifted to float just above the pedestal's top
+  index 2  the projector beam, fitted to that emblem's width
 
 Usage:
     python docs/tools/build_marker_mesh.py <mod root> [--profile chess] [--pedestal-scale 2.04]
@@ -34,7 +36,48 @@ from make_beam_obj import beam_obj  # noqa: E402
 
 REL = os.path.join("gfx", "models", "buildings", "eotg_markers")
 SHAPE = "eotg_markerShape"
-MESH = "eotg_marker.mesh"
+MESH = "eotg_marker_%s.mesh"      # one per holding type: the shared plinth, that type's emblem,
+                                  # and a beam fitted to it
+
+# The seven holding types (holding representation brief s3.1). Each has its own emblem,
+# authored by blender_marker_emblems.py as eotg_marker_<type>.obj in REL. The names match
+# build_marker_assets.py HOLDINGS, so mesh and colour pair up with no second table.
+TYPES = ("castle", "city", "temple", "temple_citadel", "tribal", "nomad", "herder")
+
+# Sites are not holdings: activity sites, the adventurer camp and epidemic sites. They stand on
+# the low "disc" puck, smaller than a holding's plinth, so a site never reads as a holding. They
+# share the marker's three material slots, so build_marker_assets.py textures them the same way.
+SITES = ("feast", "hunt", "tournament", "wedding", "camp", "quarantine", "decon", "purge")
+SITE_MESH = "eotg_site_%s.mesh"
+SITE_PROFILE = "disc"
+SITE_PEDESTAL_SCALE = 1.30       # 2.6 wide: about half the holding plinth's footprint
+SITE_EMBLEM_SCALE = 1.20
+SITE_HOVER = 0.22
+
+# The holy-site landmark replaces vanilla's cathedral meshes by path, so it lives in their folder
+MONOLITH_DIR = os.path.join("gfx", "models", "buildings", "special")
+MONOLITH_MESH = "eotg_precursor_monolith.mesh"
+MONOLITH_SHAPE = "eotg_precursor_monolithShape"
+MONOLITH_MATERIALS = [
+    dict(shader="snap_to_terrain", diff="eotg_monolith_body_diffuse.dds", normal="nonormal.dds",
+         spec="noproperties.dds"),
+    dict(shader="snap_to_terrain", diff="eotg_monolith_glow_diffuse.dds", normal="nonormal.dds",
+         spec="eotg_marker_glow_properties.dds"),
+]
+
+# The construction cage: not a marker. The engine draws the `construction` entity at the
+# holding's own locator, around the holding model, so this is one translucent wireframe in world
+# units (blender_marker_emblems.py build_cage), on the beam's blending effect, with no plinth.
+CAGE_OBJ = "eotg_construction.obj"
+CAGE_MESH = "eotg_construction.mesh"
+CAGE_SHAPE = "eotg_constructionShape"
+CAGE_MATERIAL = dict(shader="snap_to_terrain_alpha_to_coverage",
+                     diff="eotg_construction_diffuse.dds", normal="nonormal.dds",
+                     spec="eotg_marker_glow_properties.dds")
+
+
+def emblem_path(outdir, holding):
+    return os.path.join(outdir, "eotg_marker_%s.obj" % holding)
 
 # Slot 0 is the pedestal, slot 1 the emblem. The diffuse names here are only the defaults baked
 # into the mesh; the .asset overrides both per government, which is how nine colours share one
@@ -101,56 +144,107 @@ def main():
     outdir = os.path.join(a.mod_root, REL)
     os.makedirs(outdir, exist_ok=True)
 
-    emblem_obj = os.path.join(outdir, "eotg_marker_source.obj")
-    if not os.path.exists(emblem_obj):
-        sys.exit("missing the supplied emblem at " + emblem_obj)
+    missing = [t for t in TYPES if not os.path.exists(emblem_path(outdir, t))]
+    if missing:
+        sys.exit("missing emblems: " + ", ".join(emblem_path(outdir, t) for t in missing)
+                 + "\n(generate them with docs/tools/blender_marker_emblems.py)")
 
     tmp = os.environ.get("TEMP", ".")
     ped_obj = os.path.join(tmp, "eotg_pedestal_%s.obj" % a.profile)
     subprocess.run([sys.executable, os.path.join(here, "make_marker_obj.py"),
                     a.profile, ped_obj], check=True, stdout=subprocess.DEVNULL)
 
-    print("parts:")
+    print("pedestal:")
     pedestal = build_part(ped_obj, a.pedestal_scale, 0.0, False, False, 0.0, False, "pedestal")
-
-    # The supplied emblem is authored off the origin - its lowest point is at y = 0.837, so it
-    # already floats. Drop that out first and re-apply a deliberate gap, otherwise the hover
-    # would scale with the emblem and stop being a decision.
-    P, _, _, _ = load_obj(emblem_obj)
-    emblem_min_y = float(np.asarray(P, np.float64)[:, 1].min())
-    lift = float(pedestal["hi"][1]) + a.hover
-    emblem = build_part(emblem_obj, a.emblem_scale, lift, False, False, emblem_min_y, False,
-                        "emblem")
-
-    # The beam spans the GAP ONLY - pedestal top to emblem base - and stops there. It used to run
-    # the full height of the emblem, which is what put a still-bright cone inside the model and
-    # gave it a visible edge; geometry that ends where the model begins cannot cut off against it.
-    # Every number is derived from the two parts just built, so a taller or wider emblem gets a
-    # taller or wider beam without this file being touched.
     ped_r = top_radius(pedestal)
-    emb_r = float(np.hypot(emblem["pos"][:, 0], emblem["pos"][:, 2]).max())
     beam_y0 = float(pedestal["hi"][1])
-    beam_h = float(emblem["lo"][1]) - beam_y0
-    beam_path = os.path.join(tmp, "eotg_beam.obj")
-    beam_obj(beam_path, a.beam_segments, ped_r * BEAM_R0_OF_PEDESTAL,
-             emb_r * BEAM_R1_OF_EMBLEM, 0.0, beam_h)
-    # offset_y rather than baking y0 into the .obj, so the generated file stays a plain frustum
-    # sitting at the origin and is readable on its own.
-    beam = build_part(beam_path, 1.0, beam_y0, False, False, 0.0, False, "beam")
 
-    out = os.path.join(outdir, MESH)
-    write_mesh([pedestal, emblem, beam], out, SHAPE, MATERIALS)
+    for holding in TYPES:
+        print("\n%s:" % holding)
+        # Emblems are authored with their lowest point at y = 0 (blender_marker_emblems.py),
+        # but drop whatever the minimum is anyway and re-apply a deliberate gap, so the hover is
+        # a decision and not an accident of authoring.
+        src = emblem_path(outdir, holding)
+        P, _, _, _ = load_obj(src)
+        emblem_min_y = float(np.asarray(P, np.float64)[:, 1].min())
+        lift = beam_y0 + a.hover
+        emblem = build_part(src, a.emblem_scale, lift, False, False, emblem_min_y, False,
+                            "emblem")
 
-    lo = np.minimum(pedestal["lo"], emblem["lo"])
-    hi = np.maximum(pedestal["hi"], emblem["hi"])
-    print("\nwrote %s" % out)
-    print("  shape %s, 3 material slots (0 pedestal, 1 emblem, 2 beam)" % SHAPE)
-    print("  beam r %.2f -> %.2f, y %.2f..%.2f  (pedestal top r %.2f, emblem r %.2f)"
-          % (ped_r * BEAM_R0_OF_PEDESTAL, emb_r * BEAM_R1_OF_EMBLEM, beam_y0, beam_y0 + beam_h,
-             ped_r, emb_r))
-    print("  overall %.2f x %.2f x %.2f   base at y=%.2f   emblem floats %.2f above the pedestal"
-          % (hi[0]-lo[0], hi[1]-lo[1], hi[2]-lo[2], lo[1], a.hover))
-    print("  (vanilla building_western_castle_01 is 2.77 x 4.16 x 2.17)")
+        # The beam spans the GAP ONLY - pedestal top to emblem base - and stops there. It used to
+        # run the full height of the emblem, which put a still-bright cone inside the model and
+        # gave it a visible edge; geometry that ends where the model begins cannot cut off
+        # against it. Every number comes from the parts just built, so each emblem gets a beam
+        # fitted to its own width.
+        emb_r = float(np.hypot(emblem["pos"][:, 0], emblem["pos"][:, 2]).max())
+        beam_h = float(emblem["lo"][1]) - beam_y0
+        beam_path = os.path.join(tmp, "eotg_beam_%s.obj" % holding)
+        beam_obj(beam_path, a.beam_segments, ped_r * BEAM_R0_OF_PEDESTAL,
+                 emb_r * BEAM_R1_OF_EMBLEM, 0.0, beam_h)
+        # offset_y rather than baking y0 into the .obj, so the generated file stays a plain
+        # frustum sitting at the origin and is readable on its own.
+        beam = build_part(beam_path, 1.0, beam_y0, False, False, 0.0, False, "beam")
+
+        out = os.path.join(outdir, MESH % holding)
+        write_mesh([pedestal, emblem, beam], out, SHAPE, MATERIALS)
+        lo = np.minimum(pedestal["lo"], emblem["lo"])
+        hi = np.maximum(pedestal["hi"], emblem["hi"])
+        tris = sum(len(x["tri"]) for x in (pedestal, emblem, beam))
+        print("  wrote %s  (%d tris)" % (out, tris))
+        print("  beam r %.2f -> %.2f, y %.2f..%.2f   overall %.2f x %.2f x %.2f"
+              % (ped_r * BEAM_R0_OF_PEDESTAL, emb_r * BEAM_R1_OF_EMBLEM, beam_y0,
+                 beam_y0 + beam_h, hi[0] - lo[0], hi[1] - lo[1], hi[2] - lo[2]))
+    print("\n(vanilla building_western_castle_01 is 2.77 x 4.16 x 2.17)")
+
+    # Sites: activities, the adventurer camp and epidemics. Same build as a holding, but on the
+    # low "disc" puck, so a site can never be mistaken for a holding on its plinth.
+    site_obj = os.path.join(tmp, "eotg_puck_%s.obj" % SITE_PROFILE)
+    subprocess.run([sys.executable, os.path.join(here, "make_marker_obj.py"),
+                    SITE_PROFILE, site_obj], check=True, stdout=subprocess.DEVNULL)
+    print("\npuck:")
+    puck = build_part(site_obj, SITE_PEDESTAL_SCALE, 0.0, False, False, 0.0, False, "puck")
+    puck_r = top_radius(puck)
+    puck_top = float(puck["hi"][1])
+    for site in SITES:
+        print("\n%s:" % site)
+        src = emblem_path(outdir, site)
+        if not os.path.exists(src):
+            sys.exit("missing %s (generate it with docs/tools/blender_marker_emblems.py)" % src)
+        P, _, _, _ = load_obj(src)
+        emblem_min_y = float(np.asarray(P, np.float64)[:, 1].min())
+        emblem = build_part(src, SITE_EMBLEM_SCALE, puck_top + SITE_HOVER, False, False,
+                            emblem_min_y, False, "glyph")
+        emb_r = float(np.hypot(emblem["pos"][:, 0], emblem["pos"][:, 2]).max())
+        beam_path = os.path.join(tmp, "eotg_beam_%s.obj" % site)
+        beam_obj(beam_path, a.beam_segments, puck_r * BEAM_R0_OF_PEDESTAL,
+                 emb_r * BEAM_R1_OF_EMBLEM, 0.0, float(emblem["lo"][1]) - puck_top)
+        beam = build_part(beam_path, 1.0, puck_top, False, False, 0.0, False, "beam")
+        out = os.path.join(outdir, SITE_MESH % site)
+        write_mesh([puck, emblem, beam], out, SHAPE, MATERIALS)
+        hi = np.maximum(puck["hi"], emblem["hi"])
+        lo = np.minimum(puck["lo"], emblem["lo"])
+        print("  wrote %s  (%.2f x %.2f x %.2f)" % (out, hi[0] - lo[0], hi[1] - lo[1],
+                                                   hi[2] - lo[2]))
+
+    # The holy-site landmark: two parts authored in one frame, so no re-basing.
+    print("\nprecursor monolith:")
+    sdir = os.path.join(a.mod_root, MONOLITH_DIR)
+    parts = []
+    for part in ("body", "glow"):
+        src = os.path.join(sdir, "eotg_precursor_monolith__%s.obj" % part)
+        if not os.path.exists(src):
+            sys.exit("missing %s (generate it with docs/tools/blender_marker_emblems.py)" % src)
+        parts.append(build_part(src, 1.0, 0.0, False, False, 0.0, False, part))
+    write_mesh(parts, os.path.join(sdir, MONOLITH_MESH), MONOLITH_SHAPE, MONOLITH_MATERIALS)
+    print("  wrote %s" % os.path.join(sdir, MONOLITH_MESH))
+
+    print("\nconstruction cage:")
+    cage_src = os.path.join(outdir, CAGE_OBJ)
+    if not os.path.exists(cage_src):
+        sys.exit("missing %s (generate it with docs/tools/blender_marker_emblems.py)" % cage_src)
+    cage = build_part(cage_src, 1.0, 0.0, False, False, 0.0, False, "cage")
+    write_mesh([cage], os.path.join(outdir, CAGE_MESH), CAGE_SHAPE, [CAGE_MATERIAL])
+    print("  wrote %s" % os.path.join(outdir, CAGE_MESH))
 
 
 if __name__ == "__main__":
