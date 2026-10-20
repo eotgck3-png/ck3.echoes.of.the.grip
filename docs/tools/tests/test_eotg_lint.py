@@ -633,6 +633,17 @@ class L014(LintCase):
             "eotg_c = { obligation_levels = { eotg_lvl = { ai = { eotg_inner = { } } } } }"}),
             "L014", "'eotg_inner_short' is defined", count=1)
 
+    def test_bare_alias_convention(self):
+        # a game concept and each bare item in its alias list imply game_concept_<x>(_desc)
+        concept = {"common/game_concepts/g.txt": "eotg_gc = { alias = { eotg_gcs } }"}
+        self.assertClean(self.files(
+            "game_concept_eotg_gc", "game_concept_eotg_gc_desc",
+            "game_concept_eotg_gcs", "game_concept_eotg_gcs_desc", **concept), "L014")
+        # a bare item outside alias implies nothing
+        self.assertHit(self.files("game_concept_eotg_other", **{
+            "common/game_concepts/g.txt": "eotg_gc = { family = { eotg_other } }"}),
+            "L014", "'game_concept_eotg_other' is defined", count=1)
+
     def test_not_key_exempt_when_base_used(self):
         # NOT_<key> is read by the engine when custom_description <key> fails;
         # it counts as used whenever its base key is referenced in script

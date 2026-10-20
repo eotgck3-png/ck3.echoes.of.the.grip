@@ -1005,24 +1005,30 @@ def load_conventions(path=CONVENTIONS_FILE):
 def _convention_keys(doc, spec):
     """(name, patterns) pairs one common/ file implies for L014.
 
-    Top-level objects take spec["patterns"]. Two optional spec fields cover names the
+    Top-level objects take spec["patterns"]. Three optional spec fields cover names the
     engine reads below the top level:
       "nested": {"<block>": [...]}  every block directly inside a block named <block>
                 (subject contract obligation_levels: <level>, <level>_short);
       "values": {"<field>": [...]}  every value of a field named <field>
-                (customizable_localization localization_key + the child suffixes).
+                (customizable_localization localization_key + the child suffixes);
+      "bare": {"<block>": [...]}    every bare list item inside a block named <block>
+                (game concept alias = { a b }: game_concept_a, game_concept_a_desc).
     """
     for n in doc.nodes:
         if n.is_block and n.key and not n.key.startswith("@"):
             yield n.key, spec["patterns"]
-    nested, values = spec.get("nested", {}), spec.get("values", {})
-    if not (nested or values):
+    nested, values, bare = spec.get("nested", {}), spec.get("values", {}), spec.get("bare", {})
+    if not (nested or values or bare):
         return
     for n, _ in pdx_parse.walk(doc.nodes):
         if n.is_block and n.key in nested:
             for c in n.children:
                 if c.is_block and c.key and not c.key.startswith("@"):
                     yield c.key, nested[n.key]
+        elif n.is_block and n.key in bare:
+            for c in n.children:
+                if c.is_bare and c.key:
+                    yield c.key, bare[n.key]
         elif n.key in values and isinstance(n.value, str):
             yield n.value.strip('"'), values[n.key]
 
