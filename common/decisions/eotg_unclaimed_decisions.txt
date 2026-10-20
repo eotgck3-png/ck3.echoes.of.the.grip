@@ -23,6 +23,10 @@ eotg_decision_unclaimed_raise_colours = {
     picture = {
         reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
     }
+    # Picker decision, alert off as pam_saint_decisions.txt:193-195; the nudge
+    # is the custom action eotg_action_unclaimed_colours_ready
+    # (integration_v1.md §4.2, E1a).
+    should_create_alert = { always = no }
     # AI: OFF while V-U14 is open or passes (the interaction's AI is the live
     # path). V-U14 FAILS: county 36, duchy and above 24 here, ai_potential
     # below becomes { eotg_unclaimed_ai_may_claim = yes }, and the
@@ -44,6 +48,9 @@ eotg_decision_unclaimed_raise_colours = {
         }
     }
 
+    # KEEP IN STEP: is_shown, is_valid and the picker test are mirrored,
+    # selection-free, by eotg_unclaimed_colours_alertable
+    # (eotg_unclaimed_triggers.txt), which drives the top-bar nudge.
     is_valid = {
         custom_description = {
             text = eotg_unclaimed_claim_cooldown_tt
@@ -173,6 +180,9 @@ eotg_decision_unclaimed_debug_release = {
     picture = {
         reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
     }
+    # Debug decisions never alert, even under -debug_mode (integration_v1.md
+    # §4.1; form as bulls_decisions.txt:253).
+    should_create_alert = { always = no }
     ai_check_interval_by_tier = {
         barony = 0
         county = 0
@@ -227,6 +237,9 @@ eotg_decision_unclaimed_debug_readout = {
     picture = {
         reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
     }
+    # Debug decisions never alert, even under -debug_mode (integration_v1.md
+    # §4.1; form as bulls_decisions.txt:253).
+    should_create_alert = { always = no }
     ai_check_interval_by_tier = {
         barony = 0
         county = 0

@@ -1,0 +1,77 @@
+# Integration v1, batch INT1 (top-bar alerts), Frontier side, 2026-10-20
+# Spec: docs/specs/integration_v1.md §4.2, §8. Target file (new):
+# localization/english/eotg_important_actions_l_english.yml (UTF-8 with BOM, bare [x.GetName]).
+# Script: common/important_actions/eotg_important_actions.txt.
+# Voice: vanilla UI voice (important_actions_l_english.yml:166-173 for combined
+# per-title keys, :1479-1482 for a decision alert). Canadian English. Glossary:
+# Region, System, Sector, Port, Bastion; never "County". "Region" is about to be
+# renamed (CB-08), so the intents below say "Region" for now.
+# Per-title keys: the Region is [landed_title.GetName] (bare, never [scope:...]).
+# SUPERSEDED 2026-10-20 (spec rev., E1a): the decision alerts are gone. Establish
+# a Frontier and Raise Your Colours are now nudged by two custom actions with 10
+# keys each (appended below). The county term is now **Shoal** (owner 2026-10-20),
+# not "Region".
+# Never surface eotg_fracture_risk or any strain number (spec §2).
+# Deferred: eotg_action_aug_calibration_lapsed (4 keys) waits for the cybernetics batch.
+
+## eotg_action_frontier_breaking (8 keys)
+eotg_action_frontier_breaking                              # name: "Frontier at Breaking Strain"
+eotg_action_frontier_breaking_label                        # short label: "[landed_title.GetName] is breaking"
+eotg_action_frontier_breaking_desc                         # the settlers of the Frontier in [landed_title.GetName] are at breaking point; unless the strain eases, the Frontier may fail
+eotg_action_frontier_breaking_click                        # click: open the Region [landed_title.GetName]
+eotg_action_frontier_breaking_combined_label               # one line in the expanded group: "[landed_title.GetName]"
+eotg_action_frontier_breaking_combined_group_label         # group label with count: "$NUM$ Frontiers at Breaking Strain"
+eotg_action_frontier_breaking_combined_group_name          # group tooltip title: "Frontiers at Breaking Strain"
+eotg_action_frontier_breaking_combined_group_description   # group tooltip body: these Frontiers are near collapse; find them a founder, keep war away, or invest before they fail
+
+## eotg_action_frontier_founderless (10 keys)
+eotg_action_frontier_founderless                           # name: "Frontier Without a Founder"
+eotg_action_frontier_founderless_label                     # short label: "[landed_title.GetName] has no founder"
+eotg_action_frontier_founderless_desc                      # nobody leads the Frontier in [landed_title.GetName]; strain will climb every year until a founder is appointed
+eotg_action_frontier_founderless_click                     # click: open the Appoint a Founder decision
+eotg_action_frontier_founderless_unimportant               # shown when nobody can lead: there is no adult, free character at your court to appoint
+eotg_action_frontier_founderless_combined_label            # one line in the expanded group: "[landed_title.GetName]"
+eotg_action_frontier_founderless_combined_group_label      # group label with count: "$NUM$ Frontiers Without a Founder"
+eotg_action_frontier_founderless_combined_group_name       # group tooltip title: "Frontiers Without a Founder"
+eotg_action_frontier_founderless_combined_group_description # group tooltip body: these Frontiers have no one to lead the work; appoint a founder before strain breaks them
+eotg_action_frontier_founderless_combined_unimportant      # group, when nobody can lead: no one at your court can take up the work yet
+
+# == Rev. 2026-10-20 (spec §4.2, §8; QA INT1 fix-first) ========================
+# Status of the 18 existing keys above: ALL STILL USED; none to remove.
+#   - breaking (8): unchanged.
+#   - founderless (10): unchanged in script. The _unimportant and
+#     _combined_unimportant texts still match the new trigger
+#     (eotg_frontier_founder_candidate_exists = no: neither you nor any courtier
+#     is an adult and free), so their wording stands. Optional tidy only: they
+#     could say "no adult, free character, yourself included".
+# The two nudges below are single instances (combine_into_one = no) with no
+# `unimportant` block, so the _combined_* and _unimportant keys never show at
+# runtime; they are written for lint parity (spec §8). Keep them short and
+# harmless. No [landed_title...] in these 20: the actions carry no title scope.
+# Voice: vanilla decision-alert tone (important_actions_l_english.yml:1479-1482).
+
+## eotg_action_frontier_establish_ready (10 keys)
+eotg_action_frontier_establish_ready                              # name: "Decision Available: Establish a Frontier"
+eotg_action_frontier_establish_ready_label                        # short label: "Establish a Frontier"
+eotg_action_frontier_establish_ready_desc                         # you hold an Unsettled Shoal, are at peace, and can afford to found a Frontier there
+eotg_action_frontier_establish_ready_click                        # click: open the Establish a Frontier decision
+eotg_action_frontier_establish_ready_combined_label               # parity only: "Establish a Frontier"
+eotg_action_frontier_establish_ready_unimportant                  # parity only: a Frontier cannot be founded right now
+eotg_action_frontier_establish_ready_combined_group_label         # parity only: "Establish a Frontier"
+eotg_action_frontier_establish_ready_combined_group_name          # parity only: "Establish a Frontier"
+eotg_action_frontier_establish_ready_combined_group_description   # parity only: an Unsettled Shoal of yours could be settled
+eotg_action_frontier_establish_ready_combined_unimportant         # parity only: a Frontier cannot be founded right now
+
+## eotg_action_unclaimed_colours_ready (10 keys)
+# LAW AT 866: never "claim filed / registered / recognized"; raising colours is
+# simply taking the Shoal for your realm.
+eotg_action_unclaimed_colours_ready                               # name: "Decision Available: Raise Your Colours"
+eotg_action_unclaimed_colours_ready_label                         # short label: "Raise Your Colours"
+eotg_action_unclaimed_colours_ready_desc                          # an Unclaimed Shoal lies within your reach, and you have the gold and prestige to raise your colours over it
+eotg_action_unclaimed_colours_ready_click                         # click: open the Raise Your Colours decision
+eotg_action_unclaimed_colours_ready_combined_label                # parity only: "Raise Your Colours"
+eotg_action_unclaimed_colours_ready_unimportant                   # parity only: you cannot raise your colours right now
+eotg_action_unclaimed_colours_ready_combined_group_label          # parity only: "Raise Your Colours"
+eotg_action_unclaimed_colours_ready_combined_group_name           # parity only: "Raise Your Colours"
+eotg_action_unclaimed_colours_ready_combined_group_description    # parity only: an Unclaimed Shoal lies within your reach
+eotg_action_unclaimed_colours_ready_combined_unimportant          # parity only: you cannot raise your colours right now

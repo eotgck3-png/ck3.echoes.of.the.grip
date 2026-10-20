@@ -224,6 +224,21 @@ eotg_frontier_holds_establishable = {
     }
 }
 
+# Top-bar nudge for Establish a Frontier (integration_v1.md §4.2, E1a): the
+# decision has a Region picker, so its alert is off and the custom action
+# eotg_action_frontier_establish_ready reads this instead. Selection-free
+# mirror of the decision: is_shown (holds_establishable, which is also the
+# picker test: any held county with eotg_frontier_can_establish), is_valid
+# (gold, peace), plus "no Frontier runs". KEEP IN STEP with
+# eotg_decision_frontier_establish's is_shown / is_valid
+# (eotg_frontier_decisions.txt). Character scope.
+eotg_frontier_establish_alertable = {
+    eotg_frontier_holds_establishable = yes
+    gold >= eotg_frontier_establish_cost_value
+    is_at_war = no
+    eotg_frontier_holds_frontier = no
+}
+
 # Sponsors a Frontier. A sponsor backs one Frontier at a time
 # (eotg_frontier_can_sponsor), and carries the back-reference
 # var:eotg_frontier_sponsoring = that Region, written only by
@@ -367,6 +382,15 @@ eotg_frontier_war_reaches = {
     }
 }
 
+# Strain at the breaking band (COUNTY scope). The one home for the threshold
+# (integration_v1.md §4.2): read by the top-bar alert eotg_action_frontier_breaking,
+# the Abandon AI, the band readout and event .002. Strain is clamped to 0-8
+# (eotg_frontier_effects.txt).
+eotg_frontier_strain_is_breaking = {
+    exists = var:eotg_frontier_strain
+    var:eotg_frontier_strain >= 6
+}
+
 # -- Character scope -----------------------------------------------------------
 eotg_frontier_holds_surveyable = {
     any_held_title = {
@@ -379,6 +403,24 @@ eotg_frontier_holds_buildable = {
     any_held_title = {
         tier = tier_county
         eotg_frontier_infra_room = yes
+    }
+}
+
+# Someone who could lead a Frontier: the character themself, or an adult,
+# free courtier (integration_v1.md §4.2, QA S1). Selection-free: never reads
+# scope:selected_item. The single source for Appoint a Founder's is_valid
+# (eotg_frontier_decisions.txt) and for the founderless alert's `unimportant`
+# (eotg_important_actions.txt). Character scope.
+eotg_frontier_founder_candidate_exists = {
+    OR = {
+        AND = {
+            is_adult = yes
+            is_imprisoned = no
+        }
+        any_courtier = {
+            is_adult = yes
+            is_imprisoned = no
+        }
     }
 }
 

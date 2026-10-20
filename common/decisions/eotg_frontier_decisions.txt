@@ -33,6 +33,10 @@ eotg_decision_frontier_establish = {
     picture = {
         reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
     }
+    # Picker decision, alert off as pam_saint_decisions.txt:193-195; the nudge
+    # is the custom action eotg_action_frontier_establish_ready
+    # (integration_v1.md §4.2, E1a).
+    should_create_alert = { always = no }
     # frontier_v4.md A2.1: every 24 months at every tier (was 60/48)
     ai_check_interval_by_tier = {
         barony = 0
@@ -47,6 +51,9 @@ eotg_decision_frontier_establish = {
         eotg_frontier_holds_establishable = yes
     }
 
+    # KEEP IN STEP: is_shown and is_valid are mirrored, selection-free, by
+    # eotg_frontier_establish_alertable (eotg_frontier_triggers.txt), which
+    # drives the top-bar nudge. Change both together.
     is_valid = {
         custom_description = {
             text = eotg_decision_frontier_establish_gold_tt
@@ -544,7 +551,7 @@ eotg_decision_frontier_abandon = {
         any_held_title = {
             tier = tier_county
             eotg_frontier_is_frontier = yes
-            var:eotg_frontier_strain >= 6
+            eotg_frontier_strain_is_breaking = yes
         }
     }
     ai_will_do = {
@@ -565,6 +572,10 @@ eotg_decision_frontier_appoint_founder = {
     picture = {
         reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
     }
+    # No decision alert (integration_v1.md §4.1): the per-Region custom alert
+    # eotg_action_frontier_founderless replaces it, so a player who toggles
+    # this decision important gets no duplicate (bulls_decisions.txt:253).
+    should_create_alert = { always = no }
     ai_check_interval_by_tier = {
         barony = 0
         county = 0
@@ -580,18 +591,10 @@ eotg_decision_frontier_appoint_founder = {
 
     is_valid = {
         # Someone who could lead: the taker, or an adult, free courtier
+        # (one source, shared with the founderless alert's `unimportant`)
         custom_description = {
             text = eotg_decision_frontier_appoint_founder_candidate_tt
-            OR = {
-                AND = {
-                    is_adult = yes
-                    is_imprisoned = no
-                }
-                any_courtier = {
-                    is_adult = yes
-                    is_imprisoned = no
-                }
-            }
+            eotg_frontier_founder_candidate_exists = yes
         }
     }
 
@@ -696,6 +699,9 @@ eotg_decision_frontier_debug_mark_unsettled = {
     picture = {
         reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
     }
+    # Debug decisions never alert, even under -debug_mode (integration_v1.md
+    # §4.1; form as bulls_decisions.txt:253).
+    should_create_alert = { always = no }
     ai_check_interval_by_tier = {
         barony = 0
         county = 0
@@ -741,6 +747,9 @@ eotg_decision_frontier_debug_tick = {
     picture = {
         reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
     }
+    # Debug decisions never alert, even under -debug_mode (integration_v1.md
+    # §4.1; form as bulls_decisions.txt:253).
+    should_create_alert = { always = no }
     ai_check_interval_by_tier = {
         barony = 0
         county = 0
@@ -785,6 +794,9 @@ eotg_decision_frontier_debug_readout = {
     picture = {
         reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
     }
+    # Debug decisions never alert, even under -debug_mode (integration_v1.md
+    # §4.1; form as bulls_decisions.txt:253).
+    should_create_alert = { always = no }
     ai_check_interval_by_tier = {
         barony = 0
         county = 0
@@ -1201,6 +1213,9 @@ eotg_decision_frontier_debug_mark_unknown = {
     picture = {
         reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
     }
+    # Debug decisions never alert, even under -debug_mode (integration_v1.md
+    # §4.1; form as bulls_decisions.txt:253).
+    should_create_alert = { always = no }
     ai_check_interval_by_tier = {
         barony = 0
         county = 0

@@ -1,0 +1,161 @@
+﻿# -- eotg_important_actions.txt ----------------------------------------------
+# Top-bar alerts for Frontier and Unclaimed Regions
+# (docs/specs/integration_v1.md §4.2, batch INT1). Evaluated by the engine for the player character only
+# (_important_actions.info:13); no on_action, no AI effect (spec E6, §6).
+# Each alert READS the Frontier's signature resource and never moves it
+# (spec §2). Every action sets `icon` to a vanilla alert icon by name
+# (gfx/interface/icons/alerts/<name>.dds; _important_actions.info:7, spec E5).
+#
+# Shape: per held county, combined into one expandable dangerous entry, as
+# vanilla action_wrong_holding_type (00_realm_actions.txt:213-256); title-view
+# click as 00_title_actions.txt:62-68; decision click as
+# action_pam_decision_confession (pam_actions.txt:686-706).
+#
+# Picker decisions (spec E1a): the mod's decisions with a Region picker read
+# scope:selected_item in is_valid_showing_failures_only, which nothing sets
+# when an alert is evaluated, so the engine's "can execute" test fails for
+# them. No action here applies that test to a picker decision; they test
+# selection-free scripted triggers that mirror the decision instead (spec
+# test 6 b3 greps this file for the trigger name, so it appears only in code).
+#
+# Spam budget (spec §4.2): one combined entry per action however many Regions
+# qualify; only Regions the player HOLDS (a backer is never alerted); the
+# entry clears as soon as the condition clears. No soundeffect (default).
+#
+# Deferred: eotg_action_aug_calibration_lapsed (spec §4.2 row 3) waits for the
+# cybernetics files to be free; it belongs at the end of this file.
+# -----------------------------------------------------------------------------
+
+# A Frontier at breaking strain (strain in the breaking band, 6+). Gone when
+# strain falls below the band or the county stops being a Frontier
+# (complete, failed, abandoned).
+eotg_action_frontier_breaking = {
+    type = alert
+    icon = action_title_lost_from_realm_on_succession
+    is_dangerous = yes
+    combine_into_one = yes
+    priority = 460
+
+    check_create_action = {
+        every_held_title = {
+            limit = {
+                tier = tier_county
+                eotg_frontier_is_frontier = yes
+                eotg_frontier_strain_is_breaking = yes
+            }
+            try_create_important_action = {
+                important_action_type = eotg_action_frontier_breaking
+                actor = root
+                landed_title = this
+            }
+        }
+    }
+
+    effect = {
+        scope:landed_title = {
+            open_view_data = {
+                view = title_view_window
+            }
+        }
+    }
+}
+
+# A Frontier with no valid founder (the per-county form of
+# eotg_frontier_holds_founderless). Gone when a valid founder is set or the
+# county stops being a Frontier. The Appoint a Founder decision itself never
+# alerts (should_create_alert = { always = no }), so there is no duplicate.
+# Unimportant when nobody can lead: eotg_frontier_founder_candidate_exists,
+# the same trigger as the decision's is_valid (spec §4.2 QA S1; never the
+# engine's "can execute" test, E1a). Root is the player, as in `effect`
+# (_important_actions.info:22-24; bare character triggers as
+# 00_diarchy_actions.txt:538-541).
+eotg_action_frontier_founderless = {
+    type = alert
+    icon = action_empty_council_position
+    is_dangerous = yes
+    combine_into_one = yes
+    priority = 450
+
+    check_create_action = {
+        every_held_title = {
+            limit = {
+                tier = tier_county
+                eotg_frontier_is_frontier = yes
+                eotg_frontier_has_valid_founder = no
+            }
+            try_create_important_action = {
+                important_action_type = eotg_action_frontier_founderless
+                actor = root
+                landed_title = this
+            }
+        }
+    }
+
+    unimportant = {
+        eotg_frontier_founder_candidate_exists = no
+    }
+
+    effect = {
+        decision:eotg_decision_frontier_appoint_founder = { open_view_data = decision_detail }
+    }
+}
+
+# Decision nudge: Establish a Frontier is ready (spec §4.2, E1a). One instance,
+# not combined, not dangerous; shape exactly action_pam_decision_confession
+# (pam_actions.txt:686-706) except the limit is the selection-free mirror
+# trigger, not the engine's "can execute" test. Gone when a Frontier is established, war
+# starts, gold drops below the cost, or no held Region is Unsettled. Never
+# shows with eotg_action_unclaimed_colours_ready: that one requires
+# eotg_frontier_holds_establishable = no, this one requires yes.
+eotg_action_frontier_establish_ready = {
+    type = alert
+    icon = action_take_decision
+    is_dangerous = no
+    combine_into_one = no
+    priority = 300
+
+    check_create_action = {
+        if = {
+            limit = {
+                eotg_frontier_establish_alertable = yes
+            }
+            try_create_important_action = {
+                important_action_type = eotg_action_frontier_establish_ready
+                actor = root
+            }
+        }
+    }
+
+    effect = {
+        decision:eotg_decision_frontier_establish = { open_view_data = decision_detail }
+    }
+}
+
+# Decision nudge: Raise Your Colours is ready (spec §4.2, E1a). Same shape as
+# above. Gone when colours are raised (the 5-year eotg_unclaimed_colours_cd is
+# set, and the Region is now held and Unsettled, so the Establish nudge takes
+# over), gold or prestige drop, no Unclaimed Region is in reach, or a Frontier
+# runs. Reads the cooldown only; it never sets one.
+eotg_action_unclaimed_colours_ready = {
+    type = alert
+    icon = action_take_decision
+    is_dangerous = no
+    combine_into_one = no
+    priority = 290
+
+    check_create_action = {
+        if = {
+            limit = {
+                eotg_unclaimed_colours_alertable = yes
+            }
+            try_create_important_action = {
+                important_action_type = eotg_action_unclaimed_colours_ready
+                actor = root
+            }
+        }
+    }
+
+    effect = {
+        decision:eotg_decision_unclaimed_raise_colours = { open_view_data = decision_detail }
+    }
+}

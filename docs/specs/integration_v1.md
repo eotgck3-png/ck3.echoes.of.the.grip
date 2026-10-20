@@ -43,7 +43,12 @@ Concepts read nothing. They are data and loc.
   - `_decision_group_types.info:5`;
   - vanilla groups with the flag: `oaths` (`00_decision_group_types.txt:5-9`), `nomad_major` (`:26-30`) and `major` (`:42-46`).
 - Every mod decision today has no `decision_group_type`, so it falls in `decisions` (`_decisions.info:57-60`), which isn't important. **So `should_create_alert` on its own would change nothing.**
-- To alert by default, a decision must also move to an important group. Vanilla pam does exactly that: `decision_group_type = major` plus `should_create_alert` (`dlc_decisions/pam/pam_decisions.txt:4211-4212`).
+- To alert by default, a decision must also move to an important group. ~~Vanilla pam does exactly that: `decision_group_type = major` plus `should_create_alert` (`pam_decisions.txt:4211-4212`).~~ **Corrected 2026-10-20 (QA INT1):** that citation is `pam_proclaim_crusade_age_tenet_decision`, which sets `should_create_alert = { always = no }`. It is a precedent for switching an alert off, not on.
+
+**E1a. A decision with a `select_scope_object` picker can't be relied on to alert (QA INT1, verified 2026-10-20).**
+- `can_execute_decision` includes `is_valid_showing_failures_only` (`_decisions.info:227`). The mod's pickers read `scope:selected_item ?= { … }` there, and nothing sets the selection when an alert is evaluated. So the test fails, and an alert or `unimportant` built on `can_execute_decision` is wrong.
+- Of the ten vanilla `major` picker decisions, six set `should_create_alert = { always = no }`: `bulls_decisions.txt:253,319,473,734`, `pam_saint_decisions.txt:195` (`pam_choose_consecration_site_decision`) and `pam_decisions.txt:4212`. The other four set nothing, and their failures-only blocks read `exists = scope:selected_item` (`pam_decisions.txt:3656,4459`; `pam_antipope_decisions.txt:58`). QA's "every" overstates it. Even so, no vanilla picker decision is known to raise a working alert. The only vanilla decisions with alerts switched on are the tribute missions (`tgp_tribute_mission_decisions.txt:9` and onward). They use `decision_option_list_controller`, and their failures-only block doesn't read a selection.
+- **Rule:** a picker decision gets `should_create_alert = { always = no }`. When it should be nudged, a **custom important action** tests selection-free scripted triggers that mirror the decision's `is_shown` and `is_valid`, and never calls `can_execute_decision`.
 
 **E2. Decision alerts need no new loc.** `action_take_decision` builds its strings from the decision itself:
 - `[decision.GetTitleForPlayer]` and `[decision.GetDescriptionForPlayer]` (`G/localization/english/important_actions_l_english.yml:314-317`);
@@ -90,8 +95,8 @@ All in `common/decisions/`. "Group" means the `decision_group_type` added to the
 
 | Decision | File:line | Group | `should_create_alert` | Why |
 |---|---|---|---|---|
-| `eotg_decision_frontier_establish` | `eotg_frontier_decisions.txt:32` | `major` | `eotg_frontier_holds_frontier = no` | Alert only when the ruler runs no Frontier. One venture at a time is the nudge cadence. |
-| `eotg_decision_unclaimed_raise_colours` | `eotg_unclaimed_decisions.txt:22` | `major` | `eotg_frontier_holds_frontier = no` **and** `eotg_frontier_holds_establishable = no` | Don't push a claim while a held Region is already waiting to be settled; Establish's alert covers that case. `is_valid` already carries the colours cooldown, gold and prestige (`:47-58`). |
+| `eotg_decision_frontier_establish` | `eotg_frontier_decisions.txt:32` | **none** (remove `major`; rev. 2026-10-20) | `always = no` (rev. 2026-10-20) | Picker decision (E1a). The nudge is the custom action `eotg_action_frontier_establish_ready` (§4.2). `major` existed only for E1, so it goes too, and needs-human (1) closes. |
+| `eotg_decision_unclaimed_raise_colours` | `eotg_unclaimed_decisions.txt:22` | **none** (remove `major`; rev. 2026-10-20) | `always = no` (rev. 2026-10-20) | Picker decision (E1a). The nudge is the custom action `eotg_action_unclaimed_colours_ready` (§4.2). |
 | `eotg_decision_frontier_appoint_founder` | `eotg_frontier_decisions.txt:561` | none (stays `decisions`) | `always = no` | The custom alert `eotg_action_frontier_founderless` replaces it, per county. `always = no` stops a duplicate if the player toggles the decision on (vanilla form `bulls_decisions.txt:253`). |
 | `eotg_decision_maintenance_protocol` | `eotg_augmentation_decisions.txt:171` | none | `NOT = { has_character_modifier = eotg_mod_implant_calibrated }` | Only matters if the player opts in. A narrowing filter, no default alert. |
 | `eotg_decision_consult_physician` | `eotg_augmentation_decisions.txt:417` | none | same as Maintenance | As above. |
@@ -102,7 +107,9 @@ All in `common/decisions/`. "Group" means the `decision_group_type` added to the
 - **Pursue Next Stage, Self-Repair, Excision, Embrace the Cascade, Restraints, Sedation, Appoint Warden, Augment Retainer, Partial Removal, Overclock Regression, Remove Implants:** these are personal choices with their own event prompts. Players can still toggle any of them important in the vanilla UI.
 - **Invest, Sponsor, Withdraw, Abandon, Survey, Build, Explore:** routine. Invest is yearly, so an alert for it would be constant noise.
 
-**Owner check:** moving Establish and Raise Colours into `major` also moves them to the top block with big buttons (`major` has `sort_order = 200`, `gui_tags = { big_button }`). This is intended. **needs-human** to confirm the look in game.
+~~**Owner check:** moving Establish and Raise Colours into `major` also moves them to the top block with big buttons.~~ **Withdrawn 2026-10-20:** both stay in the default `decisions` group (E1a).
+
+**Comment fix (QA INT1, should-fix 3):** the comments at `eotg_frontier_decisions.txt:36-39` and `eotg_unclaimed_decisions.txt:26-29` cite `pam_decisions.txt:4211-4212` as alert precedent. Replace them with: "picker decision, alert off as `pam_saint_decisions.txt:193-195`; the nudge is the custom action `eotg_action_...` (integration_v1.md §4.2, E1a)".
 
 ### 4.2 INT1: custom important actions
 
@@ -111,7 +118,9 @@ File: `common/important_actions/eotg_important_actions.txt` (new folder). Vanill
 | Key | `type` | `icon` (vanilla, reused) | `is_dangerous` | `combine_into_one` | `priority` | Shows exactly when | Gone when | `unimportant` | Click (`effect`) |
 |---|---|---|---|---|---|---|---|---|---|
 | `eotg_action_frontier_breaking` | `alert` | `action_title_lost_from_realm_on_succession` | yes | yes | 460 | per held county: `tier = tier_county`, `eotg_frontier_is_frontier = yes`, `eotg_frontier_strain_is_breaking = yes` | strain falls below the breaking band, or the Frontier completes, fails or is abandoned | none | `scope:landed_title = { open_view_data = { view = title_view_window } }` (`00_title_actions.txt:62-68`) |
-| `eotg_action_frontier_founderless` | `alert` | `action_empty_council_position` | yes | yes | 450 | per held county: `tier = tier_county`, `eotg_frontier_is_frontier = yes`, `eotg_frontier_has_valid_founder = no` (the per-county form of `eotg_frontier_holds_founderless`, `eotg_frontier_triggers.txt:346-352`) | a valid founder is set, or the county stops being a Frontier | `NOT = { can_execute_decision = eotg_decision_frontier_appoint_founder }` (nobody can lead) | `decision:eotg_decision_frontier_appoint_founder = { open_view_data = decision_detail }` (E3) |
+| `eotg_action_frontier_founderless` | `alert` | `action_empty_council_position` | yes | yes | 450 | per held county: `tier = tier_county`, `eotg_frontier_is_frontier = yes`, `eotg_frontier_has_valid_founder = no` (the per-county form of `eotg_frontier_holds_founderless`, `eotg_frontier_triggers.txt:346-352`) | a valid founder is set, or the county stops being a Frontier **rev. 2026-10-20 (QA S1):** `eotg_frontier_founder_candidate_exists = no` (nobody can lead). Never `can_execute_decision` (E1a). Scope: root is the player, as in `effect` (`_important_actions.info:22-24`; bare character triggers as `00_diarchy_actions.txt:538-541`) | `decision:eotg_decision_frontier_appoint_founder = { open_view_data = decision_detail }` (E3) |
+| `eotg_action_frontier_establish_ready` (new 2026-10-20) | `alert` | `action_take_decision` | no | **no** (one instance, `actor = root` only) | 300 | `eotg_frontier_establish_alertable = yes` (below) | a Frontier is established (`holds_frontier` turns yes), war starts, gold drops below the cost, or no held Shoal is Unsettled | none | `decision:eotg_decision_frontier_establish = { open_view_data = decision_detail }` |
+| `eotg_action_unclaimed_colours_ready` (new 2026-10-20) | `alert` | `action_take_decision` | no | **no** | 290 | `eotg_unclaimed_colours_alertable = yes` (below) | colours are raised (the 5-year `eotg_unclaimed_colours_cd` is set, and the Shoal is now held and Unsettled, so the Establish alert takes over), gold or prestige drop, no Unclaimed Shoal is in reach, or a Frontier runs | none | `decision:eotg_decision_unclaimed_raise_colours = { open_view_data = decision_detail }` |
 | `eotg_action_aug_calibration_lapsed` | `alert` | `action_take_decision` | no | no | 100 | `has_trait = eotg_cybernetics`, `NOT = { has_character_modifier = eotg_mod_implant_calibrated }`, `can_execute_decision = eotg_decision_maintenance_protocol`, and `NOT = { is_important_decision = eotg_decision_maintenance_protocol }` (no duplicate if the player toggled it) | calibration is re-applied by Maintenance or Consult the Physician, or the trait is lost | none | `decision:eotg_decision_maintenance_protocol = { open_view_data = decision_detail }` |
 
 **Spam budget:**
@@ -122,10 +131,33 @@ File: `common/important_actions/eotg_important_actions.txt` (new folder). Vanill
 
 **Considered and rejected:**
 - **"An augmentation offer is open."** Offers arrive as events or the interaction `eotg_aug_offer_augmentation_interaction`. Both already notify, and no persistent "offer open" state exists to read. An alert would duplicate the popup.
-- **"A Frontier is claimable."** This is Raise Colours' decision alert (§4.1). A second custom action would double it.
+- **"A Frontier is claimable."** Covered by `eotg_action_unclaimed_colours_ready` (rev. 2026-10-20; it replaces the decision alert).
+
+**Shape of the two decision-nudge actions (rev. 2026-10-20).**
+- **Vanilla `action_take_decision`** (`00_action_take_decision_or_interaction.txt:5-47`):
+  - `type = alert`, no `icon` (the key is the icon name, `_important_actions.info:7`) and no `priority` (default -1, `:9`);
+  - an `every_decision` loop;
+  - its click falls through to `scope:decision = { open_view_data = decision_detail }` (`:43-45`).
+- **A fixed decision is opened by name**, as in `pam_actions.txt:686-706` and `tgp_actions.txt:128`. `action_pam_decision_confession` has:
+  - `type = alert` and `icon = action_take_decision`;
+  - an `if` wrapped around `try_create_important_action = { important_action_type = ... actor = root }`;
+  - `effect = { decision:pam_decision_confession = { open_view_data = decision_detail } }`.
+- **The mod copies the pam form exactly**, with one difference: the `limit` is the selection-free `*_alertable` trigger, not `can_execute_decision`.
+- **Priorities:** 300 and 290 sit under the two dangerous Frontier alerts (460 and 450; dangerous alerts sort first anyway, `:9`) and above the vanilla decision alert (-1).
+- **Spam:** at most one entry each, and it stays until its condition clears. The two never show together: Colours requires `holds_establishable = no`, and Establish requires it to be yes.
 - **"Strained" (strain 4-5).** Too frequent. Breaking only.
 
-**New scripted trigger** (county scope), in `common/scripted_triggers/eotg_frontier_triggers.txt`:
+**New scripted triggers (rev. 2026-10-20, QA S1/S2).** All are selection-free: they never read `scope:selected_item`.
+
+| Key | File | Scope | Body | Notes |
+|---|---|---|---|---|
+| `eotg_frontier_founder_candidate_exists` | `eotg_frontier_triggers.txt`, directly above `eotg_frontier_holds_founderless` | character | the `OR` now at `eotg_frontier_decisions.txt:595-605`: `OR = { AND = { is_adult = yes is_imprisoned = no } any_courtier = { is_adult = yes is_imprisoned = no } }` | **Single source.** Appoint a Founder's `is_valid` becomes `custom_description = { text = eotg_decision_frontier_appoint_founder_candidate_tt eotg_frontier_founder_candidate_exists = yes }`. The tooltip key doesn't change. |
+| `eotg_frontier_establish_alertable` | `eotg_frontier_triggers.txt`, character-scope block | character | `eotg_frontier_holds_establishable = yes` (`is_shown`, `:55-57`); `gold >= eotg_frontier_establish_cost_value` and `is_at_war = no` (`is_valid`, `:59-71`); `eotg_frontier_holds_frontier = no` (the old `should_create_alert` filter) | A mirror. `holds_establishable` also covers the picker test (`:73-79`): it is `any_held_title` with `eotg_frontier_can_establish`. Put keep-in-step comments both ways, on this trigger and on the decision's `is_valid`. |
+| `eotg_unclaimed_colours_alertable` | `common/scripted_triggers/eotg_unclaimed_triggers.txt`, after `eotg_unclaimed_colours_ready` | character (root must be the actor; in `check_create_action` root is the player) | `eotg_unclaimed_can_claim = yes`; `any_in_global_list = { variable = eotg_unclaimed_counties eotg_unclaimed_is_unclaimed = yes holder ?= { eotg_is_unclaimed_holder = yes } eotg_unclaimed_in_reach = { ACTOR = root } }` (`is_shown` plus the picker test, `eotg_unclaimed_decisions.txt:43-48,64-71`); `eotg_unclaimed_colours_ready = yes`, `gold >= eotg_unclaimed_claim_gold_value` and `prestige >= eotg_unclaimed_claim_prestige_value` (`is_valid`, `:50-62`); `eotg_frontier_holds_frontier = no` and `eotg_frontier_holds_establishable = no` (the old filter) | A mirror, with the same keep-in-step comments. The `eotg_unclaimed_colours_cd` variable stays the cooldown authority; the alert only reads it. |
+
+**Trigger-file order fix (QA should-fix 4):** in `eotg_frontier_triggers.txt:385-395`, `eotg_frontier_strain_is_breaking`, a county-scope trigger, sits between the comment `# frontier_v4.md A4.2: holds a Frontier with no valid founder ...` and `eotg_frontier_holds_founderless`. Move it, with its comment, into the county-scope block above `# -- Character scope --`. The A4.2 comment must sit directly on `eotg_frontier_holds_founderless`.
+
+**Existing trigger** (county scope), in `common/scripted_triggers/eotg_frontier_triggers.txt`:
 
 | Key | Body | Notes |
 |---|---|---|
@@ -214,10 +246,10 @@ No `replace_path`. No `replace/` file in this spec: the `game_concept_region` an
 
 ## 6. Wiring
 
-- **Alerts:** no on_action. The engine evaluates `check_create_action` for the player (E6). Decision alerts go through vanilla `action_take_decision` (E1, E2) and need no mod file.
+- **Alerts:** no on_action. The engine evaluates `check_create_action` for the player (E6). No decision alert remains (rev. 2026-10-20, E1a): the two decision nudges are custom actions.
 - **Concepts:** no wiring. They are reachable from any loc string and from the encyclopedia.
 - **Tiers:** all three actions and both decision alerts work at every tier the decision or system exists at (county and above for Frontier; any ruler for calibration). Nothing is gated to emperor level.
-- **Cooldowns:** none added. The alerts read the decisions' own `is_valid` and `cooldown` through `can_execute_decision`, so cooldown authority stays where it already is.
+- **Cooldowns:** none added. The alerts read the cooldown state that already exists (the `eotg_unclaimed_colours_cd` variable through `eotg_unclaimed_colours_ready`; Maintenance through `can_execute_decision`) and never set one, so cooldown authority stays where it is.
 
 ## 7. Vanilla precedent (cited)
 
@@ -225,7 +257,9 @@ No `replace_path`. No `replace/` file in this spec: the `game_concept_region` an
 |---|---|
 | Decision alert pipeline | `common/important_actions/00_action_take_decision_or_interaction.txt:5-45` |
 | Importance through the group | `_decisions.info:5-6`; `common/decision_group_types/_decision_group_types.info:5`; `00_decision_group_types.txt:42-46` |
-| `major` + `should_create_alert` | `common/decisions/dlc_decisions/pam/pam_decisions.txt:4211-4212` |
+| ~~`major` + `should_create_alert`~~ (withdrawn) | `pam_decisions.txt:4211-4212` is an `always = no` case (E1) |
+| Picker decision, alert off | `pam_saint_decisions.txt:193-195`; `bulls_decisions.txt:251-253` (E1a) |
+| Fixed-decision nudge action | `pam_actions.txt:686-706`, `:1170-1189`; `tgp_actions.txt:128` |
 | `should_create_alert = { always = no }` | `common/decisions/dlc_decisions/pam/bulls_decisions.txt:253` |
 | Custom alert that opens a decision | `common/important_actions/pam_actions.txt:686-706`; loc `localization/english/important_actions_l_english.yml:1479-1482` |
 | Per-title, combined, dangerous alert | `common/important_actions/00_realm_actions.txt:213-256`; loc `important_actions_l_english.yml:166-173` |
@@ -238,7 +272,7 @@ No `replace_path`. No `replace/` file in this spec: the `game_concept_region` an
 
 ## 8. Loc surface
 
-**Decision alerts (§4.1):** no new keys (E2).
+**Decision alerts (§4.1):** none remain (rev. 2026-10-20, E1a). The two decision nudges are now the custom actions below.
 
 **Custom actions (§4.2)**, in `eotg_important_actions_l_english.yml`, following the vanilla tone (`important_actions_l_english.yml:166-173,1479-1482`):
 
@@ -246,16 +280,18 @@ No `replace_path`. No `replace/` file in this spec: the `game_concept_region` an
 |---|---|
 | `eotg_action_frontier_breaking` | `<k>`, `<k>_label`, `<k>_desc`, `<k>_click`, `<k>_combined_label`, `<k>_combined_group_label` (uses `$NUM$`), `<k>_combined_group_name`, `<k>_combined_group_description` |
 | `eotg_action_frontier_founderless` | the same 8, plus `<k>_unimportant` and `<k>_combined_unimportant` |
+| `eotg_action_frontier_establish_ready` (new) | all 10 suffixes from the lint convention (`docs/tools/eotg_lint_loc_conventions.json` `important_actions`; `_important_actions.info:35-46`). The `_combined_*` and `_unimportant` ones never show at runtime (`combine_into_one = no`, no `unimportant`), but they are written for lint parity. Intent: "Decision Available: Establish a Frontier"; you hold an Unsettled Shoal and can afford to settle it. |
+| `eotg_action_unclaimed_colours_ready` (new) | the same 10. Intent: "Decision Available: Raise Your Colours"; an Unclaimed Shoal lies within reach. LAW AT 866: never "claim filed / recognized". |
 | `eotg_action_aug_calibration_lapsed` | `<k>`, `<k>_label`, `<k>_desc`, `<k>_click` |
 
-That makes 22 keys. In per-title keys the title is `[landed_title.GetName]` (bare, never `[scope:`).
+That makes 42 keys: 8 + 10 + 10 + 10 + 4. The previous 22 is superseded. In per-title keys the title is `[landed_title.GetName]` (bare, never `[scope:`).
 
 **Concepts (§4.3)**, in `eotg_game_concepts_l_english.yml`: 22 × (`game_concept_<k>` + `_desc`) + 16 alias names = **60 keys**.
 
 **Voice:**
 - Alerts are UI voice (vanilla's), not character voice, so there are no `_seamless` variants. A Seamless voice for alerts is deferred (§10).
 - Canadian English throughout (colour, favour, -ize).
-- Glossary terms throughout: Region, System, Sector, Port, Bastion.
+- Glossary terms throughout: **Shoal** (the county tier, owner 2026-10-20; it replaces "Region"), System, Sector, Port, Bastion.
 - Never "County".
 
 **`replace/` flags (CB-08, not this spec):**
@@ -353,8 +389,10 @@ The localizer lists every converted key in its handoff.
    - `grep -rn '\[region|E\]' localization`.
 5. **Concept parity:** every key and alias in `eotg_game_concepts.txt` has `game_concept_<x>`, and every non-alias key has `_desc` (QA script: compare the two lists).
 6. **In game (sub-mod or temporary map; `docs/qa/HOW_TO_TEST_IN_GAME.md`):**
-   - a. A ruler with an Unsettled Region, enough gold, at peace and with no Frontier sees a "Decision Available: Establish a Frontier" alert. After establishing, the alert is gone.
-   - b. With an Unclaimed Region in reach and the cooldown ready, while holding no Frontier and no establishable Region, the Raise Your Colours alert shows. It doesn't show while a held Region is establishable.
+   - a. A ruler with an Unsettled Shoal, enough gold, at peace and with no Frontier sees `eotg_action_frontier_establish_ready` exactly once. Clicking it opens the Establish decision. After establishing, the alert is gone. Toggling the decision "important" adds no second alert.
+   - b. With an Unclaimed Shoal in reach and the cooldown ready, while holding no Frontier and no establishable Shoal, `eotg_action_unclaimed_colours_ready` shows, and clicking it opens Raise Your Colours. After raising colours it goes, and (a) appears instead. It never shows alongside (a).
+   - b2. A founderless Frontier, with an adult free courtier at court, shows the founderless entry as **important** (not greyed). With no candidate (a child ruler and no adult courtiers), it shows as unimportant.
+   - b3. `grep -n 'can_execute_decision' common/important_actions/eotg_important_actions.txt` matches only the calibration action (Maintenance has no picker).
    - c. `-debug_mode`:
      - set a Frontier's founder to none: one dangerous "founderless" group entry appears;
      - make two Frontiers founderless: the group shows 2;
@@ -382,3 +420,23 @@ The localizer lists every converted key in its handoff.
 - needs-loc: 22 action keys (§8) after INT1a; 60 concept keys (§8) after INT2a and lore review; INT3 linking pass (§12) after INT2 passes QA
 - needs-lore: review the 12 lore-flagged concept rows and content notes in §4.3 (Augmentation, Neurofractured, Seamless, Augmentation Law, Frontier, Backer, Unclaimed Region, Unsworn, PMC, Corporation, Cartel, Trade Oligarchy) against LAW AT 866 and the never-name lists
 - needs-human: (1) confirm Establish and Raise Your Colours in the vanilla `major` decision block (big buttons, top of list); (2) the CB-08 rename of vanilla `game_concept_region` to avoid two "Region" encyclopedia entries; (3) the orchestrator adds `common/important_actions/` and `common/game_concepts/` to the CLAUDE.md placement table
+
+### HANDOFF (eotg-scripter, INT1 Frontier/Unclaimed side, 2026-10-20)
+- status: partial
+- built: §4.1 rows for Establish and Raise Your Colours (`major` + `should_create_alert`), Appoint a Founder and the six Frontier/Unclaimed debug decisions (`always = no`); §4.2 `eotg_action_frontier_breaking` and `eotg_action_frontier_founderless` in `common/important_actions/eotg_important_actions.txt`; `eotg_frontier_strain_is_breaking` with three call sites switched (decisions, effects, and event `.002`, which also used the literal).
+- deferred (cybernetics files in use by another scripter): §4.2 `eotg_action_aug_calibration_lapsed`; the §4.1 rows for Maintenance Protocol and Consult Physician; the debug rows in `eotg_government_debug_decisions.txt` and `eotg_aug_kingpin_decisions.txt`. Spec V1 (`is_important_decision` with a bare key) still applies to the deferred alert.
+- test-in-game: ~~`can_execute_decision` with no item picked~~ superseded (2026-10-20 rework): the alerts now use selection-free mirror triggers and no `can_execute_decision`; run tests 6a to 6d and 6f.
+- needs-loc: 18 keys, `docs/specs/build/INT1_loc_keys.txt`.
+
+### HANDOFF (eotg-architect, INT1 QA fix-first, 2026-10-20)
+- status: done
+- next: eotg-scripter
+- ask: Fix INT1 per the rev. 2026-10-20 rows in §3 (E1a), §4.1 and §4.2. The build list:
+  1. Establish and Raise Your Colours: remove `decision_group_type = major`, set `should_create_alert = { always = no }`, and correct the comments (`eotg_frontier_decisions.txt:36-39`, `eotg_unclaimed_decisions.txt:26-29`).
+  2. Add the triggers `eotg_frontier_founder_candidate_exists` (and use it in Appoint a Founder's `is_valid`), `eotg_frontier_establish_alertable` and `eotg_unclaimed_colours_alertable`.
+  3. The founderless action's `unimportant` becomes `eotg_frontier_founder_candidate_exists = no`.
+  4. Add `eotg_action_frontier_establish_ready` (300) and `eotg_action_unclaimed_colours_ready` (290), in the `action_pam_decision_confession` shape.
+  5. Move `eotg_frontier_strain_is_breaking` into the county-scope block.
+- files: docs/specs/integration_v1.md
+- needs-loc: 20 new keys (2 actions x 10 suffixes, §8), using Shoal; update `docs/specs/build/INT1_loc_keys.txt`
+- needs-human: none new (the `major` big-button question is withdrawn)

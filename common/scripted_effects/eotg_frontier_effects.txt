@@ -629,7 +629,7 @@ eotg_frontier_legibility_tooltip_effect = {
         }
         # Strain
         if = {
-            limit = { var:eotg_frontier_strain >= 6 }
+            limit = { eotg_frontier_strain_is_breaking = yes }
             custom_tooltip = eotg_frontier_band_strain_breaking_tt
         }
         else_if = {

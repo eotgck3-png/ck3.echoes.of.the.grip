@@ -81,6 +81,31 @@ eotg_unclaimed_colours_ready = {
     NOT = { has_variable = eotg_unclaimed_colours_cd }
 }
 
+# Character (the actor; root in check_create_action is the player): top-bar
+# nudge for Raise Your Colours (integration_v1.md §4.2, E1a). The decision has
+# a Region picker, so its alert is off and the custom action
+# eotg_action_unclaimed_colours_ready reads this instead. Selection-free mirror
+# of the decision: is_shown plus the picker test (an Unclaimed Region in reach,
+# held by the placeholder), is_valid (cooldown, gold, prestige), plus "no
+# Frontier runs and no held Region waits to be settled" (Establish's nudge
+# covers that, so the two never show together). Reads the cooldown; the
+# variable eotg_unclaimed_colours_cd stays its one authority. KEEP IN STEP with
+# eotg_decision_unclaimed_raise_colours (eotg_unclaimed_decisions.txt).
+eotg_unclaimed_colours_alertable = {
+    eotg_unclaimed_can_claim = yes
+    any_in_global_list = {
+        variable = eotg_unclaimed_counties
+        eotg_unclaimed_is_unclaimed = yes
+        holder ?= { eotg_is_unclaimed_holder = yes }
+        eotg_unclaimed_in_reach = { ACTOR = root }
+    }
+    eotg_unclaimed_colours_ready = yes
+    gold >= eotg_unclaimed_claim_gold_value
+    prestige >= eotg_unclaimed_claim_prestige_value
+    eotg_frontier_holds_frontier = no
+    eotg_frontier_holds_establishable = no
+}
+
 # Character (an AI actor): the AI throttle (spec §8.4). Not a cooldown: the
 # per-actor one is eotg_unclaimed_colours_ready; eotg_unclaimed_ai_gap is
 # the worldwide one, set only in eotg_unclaimed_claim_effect.
