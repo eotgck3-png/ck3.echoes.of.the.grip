@@ -1,0 +1,73 @@
+# RETURN TO ME TO CONTINUE
+
+Parked on 2026-10-20. When you come back, answer the decisions below (a word each is enough) and say "continue". I'll pick up from here.
+
+Full report: [`docs/qa/system_investigation_2026-10-18/REPORT.md`](docs/qa/system_investigation_2026-10-18/REPORT.md). The taskboard entry is **CB-60** in `circlebackTaskboard.md`.
+
+---
+
+## Where we stopped: the system investigation (2026-10-18)
+
+Six read-only reviews found about **40 gaps**. None of them crashes the game or breaks an invariant.
+
+**What is clean:**
+- on_action layering is additive only.
+- No system reads another system's variables by accident.
+- No pulse loops over every character or county.
+- Old saves stay safe.
+- Where we differ from vanilla, it was deliberate and still holds. Example: Frontier is not a vanilla great project, because those are per province and DLC-gated.
+
+### Bugs a play-test would hit (report §1, 18 mechanical fixes)
+
+- **C1:** A ruler in an enemy dungeon still gets cybernetics events, including Court Massacre against their own court.
+- **C2:** About 25 tier events fire 1 to 30 days after they're rolled and never re-check the tier. A ruler who just fell to Neurofractured can still get an Overclocked event.
+- **S3:** The AI flips its augmentation law License ↔ Favor every 10 years and pays prestige each time. Each law scores 0 while it's held.
+- **Smaller items:**
+  - Unsworn placeholders get cybernetics liege events (X1).
+  - A ruler-designer character may start without their government's succession law (X3).
+  - A vassal's Frontier takes no war strain until occupied (F1).
+  - A completed Frontier's new ruler ignores clergy-gender and realm gender laws (F3).
+  - The kingpin story passes to a child heir (S5).
+
+### Needs a design ruling (report §2, architect first)
+
+- **S1 (the one HIGH):** The Ban doesn't cover retainer or knight installs, which is how the AI mostly augments. In practice the law barely does anything.
+- **S2:** The court surgeon can operate on people who aren't at your court.
+- **S4:** A liege can be handed a crime reason against someone they chose to augment.
+- **F2:** A sponsor keeps paying for a Frontier after an enemy takes it.
+- Smaller design notes (C3, C4, C6 to C10, S7 to S9, S13) are in the report.
+
+### Vanilla integration (report §5, ranked)
+
+1. **Top-bar alerts** for Frontier and augmentation opportunities. Cheap, no art.
+2. **Encyclopedia pages** (game concepts) for Augmentation, Frontier, Unsworn and the four governments. Cheap, no art.
+3. **Secrets and blackmail** for illegal augmentation. These would also fix S1 and S4 the vanilla way.
+4. **Memories, game rules,** and later **men-at-arms, a clinic court amenity, Frontier legends.**
+
+---
+
+## Decisions I need from you
+
+1. **Fix batch I1:** may I run the 18 report §1 fixes (mostly missing guards, plus rescoring the law AI) before your next in-game test session? *Recommended: yes.*
+2. **Kingpin under the Cartel (X2):** the kingpin story has no government check. A Cartel ruler, who is the crime boss, gets "a criminal boss moves in", and once Cartel G2 lands its dread gains would feed tribute. **Block it, make it rarer, or accept it?** (It's also CB-57 question 8.)
+3. **The feudal flag (P1):** our four governments drop vanilla's `government_is_feudal`, so about 370 vanilla checks for feudal rulers never see them. **Keep them distinct, or give some of them the flag?**
+4. **Integrations:** which ones do you want? *Recommended: start with top-bar alerts and encyclopedia pages.*
+5. **Architect ruling pass on report §2:** go ahead in parallel with the fix batch? *Recommended: yes.*
+
+## Older decisions still open (the taskboard has details)
+
+| Item | Question |
+|---|---|
+| CB-57 | The Cartel G2 design: 7 questions plus X2 above. Building waits on the answers. |
+| CB-58 | Fabricators or printers at 866: keep the ban, or allow simple ones? |
+| CB-59 | 6 decision-fired Frontier events still show first-person text to Seamless rulers: hide them, or give them Seamless text? Also confirm my .004/.005 ruling. |
+| CB-53 | Government succession vs. the governments' fiction: rename the laws, or build elective laws? |
+| CB-51, CB-52 | nr.004.e cover-up text; whether Seamless characters can regain personality traits. |
+
+## In-game checks waiting on you
+
+- **CB-44:** the test-session plan, `docs/qa/IN_GAME_SESSION_PLAN.md`.
+- **CB-49:** the governments.
+- **The Frontier checks:** `docs/specs/frontier_v5.md` §10.
+- **T14:** gates Frontier batch 3, the Unsworn lobby block.
+- **New from the investigation:** report §3. These get added to the session plan when we continue.
