@@ -488,6 +488,11 @@ before it shipped:
 - Override **by key in a differently named file** (`eotg_vanilla_overrides_triggers.txt`), never by vanilla's
   path, which would replace the whole file.
 - Re-copy after every CK3 update (§2).
+- **Every override on the re-copy list** (diff each against vanilla after a patch):
+  - `herders_and_tributary_constraints` in `common/scripted_triggers/eotg_vanilla_overrides_triggers.txt`;
+  - `is_valid_for_hybridising_trigger` in `common/scripted_triggers/eotg_race_vanilla_overrides_triggers.txt`
+    (2026-11-03, race framework): vanilla `00_cultural_triggers.txt:473-514` plus one `# EOTG` clause that blocks
+    hybrids across heritage groups. Confirm with `Overriding entry 'is_valid_for_hybridising_trigger'` (race T3).
 - Tiger reports `strict-scopes ... expects scope:attacker` once per caller on the copied block. That's benign:
   the engine sets the scope, and Tiger simply doesn't report on vanilla's own copy.
 
