@@ -28,6 +28,12 @@ TRAIT_FREQ = assume('trait_freq', {
 MORTALITY = assume('ruler_mortality_per_year', 0.035, 'mean reign about 28 years')
 WAR_START = assume('war_start_per_year', 0.15, 'a realm enters a war 0.15/yr')
 WAR_END = assume('war_end_per_year', 0.5, 'wars last about 2 years; ~23% of years at war')
+# Per-owner war state (H2a fix 1). The script ticks on each owner's OWN is_at_war; a
+# vassal is not at war because its liege is (common/scripted_triggers/
+# eotg_frontier_triggers.txt:383-386 tells a liege's war from one's own, after vanilla
+# governance_on_actions.txt:1038-1039). A vassal's own wars (internal wars, its own
+# claims) start rarely: 0.015/(0.015+0.5) is about 3% of years, the local audit's figure.
+VWAR_START = assume('vassal_own_war_start_per_year', 0.015, 'a vassal starts its own war 0.015/yr, ending at war_end_per_year: ~3% of years')
 BATTLES_PER_WAR_YEAR = assume('battles_per_war_year', 2.0, 'Poisson mean, as war leader')
 BATTLE_WIN = assume('battle_win_chance', 0.5, 'even odds')
 # ASSUMPTION: yearly gold income by highest held tier, and the share an AI keeps
@@ -49,6 +55,7 @@ class World:
         self.vtiers = np.array(vt)
         self.nv = len(vt)
         self.at_war = np.zeros(runs, bool)
+        self.v_at_war = np.zeros((runs, self.nv), bool)
         self.top_gold = np.full(runs, INCOME[self.top_tier] * 1.0)
         self.v_gold = np.tile(np.array([INCOME[t] for t in vt], float), (runs, 1))
         self.top_traits = self.sample_traits((runs,))
@@ -61,6 +68,9 @@ class World:
         start = self.rng.random(self.runs) < WAR_START
         end = self.rng.random(self.runs) < WAR_END
         self.at_war = np.where(self.at_war, ~end, start)
+        vstart = self.rng.random((self.runs, self.nv)) < VWAR_START
+        vend = self.rng.random((self.runs, self.nv)) < WAR_END
+        self.v_at_war = np.where(self.v_at_war, ~vend, vstart)
 
     def step_gold(self):
         self.top_gold += INCOME[self.top_tier] * SAVE_SHARE

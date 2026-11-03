@@ -8,15 +8,20 @@ A Monte Carlo harness that models the mod's resource economies and progression s
 ## Rerun it
 
 ```bash
-pip install numpy matplotlib          # once
-python docs/tools/sim/run_all.py                      # full grid: 10,000 runs x 100 years, seed 20261103
+pip install numpy matplotlib          # once; the only dependencies (Python 3.10+)
+python docs/tools/sim/run_all.py --checks --hostile   # every number in REPORT.md (about 6.5 min locally)
 python docs/tools/sim/run_all.py --runs 500           # quick look (about 25 s)
+python docs/tools/sim/run_all.py --only void          # one part: gov, cyber, frontier, proposals, void
 python docs/tools/sim/exploit_scan.py --md out.md     # static exploit scan
 ```
 
 - `run_all.py` writes `results.json` and one PNG chart per system into
-  `docs/qa/mechanics_sim_2026-11-03/` (or `--out DIR`). The full grid takes about 9 minutes
-  on 4 cores.
+  `docs/qa/mechanics_sim_2026-11-03/` (or `--out DIR`). The full run with `--checks --hostile`
+  takes about 6.5 minutes on the local machine (about 3 minutes on the 4-core cloud container).
+  `results.json` is gitignored: it is deterministic from the seed.
+- `--checks` adds the 2,000-run side checks REPORT quotes and the Trade Oligarchy war-share
+  sweep; `--hostile` adds the Frontier hostile-world variant (REPORT L2). `--only` limits the
+  run to some parts (the charts are drawn only for a full grid; `results.json` holds what ran).
 - The seed is fixed, so two runs of the same tree give the same numbers. **Rerun after any
   tuning change:** every model reads its numbers from the script at start.
 
@@ -34,6 +39,8 @@ python docs/tools/sim/exploit_scan.py --md out.md     # static exploit scan
 - `ai` follows each decision's `ai_will_do` and `ai_check_interval` as written;
 - `greedy` is a player at the top (vassals stay AI): it takes every action that raises its resource as soon as it is valid and affordable, and never spends the resource on a sink;
 - `greedy_all` makes every ruler in the realm greedy, an upper bound on pressure (for example, every director courting the board at once).
+
+**War state is per owner:** the top and each vassal have their own war process (a vassal is not at war because its liege is; `eotg_frontier_triggers.txt:383-386`).
 
 **Realm sizes:** 1, 4, 8 and 16 vassals of the same government. 1 and 4 sit under a duke; 8 and 16 under a king, a quarter of them dukes.
 

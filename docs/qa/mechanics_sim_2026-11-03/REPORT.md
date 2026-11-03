@@ -4,7 +4,11 @@
 
 **Base:** `origin/v2-space-map` at `4a6191e`. It already holds Part C with the local session's addendum fixes: the scaled modifiers re-applied on every change; Court the Board erosion at most once a year per CEO, and only while the director's projected influence exceeds the CEO's; Corner the Market draining each Prince at most once a year. **The models read those fixes from the script; none is assumed.**
 
-**Runs:** 10,000 runs × 100 game years per system × realm size (1, 4, 8, 16 vassals of the same government) × policy, seed 20261103. Frontier: 10,000 projects per type and holder kind. The whole grid takes about 2.5 minutes.
+**Runs:** 10,000 runs × 100 game years per system × realm size (1, 4, 8, 16 vassals of the same government) × policy, seed 20261103. Frontier: 10,000 projects per type and holder kind.
+
+**Reproduce every number here:** `python docs/tools/sim/run_all.py --checks --hostile` (numpy and matplotlib). About 6.5 minutes on the local machine; about 3 minutes on the 4-core cloud container. `--checks` adds the 2,000-run side checks and the war-share sweep; `--hostile` adds the Frontier hostile world (L2). `results.json` is not committed (gitignored): it is deterministic from the seed.
+
+**Revised 2026-11-03 (H2a), after the local audit reran the sim:** vassals now carry their own war state (they had taken the top's), the cybernetics development sample is conditioned on the initiation gate, the Cartel walk-off is measured over 10 years, and P6 is marked not simulated. M1, M2, M3 and M4 are rewritten; the recommendation table below is new.
 
 **Policies:**
 - `ai` follows `ai_will_do` and `ai_check_interval` as written.
@@ -13,7 +17,21 @@
 
 **Read the numbers as comparisons.** Wars, gold, deaths, opinions and vanilla voting are proxies (the ASSUMPTION list, Appendix C). A before/after difference under the same assumptions is trustworthy. An absolute equilibrium is indicative.
 
-**Charts:** `chart_<system>.png` in this folder, one per system (AI policy, median with a 10–90% band). **Static exploit scan:** `exploit_scan.md`. **Proposed tuning:** `proposed_tuning.patch`, not applied; tuning is the owner's call. `git apply --check` passes on `4a6191e`.
+**Charts:** `chart_<system>.png` in this folder, one per system (AI policy, median with a 10–90% band). **Static exploit scan:** `exploit_scan.md`. **Proposed tuning:** `proposed_tuning.patch`, not applied; tuning is the owner's call. `git apply --check` passes on the merged tree (`v2-space-map` with the Void post-merge fixes). The patch now carries the matching loc for P1, P2, P3, P5 and P6.
+
+---
+
+## Recommendations
+
+| Call | Proposal | Change | Why (this rerun) |
+|---|---|---|---|
+| **Take now** | **P5** | Cartel succession grace 3 → 5 years (`eotg_cartel_on_actions.txt:111`, story loc) | Walk-offs within 10 years of a succession halve: 0.436 → 0.218 (4 vassals), 0.146 → 0.043 (16). Dread equilibria unchanged. |
+| **Take now** | **P1** | Court the Board erosion −5 → −2 (`eotg_corporation_values.txt:73`, two loc lines) | A dead CEO resource under full director pressure goes away (runs stuck at 0 for 20+ years: 52.2% → 0.0%); AI and player CEOs gain 5–8 points. |
+| **Owner call (structural)** | **P2-cap** | Deliver Results feeds the liege at most once a year (as Court the Board's cap). Not a value change: a guard variable in the decision. | Against the AI as written it only trims the 16-vassal equilibrium (59.8 → 56.2) because AI vassals deliver rarely; under full pressure years at 100 fall 77.8% → 57.0%. P2's value change does more for the AI case (→ 42.8). Choose the shape: a cap (scale-free, mild) or the value (P2, strong). |
+| **Hold** | P2 | Deliver Results liege +5 → +2 | Wait for the P2-cap decision: both together over-correct the small realm. |
+| **Hold** | P3 | Trade Oligarchy war loss −4 → −3 | The finding flipped (M1): vassal Princes already out-share the First Prince. P3 lifts the First Prince (23.3 → 33.8) but rests on the war-share proxy, which sits on the knife-edge (feed turns negative above 20% war; the model has ~23%). Measure the real war share first. |
+| **Hold** | P4 | Overclocked gate 20 → 15 | With the initiation gate conditioned, a pushing player already reaches Overclocked in 34% of installs; P4 takes it to 51% and cascade deaths 9.4% → 14.5%. Retune on the real map's development distribution. |
+| **Hold** | P6 | Contract pay scaled by medium gold | **Not simulated:** the gold proxy is about 2× vanilla's medium gold, and vanilla's floor of 50 (`00_basic_values.txt:82`) gives a count and a duke the same 75. |
 
 ---
 
@@ -31,107 +49,97 @@ Each finding gives the evidence (sim numbers; full tables in Appendix A), the sc
 
   The merged cap holds erosion to −5 a year per CEO, but that still outruns the +3 results feed, and the "below the director's projected value" condition is nearly always true once directors sit at about 83.
 
-  With AI directors as written, the CEO's equilibrium is 39.5 / 38.0 / 34.8 / 29.0 for 1 / 4 / 8 / 16 directors. The decline is gentle only because AI directors court the board about once in 100 years (L1).
+  With AI directors as written, the CEO's equilibrium is 39.6 / 38.5 / 36.6 / 32.5 for 1 / 4 / 8 / 16 directors. The decline is gentle only because AI directors court the board about once in 100 years (L1).
 - **Why HIGH:** the obvious fix for L1 (more AI uptake), or multiplayer, turns this into a dead CEO resource.
+- **Nested realms (local audit).** Only the top's **direct** vassals can erode the CEO: the erosion branch tests `liege ?= { eotg_corporation_role_top = yes }` (`common/decisions/eotg_corporation_decisions.txt:152-158`), so a count under a duke under the CEO erodes the duke's influence, not the CEO's. The model treats every director as a direct vassal, so the 16-director rows overstate a nested realm; read the **4–8 director rows** as the realistic case (CEO at 0 in 8.0% of years with 4 directors under full pressure, 32.2% with 8).
 - **Where:** `common/script_values/eotg_corporation_values.txt:73` (`eotg_corporation_court_erosion_value = -5`), read by `common/decisions/eotg_corporation_decisions.txt:113`.
 - **Proposal P1:** `eotg_corporation_court_erosion_value = -2`.
 
   | Scenario | Metric | Before | After |
   |---|---|---|---|
-  | 16 directors, `greedy_all` | runs stuck at 0 for 20+ years | 52.4% | 0.0% |
-  | 16 directors, `greedy_all` | equilibrium | 0 | 9.3 |
-  | 16 directors, AI | equilibrium | 29.0 | 36.0 |
-  | 16 directors, player CEO | equilibrium | 44.3 | 54.6 |
+  | 16 directors, `greedy_all` | runs stuck at 0 for 20+ years | 52.2% | 0.0% |
+  | 16 directors, `greedy_all` | equilibrium | 0 | 9.6 |
+  | 16 directors, AI | equilibrium | 32.5 | 37.5 |
+  | 16 directors, player CEO | equilibrium | 47.5 | 55.4 |
 
 **H2. PMC: Standing scales with vassal count.**
 - **Evidence.**
-  - AI top equilibrium is 29.1 / 36.5 / 44.4 / 58.2 for 1 / 4 / 8 / 16 vassals.
-  - A player top reaches 68.4 / 74.5 / 84.0 / 94.0, and with 16 vassals sits at 100 in 19.2% of years.
-  - With every vassal greedy: 56.7% of years at 100 (16), 42.6% (8).
+  - AI top equilibrium is 29.5 / 37.7 / 46.2 / 59.8 for 1 / 4 / 8 / 16 vassals.
+  - A player top with 16 vassals reaches 96.0 and sits at 100 in 23.7% of years.
+  - With every vassal greedy (16): 77.8% of years at 100.
 
-  Each vassal's Deliver Results gives the liege +5 with no per-liege cap. This is the same shape as the last two FIX FIRSTs.
+  Each vassal's Deliver Results gives the liege +5 with no per-liege cap. Vassals now deliver only in their own peace years (H2a fix), which makes the scaling slightly stronger than the first run showed.
 - **Where:** `common/script_values/eotg_pmc_values.txt:78` (`eotg_pmc_deliver_liege_value = 5`), used at `common/decisions/eotg_pmc_decisions.txt:102`.
-- **Proposal P2:** `eotg_pmc_deliver_liege_value = 2`.
+- **Proposal P2:** `eotg_pmc_deliver_liege_value = 2`. **Variant P2-cap (structural, owner call):** the liege gains from at most one Deliver Results a year.
 
-  | Scenario | Metric | Before | After |
-  |---|---|---|---|
-  | 16 vassals, AI | equilibrium | 58.2 | 41.2 |
-  | 1 vassal, AI | equilibrium | 29.1 | 27.5 |
-  | 16 vassals, `greedy_all` | years at 100 | 56.7% | 45.8% |
+  | Scenario | Metric | Before | P2 (+2) | P2-cap |
+  |---|---|---|---|---|
+  | 16 vassals, AI | equilibrium | 59.8 | 42.8 | 56.2 |
+  | 1 vassal, AI | equilibrium | 29.5 | 27.7 | 29.5 |
+  | 16 vassals, `greedy_all` | years at 100 | 77.8% | 59.7% | 57.0% |
 
-  A structural cap (once a year per liege, as Court the Board now has) would remove the scaling entirely; that is an owner choice beyond a value change. A liege value of 1 brings 16 vassals down to 34.2 (2,000-run check).
+  A liege value of 1 brings 16 AI vassals down to 35.8 (`--checks`, 2,000 runs). The cap is scale-free but mild against AI vassals, who deliver rarely (L1); the value change is strong but also trims the one-vassal case.
 
 ### MED
 
-**M1. Trade Oligarchy: the passive feed is net negative, so Princes sink toward 0 and the market-share vote is nearly inert.**
+**M1. Trade Oligarchy: the First Prince, not the vassals, is the one the passive feed starves; vassal Princes out-share their First Prince.**
+- **Correction (H2a).** The first run gave vassal Princes their liege's war state. The script ticks on each owner's own `is_at_war`, and a vassal is not at war because its liege is (the repo's ruling, `common/scripted_triggers/eotg_frontier_triggers.txt:383-386`). With vassals carrying their own wars (about 3% of years), the finding flips.
 - **Evidence.**
-  - +1 a year at peace and −4 at war averages −0.15 a year at the modelled ~23% of years at war.
-  - The median vassal Prince holds 7–10 share (AI, all sizes); the First Prince holds 24–28.
-  - The election bands start at 30, so vassal electors almost never carry a band. A non-dynast would win without the dynasty rule in 0.0–0.3% of elections, against 4.6–22.3% for the Corporation (AI).
+  - Vassal Princes: median share 55–57 (AI, all sizes), not 7–10.
+  - The First Prince: 23–28. Its feed (+1 peace, −4 war) is net negative above a **20% war share** (the knife-edge; `--checks` sweep): 54.6 at 10% war, 31.3 at 20%, 10.0 at 30%. The model's top is at war about 23% of years.
+  - The market-share vote is live: without the dynasty rule a non-dynast would win 32–37% of elections with 4+ Princes (9.6% with 1).
+- **Open question flipped:** vassal Princes out-share the First Prince by about 30 points. Whether that is the intended "first among equals" or a problem is an owner call.
 - **Where:** `common/script_values/eotg_gobcorp_values.txt:63` (`eotg_gobcorp_war_loss_value = -4`), read by the yearly tick in `common/story_cycles/eotg_gobcorp_story.txt`.
-- **Proposal P3:** `eotg_gobcorp_war_loss_value = -3` (net +0.08 a year).
+- **Proposal P3:** `eotg_gobcorp_war_loss_value = -3` (feed turns negative above 25% war instead of 20%). **Hold** (recommendation table).
 
   | Scenario | Metric | Before | After |
   |---|---|---|---|
-  | 4 Princes, AI | First Prince equilibrium | 23.7 | 33.9 |
-  | 4 Princes, AI | vassal median | 10.0 | 15.6 |
-  | 16 Princes, AI | First Prince equilibrium | 26.8 | 36.5 |
-  | 16 Princes, AI | vassal median | 9.4 | 14.9 |
+  | 4 Princes, AI | First Prince equilibrium | 23.3 | 33.8 |
+  | 4 Princes, AI | vassal median | 57.4 | 59.7 |
+  | 16 Princes, AI | First Prince equilibrium | 27.0 | 37.0 |
+  | 16 Princes, AI | vassal median | 56.5 | 59.0 |
 
-  Peace +2 instead would lift the vassal median to 48 (2,000-run check), too strong. The bands themselves (30/60/90, `eotg_gobcorp_vote_band_*`) are the second lever if vassals should vote by share.
+  Peace +2 instead would put vassals at 89–90 and the First Prince at 59–60 (`--checks`), too strong.
 
-**M2. Cartel: payers walk off right after a succession, because the 3-year grace ends before the heir's dread recovers.**
+**M2. Cartel: payers walk off after a succession, because the 3-year grace ends before the heir's dread recovers.**
+- **Correction (H2a).** The first run measured walk-offs within 5 years; with a 5-year grace that window is empty by construction, so P5 read 0.000. The metric is now walk-offs within **10 years** of a succession.
 - **Evidence.**
   - The heir starts with no dread (ASSUMPTION: dread is personal) and climbs toward the payer baseline at 0.375 a month (decay −0.25, read from the government).
   - With 1–3 payers the baseline (4 per payer) sits under `low_dread` 20, so the walk-off starts the year the grace ends.
-  - Walk-offs within 5 years of a succession: 0.41 per succession (1 vassal, AI), 0.35 (4), 0.29 (8), 0.17 (16).
+  - Walk-offs within 10 years of a succession: 0.516 per succession (1 vassal, AI), 0.436 (4), 0.318 (8), 0.146 (16).
 - **Where:** `common/on_action/eotg_cartel_on_actions.txt:111` (`years = 3` on `eotg_cartel_succession_grace`).
-- **Proposal P5:** `years = 5`, with the story `_info` loc line updated (the patch includes it).
+- **Proposal P5:** `years = 5`, with the story `_info` loc line updated (the patch includes it). **Take now.**
 
   | Scenario | Metric | Before | After |
   |---|---|---|---|
-  | 4 vassals, AI | walk-offs within 5 years of a succession | 0.354 | 0.000 |
-  | 4 vassals, AI | mean payers | 1.77 | 1.89 |
-  | 16 vassals, AI | walk-offs within 5 years of a succession | 0.165 | 0.000 |
+  | 4 vassals, AI | walk-offs within 10 years of a succession | 0.436 | 0.218 |
+  | 4 vassals, AI | mean payers | 1.82 | 1.93 |
+  | 16 vassals, AI | walk-offs within 10 years of a succession | 0.146 | 0.043 |
 
-  Dread equilibria are unchanged (58.0, 67.8).
+  Dread equilibria are unchanged (59.0, 70.0).
 
 **M3. Cybernetics: the development gate, not the decision, decides who reaches Overclocked.**
+- **Correction (H2a).** Initiation itself needs capital development ≥ 10 (`common/scripted_triggers/eotg_augmentation_triggers.txt:87-88`), so every installed ruler comes from the ≥ 10 part of the distribution. The first run sampled all capitals.
 - **Evidence.**
-  - The Overclocked gate (development 20) is met by the capitals of about 16% of rulers (vanilla history distribution, balance spec §5.1), growing about +1 a decade.
-  - A player who always pushes reaches Overclocked in 16.8% of installs, and within 20 years in 12.6% (duke). The balance spec's target for a pushing player was a median of 12 years and 100% within 20.
-  - AI: 2.6% ever, median 48 years.
+  - The Overclocked gate (development 20) is met by about 34% of installed rulers' capitals (vanilla history distribution, balance spec §5.1, conditioned on ≥ 10), growing about +1 a decade.
+  - A player who always pushes reaches Overclocked in 34.0% of installs, and within 20 years in 26.1% (duke). The balance spec's target for a pushing player was a median of 12 years and 100% within 20.
+  - AI: 5.5% ever, median 46 years.
 - **Where:** `common/script_values/eotg_augmentation_values.txt:25` (`eotg_aug_dev_gate_overclocked`, value 20).
-- **Proposal P4:** `value = 15`.
+- **Proposal P4:** `value = 15`. **Hold:** retune on the real map.
 
   | Scenario | Metric | Before | After |
   |---|---|---|---|
-  | Player who always pushes | reach Overclocked | 16.8% | 26.1% |
-  | Player who always pushes | within 20 years | 12.6% | 20.7% |
-  | Player who always pushes | cascade deaths | 4.6% | 7.2% |
-  | AI | reach Overclocked | 2.6% | 3.6% |
+  | Player who always pushes | reach Overclocked | 34.0% | 50.7% |
+  | Player who always pushes | within 20 years | 26.1% | 41.8% |
+  | Player who always pushes | cascade deaths | 9.4% | 14.5% |
+  | AI | reach Overclocked | 5.5% | 7.5% |
 
-  Lowering the Enhanced gate (15 → 10) alone changes nothing at Overclocked. **Retune on the real map:** the space map's development distribution decides this, and the balance spec already flags these gates as provisional.
+  The space map's development distribution decides this, and the balance spec already flags these gates as provisional.
 
-**M4. PMC: Take a Contract pays a flat 50 + 3 × Standing gold at every tier.**
-- **Evidence (static, the script's formula).** At Standing 50 the pay is 200 gold every 3 years, about 67 a year:
-  - 2.7× a county's modelled yearly income (25);
-  - 1.1× a duke's (60);
-  - 0.4× a king's (150).
-
-  The costs around it (minor/medium gold) scale with the realm; this pay does not. A county PMC is overpaid and a kingdom PMC barely notices.
+**M4. PMC: Take a Contract pays a flat 50 + 3 × Standing gold at every tier. (Static finding; P6 not simulated.)**
+- **Evidence (static, the script's formula).** At Standing 50 the pay is 200 gold every 3 years at every tier, while the costs around it (minor and medium gold) scale with the realm.
 - **Where:** `common/script_values/eotg_pmc_values.txt` (`eotg_pmc_contract_pay_value`).
-- **Proposal P6:** `(Standing / 50 + 0.5) × medium_gold_value`, 0.5–2.5× medium gold.
-
-  At Standing 50, with medium gold modelled at 60 / 100 / 180 by tier:
-
-  | Tier | Before | After |
-  |---|---|---|
-  | County | 200 | 90 |
-  | Duke | 200 | 150 |
-  | King | 200 | 270 |
-
-  Vanilla's `medium_gold_value` itself scales with income, so the real numbers track the realm.
+- **Proposal P6:** `(Standing / 50 + 0.5) × medium_gold_value`, 0.5–2.5× medium gold. **Not simulated, hold.** The sim's gold proxy runs about 2× vanilla's medium gold, and vanilla's `medium_gold_value` has a floor of 50 (`00_basic_values.txt:82`, local audit), so at the floor a count and a duke both get 75 at Standing 50. The first run's P6 table (90 / 150 / 270) used the inflated proxy and is withdrawn. The patch keeps P6 with its loc for the owner to judge against vanilla numbers in game.
 
 ### LOW
 
@@ -150,12 +158,12 @@ Each finding gives the evidence (sim numbers; full tables in Appendix A), the sc
 
 **L2. Frontier strain rarely forces a falter under ordinary conditions, and bites in a hostile world.**
 - **Evidence.**
-  - Baseline: completion 99–100%; falters 0.0–0.4% per project (administrative 4.0%).
-  - Durations are in the owner's bands: Settlement 11 years (median), sponsored 9, unsponsored 12; Research 14.
-  - In a hostile world (war reaching the Shoal 25%/yr, Dangerous 40%, occupied 6%/yr), abandonment rises to 10% (Settlement) and 25–26% (Research, Administrative).
-- **Strain works as a world-dependent risk. No change proposed.** Sponsor lapses run 0.20 per project (0.52 when every project is sponsored), mostly sponsor deaths.
+  - Baseline: completion 99–100%; falters 0.0–0.4% per project (administrative about 4%).
+  - Durations are in the owner's bands (Appendix A).
+  - In a hostile world (`--hostile`: war reaching the Shoal 25%/yr, Dangerous 40%, occupied 6%/yr, AI holder), abandonment rises to 1.2% (Settlement), 4.3% (Research) and 9.2% (Administrative). The first run's 10% / 25–26% came from an unrecorded setting and did not reproduce; these figures replace them.
+- **Strain works as a world-dependent risk. No change proposed.**
 
-**L3. Cybernetics: Overclocked is short.** The median from Overclocked to the cascade is 3–4 years (base accrual 12 plus stress), and about 88% of Overclocked rulers cascade. Seamless is 5.5% of installs for a player who pushes, 0.6% for the AI. This is consistent with "Overclocked is a countdown"; it is recorded for the owner, with no change proposed.
+**L3. Cybernetics: Overclocked is short.** The median from Overclocked to the cascade is about 4 years (base accrual 12 plus stress), and about 88% of Overclocked rulers cascade. Seamless is 11% of installs for a player who pushes, 1.1% for the AI. This is consistent with "Overclocked is a countdown"; it is recorded for the owner, with no change proposed.
 
 **L4. The Kingpin ×0.5 ruling holds.** The yearly start chance for an augmented ruler, read from the on_action `random_list`:
 
@@ -181,129 +189,130 @@ Each finding gives the evidence (sim numbers; full tables in Appendix A), the sc
 - **P3:** the vassal Princes' median share after 30 years of mixed war and peace.
 - **P4:** the observer run's Overclocked population (balance spec §9.2).
 - **P5:** `kill` a Cartel ruler with 2 payers, then count walk-offs over the next 5 years.
-- **P6:** Take a Contract as a county PMC and as a kingdom PMC.
+- **P2-cap:** with 8 PMC vassals, count Deliver Results in one year and the liege's standing gain.
+- **P6:** Take a Contract as a county PMC and as a kingdom PMC, and read the pay against vanilla's medium gold.
 
 ---
 
 ## Appendix A: run tables
 
-Generated by `docs/tools/sim/report_tables.py` from `results.json`.
+Generated by `docs/tools/sim/report_tables.py` from `results.json` (run with `--checks --hostile`).
 
 ### Government resources (top ruler), 100 years, 10000 runs per cell
 
 | System | Vassals | Policy | Equilibrium | Settles by year | At 0 | At 100 | 20y stuck at 0 | 20y stuck at 100 | Vassal median | Key counts |
 |---|---|---|---|---|---|---|---|---|---|---|
-| cartel | 1 | ai | 57.5 | 17 | 7.5% | 0.2% | 0.0% | 0.0% | None | accept_per_run_year 0.075, refusal_per_run_year 0.025, walkoff_per_run_year 0.011, tighten_per_run_year 0.021, lean_per_vassal_year 0.037 |
-| cartel | 1 | greedy | 34.0 | 15 | 7.1% | 0.0% | 0.0% | 0.0% | None | accept_per_run_year 0.133, refusal_per_run_year 0.265, walkoff_per_run_year 0.036, tighten_per_run_year 0.000, lean_per_vassal_year 0.038 |
-| cartel | 1 | greedy_all | 41.2 | 43 | 5.1% | 0.3% | 0.0% | 0.0% | None | accept_per_run_year 0.149, refusal_per_run_year 0.270, walkoff_per_run_year 0.028, tighten_per_run_year 0.000, lean_per_vassal_year 0.159 |
-| cartel | 4 | ai | 58.0 | 16 | 6.2% | 0.7% | 0.0% | 0.0% | None | accept_per_run_year 0.095, refusal_per_run_year 0.033, walkoff_per_run_year 0.011, tighten_per_run_year 0.024, lean_per_vassal_year 0.037 |
-| cartel | 4 | greedy | 40.5 | 40 | 5.8% | 0.3% | 0.0% | 0.0% | None | accept_per_run_year 0.147, refusal_per_run_year 0.269, walkoff_per_run_year 0.029, tighten_per_run_year 0.000, lean_per_vassal_year 0.037 |
-| cartel | 4 | greedy_all | 65.0 | 48 | 3.8% | 2.6% | 0.0% | 0.0% | None | accept_per_run_year 0.190, refusal_per_run_year 0.219, walkoff_per_run_year 0.010, tighten_per_run_year 0.000, lean_per_vassal_year 0.159 |
-| cartel | 8 | ai | 61.5 | 12 | 5.1% | 1.9% | 0.0% | 0.0% | None | accept_per_run_year 0.114, refusal_per_run_year 0.030, walkoff_per_run_year 0.010, tighten_per_run_year 0.027, lean_per_vassal_year 0.039 |
-| cartel | 8 | greedy | 49.8 | 56 | 4.7% | 1.4% | 0.0% | 0.0% | None | accept_per_run_year 0.172, refusal_per_run_year 0.223, walkoff_per_run_year 0.022, tighten_per_run_year 0.000, lean_per_vassal_year 0.039 |
-| cartel | 8 | greedy_all | 75.5 | 30 | 3.7% | 6.6% | 0.0% | 0.0% | None | accept_per_run_year 0.215, refusal_per_run_year 0.121, walkoff_per_run_year 0.006, tighten_per_run_year 0.000, lean_per_vassal_year 0.159 |
-| cartel | 16 | ai | 67.8 | 10 | 4.2% | 5.3% | 0.0% | 0.0% | None | accept_per_run_year 0.145, refusal_per_run_year 0.026, walkoff_per_run_year 0.006, tighten_per_run_year 0.033, lean_per_vassal_year 0.039 |
-| cartel | 16 | greedy | 66.5 | 46 | 4.0% | 5.5% | 0.0% | 0.0% | None | accept_per_run_year 0.192, refusal_per_run_year 0.184, walkoff_per_run_year 0.009, tighten_per_run_year 0.000, lean_per_vassal_year 0.039 |
-| cartel | 16 | greedy_all | 81.0 | 36 | 3.6% | 9.5% | 0.0% | 0.0% | None | accept_per_run_year 0.223, refusal_per_run_year 0.076, walkoff_per_run_year 0.004, tighten_per_run_year 0.000, lean_per_vassal_year 0.159 |
-| pmc | 1 | ai | 29.1 | 18 | 0.8% | 0.0% | 0.4% | 0.0% | 30.9 | take_contract_per_run_year 0.065, recruit_per_run_year 0.017, deliver_per_vassal_year 0.025, stand_down_share 0.019 |
-| pmc | 1 | greedy | 68.4 | 13 | 0.0% | 0.2% | 0.0% | 0.0% | 30.9 | take_contract_per_run_year 0.233, recruit_per_run_year 0.000, deliver_per_vassal_year 0.025, stand_down_share 0.000 |
-| pmc | 1 | greedy_all | 79.4 | 32 | 0.0% | 3.0% | 0.0% | 0.0% | 66.9 | take_contract_per_run_year 0.234, recruit_per_run_year 0.000, deliver_per_vassal_year 0.136, stand_down_share 0.000 |
-| pmc | 4 | ai | 36.5 | 0 | 0.2% | 0.0% | 0.0% | 0.0% | 31.3 | take_contract_per_run_year 0.068, recruit_per_run_year 0.026, deliver_per_vassal_year 0.025, stand_down_share 0.008 |
-| pmc | 4 | greedy | 74.5 | 22 | 0.0% | 1.9% | 0.0% | 0.0% | 31.2 | take_contract_per_run_year 0.233, recruit_per_run_year 0.000, deliver_per_vassal_year 0.025, stand_down_share 0.000 |
-| pmc | 4 | greedy_all | 97.0 | 15 | 0.0% | 24.9% | 0.0% | 0.0% | 66.1 | take_contract_per_run_year 0.233, recruit_per_run_year 0.000, deliver_per_vassal_year 0.136, stand_down_share 0.000 |
-| pmc | 8 | ai | 44.4 | 0 | 0.1% | 0.0% | 0.0% | 0.0% | 32.2 | take_contract_per_run_year 0.068, recruit_per_run_year 0.036, deliver_per_vassal_year 0.026, stand_down_share 0.001 |
-| pmc | 8 | greedy | 84.0 | 23 | 0.0% | 7.1% | 0.0% | 0.0% | 32.2 | take_contract_per_run_year 0.233, recruit_per_run_year 0.000, deliver_per_vassal_year 0.026, stand_down_share 0.000 |
-| pmc | 8 | greedy_all | 98.0 | 6 | 0.0% | 42.6% | 0.0% | 0.1% | 66.3 | take_contract_per_run_year 0.233, recruit_per_run_year 0.000, deliver_per_vassal_year 0.137, stand_down_share 0.000 |
-| pmc | 16 | ai | 58.2 | 4 | 0.0% | 0.6% | 0.0% | 0.0% | 32.3 | take_contract_per_run_year 0.074, recruit_per_run_year 0.050, deliver_per_vassal_year 0.026, stand_down_share 0.001 |
-| pmc | 16 | greedy | 94.0 | 15 | 0.0% | 19.2% | 0.0% | 0.0% | 32.3 | take_contract_per_run_year 0.233, recruit_per_run_year 0.000, deliver_per_vassal_year 0.026, stand_down_share 0.000 |
-| pmc | 16 | greedy_all | 100.0 | 4 | 0.0% | 56.7% | 0.0% | 3.1% | 66.4 | take_contract_per_run_year 0.233, recruit_per_run_year 0.000, deliver_per_vassal_year 0.137, stand_down_share 0.000 |
-| corporation | 1 | ai | 39.5 | 13 | 0.3% | 0.6% | 0.0% | 0.1% | 52.5 | court_per_vassal_year 0.009, erosion_per_run_year 0.007, restructure_per_run_year 0.030 |
-| corporation | 1 | greedy | 59.4 | 1 | 0.2% | 11.3% | 0.0% | 13.6% | 52.5 | court_per_vassal_year 0.009, erosion_per_run_year 0.004, restructure_per_run_year 0.000 |
-| corporation | 1 | greedy_all | 45.9 | 32 | 0.6% | 7.7% | 0.0% | 9.4% | 95.0 | court_per_vassal_year 0.105, erosion_per_run_year 0.077, restructure_per_run_year 0.000 |
-| corporation | 4 | ai | 38.0 | 14 | 0.5% | 0.5% | 0.0% | 0.1% | 54.5 | court_per_vassal_year 0.009, erosion_per_run_year 0.026, restructure_per_run_year 0.028 |
-| corporation | 4 | greedy | 57.0 | 0 | 0.3% | 10.6% | 0.0% | 12.8% | 54.4 | court_per_vassal_year 0.009, erosion_per_run_year 0.017, restructure_per_run_year 0.000 |
-| corporation | 4 | greedy_all | 9.0 | 60 | 7.7% | 2.4% | 0.1% | 3.4% | 83.2 | court_per_vassal_year 0.105, erosion_per_run_year 0.290, restructure_per_run_year 0.000 |
-| corporation | 8 | ai | 34.8 | 16 | 0.9% | 0.4% | 0.0% | 0.1% | 55.0 | court_per_vassal_year 0.010, erosion_per_run_year 0.058, restructure_per_run_year 0.025 |
-| corporation | 8 | greedy | 53.0 | 7 | 0.4% | 10.1% | 0.0% | 12.6% | 55.0 | court_per_vassal_year 0.010, erosion_per_run_year 0.038, restructure_per_run_year 0.000 |
-| corporation | 8 | greedy_all | 1.0 | 36 | 31.1% | 0.7% | 1.7% | 1.1% | 82.9 | court_per_vassal_year 0.112, erosion_per_run_year 0.525, restructure_per_run_year 0.000 |
-| corporation | 16 | ai | 29.0 | 20 | 1.9% | 0.3% | 0.0% | 0.1% | 54.9 | court_per_vassal_year 0.010, erosion_per_run_year 0.118, restructure_per_run_year 0.020 |
-| corporation | 16 | greedy | 44.2 | 27 | 1.2% | 8.3% | 0.0% | 10.2% | 54.8 | court_per_vassal_year 0.010, erosion_per_run_year 0.083, restructure_per_run_year 0.000 |
-| corporation | 16 | greedy_all | 0.0 | 26 | 57.2% | 0.2% | 52.4% | 0.3% | 82.7 | court_per_vassal_year 0.112, erosion_per_run_year 0.736, restructure_per_run_year 0.000 |
-| gobcorp | 1 | ai | 28.2 | 31 | 2.0% | 0.1% | 0.0% | 0.0% | 7.0 | corner_per_run_year 0.019, undercut_per_vassal_year 0.000 |
-| gobcorp | 1 | greedy | 49.5 | 39 | 0.6% | 1.5% | 0.0% | 0.4% | 5.0 | corner_per_run_year 0.045, undercut_per_vassal_year 0.000 |
-| gobcorp | 1 | greedy_all | 49.5 | 39 | 0.6% | 1.5% | 0.0% | 0.4% | 5.0 | corner_per_run_year 0.045, undercut_per_vassal_year 0.000 |
-| gobcorp | 4 | ai | 23.7 | 45 | 2.4% | 0.0% | 0.0% | 0.0% | 10.0 | corner_per_run_year 0.013, undercut_per_vassal_year 0.016 |
-| gobcorp | 4 | greedy | 50.0 | 44 | 0.7% | 1.5% | 0.0% | 0.5% | 7.1 | corner_per_run_year 0.045, undercut_per_vassal_year 0.016 |
-| gobcorp | 4 | greedy_all | 50.0 | 39 | 0.6% | 1.5% | 0.0% | 0.5% | 10.3 | corner_per_run_year 0.045, undercut_per_vassal_year 0.148 |
-| gobcorp | 8 | ai | 27.3 | 38 | 2.0% | 0.0% | 0.0% | 0.0% | 9.5 | corner_per_run_year 0.017, undercut_per_vassal_year 0.017 |
-| gobcorp | 8 | greedy | 71.1 | 63 | 0.2% | 6.1% | 0.0% | 1.7% | 5.3 | corner_per_run_year 0.072, undercut_per_vassal_year 0.017 |
-| gobcorp | 8 | greedy_all | 70.9 | 60 | 0.2% | 6.2% | 0.0% | 1.6% | 8.8 | corner_per_run_year 0.072, undercut_per_vassal_year 0.149 |
-| gobcorp | 16 | ai | 26.8 | 39 | 2.1% | 0.0% | 0.0% | 0.0% | 9.4 | corner_per_run_year 0.017, undercut_per_vassal_year 0.017 |
-| gobcorp | 16 | greedy | 71.9 | 63 | 0.2% | 6.4% | 0.0% | 2.0% | 5.3 | corner_per_run_year 0.072, undercut_per_vassal_year 0.017 |
-| gobcorp | 16 | greedy_all | 71.4 | 62 | 0.2% | 6.3% | 0.0% | 2.0% | 8.9 | corner_per_run_year 0.072, undercut_per_vassal_year 0.149 |
+| cartel | 1 | ai | 57.8 | 18 | 7.4% | 0.2% | 0.0% | 0.0% | None | accept_per_run_year 0.076, refusal_per_run_year 0.025, walkoff_per_run_year 0.011, tighten_per_run_year 0.021, lean_per_vassal_year 0.045 |
+| cartel | 1 | greedy | 34.5 | 16 | 6.9% | 0.1% | 0.0% | 0.0% | None | accept_per_run_year 0.135, refusal_per_run_year 0.267, walkoff_per_run_year 0.035, tighten_per_run_year 0.000, lean_per_vassal_year 0.045 |
+| cartel | 1 | greedy_all | 41.8 | 54 | 4.9% | 0.3% | 0.0% | 0.0% | None | accept_per_run_year 0.150, refusal_per_run_year 0.272, walkoff_per_run_year 0.027, tighten_per_run_year 0.000, lean_per_vassal_year 0.169 |
+| cartel | 4 | ai | 59.0 | 14 | 5.9% | 0.9% | 0.0% | 0.0% | None | accept_per_run_year 0.098, refusal_per_run_year 0.033, walkoff_per_run_year 0.011, tighten_per_run_year 0.025, lean_per_vassal_year 0.045 |
+| cartel | 4 | greedy | 42.2 | 42 | 5.4% | 0.4% | 0.0% | 0.0% | None | accept_per_run_year 0.151, refusal_per_run_year 0.268, walkoff_per_run_year 0.027, tighten_per_run_year 0.000, lean_per_vassal_year 0.045 |
+| cartel | 4 | greedy_all | 67.0 | 97 | 3.7% | 4.5% | 0.0% | 0.0% | None | accept_per_run_year 0.191, refusal_per_run_year 0.212, walkoff_per_run_year 0.007, tighten_per_run_year 0.000, lean_per_vassal_year 0.169 |
+| cartel | 8 | ai | 63.0 | 12 | 4.8% | 2.4% | 0.0% | 0.0% | None | accept_per_run_year 0.121, refusal_per_run_year 0.029, walkoff_per_run_year 0.009, tighten_per_run_year 0.029, lean_per_vassal_year 0.047 |
+| cartel | 8 | greedy | 54.8 | 58 | 4.5% | 2.0% | 0.0% | 0.0% | None | accept_per_run_year 0.177, refusal_per_run_year 0.216, walkoff_per_run_year 0.018, tighten_per_run_year 0.000, lean_per_vassal_year 0.047 |
+| cartel | 8 | greedy_all | 80.5 | 98 | 3.5% | 13.6% | 0.0% | 0.0% | None | accept_per_run_year 0.216, refusal_per_run_year 0.111, walkoff_per_run_year 0.003, tighten_per_run_year 0.000, lean_per_vassal_year 0.169 |
+| cartel | 16 | ai | 70.0 | 10 | 4.0% | 7.1% | 0.0% | 0.0% | None | accept_per_run_year 0.157, refusal_per_run_year 0.025, walkoff_per_run_year 0.004, tighten_per_run_year 0.035, lean_per_vassal_year 0.047 |
+| cartel | 16 | greedy | 70.8 | 42 | 3.8% | 8.2% | 0.0% | 0.0% | None | accept_per_run_year 0.197, refusal_per_run_year 0.169, walkoff_per_run_year 0.005, tighten_per_run_year 0.000, lean_per_vassal_year 0.047 |
+| cartel | 16 | greedy_all | 95.5 | 96 | 3.5% | 25.7% | 0.0% | 0.1% | None | accept_per_run_year 0.225, refusal_per_run_year 0.058, walkoff_per_run_year 0.001, tighten_per_run_year 0.000, lean_per_vassal_year 0.169 |
+| pmc | 1 | ai | 29.5 | 19 | 0.7% | 0.0% | 0.3% | 0.0% | 34.5 | take_contract_per_run_year 0.065, recruit_per_run_year 0.017, deliver_per_vassal_year 0.028, stand_down_share 0.017 |
+| pmc | 1 | greedy | 68.6 | 13 | 0.0% | 0.2% | 0.0% | 0.0% | 34.2 | take_contract_per_run_year 0.233, recruit_per_run_year 0.000, deliver_per_vassal_year 0.028, stand_down_share 0.000 |
+| pmc | 1 | greedy_all | 80.3 | 35 | 0.0% | 3.3% | 0.0% | 0.0% | 69.1 | take_contract_per_run_year 0.233, recruit_per_run_year 0.000, deliver_per_vassal_year 0.146, stand_down_share 0.000 |
+| pmc | 4 | ai | 37.7 | 6 | 0.1% | 0.0% | 0.0% | 0.0% | 34.3 | take_contract_per_run_year 0.068, recruit_per_run_year 0.028, deliver_per_vassal_year 0.029, stand_down_share 0.004 |
+| pmc | 4 | greedy | 75.6 | 20 | 0.0% | 2.3% | 0.0% | 0.0% | 34.3 | take_contract_per_run_year 0.234, recruit_per_run_year 0.000, deliver_per_vassal_year 0.028, stand_down_share 0.000 |
+| pmc | 4 | greedy_all | 98.0 | 12 | 0.0% | 30.5% | 0.0% | 0.0% | 68.3 | take_contract_per_run_year 0.233, recruit_per_run_year 0.000, deliver_per_vassal_year 0.146, stand_down_share 0.000 |
+| pmc | 8 | ai | 46.2 | 1 | 0.0% | 0.0% | 0.0% | 0.0% | 35.2 | take_contract_per_run_year 0.069, recruit_per_run_year 0.039, deliver_per_vassal_year 0.030, stand_down_share 0.001 |
+| pmc | 8 | greedy | 86.2 | 22 | 0.0% | 8.6% | 0.0% | 0.0% | 35.2 | take_contract_per_run_year 0.233, recruit_per_run_year 0.000, deliver_per_vassal_year 0.030, stand_down_share 0.000 |
+| pmc | 8 | greedy_all | 100.0 | 6 | 0.0% | 55.7% | 0.0% | 1.8% | 68.6 | take_contract_per_run_year 0.233, recruit_per_run_year 0.000, deliver_per_vassal_year 0.147, stand_down_share 0.000 |
+| pmc | 16 | ai | 59.8 | 28 | 0.0% | 1.0% | 0.0% | 0.0% | 35.3 | take_contract_per_run_year 0.076, recruit_per_run_year 0.054, deliver_per_vassal_year 0.030, stand_down_share 0.000 |
+| pmc | 16 | greedy | 96.0 | 12 | 0.0% | 23.7% | 0.0% | 0.0% | 35.2 | take_contract_per_run_year 0.234, recruit_per_run_year 0.000, deliver_per_vassal_year 0.030, stand_down_share 0.000 |
+| pmc | 16 | greedy_all | 100.0 | 4 | 0.0% | 77.8% | 0.0% | 56.8% | 68.6 | take_contract_per_run_year 0.233, recruit_per_run_year 0.000, deliver_per_vassal_year 0.147, stand_down_share 0.000 |
+| corporation | 1 | ai | 39.6 | 11 | 0.3% | 0.5% | 0.0% | 0.1% | 65.0 | court_per_vassal_year 0.007, erosion_per_run_year 0.005, restructure_per_run_year 0.031 |
+| corporation | 1 | greedy | 59.7 | 1 | 0.2% | 11.3% | 0.0% | 13.8% | 64.5 | court_per_vassal_year 0.007, erosion_per_run_year 0.004, restructure_per_run_year 0.000 |
+| corporation | 1 | greedy_all | 45.0 | 37 | 0.6% | 7.0% | 0.0% | 8.4% | 98.0 | court_per_vassal_year 0.105, erosion_per_run_year 0.082, restructure_per_run_year 0.000 |
+| corporation | 4 | ai | 38.5 | 10 | 0.5% | 0.5% | 0.0% | 0.1% | 64.7 | court_per_vassal_year 0.007, erosion_per_run_year 0.022, restructure_per_run_year 0.029 |
+| corporation | 4 | greedy | 58.0 | 0 | 0.2% | 10.6% | 0.0% | 12.6% | 64.6 | court_per_vassal_year 0.007, erosion_per_run_year 0.015, restructure_per_run_year 0.000 |
+| corporation | 4 | greedy_all | 9.0 | 57 | 8.0% | 1.9% | 0.0% | 2.5% | 85.8 | court_per_vassal_year 0.105, erosion_per_run_year 0.300, restructure_per_run_year 0.000 |
+| corporation | 8 | ai | 36.6 | 12 | 0.7% | 0.4% | 0.0% | 0.1% | 65.0 | court_per_vassal_year 0.008, erosion_per_run_year 0.048, restructure_per_run_year 0.026 |
+| corporation | 8 | greedy | 54.2 | 0 | 0.3% | 10.1% | 0.0% | 12.5% | 65.1 | court_per_vassal_year 0.008, erosion_per_run_year 0.033, restructure_per_run_year 0.000 |
+| corporation | 8 | greedy_all | 0.5 | 36 | 32.2% | 0.3% | 1.8% | 0.4% | 85.7 | court_per_vassal_year 0.112, erosion_per_run_year 0.541, restructure_per_run_year 0.000 |
+| corporation | 16 | ai | 32.5 | 14 | 1.2% | 0.3% | 0.0% | 0.1% | 64.8 | court_per_vassal_year 0.008, erosion_per_run_year 0.096, restructure_per_run_year 0.021 |
+| corporation | 16 | greedy | 47.5 | 14 | 0.7% | 8.4% | 0.0% | 10.2% | 64.8 | court_per_vassal_year 0.008, erosion_per_run_year 0.070, restructure_per_run_year 0.000 |
+| corporation | 16 | greedy_all | 0.0 | 25 | 58.4% | 0.1% | 52.2% | 0.2% | 85.3 | court_per_vassal_year 0.112, erosion_per_run_year 0.752, restructure_per_run_year 0.000 |
+| gobcorp | 1 | ai | 28.1 | 34 | 2.0% | 0.1% | 0.0% | 0.0% | 55.2 | corner_per_run_year 0.019, undercut_per_vassal_year 0.000 |
+| gobcorp | 1 | greedy | 49.9 | 44 | 0.6% | 1.6% | 0.0% | 0.4% | 47.0 | corner_per_run_year 0.045, undercut_per_vassal_year 0.000 |
+| gobcorp | 1 | greedy_all | 49.9 | 44 | 0.6% | 1.6% | 0.0% | 0.4% | 47.0 | corner_per_run_year 0.045, undercut_per_vassal_year 0.000 |
+| gobcorp | 4 | ai | 23.3 | 47 | 2.4% | 0.0% | 0.0% | 0.0% | 57.4 | corner_per_run_year 0.013, undercut_per_vassal_year 0.016 |
+| gobcorp | 4 | greedy | 49.5 | 39 | 0.7% | 1.5% | 0.0% | 0.5% | 47.6 | corner_per_run_year 0.045, undercut_per_vassal_year 0.016 |
+| gobcorp | 4 | greedy_all | 49.7 | 39 | 0.6% | 1.6% | 0.0% | 0.5% | 47.8 | corner_per_run_year 0.045, undercut_per_vassal_year 0.148 |
+| gobcorp | 8 | ai | 27.1 | 38 | 2.1% | 0.0% | 0.0% | 0.0% | 56.4 | corner_per_run_year 0.017, undercut_per_vassal_year 0.017 |
+| gobcorp | 8 | greedy | 71.4 | 61 | 0.2% | 6.3% | 0.0% | 1.9% | 39.9 | corner_per_run_year 0.072, undercut_per_vassal_year 0.017 |
+| gobcorp | 8 | greedy_all | 72.0 | 61 | 0.2% | 6.4% | 0.0% | 1.9% | 39.9 | corner_per_run_year 0.072, undercut_per_vassal_year 0.149 |
+| gobcorp | 16 | ai | 27.0 | 39 | 2.0% | 0.0% | 0.0% | 0.0% | 56.5 | corner_per_run_year 0.017, undercut_per_vassal_year 0.017 |
+| gobcorp | 16 | greedy | 72.0 | 62 | 0.2% | 6.4% | 0.0% | 1.9% | 39.8 | corner_per_run_year 0.072, undercut_per_vassal_year 0.017 |
+| gobcorp | 16 | greedy_all | 72.0 | 64 | 0.2% | 6.3% | 0.0% | 2.0% | 40.1 | corner_per_run_year 0.072, undercut_per_vassal_year 0.149 |
 
 ### Elections (at each top-ruler death)
 
 | System | Vassals | Policy | Elections | Resource leader's pick wins | Non-dynast would win without the dynasty rule |
 |---|---|---|---|---|---|
-| corporation | 1 | ai | 35026 | 76.7% | 4.6% |
-| corporation | 1 | greedy | 35231 | 84.8% | 2.1% |
-| corporation | 1 | greedy_all | 34858 | 75.8% | 11.2% |
-| corporation | 4 | ai | 34888 | 65.5% | 16.0% |
-| corporation | 4 | greedy | 35142 | 71.1% | 8.0% |
-| corporation | 4 | greedy_all | 35195 | 63.9% | 50.9% |
-| corporation | 8 | ai | 35154 | 60.4% | 11.2% |
-| corporation | 8 | greedy | 35138 | 65.8% | 6.0% |
-| corporation | 8 | greedy_all | 35145 | 59.7% | 45.1% |
-| corporation | 16 | ai | 35005 | 60.3% | 22.3% |
-| corporation | 16 | greedy | 35211 | 64.4% | 14.1% |
-| corporation | 16 | greedy_all | 35308 | 59.0% | 66.9% |
-| gobcorp | 1 | ai | 35116 | 98.1% | 0.0% |
-| gobcorp | 1 | greedy | 34991 | 99.7% | 0.0% |
-| gobcorp | 1 | greedy_all | 34991 | 99.7% | 0.0% |
-| gobcorp | 4 | ai | 34963 | 80.6% | 0.1% |
-| gobcorp | 4 | greedy | 34705 | 91.3% | 0.0% |
-| gobcorp | 4 | greedy_all | 34895 | 89.5% | 0.0% |
-| gobcorp | 8 | ai | 34909 | 75.8% | 0.2% |
-| gobcorp | 8 | greedy | 35130 | 91.1% | 0.0% |
-| gobcorp | 8 | greedy_all | 34997 | 90.1% | 0.0% |
-| gobcorp | 16 | ai | 35288 | 75.7% | 0.3% |
-| gobcorp | 16 | greedy | 34964 | 91.3% | 0.0% |
-| gobcorp | 16 | greedy_all | 35069 | 90.0% | 0.0% |
+| corporation | 1 | ai | 35084 | 74.2% | 7.4% |
+| corporation | 1 | greedy | 35101 | 81.3% | 3.7% |
+| corporation | 1 | greedy_all | 35026 | 74.2% | 12.3% |
+| corporation | 4 | ai | 35198 | 64.2% | 23.2% |
+| corporation | 4 | greedy | 35032 | 68.6% | 12.4% |
+| corporation | 4 | greedy_all | 35260 | 62.5% | 55.0% |
+| corporation | 8 | ai | 35156 | 59.7% | 16.2% |
+| corporation | 8 | greedy | 34620 | 63.7% | 9.1% |
+| corporation | 8 | greedy_all | 35174 | 58.9% | 50.1% |
+| corporation | 16 | ai | 35041 | 59.9% | 30.8% |
+| corporation | 16 | greedy | 35027 | 62.8% | 19.1% |
+| corporation | 16 | greedy_all | 34845 | 58.7% | 71.3% |
+| gobcorp | 1 | ai | 35380 | 80.4% | 9.6% |
+| gobcorp | 1 | greedy | 34894 | 87.2% | 2.7% |
+| gobcorp | 1 | greedy_all | 34894 | 87.2% | 2.7% |
+| gobcorp | 4 | ai | 34887 | 68.4% | 32.3% |
+| gobcorp | 4 | greedy | 35137 | 74.1% | 10.6% |
+| gobcorp | 4 | greedy_all | 35009 | 72.8% | 10.2% |
+| gobcorp | 8 | ai | 35275 | 62.1% | 36.3% |
+| gobcorp | 8 | greedy | 35041 | 75.6% | 4.3% |
+| gobcorp | 8 | greedy_all | 34765 | 75.0% | 3.5% |
+| gobcorp | 16 | ai | 35094 | 61.6% | 37.2% |
+| gobcorp | 16 | greedy | 35039 | 75.5% | 4.5% |
+| gobcorp | 16 | greedy_all | 34840 | 75.3% | 3.9% |
 
 ### Cartel payers and succession
 
-| Vassals | Policy | Payers (last 20 y, mean) | Walk-offs within 5 y of a succession, per succession |
-|---|---|---|---|
-| 1 | ai | 1.34 | 0.412 |
-| 1 | greedy | 2.89 | 0.381 |
-| 1 | greedy_all | 3.61 | 0.306 |
-| 4 | ai | 1.77 | 0.354 |
-| 4 | greedy | 3.55 | 0.312 |
-| 4 | greedy_all | 5.13 | 0.118 |
-| 8 | ai | 2.18 | 0.287 |
-| 8 | greedy | 4.43 | 0.207 |
-| 8 | greedy_all | 5.53 | 0.083 |
-| 16 | ai | 2.80 | 0.165 |
-| 16 | greedy | 5.20 | 0.091 |
-| 16 | greedy_all | 5.62 | 0.073 |
+| Vassals | Policy | Payers (last 20 y, mean) | Walk-offs within 5 y of a succession | within 10 y |
+|---|---|---|---|---|
+| 1 | ai | 1.36 | 0.416 | 0.516 |
+| 1 | greedy | 2.96 | 0.381 | 0.606 |
+| 1 | greedy_all | 3.64 | 0.291 | 0.468 |
+| 4 | ai | 1.82 | 0.346 | 0.436 |
+| 4 | greedy | 3.70 | 0.285 | 0.457 |
+| 4 | greedy_all | 5.21 | 0.082 | 0.124 |
+| 8 | ai | 2.33 | 0.253 | 0.318 |
+| 8 | greedy | 4.67 | 0.173 | 0.289 |
+| 8 | greedy_all | 5.60 | 0.039 | 0.047 |
+| 16 | ai | 3.00 | 0.125 | 0.146 |
+| 16 | greedy | 5.34 | 0.058 | 0.092 |
+| 16 | greedy_all | 5.72 | 0.027 | 0.027 |
 
 ### Cybernetics (one ruler from installation; tier by realm size)
 
 | Vassals | Policy | Reach Enhanced | Reach Overclocked | OC within 20 y | Cascade (NF) | Seamless | Cascade death | Natural death | Median years to OC | to NF |
 |---|---|---|---|---|---|---|---|---|---|---|
-| 1 | ai | 12.7% | 2.8% | 0.2% | 2.3% | 0.5% | 0.8% | 96.5% | 48.0 | 50.0 |
-| 1 | greedy | 33.2% | 16.3% | 12.3% | 14.3% | 5.3% | 4.2% | 93.5% | 14.0 | 17.0 |
-| 1 | greedy_all | 33.2% | 16.3% | 12.3% | 14.3% | 5.3% | 4.2% | 93.5% | 14.0 | 17.0 |
-| 4 | ai | 12.6% | 2.6% | 0.2% | 2.3% | 0.6% | 0.7% | 96.8% | 48.0 | 50.5 |
-| 4 | greedy | 33.2% | 16.8% | 12.6% | 14.8% | 5.5% | 4.6% | 92.9% | 14.0 | 18.0 |
-| 4 | greedy_all | 33.2% | 16.8% | 12.6% | 14.8% | 5.5% | 4.6% | 92.9% | 14.0 | 18.0 |
-| 8 | ai | 12.9% | 2.6% | 0.2% | 2.3% | 0.5% | 0.9% | 96.4% | 48.5 | 51.0 |
-| 8 | greedy | 33.3% | 16.7% | 12.6% | 14.7% | 5.5% | 4.5% | 93.1% | 14.0 | 17.0 |
-| 8 | greedy_all | 33.3% | 16.7% | 12.6% | 14.7% | 5.5% | 4.5% | 93.1% | 14.0 | 17.0 |
-| 16 | ai | 12.9% | 2.7% | 0.2% | 2.4% | 0.8% | 0.8% | 96.9% | 43.0 | 46.0 |
-| 16 | greedy | 33.6% | 17.1% | 13.2% | 15.2% | 5.3% | 5.0% | 92.7% | 14.0 | 18.0 |
-| 16 | greedy_all | 33.6% | 17.1% | 13.2% | 15.2% | 5.3% | 5.0% | 92.7% | 14.0 | 18.0 |
+| 1 | ai | 25.0% | 5.4% | 0.4% | 4.7% | 1.2% | 1.6% | 96.2% | 47.0 | 50.0 |
+| 1 | greedy | 65.4% | 34.0% | 25.9% | 30.1% | 11.0% | 9.4% | 89.0% | 14.0 | 18.0 |
+| 1 | greedy_all | 65.4% | 34.0% | 25.9% | 30.1% | 11.0% | 9.4% | 89.0% | 14.0 | 18.0 |
+| 4 | ai | 25.2% | 5.5% | 0.4% | 4.8% | 1.1% | 1.8% | 95.8% | 46.0 | 48.0 |
+| 4 | greedy | 64.5% | 34.0% | 26.1% | 30.4% | 11.0% | 9.4% | 88.6% | 14.0 | 18.0 |
+| 4 | greedy_all | 64.5% | 34.0% | 26.1% | 30.4% | 11.0% | 9.4% | 88.6% | 14.0 | 18.0 |
+| 8 | ai | 25.5% | 5.6% | 0.4% | 4.9% | 1.1% | 1.8% | 95.8% | 48.0 | 51.0 |
+| 8 | greedy | 64.0% | 33.8% | 26.1% | 30.1% | 10.7% | 9.4% | 89.0% | 14.0 | 17.0 |
+| 8 | greedy_all | 64.0% | 33.8% | 26.1% | 30.1% | 10.7% | 9.4% | 89.0% | 14.0 | 17.0 |
+| 16 | ai | 25.0% | 5.3% | 0.4% | 4.5% | 1.2% | 1.7% | 95.9% | 47.0 | 50.0 |
+| 16 | greedy | 65.1% | 33.8% | 25.8% | 29.8% | 11.0% | 9.2% | 89.1% | 14.0 | 17.0 |
+| 16 | greedy_all | 65.1% | 33.8% | 25.8% | 29.8% | 11.0% | 9.2% | 89.1% | 14.0 | 17.0 |
 
 ### Frontier (one project; 100-year horizon)
 
@@ -332,86 +341,138 @@ Generated by `docs/tools/sim/report_tables.py` from `results.json`.
 
 | Vassals | Policy | Metric | Before | After |
 |---|---|---|---|---|
-| 16 | greedy_all | equilibrium | 0.000 | 9.250 |
-| 16 | greedy_all | dead_lo_20y | 0.524 | 0.000 |
-| 16 | greedy_all | at_hi | 0.002 | 0.017 |
-| 16 | greedy_all | at_lo | 0.572 | 0.058 |
-| 16 | greedy_all | vassal_eq | 82.719 | 82.719 |
-| 16 | ai | equilibrium | 29.000 | 36.000 |
+| 16 | greedy_all | equilibrium | 0.000 | 9.625 |
+| 16 | greedy_all | dead_lo_20y | 0.522 | 0.000 |
+| 16 | greedy_all | at_hi | 0.001 | 0.013 |
+| 16 | greedy_all | at_lo | 0.584 | 0.057 |
+| 16 | greedy_all | vassal_eq | 85.272 | 85.272 |
+| 16 | ai | equilibrium | 32.500 | 37.500 |
 | 16 | ai | dead_lo_20y | 0.000 | 0.000 |
 | 16 | ai | at_hi | 0.003 | 0.004 |
-| 16 | ai | at_lo | 0.019 | 0.006 |
-| 16 | ai | vassal_eq | 54.902 | 54.902 |
-| 16 | greedy | equilibrium | 44.250 | 54.562 |
+| 16 | ai | at_lo | 0.012 | 0.005 |
+| 16 | ai | vassal_eq | 64.824 | 64.824 |
+| 16 | greedy | equilibrium | 47.500 | 55.375 |
 | 16 | greedy | dead_lo_20y | 0.000 | 0.000 |
-| 16 | greedy | at_hi | 0.083 | 0.100 |
-| 16 | greedy | at_lo | 0.012 | 0.003 |
-| 16 | greedy | vassal_eq | 54.797 | 54.797 |
+| 16 | greedy | at_hi | 0.084 | 0.103 |
+| 16 | greedy | at_lo | 0.007 | 0.002 |
+| 16 | greedy | vassal_eq | 64.822 | 64.822 |
 
 **P2** `pmc` override {'eotg_pmc_deliver_liege_value': 2}:
 
 | Vassals | Policy | Metric | Before | After |
 |---|---|---|---|---|
-| 16 | ai | equilibrium | 58.250 | 41.195 |
+| 16 | ai | equilibrium | 59.751 | 42.839 |
 | 16 | ai | dead_lo_20y | 0.000 | 0.000 |
-| 16 | ai | at_hi | 0.006 | 0.000 |
-| 16 | ai | at_lo | 0.000 | 0.001 |
-| 16 | ai | vassal_eq | 32.266 | 32.266 |
-| 1 | ai | equilibrium | 29.109 | 27.500 |
-| 1 | ai | dead_lo_20y | 0.004 | 0.006 |
+| 16 | ai | at_hi | 0.010 | 0.000 |
+| 16 | ai | at_lo | 0.000 | 0.000 |
+| 16 | ai | vassal_eq | 35.253 | 35.253 |
+| 1 | ai | equilibrium | 29.547 | 27.703 |
+| 1 | ai | dead_lo_20y | 0.003 | 0.004 |
 | 1 | ai | at_hi | 0.000 | 0.000 |
-| 1 | ai | at_lo | 0.008 | 0.011 |
-| 1 | ai | vassal_eq | 30.938 | 30.938 |
+| 1 | ai | at_lo | 0.007 | 0.010 |
+| 1 | ai | vassal_eq | 34.453 | 34.453 |
 | 16 | greedy_all | equilibrium | 100.000 | 100.000 |
 | 16 | greedy_all | dead_lo_20y | 0.000 | 0.000 |
-| 16 | greedy_all | at_hi | 0.567 | 0.458 |
+| 16 | greedy_all | at_hi | 0.778 | 0.597 |
 | 16 | greedy_all | at_lo | 0.000 | 0.000 |
-| 16 | greedy_all | vassal_eq | 66.425 | 66.425 |
+| 16 | greedy_all | vassal_eq | 68.575 | 68.575 |
+
+**P2-cap** `pmc` override {'pmc_deliver_liege_once_a_year': True}:
+
+| Vassals | Policy | Metric | Before | After |
+|---|---|---|---|---|
+| 16 | ai | equilibrium | 59.751 | 56.223 |
+| 16 | ai | dead_lo_20y | 0.000 | 0.000 |
+| 16 | ai | at_hi | 0.010 | 0.002 |
+| 16 | ai | at_lo | 0.000 | 0.000 |
+| 16 | ai | vassal_eq | 35.253 | 35.253 |
+| 1 | ai | equilibrium | 29.547 | 29.547 |
+| 1 | ai | dead_lo_20y | 0.003 | 0.003 |
+| 1 | ai | at_hi | 0.000 | 0.000 |
+| 1 | ai | at_lo | 0.007 | 0.007 |
+| 1 | ai | vassal_eq | 34.453 | 34.453 |
+| 16 | greedy_all | equilibrium | 100.000 | 100.000 |
+| 16 | greedy_all | dead_lo_20y | 0.000 | 0.000 |
+| 16 | greedy_all | at_hi | 0.778 | 0.570 |
+| 16 | greedy_all | at_lo | 0.000 | 0.000 |
+| 16 | greedy_all | vassal_eq | 68.575 | 68.575 |
 
 **P3** `gobcorp` override {'eotg_gobcorp_war_loss_value': -3}:
 
 | Vassals | Policy | Metric | Before | After |
 |---|---|---|---|---|
-| 4 | ai | equilibrium | 23.656 | 33.875 |
+| 4 | ai | equilibrium | 23.306 | 33.758 |
 | 4 | ai | dead_lo_20y | 0.000 | 0.000 |
 | 4 | ai | at_hi | 0.000 | 0.000 |
 | 4 | ai | at_lo | 0.024 | 0.007 |
-| 4 | ai | vassal_eq | 10.000 | 15.589 |
-| 16 | ai | equilibrium | 26.750 | 36.500 |
+| 4 | ai | vassal_eq | 57.379 | 59.686 |
+| 16 | ai | equilibrium | 26.954 | 37.000 |
 | 16 | ai | dead_lo_20y | 0.000 | 0.000 |
-| 16 | ai | at_hi | 0.000 | 0.001 |
-| 16 | ai | at_lo | 0.021 | 0.006 |
-| 16 | ai | vassal_eq | 9.379 | 14.898 |
+| 16 | ai | at_hi | 0.000 | 0.000 |
+| 16 | ai | at_lo | 0.020 | 0.005 |
+| 16 | ai | vassal_eq | 56.521 | 59.040 |
 
 **P4** `cybernetics` override {'eotg_aug_dev_gate_overclocked': 15}:
 
 | Vassals | Policy | Metric | Before | After |
 |---|---|---|---|---|
-| 4 | ai | reach_3 | 0.026 | 0.036 |
-| 4 | ai | oc_within_20y | 0.002 | 0.003 |
-| 4 | ai | cascade_death | 0.007 | 0.012 |
-| 4 | greedy | reach_3 | 0.168 | 0.261 |
-| 4 | greedy | oc_within_20y | 0.126 | 0.207 |
-| 4 | greedy | cascade_death | 0.046 | 0.072 |
+| 4 | ai | reach_3 | 0.055 | 0.075 |
+| 4 | ai | oc_within_20y | 0.004 | 0.007 |
+| 4 | ai | cascade_death | 0.018 | 0.024 |
+| 4 | greedy | reach_3 | 0.340 | 0.507 |
+| 4 | greedy | oc_within_20y | 0.261 | 0.418 |
+| 4 | greedy | cascade_death | 0.094 | 0.145 |
 
 **P5** `cartel` override {'eotg_cartel_on_death.years': 5}:
 
 | Vassals | Policy | Metric | Before | After |
 |---|---|---|---|---|
-| 4 | ai | equilibrium | 58.000 | 58.000 |
+| 4 | ai | equilibrium | 59.000 | 59.000 |
 | 4 | ai | dead_lo_20y | 0.000 | 0.000 |
-| 4 | ai | at_hi | 0.007 | 0.007 |
-| 4 | ai | at_lo | 0.062 | 0.060 |
-| 4 | ai | post_succession_walkoffs | 0.354 | 0.000 |
-| 4 | ai | payers_eq | 1.773 | 1.885 |
-| 16 | ai | equilibrium | 67.750 | 67.750 |
+| 4 | ai | at_hi | 0.009 | 0.009 |
+| 4 | ai | at_lo | 0.059 | 0.057 |
+| 4 | ai | post_succession_walkoffs | 0.346 | 0.000 |
+| 4 | ai | post_succession_walkoffs_10y | 0.436 | 0.218 |
+| 4 | ai | payers_eq | 1.821 | 1.931 |
+| 16 | ai | equilibrium | 70.000 | 70.000 |
 | 16 | ai | dead_lo_20y | 0.000 | 0.000 |
-| 16 | ai | at_hi | 0.053 | 0.053 |
-| 16 | ai | at_lo | 0.042 | 0.042 |
-| 16 | ai | post_succession_walkoffs | 0.165 | 0.000 |
-| 16 | ai | payers_eq | 2.799 | 2.871 |
+| 16 | ai | at_hi | 0.071 | 0.071 |
+| 16 | ai | at_lo | 0.040 | 0.039 |
+| 16 | ai | post_succession_walkoffs | 0.125 | 0.000 |
+| 16 | ai | post_succession_walkoffs_10y | 0.146 | 0.043 |
+| 16 | ai | payers_eq | 3.002 | 3.060 |
 
 
+### Side checks (`--checks`, 2,000 runs each)
+
+| Check | Override | Vassals | Policy | Equilibrium | Vassal median | 20y stuck at 0 | At 100 |
+|---|---|---|---|---|---|---|---|
+| P2-alt | {'eotg_pmc_deliver_liege_value': 1} | 16 | ai | 35.8 | 35.2 | 0.0% | 0.0% |
+| P3-alt | {'eotg_gobcorp_peace_gain_value': 2} | 4 | ai | 60.0 | 90.0 | 0.0% | 2.5% |
+| P3-alt | {'eotg_gobcorp_peace_gain_value': 2} | 16 | ai | 59.2 | 89.4 | 0.0% | 2.7% |
+| P1-cap-alt | {'eotg_corporation_court_erosion_value': -3} | 16 | greedy_all | 0.0 | 85.3 | 31.6% | 0.4% |
+
+**Trade Oligarchy war-share sweep** (4 Princes, AI; the top's own war share varied):
+
+| Top war share | Passive feed / year | First Prince equilibrium | Vassal median |
+|---|---|---|---|
+| 10.0% | +0.50 | 54.6 | 59.4 |
+| 15.0% | +0.25 | 43.9 | 58.6 |
+| 20.0% | +0.00 | 31.2 | 57.7 |
+| 25.0% | -0.25 | 20.2 | 57.2 |
+| 30.0% | -0.50 | 10.0 | 56.8 |
+
+### Frontier in a hostile world (`--hostile`: war reaches the Shoal 25%/yr, Dangerous 40%, occupied 6%/yr; AI holder)
+
+| Type | Completed | Abandoned | Years to complete (median / p90) | Falters per project |
+|---|---|---|---|---|
+| settlement | 98.8% | 1.2% | 11.0 / 13.0 | 0.032 |
+| trade | 97.5% | 2.5% | 13.0 / 15.0 | 0.072 |
+| mining | 97.5% | 2.5% | 13.0 / 15.0 | 0.075 |
+| military | 100.0% | 0.0% | 13.0 / 15.0 | 0.001 |
+| religious | 96.7% | 3.3% | 14.0 / 16.0 | 0.097 |
+| research | 95.7% | 4.3% | 15.0 / 17.0 | 0.124 |
+| administrative | 90.8% | 9.2% | 13.0 / 16.0 | 0.275 |
 
 ## Appendix B: the static exploit scan
 
@@ -427,6 +488,7 @@ Every number that is not read from the mod's script. The model files carry the s
 - `ruler_mortality_per_year`: (0.035, 'mean reign about 28 years')
 - `war_start_per_year`: (0.15, 'a realm enters a war 0.15/yr')
 - `war_end_per_year`: (0.5, 'wars last about 2 years; ~23% of years at war')
+- `vassal_own_war_start_per_year`: (0.015, 'a vassal starts its own war 0.015/yr, ending at war_end_per_year: ~3% of years')
 - `battles_per_war_year`: (2.0, 'Poisson mean, as war leader')
 - `battle_win_chance`: (0.5, 'even odds')
 - `gold_income_by_tier`: ({2: 25.0, 3: 60.0, 4: 150.0, 5: 300.0}, 'net yearly income')
@@ -499,3 +561,5 @@ Every number that is not read from the mod's script. The model files carry the s
 - **Exits:** Stand Down is counted but the run continues as a PMC.
 - **Cybernetics models one ruler from installation** (installation rates are not modelled), with no downgrade or excision decisions, and no sedation or restraint in the NF drift.
 - **Frontier models one project at a time;** realm size does not apply to it.
+- **War state is per owner (H2a):** the top at war about 23% of years, each vassal about 3% from its own wars; a liege's war does not put its vassals at war.
+- **Every director, payer and Prince is a direct vassal of the top** (no nesting; see H1).

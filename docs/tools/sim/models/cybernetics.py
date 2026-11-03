@@ -68,10 +68,13 @@ def run(R, size, policy, runs, years, seed):
     terminal = _terminal(R)
     flags = {k: rng.random(runs) < p for k, p in FLAGS.items()}
     # capital development: sampled from the vanilla distribution (log-linear CDF), then grows
-    u = rng.random(runs)
+    # H2a fix 2: initiation itself needs capital development >= 10
+    # (common/scripted_triggers/eotg_augmentation_triggers.txt:87-88), so every
+    # installed ruler is drawn from the >= 10 part of the distribution: u is uniform
+    # on (0, P(dev >= 10)], then the log-linear CDF is inverted as before.
+    u = rng.random(runs) * DEV_CDF[min(DEV_CDF)]
     xs = sorted(DEV_CDF); ys = np.log([DEV_CDF[k] for k in xs])
     dev = np.interp(np.log(np.clip(u, 1e-6, 1)), ys[::-1], np.array(xs, float)[::-1])
-    dev = np.where(u > DEV_CDF[10], rng.uniform(0, 10, runs), dev)
     tier = np.ones(runs, int)            # 1, 2, 3 = OC, 4 = NF, 5 = Seamless, 0 = dead (natural), -1 = cascade death
     settle = np.full(runs, settle_years); cd = np.zeros(runs); risk = np.zeros(runs)
     stress = rng.choice(4, runs, p=list(STRESS.values()))
@@ -172,5 +175,5 @@ def run(R, size, policy, runs, years, seed):
     by_tier = {f'natural_death_at_tier_{t}': float(np.mean((tier == 0) & (death_tier == t))) for t in (1, 2, 3, 4, 5)}
     return {'risk': hist_risk, 'tier': hist_tier, 'end_states': end, 'reach': reach, 'death_by_tier': by_tier,
             'derived': {'settle_years': settle_years, 'gate_enhanced': gate2, 'gate_overclocked': gate3,
-                        'p_dev_gate_enhanced': _dev_share(gate2), 'p_dev_gate_overclocked': _dev_share(gate3),
+                        'p_dev_gate_enhanced': _dev_share(gate2) / _dev_share(10), 'p_dev_gate_overclocked': _dev_share(gate3) / _dev_share(10),
                         'oc_calls': [(len(c), a, l) for c, a, l in oc_calls]}}

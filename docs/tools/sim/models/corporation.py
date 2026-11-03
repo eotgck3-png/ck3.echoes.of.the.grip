@@ -39,7 +39,7 @@ def run(R, size, policy, runs, years, seed):
         w.step_war(); w.step_gold()
         # yearly results tick (first_valid: debt, then solvent at peace)
         top = np.where(w.top_gold < 0, chg(top, debt), np.where((w.top_gold > 0) & ~w.at_war, chg(top, gain), top))
-        vas = np.where(w.v_gold < 0, chg(vas, debt), np.where((w.v_gold > 0) & ~w.at_war[:, None], chg(vas, gain), vas))
+        vas = np.where(w.v_gold < 0, chg(vas, debt), np.where((w.v_gold > 0) & ~w.v_at_war, chg(vas, gain), vas))
         # Restructure (top sink; the greedy policy keeps its resource)
         if policy == 'ai':
             ctx = Ctx({V: top, 'gold': w.top_gold, 'tier': w.top_tier, 'trig:eotg_corporation_role_top': True,
