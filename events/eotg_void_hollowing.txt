@@ -1,0 +1,259 @@
+﻿# -- eotg_void_hollowing.txt --------------------------------------------------
+# Void Corruption v2, stage D (docs/specs/void_corruption_v2.md §3.4). Lifted
+# from v1 events/eotg_void_hollowing.txt: 0030-0032.
+#
+# Ruling R8 (default (orchestrator, 2026-11-03), pending owner): after the
+# Hollowing, exposure is pinned at 100 and the stage's resource is
+# eotg_void_hollowing_depth (0-100; single writer
+# eotg_void_change_hollowing_depth_effect). Every option here moves depth.
+# Depth drifts +4 a year (the on_action), tilts the 0031/0032 pool, and shows
+# as two bands (Far Off 50, Gone Quiet 85).
+#
+# Fired only by eotg_on_yearly_void_check (cooldown authority).
+# UNVALIDATED cloud build.
+# -----------------------------------------------------------------------------
+
+namespace = eotg_void
+
+# -- 0030 The Hollowing ----------------------------------------------------------
+eotg_void.0030 = {
+    type = character_event
+    title = eotg_void.0030.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { eotg_void_is_cult_faith = yes }
+                desc = eotg_void.0030.desc_cult
+            }
+            desc = eotg_void.0030.desc
+        }
+    }
+    theme = corruption
+    override_background = { reference = eotg_bg_council }
+    left_portrait = {
+        character = root
+        animation = shock
+    }
+
+    immediate = {
+        eotg_void_become_hollowed_effect = yes
+    }
+
+    # Announce it as ascension (cult; inert, ruling R3).
+    option = {
+        name = eotg_void.0030.a
+        trigger = { eotg_void_is_cult_faith = yes }
+        add_piety = 400
+        add_prestige = 150
+        every_courtier = {
+            limit = { eotg_void_is_cult_faith = yes }
+            add_opinion = { modifier = eotg_opinion_void_kinship  target = root }
+        }
+        eotg_void_change_hollowing_depth_effect = { AMOUNT = 10 }
+        ai_chance = { base = 90 }
+    }
+
+    # [education: intrigue] Say nothing; rule.
+    option = {
+        name = eotg_void.0030.b
+        trigger = { has_trait = education_intrigue }
+        skill = intrigue
+        add_intrigue_skill = 2
+        if = {
+            limit = { NOT = { has_character_modifier = eotg_mod_void_unseen_step } }
+            add_character_modifier = { modifier = eotg_mod_void_unseen_step }
+        }
+        eotg_void_change_hollowing_depth_effect = { AMOUNT = 5 }
+        ai_chance = { base = 70 }
+    }
+
+    # Step down while the decision is still mine. Made real (ruling R9):
+    # v1's "Abdicate" did not abdicate.
+    option = {
+        name = eotg_void.0030.c
+        trigger = { exists = primary_heir }
+        add_piety = 300
+        primary_heir = {
+            add_opinion = { modifier = eotg_opinion_void_defiance_respect  target = root }
+        }
+        stress_impact = { base = major_stress_impact_loss }
+        eotg_void_change_hollowing_depth_effect = { AMOUNT = -15 }
+        eotg_void_step_down_effect = yes
+        ai_chance = {
+            base = 15
+            modifier = { add = 30  has_trait = humble }
+            modifier = { add = 25  has_trait = content }
+            modifier = { add = -40  has_trait = ambitious }
+        }
+    }
+
+    # Let them see it.
+    option = {
+        name = eotg_void.0030.d
+        add_dread = 50
+        add_prestige = 100
+        eotg_void_change_hollowing_depth_effect = { AMOUNT = 15 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 35  has_trait = callous }
+            modifier = { add = 30  has_trait = arrogant }
+            modifier = { add = 25  has_trait = ambitious }
+        }
+    }
+}
+
+# -- 0031 The Hollow Court ----------------------------------------------------------
+eotg_void.0031 = {
+    type = character_event
+    title = eotg_void.0031.t
+    desc = eotg_void.0031.desc
+    theme = dread
+    override_background = { reference = eotg_bg_council }
+    trigger = {
+        has_trait = eotg_void_hollowed
+    }
+    left_portrait = {
+        character = root
+        animation = personality_cynical
+    }
+
+    # [tier: duchy] Rule through it. Re-gated: an order to every vassal is
+    # authority (event_quality_v1.md §13.1 3b).
+    option = {
+        name = eotg_void.0031.a
+        trigger = { highest_held_title_tier >= tier_duchy }
+        add_dread = 30
+        add_prestige = 75
+        every_vassal = {
+            add_opinion = { modifier = eotg_opinion_void_unease  target = root }
+        }
+        eotg_void_change_hollowing_depth_effect = { AMOUNT = 10 }
+        ai_chance = {
+            base = 50
+            modifier = { add = 30  has_trait = callous }
+            modifier = { add = 25  has_trait = arrogant }
+        }
+    }
+
+    # [education: stewardship] Delegate what needs a person.
+    option = {
+        name = eotg_void.0031.b
+        trigger = { has_trait = education_stewardship }
+        skill = stewardship
+        add_stewardship_skill = 1
+        add_gold = 150
+        every_vassal = {
+            limit = {
+                opinion = { target = root  value < 0 }
+            }
+            add_opinion = { modifier = eotg_opinion_void_defiance_respect  target = root }
+        }
+        eotg_void_change_hollowing_depth_effect = { AMOUNT = 5 }
+        ai_chance = {
+            base = 60
+            modifier = { add = 25  has_trait = diligent }
+        }
+    }
+
+    # Sit at the table to the end.
+    option = {
+        name = eotg_void.0031.c
+        add_piety = 50
+        random_courtier = {
+            add_opinion = { modifier = eotg_opinion_void_defiance_respect  target = root }
+        }
+        stress_impact = {
+            base = medium_stress_impact_gain
+            shy = minor_stress_impact_gain
+        }
+        eotg_void_change_hollowing_depth_effect = { AMOUNT = -10 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = compassionate }
+            modifier = { add = 25  has_trait = gregarious }
+        }
+    }
+}
+
+# -- 0032 A Moment of Being -----------------------------------------------------------
+eotg_void.0032 = {
+    type = character_event
+    title = eotg_void.0032.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { age >= 60 }
+                desc = eotg_void.0032.desc_old
+            }
+            triggered_desc = {
+                trigger = { exists = primary_heir }
+                desc = eotg_void.0032.desc_heir
+            }
+            desc = eotg_void.0032.desc
+        }
+    }
+    theme = mental_health
+    override_background = { reference = eotg_bg_private_quarters }
+    trigger = {
+        has_trait = eotg_void_hollowed
+    }
+    left_portrait = {
+        character = root
+        animation = grief
+    }
+
+    option = {
+        name = eotg_void.0032.a
+        trigger = { exists = primary_heir }
+        primary_heir = {
+            add_opinion = { modifier = eotg_opinion_void_defiance_respect  target = root }
+        }
+        add_piety = 150
+        stress_impact = { base = major_stress_impact_loss }
+        eotg_void_change_hollowing_depth_effect = { AMOUNT = -15 }
+        ai_chance = {
+            base = 60
+            modifier = { add = 30  has_trait = compassionate }
+            modifier = { add = -25  has_trait = callous }
+        }
+    }
+
+    option = {
+        name = eotg_void.0032.b
+        every_courtier = {
+            add_opinion = { modifier = eotg_opinion_void_defiance_respect  target = root }
+        }
+        add_prestige = 100
+        eotg_void_change_hollowing_depth_effect = { AMOUNT = -10 }
+        ai_chance = {
+            base = 45
+            modifier = { add = 25  has_trait = gregarious }
+            modifier = { add = 25  has_trait = education_diplomacy }
+        }
+    }
+
+    option = {
+        name = eotg_void.0032.c
+        add_gold = 200
+        add_prestige = 50
+        eotg_void_change_hollowing_depth_effect = { AMOUNT = -5 }
+        ai_chance = {
+            base = 35
+            modifier = { add = 30  has_trait = diligent }
+            modifier = { add = 25  has_trait = greedy }
+            modifier = { add = -20  has_trait = compassionate }
+        }
+    }
+
+    option = {
+        name = eotg_void.0032.d
+        add_piety = 75
+        stress_impact = { base = major_stress_impact_loss }
+        eotg_void_change_hollowing_depth_effect = { AMOUNT = -20 }
+        ai_chance = {
+            base = 30
+            modifier = { add = 30  has_trait = content }
+            modifier = { add = 25  has_trait = shy }
+        }
+    }
+}

@@ -1,0 +1,125 @@
+﻿# -- eotg_void_triggers.txt ---------------------------------------------------
+# Void Corruption v2 (docs/specs/void_corruption_v2.md §3, §5). Lifted from v1
+# eotg_void_triggers.txt with the fixes in the spec's identifier table: the
+# eotg_st_ prefix is retired for eotg_void_*, the faith check is one inert
+# trigger, and the unused v1 triggers (eotg_st_is_void_hollowed,
+# eotg_st_void_rift_contact, eotg_st_void_resists) are not lifted.
+#
+# Signature resources (single writer each, eotg_void_effects.txt):
+#   eotg_void_exposure        0-100, stages A-C
+#   eotg_void_hollowing_depth 0-100, stage D (after the Hollowing)
+# UNVALIDATED cloud build.
+# -----------------------------------------------------------------------------
+
+# The cult branch (spec ruling R3, default (orchestrator, 2026-11-03), pending
+# owner). v1 tested faith = { religion_tag = eotg_religion_void_reverence } at
+# 23 call sites (v1_lift_readiness_cloud.md §6 correction 3). That is a faith
+# key, which breaks the map-agnostic rule, and v2 ships no such religion.
+# Every cult branch routes through this one trigger. It is FALSE until the
+# owner rules what a Void cult is in v2 (a doctrine or tenet check, as CB-12,
+# once faiths exist). Change the body here and nowhere else.
+eotg_void_is_cult_faith = {
+    always = no
+}
+
+eotg_void_has_exposure = {
+    has_variable = eotg_void_exposure
+}
+
+# A Void-Touched character close by: court, vassals or spouse.
+eotg_void_near_touched = {
+    OR = {
+        any_courtier = { has_trait = eotg_void_touched }
+        any_vassal = { has_trait = eotg_void_touched }
+        any_spouse = { has_trait = eotg_void_touched }
+    }
+}
+
+# Who accrues exposure each year. The Hollowed do not: their exposure is
+# pinned at 100 and stage D moves eotg_void_hollowing_depth instead.
+eotg_void_susceptible = {
+    is_landed = yes
+    NOT = { has_trait = eotg_void_hollowed }
+    OR = {
+        has_trait = eotg_grip_survivor
+        has_trait = eotg_void_touched
+        eotg_void_is_cult_faith = yes
+        eotg_void_near_touched = yes
+        has_character_flag = eotg_flag_void_seeded
+    }
+}
+
+# A Voidwalker at court. The flag sits on the Voidwalker courtier, created
+# from eotg_void_voidwalker_template (v1 bug: the flag was set on the RULER,
+# so this never matched; v1_lift_readiness_cloud.md V HIGH row 4, confirmed
+# in §6).
+eotg_void_has_voidwalker = {
+    any_courtier = {
+        has_character_flag = eotg_flag_void_voidwalker
+    }
+}
+
+# -- Stage gates (spec §3.2) ---------------------------------------------------
+
+# Stage A: whispers band (25+) without a trait.
+eotg_void_whisper_stage = {
+    eotg_void_has_exposure = yes
+    var:eotg_void_exposure >= 25
+    NOT = { has_trait = eotg_void_touched }
+    NOT = { has_trait = eotg_void_hollowed }
+}
+
+# Stage B: the Bargain (50+). A Void-Defiant character is never offered it
+# twice.
+eotg_void_bargain_ready = {
+    eotg_void_has_exposure = yes
+    var:eotg_void_exposure >= 50
+    NOT = { has_trait = eotg_void_touched }
+    NOT = { has_trait = eotg_void_hollowed }
+    NOT = { has_trait = eotg_void_defiant }
+}
+
+# Stage B forced: 75+ and not yet Touched or Hollowed. Void-Defiant does NOT
+# exempt a character (v1's comment said "with no trait"; the trigger never
+# excluded Defiant, and 0011 is written for exactly that case: the refusal
+# was never load-bearing).
+eotg_void_saturated = {
+    eotg_void_has_exposure = yes
+    var:eotg_void_exposure >= 75
+    NOT = { has_trait = eotg_void_touched }
+    NOT = { has_trait = eotg_void_hollowed }
+}
+
+# Stage C to D: Touched and exposure at the cap.
+eotg_void_hollowing_ready = {
+    has_trait = eotg_void_touched
+    eotg_void_has_exposure = yes
+    var:eotg_void_exposure >= 100
+}
+
+# Gate for both ward decisions: some exposure to push back, not Hollowed, not
+# already warded. v1's comment claimed a saturation cap the trigger never had;
+# there is none (a ward helps at any exposure short of the Hollowing).
+eotg_void_can_be_warded = {
+    eotg_void_has_exposure = yes
+    var:eotg_void_exposure >= 10
+    NOT = { has_trait = eotg_void_hollowed }
+    NOT = { has_character_modifier = eotg_mod_void_warded }
+}
+
+# Read only by eotg_void_on_actions.txt (cooldown authority, invariant 4).
+eotg_void_event_ready = {
+    NOT = { has_character_flag = eotg_flag_void_event_cooldown }
+}
+
+# Already holds the Insight for their education (re-application guard,
+# v1_lift_readiness_cloud.md V MED row 7).
+eotg_void_has_any_insight = {
+    OR = {
+        has_character_modifier = eotg_mod_void_deep_charts
+        has_character_modifier = eotg_mod_void_unseen_step
+        has_character_modifier = eotg_mod_void_cold_hand
+        has_character_modifier = eotg_mod_void_long_ledger
+        has_character_modifier = eotg_mod_void_borrowed_voice
+    }
+}

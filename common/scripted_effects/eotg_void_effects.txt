@@ -1,0 +1,301 @@
+﻿# -- eotg_void_effects.txt ----------------------------------------------------
+# Void Corruption v2 (docs/specs/void_corruption_v2.md). Lifted from v1
+# eotg_void_effects.txt. Changes:
+#   - one change effect per variable, and nothing else writes it:
+#       eotg_void_change_exposure_effect         -> eotg_void_exposure
+#       eotg_void_change_hollowing_depth_effect  -> eotg_void_hollowing_depth
+#     (v1's become_hollowed set the exposure directly; it now goes through
+#     the writer);
+#   - the Voidwalker is a flagged courtier from a character template (v1 set
+#     the flag on the ruler);
+#   - band, aura and Insight modifiers are guarded against re-application
+#     (add_character_modifier stacking is unknown: v1_lift_readiness_cloud.md
+#     §6);
+#   - eotg_se_apply/remove_void_corruption (v1 eotg_scripted_effects.txt,
+#     no callers, bypassed the state machine) are not lifted.
+# UNVALIDATED cloud build.
+# -----------------------------------------------------------------------------
+
+# -- Single writers -------------------------------------------------------------
+
+# The only writer of eotg_void_exposure. AMOUNT: a literal or a named value.
+eotg_void_change_exposure_effect = {
+    if = {
+        limit = { NOT = { has_variable = eotg_void_exposure } }
+        set_variable = { name = eotg_void_exposure  value = 0 }
+    }
+    change_variable = { name = eotg_void_exposure  add = $AMOUNT$ }
+    clamp_variable = { name = eotg_void_exposure  min = 0  max = 100 }
+    eotg_void_refresh_band_effect = yes
+}
+
+# The only writer of eotg_void_hollowing_depth (stage D, ruling R8). Does
+# nothing unless the character is Hollowed.
+eotg_void_change_hollowing_depth_effect = {
+    if = {
+        limit = { has_trait = eotg_void_hollowed }
+        if = {
+            limit = { NOT = { has_variable = eotg_void_hollowing_depth } }
+            set_variable = { name = eotg_void_hollowing_depth  value = 0 }
+        }
+        change_variable = { name = eotg_void_hollowing_depth  add = $AMOUNT$ }
+        clamp_variable = { name = eotg_void_hollowing_depth  min = 0  max = 100 }
+        eotg_void_refresh_depth_band_effect = yes
+    }
+}
+
+# Guarded removal (lint L005): remove a Void modifier only if it is held.
+eotg_void_remove_modifier_effect = {
+    if = {
+        limit = { has_character_modifier = $MODIFIER$ }
+        remove_character_modifier = $MODIFIER$
+    }
+}
+
+# -- Bands ------------------------------------------------------------------------
+
+# Exposure bands (spec §3.1): Whispers 25, Pressure 50, Saturation 75. The
+# Hollowed carry none (their state is the trait plus the depth band).
+eotg_void_refresh_band_effect = {
+    if = {
+        limit = {
+            NOT = { has_trait = eotg_void_hollowed }
+            var:eotg_void_exposure >= 75
+        }
+        eotg_void_remove_modifier_effect = { MODIFIER = eotg_mod_void_whispers }
+        eotg_void_remove_modifier_effect = { MODIFIER = eotg_mod_void_pressure }
+        if = {
+            limit = { NOT = { has_character_modifier = eotg_mod_void_saturation } }
+            add_character_modifier = { modifier = eotg_mod_void_saturation }
+        }
+    }
+    else_if = {
+        limit = {
+            NOT = { has_trait = eotg_void_hollowed }
+            var:eotg_void_exposure >= 50
+        }
+        eotg_void_remove_modifier_effect = { MODIFIER = eotg_mod_void_whispers }
+        eotg_void_remove_modifier_effect = { MODIFIER = eotg_mod_void_saturation }
+        if = {
+            limit = { NOT = { has_character_modifier = eotg_mod_void_pressure } }
+            add_character_modifier = { modifier = eotg_mod_void_pressure }
+        }
+    }
+    else_if = {
+        limit = {
+            NOT = { has_trait = eotg_void_hollowed }
+            var:eotg_void_exposure >= 25
+        }
+        eotg_void_remove_modifier_effect = { MODIFIER = eotg_mod_void_pressure }
+        eotg_void_remove_modifier_effect = { MODIFIER = eotg_mod_void_saturation }
+        if = {
+            limit = { NOT = { has_character_modifier = eotg_mod_void_whispers } }
+            add_character_modifier = { modifier = eotg_mod_void_whispers }
+        }
+    }
+    else = {
+        eotg_void_remove_modifier_effect = { MODIFIER = eotg_mod_void_whispers }
+        eotg_void_remove_modifier_effect = { MODIFIER = eotg_mod_void_pressure }
+        eotg_void_remove_modifier_effect = { MODIFIER = eotg_mod_void_saturation }
+    }
+}
+
+# Depth bands (spec §3.4): Far Off 50, Gone Quiet 85.
+eotg_void_refresh_depth_band_effect = {
+    if = {
+        limit = { var:eotg_void_hollowing_depth >= 85 }
+        eotg_void_remove_modifier_effect = { MODIFIER = eotg_mod_void_hollow_far }
+        if = {
+            limit = { NOT = { has_character_modifier = eotg_mod_void_hollow_quiet } }
+            add_character_modifier = { modifier = eotg_mod_void_hollow_quiet }
+        }
+    }
+    else_if = {
+        limit = { var:eotg_void_hollowing_depth >= 50 }
+        eotg_void_remove_modifier_effect = { MODIFIER = eotg_mod_void_hollow_quiet }
+        if = {
+            limit = { NOT = { has_character_modifier = eotg_mod_void_hollow_far } }
+            add_character_modifier = { modifier = eotg_mod_void_hollow_far }
+        }
+    }
+    else = {
+        eotg_void_remove_modifier_effect = { MODIFIER = eotg_mod_void_hollow_far }
+        eotg_void_remove_modifier_effect = { MODIFIER = eotg_mod_void_hollow_quiet }
+    }
+}
+
+# -- Stage transitions -------------------------------------------------------------
+
+# First contact (0001, 0024.a heir): opens accrual (eotg_void_susceptible reads
+# the flag) and starts the variable at 0 without a band change.
+eotg_void_seed_effect = {
+    add_character_flag = eotg_flag_void_seeded
+    if = {
+        limit = { NOT = { has_variable = eotg_void_exposure } }
+        eotg_void_change_exposure_effect = { AMOUNT = 0 }
+    }
+}
+
+# Stage C (0010.a, 0011 immediate).
+eotg_void_become_touched_effect = {
+    if = {
+        limit = { has_trait = eotg_void_defiant }
+        remove_trait = eotg_void_defiant
+    }
+    if = {
+        limit = { NOT = { has_trait = eotg_void_touched } }
+        add_trait = eotg_void_touched
+    }
+    eotg_void_remove_modifier_effect = { MODIFIER = eotg_mod_void_warded }
+    if = {
+        limit = { NOT = { has_character_modifier = eotg_mod_void_aura } }
+        add_character_modifier = { modifier = eotg_mod_void_aura }
+    }
+}
+
+# Stage B refused (0010.b).
+eotg_void_become_defiant_effect = {
+    if = {
+        limit = { NOT = { has_trait = eotg_void_defiant } }
+        add_trait = eotg_void_defiant
+    }
+    eotg_void_change_exposure_effect = { AMOUNT = -25 }
+    eotg_void_remove_modifier_effect = { MODIFIER = eotg_mod_void_warded }
+    add_character_modifier = { modifier = eotg_mod_void_warded  years = 10 }
+}
+
+# Stage D (0030 immediate). Order matters: exposure to the cap through the
+# writer, then the trait, then the band refresh clears the band modifiers.
+eotg_void_become_hollowed_effect = {
+    eotg_void_change_exposure_effect = { AMOUNT = 100 }
+    if = {
+        limit = { has_trait = eotg_void_touched }
+        remove_trait = eotg_void_touched
+    }
+    add_trait = eotg_void_hollowed
+    eotg_void_remove_modifier_effect = { MODIFIER = eotg_mod_void_aura }
+    eotg_void_refresh_band_effect = yes
+    eotg_void_change_hollowing_depth_effect = { AMOUNT = eotg_void_hollowing_start_value }
+    add_dread = 40
+    every_courtier = {
+        add_opinion = { modifier = eotg_opinion_void_unreachable  target = root }
+    }
+}
+
+# Insight matched to education (0010.a/c, 0011.a/c, 0023.a, 0024.b, Commune).
+# One Insight per character: if any is held, the skill gain still applies and
+# no modifier is added (re-application guard).
+eotg_void_insight_effect = {
+    if = {
+        limit = { has_trait = education_learning }
+        add_learning_skill = 2
+        if = {
+            limit = { eotg_void_has_any_insight = no }
+            add_character_modifier = { modifier = eotg_mod_void_deep_charts }
+        }
+    }
+    else_if = {
+        limit = { has_trait = education_intrigue }
+        add_intrigue_skill = 2
+        if = {
+            limit = { eotg_void_has_any_insight = no }
+            add_character_modifier = { modifier = eotg_mod_void_unseen_step }
+        }
+    }
+    else_if = {
+        limit = { has_trait = education_martial }
+        add_martial_skill = 2
+        if = {
+            limit = { eotg_void_has_any_insight = no }
+            add_character_modifier = { modifier = eotg_mod_void_cold_hand }
+        }
+    }
+    else_if = {
+        limit = { has_trait = education_stewardship }
+        add_stewardship_skill = 2
+        if = {
+            limit = { eotg_void_has_any_insight = no }
+            add_character_modifier = { modifier = eotg_mod_void_long_ledger }
+        }
+    }
+    else_if = {
+        limit = { has_trait = education_diplomacy }
+        add_diplomacy_skill = 2
+        if = {
+            limit = { eotg_void_has_any_insight = no }
+            add_character_modifier = { modifier = eotg_mod_void_borrowed_voice }
+        }
+    }
+    else = {
+        add_prowess_skill = 2
+        if = {
+            limit = { eotg_void_has_any_insight = no }
+            add_character_modifier = { modifier = eotg_mod_void_cold_hand }
+        }
+    }
+}
+
+# A timed ward (0001.a, 0004.b, 0011.b, 0021.a child, 0022.a). Replaces any
+# running ward rather than stacking a second copy.
+eotg_void_add_ward_effect = {
+    eotg_void_remove_modifier_effect = { MODIFIER = eotg_mod_void_warded }
+    add_character_modifier = { modifier = eotg_mod_void_warded  years = $YEARS$ }
+}
+
+# The Warding Rite decision. The shared ward cooldown is a flag because two
+# decisions share it (a decision cooldown block is per decision).
+eotg_void_warding_rite_effect = {
+    eotg_void_change_exposure_effect = { AMOUNT = -20 }
+    eotg_void_add_ward_effect = { YEARS = 8 }
+    add_character_flag = { flag = eotg_flag_void_ward_cooldown  years = 10 }
+}
+
+eotg_void_voidwalker_ward_effect = {
+    eotg_void_change_exposure_effect = { AMOUNT = -35 }
+    eotg_void_add_ward_effect = { YEARS = 10 }
+    add_character_flag = { flag = eotg_flag_void_ward_cooldown  years = 8 }
+}
+
+# -- The Voidwalker (0004) ---------------------------------------------------------
+
+# Creates the Voidwalker who comes to the gate, saved as
+# scope:eotg_void_voidwalker. Not yet a courtier: 0004.a seats them.
+# create_character shape: events/eotg_augmentation_kingpin.txt:1113-1120.
+eotg_void_create_voidwalker_effect = {
+    create_character = {
+        template = eotg_void_voidwalker_template
+        dynasty = none
+        location = root.capital_province
+        culture = root.culture
+        faith = root.faith
+        save_scope_as = eotg_void_voidwalker
+    }
+    scope:eotg_void_voidwalker = {
+        add_character_flag = eotg_flag_void_voidwalker
+    }
+}
+
+# 0004.a: seat the Voidwalker. The flag is on the courtier, which is what
+# eotg_void_has_voidwalker reads.
+eotg_void_shelter_voidwalker_effect = {
+    add_courtier = scope:eotg_void_voidwalker
+}
+
+# -- Stepping down (0030.c) ---------------------------------------------------------
+
+# Made real (ruling R9): v1's "Abdicate" did not abdicate. Shape copied from
+# eotg_aug_abdicate_effect (eotg_augmentation_effects.txt:1394-1404), which
+# cites vanilla stress_threshold_events.txt:16775 for depose = yes and
+# tgp_dynastic_cycle_decisions.txt:2155-2170 for the player hand-off. The
+# caller checks primary_heir.
+eotg_void_step_down_effect = {
+    primary_heir = { save_scope_as = eotg_void_successor }
+    if = {
+        limit = {
+            is_ai = no
+            scope:eotg_void_successor = { is_ai = yes }
+        }
+        set_player_character = scope:eotg_void_successor
+    }
+    depose = yes
+}

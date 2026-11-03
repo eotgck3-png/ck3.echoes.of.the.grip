@@ -1,0 +1,535 @@
+﻿# -- eotg_void_whispers.txt ---------------------------------------------------
+# Void Corruption v2, stages A and B (docs/specs/void_corruption_v2.md §3.2).
+# Lifted from v1 events/eotg_void_whispers.txt: 0001-0004, 0010, 0011.
+#
+# Every event here is fired by eotg_on_yearly_void_check
+# (common/on_action/eotg_void_on_actions.txt), which is also the only
+# cooldown authority: no event sets or reads eotg_flag_void_event_cooldown.
+# Every option reads or moves eotg_void_exposure (invariant 5), except where
+# the spec §8 lists the v1 option as unchanged and seeding (0001.b, 0002.b/d,
+# 0003.c), which seed or gate on the resource instead.
+# Themes are confirmed in 1.20 (v1_lift_readiness_cloud.md §6).
+# UNVALIDATED cloud build.
+# -----------------------------------------------------------------------------
+
+namespace = eotg_void
+
+# -- 0001 The Scar Reopens (contact) -------------------------------------------
+eotg_void.0001 = {
+    type = character_event
+    title = eotg_void.0001.t
+    desc = eotg_void.0001.desc
+    theme = disaster
+    override_background = { reference = eotg_bg_barren_world }
+    left_portrait = {
+        character = root
+        animation = disbelief
+    }
+
+    # [education: learning] Survey it properly.
+    option = {
+        name = eotg_void.0001.a
+        trigger = { has_trait = education_learning }
+        skill = learning
+        add_learning_skill = 1
+        eotg_void_add_ward_effect = { YEARS = 5 }
+        eotg_void_seed_effect = yes
+        eotg_void_change_exposure_effect = { AMOUNT = 5 }
+        ai_chance = {
+            base = 60
+            modifier = { add = 20  has_trait = curious }
+        }
+    }
+
+    # [tier: duchy] Wall it off. Re-gated from martial/stewardship education:
+    # an order to guards is authority (event_quality_v1.md §13.1 3b).
+    option = {
+        name = eotg_void.0001.b
+        trigger = { highest_held_title_tier >= tier_duchy }
+        remove_short_term_gold = 50
+        add_prestige = 40
+        eotg_void_seed_effect = yes
+        ai_chance = {
+            base = 30
+            modifier = { add = 20  has_trait = paranoid }
+            modifier = { add = -30  gold < 50 }
+            modifier = { add = -15  has_trait = brave }
+        }
+    }
+
+    # [brave] Go in myself. The cult also opens it (inert, ruling R3).
+    option = {
+        name = eotg_void.0001.c
+        trigger = {
+            OR = {
+                has_trait = brave
+                eotg_void_is_cult_faith = yes
+            }
+        }
+        trait = brave
+        eotg_void_seed_effect = yes
+        eotg_void_change_exposure_effect = { AMOUNT = 20 }
+        add_prestige = 75
+        stress_impact = {
+            base = minor_stress_impact_gain
+            brave = minor_stress_impact_loss
+            craven = medium_stress_impact_gain
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 40  eotg_void_is_cult_faith = yes }
+            modifier = { add = 25  has_trait = brave }
+        }
+    }
+
+    # Rebuild the barrier and say nothing.
+    option = {
+        name = eotg_void.0001.d
+        eotg_void_seed_effect = yes
+        eotg_void_change_exposure_effect = { AMOUNT = 10 }
+        stress_impact = { base = minor_stress_impact_gain }
+        ai_chance = {
+            base = 20
+            modifier = { add = 30  has_trait = craven }
+            modifier = { add = 20  has_trait = lazy }
+        }
+    }
+}
+
+# -- 0002 The Sound Under the Floor (stage A) ------------------------------------
+eotg_void.0002 = {
+    type = character_event
+    title = eotg_void.0002.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { eotg_void_is_cult_faith = yes }
+                desc = eotg_void.0002.desc_cult
+            }
+            triggered_desc = {
+                trigger = { has_trait = eotg_grip_survivor }
+                desc = eotg_void.0002.desc_bloodline
+            }
+            desc = eotg_void.0002.desc
+        }
+    }
+    theme = corruption
+    override_background = { reference = eotg_bg_private_quarters }
+    left_portrait = {
+        character = root
+        animation = worry
+    }
+
+    option = {
+        name = eotg_void.0002.a
+        trigger = { has_trait = education_learning }
+        skill = learning
+        add_learning_skill = 1
+        add_piety = 50
+        eotg_void_change_exposure_effect = { AMOUNT = -5 }
+        ai_chance = { base = 100 }
+    }
+
+    option = {
+        name = eotg_void.0002.b
+        trigger = { has_trait = education_martial }
+        skill = martial
+        add_martial_skill = 1
+        add_prestige = 50
+        stress_impact = { base = minor_stress_impact_gain }
+        ai_chance = { base = 100 }
+    }
+
+    option = {
+        name = eotg_void.0002.c
+        trigger = { has_trait = education_intrigue }
+        skill = intrigue
+        add_intrigue_skill = 1
+        eotg_void_change_exposure_effect = { AMOUNT = 5 }
+        random_courtier = {
+            add_opinion = { modifier = eotg_opinion_void_unease  target = root }
+        }
+        ai_chance = { base = 100 }
+    }
+
+    option = {
+        name = eotg_void.0002.d
+        trigger = { has_trait = education_stewardship }
+        skill = stewardship
+        add_stewardship_skill = 1
+        add_gold = 50
+        ai_chance = { base = 100 }
+    }
+
+    option = {
+        name = eotg_void.0002.e
+        trigger = { has_trait = education_diplomacy }
+        skill = diplomacy
+        add_diplomacy_skill = 1
+        eotg_void_change_exposure_effect = { AMOUNT = -3 }
+        stress_impact = { base = minor_stress_impact_loss }
+        ai_chance = { base = 100 }
+    }
+
+    option = {
+        name = eotg_void.0002.f
+        eotg_void_change_exposure_effect = { AMOUNT = 5 }
+        stress_impact = { base = minor_stress_impact_gain }
+        ai_chance = { base = 10 }
+    }
+}
+
+# -- 0003 The Star That Is Not There (stage A) -----------------------------------
+eotg_void.0003 = {
+    type = character_event
+    title = eotg_void.0003.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { age < 25 }
+                desc = eotg_void.0003.desc_young
+            }
+            triggered_desc = {
+                trigger = { age >= 60 }
+                desc = eotg_void.0003.desc_old
+            }
+            desc = eotg_void.0003.desc
+        }
+    }
+    theme = corruption
+    override_background = { reference = eotg_bg_corridor_night }
+    left_portrait = {
+        character = root
+        animation = thinking
+    }
+
+    option = {
+        name = eotg_void.0003.a
+        trigger = { age < 25 }
+        add_learning_skill = 1
+        eotg_void_change_exposure_effect = { AMOUNT = 8 }
+        stress_impact = { base = minor_stress_impact_loss }
+        ai_chance = {
+            base = 60
+            modifier = { add = 30  has_trait = curious }
+        }
+    }
+
+    option = {
+        name = eotg_void.0003.b
+        trigger = { age >= 60 }
+        add_piety = 75
+        eotg_void_change_exposure_effect = { AMOUNT = -8 }
+        stress_impact = { base = minor_stress_impact_gain }
+        ai_chance = {
+            base = 70
+            modifier = { add = 20  has_trait = patient }
+        }
+    }
+
+    option = {
+        name = eotg_void.0003.c
+        trigger = {
+            age >= 25
+            age < 60
+        }
+        add_stewardship_skill = 1
+        add_prestige = 30
+        ai_chance = { base = 60 }
+    }
+
+    option = {
+        name = eotg_void.0003.d
+        add_dread = 10
+        add_piety = -25
+        eotg_void_change_exposure_effect = { AMOUNT = 3 }
+        random_courtier = {
+            add_opinion = { modifier = eotg_opinion_void_unease  target = root }
+        }
+        stress_impact = {
+            compassionate = minor_stress_impact_gain
+        }
+        ai_chance = {
+            base = 10
+            modifier = { add = 30  has_trait = callous }
+            modifier = { add = 25  has_trait = wrathful }
+            modifier = { add = -40  has_trait = compassionate }
+        }
+    }
+}
+
+# -- 0004 The Voidwalker at the Gate -----------------------------------------------
+# Fixed (ruling R5): the Voidwalker is a real character, created here and
+# seated by option a, flagged so eotg_void_has_voidwalker matches. A seated
+# Voidwalker ends the re-rolls (the on_action's gate). Reframed (ruling R4):
+# a warrior of the Malvrick Orders who contains Void relics, not a hunted
+# heretic (REVIEW_866.md:64; the SETTING LORE body's hunts are outranked).
+eotg_void.0004 = {
+    type = character_event
+    title = eotg_void.0004.t
+    desc = eotg_void.0004.desc
+    theme = secret
+    override_background = { reference = eotg_bg_corridor_night }
+    left_portrait = {
+        character = root
+        animation = scheme
+    }
+    right_portrait = {
+        character = scope:eotg_void_voidwalker
+        animation = personality_rational
+    }
+
+    immediate = {
+        hidden_effect = {
+            eotg_void_create_voidwalker_effect = yes
+        }
+    }
+
+    # Give them a place at court.
+    option = {
+        name = eotg_void.0004.a
+        eotg_void_shelter_voidwalker_effect = yes
+        eotg_void_change_exposure_effect = { AMOUNT = -10 }
+        add_piety = -100
+        every_courtier = {
+            limit = { has_trait = zealous }
+            add_opinion = { modifier = eotg_opinion_void_shelters_voidwalker  target = root }
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 40  eotg_void_is_cult_faith = yes }
+            modifier = { add = 25  has_trait = cynical }
+            modifier = { add = 20  has_trait = education_learning }
+            modifier = { add = -60  has_trait = zealous }
+        }
+    }
+
+    # [education: learning or diplomacy] Hear them out, take the ward, let
+    # them go on.
+    option = {
+        name = eotg_void.0004.b
+        trigger = {
+            OR = {
+                has_trait = education_learning
+                has_trait = education_diplomacy
+            }
+        }
+        add_learning_skill = 1
+        eotg_void_change_exposure_effect = { AMOUNT = -5 }
+        eotg_void_add_ward_effect = { YEARS = 6 }
+        ai_chance = {
+            base = 50
+            modifier = { add = 20  has_trait = patient }
+        }
+    }
+
+    # Turn them away in front of the clergy.
+    option = {
+        name = eotg_void.0004.c
+        add_piety = 150
+        add_prestige = 50
+        eotg_void_change_exposure_effect = { AMOUNT = 5 }
+        ai_chance = {
+            base = 40
+            modifier = { add = 50  has_trait = zealous }
+            modifier = { add = 20  has_trait = just }
+            modifier = { add = -50  eotg_void_is_cult_faith = yes }
+        }
+    }
+
+    # Have them killed at the gate. Made real: v1 killed no one.
+    # death shape: events/eotg_augmentation_kingpin.txt:1135-1138.
+    option = {
+        name = eotg_void.0004.d
+        scope:eotg_void_voidwalker = {
+            death = {
+                death_reason = death_murder
+                killer = root
+            }
+        }
+        add_dread = 20
+        add_piety = 75
+        eotg_void_change_exposure_effect = { AMOUNT = 8 }
+        stress_impact = {
+            compassionate = medium_stress_impact_gain
+            just = minor_stress_impact_gain
+        }
+        ai_chance = {
+            base = 15
+            modifier = { add = 35  has_trait = callous }
+            modifier = { add = 30  has_trait = sadistic }
+            modifier = { add = -50  has_trait = compassionate }
+        }
+    }
+}
+
+# -- 0010 The Bargain (stage B) ----------------------------------------------------
+eotg_void.0010 = {
+    type = character_event
+    title = eotg_void.0010.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { eotg_void_is_cult_faith = yes }
+                desc = eotg_void.0010.desc_cult
+            }
+            triggered_desc = {
+                trigger = { has_trait = eotg_grip_survivor }
+                desc = eotg_void.0010.desc_bloodline
+            }
+            desc = eotg_void.0010.desc
+        }
+    }
+    theme = corruption
+    override_background = { reference = eotg_bg_private_quarters }
+    left_portrait = {
+        character = root
+        animation = paranoia
+    }
+
+    # Accept.
+    option = {
+        name = eotg_void.0010.a
+        eotg_void_become_touched_effect = yes
+        eotg_void_insight_effect = yes
+        add_dread = 20
+        every_courtier = {
+            limit = { eotg_void_is_cult_faith = no }
+            add_opinion = { modifier = eotg_opinion_void_unease  target = root }
+        }
+        every_courtier = {
+            limit = { eotg_void_is_cult_faith = yes }
+            add_opinion = { modifier = eotg_opinion_void_kinship  target = root }
+        }
+        stress_impact = {
+            zealous = major_stress_impact_gain
+            humble = medium_stress_impact_gain
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 50  eotg_void_is_cult_faith = yes }
+            modifier = { add = 30  has_trait = ambitious }
+            modifier = { add = 20  has_trait = brave }
+            modifier = { add = -60  has_trait = zealous }
+            modifier = { add = -25  has_trait = content }
+        }
+    }
+
+    # Refuse, aloud.
+    option = {
+        name = eotg_void.0010.b
+        eotg_void_become_defiant_effect = yes
+        add_piety = 200
+        stress_impact = { base = major_stress_impact_gain }
+        every_courtier = {
+            limit = { has_trait = zealous }
+            add_opinion = { modifier = eotg_opinion_void_defiance_respect  target = root }
+        }
+        ai_chance = {
+            base = 40
+            modifier = { add = 60  has_trait = zealous }
+            modifier = { add = 30  has_trait = brave }
+            modifier = { add = 20  has_trait = just }
+            modifier = { add = -50  eotg_void_is_cult_faith = yes }
+        }
+    }
+
+    # [education: intrigue or learning] Refuse, and keep what it showed me.
+    option = {
+        name = eotg_void.0010.c
+        trigger = {
+            OR = {
+                has_trait = education_intrigue
+                has_trait = education_learning
+            }
+        }
+        eotg_void_insight_effect = yes
+        eotg_void_change_exposure_effect = { AMOUNT = 15 }
+        add_piety = -50
+        stress_impact = { base = medium_stress_impact_gain }
+        ai_chance = {
+            base = 35
+            modifier = { add = 30  has_trait = deceitful }
+            modifier = { add = 25  has_trait = ambitious }
+            modifier = { add = -30  has_trait = honest }
+        }
+    }
+
+    # Say nothing.
+    option = {
+        name = eotg_void.0010.d
+        eotg_void_change_exposure_effect = { AMOUNT = 10 }
+        stress_impact = { base = medium_stress_impact_gain }
+        ai_chance = {
+            base = 10
+            modifier = { add = 25  has_trait = craven }
+            modifier = { add = 20  has_trait = shy }
+        }
+    }
+}
+
+# -- 0011 Taken Anyway (stage B forced) ----------------------------------------------
+eotg_void.0011 = {
+    type = character_event
+    title = eotg_void.0011.t
+    desc = eotg_void.0011.desc
+    theme = corruption
+    override_background = { reference = eotg_bg_private_quarters }
+    left_portrait = {
+        character = root
+        animation = shock
+    }
+
+    immediate = {
+        eotg_void_become_touched_effect = yes
+    }
+
+    # [brave or martial education] Meet it standing.
+    option = {
+        name = eotg_void.0011.a
+        trigger = {
+            OR = {
+                has_trait = brave
+                has_trait = education_martial
+            }
+        }
+        trait = brave
+        eotg_void_insight_effect = yes
+        add_prestige = 100
+        eotg_void_change_exposure_effect = { AMOUNT = -10 }
+        stress_impact = { brave = minor_stress_impact_loss }
+        ai_chance = { base = 70 }
+    }
+
+    # Pray, aloud.
+    option = {
+        name = eotg_void.0011.b
+        trigger = {
+            piety_level >= 2
+            eotg_void_is_cult_faith = no
+        }
+        add_piety = 150
+        eotg_void_change_exposure_effect = { AMOUNT = -15 }
+        eotg_void_add_ward_effect = { YEARS = 5 }
+        ai_chance = {
+            base = 70
+            modifier = { add = 30  has_trait = zealous }
+        }
+    }
+
+    # Stop resisting.
+    option = {
+        name = eotg_void.0011.c
+        eotg_void_insight_effect = yes
+        eotg_void_change_exposure_effect = { AMOUNT = 10 }
+        add_dread = 25
+        stress_impact = {
+            zealous = major_stress_impact_gain
+        }
+        ai_chance = {
+            base = 20
+            modifier = { add = 60  eotg_void_is_cult_faith = yes }
+            modifier = { add = -50  has_trait = zealous }
+        }
+    }
+}

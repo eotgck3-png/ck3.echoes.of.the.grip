@@ -1,0 +1,91 @@
+﻿# -- eotg_void_modifiers.txt --------------------------------------------------
+# Void Corruption v2 (docs/specs/void_corruption_v2.md §3, §7). Lifted from v1
+# eotg_void_modifiers.txt and eotg_modifiers.txt:7-14 (the aura). Values are
+# v1's. Icons are vanilla placeholders, listed for art in the spec §9 (B-ART,
+# catalog lesson 11). Modifier fields advantage and max_hostile_schemes_add
+# exist in 1.20 (v1_lift_readiness_cloud.md §6).
+# UNVALIDATED cloud build.
+# -----------------------------------------------------------------------------
+
+# -- Exposure bands (single owner: eotg_void_refresh_band_effect) -------------
+# "Pressure" stays a Void word (ruling R7); cybernetics keeps "static".
+
+eotg_mod_void_whispers = {
+    icon = stress_negative    # placeholder
+    stress_gain_mult = 0.05
+    monthly_piety_gain_mult = -0.05
+}
+
+eotg_mod_void_pressure = {
+    icon = stress_negative    # placeholder
+    stress_gain_mult = 0.1
+    diplomacy = -1
+    intrigue = 1
+}
+
+eotg_mod_void_saturation = {
+    icon = stress_negative    # placeholder
+    stress_gain_mult = 0.2
+    diplomacy = -2
+    intrigue = 2
+    health = -0.25
+}
+
+# -- Depth bands, stage D (single owner: eotg_void_refresh_depth_band_effect) --
+# New in v2 (ruling R8): the Hollowing's resource needs a visible state.
+
+eotg_mod_void_hollow_far = {
+    icon = stress_negative    # placeholder
+    general_opinion = -5
+    dread_baseline_add = 5
+}
+
+eotg_mod_void_hollow_quiet = {
+    icon = stress_negative    # placeholder
+    general_opinion = -10
+    dread_baseline_add = 10
+    stress_gain_mult = -0.25
+}
+
+# -- Ward and aura ----------------------------------------------------------------
+
+eotg_mod_void_warded = {
+    icon = health_positive    # placeholder
+    stress_gain_mult = -0.1
+    monthly_piety_gain_mult = 0.1
+}
+
+# v1 eotg_modifiers.txt:9-14. Applied with the Void-Touched trait.
+eotg_mod_void_aura = {
+    icon = stress_negative    # placeholder
+    health = -0.25
+    monthly_piety_gain_mult = -0.15
+    intrigue = 1
+}
+
+# -- Insights (one per character: eotg_void_insight_effect) ---------------------
+
+eotg_mod_void_deep_charts = {
+    icon = learning_positive    # placeholder
+    monthly_lifestyle_xp_gain_mult = 0.1
+}
+
+eotg_mod_void_unseen_step = {
+    icon = intrigue_positive    # placeholder
+    max_hostile_schemes_add = 1
+}
+
+eotg_mod_void_cold_hand = {
+    icon = martial_positive    # placeholder
+    advantage = 2
+}
+
+eotg_mod_void_long_ledger = {
+    icon = stewardship_positive    # placeholder
+    monthly_income_mult = 0.05
+}
+
+eotg_mod_void_borrowed_voice = {
+    icon = diplomacy_positive    # placeholder
+    general_opinion = 5
+}

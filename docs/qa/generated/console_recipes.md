@@ -34,7 +34,10 @@
 | Augmentation Kingpin | `eotg_augmentation_kingpin.txt` | 42 | 0 | 1 | 41 |
 | Augmentation Realm | `eotg_augmentation_realm.txt` | 1 | 0 | 0 | 1 |
 | Frontier Events | `eotg_frontier_events.txt` | 30 | 1 | 0 | 29 |
-| **Total** | | **279** | **31** | **92** | **156** |
+| Void Hollowing | `eotg_void_hollowing.txt` | 3 | 1 | 2 | 0 |
+| Void Touched Events | `eotg_void_touched_events.txt` | 6 | 0 | 6 | 0 |
+| Void Whispers | `eotg_void_whispers.txt` | 6 | 6 | 0 | 0 |
+| **Total** | | **294** | **38** | **100** | **156** |
 
 ## Initiation
 
@@ -409,3 +412,33 @@
 | `eotg_frontier.058`<br>A Pair of Steady Hands | **no**: needs scope:eotg_frontier_county, saved by effect eotg_frontier_roll_chosen_effect | <county>: the county the event is about (scope:eotg_frontier_county); your capital Region is capital_county, any other is title:<c_key><br>`remove_trait eotg_total_integration`<br>`effect <county> = { set_variable = { name = eotg_frontier_state value = flag:frontier } }`<br>or take the debug decision '(Debug) Mark Capital Shoal Unsettled' (eotg_decision_frontier_debug_mark_unsettled), which sets eotg_frontier_state<br>on scope:eotg_frontier_county: held by you | `event eotg_frontier.058` | effect eotg_frontier_flavor_pick_effect ← effect eotg_frontier_event_roll_effect | decision eotg_decision_frontier_debug_tick → effect eotg_frontier_roll_chosen_effect → effect eotg_frontier_event_roll_effect → effect eotg_frontier_flavor_pick_effect → this event |
 | `eotg_frontier.059`<br>Older Than Any Record | **no**: needs scope:eotg_frontier_county, saved by effect eotg_frontier_roll_chosen_effect | <county>: the county the event is about (scope:eotg_frontier_county); your capital Region is capital_county, any other is title:<c_key><br>`remove_trait eotg_total_integration`<br>`effect <county> = { set_variable = { name = eotg_frontier_state value = flag:frontier } }`<br>or take the debug decision '(Debug) Mark Capital Shoal Unsettled' (eotg_decision_frontier_debug_mark_unsettled), which sets eotg_frontier_state<br>`effect <county> = { set_variable = { name = eotg_frontier_progress value = 20 } }`<br>on scope:eotg_frontier_county: held by you | `event eotg_frontier.059` | effect eotg_frontier_flavor_pick_effect ← effect eotg_frontier_event_roll_effect | decision eotg_decision_frontier_debug_tick → effect eotg_frontier_roll_chosen_effect → effect eotg_frontier_event_roll_effect → effect eotg_frontier_flavor_pick_effect → this event |
 | `eotg_frontier.060`<br>Ships That Stop | **no**: needs scope:eotg_frontier_county, saved by effect eotg_frontier_roll_chosen_effect | <county>: the county the event is about (scope:eotg_frontier_county); your capital Region is capital_county, any other is title:<c_key><br>`remove_trait eotg_total_integration`<br>`effect <county> = { set_variable = { name = eotg_frontier_state value = flag:frontier } }`<br>or take the debug decision '(Debug) Mark Capital Shoal Unsettled' (eotg_decision_frontier_debug_mark_unsettled), which sets eotg_frontier_state<br>`effect <county> = { set_variable = { name = eotg_frontier_progress value = 33 } }`<br>on scope:eotg_frontier_county: held by you | `event eotg_frontier.060` | effect eotg_frontier_flavor_pick_effect ← effect eotg_frontier_event_roll_effect | decision eotg_decision_frontier_debug_tick → effect eotg_frontier_roll_chosen_effect → effect eotg_frontier_event_roll_effect → effect eotg_frontier_flavor_pick_effect → this event |
+
+## Void Hollowing
+
+| Event | Fire cold | Setup | Fire | Fired by | Live route |
+|---|---|---|---|---|---|
+| `eotg_void.0030`<br>The Hollowing | yes | *for realistic content (its usual context):* `add_trait eotg_void_touched`<br>`effect set_variable = { name = eotg_void_exposure value = 100 }` | `event eotg_void.0030` | on_action yearly_playable_pulse → eotg_on_yearly_void_check | — |
+| `eotg_void.0031`<br>The Hollow Court | after setup | `add_trait eotg_void_hollowed` | `event eotg_void.0031` | on_action yearly_playable_pulse → eotg_on_yearly_void_check | — |
+| `eotg_void.0032`<br>A Moment of Being | after setup | `add_trait eotg_void_hollowed` | `event eotg_void.0032` | on_action yearly_playable_pulse → eotg_on_yearly_void_check | — |
+
+## Void Touched Events
+
+| Event | Fire cold | Setup | Fire | Fired by | Live route |
+|---|---|---|---|---|---|
+| `eotg_void.0020`<br>The Cold Hand | after setup | `add_trait eotg_void_touched`<br>must be at war<br>*for realistic content (its usual context):* eotg_void_hollowing_ready = no (see common/scripted_triggers) | `event eotg_void.0020` | on_action yearly_playable_pulse → eotg_on_yearly_void_check | — |
+| `eotg_void.0021`<br>What the Children See | after setup | `add_trait eotg_void_touched`<br>needs a child who/which: aged < 12<br>*for realistic content (its usual context):* eotg_void_hollowing_ready = no (see common/scripted_triggers) | `event eotg_void.0021` | on_action yearly_playable_pulse → eotg_on_yearly_void_check | — |
+| `eotg_void.0022`<br>The Confessor's Verdict | after setup | `add_trait eotg_void_touched`<br>needs a courtier who/which: has trait zealous<br>*for realistic content (its usual context):* eotg_void_hollowing_ready = no (see common/scripted_triggers) | `event eotg_void.0022` | on_action yearly_playable_pulse → eotg_on_yearly_void_check | — |
+| `eotg_void.0023`<br>The Deep Route | after setup | `add_trait eotg_void_touched`<br>*for realistic content (its usual context):* eotg_void_hollowing_ready = no (see common/scripted_triggers) | `event eotg_void.0023` | on_action yearly_playable_pulse → eotg_on_yearly_void_check | — |
+| `eotg_void.0024`<br>Long Service | after setup | `add_trait eotg_void_touched`<br>aged >= 60<br>*for realistic content (its usual context):* eotg_void_hollowing_ready = no (see common/scripted_triggers) | `event eotg_void.0024` | on_action yearly_playable_pulse → eotg_on_yearly_void_check | — |
+| `eotg_void.0025`<br>The Vassal's Ultimatum | after setup | `add_trait eotg_void_touched`<br>needs a vassal who/which: opinion of you < -20<br>*for realistic content (its usual context):* eotg_void_hollowing_ready = no (see common/scripted_triggers) | `event eotg_void.0025` | on_action yearly_playable_pulse → eotg_on_yearly_void_check | — |
+
+## Void Whispers
+
+| Event | Fire cold | Setup | Fire | Fired by | Live route |
+|---|---|---|---|---|---|
+| `eotg_void.0001`<br>The Scar Reopens | yes | *for realistic content (its usual context):* `remove_trait eotg_void_touched` | `event eotg_void.0001` | on_action yearly_playable_pulse → eotg_on_yearly_void_check | — |
+| `eotg_void.0002`<br>The Sound Under the Floor | yes | *for realistic content (its usual context):* `remove_trait eotg_void_hollowed`<br>`remove_trait eotg_void_touched`<br>`effect set_variable = { name = eotg_void_exposure value = 25 }` | `event eotg_void.0002` | on_action yearly_playable_pulse → eotg_on_yearly_void_check | — |
+| `eotg_void.0003`<br>The Star That Is Not There | yes | *for realistic content (its usual context):* `remove_trait eotg_void_hollowed`<br>`remove_trait eotg_void_touched`<br>`effect set_variable = { name = eotg_void_exposure value = 25 }` | `event eotg_void.0003` | on_action yearly_playable_pulse → eotg_on_yearly_void_check | — |
+| `eotg_void.0004`<br>The Voidwalker at the Gate | yes | *for realistic content (its usual context):* `remove_trait eotg_void_hollowed`<br>`effect set_variable = { name = eotg_void_exposure value = 20 }`<br>eotg_void_has_voidwalker = no (see common/scripted_triggers) | `event eotg_void.0004` | on_action yearly_playable_pulse → eotg_on_yearly_void_check | — |
+| `eotg_void.0010`<br>The Bargain | yes | *for realistic content (its usual context):* `remove_trait eotg_void_defiant`<br>`remove_trait eotg_void_hollowed`<br>`remove_trait eotg_void_touched`<br>`effect set_variable = { name = eotg_void_exposure value = 50 }` | `event eotg_void.0010` | on_action yearly_playable_pulse → eotg_on_yearly_void_check | — |
+| `eotg_void.0011`<br>Taken Anyway | yes | *for realistic content (its usual context):* `remove_trait eotg_void_hollowed`<br>`remove_trait eotg_void_touched`<br>`effect set_variable = { name = eotg_void_exposure value = 75 }` | `event eotg_void.0011` | on_action yearly_playable_pulse → eotg_on_yearly_void_check | — |

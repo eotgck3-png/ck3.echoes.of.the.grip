@@ -1,0 +1,59 @@
+﻿# -- eotg_void_traits.txt -----------------------------------------------------
+# Void Corruption v2 (docs/specs/void_corruption_v2.md §4). Lifted from v1
+# eotg_void_traits.txt and eotg_traits.txt:10-40. Values are v1's.
+#
+# - category is omitted, as v1 did and as vanilla's body traits do
+#   (eotg_race_traits.txt:40-44 cites 00_traits.txt:8234,8274).
+# - The v1 trait flags (eotg_flag_void_corruption, eotg_flag_void_defiance,
+#   eotg_flag_grip_bloodline) had no readers and are pruned (V LOW row).
+# - Loc keys are trait_<key> / trait_<key>_desc, as eotg_augmentation_traits
+#   (no desc = field; v1 defined both forms, which doubled every key).
+# - Icons: vanilla personality icons as PLACEHOLDERS (B-ART; spec §9).
+#   UNVERIFIED-VANILLA: each <personality>.dds exists under
+#   gfx/interface/icons/traits/.
+# UNVALIDATED cloud build.
+# -----------------------------------------------------------------------------
+
+# Ruling R2 (default (orchestrator, 2026-11-03), pending owner): lifted with
+# the Void. Nothing grants it yet: the bloodline branches (0002, 0010 desc
+# variants and +3 accrual) stay inert until Gate 1 history places bearers.
+eotg_grip_survivor = {
+    icon = brave.dds    # placeholder
+    diplomacy = -1
+    martial = 1
+    health = 0.5
+    monthly_prestige_gain_mult = 0.05
+}
+
+eotg_void_touched = {
+    icon = paranoid.dds    # placeholder
+    diplomacy = -2
+    intrigue = 2
+    health = -0.5
+    monthly_piety_gain_mult = -0.1
+}
+
+eotg_void_defiant = {
+    icon = stubborn.dds    # placeholder
+    martial = 1
+    learning = 1
+    health = 0.25
+    monthly_piety_gain_mult = 0.15
+    stress_gain_mult = -0.10
+    general_opinion = 5
+}
+
+eotg_void_hollowed = {
+    icon = callous.dds    # placeholder
+    intrigue = 4
+    learning = 3
+    prowess = 4
+    diplomacy = -5
+    health = -1
+    monthly_piety_gain_mult = -0.35
+    dread_baseline_add = 25
+    general_opinion = -20
+    attraction_opinion = -30
+    fertility = -0.5
+    stress_gain_mult = -0.50
+}

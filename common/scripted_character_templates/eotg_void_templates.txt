@@ -1,0 +1,27 @@
+﻿# -- eotg_void_templates.txt --------------------------------------------------
+# Void Corruption v2 (docs/specs/void_corruption_v2.md §4, ruling R5). The
+# Voidwalker who comes to the gate in eotg_void.0004: a warrior of the
+# Malvrick Orders who contains and handles Void and Rift relics
+# (REVIEW_866.md:64). A soldier and a scholar of wards, not a worshipper.
+# Shape: eotg_pmc_operator_template / eotg_aug_kingpin_template. Culture,
+# faith and location come from the caller (eotg_void_create_voidwalker_effect).
+# UNVALIDATED cloud build.
+# -----------------------------------------------------------------------------
+
+eotg_void_voidwalker_template = {
+    age = { 30 50 }
+    gender_female_chance = 50
+
+    random_traits_list = {
+        count = 1
+        education_martial_2 = {}
+        education_martial_3 = {}
+        education_learning_2 = {}
+        education_learning_3 = {}
+    }
+    random_traits = no
+
+    martial = { 8 12 }
+    learning = { 10 14 }
+    prowess = { 10 16 }
+}
