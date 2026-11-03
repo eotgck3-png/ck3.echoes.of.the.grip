@@ -21,8 +21,9 @@ on_birth_child = {
 # Engine-created characters (pool, guests, court populator, mercenaries,
 # create_character). feasibility §2.4 (V): on_character_created with
 # scope:creation_reason (character_created_on_actions.txt:1-17).
-# UNVERIFIED-VANILLA: root is the created character, and its culture is already
-# set when the hook fires. Check the vanilla file's header comment.
+# Verified (spec §12 U6): root is the created character
+# (G/common/on_action/character_created_on_actions.txt:4, "Root is the newly
+# created character"); its culture is set when the hook fires (QA 2026-11-03).
 # Not read: scope:creation_reason. A newborn may also pass through here (T5);
 # the birth roll resets the trait whichever hook runs first, and this hook
 # skips a character that already has a race, so the order does not matter.

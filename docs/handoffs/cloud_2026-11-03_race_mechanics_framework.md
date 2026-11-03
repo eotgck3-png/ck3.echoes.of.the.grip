@@ -170,3 +170,40 @@ The test sub-mod is `docs/test_submods/races/`.
 - `docs/specs/races_framework_v1.md` §11: added **D8**. `forbidden` stays inactive until a local session completes
   stubs 2 and 3; then restore the description or hide the setting.
 - No script changed.
+
+## Local fix pass after QA (eotg-scripter, 2026-11-03)
+
+QA verdict was FIX FIRST. Worktree branch `eotg/race-framework-fix`, based on `origin/claude/race-mechanics-framework-cloud`.
+The spec (`docs/specs/races_framework_v1.md`) is updated throughout: §2, §4, §5.4, §6, §7, §8, §11 D8, §12 and §13.
+
+- **Game rule.** `eotg_race_crossbreeding` now has only `free`. The `discouraged` and `forbidden` settings and their
+  4 loc keys were removed. This follows an orchestrator ruling, pending the owner's D3. Spec §8.1 and §8.2 give the
+  build plan for each.
+  - Removed with them: `eotg_race_crossbreeding_allows`, `common/scripted_modifiers/eotg_race_modifiers.txt`, and
+    the commented-out marriage stubs.
+  - New check U19: a rule with a single setting has no vanilla precedent. Confirm it in the lobby.
+- **Main-mod load errors.**
+  - `eotg_race_has_any_race` and `eotg_race_culture_is_grouped` moved into the registry triggers file as
+    `always = no` stubs. The sub-mod supplies the real bodies.
+  - Every parameterized stub now references its parameters inertly, which removes the 10 `error(macro)` findings.
+  - The single-item ORs are gone, which removes the 2 `warning(logic)` findings.
+- **Hybrid override.** It is now active. `is_valid_for_hybridising_trigger` is copied programmatically from vanilla
+  `00_cultural_triggers.txt:473-514` at 1.20.1.1, with one `# EOTG` line. The diff against vanilla shows only
+  that line.
+- **New registry key** `eotg_race_for_each_grouped_race_effect`, used by the culture route. Half-races without a
+  heritage are no longer looked up by parameter. The registry is now 10 keys.
+- **Sub-mod.**
+  - The `LABEL` parameter was dropped; each label is now logged at its call site.
+  - `caucasian_northern` became `caucasian_northern_blond`.
+  - The grouped list was added, and `test_half_ab` was taken out of `cultures_in_different_groups`.
+  - H2 now tests `eotg_race_is_cross_race_with`.
+  - The README was updated.
+- **Validation** (Tiger logs are in the scratchpad):
+  - Tiger 1.17, main mod alone: 0 race-related findings, down from 14.
+  - Tiger, sub-mod with the main mod loaded: 0 findings in sub-mod files and 0 race-related findings.
+  - PX LSP: only the known `building_walls_*`.
+  - `px_vocab_check`: race hits are macro-unaware noise only (`eotg_race_$RACE$` read as `eotg_race_`, and
+    game-rule setting keys, which it flags for every rule).
+  - `eotg_lint`: 0 new.
+- **Not done; for the orchestrator.** `CLAUDE.md` may want the new override key, `is_valid_for_hybridising_trigger`,
+  added to the re-copy sweep (pitfalls §2).

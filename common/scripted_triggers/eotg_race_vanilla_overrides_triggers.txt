@@ -1,87 +1,86 @@
 ﻿# -- eotg_race_vanilla_overrides_triggers.txt ----------------------------------
-# !!! STUBS ONLY. EVERYTHING IN THIS FILE IS COMMENTED OUT AND INERT. !!!
-# Race mechanics framework v1 (docs/specs/races_framework_v1.md §6, §8).
+# !!! DELIBERATE NON-ADDITIVE VANILLA OVERRIDE (key-level) !!!
+# Race mechanics framework v1 (docs/specs/races_framework_v1.md §6). This file
+# REDEFINES a vanilla scripted trigger by key. The redefined key replaces
+# vanilla's whole definition, for every caller, so any vanilla change to it is
+# silently lost. The filename must stay different from vanilla's
+# (00_cultural_triggers.txt): the same name would replace the whole file.
+# Shape: eotg_vanilla_overrides_triggers.txt; rules: docs/pitfalls.md §16.
 #
-# UNVERIFIED-VANILLA (whole file): the cloud session that wrote this had no game
-# files. Each block below is a key-level override of a vanilla scripted trigger
-# that must be completed by a LOCAL session with the vanilla body in front of
-# it. Until then nothing here is active, so vanilla behaviour is untouched.
+# Overridden key:
+#   is_valid_for_hybridising_trigger (parameters $CHARACTER$, $CULTURE$)
+#     copied byte-exact (programmatically, tabs included; first line, last line,
+#     the next key `can_hybridize_culture_trigger` at :517 and brace balance
+#     asserted) from game/common/scripted_triggers/00_cultural_triggers.txt:473-514
+#     at CK3 1.20.1.1. Wrapped by can_hybridize_culture_trigger (same file,
+#     :517-527) and through it by the scripted rule can_hybridize_culture
+#     (00_rules.txt:899-904), so the UI and every wrapper inherit the clause.
+#   The ONLY difference from vanilla is the one line marked `# EOTG`, a
+#     top-level child of the body (ANDed with vanilla, never inside one of its
+#     custom_description blocks, pitfalls §16.2). It reads only the two
+#     parameters vanilla itself reads unguarded ($CHARACTER$.culture at :508,
+#     $CULTURE$ throughout), so no new scope is introduced (pitfalls §16.3).
+#     eotg_race_cultures_can_hybridize (eotg_race_triggers.txt) is always true
+#     while no race is registered (the main mod alone), so vanilla behaviour is
+#     unchanged until a race pack loads. With races, cultures of two different
+#     race heritage groups never hybridize. No custom tooltip yet: when it
+#     fails, the hybridize button shows the trigger's own breakdown.
 #
-# A partial override would be worse than none: a key-level redefinition
-# REPLACES vanilla's whole block, for every caller (docs/pitfalls.md §16). So:
+# RE-COPY DUTY: after every CK3 update, re-copy vanilla's block and re-apply
+# the EOTG line (docs/pitfalls.md §2, the override sweep). Diff this body
+# against vanilla; only the line marked `# EOTG` may differ.
 #
-# LOCAL SESSION: for each block
-#   1. Open the cited vanilla file at CK3 1.20.1.1 and find the trigger. Check
-#      the real line range (pitfalls §16.1: a stated range was wrong once).
-#   2. Copy vanilla's WHOLE block programmatically (assert first line, last line
-#      and the next key's line; braces balance).
-#   3. Paste it here in place of the `<<< VANILLA BODY >>>` marker, uncommented,
-#      and add the ONE marked `# EOTG` clause as a top-level child of the body
-#      (an AND with vanilla; never inside a custom_tooltip shared with another
-#      trigger, pitfalls §16.2). Use the vanilla block's own scope names for the
-#      two cultures / two characters (pitfalls §16.3: never read a scope at top
-#      level that vanilla only reads inside a guard).
-#   4. Diff against vanilla: the only difference may be the `# EOTG` lines.
-#   5. Keep THIS filename (differs from vanilla's, so it overrides by key and not
-#      the whole file). Add the overridden keys to the CLAUDE.md benign list if
-#      Tiger reports strict-scopes noise on the copy, and to the re-copy sweep
-#      (pitfalls §2).
-#   6. Confirm in game: logs/database_conflicts.log shows
-#      "Overriding entry '<key>'" naming this file.
+# Confirm it loads: logs/database_conflicts.log must show
+#   Overriding entry 'is_valid_for_hybridising_trigger'
+# naming this file (spec §13, T3).
 #
-# Our clauses are always TRUE while the framework is off (no races registered)
-# and under the permissive rule settings, so completing a stub is safe even
-# before any race exists.
+# Cross-race marriage and fertility are NOT overridden here: rule
+# eotg_race_crossbreeding has only `free` for now; spec §8 records how the
+# `forbidden` and `discouraged` settings are to be built (neither needs a
+# vanilla trigger override).
 # -----------------------------------------------------------------------------
 
-# When a block is completed, add above it the lint allowance used by
-# eotg_vanilla_overrides_triggers.txt:
-#   # eotg_lint: allow L001 deliberate key-level override of a vanilla trigger; the key must match vanilla's
-
-# =============================================================================
-# 1. Hybrid cultures across race groups (spec §6; feasibility §4)
-# =============================================================================
-# Chain (feasibility §4, verified locally at 1.20.1.1):
-#   is_valid_for_hybridising_trigger   G/common/scripted_triggers/00_cultural_triggers.txt:473-477
-#   -> wrapped by can_hybridize_culture_trigger   (same file, :517)
-#   -> wrapped by the scripted rule can_hybridize_culture   G/common/scripted_rules/00_rules.txt:899-904
-#   The AI path (00_culture_interactions.txt:141-152) probably routes through
-#   the same rule (I; in-game test T3).
-# Override the INNERMOST trigger, so both the UI and every wrapper inherit it.
-# If the local session finds the two cultures are not both in scope there, move
-# the clause one level out to can_hybridize_culture_trigger instead and note why.
-#
-# is_valid_for_hybridising_trigger = {
-#     <<< VANILLA BODY of is_valid_for_hybridising_trigger, 00_cultural_triggers.txt:473-477 >>>
-#     # EOTG: cultures of two different race heritage groups never hybridize.
-#     # Ungrouped cultures, and everything while no race is registered, pass.
-#     eotg_race_cultures_can_hybridize = { A = <vanilla scope of culture 1>  B = <vanilla scope of culture 2> }
-# }
-
-# =============================================================================
-# 2. Cross-race fertility: rule eotg_race_crossbreeding = forbidden (spec §8)
-# =============================================================================
-# can_have_children_with   G/common/scripted_triggers/00_marriage_triggers.txt:66-68
-# (feasibility §4, verified locally). Root and the other character: use
-# vanilla's own names from that block.
-#
-# can_have_children_with = {
-#     <<< VANILLA BODY of can_have_children_with, 00_marriage_triggers.txt:66-68 >>>
-#     # EOTG: under `forbidden`, characters of different races cannot have children.
-#     eotg_race_crossbreeding_allows = { TARGET = <vanilla scope of the other character> }
-# }
-
-# =============================================================================
-# 3. Cross-race marriage: rule eotg_race_crossbreeding = forbidden (spec §8)
-# =============================================================================
-# could_marry_character_trigger   (feasibility §4 names it overridable; file and
-# lines NOT cited there. Local session: find it under G/common/scripted_triggers/,
-# probably 00_marriage_triggers.txt, and record the range here.)
-# Also consider can_marry_common_trigger (feasibility §4) if
-# could_marry_character_trigger does not cover every marriage path.
-#
-# could_marry_character_trigger = {
-#     <<< VANILLA BODY of could_marry_character_trigger >>>
-#     # EOTG: under `forbidden`, characters of different races cannot marry.
-#     eotg_race_crossbreeding_allows = { TARGET = <vanilla scope of the other character> }
-# }
+# eotg_lint: allow L001 deliberate key-level override of a vanilla trigger; the key must match vanilla's
+is_valid_for_hybridising_trigger = {
+	$CHARACTER$ = {
+		culture = {
+			NOT = { has_same_culture_heritage = $CULTURE$ }
+			culture_age >= culture_hybrid_cooldown
+		}
+		trigger_if = {
+			limit = {
+				NAND = {
+					exists = var:special_culture
+					var:special_culture = $CULTURE$
+				}
+			}
+			custom_description = {
+				text = culture_present_in_realm_for_hybridization
+				any_sub_realm_county = {
+					culture = $CULTURE$
+				}
+			}
+		}
+		custom_description = {
+			text = culture_is_not_parent_culture
+			culture = {
+				NOT = {
+					any_parent_culture = {
+						this = $CULTURE$
+					}
+				}
+			}
+		}
+		custom_description = {
+			text = culture_is_not_child_culture
+			$CULTURE$ = {
+				NOT = {
+					any_parent_culture = {
+						this = $CHARACTER$.culture
+					}
+				}
+			}
+		}
+	}
+	eotg_race_cultures_can_hybridize = { A = $CHARACTER$.culture B = $CULTURE$ }   # EOTG
+}

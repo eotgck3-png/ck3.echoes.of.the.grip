@@ -23,8 +23,8 @@
 #   - flag = eotg_race_family_<family>: race-family flags for content that targets
 #     a family (all elves: moon elf, dusk elf, drow...). Each flag needs loc
 #     TRAIT_FLAG_DESC_<flag> (traits.info "flag"). Read with has_trait_with_flag.
-#     UNVERIFIED-VANILLA: has_trait_with_flag (feasibility §11 lists it as a
-#     technique to confirm in vanilla).
+#     Verified (spec §12 U10): vanilla uses has_trait_with_flag at
+#     G/common/scripted_triggers/00_available_for_events_triggers.txt:18.
 #   - shown_in_ruler_designer = no for now: a designer-made character gets its race
 #     from culture in the after-lobby pass. Whether players may pick race in the
 #     designer is an owner decision (spec §11).
@@ -37,11 +37,10 @@
 #     gfx/portraits/trait_portrait_modifiers/ and portrait_modifiers keyed on the
 #     trait (docs/specs/races_framework_v1_portrait_example.txt).
 #
-# UNVERIFIED-VANILLA: `category`. traits.info calls it "What unique category this
-# trait is in" and lists personality / education / childhood / commander /
-# winter_commander / lifestyle / court_type / fame / health. The template omits it.
-# Check what vanilla's own body traits (giant, dwarf) use; never pick an
-# auto-generated category (personality, education, childhood, commander).
+# `category` is omitted, as vanilla's own body traits do (spec §12 U9, verified:
+# dwarf, G/common/traits/00_traits.txt:8234, and giant, :8274, carry no
+# category). Never pick an auto-generated category (personality, education,
+# childhood, commander).
 #
 # TEMPLATE (copy, replace <race>, <other races>, <family>):
 #

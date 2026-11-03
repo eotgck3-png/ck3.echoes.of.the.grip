@@ -12,6 +12,11 @@
 #
 # Per race, a pack adds exactly one line to each OR list below. The template
 # lines are given in comments; replace <race> with the race suffix.
+#
+# Parameterized stubs reference each parameter inertly (`$TARGET$ = { always =
+# no }`) so the engine and Tiger accept the call sites (Tiger reported
+# error(macro) "does not need macro arguments" on parameter-free stubs). The
+# stubs are plain `always = no`, not a one-item OR (Tiger warning(logic)).
 # -----------------------------------------------------------------------------
 
 # Master switch. A pack sets this to `always = yes`. Every hook in
@@ -20,29 +25,44 @@ eotg_race_framework_active = {
     always = no
 }
 
+# CHARACTER scope. Has any race trait.
+# Pack body: `has_trait = eotg_race` (every race trait carries group
+# eotg_race; a group key matches any trait in the group, as vanilla does with
+# `has_trait = education_martial` at 00_education_triggers.txt:325, verified U4).
+# A stub here because the main mod defines no trait in group eotg_race, and
+# `has_trait = eotg_race` would then be an unknown-trait load error.
+eotg_race_has_any_race = {
+    always = no
+}
+
+# CULTURE scope. The culture's heritage belongs to some race group.
+# Pack body: `has_cultural_parameter = eotg_heritage_grouped` (the umbrella
+# parameter on every race heritage pillar, spec §5.4). A stub here because no
+# main-mod pillar defines that parameter.
+eotg_race_culture_is_grouped = {
+    always = no
+}
+
 # CHARACTER scope. eotg_race_same_as = { TARGET = <character> }: both have the
 # same race trait. False when either has none.
-# Pack template, one line per race inside the OR:
+# Pack body, one line per race inside an OR:
 #   AND = { has_trait = eotg_race_<race>  $TARGET$ = { has_trait = eotg_race_<race> } }
 eotg_race_same_as = {
-    OR = {
-        always = no
-        # (no races registered in the main mod; $TARGET$ is unused here)
-        # UNVERIFIED-VANILLA: a scripted trigger whose body never references
-        # a parameter it is called with. Expected to be silently accepted
-        # (replacement is literal text); if the engine logs it, the main-mod
-        # stub can reference it harmlessly, e.g. `$TARGET$ = { always = no }`.
-    }
+    always = no
+    $TARGET$ = { always = no }    # inert reference to the parameter
 }
 
 # eotg_race_cultures_in_different_groups = { A = <culture> B = <culture> }
-# Some registered race's group holds one culture and not the other. Only
-# meaningful when both cultures are grouped (eotg_race_cultures_can_hybridize
-# checks that first).
-# Pack template, one line per race inside the OR:
+# Some registered GROUPED race's group holds one culture and not the other.
+# Only meaningful when both cultures are grouped (eotg_race_cultures_can_hybridize
+# checks that first). List only races that have a heritage group (the same
+# races as eotg_race_for_each_grouped_race_effect), never a half-race without
+# heritage pillars: an undefined eotg_heritage_group_<race> parameter is a load
+# error.
+# Pack body, one line per grouped race inside an OR:
 #   AND = { $A$ = { eotg_is_heritage_group = { RACE = <race> } }  $B$ = { NOT = { eotg_is_heritage_group = { RACE = <race> } } } }
 eotg_race_cultures_in_different_groups = {
-    OR = {
-        always = no
-    }
+    always = no
+    $A$ = { always = no }    # inert reference to the parameter
+    $B$ = { always = no }    # inert reference to the parameter
 }

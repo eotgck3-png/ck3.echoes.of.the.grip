@@ -9,11 +9,12 @@
 #     eotg_race_for_each_race_effect = { OP = inherit }
 #   expands (literal text replacement) to, per race,
 #     eotg_race_op_inherit_effect = { RACE = <race> }
-# UNVERIFIED-VANILLA: a $PARAM$ inside an effect NAME (eotg_race_op_$OP$_effect)
-# and inside an identifier (eotg_race_share_$RACE$). The skill documents
-# replacement as literal text before evaluation (effects.md "Complex Form"),
-# which implies both work; confirm on first load (error.log clean of
-# "Unknown effect eotg_race_op_" / "$OP$" / "$RACE$").
+# Verified (spec §12 U1): a $PARAM$ inside an effect NAME and inside an
+# identifier is vanilla's own pattern:
+# G/common/scripted_effects/10_dlc_tgp_scripted_effects.txt:238
+# (great_project_contribution_completion_reward_$LEVEL$_effect),
+# G/common/scripted_effects/00_education_effects.txt:361
+# (has_$SKILL$_education_affinity_childhood_trait_trigger).
 #
 # Variables (CHARACTER):
 #   eotg_race_shares          boolean; present = explicit share profile below
@@ -25,12 +26,13 @@
 #   eotg_race_pure, eotg_race_share_result
 # Saved scopes: eotg_race_parent_a, eotg_race_parent_b (birth roll only).
 #
-# UNVERIFIED-VANILLA: set_local_variable / change_local_variable / local_var:
-# are used by working v2 script (eotg_augmentation_effects.txt:3823-3827), and
-# change_variable / change_local_variable with `multiply` and `subtract` is per
-# the skill (variables.md). Not verified: that a local variable set inside a
-# scripted effect is readable inside a random_list `modifier = { add = ... }`
-# (eotg_race_roll_effect in the registry). See spec §12, U3.
+# set_local_variable / change_local_variable / local_var: are used by working
+# v2 script (eotg_augmentation_effects.txt:3823-3827), and change_variable /
+# change_local_variable with `multiply` and `subtract` is per the skill
+# (variables.md). PLAUSIBLE, NOT YET PROVEN (spec §12 U3): that a local
+# variable set inside a scripted effect is readable inside a random_list
+# `modifier = { add = ... }` (eotg_race_roll_effect in the registry); vanilla
+# reads a character var there (bp2_hostage_system.txt:969). Test B1.
 #
 # Cost (feasibility §2, §11 lesson 5): one effect per birth or creation, one
 # pass at game start, no recurring loop.
@@ -83,7 +85,8 @@ eotg_race_clear_shares_effect = {
 
 # CHARACTER scope. Gives a character with no race trait the race of its
 # culture's heritage group, with the implicit 100% profile. Fallback chain:
-#   1. culture grouped -> the first registered race whose group holds it;
+#   1. culture grouped -> the first grouped race (registry
+#      eotg_race_for_each_grouped_race_effect) whose group holds it;
 #   2. no culture, ungrouped culture, or no match -> the registry's DEFAULT race
 #      (eotg_race_default_race_effect);
 #   3. no default registered -> no race (the character simply has none; every
@@ -94,7 +97,7 @@ eotg_race_assign_from_culture_effect = {
             exists = culture
             culture = { eotg_race_culture_is_grouped = yes }
         }
-        eotg_race_for_each_race_effect = { OP = from_culture }
+        eotg_race_for_each_grouped_race_effect = { OP = from_culture }
     }
     if = {
         limit = { eotg_race_has_any_race = no }
@@ -354,9 +357,10 @@ eotg_race_op_fallback_effect = {
 # CHARACTER scope. debug_log of this race's share and whether it was rolled.
 # Used only by the test sub-mod's debug decision and debug birth hook. Needs
 # scope:eotg_race_report_char (the character being reported).
-# UNVERIFIED-VANILLA: that debug_log evaluates [..] data functions and that
-# $RACE$ is replaced inside a quoted string. If not, the log still gets the
-# literal line, and debug_log_scopes (called by the caller) lists the scopes.
+# NO VANILLA PRECEDENT (spec §12 U8): that debug_log evaluates [..] data
+# functions and that $RACE$ is replaced inside a quoted string. If not, the log
+# still gets the literal line, and debug_log_scopes (called by the caller)
+# lists the scopes. Test-only output; nothing shipped depends on it.
 eotg_race_op_report_effect = {
     if = {
         limit = { has_variable = eotg_race_share_$RACE$ }

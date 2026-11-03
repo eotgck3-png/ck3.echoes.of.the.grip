@@ -6,7 +6,9 @@
 # spawned parents passed as MOTHER / FATHER, which is exactly what the main
 # mod's on_birth_child hook does with scope:mother / scope:real_father. One
 # real pregnancy also runs the hook path itself (README check B5).
-# UNVERIFIED-VANILLA: `while = { count = N }`, `make_pregnant = { father = x }`.
+# Verified (spec §12 U16): `while = { count = N }` (G/common/scripted_effects/
+# 00_administrative_effects.txt:427-428) and `make_pregnant = { father = x }`
+# (G/events/dlc/ep1/ep1_fund_inspiration_events.txt:19911).
 
 # ROOT = the decision taker. Spawns one adult into CULTURE with TEMPLATE, saves
 # it as scope:<SCOPE>, makes it a courtier, and logs the race the creation hook
@@ -56,8 +58,10 @@ eotg_test_race_simulate_one_effect = {
 }
 
 # ROOT = the decision taker. COUNT simulated newborns of MOTHER x FATHER.
+# The caller logs the scenario label first: a quoted string passed as a
+# parameter (the old LABEL = "...") risks breaking the parse, so labels are
+# literal debug_log lines at each call site.
 eotg_test_race_simulate_effect = {
-    debug_log = "EOTG_RACE ---- scenario: $LABEL$ ----"
     while = {
         count = $COUNT$
         eotg_test_race_simulate_one_effect = { MOTHER = $MOTHER$  FATHER = $FATHER$ }
@@ -116,11 +120,18 @@ eotg_test_race_run_effect = {
         debug_log = "EOTG_RACE H1 PASS: same_as(man_a, woman_b) = no"
     }
     if = {
-        limit = { scope:eotg_test_race_man_a = { eotg_race_crossbreeding_allows = { TARGET = scope:eotg_test_race_woman_b } } }
-        debug_log = "EOTG_RACE H2 crossbreeding_allows(man_a, woman_b) = yes (expected yes unless rule = forbidden)"
+        limit = { scope:eotg_test_race_man_a = { eotg_race_is_cross_race_with = { TARGET = scope:eotg_test_race_woman_b } } }
+        debug_log = "EOTG_RACE H2 PASS: cross_race_with(man_a, woman_b) = yes"
     }
     else = {
-        debug_log = "EOTG_RACE H2 crossbreeding_allows(man_a, woman_b) = no (expected only under rule = forbidden)"
+        debug_log = "EOTG_RACE H2 FAIL: cross_race_with(man_a, woman_b) = no"
+    }
+    if = {
+        limit = { scope:eotg_test_race_man_a = { eotg_race_is_cross_race_with = { TARGET = scope:eotg_test_race_woman_a } } }
+        debug_log = "EOTG_RACE H2 FAIL: cross_race_with(man_a, woman_a) = yes"
+    }
+    else = {
+        debug_log = "EOTG_RACE H2 PASS: cross_race_with(man_a, woman_a) = no"
     }
     if = {
         limit = { eotg_race_cultures_can_hybridize = { A = culture:eotg_test_culture_a  B = culture:eotg_test_culture_b } }
@@ -140,8 +151,8 @@ eotg_test_race_run_effect = {
     # --- Birth-roll scenarios (B1-B4) ---
     # B1: pure A x pure B. Rule off: every child A .5 / B .5, rolls about half
     # and half. Rule as_own_race: every child pure test_half_ab.
+    debug_log = "EOTG_RACE ---- scenario: B1 woman_b x man_a ----"
     eotg_test_race_simulate_effect = {
-        LABEL = "B1 woman_b x man_a"
         COUNT = 8
         MOTHER = scope:eotg_test_race_woman_b
         FATHER = scope:eotg_test_race_man_a
@@ -150,24 +161,24 @@ eotg_test_race_run_effect = {
 
     # B2: pure A x a B1 child. Rule off: A .75 / B .25. Rule as_own_race:
     # A .5 / half .5.
+    debug_log = "EOTG_RACE ---- scenario: B2 woman_a x B1 child ----"
     eotg_test_race_simulate_effect = {
-        LABEL = "B2 woman_a x B1 child"
         COUNT = 8
         MOTHER = scope:eotg_test_race_woman_a
         FATHER = scope:eotg_test_race_mixed
     }
 
     # B3: raceless father (counts as the default, test_a) x pure B: A .5 / B .5.
+    debug_log = "EOTG_RACE ---- scenario: B3 woman_b x man_none (no race = default test_a) ----"
     eotg_test_race_simulate_effect = {
-        LABEL = "B3 woman_b x man_none (no race = default test_a)"
         COUNT = 8
         MOTHER = scope:eotg_test_race_woman_b
         FATHER = scope:eotg_test_race_man_none
     }
 
     # B4: pure A x pure A: always pure test_a, no share variables.
+    debug_log = "EOTG_RACE ---- scenario: B4 woman_a x man_a ----"
     eotg_test_race_simulate_effect = {
-        LABEL = "B4 woman_a x man_a"
         COUNT = 4
         MOTHER = scope:eotg_test_race_woman_a
         FATHER = scope:eotg_test_race_man_a

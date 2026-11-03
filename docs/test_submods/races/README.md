@@ -5,8 +5,9 @@ test races, `eotg_race_test_a` and `eotg_race_test_b`, plus one test half-race, 
 the main mod's race registry by redefining its keys. Without this sub-mod, the framework is switched off and does
 nothing.
 
-Nothing here has been run. The cloud session that wrote it had no game, no Tiger and no PX. Every engine fact it
-could not check is marked `UNVERIFIED-VANILLA` in the files, and listed in the spec §12.
+Nothing here has been run in game. Tiger, PX and a vanilla check ran locally on 2026-11-03 (QA, then the fix
+pass). Engine facts still unproven are marked `UNVERIFIED-VANILLA`, `PLAUSIBLE` or `NO VANILLA PRECEDENT` in the
+files, and listed with their verdicts in the spec §12.
 
 ## What it adds
 
@@ -15,7 +16,7 @@ could not check is marked `UNVERIFIED-VANILLA` in the files, and listed in the s
 | `common/traits/eotg_test_race_traits.txt` | The three test race traits, written to the main mod's template |
 | `common/culture/pillars/eotg_test_race_pillars.txt` | Two test heritages carrying `eotg_heritage_group_test_a` / `_b` and `eotg_heritage_grouped`, and one test language |
 | `common/culture/cultures/eotg_test_race_cultures.txt` | `eotg_test_culture_a` and `eotg_test_culture_b`. No province or character uses them |
-| `common/scripted_effects/zz_eotg_test_race_registry_effects.txt`, `common/scripted_triggers/zz_eotg_test_race_registry_triggers.txt` | The registry: switches the framework on; test_a is the default race; test_half_ab is born of test_a × test_b |
+| `common/scripted_effects/zz_eotg_test_race_registry_effects.txt`, `common/scripted_triggers/zz_eotg_test_race_registry_triggers.txt` | The registry: switches the framework on; test_a is the default race; test_a and test_b are grouped races; test_half_ab is born of test_a × test_b and has no heritage group |
 | `common/decisions/eotg_test_race_decisions.txt`, `common/scripted_effects/eotg_test_race_debug_effects.txt`, `common/scripted_character_templates/eotg_test_race_templates.txt` | The debug decision **(Debug) Run the Race Framework Test** |
 | `common/on_action/eotg_test_race_on_actions.txt` | Logs a real test birth (B5), and the T2 probe |
 | `localization/english/eotg_test_races_l_english.yml` | Loc for all of the above (UTF-8 BOM) |
@@ -42,7 +43,7 @@ grep EOTG_RACE game.log
 ```
 
 If a line shows raw `[...]` text instead of a name or a number, then `debug_log` doesn't evaluate data functions
-(UNVERIFIED-VANILLA). The yes/no lines still work. Hover the characters in debug mode to read their variables.
+(spec §12 U8, no vanilla precedent). The yes/no lines still work. Hover the characters in debug mode to read their variables.
 
 ## Before anything: load checks
 
@@ -52,12 +53,13 @@ If a line shows raw `[...]` text instead of a name or a number, then `debug_log`
   - errors on `culture:eotg_test_culture_a`. This means a culture that nothing uses doesn't exist at game start
     (U13). Fallback: set one county to the test culture in history, or by console, then rerun.
   - unknown `ethos_stoic`, `martial_custom_equal`, `head_determination_domain`, `name_list_roman`, `western_*_gfx`
-    or `caucasian_northern`. These vanilla keys were copied from v1 unchecked. Replace them with keys from a
-    vanilla culture.
-- **S1.** `logs/database_conflicts.log` shows `Overriding entry` for each of the 7 registry keys:
-  - `eotg_race_for_each_race_effect`, `eotg_race_default_race_effect`, `eotg_race_for_each_pairing_effect` and
-    `eotg_race_roll_effect`;
-  - `eotg_race_framework_active`, `eotg_race_same_as` and `eotg_race_cultures_in_different_groups`.
+    or `caucasian_northern_blond`. These were checked against vanilla 1.20.1.1 (U14), so any error here means a
+    patch renamed them.
+- **S1.** `logs/database_conflicts.log` shows `Overriding entry` for each of the 10 registry keys:
+  - `eotg_race_for_each_race_effect`, `eotg_race_for_each_grouped_race_effect`, `eotg_race_default_race_effect`,
+    `eotg_race_for_each_pairing_effect` and `eotg_race_roll_effect`;
+  - `eotg_race_framework_active`, `eotg_race_has_any_race`, `eotg_race_culture_is_grouped`, `eotg_race_same_as` and
+    `eotg_race_cultures_in_different_groups`.
 
   Each must name a `zz_eotg_test_race_*` file.
 
@@ -67,7 +69,7 @@ If a line shows raw `[...]` text instead of a name or a number, then `debug_log`
 |---|---|---|---|
 | **T1** | A custom `parameters` entry on a heritage pillar is readable with `has_cultural_parameter` | Run the decision | Log: `T1 PASS: culture A reads eotg_heritage_group_test_a`, and no `T1 FAIL` line. Also `H3 PASS` ×2. If it fails, switch `eotg_is_heritage_group` and `eotg_race_culture_is_grouped` to OR lists of `has_cultural_pillar` (spec §5.4) |
 | **T2** | `on_character_created` fires for history and ruler-designer characters | New game, reach the map; for the designer half, start with a ruler-designer character | Log, at game start: `T2: on_character_created fired before on_game_start` or `... did NOT fire ...`. After the lobby: `T2: player ... passed through` or `... did NOT pass through`. **Either answer is fine**, because the game-start pass covers both. Record the answer in the spec §5.3 |
-| **T3** | AI culture hybridization respects the overridden scripted rule | **Only after a local session completes stub 1** in `common/scripted_triggers/eotg_race_vanilla_overrides_triggers.txt`. Put test culture A and test culture B side by side (two counties by console, each with a ruler of that culture), then watch the AI for a few decades, or try the hybridize interaction as the player | The player's UI refuses A+B with the tooltip of our clause, and no A+B hybrid ever appears. A hybrid of A and an ungrouped vanilla culture is still allowed |
+| **T3** | AI culture hybridization respects the overridden scripted rule | The override of `is_valid_for_hybridising_trigger` is in `common/scripted_triggers/eotg_race_vanilla_overrides_triggers.txt`; first confirm `database_conflicts.log` shows `Overriding entry 'is_valid_for_hybridising_trigger'`. Put test culture A and test culture B side by side (two counties by console, each with a ruler of that culture), then watch the AI for a few decades, or try the hybridize interaction as the player | The player's UI refuses A+B (the tooltip shows our trigger's breakdown; no custom text yet), and no A+B hybrid ever appears. A hybrid of A and an ungrouped vanilla culture is still allowed |
 | **T4** | A race trait added in `on_birth_child` shows on the first portrait; order against the engine's genetic roll | **Needs a trait portrait modifier.** None ships (no gfx). Locally, copy any vanilla trait portrait modifier, key it on `eotg_race_test_b`, and make it obvious (e.g. a large morph). Then let B5's pregnancy come to term | Open the newborn the day it's born: if the B-race modifier shows on a test_b child at once, race looks apply from birth. If it shows only after a reload or later, record that; the fix is on the art side (spec §10) |
 
 ## Framework checks
@@ -89,8 +91,8 @@ Run **(Debug) Run the Race Framework Test** from the decisions panel. It adds ab
 **Helpers (H1–H3)**
 
 - **H1.** `same_as(man_a, woman_a) = yes` and `same_as(man_a, woman_b) = no`, both PASS.
-- **H2.** `crossbreeding_allows(man_a, woman_b)`: `yes` under rule *Free* and *Discouraged*, `no` under *Forbidden*.
-  This checks only our trigger. Nothing calls it until the stubs are completed.
+- **H2.** `cross_race_with(man_a, woman_b) = yes` and `cross_race_with(man_a, woman_a) = no`, both PASS. Nothing
+  shipped calls this helper yet; the future *Forbidden* / *Discouraged* settings will (spec §8).
 - **H3.** Culture A and culture B may not hybridize; culture A and your ungrouped culture may.
 
 **Birth roll (B1–B5).** Run the decision once under each value of the **Half-Races** game rule. The expected values
@@ -111,14 +113,11 @@ are under each scenario label in the log.
 - **B5 hook order.** If the real-birth log says `no race yet`, the sub-mod's report hook ran before the
   framework's. Hover the newborn: it must have a race trait and, under rule *Off*, `eotg_race_share_test_a` and
   `_test_b` at 0.5.
-- **Crossbreeding rule.** Under *Forbidden*, B1–B3 still roll, because the simulation calls the birth effect
-  directly and the stubs are inert. Only H2 changes.
 
 ## Not tested here
 
-- The hybrid block (T3) and the marriage/fertility block (*Forbidden*) stay inert until a local session completes
-  the stubs in `common/scripted_triggers/eotg_race_vanilla_overrides_triggers.txt`.
-- The *Discouraged* AI marriage weight isn't wired yet (`common/scripted_modifiers/eotg_race_modifiers.txt`).
+- Cross-race marriage and fertility. The **Marriage Between Races** rule has only *Free* for now; *Discouraged* and
+  *Forbidden* were removed until they are built (spec §8 has the plan).
 - Old saves: the framework never needs a migration. A character without shares counts as 100% of its trait, and a
   character without a trait counts as the default race at its children's birth. But characters in a save started
   before the sub-mod get a race only when they're next created or born, because the game-start pass runs only on

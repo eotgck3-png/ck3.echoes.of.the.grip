@@ -21,10 +21,8 @@
 #     in eotg_frontier_tick_effect (common/scripted_effects/eotg_frontier_effects.txt)
 #   eotg_race_half_races: eotg_race_birth_effect
 #     (common/scripted_effects/eotg_race_effects.txt), birth step 3
-#   eotg_race_crossbreeding: eotg_race_crossbreeding_allows
-#     (common/scripted_triggers/eotg_race_triggers.txt) and
-#     eotg_race_crossbreeding_ai_marriage_modifier
-#     (common/scripted_modifiers/eotg_race_modifiers.txt)
+#   eotg_race_crossbreeding: no read site yet. Only `free` exists, and free
+#     restricts nothing (docs/specs/races_framework_v1.md §8)
 # -----------------------------------------------------------------------------
 
 # Cybernetics event frequency. Off stops the yearly cybernetics flavour pools
@@ -97,13 +95,14 @@ eotg_race_half_races = {
 }
 
 # Race mechanics framework v1 (spec §8). Marriage and children between
-# characters of different races. free: no restriction. discouraged: the AI
-# weighs cross-race matches down (eotg_race_crossbreeding_ai_marriage_modifier).
-# forbidden: no cross-race marriage or children (eotg_race_crossbreeding_allows,
-# read by the vanilla-override stubs in
-# common/scripted_triggers/eotg_race_vanilla_overrides_triggers.txt; inert until
-# a local session completes them). Default free pending the owner's ruling
-# (feasibility §9 decision 3).
+# characters of different races. Only `free` (no restriction) exists for now.
+# The `discouraged` and `forbidden` settings were removed (orchestrator ruling,
+# 2026-11-03, pending the owner's fertility decision D3) because nothing
+# implemented them; spec §8 records how each is to be built. Add them back here,
+# with their loc, only together with that wiring. The rule stays, with its one
+# setting, so the lobby option and its key exist when they grow. A rule with a
+# single setting has no vanilla precedent (every rule in 00_game_rules.txt has
+# two or more); confirm in the lobby that it shows and loads (spec §12, U19).
 eotg_race_crossbreeding = {
 	categories = {
 		eotg flavor
@@ -112,8 +111,4 @@ eotg_race_crossbreeding = {
 	default = eotg_race_crossbreeding_free
 
 	eotg_race_crossbreeding_free = {}
-
-	eotg_race_crossbreeding_discouraged = {}
-
-	eotg_race_crossbreeding_forbidden = {}
 }
