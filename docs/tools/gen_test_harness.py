@@ -1,12 +1,16 @@
-"""Generate the in-game test harness (docs/qa/TEST_HARNESS.md).
+"""Generate the in-game test harness sub-mod (docs/qa/TEST_HARNESS.md).
 
-    python docs/tools/gen_test_harness.py
+    python docs/tools/gen_test_harness.py [output_root]
 
-Writes common/decisions/eotg_test_harness_decisions.txt, events/eotg_test_harness.txt and
-localization/english/eotg_test_harness_l_english.yml (one BOM each). Add a test with T(...) below.
+Test content never ships (owner decision, 2026-11-03), so the harness is its own sub-mod. The output
+root defaults to docs/test_submods/test_harness/ and receives descriptor.mod, README.md,
+common/decisions/eotg_test_harness_decisions.txt, events/eotg_test_harness.txt and
+localization/english/eotg_test_harness_l_english.yml (one BOM each on the script and loc files).
+Add a test with T(...) below. Output is deterministic: a second run is byte-identical.
 """
 import os, sys, textwrap
-ROOT = sys.argv[1] if len(sys.argv) > 1 else os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(REPO, 'docs', 'test_submods', 'test_harness')
 BOM = '﻿'
 
 def ind(s, n): return textwrap.indent(textwrap.dedent(s).strip('\n'), ' ' * n)
@@ -68,12 +72,18 @@ remove_variable = eotg_test_prowess_base
 {log('CY1 DONE')}""")])
 
 T('CY2', 'cy2_neurofractured', 'CY2: Neurofractured End State',
-  'Adds the Neurofractured trait, as the session plan does, and checks that it replaced the cybernetics trait.',
+  'As a ruler with the cybernetics trait: adds the Neurofractured trait, as the session plan does, and checks that it replaced the cybernetics trait. Run CY1 first.',
   'IGSP C5',
   f"""
 {log('CY2 START: Neurofractured end state')}
-add_trait = eotg_neurofractured
-trigger_event = {{ id = eotg_test.111  days = 1 }}""",
+if = {{
+    limit = {{ NOT = {{ has_trait = eotg_cybernetics }} }}
+    {log('CY2 SKIP: needs the cybernetics trait, so the replacement can be seen; run CY1 first')}
+}}
+else = {{
+    add_trait = eotg_neurofractured
+    trigger_event = {{ id = eotg_test.111  days = 1 }}
+}}""",
   [ev('eotg_test.111', f"""
 {check('CY2.1', 'has_trait = eotg_neurofractured', 'Neurofractured', 'eotg_neurofractured was not added')}
 {check('CY2.2', 'NOT = { has_trait = eotg_cybernetics }', 'the cybernetics trait is gone (opposites)', 'still has eotg_cybernetics beside eotg_neurofractured')}
@@ -81,7 +91,7 @@ trigger_event = {{ id = eotg_test.111  days = 1 }}""",
 {log('CY2 DONE')}""")])
 
 T('CY3', 'cy3_seamless', 'CY3: Seamless End State',
-  'Adds the Seamless trait with 3 residue, as the session plan does, and checks the trait and the Frontier flavour exclusion.',
+  'Adds the Seamless trait with 3 residue, as the session plan does, and checks the trait. The Frontier flavour exclusion is a look check.',
   'IGSP C6; frontier_v5 §3.7',
   f"""
 {log('CY3 START: Seamless end state')}
@@ -90,26 +100,31 @@ set_variable = {{ name = eotg_aug_residue  value = 3 }}
 trigger_event = {{ id = eotg_test.121  days = 1 }}""",
   [ev('eotg_test.121', f"""
 {check('CY3.1', 'has_trait = eotg_total_integration', 'Seamless', 'eotg_total_integration was not added')}
-{check('CY3.2', 'eotg_frontier_can_hear_flavor = no', 'excluded from the Frontier first-person pool', 'a Seamless ruler can still hear the Frontier flavour pool')}
+{log('CY3.2 LOOK: no first-person Frontier flavour event reaches you from now on (eotg_frontier_can_hear_flavor reads this trait, so script cannot check it independently)')}
 {log('CY3 LOOK: the log-register event text in the Seamless pool (C6)')}
 {log('CY3 DONE')}""")])
 
-T('CY4', 'cy4_cascade_threshold', 'CY4: Cascade Threshold',
-  'As an Overclocked ruler, sets the fracture risk to the threshold (80) and checks the trigger that starts the Neural Cascade. Run CY1 first.',
+T('CY4', 'cy4_cascade_threshold', 'CY4: Neural Cascade at the Threshold',
+  'As an Overclocked ruler: sets the fracture risk to the threshold (80) and runs the yearly Overclocked pulse once, then checks that the Neural Cascade made you Neurofractured and reset the risk. Run CY1 first.',
   'IGSP C4; cybernetics_v2 phase 3 §1',
   f"""
-{log('CY4 START: cascade threshold')}
+{log('CY4 START: Neural Cascade at the threshold')}
 if = {{
     limit = {{ eotg_is_aug_tier3 = no }}
     {log('CY4 SKIP: needs an Overclocked character, run CY1 first')}
 }}
 else = {{
     set_variable = {{ name = eotg_fracture_risk  value = 80 }}
+    # The real yearly path (eotg_augmentation_on_actions.txt): accrual, then
+    # the threshold check, then eotg_trigger_neurofracture. trigger_event with
+    # on_action: confirmed in v2 (eotg_frontier_on_actions.txt:90, V12).
+    trigger_event = {{ on_action = eotg_on_yearly_aug_overclocked_check }}
     trigger_event = {{ id = eotg_test.131  days = 1 }}
 }}""",
   [ev('eotg_test.131', f"""
-{check('CY4.1', 'eotg_neurofracture_threshold_met = yes', 'the threshold trigger is met at 80', 'eotg_neurofracture_threshold_met is false at risk 80')}
-{log('CY4 LOOK: the Neural Cascade should start at your next yearly pulse')}
+{check('CY4.1', 'has_trait = eotg_neurofractured\nNOT = { has_trait = eotg_cybernetics }', 'the pulse cascaded: Neurofractured, cybernetics trait gone', 'no cascade from the yearly pulse at risk 80 (threshold check or eotg_trigger_neurofracture)')}
+{check('CY4.2', 'var:eotg_fracture_risk ?= 0', 'the cascade reset the fracture risk to 0', 'the fracture risk was not reset after the cascade')}
+{log('CY4 LOOK: the cascade event eotg_fracture.0001 arrives today or tomorrow')}
 {log('CY4 DONE')}""")])
 
 T('CY5', 'cy5_track_ai_values', 'CY5: Track AI Values on a Courtier',
@@ -146,8 +161,13 @@ scope:eotg_test_subject = {{ eotg_aug_set_integration_effect = {{ XP = 100 }} }}
 {log('CY5 LOOK: Overclocked now; expect energy +4, zeal -3, honour -2. If every stage shows the Augmented line, the track ai_ lines are ignored (SI T1)')}
 {log('CY5 DONE')}""")])
 
+WOUND_STEP = '''    if = {
+        limit = { NOT = { has_trait = wounded_3 } }
+        increase_wounds_effect = { REASON = attacked }
+    }
+'''
 T('CY6', 'cy6_wound_repair', 'CY6: Wound Rank 3 and the Repair Offer',
-  'As an augmented ruler, clears the repair cooldown and raises your wound to rank 3, then checks that the repair hook saw the wound.',
+  'As an augmented ruler: clears the real repair cooldown (eotg_flag_aug_repair_cooldown), raises your wound to rank 3 without ever passing it, then checks that the repair hook saw the wound.',
   'IGSP E-11; PROC §4.9',
   f"""
 {log('CY6 START: wound rank 3 and on_trait_gained')}
@@ -164,13 +184,14 @@ else = {{
         limit = {{ has_character_flag = eotg_flag_aug_repair_cooldown }}
         remove_character_flag = eotg_flag_aug_repair_cooldown
     }}
-    increase_wounds_effect = {{ REASON = attacked }}
-    increase_wounds_effect = {{ REASON = attacked }}
-    increase_wounds_effect = {{ REASON = attacked }}
-    trigger_event = {{ id = eotg_test.151  days = 2 }}
+    # increase_wounds_effect calls death on a character already at rank 3
+    # (vanilla 20_health_effects.txt:1342-1351), so each call is guarded:
+    # a fragile_bones character can jump two ranks in one call. The repair
+    # hook fires on wounded_3 only, so the test cannot stop at wounded_2.
+{WOUND_STEP}{WOUND_STEP}{WOUND_STEP}    trigger_event = {{ id = eotg_test.151  days = 2 }}
 }}""",
   [ev('eotg_test.151', f"""
-{check('CY6.1', 'has_trait = wounded_3', 'wound rank 3 reached', 'three increase_wounds_effect calls did not reach wounded_3 (a death roll or an existing wound may interfere)')}
+{check('CY6.1', 'has_trait = wounded_3', 'wound rank 3 reached', 'three guarded increase_wounds_effect calls did not reach wounded_3')}
 {check('CY6.2', 'var:eotg_aug_repair_injury ?= flag:wounded', 'on_trait_gained fired for wounded_3: the repair is queued', 'no repair queued: change_trait_rank does not fire on_trait_gained for wounded_3 (PROC §4.9 engine question)')}
 {log('CY6 LOOK: eotg_aug_proc.003 should arrive within 30 days')}
 {log('CY6 DONE')}""")])
@@ -187,8 +208,12 @@ for sfx, typ, nm, refs in (('a', 'military', 'Military', 'IGSP E-1 step 1, E-12 
 {log(f'{tid} START: start a {typ} Frontier on the capital')}
 capital_county = {{ save_scope_as = eotg_test_county }}
 if = {{
-    limit = {{ scope:eotg_test_county = {{ eotg_frontier_is_frontier = yes }} }}
-    {log(f'{tid} SKIP: the capital is already a Frontier; complete it (FR2) first')}
+    limit = {{ eotg_frontier_holds_frontier = yes }}
+    {log(f'{tid} SKIP: a Frontier is already running in your realm (one at a time, as Establish a Frontier allows); complete it with FR2 first')}
+}}
+else_if = {{
+    limit = {{ scope:eotg_test_county = {{ eotg_frontier_is_unknown = yes }} }}
+    {log(f'{tid} SKIP: the capital is Unknown, and an Unknown Shoal cannot be established; take FR5 to the end (it clears exploration) or pick a known capital')}
 }}
 else = {{
     scope:eotg_test_county = {{
@@ -204,7 +229,7 @@ else = {{
 {log(f'{tid} DONE')}""")])
 
 T('FR2', 'fr2_force_completion', 'FR2: Force Frontier Completion',
-  'On the Frontier at your capital: sets progress to 100, raises development by 5 and control to 100, runs one Frontier year, then checks that it completed.',
+  'On the Frontier at your capital: sets progress to 100, raises development by 5 and control to 100, runs one Frontier year, then checks a week later that it completed. Answer the completion event as soon as it appears.',
   'IGSP E-4, E-12; SI V8; with FR1c: FX-2; as a PMC: G-2',
   f"""
 {log('FR2 START: force completion on the capital Frontier')}
@@ -221,10 +246,12 @@ else = {{
         change_county_control = 100
         eotg_frontier_tick_effect = yes
     }}
-    trigger_event = {{ id = eotg_test.211  days = 1 }}
+    # 7 days, not 1: completion goes through an event the player answers;
+    # a 1-day check raced it (QA 2026-11-03). Answer it at once.
+    trigger_event = {{ id = eotg_test.211  days = 7 }}
 }}""",
   [ev('eotg_test.211', f"""
-{check('FR2.1', 'scope:eotg_test_county = {\n    NOT = { has_variable = eotg_frontier_state }\n}', 'the Frontier completed and cleared (normal play takes over)', 'still a Frontier: the development or control floor was not met; run FR2 again, or see the Readout')}
+{check('FR2.1', 'scope:eotg_test_county = {\n    NOT = { has_variable = eotg_frontier_state }\n}', 'the Frontier completed and cleared (normal play takes over)', 'still a Frontier a week later: the completion event was left unanswered, or the development or control floor was not met; see the Readout')}
 if = {{
     limit = {{ scope:eotg_test_county = {{ var:eotg_test_type ?= flag:military }} }}
     {log('FR2 LOOK: E-12 / SI V8: hover the new Bastion barony, note who holds it and whether a stray character was created')}
@@ -321,23 +348,40 @@ else = {{
 }}""")
 
 T('FR5', 'fr5_exploration', 'FR5: Mark the Capital Unexplored',
-  'Marks your capital Shoal Unknown with the real effect and checks the exploration state.',
+  'Marks your capital Shoal Unknown with the real effect, checks the exploration state, then clears it again so the capital is not left Unknown. Skipped while the capital is a Frontier.',
   'IGSP E-3; F3 §0.1',
   f"""
 {log('FR5 START: exploration state')}
-capital_county = {{
-    save_scope_as = eotg_test_county
-    eotg_frontier_mark_unknown_effect = yes
+capital_county = {{ save_scope_as = eotg_test_county }}
+if = {{
+    limit = {{ scope:eotg_test_county = {{ eotg_frontier_is_frontier = yes }} }}
+    {log('FR5 SKIP: a Frontier is running on the capital, and eotg_frontier_mark_unknown_effect leaves a Frontier as it is; complete it with FR2 first')}
 }}
-trigger_event = {{ id = eotg_test.251  days = 1 }}""",
+else_if = {{
+    limit = {{
+        scope:eotg_test_county = {{
+            OR = {{
+                eotg_frontier_is_abandoned = yes
+                has_variable = eotg_frontier_explored
+            }}
+        }}
+    }}
+    {log('FR5 SKIP: the capital is Abandoned or already has an exploration state, which the effect leaves as it is')}
+}}
+else = {{
+    scope:eotg_test_county = {{ eotg_frontier_mark_unknown_effect = yes }}
+    trigger_event = {{ id = eotg_test.251  days = 1 }}
+}}""",
   [ev('eotg_test.251', f"""
 {check('FR5.1', 'scope:eotg_test_county = { eotg_frontier_is_unknown = yes }', 'the capital is Unknown', 'the exploration variable was not set')}
-{log('FR5 LOOK: hover the Shoal (Unexplored Shoal); save and reload, it stays')}
+{log('FR5 LOOK: the Unexplored Shoal tooltip itself is session-plan check 0-1 (c_tortoli on playset A)')}
+scope:eotg_test_county = {{ eotg_frontier_clear_exploration_effect = yes }}
+{check('FR5.2', 'scope:eotg_test_county = { eotg_frontier_is_unknown = no }', 'exploration cleared again: the capital is Known (it stays Unsettled)', 'eotg_frontier_clear_exploration_effect left the capital Unknown')}
 {log('FR5 DONE')}""")])
 
 # ---------------------------------------------------------------- Governments
 T('GV1', 'gv1_cartel_schedule', 'GV1: Cartel Payment Schedule',
-  'As an independent Cartel ruler: tops up your dread, puts one independent neighbour on the payment schedule through the real effect, and checks the contract, the payer count and the baseline.',
+  'As an independent Cartel ruler: tops up your dread, puts one independent neighbour on the payment schedule through the real effect, and checks the contract, the payer count and that the baseline rose by 4.',
   'Cartel spec V-C4, V-C19',
   f"""
 {log('GV1 START: Cartel tribute lifecycle, start')}
@@ -359,7 +403,12 @@ else = {{
         save_scope_as = eotg_test_target
     }}
     if = {{
+        limit = {{ eotg_cartel_schedule_scale_value >= 40 }}
+        {log('GV1 SKIP: the dread baseline is already at its cap of 40 (10 payers), so a new payer cannot raise it; run GV2 first')}
+    }}
+    else_if = {{
         limit = {{ exists = scope:eotg_test_target }}
+        set_variable = {{ name = eotg_test_scale_before  value = eotg_cartel_schedule_scale_value }}
         eotg_cartel_change_dread_effect = {{ AMOUNT = 40 }}
         # The scope names eotg_cartel_start_schedule_effect reads (it is called
         # from the interaction, where the engine sets them)
@@ -375,7 +424,8 @@ else = {{
   [ev('eotg_test.301', f"""
 {check('GV1.1', 'scope:eotg_test_target = { has_subject_contract_group = eotg_cartel_tributary }', 'the neighbour is a payer in eotg_cartel_tributary', 'the neighbour is not in the Cartel contract group')}
 {check('GV1.2', 'eotg_cartel_payer_count_value >= 1', 'the payer count sees the new payer', 'eotg_cartel_payer_count_value is 0')}
-{check('GV1.3', 'has_variable = eotg_cartel_schedule_scale\nvar:eotg_cartel_schedule_scale >= 4', 'the dread baseline mirror rose (4 per payer)', 'eotg_cartel_schedule_scale did not rise')}
+{check('GV1.3', 'eotg_cartel_schedule_scale_value >= { value = var:eotg_test_scale_before add = 4 }\neotg_cartel_schedule_scale_value <= { value = var:eotg_test_scale_before add = 4 }', 'the dread baseline mirror rose by exactly 4 for the new payer', 'eotg_cartel_schedule_scale did not rise by exactly 4')}
+remove_variable = eotg_test_scale_before
 {log('GV1 LOOK: the character window shows +4 Dread baseline per payer; the Payment Schedule story counter matches your dread')}
 {log('GV1 DONE')}""")])
 
@@ -490,22 +540,30 @@ else = {{
 {log('AL2 DONE')}""")])
 
 T('AL3', 'al3_establish_ready', 'AL3: Alert: A Frontier Can Be Established',
-  'Marks your capital Shoal Unsettled (if it has no Frontier state) and checks the alert condition. Then look at the top bar.',
+  'Marks your capital Shoal Unsettled (if it has no Frontier state) and checks the alert condition. Then look at the top bar. Skipped while a Frontier runs or the capital is Unknown.',
   'integration_v1 §4.2 (INT1 alert 3)',
   f"""
 {log('AL3 START: establish-ready alert')}
-capital_county = {{
-    save_scope_as = eotg_test_county
-    eotg_frontier_mark_unsettled_effect = yes
+capital_county = {{ save_scope_as = eotg_test_county }}
+if = {{
+    limit = {{ eotg_frontier_holds_frontier = yes }}
+    {log('AL3 SKIP: a Frontier is running in your realm, and the alert is off by design while one runs; complete it with FR2 first')}
 }}
-trigger_event = {{ id = eotg_test.421  days = 1 }}""",
+else_if = {{
+    limit = {{ scope:eotg_test_county = {{ eotg_frontier_is_unknown = yes }} }}
+    {log('AL3 SKIP: the capital is Unknown, and an Unknown Shoal cannot be established; take FR5 to the end (it clears exploration) first')}
+}}
+else = {{
+    scope:eotg_test_county = {{ eotg_frontier_mark_unsettled_effect = yes }}
+    trigger_event = {{ id = eotg_test.421  days = 1 }}
+}}""",
   [ev('eotg_test.421', f"""
-{check('AL3.1', 'eotg_frontier_establish_alertable = yes', 'the alert condition holds', 'eotg_frontier_establish_alertable is false (a running Frontier, or not enough gold)')}
+{check('AL3.1', 'eotg_frontier_establish_alertable = yes', 'the alert condition holds', 'eotg_frontier_establish_alertable is false (not enough gold, at war, or the capital is occupied or Unclaimed)')}
 {log('AL3 LOOK: the top bar shows the establish alert; clicking it opens Establish a Frontier')}
 {log('AL3 DONE')}""")])
 
 T('AL4', 'al4_calibration_lapsed', 'AL4: Alert: Implant Calibration Lapsed',
-  'As an augmented ruler: removes the calibration modifier and checks the alert condition. Then look at the top bar.',
+  'As a ruler with the cybernetics trait: removes the calibration modifier, then says whether the top-bar alert should show. A look test.',
   'integration_v1 §4.2 (INT1 alert 5)',
   f"""
 {log('AL4 START: calibration-lapsed alert')}
@@ -521,13 +579,12 @@ else = {{
     {log('AL4 SKIP: needs the cybernetics trait; run CY1 first')}
 }}""",
   [ev('eotg_test.431', f"""
-{check('AL4.1', 'NOT = { has_character_modifier = eotg_mod_implant_calibrated }', 'calibration has lapsed', 'the calibration modifier is still present')}
 if = {{
     limit = {{ can_execute_decision = eotg_decision_maintenance_protocol }}
-    {log('AL4 LOOK: Maintenance Protocol can be taken, so the top bar should show the calibration alert')}
+    {log('AL4.1 LOOK: Maintenance Protocol can be taken, so the top bar should show the calibration alert (unless you marked the decision important)')}
 }}
 else = {{
-    {log('AL4 LOOK: Maintenance Protocol cannot be taken now (cost or cooldown), so the alert is correctly hidden')}
+    {log('AL4.1 LOOK: Maintenance Protocol cannot be taken now (cost or cooldown), so the top bar should NOT show the calibration alert')}
 }}
 {log('AL4 DONE')}""")])
 
@@ -552,7 +609,7 @@ RULES = [
  ('eotg_aug_ai_uptake', ['eotg_aug_ai_uptake_normal', 'eotg_aug_ai_uptake_low', 'eotg_aug_ai_uptake_high']),
  ('eotg_frontier_difficulty', ['eotg_frontier_difficulty_normal', 'eotg_frontier_difficulty_easy', 'eotg_frontier_difficulty_hard']),
  ('eotg_race_half_races', ['eotg_race_half_races_off', 'eotg_race_half_races_as_own_race']),
- ('eotg_race_crossbreeding', ['eotg_race_crossbreeding_free', 'eotg_race_crossbreeding_discouraged', 'eotg_race_crossbreeding_forbidden']),
+ ('eotg_race_crossbreeding', ['eotg_race_crossbreeding_free']),
 ]
 T('GR1', 'gr1_game_rules', 'GR1: Read the Game Rules',
   'Logs the active setting of every mod game rule, and fails any rule that reads no known setting.',
@@ -563,17 +620,18 @@ T('GR1', 'gr1_game_rules', 'GR1: Read the Game Rules',
 # ================================================================ write files
 DEC_HDR = """# -- eotg_test_harness_decisions.txt -------------------------------------------
 # GENERATED by docs/tools/gen_test_harness.py: never hand-edit; change the generator and re-run.
-# In-game test harness (docs/qa/TEST_HARNESS.md). DEBUG ONLY: every decision is
+# In-game test harness (docs/qa/TEST_HARNESS.md), in the test sub-mod
+# docs/test_submods/test_harness (test content never ships). DEBUG ONLY: every decision is
 # `debug_only = yes` (visible only under -debug_mode), never alerts, and the AI
 # never takes one. Gating copied from the shipped debug decisions
 # (eotg_government_debug_decisions.txt:9-41; eotg_frontier_decisions.txt:748-790).
 # Each decision sets up one check through the systems' OWN effects and, where
-# the result can be read in script, fires a hidden eotg_test event a day later
+# the result can be read in script, fires a hidden eotg_test event days later
 # that writes `EOTG_TEST <id> PASS|FAIL|LOOK|INFO|SKIP|START|DONE: ...` to
-# game.log with debug_log. Visual checks only log LOOK lines.
+# logs/debug.log with debug_log. Visual checks only log LOOK lines.
 # These decisions MUTATE the save (traits, Frontier state, payers, dread):
 # use a throwaway save.
-# UNVALIDATED cloud build (no Tiger, PX or game run).
+# Tiger and PX checked locally (2026-11-03); not yet run in game.
 # -----------------------------------------------------------------------------
 """
 dec = [DEC_HDR]
@@ -620,26 +678,26 @@ for t in TESTS:
 }}
 """)
     loc.append(f' {k}:0 "(Test) {t["name"]}"')
-    loc.append(f' {k}_desc:0 "Testing only. {t["desc"]} Results go to the game log on lines starting EOTG_TEST {t["tid"]}."')
+    loc.append(f' {k}_desc:0 "Testing only. {t["desc"]} Results go to logs/debug.log on lines starting EOTG_TEST {t["tid"]}."')
     loc.append(f' {k}_tooltip:0 "Testing only: {t["name"].split(": ",1)[1]}"')
     loc.append(f' {k}_confirm:0 "Run the test"')
-loc.append(' eotg_decision_test_effect_tt:0 "Sets up the test scenario on this save and writes the result to the game log. Use a throwaway save."')
+loc.append(' eotg_decision_test_effect_tt:0 "Sets up the test scenario on this save and writes the result to logs/debug.log. Use a throwaway save."')
 
 EV_HDR = """# -- eotg_test_harness.txt ------------------------------------------------------
 # GENERATED by docs/tools/gen_test_harness.py: never hand-edit; change the generator and re-run.
 # In-game test harness: the delayed assertions (docs/qa/TEST_HARNESS.md).
 # Every event here is HIDDEN and fired ONLY by an eotg_decision_test_*
-# decision (common/decisions/eotg_test_harness_decisions.txt), which are
+# decision (common/decisions/eotg_test_harness_decisions.txt in this sub-mod), which are
 # debug_only (invariant 4: always fired by something; no on_action hook).
 # Root = the decision taker. Scopes saved by the decision (eotg_test_county,
 # eotg_test_target, eotg_test_subject, actor, recipient) carry into the delayed
 # event, as the mod's own chains rely on (e.g. eotg_aug_heir.006 reads
 # scope:eotg_heir days later).
 # Assertions read the systems' own scripted triggers and values only.
-# UNVERIFIED-VANILLA: debug_log writes its literal string to game.log (the
+# UNVERIFIED-VANILLA: debug_log writes its literal string to logs/debug.log (the
 #   effect is used in v2 script, eotg_race_effects.txt, with data functions;
 #   the strings here are plain text on purpose).
-# UNVALIDATED cloud build.
+# Tiger and PX checked locally (2026-11-03); not yet run in game.
 # -----------------------------------------------------------------------------
 
 namespace = eotg_test
@@ -660,8 +718,28 @@ for eid, body in EVENTS:
 def w(path, text):
     p = os.path.join(ROOT, path); os.makedirs(os.path.dirname(p), exist_ok=True)
     open(p, 'w', encoding='utf-8', newline='\n').write(BOM + text)
+def w_plain(path, text):   # no BOM: the descriptor and README (as docs/test_submods/races)
+    p = os.path.join(ROOT, path); os.makedirs(os.path.dirname(p), exist_ok=True)
+    open(p, 'w', encoding='utf-8', newline='\n').write(text)
 w('common/decisions/eotg_test_harness_decisions.txt', ''.join(dec))
 w('events/eotg_test_harness.txt', ''.join(evs))
 w('localization/english/eotg_test_harness_l_english.yml', '\n'.join(loc) + '\n')
-import json
-print(len(TESTS), 'tests,', len(EVENTS), 'events')
+# The dependency is the main mod's descriptor name (echoes_of_the_grip.mod), as the other test sub-mods
+w_plain('descriptor.mod', '''version="0.1.0"
+tags={
+	"Utilities"
+}
+name="EotG Test: In-Game Test Harness"
+dependencies={
+	"Echoes of the Grip"
+}
+supported_version="1.20.*"
+''')
+w_plain('README.md', '''# EotG Test: In-Game Test Harness (sub-mod)
+
+**Test only, never shipped.** GENERATED by `docs/tools/gen_test_harness.py`: never hand-edit anything in this
+folder; change the generator and re-run it.
+
+The full guide (install, playsets, reading `logs/debug.log`, every test) is `docs/qa/TEST_HARNESS.md`.
+''')
+print(len(TESTS), 'tests,', len(EVENTS), 'events ->', ROOT)

@@ -37,10 +37,12 @@ script can read the result and LOOK lines for visual checks, plus a README cross
     how to extend it.
   - **Not covered:** the PMC, Corporation and Trade Oligarchy G2 resources. They live on the unmerged branch
     `claude/governments-g2-three-cloud`; add them when it merges.
-- files:
-  - `common/decisions/eotg_test_harness_decisions.txt`
-  - `events/eotg_test_harness.txt`
-  - `localization/english/eotg_test_harness_l_english.yml` (93 keys; one BOM each, checked)
+- files (moved 2026-11-03 at local validation into the test sub-mod `docs/test_submods/test_harness/`,
+  "EotG Test: In-Game Test Harness"; test content never ships):
+  - `docs/test_submods/test_harness/descriptor.mod`, `README.md`
+  - `docs/test_submods/test_harness/common/decisions/eotg_test_harness_decisions.txt`
+  - `docs/test_submods/test_harness/events/eotg_test_harness.txt`
+  - `docs/test_submods/test_harness/localization/english/eotg_test_harness_l_english.yml` (93 keys; one BOM each, checked)
   - `docs/tools/gen_test_harness.py`
   - `docs/qa/TEST_HARNESS.md`
   - this handoff
@@ -50,7 +52,8 @@ script can read the result and LOOK lines for visual checks, plus a README cross
     stand.
   - `common/decisions/eotg_test_harness_decisions.txt:761` — `random_neighboring_top_liege_realm_owner`, the
     random form of the `any_` iterator v2 already uses. If it is unknown, GV1 logs SKIP.
-  - `events/eotg_test_harness.txt:11` — `debug_log` writes its literal string to `game.log`.
+  - `events/eotg_test_harness.txt:11` — `debug_log` writes its literal string to `logs/debug.log` (corrected
+    from `game.log` at local validation).
   - Scopes saved before `trigger_event = { days = N }` reach the delayed event. The mod's own chains rely on it
     (`eotg_aug_heir.006`), so this is low risk.
 - needs-local-validation: Tiger + PX on `common/decisions/eotg_test_harness_decisions.txt`,
@@ -62,8 +65,8 @@ script can read the result and LOOK lines for visual checks, plus a README cross
 - needs-human:
   - Run the harness alongside `IN_GAME_SESSION_PLAN.md` and send back every `EOTG_TEST … FAIL` line with the
     LOOK observations.
-  - Owner choice: keep the harness in the main mod (as the existing debug decisions are), or move it into a
-    test sub-mod before release. Everything is debug-only either way.
+  - ~~Owner choice: main mod or sub-mod~~ Decided: a test sub-mod (test content never ships). Done at local
+    validation, 2026-11-03.
 - taskboard: (orchestrator to copy)
   - New item: "Run the test harness (`docs/qa/TEST_HARNESS.md`) with the session plan; harness smoke test GR1 +
     CY1 first".
