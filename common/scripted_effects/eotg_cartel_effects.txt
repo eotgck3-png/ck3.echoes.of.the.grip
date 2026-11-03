@@ -6,7 +6,8 @@
 # place Cartel content calls add_dread. Vanilla content and other mod systems
 # still write dread directly; the rule covers Cartel files only.
 # eotg_cartel_refresh_schedule_effect is the only writer of
-# var:eotg_cartel_schedule_scale. eotg_cartel_sync_story_effect is the only
+# var:eotg_cartel_schedule_scale and the only place the schedule modifier is
+# re-applied after the scale changes. eotg_cartel_sync_story_effect is the only
 # writer of the story's display mirror eotg_cartel_dread_shown (on_setup
 # seeds it once, see eotg_cartel_story.txt).
 #
@@ -55,6 +56,15 @@ eotg_cartel_sync_story_effect = {
 
 # Rewrite the baseline mirror: min(4 x payers, 40) (spec §2.2, OQ6 numbers
 # approved 2026-10-20). The schedule modifier scales by it.
+# A scaled modifier's value is computed ONCE, when it is added, and never
+# re-read (G/common/modifiers/_modifiers.info:20-21; vanilla writes the
+# variable before adding, G/common/on_action/travel_on_actions.txt:1428-1432).
+# So after every write this effect re-applies the modifier if the owner has
+# it. This is the single re-apply point: every writer of the variable (init,
+# put-on-schedule, walk-off, Tighten, the story's monthly tick) goes through
+# here, and the monthly tick also catches payer changes made elsewhere
+# (contract validity, payer death, vanilla interactions). Hidden so decision
+# tooltips do not list a remove/add pair. (QA 2026-11-03.)
 eotg_cartel_refresh_schedule_effect = {
     set_variable = {
         name = eotg_cartel_schedule_scale
@@ -64,13 +74,23 @@ eotg_cartel_refresh_schedule_effect = {
             max = 40
         }
     }
+    hidden_effect = {
+        if = {
+            limit = { has_character_modifier = eotg_cartel_schedule_modifier }
+            remove_character_modifier = eotg_cartel_schedule_modifier
+            add_character_modifier = eotg_cartel_schedule_modifier
+        }
+    }
 }
 
 # Idempotent setup (spec §2.6). Called from eotg_cartel_on_game_start,
 # eotg_cartel_on_government_change (new government is Cartel) and
 # eotg_cartel_on_title_gain (Cartel with no story: heirs, newly landed
 # courtiers via use_as_base_on_landed). Modifier added without duration as
-# G/common/on_action/travel_on_actions.txt:1432.
+# G/common/on_action/travel_on_actions.txt:1432. Order matters: the scale
+# variable is written (refresh) BEFORE the modifier is added, because the
+# scale is computed once at add time (vanilla order, travel_on_actions.txt:
+# 1428-1432). If the modifier already exists, refresh re-applies it.
 eotg_cartel_init_effect = {
     if = {
         limit = {
@@ -80,13 +100,13 @@ eotg_cartel_init_effect = {
         }
         create_story = eotg_story_cartel_schedule
     }
+    eotg_cartel_refresh_schedule_effect = yes
     if = {
         limit = {
             NOT = { has_character_modifier = eotg_cartel_schedule_modifier }
         }
         add_character_modifier = eotg_cartel_schedule_modifier
     }
-    eotg_cartel_refresh_schedule_effect = yes
     eotg_cartel_sync_story_effect = yes
 }
 
