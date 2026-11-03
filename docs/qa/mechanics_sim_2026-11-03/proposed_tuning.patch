@@ -1,0 +1,91 @@
+diff --git a/common/on_action/eotg_cartel_on_actions.txt b/common/on_action/eotg_cartel_on_actions.txt
+index 18d0f21..7bedfc2 100644
+--- a/common/on_action/eotg_cartel_on_actions.txt
++++ b/common/on_action/eotg_cartel_on_actions.txt
+@@ -108,7 +108,7 @@ eotg_cartel_on_death = {
+         primary_heir = {
+             set_variable = {
+                 name = eotg_cartel_succession_grace
+-                years = 3
++                years = 5  # sim P5
+             }
+         }
+     }
+diff --git a/common/script_values/eotg_augmentation_values.txt b/common/script_values/eotg_augmentation_values.txt
+index b23bd9c..0e0c196 100644
+--- a/common/script_values/eotg_augmentation_values.txt
++++ b/common/script_values/eotg_augmentation_values.txt
+@@ -23,7 +23,7 @@ eotg_aug_dev_gate_enhanced = {
+     value = 15
+ }
+ eotg_aug_dev_gate_overclocked = {
+-    value = 20
++    value = 15  # sim P4
+ }
+ 
+ # -- §5.5(a) Neurofractured drift --------------------------------------------
+diff --git a/common/script_values/eotg_corporation_values.txt b/common/script_values/eotg_corporation_values.txt
+index 96477ab..30b347e 100644
+--- a/common/script_values/eotg_corporation_values.txt
++++ b/common/script_values/eotg_corporation_values.txt
+@@ -70,7 +70,7 @@ eotg_corporation_restructure_ai_floor_value = 45
+ 
+ # CO3: Court the Board (spec §4.2): the director gains, the CEO's hold loosens
+ eotg_corporation_court_gain_value = 15
+-eotg_corporation_court_erosion_value = -5
++eotg_corporation_court_erosion_value = -2  # sim P1 (docs/qa/mechanics_sim_2026-11-03)
+ # The director's influence AFTER the court gain, clamped as
+ # eotg_corporation_board_influence_next_value. Court the Board saves it BEFORE
+ # the gain so the erosion check reads the same number in tooltip and execution
+diff --git a/common/script_values/eotg_gobcorp_values.txt b/common/script_values/eotg_gobcorp_values.txt
+index a3d9329..ee87d72 100644
+--- a/common/script_values/eotg_gobcorp_values.txt
++++ b/common/script_values/eotg_gobcorp_values.txt
+@@ -60,7 +60,7 @@ eotg_gobcorp_market_share_inherit_value = {
+ 
+ # TO2: trade and war (spec §2.5, story yearly tick)
+ eotg_gobcorp_peace_gain_value = 1
+-eotg_gobcorp_war_loss_value = -4
++eotg_gobcorp_war_loss_value = -3  # sim P3
+ 
+ # TO3: Corner the Market (spec §4.1): the First Prince gains, every partner
+ # Prince is squeezed
+diff --git a/common/script_values/eotg_pmc_values.txt b/common/script_values/eotg_pmc_values.txt
+index 2486090..a94238d 100644
+--- a/common/script_values/eotg_pmc_values.txt
++++ b/common/script_values/eotg_pmc_values.txt
+@@ -66,16 +66,17 @@ eotg_pmc_drift_threshold_value = 60
+ 
+ # P3: Take a Contract (spec §4.1). Pay reads the resource: 50 + 3 x standing
+ # (50 to 350 gold).
+-eotg_pmc_contract_pay_value = {
++eotg_pmc_contract_pay_value = {    # sim P6: tier-scaled, 0.5x to 2.5x medium_gold_value
+     value = eotg_pmc_standing_value
+-    multiply = 3
+-    add = 50
++    divide = 50
++    add = 0.5
++    multiply = medium_gold_value
+ }
+ eotg_pmc_contract_gain_value = 10
+ 
+ # P3: Deliver Results (spec §4.2)
+ eotg_pmc_deliver_gain_value = 15
+-eotg_pmc_deliver_liege_value = 5
++eotg_pmc_deliver_liege_value = 2  # sim P2
+ 
+ # P3: Recruit on Reputation (spec §4.3, OQ3)
+ eotg_pmc_recruit_cost_value = 20
+diff --git a/localization/english/eotg_cartel_l_english.yml b/localization/english/eotg_cartel_l_english.yml
+index 083a654..e0b04be 100644
+--- a/localization/english/eotg_cartel_l_english.yml
++++ b/localization/english/eotg_cartel_l_english.yml
+@@ -4,7 +4,7 @@
+  eotg_cartel_schedule_modifier_desc:0 "Every payer on the schedule keeps the ruler's reputation for violence fresh. The more neighbours pay, the higher the fear floor sits."
+  eotg_cartel_schedule_scale_desc:0 "Each payer on the schedule adds 4, up to a total of 40"
+  eotg_story_cartel_schedule:0 "The Payment Schedule"
+- eotg_story_cartel_schedule_info:0 "Dread keeps the schedule alive.\n\nBelow 20, one payer walks away each year.\nAt 40, a ruler can take up the Cartel government.\nAt 80, a neighbour can be compelled to pay.\n\nVassals are never on the schedule. When a ruler dies, payers stay with the heir for 3 years before anyone can walk away."
++ eotg_story_cartel_schedule_info:0 "Dread keeps the schedule alive.\n\nBelow 20, one payer walks away each year.\nAt 40, a ruler can take up the Cartel government.\nAt 80, a neighbour can be compelled to pay.\n\nVassals are never on the schedule. When a ruler dies, payers stay with the heir for 5 years before anyone can walk away."
+  eotg_story_cartel_schedule_dread_label:0 "Dread"
+  eotg_story_cartel_schedule_min_label:0 "0"
+  eotg_story_cartel_schedule_max_label:0 "100"
