@@ -244,6 +244,10 @@ eotg_decision_pmc_recruit_on_reputation = {
             add = 10
             eotg_pmc_standing_value >= 60
         }
+        modifier = { # room at court (spec §4.3); form: G/common/character_interactions/00_tributary_interactions.txt:3314
+            add = 10
+            number_of_knights < max_number_of_knights
+        }
         modifier = { # keep a reserve (spec §7)
             factor = 0
             eotg_pmc_standing_value < 40
@@ -256,8 +260,8 @@ eotg_decision_pmc_recruit_on_reputation = {
 # ONLY THE RULER CONVERTS. on_government_change runs the G1 law net and
 # eotg_pmc_init_effect (standing 40).
 # AI: OFF (spec OQ7, as the Cartel's OQ4, owner 2026-10-20).
-# Spec §6.1's knight-count condition is NOT built (no verified trigger in v2
-# script); martial alone gates entry.
+# Spec §6.1's knight-count condition: at least 3 (number_of_knights:
+# G/common/character_interactions/00_tributary_interactions.txt:3314).
 eotg_decision_pmc_adopt = {
     picture = {
         reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
@@ -297,6 +301,10 @@ eotg_decision_pmc_adopt = {
         custom_tooltip = {
             text = eotg_decision_pmc_adopt_martial_tt
             martial >= 12
+        }
+        custom_tooltip = {
+            text = eotg_decision_pmc_adopt_knights_tt
+            number_of_knights >= 3
         }
     }
 

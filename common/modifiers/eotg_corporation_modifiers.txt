@@ -7,18 +7,21 @@
 # Identity is read through the government flag, never has_government.
 # -----------------------------------------------------------------------------
 
-# Display layer 1 (spec §2.7): scaled by the resource itself, so the
-# character window shows the live value. Added without duration by
+# Display layer 1 (spec §2.7): scaled by the resource itself. The engine
+# computes the scale once, when the modifier is added
+# (G/common/modifiers/_modifiers.info:21-22), so the change effect
+# re-applies the modifier after every write; that is what keeps the
+# character window current. Added without duration by
 # eotg_corporation_init_effect, removed by eotg_corporation_teardown_effect and the story's
 # on_end. Shape: eotg_cartel_schedule_modifier (vanilla
 # prepare_travels_character_modifier, cited there). The icon and the modifier
 # keys are used by shipped mod files.
-# UNVERIFIED-VANILLA: fractional per-unit values under display_mode = scaled
-# (the Cartel used an integer, dread_baseline_add = 1). Check the tooltip.
+# Fractional per-unit values under display_mode = scaled are vanilla:
+# G/common/modifiers/00_unity_modifiers.txt:4-15 (maa_damage_mult = 0.02).
 eotg_corporation_board_modifier = {
     icon = stewardship_positive
     monthly_income_mult = 0.001   # +10% income at 100
-    vassal_opinion = 0.1          # +10 vassal opinion at 100
+    vassal_opinion = 0.1          # +10 vassal opinion at 100 (key: G/common/court_types/00_court_types.txt:589)
 
     scale = {
         value = eotg_corporation_board_influence_value

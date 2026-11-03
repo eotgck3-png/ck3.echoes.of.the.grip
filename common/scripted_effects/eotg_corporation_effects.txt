@@ -29,6 +29,19 @@ eotg_corporation_change_board_influence_effect = {
         name = eotg_corp_board_influence
         value = eotg_corporation_board_influence_next_value
     }
+    # The modifier's scale reads this variable, but a scaled modifier is
+    # computed once when added and never re-read (G/common/modifiers/
+    # _modifiers.info:21-22). Re-apply it after every write, as
+    # eotg_cartel_refresh_schedule_effect (QA 2026-11-03). Init writes the
+    # variable before its first add, so this is a no-op there. Hidden so
+    # decision tooltips do not list a remove/add pair.
+    hidden_effect = {
+        if = {
+            limit = { has_character_modifier = eotg_corporation_board_modifier }
+            remove_character_modifier = eotg_corporation_board_modifier
+            add_character_modifier = eotg_corporation_board_modifier
+        }
+    }
     # Refresh the story counter now
     eotg_corporation_sync_story_effect = yes
 }

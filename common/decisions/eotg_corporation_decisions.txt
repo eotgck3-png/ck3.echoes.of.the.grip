@@ -102,6 +102,11 @@ eotg_decision_corporation_restructure = {
 # medium gold for +15 board influence; a Corporation CEO liege loses 5 ("every
 # director's gain loosens the chief's hold"). High influence counts in the
 # board election (batch CO5).
+# OQ3 (default, orchestrator, 2026-11-03, pending owner): the CEO loses
+# influence at most once a year (eotg_corp_board_eroded, a 1-year variable on
+# the CEO), and only while the director now holds more influence than the CEO.
+# The director's post-gain value is saved once as eotg_corp_director_influence;
+# no other name is saved in this effect.
 eotg_decision_corporation_court_board = {
     picture = {
         reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
@@ -137,14 +142,26 @@ eotg_decision_corporation_court_board = {
         hidden_effect = {
             eotg_corporation_change_board_influence_effect = { AMOUNT = eotg_corporation_court_gain_value }
         }
+        save_scope_value_as = {
+            name = eotg_corp_director_influence
+            value = eotg_corporation_board_influence_value
+        }
         if = {
             limit = {
-                liege ?= { eotg_corporation_role_top = yes }
+                liege ?= {
+                    eotg_corporation_role_top = yes
+                    NOT = { has_variable = eotg_corp_board_eroded }
+                    eotg_corporation_board_influence_value < scope:eotg_corp_director_influence
+                }
             }
             custom_tooltip = eotg_decision_corporation_court_board_erosion_tt
             hidden_effect = {
                 liege = {
                     eotg_corporation_change_board_influence_effect = { AMOUNT = eotg_corporation_court_erosion_value }
+                    set_variable = {
+                        name = eotg_corp_board_eroded
+                        years = 1
+                    }
                 }
             }
         }
@@ -160,9 +177,15 @@ eotg_decision_corporation_court_board = {
             add = 15
             has_trait = ambitious
         }
-        # Spec §4.2's "+10 if the liege dislikes root" term is NOT built: no
-        # opinion-comparison trigger form is used in v2 script yet (the only
-        # opinion reads are values, eotg_aug_kingpin_effects.txt:937).
+        modifier = { # the liege dislikes root (spec §4.2); form: G/common/decisions/30_court_decisions.txt:371-377
+            add = 10
+            liege ?= {
+                opinion = {
+                    target = root
+                    value < 0
+                }
+            }
+        }
         modifier = {
             add = 10
             eotg_corporation_board_influence_value < 30

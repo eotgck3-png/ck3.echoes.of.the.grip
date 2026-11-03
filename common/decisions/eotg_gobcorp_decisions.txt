@@ -21,6 +21,10 @@
 # Corner the Market (spec §4.1): the First Prince pays major gold for +15
 # market share, and every Trade Oligarchy vassal Prince loses 5 and takes
 # eotg_market_cornered_opinion (-10): first among equals, not above them.
+# OQ10 (default, orchestrator, 2026-11-03, pending owner): each Prince is
+# drained at most once a year. eotg_gobcorp_cornered (1-year variable on the
+# drained Prince) is that guard; the decision's cooldown stays the cadence
+# authority for the First Prince.
 eotg_decision_gobcorp_corner_market = {
     picture = {
         reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
@@ -67,8 +71,15 @@ eotg_decision_gobcorp_corner_market = {
         custom_tooltip = eotg_decision_gobcorp_corner_market_squeeze_tt
         hidden_effect = {
             every_vassal = {
-                limit = { government_has_flag = eotg_government_is_gobcorp }
+                limit = {
+                    government_has_flag = eotg_government_is_gobcorp
+                    NOT = { has_variable = eotg_gobcorp_cornered }
+                }
                 eotg_gobcorp_change_market_share_effect = { AMOUNT = eotg_gobcorp_corner_squeeze_value }
+                set_variable = {
+                    name = eotg_gobcorp_cornered
+                    years = 1
+                }
                 add_opinion = {
                     modifier = eotg_market_cornered_opinion
                     target = root
@@ -109,9 +120,8 @@ eotg_decision_gobcorp_corner_market = {
 # pays minor gold for +10 market share, taken from ONE rival Prince under the
 # same liege (-10 and eotg_undercut_opinion, -15). The rival is a weighted
 # random pick, bigger rivals likelier: no picker widget.
-# UNVERIFIED-VANILLA: a `weight` block on random_vassal. The Cartel's walk-off
-# uses the same shape on random_tributary (eotg_cartel_effects.txt), so it
-# is expected to work on any random_ list builder.
+# A `weight` block on random_vassal is vanilla:
+# G/events/activities/hold_court_activity/hold_court_events_general.txt:1439-1449.
 eotg_decision_gobcorp_undercut_rival = {
     picture = {
         reference = "gfx/interface/illustrations/decisions/decision_realm.dds"

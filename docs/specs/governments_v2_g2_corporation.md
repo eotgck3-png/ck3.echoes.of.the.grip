@@ -277,8 +277,15 @@ As the PMC spec §6.3. In addition: **an elected heir from a cadet line** gets t
 > **Amendment, 2026-11-03 (cloud build of CO2–CO5, unvalidated).**
 > 1. **Built:** CO2 (story yearly results tick), CO3 (Restructure, Court the Board, `eotg_corporation_restructured_modifier`, shared `eotg_restructured_opinion`), CO4 (entry, exit, grant field), CO5 (the election's vote strength reads board influence), and all their loc (the CO6 loc part). CO6's lore-keeper and QA review remain.
 > 2. **CO5 as built:** `eotg_corporation_su_vote_board` keeps its key and now fires at influence ≥ 40 for **any** elector, the holder included. A new `eotg_corporation_su_vote_board_major` fires at ≥ 75. The councillor condition is gone (OQ9 default). Candidates and electors are unchanged (owner ruling: dynasty-only candidates, unrestricted electors). Loc "Seat on the board" became "Hold on the board (40+)".
-> 3. **Deviation:** the §4.2 "+10 if the liege dislikes root" AI term is not built (no opinion-comparison trigger form in v2 script).
+> 3. **Deviation:** the §4.2 "+10 if the liege dislikes root" AI term is not built (no opinion-comparison trigger form in v2 script). **Restored 2026-11-03, see below.**
 > 4. **The yearly tick** uses `first_valid` with the landed check in each branch, not a group-level `trigger` beside `first_valid` (the Cartel uses one form or the other, never both).
+>
+> **Amendment, 2026-11-03 (local fixes after QA of the cloud build).**
+> - **Restored:** the §4.2 AI term, +10 if `liege ?= { opinion = { target = root value < 0 } }`. Form: `G/common/decisions/30_court_decisions.txt:371-377`.
+> - **Court the Board erosion (OQ3 default):** the CEO liege loses 5 only if the CEO has no `eotg_corp_board_eroded` (1-year variable set on erosion) and the director's post-gain influence (saved once as `eotg_corp_director_influence`) exceeds the CEO's. Still through the change effect.
+> - **`vassal_opinion`** is a vanilla modifier key: `G/common/court_types/00_court_types.txt:589`.
+> - **Scaled modifier refresh:** the change effect now re-applies the display modifier after every write (hidden remove/add, as `eotg_cartel_refresh_schedule_effect`); the engine computes a scale only when a modifier is added (`G/common/modifiers/_modifiers.info:21-22`). Init writes the variable before the first add.
+> - **Fractional per-unit values under `display_mode = scaled`** are vanilla (`G/common/modifiers/00_unity_modifiers.txt:4-15`); the §2.7 UNVERIFIED note is withdrawn.
 
 | Batch | Contents | Static gate | In-game tests |
 |---|---|---|---|
@@ -345,11 +352,11 @@ As the PMC spec §6.3. In addition: **an elected heir from a cadet line** gets t
 
 - **OQ1, scripted variable rather than vanilla influence (recommended: scripted).** Skip the T11 probe.
 - **OQ2, 50% inheritance to the primary heir (recommended: yes).** The board must be won again. Alternatives: 75% (as the PMC) or 0% (a fresh start at the start value).
-- **OQ3, directors' gains erode the CEO (recommended: yes, −5 per Court).** Makes the board contested. Alternative: no erosion (directors and CEO grow independently).
+- **OQ3, directors' gains erode the CEO (recommended: yes, −5 per Court).** Makes the board contested. Alternative: no erosion (directors and CEO grow independently). **Default (orchestrator, 2026-11-03), pending owner:** yes, −5, but at most once a year per CEO and only while the director's influence is above the CEO's. Built.
 - **OQ4, a visible story (recommended: yes).**
 - **OQ5, start values 50 (CEO) / 20 (director) (recommended: yes).**
 - **OQ6, first-pass numbers (recommended: approve).** Results +3 / debt −5 a year; Restructure −25 for +10% income and −10% build cost for 5 years and −10 director opinion; Court +15 / −5 for medium gold; exit ×2 legitimacy max 200; modifier +10% income and +10 vassal opinion at 100.
 - **OQ7, AI adoption (recommended: not yet).** As the Cartel.
 - **OQ8, the events in §11 (recommended: none yet).**
 - **OQ9, CO5: keep the councillor +1 alongside the influence bands (recommended: no).** A seat is not a hold. Yes keeps landless councillors' weight.
-- **OQ10, entry requires a Port capital (recommended: no, record V-CO10 first).** If a castle capital is penalized under the city shape, add `capital_county` holding checks (UNVERIFIED-VANILLA form) before shipping CO4.
+- **OQ10, entry requires a Port capital (recommended: no, record V-CO10 first).** No change 2026-11-03 (the orchestrator's OQ10 default is the Trade Oligarchy's). If a castle capital is penalized under the city shape, add `capital_county` holding checks (UNVERIFIED-VANILLA form) before shipping CO4.

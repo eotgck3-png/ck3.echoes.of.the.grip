@@ -7,14 +7,17 @@
 # Identity is read through the government flag, never has_government.
 # -----------------------------------------------------------------------------
 
-# Display layer 1 (spec §2.7): scaled by the resource itself, so the
-# character window shows the live value. Added without duration by
+# Display layer 1 (spec §2.7): scaled by the resource itself. The engine
+# computes the scale once, when the modifier is added
+# (G/common/modifiers/_modifiers.info:21-22), so the change effect
+# re-applies the modifier after every write; that is what keeps the
+# character window current. Added without duration by
 # eotg_pmc_init_effect, removed by eotg_pmc_teardown_effect and the story's
 # on_end. Shape: eotg_cartel_schedule_modifier (vanilla
 # prepare_travels_character_modifier, cited there). The icon and the modifier
 # keys are used by shipped mod files.
-# UNVERIFIED-VANILLA: fractional per-unit values under display_mode = scaled
-# (the Cartel used an integer, dread_baseline_add = 1). Check the tooltip.
+# Fractional per-unit values under display_mode = scaled are vanilla:
+# G/common/modifiers/00_unity_modifiers.txt:4-15 (maa_damage_mult = 0.02).
 eotg_pmc_standing_modifier = {
     icon = martial_positive
     monthly_prestige = 0.01            # +1 prestige a month at 100

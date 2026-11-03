@@ -276,6 +276,13 @@ As the PMC spec §6.3.
 > 2. **`major_gold_value` is verified**: v2 script reads it 72 times. The §4.1 UNVERIFIED note is withdrawn. The `any_vassal = { count >= 3 }` form is verified too (`eotg_augmentation_laws.txt:90-93`).
 > 3. **`eotg_gobcorp_is_rival_prince_of`** checks role and `this != PRINCE` only. Callers iterate PRINCE's liege's vassals, which is what makes the rival a charter partner.
 > 4. **Deviation:** the exit's AI "+10 at war for long" became "+10 in debt" (the decision needs peace, and no war-length trigger is used in v2).
+>
+> **Amendment, 2026-11-03 (local fixes after QA of the cloud build).**
+> - **Not restored, on purpose:** the exit's war-length AI term (item 4). The decision requires `is_at_war = no`, so the term would be dead code.
+> - **Corner the Market (OQ10 default):** each vassal Prince is drained at most once a year. The `every_vassal` limit skips Princes with `eotg_gobcorp_cornered`, which is set for 1 year on each Prince drained.
+> - **`weight` on `random_vassal`** (§4.2) is vanilla: `G/events/activities/hold_court_activity/hold_court_events_general.txt:1439-1449`.
+> - **Scaled modifier refresh:** the change effect now re-applies the display modifier after every write (hidden remove/add, as `eotg_cartel_refresh_schedule_effect`); the engine computes a scale only when a modifier is added (`G/common/modifiers/_modifiers.info:21-22`). Init writes the variable before the first add.
+> - **Fractional per-unit values under `display_mode = scaled`** are vanilla (`G/common/modifiers/00_unity_modifiers.txt:4-15`); the §2.7 UNVERIFIED note is withdrawn.
 
 | Batch | Contents | Static gate | In-game tests |
 |---|---|---|---|
@@ -349,5 +356,5 @@ As the PMC spec §6.3.
 - **OQ7, AI adoption (recommended: not yet).** As the Cartel.
 - **OQ8, the events in §11 (recommended: none yet).**
 - **OQ9, TO5: sort electors by market share instead of gold (recommended: no, keep gold for selection).** Only vote strength moves to share in TO5.
-- **OQ10, Corner the Market hits all vassal Princes, including counts (recommended: yes).** Alternative: only duke- and kingdom-tier Princes.
+- **OQ10, Corner the Market hits all vassal Princes, including counts (recommended: yes).** Alternative: only duke- and kingdom-tier Princes. **Default (orchestrator, 2026-11-03), pending owner:** all vassal Princes, each drained at most once a year. Built.
 - **OQ11, change the government's `diplomacy = -1` to `+1` (recommended: yes, separately).** Assessment P4; outside this pass's batches.

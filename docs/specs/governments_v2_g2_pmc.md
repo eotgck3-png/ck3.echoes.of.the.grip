@@ -326,6 +326,12 @@ From `governments_v2.md` §5.1, §11 and §17, binding unchanged:
 > 2. **Every amount is a named value** (`eotg_pmc_values.txt`), including the positive ones, so the numbers live in one file.
 > 3. **Deviations:** the §6.1 knight-count entry condition and the §4.3 knight-count AI term are **not built**, because no knight-count trigger is used in v2 script. Entry gates on `martial >= 12` alone. The §4.1 neighbour-at-war AI term is not built; `is_at_war` gates it. The exit's AI is base 0, +10 content, +10 `martial < 8`.
 > 4. **`side_primary_participant`** (§5.1) is built and marked `UNVERIFIED-VANILLA` in `eotg_pmc_on_actions.txt`. If error.log rejects it, swap the hooks for the fallback in §5.1.
+>
+> **Amendment, 2026-11-03 (local fixes after QA of the cloud build).**
+> - **Restored** (supersedes item 3's first sentence): the §6.1 entry condition, custom tooltip `eotg_decision_pmc_adopt_knights_tt` on `number_of_knights >= 3`, beside `martial >= 12`; and the §4.3 AI term, +10 if `number_of_knights < max_number_of_knights`. Both triggers: `G/common/character_interactions/00_tributary_interactions.txt:3314`.
+> - **`side_primary_participant` is verified** (supersedes item 4): `G/common/on_action/combat_on_actions.txt:12-14,36,40`.
+> - **Scaled modifier refresh:** the change effect now re-applies the display modifier after every write (hidden remove/add, as `eotg_cartel_refresh_schedule_effect`); the engine computes a scale only when a modifier is added (`G/common/modifiers/_modifiers.info:21-22`). Init writes the variable before the first add.
+> - **Fractional per-unit values under `display_mode = scaled`** are vanilla (`G/common/modifiers/00_unity_modifiers.txt:4-15`); the §2.7 UNVERIFIED note is withdrawn.
 
 | Batch | Contents | Static gate | In-game tests |
 |---|---|---|---|
