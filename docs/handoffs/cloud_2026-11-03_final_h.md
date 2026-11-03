@@ -14,7 +14,8 @@ Branch `claude/final-h-cloud`: cut from origin/claude/void-corruption-v2-cloud (
   - GT2a → GT2b: Corner the Market bracket (V-TO7, including the once-a-year guard on a pre-marked Prince).
   - GE1/GE2: election band edges as LOOK (V-CO13, V-TO13).
   - Void: VD1 exposure bands (V-V3), VD2 the Hollowing through the real yearly pulse with the cooldown set by the on_action (V-V8, V-V17), VD3 depth bands and the +4 drift (V-V9–V-V12), VD4 the Voidwalker courtier, −6 accrual and the Ward decision (V-V13), VD5 the Insight guard (V-V16).
-  - Lessons followed: nothing kills or deposes (VD2 warns that 0030.c steps down; the player chooses), every unmet setup logs SKIP, each PASS reads something downstream of the setup (story counter, band modifiers, accrual value, decision availability) or is a LOOK, baselines read first with exact deltas and restored, every `eotg_test_*` variable cleared in the final step.
+  - Lessons followed: nothing kills or deposes (VD2 warns that 0030.c steps down; the player chooses), every unmet setup logs SKIP, each PASS reads something downstream of the setup (story counter, band modifiers, accrual value, decision availability) or is a LOOK, baselines read first with exact deltas, every `eotg_test_*` variable cleared in the final step. **Correction (local validation, 2026-11-03):** not everything is restored. GP1/GC1/GT1, GP2, GE1/GE2, VD1 and VD3 restore their value; VD2 leaves the ruler Hollowed, VD4 leaves a Voidwalker at court, VD5 leaves +4 skill and an Insight modifier, and GC2b / GT2a leave the real 1-year guards (`eotg_corp_board_eroded` on the liege, `eotg_gobcorp_cornered` on a Prince). `docs/qa/TEST_HARNESS.md` now lists what each test leaves and a suggested order; use a throwaway save.
+  - Local fixes (eotg-scripter, 2026-11-03, after eotg-qa): VD5.1 compared two `{ }` blocks (a parse error; now stored in `eotg_test_after` first); VD2 SKIPs when a Voidwalker is at court (VD4 leaves one, which made VD2.1 a false pass); GT2B.2/.3 FAIL lines carry their sub-step numbers.
 - files: `docs/tools/gen_test_harness.py`; `docs/test_submods/test_harness/**` (regenerated, byte-stable on a second run); `docs/qa/TEST_HARNESS.md`; this handoff.
 - unverified-vanilla:
   - `gen_test_harness.py` GC2a/GT2a: `is_decision_on_cooldown = <decision>` as a character trigger.
@@ -22,7 +23,7 @@ Branch `claude/final-h-cloud`: cut from origin/claude/void-corruption-v2-cloud (
   - VD5 and the existing CY1: skills read as values (`value = diplomacy add = martial …`).
   - VD4: `can_execute_decision` for a decision with a gold cost (AL4 uses it already).
   - All tests: `save_scope_value_as` with a `{ value subtract }` block passed on as `AMOUNT = scope:x` into the writers (their `save_scope_value_as` / `change_variable` take a value).
-- needs-local-validation: Tiger and PX over `docs/test_submods/test_harness/` (with the main mod), then the session: GP1, GP2, GE1/GE2 as Raoul/Hoël/Bertrand; GC2 as Konan (reload between a and b); GT2 needs two Trade Oligarchy vassals (V-TO9); VD1, VD4, VD5 on any ruler; VD2 → answer 0030 → VD3 on a throwaway save.
+- needs-local-validation: Tiger and PX over `docs/test_submods/test_harness/` (with the main mod), then the session: GP1, GP2, GE1/GE2 as Raoul/Hoël/Bertrand; GC2 as Konan (reload between a and b); GT2 needs two Trade Oligarchy vassals (V-TO9); VD1, VD5 on any ruler; VD2 → answer 0030 → VD3 on a throwaway save; VD4 last or from a reload (its Voidwalker makes VD2 SKIP).
 - needs-loc: none (harness loc is generated).
 - needs-lore: none.
 - needs-human: none.

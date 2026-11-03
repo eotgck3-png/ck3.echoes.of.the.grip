@@ -1270,7 +1270,7 @@ eotg_test.511 = {
             limit = {
                 var:eotg_void_exposure >= 100
             }
-            debug_log = "EOTG_TEST VD2.2 PASS: exposure is at the cap (Touched accrual cannot lower it)"
+            debug_log = "EOTG_TEST VD2.2 PASS: exposure is still at the cap after the pulse (no Voidwalker at court, so the accrual is not negative)"
         }
         else = {
             debug_log = "EOTG_TEST VD2.2 FAIL: exposure fell below 100 after the pulse"
@@ -1446,10 +1446,11 @@ eotg_test.541 = {
     hidden = yes
 
     immediate = {
+        set_variable = { name = eotg_test_after  value = { value = diplomacy add = martial add = stewardship add = intrigue add = learning add = prowess } }
         if = {
             limit = {
-                { value = diplomacy add = martial add = stewardship add = intrigue add = learning add = prowess } >= { value = var:eotg_test_before add = 4 }
-                { value = diplomacy add = martial add = stewardship add = intrigue add = learning add = prowess } <= { value = var:eotg_test_before add = 4 }
+                var:eotg_test_after >= { value = var:eotg_test_before add = 4 }
+                var:eotg_test_after <= { value = var:eotg_test_before add = 4 }
             }
             debug_log = "EOTG_TEST VD5.1 PASS: two Insights gave +2 skill each (+4 total)"
         }
@@ -1466,6 +1467,7 @@ eotg_test.541 = {
             debug_log = "EOTG_TEST VD5.2 FAIL: no Insight modifier after the effect"
         }
         remove_variable = eotg_test_before
+        remove_variable = eotg_test_after
         debug_log = "EOTG_TEST VD5.3 LOOK: the character window lists ONE Insight modifier, not two copies"
         debug_log = "EOTG_TEST VD5 DONE"
     }

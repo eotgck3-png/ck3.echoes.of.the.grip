@@ -1916,7 +1916,7 @@ eotg_decision_test_gt2b_corner_check = {
                             NOT = { eotg_gobcorp_market_share_value >= { value = var:eotg_test_share_before add = -5 min = 0 } eotg_gobcorp_market_share_value <= { value = var:eotg_test_share_before add = -5 min = 0 } }
                         }
                     }
-                    debug_log = "EOTG_TEST GT2B FAIL: a Prince not yet cornered did not lose exactly 5"
+                    debug_log = "EOTG_TEST GT2B.2 FAIL: a Prince not yet cornered did not lose exactly 5"
                 }
                 else = {
                     debug_log = "EOTG_TEST GT2B.2 PASS: every Prince not yet cornered lost exactly 5"
@@ -1928,7 +1928,7 @@ eotg_decision_test_gt2b_corner_check = {
                             NOT = { eotg_gobcorp_market_share_value >= var:eotg_test_share_before eotg_gobcorp_market_share_value <= var:eotg_test_share_before }
                         }
                     }
-                    debug_log = "EOTG_TEST GT2B FAIL: a Prince already cornered this year was drained again"
+                    debug_log = "EOTG_TEST GT2B.3 FAIL: a Prince already cornered this year was drained again"
                 }
                 else_if = {
                     limit = { any_vassal = { has_variable = eotg_test_was_cornered } }
@@ -2145,6 +2145,10 @@ eotg_decision_test_vd2_void_hollowing_path = {
             if = {
                 limit = { has_trait = eotg_void_hollowed }
                 debug_log = "EOTG_TEST VD2 SKIP: already Hollowed; run VD3"
+            }
+            else_if = {
+                limit = { eotg_void_has_voidwalker = yes }
+                debug_log = "EOTG_TEST VD2 SKIP: a Voidwalker is at court (VD4 leaves one); reload a save from before VD4"
             }
             else = {
                 eotg_void_become_touched_effect = yes

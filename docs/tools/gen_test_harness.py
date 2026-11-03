@@ -873,7 +873,7 @@ else = {{
                 NOT = {{ {eq('eotg_gobcorp_market_share_value', '{ value = var:eotg_test_share_before add = -5 min = 0 }').replace(chr(10), ' ')} }}
             }}
         }}
-        {log('GT2B FAIL: a Prince not yet cornered did not lose exactly 5')}
+        {log('GT2B.2 FAIL: a Prince not yet cornered did not lose exactly 5')}
     }}
     else = {{
         {log('GT2B.2 PASS: every Prince not yet cornered lost exactly 5')}
@@ -885,7 +885,7 @@ else = {{
                 NOT = {{ {eq('eotg_gobcorp_market_share_value', 'var:eotg_test_share_before').replace(chr(10), ' ')} }}
             }}
         }}
-        {log('GT2B FAIL: a Prince already cornered this year was drained again')}
+        {log('GT2B.3 FAIL: a Prince already cornered this year was drained again')}
     }}
     else_if = {{
         limit = {{ any_vassal = {{ has_variable = eotg_test_was_cornered }} }}
@@ -997,13 +997,17 @@ remove_variable = eotg_test_before
 {log('VD1 DONE (exposure restored; VD1 may have advanced Void events: the on_action reads exposure yearly)')}""")])
 
 T('VD2', 'vd2_void_hollowing_path', 'VD2: The Hollowing Through the Yearly Pulse',
-  'Makes you Void-Touched with exposure 100 through the system\'s own effects, clears the Void event cooldown, runs the real yearly Void pulse once, and checks that the pulse set the cooldown itself. The Hollowing event follows: answer it (avoid stepping down if you want to keep playing this ruler), then run VD3. This ruler stays Hollowed: throwaway save.',
+  'Makes you Void-Touched with exposure 100 through the system\'s own effects, clears the Void event cooldown, runs the real yearly Void pulse once, and checks that the pulse set the cooldown itself. The Hollowing event follows: answer it (avoid stepping down if you want to keep playing this ruler), then run VD3. Skips if a Voidwalker is at court (VD4 leaves one). This ruler stays Hollowed: throwaway save.',
   'Void spec V-V8, V-V17 (cooldown authority in the on_action)',
   f"""
 {log('VD2 START: the Hollowing through the yearly pulse')}
 if = {{
     limit = {{ has_trait = eotg_void_hollowed }}
     {log('VD2 SKIP: already Hollowed; run VD3')}
+}}
+else_if = {{
+    limit = {{ eotg_void_has_voidwalker = yes }}
+    {log('VD2 SKIP: a Voidwalker is at court (VD4 leaves one); reload a save from before VD4')}
 }}
 else = {{
     eotg_void_become_touched_effect = yes
@@ -1017,7 +1021,7 @@ else = {{
 }}""",
   [ev('eotg_test.511', f"""
 {check('VD2.1', 'has_character_flag = eotg_flag_void_event_cooldown', 'the on_action set the event cooldown when it fired the Hollowing (no event sets it)', 'no cooldown flag after the pulse fired: the on_action is not the cooldown authority, or the Hollowing branch did not fire')}
-{check('VD2.2', 'var:eotg_void_exposure >= 100', 'exposure is at the cap (Touched accrual cannot lower it)', 'exposure fell below 100 after the pulse')}
+{check('VD2.2', 'var:eotg_void_exposure >= 100', 'exposure is still at the cap after the pulse (no Voidwalker at court, so the accrual is not negative)', 'exposure fell below 100 after the pulse')}
 {log('VD2 LOOK: The Hollowing (eotg_void.0030) arrives within 10 days; answer it, then take VD3')}
 {log('VD2 DONE')}""")])
 
@@ -1125,9 +1129,11 @@ else = {{
     trigger_event = {{ id = eotg_test.541  days = 1 }}
 }}""",
   [ev('eotg_test.541', f"""
-{check('VD5.1', eq(skill_sum(), '{ value = var:eotg_test_before add = 4 }'), 'two Insights gave +2 skill each (+4 total)', 'the skill total did not rise by exactly 4')}
+set_variable = {{ name = eotg_test_after  value = {skill_sum()} }}
+{check('VD5.1', eq('var:eotg_test_after', '{ value = var:eotg_test_before add = 4 }'), 'two Insights gave +2 skill each (+4 total)', 'the skill total did not rise by exactly 4')}
 {check('VD5.2', 'eotg_void_has_any_insight = yes', 'an Insight modifier is held', 'no Insight modifier after the effect')}
 remove_variable = eotg_test_before
+remove_variable = eotg_test_after
 {log('VD5.3 LOOK: the character window lists ONE Insight modifier, not two copies')}
 {log('VD5 DONE')}""")])
 
