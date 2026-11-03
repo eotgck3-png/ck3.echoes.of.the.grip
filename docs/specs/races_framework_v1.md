@@ -296,6 +296,7 @@ whether a trait added in `on_birth_child` shows on the first portrait. If it doe
 - **D6. Ruler designer.** May players pick race in the designer? Today `shown_in_ruler_designer = no`, and the race
   comes from culture.
 - **D7. Pairing order** for shared parent races (§9.3).
+- **D8. `forbidden` is inactive.** The `eotg_race_crossbreeding_forbidden` setting does nothing until a local session completes stubs 2 and 3 in `eotg_race_vanilla_overrides_triggers.txt` (§8). Its loc now says "Not yet active". When the stubs land, restore the description ("Characters of different races cannot marry or have children together."), or hide the setting if the owner prefers.
 
 ## 12. UNVERIFIED-VANILLA list
 

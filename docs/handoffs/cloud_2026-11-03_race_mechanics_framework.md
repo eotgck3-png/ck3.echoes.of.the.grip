@@ -163,3 +163,10 @@ The test sub-mod is `docs/test_submods/races/`.
     - a divergence `is_shown` limit on race heritages (spec §6);
     - an `on_culture_created` check that new cultures keep their group (feasibility §11);
     - race events, after D4.
+
+## Part A follow-up (cloud, 2026-11-03)
+- `localization/english/eotg_game_rules_l_english.yml`: `setting_eotg_race_crossbreeding_forbidden_desc` now says the
+  setting is **not yet active** and works like Free for now. The key is unchanged; BOM checked `ef bb bf`.
+- `docs/specs/races_framework_v1.md` §11: added **D8**. `forbidden` stays inactive until a local session completes
+  stubs 2 and 3; then restore the description or hide the setting.
+- No script changed.
