@@ -51,3 +51,16 @@ eotg_void_hollowing_start_value = {
 eotg_void_hollowing_drift_value = {
     value = 4
 }
+
+# Contact chance (percent, per yearly pulse) for an unseeded character: read by
+# eotg_on_yearly_void_check as random = { chance = <value> } (vanilla form:
+# common/on_action/army_on_actions.txt:852-853, chance = legend_seed_chance_low).
+# Spec Q5: default (orchestrator, 2026-11-03), pending owner. 4% a year is
+# about 56% contacted within 20 years; the AI's 1% is about 18%.
+eotg_void_contact_chance_value = {
+    value = 4
+    if = {
+        limit = { is_ai = yes }
+        value = 1
+    }
+}

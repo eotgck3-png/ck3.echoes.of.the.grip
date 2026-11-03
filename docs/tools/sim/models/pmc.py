@@ -77,20 +77,27 @@ def run(R, size, policy, runs, years, seed):
             recruits += int(rec.sum())
         # Deliver Results (each vassal)
         cost = np.zeros((runs, nv))
+        # Structural variant (owner call, H2a item 9): the liege gains from at most one
+        # Deliver Results a year, as Court the Board's erosion cap. Not in the script; a
+        # what-if switched on by R.overrides['pmc_deliver_liege_once_a_year'].
+        cap = bool(R.overrides.get('pmc_deliver_liege_once_a_year', False))
+        fed = np.zeros(runs, bool)
         for j in range(nv):
             vt = int(w.vtiers[j])
-            cv = Ctx({V: vas[:, j], 'gold': w.v_gold[:, j], 'tier': vt, 'is_at_war': w.at_war,
+            cv = Ctx({V: vas[:, j], 'gold': w.v_gold[:, j], 'tier': vt, 'is_at_war': w.v_at_war[:, j],
                       'trig:eotg_pmc_role_vassal': True, **trait_ctx(w.v_traits, j)})
             c = R.cost_value(D_del, 'gold', cv)
             cost[:, j] = c
-            ok = (~w.at_war) & (cd_del[:, j] <= 0) & (w.v_gold[:, j] >= c)
+            ok = (~w.v_at_war[:, j]) & (cd_del[:, j] <= 0) & (w.v_gold[:, j] >= c)
             if policy == 'greedy_all':
                 dl = ok
             else:
                 dl = ok & annual_take(R, D_del, cv, TIER_KEY[vt], rng, (runs,))
             vas[:, j] = np.where(dl, chg(vas[:, j], d_gain), vas[:, j])
             w.v_gold[:, j] -= np.where(dl, c, 0)
-            top = np.where(dl, chg(top, d_liege), top)
+            feed = dl & ~fed if cap else dl
+            top = np.where(feed, chg(top, d_liege), top)
+            fed |= dl
             cd_del[:, j] = np.where(dl, D_del['cooldown_years'], cd_del[:, j] - 1)
             delivers += int(dl.sum())
         # Stand Down (AI only; recorded, the run continues as a PMC for the statistics)

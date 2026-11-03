@@ -70,7 +70,7 @@ def run(R, size, policy, runs, years, seed):
     grace = np.zeros(runs); cd_t = np.zeros(runs); cd_l = np.zeros((runs, nv))
     hist = np.zeros((runs, years)); phist = np.zeros((runs, years))
     walkoffs = 0; accepts = 0; refusals = 0; tightens = 0; leans = 0
-    post_succ_walks = 0; successions_with_payers = 0  # walk-offs within 5 years of a succession
+    post_succ_walks = 0; post_succ_walks10 = 0; successions_with_payers = 0  # walk-offs within 5 years of a succession
     since_succ = np.full(runs, 99.0); payers_at_succ = np.zeros(runs)
     for y in range(years):
         w.step_war(); w.step_gold()
@@ -84,9 +84,9 @@ def run(R, size, policy, runs, years, seed):
         # Lean on the Locals (vassals)
         for j in range(nv):
             vt = int(w.vtiers[j])
-            cv = Ctx({'dread': vdread[:, j], 'low_dread': low_dread, 'is_at_war': w.at_war,
+            cv = Ctx({'dread': vdread[:, j], 'low_dread': low_dread, 'is_at_war': w.v_at_war[:, j],
                       'trig:eotg_cartel_role_vassal': True, **trait_ctx(w.v_traits, j)})
-            ok = (~w.at_war) & (cd_l[:, j] <= 0)
+            ok = (~w.v_at_war[:, j]) & (cd_l[:, j] <= 0)
             ln = ok if policy == 'greedy_all' else ok & annual_take(R, D_l, cv, TIER_KEY[vt], rng, (runs,))
             vdread[:, j] = np.where(ln, np.minimum(MAX_DREAD, vdread[:, j] + lean_own * gain_mult), vdread[:, j])
             dread = np.where(ln, np.minimum(MAX_DREAD, dread + lean_liege * gain_mult), dread)
@@ -158,6 +158,9 @@ def run(R, size, policy, runs, years, seed):
         walkoffs += int(walk.sum())
         since_succ += 1
         post_succ_walks += int(((since_succ <= 5) & walk & (payers_at_succ > 0)).sum())
+        # H2a fix 3: the 5-year window equals a 5-year grace, so P5 reads 0 by
+        # construction; the 10-year window shows what the longer grace really buys.
+        post_succ_walks10 += int(((since_succ <= 10) & walk & (payers_at_succ > 0)).sum())
         # succession
         dead = w.deaths(runs)
         successions_with_payers += int((dead & (npay > 0)).sum())
@@ -171,7 +174,8 @@ def run(R, size, policy, runs, years, seed):
             'counts': {'accept_per_run_year': accepts / (runs * years), 'refusal_per_run_year': refusals / (runs * years),
                        'walkoff_per_run_year': walkoffs / (runs * years), 'tighten_per_run_year': tightens / (runs * years),
                        'lean_per_vassal_year': leans / (runs * years * nv)},
-            'succession': {'walkoffs_within_5y_per_succession': post_succ_walks / max(1, successions_with_payers)},
+            'succession': {'walkoffs_within_5y_per_succession': post_succ_walks / max(1, successions_with_payers),
+                           'walkoffs_within_10y_per_succession': post_succ_walks10 / max(1, successions_with_payers)},
             'derived': {'monthly_decay': decay, 'gain_mult': gain_mult, 'grace_years': grace_years}}
 
 

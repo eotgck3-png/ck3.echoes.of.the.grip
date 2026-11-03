@@ -60,7 +60,7 @@ eotg_void.0030 = {
         skill = intrigue
         add_intrigue_skill = 2
         if = {
-            limit = { NOT = { has_character_modifier = eotg_mod_void_unseen_step } }
+            limit = { eotg_void_has_any_insight = no }    # one Insight per character
             add_character_modifier = { modifier = eotg_mod_void_unseen_step }
         }
         eotg_void_change_hollowing_depth_effect = { AMOUNT = 5 }
@@ -71,7 +71,10 @@ eotg_void.0030 = {
     # v1's "Abdicate" did not abdicate.
     option = {
         name = eotg_void.0030.c
-        trigger = { exists = primary_heir }
+        trigger = {
+            is_ruler = yes    # fires up to 10 days late; land may be gone
+            exists = primary_heir
+        }
         add_piety = 300
         primary_heir = {
             add_opinion = { modifier = eotg_opinion_void_defiance_respect  target = root }
@@ -79,12 +82,9 @@ eotg_void.0030 = {
         stress_impact = { base = major_stress_impact_loss }
         eotg_void_change_hollowing_depth_effect = { AMOUNT = -15 }
         eotg_void_step_down_effect = yes
-        ai_chance = {
-            base = 15
-            modifier = { add = 30  has_trait = humble }
-            modifier = { add = 25  has_trait = content }
-            modifier = { add = -40  has_trait = ambitious }
-        }
+        # AI never opts to abdicate (vanilla:
+        # events/stress_events/stress_threshold_events.txt:16778, base 0).
+        ai_chance = { base = 0 }
     }
 
     # Let them see it.

@@ -34,7 +34,7 @@ def run(R, size, policy, runs, years, seed):
     for y in range(years):
         w.step_war(); w.step_gold()
         top = np.where(w.at_war, chg(top, war), chg(top, peace))
-        vas = np.where(w.at_war[:, None], chg(vas, war), chg(vas, peace))
+        vas = np.where(w.v_at_war, chg(vas, war), chg(vas, peace))   # each Prince's own wars (H2a)
         cornered = np.zeros((runs, nv), bool)
         # Corner the Market (top): a source for the top, a sink for every Prince
         ctx = Ctx({V: top, 'gold': w.top_gold, 'tier': w.top_tier, 'is_at_war': w.at_war,
