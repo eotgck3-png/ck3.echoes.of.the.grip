@@ -19,6 +19,10 @@
 #   eotg_frontier_difficulty: eotg_frontier_pace_value
 #     (common/script_values/eotg_frontier_values.txt) and the quiet-year ease
 #     in eotg_frontier_tick_effect (common/scripted_effects/eotg_frontier_effects.txt)
+#   eotg_race_half_races: eotg_race_birth_effect
+#     (common/scripted_effects/eotg_race_effects.txt), birth step 3
+#   eotg_race_crossbreeding: no read site yet. Only `free` exists, and free
+#     restricts nothing (docs/specs/races_framework_v1.md §8)
 # -----------------------------------------------------------------------------
 
 # Cybernetics event frequency. Off stops the yearly cybernetics flavour pools
@@ -70,4 +74,41 @@ eotg_frontier_difficulty = {
 	eotg_frontier_difficulty_easy = {}
 
 	eotg_frontier_difficulty_hard = {}
+}
+
+# Race mechanics framework v1 (docs/specs/races_framework_v1.md §9). Whether a
+# pairing of two races (the registry's pairing table) produces a half-race at
+# birth. off: no new half-race births; an inherited half-race share splits back
+# into its two parent races. as_own_race: a half-race is a race of its own, with
+# its own trait and share. Existing half-race characters keep their trait under
+# both. Default off pending the canon ruling (feasibility §6, §9 decision 1).
+eotg_race_half_races = {
+	categories = {
+		eotg flavor
+	}
+
+	default = eotg_race_half_races_off
+
+	eotg_race_half_races_off = {}
+
+	eotg_race_half_races_as_own_race = {}
+}
+
+# Race mechanics framework v1 (spec §8). Marriage and children between
+# characters of different races. Only `free` (no restriction) exists for now.
+# The `discouraged` and `forbidden` settings were removed (orchestrator ruling,
+# 2026-11-03, pending the owner's fertility decision D3) because nothing
+# implemented them; spec §8 records how each is to be built. Add them back here,
+# with their loc, only together with that wiring. The rule stays, with its one
+# setting, so the lobby option and its key exist when they grow. A rule with a
+# single setting has no vanilla precedent (every rule in 00_game_rules.txt has
+# two or more); confirm in the lobby that it shows and loads (spec §12, U19).
+eotg_race_crossbreeding = {
+	categories = {
+		eotg flavor
+	}
+
+	default = eotg_race_crossbreeding_free
+
+	eotg_race_crossbreeding_free = {}
 }

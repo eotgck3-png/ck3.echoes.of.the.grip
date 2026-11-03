@@ -1,0 +1,193 @@
+﻿# TEST ONLY: not mod content. EotG Test: Race Framework (docs/test_submods/races/README.md).
+# The debug decision's effects: spawn test couples, run the scripted birth roll
+# on simulated newborns, and debug_log shares and rolled races. Every line
+# starts "EOTG_RACE" so the log can be filtered (game.log; README).
+# The simulated newborns go through eotg_race_birth_effect directly, with the
+# spawned parents passed as MOTHER / FATHER, which is exactly what the main
+# mod's on_birth_child hook does with scope:mother / scope:real_father. One
+# real pregnancy also runs the hook path itself (README check B5).
+# Verified (spec §12 U16): `while = { count = N }` (G/common/scripted_effects/
+# 00_administrative_effects.txt:427-428) and `make_pregnant = { father = x }`
+# (G/events/dlc/ep1/ep1_fund_inspiration_events.txt:19911).
+
+# ROOT = the decision taker. Spawns one adult into CULTURE with TEMPLATE, saves
+# it as scope:<SCOPE>, makes it a courtier, and logs the race the creation hook
+# gave it (check C1, C2).
+eotg_test_race_spawn_adult_effect = {
+    create_character = {
+        template = $TEMPLATE$
+        location = root.capital_province
+        culture = $CULTURE$
+        faith = root.faith
+        save_scope_as = $SCOPE$
+    }
+    add_courtier = scope:$SCOPE$
+    scope:$SCOPE$ = {
+        add_character_flag = eotg_test_race_spawned
+        save_scope_as = eotg_race_report_char
+        debug_log = "EOTG_RACE spawned adult [eotg_race_report_char.GetName] ($SCOPE$), creation hook result:"
+        if = {
+            limit = { eotg_race_has_any_race = no }
+            debug_log = "EOTG_RACE   NO RACE: on_character_created did not assign one (check C1)"
+        }
+        eotg_race_for_each_race_effect = { OP = report }
+    }
+}
+
+# ROOT = the decision taker. One simulated newborn of MOTHER x FATHER.
+eotg_test_race_simulate_one_effect = {
+    create_character = {
+        template = eotg_test_race_child_template
+        location = root.capital_province
+        culture = $MOTHER$.culture
+        faith = $MOTHER$.faith
+        save_scope_as = eotg_test_race_child
+    }
+    add_courtier = scope:eotg_test_race_child
+    scope:eotg_test_race_child = {
+        add_character_flag = eotg_test_race_spawned
+        eotg_race_birth_effect = { MOTHER = $MOTHER$  FATHER = $FATHER$ }
+        save_scope_as = eotg_race_report_char
+        debug_log = "EOTG_RACE child [eotg_race_report_char.GetName]:"
+        if = {
+            limit = { NOT = { has_variable = eotg_race_shares } }
+            debug_log = "EOTG_RACE   pure (implicit profile, no share variables)"
+        }
+        eotg_race_for_each_race_effect = { OP = report }
+    }
+}
+
+# ROOT = the decision taker. COUNT simulated newborns of MOTHER x FATHER.
+# The caller logs the scenario label first: a quoted string passed as a
+# parameter (the old LABEL = "...") risks breaking the parse, so labels are
+# literal debug_log lines at each call site.
+eotg_test_race_simulate_effect = {
+    while = {
+        count = $COUNT$
+        eotg_test_race_simulate_one_effect = { MOTHER = $MOTHER$  FATHER = $FATHER$ }
+    }
+}
+
+# ROOT = the decision taker. The whole test run.
+eotg_test_race_run_effect = {
+    debug_log = "EOTG_RACE ===== race framework test run ====="
+    if = {
+        limit = { has_game_rule = eotg_race_half_races_as_own_race }
+        debug_log = "EOTG_RACE rule eotg_race_half_races = as_own_race"
+    }
+    else = {
+        debug_log = "EOTG_RACE rule eotg_race_half_races = off"
+    }
+
+    # --- T1: the heritage parameter is readable ---
+    if = {
+        limit = { culture:eotg_test_culture_a = { has_cultural_parameter = eotg_heritage_group_test_a } }
+        debug_log = "EOTG_RACE T1 PASS: culture A reads eotg_heritage_group_test_a"
+    }
+    else = {
+        debug_log = "EOTG_RACE T1 FAIL: culture A does not read eotg_heritage_group_test_a (use the OR-list fallback, spec §5.4)"
+    }
+    if = {
+        limit = { culture:eotg_test_culture_b = { eotg_is_heritage_group = { RACE = test_a } } }
+        debug_log = "EOTG_RACE T1 FAIL: culture B reads as group test_a"
+    }
+
+    # --- Spawn the couples (checks C1, C2) ---
+    eotg_test_race_spawn_adult_effect = { TEMPLATE = eotg_test_race_man_template    CULTURE = culture:eotg_test_culture_a  SCOPE = eotg_test_race_man_a }
+    eotg_test_race_spawn_adult_effect = { TEMPLATE = eotg_test_race_woman_template  CULTURE = culture:eotg_test_culture_a  SCOPE = eotg_test_race_woman_a }
+    eotg_test_race_spawn_adult_effect = { TEMPLATE = eotg_test_race_woman_template  CULTURE = culture:eotg_test_culture_b  SCOPE = eotg_test_race_woman_b }
+    # Ungrouped culture (the player's): should fall back to the default race test_a.
+    eotg_test_race_spawn_adult_effect = { TEMPLATE = eotg_test_race_man_template    CULTURE = root.culture             SCOPE = eotg_test_race_man_none }
+    # Then strip its race, to test "a parent with no race counts as the default race".
+    scope:eotg_test_race_man_none = {
+        eotg_race_for_each_race_effect = { OP = remove }
+        debug_log = "EOTG_RACE man_none: race removed, for scenario 3"
+    }
+
+    # --- Helper checks (H1-H3) ---
+    if = {
+        limit = { scope:eotg_test_race_man_a = { eotg_race_same_as = { TARGET = scope:eotg_test_race_woman_a } } }
+        debug_log = "EOTG_RACE H1 PASS: same_as(man_a, woman_a) = yes"
+    }
+    else = {
+        debug_log = "EOTG_RACE H1 FAIL: same_as(man_a, woman_a) = no"
+    }
+    if = {
+        limit = { scope:eotg_test_race_man_a = { eotg_race_same_as = { TARGET = scope:eotg_test_race_woman_b } } }
+        debug_log = "EOTG_RACE H1 FAIL: same_as(man_a, woman_b) = yes"
+    }
+    else = {
+        debug_log = "EOTG_RACE H1 PASS: same_as(man_a, woman_b) = no"
+    }
+    if = {
+        limit = { scope:eotg_test_race_man_a = { eotg_race_is_cross_race_with = { TARGET = scope:eotg_test_race_woman_b } } }
+        debug_log = "EOTG_RACE H2 PASS: cross_race_with(man_a, woman_b) = yes"
+    }
+    else = {
+        debug_log = "EOTG_RACE H2 FAIL: cross_race_with(man_a, woman_b) = no"
+    }
+    if = {
+        limit = { scope:eotg_test_race_man_a = { eotg_race_is_cross_race_with = { TARGET = scope:eotg_test_race_woman_a } } }
+        debug_log = "EOTG_RACE H2 FAIL: cross_race_with(man_a, woman_a) = yes"
+    }
+    else = {
+        debug_log = "EOTG_RACE H2 PASS: cross_race_with(man_a, woman_a) = no"
+    }
+    if = {
+        limit = { eotg_race_cultures_can_hybridize = { A = culture:eotg_test_culture_a  B = culture:eotg_test_culture_b } }
+        debug_log = "EOTG_RACE H3 FAIL: cultures A and B may hybridize"
+    }
+    else = {
+        debug_log = "EOTG_RACE H3 PASS: cultures A and B may not hybridize"
+    }
+    if = {
+        limit = { eotg_race_cultures_can_hybridize = { A = culture:eotg_test_culture_a  B = root.culture } }
+        debug_log = "EOTG_RACE H3 PASS: culture A and an ungrouped culture may hybridize"
+    }
+    else = {
+        debug_log = "EOTG_RACE H3 FAIL: culture A and an ungrouped culture may not hybridize"
+    }
+
+    # --- Birth-roll scenarios (B1-B4) ---
+    # B1: pure A x pure B. Rule off: every child A .5 / B .5, rolls about half
+    # and half. Rule as_own_race: every child pure test_half_ab.
+    debug_log = "EOTG_RACE ---- scenario: B1 woman_b x man_a ----"
+    eotg_test_race_simulate_effect = {
+        COUNT = 8
+        MOTHER = scope:eotg_test_race_woman_b
+        FATHER = scope:eotg_test_race_man_a
+    }
+    scope:eotg_test_race_child = { save_scope_as = eotg_test_race_mixed }
+
+    # B2: pure A x a B1 child. Rule off: A .75 / B .25. Rule as_own_race:
+    # A .5 / half .5.
+    debug_log = "EOTG_RACE ---- scenario: B2 woman_a x B1 child ----"
+    eotg_test_race_simulate_effect = {
+        COUNT = 8
+        MOTHER = scope:eotg_test_race_woman_a
+        FATHER = scope:eotg_test_race_mixed
+    }
+
+    # B3: raceless father (counts as the default, test_a) x pure B: A .5 / B .5.
+    debug_log = "EOTG_RACE ---- scenario: B3 woman_b x man_none (no race = default test_a) ----"
+    eotg_test_race_simulate_effect = {
+        COUNT = 8
+        MOTHER = scope:eotg_test_race_woman_b
+        FATHER = scope:eotg_test_race_man_none
+    }
+
+    # B4: pure A x pure A: always pure test_a, no share variables.
+    debug_log = "EOTG_RACE ---- scenario: B4 woman_a x man_a ----"
+    eotg_test_race_simulate_effect = {
+        COUNT = 4
+        MOTHER = scope:eotg_test_race_woman_a
+        FATHER = scope:eotg_test_race_man_a
+    }
+
+    # --- B5: one real pregnancy, through the on_birth_child hook ---
+    scope:eotg_test_race_woman_b = {
+        make_pregnant = { father = scope:eotg_test_race_man_a }
+    }
+    debug_log = "EOTG_RACE B5: woman_b is pregnant by man_a; the birth (about 9 months) logs 'EOTG_RACE real birth'"
+    debug_log = "EOTG_RACE ===== end of immediate test run ====="
+}

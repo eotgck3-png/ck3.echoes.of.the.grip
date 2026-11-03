@@ -1,0 +1,102 @@
+﻿# TEST ONLY: not mod content. EotG Test: Race Framework (docs/test_submods/races/README.md).
+# Check B5: logs the race and shares of a REAL newborn whose mother the debug
+# decision spawned, so the main mod's on_birth_child hook can be seen working.
+# Additive on vanilla's on_birth_child (invariant 4).
+# Order: this hook and the main mod's eotg_race_on_birth_child are both in
+# on_birth_child's on_actions list. If this one runs first, it logs "no race
+# yet"; then check the child by hand (README B5).
+
+on_birth_child = {
+    on_actions = {
+        eotg_test_race_on_birth_report
+    }
+}
+
+eotg_test_race_on_birth_report = {
+    trigger = {
+        exists = scope:mother
+        scope:mother = { has_character_flag = eotg_test_race_spawned }
+    }
+    effect = {
+        scope:child = {
+            save_scope_as = eotg_race_report_char
+            debug_log = "EOTG_RACE real birth: [eotg_race_report_char.GetName]"
+            if = {
+                limit = { eotg_race_has_any_race = no }
+                debug_log = "EOTG_RACE   no race yet (this hook may have run before the framework's; check by hand)"
+            }
+            eotg_race_for_each_race_effect = { OP = report }
+        }
+    }
+}
+
+# Check T2 (feasibility §8): does on_character_created fire for history and
+# ruler-designer characters? Every character the hook sees gets the flag
+# eotg_test_race_created_hook, and the first one sets a global variable. At
+# on_game_start the log says whether the hook had already fired (so it covers
+# history characters); after the lobby it says, per player, whether the
+# player's character passed through the hook (ruler designer).
+# The main mod's game-start pass makes the framework correct either way; this
+# only answers the question. Test only: it flags every created character.
+
+on_character_created = {
+    on_actions = {
+        eotg_test_race_on_created_probe
+    }
+}
+
+on_game_start = {
+    on_actions = {
+        eotg_test_race_on_game_start_probe
+    }
+}
+
+on_game_start_after_lobby = {
+    on_actions = {
+        eotg_test_race_after_lobby_probe
+    }
+}
+
+eotg_test_race_on_created_probe = {
+    effect = {
+        add_character_flag = eotg_test_race_created_hook
+        if = {
+            limit = { NOT = { has_global_variable = eotg_test_race_created_seen } }
+            set_global_variable = eotg_test_race_created_seen
+        }
+    }
+}
+
+eotg_test_race_on_game_start_probe = {
+    effect = {
+        if = {
+            limit = { has_global_variable = eotg_test_race_created_seen }
+            debug_log = "EOTG_RACE T2: on_character_created fired before on_game_start (covers history characters)"
+        }
+        else = {
+            debug_log = "EOTG_RACE T2: on_character_created did NOT fire for history characters (the game-start pass covers them)"
+        }
+    }
+}
+
+eotg_test_race_after_lobby_probe = {
+    effect = {
+        every_player = {
+            save_scope_as = eotg_race_report_char
+            if = {
+                limit = { has_character_flag = eotg_test_race_created_hook }
+                debug_log = "EOTG_RACE T2: player [eotg_race_report_char.GetName] passed through on_character_created"
+            }
+            else = {
+                debug_log = "EOTG_RACE T2: player [eotg_race_report_char.GetName] did NOT pass through on_character_created"
+            }
+            if = {
+                limit = { eotg_race_has_any_race = yes }
+                debug_log = "EOTG_RACE G1: player has a race after the lobby"
+            }
+            else = {
+                debug_log = "EOTG_RACE G1 FAIL: player has no race after the lobby"
+            }
+        }
+    }
+}

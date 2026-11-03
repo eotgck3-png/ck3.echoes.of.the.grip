@@ -1,0 +1,423 @@
+﻿# -- eotg_race_effects.txt -----------------------------------------------------
+# Race mechanics framework v1 (docs/specs/races_framework_v1.md).
+# Design source: docs/proposals/race_and_heritage_groups_feasibility.md §2.
+#
+# Generic, race-agnostic effects. NO race is named here. The races live only in
+# the registry (common/scripted_effects/eotg_race_registry_effects.txt and
+# common/scripted_triggers/eotg_race_registry_triggers.txt), which calls the
+# per-race "op" effects below once per registered race:
+#     eotg_race_for_each_race_effect = { OP = inherit }
+#   expands (literal text replacement) to, per race,
+#     eotg_race_op_inherit_effect = { RACE = <race> }
+# Verified (spec §12 U1): a $PARAM$ inside an effect NAME and inside an
+# identifier is vanilla's own pattern:
+# G/common/scripted_effects/10_dlc_tgp_scripted_effects.txt:238
+# (great_project_contribution_completion_reward_$LEVEL$_effect),
+# G/common/scripted_effects/00_education_effects.txt:361
+# (has_$SKILL$_education_affinity_childhood_trait_trigger).
+#
+# Variables (CHARACTER):
+#   eotg_race_shares          boolean; present = explicit share profile below
+#   eotg_race_share_<race>    0..1; absent = 0. Shares sum to 1 (within the
+#                             engine's fixed-point rounding).
+#   No eotg_race_shares       implicit profile: 1 in the race of the race trait.
+# Local variables (effect-local, reset by the op that uses them):
+#   eotg_race_acc, eotg_race_total, eotg_race_w_<race>, eotg_race_pair,
+#   eotg_race_pure, eotg_race_share_result
+# Saved scopes: eotg_race_parent_a, eotg_race_parent_b (birth roll only).
+#
+# set_local_variable / change_local_variable / local_var: are used by working
+# v2 script (eotg_augmentation_effects.txt:3823-3827), and change_variable /
+# change_local_variable with `multiply` and `subtract` is per the skill
+# (variables.md). PLAUSIBLE, NOT YET PROVEN (spec §12 U3): that a local
+# variable set inside a scripted effect is readable inside a random_list
+# `modifier = { add = ... }` (eotg_race_roll_effect in the registry); vanilla
+# reads a character var there (bp2_hostage_system.txt:969). Test B1.
+#
+# Cost (feasibility §2, §11 lesson 5): one effect per birth or creation, one
+# pass at game start, no recurring loop.
+# -----------------------------------------------------------------------------
+
+# =============================================================================
+# Public helpers (for future race events; spec §7)
+# =============================================================================
+
+# CHARACTER scope. eotg_race_share_of = { RACE = elf }
+# Writes this character's ancestry share of RACE (0..1) into
+# local_var:eotg_race_share_result, honouring the implicit profile.
+eotg_race_share_of = {
+    set_local_variable = { name = eotg_race_share_result  value = 0 }
+    if = {
+        limit = { has_variable = eotg_race_shares }
+        if = {
+            limit = { has_variable = eotg_race_share_$RACE$ }
+            set_local_variable = { name = eotg_race_share_result  value = var:eotg_race_share_$RACE$ }
+        }
+    }
+    else_if = {
+        limit = { has_trait = eotg_race_$RACE$ }
+        set_local_variable = { name = eotg_race_share_result  value = 1 }
+    }
+}
+
+# CHARACTER scope. eotg_race_set_effect = { RACE = elf }
+# Makes the character a pure member of RACE: removes every race trait, clears
+# the share profile, adds the trait. For history fix-ups, scripted spawns and
+# future events. Fires no event.
+eotg_race_set_effect = {
+    eotg_race_for_each_race_effect = { OP = remove }
+    eotg_race_clear_shares_effect = yes
+    add_trait = eotg_race_$RACE$
+}
+
+# CHARACTER scope. Drops the explicit share profile (back to implicit).
+eotg_race_clear_shares_effect = {
+    eotg_race_for_each_race_effect = { OP = clear }
+    if = {
+        limit = { has_variable = eotg_race_shares }
+        remove_variable = eotg_race_shares
+    }
+}
+
+# =============================================================================
+# Engine-created characters (spec §5.2) and the game-start pass (§5.3)
+# =============================================================================
+
+# CHARACTER scope. Gives a character with no race trait the race of its
+# culture's heritage group, with the implicit 100% profile. Fallback chain:
+#   1. culture grouped -> the first grouped race (registry
+#      eotg_race_for_each_grouped_race_effect) whose group holds it;
+#   2. no culture, ungrouped culture, or no match -> the registry's DEFAULT race
+#      (eotg_race_default_race_effect);
+#   3. no default registered -> no race (the character simply has none; every
+#      reader treats "no race" as neutral).
+eotg_race_assign_from_culture_effect = {
+    if = {
+        limit = {
+            exists = culture
+            culture = { eotg_race_culture_is_grouped = yes }
+        }
+        eotg_race_for_each_grouped_race_effect = { OP = from_culture }
+    }
+    if = {
+        limit = { eotg_race_has_any_race = no }
+        eotg_race_default_race_effect = { OP = fallback }
+    }
+    eotg_race_clear_shares_effect = yes
+}
+
+# Game start: every living character still without a race. Called from
+# on_game_start and on_game_start_after_lobby (ruler-designer characters exist
+# only after the lobby; precedent eotg_cartel_on_actions.txt:18-25). Idempotent:
+# a character that already has a race (from history `trait = eotg_race_<race>`,
+# or from on_character_created) is skipped.
+eotg_race_game_start_effect = {
+    every_living_character = {
+        limit = { eotg_race_has_any_race = no }
+        eotg_race_assign_from_culture_effect = yes
+    }
+}
+
+# =============================================================================
+# The birth roll (spec §5.1)
+# =============================================================================
+
+# CHILD scope. eotg_race_birth_effect = { MOTHER = scope:mother FATHER = scope:real_father }
+# Called from eotg_race_on_birth_child (scopes per feasibility §2.3,
+# child_birth_on_actions.txt:855-860) and by the test sub-mod's debug decision
+# with its own spawned parents. Steps:
+#   1. reset: remove any race trait (on_character_created may already have
+#      given one from culture) and any share profile;
+#   2. average: each registered race's share = (mother's + father's) / 2, where
+#      a parent's share is its explicit var, else 1 if it has that race trait,
+#      else 0; a parent with NO race trait and no profile counts as 100% of the
+#      DEFAULT race (inherit_default);
+#   3. half-races, by game rule eotg_race_half_races (spec §9);
+#   4. weighted roll over the shares (registry eotg_race_roll_effect);
+#   5. compaction: a child whose rolled race holds >= 0.999 of its profile is
+#      pure, and its variables are dropped (implicit profile).
+# A missing parent is replaced by the other one. Both missing: culture route.
+# UNVERIFIED-VANILLA: whether a DEAD parent keeps its variables. The skill
+# (variables.md) says character variables go when the character dies; if so, a
+# posthumous child's dead father counts as 100% of his race trait (his explicit
+# profile is lost). Acceptable loss; check in game (spec §12, U11).
+# UNVERIFIED-VANILLA: fixed-point precision. Shares are halved each generation;
+# a share below the engine's smallest step (expected 0.001) rounds to 0, so a
+# lone ancestor fades out after about ten generations (spec §3.3).
+eotg_race_birth_effect = {
+    if = {
+        limit = {
+            OR = {
+                exists = $MOTHER$
+                exists = $FATHER$
+            }
+        }
+        # Parents. Saved unconditionally every call, so a loop that calls this
+        # repeatedly (the debug decision) never reads a stale scope.
+        if = {
+            limit = { exists = $MOTHER$ }
+            $MOTHER$ = { save_scope_as = eotg_race_parent_a }
+        }
+        else = {
+            $FATHER$ = { save_scope_as = eotg_race_parent_a }
+        }
+        if = {
+            limit = { exists = $FATHER$ }
+            $FATHER$ = { save_scope_as = eotg_race_parent_b }
+        }
+        else = {
+            $MOTHER$ = { save_scope_as = eotg_race_parent_b }
+        }
+
+        # 1. Reset
+        eotg_race_for_each_race_effect = { OP = remove }
+        eotg_race_clear_shares_effect = yes
+
+        # 2. Average
+        eotg_race_for_each_race_effect = { OP = inherit }
+        eotg_race_default_race_effect = { OP = inherit_default }
+        set_variable = eotg_race_shares
+
+        # 3. Half-races (eotg_race_half_races; default off)
+        if = {
+            limit = { has_game_rule = eotg_race_half_races_as_own_race }
+            eotg_race_for_each_pairing_effect = { OP = merge }
+        }
+        else = {
+            eotg_race_for_each_pairing_effect = { OP = split }
+        }
+
+        # 4. Roll
+        set_local_variable = { name = eotg_race_total  value = 0 }
+        eotg_race_for_each_race_effect = { OP = weight }
+        if = {
+            limit = { local_var:eotg_race_total > 0 }
+            eotg_race_roll_effect = yes
+        }
+        # Nothing to roll (no parent has any registered race and no default is
+        # registered): culture route.
+        if = {
+            limit = { eotg_race_has_any_race = no }
+            eotg_race_assign_from_culture_effect = yes
+        }
+
+        # 5. Compaction
+        set_local_variable = { name = eotg_race_pure  value = 0 }
+        eotg_race_for_each_race_effect = { OP = pure_check }
+        if = {
+            limit = { local_var:eotg_race_pure > 0 }
+            eotg_race_clear_shares_effect = yes
+        }
+    }
+    else = {
+        eotg_race_assign_from_culture_effect = yes
+    }
+}
+
+# =============================================================================
+# Internal helpers
+# =============================================================================
+
+# CHARACTER scope. eotg_race_add_share_effect = { RACE = elf VALUE = <value> }
+# Adds VALUE to var:eotg_race_share_<RACE>, creating it when absent.
+eotg_race_add_share_effect = {
+    if = {
+        limit = { has_variable = eotg_race_share_$RACE$ }
+        change_variable = { name = eotg_race_share_$RACE$  add = $VALUE$ }
+    }
+    else = {
+        set_variable = { name = eotg_race_share_$RACE$  value = $VALUE$ }
+    }
+}
+
+# CHILD scope. eotg_race_add_parent_share_effect = { PARENT = scope:x RACE = elf }
+# Adds PARENT's share of RACE (explicit, else implicit from the trait) to
+# local_var:eotg_race_acc.
+eotg_race_add_parent_share_effect = {
+    if = {
+        limit = { $PARENT$ = { has_variable = eotg_race_shares } }
+        if = {
+            limit = { $PARENT$ = { has_variable = eotg_race_share_$RACE$ } }
+            change_local_variable = { name = eotg_race_acc  add = $PARENT$.var:eotg_race_share_$RACE$ }
+        }
+    }
+    else_if = {
+        limit = { $PARENT$ = { has_trait = eotg_race_$RACE$ } }
+        change_local_variable = { name = eotg_race_acc  add = 1 }
+    }
+}
+
+# =============================================================================
+# Per-race ops. Each takes RACE (the race suffix) and runs in the character
+# scope it is called from. Called only through the registry.
+# =============================================================================
+
+# Remove this race's trait.
+eotg_race_op_remove_effect = {
+    if = {
+        limit = { has_trait = eotg_race_$RACE$ }
+        remove_trait = eotg_race_$RACE$
+    }
+}
+
+# Remove this race's share variable.
+eotg_race_op_clear_effect = {
+    if = {
+        limit = { has_variable = eotg_race_share_$RACE$ }
+        remove_variable = eotg_race_share_$RACE$
+    }
+}
+
+# CHILD scope, birth step 2. Needs scope:eotg_race_parent_a / _b.
+eotg_race_op_inherit_effect = {
+    set_local_variable = { name = eotg_race_acc  value = 0 }
+    eotg_race_add_parent_share_effect = { PARENT = scope:eotg_race_parent_a  RACE = $RACE$ }
+    eotg_race_add_parent_share_effect = { PARENT = scope:eotg_race_parent_b  RACE = $RACE$ }
+    if = {
+        limit = { local_var:eotg_race_acc > 0 }
+        change_local_variable = { name = eotg_race_acc  multiply = 0.5 }
+        set_variable = { name = eotg_race_share_$RACE$  value = local_var:eotg_race_acc }
+    }
+}
+
+# CHILD scope, birth step 2, DEFAULT race only (called through
+# eotg_race_default_race_effect). A parent with no race trait and no profile
+# counts as 100% of the default race.
+eotg_race_op_inherit_default_effect = {
+    set_local_variable = { name = eotg_race_acc  value = 0 }
+    if = {
+        limit = {
+            scope:eotg_race_parent_a = {
+                eotg_race_has_any_race = no
+                NOT = { has_variable = eotg_race_shares }
+            }
+        }
+        change_local_variable = { name = eotg_race_acc  add = 1 }
+    }
+    if = {
+        limit = {
+            scope:eotg_race_parent_b = {
+                eotg_race_has_any_race = no
+                NOT = { has_variable = eotg_race_shares }
+            }
+        }
+        change_local_variable = { name = eotg_race_acc  add = 1 }
+    }
+    if = {
+        limit = { local_var:eotg_race_acc > 0 }
+        change_local_variable = { name = eotg_race_acc  multiply = 0.5 }
+        eotg_race_add_share_effect = { RACE = $RACE$  VALUE = local_var:eotg_race_acc }
+    }
+}
+
+# CHILD scope, birth step 4. Weight = share x 1000 (random_list weights are
+# read as numbers; x1000 keeps fractional shares well clear of rounding).
+eotg_race_op_weight_effect = {
+    set_local_variable = { name = eotg_race_w_$RACE$  value = 0 }
+    if = {
+        limit = { has_variable = eotg_race_share_$RACE$ }
+        set_local_variable = { name = eotg_race_w_$RACE$  value = var:eotg_race_share_$RACE$ }
+        change_local_variable = { name = eotg_race_w_$RACE$  multiply = 1000 }
+        change_local_variable = { name = eotg_race_total  add = var:eotg_race_share_$RACE$ }
+    }
+}
+
+# CHILD scope, birth step 5.
+eotg_race_op_pure_check_effect = {
+    if = {
+        limit = {
+            has_trait = eotg_race_$RACE$
+            has_variable = eotg_race_share_$RACE$
+            var:eotg_race_share_$RACE$ >= 0.999
+        }
+        set_local_variable = { name = eotg_race_pure  value = 1 }
+    }
+}
+
+# CHARACTER scope, creation route step 1. The has_any_race guard makes the
+# first registered match win.
+eotg_race_op_from_culture_effect = {
+    if = {
+        limit = {
+            eotg_race_has_any_race = no
+            culture = { eotg_is_heritage_group = { RACE = $RACE$ } }
+        }
+        add_trait = eotg_race_$RACE$
+    }
+}
+
+# CHARACTER scope, creation route step 2, DEFAULT race only.
+eotg_race_op_fallback_effect = {
+    if = {
+        limit = { eotg_race_has_any_race = no }
+        add_trait = eotg_race_$RACE$
+    }
+}
+
+# CHARACTER scope. debug_log of this race's share and whether it was rolled.
+# Used only by the test sub-mod's debug decision and debug birth hook. Needs
+# scope:eotg_race_report_char (the character being reported).
+# NO VANILLA PRECEDENT (spec §12 U8): that debug_log evaluates [..] data
+# functions and that $RACE$ is replaced inside a quoted string. If not, the log
+# still gets the literal line, and debug_log_scopes (called by the caller)
+# lists the scopes. Test-only output; nothing shipped depends on it.
+eotg_race_op_report_effect = {
+    if = {
+        limit = { has_variable = eotg_race_share_$RACE$ }
+        debug_log = "EOTG_RACE [eotg_race_report_char.GetName] share $RACE$ = [eotg_race_report_char.MakeScope.Var('eotg_race_share_$RACE$').GetValue|3]"
+    }
+    if = {
+        limit = { has_trait = eotg_race_$RACE$ }
+        debug_log = "EOTG_RACE [eotg_race_report_char.GetName] race = $RACE$"
+    }
+}
+
+# =============================================================================
+# Per-pairing ops (half-races, spec §9). Each takes HALF, A and B race
+# suffixes: a HALF is born of A and B. Called only through
+# eotg_race_for_each_pairing_effect. CHILD scope, after step 2.
+# =============================================================================
+
+# Rule `as_own_race`: the overlapping A+B portion of the child's profile becomes
+# HALF. amount = min(share A, share B); A -= amount; B -= amount;
+# HALF += 2 x amount. Pure A x pure B -> 100% HALF. A quarter-A child of a B
+# parent (A .125, B .875) -> HALF .25, B .75.
+eotg_race_pair_op_merge_effect = {
+    if = {
+        limit = {
+            has_variable = eotg_race_share_$A$
+            has_variable = eotg_race_share_$B$
+        }
+        set_local_variable = { name = eotg_race_pair  value = var:eotg_race_share_$A$ }
+        if = {
+            limit = { var:eotg_race_share_$B$ < local_var:eotg_race_pair }
+            set_local_variable = { name = eotg_race_pair  value = var:eotg_race_share_$B$ }
+        }
+        change_variable = { name = eotg_race_share_$A$  subtract = local_var:eotg_race_pair }
+        change_variable = { name = eotg_race_share_$B$  subtract = local_var:eotg_race_pair }
+        if = {
+            limit = { var:eotg_race_share_$A$ <= 0 }
+            remove_variable = eotg_race_share_$A$
+        }
+        if = {
+            limit = { var:eotg_race_share_$B$ <= 0 }
+            remove_variable = eotg_race_share_$B$
+        }
+        change_local_variable = { name = eotg_race_pair  multiply = 2 }
+        eotg_race_add_share_effect = { RACE = $HALF$  VALUE = local_var:eotg_race_pair }
+    }
+}
+
+# Rule `off`: no new half-race births. Any HALF share the child inherited is
+# split evenly back into A and B, so the child can never roll HALF. Existing
+# half-race characters (canon: Xerxes) keep their trait; only births change.
+eotg_race_pair_op_split_effect = {
+    if = {
+        limit = { has_variable = eotg_race_share_$HALF$ }
+        set_local_variable = { name = eotg_race_pair  value = var:eotg_race_share_$HALF$ }
+        change_local_variable = { name = eotg_race_pair  multiply = 0.5 }
+        remove_variable = eotg_race_share_$HALF$
+        eotg_race_add_share_effect = { RACE = $A$  VALUE = local_var:eotg_race_pair }
+        eotg_race_add_share_effect = { RACE = $B$  VALUE = local_var:eotg_race_pair }
+    }
+}

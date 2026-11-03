@@ -1,0 +1,51 @@
+﻿# TEST ONLY: not mod content. EotG Test: Race Framework (docs/test_submods/races/README.md).
+# Fills the race registry (spec docs/specs/races_framework_v1.md §4) by
+# REDEFINING the main mod's five registry keys from
+# common/scripted_effects/eotg_race_registry_effects.txt. Key-level override:
+# this file's name differs from the main mod's on purpose (same name would
+# replace the whole file); the sub-mod loads after the main mod, so these win.
+# Confirm: logs/database_conflicts.log shows "Overriding entry" for each key.
+#
+# Registered: test_a (also the DEFAULT race), test_b, and the half-race
+# test_half_ab (born of test_a x test_b under eotg_race_half_races = as_own_race).
+
+eotg_race_for_each_race_effect = {
+    eotg_race_op_$OP$_effect = { RACE = test_a }
+    eotg_race_op_$OP$_effect = { RACE = test_b }
+    eotg_race_op_$OP$_effect = { RACE = test_half_ab }
+}
+
+# Grouped races only: test_half_ab has no heritage pillar (no
+# eotg_heritage_group_test_half_ab parameter), so the culture route never
+# looks it up.
+eotg_race_for_each_grouped_race_effect = {
+    eotg_race_op_$OP$_effect = { RACE = test_a }
+    eotg_race_op_$OP$_effect = { RACE = test_b }
+}
+
+eotg_race_default_race_effect = {
+    eotg_race_op_$OP$_effect = { RACE = test_a }
+}
+
+eotg_race_for_each_pairing_effect = {
+    eotg_race_pair_op_$OP$_effect = { HALF = test_half_ab  A = test_a  B = test_b }
+}
+
+# Zero-weight entries plus a modifier: vanilla pattern (spec §12 U2,
+# bp2_hostage_system.txt:968-969). Local variables in the modifier: U3, test B1.
+eotg_race_roll_effect = {
+    random_list = {
+        0 = {
+            modifier = { add = local_var:eotg_race_w_test_a }
+            add_trait = eotg_race_test_a
+        }
+        0 = {
+            modifier = { add = local_var:eotg_race_w_test_b }
+            add_trait = eotg_race_test_b
+        }
+        0 = {
+            modifier = { add = local_var:eotg_race_w_test_half_ab }
+            add_trait = eotg_race_test_half_ab
+        }
+    }
+}

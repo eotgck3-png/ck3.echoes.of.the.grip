@@ -1,0 +1,86 @@
+﻿# -- eotg_race_vanilla_overrides_triggers.txt ----------------------------------
+# !!! DELIBERATE NON-ADDITIVE VANILLA OVERRIDE (key-level) !!!
+# Race mechanics framework v1 (docs/specs/races_framework_v1.md §6). This file
+# REDEFINES a vanilla scripted trigger by key. The redefined key replaces
+# vanilla's whole definition, for every caller, so any vanilla change to it is
+# silently lost. The filename must stay different from vanilla's
+# (00_cultural_triggers.txt): the same name would replace the whole file.
+# Shape: eotg_vanilla_overrides_triggers.txt; rules: docs/pitfalls.md §16.
+#
+# Overridden key:
+#   is_valid_for_hybridising_trigger (parameters $CHARACTER$, $CULTURE$)
+#     copied byte-exact (programmatically, tabs included; first line, last line,
+#     the next key `can_hybridize_culture_trigger` at :517 and brace balance
+#     asserted) from game/common/scripted_triggers/00_cultural_triggers.txt:473-514
+#     at CK3 1.20.1.1. Wrapped by can_hybridize_culture_trigger (same file,
+#     :517-527) and through it by the scripted rule can_hybridize_culture
+#     (00_rules.txt:899-904), so the UI and every wrapper inherit the clause.
+#   The ONLY difference from vanilla is the one line marked `# EOTG`, a
+#     top-level child of the body (ANDed with vanilla, never inside one of its
+#     custom_description blocks, pitfalls §16.2). It reads only the two
+#     parameters vanilla itself reads unguarded ($CHARACTER$.culture at :508,
+#     $CULTURE$ throughout), so no new scope is introduced (pitfalls §16.3).
+#     eotg_race_cultures_can_hybridize (eotg_race_triggers.txt) is always true
+#     while no race is registered (the main mod alone), so vanilla behaviour is
+#     unchanged until a race pack loads. With races, cultures of two different
+#     race heritage groups never hybridize. No custom tooltip yet: when it
+#     fails, the hybridize button shows the trigger's own breakdown.
+#
+# RE-COPY DUTY: after every CK3 update, re-copy vanilla's block and re-apply
+# the EOTG line (docs/pitfalls.md §2, the override sweep). Diff this body
+# against vanilla; only the line marked `# EOTG` may differ.
+#
+# Confirm it loads: logs/database_conflicts.log must show
+#   Overriding entry 'is_valid_for_hybridising_trigger'
+# naming this file (spec §13, T3).
+#
+# Cross-race marriage and fertility are NOT overridden here: rule
+# eotg_race_crossbreeding has only `free` for now; spec §8 records how the
+# `forbidden` and `discouraged` settings are to be built (neither needs a
+# vanilla trigger override).
+# -----------------------------------------------------------------------------
+
+# eotg_lint: allow L001 deliberate key-level override of a vanilla trigger; the key must match vanilla's
+is_valid_for_hybridising_trigger = {
+	$CHARACTER$ = {
+		culture = {
+			NOT = { has_same_culture_heritage = $CULTURE$ }
+			culture_age >= culture_hybrid_cooldown
+		}
+		trigger_if = {
+			limit = {
+				NAND = {
+					exists = var:special_culture
+					var:special_culture = $CULTURE$
+				}
+			}
+			custom_description = {
+				text = culture_present_in_realm_for_hybridization
+				any_sub_realm_county = {
+					culture = $CULTURE$
+				}
+			}
+		}
+		custom_description = {
+			text = culture_is_not_parent_culture
+			culture = {
+				NOT = {
+					any_parent_culture = {
+						this = $CULTURE$
+					}
+				}
+			}
+		}
+		custom_description = {
+			text = culture_is_not_child_culture
+			$CULTURE$ = {
+				NOT = {
+					any_parent_culture = {
+						this = $CHARACTER$.culture
+					}
+				}
+			}
+		}
+	}
+	eotg_race_cultures_can_hybridize = { A = $CHARACTER$.culture B = $CULTURE$ }   # EOTG
+}

@@ -1,0 +1,111 @@
+﻿# -- eotg_race_triggers.txt ----------------------------------------------------
+# Race mechanics framework v1 (docs/specs/races_framework_v1.md §3, §7).
+# Design source: docs/proposals/race_and_heritage_groups_feasibility.md §2-§4.
+#
+# Generic, race-agnostic triggers. Nothing here names a race: the races are
+# listed only in the registry (eotg_race_registry_triggers.txt and
+# common/scripted_effects/eotg_race_registry_effects.txt). The main mod
+# registers NO races; the test sub-mod (docs/test_submods/races/) and, later,
+# the real race kit fill the registry.
+#
+# Map-agnostic: no title, province, culture or faith key appears here.
+#
+# Parameters are literal text replacement (ck3-modding skill, effects.md
+# "Complex Form"), so `eotg_race_share_$RACE$` with RACE = elf reads
+# `eotg_race_share_elf`. Callers pass the race SUFFIX (elf), never the trait key.
+#
+# Storage rule (spec §3.2): a character holding the boolean variable
+# eotg_race_shares has an explicit share profile in var:eotg_race_share_<race>
+# (absent = 0). A character WITHOUT eotg_race_shares has an implicit share of 1
+# in the race of its race trait (and 0 elsewhere). Pure characters therefore
+# store no variables at all, which keeps the save small.
+# -----------------------------------------------------------------------------
+
+# eotg_race_has_any_race (has any race trait) lives in the REGISTRY,
+# eotg_race_registry_triggers.txt: its real body, `has_trait = eotg_race`, names
+# a trait group that only a race pack defines, so in the main mod it is an
+# `always = no` stub (spec §4.2).
+
+# eotg_race_is = { RACE = elf }: the character's race trait is eotg_race_<RACE>.
+# This is "is of race", not "has some ancestry of": for ancestry use
+# eotg_race_share_at_least / eotg_race_share_of.
+eotg_race_is = {
+    has_trait = eotg_race_$RACE$
+}
+
+# eotg_race_share_at_least = { RACE = elf VALUE = 0.25 }: the character's
+# ancestry share of RACE is at least VALUE. Honours the storage rule above.
+eotg_race_share_at_least = {
+    trigger_if = {
+        limit = { has_variable = eotg_race_shares }
+        has_variable = eotg_race_share_$RACE$
+        var:eotg_race_share_$RACE$ >= $VALUE$
+    }
+    trigger_else = {
+        # Implicit profile: 1 in the trait's race, 0 elsewhere.
+        has_trait = eotg_race_$RACE$
+    }
+}
+
+# -- Heritage groups (spec §5.4) -------------------------------------------------
+# Every heritage pillar of a race carries two custom parameters:
+#   parameters = { eotg_heritage_group_<race> = yes  eotg_heritage_grouped = yes }
+# The first names the race group; the second is an umbrella flag meaning "this
+# heritage belongs to some race group", so ungrouped cultures can be detected
+# with one check.
+# PLAUSIBLE, NOT YET PROVEN (test T1, spec §12 U5): a custom `parameters` entry
+# on a `type = heritage` pillar is readable with has_cultural_parameter.
+# _pillars.info says pillars share the cultural-trait structure, _cultural_traits.info documents `parameters` and
+# `has_cultural_parameter` ("Checks if any ethos, pillar, or tradition has this
+# bool parameter set to yes"); vanilla uses parameters on ethos and martial
+# pillars only. Fallback if T1 fails: rewrite eotg_is_heritage_group and
+# eotg_race_culture_is_grouped as OR lists of has_cultural_pillar per heritage
+# (vanilla's own idiom, 00_combat_traditions.txt:245-246). Callers do not change.
+
+# CULTURE scope. eotg_is_heritage_group = { RACE = elf }: this culture's heritage
+# belongs to RACE's group. Per-race wrappers (eotg_is_heritage_group_elf = {
+# eotg_is_heritage_group = { RACE = elf } }) are optional sugar for event writers;
+# the framework itself only uses this generic form.
+eotg_is_heritage_group = {
+    has_cultural_parameter = eotg_heritage_group_$RACE$
+}
+
+# eotg_race_culture_is_grouped (CULTURE scope: the heritage belongs to some race
+# group) lives in the REGISTRY, eotg_race_registry_triggers.txt: its real body,
+# `has_cultural_parameter = eotg_heritage_grouped`, names a parameter that only a
+# race pack's pillars define, so in the main mod it is an `always = no` stub.
+
+# -- Hybrid cultures (spec §6) -------------------------------------------------
+# eotg_race_cultures_can_hybridize = { A = <culture> B = <culture> }
+# True unless both cultures are grouped AND their groups differ. Documented
+# fallback: an ungrouped culture (no eotg_heritage_grouped) hybridizes freely,
+# and so does everything while no race is registered.
+# Called from the vanilla override of is_valid_for_hybridising_trigger in
+# eotg_race_vanilla_overrides_triggers.txt, and must be
+# called by any of our own events before create_hybrid_culture (feasibility §4:
+# that effect bypasses the UI check).
+eotg_race_cultures_can_hybridize = {
+    OR = {
+        eotg_race_framework_active = no
+        $A$ = { eotg_race_culture_is_grouped = no }
+        $B$ = { eotg_race_culture_is_grouped = no }
+        NOT = { eotg_race_cultures_in_different_groups = { A = $A$ B = $B$ } }
+    }
+}
+
+# -- Cross-race fertility and marriage (spec §8) -------------------------------
+# Game rule eotg_race_crossbreeding has only its `free` setting for now, so no
+# trigger here reads it. Spec §8 records how `forbidden` (an on_pregnancy_mother
+# hook) and `discouraged` (a marriage_ai_accept_modifier override) are to be
+# built; both would call eotg_race_is_cross_race_with below.
+
+# CHARACTER scope. eotg_race_is_cross_race_with = { TARGET = <character> }
+# Both have a race and the races differ, whatever the rule says. A half-race
+# differs from both of its parent races (spec §11 D2). Public helper (spec §7);
+# the future `forbidden` / `discouraged` settings read it (spec §8).
+eotg_race_is_cross_race_with = {
+    eotg_race_framework_active = yes
+    eotg_race_has_any_race = yes
+    $TARGET$ = { eotg_race_has_any_race = yes }
+    NOT = { eotg_race_same_as = { TARGET = $TARGET$ } }
+}

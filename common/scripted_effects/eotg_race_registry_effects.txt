@@ -1,0 +1,95 @@
+﻿# -- eotg_race_registry_effects.txt --------------------------------------------
+# Race mechanics framework v1: the EFFECT half of the race registry
+# (docs/specs/races_framework_v1.md §4). The trigger half is
+# common/scripted_triggers/eotg_race_registry_triggers.txt.
+#
+# THE MAIN MOD REGISTERS NO RACES. Every key below is an empty stub, and the
+# framework is switched off (eotg_race_framework_active = no), so nothing here
+# ever runs in the main mod. A race pack (the test sub-mod
+# docs/test_submods/races/, later the real race kit) REDEFINES these five keys,
+# by key, in a file with a DIFFERENT name that loads after this one (e.g.
+# zz_eotg_<pack>_race_registry_effects.txt). Never reuse this filename in a pack:
+# the same path would replace the whole file.
+#
+# The parameterized stubs below reference $OP$ inertly, inside an
+# `if = { limit = { always = no } }` that never runs, so the call sites
+# (`= { OP = x }`) are accepted. Without it Tiger reported error(macro) "this
+# scripted effect does not need macro arguments" at every call site (QA,
+# 2026-11-03). The saved name eotg_race_stub_<op> is never read.
+#
+# ADDING A RACE <race> (full checklist: spec §4.3). In this file, two lines:
+#   1. in eotg_race_for_each_race_effect:
+#        eotg_race_op_$OP$_effect = { RACE = <race> }
+#      and, if the race has heritage pillars of its own, the same line in
+#      eotg_race_for_each_grouped_race_effect;
+#   2. in eotg_race_roll_effect's random_list:
+#        0 = { modifier = { add = local_var:eotg_race_w_<race> }  add_trait = eotg_race_<race> }
+# If <race> is the DEFAULT race (the race of a parent or culture with none),
+# eotg_race_default_race_effect names it instead of being empty:
+#        eotg_race_op_$OP$_effect = { RACE = <race> }
+# If <race> is a HALF-race born of <a> and <b>, add to
+# eotg_race_for_each_pairing_effect:
+#        eotg_race_pair_op_$OP$_effect = { HALF = <race>  A = <a>  B = <b> }
+# (a half-race is ALSO a full race: it gets lines 1 and 2 too).
+# -----------------------------------------------------------------------------
+
+# Calls eotg_race_op_<OP>_effect = { RACE = <race> } once per registered race
+# (half-races included), in registry order.
+eotg_race_for_each_race_effect = {
+    # (no races registered in the main mod)
+    if = {
+        limit = { always = no }
+        save_temporary_scope_value_as = { name = eotg_race_stub_$OP$  value = yes }    # inert reference to OP
+    }
+}
+
+# Calls eotg_race_op_<OP>_effect = { RACE = <race> } once per registered race
+# that HAS A HERITAGE GROUP (pillars carrying eotg_heritage_group_<race>), in
+# registry order; for a culture somehow in two groups the first match wins.
+# Used by the culture route (OP = from_culture), which reads
+# eotg_is_heritage_group = { RACE }: a race without heritage pillars, such as a
+# half-race born only of a pairing, must not be listed, because its
+# eotg_heritage_group_<race> parameter is defined nowhere (a load error).
+eotg_race_for_each_grouped_race_effect = {
+    # (no races registered in the main mod)
+    if = {
+        limit = { always = no }
+        save_temporary_scope_value_as = { name = eotg_race_stub_$OP$  value = yes }    # inert reference to OP
+    }
+}
+
+# Calls eotg_race_op_<OP>_effect = { RACE = <default race> } for the ONE default
+# race, or nothing when no default is registered.
+eotg_race_default_race_effect = {
+    # (no default race in the main mod)
+    if = {
+        limit = { always = no }
+        save_temporary_scope_value_as = { name = eotg_race_stub_$OP$  value = yes }    # inert reference to OP
+    }
+}
+
+# Calls eotg_race_pair_op_<OP>_effect = { HALF = h A = a B = b } once per
+# half-race pairing. OP is merge (rule as_own_race) or split (rule off).
+# Pairings that share a race (half-elf = elf + human, half-orc = orc + human)
+# are applied in listed order; spec §9.3.
+eotg_race_for_each_pairing_effect = {
+    # (no pairings in the main mod)
+    if = {
+        limit = { always = no }
+        save_temporary_scope_value_as = { name = eotg_race_stub_$OP$  value = yes }    # inert reference to OP
+    }
+}
+
+# CHILD scope, birth step 4. ONE random_list, one entry per registered race,
+# base weight 0, `modifier = { add = local_var:eotg_race_w_<race> }` (share x
+# 1000, set by eotg_race_op_weight_effect just before). Only called when the
+# weights sum above 0, so an all-zero list never runs.
+# Verified (spec §12 U2): a random_list entry with base weight 0 plus
+# `modifier = { add = ... }` is vanilla's own pattern, and a zero-weight entry
+# is never picked (QA 2026-11-03). Vanilla precedent, with a variable in the
+# modifier: G/events/dlc/bp2/bp2_hostage_system.txt:968-969
+# `0 = { modifier = { add = var:hook_chance } ... }`. A LOCAL variable there
+# (U3) is plausible but unproven; test B1.
+eotg_race_roll_effect = {
+    # (no races registered in the main mod)
+}

@@ -1,0 +1,37 @@
+﻿# TEST ONLY: not mod content. EotG Test: Race Framework (docs/test_submods/races/README.md).
+# One debug decision (debug_only, needs -debug_mode). Shape: the main mod's
+# common/decisions/eotg_government_debug_decisions.txt:9-41.
+
+eotg_decision_race_test_run = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    should_create_alert = { always = no }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 0
+        kingdom = 0
+        empire = 0
+        hegemony = 0
+    }
+
+    is_shown = {
+        debug_only = yes
+        is_landed = yes
+    }
+
+    effect = {
+        custom_tooltip = eotg_decision_race_test_run_effect_tt
+        hidden_effect = {
+            eotg_test_race_run_effect = yes
+        }
+    }
+
+    ai_potential = {
+        always = no
+    }
+    ai_will_do = {
+        base = 0
+    }
+}
