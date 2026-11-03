@@ -10,6 +10,8 @@ Add a test with T(...) below. Output is deterministic: a second run is byte-iden
 """
 import os, sys, textwrap
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if len(sys.argv) > 1 and sys.argv[1].startswith('-'):
+    sys.exit('usage: gen_test_harness.py [OUTPUT_ROOT]  (default: docs/test_submods/test_harness)')
 ROOT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(REPO, 'docs', 'test_submods', 'test_harness')
 BOM = '﻿'
 
