@@ -1,0 +1,61 @@
+﻿# -- eotg_race_traits.txt ------------------------------------------------------
+# Race mechanics framework v1 (docs/specs/races_framework_v1.md §2).
+# Design source: docs/proposals/race_and_heritage_groups_feasibility.md §2.
+#
+# THE MAIN MOD DEFINES NO RACE TRAITS. The real races (human, elf, orc, goblin,
+# hobgoblin, dwarf, duergar, ogre/giantkin, minotaur, and the sub-races) arrive
+# with the race kit, built elsewhere. This file holds only the per-race template.
+# The test sub-mod's traits (docs/test_submods/races/common/traits/) are a
+# worked example of it.
+#
+# Rules for every race trait:
+#   - key eotg_race_<race>; <race> is the suffix the registry uses (elf, orc...).
+#   - group = eotg_race on every one, so `has_trait = eotg_race` means "has any
+#     race" (read only through eotg_race_has_any_race).
+#   - opposites = every OTHER race trait. Adding a race means adding its key to
+#     every existing race's opposites (all in the pack's traits file). Script
+#     never relies on opposites (it removes race traits before adding one); they
+#     are a safety net against console/history double-adds.
+#   - NOT genetic, NO inherit_chance / both_parent_has_trait_inherit_chance, NO
+#     birth / random_creation: the engine must never hand these out. Race comes
+#     only from the scripted roll (eotg_race_birth_effect) and the culture route
+#     (eotg_race_assign_from_culture_effect). feasibility §2 "Why not genetic".
+#   - flag = eotg_race_family_<family>: race-family flags for content that targets
+#     a family (all elves: moon elf, dusk elf, drow...). Each flag needs loc
+#     TRAIT_FLAG_DESC_<flag> (traits.info "flag"). Read with has_trait_with_flag.
+#     UNVERIFIED-VANILLA: has_trait_with_flag (feasibility §11 lists it as a
+#     technique to confirm in vanilla).
+#   - shown_in_ruler_designer = no for now: a designer-made character gets its race
+#     from culture in the after-lobby pass. Whether players may pick race in the
+#     designer is an owner decision (spec §11).
+#   - Loc: trait_eotg_race_<race> and trait_eotg_race_<race>_desc (default keys,
+#     traits.info "Loc/icon").
+#   - Icon: gfx/interface/icons/traits/eotg_race_<race>.dds is the default path;
+#     the race kit supplies it (B-ART). Until then point `icon =` at an existing
+#     icon, as the test sub-mod does.
+#   - Appearance is NOT set here: the trait drives portraits through
+#     gfx/portraits/trait_portrait_modifiers/ and portrait_modifiers keyed on the
+#     trait (docs/specs/races_framework_v1_portrait_example.txt).
+#
+# UNVERIFIED-VANILLA: `category`. traits.info calls it "What unique category this
+# trait is in" and lists personality / education / childhood / commander /
+# winter_commander / lifestyle / court_type / fame / health. The template omits it.
+# Check what vanilla's own body traits (giant, dwarf) use; never pick an
+# auto-generated category (personality, education, childhood, commander).
+#
+# TEMPLATE (copy, replace <race>, <other races>, <family>):
+#
+# eotg_race_<race> = {
+#     group = eotg_race
+#     opposites = {
+#         eotg_race_<other race 1>
+#         eotg_race_<other race 2>
+#     }
+#     flag = eotg_race_family_<family>
+#     physical = yes
+#     shown_in_ruler_designer = no
+#     icon = eotg_race_<race>.dds
+#     # Gameplay (fertility, health, life expectancy...) goes here as ordinary
+#     # trait modifiers once the owner sets them. None in v1.
+# }
+# -----------------------------------------------------------------------------

@@ -1,0 +1,85 @@
+﻿# -- eotg_race_on_actions.txt --------------------------------------------------
+# Race mechanics framework v1 (docs/specs/races_framework_v1.md §5).
+# Vanilla hooks are extended ADDITIVELY only (CLAUDE.md invariant 4):
+# `on_actions = { }` lists, never a top-level effect/trigger on a vanilla hook.
+# The trigger/effect blocks below sit on OUR custom on_actions only.
+# No event is fired and no cooldown is involved: every hook runs once per
+# birth, creation or game start (feasibility §11 lesson 5).
+# Every custom on_action checks eotg_race_framework_active first. The main mod
+# registers no races, so in the main mod alone these hooks do nothing.
+# -----------------------------------------------------------------------------
+
+# Birth roll. feasibility §2.3 (V): on_birth_child, scopes scope:child,
+# scope:mother, scope:real_father (child_birth_on_actions.txt:855-860). NOT
+# on_birth_mother, which skips historical pregnancies (:9-11).
+on_birth_child = {
+    on_actions = {
+        eotg_race_on_birth_child
+    }
+}
+
+# Engine-created characters (pool, guests, court populator, mercenaries,
+# create_character). feasibility §2.4 (V): on_character_created with
+# scope:creation_reason (character_created_on_actions.txt:1-17).
+# UNVERIFIED-VANILLA: root is the created character, and its culture is already
+# set when the hook fires. Check the vanilla file's header comment.
+# Not read: scope:creation_reason. A newborn may also pass through here (T5);
+# the birth roll resets the trait whichever hook runs first, and this hook
+# skips a character that already has a race, so the order does not matter.
+on_character_created = {
+    on_actions = {
+        eotg_race_on_character_created
+    }
+}
+
+# Characters that exist at game start (history, bookmark). Vanilla
+# G/common/on_action/game_start.txt:2, after history is applied (precedent
+# eotg_cartel_on_actions.txt:11-16). Whether on_character_created also covers
+# history characters is test T2; this pass makes the answer not matter.
+on_game_start = {
+    on_actions = {
+        eotg_race_on_game_start
+    }
+}
+
+# Ruler-designer characters exist only after the lobby (vanilla
+# game_start.txt:2553; precedent eotg_cartel_on_actions.txt:18-25). The pass is
+# idempotent, so running twice is harmless.
+on_game_start_after_lobby = {
+    on_actions = {
+        eotg_race_on_game_start
+    }
+}
+
+eotg_race_on_birth_child = {
+    trigger = {
+        eotg_race_framework_active = yes
+    }
+    effect = {
+        scope:child = {
+            eotg_race_birth_effect = {
+                MOTHER = scope:mother
+                FATHER = scope:real_father
+            }
+        }
+    }
+}
+
+eotg_race_on_character_created = {
+    trigger = {
+        eotg_race_framework_active = yes
+        eotg_race_has_any_race = no
+    }
+    effect = {
+        eotg_race_assign_from_culture_effect = yes
+    }
+}
+
+eotg_race_on_game_start = {
+    trigger = {
+        eotg_race_framework_active = yes
+    }
+    effect = {
+        eotg_race_game_start_effect = yes
+    }
+}

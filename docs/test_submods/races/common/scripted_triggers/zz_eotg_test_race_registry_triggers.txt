@@ -1,0 +1,24 @@
+﻿# TEST ONLY: not mod content. EotG Test: Race Framework (docs/test_submods/races/README.md).
+# Fills the trigger half of the race registry by REDEFINING the main mod's keys
+# from common/scripted_triggers/eotg_race_registry_triggers.txt (key-level
+# override, differently named file; see zz_eotg_test_race_registry_effects.txt).
+
+eotg_race_framework_active = {
+    always = yes
+}
+
+eotg_race_same_as = {
+    OR = {
+        AND = { has_trait = eotg_race_test_a  $TARGET$ = { has_trait = eotg_race_test_a } }
+        AND = { has_trait = eotg_race_test_b  $TARGET$ = { has_trait = eotg_race_test_b } }
+        AND = { has_trait = eotg_race_test_half_ab  $TARGET$ = { has_trait = eotg_race_test_half_ab } }
+    }
+}
+
+eotg_race_cultures_in_different_groups = {
+    OR = {
+        AND = { $A$ = { eotg_is_heritage_group = { RACE = test_a } }  $B$ = { NOT = { eotg_is_heritage_group = { RACE = test_a } } } }
+        AND = { $A$ = { eotg_is_heritage_group = { RACE = test_b } }  $B$ = { NOT = { eotg_is_heritage_group = { RACE = test_b } } } }
+        AND = { $A$ = { eotg_is_heritage_group = { RACE = test_half_ab } }  $B$ = { NOT = { eotg_is_heritage_group = { RACE = test_half_ab } } } }
+    }
+}

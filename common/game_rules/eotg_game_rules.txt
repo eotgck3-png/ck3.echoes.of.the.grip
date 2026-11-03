@@ -19,6 +19,12 @@
 #   eotg_frontier_difficulty: eotg_frontier_pace_value
 #     (common/script_values/eotg_frontier_values.txt) and the quiet-year ease
 #     in eotg_frontier_tick_effect (common/scripted_effects/eotg_frontier_effects.txt)
+#   eotg_race_half_races: eotg_race_birth_effect
+#     (common/scripted_effects/eotg_race_effects.txt), birth step 3
+#   eotg_race_crossbreeding: eotg_race_crossbreeding_allows
+#     (common/scripted_triggers/eotg_race_triggers.txt) and
+#     eotg_race_crossbreeding_ai_marriage_modifier
+#     (common/scripted_modifiers/eotg_race_modifiers.txt)
 # -----------------------------------------------------------------------------
 
 # Cybernetics event frequency. Off stops the yearly cybernetics flavour pools
@@ -70,4 +76,44 @@ eotg_frontier_difficulty = {
 	eotg_frontier_difficulty_easy = {}
 
 	eotg_frontier_difficulty_hard = {}
+}
+
+# Race mechanics framework v1 (docs/specs/races_framework_v1.md §9). Whether a
+# pairing of two races (the registry's pairing table) produces a half-race at
+# birth. off: no new half-race births; an inherited half-race share splits back
+# into its two parent races. as_own_race: a half-race is a race of its own, with
+# its own trait and share. Existing half-race characters keep their trait under
+# both. Default off pending the canon ruling (feasibility §6, §9 decision 1).
+eotg_race_half_races = {
+	categories = {
+		eotg flavor
+	}
+
+	default = eotg_race_half_races_off
+
+	eotg_race_half_races_off = {}
+
+	eotg_race_half_races_as_own_race = {}
+}
+
+# Race mechanics framework v1 (spec §8). Marriage and children between
+# characters of different races. free: no restriction. discouraged: the AI
+# weighs cross-race matches down (eotg_race_crossbreeding_ai_marriage_modifier).
+# forbidden: no cross-race marriage or children (eotg_race_crossbreeding_allows,
+# read by the vanilla-override stubs in
+# common/scripted_triggers/eotg_race_vanilla_overrides_triggers.txt; inert until
+# a local session completes them). Default free pending the owner's ruling
+# (feasibility §9 decision 3).
+eotg_race_crossbreeding = {
+	categories = {
+		eotg flavor
+	}
+
+	default = eotg_race_crossbreeding_free
+
+	eotg_race_crossbreeding_free = {}
+
+	eotg_race_crossbreeding_discouraged = {}
+
+	eotg_race_crossbreeding_forbidden = {}
 }

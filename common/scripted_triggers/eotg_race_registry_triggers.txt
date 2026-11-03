@@ -1,0 +1,48 @@
+﻿# -- eotg_race_registry_triggers.txt -------------------------------------------
+# Race mechanics framework v1: the TRIGGER half of the race registry
+# (docs/specs/races_framework_v1.md §4). The other half is
+# common/scripted_effects/eotg_race_registry_effects.txt.
+#
+# THE MAIN MOD REGISTERS NO RACES. Every key below is a stub that makes the
+# framework inert: eotg_race_framework_active = no, so no hook does anything.
+# A race pack (the test sub-mod docs/test_submods/races/, later the real race
+# kit) REDEFINES these keys, by key, in a file with a DIFFERENT name that loads
+# after this one (e.g. zz_eotg_<pack>_race_registry_triggers.txt). Never reuse
+# this filename in a pack: same path replaces the whole file.
+#
+# Per race, a pack adds exactly one line to each OR list below. The template
+# lines are given in comments; replace <race> with the race suffix.
+# -----------------------------------------------------------------------------
+
+# Master switch. A pack sets this to `always = yes`. Every hook in
+# common/on_action/eotg_race_on_actions.txt checks it first.
+eotg_race_framework_active = {
+    always = no
+}
+
+# CHARACTER scope. eotg_race_same_as = { TARGET = <character> }: both have the
+# same race trait. False when either has none.
+# Pack template, one line per race inside the OR:
+#   AND = { has_trait = eotg_race_<race>  $TARGET$ = { has_trait = eotg_race_<race> } }
+eotg_race_same_as = {
+    OR = {
+        always = no
+        # (no races registered in the main mod; $TARGET$ is unused here)
+        # UNVERIFIED-VANILLA: a scripted trigger whose body never references
+        # a parameter it is called with. Expected to be silently accepted
+        # (replacement is literal text); if the engine logs it, the main-mod
+        # stub can reference it harmlessly, e.g. `$TARGET$ = { always = no }`.
+    }
+}
+
+# eotg_race_cultures_in_different_groups = { A = <culture> B = <culture> }
+# Some registered race's group holds one culture and not the other. Only
+# meaningful when both cultures are grouped (eotg_race_cultures_can_hybridize
+# checks that first).
+# Pack template, one line per race inside the OR:
+#   AND = { $A$ = { eotg_is_heritage_group = { RACE = <race> } }  $B$ = { NOT = { eotg_is_heritage_group = { RACE = <race> } } } }
+eotg_race_cultures_in_different_groups = {
+    OR = {
+        always = no
+    }
+}

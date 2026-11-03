@@ -1,0 +1,42 @@
+﻿# TEST ONLY: not mod content. EotG Test: Race Framework (docs/test_submods/races/README.md).
+# Two test races and one test half-race, written to the per-race template in the
+# main mod's common/traits/eotg_race_traits.txt (spec docs/specs/races_framework_v1.md §2).
+# eotg_race_test_half_ab is the half-race fixture for game rule eotg_race_half_races:
+# it is born of test_a x test_b only under `as_own_race`.
+# Icons: placeholder, the main mod's cybernetics icon (no race art exists; B-ART).
+
+eotg_race_test_a = {
+    group = eotg_race
+    opposites = {
+        eotg_race_test_b
+        eotg_race_test_half_ab
+    }
+    flag = eotg_race_family_test
+    physical = yes
+    shown_in_ruler_designer = no
+    icon = eotg_cybernetics.dds
+}
+
+eotg_race_test_b = {
+    group = eotg_race
+    opposites = {
+        eotg_race_test_a
+        eotg_race_test_half_ab
+    }
+    flag = eotg_race_family_test
+    physical = yes
+    shown_in_ruler_designer = no
+    icon = eotg_cybernetics.dds
+}
+
+eotg_race_test_half_ab = {
+    group = eotg_race
+    opposites = {
+        eotg_race_test_a
+        eotg_race_test_b
+    }
+    flag = eotg_race_family_test
+    physical = yes
+    shown_in_ruler_designer = no
+    icon = eotg_cybernetics.dds
+}

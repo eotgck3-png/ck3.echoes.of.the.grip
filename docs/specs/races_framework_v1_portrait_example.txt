@@ -1,0 +1,70 @@
+# -- races_framework_v1_portrait_example.txt -----------------------------------
+# EXAMPLE ONLY. NOT LOADED (it lives in docs/). SHIPS NO GFX.
+# Race mechanics framework v1, spec docs/specs/races_framework_v1.md §10.
+# How a race trait will drive portraits once the race kit (built elsewhere)
+# supplies the art. Feasibility report §5 (V, verified locally at 1.20.1.1):
+#   - gfx/portraits/trait_portrait_modifiers/ takes `traits = { ... }` and
+#     `dna_modifiers` (_trait_modifier.info:1-17);
+#   - portrait_modifiers can gate morphs and accessories on a trait
+#     (00_animation_expressions.txt:42-66 uses `has_trait = dwarf`);
+#   - culture `ethnicities` set the base look of characters generated in a
+#     culture; children's DNA blends from both parents (genes blend_range), and
+#     a race overlay sits on top of the blend.
+#
+# UNVERIFIED-VANILLA (everything below): field names are from the feasibility
+# report's citations, not from a vanilla file this session could read. Before
+# using either block, open the cited vanilla files and copy their exact shape.
+# Gene and template names (<race gene>, <ears template>) come from the race kit.
+#
+# Order question (test T4): a race trait is added in on_birth_child. Whether the
+# newborn's first portrait already shows the trait's modifiers, and whether the
+# engine's genetic DNA roll happens before or after, is unproven. If the first
+# portrait is wrong, the fix is on the art side (an inheritable race morph gene
+# pinned by ethnicity, feasibility §11), not in the roll.
+# -----------------------------------------------------------------------------
+
+# --- A. Trait portrait modifier (would live in
+#        gfx/portraits/trait_portrait_modifiers/eotg_race_trait_portrait_modifiers.txt)
+#
+# eotg_race_elf_portrait = {
+#     traits = { eotg_race_elf }
+#     dna_modifiers = {
+#         morph = {
+#             mode = replace
+#             gene = <race gene, e.g. the kit's ear-shape gene>
+#             template = <ears template from the kit>
+#             value = 1.0
+#         }
+#     }
+# }
+
+# --- B. Portrait modifier gated on the trait (would live in
+#        gfx/portraits/portrait_modifiers/eotg_race_portrait_modifiers.txt),
+#        for accessories (e.g. tusks, horns) rather than morphs.
+#
+# eotg_race_horns = {
+#     usage = game
+#     eotg_race_minotaur_horns = {
+#         dna_modifiers = {
+#             accessory = {
+#                 mode = add
+#                 gene = <horn accessory gene from the kit>
+#                 template = <horn template>
+#                 value = 1.0
+#             }
+#         }
+#         weight = {
+#             base = 0
+#             modifier = {
+#                 add = 100
+#                 has_trait = eotg_race_minotaur
+#             }
+#         }
+#     }
+# }
+
+# --- C. Race families: one modifier for a whole family (all elves) can key on
+#        the family flag instead of listing every trait, if the portrait trigger
+#        context allows it:
+#                 has_trait_with_flag = eotg_race_family_elf
+#        (UNVERIFIED-VANILLA, see common/traits/eotg_race_traits.txt).

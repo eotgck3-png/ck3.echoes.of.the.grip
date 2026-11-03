@@ -1,0 +1,21 @@
+﻿# TEST ONLY: not mod content. EotG Test: Race Framework (docs/test_submods/races/README.md).
+# Characters spawned by the debug decision. Shape: main mod
+# common/scripted_character_templates/eotg_augmentation_templates.txt:44-60.
+# Culture, faith and location come from the caller.
+
+eotg_test_race_man_template = {
+    age = { 25 30 }
+    gender_female_chance = 0
+}
+
+eotg_test_race_woman_template = {
+    age = { 25 30 }
+    gender_female_chance = 100
+}
+
+# A simulated newborn for the scripted birth roll (no pregnancy involved).
+# UNVERIFIED-VANILLA: a fixed `age = 0` in a template (the repo only uses ranges).
+eotg_test_race_child_template = {
+    age = 0
+    gender_female_chance = 50
+}

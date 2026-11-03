@@ -1,0 +1,39 @@
+﻿# TEST ONLY: not mod content. EotG Test: Race Framework (docs/test_submods/races/README.md).
+# Two test cultures, one per test heritage. No province or history character
+# uses them; the debug decision spawns characters into them.
+# UNVERIFIED-VANILLA: the vanilla keys below (ethos_stoic, martial_custom_equal,
+# head_determination_domain, name_list_roman, western_*_gfx, caucasian_northern)
+# are copied from v1 (OLD PROJECT VERSION/common/culture/cultures/eotg_cultures.txt:11-29),
+# which never loaded in game. Check each against a vanilla culture file.
+# UNVERIFIED-VANILLA: that a culture no province or character uses still exists
+# as culture:<key> at game start (README check S0).
+
+eotg_test_culture_a = {
+    color = { 0.8 0.3 0.3 }
+    ethos = ethos_stoic
+    heritage = eotg_heritage_test_a
+    language = eotg_language_test
+    martial_custom = martial_custom_equal
+    head_determination = head_determination_domain
+    name_list = name_list_roman
+    coa_gfx = { western_coa_gfx }
+    building_gfx = { western_building_gfx }
+    clothing_gfx = { western_clothing_gfx }
+    unit_gfx = { western_unit_gfx }
+    ethnicities = { 100 = caucasian_northern }
+}
+
+eotg_test_culture_b = {
+    color = { 0.3 0.3 0.8 }
+    ethos = ethos_stoic
+    heritage = eotg_heritage_test_b
+    language = eotg_language_test
+    martial_custom = martial_custom_equal
+    head_determination = head_determination_domain
+    name_list = name_list_roman
+    coa_gfx = { western_coa_gfx }
+    building_gfx = { western_building_gfx }
+    clothing_gfx = { western_clothing_gfx }
+    unit_gfx = { western_unit_gfx }
+    ethnicities = { 100 = caucasian_northern }
+}
