@@ -260,6 +260,22 @@
    ],
    "verified": true,
    "source": "_character_memories.info (GetName returns memory_key); desc keys are script literals"
+  },
+  "portrait_modifiers": {
+   "path": "gfx/portraits/portrait_modifiers",
+   "patterns": [
+    "PORTRAIT_MODIFIER_{key}"
+   ],
+   "children": [
+    "PORTRAIT_MODIFIER_{parent}_{key}"
+   ],
+   "accessories": {
+    "add_accessory_modifiers": [
+     "PORTRAIT_MODIFIER_{parent}_{key}"
+    ]
+   },
+   "verified": true,
+   "source": "vanilla 1.20 localization/english/portraits/portrait_modifiers_l_english.yml. Group: :10 PORTRAIT_MODIFIER_custom_clothes (gfx/portraits/portrait_modifiers/00_custom_clothes.txt). Explicit entry: :30 PORTRAIT_MODIFIER_custom_clothes_no_clothes. add_accessory_modifiers: one key per accessory in the gene template's sex lists, <group>_<accessory> (:1198 custom_beards_male_beard_western_01; PAM beards custom_beards_m_beard_pam_01 from common/genes/04_genes_special_accessories_beards.txt:895-899); the null accessory 'empty' is <group>_<sex>_empty (:1196 custom_beards_male_empty; custom_headgear_boy_empty, an aliased boy = male list). 'path' because the files live under gfx/, not common/. Covers the imported cyberware barbershop loc (docs/specs/cyberware_portraits_ship.md \u00a73.2, \u00a77)."
   }
  },
  "loc_reference_regexes": [

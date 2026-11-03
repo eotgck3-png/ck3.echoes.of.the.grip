@@ -142,6 +142,8 @@ eotg_aug_initiate_effect = {
         }
     }
     add_trait = eotg_cybernetics
+    # Cyberware portraits §5.2: a re-initiation starts at XP 0, so stale tier flags go
+    eotg_aug_portrait_tier_sync_effect = yes
     eotg_aug_refresh_synergy_effect = yes
 }
 
@@ -175,6 +177,8 @@ eotg_aug_set_integration_effect = {
                 subtract = "has_trait_xp(eotg_cybernetics)"
             }
         }
+        # Cyberware portraits §5.2: every promotion and regression passes here
+        eotg_aug_portrait_tier_sync_effect = yes
         eotg_aug_refresh_synergy_effect = yes
         # INT4 M2: Enhanced -> Overclocked only; a regression never passes
         if = {
@@ -186,6 +190,30 @@ eotg_aug_set_integration_effect = {
         }
         # keep in sync with loc eotg_decision_aug_pursue_next_stage_desc ("five years") and _settling_tt ("5 years")
         add_character_flag = { flag = eotg_flag_aug_settling  years = 5 }
+    }
+}
+
+# Cyberware portraits §5.2: the portrait tier flags mirror the eotg_cybernetics
+# track (XP 0/50/100). They are read by eotg_portrait_aug_*_trigger and are
+# deliberately NOT touched by the Neurofracture or Total Integration effects, so
+# the last tier survives the track's removal. Cleared only in
+# eotg_aug_remove_all_effect.
+# Callers: eotg_aug_initiate_effect, eotg_aug_set_integration_effect.
+eotg_aug_portrait_tier_sync_effect = {
+    if = {
+        limit = { has_trait = eotg_cybernetics }
+        hidden_effect = {
+            if = {
+                limit = { OR = { eotg_is_aug_tier2 = yes  eotg_is_aug_tier3 = yes } }
+                add_character_flag = eotg_aug_tier_enhanced
+            }
+            else = { remove_character_flag = eotg_aug_tier_enhanced }
+            if = {
+                limit = { eotg_is_aug_tier3 = yes }
+                add_character_flag = eotg_aug_tier_overclocked
+            }
+            else = { remove_character_flag = eotg_aug_tier_overclocked }
+        }
     }
 }
 
@@ -494,6 +522,12 @@ eotg_aug_remove_all_effect = {
     remove_character_flag = eotg_flag_aug_sedated
     remove_character_flag = eotg_flag_aug_containment_regency
     remove_character_flag = eotg_flag_aug_may_embrace
+    # Cyberware portraits §5.1-5.2: tier and back-street finish go with the
+    # implants. The eotg_aug_prosthetic_* flags are KEPT (owner ruling
+    # 2026-11-03): the limb stays whole, so the prosthesis stays drawn.
+    remove_character_flag = eotg_aug_tier_enhanced
+    remove_character_flag = eotg_aug_tier_overclocked
+    remove_character_flag = eotg_aug_backstreet_fitted
     eotg_clean_all_aug_modifiers = yes
     remove_variable = eotg_fracture_risk
     remove_variable = eotg_aug_voice
@@ -552,22 +586,29 @@ eotg_aug_unmask_congenital_effect = {
 # Removes ONE physical-loss trait, worst first: blind > one_legged > maimed >
 # one_eyed. Same if/else_if shape as eotg_aug_heal_wounds_effect.
 # Guard: eotg_has_physical_loss.
+# Cyberware portraits §5.3: each branch sets the matching eotg_aug_prosthetic_*
+# flag (never cleared; the portrait triggers skip it while the loss trait is
+# held again).
 eotg_aug_restore_loss_effect = {
     if = {
         limit = { has_trait = blind }
         remove_trait = blind
+        hidden_effect = { add_character_flag = eotg_aug_prosthetic_eye }
     }
     else_if = {
         limit = { has_trait = one_legged }
         remove_trait = one_legged
+        hidden_effect = { add_character_flag = eotg_aug_prosthetic_leg }
     }
     else_if = {
         limit = { has_trait = maimed }
         remove_trait = maimed
+        hidden_effect = { add_character_flag = eotg_aug_prosthetic_arm }
     }
     else_if = {
         limit = { has_trait = one_eyed }
         remove_trait = one_eyed
+        hidden_effect = { add_character_flag = eotg_aug_prosthetic_eye }
     }
 }
 
@@ -2357,6 +2398,20 @@ eotg_aug_procedure_roll_effect = {
             }
             hidden_effect = { remove_variable = eotg_aug_sponsor }
         }
+        # Cyberware portraits §5.1: back-street hardware stays visible (patch,
+        # khaki casings, amber). Set here, not in eotg_aug_procedure_effect, so
+        # the six direct back-street rolls are covered. Install, upgrade and
+        # repair count; removal does not. Cleared only in
+        # eotg_aug_remove_all_effect; a later clinic refit keeps it.
+        if = {
+            limit = {
+                scope:eotg_proc_provider = flag:backstreet
+                NOT = { scope:eotg_proc_kind = flag:removal }
+                NOT = { scope:eotg_proc_outcome = flag:death }
+                eotg_is_augmented_any = yes
+            }
+            hidden_effect = { add_character_flag = eotg_aug_backstreet_fitted }
+        }
         if = {
             limit = { scope:eotg_proc_outcome = flag:death }
             death = { death_reason = death_treatment }
@@ -2633,6 +2688,8 @@ eotg_aug_repair_injury_effect = {
         if = {
             limit = { has_trait = maimed }
             remove_trait = maimed
+            # Cyberware portraits §5.3
+            hidden_effect = { add_character_flag = eotg_aug_prosthetic_arm }
         }
         if = {
             limit = { has_character_modifier = recently_maimed_modifier }
@@ -2644,6 +2701,8 @@ eotg_aug_repair_injury_effect = {
         if = {
             limit = { has_trait = one_legged }
             remove_trait = one_legged
+            # Cyberware portraits §5.3
+            hidden_effect = { add_character_flag = eotg_aug_prosthetic_leg }
         }
     }
     else_if = {
@@ -2651,6 +2710,8 @@ eotg_aug_repair_injury_effect = {
         if = {
             limit = { has_trait = one_eyed }
             remove_trait = one_eyed
+            # Cyberware portraits §5.3
+            hidden_effect = { add_character_flag = eotg_aug_prosthetic_eye }
         }
     }
     else_if = {
@@ -2658,6 +2719,8 @@ eotg_aug_repair_injury_effect = {
         if = {
             limit = { has_trait = blind }
             remove_trait = blind
+            # Cyberware portraits §5.3
+            hidden_effect = { add_character_flag = eotg_aug_prosthetic_eye }
         }
     }
     else_if = {

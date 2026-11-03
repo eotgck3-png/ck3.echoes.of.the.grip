@@ -656,6 +656,35 @@ class L014(LintCase):
             "common/game_rules/r.txt": "eotg_rule = { eotg_on = { eotg_deep = { } } }"}),
             "L014", "'setting_eotg_deep' is defined", count=1)
 
+    def test_portrait_modifier_convention(self):
+        # gfx/portraits/portrait_modifiers ("path"): the group, each explicit entry
+        # (<group>_<entry>) and, through common/genes, each accessory of an
+        # add_accessory_modifiers template (<group>_<accessory>; empty -> <sex>_empty,
+        # aliases chained girl = female = male)
+        pm = {"common/genes/g.txt":
+              "special_genes = { accessory_genes = { eotg_gene = { "
+              "eotg_none = { index = 0 male = { 1 = empty } female = male boy = male girl = female } "
+              "eotg_t = { index = 1 male = { 1 = eotg_acc_m } female = { 1 = eotg_acc_f } } } } }",
+              "gfx/portraits/portrait_modifiers/p.txt":
+              "eotg_grp = { usage = customization "
+              "add_accessory_modifiers = { gene = eotg_gene template = eotg_none } "
+              "add_accessory_modifiers = { gene = eotg_gene template = eotg_t } } "
+              "eotg_grp2 = { eotg_entry = { dna_modifiers = { } } }"}
+        keys = ["PORTRAIT_MODIFIER_eotg_grp", "PORTRAIT_MODIFIER_eotg_grp2",
+                "PORTRAIT_MODIFIER_eotg_grp2_eotg_entry",
+                "PORTRAIT_MODIFIER_eotg_grp_eotg_acc_m", "PORTRAIT_MODIFIER_eotg_grp_eotg_acc_f"]
+        keys += ["PORTRAIT_MODIFIER_eotg_grp_%s_empty" % s for s in ("male", "female", "boy", "girl")]
+        self.assertClean(self.files(*keys, **pm), "L014")
+        # an accessory under the wrong group, a sex the template lacks, and the
+        # add_accessory_modifiers block itself imply nothing
+        self.assertHit(self.files(
+            "PORTRAIT_MODIFIER_eotg_grp2_eotg_acc_m", "PORTRAIT_MODIFIER_eotg_grp_boy_eotg_acc_m",
+            "PORTRAIT_MODIFIER_eotg_grp_add_accessory_modifiers", **pm), "L014", count=3)
+        # the same file under common/ is not a portrait modifier file
+        moved = dict(pm)
+        moved["common/portrait_modifiers/p.txt"] = moved.pop("gfx/portraits/portrait_modifiers/p.txt")
+        self.assertHit(self.files("PORTRAIT_MODIFIER_eotg_grp", **moved), "L014", count=1)
+
     def test_not_key_exempt_when_base_used(self):
         # NOT_<key> is read by the engine when custom_description <key> fails;
         # it counts as used whenever its base key is referenced in script

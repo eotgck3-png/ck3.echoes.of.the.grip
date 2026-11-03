@@ -1002,27 +1002,73 @@ def load_conventions(path=CONVENTIONS_FILE):
     return data
 
 
-def _convention_keys(doc, spec):
-    """(name, patterns) pairs one common/ file implies for L014.
+GENE_SEXES = ("male", "female", "boy", "girl")
 
-    Top-level objects take spec["patterns"]. Four optional spec fields cover names the
+
+def _gene_accessories(mod):
+    """{(gene, template): [accessory names]} from common/genes, for the "accessories"
+    convention. A sex list aliased to another (boy = male, girl = female) takes that list; the null
+    accessory `empty` is named <sex>_empty (vanilla PORTRAIT_MODIFIER_custom_headgear_boy_empty)."""
+    out = {}
+    for _, doc in mod.common_dir("genes"):
+        for gene, parents in pdx_parse.walk(doc.nodes):
+            if not (gene.is_block and parents and parents[-1].key == "accessory_genes"):
+                continue
+            for tmpl in gene.children:
+                if not tmpl.is_block:
+                    continue
+                lists = {s.key: s.value for s in tmpl.children if s.key in GENE_SEXES}
+                names = []
+                for sex in GENE_SEXES:
+                    val = lists.get(sex)
+                    for _ in GENE_SEXES:    # aliases chain: girl = female, female = male
+                        if not isinstance(val, str):
+                            break
+                        val = lists.get(val)
+                    for item in val if isinstance(val, list) else ():
+                        acc = item.value if isinstance(item.value, str) else None
+                        if acc:
+                            names.append("%s_empty" % sex if acc == "empty" else acc)
+                out[(gene.key, tmpl.key)] = names
+    return out
+
+
+def _convention_keys(doc, spec, genes=None):
+    """(name, patterns) pairs one script file implies for L014.
+
+    Top-level objects take spec["patterns"]. Five optional spec fields cover names the
     engine reads below the top level:
       "children": [...]             every block directly inside each top-level object,
-                except blocks named in "nested"/"bare" (game rule settings);
+                except blocks named in "nested"/"bare"/"accessories" (game rule settings;
+                portrait modifier entries); {parent} is the top-level object's key;
       "nested": {"<block>": [...]}  every block directly inside a block named <block>
                 (subject contract obligation_levels: <level>, <level>_short);
       "values": {"<field>": [...]}  every value of a field named <field>
                 (customizable_localization localization_key + the child suffixes);
       "bare": {"<block>": [...]}    every bare list item inside a block named <block>
-                (game concept alias = { a b }: game_concept_a, game_concept_a_desc).
+                (game concept alias = { a b }: game_concept_a, game_concept_a_desc);
+      "accessories": {"<block>": [...]}  every accessory of the gene template named by
+                the gene/template fields of a block <block> directly inside a top-level
+                object (portrait add_accessory_modifiers); {parent} as for "children".
+    A spec with "path" reads its files from that mod-relative folder instead of
+    common/<folder> (portrait modifiers live under gfx/).
     """
     nested, values, bare = spec.get("nested", {}), spec.get("values", {}), spec.get("bare", {})
+    accs = spec.get("accessories", {})
     for n in doc.nodes:
         if n.is_block and n.key and not n.key.startswith("@"):
             yield n.key, spec["patterns"]
-            for c in n.children if "children" in spec else ():
-                if c.is_block and c.key and c.key not in nested and c.key not in bare:
-                    yield c.key, spec["children"]
+            for c in n.children:
+                if not (c.is_block and c.key):
+                    continue
+                if c.key in accs:
+                    gene = pdx_parse.first(c.children, "gene")
+                    tmpl = pdx_parse.first(c.children, "template")
+                    pats = [p.replace("{parent}", n.key) for p in accs[c.key]]
+                    for acc in (genes or {}).get((gene and gene.value, tmpl and tmpl.value), ()):
+                        yield acc, pats
+                elif "children" in spec and c.key not in nested and c.key not in bare:
+                    yield c.key, [p.replace("{parent}", n.key) for p in spec["children"]]
     if not (nested or values or bare):
         return
     for n, _ in pdx_parse.walk(doc.nodes):
@@ -1041,9 +1087,16 @@ def _convention_keys(doc, spec):
 def _convention_regex(conv, mod):
     """One regex matching every loc key implied by a defined object."""
     alts = []
+    genes = None
     for folder, spec in sorted(conv["folders"].items()):
-        for _, doc in mod.common_dir(folder):
-            for key, pats in _convention_keys(doc, spec):
+        if "accessories" in spec and genes is None:
+            genes = _gene_accessories(mod)
+        if "path" in spec:
+            docs = [pdx_parse.parse_file(f) for f in _iter_files(mod.root, spec["path"], (".txt",))]
+        else:
+            docs = [d for _, d in mod.common_dir(folder)]
+        for doc in docs:
+            for key, pats in _convention_keys(doc, spec, genes):
                 for pat in pats:
                     alts.append(re.escape(pat).replace(r"\{key\}", re.escape(key))
                                 .replace(r"\{n\}", r"\d+"))

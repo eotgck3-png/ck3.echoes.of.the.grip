@@ -6,7 +6,7 @@
 **Source set:** MCP asset workspace `C:/Users/river/MCP`, which is outside this repo. The source files are:
 - `staging/cyberware/CATALOG.md` (21 items, QA verdict SHIP-READY 2026-10-26, §8);
 - `staging/cyberware/eotg_wiring/EOTG_WIRING_PROPOSAL.md`;
-- `staging/cyberware/eotg_wiring/eotg_cyberware_portrait_modifiers_draft.txt` (2,438 lines, sha256 `eccdc653d5d010987c98f33a0537f90d67b2bd0ec8396a554ec8eba428ec3b45` on 2026-11-03);
+- `staging/cyberware/eotg_wiring/eotg_cyberware_portrait_modifiers_draft.txt` (2,438 lines, sha256 `d5c6242a0dc8b0029979bf016c3ef2a2905154cfe4993f36e903f9f0df83f879` after the SH4 none-weight fix, 2026-11-03);
 - `staging/cyberware/BRIEF.md` and `ENGINE_NOTES.md` (vanilla-scout, 2026-10-26).
 
 **Game:** CK3 1.20.1.1.
@@ -143,7 +143,7 @@ Source root `C:/Users/river/MCP/ck3_mod/`; destination is the repo root. **Allow
 
 **Hard denylist.** The tool refuses these even if a glob would match:
 - `descriptor.mod`;
-- any path containing `chad_orc`;
+- any **race-kit** path or non-`eotg_` file containing `chad_orc` (amended 2026-11-03: the 30 `eotg_*_chad_orc*.mesh` cyberware variants ship, because three `.asset` files reference them; see `docs/tools/sync_cyberware.py:27-31`);
 - `gfx/models/portraits/{male_head,female_head,textures}/` (the race kit overrides vanilla `male_head.asset` / `female_head.asset`; copying them would replace every head in the game);
 - `gfx/models/portraits/decals/chad_orc/`;
 - `common/ethnicities/`, `gfx/coat_of_arms/`, `gui/`, `interface/`;
@@ -421,7 +421,7 @@ From BRIEF.md (lore-keeper rulings 2026-10-26, binding) and the wiring proposal'
 
 1. `python docs/tools/sync_cyberware.py verify` exits 0. The manifest lists **2,803** files (2,754 `lfs`, 49 `text`), plus the 2 `generated` wiring files, and the working tree holds no LFS pointer files.
 2. `git lfs ls-files | wc -l` = **2,754** (2,585 `.mesh` + 169 `.dds`). `git ls-files gfx/models/portraits/eotg_cyberware | grep -c '\.asset$'` = 21 (plain git). `.git/hooks/pre-push` exists. After the push, GitHub shows "Stored with Git LFS" on a sampled `.mesh`.
-3. **Nothing from the denylist is in the tree.** `ls gfx/models/portraits` shows only `eotg_cyberware` and `decals`, and `ls gfx/models/portraits/decals` shows only `eotg_face_mark`. `git ls-files | grep -E 'chad_orc|male_head|female_head|ethnicities'` is empty.
+3. **Nothing from the denylist is in the tree.** `ls gfx/models/portraits` shows only `eotg_cyberware` and `decals`, and `ls gfx/models/portraits/decals` shows only `eotg_face_mark`. `git ls-files | grep -E 'male_head|female_head|ethnicities'` is empty, and every `chad_orc` hit is an `eotg_` cyberware mesh under `eotg_cyberware/`.
 4. **Tiger** (1.17 command in CLAUDE.md, log in the scratchpad) shows **no new finding** in any imported or new file beyond the known-benign list. Record the before and after totals; the MCP baseline had 0 findings from cyberware. **PX LSP** and `px_vocab_check.py common events` are clean on `eotg_portrait_triggers.txt` and the edited effects file. `eotg_lint.py` findings on the engine-forced keys of §3.2 go to an allowlist with a comment citing this spec; no key is renamed.
 5. **Grep checks:**
    - `eotg_aug_backstreet_fitted` is set in exactly 1 place (`eotg_aug_procedure_roll_effect`) and cleared in exactly 1 (`eotg_aug_remove_all_effect`);

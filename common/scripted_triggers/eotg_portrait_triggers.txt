@@ -1,0 +1,97 @@
+﻿# -- eotg_portrait_triggers.txt -----------------------------------------------
+# Cyberware portraits, batch SH3 (docs/specs/cyberware_portraits_ship.md §5.4).
+# From MCP wiring draft section A (eotg_cyberware_portrait_modifiers_draft.txt
+# :31-84, sha256 eccdc653...ec3b45), with the spec's changes:
+#   1. the tier triggers read the tier flags set by
+#      eotg_aug_portrait_tier_sync_effect (§5.2), not the track XP, and need no
+#      saved-XP variable (the flags survive remove_trait = eotg_cybernetics);
+#   2. new prosthesis guards: flag AND the matching loss trait not held again
+#      (§5.3; a re-lost limb shows the vanilla stump / patch, not hardware);
+#   3. eotg_portrait_shows_optic_trigger reads the eye guard, not the bare flag.
+# Precedent for flag-keyed portrait triggers: vanilla 00_trait_modifiers.txt
+# temporarily_blind / temporarily_one_eyed (has_character_flag).
+#
+# Readers: the generated gfx/portraits/trait_portrait_modifiers/
+# eotg_cyber_trait_modifiers.txt (draft section B) and
+# gfx/portraits/portrait_modifiers/eotg_wear_game.txt (draft section C).
+# Map-agnostic: no title, culture, faith or character key.
+# -----------------------------------------------------------------------------
+
+# ---- tier, kept across the end states (§5.2: the flags outlive the track) ----
+eotg_portrait_aug_enhanced_trigger = {
+    has_character_flag = eotg_aug_tier_enhanced
+}
+eotg_portrait_aug_overclocked_trigger = {
+    has_character_flag = eotg_aug_tier_overclocked
+}
+
+# ---- prosthesis guards (§5.3, §5.4 item 2) ----
+eotg_portrait_prosthetic_eye_trigger = {
+    has_character_flag = eotg_aug_prosthetic_eye
+    NOT = { has_trait = one_eyed }
+    NOT = { has_trait = blind }
+}
+eotg_portrait_prosthetic_arm_trigger = {
+    has_character_flag = eotg_aug_prosthetic_arm
+    NOT = { has_trait = maimed }
+}
+eotg_portrait_prosthetic_leg_trigger = {
+    has_character_flag = eotg_aug_prosthetic_leg
+    NOT = { has_trait = one_legged }
+}
+
+# ---- one rule for "the optic shows" (the eye group and the visor / brow-stud exclusions both read it)
+eotg_portrait_shows_optic_trigger = {
+    eotg_is_augmented_any = yes
+    NOT = { has_trait = blind }    # vanilla blindfold covers both eyes
+    eotg_portrait_prosthetic_eye_trigger = no    # that optic is on the LEFT eye, clear of visor rim / stud
+    OR = {
+        var:eotg_aug_focus ?= flag:senses
+        eotg_portrait_aug_enhanced_trigger = yes
+    }
+}
+eotg_portrait_shows_lattice_trigger = {
+    OR = {
+        has_trait = eotg_cybernetics
+        has_trait = eotg_neurofractured
+    }
+    var:eotg_aug_focus ?= flag:senses
+    eotg_portrait_aug_enhanced_trigger = yes
+}
+
+# ---- race shape: PLACEHOLDERS until the races ship in EotG (culture / heritage
+# / race trait; portraits cannot read DNA). Spec §10: the 105 race templates
+# ship inert until these are real.
+eotg_portrait_bull_head_trigger = { always = no }      # Minotaur v2 bull head
+eotg_portrait_small_frame_trigger = { always = no }    # goblin
+eotg_portrait_large_frame_trigger = { always = no }    # giantkin (ogre, half-giant) and Minotaur bodies
+eotg_portrait_elf_ears_trigger = { always = no }       # elf, moon elf, dusk elf, drow (2026-10-26 fit)
+eotg_portrait_orc_ears_trigger = { always = no }       # orc, orog, deep orc, hobgoblin, stardust hobgoblin, half-elf (orc hook fits the half-length elf ear)
+eotg_portrait_goblin_ears_trigger = { always = no }    # goblin
+eotg_portrait_chad_orc_ears_trigger = { always = no }  # Chad Orc
+eotg_portrait_tusked_trigger = { always = no }         # orc tusks, goblin fangs, ogre tusks (orc, orog, deep orc, goblin, ogre; not hobgoblin)
+eotg_portrait_human_ears_trigger = {                   # human, dwarf, duergar, giantkin (ogre, half-giant)
+    eotg_portrait_bull_head_trigger = no
+    eotg_portrait_elf_ears_trigger = no
+    eotg_portrait_orc_ears_trigger = no
+    eotg_portrait_goblin_ears_trigger = no
+    eotg_portrait_chad_orc_ears_trigger = no
+}
+
+# ---- roles / affiliation ----
+eotg_wear_earpiece_role_trigger = {
+    is_adult = yes
+    OR = {
+        is_councillor = yes
+        has_court_position = bodyguard_court_position
+        has_court_position = master_of_hunt_court_position
+    }
+}
+# Identity through the government flag, never has_government (governments_v2 §13 item 5).
+eotg_portrait_cartel_affiliated_trigger = {
+    is_adult = yes
+    OR = {
+        government_has_flag = eotg_government_is_cartel
+        liege ?= { government_has_flag = eotg_government_is_cartel }
+    }
+}
