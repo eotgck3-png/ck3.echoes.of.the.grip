@@ -66,9 +66,9 @@
 | Attention | Band | What reads it |
 |---|---|---|
 | 0–24 | Obscure | nothing |
-| 25–49 | Rumoured | nothing (flavour in loc via a GUI-free concept, deferred) |
-| 50–74 | Contested | the rival-claim aftermath (0101) |
-| 75–100 | Renowned | the rival-claim aftermath (0101), weighted ×1.5 (new weight, not a new event) |
+| 25–49 | Rumoured | the rival-claim aftermath (0101) at ≥ 25 (`eotg_legacy_rival_gate_value`, Q10); decay stops at 25 once reached (`eotg_legacy_attention_floor_value`) |
+| 50–74 | Contested | nothing new (v1 gated 0101 here; the sim shows it never fires, Q10) |
+| 75–100 | Renowned | nothing new (the old ×1.5 idea is dropped, Q10) |
 
 **Integrity:**
 
@@ -127,9 +127,11 @@ All three hooks are extended **additively** (`on_actions = { }`), never with a t
 
 Gate: `is_landed = yes`, `is_adult = yes` (as v1 `:26-29`). Steps, in order:
 
-1. **Attention decay.** `every_held_title = { limit = { tier = tier_county  eotg_legacy_is_known_site = yes  var:eotg_legacy_attention > 0 } eotg_legacy_change_attention_effect = { AMOUNT = eotg_legacy_attention_decay_value } }`.
+1. **Attention decay and Extracted drain.**
+   - `every_held_title = { limit = { tier = tier_county  eotg_legacy_is_known_site = yes  var:eotg_legacy_attention > eotg_legacy_attention_floor_value } eotg_legacy_change_attention_effect = { AMOUNT = eotg_legacy_attention_decay_value } }`, where the floor is 25 (Q10). The floor applies only to sites that have reached it: below 25, the floor is 0. That needs a site flag `eotg_legacy_reached_rumoured`, set by the attention writer when the value crosses 25.
+   - Then, for condition 4, `eotg_legacy_change_integrity_effect = { AMOUNT = eotg_legacy_extracted_drain_value }` (−1, Q8).
 2. **One aftermath roll a year**, gated by `NOT = { has_character_flag = eotg_flag_legacy_aftermath_cd }`. This is the first-valid chain v1 used (`:61-155`), with the chances from named values:
-   - 0101 at 25%: a known site with attention ≥ 50 that is ready;
+   - 0101 at 25%: a known site with attention ≥ `eotg_legacy_rival_gate_value` (25, Q10; v1 had 50) that is ready;
    - else 0102 at 20%: a powerful vassal and an extracted site that is ready;
    - else 0103 at 15%: a governed or sealed site with integrity ≤ 50 that is ready.
 
@@ -142,7 +144,7 @@ Gate: `is_landed = yes`, `is_adult = yes` (as v1 `:26-29`). Steps, in order:
 
 ### 3.2 Title gain (`eotg_on_title_gain_legacy_check`)
 
-As v1 `:163-180`. The trigger: `scope:title` is a county, a known site and ready. Effect: save the county, set a 3-year site cooldown, then fire 0105.
+As v1 `:163-180`, plus NEW-5. The trigger: `scope:title` is a county, a known site and ready, **and** the title changed dynasty (`NOT = { scope:previous_holder ?= { dynasty = root.dynasty } }`; UNVERIFIED-VANILLA). Effect: save the county, set a 3-year site cooldown, then fire 0105.
 
 ### 3.3 Cooldown authority (the rule, copied from the Void)
 
@@ -474,6 +476,9 @@ As v1 `:163-180`. The trigger: `scope:title` is a county, a known site and ready
 | V-L15 | 0102.b | the vassal gains the honoured opinion; attention −5 (NEW-1) |
 | V-L16 | 0040.c | condition 6 once; no site cooldown written by the event |
 | V-L17 | Survey twice | blocked by the decision `cooldown` (5 years); no gold check duplicated in the tooltip |
+| V-L19 | Inherit a known site within the dynasty | 0105 does not fire (NEW-5); a non-dynasty grant does fire it |
+| V-L20 | An Extracted site at integrity 3, three yearly pulses | integrity 0 after the third; 0104 once (Q8, MED-2) |
+| V-L21 | Attention 30 on a known site, ten pulses | it stops at 25 (the floor); 0101 can roll (Q10) |
 | V-L18 | Loc | every key resolves; no "Confluence", "Hell", "eight centuries", dash, `[scope:` or US spelling |
 
 ---
