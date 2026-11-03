@@ -1,0 +1,60 @@
+﻿# -- eotg_corporation_triggers.txt -----------------------------------------------
+# Governments v2, Phase G2, Corporation batch CO1 (resource core).
+# Spec: docs/specs/governments_v2_g2_corporation.md. Pattern: the shipped Cartel batch C1
+# (eotg_cartel_*.txt), whose shapes were validated locally; this file copies
+# them. UNVALIDATED cloud build (no Tiger, PX or game run).
+# Role ladder (governments_v2.md §14.2): the top is the independent
+# Corporation ruler at any tier; the vassal roles match by
+# highest_held_title_tier (form as eotg_cartel_triggers.txt). Readers in
+# CO1: the start value and the on_actions; the decisions of later
+# batches gate on these.
+# Map-agnostic: no title, culture, faith, province or character key.
+# Identity is read through the government flag, never has_government.
+# -----------------------------------------------------------------------------
+
+# The top: a landed, independent Corporation ruler at any tier
+eotg_corporation_role_top = {
+    is_landed = yes
+    government_has_flag = eotg_government_is_corporation
+    is_independent_ruler = yes
+}
+
+# Corporation vassal whose highest title is a county
+eotg_corporation_role_county = {
+    is_landed = yes
+    government_has_flag = eotg_government_is_corporation
+    is_independent_ruler = no
+    highest_held_title_tier = tier_county
+}
+
+# Corporation vassal whose highest title is a duchy
+eotg_corporation_role_duchy = {
+    is_landed = yes
+    government_has_flag = eotg_government_is_corporation
+    is_independent_ruler = no
+    highest_held_title_tier = tier_duchy
+}
+
+# Corporation vassal whose highest title is a kingdom
+eotg_corporation_role_kingdom = {
+    is_landed = yes
+    government_has_flag = eotg_government_is_corporation
+    is_independent_ruler = no
+    highest_held_title_tier = tier_kingdom
+}
+
+# Any Corporation vassal tier (the Gate 2 every-tier rule, v1 lesson 4)
+eotg_corporation_role_vassal = {
+    OR = {
+        eotg_corporation_role_county = yes
+        eotg_corporation_role_duchy = yes
+        eotg_corporation_role_kingdom = yes
+    }
+}
+
+# A landed Corporation ruler of any rank: who holds the resource and its
+# story (spec §2.6, §3.2 monthly tick (a)).
+eotg_corporation_is_landed_corporation = {
+    is_landed = yes
+    government_has_flag = eotg_government_is_corporation
+}

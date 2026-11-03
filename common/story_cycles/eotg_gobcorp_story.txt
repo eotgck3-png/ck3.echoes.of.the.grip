@@ -1,0 +1,132 @@
+﻿# -- eotg_gobcorp_story.txt ------------------------------------------------------
+# Governments v2, Phase G2, Trade Oligarchy batch TO1 (resource core).
+# Spec: docs/specs/governments_v2_g2_gobcorp.md. Pattern: the shipped Cartel batch C1
+# (eotg_cartel_*.txt), whose shapes were validated locally; this file copies
+# them. UNVALIDATED cloud build (no Tiger, PX or game run).
+# eotg_story_gobcorp_market (spec §2.7 layer 4, §3.2).
+# Created by eotg_gobcorp_init_effect; ended by eotg_gobcorp_teardown_effect or
+# on_owner_death (the heir gets a fresh story through eotg_gobcorp_on_title_gain;
+# the resource has already moved to the heir in eotg_gobcorp_on_death).
+# Fires no event (spec §11: proposals only).
+# VISIBLE (spec OQ4, pending; the Cartel's visible story is the precedent,
+# owner OQ3 2026-10-20). Shape: eotg_cartel_story.txt (vanilla
+# _story_cycles.info and book_translation_story_cycle.txt, cited there).
+# Tiger 1.17 flags visible/icon/background/visualization: benign (CLAUDE.md).
+# The background file is already used by a shipped mod file.
+# Batch TO1: the monthly tick. Batch TO2: the yearly trade-and-war tick.
+# Map-agnostic: no title, culture, faith, province or character key.
+# Identity is read through the government flag, never has_government.
+# -----------------------------------------------------------------------------
+
+eotg_story_gobcorp_market = {
+    visible = yes
+
+    icon = {
+        reference = "gfx/interface/icons/story_cycles/story_icon_palace_politics.dds"
+    }
+    background = {
+        reference = "gfx/interface/illustrations/event_scenes/corridor.dds"
+    }
+
+    visualization = {
+        custom_string_key = "eotg_story_gobcorp_market_info"
+        basic_counter = {
+            variable_name = "eotg_gobcorp_market_share_shown"
+            min = 0
+            max = 100
+            label = "eotg_story_gobcorp_market_label"
+            min_label = "eotg_story_gobcorp_market_min_label"
+            max_label = "eotg_story_gobcorp_market_max_label"
+            tooltip = "eotg_story_gobcorp_market_tt"
+        }
+        modifiers = { eotg_gobcorp_market_share_modifier }
+    }
+
+    # Seed the counter at 0: init syncs it right after create_story. Not read
+    # from the owner here, because the variable may not be set yet when the
+    # story is created (init writes it after create_story).
+    on_setup = {
+        set_variable = {
+            name = eotg_gobcorp_market_share_shown
+            value = 0
+        }
+    }
+
+    # Idempotent with eotg_gobcorp_teardown_effect
+    on_end = {
+        story_owner = {
+            if = {
+                limit = { has_character_modifier = eotg_gobcorp_market_share_modifier }
+                remove_character_modifier = eotg_gobcorp_market_share_modifier
+            }
+        }
+    }
+
+    on_owner_death = {
+        end_story = yes
+    }
+
+    # Monthly tick (spec §3.2): self-heal or refresh. No cooldown; no event.
+    effect_group = {
+        months = 1
+        first_valid = {
+            # (a) The owner is no longer a landed Trade Oligarchy ruler: tear down
+            triggered_effect = {
+                trigger = {
+                    story_owner = {
+                        NOT = { eotg_gobcorp_is_landed_gobcorp = yes }
+                    }
+                }
+                effect = {
+                    story_owner = { eotg_gobcorp_teardown_effect = yes }
+                }
+            }
+            # (b) Otherwise: refresh the counter (a safety net: the resource
+            # changes only through the change effect, which syncs at once)
+            triggered_effect = {
+                trigger = {
+                    always = yes
+                }
+                effect = {
+                    story_owner = { eotg_gobcorp_sync_story_effect = yes }
+                }
+            }
+        }
+    }
+
+    # Yearly tick (spec §2.5, §3.2; batch TO2): war is bad for trade (-4),
+    # peace grows it (+1). THIS is the feed's only cadence authority
+    # (invariant 4, v1 lesson 5). Each branch checks the owner itself.
+    effect_group = {
+        years = 1
+        first_valid = {
+            triggered_effect = {
+                trigger = {
+                    story_owner = {
+                        eotg_gobcorp_is_landed_gobcorp = yes
+                        is_at_war = yes
+                    }
+                }
+                effect = {
+                    story_owner = {
+                        eotg_gobcorp_change_market_share_effect = { AMOUNT = eotg_gobcorp_war_loss_value }
+                    }
+                }
+            }
+            triggered_effect = {
+                trigger = {
+                    story_owner = {
+                        eotg_gobcorp_is_landed_gobcorp = yes
+                        is_at_war = no
+                    }
+                }
+                effect = {
+                    story_owner = {
+                        eotg_gobcorp_change_market_share_effect = { AMOUNT = eotg_gobcorp_peace_gain_value }
+                    }
+                }
+            }
+        }
+    }
+}
+

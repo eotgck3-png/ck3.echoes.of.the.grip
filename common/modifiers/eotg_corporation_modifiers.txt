@@ -1,0 +1,41 @@
+﻿# -- eotg_corporation_modifiers.txt ----------------------------------------------
+# Governments v2, Phase G2, Corporation batch CO1 (resource core).
+# Spec: docs/specs/governments_v2_g2_corporation.md. Pattern: the shipped Cartel batch C1
+# (eotg_cartel_*.txt), whose shapes were validated locally; this file copies
+# them. UNVALIDATED cloud build (no Tiger, PX or game run).
+# Map-agnostic: no title, culture, faith, province or character key.
+# Identity is read through the government flag, never has_government.
+# -----------------------------------------------------------------------------
+
+# Display layer 1 (spec §2.7): scaled by the resource itself. The engine
+# computes the scale once, when the modifier is added
+# (G/common/modifiers/_modifiers.info:21-22), so the change effect
+# re-applies the modifier after every write; that is what keeps the
+# character window current. Added without duration by
+# eotg_corporation_init_effect, removed by eotg_corporation_teardown_effect and the story's
+# on_end. Shape: eotg_cartel_schedule_modifier (vanilla
+# prepare_travels_character_modifier, cited there). The icon and the modifier
+# keys are used by shipped mod files.
+# Fractional per-unit values under display_mode = scaled are vanilla:
+# G/common/modifiers/00_unity_modifiers.txt:4-15 (maa_damage_mult = 0.02).
+eotg_corporation_board_modifier = {
+    icon = stewardship_positive
+    monthly_income_mult = 0.001   # +10% income at 100
+    vassal_opinion = 0.1          # +10 vassal opinion at 100 (key: G/common/court_types/00_court_types.txt:589)
+
+    scale = {
+        value = eotg_corporation_board_influence_value
+        desc = eotg_corporation_board_scale_desc
+        display_mode = scaled
+    }
+}
+
+# Batch CO3 (spec §3.1, §4.1): the CEO pushed a restructuring through the
+# board. 5 years. Keys as the government's own character_modifier
+# (eotg_corporation_government.txt) and shipped mod modifiers.
+eotg_corporation_restructured_modifier = {
+    icon = stewardship_positive
+    monthly_income_mult = 0.1
+    build_gold_cost = -0.1
+}
+

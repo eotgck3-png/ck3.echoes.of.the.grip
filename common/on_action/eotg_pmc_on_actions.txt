@@ -1,0 +1,157 @@
+﻿# -- eotg_pmc_on_actions.txt -----------------------------------------------------
+# Governments v2, Phase G2, PMC batch P1 (resource core).
+# Spec: docs/specs/governments_v2_g2_pmc.md. Pattern: the shipped Cartel batch C1
+# (eotg_cartel_*.txt), whose shapes were validated locally; this file copies
+# them. UNVALIDATED cloud build (no Tiger, PX or game run).
+# Sets up and tears down the resource core, and passes the resource to the
+# primary heir. Vanilla hooks are extended ADDITIVELY only (CLAUDE.md
+# invariant 4): `on_actions = { }` lists, never a top-level effect/trigger on
+# a vanilla hook. No cooldown; no event. Hook lines and scopes as the shipped
+# eotg_cartel_on_actions.txt (vanilla citations there).
+# Map-agnostic: no title, culture, faith, province or character key.
+# Identity is read through the government flag, never has_government.
+# -----------------------------------------------------------------------------
+
+# Vanilla G/common/on_action/game_start.txt:2 (after history is applied)
+on_game_start = {
+    on_actions = {
+        eotg_pmc_on_game_start
+    }
+}
+
+# Ruler-designer characters exist only after the lobby (game_start.txt:2553,
+# via eotg_cartel_on_actions.txt). Init is idempotent.
+on_game_start_after_lobby = {
+    on_actions = {
+        eotg_pmc_on_game_start
+    }
+}
+
+# Vanilla government_on_actions.txt:4: root changed government;
+# scope:old_government.
+on_government_change = {
+    on_actions = {
+        eotg_pmc_on_government_change
+    }
+}
+
+# Vanilla title_on_actions.txt:229-233: root = the new holder.
+on_title_gain = {
+    on_actions = {
+        eotg_pmc_on_title_gain
+    }
+}
+
+# Vanilla death.txt:1-7: root is about to die.
+on_death = {
+    on_actions = {
+        eotg_pmc_on_death
+    }
+}
+
+eotg_pmc_on_game_start = {
+    effect = {
+        every_ruler = {
+            limit = { eotg_pmc_is_landed_pmc = yes }
+            eotg_pmc_init_effect = yes
+        }
+    }
+}
+
+# Into the government: init. Out of it: teardown. The flag test on a
+# government-type scope is the Cartel's (vanilla 01_grant_title_rules.txt:39-42,
+# cited there).
+eotg_pmc_on_government_change = {
+    effect = {
+        if = {
+            limit = { eotg_pmc_is_landed_pmc = yes }
+            eotg_pmc_init_effect = yes
+        }
+        else_if = {
+            limit = {
+                NOT = { government_has_flag = eotg_government_is_pmc }
+                scope:old_government = {
+                    government_type_has_flag = eotg_government_is_pmc
+                }
+            }
+            eotg_pmc_teardown_effect = yes
+        }
+    }
+}
+
+# Catches heirs (the dead ruler's story ended in on_owner_death) and newly
+# landed courtiers. Trigger-gated so it stays cheap.
+eotg_pmc_on_title_gain = {
+    trigger = {
+        eotg_pmc_is_landed_pmc = yes
+        NOT = {
+            any_owned_story = { story_type = eotg_story_pmc_standing }
+        }
+    }
+    effect = {
+        eotg_pmc_init_effect = yes
+    }
+}
+
+# Inheritance (spec §2.4; the brief: resources follow primary_heir). Under an
+# election, primary_heir is the current vote leader, and the vote resolves
+# with the same votes at death (governments_v2_g2_succession.md). The heir may
+# not hold the government yet; the value waits on it, and init keeps it.
+eotg_pmc_on_death = {
+    trigger = {
+        government_has_flag = eotg_government_is_pmc
+        exists = primary_heir
+        has_variable = eotg_pmc_standing
+        eotg_pmc_standing_value > 0
+    }
+    effect = {
+        save_scope_as = eotg_pmc_predecessor
+        primary_heir = {
+            eotg_pmc_change_standing_effect = { AMOUNT = eotg_pmc_standing_inherit_value }
+        }
+    }
+}
+
+# -- Batch P2: results in the field (spec §5.1) -------------------------------
+# Root = a combat side (on_combat_end_winner / _loser, vanilla
+# combat_on_actions.txt:12-14, :523-525, via eotg_augmentation_on_actions.txt).
+# The side's war leader, if a landed PMC ruler, gains or loses standing.
+# side_primary_participant is the link from a combat side to its primary
+# participant: vanilla reads it on the winning side in
+# G/common/on_action/combat_on_actions.txt:12-14,36,40.
+# Cost: one cheap trigger per battle per side. No event, no cooldown; the
+# 0-100 clamp caps a long winning war.
+on_combat_end_winner = {
+    on_actions = {
+        eotg_pmc_on_combat_won
+    }
+}
+
+on_combat_end_loser = {
+    on_actions = {
+        eotg_pmc_on_combat_lost
+    }
+}
+
+eotg_pmc_on_combat_won = {
+    trigger = {
+        side_primary_participant ?= { eotg_pmc_is_landed_pmc = yes }
+    }
+    effect = {
+        side_primary_participant = {
+            eotg_pmc_change_standing_effect = { AMOUNT = eotg_pmc_battle_won_value }
+        }
+    }
+}
+
+eotg_pmc_on_combat_lost = {
+    trigger = {
+        side_primary_participant ?= { eotg_pmc_is_landed_pmc = yes }
+    }
+    effect = {
+        side_primary_participant = {
+            eotg_pmc_change_standing_effect = { AMOUNT = eotg_pmc_battle_lost_value }
+        }
+    }
+}
+

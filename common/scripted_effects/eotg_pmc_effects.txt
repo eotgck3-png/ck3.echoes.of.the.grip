@@ -1,0 +1,115 @@
+﻿# -- eotg_pmc_effects.txt --------------------------------------------------------
+# Governments v2, Phase G2, PMC batch P1 (resource core).
+# Spec: docs/specs/governments_v2_g2_pmc.md. Pattern: the shipped Cartel batch C1
+# (eotg_cartel_*.txt), whose shapes were validated locally; this file copies
+# them. UNVALIDATED cloud build (no Tiger, PX or game run).
+# All character scope.
+# AUTHORITY (spec §2.2): eotg_pmc_change_standing_effect is the ONLY place any script
+# writes var:eotg_pmc_standing. Init (start value), inheritance (on_death)
+# and, in later batches, every decision call it. Teardown does NOT touch the
+# variable (it stays dormant, spec §2.6), so there is no second writer.
+# eotg_pmc_sync_story_effect is the only writer of the story mirror
+# eotg_pmc_standing_shown (on_setup seeds it at 0 once).
+# Map-agnostic: no title, culture, faith, province or character key.
+# Identity is read through the government flag, never has_government.
+# -----------------------------------------------------------------------------
+
+# Change the resource by $AMOUNT$: a number or a NAMED script value (never an
+# inline { } block). Callers gate spends in is_valid; this effect never
+# checks affordability (Cartel spec §2.3). set_variable shows no tooltip, so
+# every visible caller adds its own custom tooltip (spec §2.3).
+# save_scope_value_as form: as eotg_cartel_change_dread_effect
+# (vanilla 00_administrative_effects.txt:101-104, cited there).
+eotg_pmc_change_standing_effect = {
+    save_scope_value_as = {
+        name = eotg_pmc_standing_amount
+        value = $AMOUNT$
+    }
+    set_variable = {
+        name = eotg_pmc_standing
+        value = eotg_pmc_standing_next_value
+    }
+    # The modifier's scale reads this variable, but a scaled modifier is
+    # computed once when added and never re-read (G/common/modifiers/
+    # _modifiers.info:21-22). Re-apply it after every write, as
+    # eotg_cartel_refresh_schedule_effect (QA 2026-11-03). Init writes the
+    # variable before its first add, so this is a no-op there. Hidden so
+    # decision tooltips do not list a remove/add pair.
+    hidden_effect = {
+        if = {
+            limit = { has_character_modifier = eotg_pmc_standing_modifier }
+            remove_character_modifier = eotg_pmc_standing_modifier
+            add_character_modifier = eotg_pmc_standing_modifier
+        }
+    }
+    # Refresh the story counter now
+    eotg_pmc_sync_story_effect = yes
+}
+
+# Copy the owner's value onto the story's display variable (spec §2.7 layer
+# 4). Display only. Story lookup form: eotg_cartel_sync_story_effect. A
+# character without the story (an heir before taking land) is a no-op.
+# The direct var: read is safe: every caller runs after the variable is set
+# (the change effect writes it first; init writes it before its final sync;
+# a story exists only on a character init has already run on).
+eotg_pmc_sync_story_effect = {
+    save_temporary_scope_as = eotg_pmc_sync_owner
+    random_owned_story = {
+        limit = { story_type = eotg_story_pmc_standing }
+        set_variable = {
+            name = eotg_pmc_standing_shown
+            value = scope:eotg_pmc_sync_owner.var:eotg_pmc_standing
+        }
+    }
+}
+
+# Idempotent setup (spec §2.6). Called from eotg_pmc_on_game_start (also
+# after the lobby), eotg_pmc_on_government_change (new government is
+# PMC) and eotg_pmc_on_title_gain (landed PMC ruler
+# without the story: heirs, newly landed courtiers). The start value is
+# written only when the variable is unset, so an inherited (eotg_pmc_on_death)
+# or dormant value is kept. Story first, so the change effect's sync finds it.
+eotg_pmc_init_effect = {
+    if = {
+        limit = {
+            NOT = {
+                any_owned_story = { story_type = eotg_story_pmc_standing }
+            }
+        }
+        create_story = eotg_story_pmc_standing
+    }
+    if = {
+        limit = {
+            NOT = { has_variable = eotg_pmc_standing }
+        }
+        eotg_pmc_change_standing_effect = { AMOUNT = eotg_pmc_standing_start_value }
+    }
+    if = {
+        limit = {
+            NOT = { has_character_modifier = eotg_pmc_standing_modifier }
+        }
+        add_character_modifier = eotg_pmc_standing_modifier
+    }
+    eotg_pmc_sync_story_effect = yes
+}
+
+# Undo eotg_pmc_init_effect (spec §2.6). Does NOT touch var:eotg_pmc_standing:
+# it stays dormant on the character (nothing reads it without the
+# government flag), which keeps the change effect the only writer. Called
+# from eotg_pmc_on_government_change (PMC -> other) and the
+# story's monthly tick when the owner is no longer a landed PMC ruler.
+eotg_pmc_teardown_effect = {
+    if = {
+        limit = {
+            any_owned_story = { story_type = eotg_story_pmc_standing }
+        }
+        random_owned_story = {
+            limit = { story_type = eotg_story_pmc_standing }
+            end_story = yes
+        }
+    }
+    if = {
+        limit = { has_character_modifier = eotg_pmc_standing_modifier }
+        remove_character_modifier = eotg_pmc_standing_modifier
+    }
+}

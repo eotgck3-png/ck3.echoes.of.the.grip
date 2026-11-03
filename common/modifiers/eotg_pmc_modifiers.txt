@@ -1,0 +1,41 @@
+﻿# -- eotg_pmc_modifiers.txt ------------------------------------------------------
+# Governments v2, Phase G2, PMC batch P1 (resource core).
+# Spec: docs/specs/governments_v2_g2_pmc.md. Pattern: the shipped Cartel batch C1
+# (eotg_cartel_*.txt), whose shapes were validated locally; this file copies
+# them. UNVALIDATED cloud build (no Tiger, PX or game run).
+# Map-agnostic: no title, culture, faith, province or character key.
+# Identity is read through the government flag, never has_government.
+# -----------------------------------------------------------------------------
+
+# Display layer 1 (spec §2.7): scaled by the resource itself. The engine
+# computes the scale once, when the modifier is added
+# (G/common/modifiers/_modifiers.info:21-22), so the change effect
+# re-applies the modifier after every write; that is what keeps the
+# character window current. Added without duration by
+# eotg_pmc_init_effect, removed by eotg_pmc_teardown_effect and the story's
+# on_end. Shape: eotg_cartel_schedule_modifier (vanilla
+# prepare_travels_character_modifier, cited there). The icon and the modifier
+# keys are used by shipped mod files.
+# Fractional per-unit values under display_mode = scaled are vanilla:
+# G/common/modifiers/00_unity_modifiers.txt:4-15 (maa_damage_mult = 0.02).
+eotg_pmc_standing_modifier = {
+    icon = martial_positive
+    monthly_prestige = 0.01            # +1 prestige a month at 100
+    knight_effectiveness_mult = 0.001  # +10% knight effectiveness at 100
+
+    scale = {
+        value = eotg_pmc_standing_value
+        desc = eotg_pmc_standing_scale_desc
+        display_mode = scaled
+    }
+}
+
+# Batch P3 (spec §3.1, §4.1): the company's force is away on a client's
+# business for 2 years after Take a Contract. Its presence also blocks a
+# second contract (a state, not a cooldown; the decision's own cooldown is
+# the cadence authority). Icon and modifier key as shipped mod files.
+eotg_pmc_under_contract_modifier = {
+    icon = martial_negative
+    levy_size = -0.25
+}
+

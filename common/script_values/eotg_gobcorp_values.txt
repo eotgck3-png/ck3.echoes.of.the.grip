@@ -1,0 +1,96 @@
+﻿# -- eotg_gobcorp_values.txt -----------------------------------------------------
+# Governments v2, Phase G2, Trade Oligarchy batch TO1 (resource core).
+# Spec: docs/specs/governments_v2_g2_gobcorp.md. Pattern: the shipped Cartel batch C1
+# (eotg_cartel_*.txt), whose shapes were validated locally; this file copies
+# them. UNVALIDATED cloud build (no Tiger, PX or game run).
+# All character scope. The resource is var:eotg_gobcorp_market_share, 0 to 100.
+# READ IT ONLY THROUGH eotg_gobcorp_market_share_value (0 when unset). The only writer is
+# eotg_gobcorp_change_market_share_effect (eotg_gobcorp_effects.txt).
+# AMOUNT RULE (Cartel QA C2, 2026-10-20): the change effect takes a number or
+# a NAMED value, never an inline { } block (Tiger error(macro)).
+# Map-agnostic: no title, culture, faith, province or character key.
+# Identity is read through the government flag, never has_government.
+# -----------------------------------------------------------------------------
+
+# The resource, 0 when unset. Shape: eotg_cartel_schedule_scale_value
+# (eotg_cartel_values.txt; vanilla prepare_travels_modifier_value, cited there).
+eotg_gobcorp_market_share_value = {
+    value = 0
+    if = {
+        limit = {
+            has_variable = eotg_gobcorp_market_share
+        }
+        value = var:eotg_gobcorp_market_share
+    }
+}
+
+# The new value the change effect writes: current + scope:eotg_gobcorp_market_share_amount,
+# clamped to [0, 100] (spec §2.2, §2.3).
+eotg_gobcorp_market_share_next_value = {
+    value = eotg_gobcorp_market_share_value
+    add = scope:eotg_gobcorp_market_share_amount
+    min = 0
+    max = 100
+}
+
+# Start value, written once by eotg_gobcorp_init_effect when the variable is unset
+# (spec §2.2, OQ5): 40 for the independent ruler, 20 for a vassal.
+eotg_gobcorp_market_share_start_value = {
+    value = 20
+    if = {
+        limit = { eotg_gobcorp_role_top = yes }
+        value = 40
+    }
+}
+
+# Inheritance (spec §2.4): evaluated in the PRIMARY HEIR's scope by
+# eotg_gobcorp_on_death. The heir ends with the higher of its own value and
+# 0.75 x the predecessor's (scope:eotg_gobcorp_predecessor). The on_death trigger
+# guarantees the predecessor holds the variable, so the direct var: read is
+# safe here (with the story sync, an exception to "read through eotg_gobcorp_market_share_value").
+eotg_gobcorp_market_share_inherit_value = {
+    value = scope:eotg_gobcorp_predecessor.var:eotg_gobcorp_market_share
+    multiply = 0.75
+    subtract = eotg_gobcorp_market_share_value
+    min = 0
+}
+
+# -- Batches TO2-TO5 (spec §2.5, §4, §5, §6; first-pass numbers, OQ6) --------
+# Every amount the change effect receives is a NAMED value (the AMOUNT rule).
+
+# TO2: trade and war (spec §2.5, story yearly tick)
+eotg_gobcorp_peace_gain_value = 1
+eotg_gobcorp_war_loss_value = -4
+
+# TO3: Corner the Market (spec §4.1): the First Prince gains, every partner
+# Prince is squeezed
+eotg_gobcorp_corner_gain_value = 15
+eotg_gobcorp_corner_squeeze_value = -5
+
+# TO3: Undercut a Rival Prince (spec §4.2)
+eotg_gobcorp_undercut_gain_value = 10
+eotg_gobcorp_undercut_loss_value = -10
+
+# TO3: the weight of a candidate rival in Undercut's random pick: 1 + its
+# share, so a bigger rival is likelier (shape: the Cartel walk-off weight,
+# eotg_cartel_effects.txt). Rival scope.
+eotg_gobcorp_rival_weight_value = {
+    value = eotg_gobcorp_market_share_value
+    add = 1
+}
+
+# TO4: Dissolve the Charter (spec §6.2). Gold reads share BEFORE it is zeroed.
+eotg_gobcorp_exit_gold_value = {
+    value = eotg_gobcorp_market_share_value
+    multiply = 5
+    max = 500
+}
+eotg_gobcorp_exit_loss_value = {
+    value = eotg_gobcorp_market_share_value
+    multiply = -1
+}
+
+# TO5: the wealth election's bands (spec §5)
+eotg_gobcorp_vote_band_1_value = 30
+eotg_gobcorp_vote_band_2_value = 60
+eotg_gobcorp_vote_band_3_value = 90

@@ -1,0 +1,23 @@
+﻿# -- eotg_gobcorp_opinions.txt -------------------------------------------------
+# Governments v2, Phase G2, Trade Oligarchy batch TO3
+# (docs/specs/governments_v2_g2_gobcorp.md §3.1, §4). UNVALIDATED cloud build.
+# Shared opinion modifiers: no government prefix (CLAUDE.md invariant 7), so
+# any later trade system may reuse them.
+# Shape: eotg_schedule_tightened_opinion (eotg_cartel_opinions.txt).
+# -----------------------------------------------------------------------------
+
+# A partner Prince squeezed when the First Prince cornered the market.
+# Caller: eotg_decision_gobcorp_corner_market, on every Trade Oligarchy vassal.
+eotg_market_cornered_opinion = {
+    opinion = -10
+    decaying = yes
+    years = 5
+}
+
+# A Prince undercut by a rival Prince.
+# Caller: eotg_decision_gobcorp_undercut_rival, on the rival.
+eotg_undercut_opinion = {
+    opinion = -15
+    decaying = yes
+    years = 5
+}

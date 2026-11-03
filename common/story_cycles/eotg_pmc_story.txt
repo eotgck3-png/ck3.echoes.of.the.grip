@@ -1,0 +1,117 @@
+﻿# -- eotg_pmc_story.txt ----------------------------------------------------------
+# Governments v2, Phase G2, PMC batch P1 (resource core).
+# Spec: docs/specs/governments_v2_g2_pmc.md. Pattern: the shipped Cartel batch C1
+# (eotg_cartel_*.txt), whose shapes were validated locally; this file copies
+# them. UNVALIDATED cloud build (no Tiger, PX or game run).
+# eotg_story_pmc_standing (spec §2.7 layer 4, §3.2).
+# Created by eotg_pmc_init_effect; ended by eotg_pmc_teardown_effect or
+# on_owner_death (the heir gets a fresh story through eotg_pmc_on_title_gain;
+# the resource has already moved to the heir in eotg_pmc_on_death).
+# Fires no event (spec §11: proposals only).
+# VISIBLE (spec OQ4, pending; the Cartel's visible story is the precedent,
+# owner OQ3 2026-10-20). Shape: eotg_cartel_story.txt (vanilla
+# _story_cycles.info and book_translation_story_cycle.txt, cited there).
+# Tiger 1.17 flags visible/icon/background/visualization: benign (CLAUDE.md).
+# The background file is already used by a shipped mod file.
+# Batch P1: the monthly tick. Batch P2: the yearly drift tick.
+# Map-agnostic: no title, culture, faith, province or character key.
+# Identity is read through the government flag, never has_government.
+# -----------------------------------------------------------------------------
+
+eotg_story_pmc_standing = {
+    visible = yes
+
+    icon = {
+        reference = "gfx/interface/icons/story_cycles/story_icon_palace_politics.dds"
+    }
+    background = {
+        reference = "gfx/interface/illustrations/event_scenes/ep3_military_tent.dds"
+    }
+
+    visualization = {
+        custom_string_key = "eotg_story_pmc_standing_info"
+        basic_counter = {
+            variable_name = "eotg_pmc_standing_shown"
+            min = 0
+            max = 100
+            label = "eotg_story_pmc_standing_label"
+            min_label = "eotg_story_pmc_standing_min_label"
+            max_label = "eotg_story_pmc_standing_max_label"
+            tooltip = "eotg_story_pmc_standing_tt"
+        }
+        modifiers = { eotg_pmc_standing_modifier }
+    }
+
+    # Seed the counter at 0: init syncs it right after create_story. Not read
+    # from the owner here, because the variable may not be set yet when the
+    # story is created (init writes it after create_story).
+    on_setup = {
+        set_variable = {
+            name = eotg_pmc_standing_shown
+            value = 0
+        }
+    }
+
+    # Idempotent with eotg_pmc_teardown_effect
+    on_end = {
+        story_owner = {
+            if = {
+                limit = { has_character_modifier = eotg_pmc_standing_modifier }
+                remove_character_modifier = eotg_pmc_standing_modifier
+            }
+        }
+    }
+
+    on_owner_death = {
+        end_story = yes
+    }
+
+    # Monthly tick (spec §3.2): self-heal or refresh. No cooldown; no event.
+    effect_group = {
+        months = 1
+        first_valid = {
+            # (a) The owner is no longer a landed PMC ruler: tear down
+            triggered_effect = {
+                trigger = {
+                    story_owner = {
+                        NOT = { eotg_pmc_is_landed_pmc = yes }
+                    }
+                }
+                effect = {
+                    story_owner = { eotg_pmc_teardown_effect = yes }
+                }
+            }
+            # (b) Otherwise: refresh the counter (a safety net: the resource
+            # changes only through the change effect, which syncs at once)
+            triggered_effect = {
+                trigger = {
+                    always = yes
+                }
+                effect = {
+                    story_owner = { eotg_pmc_sync_story_effect = yes }
+                }
+            }
+        }
+    }
+
+    # Yearly tick (spec §3.2, §5.2; batch P2): the drift. Above 60, standing
+    # falls by 2 a year ("the market forgets"). THIS is the drift's only
+    # cadence authority (invariant 4, v1 lesson 5): nothing else checks it.
+    effect_group = {
+        years = 1
+        trigger = {
+            story_owner = {
+                eotg_pmc_is_landed_pmc = yes
+                eotg_pmc_standing_value > eotg_pmc_drift_threshold_value
+            }
+        }
+        triggered_effect = {
+            trigger = { always = yes }
+            effect = {
+                story_owner = {
+                    eotg_pmc_change_standing_effect = { AMOUNT = eotg_pmc_drift_value }
+                }
+            }
+        }
+    }
+}

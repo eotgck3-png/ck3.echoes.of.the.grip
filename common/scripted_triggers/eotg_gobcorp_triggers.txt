@@ -1,0 +1,70 @@
+﻿# -- eotg_gobcorp_triggers.txt ---------------------------------------------------
+# Governments v2, Phase G2, Trade Oligarchy batch TO1 (resource core).
+# Spec: docs/specs/governments_v2_g2_gobcorp.md. Pattern: the shipped Cartel batch C1
+# (eotg_cartel_*.txt), whose shapes were validated locally; this file copies
+# them. UNVALIDATED cloud build (no Tiger, PX or game run).
+# Role ladder (governments_v2.md §14.2): the top is the independent
+# Trade Oligarchy ruler at any tier; the vassal roles match by
+# highest_held_title_tier (form as eotg_cartel_triggers.txt). Readers in
+# TO1: the start value and the on_actions; the decisions of later
+# batches gate on these.
+# Map-agnostic: no title, culture, faith, province or character key.
+# Identity is read through the government flag, never has_government.
+# -----------------------------------------------------------------------------
+
+# The top: a landed, independent Trade Oligarchy ruler at any tier
+eotg_gobcorp_role_top = {
+    is_landed = yes
+    government_has_flag = eotg_government_is_gobcorp
+    is_independent_ruler = yes
+}
+
+# Trade Oligarchy vassal whose highest title is a county
+eotg_gobcorp_role_county = {
+    is_landed = yes
+    government_has_flag = eotg_government_is_gobcorp
+    is_independent_ruler = no
+    highest_held_title_tier = tier_county
+}
+
+# Trade Oligarchy vassal whose highest title is a duchy
+eotg_gobcorp_role_duchy = {
+    is_landed = yes
+    government_has_flag = eotg_government_is_gobcorp
+    is_independent_ruler = no
+    highest_held_title_tier = tier_duchy
+}
+
+# Trade Oligarchy vassal whose highest title is a kingdom
+eotg_gobcorp_role_kingdom = {
+    is_landed = yes
+    government_has_flag = eotg_government_is_gobcorp
+    is_independent_ruler = no
+    highest_held_title_tier = tier_kingdom
+}
+
+# Any Trade Oligarchy vassal tier (the Gate 2 every-tier rule, v1 lesson 4)
+eotg_gobcorp_role_vassal = {
+    OR = {
+        eotg_gobcorp_role_county = yes
+        eotg_gobcorp_role_duchy = yes
+        eotg_gobcorp_role_kingdom = yes
+    }
+}
+
+# A landed Trade Oligarchy ruler of any rank: who holds the resource and its
+# story (spec §2.6, §3.2 monthly tick (a)).
+eotg_gobcorp_is_landed_gobcorp = {
+    is_landed = yes
+    government_has_flag = eotg_government_is_gobcorp
+}
+
+# Batch TO3 (spec §4.2). eotg_gobcorp_is_rival_prince_of = { PRINCE = <character> }
+# A landed Trade Oligarchy vassal who is not PRINCE: a partner who can be
+# undercut. CALLERS iterate PRINCE's liege's vassals (`liege = { any_vassal /
+# random_vassal = { ... } }`), which is what makes it the same charter.
+# `this != <scope>`: as eotg_government_elections.txt:57.
+eotg_gobcorp_is_rival_prince_of = {
+    eotg_gobcorp_role_vassal = yes
+    this != $PRINCE$
+}

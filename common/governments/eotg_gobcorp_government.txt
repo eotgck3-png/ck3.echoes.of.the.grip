@@ -41,6 +41,14 @@ eotg_gobcorp_government = {
 
     vassal_contract_group = eotg_gobcorp_vassal # §6; feudal :22
 
+    # G2 TO4 (docs/specs/governments_v2_g2_gobcorp.md §7): the feudal list, verbatim, as
+    # eotg_cartel_government.txt (vanilla 00_government_types.txt:40 and the
+    # grant rules, cited there). Only the faith's own theocratic type is
+    # offered, so no faith key is needed. feudal_government is deliberately
+    # NOT listed (an erosion path out of the government). grant_vassal_ai_will_do
+    # is not set: no government lists this one as a grant type (dead code).
+    possible_grant_vassal_governments = { theocracy_government ecclesiastical_government }
+
     character_modifier = {
         monthly_income_mult = 0.1           # v1
         diplomacy = -1                      # v1

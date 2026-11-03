@@ -1,0 +1,60 @@
+﻿# -- eotg_pmc_triggers.txt -------------------------------------------------------
+# Governments v2, Phase G2, PMC batch P1 (resource core).
+# Spec: docs/specs/governments_v2_g2_pmc.md. Pattern: the shipped Cartel batch C1
+# (eotg_cartel_*.txt), whose shapes were validated locally; this file copies
+# them. UNVALIDATED cloud build (no Tiger, PX or game run).
+# Role ladder (governments_v2.md §14.2): the top is the independent
+# PMC ruler at any tier; the vassal roles match by
+# highest_held_title_tier (form as eotg_cartel_triggers.txt). Readers in
+# P1: the start value and the on_actions; the decisions of later
+# batches gate on these.
+# Map-agnostic: no title, culture, faith, province or character key.
+# Identity is read through the government flag, never has_government.
+# -----------------------------------------------------------------------------
+
+# The top: a landed, independent PMC ruler at any tier
+eotg_pmc_role_top = {
+    is_landed = yes
+    government_has_flag = eotg_government_is_pmc
+    is_independent_ruler = yes
+}
+
+# PMC vassal whose highest title is a county
+eotg_pmc_role_county = {
+    is_landed = yes
+    government_has_flag = eotg_government_is_pmc
+    is_independent_ruler = no
+    highest_held_title_tier = tier_county
+}
+
+# PMC vassal whose highest title is a duchy
+eotg_pmc_role_duchy = {
+    is_landed = yes
+    government_has_flag = eotg_government_is_pmc
+    is_independent_ruler = no
+    highest_held_title_tier = tier_duchy
+}
+
+# PMC vassal whose highest title is a kingdom
+eotg_pmc_role_kingdom = {
+    is_landed = yes
+    government_has_flag = eotg_government_is_pmc
+    is_independent_ruler = no
+    highest_held_title_tier = tier_kingdom
+}
+
+# Any PMC vassal tier (the Gate 2 every-tier rule, v1 lesson 4)
+eotg_pmc_role_vassal = {
+    OR = {
+        eotg_pmc_role_county = yes
+        eotg_pmc_role_duchy = yes
+        eotg_pmc_role_kingdom = yes
+    }
+}
+
+# A landed PMC ruler of any rank: who holds the resource and its
+# story (spec §2.6, §3.2 monthly tick (a)).
+eotg_pmc_is_landed_pmc = {
+    is_landed = yes
+    government_has_flag = eotg_government_is_pmc
+}

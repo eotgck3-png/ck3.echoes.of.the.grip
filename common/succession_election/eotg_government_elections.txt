@@ -32,11 +32,24 @@ eotg_corporation_elective = {
             add = 1
             this = scope:holder
         }
-        modifier = {  # board-influence hook (spec §2): the Corporation G2 pass reads eotg_corp_board_influence here
+        # Board-influence hook (succession spec §2), READ since Corporation G2
+        # batch CO5 (docs/specs/governments_v2_g2_corporation.md §5; cloud,
+        # unvalidated). Was: +1 for a councillor of the holder. Now +1 at 40
+        # board influence and +1 more at 75, for any elector, the holder
+        # included. A landless councillor has no board influence (the
+        # variable lives on landed Corporation rulers), so a seat at the table
+        # alone no longer counts (spec OQ9). Read only through the value
+        # (spec §2.2). Candidates and electors are unchanged (owner ruling
+        # 2026-10-20: candidates limited to the dynasty, electors unrestricted).
+        modifier = {
             desc = eotg_corporation_su_vote_board
             add = 1
-            this != scope:holder
-            is_councillor_of = scope:holder
+            eotg_corporation_board_influence_value >= eotg_corporation_board_vote_band_1_value
+        }
+        modifier = {
+            desc = eotg_corporation_su_vote_board_major
+            add = 1
+            eotg_corporation_board_influence_value >= eotg_corporation_board_vote_band_2_value
         }
         modifier = {  # 00_feudal_elective.txt:35-49, without the military-strength bonus
             desc = tooltip_feudal_vote_strength_powerful_vassal
@@ -121,22 +134,26 @@ eotg_gobcorp_elective = {
             add = 1
             this = scope:holder
         }
-        # Market-share hook (spec §2): the Trade Oligarchy G2 pass replaces
-        # these gold reads with var:eotg_gobcorp_market_share bands.
+        # Market-share hook (succession spec §2), READ since Trade Oligarchy
+        # G2 batch TO5 (docs/specs/governments_v2_g2_gobcorp.md §5; cloud,
+        # unvalidated). Was: gold >= 100 / 300 / 1000. Now market share >= 30 /
+        # 60 / 90, read only through the value (spec §2.2). Elector selection
+        # still sorts by gold (eotg_gobcorp_su_prince_priority_value, spec
+        # OQ9). Candidates unchanged (owner ruling 2026-10-20: dynasty only).
         modifier = {
             desc = eotg_gobcorp_su_vote_wealth_1
             add = 1
-            gold >= 100
+            eotg_gobcorp_market_share_value >= eotg_gobcorp_vote_band_1_value
         }
         modifier = {
             desc = eotg_gobcorp_su_vote_wealth_2
             add = 1
-            gold >= 300
+            eotg_gobcorp_market_share_value >= eotg_gobcorp_vote_band_2_value
         }
         modifier = {
             desc = eotg_gobcorp_su_vote_wealth_3
             add = 1
-            gold >= 1000
+            eotg_gobcorp_market_share_value >= eotg_gobcorp_vote_band_3_value
         }
     }
 
