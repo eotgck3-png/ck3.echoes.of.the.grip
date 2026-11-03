@@ -211,7 +211,7 @@ Each is **default (orchestrator, 2026-11-03), pending owner**.
 - **R7 Pressure.** The Void keeps "pressure"; cybernetics keeps "static". Band names kept.
 - **R8 Stage D.** `eotg_void_hollowing_depth` (0–100) with its own clamped writer; 0031 and 0032 move it; every 0030–0032 option touches depth.
 - **R9 Overpromising options.**
-  - 0030.c made real: `eotg_void_step_down_effect`, `depose = yes` plus the player hand-off, copied from `eotg_aug_abdicate_effect` (`eotg_augmentation_effects.txt:1386-1404`, which cites vanilla `stress_threshold_events.txt:16775` and `tgp_dynastic_cycle_decisions.txt:2155-2170`).
+  - 0030.c made real: `eotg_void_step_down_effect`, `depose = yes` plus the player hand-off, copied from `eotg_aug_abdicate_effect` (`eotg_augmentation_effects.txt:1386-1404`, which cites vanilla `stress_threshold_events.txt:16775` and `tgp_dynastic_cycle_decisions.txt:2155-2170`). The option needs `is_ruler = yes` (the event can fire up to 10 days after the pulse). The AI never takes it: `ai_chance = { base = 0 }`, as vanilla's opted abdication (`events/stress_events/stress_threshold_events.txt:16778`).
   - 0021.c reworded ("Keep them away from me for now"): no vanilla or v2 effect fosters a child to a chosen far court in one call.
   - 0022.c reworded ("Have them dragged from the hall"): the effect is dread, piety and an opinion, so the text now says humiliation, not silencing.
   - 0004.d made honest: the Voidwalker now exists, so the option kills them (`death` shape of `eotg_augmentation_kingpin.txt:1135-1138`).
@@ -299,5 +299,5 @@ Each can become a test-harness decision later.
 - **Q2 What is a Void cult in v2?** **Default:** keep `eotg_void_is_cult_faith` at `always = no` until faiths exist, then key it on a doctrine or tenet (as CB-12), never a faith key.
 - **Q3 Who bears `eotg_grip_survivor` at 866?** **Default:** Gate 1 history assigns it to a handful of old dynasties; until then nobody has it.
 - **Q4 Do the devout dislike a Voidwalker at court?** **Default:** yes, mildly (kept from v1: −10 opinion from zealous courtiers, piety costs), framed as discomfort, not heresy. Lore-keeper to confirm.
-- **Q5 Contact rate for AI rulers.** 4% a year for every unseeded playable character gives every realm the Void within a generation. **Default:** keep v1's rate for the player test; consider `is_ai = no` or a lower AI rate after the first in-game test.
+- **Q5 Contact rate for AI rulers.** 4% a year for every unseeded playable character gives every realm the Void within a generation. **Default (orchestrator, 2026-11-03), pending owner:** `eotg_void_contact_chance_value` (`common/script_values/eotg_void_values.txt`), 4% a year for players, 1% for the AI (`is_ai = yes`). Over 20 years that is about 56% of player rulers contacted and about 18% of AI rulers. The on_action reads it as `random = { chance = <value> }`, the vanilla form at `common/on_action/army_on_actions.txt:852-853`.
 - **Q6 Stage-D end state.** Depth 100 has no terminal event (no new events allowed). **Default:** none; the "Gone Quiet" band is the end state.

@@ -162,7 +162,7 @@ eotg_on_yearly_void_check = {
                     NOT = { has_trait = eotg_void_touched }
                 }
                 random = {
-                    chance = 4
+                    chance = eotg_void_contact_chance_value    # 4 player / 1 AI (spec Q5)
                     add_character_flag = { flag = eotg_flag_void_event_cooldown  years = 3 }
                     trigger_event = { id = eotg_void.0001  days = { 5 40 } }
                 }
