@@ -605,3 +605,868 @@ eotg_test.431 = {
         debug_log = "EOTG_TEST AL4 DONE"
     }
 }
+
+eotg_test.321 = {
+    type = character_event
+    hidden = yes
+
+    immediate = {
+        if = {
+            limit = {
+                eotg_pmc_standing_value >= { value = var:eotg_test_before add = var:eotg_test_delta }
+                eotg_pmc_standing_value <= { value = var:eotg_test_before add = var:eotg_test_delta }
+            }
+            debug_log = "EOTG_TEST GP1.1 PASS: standing moved by exactly the delta"
+        }
+        else = {
+            debug_log = "EOTG_TEST GP1.1 FAIL: standing did not move by exactly the delta through the writer"
+        }
+        if = {
+            limit = {
+                any_owned_story = {
+                    story_type = eotg_story_pmc_standing
+                    var:eotg_pmc_standing_shown >= root.var:eotg_pmc_standing
+                    var:eotg_pmc_standing_shown <= root.var:eotg_pmc_standing
+                }
+            }
+            debug_log = "EOTG_TEST GP1.2 PASS: the story counter mirrors the new value (sync effect ran)"
+        }
+        else = {
+            debug_log = "EOTG_TEST GP1.2 FAIL: the eotg_story_pmc_standing counter does not match the value after a write"
+        }
+        if = {
+            limit = {
+                has_character_modifier = eotg_pmc_standing_modifier
+            }
+            debug_log = "EOTG_TEST GP1.3 PASS: the scaled modifier is present after the write (re-applied)"
+        }
+        else = {
+            debug_log = "EOTG_TEST GP1.3 FAIL: eotg_pmc_standing_modifier is missing after a write"
+        }
+        debug_log = "EOTG_TEST GP1.4 LOOK: hover eotg_pmc_standing_modifier: its numbers must match the new value, not the old one (a scaled modifier is computed when added; the writer re-applies it)"
+        eotg_pmc_change_standing_effect = { AMOUNT = 120 }
+        trigger_event = { id = eotg_test.322  days = 1 }
+    }
+}
+
+eotg_test.322 = {
+    type = character_event
+    hidden = yes
+
+    immediate = {
+        if = {
+            limit = {
+                eotg_pmc_standing_value >= 100
+                eotg_pmc_standing_value <= 100
+            }
+            debug_log = "EOTG_TEST GP1.5 PASS: standing +120 clamps at 100"
+        }
+        else = {
+            debug_log = "EOTG_TEST GP1.5 FAIL: standing is not 100 after +120"
+        }
+        if = {
+            limit = {
+                any_owned_story = {
+                    story_type = eotg_story_pmc_standing
+                    var:eotg_pmc_standing_shown >= root.var:eotg_pmc_standing
+                    var:eotg_pmc_standing_shown <= root.var:eotg_pmc_standing
+                }
+            }
+            debug_log = "EOTG_TEST GP1.6 PASS: the story counter follows the clamp"
+        }
+        else = {
+            debug_log = "EOTG_TEST GP1.6 FAIL: the story counter does not show the clamped value"
+        }
+        save_scope_value_as = { name = eotg_test_back  value = { value = var:eotg_test_before subtract = 100 } }
+        eotg_pmc_change_standing_effect = { AMOUNT = scope:eotg_test_back }
+        if = {
+            limit = {
+                eotg_pmc_standing_value >= var:eotg_test_before
+                eotg_pmc_standing_value <= var:eotg_test_before
+            }
+            debug_log = "EOTG_TEST GP1.7 PASS: standing restored to the baseline"
+        }
+        else = {
+            debug_log = "EOTG_TEST GP1.7 FAIL: standing not restored to the baseline"
+        }
+        remove_variable = eotg_test_before
+        remove_variable = eotg_test_delta
+        debug_log = "EOTG_TEST GP1 DONE"
+    }
+}
+
+eotg_test.331 = {
+    type = character_event
+    hidden = yes
+
+    immediate = {
+        if = {
+            limit = {
+                eotg_corporation_board_influence_value >= { value = var:eotg_test_before add = var:eotg_test_delta }
+                eotg_corporation_board_influence_value <= { value = var:eotg_test_before add = var:eotg_test_delta }
+            }
+            debug_log = "EOTG_TEST GC1.1 PASS: board influence moved by exactly the delta"
+        }
+        else = {
+            debug_log = "EOTG_TEST GC1.1 FAIL: board influence did not move by exactly the delta through the writer"
+        }
+        if = {
+            limit = {
+                any_owned_story = {
+                    story_type = eotg_story_corporation_board
+                    var:eotg_corporation_board_shown >= root.var:eotg_corp_board_influence
+                    var:eotg_corporation_board_shown <= root.var:eotg_corp_board_influence
+                }
+            }
+            debug_log = "EOTG_TEST GC1.2 PASS: the story counter mirrors the new value (sync effect ran)"
+        }
+        else = {
+            debug_log = "EOTG_TEST GC1.2 FAIL: the eotg_story_corporation_board counter does not match the value after a write"
+        }
+        if = {
+            limit = {
+                has_character_modifier = eotg_corporation_board_modifier
+            }
+            debug_log = "EOTG_TEST GC1.3 PASS: the scaled modifier is present after the write (re-applied)"
+        }
+        else = {
+            debug_log = "EOTG_TEST GC1.3 FAIL: eotg_corporation_board_modifier is missing after a write"
+        }
+        debug_log = "EOTG_TEST GC1.4 LOOK: hover eotg_corporation_board_modifier: its numbers must match the new value, not the old one (a scaled modifier is computed when added; the writer re-applies it)"
+        eotg_corporation_change_board_influence_effect = { AMOUNT = 120 }
+        trigger_event = { id = eotg_test.332  days = 1 }
+    }
+}
+
+eotg_test.332 = {
+    type = character_event
+    hidden = yes
+
+    immediate = {
+        if = {
+            limit = {
+                eotg_corporation_board_influence_value >= 100
+                eotg_corporation_board_influence_value <= 100
+            }
+            debug_log = "EOTG_TEST GC1.5 PASS: board influence +120 clamps at 100"
+        }
+        else = {
+            debug_log = "EOTG_TEST GC1.5 FAIL: board influence is not 100 after +120"
+        }
+        if = {
+            limit = {
+                any_owned_story = {
+                    story_type = eotg_story_corporation_board
+                    var:eotg_corporation_board_shown >= root.var:eotg_corp_board_influence
+                    var:eotg_corporation_board_shown <= root.var:eotg_corp_board_influence
+                }
+            }
+            debug_log = "EOTG_TEST GC1.6 PASS: the story counter follows the clamp"
+        }
+        else = {
+            debug_log = "EOTG_TEST GC1.6 FAIL: the story counter does not show the clamped value"
+        }
+        save_scope_value_as = { name = eotg_test_back  value = { value = var:eotg_test_before subtract = 100 } }
+        eotg_corporation_change_board_influence_effect = { AMOUNT = scope:eotg_test_back }
+        if = {
+            limit = {
+                eotg_corporation_board_influence_value >= var:eotg_test_before
+                eotg_corporation_board_influence_value <= var:eotg_test_before
+            }
+            debug_log = "EOTG_TEST GC1.7 PASS: board influence restored to the baseline"
+        }
+        else = {
+            debug_log = "EOTG_TEST GC1.7 FAIL: board influence not restored to the baseline"
+        }
+        remove_variable = eotg_test_before
+        remove_variable = eotg_test_delta
+        debug_log = "EOTG_TEST GC1 DONE"
+    }
+}
+
+eotg_test.341 = {
+    type = character_event
+    hidden = yes
+
+    immediate = {
+        if = {
+            limit = {
+                eotg_gobcorp_market_share_value >= { value = var:eotg_test_before add = var:eotg_test_delta }
+                eotg_gobcorp_market_share_value <= { value = var:eotg_test_before add = var:eotg_test_delta }
+            }
+            debug_log = "EOTG_TEST GT1.1 PASS: market share moved by exactly the delta"
+        }
+        else = {
+            debug_log = "EOTG_TEST GT1.1 FAIL: market share did not move by exactly the delta through the writer"
+        }
+        if = {
+            limit = {
+                any_owned_story = {
+                    story_type = eotg_story_gobcorp_market
+                    var:eotg_gobcorp_market_share_shown >= root.var:eotg_gobcorp_market_share
+                    var:eotg_gobcorp_market_share_shown <= root.var:eotg_gobcorp_market_share
+                }
+            }
+            debug_log = "EOTG_TEST GT1.2 PASS: the story counter mirrors the new value (sync effect ran)"
+        }
+        else = {
+            debug_log = "EOTG_TEST GT1.2 FAIL: the eotg_story_gobcorp_market counter does not match the value after a write"
+        }
+        if = {
+            limit = {
+                has_character_modifier = eotg_gobcorp_market_share_modifier
+            }
+            debug_log = "EOTG_TEST GT1.3 PASS: the scaled modifier is present after the write (re-applied)"
+        }
+        else = {
+            debug_log = "EOTG_TEST GT1.3 FAIL: eotg_gobcorp_market_share_modifier is missing after a write"
+        }
+        debug_log = "EOTG_TEST GT1.4 LOOK: hover eotg_gobcorp_market_share_modifier: its numbers must match the new value, not the old one (a scaled modifier is computed when added; the writer re-applies it)"
+        eotg_gobcorp_change_market_share_effect = { AMOUNT = 120 }
+        trigger_event = { id = eotg_test.342  days = 1 }
+    }
+}
+
+eotg_test.342 = {
+    type = character_event
+    hidden = yes
+
+    immediate = {
+        if = {
+            limit = {
+                eotg_gobcorp_market_share_value >= 100
+                eotg_gobcorp_market_share_value <= 100
+            }
+            debug_log = "EOTG_TEST GT1.5 PASS: market share +120 clamps at 100"
+        }
+        else = {
+            debug_log = "EOTG_TEST GT1.5 FAIL: market share is not 100 after +120"
+        }
+        if = {
+            limit = {
+                any_owned_story = {
+                    story_type = eotg_story_gobcorp_market
+                    var:eotg_gobcorp_market_share_shown >= root.var:eotg_gobcorp_market_share
+                    var:eotg_gobcorp_market_share_shown <= root.var:eotg_gobcorp_market_share
+                }
+            }
+            debug_log = "EOTG_TEST GT1.6 PASS: the story counter follows the clamp"
+        }
+        else = {
+            debug_log = "EOTG_TEST GT1.6 FAIL: the story counter does not show the clamped value"
+        }
+        save_scope_value_as = { name = eotg_test_back  value = { value = var:eotg_test_before subtract = 100 } }
+        eotg_gobcorp_change_market_share_effect = { AMOUNT = scope:eotg_test_back }
+        if = {
+            limit = {
+                eotg_gobcorp_market_share_value >= var:eotg_test_before
+                eotg_gobcorp_market_share_value <= var:eotg_test_before
+            }
+            debug_log = "EOTG_TEST GT1.7 PASS: market share restored to the baseline"
+        }
+        else = {
+            debug_log = "EOTG_TEST GT1.7 FAIL: market share not restored to the baseline"
+        }
+        remove_variable = eotg_test_before
+        remove_variable = eotg_test_delta
+        debug_log = "EOTG_TEST GT1 DONE"
+    }
+}
+
+eotg_test.351 = {
+    type = character_event
+    hidden = yes
+
+    immediate = {
+        if = {
+            limit = {
+                eotg_pmc_standing_value >= { value = var:eotg_test_before add = 2 }
+                eotg_pmc_standing_value <= { value = var:eotg_test_before add = 2 }
+            }
+            debug_log = "EOTG_TEST GP2.1 PASS: a won battle is worth +2"
+        }
+        else = {
+            debug_log = "EOTG_TEST GP2.1 FAIL: eotg_pmc_battle_won_value did not move standing by +2"
+        }
+        eotg_pmc_change_standing_effect = { AMOUNT = eotg_pmc_battle_lost_value }
+        if = {
+            limit = {
+                eotg_pmc_standing_value >= { value = var:eotg_test_before add = -1 }
+                eotg_pmc_standing_value <= { value = var:eotg_test_before add = -1 }
+            }
+            debug_log = "EOTG_TEST GP2.2 PASS: a lost battle is worth -3 (net -1 from the baseline)"
+        }
+        else = {
+            debug_log = "EOTG_TEST GP2.2 FAIL: eotg_pmc_battle_lost_value did not move standing by -3"
+        }
+        save_scope_value_as = { name = eotg_test_back  value = 1 }
+        eotg_pmc_change_standing_effect = { AMOUNT = scope:eotg_test_back }
+        remove_variable = eotg_test_before
+        debug_log = "EOTG_TEST GP2.3 LOOK: the hook: fight a battle as war leader (console: add armies near an enemy); standing +2 on a win, -3 on a loss, read from the story counter"
+        debug_log = "EOTG_TEST GP2 DONE"
+    }
+}
+
+eotg_test.361 = {
+    type = character_event
+    hidden = yes
+
+    immediate = {
+        save_scope_value_as = {
+            name = eotg_test_delta
+            value = {
+                value = { value = eotg_corporation_board_vote_band_1_value add = -1 }
+                subtract = eotg_corporation_board_influence_value
+            }
+        }
+        eotg_corporation_change_board_influence_effect = { AMOUNT = scope:eotg_test_delta }
+        if = {
+            limit = {
+                eotg_corporation_board_influence_value >= { value = eotg_corporation_board_vote_band_1_value add = -1 }
+                eotg_corporation_board_influence_value <= { value = eotg_corporation_board_vote_band_1_value add = -1 }
+            }
+            debug_log = "EOTG_TEST GE1.1 PASS: the value sits on the band edge"
+        }
+        else = {
+            debug_log = "EOTG_TEST GE1.1 FAIL: the writer did not land on the band edge"
+        }
+        debug_log = "EOTG_TEST GE1.1 LOOK: open your primary title succession tooltip: just below the first band: no band line"
+        trigger_event = { id = eotg_test.362  days = 1 }
+    }
+}
+
+eotg_test.362 = {
+    type = character_event
+    hidden = yes
+
+    immediate = {
+        save_scope_value_as = {
+            name = eotg_test_delta
+            value = {
+                value = eotg_corporation_board_vote_band_1_value
+                subtract = eotg_corporation_board_influence_value
+            }
+        }
+        eotg_corporation_change_board_influence_effect = { AMOUNT = scope:eotg_test_delta }
+        if = {
+            limit = {
+                eotg_corporation_board_influence_value >= eotg_corporation_board_vote_band_1_value
+                eotg_corporation_board_influence_value <= eotg_corporation_board_vote_band_1_value
+            }
+            debug_log = "EOTG_TEST GE1.2 PASS: the value sits on the band edge"
+        }
+        else = {
+            debug_log = "EOTG_TEST GE1.2 FAIL: the writer did not land on the band edge"
+        }
+        debug_log = "EOTG_TEST GE1.2 LOOK: open your primary title succession tooltip: at eotg_corporation_board_vote_band_1_value: expect Hold on the board (+1)"
+        trigger_event = { id = eotg_test.363  days = 1 }
+    }
+}
+
+eotg_test.363 = {
+    type = character_event
+    hidden = yes
+
+    immediate = {
+        save_scope_value_as = {
+            name = eotg_test_delta
+            value = {
+                value = eotg_corporation_board_vote_band_2_value
+                subtract = eotg_corporation_board_influence_value
+            }
+        }
+        eotg_corporation_change_board_influence_effect = { AMOUNT = scope:eotg_test_delta }
+        if = {
+            limit = {
+                eotg_corporation_board_influence_value >= eotg_corporation_board_vote_band_2_value
+                eotg_corporation_board_influence_value <= eotg_corporation_board_vote_band_2_value
+            }
+            debug_log = "EOTG_TEST GE1.3 PASS: the value sits on the band edge"
+        }
+        else = {
+            debug_log = "EOTG_TEST GE1.3 FAIL: the writer did not land on the band edge"
+        }
+        debug_log = "EOTG_TEST GE1.3 LOOK: open your primary title succession tooltip: at eotg_corporation_board_vote_band_2_value: expect the second board bonus (+1 more)"
+
+        save_scope_value_as = { name = eotg_test_back  value = { value = var:eotg_test_before subtract = eotg_corporation_board_influence_value } }
+        eotg_corporation_change_board_influence_effect = { AMOUNT = scope:eotg_test_back }
+        remove_variable = eotg_test_before
+        debug_log = "EOTG_TEST GE1 LOOK: a landless councillor shows no band line (V-CO13); gold no longer adds vote strength (V-TO13)"
+        debug_log = "EOTG_TEST GE1 DONE (value restored)"
+    }
+}
+
+eotg_test.371 = {
+    type = character_event
+    hidden = yes
+
+    immediate = {
+        save_scope_value_as = {
+            name = eotg_test_delta
+            value = {
+                value = { value = eotg_gobcorp_vote_band_1_value add = -1 }
+                subtract = eotg_gobcorp_market_share_value
+            }
+        }
+        eotg_gobcorp_change_market_share_effect = { AMOUNT = scope:eotg_test_delta }
+        if = {
+            limit = {
+                eotg_gobcorp_market_share_value >= { value = eotg_gobcorp_vote_band_1_value add = -1 }
+                eotg_gobcorp_market_share_value <= { value = eotg_gobcorp_vote_band_1_value add = -1 }
+            }
+            debug_log = "EOTG_TEST GE2.1 PASS: the value sits on the band edge"
+        }
+        else = {
+            debug_log = "EOTG_TEST GE2.1 FAIL: the writer did not land on the band edge"
+        }
+        debug_log = "EOTG_TEST GE2.1 LOOK: open your primary title succession tooltip: just below the first band: no band line"
+        trigger_event = { id = eotg_test.372  days = 1 }
+    }
+}
+
+eotg_test.372 = {
+    type = character_event
+    hidden = yes
+
+    immediate = {
+        save_scope_value_as = {
+            name = eotg_test_delta
+            value = {
+                value = eotg_gobcorp_vote_band_1_value
+                subtract = eotg_gobcorp_market_share_value
+            }
+        }
+        eotg_gobcorp_change_market_share_effect = { AMOUNT = scope:eotg_test_delta }
+        if = {
+            limit = {
+                eotg_gobcorp_market_share_value >= eotg_gobcorp_vote_band_1_value
+                eotg_gobcorp_market_share_value <= eotg_gobcorp_vote_band_1_value
+            }
+            debug_log = "EOTG_TEST GE2.2 PASS: the value sits on the band edge"
+        }
+        else = {
+            debug_log = "EOTG_TEST GE2.2 FAIL: the writer did not land on the band edge"
+        }
+        debug_log = "EOTG_TEST GE2.2 LOOK: open your primary title succession tooltip: at eotg_gobcorp_vote_band_1_value: expect the first share band (+1)"
+        trigger_event = { id = eotg_test.373  days = 1 }
+    }
+}
+
+eotg_test.373 = {
+    type = character_event
+    hidden = yes
+
+    immediate = {
+        save_scope_value_as = {
+            name = eotg_test_delta
+            value = {
+                value = eotg_gobcorp_vote_band_2_value
+                subtract = eotg_gobcorp_market_share_value
+            }
+        }
+        eotg_gobcorp_change_market_share_effect = { AMOUNT = scope:eotg_test_delta }
+        if = {
+            limit = {
+                eotg_gobcorp_market_share_value >= eotg_gobcorp_vote_band_2_value
+                eotg_gobcorp_market_share_value <= eotg_gobcorp_vote_band_2_value
+            }
+            debug_log = "EOTG_TEST GE2.3 PASS: the value sits on the band edge"
+        }
+        else = {
+            debug_log = "EOTG_TEST GE2.3 FAIL: the writer did not land on the band edge"
+        }
+        debug_log = "EOTG_TEST GE2.3 LOOK: open your primary title succession tooltip: at eotg_gobcorp_vote_band_2_value: expect the second (+2)"
+        trigger_event = { id = eotg_test.374  days = 1 }
+    }
+}
+
+eotg_test.374 = {
+    type = character_event
+    hidden = yes
+
+    immediate = {
+        save_scope_value_as = {
+            name = eotg_test_delta
+            value = {
+                value = eotg_gobcorp_vote_band_3_value
+                subtract = eotg_gobcorp_market_share_value
+            }
+        }
+        eotg_gobcorp_change_market_share_effect = { AMOUNT = scope:eotg_test_delta }
+        if = {
+            limit = {
+                eotg_gobcorp_market_share_value >= eotg_gobcorp_vote_band_3_value
+                eotg_gobcorp_market_share_value <= eotg_gobcorp_vote_band_3_value
+            }
+            debug_log = "EOTG_TEST GE2.4 PASS: the value sits on the band edge"
+        }
+        else = {
+            debug_log = "EOTG_TEST GE2.4 FAIL: the writer did not land on the band edge"
+        }
+        debug_log = "EOTG_TEST GE2.4 LOOK: open your primary title succession tooltip: at eotg_gobcorp_vote_band_3_value: expect the third (+3)"
+
+        save_scope_value_as = { name = eotg_test_back  value = { value = var:eotg_test_before subtract = eotg_gobcorp_market_share_value } }
+        eotg_gobcorp_change_market_share_effect = { AMOUNT = scope:eotg_test_back }
+        remove_variable = eotg_test_before
+        debug_log = "EOTG_TEST GE2 LOOK: a landless councillor shows no band line (V-CO13); gold no longer adds vote strength (V-TO13)"
+        debug_log = "EOTG_TEST GE2 DONE (value restored)"
+    }
+}
+
+eotg_test.501 = {
+    type = character_event
+    hidden = yes
+
+    immediate = {
+        if = {
+            limit = {
+                NOT = { has_character_modifier = eotg_mod_void_whispers }
+                NOT = { has_character_modifier = eotg_mod_void_pressure }
+                NOT = { has_character_modifier = eotg_mod_void_saturation }
+            }
+            debug_log = "EOTG_TEST VD1.1 PASS: exposure 24: no band"
+        }
+        else = {
+            debug_log = "EOTG_TEST VD1.1 FAIL: a band modifier is present at exposure 24"
+        }
+        save_scope_value_as = {
+            name = eotg_test_delta
+            value = {
+                value = 25
+                subtract = var:eotg_void_exposure
+            }
+        }
+        eotg_void_change_exposure_effect = { AMOUNT = scope:eotg_test_delta }
+        trigger_event = { id = eotg_test.502  days = 1 }
+    }
+}
+
+eotg_test.502 = {
+    type = character_event
+    hidden = yes
+
+    immediate = {
+        if = {
+            limit = {
+                has_character_modifier = eotg_mod_void_whispers
+                NOT = { has_character_modifier = eotg_mod_void_pressure }
+                NOT = { has_character_modifier = eotg_mod_void_saturation }
+            }
+            debug_log = "EOTG_TEST VD1.2 PASS: exposure 25: Void Whispers only"
+        }
+        else = {
+            debug_log = "EOTG_TEST VD1.2 FAIL: exposure 25 is not Whispers alone"
+        }
+        save_scope_value_as = {
+            name = eotg_test_delta
+            value = {
+                value = 50
+                subtract = var:eotg_void_exposure
+            }
+        }
+        eotg_void_change_exposure_effect = { AMOUNT = scope:eotg_test_delta }
+        trigger_event = { id = eotg_test.503  days = 1 }
+    }
+}
+
+eotg_test.503 = {
+    type = character_event
+    hidden = yes
+
+    immediate = {
+        if = {
+            limit = {
+                NOT = { has_character_modifier = eotg_mod_void_whispers }
+                has_character_modifier = eotg_mod_void_pressure
+                NOT = { has_character_modifier = eotg_mod_void_saturation }
+            }
+            debug_log = "EOTG_TEST VD1.3 PASS: exposure 50: Void Pressure only (Whispers removed)"
+        }
+        else = {
+            debug_log = "EOTG_TEST VD1.3 FAIL: exposure 50 is not Pressure alone"
+        }
+        save_scope_value_as = {
+            name = eotg_test_delta
+            value = {
+                value = 75
+                subtract = var:eotg_void_exposure
+            }
+        }
+        eotg_void_change_exposure_effect = { AMOUNT = scope:eotg_test_delta }
+        trigger_event = { id = eotg_test.504  days = 1 }
+    }
+}
+
+eotg_test.504 = {
+    type = character_event
+    hidden = yes
+
+    immediate = {
+        if = {
+            limit = {
+                NOT = { has_character_modifier = eotg_mod_void_whispers }
+                NOT = { has_character_modifier = eotg_mod_void_pressure }
+                has_character_modifier = eotg_mod_void_saturation
+            }
+            debug_log = "EOTG_TEST VD1.4 PASS: exposure 75: Void Saturation only"
+        }
+        else = {
+            debug_log = "EOTG_TEST VD1.4 FAIL: exposure 75 is not Saturation alone"
+        }
+        save_scope_value_as = {
+            name = eotg_test_delta
+            value = {
+                value = var:eotg_test_before
+                subtract = var:eotg_void_exposure
+            }
+        }
+        eotg_void_change_exposure_effect = { AMOUNT = scope:eotg_test_delta }
+        if = {
+            limit = { var:eotg_void_exposure < 25 }
+            if = {
+            limit = {
+                NOT = { has_character_modifier = eotg_mod_void_whispers }
+                NOT = { has_character_modifier = eotg_mod_void_pressure }
+                NOT = { has_character_modifier = eotg_mod_void_saturation }
+            }
+            debug_log = "EOTG_TEST VD1.5 PASS: restored below 25: no band"
+        }
+        else = {
+            debug_log = "EOTG_TEST VD1.5 FAIL: a band survived the restore"
+        }
+        }
+        else = {
+            if = {
+            limit = {
+                OR = { has_character_modifier = eotg_mod_void_whispers has_character_modifier = eotg_mod_void_pressure has_character_modifier = eotg_mod_void_saturation }
+            }
+            debug_log = "EOTG_TEST VD1.5 PASS: restored: a band matches the restored exposure"
+        }
+        else = {
+            debug_log = "EOTG_TEST VD1.5 FAIL: no band after restoring an exposure of 25 or more"
+        }
+        }
+        remove_variable = eotg_test_before
+        debug_log = "EOTG_TEST VD1 LOOK: the band modifier tooltip text (Whispers, Pressure, Saturation)"
+        debug_log = "EOTG_TEST VD1 DONE (exposure restored; VD1 may have advanced Void events: the on_action reads exposure yearly)"
+    }
+}
+
+eotg_test.511 = {
+    type = character_event
+    hidden = yes
+
+    immediate = {
+        if = {
+            limit = {
+                has_character_flag = eotg_flag_void_event_cooldown
+            }
+            debug_log = "EOTG_TEST VD2.1 PASS: the on_action set the event cooldown when it fired the Hollowing (no event sets it)"
+        }
+        else = {
+            debug_log = "EOTG_TEST VD2.1 FAIL: no cooldown flag after the pulse fired: the on_action is not the cooldown authority, or the Hollowing branch did not fire"
+        }
+        if = {
+            limit = {
+                var:eotg_void_exposure >= 100
+            }
+            debug_log = "EOTG_TEST VD2.2 PASS: exposure is at the cap (Touched accrual cannot lower it)"
+        }
+        else = {
+            debug_log = "EOTG_TEST VD2.2 FAIL: exposure fell below 100 after the pulse"
+        }
+        debug_log = "EOTG_TEST VD2 LOOK: The Hollowing (eotg_void.0030) arrives within 10 days; answer it, then take VD3"
+        debug_log = "EOTG_TEST VD2 DONE"
+    }
+}
+
+eotg_test.521 = {
+    type = character_event
+    hidden = yes
+
+    immediate = {
+        if = {
+            limit = {
+                has_character_modifier = eotg_mod_void_hollow_far
+                NOT = { has_character_modifier = eotg_mod_void_hollow_quiet }
+            }
+            debug_log = "EOTG_TEST VD3.3 PASS: depth 50: Far Off only"
+        }
+        else = {
+            debug_log = "EOTG_TEST VD3.3 FAIL: depth 50 is not Far Off alone"
+        }
+        save_scope_value_as = {
+            name = eotg_test_delta
+            value = {
+                value = 85
+                subtract = var:eotg_void_hollowing_depth
+            }
+        }
+        eotg_void_change_hollowing_depth_effect = { AMOUNT = scope:eotg_test_delta }
+        trigger_event = { id = eotg_test.522  days = 1 }
+    }
+}
+
+eotg_test.522 = {
+    type = character_event
+    hidden = yes
+
+    immediate = {
+        if = {
+            limit = {
+                NOT = { has_character_modifier = eotg_mod_void_hollow_far }
+                has_character_modifier = eotg_mod_void_hollow_quiet
+            }
+            debug_log = "EOTG_TEST VD3.4 PASS: depth 85: Gone Quiet only (Far Off removed)"
+        }
+        else = {
+            debug_log = "EOTG_TEST VD3.4 FAIL: depth 85 is not Gone Quiet alone"
+        }
+        save_scope_value_as = {
+            name = eotg_test_delta
+            value = {
+                value = 10
+                subtract = var:eotg_void_hollowing_depth
+            }
+        }
+        eotg_void_change_hollowing_depth_effect = { AMOUNT = scope:eotg_test_delta }
+        trigger_event = { id = eotg_test.523  days = 1 }
+    }
+}
+
+eotg_test.523 = {
+    type = character_event
+    hidden = yes
+
+    immediate = {
+        if = {
+            limit = {
+                NOT = { has_character_modifier = eotg_mod_void_hollow_far }
+                NOT = { has_character_modifier = eotg_mod_void_hollow_quiet }
+            }
+            debug_log = "EOTG_TEST VD3.5 PASS: depth 10: no depth band"
+        }
+        else = {
+            debug_log = "EOTG_TEST VD3.5 FAIL: a depth band survived at depth 10"
+        }
+        # The real pulse: depth drift +4. The Hollowing set a 5-year cooldown, so no
+        # stage-D event should roll; if the cooldown has lapsed, 0031 or 0032 may follow.
+        trigger_event = { on_action = eotg_on_yearly_void_check }
+        trigger_event = { id = eotg_test.524  days = 1 }
+    }
+}
+
+eotg_test.524 = {
+    type = character_event
+    hidden = yes
+
+    immediate = {
+        if = {
+            limit = {
+                var:eotg_void_hollowing_depth >= 14
+                var:eotg_void_hollowing_depth <= 14
+            }
+            debug_log = "EOTG_TEST VD3.6 PASS: the yearly pulse drifted depth by exactly +4"
+        }
+        else = {
+            debug_log = "EOTG_TEST VD3.6 FAIL: depth did not drift by exactly +4 in one pulse"
+        }
+        save_scope_value_as = {
+            name = eotg_test_delta
+            value = {
+                value = var:eotg_test_before
+                subtract = var:eotg_void_hollowing_depth
+            }
+        }
+        eotg_void_change_hollowing_depth_effect = { AMOUNT = scope:eotg_test_delta }
+        remove_variable = eotg_test_before
+        debug_log = "EOTG_TEST VD3 LOOK: the Far Off and Gone Quiet tooltips"
+        debug_log = "EOTG_TEST VD3 DONE (depth restored)"
+    }
+}
+
+eotg_test.531 = {
+    type = character_event
+    hidden = yes
+
+    immediate = {
+        if = {
+            limit = {
+                any_courtier = { has_character_flag = eotg_flag_void_voidwalker }
+            }
+            debug_log = "EOTG_TEST VD4.1 PASS: the Voidwalker is a flagged courtier (the flag is no longer on the ruler)"
+        }
+        else = {
+            debug_log = "EOTG_TEST VD4.1 FAIL: no courtier carries eotg_flag_void_voidwalker"
+        }
+        if = {
+            limit = {
+                eotg_void_yearly_accrual_value >= { value = var:eotg_test_before add = -6 }
+                eotg_void_yearly_accrual_value <= { value = var:eotg_test_before add = -6 }
+            }
+            debug_log = "EOTG_TEST VD4.2 PASS: the yearly accrual fell by exactly 6"
+        }
+        else = {
+            debug_log = "EOTG_TEST VD4.2 FAIL: the accrual did not fall by 6 with a Voidwalker at court"
+        }
+        if = {
+            limit = {
+                has_trait = eotg_void_hollowed
+            }
+            debug_log = "EOTG_TEST VD4.3 SKIP: the Hollowed cannot take the Voidwalker Ward"
+        }
+        else_if = {
+            limit = {
+                OR = {
+                    has_character_flag = eotg_flag_void_ward_cooldown
+                    gold < 100
+                }
+            }
+            debug_log = "EOTG_TEST VD4.3 SKIP: the ward cooldown is running or you have under 100 gold; the decision should still be listed, greyed out (LOOK)"
+        }
+        else = {
+            if = {
+            limit = {
+                can_execute_decision = eotg_decision_void_voidwalker_ward
+            }
+            debug_log = "EOTG_TEST VD4.3 PASS: the Voidwalker Ward decision can be taken"
+        }
+        else = {
+            debug_log = "EOTG_TEST VD4.3 FAIL: the Voidwalker Ward decision cannot be taken with a Voidwalker at court"
+        }
+        }
+        remove_variable = eotg_test_before
+        debug_log = "EOTG_TEST VD4 LOOK: the Decisions tab lists Ask the Voidwalker for the Old Ward"
+        debug_log = "EOTG_TEST VD4 DONE"
+    }
+}
+
+eotg_test.541 = {
+    type = character_event
+    hidden = yes
+
+    immediate = {
+        if = {
+            limit = {
+                { value = diplomacy add = martial add = stewardship add = intrigue add = learning add = prowess } >= { value = var:eotg_test_before add = 4 }
+                { value = diplomacy add = martial add = stewardship add = intrigue add = learning add = prowess } <= { value = var:eotg_test_before add = 4 }
+            }
+            debug_log = "EOTG_TEST VD5.1 PASS: two Insights gave +2 skill each (+4 total)"
+        }
+        else = {
+            debug_log = "EOTG_TEST VD5.1 FAIL: the skill total did not rise by exactly 4"
+        }
+        if = {
+            limit = {
+                eotg_void_has_any_insight = yes
+            }
+            debug_log = "EOTG_TEST VD5.2 PASS: an Insight modifier is held"
+        }
+        else = {
+            debug_log = "EOTG_TEST VD5.2 FAIL: no Insight modifier after the effect"
+        }
+        remove_variable = eotg_test_before
+        debug_log = "EOTG_TEST VD5.3 LOOK: the character window lists ONE Insight modifier, not two copies"
+        debug_log = "EOTG_TEST VD5 DONE"
+    }
+}

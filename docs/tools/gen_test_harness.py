@@ -619,6 +619,518 @@ T('GR1', 'gr1_game_rules', 'GR1: Read the Game Rules',
   log('GR1 START: game rules') + '\n' + '\n'.join(rule_block('GR1', r, s) for r, s in RULES) + '\n' +
   log('GR1 LOOK: compare with the lobby settings you chose; behaviour checks are in the specs named in the README') + '\n' + log('GR1 DONE'))
 
+# ---------------------------------------------------------------- G2 resources (PMC, Corporation, Trade Oligarchy)
+# Added 2026-11-03 (final H1). Each resource has one writer; these tests drive the
+# writer and assert what follows from it (the story counter the sync effect writes,
+# the scaled modifier's presence, the election-band LOOKs), never the variable alone.
+def eq(lhs, rhs):
+    """Exact equality of two values, written as the harness always does (>= and <=)."""
+    return f'{lhs} >= {rhs}\n{lhs} <= {rhs}'
+def delta_to(name, target, current):
+    """Save scope:<name> = target - current, so a writer can be driven to an exact value."""
+    return f"""save_scope_value_as = {{
+    name = {name}
+    value = {{
+        value = {target}
+        subtract = {current}
+    }}
+}}"""
+def clamp_expect(var, base, delta):
+    """set_variable var = clamp(base + delta, 0, 100): the expected writer result."""
+    return f"""set_variable = {{
+    name = {var}
+    value = {{
+        value = {base}
+        add = {delta}
+        min = 0
+        max = 100
+    }}
+}}"""
+
+G2 = [
+ # tid, key, Name, role trigger, writer, value, variable, story, shown var, modifier, spec ids
+ ('GP1', 'gp1_pmc_standing', 'PMC', 'eotg_pmc_is_landed_pmc', 'eotg_pmc_change_standing_effect',
+  'eotg_pmc_standing_value', 'eotg_pmc_standing', 'eotg_story_pmc_standing', 'eotg_pmc_standing_shown',
+  'eotg_pmc_standing_modifier', 'PMC spec V-P2, V-P3', 'standing', '(Debug) Become a PMC, or play Raoul'),
+ ('GC1', 'gc1_corp_influence', 'Corporation', 'eotg_corporation_is_landed_corporation', 'eotg_corporation_change_board_influence_effect',
+  'eotg_corporation_board_influence_value', 'eotg_corp_board_influence', 'eotg_story_corporation_board', 'eotg_corporation_board_shown',
+  'eotg_corporation_board_modifier', 'Corporation spec V-CO2, V-CO3', 'board influence', 'play Hoel or Konan'),
+ ('GT1', 'gt1_gobcorp_share', 'Trade Oligarchy', 'eotg_gobcorp_is_landed_gobcorp', 'eotg_gobcorp_change_market_share_effect',
+  'eotg_gobcorp_market_share_value', 'eotg_gobcorp_market_share', 'eotg_story_gobcorp_market', 'eotg_gobcorp_market_share_shown',
+  'eotg_gobcorp_market_share_modifier', 'Trade Oligarchy spec V-TO2, V-TO3', 'market share', 'play Bertrand'),
+]
+for n, (tid, key, gname, role, writer, val, var, story, shown, mod, refs, noun, who) in enumerate(G2):
+    e1, e2 = f'eotg_test.{321 + 10 * n}', f'eotg_test.{322 + 10 * n}'
+    counter = f'any_owned_story = {{\n    story_type = {story}\n    {eq(f"var:{shown}", f"root.var:{var}").replace(chr(10), chr(10) + "    ")}\n}}'
+    T(tid, key, f'{tid}: {gname} Resource Follows a Change',
+      f'As a landed {gname} ruler: reads your {noun}, moves it by +10 (or -10 near the top) through its only writer, then by 120 past the cap, and checks the story counter, the modifier and the clamp each time.',
+      refs,
+      f"""
+{log(f'{tid} START: {noun} writer, story counter and modifier')}
+if = {{
+    limit = {{ {role} = no }}
+    {log(f'{tid} SKIP: needs a landed {gname} ruler; {who}')}
+}}
+else = {{
+    set_variable = {{ name = eotg_test_before  value = {val} }}
+    if = {{
+        limit = {{ {val} > 90 }}
+        save_scope_value_as = {{ name = eotg_test_delta  value = -10 }}
+    }}
+    else = {{
+        save_scope_value_as = {{ name = eotg_test_delta  value = 10 }}
+    }}
+    set_variable = {{ name = eotg_test_delta  value = scope:eotg_test_delta }}
+    {writer} = {{ AMOUNT = scope:eotg_test_delta }}
+    trigger_event = {{ id = {e1}  days = 1 }}
+}}""",
+      [ev(e1, f"""
+{check(f'{tid}.1', eq(val, '{ value = var:eotg_test_before add = var:eotg_test_delta }'), f'{noun} moved by exactly the delta', f'{noun} did not move by exactly the delta through the writer')}
+{check(f'{tid}.2', counter, 'the story counter mirrors the new value (sync effect ran)', f'the {story} counter does not match the value after a write')}
+{check(f'{tid}.3', f'has_character_modifier = {mod}', 'the scaled modifier is present after the write (re-applied)', f'{mod} is missing after a write')}
+{log(f'{tid}.4 LOOK: hover {mod}: its numbers must match the new value, not the old one (a scaled modifier is computed when added; the writer re-applies it)')}
+{writer} = {{ AMOUNT = 120 }}
+trigger_event = {{ id = {e2}  days = 1 }}"""),
+       ev(e2, f"""
+{check(f'{tid}.5', eq(val, '100'), f'{noun} +120 clamps at 100', f'{noun} is not 100 after +120')}
+{check(f'{tid}.6', counter, 'the story counter follows the clamp', 'the story counter does not show the clamped value')}
+save_scope_value_as = {{ name = eotg_test_back  value = {{ value = var:eotg_test_before subtract = 100 }} }}
+{writer} = {{ AMOUNT = scope:eotg_test_back }}
+{check(f'{tid}.7', eq(val, 'var:eotg_test_before'), f'{noun} restored to the baseline', f'{noun} not restored to the baseline')}
+remove_variable = eotg_test_before
+remove_variable = eotg_test_delta
+{log(f'{tid} DONE')}""")])
+
+# PMC battle feed (V-P6). The on_action root is a combat side, which a decision
+# cannot build, so the test drives the writer with the on_action's own named
+# values and leaves the wiring to a LOOK (fight a battle as war leader).
+T('GP2', 'gp2_pmc_battle_feed', 'GP2: PMC Battle Feed Values',
+  'As a landed PMC ruler with standing between 3 and 97: applies the battle-won value, then the battle-lost value, through the standing writer, and checks +2 then -3 exactly. The battle hook itself is a look check.',
+  'PMC spec V-P6',
+  f"""
+{log('GP2 START: battle feed values')}
+if = {{
+    limit = {{ eotg_pmc_is_landed_pmc = no }}
+    {log('GP2 SKIP: needs a landed PMC ruler; (Debug) Become a PMC, or play Raoul')}
+}}
+else_if = {{
+    limit = {{
+        OR = {{
+            eotg_pmc_standing_value < 3
+            eotg_pmc_standing_value > 97
+        }}
+    }}
+    {log('GP2 SKIP: standing is within 3 of a clamp, so the exact deltas cannot show; run GP1 or wait')}
+}}
+else = {{
+    set_variable = {{ name = eotg_test_before  value = eotg_pmc_standing_value }}
+    eotg_pmc_change_standing_effect = {{ AMOUNT = eotg_pmc_battle_won_value }}
+    trigger_event = {{ id = eotg_test.351  days = 1 }}
+}}""",
+  [ev('eotg_test.351', f"""
+{check('GP2.1', eq('eotg_pmc_standing_value', '{ value = var:eotg_test_before add = 2 }'), 'a won battle is worth +2', 'eotg_pmc_battle_won_value did not move standing by +2')}
+eotg_pmc_change_standing_effect = {{ AMOUNT = eotg_pmc_battle_lost_value }}
+{check('GP2.2', eq('eotg_pmc_standing_value', '{ value = var:eotg_test_before add = -1 }'), 'a lost battle is worth -3 (net -1 from the baseline)', 'eotg_pmc_battle_lost_value did not move standing by -3')}
+save_scope_value_as = {{ name = eotg_test_back  value = 1 }}
+eotg_pmc_change_standing_effect = {{ AMOUNT = scope:eotg_test_back }}
+remove_variable = eotg_test_before
+{log('GP2.3 LOOK: the hook: fight a battle as war leader (console: add armies near an enemy); standing +2 on a win, -3 on a loss, read from the story counter')}
+{log('GP2 DONE')}""")])
+
+# Court the Board (V-CO8 and the 2026-11-03 erosion fix). The decision is taken
+# by a Corporation VASSAL and its effect is inline, so the harness brackets the
+# real decision: a record step before, a check step after. GC2b pre-marks the
+# liege as eroded this year (the decision's own guard variable) to prove the
+# second courting of a year costs the liege nothing.
+COURT_RECORD = """
+set_variable = {{ name = eotg_test_own_before  value = eotg_corporation_board_influence_value }}
+set_variable = {{ name = eotg_test_projected  value = eotg_corporation_court_projected_value }}
+liege = {{
+    set_variable = {{ name = eotg_test_liege_before  value = eotg_corporation_board_influence_value }}
+    {mark}
+    if = {{
+        limit = {{ has_variable = eotg_corp_board_eroded }}
+        set_variable = {{ name = eotg_test_liege_eroded  value = 1 }}
+    }}
+    else = {{
+        set_variable = {{ name = eotg_test_liege_eroded  value = 0 }}
+    }}
+}}"""
+for sfx, mark, nm, desc in (
+    ('A', '', 'Record (Normal Path)', 'records your influence, the projected value and your liege\'s influence and erosion state'),
+    ('B', 'set_variable = { name = eotg_corp_board_eroded  years = 1 }', 'Record (Liege Already Eroded)', 'marks your liege as already eroded this year (the decision\'s own guard), then records the same values')):
+    T(f'GC2{sfx}', f'gc2{sfx.lower()}_court_board_record', f'GC2{sfx.lower()}: Court the Board, {nm}',
+      f'As a Corporation vassal under a Corporation liege: {desc}. Then take Court the Board yourself, and run GC2c the next day.',
+      'Corporation spec V-CO8; QA 2026-11-03 erosion fix',
+      f"""
+{log(f'GC2{sfx} START: Court the Board, record')}
+if = {{
+    limit = {{
+        OR = {{
+            eotg_corporation_role_vassal = no
+            NOT = {{ liege ?= {{ eotg_corporation_role_top = yes }} }}
+        }}
+    }}
+    {log(f'GC2{sfx} SKIP: needs a Corporation vassal under a Corporation liege; play Konan')}
+}}
+# UNVERIFIED-VANILLA: is_decision_on_cooldown (a character trigger in 1.20 .info)
+else_if = {{
+    limit = {{ NOT = {{ is_decision_on_cooldown = eotg_decision_corporation_court_board }} }}
+{ind(COURT_RECORD.format(mark=mark), 4)}
+    {log(f'GC2{sfx} LOOK: now take Court the Board, then GC2c tomorrow')}
+}}
+else = {{
+    {log(f'GC2{sfx} SKIP: Court the Board is on its 5-year cooldown; reload a save from before you took it')}
+}}""")
+T('GC2C', 'gc2c_court_board_check', 'GC2c: Court the Board, Check',
+  'After GC2a or GC2b and the real Court the Board: checks your gain and that your liege lost exactly 5 only if not already eroded this year and only if your projected value was above theirs.',
+  'Corporation spec V-CO8; QA 2026-11-03 erosion fix',
+  f"""
+{log('GC2C START: Court the Board, check')}
+if = {{
+    limit = {{ NOT = {{ has_variable = eotg_test_projected }} }}
+    {log('GC2C SKIP: nothing recorded; run GC2a or GC2b, then take Court the Board')}
+}}
+else = {{
+    {check('GC2C.1', eq('eotg_corporation_board_influence_value', 'var:eotg_test_projected'), 'your influence is the projected value (+15, clamped)', 'your influence is not the recorded projection: was Court the Board taken?')}
+    liege = {{
+        if = {{
+            limit = {{
+                var:eotg_test_liege_eroded = 0
+                var:eotg_test_liege_before < root.var:eotg_test_projected
+            }}
+            {check('GC2C.2', eq('eotg_corporation_board_influence_value', '{ value = var:eotg_test_liege_before add = -5 max = 100 min = 0 }'), 'the liege lost exactly 5 (not eroded yet, director projected above the CEO)', 'the liege did not lose exactly 5 on an eligible courting')}
+            {check('GC2C.3', 'has_variable = eotg_corp_board_eroded', 'the liege is marked eroded for the year', 'no eotg_corp_board_eroded on the liege after erosion')}
+        }}
+        else = {{
+            {check('GC2C.4', eq('eotg_corporation_board_influence_value', 'var:eotg_test_liege_before'), 'the liege lost nothing (already eroded this year, or the CEO was at or above your projection)', 'the liege lost influence when the guard should have held')}
+        }}
+        remove_variable = eotg_test_liege_before
+        remove_variable = eotg_test_liege_eroded
+    }}
+    remove_variable = eotg_test_own_before
+    remove_variable = eotg_test_projected
+    {log('GC2C DONE')}
+}}""")
+
+# Corner the Market (V-TO7). Taken by the top Trade Oligarch; inline effect,
+# so the same bracket. GT2a pre-marks the first vassal Prince as cornered this
+# year (the decision's own guard) when there are two or more.
+T('GT2A', 'gt2a_corner_record', 'GT2a: Corner the Market, Record',
+  'As the top Trade Oligarch with Trade Oligarchy vassals: records your share and each vassal Prince\'s, and marks one Prince as already cornered this year when you have two or more. Then take Corner the Market, and run GT2b the next day.',
+  'Trade Oligarchy spec V-TO7',
+  f"""
+{log('GT2A START: Corner the Market, record')}
+if = {{
+    limit = {{
+        OR = {{
+            eotg_gobcorp_role_top = no
+            NOT = {{ any_vassal = {{ government_has_flag = eotg_government_is_gobcorp }} }}
+        }}
+    }}
+    {log('GT2A SKIP: needs the top Trade Oligarch with Trade Oligarchy vassals (V-TO9: grant counties by console)')}
+}}
+# UNVERIFIED-VANILLA: is_decision_on_cooldown (as GC2a)
+else_if = {{
+    limit = {{ is_decision_on_cooldown = eotg_decision_gobcorp_corner_market }}
+    {log('GT2A SKIP: Corner the Market is on its cooldown; reload a save from before you took it')}
+}}
+else = {{
+    set_variable = {{ name = eotg_test_own_before  value = eotg_gobcorp_market_share_value }}
+    if = {{
+        limit = {{ any_vassal = {{ count >= 2  government_has_flag = eotg_government_is_gobcorp }} }}
+        random_vassal = {{
+            limit = {{ government_has_flag = eotg_government_is_gobcorp }}
+            set_variable = {{ name = eotg_gobcorp_cornered  years = 1 }}
+        }}
+    }}
+    every_vassal = {{
+        limit = {{ government_has_flag = eotg_government_is_gobcorp }}
+        set_variable = {{ name = eotg_test_share_before  value = eotg_gobcorp_market_share_value }}
+        if = {{
+            limit = {{ has_variable = eotg_gobcorp_cornered }}
+            set_variable = {{ name = eotg_test_was_cornered  value = 1 }}
+        }}
+    }}
+    {log('GT2A LOOK: now take Corner the Market, then GT2b tomorrow')}
+}}""")
+T('GT2B', 'gt2b_corner_check', 'GT2b: Corner the Market, Check',
+  'After GT2a and the real Corner the Market: checks your gain, that every Prince not yet cornered lost exactly 5 and is now marked, and that the pre-marked Prince lost nothing.',
+  'Trade Oligarchy spec V-TO7',
+  f"""
+{log('GT2B START: Corner the Market, check')}
+if = {{
+    limit = {{ NOT = {{ has_variable = eotg_test_own_before }} }}
+    {log('GT2B SKIP: nothing recorded; run GT2a, then take Corner the Market')}
+}}
+else = {{
+    {check('GT2B.1', eq('eotg_gobcorp_market_share_value', '{ value = var:eotg_test_own_before add = 15 max = 100 }'), 'your share rose by 15 (clamped)', 'your share did not rise by 15: was Corner the Market taken?')}
+    if = {{
+        limit = {{
+            any_vassal = {{
+                has_variable = eotg_test_share_before
+                NOT = {{ has_variable = eotg_test_was_cornered }}
+                NOT = {{ {eq('eotg_gobcorp_market_share_value', '{ value = var:eotg_test_share_before add = -5 min = 0 }').replace(chr(10), ' ')} }}
+            }}
+        }}
+        {log('GT2B FAIL: a Prince not yet cornered did not lose exactly 5')}
+    }}
+    else = {{
+        {log('GT2B.2 PASS: every Prince not yet cornered lost exactly 5')}
+    }}
+    if = {{
+        limit = {{
+            any_vassal = {{
+                has_variable = eotg_test_was_cornered
+                NOT = {{ {eq('eotg_gobcorp_market_share_value', 'var:eotg_test_share_before').replace(chr(10), ' ')} }}
+            }}
+        }}
+        {log('GT2B FAIL: a Prince already cornered this year was drained again')}
+    }}
+    else_if = {{
+        limit = {{ any_vassal = {{ has_variable = eotg_test_was_cornered }} }}
+        {log('GT2B.3 PASS: the Prince already cornered this year was not drained again')}
+    }}
+    else = {{
+        {log('GT2B.3 SKIP: only one Prince, so the once-a-year guard was not exercised (V-TO9: make a second)')}
+    }}
+    {check('GT2B.4', 'NOT = { any_vassal = { has_variable = eotg_test_share_before NOT = { has_variable = eotg_gobcorp_cornered } } }', 'every Prince is marked cornered for the year', 'a Prince has no eotg_gobcorp_cornered after Corner the Market')}
+    every_vassal = {{
+        limit = {{ has_variable = eotg_test_share_before }}
+        remove_variable = eotg_test_share_before
+        if = {{
+            limit = {{ has_variable = eotg_test_was_cornered }}
+            remove_variable = eotg_test_was_cornered
+        }}
+    }}
+    remove_variable = eotg_test_own_before
+    {log('GT2B DONE')}
+}}""")
+
+# Election bands (V-CO13, V-TO13). Vote strength cannot be read in script, so the
+# test drives the ruler's value to each band edge through the writer, a day
+# apart, and the player reads the title's vote tooltip at each LOOK line.
+for tid, key, gname, role, writer, val, bands, refs, label in (
+    ('GE1', 'ge1_corp_bands', 'Corporation', 'eotg_corporation_is_landed_corporation', 'eotg_corporation_change_board_influence_effect',
+     'eotg_corporation_board_influence_value', ['eotg_corporation_board_vote_band_1_value', 'eotg_corporation_board_vote_band_2_value'],
+     'Corporation spec V-CO13', ['Hold on the board (+1)', 'the second board bonus (+1 more)']),
+    ('GE2', 'ge2_gobcorp_bands', 'Trade Oligarchy', 'eotg_gobcorp_is_landed_gobcorp', 'eotg_gobcorp_change_market_share_effect',
+     'eotg_gobcorp_market_share_value', ['eotg_gobcorp_vote_band_1_value', 'eotg_gobcorp_vote_band_2_value', 'eotg_gobcorp_vote_band_3_value'],
+     'Trade Oligarchy spec V-TO13', ['the first share band (+1)', 'the second (+2)', 'the third (+3)'])):
+    base = 361 if tid == 'GE1' else 371
+    steps = []
+    targets = [(f'{{ value = {bands[0]} add = -1 }}', 'just below the first band: no band line')] + [(b, f'at {b}: expect {l}') for b, l in zip(bands, label)]
+    for i, (tgt, what) in enumerate(targets):
+        nxt = f'trigger_event = {{ id = eotg_test.{base + i + 1}  days = 1 }}' if i + 1 < len(targets) else ''
+        steps.append(ev(f'eotg_test.{base + i}', f"""
+{delta_to('eotg_test_delta', tgt, val)}
+{writer} = {{ AMOUNT = scope:eotg_test_delta }}
+{check(f'{tid}.{i + 1}', eq(val, tgt), 'the value sits on the band edge', 'the writer did not land on the band edge')}
+{log(f'{tid}.{i + 1} LOOK: open your primary title succession tooltip: {what}')}
+{nxt}"""))
+    steps[-1] = ev(steps[-1][0], steps[-1][1] + f"""
+save_scope_value_as = {{ name = eotg_test_back  value = {{ value = var:eotg_test_before subtract = {val} }} }}
+{writer} = {{ AMOUNT = scope:eotg_test_back }}
+remove_variable = eotg_test_before
+{log(f'{tid} LOOK: a landless councillor shows no band line (V-CO13); gold no longer adds vote strength (V-TO13)')}
+{log(f'{tid} DONE (value restored)')}""")
+    T(tid, key, f'{tid}: {gname} Election Bands',
+      f'As a landed {gname} ruler: moves your value to each vote-strength band edge, a day apart, and says what the succession tooltip should show. Then restores the value.',
+      refs,
+      f"""
+{log(f'{tid} START: election bands')}
+if = {{
+    limit = {{ {role} = no }}
+    {log(f'{tid} SKIP: needs a landed {gname} ruler')}
+}}
+else = {{
+    set_variable = {{ name = eotg_test_before  value = {val} }}
+    trigger_event = {{ id = eotg_test.{base}  days = 1 }}
+}}""", steps)
+
+# ---------------------------------------------------------------- Void Corruption (docs/specs/void_corruption_v2.md §10)
+VOID_BANDS = ('eotg_mod_void_whispers', 'eotg_mod_void_pressure', 'eotg_mod_void_saturation')
+def only_band(keep, mods=VOID_BANDS):
+    return '\n'.join((f'has_character_modifier = {m}' if m == keep else f'NOT = {{ has_character_modifier = {m} }}') for m in mods)
+def void_to(target):
+    return delta_to('eotg_test_delta', target, 'var:eotg_void_exposure') + '\neotg_void_change_exposure_effect = { AMOUNT = scope:eotg_test_delta }'
+
+T('VD1', 'vd1_void_bands', 'VD1: Void Exposure Bands',
+  'As a ruler who is not Hollowed: moves Void exposure through 24, 25, 50 and 75 with its only writer, a day apart, and checks that exactly the right band modifier follows each time. Then restores your exposure.',
+  'Void spec V-V3',
+  f"""
+{log('VD1 START: exposure bands')}
+if = {{
+    limit = {{ has_trait = eotg_void_hollowed }}
+    {log('VD1 SKIP: the Hollowed carry no exposure band; use a ruler who is not Hollowed')}
+}}
+else = {{
+    eotg_void_change_exposure_effect = {{ AMOUNT = 0 }}
+    set_variable = {{ name = eotg_test_before  value = var:eotg_void_exposure }}
+{ind(void_to(24), 4)}
+    trigger_event = {{ id = eotg_test.501  days = 1 }}
+}}""",
+  [ev('eotg_test.501', f"""
+{check('VD1.1', only_band('none'), 'exposure 24: no band', 'a band modifier is present at exposure 24')}
+{void_to(25)}
+trigger_event = {{ id = eotg_test.502  days = 1 }}"""),
+   ev('eotg_test.502', f"""
+{check('VD1.2', only_band(VOID_BANDS[0]), 'exposure 25: Void Whispers only', 'exposure 25 is not Whispers alone')}
+{void_to(50)}
+trigger_event = {{ id = eotg_test.503  days = 1 }}"""),
+   ev('eotg_test.503', f"""
+{check('VD1.3', only_band(VOID_BANDS[1]), 'exposure 50: Void Pressure only (Whispers removed)', 'exposure 50 is not Pressure alone')}
+{void_to(75)}
+trigger_event = {{ id = eotg_test.504  days = 1 }}"""),
+   ev('eotg_test.504', f"""
+{check('VD1.4', only_band(VOID_BANDS[2]), 'exposure 75: Void Saturation only', 'exposure 75 is not Saturation alone')}
+{void_to('var:eotg_test_before')}
+if = {{
+    limit = {{ var:eotg_void_exposure < 25 }}
+    {check('VD1.5', only_band('none'), 'restored below 25: no band', 'a band survived the restore')}
+}}
+else = {{
+    {check('VD1.5', 'OR = { ' + ' '.join(f'has_character_modifier = {m}' for m in VOID_BANDS) + ' }', 'restored: a band matches the restored exposure', 'no band after restoring an exposure of 25 or more')}
+}}
+remove_variable = eotg_test_before
+{log('VD1 LOOK: the band modifier tooltip text (Whispers, Pressure, Saturation)')}
+{log('VD1 DONE (exposure restored; VD1 may have advanced Void events: the on_action reads exposure yearly)')}""")])
+
+T('VD2', 'vd2_void_hollowing_path', 'VD2: The Hollowing Through the Yearly Pulse',
+  'Makes you Void-Touched with exposure 100 through the system\'s own effects, clears the Void event cooldown, runs the real yearly Void pulse once, and checks that the pulse set the cooldown itself. The Hollowing event follows: answer it (avoid stepping down if you want to keep playing this ruler), then run VD3. This ruler stays Hollowed: throwaway save.',
+  'Void spec V-V8, V-V17 (cooldown authority in the on_action)',
+  f"""
+{log('VD2 START: the Hollowing through the yearly pulse')}
+if = {{
+    limit = {{ has_trait = eotg_void_hollowed }}
+    {log('VD2 SKIP: already Hollowed; run VD3')}
+}}
+else = {{
+    eotg_void_become_touched_effect = yes
+    eotg_void_change_exposure_effect = {{ AMOUNT = 100 }}
+    if = {{
+        limit = {{ has_character_flag = eotg_flag_void_event_cooldown }}
+        remove_character_flag = eotg_flag_void_event_cooldown
+    }}
+    trigger_event = {{ on_action = eotg_on_yearly_void_check }}
+    trigger_event = {{ id = eotg_test.511  days = 1 }}
+}}""",
+  [ev('eotg_test.511', f"""
+{check('VD2.1', 'has_character_flag = eotg_flag_void_event_cooldown', 'the on_action set the event cooldown when it fired the Hollowing (no event sets it)', 'no cooldown flag after the pulse fired: the on_action is not the cooldown authority, or the Hollowing branch did not fire')}
+{check('VD2.2', 'var:eotg_void_exposure >= 100', 'exposure is at the cap (Touched accrual cannot lower it)', 'exposure fell below 100 after the pulse')}
+{log('VD2 LOOK: The Hollowing (eotg_void.0030) arrives within 10 days; answer it, then take VD3')}
+{log('VD2 DONE')}""")])
+
+T('VD3', 'vd3_void_depth', 'VD3: Hollowing Depth Bands and Drift',
+  'As a Hollowed ruler (run VD2 first): checks the Hollowed state, moves Hollowing depth through 50, 85 and 10 with its only writer and checks the depth band each time, then runs the yearly Void pulse once and checks the +4 drift. Restores your depth.',
+  'Void spec V-V9, V-V10, V-V11, V-V12',
+  f"""
+{log('VD3 START: Hollowing depth bands and drift')}
+if = {{
+    limit = {{ NOT = {{ has_trait = eotg_void_hollowed }} }}
+    {log('VD3 SKIP: needs the Hollowed trait; run VD2 and answer The Hollowing')}
+}}
+else = {{
+    {check('VD3.1', 'NOT = { has_trait = eotg_void_touched }\nvar:eotg_void_exposure >= 100\n' + only_band('none'), 'Hollowed state: Touched removed, exposure 100, no exposure band', 'the Hollowed state is wrong (Touched kept, exposure below 100, or a band left)')}
+    # UNVERIFIED-VANILLA: has_opinion_modifier = {{ modifier target }} (vanilla trigger)
+    if = {{
+        limit = {{ any_courtier = {{ count >= 1 }} }}
+        {check('VD3.2', 'any_courtier = { has_opinion_modifier = { modifier = eotg_opinion_void_unreachable target = root } }', 'the court holds the Unreachable opinion of you', 'no courtier has eotg_opinion_void_unreachable')}
+    }}
+    set_variable = {{ name = eotg_test_before  value = var:eotg_void_hollowing_depth }}
+{ind(delta_to('eotg_test_delta', 50, 'var:eotg_void_hollowing_depth'), 4)}
+    eotg_void_change_hollowing_depth_effect = {{ AMOUNT = scope:eotg_test_delta }}
+    trigger_event = {{ id = eotg_test.521  days = 1 }}
+}}""",
+  [ev('eotg_test.521', f"""
+{check('VD3.3', only_band('eotg_mod_void_hollow_far', ('eotg_mod_void_hollow_far', 'eotg_mod_void_hollow_quiet')), 'depth 50: Far Off only', 'depth 50 is not Far Off alone')}
+{delta_to('eotg_test_delta', 85, 'var:eotg_void_hollowing_depth')}
+eotg_void_change_hollowing_depth_effect = {{ AMOUNT = scope:eotg_test_delta }}
+trigger_event = {{ id = eotg_test.522  days = 1 }}"""),
+   ev('eotg_test.522', f"""
+{check('VD3.4', only_band('eotg_mod_void_hollow_quiet', ('eotg_mod_void_hollow_far', 'eotg_mod_void_hollow_quiet')), 'depth 85: Gone Quiet only (Far Off removed)', 'depth 85 is not Gone Quiet alone')}
+{delta_to('eotg_test_delta', 10, 'var:eotg_void_hollowing_depth')}
+eotg_void_change_hollowing_depth_effect = {{ AMOUNT = scope:eotg_test_delta }}
+trigger_event = {{ id = eotg_test.523  days = 1 }}"""),
+   ev('eotg_test.523', f"""
+{check('VD3.5', 'NOT = { has_character_modifier = eotg_mod_void_hollow_far }\nNOT = { has_character_modifier = eotg_mod_void_hollow_quiet }', 'depth 10: no depth band', 'a depth band survived at depth 10')}
+# The real pulse: depth drift +4. The Hollowing set a 5-year cooldown, so no
+# stage-D event should roll; if the cooldown has lapsed, 0031 or 0032 may follow.
+trigger_event = {{ on_action = eotg_on_yearly_void_check }}
+trigger_event = {{ id = eotg_test.524  days = 1 }}"""),
+   ev('eotg_test.524', f"""
+{check('VD3.6', eq('var:eotg_void_hollowing_depth', '14'), 'the yearly pulse drifted depth by exactly +4', 'depth did not drift by exactly +4 in one pulse')}
+{delta_to('eotg_test_delta', 'var:eotg_test_before', 'var:eotg_void_hollowing_depth')}
+eotg_void_change_hollowing_depth_effect = {{ AMOUNT = scope:eotg_test_delta }}
+remove_variable = eotg_test_before
+{log('VD3 LOOK: the Far Off and Gone Quiet tooltips')}
+{log('VD3 DONE (depth restored)')}""")])
+
+T('VD4', 'vd4_voidwalker', 'VD4: The Voidwalker at Court',
+  'Creates and seats a Voidwalker with the same effects as option a of The Voidwalker at the Gate, then checks that the yearly accrual fell by exactly 6 and that the Voidwalker Ward decision can be taken.',
+  'Void spec V-V13 (the v1 Voidwalker bug)',
+  f"""
+{log('VD4 START: the Voidwalker courtier')}
+if = {{
+    limit = {{ eotg_void_has_voidwalker = yes }}
+    {log('VD4 SKIP: a Voidwalker is already at your court, so the accrual change cannot show; reload a save without one')}
+}}
+else = {{
+    set_variable = {{ name = eotg_test_before  value = eotg_void_yearly_accrual_value }}
+    eotg_void_create_voidwalker_effect = yes
+    eotg_void_shelter_voidwalker_effect = yes
+    trigger_event = {{ id = eotg_test.531  days = 1 }}
+}}""",
+  [ev('eotg_test.531', f"""
+{check('VD4.1', 'any_courtier = { has_character_flag = eotg_flag_void_voidwalker }', 'the Voidwalker is a flagged courtier (the flag is no longer on the ruler)', 'no courtier carries eotg_flag_void_voidwalker')}
+{check('VD4.2', eq('eotg_void_yearly_accrual_value', '{ value = var:eotg_test_before add = -6 }'), 'the yearly accrual fell by exactly 6', 'the accrual did not fall by 6 with a Voidwalker at court')}
+if = {{
+    limit = {{
+        has_trait = eotg_void_hollowed
+    }}
+    {log('VD4.3 SKIP: the Hollowed cannot take the Voidwalker Ward')}
+}}
+else_if = {{
+    limit = {{
+        OR = {{
+            has_character_flag = eotg_flag_void_ward_cooldown
+            gold < 100
+        }}
+    }}
+    {log('VD4.3 SKIP: the ward cooldown is running or you have under 100 gold; the decision should still be listed, greyed out (LOOK)')}
+}}
+else = {{
+    {check('VD4.3', 'can_execute_decision = eotg_decision_void_voidwalker_ward', 'the Voidwalker Ward decision can be taken', 'the Voidwalker Ward decision cannot be taken with a Voidwalker at court')}
+}}
+remove_variable = eotg_test_before
+{log('VD4 LOOK: the Decisions tab lists Ask the Voidwalker for the Old Ward')}
+{log('VD4 DONE')}""")])
+
+def skill_sum():
+    # UNVERIFIED-VANILLA: skills read as values (as CY1 reads prowess)
+    return '{ value = diplomacy add = martial add = stewardship add = intrigue add = learning add = prowess }'
+T('VD5', 'vd5_void_insight', 'VD5: One Insight per Character',
+  'Runs the Void Insight effect twice and checks that both runs gave their +2 skill but only one Insight modifier was ever added.',
+  'Void spec V-V16',
+  f"""
+{log('VD5 START: Insight re-application guard')}
+if = {{
+    limit = {{ eotg_void_has_any_insight = yes }}
+    {log('VD5 SKIP: you already hold an Insight; reload a save without one')}
+}}
+else = {{
+    set_variable = {{ name = eotg_test_before  value = {skill_sum()} }}
+    eotg_void_insight_effect = yes
+    eotg_void_insight_effect = yes
+    trigger_event = {{ id = eotg_test.541  days = 1 }}
+}}""",
+  [ev('eotg_test.541', f"""
+{check('VD5.1', eq(skill_sum(), '{ value = var:eotg_test_before add = 4 }'), 'two Insights gave +2 skill each (+4 total)', 'the skill total did not rise by exactly 4')}
+{check('VD5.2', 'eotg_void_has_any_insight = yes', 'an Insight modifier is held', 'no Insight modifier after the effect')}
+remove_variable = eotg_test_before
+{log('VD5.3 LOOK: the character window lists ONE Insight modifier, not two copies')}
+{log('VD5 DONE')}""")])
+
 # ================================================================ write files
 DEC_HDR = """# -- eotg_test_harness_decisions.txt -------------------------------------------
 # GENERATED by docs/tools/gen_test_harness.py: never hand-edit; change the generator and re-run.
