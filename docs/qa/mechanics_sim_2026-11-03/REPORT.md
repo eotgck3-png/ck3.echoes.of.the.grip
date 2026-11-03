@@ -210,7 +210,7 @@ Seats run 50 years (sweep) or 100 years (timings), 10,000 each. Full tables are 
 - **Evidence.**
   - A Touched ruler accrues +8 a year (base 2, Touched 6) from 50–75 to 100, so Touched lasts a median of **4 years** (quartiles 2–5), and **85%** of Touched rulers are Hollowed.
   - The Bargain (0010) or Taken Anyway (0011) that made them Touched set a 5-year cooldown (`eotg_void_on_actions.txt:125-139`). The Hollowing fires regardless of the cooldown (`:46-50`), so the stage-C roll (`:79-121`) rarely gets a turn.
-  - All six stage-C events together fire **0.038 per 100 seat-years** (player, 4% contact), against 0.067 Hollowings. A player meets The Cold Hand or What the Children See about once in 2,600 seat-years.
+  - All six stage-C events together fire **0.038 per 100 seat-years** (player, 4% contact), against 0.203 player Hollowings, so stage-C events are about 7× rarer than Hollowings (0.067 is the AI 1% / 50-year rate). A player meets any one of the six stage-C events about once in 2,600 seat-years. **Local audit 2026-11-03:** the binding constraint is the shared 5-year cooldown set by 0010/0011 (`eotg_void_on_actions.txt:127,137`); cutting that cooldown to 2 years alone takes stage C from 0.037 to 0.245 per seat-century without lengthening Touched (a more direct lever than V1, which gives 0.227 and stretches Touched to about 6 years). V2 is about rarity (0.46–0.50 Voidwalkers per 100 seat-years, about 29% seated), not lateness.
 - **Where:** `common/script_values/eotg_void_values.txt:16` (`has_trait = eotg_void_touched`, `add = 6`).
 - **Proposal V1:** `add = 2`.
 

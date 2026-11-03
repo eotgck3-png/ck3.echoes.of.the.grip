@@ -364,11 +364,11 @@ def main():
     res['density'] = [{'chance': c, 'disc25': c * ai[25], 'disc50': c * ai[50]} for c in (1, 3, 5)]
     md = report(res)
     if a.md:
-        open(a.md, 'w').write(md + '\n')
+        open(a.md, 'w', encoding='utf-8').write(md + '\n')
     print(md)
     import json
     if a.json:
-        json.dump(res, open(a.json, 'w'), indent=1, default=float)
+        json.dump(res, open(a.json, 'w', encoding='utf-8'), indent=1, default=float)
 
 
 if __name__ == '__main__':

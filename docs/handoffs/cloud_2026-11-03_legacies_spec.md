@@ -13,15 +13,15 @@ Spec: `docs/specs/legacies_v2.md`. This is a spec and audit only: no game script
   - **§5.2 every MED and LOW audit row** has a concrete design, plus three new findings: 0102.b is empty; the loc keys move to the Void form; the survey picks through `random_held_title`.
   - **§6 identifier table**, v1 → v2.
   - **§7 fate table:** 16 events, 62 options (32 fixed, 30 lifted, none dropped).
-  - **§8 canon:** under the ERAS rule the "Second Era" *is* pre-Grip, so it stays. "Eight centuries" becomes "nearly nine centuries". "The Confluence" becomes "the Grip". "Hell" becomes "another plane" ("Planar Pocket"). Every flagged line is listed with its file:line. The register is physical and archaeological; the voice mix follows R1.
-  - **§9** has tests V-L1 to V-L18. **§10** has owner questions Q2, Q3, Q4, Q7, Q8, Q9 and Q10, each with a default. **§11** lists the pitch's unbuilt beats, which need owner approval.
+  - **§8 canon:** under the ERAS rule the "Second Era" *is* pre-Grip, so it stays. "Eight centuries" is dropped with no replacement figure: the text says "since the Grip" (local review, 2026-11-03). "The Confluence" becomes "the Grip". "Hell" becomes "a shard of one of the hells", and the family is "Hellshard", pending the vault (local review; this replaces the cloud draft's "another plane" / "Planar Pocket"). Every flagged line is listed with its file:line. The register is physical and archaeological; the voice mix follows R1.
+  - **§9** has tests V-L1 to V-L23 (the local review added V-L22 and V-L23). **§10** has owner questions Q2, Q3, Q4, Q7, Q8, Q9 and Q10, each with a default. **§11** lists the pitch's unbuilt beats, which need owner approval.
 - files: `docs/specs/legacies_v2.md`, this handoff.
-- unverified-vanilla:
-  - `every_county` in a game-start on_action (§4.1);
-  - `random_pool_character` with `province =` (§5.2, LOW-2);
-  - `increase_wounds_effect` REASON keys other than `attacked` (LOW-1);
-  - the event themes `martial`, `stewardship`, `diplomacy`, `intrigue`, `learning`, `faith` and `realm` (lifted from v1).
-- needs-local-validation: none yet (no script). After the build: Tiger and PX, then V-L1 to V-L18.
+- unverified-vanilla: none since the local review (2026-11-03). All of these were verified against vanilla; the citations are in the spec's amendment block and §4.1, §5.2 and §7:
+  - `every_county`;
+  - `random_pool_character` with `province =`;
+  - the wound effect, now `increase_wounds_no_death_effect`;
+  - the event themes.
+- needs-local-validation: none yet (no script). After the build: Tiger and PX, then V-L1 to V-L23.
 - needs-loc: the full conversion of 127 keys (second person to first, dashes, Canadian spelling); the flagged lines are drafted in Appendix A.
 - needs-lore: §8.1. Confirm with the vault that the Second Era is pre-Grip, and send "Confluence" and the Hell/plane wording there.
 - needs-human: Q7 (mod-exclusive), Q2 (names), Q3 (dating), Q4 (Exodus), Q9 (density), Q8 (passive drain), Q10 (weighting).
@@ -39,7 +39,7 @@ Spec: `docs/specs/legacies_v2.md`. This is a spec and audit only: no game script
   - the descs of 0002, 0010, 0020, 0021 (with one heir speech line), 0030 and 0040, plus 0040's title, and option 0021.b;
   - the modifier names and descs.
 
-  The rules applied: first person in the main descs, no dashes, Canadian spelling, "nearly nine centuries", "the Grip", "another plane", bare `[x.GetName]`. The block is BOM-free markdown; the BOM goes on at build time. The other 100-odd keys are left for the voice, dash and spelling conversion at build time.
+  The rules applied: first person in the main descs, no dashes, Canadian spelling, "the Grip", bare `[x.GetName]`. The local review (2026-11-03) replaced "nearly nine centuries" with "since the Grip", "another plane" with "a shard of one of the hells", and "county" with "Shoal". The block is BOM-free markdown; the BOM goes on at build time. The other 100-odd keys are left for the voice, dash and spelling conversion at build time.
 - files: `docs/specs/legacies_v2.md` (Appendix A).
 - needs-lore: the four checks listed under Appendix A.
 - needs-loc: the full 127-key conversion at build time.
@@ -56,6 +56,6 @@ Spec: `docs/specs/legacies_v2.md`. This is a spec and audit only: no game script
   - **B5 / Q9:** survey seeding gives a player about 4 new sites a century.
   - **NEW-4:** 0104 writes integrity directly; route it through the writer.
 - files: `docs/tools/sim/models/legacies.py` (new); `docs/tools/sim/{pdx_read.py,common.py,models/__init__.py}` (copied, identical to `claude/final-h-cloud`); `docs/qa/mechanics_sim_2026-11-03/legacies_v2_sim.md`; the spec (§5.2 NEW-4 and NEW-5, §7, §10, §12, Appendix B).
-- unverified-vanilla: `scope:previous_holder ?= { dynasty = root.dynasty }` in `on_title_gain` (NEW-5).
+- unverified-vanilla: none. The local review (2026-11-03) replaced NEW-5's compare with vanilla's form, `title_on_actions.txt:474-475`.
 - needs-local-validation: rerun `python docs/tools/sim/models/legacies.py` and compare with the md file.
 - needs-human: the revised Q8, Q9 and Q10 defaults, and NEW-5.

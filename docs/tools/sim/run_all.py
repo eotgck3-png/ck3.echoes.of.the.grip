@@ -145,7 +145,7 @@ def main():
         print(f'void: {time.time() - t0:.0f}s', flush=True)
     res['assumptions'] = {k: str(v) for k, v in ASSUMPTIONS.items()}
     res['assumptions_reader'] = assumptions_used()
-    json.dump(res, open(os.path.join(a.out, 'results.json'), 'w'), indent=1, default=float)
+    json.dump(res, open(os.path.join(a.out, 'results.json'), 'w', encoding='utf-8'), indent=1, default=float)
     if 'gov' in parts and 'cyber' in parts and 'frontier' in parts:
         charts(a.out, series_for_chart, cy_series, fr_curves, a.years)
     print('done', round(time.time() - t0), 's')
