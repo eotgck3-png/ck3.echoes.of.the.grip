@@ -36,7 +36,7 @@ The mod is a space setting, but vanilla's interface still says Barony, County, C
 
 ## 3. What was done
 
-### 3.1 Ported: 477 keys in 37 files
+### 3.1 Ported: 461 keys in 37 files
 
 Files are `localization/english/replace/eotg_reflavour_<area>_l_english.yml`, one per v1 source area. `<area>` is the v1 file's name without `eotg_` and `_l_english`. The v1 files were already grouped by vanilla source area, but their exact vanilla origin can't be checked here (no vanilla loc). Each file carries the header line `# UNVERIFIED-VANILLA: keys ported from v1 (CK3 1.19); the local session diffs them against 1.20.1.1`.
 
@@ -53,7 +53,7 @@ The largest: holdings and concepts (63 keys: the tier and holding concept names,
 4. **Formatting tokens are untouched.** `[Concept|E]`, `[x.GetName]`, `$KEY$`, `#S … #!`, `\n` and `[Glossary(...)]` are masked before every substitution.
 5. **Three pronoun allowlist entries** in `docs/tools/eotg_lint_pronoun_allowlist.txt`. Each "they/them" refers to plural commoners, not the named scope.
 
-### 3.3 Held: 693 keys (appendix lists each)
+### 3.3 Held: 709 keys (appendix lists each)
 
 | Reason | Keys | Why |
 |---|---|---|
@@ -64,9 +64,10 @@ The largest: holdings and concepts (63 keys: the tier and holding concept names,
 | **Blocked key: `horse_archers`, `horse_archers_lowercase`** | 2 | "Strike Speeders" collides with the mod's own `eotg_maa_strike_speeders` (glossary §5.6; proposed rename "Skimmer Gunners", not ruled). The other mount-UI keys are ported. |
 | **Conflicting duplicates in v1** | 44 | v1 defined the same key differently in two files. Choosing between them is a localizer merge (glossary §6.2 step 0). Identical duplicates (122) were collapsed into one copy and ported. |
 | **Medieval or Earth word** | 40 | A term key whose value still says knight, archers, crops, harvest, forest, gods, temple, Roman, Persian, Mongol, Meteora… "No medieval words in replaced text". Fix the text, then port. |
+| **Removed in local validation** | 16 | Stale against 1.20.1.1 (2), event prose that escaped the event-id filter (4), and no-ops equal to vanilla (10). Listed in the appendix and in `BLOCKED_KEYS`. |
 | **Already defined in v2** | 14 | The county concept and tier keys, owned by `eotg_county_term_l_english.yml`. |
 
-The filter is a word list (`MEDIEVAL` and `EARTH` in `docs/tools/reflavour_port.py`). It errs towards holding, and it has at least one false positive: "dungeon" matched `dung…`.
+The filter is a word list (`MEDIEVAL`, now including "city", and `EARTH` in `docs/tools/reflavour_port.py`). It errs towards holding, and it has at least one false positive: "dungeon" matched `dung…`.
 
 ### 3.4 Rules checked (static, cloud)
 - **One definition per key:** no key is defined twice anywhere under `localization/` (script check over every `*.yml`).
@@ -75,7 +76,7 @@ The filter is a word list (`MEDIEVAL` and `EARTH` in `docs/tools/reflavour_port.
 - **eotg_lint:** 0 new findings against the baseline (L003 format, L010 references, L013 style, L016 BOM).
 
 ## 4. Known gaps in what was ported
-- **Multi-species voice** (glossary principle 6): a few ported values still assume humans, e.g. "a very callous view on human life" (`child_personality.callous.desc`). The localizer should sweep for "human" and "man/men".
+- **Multi-species voice** (glossary principle 6): the local pass removed "human" from the ported values ("human life" and "other humans" are now neutral). The localizer should still sweep for "man/men".
 - **Residual Earth-feudal flavour that passed the word filter:** "the crown", tournaments and "the Devaraja" (vanilla mechanic names), "Lords and Ladies"-style phrasing in held keys. These are tolerable as vanilla mechanic names. The localizer can tighten them.
 - **Ruler ranks** still read medieval ("Count of X (Shoal)"), by the glossary's keep-for-now proposal.
 

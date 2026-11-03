@@ -946,4 +946,27 @@ Generated 2026-11-03 by the cloud port (spec `docs/specs/reflavour_v2.md`). Ever
 - `hunt_mystical_animal.9002.desc`
 - `culture_tradition_events.2001.desc`
 
+## removed in local validation (16)
 
+Ported by the cloud run, removed on 2026-11-03 after the diff against vanilla 1.20.1.1 (`reflavour_diff.py`). All are in `BLOCKED_KEYS` in `docs/tools/reflavour_port.py`.
+
+**Stale (vanilla 1.20.1.1 changed the string or its tokens)**
+
+- `lesson_basics_religion_3_desc` (vanilla rewrote it)
+- `religious_interaction.6.desc` (extra `GetWifeHusband`; also event prose)
+
+**Event prose (the port holds all event prose; these key forms escaped the event-id filter)**
+
+- `religious_interaction.1.desc`
+- `ep3_contract_event.0094_success`
+- `ep3_contract_event.0094_fail`
+- `ep3_laamp_decision_event.1047_desc_intro`
+
+**No-op (value equals vanilla 1.20.1.1)**
+
+- `building_temple_01`
+- `associates_with_strange_peasants_modifier_desc`
+- `county_holy_order`, `county_mercenary`
+- `duchy_holy_order`, `duchy_mercenary`
+- `kingdom_holy_order`
+- `empire_clan`, `empire_holy_order`, `empire_mercenary`

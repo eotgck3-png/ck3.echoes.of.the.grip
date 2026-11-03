@@ -44,6 +44,17 @@ BLOCKED_FILES={ # pending rulings (glossary_proposal_cloud.md §3, §5.4)
 }
 BLOCKED_KEYS={'horse_archers_lowercase':'as horse_archers (glossary §5.6)','horse_archers':'"Strike Speeders" clashes with the mod\'s own eotg_maa_strike_speeders (glossary §5.6, §6.1 item 12)',
               'horse_archers_flavor':'as horse_archers (glossary §5.6)'}
+# Added in local validation (2026-11-03): keys removed from the port. Never re-add them.
+_NOOP='no-op: value equals vanilla 1.20.1.1'
+_EVT='event prose: the port holds all event prose (key form escaped is_event)'
+BLOCKED_KEYS.update({
+ 'lesson_basics_religion_3_desc':'stale: vanilla 1.20.1.1 rewrote the string',
+ 'religious_interaction.6.desc':'stale: 1.20.1.1 changed its tokens; event prose',
+ 'religious_interaction.1.desc':_EVT,
+ 'ep3_contract_event.0094_success':_EVT,'ep3_contract_event.0094_fail':_EVT,
+ 'ep3_laamp_decision_event.1047_desc_intro':_EVT,
+})
+BLOCKED_KEYS.update({k:_NOOP for k in ('building_temple_01','associates_with_strange_peasants_modifier_desc','county_holy_order','county_mercenary','duchy_holy_order','duchy_mercenary','kingdom_holy_order','empire_clan','empire_holy_order','empire_mercenary')})
 def is_event(k): return bool(re.search(r'\.\d{2,5}(\b|\.|$)',k))
 SEG=re.compile(r'(\[[^\]]*\]|\$[^$]*\$|#[A-Za-z_]+\b|#!)')
 def outside(v, fn):
@@ -57,7 +68,7 @@ def transform(v):
         for a,b in SUBS: t=re.sub(a,b,t)
         return t
     return outside(v,f)
-MEDIEVAL=r"castles?|peasants?|serfs?|knights?|knighted|horses?|wheat|spears?|rice|forests?|forester|villages?|villagers?|lords?|lordling|ladies|crops?|swords?|harvest|kings?|queens?|emperors?|empires?|church(es)?|monaster\w*|fief\w*|manor\w*|plow|plough|pope|bishops?|abbey|kingdoms?|duch(y|ies)|baron(y|ies)|temples?|tribes?\w*|pitchforks?|archers?|axes?|joust\w*|windmill|maund|dung\w*|arrows?|cavalry|steeds?|saddle\w*|mounts?|chivalr\w*|feudal|medieval|god|gods|goddess"
+MEDIEVAL=r"castles?|peasants?|serfs?|knights?|knighted|horses?|wheat|spears?|rice|forests?|forester|villages?|villagers?|lords?|lordling|ladies|crops?|swords?|harvest|kings?|queens?|emperors?|empires?|church(es)?|monaster\w*|fief\w*|manor\w*|plow|plough|pope|bishops?|abbey|kingdoms?|duch(y|ies)|baron(y|ies)|temples?|tribes?\w*|pitchforks?|archers?|axes?|joust\w*|windmill|maund|dung\w*|arrows?|cavalry|steeds?|saddle\w*|cit(y|ies)|mounts?|chivalr\w*|feudal|medieval|god|gods|goddess"
 EARTH=r"roman|rome|muslims?|islam\w*|christian\w*|persian|persia|sicily|german\w*|burgund\w*|shiva|ganga|britannia|toledo|premysl|stadice|meteora|europe\w*|byzant\w*|norse|viking\w*|jesus|catholic|pagan|saxon|frank\w*|india\w*|chin(a|ese)|mongol\w*|arab\w*"
 BAD=re.compile(r'\b('+MEDIEVAL+'|'+EARTH+r')\b',re.I)
 held=collections.OrderedDict(); ported=collections.defaultdict(list); reasons=collections.Counter()
