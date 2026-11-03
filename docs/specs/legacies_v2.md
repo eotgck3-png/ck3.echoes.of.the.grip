@@ -215,6 +215,8 @@ As v1 `:163-180`. The trigger: `scope:title` is a county, a known site and ready
 | **LOW-6** names to confirm | `monthly_county_control_decline_add`: confirmed by v2 use (`common/modifiers/eotg_aug_kingpin_modifiers.txt:82,95`). `on_title_gain` and `on_game_start_after_lobby`: confirmed (§3). |
 | **NEW-1** (this audit) empty option | 0102.b "Leverage" (`eotg_legacy_events.txt:1252`) has no effect at all. v2: the vassal gains `eotg_opinion_legacy_concession_honored`, and the site gains −5 attention (the dispute settled quietly), so it differs from .c. |
 | **NEW-2** (this audit) loc keys | v1 keys are `eotg_legacy_0002_desc` / `_title` / `_opt_<name>`; v2 uses the Void form `eotg_legacy.0002.t` / `.desc` / `.a`… (§6.3). |
+| **NEW-4** (this audit) direct integrity writes | 0104.a and 0104.c set `eotg_legacy_integrity` directly to 20 and 40 (`eotg_legacy_events.txt:1374,1401`), bypassing the writer. v2: `eotg_legacy_change_integrity_effect = { AMOUNT = 20 }` / `40`, from 0. |
+| **NEW-5** (sim, Appendix B) 0105 at every succession | `on_title_gain` fires on inheritance too, so 0105 fires for every known, ready site at every holder death (2.6 per site-century), and its reseal option ratchets sites into Sealed (63% of sites end Sealed). v2: the title-gain check also requires a dynasty change: `NOT = { scope:previous_holder ?= { dynasty = root.dynasty } }` (UNVERIFIED-VANILLA: `scope:previous_holder` is named in `eotg_cartel_on_actions.txt:36`; the `?=` form follows v2 use). Sealed falls to 26%, Governed rises to 54%. |
 | **NEW-3** (this audit) the survey pick | The survey's discovery branch uses `random_held_title` with `eotg_legacy_is_hidden_site = yes` (as §5.1), replacing `random_sub_realm_county` + `holder = root`. |
 
 ---
@@ -267,7 +269,7 @@ As v1 `:163-180`. The trigger: `scope:title` is a county, a known site and ready
 | `eotg_legacy_enclave_protected` | cut | opinion | dead (LOW-3) |
 | none | `eotg_legacy_heir_template` | character template | LOW-2 fallback (shape: `eotg_pmc_operator_template`) |
 | none | `eotg_legacy_survivor_template` | character template | 0003.a (v1 inline `create_character` with `age = 32`) |
-| none | `eotg_legacy_seed_chance_value` (3), `eotg_legacy_attention_decay_value` (−2), `eotg_legacy_aftermath_rival_chance_value` (25), `_vassal_chance_value` (20), `_cult_chance_value` (15) | script values | named, so the sim reads them and the owner can tune them |
+| none | `eotg_legacy_seed_chance_value` (3), `eotg_legacy_attention_decay_value` (−2), `eotg_legacy_aftermath_rival_chance_value` (25), `_vassal_chance_value` (20), `_cult_chance_value` (15), `eotg_legacy_extracted_drain_value` (−1, Q8), `eotg_legacy_attention_floor_value` (25, Q10), `eotg_legacy_rival_gate_value` (25, Q10) | script values | named, so the sim reads them and the owner can tune them |
 
 ### 6.2 Variables, flags and scopes
 
@@ -371,9 +373,9 @@ As v1 `:163-180`. The trigger: `scope:title` is a county, a known site and ready
 | | b infiltrate [intrigue edu ≥ 2] | lifted | |
 | | c tolerate | lifted | |
 | **0104** The Exhausted Legacy | fired by | fixed | Fires on the crossing only (MED-2) |
-| | a stabilize | fixed | Cooldown moved |
+| | a stabilize | fixed | Cooldown moved; the direct integrity set (20) goes through the writer (NEW-4) |
 | | b abandon | fixed | Cooldown moved |
-| | c deeper [learning ≥ 16] | fixed | Cooldown moved; integrity stays 0 (condition back to 2): see Q8 |
+| | c deeper [learning ≥ 16] | fixed | Cooldown moved; the direct integrity set (40) goes through the writer (NEW-4) |
 | **0105** The Seam Changes Hands | a honour | lifted | |
 | | b strip | lifted | |
 | | c reseal | fixed | Cooldown moved |
@@ -485,9 +487,18 @@ As v1 `:163-180`. The trigger: `scope:title` is a county, a known site and ready
   - Send both terms to the vault.
 - **Q3. Pre-Grip dating.** **Default:** sites are pre-Grip; "Second Era" stays (ERAS); "eight centuries" becomes "nearly nine centuries".
 - **Q4. Exodus re-entry.** **Default:** drop the haven path now; a taskboard note re-adds it, with its 10%/yr, when Titan Exodus is lifted.
-- **Q9. Seeding density.** **Default:** `eotg_legacy_seed_chance_value = 3` (about 3% of counties). The sim (§12) gives the discovery and aftermath rates that follow.
-- **Q8 (new). Integrity has no passive drain**, so an Extracted site keeps its tax bonus forever. **Default:** none, as v1. If the sim shows Extracted dominating, add −2 a year for condition 4 (a value, not an event).
-- **Q10 (new). The aftermath weighting at Renowned (×1.5).** **Default:** yes; it is a weight, not a new event.
+- **Q9. Seeding density.** **Default:** `eotg_legacy_seed_chance_value = 3` (about 3% of counties).
+  - Sim (Appendix B): 82% of seeded sites are found within 25 years by AI holders (median 10 years), and at once by players.
+  - For a player, **game-start density matters less than the survey's own seeding.** A survey that finds nothing creates a new site 20% of the time, about 4 new sites per player-century at one survey every 5 years.
+  - If players should not accumulate sites, cut 0002.a's seeding branches (30 + 25 of 100) in half. That is a value change; the owner decides.
+- **Q8 (new). Integrity has no passive drain**, so an Extracted site keeps its tax bonus forever, and in the sim no site ever reaches 0 integrity from play: 0104 fires 0.00 times per site-century. **Default (revised by the sim): −1 a year on condition 4 (Extracted)**, a value (`eotg_legacy_extracted_drain_value`) read in the yearly check.
+  - Result: 12% of sites reach 0, a median 59 years after discovery.
+  - Extracted ends at 1% rather than 11%, and Unstable at 9%. Exploitation now has the cost the pitch describes.
+  - −2 is too fast (16.5% reach 0 in a median 34 years).
+- **Q10 (new). The rival claim (0101) never fires,** at 0.0004 per site-century. Attention peaks at discovery, then the 3-year discovery cooldown blocks every aftermath while −2 a year decay erodes it, so attention ≥ 50 is never met when a roll is allowed; the median attention on a known site is 0.
+  - **Default:** gate 0101 at **25** (Rumoured), and stop the decay at 25 once a site has reached it (a floor, read from `eotg_legacy_attention_floor_value`). Together these give 0101 0.61 per site-century.
+  - Either change alone does little: gate 25 alone gives 0.06, and the floor alone gives 0.
+  - The Renowned ×1.5 weight (old Q10) is moot until attention can reach 75; it is dropped.
 
 ---
 
@@ -506,7 +517,9 @@ None are part of the lift. The pitch describes beats v1 never built. They are li
 
 ## 12. Numbers (the sim)
 
-`docs/tools/sim/models/legacies.py` (this branch) reads the v1 option and on_action amounts through `pdx_read.py` and models the v2 design: per-county seeding, survey-only discovery, the −2 a year decay, and the aftermath chances. Its results are in Appendix B, which justifies the defaults in Q8 and Q9.
+`docs/tools/sim/models/legacies.py` (this branch) reads the v1 option and on_action amounts through `pdx_read.py` and models the v2 design: per-county seeding, survey-only discovery, the −2 a year decay, the aftermath chances, the crossing-only 0104, and title-gain 0105.
+
+Its results are in Appendix B and in `docs/qa/mechanics_sim_2026-11-03/legacies_v2_sim.md`. They justify the revised defaults Q8, Q9 and Q10 and the finding NEW-5.
 
 ---
 
@@ -574,3 +587,46 @@ They go into a UTF-8-with-BOM `localization/english/eotg_legacy_l_english.yml` a
 - "nearly nine centuries";
 - "another plane", which must not read as the Rift (a separate god-prison plane);
 - the 0021 heir line, which may assume nothing beyond the trigger: any adult, so it uses `GetSheHe`.
+
+
+---
+
+## Appendix B: the sim (v2 design, v1 numbers)
+
+**Run:** `python docs/tools/sim/models/legacies.py --md docs/qa/mechanics_sim_2026-11-03/legacies_v2_sim.md` (about 1 minute; numpy only). It runs 20,000 sites × 100 years per scenario, seed 20261103. The full tables are in that file.
+
+**Model:** site-centric, one site per holder, which is the common case at 3% density. **It reads from the v1 script:**
+- every option's AI weight, gate, attention and integrity amounts, condition writes, direct integrity sets, `random_list` branches and follow-up events;
+- the survey's `ai_will_do`, its check interval and the fallback weights;
+- the yearly pulse's decay, aftermath chances, site cooldowns and flag years;
+- the seed weights and the start integrity.
+
+**ASSUMPTIONS:**
+- a gated option is open to the holder 30% of the time;
+- a powerful vassal is present 50% of the time;
+- players survey every 5 years;
+- in the 0105 what-if, 90% of holder deaths are inheritance within the dynasty;
+- AI weights also stand in for players' choices.
+
+| Finding | Evidence (AI holder unless noted) | Spec change |
+|---|---|---|
+| **B1. Discovery is slow for the AI and instant for players** | AI holders survey 6.9% a year (read), so 47% / 82% / 97% of sites are found by 10 / 25 / 50 years, median 10. A player finds every site in the first survey. | None. Q9 notes that player-side seeding comes from the survey. |
+| **B2. Sealed is the absorbing state** | 63% of sites end Sealed (Governed 26%, Extracted 11%). 0105 fires 2.6 times per site-century, once per succession, and its reseal option sends a site to Sealed, which nothing but 0104.c leaves. | **NEW-5:** 0105 only on a dynasty change. Sealed 26%, Governed 54%. |
+| **B3. Integrity never runs out** | 0% of sites reach 0 in 100 years, and 0104 fires 0.00 per site-century, so Extracted is a free +20% tax forever. | **Q8:** −1 a year on Extracted. 12% reach 0 (median 59 years); Extracted 1%. |
+| **B4. The rival claim is dead** | 0101 fires 0.0004 per site-century; the median attention on a known site is 0. | **Q10:** gate 25 plus a floor at 25 gives 0.61 per site-century. |
+| **B5. Survey seeding dominates for players** | 0.20 new sites per survey that finds nothing (0002 40% × 0.43 + 0003 20% × 0.15, read), so about 4 per player-century. | **Q9** note (an optional value change). |
+
+**The recommended package** (NEW-5, Q8 at −1, Q10's gate 25 with floor 25), AI holder, at the end of 100 years:
+
+| Condition | Share of sites |
+|---|---|
+| Governed | 54% |
+| Extracted | 2% |
+| Sealed | 27% |
+| Unstable | 18% |
+
+- 17% of sites reach 0 integrity (median 69 years);
+- aftermath events run 1.12 per site-century;
+- 0101 fires 0.35 per site-century.
+
+**Unstable at 18% is the cost of exploitation, now visible.** If that is too high, use drain −1 only below integrity 50 (a condition on the value).

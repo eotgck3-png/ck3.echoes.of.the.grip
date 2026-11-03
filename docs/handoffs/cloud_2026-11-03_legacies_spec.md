@@ -28,3 +28,34 @@ Spec: `docs/specs/legacies_v2.md`. This is a spec and audit only: no game script
 - taskboard (for the orchestrator to add; I didn't edit it):
   - "Legacies: re-add bookmark seeding of named sites (v1 had 7 history characters) after Gate 1".
   - "Legacies: re-add the Exodus-haven discovery path when Titan Exodus is lifted".
+
+## Deepening (a): Appendix A, replacement loc
+
+### HANDOFF (cloud session, unvalidated)
+- branch: `claude/legacies-spec-cloud`
+- status: done
+- summary: The spec's Appendix A gives exact replacement strings, under the v2 keys, for every flagged line:
+  - the decision name, desc and tooltip;
+  - the descs of 0002, 0010, 0020, 0021 (with one heir speech line), 0030 and 0040, plus 0040's title, and option 0021.b;
+  - the modifier names and descs.
+
+  The rules applied: first person in the main descs, no dashes, Canadian spelling, "nearly nine centuries", "the Grip", "another plane", bare `[x.GetName]`. The block is BOM-free markdown; the BOM goes on at build time. The other 100-odd keys are left for the voice, dash and spelling conversion at build time.
+- files: `docs/specs/legacies_v2.md` (Appendix A).
+- needs-lore: the four checks listed under Appendix A.
+- needs-loc: the full 127-key conversion at build time.
+
+## Deepening (b): the Legacies sim, Appendix B
+
+### HANDOFF (cloud session, unvalidated)
+- branch: `claude/legacies-spec-cloud`
+- status: done
+- summary: `docs/tools/sim/models/legacies.py` reads the **v1** files through `pdx_read.py` (`Script(repo='OLD PROJECT VERSION')`): option weights, gates and amounts, condition and direct integrity writes, `random_list` branches, follow-ups, the survey's AI weight and fallback, the pulse's decay, chances and cooldowns, and the seed weights. It models the v2 design. I copied `pdx_read.py`, `common.py` and `models/__init__.py` unchanged from `claude/final-h-cloud`, so the branches merge clean. Output: `docs/qa/mechanics_sim_2026-11-03/legacies_v2_sim.md`. The findings revise the spec:
+  - **B2 / NEW-5:** 0105 fires at every succession and ratchets 63% of sites into Sealed. Gate it on a dynasty change: Sealed falls to 26%.
+  - **B3 / Q8:** integrity never reaches 0 from play. Default: −1 a year on Extracted.
+  - **B4 / Q10:** the rival claim (0101) never fires. Default: gate 25 plus an attention floor at 25.
+  - **B5 / Q9:** survey seeding gives a player about 4 new sites a century.
+  - **NEW-4:** 0104 writes integrity directly; route it through the writer.
+- files: `docs/tools/sim/models/legacies.py` (new); `docs/tools/sim/{pdx_read.py,common.py,models/__init__.py}` (copied, identical to `claude/final-h-cloud`); `docs/qa/mechanics_sim_2026-11-03/legacies_v2_sim.md`; the spec (§5.2 NEW-4 and NEW-5, §7, §10, §12, Appendix B).
+- unverified-vanilla: `scope:previous_holder ?= { dynasty = root.dynasty }` in `on_title_gain` (NEW-5).
+- needs-local-validation: rerun `python docs/tools/sim/models/legacies.py` and compare with the md file.
+- needs-human: the revised Q8, Q9 and Q10 defaults, and NEW-5.
