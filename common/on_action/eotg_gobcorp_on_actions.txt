@@ -1,0 +1,113 @@
+﻿# -- eotg_gobcorp_on_actions.txt -------------------------------------------------
+# Governments v2, Phase G2, Trade Oligarchy batch TO1 (resource core).
+# Spec: docs/specs/governments_v2_g2_gobcorp.md. Pattern: the shipped Cartel batch C1
+# (eotg_cartel_*.txt), whose shapes were validated locally; this file copies
+# them. UNVALIDATED cloud build (no Tiger, PX or game run).
+# Sets up and tears down the resource core, and passes the resource to the
+# primary heir. Vanilla hooks are extended ADDITIVELY only (CLAUDE.md
+# invariant 4): `on_actions = { }` lists, never a top-level effect/trigger on
+# a vanilla hook. No cooldown; no event. Hook lines and scopes as the shipped
+# eotg_cartel_on_actions.txt (vanilla citations there).
+# Map-agnostic: no title, culture, faith, province or character key.
+# Identity is read through the government flag, never has_government.
+# -----------------------------------------------------------------------------
+
+# Vanilla G/common/on_action/game_start.txt:2 (after history is applied)
+on_game_start = {
+    on_actions = {
+        eotg_gobcorp_on_game_start
+    }
+}
+
+# Ruler-designer characters exist only after the lobby (game_start.txt:2553,
+# via eotg_cartel_on_actions.txt). Init is idempotent.
+on_game_start_after_lobby = {
+    on_actions = {
+        eotg_gobcorp_on_game_start
+    }
+}
+
+# Vanilla government_on_actions.txt:4: root changed government;
+# scope:old_government.
+on_government_change = {
+    on_actions = {
+        eotg_gobcorp_on_government_change
+    }
+}
+
+# Vanilla title_on_actions.txt:229-233: root = the new holder.
+on_title_gain = {
+    on_actions = {
+        eotg_gobcorp_on_title_gain
+    }
+}
+
+# Vanilla death.txt:1-7: root is about to die.
+on_death = {
+    on_actions = {
+        eotg_gobcorp_on_death
+    }
+}
+
+eotg_gobcorp_on_game_start = {
+    effect = {
+        every_ruler = {
+            limit = { eotg_gobcorp_is_landed_gobcorp = yes }
+            eotg_gobcorp_init_effect = yes
+        }
+    }
+}
+
+# Into the government: init. Out of it: teardown. The flag test on a
+# government-type scope is the Cartel's (vanilla 01_grant_title_rules.txt:39-42,
+# cited there).
+eotg_gobcorp_on_government_change = {
+    effect = {
+        if = {
+            limit = { eotg_gobcorp_is_landed_gobcorp = yes }
+            eotg_gobcorp_init_effect = yes
+        }
+        else_if = {
+            limit = {
+                NOT = { government_has_flag = eotg_government_is_gobcorp }
+                scope:old_government = {
+                    government_type_has_flag = eotg_government_is_gobcorp
+                }
+            }
+            eotg_gobcorp_teardown_effect = yes
+        }
+    }
+}
+
+# Catches heirs (the dead ruler's story ended in on_owner_death) and newly
+# landed courtiers. Trigger-gated so it stays cheap.
+eotg_gobcorp_on_title_gain = {
+    trigger = {
+        eotg_gobcorp_is_landed_gobcorp = yes
+        NOT = {
+            any_owned_story = { story_type = eotg_story_gobcorp_market }
+        }
+    }
+    effect = {
+        eotg_gobcorp_init_effect = yes
+    }
+}
+
+# Inheritance (spec §2.4; the brief: resources follow primary_heir). Under an
+# election, primary_heir is the current vote leader, and the vote resolves
+# with the same votes at death (governments_v2_g2_succession.md). The heir may
+# not hold the government yet; the value waits on it, and init keeps it.
+eotg_gobcorp_on_death = {
+    trigger = {
+        government_has_flag = eotg_government_is_gobcorp
+        exists = primary_heir
+        has_variable = eotg_gobcorp_market_share
+        eotg_gobcorp_market_share_value > 0
+    }
+    effect = {
+        save_scope_as = eotg_gobcorp_predecessor
+        primary_heir = {
+            eotg_gobcorp_change_market_share_effect = { AMOUNT = eotg_gobcorp_market_share_inherit_value }
+        }
+    }
+}

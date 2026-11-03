@@ -1,0 +1,28 @@
+﻿# -- eotg_pmc_modifiers.txt ------------------------------------------------------
+# Governments v2, Phase G2, PMC batch P1 (resource core).
+# Spec: docs/specs/governments_v2_g2_pmc.md. Pattern: the shipped Cartel batch C1
+# (eotg_cartel_*.txt), whose shapes were validated locally; this file copies
+# them. UNVALIDATED cloud build (no Tiger, PX or game run).
+# Map-agnostic: no title, culture, faith, province or character key.
+# Identity is read through the government flag, never has_government.
+# -----------------------------------------------------------------------------
+
+# Display layer 1 (spec §2.7): scaled by the resource itself, so the
+# character window shows the live value. Added without duration by
+# eotg_pmc_init_effect, removed by eotg_pmc_teardown_effect and the story's
+# on_end. Shape: eotg_cartel_schedule_modifier (vanilla
+# prepare_travels_character_modifier, cited there). The icon and the modifier
+# keys are used by shipped mod files.
+# UNVERIFIED-VANILLA: fractional per-unit values under display_mode = scaled
+# (the Cartel used an integer, dread_baseline_add = 1). Check the tooltip.
+eotg_pmc_standing_modifier = {
+    icon = martial_positive
+    monthly_prestige = 0.01            # +1 prestige a month at 100
+    knight_effectiveness_mult = 0.001  # +10% knight effectiveness at 100
+
+    scale = {
+        value = eotg_pmc_standing_value
+        desc = eotg_pmc_standing_scale_desc
+        display_mode = scaled
+    }
+}

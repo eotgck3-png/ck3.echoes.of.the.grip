@@ -1,0 +1,56 @@
+﻿# -- eotg_pmc_values.txt ---------------------------------------------------------
+# Governments v2, Phase G2, PMC batch P1 (resource core).
+# Spec: docs/specs/governments_v2_g2_pmc.md. Pattern: the shipped Cartel batch C1
+# (eotg_cartel_*.txt), whose shapes were validated locally; this file copies
+# them. UNVALIDATED cloud build (no Tiger, PX or game run).
+# All character scope. The resource is var:eotg_pmc_standing, 0 to 100.
+# READ IT ONLY THROUGH eotg_pmc_standing_value (0 when unset). The only writer is
+# eotg_pmc_change_standing_effect (eotg_pmc_effects.txt).
+# AMOUNT RULE (Cartel QA C2, 2026-10-20): the change effect takes a number or
+# a NAMED value, never an inline { } block (Tiger error(macro)).
+# Map-agnostic: no title, culture, faith, province or character key.
+# Identity is read through the government flag, never has_government.
+# -----------------------------------------------------------------------------
+
+# The resource, 0 when unset. Shape: eotg_cartel_schedule_scale_value
+# (eotg_cartel_values.txt; vanilla prepare_travels_modifier_value, cited there).
+eotg_pmc_standing_value = {
+    value = 0
+    if = {
+        limit = {
+            has_variable = eotg_pmc_standing
+        }
+        value = var:eotg_pmc_standing
+    }
+}
+
+# The new value the change effect writes: current + scope:eotg_pmc_standing_amount,
+# clamped to [0, 100] (spec §2.2, §2.3).
+eotg_pmc_standing_next_value = {
+    value = eotg_pmc_standing_value
+    add = scope:eotg_pmc_standing_amount
+    min = 0
+    max = 100
+}
+
+# Start value, written once by eotg_pmc_init_effect when the variable is unset
+# (spec §2.2, OQ5): 40 for the independent ruler, 20 for a vassal.
+eotg_pmc_standing_start_value = {
+    value = 20
+    if = {
+        limit = { eotg_pmc_role_top = yes }
+        value = 40
+    }
+}
+
+# Inheritance (spec §2.4): evaluated in the PRIMARY HEIR's scope by
+# eotg_pmc_on_death. The heir ends with the higher of its own value and
+# 0.75 x the predecessor's (scope:eotg_pmc_predecessor). The on_death trigger
+# guarantees the predecessor holds the variable, so the direct var: read is
+# safe here (with the story sync, an exception to "read through eotg_pmc_standing_value").
+eotg_pmc_standing_inherit_value = {
+    value = scope:eotg_pmc_predecessor.var:eotg_pmc_standing
+    multiply = 0.75
+    subtract = eotg_pmc_standing_value
+    min = 0
+}

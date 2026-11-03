@@ -1,0 +1,56 @@
+﻿# -- eotg_corporation_values.txt -------------------------------------------------
+# Governments v2, Phase G2, Corporation batch CO1 (resource core).
+# Spec: docs/specs/governments_v2_g2_corporation.md. Pattern: the shipped Cartel batch C1
+# (eotg_cartel_*.txt), whose shapes were validated locally; this file copies
+# them. UNVALIDATED cloud build (no Tiger, PX or game run).
+# All character scope. The resource is var:eotg_corp_board_influence, 0 to 100.
+# READ IT ONLY THROUGH eotg_corporation_board_influence_value (0 when unset). The only writer is
+# eotg_corporation_change_board_influence_effect (eotg_corporation_effects.txt).
+# AMOUNT RULE (Cartel QA C2, 2026-10-20): the change effect takes a number or
+# a NAMED value, never an inline { } block (Tiger error(macro)).
+# Map-agnostic: no title, culture, faith, province or character key.
+# Identity is read through the government flag, never has_government.
+# -----------------------------------------------------------------------------
+
+# The resource, 0 when unset. Shape: eotg_cartel_schedule_scale_value
+# (eotg_cartel_values.txt; vanilla prepare_travels_modifier_value, cited there).
+eotg_corporation_board_influence_value = {
+    value = 0
+    if = {
+        limit = {
+            has_variable = eotg_corp_board_influence
+        }
+        value = var:eotg_corp_board_influence
+    }
+}
+
+# The new value the change effect writes: current + scope:eotg_corporation_board_amount,
+# clamped to [0, 100] (spec §2.2, §2.3).
+eotg_corporation_board_influence_next_value = {
+    value = eotg_corporation_board_influence_value
+    add = scope:eotg_corporation_board_amount
+    min = 0
+    max = 100
+}
+
+# Start value, written once by eotg_corporation_init_effect when the variable is unset
+# (spec §2.2, OQ5): 50 for the independent ruler, 20 for a vassal.
+eotg_corporation_board_influence_start_value = {
+    value = 20
+    if = {
+        limit = { eotg_corporation_role_top = yes }
+        value = 50
+    }
+}
+
+# Inheritance (spec §2.4): evaluated in the PRIMARY HEIR's scope by
+# eotg_corporation_on_death. The heir ends with the higher of its own value and
+# 0.5 x the predecessor's (scope:eotg_corporation_predecessor). The on_death trigger
+# guarantees the predecessor holds the variable, so the direct var: read is
+# safe here (with the story sync, an exception to "read through eotg_corporation_board_influence_value").
+eotg_corporation_board_influence_inherit_value = {
+    value = scope:eotg_corporation_predecessor.var:eotg_corp_board_influence
+    multiply = 0.5
+    subtract = eotg_corporation_board_influence_value
+    min = 0
+}
