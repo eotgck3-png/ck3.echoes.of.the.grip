@@ -13,7 +13,7 @@
 # _story_cycles.info and book_translation_story_cycle.txt, cited there).
 # Tiger 1.17 flags visible/icon/background/visualization: benign (CLAUDE.md).
 # The background file is already used by a shipped mod file.
-# Batch TO1: the monthly tick only. The next batch adds the yearly tick.
+# Batch TO1: the monthly tick. Batch TO2: the yearly trade-and-war tick.
 # Map-agnostic: no title, culture, faith, province or character key.
 # Identity is read through the government flag, never has_government.
 # -----------------------------------------------------------------------------
@@ -93,4 +93,40 @@ eotg_story_gobcorp_market = {
             }
         }
     }
+
+    # Yearly tick (spec §2.5, §3.2; batch TO2): war is bad for trade (-4),
+    # peace grows it (+1). THIS is the feed's only cadence authority
+    # (invariant 4, v1 lesson 5). Each branch checks the owner itself.
+    effect_group = {
+        years = 1
+        first_valid = {
+            triggered_effect = {
+                trigger = {
+                    story_owner = {
+                        eotg_gobcorp_is_landed_gobcorp = yes
+                        is_at_war = yes
+                    }
+                }
+                effect = {
+                    story_owner = {
+                        eotg_gobcorp_change_market_share_effect = { AMOUNT = eotg_gobcorp_war_loss_value }
+                    }
+                }
+            }
+            triggered_effect = {
+                trigger = {
+                    story_owner = {
+                        eotg_gobcorp_is_landed_gobcorp = yes
+                        is_at_war = no
+                    }
+                }
+                effect = {
+                    story_owner = {
+                        eotg_gobcorp_change_market_share_effect = { AMOUNT = eotg_gobcorp_peace_gain_value }
+                    }
+                }
+            }
+        }
+    }
 }
+

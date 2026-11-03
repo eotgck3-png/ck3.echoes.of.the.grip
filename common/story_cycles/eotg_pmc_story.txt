@@ -13,7 +13,7 @@
 # _story_cycles.info and book_translation_story_cycle.txt, cited there).
 # Tiger 1.17 flags visible/icon/background/visualization: benign (CLAUDE.md).
 # The background file is already used by a shipped mod file.
-# Batch P1: the monthly tick only. The next batch adds the yearly tick.
+# Batch P1: the monthly tick. Batch P2: the yearly drift tick.
 # Map-agnostic: no title, culture, faith, province or character key.
 # Identity is read through the government flag, never has_government.
 # -----------------------------------------------------------------------------
@@ -89,6 +89,27 @@ eotg_story_pmc_standing = {
                 }
                 effect = {
                     story_owner = { eotg_pmc_sync_story_effect = yes }
+                }
+            }
+        }
+    }
+
+    # Yearly tick (spec §3.2, §5.2; batch P2): the drift. Above 60, standing
+    # falls by 2 a year ("the market forgets"). THIS is the drift's only
+    # cadence authority (invariant 4, v1 lesson 5): nothing else checks it.
+    effect_group = {
+        years = 1
+        trigger = {
+            story_owner = {
+                eotg_pmc_is_landed_pmc = yes
+                eotg_pmc_standing_value > eotg_pmc_drift_threshold_value
+            }
+        }
+        triggered_effect = {
+            trigger = { always = yes }
+            effect = {
+                story_owner = {
+                    eotg_pmc_change_standing_effect = { AMOUNT = eotg_pmc_drift_value }
                 }
             }
         }

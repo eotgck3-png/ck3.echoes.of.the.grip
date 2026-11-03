@@ -13,7 +13,7 @@
 # _story_cycles.info and book_translation_story_cycle.txt, cited there).
 # Tiger 1.17 flags visible/icon/background/visualization: benign (CLAUDE.md).
 # The background file is already used by a shipped mod file.
-# Batch CO1: the monthly tick only. The next batch adds the yearly tick.
+# Batch CO1: the monthly tick. Batch CO2: the yearly results tick.
 # Map-agnostic: no title, culture, faith, province or character key.
 # Identity is read through the government flag, never has_government.
 # -----------------------------------------------------------------------------
@@ -93,4 +93,43 @@ eotg_story_corporation_board = {
             }
         }
     }
+
+    # Yearly tick (spec §2.5, §3.2; batch CO2): the results feed. In debt, the
+    # board loses faith (-5); solvent and at peace, it gains (+3). THIS is the
+    # feed's only cadence authority (invariant 4, v1 lesson 5).
+    effect_group = {
+        years = 1
+        # No group-level trigger next to first_valid: each branch checks the
+        # owner itself (the Cartel's ticks use one form or the other, never both)
+        first_valid = {
+            triggered_effect = {
+                trigger = {
+                    story_owner = {
+                        eotg_corporation_is_landed_corporation = yes
+                        gold < 0
+                    }
+                }
+                effect = {
+                    story_owner = {
+                        eotg_corporation_change_board_influence_effect = { AMOUNT = eotg_corporation_debt_loss_value }
+                    }
+                }
+            }
+            triggered_effect = {
+                trigger = {
+                    story_owner = {
+                        eotg_corporation_is_landed_corporation = yes
+                        gold > 0
+                        is_at_war = no
+                    }
+                }
+                effect = {
+                    story_owner = {
+                        eotg_corporation_change_board_influence_effect = { AMOUNT = eotg_corporation_results_gain_value }
+                    }
+                }
+            }
+        }
+    }
 }
+

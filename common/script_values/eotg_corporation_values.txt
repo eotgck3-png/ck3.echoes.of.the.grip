@@ -54,3 +54,36 @@ eotg_corporation_board_influence_inherit_value = {
     subtract = eotg_corporation_board_influence_value
     min = 0
 }
+
+# -- Batches CO2-CO5 (spec §2.5, §4, §5, §6; first-pass numbers, OQ6) --------
+# Every amount the change effect receives is a NAMED value (the AMOUNT rule).
+
+# CO2: the yearly results feed (spec §2.5, story yearly tick)
+eotg_corporation_results_gain_value = 3
+eotg_corporation_debt_loss_value = -5
+
+# CO3: Push Through a Restructuring (spec §4.1)
+eotg_corporation_restructure_cost_value = 25
+eotg_corporation_restructure_spend_value = -25
+# The AI keeps 20 after the spend (spec §4.1 ai_will_do)
+eotg_corporation_restructure_ai_floor_value = 45
+
+# CO3: Court the Board (spec §4.2): the director gains, the CEO's hold loosens
+eotg_corporation_court_gain_value = 15
+eotg_corporation_court_erosion_value = -5
+
+# CO4: Dissolve the Board (spec §6.2). Legitimacy reads influence BEFORE it
+# is zeroed. Cap: major_legitimacy_gain, as eotg_cartel_exit_legitimacy_value.
+eotg_corporation_exit_legitimacy_value = {
+    value = eotg_corporation_board_influence_value
+    multiply = 2
+    max = major_legitimacy_gain
+}
+eotg_corporation_exit_loss_value = {
+    value = eotg_corporation_board_influence_value
+    multiply = -1
+}
+
+# CO5: the board election's bands (spec §5)
+eotg_corporation_board_vote_band_1_value = 40
+eotg_corporation_board_vote_band_2_value = 75

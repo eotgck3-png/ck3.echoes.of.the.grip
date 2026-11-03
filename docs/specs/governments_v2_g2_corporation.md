@@ -273,14 +273,21 @@ As the PMC spec §6.3. In addition: **an elected heir from a cadet line** gets t
 
 ## 10. Build batches
 
+
+> **Amendment, 2026-11-03 (cloud build of CO2–CO5, unvalidated).**
+> 1. **Built:** CO2 (story yearly results tick), CO3 (Restructure, Court the Board, `eotg_corporation_restructured_modifier`, shared `eotg_restructured_opinion`), CO4 (entry, exit, grant field), CO5 (the election's vote strength reads board influence), and all their loc (the CO6 loc part). CO6's lore-keeper and QA review remain.
+> 2. **CO5 as built:** `eotg_corporation_su_vote_board` keeps its key and now fires at influence ≥ 40 for **any** elector, the holder included. A new `eotg_corporation_su_vote_board_major` fires at ≥ 75. The councillor condition is gone (OQ9 default). Candidates and electors are unchanged (owner ruling: dynasty-only candidates, unrestricted electors). Loc "Seat on the board" became "Hold on the board (40+)".
+> 3. **Deviation:** the §4.2 "+10 if the liege dislikes root" AI term is not built (no opinion-comparison trigger form in v2 script).
+> 4. **The yearly tick** uses `first_valid` with the landed check in each branch, not a group-level `trigger` beside `first_valid` (the Cartel uses one form or the other, never both).
+
 | Batch | Contents | Static gate | In-game tests |
 |---|---|---|---|
 | **CO1, resource core** (**built**, unvalidated) | role ladder; CO1 values; change, sync, init, teardown; board modifier; story (monthly tick); on_actions incl. death inheritance; CO1 loc | Tiger, PX, vocab; one writer of `eotg_corp_board_influence` | V-CO1–V-CO5 |
-| **CO2, results feed** | story yearly tick; CO2 values | one cadence authority | V-CO6 |
-| **CO3, decisions** | Restructure, Court the Board; restructured modifier; shared opinion | `ai_will_do`; moves only through the change effect | V-CO7–V-CO9 |
-| **CO4, transitions and grants** | entry, exit, grant field | entry `ai_potential = always = no` | V-CO10–V-CO12 |
-| **CO5, the election reads the board** | election vote-strength edit (§5) | V-SU re-run | V-CO13 |
-| **CO6, loc and review** | §9 loc for CO2–CO5; lore review; QA | template §5.1 | V-CO14, V-CO15 |
+| **CO2, results feed** (**built (cloud, unvalidated), 2026-11-03**) | story yearly tick; CO2 values | one cadence authority | V-CO6 |
+| **CO3, decisions** (**built (cloud, unvalidated), 2026-11-03**) | Restructure, Court the Board; restructured modifier; shared opinion | `ai_will_do`; moves only through the change effect | V-CO7–V-CO9 |
+| **CO4, transitions and grants** (**built (cloud, unvalidated), 2026-11-03**) | entry, exit, grant field | entry `ai_potential = always = no` | V-CO10–V-CO12 |
+| **CO5, the election reads the board** (**built (cloud, unvalidated), 2026-11-03**) | election vote-strength edit (§5) | V-SU re-run | V-CO13 |
+| **CO6, loc and review** (loc **built (cloud, unvalidated), 2026-11-03**; review pending) | §9 loc for CO2–CO5; lore review; QA | template §5.1 | V-CO14, V-CO15 |
 
 ---
 

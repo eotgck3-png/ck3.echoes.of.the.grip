@@ -111,3 +111,48 @@ eotg_pmc_on_death = {
         }
     }
 }
+
+# -- Batch P2: results in the field (spec §5.1) -------------------------------
+# Root = a combat side (on_combat_end_winner / _loser, vanilla
+# combat_on_actions.txt:12-14, :523-525, via eotg_augmentation_on_actions.txt).
+# The side's war leader, if a landed PMC ruler, gains or loses standing.
+# UNVERIFIED-VANILLA: side_primary_participant as the link from a combat side
+# to its primary participant. The mod has only used every_side_knight on this
+# scope. If the link does not exist, error.log names it; the fallback is the
+# war on_actions or dropping the battle feed (spec §5.1).
+# Cost: one cheap trigger per battle per side. No event, no cooldown; the
+# 0-100 clamp caps a long winning war.
+on_combat_end_winner = {
+    on_actions = {
+        eotg_pmc_on_combat_won
+    }
+}
+
+on_combat_end_loser = {
+    on_actions = {
+        eotg_pmc_on_combat_lost
+    }
+}
+
+eotg_pmc_on_combat_won = {
+    trigger = {
+        side_primary_participant ?= { eotg_pmc_is_landed_pmc = yes }
+    }
+    effect = {
+        side_primary_participant = {
+            eotg_pmc_change_standing_effect = { AMOUNT = eotg_pmc_battle_won_value }
+        }
+    }
+}
+
+eotg_pmc_on_combat_lost = {
+    trigger = {
+        side_primary_participant ?= { eotg_pmc_is_landed_pmc = yes }
+    }
+    effect = {
+        side_primary_participant = {
+            eotg_pmc_change_standing_effect = { AMOUNT = eotg_pmc_battle_lost_value }
+        }
+    }
+}
+

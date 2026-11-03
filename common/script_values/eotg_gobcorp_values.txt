@@ -54,3 +54,43 @@ eotg_gobcorp_market_share_inherit_value = {
     subtract = eotg_gobcorp_market_share_value
     min = 0
 }
+
+# -- Batches TO2-TO5 (spec §2.5, §4, §5, §6; first-pass numbers, OQ6) --------
+# Every amount the change effect receives is a NAMED value (the AMOUNT rule).
+
+# TO2: trade and war (spec §2.5, story yearly tick)
+eotg_gobcorp_peace_gain_value = 1
+eotg_gobcorp_war_loss_value = -4
+
+# TO3: Corner the Market (spec §4.1): the First Prince gains, every partner
+# Prince is squeezed
+eotg_gobcorp_corner_gain_value = 15
+eotg_gobcorp_corner_squeeze_value = -5
+
+# TO3: Undercut a Rival Prince (spec §4.2)
+eotg_gobcorp_undercut_gain_value = 10
+eotg_gobcorp_undercut_loss_value = -10
+
+# TO3: the weight of a candidate rival in Undercut's random pick: 1 + its
+# share, so a bigger rival is likelier (shape: the Cartel walk-off weight,
+# eotg_cartel_effects.txt). Rival scope.
+eotg_gobcorp_rival_weight_value = {
+    value = eotg_gobcorp_market_share_value
+    add = 1
+}
+
+# TO4: Dissolve the Charter (spec §6.2). Gold reads share BEFORE it is zeroed.
+eotg_gobcorp_exit_gold_value = {
+    value = eotg_gobcorp_market_share_value
+    multiply = 5
+    max = 500
+}
+eotg_gobcorp_exit_loss_value = {
+    value = eotg_gobcorp_market_share_value
+    multiply = -1
+}
+
+# TO5: the wealth election's bands (spec §5)
+eotg_gobcorp_vote_band_1_value = 30
+eotg_gobcorp_vote_band_2_value = 60
+eotg_gobcorp_vote_band_3_value = 90

@@ -153,3 +153,109 @@ copying the Cartel's validated C1 shapes. Pattern: `docs/specs/governments_v2_g2
   - Owner decisions: the OQ lists above, and the events (E1–E5 per government).
   - Closes, once validated: template §9.2 item 1 (no signature resource) for these three; assessment GAPs
     pmc G1/Q2, corporation G3, gobcorp G2. Entry/exit (Q5) and grants (§3.14) close with batch 4.
+
+## Part C: the remaining batches (cloud, 2026-11-03)
+
+### HANDOFF (cloud session, unvalidated)
+- branch: claude/governments-g2-three-cloud (continued)
+- status: done. Every batch after batch 1 is built for all three governments: PMC P2–P4, Corporation CO2–CO5,
+  Trade Oligarchy TO2–TO5. The loc part of P5 / CO6 / TO6 is written. Their lore-keeper and QA reviews remain.
+  Each spec's §10 marks the batches "built (cloud, unvalidated), 2026-11-03" and carries a dated amendment listing
+  the build deviations.
+- summary:
+  - **Sources and sinks (yearly ticks).** Each story has a yearly `effect_group`, which is that feed's only cadence
+    authority:
+    - PMC drift: −2 above 60;
+    - Corporation results: debt −5, solvent at peace +3;
+    - Trade Oligarchy: war −4, peace +1.
+  - **PMC battle feed:** additive `on_combat_end_winner` / `_loser` hooks give the side's primary participant +2 /
+    −3 if it is a landed PMC ruler.
+  - **Decisions,** on the shipped Cartel C3/C4 shapes (`desc` / `selection_tooltip` / `confirm_text`, the
+    `cooldown` as the only authority, resource-gated `is_valid` with custom tooltips, a custom tooltip on every
+    hidden change):
+    - PMC: Take a Contract, Deliver Results, Recruit on Reputation (creates an Operator from
+      `eotg_pmc_operator_template`), Run the Realm as a Company, Stand Down the Company;
+    - Corporation: Push Through a Restructuring, Court the Board (erodes the CEO by 5), Incorporate the Realm,
+      Dissolve the Board;
+    - Trade Oligarchy: Corner the Market (squeezes every partner Prince), Undercut a Rival Prince (one rival, a
+      weighted random pick, toast), Sign the Charter, Dissolve the Charter.
+  - **Entries and exits.** Entry `ai_potential = { always = no }` on all three. Exits convert the resource
+    (prestige ×4 / legitimacy ×2 / gold ×5), zero it through the change effect, move same-government vassals to
+    feudal, then `change_government`.
+  - **Grant field.** `possible_grant_vassal_governments = { theocracy_government ecclesiastical_government }` is
+    added to all three government files, verbatim as the Cartel. `grant_vassal_ai_will_do` is deliberately unset
+    (dead code, Cartel spec §7).
+  - **Elections** (`common/succession_election/eotg_government_elections.txt`). Only vote-strength modifiers
+    changed; candidates (dynasty only) and electors are untouched, per the owner ruling.
+    - Corporation: +1 at board influence ≥ 40 and +1 more at ≥ 75, for any elector. The councillor proxy is gone
+      (spec OQ9 default).
+    - Trade Oligarchy: the three wealth modifiers read market share ≥ 30 / 60 / 90 instead of gold
+      ≥ 100 / 300 / 1000. Elector selection still sorts by gold (OQ9 default).
+  - **Shared opinion modifiers** (no government prefix, invariant 7): `eotg_restructured_opinion`,
+    `eotg_market_cornered_opinion`, `eotg_undercut_opinion`.
+  - **Single writer kept:** grep shows one `name = <resource>` per resource, inside its change effect. Every amount
+    is a named script value; there is no inline `{ }` AMOUNT. No vanilla letter is used; feedback is by toast or
+    tooltip.
+  - **No new interaction or contract group:** none of the three specs calls for one. No events.
+- files:
+  - new:
+    - `common/decisions/eotg_pmc_decisions.txt`, `eotg_corporation_decisions.txt`, `eotg_gobcorp_decisions.txt`
+    - `common/opinion_modifiers/eotg_corporation_opinions.txt`, `eotg_gobcorp_opinions.txt`
+    - `common/scripted_character_templates/eotg_pmc_templates.txt`
+  - edited (appended to the batch-1 files):
+    - `common/script_values/eotg_{pmc,corporation,gobcorp}_values.txt`
+    - `common/story_cycles/eotg_{pmc,corporation,gobcorp}_story.txt` (yearly tick)
+    - `common/on_action/eotg_pmc_on_actions.txt` (combat hooks)
+    - `common/modifiers/eotg_pmc_modifiers.txt` (under contract), `eotg_corporation_modifiers.txt`
+      (restructured)
+    - `common/scripted_triggers/eotg_gobcorp_triggers.txt` (rival trigger)
+  - edited (shipped files):
+    - `common/governments/eotg_{pmc,corporation,gobcorp}_government.txt` (grant field)
+    - `common/succession_election/eotg_government_elections.txt` (vote strength)
+    - `localization/english/eotg_government_l_english.yml`: changed `eotg_corporation_su_vote_board` and
+      `eotg_gobcorp_su_vote_wealth_1/2/3`, and `eotg_gobcorp_succession_law_effects`; added
+      `eotg_corporation_su_vote_board_major`
+  - loc: `localization/english/eotg_{pmc,corporation,gobcorp}_l_english.yml`. Decision, modifier and opinion keys
+    were added, and the three story `_info` texts now describe the live sources and sinks. One BOM each.
+  - specs: the three G2 specs (§10 marks plus an amendment each)
+  - `docs/tools/eotg_lint_baseline.json`: +6 entries, all
+    `L001 changed_government_recently` in the three new decisions files. It is the vanilla guard variable, accepted
+    the same way as the Cartel's two entries.
+- unverified-vanilla:
+  - `common/on_action/eotg_pmc_on_actions.txt:119` (used at :139, :150) — `side_primary_participant` as the
+    combat-side → primary-participant link. If it is rejected, swap in the spec §5.1 fallback.
+  - `common/decisions/eotg_gobcorp_decisions.txt:112` (used at :158) — a `weight` block on `random_vassal`. The
+    Cartel uses it on `random_tributary`.
+  - `common/modifiers/eotg_{pmc,corporation,gobcorp}_modifiers.txt:16` — fractional scaled values (from Part B,
+    still open).
+  - Not marked because it is an established form: comparing a script value with a named value in the election
+    (`eotg_government_elections.txt:47`, `:146`). Check the election tooltip in game (V-CO13, V-TO13).
+- needs-local-validation: Tiger + PX on:
+  - `common/decisions/eotg_{pmc,corporation,gobcorp}_decisions.txt`
+  - `common/opinion_modifiers/eotg_{corporation,gobcorp}_opinions.txt`
+  - `common/scripted_character_templates/eotg_pmc_templates.txt`
+  - every `common/*/eotg_{pmc,corporation,gobcorp}_*.txt`
+  - the three government files
+  - `common/succession_election/eotg_government_elections.txt`
+  - `localization/english/eotg_{pmc,corporation,gobcorp,government}_l_english.yml`
+
+  Also re-run V-SU for the two election edits. In game: V-P6–V-P16, V-CO6–V-CO15, V-TO6–V-TO15 (the British Isles
+  data needs two console-made Trade Oligarchy vassals for V-TO8).
+- needs-loc: localizer review of about 95 new or changed keys across the four loc files.
+- needs-lore: the decision names and descs in each spec's §8, all now in loc. In particular: "Restructured Over My
+  Head", "Cornered My Market", "Undercut Me", and "CEO" in prose (not used in the new loc).
+- needs-human:
+  - The owner questions in each spec's §14 are unchanged. The build followed every recommended default:
+    - PMC: Recruit included; 75% inheritance; numbers as listed.
+    - Corporation: erosion −5; councillor +1 dropped; no Port-capital requirement.
+    - Trade Oligarchy: Corner hits every vassal Prince; electors still sorted by gold.
+
+    A different ruling changes a named value or one block.
+  - Build deviations to accept or reject (each spec's 2026-11-03 amendment):
+    - the PMC knight-count conditions are dropped;
+    - the Corporation's liege-opinion AI term is dropped;
+    - the Trade Oligarchy exit's AI term is changed.
+- taskboard: (orchestrator to copy)
+  - G2 batches 2–5 for PMC, Corporation and Trade Oligarchy: built (cloud, unvalidated).
+  - Next: Tiger and PX, then the V-tests above together with CB-49 and V-SU.
+  - The lint baseline grew by 6 accepted entries.

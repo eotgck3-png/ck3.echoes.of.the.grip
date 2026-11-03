@@ -58,3 +58,13 @@ eotg_gobcorp_is_landed_gobcorp = {
     is_landed = yes
     government_has_flag = eotg_government_is_gobcorp
 }
+
+# Batch TO3 (spec §4.2). eotg_gobcorp_is_rival_prince_of = { PRINCE = <character> }
+# A landed Trade Oligarchy vassal who is not PRINCE: a partner who can be
+# undercut. CALLERS iterate PRINCE's liege's vassals (`liege = { any_vassal /
+# random_vassal = { ... } }`), which is what makes it the same charter.
+# `this != <scope>`: as eotg_government_elections.txt:57.
+eotg_gobcorp_is_rival_prince_of = {
+    eotg_gobcorp_role_vassal = yes
+    this != $PRINCE$
+}

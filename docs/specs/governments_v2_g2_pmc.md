@@ -320,13 +320,20 @@ From `governments_v2.md` §5.1, §11 and §17, binding unchanged:
 
 ## 10. Build batches (scripter → localizer → lore-keeper → QA, per batch)
 
+
+> **Amendment, 2026-11-03 (cloud build of P2–P4, unvalidated).**
+> 1. **Built:** P2 (battle hooks `eotg_pmc_on_combat_won` / `_lost`; story yearly drift), P3 (the three decisions, `eotg_pmc_under_contract_modifier`, `eotg_pmc_operator_template`), P4 (entry, exit, `possible_grant_vassal_governments`), and all their loc (the P5 loc part). P5's lore-keeper and QA review remain.
+> 2. **Every amount is a named value** (`eotg_pmc_values.txt`), including the positive ones, so the numbers live in one file.
+> 3. **Deviations:** the §6.1 knight-count entry condition and the §4.3 knight-count AI term are **not built**, because no knight-count trigger is used in v2 script. Entry gates on `martial >= 12` alone. The §4.1 neighbour-at-war AI term is not built; `is_at_war` gates it. The exit's AI is base 0, +10 content, +10 `martial < 8`.
+> 4. **`side_primary_participant`** (§5.1) is built and marked `UNVERIFIED-VANILLA` in `eotg_pmc_on_actions.txt`. If error.log rejects it, swap the hooks for the fallback in §5.1.
+
 | Batch | Contents | Static gate | In-game tests |
 |---|---|---|---|
 | **P1, resource core** (**built** on `claude/governments-g2-three-cloud`, unvalidated) | role-ladder triggers; P1 script values; change, sync, init, teardown effects; `eotg_pmc_standing_modifier`; story (monthly tick); `eotg_pmc_on_actions.txt` (game start, after lobby, government change, title gain, death inheritance); P1 loc | Tiger, PX, vocab; `grep "name = eotg_pmc_standing"` returns one line, inside `eotg_pmc_change_standing_effect` | V-P1–V-P5 |
-| **P2, field results** | combat hooks; story yearly drift tick; P2 values | the side link verified (§5.1); drift has one authority | V-P6, V-P7 |
-| **P3, decisions** | Take a Contract, Deliver Results, Recruit on Reputation (OQ3); under-contract modifier; operator template | `ai_will_do` on all three; each moves standing through the change effect only | V-P8–V-P11 |
-| **P4, transitions and grants** | entry and exit; `possible_grant_vassal_governments` | entry `ai_potential = always = no` | V-P12–V-P14 |
-| **P5, loc and review** | §9 loc for P2–P4; lore-keeper names; QA full pass | template §5.1 items 1–8 | V-P15, V-P16 |
+| **P2, field results** (**built (cloud, unvalidated), 2026-11-03**) | combat hooks; story yearly drift tick; P2 values | the side link verified (§5.1); drift has one authority | V-P6, V-P7 |
+| **P3, decisions** (**built (cloud, unvalidated), 2026-11-03**) | Take a Contract, Deliver Results, Recruit on Reputation (OQ3); under-contract modifier; operator template | `ai_will_do` on all three; each moves standing through the change effect only | V-P8–V-P11 |
+| **P4, transitions and grants** (**built (cloud, unvalidated), 2026-11-03**) | entry and exit; `possible_grant_vassal_governments` | entry `ai_potential = always = no` | V-P12–V-P14 |
+| **P5, loc and review** (loc **built (cloud, unvalidated), 2026-11-03**; review pending) | §9 loc for P2–P4; lore-keeper names; QA full pass | template §5.1 items 1–8 | V-P15, V-P16 |
 
 **Save compatibility (template §4.10):** P1–P3 add keys only. P4 edits a shipped government (adds a grant field), which is not save-breaking. Note it in the P4 commit.
 

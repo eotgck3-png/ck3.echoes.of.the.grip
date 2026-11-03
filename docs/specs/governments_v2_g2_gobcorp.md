@@ -158,7 +158,7 @@ Shape: the Cartel's shipped decisions. Market share is not a `cost` key; gate in
 |---|---|
 | `is_shown` | `eotg_gobcorp_role_top = yes` |
 | `is_valid` | `is_at_war = no`; custom tooltip `eotg_gobcorp_market_share_value < 100` |
-| `cost` | `gold = major_gold_value` (**UNVERIFIED-VANILLA:** the repo reads `minor_gold_value` and `medium_gold_value`; `major_gold_value` is assumed to exist alongside them. Fallback: `medium_gold_value × 2` as a named value) |
+| `cost` | `gold = major_gold_value` (verified in v2 script, amendment 2026-11-03) |
 | `cooldown` | `{ years = 5 }` |
 | `effect` | Own: `eotg_gobcorp_change_market_share_effect = { AMOUNT = eotg_gobcorp_corner_gain_value }` (+15). `every_vassal` with `government_has_flag = eotg_government_is_gobcorp`: `eotg_gobcorp_change_market_share_effect = { AMOUNT = eotg_gobcorp_corner_squeeze_value }` (−5) and `add_opinion = { modifier = eotg_market_cornered_opinion target = root }`. Custom tooltips. |
 | `ai_check_interval_by_tier` | barony 0, county 60, duchy 36, kingdom 36, empire 36, hegemony 36 |
@@ -270,14 +270,21 @@ As the PMC spec §6.3.
 
 ## 10. Build batches
 
+
+> **Amendment, 2026-11-03 (cloud build of TO2–TO5, unvalidated).**
+> 1. **Built:** TO2 (story yearly trade-and-war tick), TO3 (Corner, Undercut, `eotg_gobcorp_is_rival_prince_of`, `eotg_gobcorp_rival_weight_value`, shared `eotg_market_cornered_opinion` and `eotg_undercut_opinion`), TO4 (entry, exit, grant field), TO5 (vote strength reads market share), and all their loc (the TO6 loc part), including the election tooltips and the law description ("Market share adds voting power"). TO6's lore-keeper and QA review remain.
+> 2. **`major_gold_value` is verified**: v2 script reads it 72 times. The §4.1 UNVERIFIED note is withdrawn. The `any_vassal = { count >= 3 }` form is verified too (`eotg_augmentation_laws.txt:90-93`).
+> 3. **`eotg_gobcorp_is_rival_prince_of`** checks role and `this != PRINCE` only. Callers iterate PRINCE's liege's vassals, which is what makes the rival a charter partner.
+> 4. **Deviation:** the exit's AI "+10 at war for long" became "+10 in debt" (the decision needs peace, and no war-length trigger is used in v2).
+
 | Batch | Contents | Static gate | In-game tests |
 |---|---|---|---|
 | **TO1, resource core** (**built**, unvalidated) | role ladder; TO1 values; change, sync, init, teardown; modifier; story (monthly tick); on_actions incl. death inheritance; TO1 loc | Tiger, PX, vocab; one writer of `eotg_gobcorp_market_share` | V-TO1–V-TO5 |
-| **TO2, trade and war** | story yearly tick; TO2 values | one cadence authority | V-TO6 |
-| **TO3, decisions** | Corner, Undercut, rival trigger, two shared opinions | `ai_will_do`; moves only through the change effect | V-TO7–V-TO9 |
-| **TO4, transitions and grants** | entry, exit, grant field | entry `ai_potential = always = no` | V-TO10–V-TO12 |
-| **TO5, the election reads market share** | three condition edits (§5) | V-SU re-run | V-TO13 |
-| **TO6, loc and review** | §9 loc for TO2–TO5; lore; QA | template §5.1 | V-TO14, V-TO15 |
+| **TO2, trade and war** (**built (cloud, unvalidated), 2026-11-03**) | story yearly tick; TO2 values | one cadence authority | V-TO6 |
+| **TO3, decisions** (**built (cloud, unvalidated), 2026-11-03**) | Corner, Undercut, rival trigger, two shared opinions | `ai_will_do`; moves only through the change effect | V-TO7–V-TO9 |
+| **TO4, transitions and grants** (**built (cloud, unvalidated), 2026-11-03**) | entry, exit, grant field | entry `ai_potential = always = no` | V-TO10–V-TO12 |
+| **TO5, the election reads market share** (**built (cloud, unvalidated), 2026-11-03**) | three condition edits (§5) | V-SU re-run | V-TO13 |
+| **TO6, loc and review** (loc **built (cloud, unvalidated), 2026-11-03**; review pending) | §9 loc for TO2–TO5; lore; QA | template §5.1 | V-TO14, V-TO15 |
 
 ---
 
