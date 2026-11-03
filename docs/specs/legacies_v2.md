@@ -507,3 +507,70 @@ None are part of the lift. The pitch describes beats v1 never built. They are li
 ## 12. Numbers (the sim)
 
 `docs/tools/sim/models/legacies.py` (this branch) reads the v1 option and on_action amounts through `pdx_read.py` and models the v2 design: per-county seeding, survey-only discovery, the −2 a year decay, and the aftermath chances. Its results are in Appendix B, which justifies the defaults in Q8 and Q9.
+
+---
+
+## Appendix A: replacement loc for every flagged line (draft for the localizer)
+
+These are exact strings with the v2 keys (§6.3), written to §8:
+- first person in the main descs, neutral in modifier text;
+- no dashes, Canadian spelling, bare `[x.GetName]`;
+- "Second Era" kept (ERAS); "nearly nine centuries"; "the Grip" for "the Confluence"; "another plane" for "Hell" (the Q2 and Q3 defaults).
+
+They go into a UTF-8-with-BOM `localization/english/eotg_legacy_l_english.yml` at build time. This markdown block carries no BOM. The v1 line each replaces is in the comment above it. Keys not listed here are reworded at build time for voice, dashes and spelling only.
+
+```yaml
+ # v1 :13
+ eotg_decision_legacy_survey:0 "Survey for Grip Legacies"
+ # v1 :14
+ eotg_decision_legacy_survey_desc:0 "The Grip left every settled system stitched together from wreckage: districts, machines and archives from worlds that no longer exist, buried under nearly nine centuries of ordinary life. A proper survey of the domain may find what the ground has been keeping."
+ # v1 :15
+ eotg_decision_legacy_survey_tooltip:0 "Commission a survey of your held counties for sites the Grip buried"
+ # v1 :21 (Second Era kept; the dash removed; first person)
+ eotg_legacy.0002.desc:0 "My survey team returns not with ore samples but with a star chart. It is Second Era work, beautifully drawn and meticulously wrong: its route network will not match the present heavens however my navigators turn it. One of its terminals falls squarely inside [eotg_legacy_county.GetName], on ground the maps of the living call empty."
+ # v1 :41
+ eotg_legacy.0010.desc:0 "Beneath [eotg_legacy_county.GetName] my excavators break into a boulevard. Shopfronts stand intact under vapour lamps that failed nearly nine centuries ago. The architecture belongs to no local tradition. The signage reads right to left in an alphabet my archivists cannot place, and the orrery in the plaza models a star system that is not ours. An entire district of a vanished city-world, folded into this ground by the Grip, has been waiting all this time under the plain."
+ # v1 :58
+ eotg_legacy.0020.desc:0 "The vault under [eotg_legacy_county.GetName] holds no treasure. It holds paperwork, which may be worse: the complete legal apparatus of a dead Second Era polity. Land registers, genealogies, treaties, and a succession protocol still formally in force, waiting for claimants from a world that no longer exists. I understand at once that whoever keeps these records decides what they mean, and that whoever decides what they mean inherits a dead court's authority, and its enemies."
+ # v1 :66 (the heir's speech replaces the second-person close)
+ eotg_legacy.0021.desc:0 "My genealogists were thorough, and thoroughness has consequences. The dead court's succession protocol, applied to the living, produces a name: [eotg_legacy_heir.GetName], whose line survived the Grip without knowing what it carried. The finding is defensible. The finding is dangerous. And the finding is standing in my outer office, having heard the rumours first. "I did not ask for this," [eotg_legacy_heir.GetSheHe] says. "But I am not going to refuse it.""
+ # v1 option :0021 instrument (dash)
+ eotg_legacy.0021.b:0 "Support [eotg_legacy_heir.GetHerHim] at arm's length, on my terms."
+ # v1 :74
+ eotg_legacy.0030.desc:0 "Eight hundred metres under [eotg_legacy_county.GetName], my survey lights fall on a foundry floor that never cooled. Second Era fabricators idle at their stations, feedstock hoppers half full, a maintenance queue nearly nine centuries deep and patiently waiting. It could produce again. Its safety systems were engineered for a workforce, an atmosphere and a world that no longer exist, details the first eager concession bidder will not mention."
+ # v1 :92 (title pending Q2)
+ eotg_legacy.0040.t:0 "The Foreign Ledger"
+ # v1 :93
+ eotg_legacy.0040.desc:0 "The sealed badland in [eotg_legacy_county.GetName] is not a wasteland. Past the heat-shimmer boundary there are roads, tollhouses and a working market: a fragment of another plane's administration, folded into this ground by the Grip and carrying on with commendable procedure. Its clerks have noticed the new management, and they have prepared terms. The ledger they set before me is old, precise and patient, and it is signed at the bottom by everything it has ever owned."
+ # v1 :97 (reject; "blasphemy" is a stance, not a canon claim: kept)
+ eotg_legacy.0040.c:0 "This is blasphemy, and blasphemy burns."
+ # v1 :135
+ eotg_mod_legacy_metropolis_governed_desc:0 "A recovered district of a vanished city-world lives again beneath this county, its streets lit for the first time in nearly nine centuries."
+ # v1 :137 (unchanged in sense; key renamed)
+ eotg_mod_legacy_archive_governed_desc:0 "A Second Era archive is kept here under a proper chain of custody, its records lending weight to the county's law."
+ # v1 :139
+ eotg_mod_legacy_works_governed_desc:0 "Second Era industry runs beneath this county under audited concessions, producing wealth at a sustainable burn."
+ # v1 :140-141 (name pending Q2)
+ eotg_mod_legacy_planar_warded:0 "Warded Seam"
+ eotg_mod_legacy_planar_warded_desc:0 "The fragment of another plane beneath this county is contained under permanent watch, and the watchers are taken seriously."
+ # v1 :143
+ eotg_mod_legacy_extracted_site_desc:0 "The site the Grip buried here is being stripped for value faster than it can ever be restored."
+ # v1 :145 (the dash removed)
+ eotg_mod_legacy_sealed_site_desc:0 "The site the Grip buried here is closed, forbidden and quiet. For now."
+ # v1 :149
+ eotg_mod_legacy_loyal_enclave_desc:0 "A community recovered from beneath the ground holds protected status here, and repays it in loyalty."
+ # v1 :150-151
+ eotg_mod_legacy_grim_rumours:0 "Grim Rumours"
+ eotg_mod_legacy_grim_rumours_desc:0 "Abandoned surveyors, sealed galleries, songs after dark: the county repeats stories its lord would prefer it forgot."
+ # v1 :154-155
+ eotg_mod_legacy_arsenal_desc:0 "Second Era fabricators turn out arms and armour for the levies, equipment no living machinist could copy."
+ # v1 :156-157 (name pending Q2)
+ eotg_mod_legacy_warden:0 "Warden of the Seam"
+ eotg_mod_legacy_warden_desc:0 "This ruler personally holds the wardenship of a contained gate to another plane. The honour is immense. So is the weight."
+```
+
+**Lore checks for eotg-lore-keeper:**
+- "Second Era" as pre-Grip (ERAS);
+- "nearly nine centuries";
+- "another plane", which must not read as the Rift (a separate god-prison plane);
+- the 0021 heir line, which may assume nothing beyond the trigger: any adult, so it uses `GetSheHe`.
