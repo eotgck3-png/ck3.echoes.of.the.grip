@@ -1,0 +1,53 @@
+﻿# -- eotg_void_values.txt -----------------------------------------------------
+# Void Corruption v2 (docs/specs/void_corruption_v2.md §3.3). Every AMOUNT
+# passed to a change effect is a literal or a named value here (an inline
+# { } block is not a valid $AMOUNT$).
+# UNVALIDATED cloud build.
+# -----------------------------------------------------------------------------
+
+# Yearly exposure accrual (v1 eotg_se_void_yearly_accrual, same terms). v1
+# made up to 13 separate add calls, each refreshing the band; v2 sums them and
+# writes once. Range: -24 (warded, Defiant, learned, pious, Voidwalker) to +28.
+eotg_void_yearly_accrual_value = {
+    value = 2
+    if = { limit = { has_trait = eotg_grip_survivor }  add = 3 }
+    if = { limit = { eotg_void_is_cult_faith = yes }  add = 5 }
+    if = { limit = { eotg_void_near_touched = yes }  add = 4 }
+    if = { limit = { has_trait = eotg_void_touched }  add = 6 }
+    if = { limit = { stress >= 200 }  add = 4 }
+    # lunatic_1, possessed_1: exist in 1.20 (v1_lift_readiness_cloud.md §6)
+    # UNVERIFIED-VANILLA: lunatic_genetic, possessed_genetic (lifted from v1)
+    if = {
+        limit = {
+            OR = {
+                has_trait = lunatic_1
+                has_trait = lunatic_genetic
+                has_trait = possessed_1
+                has_trait = possessed_genetic
+            }
+        }
+        add = 4
+    }
+    if = { limit = { age >= 60 }  add = 2 }
+    if = { limit = { has_trait = eotg_void_defiant }  add = -4 }
+    if = { limit = { has_character_modifier = eotg_mod_void_warded }  add = -5 }
+    if = { limit = { has_trait = education_learning }  add = -3 }
+    if = { limit = { eotg_void_has_voidwalker = yes }  add = -6 }
+    if = {
+        limit = {
+            piety_level >= 3
+            eotg_void_is_cult_faith = no
+        }
+        add = -3
+    }
+}
+
+# Stage D (spec §3.4): the Hollowing starts depth here.
+eotg_void_hollowing_start_value = {
+    value = 25
+}
+
+# Stage D yearly drift. Nothing pulls back except the events' options.
+eotg_void_hollowing_drift_value = {
+    value = 4
+}

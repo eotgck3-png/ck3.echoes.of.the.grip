@@ -1,0 +1,190 @@
+﻿# -- eotg_void_on_actions.txt -------------------------------------------------
+# Void Corruption v2 (docs/specs/void_corruption_v2.md §3.2, §5; ruling R1).
+#
+# Vanilla hooks are extended ADDITIVELY only (CLAUDE.md invariant 4): an
+# `on_actions = { }` list, never a top-level effect/trigger on a vanilla hook.
+# The yearly hook is yearly_playable_pulse. v1 chained five on_actions from the
+# hub's on_yearly_playable, a dead hook, so no Void content ever ran
+# (v1_lift_readiness_cloud.md V HIGH row 1; catalog §4 lesson 13).
+#
+# v2 folds v1's five sub-hooks into one effect, in v1's load-bearing order:
+#   1. accrual (exposure) and stage D drift (depth), before any gate reads them;
+#   2. the Hollowing (0030), forced, ignores the cooldown, as in v1;
+#   3. ONE flavour roll per pulse, by stage;
+#   4. the Voidwalker at the gate (0004), only if step 3 fired nothing.
+#
+# COOLDOWN AUTHORITY lives here and only here (invariant 4; catalog §4 lesson
+# 5). Each branch sets eotg_flag_void_event_cooldown at the moment it fires,
+# for v1's per-event duration. v1 set it in each event's immediate, days
+# later, so 0004 could fire in the same pulse as a whisper; no event reads or
+# sets the flag now.
+#   0001 3y   0002 3y   0003 4y   0004 5y   0010 5y   0011 5y
+#   0020 3y   0021 4y   0022 3y   0023 4y   0024 5y   0025 3y
+#   0030 5y   0031 3y   0032 6y
+# UNVALIDATED cloud build.
+# -----------------------------------------------------------------------------
+
+yearly_playable_pulse = {
+    on_actions = {
+        eotg_on_yearly_void_check
+    }
+}
+
+eotg_on_yearly_void_check = {
+    effect = {
+        # -- 1. Resources ----------------------------------------------------
+        if = {
+            limit = { eotg_void_susceptible = yes }
+            eotg_void_change_exposure_effect = { AMOUNT = eotg_void_yearly_accrual_value }
+        }
+        if = {
+            limit = { has_trait = eotg_void_hollowed }
+            eotg_void_change_hollowing_depth_effect = { AMOUNT = eotg_void_hollowing_drift_value }
+        }
+
+        # -- 2. The Hollowing (forced) ----------------------------------------
+        if = {
+            limit = { eotg_void_hollowing_ready = yes }
+            add_character_flag = { flag = eotg_flag_void_event_cooldown  years = 5 }
+            trigger_event = { id = eotg_void.0030  days = { 1 10 } }
+        }
+
+        # -- 3. One flavour roll per pulse ------------------------------------
+        if = {
+            limit = { eotg_void_event_ready = yes }
+
+            # Stage D. Depth tilts the pool (ruling R8): far gone, the court
+            # adapts (0031); not yet far, a moment of being comes back (0032).
+            # UNVERIFIED-VANILLA: modifier blocks inside random_list entries
+            # (common vanilla shape; check one citation).
+            if = {
+                limit = { has_trait = eotg_void_hollowed }
+                random_list = {
+                    45 = {
+                        modifier = { add = 20  var:eotg_void_hollowing_depth >= 50 }
+                        add_character_flag = { flag = eotg_flag_void_event_cooldown  years = 3 }
+                        trigger_event = { id = eotg_void.0031  days = { 5 40 } }
+                    }
+                    15 = {
+                        modifier = { add = 15  var:eotg_void_hollowing_depth < 50 }
+                        add_character_flag = { flag = eotg_flag_void_event_cooldown  years = 6 }
+                        trigger_event = { id = eotg_void.0032  days = { 5 40 } }
+                    }
+                    40 = { }
+                }
+            }
+
+            # Stage C. trigger inside a random_list entry: confirmed 1.20
+            # (v1_lift_readiness_cloud.md §6).
+            else_if = {
+                limit = {
+                    has_trait = eotg_void_touched
+                    eotg_void_hollowing_ready = no
+                }
+                random_list = {
+                    20 = {
+                        trigger = { is_at_war = yes }
+                        add_character_flag = { flag = eotg_flag_void_event_cooldown  years = 3 }
+                        trigger_event = { id = eotg_void.0020  days = { 5 30 } }
+                    }
+                    15 = {
+                        trigger = { any_child = { age < 12 } }
+                        add_character_flag = { flag = eotg_flag_void_event_cooldown  years = 4 }
+                        trigger_event = { id = eotg_void.0021  days = { 5 30 } }
+                    }
+                    20 = {
+                        trigger = { any_courtier = { has_trait = zealous } }
+                        add_character_flag = { flag = eotg_flag_void_event_cooldown  years = 3 }
+                        trigger_event = { id = eotg_void.0022  days = { 5 30 } }
+                    }
+                    20 = {
+                        add_character_flag = { flag = eotg_flag_void_event_cooldown  years = 4 }
+                        trigger_event = { id = eotg_void.0023  days = { 5 30 } }
+                    }
+                    15 = {
+                        trigger = { age >= 60 }
+                        add_character_flag = { flag = eotg_flag_void_event_cooldown  years = 5 }
+                        trigger_event = { id = eotg_void.0024  days = { 5 30 } }
+                    }
+                    20 = {
+                        trigger = {
+                            any_vassal = {
+                                opinion = { target = root  value < -20 }
+                            }
+                        }
+                        add_character_flag = { flag = eotg_flag_void_event_cooldown  years = 3 }
+                        trigger_event = { id = eotg_void.0025  days = { 5 30 } }
+                    }
+                    30 = { }
+                }
+            }
+
+            # Stage B forced: Taken Anyway.
+            else_if = {
+                limit = { eotg_void_saturated = yes }
+                random = {
+                    chance = 75
+                    add_character_flag = { flag = eotg_flag_void_event_cooldown  years = 5 }
+                    trigger_event = { id = eotg_void.0011  days = { 1 20 } }
+                }
+            }
+
+            # Stage B: the Bargain.
+            else_if = {
+                limit = { eotg_void_bargain_ready = yes }
+                random = {
+                    chance = 50
+                    add_character_flag = { flag = eotg_flag_void_event_cooldown  years = 5 }
+                    trigger_event = { id = eotg_void.0010  days = { 5 30 } }
+                }
+            }
+
+            # Stage A: whispers.
+            else_if = {
+                limit = { eotg_void_whisper_stage = yes }
+                random_list = {
+                    40 = {
+                        add_character_flag = { flag = eotg_flag_void_event_cooldown  years = 3 }
+                        trigger_event = { id = eotg_void.0002  days = { 5 40 } }
+                    }
+                    35 = {
+                        add_character_flag = { flag = eotg_flag_void_event_cooldown  years = 4 }
+                        trigger_event = { id = eotg_void.0003  days = { 5 40 } }
+                    }
+                    25 = { }
+                }
+            }
+
+            # Contact: the scar reopens (first seed).
+            else_if = {
+                limit = {
+                    NOT = { has_character_flag = eotg_flag_void_seeded }
+                    NOT = { has_trait = eotg_void_touched }
+                }
+                random = {
+                    chance = 4
+                    add_character_flag = { flag = eotg_flag_void_event_cooldown  years = 3 }
+                    trigger_event = { id = eotg_void.0001  days = { 5 40 } }
+                }
+            }
+        }
+
+        # -- 4. The Voidwalker at the gate --------------------------------------
+        # Re-reads the cooldown, so it cannot fire in a pulse where step 3 did.
+        # The Voidwalker bug fix means a seated Voidwalker ends the re-rolls.
+        if = {
+            limit = {
+                eotg_void_event_ready = yes
+                eotg_void_has_exposure = yes
+                var:eotg_void_exposure >= 20
+                eotg_void_has_voidwalker = no
+                NOT = { has_trait = eotg_void_hollowed }
+            }
+            random = {
+                chance = 12
+                add_character_flag = { flag = eotg_flag_void_event_cooldown  years = 5 }
+                trigger_event = { id = eotg_void.0004  days = { 10 60 } }
+            }
+        }
+    }
+}

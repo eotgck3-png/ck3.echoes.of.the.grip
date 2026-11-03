@@ -1,0 +1,495 @@
+﻿# -- eotg_void_touched_events.txt ---------------------------------------------
+# Void Corruption v2, stage C (docs/specs/void_corruption_v2.md §3.2). Lifted
+# from v1 events/eotg_void_touched_events.txt: 0020-0025.
+#
+# Fired only by eotg_on_yearly_void_check, which holds the cooldown (no event
+# sets or reads eotg_flag_void_event_cooldown). Each event's trigger is its
+# validity at fire time, not a cooldown. Saved scopes carry the eotg_ prefix
+# (v1: void_child, void_confessor, void_vassal; invariant 1).
+# UNVALIDATED cloud build.
+# -----------------------------------------------------------------------------
+
+namespace = eotg_void
+
+# -- 0020 The Cold Hand ---------------------------------------------------------
+eotg_void.0020 = {
+    type = character_event
+    title = eotg_void.0020.t
+    desc = eotg_void.0020.desc
+    theme = war
+    override_background = { reference = eotg_bg_battlefield }
+    trigger = {
+        has_trait = eotg_void_touched
+        is_at_war = yes
+    }
+    left_portrait = {
+        character = root
+        animation = personality_bold
+    }
+
+    # [martial education or brave] Use it.
+    option = {
+        name = eotg_void.0020.a
+        trigger = {
+            OR = {
+                has_trait = education_martial
+                has_trait = brave
+            }
+        }
+        add_prowess_skill = 1
+        add_dread = 25
+        eotg_void_change_exposure_effect = { AMOUNT = 12 }
+        add_prestige = 100
+        ai_chance = {
+            base = 60
+            modifier = { add = 30  has_trait = brave }
+            modifier = { add = 25  has_trait = ambitious }
+        }
+    }
+
+    # Hold it back.
+    option = {
+        name = eotg_void.0020.b
+        eotg_void_change_exposure_effect = { AMOUNT = -8 }
+        add_piety = 75
+        stress_impact = {
+            base = medium_stress_impact_gain
+            wrathful = minor_stress_impact_gain
+        }
+        ai_chance = {
+            base = 40
+            modifier = { add = 30  has_trait = zealous }
+            modifier = { add = 20  has_trait = temperate }
+            modifier = { add = -25  has_trait = wrathful }
+        }
+    }
+
+    # Let my own fighters see it. every_knight confirmed in 1.20
+    # (v1_lift_readiness_cloud.md §6).
+    option = {
+        name = eotg_void.0020.c
+        add_dread = 40
+        eotg_void_change_exposure_effect = { AMOUNT = 6 }
+        every_knight = {
+            add_opinion = { modifier = eotg_opinion_void_unease  target = root }
+        }
+        ai_chance = {
+            base = 25
+            modifier = { add = 35  has_trait = callous }
+            modifier = { add = 25  has_trait = arrogant }
+        }
+    }
+}
+
+# -- 0021 What the Children See ----------------------------------------------------
+eotg_void.0021 = {
+    type = character_event
+    title = eotg_void.0021.t
+    desc = eotg_void.0021.desc
+    theme = family
+    override_background = { reference = eotg_bg_private_quarters }
+    trigger = {
+        has_trait = eotg_void_touched
+        any_child = { age < 12 }
+    }
+    left_portrait = {
+        character = root
+        animation = worry
+    }
+    right_portrait = {
+        character = scope:eotg_void_child
+        animation = fear
+    }
+
+    immediate = {
+        hidden_effect = {
+            random_child = {
+                limit = { age < 12 }
+                save_scope_as = eotg_void_child
+            }
+        }
+    }
+
+    # [honest, compassionate or diplomacy education] The truth, at their size.
+    option = {
+        name = eotg_void.0021.a
+        trigger = {
+            OR = {
+                has_trait = honest
+                has_trait = compassionate
+                has_trait = education_diplomacy
+            }
+        }
+        scope:eotg_void_child = {
+            add_opinion = { modifier = eotg_opinion_void_unease  target = root }
+            eotg_void_add_ward_effect = { YEARS = 5 }
+        }
+        eotg_void_change_exposure_effect = { AMOUNT = -5 }
+        stress_impact = { base = minor_stress_impact_gain }
+        ai_chance = {
+            base = 60
+            modifier = { add = 30  has_trait = honest }
+            modifier = { add = 25  has_trait = compassionate }
+        }
+    }
+
+    # A warm lie.
+    option = {
+        name = eotg_void.0021.b
+        eotg_void_change_exposure_effect = { AMOUNT = 5 }
+        stress_impact = {
+            honest = medium_stress_impact_gain
+        }
+        ai_chance = {
+            base = 40
+            modifier = { add = 25  has_trait = deceitful }
+            modifier = { add = -30  has_trait = honest }
+        }
+    }
+
+    # Keep them away from me. Reworded (ruling R9): v1 said "fostered" and
+    # fostered no one; the effect is distance and an opinion.
+    option = {
+        name = eotg_void.0021.c
+        scope:eotg_void_child = {
+            add_opinion = { modifier = eotg_opinion_void_unease  target = root }
+        }
+        eotg_void_change_exposure_effect = { AMOUNT = -3 }
+        stress_impact = {
+            base = medium_stress_impact_gain
+            compassionate = minor_stress_impact_gain
+        }
+        ai_chance = {
+            base = 25
+            modifier = { add = 25  has_trait = paranoid }
+            modifier = { add = -25  has_trait = compassionate }
+        }
+    }
+}
+
+# -- 0022 The Confessor's Verdict -----------------------------------------------------
+eotg_void.0022 = {
+    type = character_event
+    title = eotg_void.0022.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = { eotg_void_is_cult_faith = yes }
+                desc = eotg_void.0022.desc_cult
+            }
+            desc = eotg_void.0022.desc
+        }
+    }
+    theme = faith
+    override_background = { reference = eotg_bg_council }
+    trigger = {
+        has_trait = eotg_void_touched
+        any_courtier = { has_trait = zealous }
+    }
+    left_portrait = {
+        character = root
+        animation = personality_rational
+    }
+    right_portrait = {
+        character = scope:eotg_void_confessor
+        animation = anger
+    }
+
+    immediate = {
+        hidden_effect = {
+            random_courtier = {
+                limit = { has_trait = zealous }
+                save_scope_as = eotg_void_confessor
+            }
+        }
+    }
+
+    # Submit to the rite.
+    option = {
+        name = eotg_void.0022.a
+        trigger = { eotg_void_is_cult_faith = no }
+        add_piety = 150
+        eotg_void_change_exposure_effect = { AMOUNT = -15 }
+        eotg_void_add_ward_effect = { YEARS = 6 }
+        scope:eotg_void_confessor = {
+            add_opinion = { modifier = eotg_opinion_void_defiance_respect  target = root }
+        }
+        stress_impact = {
+            base = minor_stress_impact_loss
+            arrogant = minor_stress_impact_gain
+        }
+        ai_chance = {
+            base = 50
+            modifier = { add = 40  has_trait = zealous }
+            modifier = { add = 20  has_trait = humble }
+        }
+    }
+
+    # Accept the blessing (cult; inert, ruling R3).
+    option = {
+        name = eotg_void.0022.b
+        trigger = { eotg_void_is_cult_faith = yes }
+        add_piety = 200
+        eotg_void_change_exposure_effect = { AMOUNT = 10 }
+        scope:eotg_void_confessor = {
+            add_opinion = { modifier = eotg_opinion_void_kinship  target = root }
+        }
+        ai_chance = { base = 80 }
+    }
+
+    # Have them dragged from the hall. Reworded (ruling R9): v1 promised
+    # "silenced, permanently" and applied an opinion; the effect is a public
+    # humiliation, and the text now says so.
+    option = {
+        name = eotg_void.0022.c
+        add_dread = 25
+        add_piety = -100
+        eotg_void_change_exposure_effect = { AMOUNT = 8 }
+        scope:eotg_void_confessor = {
+            add_opinion = { modifier = eotg_opinion_void_unease  target = root }
+        }
+        stress_impact = {
+            compassionate = minor_stress_impact_gain
+            just = minor_stress_impact_gain
+        }
+        ai_chance = {
+            base = 20
+            modifier = { add = 35  has_trait = callous }
+            modifier = { add = 30  has_trait = paranoid }
+            modifier = { add = -40  has_trait = just }
+        }
+    }
+
+    # Say nothing.
+    option = {
+        name = eotg_void.0022.d
+        eotg_void_change_exposure_effect = { AMOUNT = 3 }
+        stress_impact = { base = minor_stress_impact_gain }
+        ai_chance = {
+            base = 25
+            modifier = { add = 25  has_trait = shy }
+        }
+    }
+}
+
+# -- 0023 The Deep Route -------------------------------------------------------------
+eotg_void.0023 = {
+    type = character_event
+    title = eotg_void.0023.t
+    desc = eotg_void.0023.desc
+    theme = learning
+    override_background = { reference = eotg_bg_vault }
+    trigger = {
+        has_trait = eotg_void_touched
+    }
+    left_portrait = {
+        character = root
+        animation = thinking
+    }
+
+    option = {
+        name = eotg_void.0023.a
+        trigger = { has_trait = education_learning }
+        skill = learning
+        eotg_void_insight_effect = yes
+        eotg_void_change_exposure_effect = { AMOUNT = 10 }
+        add_prestige = 100
+        ai_chance = {
+            base = 70
+            modifier = { add = 30  has_trait = curious }
+        }
+    }
+
+    option = {
+        name = eotg_void.0023.b
+        trigger = {
+            OR = {
+                has_trait = education_stewardship
+                has_trait = education_intrigue
+            }
+        }
+        add_gold = 300
+        eotg_void_change_exposure_effect = { AMOUNT = 5 }
+        add_piety = -50
+        ai_chance = {
+            base = 60
+            modifier = { add = 30  has_trait = greedy }
+            modifier = { add = -20  has_trait = generous }
+        }
+    }
+
+    option = {
+        name = eotg_void.0023.c
+        eotg_void_change_exposure_effect = { AMOUNT = -12 }
+        add_piety = 100
+        stress_impact = {
+            base = minor_stress_impact_gain
+            greedy = minor_stress_impact_gain
+        }
+        ai_chance = {
+            base = 30
+            modifier = { add = 40  has_trait = zealous }
+            modifier = { add = 20  has_trait = craven }
+            modifier = { add = -30  has_trait = greedy }
+        }
+    }
+}
+
+# -- 0024 Long Service ---------------------------------------------------------------
+eotg_void.0024 = {
+    type = character_event
+    title = eotg_void.0024.t
+    desc = eotg_void.0024.desc
+    theme = mental_health
+    override_background = { reference = eotg_bg_private_quarters }
+    trigger = {
+        has_trait = eotg_void_touched
+        age >= 60
+    }
+    left_portrait = {
+        character = root
+        animation = sadness
+    }
+
+    # Write it all down for the heir. The heir is seeded: the knowledge is
+    # also contact.
+    option = {
+        name = eotg_void.0024.a
+        trigger = { exists = primary_heir }
+        add_learning_skill = 1
+        add_prestige = 100
+        primary_heir = {
+            eotg_void_seed_effect = yes
+            add_opinion = { modifier = eotg_opinion_void_defiance_respect  target = root }
+        }
+        eotg_void_change_exposure_effect = { AMOUNT = -5 }
+        ai_chance = {
+            base = 60
+            modifier = { add = 30  has_trait = diligent }
+            modifier = { add = 25  has_trait = education_learning }
+        }
+    }
+
+    option = {
+        name = eotg_void.0024.b
+        eotg_void_insight_effect = yes
+        eotg_void_change_exposure_effect = { AMOUNT = 20 }
+        add_prestige = 150
+        ai_chance = {
+            base = 30
+            modifier = { add = 40  has_trait = ambitious }
+            modifier = { add = -30  has_trait = content }
+        }
+    }
+
+    option = {
+        name = eotg_void.0024.c
+        add_piety = 200
+        eotg_void_change_exposure_effect = { AMOUNT = -15 }
+        stress_impact = { base = major_stress_impact_loss }
+        ai_chance = {
+            base = 45
+            modifier = { add = 35  has_trait = content }
+            modifier = { add = 30  has_trait = zealous }
+            modifier = { add = 20  has_trait = humble }
+        }
+    }
+}
+
+# -- 0025 The Vassal's Question ------------------------------------------------------
+eotg_void.0025 = {
+    type = character_event
+    title = eotg_void.0025.t
+    desc = eotg_void.0025.desc
+    theme = vassal
+    override_background = { reference = eotg_bg_office }
+    trigger = {
+        has_trait = eotg_void_touched
+        any_vassal = {
+            opinion = { target = root  value < -20 }
+        }
+    }
+    left_portrait = {
+        character = root
+        animation = anger
+    }
+    right_portrait = {
+        character = scope:eotg_void_vassal
+        animation = personality_bold
+    }
+
+    immediate = {
+        hidden_effect = {
+            random_vassal = {
+                limit = {
+                    opinion = { target = root  value < -20 }
+                }
+                save_scope_as = eotg_void_vassal
+            }
+        }
+    }
+
+    option = {
+        name = eotg_void.0025.a
+        trigger = {
+            OR = {
+                has_trait = education_diplomacy
+                has_trait = education_learning
+            }
+        }
+        scope:eotg_void_vassal = {
+            add_opinion = { modifier = eotg_opinion_void_defiance_respect  target = root }
+        }
+        eotg_void_change_exposure_effect = { AMOUNT = -10 }
+        add_prestige = 50
+        stress_impact = { base = minor_stress_impact_gain }
+        ai_chance = {
+            base = 55
+            modifier = { add = 25  has_trait = just }
+            modifier = { add = 20  has_trait = humble }
+        }
+    }
+
+    option = {
+        name = eotg_void.0025.b
+        add_dread = 40
+        eotg_void_change_exposure_effect = { AMOUNT = 12 }
+        scope:eotg_void_vassal = {
+            add_opinion = { modifier = eotg_opinion_void_unease  target = root }
+        }
+        ai_chance = {
+            base = 35
+            modifier = { add = 40  has_trait = wrathful }
+            modifier = { add = 30  has_trait = arrogant }
+            modifier = { add = -30  has_trait = calm }
+        }
+    }
+
+    option = {
+        name = eotg_void.0025.c
+        trigger = { gold >= 150 }
+        remove_short_term_gold = 150
+        scope:eotg_void_vassal = {
+            add_opinion = { modifier = eotg_opinion_void_defiance_respect  target = root }
+        }
+        ai_chance = {
+            base = 40
+            modifier = { add = 25  has_trait = deceitful }
+            modifier = { add = 20  has_trait = craven }
+        }
+    }
+
+    option = {
+        name = eotg_void.0025.d
+        eotg_void_change_exposure_effect = { AMOUNT = 5 }
+        scope:eotg_void_vassal = {
+            add_opinion = { modifier = eotg_opinion_void_unease  target = root }
+        }
+        stress_impact = { base = minor_stress_impact_gain }
+        ai_chance = {
+            base = 20
+            modifier = { add = 25  has_trait = lazy }
+            modifier = { add = 20  has_trait = arrogant }
+        }
+    }
+}

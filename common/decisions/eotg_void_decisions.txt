@@ -1,0 +1,161 @@
+﻿# -- eotg_void_decisions.txt --------------------------------------------------
+# Void Corruption v2 (docs/specs/void_corruption_v2.md §6). Lifted from v1
+# eotg_void_decisions.txt in the v2 decision shape
+# (eotg_cartel_decisions.txt:40-58: desc, selection_tooltip, confirm_text,
+# ai_check_interval_by_tier, cooldown). Costs and effects are v1's, except
+# the Voidwalker Ward, which can now be shown at all (the v1 Voidwalker bug).
+# Pictures are vanilla placeholders (B-ART).
+# UNVALIDATED cloud build.
+# -----------------------------------------------------------------------------
+
+# Two decisions share the ward cooldown, so it stays a flag
+# (eotg_flag_void_ward_cooldown, set only in eotg_void_warding_rite_effect and
+# eotg_void_voidwalker_ward_effect).
+eotg_decision_void_warding_rite = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_misc.dds"
+    }
+    desc = eotg_decision_void_warding_rite_desc
+    selection_tooltip = eotg_decision_void_warding_rite_tooltip
+    confirm_text = eotg_decision_void_warding_rite_confirm
+
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 60
+        duchy = 36
+        kingdom = 36
+        empire = 36
+        hegemony = 36
+    }
+
+    is_shown = {
+        eotg_void_can_be_warded = yes
+        eotg_void_is_cult_faith = no
+    }
+
+    is_valid = {
+        custom_tooltip = {
+            text = eotg_decision_void_ward_cooldown_tt
+            NOT = { has_character_flag = eotg_flag_void_ward_cooldown }
+        }
+    }
+
+    cost = { piety = 200 }
+
+    effect = {
+        eotg_void_warding_rite_effect = yes
+    }
+
+    ai_potential = {
+        eotg_void_has_exposure = yes
+        var:eotg_void_exposure >= 40
+    }
+
+    ai_will_do = {
+        base = 20
+        modifier = { add = 30  var:eotg_void_exposure >= 60 }
+        modifier = { add = 25  has_trait = zealous }
+        modifier = { add = -20  has_trait = eotg_void_touched }
+    }
+}
+
+eotg_decision_void_voidwalker_ward = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_misc.dds"
+    }
+    desc = eotg_decision_void_voidwalker_ward_desc
+    selection_tooltip = eotg_decision_void_voidwalker_ward_tooltip
+    confirm_text = eotg_decision_void_voidwalker_ward_confirm
+
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 60
+        duchy = 36
+        kingdom = 36
+        empire = 36
+        hegemony = 36
+    }
+
+    is_shown = {
+        eotg_void_has_voidwalker = yes
+        NOT = { has_trait = eotg_void_hollowed }
+    }
+
+    is_valid = {
+        custom_tooltip = {
+            text = eotg_decision_void_ward_cooldown_tt
+            NOT = { has_character_flag = eotg_flag_void_ward_cooldown }
+        }
+    }
+
+    cost = { gold = 100 }
+
+    effect = {
+        eotg_void_voidwalker_ward_effect = yes
+        add_piety = -150
+        every_courtier = {
+            limit = { has_trait = zealous }
+            add_opinion = { modifier = eotg_opinion_void_shelters_voidwalker  target = root }
+        }
+    }
+
+    ai_potential = {
+        eotg_void_has_exposure = yes
+        var:eotg_void_exposure >= 50
+    }
+
+    ai_will_do = {
+        base = 25
+        modifier = { add = 40  var:eotg_void_exposure >= 75 }
+        modifier = { add = 20  has_trait = cynical }
+        modifier = { add = -30  has_trait = zealous }
+    }
+}
+
+# Cult only: inert while eotg_void_is_cult_faith is always = no (ruling R3).
+eotg_decision_void_commune = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_misc.dds"
+    }
+    desc = eotg_decision_void_commune_desc
+    selection_tooltip = eotg_decision_void_commune_tooltip
+    confirm_text = eotg_decision_void_commune_confirm
+
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 120
+        duchy = 60
+        kingdom = 60
+        empire = 60
+        hegemony = 60
+    }
+
+    # The only cadence authority for Commune (v1 used a flag for 10 years)
+    cooldown = { years = 10 }
+
+    is_shown = {
+        eotg_void_is_cult_faith = yes
+        NOT = { has_trait = eotg_void_hollowed }
+    }
+
+    cost = { piety = 150 }
+
+    effect = {
+        eotg_void_seed_effect = yes
+        eotg_void_insight_effect = yes
+        eotg_void_change_exposure_effect = { AMOUNT = 20 }
+        stress_impact = { base = medium_stress_impact_gain }
+    }
+
+    ai_potential = {
+        NOT = { has_trait = eotg_void_hollowed }
+    }
+
+    ai_will_do = {
+        base = 15
+        modifier = { add = 25  has_trait = ambitious }
+        modifier = { add = 20  has_trait = brave }
+        modifier = { add = -30  has_trait = content }
+        modifier = { add = -25  has_trait = craven }
+    }
+}
