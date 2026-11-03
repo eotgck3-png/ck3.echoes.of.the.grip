@@ -105,8 +105,11 @@ eotg_decision_corporation_restructure = {
 # OQ3 (default, orchestrator, 2026-11-03, pending owner): the CEO loses
 # influence at most once a year (eotg_corp_board_eroded, a 1-year variable on
 # the CEO), and only while the director now holds more influence than the CEO.
-# The director's post-gain value is saved once as eotg_corp_director_influence;
-# no other name is saved in this effect.
+# The director's post-gain value is projected (eotg_corporation_court_projected_value)
+# and saved as eotg_corp_director_influence BEFORE the gain: the gain is
+# hidden, so it does not run at tooltip time, and a post-gain read would differ
+# between tooltip and execution (QA 2026-11-03). The change effect also saves
+# eotg_corporation_board_amount on each call (director, then CEO).
 eotg_decision_corporation_court_board = {
     picture = {
         reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
@@ -138,13 +141,13 @@ eotg_decision_corporation_court_board = {
     }
 
     effect = {
+        save_scope_value_as = { # projected, so tooltip and execution agree
+            name = eotg_corp_director_influence
+            value = eotg_corporation_court_projected_value
+        }
         custom_tooltip = eotg_decision_corporation_court_board_gain_tt
         hidden_effect = {
             eotg_corporation_change_board_influence_effect = { AMOUNT = eotg_corporation_court_gain_value }
-        }
-        save_scope_value_as = {
-            name = eotg_corp_director_influence
-            value = eotg_corporation_board_influence_value
         }
         if = {
             limit = {

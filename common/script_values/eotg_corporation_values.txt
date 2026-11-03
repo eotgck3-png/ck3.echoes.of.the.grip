@@ -71,6 +71,16 @@ eotg_corporation_restructure_ai_floor_value = 45
 # CO3: Court the Board (spec §4.2): the director gains, the CEO's hold loosens
 eotg_corporation_court_gain_value = 15
 eotg_corporation_court_erosion_value = -5
+# The director's influence AFTER the court gain, clamped as
+# eotg_corporation_board_influence_next_value. Court the Board saves it BEFORE
+# the gain so the erosion check reads the same number in tooltip and execution
+# (QA 2026-11-03: the gain is hidden, so it does not run at tooltip time).
+eotg_corporation_court_projected_value = {
+    value = eotg_corporation_board_influence_value
+    add = eotg_corporation_court_gain_value
+    min = 0
+    max = 100
+}
 
 # CO4: Dissolve the Board (spec §6.2). Legitimacy reads influence BEFORE it
 # is zeroed. Cap: major_legitimacy_gain, as eotg_cartel_exit_legitimacy_value.
