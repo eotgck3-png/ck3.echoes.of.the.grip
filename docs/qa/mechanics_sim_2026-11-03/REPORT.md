@@ -1,6 +1,6 @@
 # Mechanics simulation and balance audit (2026-11-03)
 
-**What this is.** A Monte Carlo audit of the mod's five resource economies (Cartel dread, PMC Standing, Corporation Board Influence, Trade Oligarchy Market Share, Frontier progress and strain) and its two long progression systems (the cybernetics tier ladder and Frontier projects). Each model **reads its numbers from the current script** through `docs/tools/sim/pdx_read.py`: values, decision costs and cooldowns, `ai_will_do`, story ticks, `random_list` weights. A tuning change is therefore measured by rerunning `python docs/tools/sim/run_all.py`.
+**What this is.** A Monte Carlo audit of the mod's five resource economies (Cartel dread, PMC Standing, Corporation Board Influence, Trade Oligarchy Market Share, Frontier progress and strain), its two long progression systems (the cybernetics tier ladder and Frontier projects), and Void Corruption (exposure and Hollowing depth; section near the end). Each model **reads its numbers from the current script** through `docs/tools/sim/pdx_read.py`: values, decision costs and cooldowns, `ai_will_do`, story ticks, `random_list` weights. A tuning change is therefore measured by rerunning `python docs/tools/sim/run_all.py`.
 
 **Base:** `origin/v2-space-map` at `4a6191e`. It already holds Part C with the local session's addendum fixes: the scaled modifiers re-applied on every change; Court the Board erosion at most once a year per CEO, and only while the director's projected influence exceeds the CEO's; Corner the Market draining each Prince at most once a year. **The models read those fixes from the script; none is assumed.**
 
@@ -17,7 +17,7 @@
 
 **Read the numbers as comparisons.** Wars, gold, deaths, opinions and vanilla voting are proxies (the ASSUMPTION list, Appendix C). A before/after difference under the same assumptions is trustworthy. An absolute equilibrium is indicative.
 
-**Charts:** `chart_<system>.png` in this folder, one per system (AI policy, median with a 10–90% band). **Static exploit scan:** `exploit_scan.md`. **Proposed tuning:** `proposed_tuning.patch`, not applied; tuning is the owner's call. `git apply --check` passes on the merged tree (`v2-space-map` with the Void post-merge fixes). The patch now carries the matching loc for P1, P2, P3, P5 and P6.
+**Charts:** `chart_<system>.png` in this folder, one per system (`chart_void.png`: the contact sweep) (AI policy, median with a 10–90% band). **Static exploit scan:** `exploit_scan.md`. **Proposed tuning:** `proposed_tuning.patch`, not applied; tuning is the owner's call. `git apply --check` passes on the merged tree (`v2-space-map` with the Void post-merge fixes). The patch now carries the matching loc for P1, P2, P3, P5 and P6.
 
 ---
 
@@ -28,6 +28,9 @@
 | **Take now** | **P5** | Cartel succession grace 3 → 5 years (`eotg_cartel_on_actions.txt:111`, story loc) | Walk-offs within 10 years of a succession halve: 0.436 → 0.218 (4 vassals), 0.146 → 0.043 (16). Dread equilibria unchanged. |
 | **Take now** | **P1** | Court the Board erosion −5 → −2 (`eotg_corporation_values.txt:73`, two loc lines) | A dead CEO resource under full director pressure goes away (runs stuck at 0 for 20+ years: 52.2% → 0.0%); AI and player CEOs gain 5–8 points. |
 | **Owner call (structural)** | **P2-cap** | Deliver Results feeds the liege at most once a year (as Court the Board's cap). Not a value change: a guard variable in the decision. | Against the AI as written it only trims the 16-vassal equilibrium (59.8 → 56.2) because AI vassals deliver rarely; under full pressure years at 100 fall 77.8% → 57.0%. P2's value change does more for the AI case (→ 42.8). Choose the shape: a cap (scale-free, mild) or the value (P2, strong). |
+| **Take now** | **V1** | Void: Touched accrual term +6 → +2 (`eotg_void_values.txt:16`) | The six Touched events are almost never seen: Touched lasts a median 4 years under a 5-year cooldown. V1 raises them 5.5× (0.038 → 0.211 per 100 seat-years) and trims Hollowings (26.4% → 22.8% of seats in 100 years). See the Void section. |
+| **Owner call** | **V2** | Void: 0004 roll 12% → 25% (`eotg_void_on_actions.txt:184`) | The Voidwalker arrives too late to matter (Touched, given contact: 34.7% without one, 31.4% as scripted). V2 doubles arrivals (0.50 → 0.94 per 100 seat-years) for a small cut (31.4% → 29.3%). Whether Voidwalkers should be common is a design call. |
+| **Keep** | Q5 | Void contact 4% player / 1% AI (`eotg_void_values.txt:60-66`) | Within 50 years: 86.6% of player seats contacted and 13.4% ever Touched; AI 40.3% and 4.6%. Scales almost linearly with the rate (sweep below). |
 | **Hold** | P2 | Deliver Results liege +5 → +2 | Wait for the P2-cap decision: both together over-correct the small realm. |
 | **Hold** | P3 | Trade Oligarchy war loss −4 → −3 | The finding flipped (M1): vassal Princes already out-share the First Prince. P3 lifts the First Prince (23.3 → 33.8) but rests on the war-share proxy, which sits on the knife-edge (feed turns negative above 20% war; the model has ~23%). Measure the real war share first. |
 | **Hold** | P4 | Overclocked gate 20 → 15 | With the initiation gate conditioned, a pushing player already reaches Overclocked in 34% of installs; P4 takes it to 51% and cascade deaths 9.4% → 14.5%. Retune on the real map's development distribution. |
@@ -184,11 +187,94 @@ Each finding gives the evidence (sim numbers; full tables in Appendix A), the sc
 
 ---
 
+## Void Corruption (added 2026-11-03, H2b)
+
+**Model:** `docs/tools/sim/models/void.py`. It reads the merged Void script through `pdx_read.py`:
+- the accrual block (`eotg_void_values.txt:11-43`), the Voidwalker −6 (`:35`), the Hollowing start and drift (`:46-53`), and the contact chance with its `is_ai` branch (`:60-66`);
+- the stage triggers as written;
+- the band thresholds inside the two refresh effects;
+- every event slot of `eotg_on_yearly_void_check` (`eotg_void_on_actions.txt:33-190`): chance or weight, sibling total and the cooldown it sets;
+- every option of the 15 events: AI weight, exposure and depth amounts, wards and stage effects, with the `eotg_void_*` scripted effects walked inline.
+
+It follows the on_action's order: accrual, the forced Hollowing, one roll by stage, then the Voidwalker only if nothing fired. **ASSUMPTIONS:**
+- option availability 0.35 for any gated option;
+- AI weights for players too, so player and AI differ only in contact rate;
+- a lone realm with no Touched neighbours;
+- no Grip Survivors (R2: nobody bears the trait yet).
+
+Seats run 50 years (sweep) or 100 years (timings), 10,000 each. Full tables are in Appendix A; the chart is `chart_void.png`.
+
+### HIGH
+
+**VH1. The Touched stage is a four-year sprint hidden behind the cooldown, so its six events are almost never seen.**
+- **Evidence.**
+  - A Touched ruler accrues +8 a year (base 2, Touched 6) from 50–75 to 100, so Touched lasts a median of **4 years** (quartiles 2–5), and **85%** of Touched rulers are Hollowed.
+  - The Bargain (0010) or Taken Anyway (0011) that made them Touched set a 5-year cooldown (`eotg_void_on_actions.txt:125-139`). The Hollowing fires regardless of the cooldown (`:46-50`), so the stage-C roll (`:79-121`) rarely gets a turn.
+  - All six stage-C events together fire **0.038 per 100 seat-years** (player, 4% contact), against 0.067 Hollowings. A player meets The Cold Hand or What the Children See about once in 2,600 seat-years.
+- **Where:** `common/script_values/eotg_void_values.txt:16` (`has_trait = eotg_void_touched`, `add = 6`).
+- **Proposal V1:** `add = 2`.
+
+  | Metric (player seat, 4% contact, 100 years) | Before | After |
+  |---|---|---|
+  | Stage-C events per 100 seat-years | 0.038 | 0.211 |
+  | Touched duration, median years | 4 | 6 |
+  | Seats ever Hollowed | 26.4% | 22.8% |
+  | Seats ever Touched | 30.9% | 30.9% |
+
+  A term of 0 would give 0.36 and 7 years (2,000-run check, the same model). +2 keeps the Hollowing a real threat.
+
+### MED
+
+**VM1. The Voidwalker arrives too late to matter.**
+- **Evidence.**
+  - 0004 rolls 12% a year (`eotg_void_on_actions.txt:175-189`). It needs exposure ≥ 20 and a free cooldown, and option a (seat them) is one of four.
+  - Share of contacted rulers who become Touched: 34.7% with no Voidwalker, **31.4% as scripted**, 0.3% with a Voidwalker seated at contact.
+  - The model reads the −6 (`eotg_void_values.txt:35`): a seated Voidwalker turns an untouched ruler's accrual negative, so it is near-total protection, but it rarely arrives in time.
+  - Voidwalkers created: 0.50 per 100 seat-years. About two in three of these are not seated: they wander (option b or c) or are killed (option d).
+- **Where:** `common/on_action/eotg_void_on_actions.txt:184` (`chance = 12`).
+- **Proposal V2:** `chance = 25`. **Owner call:** it makes Voidwalkers about twice as common in the world.
+
+  | Metric (player seat, 4% contact, 100 years) | Before | After |
+  |---|---|---|
+  | Voidwalkers created per 100 seat-years | 0.50 | 0.94 |
+  | Touched, given contact | 31.4% | 29.3% |
+  | Seats ever Hollowed | 26.4% | 24.3% |
+
+  The stronger lever would be the exposure gate (`>= 20` at `:180`). It is not proposed, because it changes when the visit fits the story.
+
+### LOW
+
+**VL1. Owner question Q5, the contact rate: keep 4% player / 1% AI.**
+- **Evidence (50-year seats):**
+
+  | Contact rate | Contacted | Ever Touched | Ever Hollowed |
+  |---|---|---|---|
+  | 0.5% | 22.9% | 2.5% | 2.0% |
+  | 1% (AI default) | 40.3% | 4.6% | 3.3% |
+  | 2% | 64.3% | 8.2% | 6.3% |
+  | 4% (player default) | 86.6% | 13.4% | 10.2% |
+
+  The shares scale almost linearly. Under the 4/1 default, about one AI ruler in 20 is ever Touched within 50 years, so the Void stays rare in the world while a player meets it.
+  - **Stage timings (player):** contact to Touched takes a median of 28–29 years (quartiles 19–55). Touched to Hollowed takes 4 years, or 6 with a Voidwalker seated at contact (it is rare to be Touched at all then).
+- **Proposed value change: none** (keep `eotg_void_contact_chance_value` at 4 / 1).
+
+**VL2. The Voidwalker's accrual term is not a lever.**
+- **Evidence.** Changing −6 to −4 (V3, simulated) moves nothing measurable: Touched 30.9% → 31.8% of seats, inside the noise, because few Voidwalkers are seated.
+- **Proposed value change: none.**
+
+**VL3. The exploit scan is clean for the Void** (`exploit_scan.md`, Void section).
+- The Warding Rite (−20, piety 200) and the Voidwalker Ward (−35, gold 100 and piety 150) share one flag cooldown. It is set inside the scripted effects, which the scan now walks inline: 10 and 8 years. So relief runs at most −2 to −4.4 a year, plus the ward modifier's −5 a year accrual while it holds.
+- Commune adds exposure (+20) in trade for an Insight, on a 10-year `cooldown`. It is inert while `eotg_void_is_cult_faith` is `always = no`.
+- No Void decision has F1 or F4.
+
+---
+
 ## How to verify a proposal in game
 - **P1/P2:** play 20 years with 8+ vassals of the government, then read the top's resource in the story counter.
 - **P3:** the vassal Princes' median share after 30 years of mixed war and peace.
 - **P4:** the observer run's Overclocked population (balance spec §9.2).
 - **P5:** `kill` a Cartel ruler with 2 payers, then count walk-offs over the next 5 years.
+- **V1/V2:** the harness VD tests set up the states; then play a Touched ruler 10 years and count stage-C events.
 - **P2-cap:** with 8 PMC vassals, count Deliver Results in one year and the liege's standing gain.
 - **P6:** Take a Contract as a county PMC and as a kingdom PMC, and read the pay against vanilla's medium gold.
 
@@ -474,6 +560,54 @@ Generated by `docs/tools/sim/report_tables.py` from `results.json` (run with `--
 | research | 95.7% | 4.3% | 15.0 / 17.0 | 0.124 |
 | administrative | 90.8% | 9.2% | 13.0 / 16.0 | 0.275 |
 
+### Void Corruption (`models/void.py`; 50-year seats, contact sweep)
+
+Script values read: contact 4% player / 1% AI; Hollowing start 25, drift +4/yr; exposure bands [25.0, 50.0, 75.0]; depth bands [50.0, 85.0].
+
+| Ruler | Contact rate | Seeded by 10 / 25 / 50 y | Ever Touched by 10 / 25 / 50 y | Touched or Hollowed now at 50 y | Ever Hollowed by 50 y | Voidwalkers created / 100 seat-years |
+|---|---|---|---|---|---|---|
+| ai | script default (1%) | 10.1% / 22.5% / 40.3% | 0.0% / 0.6% / 4.6% | 2.8% | 3.3% | 0.16 |
+| ai | 0.5% (0.5%) | 4.7% / 11.9% / 22.9% | 0.0% / 0.2% / 2.5% | 1.7% | 2.0% | 0.10 |
+| ai | 1.0% (1%) | 10.1% / 22.5% / 40.3% | 0.0% / 0.6% / 4.6% | 2.8% | 3.3% | 0.16 |
+| ai | 2.0% (2%) | 18.5% / 39.6% / 64.3% | 0.0% / 1.0% / 8.2% | 5.2% | 6.3% | 0.29 |
+| ai | 4.0% (4%) | 33.5% / 63.7% / 86.6% | 0.0% / 2.1% / 13.4% | 7.9% | 10.2% | 0.46 |
+| player | script default (4%) | 33.5% / 63.7% / 86.6% | 0.0% / 2.1% / 13.4% | 7.9% | 10.2% | 0.46 |
+| player | 0.5% (0.5%) | 4.7% / 11.9% / 22.9% | 0.0% / 0.2% / 2.5% | 1.7% | 2.0% | 0.10 |
+| player | 1.0% (1%) | 10.1% / 22.5% / 40.3% | 0.0% / 0.6% / 4.6% | 2.8% | 3.3% | 0.16 |
+| player | 2.0% (2%) | 18.5% / 39.6% / 64.3% | 0.0% / 1.0% / 8.2% | 5.2% | 6.3% | 0.29 |
+| player | 4.0% (4%) | 33.5% / 63.7% / 86.6% | 0.0% / 2.1% / 13.4% | 7.9% | 10.2% | 0.46 |
+
+**Stage timings** (player rate, 100-year seats; quartiles in years):
+
+| Voidwalker | Seeded | Touched, given seeded | Hollowed, given Touched | Contact → Touched (25/50/75) | Touched → Hollowed (25/50/75) |
+|---|---|---|---|---|---|
+| never seated | 98.1% | 34.7% | 85.0% | [19.0, 28.0, 55.0] | [2.0, 4.0, 5.0] |
+| as scripted (0004) | 98.4% | 31.4% | 85.4% | [20.0, 29.0, 55.0] | [2.0, 4.0, 5.0] |
+| seated at contact | 98.2% | 0.3% | 81.5% | [36.0, 44.0, 58.5] | [5.25, 6.0, 7.0] |
+
+**Void proposals, before and after** (player seat, 4% contact, 100 years, 0004 as scripted):
+
+| Proposal | Override | Metric | Before | After |
+|---|---|---|---|---|
+| V1 | `{'void.term.has_trait=eotg_void_touched': 2}` | stage_c_per_100_seat_years | 0.038 | 0.211 |
+| V1 | `{'void.term.has_trait=eotg_void_touched': 2}` | touched_years_median | 4.000 | 6.000 |
+| V1 | `{'void.term.has_trait=eotg_void_touched': 2}` | ever_touched_100y | 0.309 | 0.309 |
+| V1 | `{'void.term.has_trait=eotg_void_touched': 2}` | ever_hollow_100y | 0.264 | 0.228 |
+| V1 | `{'void.term.has_trait=eotg_void_touched': 2}` | touched_given_seeded | 0.314 | 0.314 |
+| V1 | `{'void.term.has_trait=eotg_void_touched': 2}` | voidwalkers_per_100_seat_years | 0.500 | 0.514 |
+| V2 | `{'void.slot.0004.chance': 25}` | stage_c_per_100_seat_years | 0.038 | 0.033 |
+| V2 | `{'void.slot.0004.chance': 25}` | touched_years_median | 4.000 | 4.000 |
+| V2 | `{'void.slot.0004.chance': 25}` | ever_touched_100y | 0.309 | 0.288 |
+| V2 | `{'void.slot.0004.chance': 25}` | ever_hollow_100y | 0.264 | 0.243 |
+| V2 | `{'void.slot.0004.chance': 25}` | touched_given_seeded | 0.314 | 0.293 |
+| V2 | `{'void.slot.0004.chance': 25}` | voidwalkers_per_100_seat_years | 0.500 | 0.940 |
+| V3 | `{'void.term.eotg_void_has_voidwalker=yes': -4}` | stage_c_per_100_seat_years | 0.038 | 0.042 |
+| V3 | `{'void.term.eotg_void_has_voidwalker=yes': -4}` | touched_years_median | 4.000 | 4.000 |
+| V3 | `{'void.term.eotg_void_has_voidwalker=yes': -4}` | ever_touched_100y | 0.309 | 0.318 |
+| V3 | `{'void.term.eotg_void_has_voidwalker=yes': -4}` | ever_hollow_100y | 0.264 | 0.267 |
+| V3 | `{'void.term.eotg_void_has_voidwalker=yes': -4}` | touched_given_seeded | 0.314 | 0.323 |
+| V3 | `{'void.term.eotg_void_has_voidwalker=yes': -4}` | voidwalkers_per_100_seat_years | 0.500 | 0.498 |
+
 ## Appendix B: the static exploit scan
 
 See `exploit_scan.md` (generated by `docs/tools/sim/exploit_scan.py`).
@@ -540,6 +674,14 @@ Every number that is not read from the mod's script. The model files carry the s
 - `frontier_holder_skill`: (10.0, "the holder's type skill read by eotg_frontier_type_input_value")
 - `frontier_holder_gold_2x_minor`: (0.6, 'holder gold >= 2 x minor_gold_value at the falter')
 - `pmc_under_contract_years`: (2, 'eotg_pmc_under_contract_modifier years = 2 (decision effect)')
+- `void_option_gate_open`: (0.35, 'an option with a trigger (education, personality, age, heir) is open to a given ruler; cult-gated options are closed (eotg_void_is_cult_faith is always = no)')
+- `void_education_learning_share`: (0.2, 'one of five educations')
+- `void_lunatic_or_possessed_share`: (0.02, 'lunatic_1/_genetic or possessed_1/_genetic')
+- `void_piety_level_3_share`: (0.15, 'piety_level >= 3')
+- `void_stress_200_share`: (0.05, 'stress >= 200 in a given year')
+- `void_ruler_start_age`: ((30, 10), 'a ruler takes the seat at N(30, 10)')
+- `void_near_touched`: (False, 'no Void-Touched courtier, vassal or spouse (a lone realm)')
+- `void_stage_c_slot_open`: ({'0020': 0.23, '0021': 0.5, '0022': 0.6, '0024': None, '0025': 0.3}, 'P(the slot trigger holds): at war ~23%, a child under 12, a zealous courtier, a vassal below -20; 0024 reads age')
 
 ### Reader: vanilla named values and unresolved names
 

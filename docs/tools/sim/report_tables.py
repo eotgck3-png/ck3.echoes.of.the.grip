@@ -66,6 +66,7 @@ if r.get('frontier_hostile'):
         out.append(f"| {k} | {pct(v['completed'])} | {pct(v['abandoned'])} | {v['years_to_complete_p50']} / {v['years_to_complete_p90']} | {v['falters_per_project']:.3f} |")
 if r.get('void'):
     try:
+        import pdx_read  # noqa: F401 (puts docs/tools on the path for pdx_parse)
         from models.void import tables as void_tables
         out.extend(void_tables(r['void']))
     except ImportError:
