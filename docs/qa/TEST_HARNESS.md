@@ -9,8 +9,8 @@ Built 2026-11-03 by a cloud session; Tiger and PX checked locally the same day. 
 | File (under `docs/test_submods/test_harness/`) | What |
 |---|---|
 | `descriptor.mod` | The sub-mod descriptor; depends on **Echoes of the Grip** |
-| `common/decisions/eotg_test_harness_decisions.txt` | 23 decisions, all `debug_only = yes` |
-| `events/eotg_test_harness.txt` | 24 hidden assertion events (namespace `eotg_test`), fired only by those decisions |
+| `common/decisions/eotg_test_harness_decisions.txt` | 39 decisions, all `debug_only = yes` |
+| `events/eotg_test_harness.txt` | 49 hidden assertion events (namespace `eotg_test`), fired only by those decisions |
 | `localization/english/eotg_test_harness_l_english.yml` | Decision text |
 | `README.md` | A pointer to this guide |
 
@@ -109,7 +109,35 @@ Also check `error.log` for `eotg_test`, which means a harness bug. Any other mod
 
 **The tribute lifecycle in full:** GV4 → GV1 (repeat for more payers) → GV2. Then `kill` the ruler for V-C11 (manual: the heir keeps the payers and has the 3-year grace).
 
-**PMC, Corporation and Trade Oligarchy G2 resources** are on the unmerged branch `claude/governments-g2-three-cloud`, so they have no harness tests here. Add them to the generator when that branch merges (their V-P, V-CO and V-TO lists are in each spec's §12).
+### PMC, Corporation and Trade Oligarchy G2 resources (playset C, British Isles)
+
+Added 2026-11-03 (final H1; `docs/handoffs/cloud_2026-11-03_final_h.md`). Spec ids are each spec's §12 (`governments_v2_g2_pmc.md`, `_corporation.md`, `_gobcorp.md`). GP1, GC1, GT1, GP2 and GE1/GE2 read a baseline first and restore it. The two brackets do not: they leave the real 1-year guard variables in the save (below). **Use a throwaway save**, and reload it between brackets.
+
+| Id | Decision | Spec ids | Auto | What it does |
+|---|---|---|---|---|
+| **GP1 / GC1 / GT1** | Resource Follows a Change (PMC standing / board influence / market share) | V-P2, V-P3 / V-CO2, V-CO3 / V-TO2, V-TO3 | yes, then LOOK | Moves the value +10 (−10 above 90) through its only writer, then +120. Checks the exact delta, that the story counter (written by the sync effect) mirrors the value, that the scaled modifier is still present (the writer re-applies it), and the clamp at 100. Restores the baseline. LOOK (x.4): the modifier's numbers match the new value. |
+| **GP2** | PMC Battle Feed Values | V-P6 | yes, then LOOK | Applies `eotg_pmc_battle_won_value` then `eotg_pmc_battle_lost_value` through the writer: exactly +2, then −3. SKIPs within 3 of a clamp. The combat hook needs a combat side a decision cannot build: LOOK GP2.3, fight a battle as war leader. |
+| **GC2a / GC2b → GC2c** | Court the Board: record, then check | V-CO8; the 2026-11-03 erosion fix | yes | Play a Corporation **vassal** (Konan). GC2a records your influence, the projected value and your liege's influence and erosion state; GC2b first marks the liege eroded this year (the decision's own guard). **Then take the real Court the Board**, and GC2c the next day: your influence is the projection; the liege lost exactly 5 only if not already eroded and your projection was above theirs, and is then marked; otherwise the liege lost nothing. Reload between GC2a and GC2b (5-year cooldown). **Leaves:** GC2b, and any courting that erodes, leaves the real guard `eotg_corp_board_eroded` on your liege for 1 year. |
+| **GT2a → GT2b** | Corner the Market: record, then check | V-TO7 | yes | As the top Trade Oligarch with Trade Oligarchy vassals (V-TO9). GT2a records every Prince's share and marks one as already cornered this year (when there are two or more). **Then take the real Corner the Market**, and GT2b: your share +15; every Prince not yet cornered −5 exactly and now marked; the pre-marked Prince untouched (drained at most once a year). **Leaves:** GT2a leaves the real guard `eotg_gobcorp_cornered` on one Prince for 1 year (and Corner the Market marks the rest); reload before a second run. |
+| **GE1 / GE2** | Election Bands (Corporation / Trade Oligarchy) | V-CO13 / V-TO13 | LOOK | Moves your value to each vote band edge (one below band 1, then each band), a day apart, through the writer, and says what the succession tooltip should show. Vote strength cannot be read in script. Restores the value. |
+
+**Suggested order (throwaway save; save first):** GP1, GC1, GT1, GP2, GE1/GE2 (they restore); then GC2a → Court the Board → GC2c; reload; GC2b → Court the Board → GC2c; reload; GT2a → Corner the Market → GT2b.
+
+### Void Corruption (any playset; throwaway save)
+
+Spec ids are `docs/specs/void_corruption_v2.md` §10.
+
+| Id | Decision | Spec ids | Auto | What it does |
+|---|---|---|---|---|
+| **VD1** | Void Exposure Bands | V-V3 | yes | Not Hollowed. Drives exposure to 24, 25, 50, 75 through `eotg_void_change_exposure_effect`, a day apart; checks exactly one band (none / Whispers / Pressure / Saturation) each time, then restores the baseline and checks the band follows it. |
+| **VD2** | The Hollowing Through the Yearly Pulse | V-V8, V-V17 | yes, then LOOK | Touched + exposure 100 through the system's effects; clears the Void cooldown; runs the real `eotg_on_yearly_void_check` once. Checks the **on_action** set the cooldown flag (no event sets it). The Hollowing event follows: answer it (option c steps you down), then VD3. SKIPs if a Voidwalker is at court (VD4 leaves one: with it, a Touched ruler's accrual can go negative, the Hollowing never fires, and VD2.1 would pass for the wrong reason). **Leaves:** the ruler Hollowed, for good. |
+| **VD3** | Hollowing Depth Bands and Drift | V-V9, V-V10, V-V11, V-V12 | yes | Hollowed only. Checks Touched gone, exposure 100, no exposure band, the court's Unreachable opinion. Drives depth to 50 (Far Off only), 85 (Gone Quiet only), 10 (none), then runs the yearly pulse once: depth exactly 14 (+4 drift). Restores depth. |
+| **VD4** | The Voidwalker at Court | V-V13 | yes, then LOOK | Creates and seats a Voidwalker with option a's own effects. Checks the flag is on a courtier, the yearly accrual value fell by exactly 6, and `can_execute_decision` for the Voidwalker Ward (SKIP when Hollowed, short of 100 gold or on the ward cooldown). **Leaves:** the Voidwalker at your court for good (and VD2 then SKIPs). |
+| **VD5** | One Insight per Character | V-V16 | yes, then LOOK | Runs `eotg_void_insight_effect` twice: the six-skill total rises by exactly 4, an Insight is held; LOOK: only one copy listed. **Leaves:** +4 skill and one Insight modifier, for good (VD5 then SKIPs). |
+
+**Suggested order (throwaway save; save first):** VD1 (restores exposure), VD5, then VD2 → answer The Hollowing → VD3; reload the save from before VD2, then VD4. VD4 must come last, or from a reload: its Voidwalker makes VD2 SKIP, and VD4.3 SKIPs on a Hollowed ruler.
+
+Not automated: V-V1 (contact odds; the sim covers it), V-V2/V-V4–V-V7 (random event rolls), V-V14 and V-V15 (they kill or depose, which the harness never does), V-V18–V-V20 (static: Tiger, PX, grep).
 
 ### Alerts (INT1; playset A)
 

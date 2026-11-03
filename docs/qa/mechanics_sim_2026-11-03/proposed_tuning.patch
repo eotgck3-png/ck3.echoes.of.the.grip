@@ -1,0 +1,174 @@
+diff --git a/common/on_action/eotg_cartel_on_actions.txt b/common/on_action/eotg_cartel_on_actions.txt
+index 18d0f21..7bedfc2 100644
+--- a/common/on_action/eotg_cartel_on_actions.txt
++++ b/common/on_action/eotg_cartel_on_actions.txt
+@@ -108,7 +108,7 @@ eotg_cartel_on_death = {
+         primary_heir = {
+             set_variable = {
+                 name = eotg_cartel_succession_grace
+-                years = 3
++                years = 5  # sim P5
+             }
+         }
+     }
+diff --git a/common/on_action/eotg_void_on_actions.txt b/common/on_action/eotg_void_on_actions.txt
+index f89d9f5..62970d2 100644
+--- a/common/on_action/eotg_void_on_actions.txt
++++ b/common/on_action/eotg_void_on_actions.txt
+@@ -181,7 +181,7 @@ eotg_on_yearly_void_check = {
+                 NOT = { has_trait = eotg_void_hollowed }
+             }
+             random = {
+-                chance = 12
++                chance = 25  # sim V2
+                 add_character_flag = { flag = eotg_flag_void_event_cooldown  years = 5 }
+                 trigger_event = { id = eotg_void.0004  days = { 10 60 } }
+             }
+diff --git a/common/script_values/eotg_augmentation_values.txt b/common/script_values/eotg_augmentation_values.txt
+index b23bd9c..0e0c196 100644
+--- a/common/script_values/eotg_augmentation_values.txt
++++ b/common/script_values/eotg_augmentation_values.txt
+@@ -23,7 +23,7 @@ eotg_aug_dev_gate_enhanced = {
+     value = 15
+ }
+ eotg_aug_dev_gate_overclocked = {
+-    value = 20
++    value = 15  # sim P4
+ }
+ 
+ # -- §5.5(a) Neurofractured drift --------------------------------------------
+diff --git a/common/script_values/eotg_corporation_values.txt b/common/script_values/eotg_corporation_values.txt
+index 96477ab..30b347e 100644
+--- a/common/script_values/eotg_corporation_values.txt
++++ b/common/script_values/eotg_corporation_values.txt
+@@ -70,7 +70,7 @@ eotg_corporation_restructure_ai_floor_value = 45
+ 
+ # CO3: Court the Board (spec §4.2): the director gains, the CEO's hold loosens
+ eotg_corporation_court_gain_value = 15
+-eotg_corporation_court_erosion_value = -5
++eotg_corporation_court_erosion_value = -2  # sim P1 (docs/qa/mechanics_sim_2026-11-03)
+ # The director's influence AFTER the court gain, clamped as
+ # eotg_corporation_board_influence_next_value. Court the Board saves it BEFORE
+ # the gain so the erosion check reads the same number in tooltip and execution
+diff --git a/common/script_values/eotg_gobcorp_values.txt b/common/script_values/eotg_gobcorp_values.txt
+index a3d9329..ee87d72 100644
+--- a/common/script_values/eotg_gobcorp_values.txt
++++ b/common/script_values/eotg_gobcorp_values.txt
+@@ -60,7 +60,7 @@ eotg_gobcorp_market_share_inherit_value = {
+ 
+ # TO2: trade and war (spec §2.5, story yearly tick)
+ eotg_gobcorp_peace_gain_value = 1
+-eotg_gobcorp_war_loss_value = -4
++eotg_gobcorp_war_loss_value = -3  # sim P3
+ 
+ # TO3: Corner the Market (spec §4.1): the First Prince gains, every partner
+ # Prince is squeezed
+diff --git a/common/script_values/eotg_pmc_values.txt b/common/script_values/eotg_pmc_values.txt
+index 2486090..a94238d 100644
+--- a/common/script_values/eotg_pmc_values.txt
++++ b/common/script_values/eotg_pmc_values.txt
+@@ -66,16 +66,17 @@ eotg_pmc_drift_threshold_value = 60
+ 
+ # P3: Take a Contract (spec §4.1). Pay reads the resource: 50 + 3 x standing
+ # (50 to 350 gold).
+-eotg_pmc_contract_pay_value = {
++eotg_pmc_contract_pay_value = {    # sim P6: tier-scaled, 0.5x to 2.5x medium_gold_value
+     value = eotg_pmc_standing_value
+-    multiply = 3
+-    add = 50
++    divide = 50
++    add = 0.5
++    multiply = medium_gold_value
+ }
+ eotg_pmc_contract_gain_value = 10
+ 
+ # P3: Deliver Results (spec §4.2)
+ eotg_pmc_deliver_gain_value = 15
+-eotg_pmc_deliver_liege_value = 5
++eotg_pmc_deliver_liege_value = 2  # sim P2
+ 
+ # P3: Recruit on Reputation (spec §4.3, OQ3)
+ eotg_pmc_recruit_cost_value = 20
+diff --git a/common/script_values/eotg_void_values.txt b/common/script_values/eotg_void_values.txt
+index b916004..3192402 100644
+--- a/common/script_values/eotg_void_values.txt
++++ b/common/script_values/eotg_void_values.txt
+@@ -13,7 +13,7 @@ eotg_void_yearly_accrual_value = {
+     if = { limit = { has_trait = eotg_grip_survivor }  add = 3 }
+     if = { limit = { eotg_void_is_cult_faith = yes }  add = 5 }
+     if = { limit = { eotg_void_near_touched = yes }  add = 4 }
+-    if = { limit = { has_trait = eotg_void_touched }  add = 6 }
++    if = { limit = { has_trait = eotg_void_touched }  add = 2 }  # sim V1
+     if = { limit = { stress >= 200 }  add = 4 }
+     # lunatic_1, possessed_1: exist in 1.20 (v1_lift_readiness_cloud.md §6)
+     # UNVERIFIED-VANILLA: lunatic_genetic, possessed_genetic (lifted from v1)
+diff --git a/localization/english/eotg_cartel_l_english.yml b/localization/english/eotg_cartel_l_english.yml
+index 083a654..e0b04be 100644
+--- a/localization/english/eotg_cartel_l_english.yml
++++ b/localization/english/eotg_cartel_l_english.yml
+@@ -4,7 +4,7 @@
+  eotg_cartel_schedule_modifier_desc:0 "Every payer on the schedule keeps the ruler's reputation for violence fresh. The more neighbours pay, the higher the fear floor sits."
+  eotg_cartel_schedule_scale_desc:0 "Each payer on the schedule adds 4, up to a total of 40"
+  eotg_story_cartel_schedule:0 "The Payment Schedule"
+- eotg_story_cartel_schedule_info:0 "Dread keeps the schedule alive.\n\nBelow 20, one payer walks away each year.\nAt 40, a ruler can take up the Cartel government.\nAt 80, a neighbour can be compelled to pay.\n\nVassals are never on the schedule. When a ruler dies, payers stay with the heir for 3 years before anyone can walk away."
++ eotg_story_cartel_schedule_info:0 "Dread keeps the schedule alive.\n\nBelow 20, one payer walks away each year.\nAt 40, a ruler can take up the Cartel government.\nAt 80, a neighbour can be compelled to pay.\n\nVassals are never on the schedule. When a ruler dies, payers stay with the heir for 5 years before anyone can walk away."
+  eotg_story_cartel_schedule_dread_label:0 "Dread"
+  eotg_story_cartel_schedule_min_label:0 "0"
+  eotg_story_cartel_schedule_max_label:0 "100"
+diff --git a/localization/english/eotg_corporation_l_english.yml b/localization/english/eotg_corporation_l_english.yml
+index d22ff50..beeaaab 100644
+--- a/localization/english/eotg_corporation_l_english.yml
++++ b/localization/english/eotg_corporation_l_english.yml
+@@ -4,7 +4,7 @@
+  eotg_corporation_board_modifier_desc:0 "A chief who holds the board is paid well and obeyed. One who loses it is neither."
+  eotg_corporation_board_scale_desc:0 "Your hold on the board, from 0 to 100"
+  eotg_story_corporation_board:0 "The Board"
+- eotg_story_corporation_board_info:0 "Board Influence is your hold on the board that really runs the company.\n\nEach year a company that is solvent and at peace gains 3. One in debt loses 5. Every director who courts the board takes 5 from you.\n\nThe higher it is, the more the company earns and the more your [vassals|E] trust you. At 40 and again at 75 it adds to your vote when the next chief is chosen.\n\nWhen you die, your successor keeps half of it, or their own if that is higher. A new chief has to win the board again."
++ eotg_story_corporation_board_info:0 "Board Influence is your hold on the board that really runs the company.\n\nEach year a company that is solvent and at peace gains 3. One in debt loses 5. Once a year, a director who courts the board can take 2 from you.\n\nThe higher it is, the more the company earns and the more your [vassals|E] trust you. At 40 and again at 75 it adds to your vote when the next chief is chosen.\n\nWhen you die, your successor keeps half of it, or their own if that is higher. A new chief has to win the board again."
+  eotg_story_corporation_board_label:0 "Board Influence"
+  eotg_story_corporation_board_min_label:0 "0"
+  eotg_story_corporation_board_max_label:0 "100"
+@@ -25,7 +25,7 @@
+  eotg_decision_corporation_court_board_tooltip:0 "Buy favour on the board"
+  eotg_decision_corporation_court_board_confirm:0 "Make the rounds"
+  eotg_decision_corporation_court_board_gain_tt:0 "Your Board Influence rises by 15"
+- eotg_decision_corporation_court_board_erosion_tt:0 "Your [liege|E]'s Board Influence falls by 5"
++ eotg_decision_corporation_court_board_erosion_tt:0 "Your [liege|E]'s Board Influence falls by 2"
+  eotg_decision_corporation_adopt:0 "Incorporate the Realm"
+  eotg_decision_corporation_adopt_desc:0 "Put your realm on the books and run it as a company, with a board above you and directors below. Only you change: your vassals keep their governments, but land you grant from now on is run the company way."
+  eotg_decision_corporation_adopt_tooltip:0 "Run your realm as a company"
+diff --git a/localization/english/eotg_gobcorp_l_english.yml b/localization/english/eotg_gobcorp_l_english.yml
+index 259d8ed..81ba9f0 100644
+--- a/localization/english/eotg_gobcorp_l_english.yml
++++ b/localization/english/eotg_gobcorp_l_english.yml
+@@ -4,7 +4,7 @@
+  eotg_gobcorp_market_share_modifier_desc:0 "Every Prince of the charter takes a cut of the realm's trade. The bigger the cut, the bigger the income."
+  eotg_gobcorp_market_share_scale_desc:0 "Your market share, from 0 to 100"
+  eotg_story_gobcorp_market:0 "The Charter Market"
+- eotg_story_gobcorp_market_info:0 "Market Share is your slice of the trade the charter binds together. Every point of it is a point a partner does not have.\n\nEach year of peace adds 1. Each year at war costs 4. Cornering the market or undercutting a rival takes share from your partners.\n\nThe higher it is, the more you earn. At 30, 60 and 90 it adds to your vote when the next First Prince is chosen.\n\nWhen you die, your successor keeps three quarters of it, or their own if that is higher."
++ eotg_story_gobcorp_market_info:0 "Market Share is your slice of the trade the charter binds together. Every point of it is a point a partner does not have.\n\nEach year of peace adds 1. Each year at war costs 3. Cornering the market or undercutting a rival takes share from your partners.\n\nThe higher it is, the more you earn. At 30, 60 and 90 it adds to your vote when the next First Prince is chosen.\n\nWhen you die, your successor keeps three quarters of it, or their own if that is higher."
+  eotg_story_gobcorp_market_label:0 "Market Share"
+  eotg_story_gobcorp_market_min_label:0 "0"
+  eotg_story_gobcorp_market_max_label:0 "100"
+diff --git a/localization/english/eotg_pmc_l_english.yml b/localization/english/eotg_pmc_l_english.yml
+index d3a954f..3e9d04a 100644
+--- a/localization/english/eotg_pmc_l_english.yml
++++ b/localization/english/eotg_pmc_l_english.yml
+@@ -13,7 +13,7 @@
+  eotg_pmc_under_contract_modifier:0 "Under Contract"
+  eotg_pmc_under_contract_modifier_desc:0 "Much of the company's force is away on a client's business."
+  eotg_decision_pmc_take_contract:0 "Take a Contract"
+- eotg_decision_pmc_take_contract_desc:0 "A client needs force and will pay for it. The better your company's standing, the more the contract is worth: 50 [gold|E], plus 3 for every point of standing. For two years much of your force will be away on the client's business."
++ eotg_decision_pmc_take_contract_desc:0 "A client needs force and will pay for it. The better your company's standing, the more the contract is worth: from half to two and a half times a moderate sum of [gold|E], scaled to the size of your realm. For two years much of your force will be away on the client's business."
+  eotg_decision_pmc_take_contract_tooltip:0 "Sell your company's force for a fee"
+  eotg_decision_pmc_take_contract_confirm:0 "Sign the contract"
+  eotg_decision_pmc_take_contract_free_tt:0 "Your company is not already under contract"
+@@ -23,7 +23,7 @@
+  eotg_decision_pmc_deliver_results_tooltip:0 "Earn standing by results"
+  eotg_decision_pmc_deliver_results_confirm:0 "Get it done"
+  eotg_decision_pmc_deliver_results_standing_tt:0 "Your standing rises by 15"
+- eotg_decision_pmc_deliver_results_liege_tt:0 "Your [liege|E]'s standing rises by 5"
++ eotg_decision_pmc_deliver_results_liege_tt:0 "Your [liege|E]'s standing rises by 2"
+  eotg_decision_pmc_recruit_on_reputation:0 "Recruit on Reputation"
+  eotg_decision_pmc_recruit_on_reputation_desc:0 "The best fighters go where the name is good. Spend some of your company's standing to bring a seasoned Operator to your court."
+  eotg_decision_pmc_recruit_on_reputation_tooltip:0 "Trade standing for a seasoned fighter"

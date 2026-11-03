@@ -1339,3 +1339,1010 @@ eotg_decision_test_gr1_game_rules = {
         base = 0
     }
 }
+
+# GP1: PMC Resource Follows a Change. Plan: PMC spec V-P2, V-P3.
+eotg_decision_test_gp1_pmc_standing = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    desc = eotg_decision_test_gp1_pmc_standing_desc
+    selection_tooltip = eotg_decision_test_gp1_pmc_standing_tooltip
+    confirm_text = eotg_decision_test_gp1_pmc_standing_confirm
+    should_create_alert = { always = no }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 0
+        kingdom = 0
+        empire = 0
+        hegemony = 0
+    }
+
+    is_shown = {
+        debug_only = yes
+        is_landed = yes
+    }
+
+    effect = {
+        custom_tooltip = eotg_decision_test_effect_tt
+        hidden_effect = {
+            debug_log = "EOTG_TEST GP1 START: standing writer, story counter and modifier"
+            if = {
+                limit = { eotg_pmc_is_landed_pmc = no }
+                debug_log = "EOTG_TEST GP1 SKIP: needs a landed PMC ruler; (Debug) Become a PMC, or play Raoul"
+            }
+            else = {
+                set_variable = { name = eotg_test_before  value = eotg_pmc_standing_value }
+                if = {
+                    limit = { eotg_pmc_standing_value > 90 }
+                    save_scope_value_as = { name = eotg_test_delta  value = -10 }
+                }
+                else = {
+                    save_scope_value_as = { name = eotg_test_delta  value = 10 }
+                }
+                set_variable = { name = eotg_test_delta  value = scope:eotg_test_delta }
+                eotg_pmc_change_standing_effect = { AMOUNT = scope:eotg_test_delta }
+                trigger_event = { id = eotg_test.321  days = 1 }
+            }
+        }
+    }
+
+    ai_potential = {
+        always = no
+    }
+    ai_will_do = {
+        base = 0
+    }
+}
+
+# GC1: Corporation Resource Follows a Change. Plan: Corporation spec V-CO2, V-CO3.
+eotg_decision_test_gc1_corp_influence = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    desc = eotg_decision_test_gc1_corp_influence_desc
+    selection_tooltip = eotg_decision_test_gc1_corp_influence_tooltip
+    confirm_text = eotg_decision_test_gc1_corp_influence_confirm
+    should_create_alert = { always = no }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 0
+        kingdom = 0
+        empire = 0
+        hegemony = 0
+    }
+
+    is_shown = {
+        debug_only = yes
+        is_landed = yes
+    }
+
+    effect = {
+        custom_tooltip = eotg_decision_test_effect_tt
+        hidden_effect = {
+            debug_log = "EOTG_TEST GC1 START: board influence writer, story counter and modifier"
+            if = {
+                limit = { eotg_corporation_is_landed_corporation = no }
+                debug_log = "EOTG_TEST GC1 SKIP: needs a landed Corporation ruler; play Hoel or Konan"
+            }
+            else = {
+                set_variable = { name = eotg_test_before  value = eotg_corporation_board_influence_value }
+                if = {
+                    limit = { eotg_corporation_board_influence_value > 90 }
+                    save_scope_value_as = { name = eotg_test_delta  value = -10 }
+                }
+                else = {
+                    save_scope_value_as = { name = eotg_test_delta  value = 10 }
+                }
+                set_variable = { name = eotg_test_delta  value = scope:eotg_test_delta }
+                eotg_corporation_change_board_influence_effect = { AMOUNT = scope:eotg_test_delta }
+                trigger_event = { id = eotg_test.331  days = 1 }
+            }
+        }
+    }
+
+    ai_potential = {
+        always = no
+    }
+    ai_will_do = {
+        base = 0
+    }
+}
+
+# GT1: Trade Oligarchy Resource Follows a Change. Plan: Trade Oligarchy spec V-TO2, V-TO3.
+eotg_decision_test_gt1_gobcorp_share = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    desc = eotg_decision_test_gt1_gobcorp_share_desc
+    selection_tooltip = eotg_decision_test_gt1_gobcorp_share_tooltip
+    confirm_text = eotg_decision_test_gt1_gobcorp_share_confirm
+    should_create_alert = { always = no }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 0
+        kingdom = 0
+        empire = 0
+        hegemony = 0
+    }
+
+    is_shown = {
+        debug_only = yes
+        is_landed = yes
+    }
+
+    effect = {
+        custom_tooltip = eotg_decision_test_effect_tt
+        hidden_effect = {
+            debug_log = "EOTG_TEST GT1 START: market share writer, story counter and modifier"
+            if = {
+                limit = { eotg_gobcorp_is_landed_gobcorp = no }
+                debug_log = "EOTG_TEST GT1 SKIP: needs a landed Trade Oligarchy ruler; play Bertrand"
+            }
+            else = {
+                set_variable = { name = eotg_test_before  value = eotg_gobcorp_market_share_value }
+                if = {
+                    limit = { eotg_gobcorp_market_share_value > 90 }
+                    save_scope_value_as = { name = eotg_test_delta  value = -10 }
+                }
+                else = {
+                    save_scope_value_as = { name = eotg_test_delta  value = 10 }
+                }
+                set_variable = { name = eotg_test_delta  value = scope:eotg_test_delta }
+                eotg_gobcorp_change_market_share_effect = { AMOUNT = scope:eotg_test_delta }
+                trigger_event = { id = eotg_test.341  days = 1 }
+            }
+        }
+    }
+
+    ai_potential = {
+        always = no
+    }
+    ai_will_do = {
+        base = 0
+    }
+}
+
+# GP2: PMC Battle Feed Values. Plan: PMC spec V-P6.
+eotg_decision_test_gp2_pmc_battle_feed = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    desc = eotg_decision_test_gp2_pmc_battle_feed_desc
+    selection_tooltip = eotg_decision_test_gp2_pmc_battle_feed_tooltip
+    confirm_text = eotg_decision_test_gp2_pmc_battle_feed_confirm
+    should_create_alert = { always = no }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 0
+        kingdom = 0
+        empire = 0
+        hegemony = 0
+    }
+
+    is_shown = {
+        debug_only = yes
+        is_landed = yes
+    }
+
+    effect = {
+        custom_tooltip = eotg_decision_test_effect_tt
+        hidden_effect = {
+            debug_log = "EOTG_TEST GP2 START: battle feed values"
+            if = {
+                limit = { eotg_pmc_is_landed_pmc = no }
+                debug_log = "EOTG_TEST GP2 SKIP: needs a landed PMC ruler; (Debug) Become a PMC, or play Raoul"
+            }
+            else_if = {
+                limit = {
+                    OR = {
+                        eotg_pmc_standing_value < 3
+                        eotg_pmc_standing_value > 97
+                    }
+                }
+                debug_log = "EOTG_TEST GP2 SKIP: standing is within 3 of a clamp, so the exact deltas cannot show; run GP1 or wait"
+            }
+            else = {
+                set_variable = { name = eotg_test_before  value = eotg_pmc_standing_value }
+                eotg_pmc_change_standing_effect = { AMOUNT = eotg_pmc_battle_won_value }
+                trigger_event = { id = eotg_test.351  days = 1 }
+            }
+        }
+    }
+
+    ai_potential = {
+        always = no
+    }
+    ai_will_do = {
+        base = 0
+    }
+}
+
+# GC2A: Court the Board, Record (Normal Path). Plan: Corporation spec V-CO8; QA 2026-11-03 erosion fix.
+eotg_decision_test_gc2a_court_board_record = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    desc = eotg_decision_test_gc2a_court_board_record_desc
+    selection_tooltip = eotg_decision_test_gc2a_court_board_record_tooltip
+    confirm_text = eotg_decision_test_gc2a_court_board_record_confirm
+    should_create_alert = { always = no }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 0
+        kingdom = 0
+        empire = 0
+        hegemony = 0
+    }
+
+    is_shown = {
+        debug_only = yes
+        is_landed = yes
+    }
+
+    effect = {
+        custom_tooltip = eotg_decision_test_effect_tt
+        hidden_effect = {
+            debug_log = "EOTG_TEST GC2A START: Court the Board, record"
+            if = {
+                limit = {
+                    OR = {
+                        eotg_corporation_role_vassal = no
+                        NOT = { liege ?= { eotg_corporation_role_top = yes } }
+                    }
+                }
+                debug_log = "EOTG_TEST GC2A SKIP: needs a Corporation vassal under a Corporation liege; play Konan"
+            }
+            # UNVERIFIED-VANILLA: is_decision_on_cooldown (a character trigger in 1.20 .info)
+            else_if = {
+                limit = { NOT = { is_decision_on_cooldown = eotg_decision_corporation_court_board } }
+                set_variable = { name = eotg_test_own_before  value = eotg_corporation_board_influence_value }
+                set_variable = { name = eotg_test_projected  value = eotg_corporation_court_projected_value }
+                liege = {
+                    set_variable = { name = eotg_test_liege_before  value = eotg_corporation_board_influence_value }
+
+                    if = {
+                        limit = { has_variable = eotg_corp_board_eroded }
+                        set_variable = { name = eotg_test_liege_eroded  value = 1 }
+                    }
+                    else = {
+                        set_variable = { name = eotg_test_liege_eroded  value = 0 }
+                    }
+                }
+                debug_log = "EOTG_TEST GC2A LOOK: now take Court the Board, then GC2c tomorrow"
+            }
+            else = {
+                debug_log = "EOTG_TEST GC2A SKIP: Court the Board is on its 5-year cooldown; reload a save from before you took it"
+            }
+        }
+    }
+
+    ai_potential = {
+        always = no
+    }
+    ai_will_do = {
+        base = 0
+    }
+}
+
+# GC2B: Court the Board, Record (Liege Already Eroded). Plan: Corporation spec V-CO8; QA 2026-11-03 erosion fix.
+eotg_decision_test_gc2b_court_board_record = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    desc = eotg_decision_test_gc2b_court_board_record_desc
+    selection_tooltip = eotg_decision_test_gc2b_court_board_record_tooltip
+    confirm_text = eotg_decision_test_gc2b_court_board_record_confirm
+    should_create_alert = { always = no }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 0
+        kingdom = 0
+        empire = 0
+        hegemony = 0
+    }
+
+    is_shown = {
+        debug_only = yes
+        is_landed = yes
+    }
+
+    effect = {
+        custom_tooltip = eotg_decision_test_effect_tt
+        hidden_effect = {
+            debug_log = "EOTG_TEST GC2B START: Court the Board, record"
+            if = {
+                limit = {
+                    OR = {
+                        eotg_corporation_role_vassal = no
+                        NOT = { liege ?= { eotg_corporation_role_top = yes } }
+                    }
+                }
+                debug_log = "EOTG_TEST GC2B SKIP: needs a Corporation vassal under a Corporation liege; play Konan"
+            }
+            # UNVERIFIED-VANILLA: is_decision_on_cooldown (a character trigger in 1.20 .info)
+            else_if = {
+                limit = { NOT = { is_decision_on_cooldown = eotg_decision_corporation_court_board } }
+                set_variable = { name = eotg_test_own_before  value = eotg_corporation_board_influence_value }
+                set_variable = { name = eotg_test_projected  value = eotg_corporation_court_projected_value }
+                liege = {
+                    set_variable = { name = eotg_test_liege_before  value = eotg_corporation_board_influence_value }
+                    set_variable = { name = eotg_corp_board_eroded  years = 1 }
+                    if = {
+                        limit = { has_variable = eotg_corp_board_eroded }
+                        set_variable = { name = eotg_test_liege_eroded  value = 1 }
+                    }
+                    else = {
+                        set_variable = { name = eotg_test_liege_eroded  value = 0 }
+                    }
+                }
+                debug_log = "EOTG_TEST GC2B LOOK: now take Court the Board, then GC2c tomorrow"
+            }
+            else = {
+                debug_log = "EOTG_TEST GC2B SKIP: Court the Board is on its 5-year cooldown; reload a save from before you took it"
+            }
+        }
+    }
+
+    ai_potential = {
+        always = no
+    }
+    ai_will_do = {
+        base = 0
+    }
+}
+
+# GC2C: Court the Board, Check. Plan: Corporation spec V-CO8; QA 2026-11-03 erosion fix.
+eotg_decision_test_gc2c_court_board_check = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    desc = eotg_decision_test_gc2c_court_board_check_desc
+    selection_tooltip = eotg_decision_test_gc2c_court_board_check_tooltip
+    confirm_text = eotg_decision_test_gc2c_court_board_check_confirm
+    should_create_alert = { always = no }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 0
+        kingdom = 0
+        empire = 0
+        hegemony = 0
+    }
+
+    is_shown = {
+        debug_only = yes
+        is_landed = yes
+    }
+
+    effect = {
+        custom_tooltip = eotg_decision_test_effect_tt
+        hidden_effect = {
+            debug_log = "EOTG_TEST GC2C START: Court the Board, check"
+            if = {
+                limit = { NOT = { has_variable = eotg_test_projected } }
+                debug_log = "EOTG_TEST GC2C SKIP: nothing recorded; run GC2a or GC2b, then take Court the Board"
+            }
+            else = {
+                if = {
+                limit = {
+                    eotg_corporation_board_influence_value >= var:eotg_test_projected
+                    eotg_corporation_board_influence_value <= var:eotg_test_projected
+                }
+                debug_log = "EOTG_TEST GC2C.1 PASS: your influence is the projected value (+15, clamped)"
+            }
+            else = {
+                debug_log = "EOTG_TEST GC2C.1 FAIL: your influence is not the recorded projection: was Court the Board taken?"
+            }
+                liege = {
+                    if = {
+                        limit = {
+                            var:eotg_test_liege_eroded = 0
+                            var:eotg_test_liege_before < root.var:eotg_test_projected
+                        }
+                        if = {
+                limit = {
+                    eotg_corporation_board_influence_value >= { value = var:eotg_test_liege_before add = -5 max = 100 min = 0 }
+                    eotg_corporation_board_influence_value <= { value = var:eotg_test_liege_before add = -5 max = 100 min = 0 }
+                }
+                debug_log = "EOTG_TEST GC2C.2 PASS: the liege lost exactly 5 (not eroded yet, director projected above the CEO)"
+            }
+            else = {
+                debug_log = "EOTG_TEST GC2C.2 FAIL: the liege did not lose exactly 5 on an eligible courting"
+            }
+                        if = {
+                limit = {
+                    has_variable = eotg_corp_board_eroded
+                }
+                debug_log = "EOTG_TEST GC2C.3 PASS: the liege is marked eroded for the year"
+            }
+            else = {
+                debug_log = "EOTG_TEST GC2C.3 FAIL: no eotg_corp_board_eroded on the liege after erosion"
+            }
+                    }
+                    else = {
+                        if = {
+                limit = {
+                    eotg_corporation_board_influence_value >= var:eotg_test_liege_before
+                    eotg_corporation_board_influence_value <= var:eotg_test_liege_before
+                }
+                debug_log = "EOTG_TEST GC2C.4 PASS: the liege lost nothing (already eroded this year, or the CEO was at or above your projection)"
+            }
+            else = {
+                debug_log = "EOTG_TEST GC2C.4 FAIL: the liege lost influence when the guard should have held"
+            }
+                    }
+                    remove_variable = eotg_test_liege_before
+                    remove_variable = eotg_test_liege_eroded
+                }
+                remove_variable = eotg_test_own_before
+                remove_variable = eotg_test_projected
+                debug_log = "EOTG_TEST GC2C DONE"
+            }
+        }
+    }
+
+    ai_potential = {
+        always = no
+    }
+    ai_will_do = {
+        base = 0
+    }
+}
+
+# GT2A: Corner the Market, Record. Plan: Trade Oligarchy spec V-TO7.
+eotg_decision_test_gt2a_corner_record = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    desc = eotg_decision_test_gt2a_corner_record_desc
+    selection_tooltip = eotg_decision_test_gt2a_corner_record_tooltip
+    confirm_text = eotg_decision_test_gt2a_corner_record_confirm
+    should_create_alert = { always = no }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 0
+        kingdom = 0
+        empire = 0
+        hegemony = 0
+    }
+
+    is_shown = {
+        debug_only = yes
+        is_landed = yes
+    }
+
+    effect = {
+        custom_tooltip = eotg_decision_test_effect_tt
+        hidden_effect = {
+            debug_log = "EOTG_TEST GT2A START: Corner the Market, record"
+            if = {
+                limit = {
+                    OR = {
+                        eotg_gobcorp_role_top = no
+                        NOT = { any_vassal = { government_has_flag = eotg_government_is_gobcorp } }
+                    }
+                }
+                debug_log = "EOTG_TEST GT2A SKIP: needs the top Trade Oligarch with Trade Oligarchy vassals (V-TO9: grant counties by console)"
+            }
+            # UNVERIFIED-VANILLA: is_decision_on_cooldown (as GC2a)
+            else_if = {
+                limit = { is_decision_on_cooldown = eotg_decision_gobcorp_corner_market }
+                debug_log = "EOTG_TEST GT2A SKIP: Corner the Market is on its cooldown; reload a save from before you took it"
+            }
+            else = {
+                set_variable = { name = eotg_test_own_before  value = eotg_gobcorp_market_share_value }
+                if = {
+                    limit = { any_vassal = { count >= 2  government_has_flag = eotg_government_is_gobcorp } }
+                    random_vassal = {
+                        limit = { government_has_flag = eotg_government_is_gobcorp }
+                        set_variable = { name = eotg_gobcorp_cornered  years = 1 }
+                    }
+                }
+                every_vassal = {
+                    limit = { government_has_flag = eotg_government_is_gobcorp }
+                    set_variable = { name = eotg_test_share_before  value = eotg_gobcorp_market_share_value }
+                    if = {
+                        limit = { has_variable = eotg_gobcorp_cornered }
+                        set_variable = { name = eotg_test_was_cornered  value = 1 }
+                    }
+                }
+                debug_log = "EOTG_TEST GT2A LOOK: now take Corner the Market, then GT2b tomorrow"
+            }
+        }
+    }
+
+    ai_potential = {
+        always = no
+    }
+    ai_will_do = {
+        base = 0
+    }
+}
+
+# GT2B: Corner the Market, Check. Plan: Trade Oligarchy spec V-TO7.
+eotg_decision_test_gt2b_corner_check = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    desc = eotg_decision_test_gt2b_corner_check_desc
+    selection_tooltip = eotg_decision_test_gt2b_corner_check_tooltip
+    confirm_text = eotg_decision_test_gt2b_corner_check_confirm
+    should_create_alert = { always = no }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 0
+        kingdom = 0
+        empire = 0
+        hegemony = 0
+    }
+
+    is_shown = {
+        debug_only = yes
+        is_landed = yes
+    }
+
+    effect = {
+        custom_tooltip = eotg_decision_test_effect_tt
+        hidden_effect = {
+            debug_log = "EOTG_TEST GT2B START: Corner the Market, check"
+            if = {
+                limit = { NOT = { has_variable = eotg_test_own_before } }
+                debug_log = "EOTG_TEST GT2B SKIP: nothing recorded; run GT2a, then take Corner the Market"
+            }
+            else = {
+                if = {
+                limit = {
+                    eotg_gobcorp_market_share_value >= { value = var:eotg_test_own_before add = 15 max = 100 }
+                    eotg_gobcorp_market_share_value <= { value = var:eotg_test_own_before add = 15 max = 100 }
+                }
+                debug_log = "EOTG_TEST GT2B.1 PASS: your share rose by 15 (clamped)"
+            }
+            else = {
+                debug_log = "EOTG_TEST GT2B.1 FAIL: your share did not rise by 15: was Corner the Market taken?"
+            }
+                if = {
+                    limit = {
+                        any_vassal = {
+                            has_variable = eotg_test_share_before
+                            NOT = { has_variable = eotg_test_was_cornered }
+                            NOT = { eotg_gobcorp_market_share_value >= { value = var:eotg_test_share_before add = -5 min = 0 } eotg_gobcorp_market_share_value <= { value = var:eotg_test_share_before add = -5 min = 0 } }
+                        }
+                    }
+                    debug_log = "EOTG_TEST GT2B.2 FAIL: a Prince not yet cornered did not lose exactly 5"
+                }
+                else = {
+                    debug_log = "EOTG_TEST GT2B.2 PASS: every Prince not yet cornered lost exactly 5"
+                }
+                if = {
+                    limit = {
+                        any_vassal = {
+                            has_variable = eotg_test_was_cornered
+                            NOT = { eotg_gobcorp_market_share_value >= var:eotg_test_share_before eotg_gobcorp_market_share_value <= var:eotg_test_share_before }
+                        }
+                    }
+                    debug_log = "EOTG_TEST GT2B.3 FAIL: a Prince already cornered this year was drained again"
+                }
+                else_if = {
+                    limit = { any_vassal = { has_variable = eotg_test_was_cornered } }
+                    debug_log = "EOTG_TEST GT2B.3 PASS: the Prince already cornered this year was not drained again"
+                }
+                else = {
+                    debug_log = "EOTG_TEST GT2B.3 SKIP: only one Prince, so the once-a-year guard was not exercised (V-TO9: make a second)"
+                }
+                if = {
+                limit = {
+                    NOT = { any_vassal = { has_variable = eotg_test_share_before NOT = { has_variable = eotg_gobcorp_cornered } } }
+                }
+                debug_log = "EOTG_TEST GT2B.4 PASS: every Prince is marked cornered for the year"
+            }
+            else = {
+                debug_log = "EOTG_TEST GT2B.4 FAIL: a Prince has no eotg_gobcorp_cornered after Corner the Market"
+            }
+                every_vassal = {
+                    limit = { has_variable = eotg_test_share_before }
+                    remove_variable = eotg_test_share_before
+                    if = {
+                        limit = { has_variable = eotg_test_was_cornered }
+                        remove_variable = eotg_test_was_cornered
+                    }
+                }
+                remove_variable = eotg_test_own_before
+                debug_log = "EOTG_TEST GT2B DONE"
+            }
+        }
+    }
+
+    ai_potential = {
+        always = no
+    }
+    ai_will_do = {
+        base = 0
+    }
+}
+
+# GE1: Corporation Election Bands. Plan: Corporation spec V-CO13.
+eotg_decision_test_ge1_corp_bands = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    desc = eotg_decision_test_ge1_corp_bands_desc
+    selection_tooltip = eotg_decision_test_ge1_corp_bands_tooltip
+    confirm_text = eotg_decision_test_ge1_corp_bands_confirm
+    should_create_alert = { always = no }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 0
+        kingdom = 0
+        empire = 0
+        hegemony = 0
+    }
+
+    is_shown = {
+        debug_only = yes
+        is_landed = yes
+    }
+
+    effect = {
+        custom_tooltip = eotg_decision_test_effect_tt
+        hidden_effect = {
+            debug_log = "EOTG_TEST GE1 START: election bands"
+            if = {
+                limit = { eotg_corporation_is_landed_corporation = no }
+                debug_log = "EOTG_TEST GE1 SKIP: needs a landed Corporation ruler"
+            }
+            else = {
+                set_variable = { name = eotg_test_before  value = eotg_corporation_board_influence_value }
+                trigger_event = { id = eotg_test.361  days = 1 }
+            }
+        }
+    }
+
+    ai_potential = {
+        always = no
+    }
+    ai_will_do = {
+        base = 0
+    }
+}
+
+# GE2: Trade Oligarchy Election Bands. Plan: Trade Oligarchy spec V-TO13.
+eotg_decision_test_ge2_gobcorp_bands = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    desc = eotg_decision_test_ge2_gobcorp_bands_desc
+    selection_tooltip = eotg_decision_test_ge2_gobcorp_bands_tooltip
+    confirm_text = eotg_decision_test_ge2_gobcorp_bands_confirm
+    should_create_alert = { always = no }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 0
+        kingdom = 0
+        empire = 0
+        hegemony = 0
+    }
+
+    is_shown = {
+        debug_only = yes
+        is_landed = yes
+    }
+
+    effect = {
+        custom_tooltip = eotg_decision_test_effect_tt
+        hidden_effect = {
+            debug_log = "EOTG_TEST GE2 START: election bands"
+            if = {
+                limit = { eotg_gobcorp_is_landed_gobcorp = no }
+                debug_log = "EOTG_TEST GE2 SKIP: needs a landed Trade Oligarchy ruler"
+            }
+            else = {
+                set_variable = { name = eotg_test_before  value = eotg_gobcorp_market_share_value }
+                trigger_event = { id = eotg_test.371  days = 1 }
+            }
+        }
+    }
+
+    ai_potential = {
+        always = no
+    }
+    ai_will_do = {
+        base = 0
+    }
+}
+
+# VD1: Void Exposure Bands. Plan: Void spec V-V3.
+eotg_decision_test_vd1_void_bands = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    desc = eotg_decision_test_vd1_void_bands_desc
+    selection_tooltip = eotg_decision_test_vd1_void_bands_tooltip
+    confirm_text = eotg_decision_test_vd1_void_bands_confirm
+    should_create_alert = { always = no }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 0
+        kingdom = 0
+        empire = 0
+        hegemony = 0
+    }
+
+    is_shown = {
+        debug_only = yes
+        is_landed = yes
+    }
+
+    effect = {
+        custom_tooltip = eotg_decision_test_effect_tt
+        hidden_effect = {
+            debug_log = "EOTG_TEST VD1 START: exposure bands"
+            if = {
+                limit = { has_trait = eotg_void_hollowed }
+                debug_log = "EOTG_TEST VD1 SKIP: the Hollowed carry no exposure band; use a ruler who is not Hollowed"
+            }
+            else = {
+                eotg_void_change_exposure_effect = { AMOUNT = 0 }
+                set_variable = { name = eotg_test_before  value = var:eotg_void_exposure }
+                save_scope_value_as = {
+                    name = eotg_test_delta
+                    value = {
+                        value = 24
+                        subtract = var:eotg_void_exposure
+                    }
+                }
+                eotg_void_change_exposure_effect = { AMOUNT = scope:eotg_test_delta }
+                trigger_event = { id = eotg_test.501  days = 1 }
+            }
+        }
+    }
+
+    ai_potential = {
+        always = no
+    }
+    ai_will_do = {
+        base = 0
+    }
+}
+
+# VD2: The Hollowing Through the Yearly Pulse. Plan: Void spec V-V8, V-V17 (cooldown authority in the on_action).
+eotg_decision_test_vd2_void_hollowing_path = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    desc = eotg_decision_test_vd2_void_hollowing_path_desc
+    selection_tooltip = eotg_decision_test_vd2_void_hollowing_path_tooltip
+    confirm_text = eotg_decision_test_vd2_void_hollowing_path_confirm
+    should_create_alert = { always = no }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 0
+        kingdom = 0
+        empire = 0
+        hegemony = 0
+    }
+
+    is_shown = {
+        debug_only = yes
+        is_landed = yes
+    }
+
+    effect = {
+        custom_tooltip = eotg_decision_test_effect_tt
+        hidden_effect = {
+            debug_log = "EOTG_TEST VD2 START: the Hollowing through the yearly pulse"
+            if = {
+                limit = { has_trait = eotg_void_hollowed }
+                debug_log = "EOTG_TEST VD2 SKIP: already Hollowed; run VD3"
+            }
+            else_if = {
+                limit = { eotg_void_has_voidwalker = yes }
+                debug_log = "EOTG_TEST VD2 SKIP: a Voidwalker is at court (VD4 leaves one); reload a save from before VD4"
+            }
+            else = {
+                eotg_void_become_touched_effect = yes
+                eotg_void_change_exposure_effect = { AMOUNT = 100 }
+                if = {
+                    limit = { has_character_flag = eotg_flag_void_event_cooldown }
+                    remove_character_flag = eotg_flag_void_event_cooldown
+                }
+                trigger_event = { on_action = eotg_on_yearly_void_check }
+                trigger_event = { id = eotg_test.511  days = 1 }
+            }
+        }
+    }
+
+    ai_potential = {
+        always = no
+    }
+    ai_will_do = {
+        base = 0
+    }
+}
+
+# VD3: Hollowing Depth Bands and Drift. Plan: Void spec V-V9, V-V10, V-V11, V-V12.
+eotg_decision_test_vd3_void_depth = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    desc = eotg_decision_test_vd3_void_depth_desc
+    selection_tooltip = eotg_decision_test_vd3_void_depth_tooltip
+    confirm_text = eotg_decision_test_vd3_void_depth_confirm
+    should_create_alert = { always = no }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 0
+        kingdom = 0
+        empire = 0
+        hegemony = 0
+    }
+
+    is_shown = {
+        debug_only = yes
+        is_landed = yes
+    }
+
+    effect = {
+        custom_tooltip = eotg_decision_test_effect_tt
+        hidden_effect = {
+            debug_log = "EOTG_TEST VD3 START: Hollowing depth bands and drift"
+            if = {
+                limit = { NOT = { has_trait = eotg_void_hollowed } }
+                debug_log = "EOTG_TEST VD3 SKIP: needs the Hollowed trait; run VD2 and answer The Hollowing"
+            }
+            else = {
+                if = {
+                limit = {
+                    NOT = { has_trait = eotg_void_touched }
+                    var:eotg_void_exposure >= 100
+                    NOT = { has_character_modifier = eotg_mod_void_whispers }
+                    NOT = { has_character_modifier = eotg_mod_void_pressure }
+                    NOT = { has_character_modifier = eotg_mod_void_saturation }
+                }
+                debug_log = "EOTG_TEST VD3.1 PASS: Hollowed state: Touched removed, exposure 100, no exposure band"
+            }
+            else = {
+                debug_log = "EOTG_TEST VD3.1 FAIL: the Hollowed state is wrong (Touched kept, exposure below 100, or a band left)"
+            }
+                # UNVERIFIED-VANILLA: has_opinion_modifier = { modifier target } (vanilla trigger)
+                if = {
+                    limit = { any_courtier = { count >= 1 } }
+                    if = {
+                limit = {
+                    any_courtier = { has_opinion_modifier = { modifier = eotg_opinion_void_unreachable target = root } }
+                }
+                debug_log = "EOTG_TEST VD3.2 PASS: the court holds the Unreachable opinion of you"
+            }
+            else = {
+                debug_log = "EOTG_TEST VD3.2 FAIL: no courtier has eotg_opinion_void_unreachable"
+            }
+                }
+                set_variable = { name = eotg_test_before  value = var:eotg_void_hollowing_depth }
+                save_scope_value_as = {
+                    name = eotg_test_delta
+                    value = {
+                        value = 50
+                        subtract = var:eotg_void_hollowing_depth
+                    }
+                }
+                eotg_void_change_hollowing_depth_effect = { AMOUNT = scope:eotg_test_delta }
+                trigger_event = { id = eotg_test.521  days = 1 }
+            }
+        }
+    }
+
+    ai_potential = {
+        always = no
+    }
+    ai_will_do = {
+        base = 0
+    }
+}
+
+# VD4: The Voidwalker at Court. Plan: Void spec V-V13 (the v1 Voidwalker bug).
+eotg_decision_test_vd4_voidwalker = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    desc = eotg_decision_test_vd4_voidwalker_desc
+    selection_tooltip = eotg_decision_test_vd4_voidwalker_tooltip
+    confirm_text = eotg_decision_test_vd4_voidwalker_confirm
+    should_create_alert = { always = no }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 0
+        kingdom = 0
+        empire = 0
+        hegemony = 0
+    }
+
+    is_shown = {
+        debug_only = yes
+        is_landed = yes
+    }
+
+    effect = {
+        custom_tooltip = eotg_decision_test_effect_tt
+        hidden_effect = {
+            debug_log = "EOTG_TEST VD4 START: the Voidwalker courtier"
+            if = {
+                limit = { eotg_void_has_voidwalker = yes }
+                debug_log = "EOTG_TEST VD4 SKIP: a Voidwalker is already at your court, so the accrual change cannot show; reload a save without one"
+            }
+            else = {
+                set_variable = { name = eotg_test_before  value = eotg_void_yearly_accrual_value }
+                eotg_void_create_voidwalker_effect = yes
+                eotg_void_shelter_voidwalker_effect = yes
+                trigger_event = { id = eotg_test.531  days = 1 }
+            }
+        }
+    }
+
+    ai_potential = {
+        always = no
+    }
+    ai_will_do = {
+        base = 0
+    }
+}
+
+# VD5: One Insight per Character. Plan: Void spec V-V16.
+eotg_decision_test_vd5_void_insight = {
+    picture = {
+        reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+    }
+    desc = eotg_decision_test_vd5_void_insight_desc
+    selection_tooltip = eotg_decision_test_vd5_void_insight_tooltip
+    confirm_text = eotg_decision_test_vd5_void_insight_confirm
+    should_create_alert = { always = no }
+    ai_check_interval_by_tier = {
+        barony = 0
+        county = 0
+        duchy = 0
+        kingdom = 0
+        empire = 0
+        hegemony = 0
+    }
+
+    is_shown = {
+        debug_only = yes
+        is_landed = yes
+    }
+
+    effect = {
+        custom_tooltip = eotg_decision_test_effect_tt
+        hidden_effect = {
+            debug_log = "EOTG_TEST VD5 START: Insight re-application guard"
+            if = {
+                limit = { eotg_void_has_any_insight = yes }
+                debug_log = "EOTG_TEST VD5 SKIP: you already hold an Insight; reload a save without one"
+            }
+            else = {
+                set_variable = { name = eotg_test_before  value = { value = diplomacy add = martial add = stewardship add = intrigue add = learning add = prowess } }
+                eotg_void_insight_effect = yes
+                eotg_void_insight_effect = yes
+                trigger_event = { id = eotg_test.541  days = 1 }
+            }
+        }
+    }
+
+    ai_potential = {
+        always = no
+    }
+    ai_will_do = {
+        base = 0
+    }
+}
